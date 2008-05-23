@@ -33,7 +33,9 @@ public class Play {
 
     public static synchronized void start() {
         try {
-            started = false;
+            if(started) {
+                stop();
+            }
             // 1. Configuration
             configuration = Files.readUtf8Properties(new VirtualFile("conf/application.conf").inputstream());
             applicationName = configuration.getProperty("application.name", "(no name)");
@@ -50,6 +52,10 @@ public class Play {
         } catch(Exception e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    public static synchronized void stop() {
+        started = false;
     }
 
     public static synchronized void detectChanges() {
@@ -95,7 +101,7 @@ public class Play {
         
         public String contentAsString() {
             try {
-                return new String(content(), "utf-8");
+                return Files.readContentAsString(inputstream());
             } catch(Exception e) {
                 throw new RuntimeException(e);
             }

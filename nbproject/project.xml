@@ -32,28 +32,28 @@
             </folders>
             <ide-actions>
                 <action name="build">
-                    <script>${ant.script}</script>
+                    <script>nbproject/nbjdk.xml</script>
                     <target>jar</target>
                 </action>
                 <action name="run">
-                    <script>${ant.script}</script>
+                    <script>nbproject/nbjdk.xml</script>
                     <target>run-test-application</target>
                 </action>
                 <action name="clean">
-                    <script>${ant.script}</script>
+                    <script>nbproject/nbjdk.xml</script>
                     <target>clean</target>
                 </action>
                 <action name="test">
-                    <script>${ant.script}</script>
+                    <script>nbproject/nbjdk.xml</script>
                     <target>test</target>
                 </action>
                 <action name="rebuild">
-                    <script>${ant.script}</script>
+                    <script>nbproject/nbjdk.xml</script>
                     <target>clean</target>
                     <target>jar</target>
                 </action>
                 <action name="test.single">
-                    <script>${ant.script}</script>
+                    <script>nbproject/nbjdk.xml</script>
                     <target>test-single</target>
                     <context>
                         <property>testclass</property>
@@ -66,11 +66,11 @@
                     </context>
                 </action>
                 <action name="debug">
-                    <script>${ant.script}</script>
+                    <script>nbproject/nbjdk.xml</script>
                     <target>debug-test-application</target>
                 </action>
                 <action name="debug.single">
-                    <script>${ant.script}</script>
+                    <script>nbproject/nbjdk.xml</script>
                     <target>debug-selected-file-in-src</target>
                     <context>
                         <property>debug.class</property>
@@ -86,7 +86,7 @@
             <export>
                 <type>folder</type>
                 <location>framework/classes</location>
-                <script>${ant.script}</script>
+                <script>nbproject/nbjdk.xml</script>
                 <build-target>jar</build-target>
             </export>
             <view>

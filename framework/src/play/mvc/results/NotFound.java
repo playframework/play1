@@ -7,7 +7,6 @@ import play.mvc.Result;
 public class NotFound extends Result {
 
     public void apply(Request request, Response response) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        response.status = 404;
     }
-
 }

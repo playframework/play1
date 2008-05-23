@@ -1,10 +1,14 @@
 package play.server;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import play.Invoker;
 import play.Logger;
@@ -44,31 +48,62 @@ public class Server {
                 request.querystring = "";
             }
             request.method = http.getRequestMethod();
-            request.body = http.getRequestBody();
+            request._body = http.getRequestBody();
             
             // Response
             Response response = new Response();
-            response.out = http.getResponseBody();
+            response.out = new ResponseStream(response, http);
 
-            Invoker.invoke(new PlayInvocation(request, response));
-            
-            http.close();
+            Invoker.invoke(new RequestInvocation(request, response));
         }
         
     }
     
-    static class PlayInvocation extends Thread {
+    static class ResponseStream extends OutputStream {
+        
+        HttpExchange http;
+        Response response;
+        OutputStream out;
+        
+        public ResponseStream(Response response, HttpExchange http) {
+            this.http = http;
+            this.response = response;            
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            if(out == null) {
+                Headers headers = http.getResponseHeaders();
+                if(response.contentType != null) {
+                    headers.set("Content-type", response.contentType+(response.contentType.startsWith("text/")?"; charset=utf-8":""));
+                }
+                http.sendResponseHeaders(response.status, 0L);
+                out = http.getResponseBody();                
+            }
+            out.write(b);
+        }
+
+        @Override
+        public void close() throws IOException {            
+            super.close();
+            out.flush();
+            out.close();
+        }
+       
+    }
+    
+    static class RequestInvocation extends Invoker.Invocation {
         
         Request request;
         Response response;
         
-        public PlayInvocation(Request request, Response response) {
+        public RequestInvocation(Request request, Response response) {
             this.request = request;
             this.response = response;
         }
 
         @Override
-        public void run() {
+        public void execute() {
             ActionInvoker.invoke(request, response);
         }
         

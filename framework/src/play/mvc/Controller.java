@@ -1,6 +1,7 @@
 package play.mvc;
 
-import javax.xml.ws.Response;
+import play.mvc.Http.Response;
+import play.mvc.results.RenderText;
 
 public abstract class Controller {
     
@@ -10,5 +11,9 @@ public abstract class Controller {
     public static final Scope.Flash flash = null;
     public static final Scope.Params params = null;
     public static final Scope.RenderArgs renderArgs = null;
+    
+    public static void renderText(CharSequence text) {
+        throw new RenderText(text);
+    }
 
 }

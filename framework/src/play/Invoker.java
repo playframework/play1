@@ -2,17 +2,21 @@ package play;
 
 public class Invoker {
     
-    public static void invoke(Thread thread) {
-        
-        // 1. Reload
+    public static void invoke(Invocation invocation) {
         Play.detectChanges();
-        
-        // 2. Prepare this thread
-        thread.setContextClassLoader(Play.classloader);
-        
-        // 3. Run it
-        thread.run();
-        
+        invocation.start();        
+    }
+    
+    public static abstract class Invocation extends Thread {
+    
+        public abstract void execute();
+
+        @Override
+        public void run() {
+            setContextClassLoader(Play.classloader);
+            execute();
+        }
+
     }
 
 }

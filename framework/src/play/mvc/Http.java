@@ -37,10 +37,10 @@ public class Http {
         public String remoteUser;
         public String contentType;
         public Integer port;
-        public InputStream body;
         public Boolean secure;
         public Map<String, Http.Header> headers;
         public Map<String, Http.Cookie> cookies;
+        public InputStream _body;        
         
         // Play!
         public String action;
@@ -55,7 +55,7 @@ public class Http {
     public static class Response {
 
         // A clean access to HTTP
-        public Integer status;
+        public Integer status = 200;
         public String contentType;
         public Map<String, Http.Header> headers;
         public Map<String, Http.Cookie> cookies;
@@ -66,5 +66,7 @@ public class Http {
         public static Response get() {
             return current.get();
         }
+        
     }
+
 }
