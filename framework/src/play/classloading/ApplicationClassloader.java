@@ -22,6 +22,7 @@ public class ApplicationClassloader extends ClassLoader {
         this.javaPath = Arrays.asList(javaPath);
     }
 
+    @Override
     protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
 
         // First check if it's an application Class

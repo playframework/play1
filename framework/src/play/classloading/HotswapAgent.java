@@ -9,7 +9,6 @@ public class HotswapAgent {
     static Instrumentation instrumentation;
 
     public static void premain(String agentArgs, Instrumentation instrumentation) {
-        System.out.println("HotswapAgent loaded ...");
         HotswapAgent.instrumentation = instrumentation;
     }
 

@@ -42,6 +42,9 @@ public class Http {
         public Map<String, Http.Header> headers;
         public Map<String, Http.Cookie> cookies;
         
+        // Play!
+        public String action;
+        
         // ThreadLocal access
         private static ThreadLocal<Request> current = new ThreadLocal<Request>();
         public static Request get() {

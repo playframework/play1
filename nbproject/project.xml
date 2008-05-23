@@ -35,6 +35,10 @@
                     <script>${ant.script}</script>
                     <target>jar</target>
                 </action>
+                <action name="run">
+                    <script>${ant.script}</script>
+                    <target>run-test-application</target>
+                </action>
                 <action name="clean">
                     <script>${ant.script}</script>
                     <target>clean</target>
@@ -108,7 +112,7 @@
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
             <compilation-unit>
                 <package-root>framework/src</package-root>
-                <classpath mode="compile">framework/lib/compiler-jdt.jar</classpath>
+                <classpath mode="compile">framework/lib/compiler-jdt.jar:framework/lib/jregex1.2_01.jar</classpath>
                 <source-level>1.5</source-level>
             </compilation-unit>
             <compilation-unit>

@@ -1,16 +1,10 @@
 package play.classloading;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
 import play.Play;
+import play.Play.VirtualFile;
 
 public class ApplicationClasses {
 
@@ -30,7 +24,7 @@ public class ApplicationClasses {
     public class ApplicationClass {
 
         public String name;
-        public File javaFile;
+        public VirtualFile javaFile;
         public String javaSource;
         public byte[] javaByteCode;
         public Class javaClass;
@@ -43,25 +37,7 @@ public class ApplicationClasses {
         }
 
         public void refresh() {
-            StringWriter source = new StringWriter();
-            PrintWriter out = new PrintWriter(source);
-            InputStream is = null;
-            try {
-                is = new FileInputStream(this.javaFile);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "utf-8"));
-                String line = null;
-                while ((line = reader.readLine()) != null) {
-                    out.println(line);
-                }
-                this.javaSource = source.toString();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } finally {
-                try {
-                    is.close();
-                } catch (Exception e) {
-                }
-            }
+            this.javaSource = this.javaFile.contentAsString();
             this.javaByteCode = null;
             this.timestamp = this.javaFile.lastModified();
         }
@@ -81,10 +57,10 @@ public class ApplicationClasses {
     }
 
     // ~~ Utils
-    public File getJava(String name) {
+    public VirtualFile getJava(String name) {
         name = name.replace(".", "/") + ".java";
-        for (File path : Play.javaPath) {
-            File javaFile = new File(path, name);
+        for (VirtualFile path : Play.javaPath) {
+            VirtualFile javaFile = new VirtualFile(path, name);
             if (javaFile.exists()) {
                 return javaFile;
             }

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="play! framework" default="jar" basedir=".">
+    
+    <path id="project.classpath">
+        <fileset dir="lib">
+            <include name="*.jar"/>                        
+        </fileset>
+        <pathelement path="play.jar"/>
+    </path>
+    
+    <target name="clean" description="clean resources">
+        <delete dir="classes" /> 
+        <delete dir="dist" />
+        <delete dir="test-results" />
+        <delete file="play.jar" /> 
+        <delete file="src/play/version" /> 
+    </target>
+    
+    <target name="version" unless="version">
+        <exec executable="bzr" outputproperty="bzrversion" errorproperty="bzrerror" failonerror="false" failifexecutionfails="false">
+            <arg value="revno" />
+        </exec>
+        <condition property="version" value="1.0-stable3-hacks-r${bzrversion}" else="1.0-localbuild">
+            <equals arg1="" arg2="${bzrerror}" trim="true" />
+        </condition> 
+        <echo message="Version ${version}"></echo>
+    </target>
+    
+    <target name="compile" description="compile without cleaning">
+        <mkdir dir="classes"/>
+        <javac encoding="utf-8" srcdir="src" destdir="classes" debug="true" > 
+            <classpath refid="project.classpath"/>
+        </javac>
+        <copy todir="classes">
+            <fileset dir="src">
+                <include name="**/*.properties"/>
+                <include name="**/*.xml"/>
+            </fileset>
+        </copy>
+    </target>
+    
+    <target name="jar" depends="compile,version" description="create play.jar">        
+        <echo message="${version}" file="src/play/version" />
+        <echo message="${version}" file="classes/play/version" />
+        <jar destfile="play.jar" basedir="classes">
+            <manifest>
+                <attribute name="Premain-Class" value="play.classloading.HotswapAgent"/>
+                <attribute name="Can-Redefine-Classes" value="true" />
+                <section name="Play">
+                    <attribute name="Specification-Title" value="Play! framework"/>
+                    <attribute name="Specification-Version" value="${version}"/>
+                    <attribute name="Specification-Vendor" value="zenexity"/>
+                </section>
+            </manifest>
+        </jar>
+    </target>
+    
+    <target name="run-test-application" depends="clean,jar">
+        <java classname="play.server.Server" dir="${basedir}" fork="true">
+            <classpath>
+                <pathelement path="${application.path}/conf"/>
+                <path refid="project.classpath"/>                
+            </classpath>
+            <sysproperty key="application.path" value="${basedir}/tests/test-application" />
+            <sysproperty key="java.endorsed.dirs" value="${basedir}/endorsed" />
+            <jvmarg value="-javaagent:${basedir}/play.jar" />
+        </java>	
+    </target>
+    
+</project>
