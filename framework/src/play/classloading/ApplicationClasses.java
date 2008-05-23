@@ -1,6 +1,8 @@
 package play.classloading;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import play.Play;
@@ -19,6 +21,10 @@ public class ApplicationClasses {
             classes.put(name, new ApplicationClass(name));
         }
         return classes.get(name);
+    }
+    
+    public List<ApplicationClass> all() {
+        return new ArrayList<ApplicationClass>(classes.values());
     }
 
     public class ApplicationClass {
@@ -53,6 +59,10 @@ public class ApplicationClasses {
         public byte[] compile() {
             compiler.compile(this.name);
             return this.javaByteCode;
+        }
+                
+        public void uncompile() {
+            this.javaClass = null;
         }
     }
 

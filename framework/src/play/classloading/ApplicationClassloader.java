@@ -1,13 +1,11 @@
 package play.classloading;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.UnmodifiableClassException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import play.Play;
@@ -15,11 +13,12 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 
 public class ApplicationClassloader extends ClassLoader {
 
-    List<File> javaPath;
-
-    public ApplicationClassloader(File... javaPath) {
+    public ApplicationClassloader() {
         super(ApplicationClassloader.class.getClassLoader());
-        this.javaPath = Arrays.asList(javaPath);
+        // Clean the existing classes
+        for (ApplicationClass applicationClass : Play.classes.all()) {
+            applicationClass.uncompile();
+        }
     }
 
     @Override
@@ -47,6 +46,7 @@ public class ApplicationClassloader extends ClassLoader {
             } else {
                 byte[] byteCode = applicationClass.compile();
                 applicationClass.javaClass = defineClass(name, byteCode, 0, byteCode.length);
+                resolveClass(applicationClass.javaClass);
                 return applicationClass.javaClass;
             }
         }
@@ -80,7 +80,7 @@ public class ApplicationClassloader extends ClassLoader {
 
     public void detectChanges() {
         List<ApplicationClass> modifieds = new ArrayList<ApplicationClass>();
-        for (ApplicationClass applicationClass : Play.classes.classes.values()) {
+        for (ApplicationClass applicationClass : Play.classes.all()) {
             if (applicationClass.timestamp < applicationClass.javaFile.lastModified()) {
                 applicationClass.refresh();
                 modifieds.add(applicationClass);

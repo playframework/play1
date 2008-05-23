@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import play.Invoker;
 import play.Logger;
 import play.Play;
 import play.mvc.ActionInvoker;
@@ -49,9 +50,26 @@ public class Server {
             Response response = new Response();
             response.out = http.getResponseBody();
 
-            ActionInvoker.invoke(request, response);
+            Invoker.invoke(new PlayInvocation(request, response));
             
             http.close();
+        }
+        
+    }
+    
+    static class PlayInvocation extends Thread {
+        
+        Request request;
+        Response response;
+        
+        public PlayInvocation(Request request, Response response) {
+            this.request = request;
+            this.response = response;
+        }
+
+        @Override
+        public void run() {
+            ActionInvoker.invoke(request, response);
         }
         
     }

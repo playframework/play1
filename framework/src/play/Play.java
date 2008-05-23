@@ -10,6 +10,7 @@ import java.util.Properties;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
 import play.libs.Files;
+import play.mvc.Router;
 
 public class Play {
     
@@ -34,14 +35,15 @@ public class Play {
         try {
             started = false;
             // 1. Configuration
-            VirtualFile applicationConf = new VirtualFile("conf/application.conf");
-            configuration = Files.readUtf8Properties(applicationConf.inputstream());
+            configuration = Files.readUtf8Properties(new VirtualFile("conf/application.conf").inputstream());
             applicationName = configuration.getProperty("application.name", "(no name)");
             // 2. The Java path
             javaPath = new ArrayList<VirtualFile>();
             javaPath.add(new VirtualFile("app"));
             // 3. The classloader
             classloader = new ApplicationClassloader();
+            // 4. Routes
+            Router.load(new VirtualFile("conf/routes"));
             // Ok
             started = true;
             Logger.info("Application %s is started !", applicationName);
@@ -115,6 +117,9 @@ public class Play {
         }
         
         public Long lastModified() {
+            if(realFile != null) {
+                return realFile.lastModified();
+            }
             return 0L;
         }
         

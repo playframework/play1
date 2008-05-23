@@ -65,6 +65,10 @@
                         </arity>
                     </context>
                 </action>
+                <action name="debug">
+                    <script>${ant.script}</script>
+                    <target>debug-test-application</target>
+                </action>
                 <action name="debug.single">
                     <script>${ant.script}</script>
                     <target>debug-selected-file-in-src</target>
@@ -79,6 +83,12 @@
                     </context>
                 </action>
             </ide-actions>
+            <export>
+                <type>folder</type>
+                <location>framework/classes</location>
+                <script>${ant.script}</script>
+                <build-target>jar</build-target>
+            </export>
             <view>
                 <items>
                     <source-folder style="tree">
@@ -113,6 +123,7 @@
             <compilation-unit>
                 <package-root>framework/src</package-root>
                 <classpath mode="compile">framework/lib/compiler-jdt.jar:framework/lib/jregex1.2_01.jar</classpath>
+                <built-to>framework/classes</built-to>
                 <source-level>1.5</source-level>
             </compilation-unit>
             <compilation-unit>
