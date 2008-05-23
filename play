@@ -1,0 +1,292 @@
+#! /bin/sh 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Play! command line script
+
+# Functions
+
+absname() {
+       filename=$1
+       d=`dirname "$1"`
+       b=`basename "$1"`
+       file="`cd \"$d\" 2>/dev/null && pwd`/$b"
+       if [ ! -f $file ]; then
+               echo "file not found $file"
+               exit 2
+       fi
+}
+
+# OS
+CYGWIN=false
+case "`uname`" in
+	CYGWIN*) CYGWIN=true;;
+esac
+         
+# Framework directory
+PRG="$0"
+PLAY_BASE=`dirname "$PRG"`
+
+# Display logo
+logo() {
+	echo "~        _            _ "
+	echo "~  _ __ | | __ _ _  _| |"
+	echo "~ | '_ \\| |/ _' | || |_|"
+	echo "~ |  __/|_|\\____|\\__ (_)"
+	echo "~ |_|            |__/   "
+	echo "~"
+	echo "~ play! `cat "${PLAY_BASE}/framework/src/play.properties"` 
+- web application framework by zenexity"
+	echo "~"
+}
+
+# Help
+usage() {
+	logo
+	echo "~ "
+	echo "~ Usage: play {new,run,start,stop,restart,debug,pid,logs} [path] "
+	echo "~ "
+	echo "~ with,  new      Create a new application"                                
+	echo "~        run      Start the application in the current window"
+	echo "~        start    Start the application in background"
+	echo "~        stop     Stop the application"
+	echo "~        restart  Restart the application"
+	echo "~        debug    Start the application under JDPA debugger"
+	echo "~        pid      Show the process ID of the running application"
+	echo "~        logs     Follow application logs"
+	echo "~"
+	exit 1;
+}
+
+# Which command ?
+if [ -z "$1" ]; then
+	usage;
+fi
+
+COMMANDE=$1
+
+# The project path
+path="${2:-.}"
+
+if [ "$path" = . ]; then
+	path=`/bin/pwd`
+fi
+
+# Project shortName
+APPLICATION=`basename "$path"`
+
+# JAVA_HOME/bin/java is used if defined
+if [ ! -d "$JAVA_HOME" ] ; then
+	JAVA_PATH="java"
+else
+	JAVA_PATH="$JAVA_HOME/bin/java"
+fi
+
+# Start classpath
+CLASSPATH="$path/conf/"
+PLAYCLASSES="$PLAY_BASE/framework/classes"
+PLAYJAR="$PLAY_BASE/framework/play.jar"
+
+if [  "$COMMANDE" = "run" ]; then
+        CLASSPATH=$CLASSPATH:$PLAYCLASSES;
+else
+        CLASSPATH=$CLASSPATH:$PLAYJAR;
+fi
+
+# Add all framework libs
+if $CYGWIN; then
+	OLD_IFS=$IFS
+	IFS=$'\n'
+fi
+for jar in `ls -c1 "$PLAY_BASE/framework/lib"/**/*.jar`; do 
+	CLASSPATH="$CLASSPATH:$jar";
+done
+if $CYGWIN; then
+	IFS=$OLD_IFS
+fi
+
+# For windows only
+if $CYGWIN; then
+	CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
+fi
+
+# [NEW] 
+if [ "$COMMANDE" = new ] ; then
+	echo "~"
+	echo "~ The new application will be created in `dirname "${path}"`/`basename "${path}"`"
+	echo -n "~ What is the application name ? "
+	read applicationName
+	echo "~"
+	"$JAVA_PATH" -classpath "$CLASSPATH" -Dapplication.path="`dirname "${path}"`/`basename "${path}"`" -Dapplication.name="${applicationName}" play.utils.NewApp
+	echo "~ Ok, application created"
+	COMMANDE="run"
+fi	
+
+# Check if it's a valid application
+if [ ! -r "${path}/conf/routes.yml" ] ; then
+	echo "~"
+	echo "~ Oops. ${path} does not seem to host a valid application"
+	echo "~"
+	exit 1;
+fi
+
+# [RUN]
+if [  "$COMMANDE" = "run" ]; then
+	logo
+	echo "~ Ctrl+C to break"
+	echo "~ "
+	"$JAVA_PATH" -classpath "$CLASSPATH" -Dcom.sun.management.jmxremote -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="`dirname "${path}"`/`basename "${path}"`" play.server.Server
+	echo "~ "
+
+# [DEBUG]
+elif [ "$COMMANDE" = "debug" ] ; then	
+	
+	logo
+	echo "~"
+	echo "$JAVA_PATH -classpath $CLASSPATH -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -Dplay.debug=yes -Dcom.sun.management.jmxremote -Djava.endorsed.dirs=$PLAY_BASE/framework/endorsed -Dapplication.path=`dirname "${path}"`/`basename ${path}` play.server.Server"
+	echo "~"
+	echo "~ Ctrl+C to break"
+	echo "~ "
+	"$JAVA_PATH" -classpath "$CLASSPATH" -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -Dplay.debug=yes -Dcom.sun.management.jmxremote -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="`dirname "${path}"`/`basename "${path}"`" play.server.Server
+
+# [START]	
+elif [ "$COMMANDE" = start ] ; then
+	
+	if [ ! -r "${path}/logs" ] ; then
+		mkdir "${path}/logs";
+	fi
+
+	if [ -f "${path}/server.pid" ] ; then
+		echo "~"
+		echo "~ $APPLICATION is already started (or delete `dirname ${path}`/`basename ${path}`/server.pid)"
+		echo "~"
+		exit
+	else
+		"$JAVA_PATH" -classpath "$CLASSPATH" -Dcom.sun.management.jmxremote -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="`dirname "${path}"`/`basename "${path}"`" play.server.Server > "${path}"/logs/system.out 2>&1 &
+		echo "~"
+		echo "~ $APPLICATION is started"
+		echo "~ Output is redirected to `dirname ${path}`/`basename ${path}`/logs/system.out ..."
+		echo "~"
+		echo $! > "${path}/server.pid"
+		exit
+	fi
+
+# [STOP]
+elif [ "$COMMANDE" = stop ] ; then 
+
+	if [ -f "${path}/server.pid" ] ; then
+		echo "~"
+		echo "~ kill `cat ${path}/server.pid`"
+		echo "~"
+		kill `cat "$path/server.pid"`
+		rm "${path}/server.pid"
+		rm "${path}/logs/system.out"
+		exit
+	else
+		echo "~"
+		echo "~ $APPLICATION is not started"
+		echo "~"
+		exit
+	fi
+
+# [PACKAGE PLUGIN]
+elif [ "$COMMANDE" = package-plugin ] ; then 
+
+    PLUGIN_NAME="`cat conf/application.conf | grep application.name | sed -e 's/application.name=//g'`"
+
+    echo "~"
+    echo "~ Ok, packaging plugin $PLUGIN_NAME"
+    echo "~"
+	ant -f $PLAY_BASE/framework/build.xml package-plugin -Dplugin.dir="${path}" -Dplugin.name="$PLUGIN_NAME"
+    echo "~"
+    echo "~ Plugin is built : `dirname ${path}`/`basename ${path}`/dist/$PLUGIN_NAME.plugin"
+    echo "~"
+
+# [ECLIPSIFY]
+elif [ "$COMMANDE" = eclipsify ] ; then 
+	
+   PROJECT_NAME="`cat conf/application.conf | grep application.name | sed -e 's/application.name=//g'`"	
+
+   rm -f "$path/.project" "$path/.classpath" "$path/play-app.launch"
+   sed  -e "s/%PROJECT_NAME%/$PROJECT_NAME/g" "$PLAY_BASE/application/eclipse-config/.project" > "$path/.project" 
+   # sed  -e "s/%PROJECT_NAME%/$PROJECT_NAME/g" "$PLAY_BASE/application/eclipse-config/play-app.launch" > "$path/play-app.launch" 
+   IFS=":"
+   XML=""
+   for p in $CLASSPATH; do
+        if [ -f "$p" ]; then
+                absname $p
+		XML="$XML <classpathentry kind=\"lib\" path=\"${file}\" />"
+	fi;
+   done;
+   sed  -e "s|%PROJECTCLASSPATH%|${XML}|g" "$PLAY_BASE/application/eclipse-config/.classpath" > "$path/.classpath"   
+
+   echo "~"
+   echo "~ This project is ready for eclipse !"
+   echo "~"
+
+# [PID]
+elif [ "$COMMANDE" = pid ] ; then 
+
+	if [ -f "${path}/server.pid" ] ; then
+		echo "~"
+		echo "~ pid for $APPLICATION is `cat ${path}/server.pid`"
+		echo "~"
+		exit
+	else
+		echo "~"
+		echo "~ $APPLICATION is not started"
+		echo "~"
+		exit
+	fi
+
+# [LOGS]	
+elif [ "$COMMANDE" = logs ] ; then 
+
+	if [ -f "${path}/server.pid" ] ; then
+		echo "~"
+		tail -f "${path}/logs/system.out"
+		echo "~"
+		exit
+	else
+		echo "~"
+		echo "~ $APPLICATION is not started"
+		echo "~"
+		exit
+	fi
+
+# [RESTART]	
+elif [ "$COMMANDE" = restart ] ; then 
+
+	if [ -f "${path}/server.pid" ] ; then
+		echo "~"
+		echo "~ kill `cat ${path}/server.pid`"
+		echo "~"
+		kill `cat "$path/server.pid"`
+		rm "${path}/server.pid"
+		rm "${path}/logs/system.out"
+	else
+		echo "~"
+		echo "~ $APPLICATION is not started"
+		echo "~"
+		exit
+	fi
+	
+	# Hack (for windows of course)
+	sleep 2
+	
+	if [ -f "${path}/server.pid" ] ; then
+		echo "~ $APPLICATION is already started (or delete `dirname ${path}`/`basename ${path}`/server.pid)"
+		echo "~"
+		exit
+	else
+		"$JAVA_PATH" -classpath "$CLASSPATH" -Dcom.sun.management.jmxremote -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="`dirname "${path}"`/`basename "${path}"`" play.server.Server > "${path}"/logs/system.out 2>&1 &
+		echo "~ $APPLICATION is started"
+		echo "~ Output is redirected to `dirname ${path}`/`basename ${path}`/logs/system.out ..."
+		echo "~"
+		echo $! > "${path}/server.pid"
+		exit
+	fi
+
+# Oops
+else
+	usage;
+fi
+	
