@@ -3,7 +3,7 @@ package play.mvc.results;
 import java.io.InputStream;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
-import play.mvc.Result;
+import play.mvc.results.Result;
 
 public class RenderBinary extends Result {
     

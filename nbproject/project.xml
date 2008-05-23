@@ -122,7 +122,7 @@
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
             <compilation-unit>
                 <package-root>framework/src</package-root>
-                <classpath mode="compile">framework/lib/compiler-jdt.jar:framework/lib/jregex1.2_01.jar</classpath>
+                <classpath mode="compile">framework/lib/compiler-jdt.jar:framework/lib/jregex1.2_01.jar:framework/lib/javassist.jar</classpath>
                 <built-to>framework/classes</built-to>
                 <source-level>1.5</source-level>
             </compilation-unit>

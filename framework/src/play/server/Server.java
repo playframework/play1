@@ -86,6 +86,10 @@ public class Server {
         @Override
         public void close() throws IOException {            
             super.close();
+            if(out == null) {
+                http.sendResponseHeaders(response.status, 0L);
+                out = http.getResponseBody();
+            }
             out.flush();
             out.close();
         }

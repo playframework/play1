@@ -46,7 +46,7 @@ public class Http {
         public String action;
         
         // ThreadLocal access
-        private static ThreadLocal<Request> current = new ThreadLocal<Request>();
+        public static ThreadLocal<Request> current = new ThreadLocal<Request>();
         public static Request get() {
             return current.get();
         }
@@ -62,7 +62,7 @@ public class Http {
         public OutputStream out;
         
         // ThreadLocal access
-        private static ThreadLocal<Response> current = new ThreadLocal<Response>();
+        public static ThreadLocal<Response> current = new ThreadLocal<Response>();
         public static Response get() {
             return current.get();
         }

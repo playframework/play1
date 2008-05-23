@@ -7,6 +7,8 @@ import java.util.Map;
 
 import play.Play;
 import play.Play.VirtualFile;
+import play.classloading.enhancers.ControllersEnhancer;
+import play.classloading.enhancers.Enhancer;
 
 public class ApplicationClasses {
 
@@ -26,6 +28,11 @@ public class ApplicationClasses {
     public List<ApplicationClass> all() {
         return new ArrayList<ApplicationClass>(classes.values());
     }
+    
+    // Enhancers
+    Enhancer[] enhancers = new Enhancer[] {
+        new ControllersEnhancer()
+    };
 
     public class ApplicationClass {
 
@@ -50,6 +57,13 @@ public class ApplicationClasses {
 
         public void setByteCode(byte[] compiledByteCode) {
             this.javaByteCode = compiledByteCode;
+            try {
+                for(Enhancer enhancer : enhancers) {
+                    enhancer.enhanceThisClass(this);
+                }
+            } catch(Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         public boolean isCompiled() {

@@ -17,7 +17,7 @@ public class Scope {
     public static class Session extends HashMap<String,String> {
 
         // ThreadLocal access
-        private static ThreadLocal<Session> current = new ThreadLocal<Session>();    
+        public static ThreadLocal<Session> current = new ThreadLocal<Session>();    
         public static Session get() {
             return current.get();
         }
@@ -27,7 +27,7 @@ public class Scope {
     public static class Params extends HashMap<String, String[]> {
         
         // ThreadLocal access
-        private static ThreadLocal<Params> current = new ThreadLocal<Params>();    
+        public static ThreadLocal<Params> current = new ThreadLocal<Params>();    
         public static Params get() {
             return current.get();
         }
@@ -37,7 +37,7 @@ public class Scope {
     public static class RenderArgs extends HashMap<String, String[]> {
         
         // ThreadLocal access
-        private static ThreadLocal<RenderArgs> current = new ThreadLocal<RenderArgs>();    
+        public static ThreadLocal<RenderArgs> current = new ThreadLocal<RenderArgs>();    
         public static RenderArgs get() {
             return current.get();
         }

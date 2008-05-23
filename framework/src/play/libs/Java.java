@@ -14,4 +14,17 @@ public class Java {
         return null;
     }
     
+    public static Object invokeStatic(Class clazz, String method) throws Exception {
+        return invokeStatic(clazz, method, new Object[0]);
+    }
+    
+    public static Object invokeStatic(Class clazz, String method, Object... args) throws Exception {
+        Class[] types = new Class[args.length];
+        for(int i=0; i<args.length; i++) {
+            types[0] = args[0].getClass();
+        }
+        Method m = clazz.getDeclaredMethod(method, types);
+        return m.invoke(null, args);
+    }
+    
 }
