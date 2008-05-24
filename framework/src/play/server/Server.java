@@ -7,8 +7,6 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import play.Invoker;
 import play.Logger;
@@ -48,7 +46,7 @@ public class Server {
                 request.querystring = "";
             }
             request.method = http.getRequestMethod();
-            request._body = http.getRequestBody();
+            request.body = http.getRequestBody();
             
             // Response
             Response response = new Response();
@@ -109,6 +107,11 @@ public class Server {
         @Override
         public void execute() {
             ActionInvoker.invoke(request, response);
+            try {
+                response.out.close();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         }
         
     }

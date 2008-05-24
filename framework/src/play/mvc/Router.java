@@ -42,6 +42,7 @@ public class Router {
         for(Route route : routes) {
             Map<String,String> args = route.matches(request);
             if(args != null) {
+                request.routeArgs = args;
                 request.action = route.action;
                 return;
             } 

@@ -6,7 +6,7 @@ public class Application extends Controller {
 
     public static void index() throws Exception {
         response.status = 202;
-        renderText("SHIGETA フローラルウォーターは !");
+        renderText("SHIGETA フローラルウォーターは (%s -> %s)", params.get("name"), params.get("age"));
     }
 
 }

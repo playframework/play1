@@ -23,7 +23,7 @@ public class ControllersEnhancer extends Enhancer {
                     try {
                         if (isThreadedFieldAccess(fieldAccess.getField())) {
                             if (fieldAccess.isReader()) {
-                                fieldAccess.replace("$_ = ($r)play.libs.Java.invokeStatic($type, \"get\");");
+                                fieldAccess.replace("$_ = ($r)play.libs.Java.invokeStatic($type, \"current\");");
                             }
                         }
                     } catch (Exception e) {

@@ -15,5 +15,9 @@ public abstract class Controller {
     public static void renderText(CharSequence text) {
         throw new RenderText(text);
     }
+    
+    public static void renderText(CharSequence pattern, Object... args) {
+        throw new RenderText(String.format(pattern.toString(), args));
+    }
 
 }

@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import play.libs.Utils;
 
 public class UrlEncodedParser extends DataParser {
 
@@ -27,7 +28,7 @@ public class UrlEncodedParser extends DataParser {
                     case '&':
                         value = new String(data, 0, ox, "utf-8");
                         if (key != null) {
-                            putMapEntry(params, key, value);
+                            Utils.Maps.mergeValueInMap(params, key, value);
                             key = null;
                         }
                         ox = 0;
@@ -53,10 +54,10 @@ public class UrlEncodedParser extends DataParser {
             //The last value does not end in '&'.  So save it now.
             if (key != null) {
                 value = new String(data, 0, ox, "utf-8");
-                putMapEntry(params, key, value);
+                Utils.Maps.mergeValueInMap(params, key, value);
             }
 
-            putMapEntry(params, "body", new String(data, "utf-8"));
+            Utils.Maps.mergeValueInMap(params, "body", new String(data, "utf-8"));
             return params;
         } catch (Exception e) {
             throw new RuntimeException(e);

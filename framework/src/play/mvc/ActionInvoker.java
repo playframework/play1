@@ -1,10 +1,11 @@
 package play.mvc;
 
+import java.io.ByteArrayInputStream;
 import play.mvc.results.Result;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import play.Play;
+import play.data.parsing.DataParser;
 import play.libs.Java;
 
 public class ActionInvoker {
@@ -29,13 +30,18 @@ public class ActionInvoker {
                 // ActionNotFound
                 throw new RuntimeException(e);
             }
-
             if (actionMethod == null) {
                 // ActionNotFound
                 throw new RuntimeException("Not found");
             }
             
-            // 3. Invoke the action
+            // 3. Prepare request params
+            Scope.Params params = new Scope.Params();
+            Scope.Params.current.set(params);
+            params.__mergeWith(request.routeArgs);
+            params._mergeWith(DataParser.parsers.get("application/x-www-form-urlencoded").parse(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
+            
+            // 4. Invoke the action
             try {
                 actionMethod.invoke(null);
             } catch (IllegalAccessException ex) {
@@ -50,19 +56,16 @@ public class ActionInvoker {
                 if(ex.getTargetException() instanceof RuntimeException) {
                     throw (RuntimeException)ex.getTargetException();
                 }
-                throw new RuntimeException(ex);
+                throw new RuntimeException(ex.getTargetException());
             }
 
 
         } catch (Result result) {
             result.apply(request, response);
             
-        } finally {
-            try {
-                response.out.close();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
+        } catch (Exception e) {
+             throw new RuntimeException(e);
+        } 
+        
     } 
 }

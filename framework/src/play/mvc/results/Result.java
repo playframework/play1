@@ -1,6 +1,6 @@
 package play.mvc.results;
 
-import play.mvc.*;
+import play.mvc.Http;
 
 public abstract class Result extends RuntimeException {
     

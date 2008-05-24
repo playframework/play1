@@ -40,14 +40,15 @@ public class Http {
         public Boolean secure;
         public Map<String, Http.Header> headers;
         public Map<String, Http.Cookie> cookies;
-        public InputStream _body;        
+        public InputStream body;   
+        public Map<String, String> routeArgs;
         
         // Play!
         public String action;
         
         // ThreadLocal access
         public static ThreadLocal<Request> current = new ThreadLocal<Request>();
-        public static Request get() {
+        public static Request current() {
             return current.get();
         }
     }
@@ -63,7 +64,7 @@ public class Http {
         
         // ThreadLocal access
         public static ThreadLocal<Response> current = new ThreadLocal<Response>();
-        public static Response get() {
+        public static Response current() {
             return current.get();
         }
         
