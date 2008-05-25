@@ -11,7 +11,7 @@ public class Application extends Controller {
     }
     
     public static void test() {
-        index("Guillaume", 27, null);
+        Orders.show(56L);
     }
 
 }

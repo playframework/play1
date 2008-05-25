@@ -70,8 +70,11 @@ public class Router {
                 }
                 if(allRequiredArgsAreHere) {
                     StringBuilder queryString = new StringBuilder();
+                    String path = route.path;
                     for(String key : args.keySet()) {
-                        if(!inPathArgs.contains(key) && args.get(key) != null) {
+                        if(inPathArgs.contains(key) && args.get(key) != null) {
+                            path = path.replaceAll("\\{(<[^>]+>)?"+key+"\\}", args.get(key));
+                        } else {
                             try {
                                 queryString.append(URLEncoder.encode(key, "utf-8"));
                                 queryString.append("=");
@@ -80,13 +83,13 @@ public class Router {
                             } catch (UnsupportedEncodingException ex) {
                                 //
                             }
-                        }
+                        } 
                     }
                     String qs = queryString.toString();
                     if(qs.endsWith("&")) {
                         qs = qs.substring(0, qs.length()-1);
                     }
-                    return qs.length() == 0 ? route.path : route.path+"?"+qs;
+                    return qs.length() == 0 ? path : path+"?"+qs;
                 }
             }
         }
