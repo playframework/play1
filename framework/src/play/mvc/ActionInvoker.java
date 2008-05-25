@@ -43,11 +43,15 @@ public class ActionInvoker {
             
             // 4. Invoke the action
             try {
-                actionMethod.invoke(null);
+                if(actionMethod.getParameterTypes().length>0) {
+                    // It's time to parse the request data
+                    params.checkAndParse();
+                }
+                Java.invokeStatic(actionMethod, params.data);
             } catch (IllegalAccessException ex) {
                 // Nope
             } catch (IllegalArgumentException ex) {
-                // ???
+                throw ex;
             } catch (InvocationTargetException ex) {                
                 // It's a Result ? (expected)
                 if(ex.getTargetException() instanceof Result) {

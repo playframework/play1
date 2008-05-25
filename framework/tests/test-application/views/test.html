@@ -3,11 +3,20 @@
   <head>
     <title>${title}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    #{script file:'jquery.js', version:3 } 
+    #{script file:'users.js' /}
   </head>
   <body>
-      <a href="@{Application.index}">
-          Yop
-      </a>
-  </body>
+      #{if test:connected}
+        
+      #{/if}
+      <script type="text/javascript">
+            var size = '${users.size()}';
+            '^#{if test:connected}'
+                jkkjjkkj
+            '^#{/if}'
+      </script>
+      <form>
+          <input type="text" name="name">
+      </form>
+  </body>  
 </html>

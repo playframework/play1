@@ -45,6 +45,7 @@ public class Server {
                 request.path = uri;
                 request.querystring = "";
             }
+            request.contentType = http.getRequestHeaders().getFirst("Content-Type");
             request.method = http.getRequestMethod();
             request.body = http.getRequestBody();
             
@@ -73,7 +74,7 @@ public class Server {
             if(out == null) {
                 Headers headers = http.getResponseHeaders();
                 if(response.contentType != null) {
-                    headers.set("Content-type", response.contentType+(response.contentType.startsWith("text/")?"; charset=utf-8":""));
+                    headers.set("Content-Type", response.contentType+(response.contentType.startsWith("text/")?"; charset=utf-8":""));
                 }
                 http.sendResponseHeaders(response.status, 0L);
                 out = http.getResponseBody();                
@@ -106,11 +107,16 @@ public class Server {
 
         @Override
         public void execute() {
-            ActionInvoker.invoke(request, response);
             try {
-                response.out.close();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
+                ActionInvoker.invoke(request, response);                
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            } finally {
+                try {
+                    response.out.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
         

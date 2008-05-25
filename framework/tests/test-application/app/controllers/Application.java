@@ -1,12 +1,13 @@
 package controllers;
 
 import play.mvc.Controller;
+import java.util.HashSet;
+import java.util.Date;
 
 public class Application extends Controller {
 
-    public static void index() throws Exception {
-        response.status = 202;
-        renderText("SHIGETA フローラルウォーターは (%s -> %s)", params.get("name"), params.get("age"));
+    public static void index(HashSet name, Integer[] age, HashSet<Date> date) {
+        renderText("SHIGETA フローラルウォーターは (%s -> %s / %s)", name, age[0], date);
     }
 
 }

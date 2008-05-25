@@ -10,6 +10,7 @@ import java.util.List;
 
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.classloading.enhancers.Enhancer;
 
 public class ApplicationClassloader extends ClassLoader {
 

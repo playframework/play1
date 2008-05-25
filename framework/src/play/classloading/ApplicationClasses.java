@@ -9,6 +9,7 @@ import play.Play;
 import play.Play.VirtualFile;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.Enhancer;
+import play.classloading.enhancers.LocalvariablesNamesEnhancer;
 
 public class ApplicationClasses {
 
@@ -31,7 +32,8 @@ public class ApplicationClasses {
     
     // Enhancers
     Enhancer[] enhancers = new Enhancer[] {
-        new ControllersEnhancer()
+        new ControllersEnhancer(),
+        new LocalvariablesNamesEnhancer()
     };
 
     public class ApplicationClass {
