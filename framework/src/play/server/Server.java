@@ -12,6 +12,7 @@ import play.Invoker;
 import play.Logger;
 import play.Play;
 import play.mvc.ActionInvoker;
+import play.mvc.Http.Header;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
@@ -48,6 +49,9 @@ public class Server {
             request.contentType = http.getRequestHeaders().getFirst("Content-Type");
             request.method = http.getRequestMethod();
             request.body = http.getRequestBody();
+            request.domain = http.getLocalAddress().getHostName();
+            request.port = http.getLocalAddress().getPort();
+            request.secure = false;
             
             // Response
             Response response = new Response();
@@ -72,10 +76,7 @@ public class Server {
         @Override
         public void write(int b) throws IOException {
             if(out == null) {
-                Headers headers = http.getResponseHeaders();
-                if(response.contentType != null) {
-                    headers.set("Content-Type", response.contentType+(response.contentType.startsWith("text/")?"; charset=utf-8":""));
-                }
+                flushHeaders();
                 http.sendResponseHeaders(response.status, 0L);
                 out = http.getResponseBody();                
             }
@@ -86,11 +87,24 @@ public class Server {
         public void close() throws IOException {            
             super.close();
             if(out == null) {
+                flushHeaders();
                 http.sendResponseHeaders(response.status, 0L);
                 out = http.getResponseBody();
             }
             out.flush();
             out.close();
+        }
+        
+        void flushHeaders() {
+            Headers headers = http.getResponseHeaders();
+            if(response.contentType != null) {
+                headers.set("Content-Type", response.contentType+(response.contentType.startsWith("text/")?"; charset=utf-8":""));
+            }
+            for(Header h : response.headers.values()) {
+                for(String v : h.values) {
+                    headers.add(h.name, v);
+                }
+            }
         }
        
     }

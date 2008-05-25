@@ -6,6 +6,7 @@ import javassist.CtField;
 import javassist.CtMethod;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
+import javassist.expr.Handler;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 public class ControllersEnhancer extends Enhancer {
@@ -29,6 +30,16 @@ public class ControllersEnhancer extends Enhancer {
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
+                }
+            });
+            
+            // Enchance global catch to avoid potential unwanted catching of play.mvc.results.Result
+            ctMethod.instrument(new ExprEditor() {
+                @Override
+                public void edit(Handler handler) throws CannotCompileException {
+                    StringBuffer code = new StringBuffer();
+                    code.append("if($1 instanceof play.mvc.results.Result) throw $1;");
+                    handler.insertBefore(code.toString());
                 }
             });
 

@@ -2,6 +2,8 @@ package play.mvc;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +53,8 @@ public class Http {
         public static Request current() {
             return current.get();
         }
+        
+        
     }
 
     public static class Response {
@@ -58,14 +62,22 @@ public class Http {
         // A clean access to HTTP
         public Integer status = 200;
         public String contentType;
-        public Map<String, Http.Header> headers;
-        public Map<String, Http.Cookie> cookies;
+        public Map<String, Http.Header> headers = new HashMap<String, Header>();
+        public Map<String, Http.Cookie> cookies = new HashMap<String, Cookie>();
         public OutputStream out;
         
         // ThreadLocal access
         public static ThreadLocal<Response> current = new ThreadLocal<Response>();
         public static Response current() {
             return current.get();
+        }
+        
+        public void setHeader(String name, String value) {
+            Header h = new Header();
+            h.name = name;
+            h.values = new ArrayList<String>();
+            h.values.add(value);
+            headers.put(name, h);
         }
         
     }

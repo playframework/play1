@@ -2,6 +2,7 @@
 
 GET	/ 				Application.index
 POST    /                               Application.index
+GET	/test 				Application.test
 GET 	/clients/{name} 		Clients.show
 GET 	/orders 			Orders.index
 GET	/orders/{<[0-9]+>id}            Orders.show
