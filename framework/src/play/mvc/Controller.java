@@ -1,5 +1,8 @@
 package play.mvc;
 
+import java.util.HashMap;
+import java.util.Map;
+import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
 import play.mvc.Http.Response;
 import play.mvc.results.Redirect;
 import play.mvc.results.RenderText;
@@ -23,6 +26,16 @@ public abstract class Controller {
     
     protected static void redirect(String url) {
         throw new Redirect(url);
+    }
+    
+    protected static void redirect(String action, Object... args) {
+        Map<String, String> r = new HashMap<String, String>();
+        String[] names = SignaturesNamesRepository.get(ActionInvoker.getActionMethod(action));
+        assert names.length == args.length : "Problem is action redirection";
+        for(int i=0; i<names.length; i++) {
+            r.put(names[i], args[i] == null ? null : args[i].toString());
+        }
+        throw new Redirect(Router.reverse(action, r));
     }
 
 }

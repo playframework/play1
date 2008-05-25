@@ -5,6 +5,7 @@ import play.mvc.results.Result;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import play.Play;
+import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.data.parsing.DataParser;
 import play.libs.Java;
 
@@ -20,20 +21,7 @@ public class ActionInvoker {
             Router.route(request);
 
             // 2. Find the action method
-            Method actionMethod = null;
-            try {
-                String controller = "controllers." + request.action.substring(0, request.action.lastIndexOf("."));
-                String action = request.action.substring(request.action.lastIndexOf(".") + 1);
-                Class controllerClass = Play.classloader.loadClass(controller);
-                actionMethod = Java.findPublicStaticMethod(action, controllerClass);
-            } catch (Exception e) {
-                // ActionNotFound
-                throw new RuntimeException(e);
-            }
-            if (actionMethod == null) {
-                // ActionNotFound
-                throw new RuntimeException("Not found");
-            }
+            Method actionMethod = getActionMethod(request.action);
             
             // 3. Prepare request params
             Scope.Params params = new Scope.Params();
@@ -43,13 +31,14 @@ public class ActionInvoker {
             
             // 4. Invoke the action
             try {
+                ControllerInstrumentation.initActionCall();
                 if(actionMethod.getParameterTypes().length>0) {
                     // It's time to parse the request data
                     params.checkAndParse();
                 }
                 Java.invokeStatic(actionMethod, params.data);
             } catch (IllegalAccessException ex) {
-                // Nope
+                throw ex;
             } catch (IllegalArgumentException ex) {
                 throw ex;
             } catch (InvocationTargetException ex) {                
@@ -57,6 +46,7 @@ public class ActionInvoker {
                 if(ex.getTargetException() instanceof Result) {
                     throw (Result)ex.getTargetException();
                 }
+                // Rethrow the enclosed exception
                 if(ex.getTargetException() instanceof RuntimeException) {
                     throw (RuntimeException)ex.getTargetException();
                 }
@@ -72,4 +62,25 @@ public class ActionInvoker {
         } 
         
     } 
+    
+    public static Method getActionMethod(String fullAction) {
+        Method actionMethod = null;
+        try {
+            if(!fullAction.startsWith("controllers.")) {
+                fullAction = "controllers." + fullAction;
+            }
+            String controller = fullAction.substring(0, fullAction.lastIndexOf("."));
+            String action = fullAction.substring(fullAction.lastIndexOf(".") + 1);
+            Class controllerClass = Play.classloader.loadClass(controller);
+            actionMethod = Java.findPublicStaticMethod(action, controllerClass);
+        } catch (Exception e) {
+            // ActionNotFound
+            throw new RuntimeException("Not found");
+        }
+        if (actionMethod == null) {
+            // ActionNotFound
+            throw new RuntimeException("Not found");
+        }
+        return actionMethod;
+    }
 }

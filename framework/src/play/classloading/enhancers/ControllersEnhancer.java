@@ -4,6 +4,7 @@ import javassist.CannotCompileException;
 import javassist.CtClass;
 import javassist.CtField;
 import javassist.CtMethod;
+import javassist.Modifier;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
 import javassist.expr.Handler;
@@ -33,6 +34,20 @@ public class ControllersEnhancer extends Enhancer {
                 }
             });
             
+            // Auto-redirect
+            if (Modifier.isPublic(ctMethod.getModifiers()) && Modifier.isStatic(ctMethod.getModifiers())) {
+                try {
+                    ctMethod.insertBefore(
+                               "if(!play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.isActionCallAllowed()) {"+
+                                    "redirect(\""+ctClass.getName()+"."+ctMethod.getName()+"\", $args);"+
+                               "}"+
+                               "play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.stopActionCall();"
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            
             // Enchance global catch to avoid potential unwanted catching of play.mvc.results.Result
             ctMethod.instrument(new ExprEditor() {
                 @Override
@@ -60,5 +75,24 @@ public class ControllersEnhancer extends Enhancer {
 	}
 	return false;
     }	
+    
+    public static class ControllerInstrumentation {
+        
+        public static boolean isActionCallAllowed() {
+            return allow.get();
+        }
+        
+        public static void initActionCall() {
+            allow.set(true);
+        }
+        
+        public static void stopActionCall() {
+            allow.set(false);
+        }
+        
+        static ThreadLocal<Boolean> allow = new ThreadLocal<Boolean>();
+        
+        
+    }
     
 }

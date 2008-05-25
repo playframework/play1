@@ -6,12 +6,12 @@ import java.util.Date;
 
 public class Application extends Controller {
 
-    public static void index(HashSet name, Integer age, HashSet<Date> date) {
+    public static void index(String name, Integer age, HashSet<Date> date) {
         renderText("SHIGETA フローラルウォーターは (%s -> %s / %s)", name, age, date);
     }
     
     public static void test() {
-        redirect("/");
+        index("Guillaume", 27, null);
     }
 
 }
