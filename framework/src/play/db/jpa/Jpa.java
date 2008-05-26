@@ -68,9 +68,9 @@ public class Jpa {
         JpaContext.createContext(manager, readonly);
     }
     
-    public static void closeTx () {
+    public static void closeTx (boolean rollback) {
         EntityManager manager = JpaContext.get().entityManager;
-        if (JpaContext.get().readonly)
+        if (JpaContext.get().readonly || rollback)
             manager.getTransaction().rollback();
         else
             manager.getTransaction().commit();

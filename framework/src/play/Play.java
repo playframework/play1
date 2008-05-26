@@ -62,9 +62,7 @@ public class Play {
     }
     
     public static synchronized void stop() {
-        
         Jpa.shutdown();
-        
         started = false;
     }
     

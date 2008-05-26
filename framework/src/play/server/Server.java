@@ -57,7 +57,7 @@ public class Server {
             Response response = new Response();
             response.out = new ResponseStream(response, http);
 
-            Invoker.invoke(new RequestInvocation(request, response));
+            Invoker.invokeInThread(new RequestInvocation(request, response));
         }
         
     }
@@ -135,5 +135,4 @@ public class Server {
         }
         
     }
-    
 }
