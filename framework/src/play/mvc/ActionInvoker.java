@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import play.mvc.results.Result;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.List;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.data.parsing.DataParser;
@@ -31,9 +33,21 @@ public class ActionInvoker {
             
             // 4. Invoke the action
             try {
+                // @Before
+                List<Method> befores = Java.findAllAnnotatedMethods(actionMethod.getDeclaringClass(), Before.class);
+                ControllerInstrumentation.stopActionCall();
+                for(Method before : befores) {
+                    if(Modifier.isStatic(before.getModifiers())) {
+                        before.setAccessible(true);
+                        if(before.getParameterTypes().length>0) {
+                            params.checkAndParse();
+                        }
+                        Java.invokeStatic(before, params.data);
+                    }
+                }
+                // Action
                 ControllerInstrumentation.initActionCall();
                 if(actionMethod.getParameterTypes().length>0) {
-                    // It's time to parse the request data
                     params.checkAndParse();
                 }
                 Java.invokeStatic(actionMethod, params.data);

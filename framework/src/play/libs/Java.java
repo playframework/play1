@@ -2,6 +2,8 @@ package play.libs;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
 import play.data.binding.Binder;
@@ -89,4 +91,19 @@ public class Java {
         }
         return "L" + (clazz.getName().replace('.', '/')) + ";";
     }
+    
+    public static List<Method> findAllAnnotatedMethods(Class clazz, Class annotationType) {
+        List<Method> methods = new ArrayList<Method>();
+        while(!clazz.equals(Object.class)) {
+            for(Method method : clazz.getDeclaredMethods()) {
+                if(method.isAnnotationPresent(annotationType)) {
+                    methods.add(method);
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return methods;
+    }
+    
+    
 }
