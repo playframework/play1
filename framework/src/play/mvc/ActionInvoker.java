@@ -9,6 +9,8 @@ import java.util.List;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.data.parsing.DataParser;
+import play.exceptions.PlayException;
+import play.exceptions.UnexpectedException;
 import play.libs.Java;
 
 public class ActionInvoker {
@@ -71,8 +73,10 @@ public class ActionInvoker {
         } catch (Result result) {
             result.apply(request, response);
             
+        } catch(PlayException e) {
+            throw e;
         } catch (Exception e) {
-             throw new RuntimeException(e);
+             throw new UnexpectedException(e);
         } 
         
     } 
@@ -87,6 +91,8 @@ public class ActionInvoker {
             String action = fullAction.substring(fullAction.lastIndexOf(".") + 1);
             Class controllerClass = Play.classloader.loadClass(controller);
             actionMethod = Java.findPublicStaticMethod(action, controllerClass);
+        } catch(PlayException e) {
+            throw e;
         } catch (Exception e) {
             // ActionNotFound
             throw new RuntimeException("Not found");

@@ -92,7 +92,9 @@ public class ApplicationClassloader extends ClassLoader {
         for (ApplicationClass applicationClass : modifieds) {
             applicationClass.compile();
             applicationClass.enhance();
-            newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.javaByteCode));
+            if(applicationClass.javaClass != null) {
+                newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.javaByteCode));
+            }
         }
         try {
             HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));

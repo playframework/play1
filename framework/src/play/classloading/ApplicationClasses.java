@@ -45,7 +45,7 @@ public class ApplicationClasses {
         public String javaSource;
         public byte[] javaByteCode;
         public Class javaClass;
-        public Long timestamp;
+        public Long timestamp = 0L;
         ClassPath classPath;
 
         public ApplicationClass(String name) {
@@ -56,8 +56,7 @@ public class ApplicationClasses {
 
         public void refresh() {
             this.javaSource = this.javaFile.contentAsString();
-            this.javaByteCode = null;
-            this.timestamp = this.javaFile.lastModified();
+            this.javaByteCode = null;            
         }
 
         public void setByteCode(byte[] compiledByteCode) {
@@ -85,6 +84,7 @@ public class ApplicationClasses {
 
         public byte[] compile() {
             compiler.compile(this.name);
+            this.timestamp = this.javaFile.lastModified();
             return this.javaByteCode;
         }
                 

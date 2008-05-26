@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.compiler.Compiler;
 
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.exceptions.JavaCompilationException;
 
 public class ApplicationCompiler {
 
@@ -197,7 +198,7 @@ public class ApplicationCompiler {
                     IProblem[] problems = result.getErrors();
                     for (int i = 0; i < problems.length; i++) {
                         IProblem problem = problems[i];
-                        throw new RuntimeException(new String(problem.getOriginatingFileName()) + " " + problem);
+                        throw new JavaCompilationException(new String(problem.getOriginatingFileName()), problem);
                     }
                 }
                 // Something has been compiled
@@ -221,7 +222,6 @@ public class ApplicationCompiler {
          * The JDT compiler
          */
         Compiler jdtCompiler = new Compiler(nameEnvironment, policy, settings, compilerRequestor, problemFactory) {
-
             @Override
             protected void handleInternalException(Throwable e, CompilationUnitDeclaration ud, CompilationResult result) {
                 super.handleInternalException(e, ud, result);

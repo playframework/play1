@@ -7,6 +7,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import play.Invoker;
 import play.Logger;
@@ -57,7 +58,20 @@ public class Server {
             Response response = new Response();
             response.out = new ResponseStream(response, http);
 
-            Invoker.invokeInThread(new RequestInvocation(request, response));
+            try {
+                Invoker.invokeInThread(new RequestInvocation(request, response));
+            } catch (Throwable ex) {
+                response.status = 500;
+                response.contentType = "text/plain";
+                ex.printStackTrace(new PrintStream(response.out));                
+            } finally {
+                try {
+                    response.out.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            
         }
         
     }
@@ -121,17 +135,7 @@ public class Server {
 
         @Override
         public void execute() {
-            try {
-                ActionInvoker.invoke(request, response);                
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            } finally {
-                try {
-                    response.out.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
+            ActionInvoker.invoke(request, response);               
         }
         
     }

@@ -14,6 +14,7 @@ public class Application extends Controller {
 		if("Guillaume".equals(name)) {
 			redirect("http://www.amazon.com");
 		}
+		models.Test.test();
 	}
 
     public static void index(String name, Integer age, HashSet<Date> date) {

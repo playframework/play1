@@ -8,12 +8,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.db.jpa.Jpa;
+import play.exceptions.PlayException;
 
 public class Invoker {
     public static Executor executor =null;
        
     public static void invoke(Invocation invocation) {
-        Play.detectChanges();
         if (executor==null) {
             executor=Invoker.startExecutor();
         }
@@ -21,7 +21,6 @@ public class Invoker {
     }
 
     public static void invokeInThread(Invocation invocation) {
-        Play.detectChanges();
         invocation.run();      
     }
     
@@ -31,6 +30,7 @@ public class Invoker {
 
         @Override
         public void run() {
+            Play.detectChanges();
             setContextClassLoader(Play.classloader);
             LocalVariablesNamesTracer.enterMethod();
             if (Jpa.isEnabled()) Jpa.startTx(false);
@@ -38,6 +38,12 @@ public class Invoker {
                 execute();
             } catch (Throwable e) {
                 if (Jpa.isEnabled()) Jpa.closeTx(true);
+                if(e instanceof PlayException) {
+                    throw (PlayException)e;
+                }
+                if(e instanceof RuntimeException) {
+                    throw (RuntimeException)e;
+                }
                 throw new RuntimeException(e);
             }
             if (Jpa.isEnabled()) Jpa.closeTx(false);
