@@ -49,6 +49,6 @@ public class Invoker {
         int core = Integer.parseInt(p.getProperty("play.pool.core", "2"));
         int max = Integer.parseInt(p.getProperty("play.pool.max", "20"));
         int keepalive = Integer.parseInt(p.getProperty("play.pool.keepalive", "5"));
-        return new ThreadPoolExecutor (core,max,keepalive,TimeUnit.MINUTES,queue,new ThreadPoolExecutor.AbortPolicy());
+        return new ThreadPoolExecutor (core,max,keepalive*60,TimeUnit.SECONDS,queue,new ThreadPoolExecutor.AbortPolicy());
     }
 }
