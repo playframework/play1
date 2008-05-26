@@ -57,10 +57,18 @@ public class Play {
     public static synchronized void stop() {
         started = false;
     }
-
-    public static synchronized void detectChanges() {
+    
+    public static File getFile(String path) {
+        return new File(root, path);
+    }
+    
+    public static String relativize(File f) {
+        return f.getName();
+    }
+   
+    protected static synchronized void detectChanges() {
         try {
-            classloader.detectChanges();
+            classloader.detectChanges();            
         } catch (UnsupportedOperationException e) {
             // We have to do a clean refresh
             start();

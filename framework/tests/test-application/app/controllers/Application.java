@@ -9,10 +9,10 @@ import java.util.Date;
 public class Application extends Controller {
 	
 	@Before
-	static void log(String name) {
-		Logger.info(">>>> %s", name);
-		if(name.equals("Guillaume")) {
-			redirect("http://www.google.com");
+	static void log(String name, Integer age) { 
+		Logger.info(">>>> %s", name); 
+		if("Guillaume".equals(name)) {
+			redirect("http://www.amazon.com");
 		}
 	}
 

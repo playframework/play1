@@ -26,10 +26,10 @@ public class ActionInvoker {
             Method actionMethod = getActionMethod(request.action);
             
             // 3. Prepare request params
-            Scope.Params params = new Scope.Params();
-            Scope.Params.current.set(params);
-            params.__mergeWith(request.routeArgs);
-            params._mergeWith(DataParser.parsers.get("application/x-www-form-urlencoded").parse(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
+            Scope.Params.current.set(new Scope.Params());
+            Scope.RenderArgs.current.set(new Scope.RenderArgs());
+            Scope.Params.current().__mergeWith(request.routeArgs);
+            Scope.Params.current()._mergeWith(DataParser.parsers.get("application/x-www-form-urlencoded").parse(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
             
             // 4. Invoke the action
             try {
@@ -40,17 +40,17 @@ public class ActionInvoker {
                     if(Modifier.isStatic(before.getModifiers())) {
                         before.setAccessible(true);
                         if(before.getParameterTypes().length>0) {
-                            params.checkAndParse();
+                            Scope.Params.current().checkAndParse();
                         }
-                        Java.invokeStatic(before, params.data);
+                        Java.invokeStatic(before, Scope.Params.current().data);
                     }
                 }
                 // Action
                 ControllerInstrumentation.initActionCall();
                 if(actionMethod.getParameterTypes().length>0) {
-                    params.checkAndParse();
+                    Scope.Params.current().checkAndParse();
                 }
-                Java.invokeStatic(actionMethod, params.data);
+                Java.invokeStatic(actionMethod, Scope.Params.current().data);
             } catch (IllegalAccessException ex) {
                 throw ex;
             } catch (IllegalArgumentException ex) {

@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javassist.ByteArrayClassPath;
+import javassist.ClassPath;
 import play.Play;
 import play.Play.VirtualFile;
 import play.classloading.enhancers.ControllersEnhancer;
@@ -44,6 +46,7 @@ public class ApplicationClasses {
         public byte[] javaByteCode;
         public Class javaClass;
         public Long timestamp;
+        ClassPath classPath;
 
         public ApplicationClass(String name) {
             this.name = name;
@@ -58,11 +61,19 @@ public class ApplicationClasses {
         }
 
         public void setByteCode(byte[] compiledByteCode) {
-            this.javaByteCode = compiledByteCode;
-            try {
+            this.javaByteCode = compiledByteCode;               
+            if(classPath != null) {
+                Enhancer.classPool.removeClassPath(classPath);
+            }
+            classPath = new ByteArrayClassPath(name, javaByteCode);
+            Enhancer.classPool.appendClassPath(classPath);           
+        }
+        
+        public void enhance() {
+            try {       
                 for(Enhancer enhancer : enhancers) {
                     enhancer.enhanceThisClass(this);
-                }
+                } 
             } catch(Exception e) {
                 throw new RuntimeException(e);
             }

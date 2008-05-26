@@ -140,6 +140,7 @@ public class ApplicationCompiler {
                             ClassFileReader classFileReader = new ClassFileReader(applicationClass.javaByteCode, fileName, true);
                             return new NameEnvironmentAnswer(classFileReader, null);
                         } else {
+                            // Cascade compilation
                             ICompilationUnit compilationUnit = new CompilationUnit(name);
                             return new NameEnvironmentAnswer(compilationUnit, null);
                         }

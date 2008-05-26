@@ -135,7 +135,7 @@
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
             <compilation-unit>
                 <package-root>framework/src</package-root>
-                <classpath mode="compile">framework/lib/compiler-jdt.jar:framework/lib/jregex1.2_01.jar:framework/lib/javassist.jar:framework/lib/c3p0-0.9.1.jar:framework/lib/junit-4.4.jar</classpath>
+                <classpath mode="compile">framework/lib/compiler-jdt.jar:framework/lib/jregex1.2_01.jar:framework/lib/javassist.jar:framework/lib/c3p0-0.9.1.jar:framework/lib/junit-4.4.jar:framework/lib/openjdk_071012-httpserver.jar</classpath>
                 <built-to>framework/classes</built-to>
                 <source-level>1.5</source-level>
             </compilation-unit>

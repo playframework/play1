@@ -13,10 +13,10 @@ public class Files {
     public static Properties readUtf8Properties(InputStream is) throws IOException {
         Properties properties = new Properties();
         properties.load(is);
-        for(String key : properties.stringPropertyNames()) { 
-            String value = properties.getProperty(key);
+        for(Object key : properties.keySet()) { 
+            String value = properties.getProperty(key.toString());
             String goodValue = new String(value.getBytes("iso8859-1"), "utf-8");
-            properties.setProperty(key, goodValue);
+            properties.setProperty(key.toString(), goodValue);
         }
         is.close();
         return properties;

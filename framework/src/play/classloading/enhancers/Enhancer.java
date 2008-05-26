@@ -8,7 +8,7 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 
 public abstract class Enhancer {
     
-    static ClassPool classPool = ClassPool.getDefault();
+    public static ClassPool classPool = ClassPool.getDefault();
     
     CtClass makeClass(ApplicationClass applicationClass) throws IOException {
         return classPool.makeClass(new ByteArrayInputStream(applicationClass.javaByteCode));

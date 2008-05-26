@@ -10,7 +10,6 @@ import java.util.List;
 
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.classloading.enhancers.Enhancer;
 
 public class ApplicationClassloader extends ClassLoader {
 
@@ -45,8 +44,9 @@ public class ApplicationClassloader extends ClassLoader {
             if (applicationClass.isCompiled()) {
                 return applicationClass.javaClass;
             } else {
-                byte[] byteCode = applicationClass.compile();
-                applicationClass.javaClass = defineClass(name, byteCode, 0, byteCode.length);
+                applicationClass.compile();
+                applicationClass.enhance();
+                applicationClass.javaClass = defineClass(name, applicationClass.javaByteCode, 0, applicationClass.javaByteCode.length);
                 resolveClass(applicationClass.javaClass);
                 return applicationClass.javaClass;
             }
@@ -90,6 +90,7 @@ public class ApplicationClassloader extends ClassLoader {
         List<ClassDefinition> newDefinitions = new ArrayList<ClassDefinition>();
         for (ApplicationClass applicationClass : modifieds) {
             applicationClass.compile();
+            applicationClass.enhance();
             newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.javaByteCode));
         }
         try {

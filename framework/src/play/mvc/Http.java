@@ -44,6 +44,7 @@ public class Http {
         public Map<String, Http.Cookie> cookies;
         public InputStream body;   
         public Map<String, String> routeArgs;
+        public String format = "html";
         
         // Play!
         public String action;

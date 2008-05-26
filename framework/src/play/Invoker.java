@@ -1,5 +1,7 @@
 package play;
 
+import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
+
 public class Invoker {
     
     public static void invoke(Invocation invocation) {
@@ -14,6 +16,7 @@ public class Invoker {
         @Override
         public void run() {
             setContextClassLoader(Play.classloader);
+            LocalVariablesNamesTracer.enterMethod();
             execute();
         }
 

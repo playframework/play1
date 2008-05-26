@@ -85,12 +85,18 @@ public class Scope {
     
     public static class RenderArgs {
         
+        Map<String, Object> data = new HashMap<String, Object>();
+        
         // ThreadLocal access
         public static ThreadLocal<RenderArgs> current = new ThreadLocal<RenderArgs>();    
         public static RenderArgs current() {
             return current.get();
         }
         
+        public void put(String key, Object arg) {
+            this.data.put(key, arg);
+        }
+                
     }
 
 
