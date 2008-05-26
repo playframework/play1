@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import play.Play;
+import play.Play.VirtualFile;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 public class ApplicationClassloader extends ClassLoader {
@@ -99,6 +100,26 @@ public class ApplicationClassloader extends ClassLoader {
             throw new RuntimeException(e);
         } catch (UnmodifiableClassException e) {
             throw new RuntimeException(e);
+        }
+    }
+    
+    
+    public List<Class> getAllClasses() {
+        List<Class> res = new ArrayList<Class>();
+        for (VirtualFile virtualFile : Play.javaPath)
+            scan(res, "", virtualFile);
+        return res;
+    }
+    
+    private void scan (List<Class> classes, String packageName, VirtualFile current) {
+        if (!current.isDirectory()) {
+             if (current.getName().endsWith(".java")) {
+                    String classname = packageName+current.getName().substring(0, current.getName().length() - 5);
+                    classes.add (loadApplicationClass(classname));
+                }
+        } else {    
+            for (VirtualFile virtualFile : current.list())
+               scan(classes, current.getName()+".", virtualFile); 
         }
     }
 }

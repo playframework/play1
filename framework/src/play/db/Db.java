@@ -22,14 +22,13 @@ public class Db {
                 ds.setPassword(p.getProperty("db.pass"));
                 ds.setAcquireRetryAttempts(1);
                 ds.setAcquireRetryDelay(0);
-                
                 datasource=ds;
             } catch (Exception e) {
                 Logger.debug(e);
             }
         }
     }
-    
+
     private static boolean changed () {
        Properties p = Play.configuration;
        

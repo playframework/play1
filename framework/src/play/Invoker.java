@@ -1,6 +1,7 @@
 package play;
 
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
+import play.db.jpa.Jpa;
 
 public class Invoker {
     
@@ -17,7 +18,9 @@ public class Invoker {
         public void run() {
             setContextClassLoader(Play.classloader);
             LocalVariablesNamesTracer.enterMethod();
+            if (Jpa.isEnabled()) Jpa.startTx(false);
             execute();
+            if (Jpa.isEnabled()) Jpa.closeTx();
         }
 
     }
