@@ -7,6 +7,10 @@ public class Logger {
     public static void debug(String message, Object... args) { 
         print("DEBUG", message, args);
     }
+
+    public static void debug(Throwable e) { 
+        e.printStackTrace();
+    }
     
     public static void info(String message, Object... args) {    
         print("INFO", message, args);
@@ -27,7 +31,7 @@ public class Logger {
     private static void print(String level, String message, Object... args) {
         System.out.println(String.format("%-6s %-6s %s", time(), level, String.format(message, args)));
     }
-    
+   
     private static Long time() {
         return System.currentTimeMillis() - start;
     }

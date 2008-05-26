@@ -9,6 +9,14 @@
         <pathelement path="play.jar"/>
     </path>
     
+    <path id="test.classpath">
+        <fileset dir="lib">
+            <include name="**/*.jar"/>
+            <exclude name="ant/*.jar"/>
+        </fileset>
+        <pathelement path="classes/"/>
+    </path>  
+    
     <target name="clean" description="clean resources">
         <delete dir="classes" /> 
         <delete dir="dist" />
@@ -84,6 +92,47 @@
             <jvmarg value="-Xdebug"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
         </java>	
+    </target>
+    
+     <target name="compile-tests" depends="compile">
+        <javac encoding="utf-8" nowarn="${compile.nowarn}" debug="true" destdir="classes" classpathref="project.classpath" srcdir="tests/src" >
+            <include name="**/*.java"/>
+        </javac> 
+    </target>
+    
+    <target name="test" depends="compile-tests" description="run tests suite">                       
+        <mkdir dir="tests-results" />
+        <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true">
+            <batchtest todir="tests-results">
+                <fileset dir="tests/src">
+                    <include name="**/*.java"/>
+                </fileset>
+            </batchtest>
+            <classpath refid="test.classpath"/>                    
+            <formatter type="brief" usefile="false"/>
+            <formatter type="xml"/>                    
+        </junit>
+        <mkdir dir="tests-results/html" />
+        <junitreport todir="tests-results">
+            <fileset dir="tests-results">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="tests-results/html"/>
+        </junitreport>
+    </target>
+    
+    <target name="debug-test-single" depends="compile-tests" description="run a single test">
+        <nbjpdastart addressproperty="jpda.address" name="Play! framework" transport="dt_socket">
+            <classpath refid="project.classpath"/>
+        </nbjpdastart>
+        <mkdir dir="tests-results" />
+        <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true">
+            <test name="${testclass}" />
+            <classpath refid="test.classpath"/>                    
+            <formatter type="brief" usefile="false"/> 
+            <formatter type="xml"/>
+            <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
+        </junit>	
     </target>
     
 </project>

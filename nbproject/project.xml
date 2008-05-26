@@ -32,28 +32,28 @@
             </folders>
             <ide-actions>
                 <action name="build">
-                    <script>nbproject/nbjdk.xml</script>
+                    <script>framework/build.xml</script>
                     <target>jar</target>
                 </action>
                 <action name="run">
-                    <script>nbproject/nbjdk.xml</script>
+                    <script>framework/build.xml</script>
                     <target>run-test-application</target>
                 </action>
                 <action name="clean">
-                    <script>nbproject/nbjdk.xml</script>
+                    <script>framework/build.xml</script>
                     <target>clean</target>
                 </action>
                 <action name="test">
-                    <script>nbproject/nbjdk.xml</script>
+                    <script>framework/build.xml</script>
                     <target>test</target>
                 </action>
                 <action name="rebuild">
-                    <script>nbproject/nbjdk.xml</script>
+                    <script>framework/build.xml</script>
                     <target>clean</target>
                     <target>jar</target>
                 </action>
                 <action name="test.single">
-                    <script>nbproject/nbjdk.xml</script>
+                    <script>framework/build.xml</script>
                     <target>test-single</target>
                     <context>
                         <property>testclass</property>
@@ -66,14 +66,27 @@
                     </context>
                 </action>
                 <action name="debug">
-                    <script>nbproject/nbjdk.xml</script>
+                    <script>framework/build.xml</script>
                     <target>debug-test-application</target>
                 </action>
                 <action name="debug.single">
-                    <script>nbproject/nbjdk.xml</script>
-                    <target>debug-selected-file-in-src</target>
+                    <script>framework/build.xml</script>
+                    <target>test-single</target>
                     <context>
                         <property>debug.class</property>
+                        <folder>framework/tests/src</folder>
+                        <pattern>\.java$</pattern>
+                        <format>java-name</format>
+                        <arity>
+                            <one-file-only/>
+                        </arity>
+                    </context>
+                </action>
+                <action name="debug.test.single">
+                    <script>framework/build.xml</script>
+                    <target>debug-test-single</target>
+                    <context>
+                        <property>testclass</property>
                         <folder>framework/tests/src</folder>
                         <pattern>\.java$</pattern>
                         <format>java-name</format>
@@ -86,7 +99,7 @@
             <export>
                 <type>folder</type>
                 <location>framework/classes</location>
-                <script>nbproject/nbjdk.xml</script>
+                <script>framework/build.xml</script>
                 <build-target>jar</build-target>
             </export>
             <view>
@@ -122,13 +135,14 @@
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
             <compilation-unit>
                 <package-root>framework/src</package-root>
-                <classpath mode="compile">framework/lib/compiler-jdt.jar:framework/lib/jregex1.2_01.jar:framework/lib/javassist.jar</classpath>
+                <classpath mode="compile">framework/lib/compiler-jdt.jar:framework/lib/jregex1.2_01.jar:framework/lib/javassist.jar:framework/lib/c3p0-0.9.1.jar:framework/lib/junit-4.4.jar</classpath>
                 <built-to>framework/classes</built-to>
                 <source-level>1.5</source-level>
             </compilation-unit>
             <compilation-unit>
                 <package-root>framework/tests/src</package-root>
                 <unit-tests/>
+                <classpath mode="compile">framework/lib/junit-4.4.jar:framework/classes</classpath>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>
