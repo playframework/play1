@@ -21,7 +21,7 @@ public class Application extends Controller {
     }
     
     public static void test() {
-        Orders.show(56L);
+        Orders.show(56L, "kiki");
     }
 
 }

@@ -7,3 +7,5 @@ nbproject/nbjdk.properties
 nbproject/nbjdk.xml
 nbproject/private
 framework/tests-results
+framework/src/version
+framework/src/play/version

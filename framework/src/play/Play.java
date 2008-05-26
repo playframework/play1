@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import java.util.Properties;
@@ -13,6 +14,7 @@ import play.db.Db;
 import play.db.jpa.Jpa;
 import play.libs.Files;
 import play.mvc.Router;
+import play.templates.TemplateLoader;
 
 public class Play {
     
@@ -24,6 +26,7 @@ public class Play {
     public static ApplicationClasses classes = new ApplicationClasses();
     public static ApplicationClassloader classloader;
     public static List<VirtualFile> javaPath;
+    public static List<VirtualFile> templatesPath;
     public static Properties configuration;
     public static String applicationName;
     
@@ -38,22 +41,18 @@ public class Play {
             if(started) {
                 stop();
             }
-            // 1. Configuration
             Thread.currentThread().setContextClassLoader(Play.classloader);
             configuration = Files.readUtf8Properties(new VirtualFile("conf/application.conf").inputstream());
             applicationName = configuration.getProperty("application.name", "(no name)");
-            // 2. The Java path
             javaPath = new ArrayList<VirtualFile>();
             javaPath.add(new VirtualFile("app"));
-            // 3. The classloader
+            templatesPath = new ArrayList<VirtualFile>();
+            templatesPath.add(new VirtualFile("app/views"));
             classloader = new ApplicationClassloader();
-            // 4. Routes
             Router.load(new VirtualFile("conf/routes"));
-            // 5. Db Config
+            TemplateLoader.cleanCompiledCache();
             Db.init();
-            // 6. JPA Config
             Jpa.init();
-            // Ok
             started = true;
             Logger.info("Application %s is started !", applicationName);
         } catch(Exception e) {
@@ -65,14 +64,6 @@ public class Play {
         Jpa.shutdown();
         started = false;
     }
-    
-    public static File getFile(String path) {
-        return new File(root, path);
-    }
-    
-    public static String relativize(File f) {
-        return f.getName();
-    }
    
     protected static synchronized void detectChanges() {
         try {
@@ -83,95 +74,150 @@ public class Play {
         }
     }
     
+    public static VirtualFile getFile(String path) {
+        return new VirtualFile(path);
+    }
+    
     public static class VirtualFile {
+
         File realFile;
-        
-        public VirtualFile(String path) {   
+
+        public VirtualFile(String path) {
             realFile = new File(root, path);
         }
 
         private VirtualFile(File file) {
-            realFile=file;
+            realFile = file;
         }
-        
-        public String getName () {
-            if (realFile!=null)
+
+        public String getName() {
+            if (realFile != null) {
                 return realFile.getName();
-            else
+            } else {
                 throw new UnsupportedOperationException();
+            }
         }
-        
-        public boolean isDirectory () {
-            if (realFile!=null)
+
+        public boolean isDirectory() {
+            if (realFile != null) {
                 return realFile.isDirectory();
-             else
+            } else {
                 throw new UnsupportedOperationException();
+            }
         }
-        
-        public List<VirtualFile> list () {
+
+        public String relativePath() {
+            if (realFile != null) {
+                List<String> path = new ArrayList<String>();
+                File f = realFile;
+                while(f != null && !f.equals(Play.root)) {
+                    path.add(f.getName());
+                    f = f.getParentFile();
+                }
+                Collections.reverse(path);
+                StringBuilder builder = new StringBuilder();
+                for(String p : path) {
+                    builder.append("/"+p);
+                }
+                return builder.toString();
+            }
+            return null;
+        }
+
+        public VirtualFile get(String path) {
+            if (realFile != null) {
+                return new VirtualFile(new File(realFile, path));
+            }
+            return null;
+        }
+
+        public List<VirtualFile> list() {
             List<VirtualFile> res = new ArrayList<VirtualFile>();
-            if (realFile!=null) {
+            if (realFile != null) {
                 File[] children = realFile.listFiles();
-                for (int i = 0; i < children.length; i++)
+                for (int i = 0; i < children.length; i++) {
                     res.add(new VirtualFile(children[i]));
-            } else 
+                }
+            } else {
                 throw new UnsupportedOperationException();
+            }
             return res;
         }
-        
-        public VirtualFile(VirtualFile parent, String path) {         
-            if(parent.realFile != null) {
+
+        public VirtualFile(VirtualFile parent, String path) {
+            if (parent.realFile != null) {
                 realFile = new File(parent.realFile, path);
             }
         }
-        
+
         public boolean exists() {
-            if(realFile != null) {
+            if (realFile != null) {
                 return realFile.exists();
             }
             return false;
         }
-        
+
         public InputStream inputstream() {
-            if(realFile != null) {
+            if (realFile != null) {
                 try {
                     return new FileInputStream(realFile);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
             return null;
         }
-        
+
         public String contentAsString() {
             try {
                 return Files.readContentAsString(inputstream());
-            } catch(Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
-        
+
         public byte[] content() {
-            if(realFile != null) {
-                byte[] buffer = new byte[(int)realFile.length()];
+            if (realFile != null) {
+                byte[] buffer = new byte[(int) realFile.length()];
                 try {
                     InputStream is = inputstream();
                     is.read(buffer);
                     is.close();
                     return buffer;
-                } catch(Exception e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
             return null;
         }
-        
+
         public Long lastModified() {
-            if(realFile != null) {
+            if (realFile != null) {
                 return realFile.lastModified();
             }
             return 0L;
         }
+
+        @Override
+        public boolean equals(Object other) {
+            if(other instanceof VirtualFile) {
+                VirtualFile vf = (VirtualFile)other;
+                if(realFile != null && vf.realFile != null) {
+                    return realFile.equals(vf.realFile);
+                }
+            }
+            return super.equals(other);
+        }
+
+        @Override
+        public int hashCode() {
+            if(realFile != null) {
+                return realFile.hashCode();
+            }
+            return super.hashCode();
+        }
+        
+        
         
     }
 }

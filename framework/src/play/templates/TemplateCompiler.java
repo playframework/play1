@@ -1,86 +1,93 @@
 package play.templates;
 
-import java.io.File;
-import java.io.FileInputStream;
-import play.Play;
-import play.libs.Files;
+import java.util.Stack;
+import play.Play.VirtualFile;
 
 public class TemplateCompiler {
-    
-    public static Template compile(File file) {
+
+    public static Template compile(VirtualFile file) {
         try {
-            String source = Files.readContentAsString(new FileInputStream(file));
-            String name = Play.relativize(file);
+            String source = file.contentAsString();
+            String name = file.relativePath();
             Template template = new Template(name, source);
             new Compiler().hop(template);
             return template;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    } 
-    
+    }
+
     public static class Compiler {
-        
+
         StringBuilder groovySource = new StringBuilder();
-        Template template;     
+        Template template;
         Parser parser;
         boolean doNextScan = true;
         Parser.Token state;
-        
-        void hop(Template template) {        
+        Stack<Tag> tagsStack = new Stack<Tag>();
+        int tagIndex;
+
+        static class Tag {
+
+            String name;
+            int startLine;
+        }
+
+        void hop(Template template) {
             this.template = template;
             this.parser = new Parser(template.source);
-            
+
             // Class header
             print("class ");
             String className = "Template_" + template.name.replaceAll("/", "_").replaceAll("\\.", "_");
             print(className);
-            println(" extends play.templates.Template {");
-            println("public Object run() { use(play.templates.Extensions) {");
-            
+            println(" extends play.templates.Template.ExecutableTemplate {");
+            println("public Object run() { use(play.templates.JavaExtensions) {");
+
             // Parse
             loop:
-                for (;;) {
+            for (;;) {
 
-                    if (doNextScan) {
-                        state = parser.nextToken();
-                    } else {
-                        doNextScan = true;
-                    }
-
-                    switch (state) {
-                        case EOF:
-                            break loop;
-                        case PLAIN:
-                            plain();
-                            break;
-                        case SCRIPT:
-                            script();
-                            break;
-                        case EXPR:
-                            expr();
-                            break;
-                        case MESSAGE:
-                            message();
-                            break;
-                        case ACTION:
-                            action();
-                            break;
-                        case START_TAG:
-                            startTag();
-                            break;
-                        case END_TAG:
-                            endTag();
-                            break;
-                    }
+                if (doNextScan) {
+                    state = parser.nextToken();
+                } else {
+                    doNextScan = true;
                 }
-            
+
+                switch (state) {
+                    case EOF:
+                        break loop;
+                    case PLAIN:
+                        plain();
+                        break;
+                    case SCRIPT:
+                        script();
+                        break;
+                    case EXPR:
+                        expr();
+                        break;
+                    case MESSAGE:
+                        message();
+                        break;
+                    case ACTION:
+                        action();
+                        break;
+                    case START_TAG:
+                        startTag();
+                        break;
+                    case END_TAG:
+                        endTag();
+                        break;
+                }
+            }
+
             println("} }");
             println("}");
-            
+
+            // Done !            
             template.groovySource = groovySource.toString();
         }
-        
+
         void plain() {
             String text = parser.getToken().replaceAll("\"", "\\\\\"").replace("$", "\\$");
             if (text.indexOf("\n") > -1) {
@@ -131,17 +138,84 @@ public class TemplateCompiler {
         }
 
         void message() {
+            String expr = parser.getToken().trim();
+            print("\tkey=");
+            print(expr);
+            print(";out.print('Message -> '+key)");
+            markLine(parser.getLine());
+            println();
         }
 
         void action() {
+            String action = parser.getToken().trim();
+            if (!action.endsWith(")")) {
+                action = action + "()";
+            }
+            print("\tout.print(actionBridge." + action + ");");
+            markLine(parser.getLine());
+            println();
         }
 
         void startTag() {
+            tagIndex++;
+            String tagText = parser.getToken().trim();
+            String tagName = "";
+            String tagArgs = "";
+            if (tagText.indexOf(" ") > 0) {
+                tagName = tagText.substring(0, tagText.indexOf(" "));
+                tagArgs = tagText.substring(tagText.indexOf(" ") + 1).trim();
+                if (!tagArgs.matches("^[a-zA-Z0-9]+:.*$")) {
+                    tagArgs = "arg:" + tagArgs;
+                }
+            } else {
+                tagName = tagText;
+                tagArgs = ":";
+            }
+            Tag tag = new Tag();
+            tag.name = tagName;
+            tag.startLine = currentLine;
+            tagsStack.push(tag);
+            print("attrs" + tagIndex + " = [" + tagArgs + "];");
+            if (!tag.name.equals("doBody")) {
+                print("body" + tagIndex + " = {");
+                markLine(parser.getLine());
+                println();
+            }
         }
 
         void endTag() {
-        }
-                
+            String tagName = parser.getToken().trim();
+            if (tagsStack.isEmpty()) {
+                throw new RuntimeException("Erreur d'ouverture/fermeture des tags.");
+            }
+            Tag tag = (Tag) tagsStack.pop();
+            String lastInStack = tag.name;
+            if (tagName.equals("")) {
+                tagName = lastInStack;
+            }
+            if (!lastInStack.equals(tagName)) {
+                throw new RuntimeException("Erreur d'ouverture/fermeture des tags.");
+            }
+            if (tag.name.equals("doBody")) {
+                print("if(_body) {");
+                print("if(attrs" + tagIndex + "['vars']) {");
+                print("attrs" + tagIndex + "['vars'].each() {");
+                print("_body.setProperty(it.key, it.value);");
+                print("}};");
+                print("_body.call() };");
+                markLine(tag.startLine);
+                template.doBodyLines.add(currentLine);
+                println();
+            } else {
+                print("}");
+                markLine(currentLine);
+                println();
+                print("invokeTag(" + tag.startLine + ",'" + tagName + "',attrs" + tagIndex + ",body" + tagIndex + ")");
+                markLine(tag.startLine);
+                println();
+            }
+        }  
+        
         // Writer
         int currentLine = 1;
 
@@ -164,7 +238,6 @@ public class TemplateCompiler {
             groovySource.append(text);
             println();
         }
-        
     }
 
     public static class Parser {
@@ -178,6 +251,7 @@ public class TemplateCompiler {
 
         //
         public enum Token {
+
             EOF, //
             PLAIN, //
             SCRIPT, // %{...}
@@ -187,10 +261,8 @@ public class TemplateCompiler {
             MESSAGE, // &{...}
             ACTION, // @{...}
         }
-        
         private int end,  begin,  end2,  begin2,  len;
         private Token state = Token.PLAIN;
-        private int openAc = 0;
 
         private Token found(Token newState, int skip) {
             begin2 = begin;
@@ -230,44 +302,32 @@ public class TemplateCompiler {
                 switch (state) {
                     case PLAIN:
                         if (c == '%' && c1 == '{') {
-                            return  found(Token.SCRIPT, 2);
+                            return found(Token.SCRIPT, 2);
                         }
                         if (c == '$' && c1 == '{') {
-                            return  found(Token.EXPR, 2);
-                        } 
-                        if (c == '#' && c1 == '{') {
-                            return  found(Token.START_TAG, 2);
+                            return found(Token.EXPR, 2);
                         }
                         if (c == '#' && c1 == '{' && c2 == '/') {
-                            return  found(Token.END_TAG, 3);
+                            return found(Token.END_TAG, 3);
+                        }
+                        if (c == '#' && c1 == '{') {
+                            return found(Token.START_TAG, 2);
                         }
                         if (c == '&' && c1 == '{') {
-                            return  found(Token.MESSAGE, 2);
+                            return found(Token.MESSAGE, 2);
                         }
                         if (c == '@' && c1 == '{') {
-                            return  found(Token.ACTION, 2);
+                            return found(Token.ACTION, 2);
                         }
                         break;
                     case SCRIPT:
-                        if (c == '{') {
-                            openAc++;
-                        }
-                        if (c == '}') {
-                            if(openAc == 0) {
-                                return found(Token.PLAIN, 1);
-                            }
-                            openAc--;                            
+                        if (c == '}' && c1 == '%') {
+                            return found(Token.PLAIN, 2);
                         }
                         break;
                     case START_TAG:
-                        if (c == '{') {
-                            openAc++;
-                        }
                         if (c == '}') {
-                            if(openAc == 0) {
-                                return found(Token.PLAIN, 1);
-                            }
-                            openAc--;                            
+                            return found(Token.PLAIN, 1);
                         }
                         if (c == '/' && c1 == '}') {
                             return found(Token.END_TAG, 1);
@@ -279,14 +339,8 @@ public class TemplateCompiler {
                         }
                         break;
                     case EXPR:
-                        if (c == '{') {
-                            openAc++;
-                        }
                         if (c == '}') {
-                            if(openAc == 0) {
-                                return found(Token.PLAIN, 1);
-                            }
-                            openAc--; 
+                            return found(Token.PLAIN, 1);
                         }
                         break;
                     case ACTION:

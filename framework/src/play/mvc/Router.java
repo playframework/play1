@@ -56,6 +56,9 @@ public class Router {
     }
     
     public static String reverse(String action, Map<String,String> args) {
+        if(!action.startsWith("controllers.")) {
+            action = "controllers."+action;
+        }
         for(Route route : routes) {
             if(route.action.equals(action)) {
                 List<String> inPathArgs = new ArrayList<String>();

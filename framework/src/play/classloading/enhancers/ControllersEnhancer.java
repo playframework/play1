@@ -15,6 +15,10 @@ public class ControllersEnhancer extends Enhancer {
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
         CtClass ctClass = makeClass(applicationClass);
+        
+        if(!ctClass.subtypeOf(classPool.get("play.mvc.Controller"))) {
+            return;
+        }
 
         for (final CtMethod ctMethod : ctClass.getDeclaredMethods()) {
 

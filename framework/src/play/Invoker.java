@@ -14,8 +14,9 @@ public class Invoker {
        
     public static void invoke(Invocation invocation) {
         Play.detectChanges();
-        if (executor==null)
+        if (executor==null) {
             executor=Invoker.startExecutor();
+        }
         executor.execute(invocation);      
     }
 

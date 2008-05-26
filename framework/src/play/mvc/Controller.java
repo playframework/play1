@@ -45,21 +45,34 @@ public abstract class Controller {
     }
     
     protected static void render(Object... args) {
-        Scope.RenderArgs mArgs = Scope.RenderArgs.current();
+        // Template datas
+        Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
         for(Object o:args) {
             String name = LocalVariablesNamesTracer.getLocalVariableName(o);
             if(name != null) {
-                mArgs.put(name, o);
+                templateBinding.put(name, o);
             }
         }
+        templateBinding.put("session", Scope.Session.current());
+        templateBinding.put("request", Http.Request.current());
+        templateBinding.put("flash", Scope.Flash.current());
+        templateBinding.put("params", Scope.Params.current());
+        // Template name
         String templateName = null;
         if(args.length>0 && args[0] instanceof String && LocalVariablesNamesTracer.getLocalVariableName(args[0]) == null) {
             templateName = args[0].toString();
         } else {
             templateName = Http.Request.current().action.substring(12).replace(".", "/")+"."+Http.Request.current().format;
         }
-        Template template = TemplateLoader.load(Play.getFile("views/"+templateName));
-        throw new RenderTemplate(template, mArgs.data);
+        Template template = null;
+        for(Play.VirtualFile vf : Play.templatesPath) {
+            Play.VirtualFile tf = vf.get(templateName);
+            if(tf.exists()) {
+                template = TemplateLoader.load(tf);
+                break;
+            }
+        }
+        throw new RenderTemplate(template, templateBinding.data);
     }
 
 }

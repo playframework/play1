@@ -5,8 +5,8 @@ import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNam
 
 public class Orders extends Controller {
     
-    public static void show(Long id) {
-        render(id);
+    public static void show(Long id, String name) {
+        render(id, name);
     }
     
 }

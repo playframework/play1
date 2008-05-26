@@ -62,7 +62,7 @@ public class Server {
         
     }
     
-    static class ResponseStream extends OutputStream {
+    static class ResponseStream extends OutputStream { 
         
         HttpExchange http;
         Response response;
@@ -78,7 +78,7 @@ public class Server {
             if(out == null) {
                 flushHeaders();
                 http.sendResponseHeaders(response.status, 0L);
-                out = http.getResponseBody();                
+                out = http.getResponseBody();                 
             }
             out.write(b);
         }
