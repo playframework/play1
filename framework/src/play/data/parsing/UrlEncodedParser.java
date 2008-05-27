@@ -14,8 +14,8 @@ public class UrlEncodedParser extends DataParser {
         try {
             Map<String, String[]> params = new HashMap<String, String[]>();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            byte b;
-            while ((b = (byte) is.read()) > -1) {
+            int b;
+            while ((b = is.read()) != -1) {
                 os.write(b);
             }
             byte[] data = os.toByteArray();

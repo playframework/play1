@@ -61,7 +61,7 @@ public class Jpa {
         if (driver.equals("org.hsqldb.jdbcDriver")) {
             return "org.hibernate.dialect.HSQLDialect";
         } else {
-            throw new UnsupportedOperationException("I do not know which hibernate dialect tu user with " +
+            throw new UnsupportedOperationException("I do not know which hibernate dialect to use with " +
                     driver + ", use the property jpa.dialect in config file");
         }
     }
