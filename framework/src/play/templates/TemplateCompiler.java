@@ -2,6 +2,9 @@ package play.templates;
 
 import java.util.Stack;
 import play.Play.VirtualFile;
+import play.exceptions.TemplateCompilationException;
+import play.exceptions.PlayException;
+import play.exceptions.UnexpectedException;
 
 public class TemplateCompiler {
 
@@ -12,8 +15,10 @@ public class TemplateCompiler {
             Template template = new Template(name, source);
             new Compiler().hop(template);
             return template;
+        } catch (PlayException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new UnexpectedException(e);
         }
     }
 
@@ -83,6 +88,11 @@ public class TemplateCompiler {
 
             println("} }");
             println("}");
+            
+            if(!tagsStack.empty()) {
+                Tag tag = tagsStack.peek();
+                throw new TemplateCompilationException(template, tag.startLine, "#{" + tag.name + "} is not closed.");
+            }
 
             // Done !            
             template.groovySource = groovySource.toString();
@@ -186,7 +196,7 @@ public class TemplateCompiler {
         void endTag() {
             String tagName = parser.getToken().trim();
             if (tagsStack.isEmpty()) {
-                throw new RuntimeException("Erreur d'ouverture/fermeture des tags.");
+                throw new TemplateCompilationException(template, currentLine, "#{/" + tagName + "} is not opened.");
             }
             Tag tag = (Tag) tagsStack.pop();
             String lastInStack = tag.name;
@@ -194,7 +204,7 @@ public class TemplateCompiler {
                 tagName = lastInStack;
             }
             if (!lastInStack.equals(tagName)) {
-                throw new RuntimeException("Erreur d'ouverture/fermeture des tags.");
+                throw new TemplateCompilationException(template, tag.startLine, "#{" + tag.name + "} is not closed.");
             }
             if (tag.name.equals("doBody")) {
                 print("if(_body) {");

@@ -1,6 +1,7 @@
 package play.mvc.results;
 
 import java.io.InputStream;
+import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
@@ -22,7 +23,7 @@ public class RenderBinary extends Result {
             }
             is.close();
         } catch(Exception e) {
-            throw new RuntimeException(e);
+            throw new UnexpectedException(e);
         }        
     }
 

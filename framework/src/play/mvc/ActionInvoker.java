@@ -9,6 +9,8 @@ import java.util.List;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.data.parsing.DataParser;
+import play.exceptions.ActionInvocationException;
+import play.exceptions.ActionNotFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.Java;
@@ -63,10 +65,10 @@ public class ActionInvoker {
                     throw (Result)ex.getTargetException();
                 }
                 // Rethrow the enclosed exception
-                if(ex.getTargetException() instanceof RuntimeException) {
-                    throw (RuntimeException)ex.getTargetException();
+                if(ex.getTargetException() instanceof PlayException) {
+                    throw (PlayException)ex.getTargetException();
                 }
-                throw new RuntimeException(ex.getTargetException());
+                throw ActionInvocationException.toActionInvocationException(Http.Request.current().action, ex.getTargetException());
             }
 
 
@@ -94,12 +96,10 @@ public class ActionInvoker {
         } catch(PlayException e) {
             throw e;
         } catch (Exception e) {
-            // ActionNotFound
-            throw new RuntimeException("Not found");
+            throw new ActionNotFoundException(fullAction, e);
         }
         if (actionMethod == null) {
-            // ActionNotFound
-            throw new RuntimeException("Not found");
+            throw new ActionNotFoundException(fullAction);
         }
         return actionMethod;
     }

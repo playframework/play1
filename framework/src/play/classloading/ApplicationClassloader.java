@@ -11,6 +11,7 @@ import java.util.List;
 import play.Play;
 import play.Play.VirtualFile;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.exceptions.UnexpectedException;
 
 public class ApplicationClassloader extends ClassLoader {
 
@@ -70,12 +71,12 @@ public class ApplicationClassloader extends ClassLoader {
             }
             return os.toByteArray();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new UnexpectedException(e);
         } finally {
             try {
                 is.close();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new UnexpectedException(e);
             }
         }
     }
@@ -99,9 +100,9 @@ public class ApplicationClassloader extends ClassLoader {
         try {
             HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new UnexpectedException(e);
         } catch (UnmodifiableClassException e) {
-            throw new RuntimeException(e);
+            throw new UnexpectedException(e);
         }
     }
     

@@ -21,18 +21,24 @@ import org.codehaus.groovy.runtime.InvokerHelper;
 import org.codehaus.groovy.syntax.SyntaxException;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
+import play.exceptions.PlayException;
+import play.exceptions.TemplateCompilationException;
+import play.exceptions.TemplateExecutionException;
+import play.exceptions.TemplateExecutionException.DoBodyException;
+import play.exceptions.TemplateNotFoundException;
+import play.exceptions.UnexpectedException;
 import play.mvc.ActionInvoker;
 import play.mvc.Router;
 
 public class Template {
     
-    String name;
-    String source;
-    String groovySource;
-    Map<Integer,Integer> linesMatrix = new HashMap<Integer, Integer>();
-    Set<Integer> doBodyLines = new HashSet<Integer>();
-    Class compiledTemplate;
-    Long timestamp = System.currentTimeMillis();
+    public String name;
+    public String source;
+    public String groovySource;
+    public Map<Integer,Integer> linesMatrix = new HashMap<Integer, Integer>();
+    public Set<Integer> doBodyLines = new HashSet<Integer>();
+    public Class compiledTemplate;
+    public Long timestamp = System.currentTimeMillis();
     
     
     public Template(String name, String source) {
@@ -48,7 +54,7 @@ public class Template {
             try {
                 compiledTemplate = classLoader.parseClass(new ByteArrayInputStream(groovySource.getBytes("utf-8")));
             } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
+                throw new UnexpectedException(e);
             } catch (MultipleCompilationErrorsException e) {
                 if (e.getErrorCollector().getLastError() != null) {
                     SyntaxErrorMessage errorMessage = (SyntaxErrorMessage) e.getErrorCollector().getLastError();
@@ -58,11 +64,11 @@ public class Template {
                         line = 0;
                     }
                     String message = syntaxException.getMessage();
-                    throw new RuntimeException(message);
+                    throw new TemplateCompilationException(this, line, message);
                 }
-                throw new RuntimeException("template");
+                throw new UnexpectedException(e);
             } catch (Exception e) {
-                throw new RuntimeException("template");
+                throw new UnexpectedException(e);
             }
         }
         Binding binding = new Binding(args);
@@ -76,7 +82,13 @@ public class Template {
         }
         ExecutableTemplate t = (ExecutableTemplate) InvokerHelper.createScript(compiledTemplate, binding);        
         t.template = this;
-        t.run();
+        try {
+            t.run();
+        } catch(PlayException e) {
+            throw e;
+        } catch(Exception e) {
+            throwException(e);
+        }
         if(applyLayouts && layout.get() != null) {
             Map<String,Object> layoutArgs = new HashMap<String,Object>(args);
             layoutArgs.remove("out");
@@ -87,6 +99,19 @@ public class Template {
             return writer.toString();
         }
         return null;
+    }
+    
+    void throwException(Exception e) {
+        for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+            if (stackTraceElement.getClassName().equals(compiledTemplate.getName()) || stackTraceElement.getClassName().startsWith(compiledTemplate.getName() + "$_run_closure")) {
+                if (doBodyLines.contains(stackTraceElement.getLineNumber())) {
+                    throw new DoBodyException(e);
+                } else {
+                    throw new TemplateExecutionException(this, this.linesMatrix.get(stackTraceElement.getLineNumber()), e.getMessage(), e);
+                }
+            }
+        }
+        throw new RuntimeException(e);
     }
     
     public static ThreadLocal<Template> layout = new ThreadLocal<Template>();
@@ -127,7 +152,7 @@ public class Template {
                 }
             }
             if(tagTemplate == null) {
-                throw new RuntimeException("...");
+                throw new TemplateNotFoundException("Tag "+templateName+"."+callerExtension+" or "+templateName+".tag");
             }
             Map<String, Object> args = new HashMap<String, Object>();
             args.putAll(getBinding().getVariables());

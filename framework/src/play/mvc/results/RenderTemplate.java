@@ -1,6 +1,7 @@
 package play.mvc.results;
 
 import java.util.Map;
+import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.templates.Template;
@@ -21,7 +22,7 @@ public class RenderTemplate extends Result {
             setContentTypeIfNotSet(response, "text/html");
             response.out.write(content.getBytes("utf-8"));
         } catch(Exception e) {
-            throw new RuntimeException(e);
+            throw new UnexpectedException(e);
         }
     }
 

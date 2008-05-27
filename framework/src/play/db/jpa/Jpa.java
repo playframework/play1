@@ -47,8 +47,10 @@ public class Jpa {
     }
 
     public static void shutdown() {
-        entityManagerFactory.close();
-        entityManagerFactory = null;
+        if(entityManagerFactory != null) {
+            entityManagerFactory.close();
+            entityManagerFactory = null;
+        }
     }
 
     public static EntityManager getEntityManager() {

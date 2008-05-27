@@ -13,12 +13,14 @@ public class Application extends Controller {
 		Logger.info(">>>> %s", name); 
 		if("Guillaume".equals(name)) {
 			redirect("http://www.amazon.com");
-		}
+		}		 
 		models.Test.test();
 	}
 
     public static void index(String name, Integer age, HashSet<Date> date) {
-        renderText("SHIGETA フローラルウォーターは (%s -> %s / %s)", name, age, date);
+		models.Test t = new models.Test();
+		t.prop = "kiki";
+        renderText("%s | SHIGETA フローラルウォーターは (%s -> %s / %s)", t.prop, name, age, date);
     }
     
     public static void test() {

@@ -12,6 +12,7 @@ import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
 import play.db.Db;
 import play.db.jpa.Jpa;
+import play.exceptions.UnexpectedException;
 import play.libs.Files;
 import play.mvc.Router;
 import play.templates.TemplateLoader;
@@ -56,7 +57,7 @@ public class Play {
             started = true;
             Logger.info("Application %s is started !", applicationName);
         } catch(Exception e) {
-            throw new RuntimeException(e);
+            throw new UnexpectedException(e);
         }
     }
     
@@ -162,7 +163,7 @@ public class Play {
                 try {
                     return new FileInputStream(realFile);
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    throw new UnexpectedException(e);
                 }
             }
             return null;
@@ -172,7 +173,7 @@ public class Play {
             try {
                 return Files.readContentAsString(inputstream());
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new UnexpectedException(e);
             }
         }
 
@@ -185,7 +186,7 @@ public class Play {
                     is.close();
                     return buffer;
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    throw new UnexpectedException(e);
                 }
             }
             return null;

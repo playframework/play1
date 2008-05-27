@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
 import play.data.binding.Binder;
+import play.exceptions.UnexpectedException;
 
 public class Java {
 
@@ -35,7 +36,7 @@ public class Java {
     public static Object invokeStatic(Method method, Map<String, String[]> args) throws Exception {
         String[] paramsNames = SignaturesNamesRepository.get(method);
         if(paramsNames == null) {
-            throw new RuntimeException("Parameter names not found");
+            throw new UnexpectedException("Parameter names not found");
         }
         Object[] rArgs = new Object[method.getParameterTypes().length];
         for (int i = 0; i < method.getParameterTypes().length; i++) {

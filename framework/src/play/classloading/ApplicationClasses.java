@@ -12,6 +12,8 @@ import play.Play.VirtualFile;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.Enhancer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer;
+import play.classloading.enhancers.PropertiesEnhancer;
+import play.exceptions.UnexpectedException;
 
 public class ApplicationClasses {
 
@@ -32,10 +34,15 @@ public class ApplicationClasses {
         return new ArrayList<ApplicationClass>(classes.values());
     }
     
+    public boolean hasClass(String name) {
+        return classes.containsKey(name);
+    }
+    
     // Enhancers
     Enhancer[] enhancers = new Enhancer[] {
         new ControllersEnhancer(),
-        new LocalvariablesNamesEnhancer()
+        new LocalvariablesNamesEnhancer(),
+        new PropertiesEnhancer()
     };
 
     public class ApplicationClass {
@@ -47,6 +54,7 @@ public class ApplicationClasses {
         public Class javaClass;
         public Long timestamp = 0L;
         ClassPath classPath;
+        boolean compiled;
 
         public ApplicationClass(String name) {
             this.name = name;
@@ -56,7 +64,9 @@ public class ApplicationClasses {
 
         public void refresh() {
             this.javaSource = this.javaFile.contentAsString();
-            this.javaByteCode = null;            
+            this.javaByteCode = null;  
+            this.timestamp = this.javaFile.lastModified();
+            this.compiled = false;
         }
 
         public void setByteCode(byte[] compiledByteCode) {
@@ -74,17 +84,17 @@ public class ApplicationClasses {
                     enhancer.enhanceThisClass(this);
                 } 
             } catch(Exception e) {
-                throw new RuntimeException(e);
+                throw new UnexpectedException(e);
             }
         }
 
         public boolean isCompiled() {
-            return javaClass != null;
+            return compiled && javaClass != null;
         }
 
         public byte[] compile() {
             compiler.compile(this.name);
-            this.timestamp = this.javaFile.lastModified();
+            compiled = true;
             return this.javaByteCode;
         }
                 

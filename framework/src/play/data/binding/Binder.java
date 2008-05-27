@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import play.exceptions.BindingException;
 
 public class Binder {
     
@@ -65,7 +66,7 @@ public class Binder {
             }
             return null;
         } catch(Exception e) {
-            throw new RuntimeException(e);
+            throw new BindingException("TODO", e);
         }
     }
     

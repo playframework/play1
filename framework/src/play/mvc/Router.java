@@ -10,6 +10,7 @@ import jregex.Matcher;
 import jregex.Pattern;
 import play.Logger;
 import play.Play.VirtualFile;
+import play.exceptions.NoRouteFoundException;
 import play.mvc.results.NotFound;
 
 public class Router {
@@ -96,7 +97,7 @@ public class Router {
                 }
             }
         }
-        throw new RuntimeException("No route found");
+        throw new NoRouteFoundException();
     }
     
     static class Route {

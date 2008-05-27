@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.compiler.Compiler;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.JavaCompilationException;
+import play.exceptions.UnexpectedException;
 
 public class ApplicationCompiler {
 
@@ -158,7 +159,7 @@ public class ApplicationCompiler {
                     return null;
                 } catch (ClassFormatException e) {
                     // Something very very bad
-                    throw new RuntimeException(e);
+                    throw new UnexpectedException(e);
                 }
             }
 

@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import play.exceptions.UnexpectedException;
 import play.libs.Utils;
 
 public class UrlEncodedParser extends DataParser {
@@ -60,7 +61,7 @@ public class UrlEncodedParser extends DataParser {
             Utils.Maps.mergeValueInMap(params, "body", new String(data, "utf-8"));
             return params;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new UnexpectedException(e);
         }
     }
 

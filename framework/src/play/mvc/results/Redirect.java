@@ -1,5 +1,6 @@
 package play.mvc.results;
 
+import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
@@ -23,7 +24,7 @@ public class Redirect extends Result {
             response.status = 302;
             response.setHeader("Location", url);            
         } catch(Exception e) {
-            throw new RuntimeException(e);
+            throw new UnexpectedException(e);
         }
     }
 

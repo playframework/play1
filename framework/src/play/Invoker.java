@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.db.jpa.Jpa;
 import play.exceptions.PlayException;
+import play.exceptions.UnexpectedException;
 
 public class Invoker {
     public static Executor executor =null;
@@ -41,10 +42,7 @@ public class Invoker {
                 if(e instanceof PlayException) {
                     throw (PlayException)e;
                 }
-                if(e instanceof RuntimeException) {
-                    throw (RuntimeException)e;
-                }
-                throw new RuntimeException(e);
+                throw new UnexpectedException(e);
             }
             if (Jpa.isEnabled()) Jpa.closeTx(false);
         }

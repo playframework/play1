@@ -19,6 +19,7 @@ import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.exceptions.UnexpectedException;
 import play.libs.Java;
 
 public class LocalvariablesNamesEnhancer extends Enhancer {
@@ -26,7 +27,6 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
         CtClass ctClass = makeClass(applicationClass);
-
        
         for (CtMethod method : ctClass.getDeclaredMethods()) {
             
@@ -71,7 +71,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                             }
                         }
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw new UnexpectedException(e);
                     }
                 }
             });

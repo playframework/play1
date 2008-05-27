@@ -6,6 +6,7 @@ import java.util.Map;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
+import play.exceptions.TemplateNotFoundException;
 import play.mvc.Http.Response;
 import play.mvc.results.Redirect;
 import play.mvc.results.RenderTemplate;
@@ -71,6 +72,9 @@ public abstract class Controller {
                 template = TemplateLoader.load(tf);
                 break;
             }
+        }
+        if(template == null) {
+            throw new TemplateNotFoundException(templateName);
         }
         throw new RenderTemplate(template, templateBinding.data);
     }

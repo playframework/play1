@@ -9,6 +9,7 @@ import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
 import javassist.expr.Handler;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.exceptions.UnexpectedException;
 
 public class ControllersEnhancer extends Enhancer {
 
@@ -33,7 +34,7 @@ public class ControllersEnhancer extends Enhancer {
                             }
                         }
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw new UnexpectedException(e);
                     }
                 }
             });
