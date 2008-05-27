@@ -68,7 +68,11 @@ public class ActionInvoker {
                 if(ex.getTargetException() instanceof PlayException) {
                     throw (PlayException)ex.getTargetException();
                 }
-                throw ActionInvocationException.toActionInvocationException(Http.Request.current().action, ex.getTargetException());
+                StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex.getTargetException());
+                if(element != null) {
+                    throw new ActionInvocationException(Play.classes.getApplicationClass(element.getClassName()), Http.Request.current().action, element.getLineNumber(), ex.getTargetException());
+                }
+                throw new ActionInvocationException(Http.Request.current().action, ex);
             }
 
 

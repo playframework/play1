@@ -6,6 +6,8 @@ import java.util.Map;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
+import play.exceptions.NoRouteFoundException;
+import play.exceptions.PlayException;
 import play.exceptions.TemplateNotFoundException;
 import play.mvc.Http.Response;
 import play.mvc.results.Redirect;
@@ -42,7 +44,16 @@ public abstract class Controller {
         for(int i=0; i<names.length; i++) {
             r.put(names[i], args[i] == null ? null : args[i].toString());
         }
-        throw new Redirect(Router.reverse(action, r));
+        try {
+            throw new Redirect(Router.reverse(action, r).toString());
+        } catch(NoRouteFoundException e) {
+            StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
+            if(element != null) {
+                throw new NoRouteFoundException(action, r, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
+            } else {
+                throw e;
+            }
+        }
     }
     
     protected static void render(Object... args) {
@@ -65,18 +76,17 @@ public abstract class Controller {
         } else {
             templateName = Http.Request.current().action.substring(12).replace(".", "/")+"."+Http.Request.current().format;
         }
-        Template template = null;
-        for(Play.VirtualFile vf : Play.templatesPath) {
-            Play.VirtualFile tf = vf.get(templateName);
-            if(tf.exists()) {
-                template = TemplateLoader.load(tf);
-                break;
+        try {
+            Template template = TemplateLoader.load(templateName);
+            throw new RenderTemplate(template, templateBinding.data);
+        } catch(TemplateNotFoundException ex) {
+            StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex);
+            if(element != null) {
+                throw new TemplateNotFoundException(templateName, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
+            } else {
+                throw ex;
             }
-        }
-        if(template == null) {
-            throw new TemplateNotFoundException(templateName);
-        }
-        throw new RenderTemplate(template, templateBinding.data);
+        }      
     }
 
 }

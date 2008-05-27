@@ -9,17 +9,13 @@ public class TemplateCompilationException extends TemplateException {
         super(template, lineNumber, message);
     }
 
-    public TemplateCompilationException(Template template, Integer lineNumber, String message, Throwable cause) {
-        super(template, lineNumber, message);
-    }
-
     @Override
     public String getErrorTitle() {
-        return String.format("Compilation error for template");
+        return String.format("Template compilation error");
     }
 
     @Override
     public String getErrorDescription() {
-        return String.format("The <strong>%s</strong> page does not compile at line %s.", getTemplate().name, getLineNumber());
+        return String.format("The template <strong>%s</strong> does not compile : <strong>%s</strong>", getTemplate().name, getMessage());
     }
 }

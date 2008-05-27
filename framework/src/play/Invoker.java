@@ -27,7 +27,7 @@ public class Invoker {
     
     public static abstract class Invocation extends Thread {
     
-        public abstract void execute();
+        public abstract void execute() throws Exception;
 
         @Override
         public void run() {

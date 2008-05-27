@@ -6,5 +6,4 @@ GET	/test 				Application.test
 GET 	/clients/{name} 		Clients.show
 GET 	/orders 			Orders.index
 GET	/orders/{<[0-9]+>id}            Orders.show
-GET	/orders/first			Orders.show(id:0)
 *	/login				Admin.login

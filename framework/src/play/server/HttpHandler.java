@@ -16,8 +16,6 @@ import org.apache.asyncweb.common.HttpHeaderConstants;
 import org.apache.asyncweb.common.HttpRequest;
 import org.apache.asyncweb.common.HttpResponseStatus;
 import org.apache.asyncweb.common.MutableHttpResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.mina.common.IdleStatus;
 import org.apache.mina.common.IoBuffer;
 import org.apache.mina.common.IoFutureListener;
@@ -25,6 +23,7 @@ import org.apache.mina.common.IoHandler;
 import org.apache.mina.common.IoSession;
 import org.apache.mina.common.WriteFuture;
 import play.Invoker;
+import play.Logger;
 import play.Play;
 import play.mvc.ActionInvoker;
 import play.mvc.Http;
@@ -34,17 +33,15 @@ import play.templates.TemplateLoader;
 
 public class HttpHandler implements IoHandler {
 
-    private static Log log = LogFactory.getLog(HttpHandler.class);
-
     public void messageReceived(IoSession session, Object message) throws Exception {
         HttpRequest minaRequest = (HttpRequest) message;
         MutableHttpResponse minaResponse = new DefaultHttpResponse();
         URI uri = minaRequest.getRequestUri();
         if (uri.getPath().startsWith("/public/")) {
-            log.info("Serve static: " + uri.getPath());
+            Logger.debug("Serve static: " + uri.getPath());
             serveStatic(session, minaRequest, minaResponse);
         } else {
-            Invoker.invoke(new MinaInvocation(session, minaRequest, minaResponse));
+            Invoker.invoke(new MinaInvocation(session, minaRequest, minaResponse));           
         }
     }
 
@@ -75,9 +72,8 @@ public class HttpHandler implements IoHandler {
         binding.put("exception", e);
         response.setStatus(HttpResponseStatus.forId(500));
         response.setContentType("text/html");
-        Play.VirtualFile errorTemplate = new Play.VirtualFile(new File(Play.frameworkPath, "framework/errors/default.html"));
         try {
-            String errorHtml = TemplateLoader.load(errorTemplate).render(binding);
+            String errorHtml = TemplateLoader.load("templates/error.html").render(binding);
             response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
             writeResponse(session, request, response);
         } catch (Exception ex) {
@@ -86,7 +82,7 @@ public class HttpHandler implements IoHandler {
                 response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
                 writeResponse(session, request, response);
             } catch (UnsupportedEncodingException fex) {
-                //
+                fex.printStackTrace();
             }
         }
     }
@@ -105,7 +101,7 @@ public class HttpHandler implements IoHandler {
                 FileChannel channel = (FileChannel) session.getAttribute("channel");
                 session.removeAttribute("channel");
                 session.write(channel);
-                log.info("File sent");
+                Logger.debug("File sent");
             }
         }
     }
@@ -126,7 +122,7 @@ public class HttpHandler implements IoHandler {
 
     public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
         if (!(cause instanceof IOException)) {
-            log.error("Caught ", cause);
+            Logger.error("Caught ", cause);
         }
         session.close();
     }
@@ -143,9 +139,18 @@ public class HttpHandler implements IoHandler {
             this.minaResponse = minaResponse;
         }
 
-        public void execute() {
+        @Override
+        public void run() {
+            try {
+                super.run();
+            } catch (Exception e) {
+                serve500(e, session, minaRequest, minaResponse);
+                return;
+            }
+        }
+
+        public void execute() throws Exception { 
             URI uri = minaRequest.getRequestUri();
-            String host = minaRequest.getHeader("Host");
             IoBuffer buffer = (IoBuffer) minaRequest.getContent();
             Request request = new Request();
             request.contentType = minaRequest.getHeader("Content-Type");
@@ -160,14 +165,9 @@ public class HttpHandler implements IoHandler {
             Response response = new Response();
             response.out = new ByteArrayOutputStream();
 
-            try {
-                ActionInvoker.invoke(request, response);
-                response.out.flush();
-            } catch (Exception e) {
-                serve500(e, session, minaRequest, minaResponse);
-                return;
-            }
-            log.info("Invoke: " + uri.getPath() + ": " + response.status);
+            ActionInvoker.invoke(request, response);
+            response.out.flush();            
+            Logger.debug("Invoke: " + uri.getPath() + ": " + response.status);
             if (response.status == 404) {
                 HttpHandler.serve404(session, minaRequest, minaResponse);
                 return;

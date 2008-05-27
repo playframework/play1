@@ -21,7 +21,10 @@ import org.codehaus.groovy.runtime.InvokerHelper;
 import org.codehaus.groovy.syntax.SyntaxException;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
+import play.exceptions.ActionNotFoundException;
+import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
+import play.exceptions.TagInternalException;
 import play.exceptions.TemplateCompilationException;
 import play.exceptions.TemplateExecutionException;
 import play.exceptions.TemplateExecutionException.DoBodyException;
@@ -64,6 +67,9 @@ public class Template {
                         line = 0;
                     }
                     String message = syntaxException.getMessage();
+                    if(message.indexOf("@")>0) {
+                        message = message.substring(0, message.lastIndexOf("@"));
+                    }
                     throw new TemplateCompilationException(this, line, message);
                 }
                 throw new UnexpectedException(e);
@@ -84,8 +90,13 @@ public class Template {
         t.template = this;
         try {
             t.run();
+        } catch(NoRouteFoundException e ) {
+            throwException(e);
         } catch(PlayException e) {
             throw e;
+        } catch(DoBodyException e) {
+            Exception ex = (Exception) e.getCause();
+            throwException(ex);
         } catch(Exception e) {
             throwException(e);
         }
@@ -106,6 +117,11 @@ public class Template {
             if (stackTraceElement.getClassName().equals(compiledTemplate.getName()) || stackTraceElement.getClassName().startsWith(compiledTemplate.getName() + "$_run_closure")) {
                 if (doBodyLines.contains(stackTraceElement.getLineNumber())) {
                     throw new DoBodyException(e);
+                } else if (e instanceof TagInternalException) {
+                    throw (TagInternalException) e;
+                } else if (e instanceof NoRouteFoundException) {
+                   NoRouteFoundException ex = (NoRouteFoundException)e;
+                   throw new NoRouteFoundException(ex.getAction(), ex.getArgs(), this, this.linesMatrix.get(stackTraceElement.getLineNumber()));
                 } else {
                     throw new TemplateExecutionException(this, this.linesMatrix.get(stackTraceElement.getLineNumber()), e.getMessage(), e);
                 }
@@ -139,20 +155,14 @@ public class Template {
                 callerExtension = template.name.substring(template.name.lastIndexOf(".")+1);
             }
             Template tagTemplate = null;
-            for(Play.VirtualFile vf : Play.templatesPath) {
-                Play.VirtualFile tf = vf.get("tags/"+templateName+"."+callerExtension);
-                if(tf.exists()) {
-                    tagTemplate = TemplateLoader.load(tf);
-                    break;
+            try {
+                tagTemplate = TemplateLoader.load("tags/"+templateName+"."+callerExtension);
+            } catch(TemplateNotFoundException e) {
+                try {
+                    tagTemplate = TemplateLoader.load("tags/"+templateName+".tag");
+                } catch(TemplateNotFoundException ex) {
+                    throw new TemplateNotFoundException("tags/"+templateName+"."+callerExtension+" or tags/"+templateName+".tag", template, fromLine);
                 }
-                tf = vf.get("tags/"+templateName+".tag");
-                if(tf.exists()) {
-                    tagTemplate = TemplateLoader.load(tf);
-                    break;
-                }
-            }
-            if(tagTemplate == null) {
-                throw new TemplateNotFoundException("Tag "+templateName+"."+callerExtension+" or "+templateName+".tag");
             }
             Map<String, Object> args = new HashMap<String, Object>();
             args.putAll(getBinding().getVariables());
@@ -162,7 +172,14 @@ public class Template {
                 }
             }
             args.put("_body", body);
-            tagTemplate.render(args);        
+            try {
+                tagTemplate.render(args);   
+            } catch(TagInternalException e) {
+                throw new TemplateExecutionException(template, fromLine, e.getMessage(), e);
+            } catch(TemplateNotFoundException e) {
+                throw new TemplateNotFoundException(e.getPath(), template, fromLine);
+            }
+                    
         }
 
         static class ActionBridge extends GroovyObjectSupport {
@@ -183,16 +200,20 @@ public class Template {
 
             @Override
             @SuppressWarnings("unchecked")
-            public Object invokeMethod(String name, Object param) {      
+            public Object invokeMethod(String name, Object param) {   
                 String action = controller+"."+name;
-                Map<String, String> r = new HashMap<String, String>();
-                String[] names = SignaturesNamesRepository.get(ActionInvoker.getActionMethod(action));
-                if(param instanceof Object[]) {
-                    for(int i=0; i<((Object[])param).length; i++) {
-                        r.put(names[i], ((Object[])param)[i] == null ? null : ((Object[])param)[i].toString());
+                try {
+                    Map<String, String> r = new HashMap<String, String>();
+                    String[] names = SignaturesNamesRepository.get(ActionInvoker.getActionMethod(action));
+                    if(param instanceof Object[]) {
+                        for(int i=0; i<((Object[])param).length; i++) {
+                            r.put(names[i], ((Object[])param)[i] == null ? null : ((Object[])param)[i].toString());
+                        }
                     }
+                    return Router.reverse(action, r);
+                } catch(ActionNotFoundException e) {
+                    throw new NoRouteFoundException(action, null);
                 }
-                return Router.reverse(action, r);
             }
         }
     }

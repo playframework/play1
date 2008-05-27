@@ -1,6 +1,5 @@
 package play.exceptions;
 
-import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 public class ActionInvocationException extends JavaException {
@@ -11,15 +10,10 @@ public class ActionInvocationException extends JavaException {
         super(applicationClass, lineNumber, e.getMessage(), e);
         this.action = action;
     }
-
-    public static PlayException toActionInvocationException(String action, Throwable cause) {
-        for (StackTraceElement stackTraceElement : cause.getStackTrace()) {
-            if (stackTraceElement.getLineNumber() > 0 && Play.classes.hasClass(stackTraceElement.getClassName())) {
-                String className = stackTraceElement.getClassName();                
-                return new ActionInvocationException(Play.classes.getApplicationClass(className), action, stackTraceElement.getLineNumber(), cause);
-            }
-        }
-        return new UnexpectedException(cause);
+    
+    public ActionInvocationException(String action, Throwable e) {
+        super(null, null, e.getMessage(), e);
+        this.action = action;
     }
 
     @Override

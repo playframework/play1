@@ -183,7 +183,7 @@ public class TemplateCompiler {
             }
             Tag tag = new Tag();
             tag.name = tagName;
-            tag.startLine = currentLine;
+            tag.startLine = parser.getLine();
             tagsStack.push(tag);
             print("attrs" + tagIndex + " = [" + tagArgs + "];");
             if (!tag.name.equals("doBody")) {

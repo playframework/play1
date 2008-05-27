@@ -15,10 +15,16 @@
 
 #{if id>100 }
 	<h5>な役割を持つ肝機能 YYYYYYYYYYYYYYYYYYYYYYYYYYYY</h5>
-	<strong>${kiki}</strong>
+        #{if false }
+            <strong>${9/0}</strong>
+        #{/if}
 #{/if}
 
 &{id > 1 ? 'orders':'order'}
 
 <a href="@{Application.index}">Index</a> - <a href="@{Orders.show(55)}">Order 55</a> - <a href="@{Application.test}">Test</a> - <a href="@{Orders.show(j)}">Order 999</a>
 - <a href="@{Application.index('ォータ', 555555)}">Index</a> 
+
+#{include 'yop.html' /}
+
+<p>------------</p>

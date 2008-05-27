@@ -4,10 +4,6 @@ import play.templates.Template;
 
 public class TemplateExecutionException extends TemplateException {
 
-    public TemplateExecutionException(Template template, Integer lineNumber, String message) {
-        super(template, lineNumber, message);
-    }
-
     public TemplateExecutionException(Template template, Integer lineNumber, String message, Throwable cause) {
         super(template, lineNumber, message, cause);
     }

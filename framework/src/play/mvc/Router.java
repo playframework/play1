@@ -56,7 +56,7 @@ public class Router {
         throw new NotFound();
     }
     
-    public static String reverse(String action, Map<String,String> args) {
+    public static ActionDefinition reverse(String action, Map<String,String> args) {
         if(!action.startsWith("controllers.")) {
             action = "controllers."+action;
         }
@@ -67,7 +67,7 @@ public class Router {
                 for(Route.Arg arg : route.args) {
                     inPathArgs.add(arg.name);
                     String value = args.get(arg.name);
-                    if(!arg.constraint.matches(value)) {
+                    if(value == null || !arg.constraint.matches(value)) {
                         allRequiredArgsAreHere = false;
                         break;
                     }
@@ -93,11 +93,24 @@ public class Router {
                     if(qs.endsWith("&")) {
                         qs = qs.substring(0, qs.length()-1);
                     }
-                    return qs.length() == 0 ? path : path+"?"+qs;
+                    ActionDefinition actionDefinition = new ActionDefinition();
+                    actionDefinition.url = qs.length() == 0 ? path : path+"?"+qs;
+                    actionDefinition.method = route.method == null || route.method.equals("*") ? "GET" : route.method.toUpperCase();
+                    return actionDefinition;
                 }
             }
         }
-        throw new NoRouteFoundException();
+        throw new NoRouteFoundException(action, args);
+    }
+    
+    public static class ActionDefinition {
+        public String method;
+        public String url;
+
+        @Override
+        public String toString() {
+            return url;
+        }        
     }
     
     static class Route {

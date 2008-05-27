@@ -5,15 +5,13 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Properties;
 import org.apache.asyncweb.common.HttpCodecFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.transport.socket.SocketAcceptor;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
+import play.Logger;
 import play.Play;
 
 public class Server {
-    private static Log logger = LogFactory.getLog(Server.class);
     private SocketAcceptor acceptor;
 
     public Server() {
@@ -31,9 +29,9 @@ public class Server {
         acceptor.setHandler(new HttpHandler());
         try {
             acceptor.bind(new InetSocketAddress(httpPort));
-            logger.info("Play Listening on port " + httpPort);
+            Logger.info("Play Listening on port " + httpPort);
         } catch (IOException e) {
-            logger.info("Play could not bind on port " + httpPort, e);
+            Logger.error("Play could not bind on port " + httpPort, e);
             acceptor.dispose();
         }
     }
@@ -41,6 +39,6 @@ public class Server {
     public static void main(String[] args) {
         File root = new File(System.getProperty("application.path"));
         Play.init(root);
-        Server server = new Server();
+        new Server();
     }
 }
