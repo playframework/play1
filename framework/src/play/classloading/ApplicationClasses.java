@@ -67,6 +67,9 @@ public class ApplicationClasses {
             this.javaByteCode = null;  
             this.timestamp = this.javaFile.lastModified();
             this.compiled = false;
+            if(classPath != null) {
+                Enhancer.classPool.removeClassPath(classPath);
+            }
         }
 
         public void setByteCode(byte[] compiledByteCode) {

@@ -76,6 +76,7 @@ public class HttpHandler implements IoHandler {
             String errorHtml = TemplateLoader.load("templates/error.html").render(binding);
             response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
             writeResponse(session, request, response);
+            e.printStackTrace();
         } catch (Exception ex) {
             ex.printStackTrace();
             try {

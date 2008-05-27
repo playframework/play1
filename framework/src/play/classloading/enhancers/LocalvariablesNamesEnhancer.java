@@ -71,7 +71,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                             }
                         }
                     } catch (Exception e) {
-                        throw new UnexpectedException(e);
+                        throw new UnexpectedException("Unexpected error in LocalvariablesEnhancer whil compiling the enter/exit block", e);
                     }
                 }
             });
