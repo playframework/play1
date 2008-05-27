@@ -156,8 +156,10 @@ public class Template {
             }
             Map<String, Object> args = new HashMap<String, Object>();
             args.putAll(getBinding().getVariables());
-            for(String key:attrs.keySet()) {
-                args.put("_"+key, attrs.get(key));
+            if(attrs != null) {
+                for(String key:attrs.keySet()) {
+                    args.put("_"+key, attrs.get(key));
+                }
             }
             args.put("_body", body);
             tagTemplate.render(args);        

@@ -199,7 +199,9 @@ public class ApplicationCompiler {
                     IProblem[] problems = result.getErrors();
                     for (int i = 0; i < problems.length; i++) {
                         IProblem problem = problems[i];
-                        throw new JavaCompilationException(new String(problem.getOriginatingFileName()), problem);
+                        String className = new String(problem.getOriginatingFileName()).replace("/", ".");
+                        className = className.substring(0, className.length()-5);
+                        throw new JavaCompilationException(Play.classes.getApplicationClass(className), problem);
                     }
                 }
                 // Something has been compiled

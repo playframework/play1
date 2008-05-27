@@ -14,12 +14,12 @@ public class TemplateExecutionException extends TemplateException {
 
     @Override
     public String getErrorTitle() {
-        return String.format("Execution error");
+        return String.format("Template execution error");
     }
 
     @Override
     public String getErrorDescription() {
-        return  String.format("Execution error occured in page %s. Source file <strong>%s</strong> could not be parsed\nAn exception <strong>%s</strong> was raised : <strong>%s</strong>", getTemplate(), getSourceFile(), getCause().getClass().getSimpleName(), getMessage());
+        return  String.format("Execution error occured in template <strong>%s</strong>. Exception raised was <strong>%s</strong> : <strong>%s</strong>.", getSourceFile(), getCause().getClass().getSimpleName(), getMessage());
     }
     
     public static class DoBodyException extends RuntimeException {

@@ -3,6 +3,7 @@ package play;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,7 +24,8 @@ public class Play {
     public static boolean started = false;
     
     // Application
-    public static File root = null;            
+    public static File applicationPath = null;  
+    public static File frameworkPath = null;
     public static ApplicationClasses classes = new ApplicationClasses();
     public static ApplicationClassloader classloader;
     public static List<VirtualFile> javaPath;
@@ -33,7 +35,18 @@ public class Play {
     
     public static void init(File root) {
         Play.started = false;
-        Play.root = root;
+        Play.applicationPath = root;
+        try {
+            URI uri = Play.class.getResource("/play/version").toURI();
+            if (uri.getScheme().equals("jar")) {
+                String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
+                frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
+            } else if (uri.getScheme().equals("file")) {
+                frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile();
+            }
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
         start();
     }
 
@@ -49,6 +62,7 @@ public class Play {
             javaPath.add(new VirtualFile("app"));
             templatesPath = new ArrayList<VirtualFile>();
             templatesPath.add(new VirtualFile("app/views"));
+            templatesPath.add(new VirtualFile(new File(frameworkPath , "framework")));
             classloader = new ApplicationClassloader();
             Router.load(new VirtualFile("conf/routes"));
             TemplateLoader.cleanCompiledCache();
@@ -82,12 +96,12 @@ public class Play {
     public static class VirtualFile {
 
         File realFile;
-
+        
         public VirtualFile(String path) {
-            realFile = new File(root, path);
+            realFile = new File(applicationPath, path);
         }
 
-        private VirtualFile(File file) {
+        public VirtualFile(File file) {
             realFile = file;
         }
 
@@ -111,7 +125,7 @@ public class Play {
             if (realFile != null) {
                 List<String> path = new ArrayList<String>();
                 File f = realFile;
-                while(f != null && !f.equals(Play.root)) {
+                while(f != null && !f.equals(Play.applicationPath) && !f.equals(Play.frameworkPath)) {
                     path.add(f.getName());
                     f = f.getParentFile();
                 }

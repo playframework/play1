@@ -1,13 +1,14 @@
 package play.exceptions;
 
 import org.eclipse.jdt.core.compiler.IProblem;
+import play.classloading.ApplicationClasses.ApplicationClass;
 
 public class JavaCompilationException extends JavaException {
 
     private IProblem problem;
 
-    public JavaCompilationException(String fileName, IProblem problem) {
-        super(fileName, problem.getSourceLineNumber(), problem.getMessage());
+    public JavaCompilationException(ApplicationClass applicationClass, IProblem problem) {
+        super(applicationClass, problem.getSourceLineNumber(), problem.getMessage());
         this.problem = problem;
     }
 
@@ -17,7 +18,7 @@ public class JavaCompilationException extends JavaException {
 
     @Override
     public String getErrorTitle() {
-        return String.format("Compilation error in %s", getSourceFile());
+        return String.format("Java compilation error");
     }
 
     @Override

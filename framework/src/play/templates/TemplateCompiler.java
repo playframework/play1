@@ -44,7 +44,7 @@ public class TemplateCompiler {
 
             // Class header
             print("class ");
-            String className = "Template_" + template.name.replaceAll("/", "_").replaceAll("\\.", "_");
+            String className = "Template_" + template.name.replaceAll("/", "_").replaceAll("\\.", "_").replaceAll("-", "_");
             print(className);
             println(" extends play.templates.Template.ExecutableTemplate {");
             println("public Object run() { use(play.templates.JavaExtensions) {");
@@ -224,6 +224,7 @@ public class TemplateCompiler {
                 markLine(tag.startLine);
                 println();
             }
+            tagIndex--;
         }  
         
         // Writer

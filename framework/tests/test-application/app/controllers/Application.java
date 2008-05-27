@@ -13,7 +13,7 @@ public class Application extends Controller {
 		Logger.info(">>>> %s", name); 
 		if("Guillaume".equals(name)) {
 			redirect("http://www.amazon.com");
-		}		 
+		};		
 		models.Test.test();
 	}
 
