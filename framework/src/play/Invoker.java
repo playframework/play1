@@ -7,7 +7,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
-import play.db.jpa.Jpa;
+import play.db.DB;
+import play.db.jpa.JPA;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 
@@ -35,16 +36,18 @@ public class Invoker {
                 Play.detectChanges();
                 setContextClassLoader(Play.classloader);
                 LocalVariablesNamesTracer.enterMethod();
-                if (Jpa.isEnabled()) Jpa.startTx(false);
+                JPA.startTx(false); 
                 execute();
             } catch (Throwable e) {
-                if (Jpa.isEnabled()) Jpa.closeTx(true);
+                JPA.closeTx(true);
                 if(e instanceof PlayException) {
                     throw (PlayException)e;
                 }
                 throw new UnexpectedException(e);
-            }
-            if (Jpa.isEnabled()) Jpa.closeTx(false);
+            } finally {
+                JPA.closeTx(false);
+                DB.close();
+            }            
         }
     }
 
@@ -52,7 +55,7 @@ public class Invoker {
         Properties p = Play.configuration;
         BlockingQueue queue = new LinkedBlockingQueue ();
         int core = Integer.parseInt(p.getProperty("play.pool.core", "2"));
-        int max = Integer.parseInt(p.getProperty("play.pool.max", "20"));
+        int max = Integer.parseInt(p.getProperty("play.pool.max", "50"));
         int keepalive = Integer.parseInt(p.getProperty("play.pool.keepalive", "5"));
         return new ThreadPoolExecutor (core,max,keepalive*60,TimeUnit.SECONDS,queue,new ThreadPoolExecutor.AbortPolicy());
     }

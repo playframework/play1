@@ -9,18 +9,18 @@ import play.Play;
 public class TestDb extends TestCase  {
     
     public void testDatasource () throws Exception{
-        Db.init();
-        assertNotNull(Db.datasource);
-        Connection c = Db.datasource.getConnection();
+        DB.init();
+        assertNotNull(DB.datasource);
+        Connection c = DB.datasource.getConnection();
         assertNotNull(c);
         c.close();
     }
     
     public void testNoReload () throws Exception{
-        Db.init();
-        DataSource ds = Db.datasource;
-        Db.init();
-        assertSame(Db.datasource, ds);
+        DB.init();
+        DataSource ds = DB.datasource;
+        DB.init();
+        assertSame(DB.datasource, ds);
     }
     
     protected void setUp() throws Exception {

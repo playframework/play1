@@ -8,6 +8,7 @@ import java.lang.instrument.UnmodifiableClassException;
 import java.util.ArrayList;
 import java.util.List;
 
+import play.Logger;
 import play.Play;
 import play.Play.VirtualFile;
 import play.classloading.ApplicationClasses.ApplicationClass;
@@ -40,9 +41,15 @@ public class ApplicationClassloader extends ClassLoader {
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~
+    
+    public ThreadLocal<List<ApplicationClass>> loadingTracer = new ThreadLocal<List<ApplicationClass>>();
+    
     protected Class loadApplicationClass(String name) {
         ApplicationClass applicationClass = Play.classes.getApplicationClass(name);
         if (applicationClass != null) {
+            if(loadingTracer.get() != null) {
+                loadingTracer.get().add(applicationClass);
+            }
             if (applicationClass.isCompiled()) {
                 return applicationClass.javaClass;
             } else {
@@ -91,11 +98,13 @@ public class ApplicationClassloader extends ClassLoader {
         }
         List<ClassDefinition> newDefinitions = new ArrayList<ClassDefinition>();
         for (ApplicationClass applicationClass : modifieds) {
+            long start = System.currentTimeMillis();
             applicationClass.compile();
             applicationClass.enhance();
             if(applicationClass.javaClass != null) {
                 newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.javaByteCode));
             }
+            Logger.debug("%sms to compile & enhance %s", System.currentTimeMillis()-start, applicationClass.name);
         }
         try {
             HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));

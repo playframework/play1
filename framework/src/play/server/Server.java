@@ -25,7 +25,7 @@ public class Server {
         acceptor.getSessionConfig().setSendBufferSize(1024 * 100);
         acceptor.getSessionConfig().setTcpNoDelay(true);
         acceptor.getSessionConfig().setSoLinger(-1);
-        acceptor.setBacklog(10240);
+        acceptor.setBacklog(50000);
         acceptor.setHandler(new HttpHandler());
         try {
             acceptor.bind(new InetSocketAddress(httpPort));

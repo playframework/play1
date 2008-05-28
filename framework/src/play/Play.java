@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Properties;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
-import play.db.Db;
-import play.db.jpa.Jpa;
+import play.db.DB;
+import play.db.jpa.JPA;
 import play.exceptions.UnexpectedException;
 import play.libs.Files;
 import play.mvc.Router;
@@ -53,6 +53,7 @@ public class Play {
 
     public static synchronized void start() {
         try {
+            long start = System.currentTimeMillis();
             if(started) {
                 stop();
             }
@@ -67,9 +68,10 @@ public class Play {
             classloader = new ApplicationClassloader();
             Router.load(new VirtualFile("conf/routes"));
             TemplateLoader.cleanCompiledCache();
-            Db.init();
-            Jpa.init();
+            DB.init();
+            JPA.init();
             started = true;
+            Logger.debug("%sms to start the application", System.currentTimeMillis()-start);
             Logger.info("Application %s is started !", applicationName);
         } catch(Exception e) {
             throw new UnexpectedException(e);
@@ -77,7 +79,7 @@ public class Play {
     }
     
     public static synchronized void stop() {
-        Jpa.shutdown();
+        JPA.shutdown();
         started = false;
     }
    

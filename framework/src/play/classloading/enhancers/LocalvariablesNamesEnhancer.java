@@ -54,24 +54,20 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 @Override
                 public void edit(MethodCall m) throws CannotCompileException {
                     try {
-                        ApplicationClass applicationClass = Play.classes.getApplicationClass(m.getClassName());
-                        if(applicationClass != null) {
-                            applicationClass.compile();
-                            if(Play.classes.getApplicationClass(m.getMethod().getDeclaringClass().getName()) != null) {
-                                m.replace(
-                                    "play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.enterMethod();"+
-                                    "try{" +
-                                        "$_ = $proceed($$);" +
-                                        "play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.exitMethod();" +
-                                    "} catch(Throwable t) {" +
-                                        "play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.exitMethod(); " +
-                                        "throw t;" +
-                                    "}"
-                                );
-                            }
+                        if(Play.classes.getApplicationClass(m.getMethod().getDeclaringClass().getName()) != null) {
+                            m.replace(
+                                "play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.enterMethod();"+
+                                "try{" +
+                                    "$_ = $proceed($$);" +
+                                    "play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.exitMethod();" +
+                                "} catch(Throwable t) {" +
+                                    "play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.exitMethod(); " +
+                                    "throw t;" +
+                                "}"
+                            );
                         }
                     } catch (Exception e) {
-                        throw new UnexpectedException("Unexpected error in LocalvariablesEnhancer whil compiling the enter/exit block", e);
+                        throw new UnexpectedException("Unexpected error in LocalvariablesEnhancer while compiling the enter/exit block", e);
                     }
                 }
             });

@@ -14,9 +14,10 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 
 public abstract class Enhancer {
     
-    protected ClassPool classPool = ClassPool.getDefault();
+    protected ClassPool classPool = new ClassPool();
     
     public Enhancer() {
+        classPool.appendSystemPath();
         classPool.appendClassPath(new ApplicationClassesClasspath());
     }
     

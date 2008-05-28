@@ -7,15 +7,15 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import junit.framework.TestCase;
 import play.Play;
-import play.db.Db;
+import play.db.DB;
 
 public class TestJpa extends TestCase{
     
     public void testJpa () {
         List<Class> classes = new ArrayList<Class>();
         classes.add(Dummy.class);
-        Jpa.init(classes, new Properties());
-        EntityManager em = Jpa.getEntityManager();
+        JPA.init(classes, new Properties());
+        EntityManager em = JPA.getEntityManager();
         em.getTransaction().begin();
         Dummy dum = new Dummy();
         dum.ppt="test";
@@ -38,6 +38,6 @@ public class TestJpa extends TestCase{
         p.setProperty("db.user", "sa");
         p.setProperty("db.pass", "");
         Play.configuration=p;
-        Db.init();
+        DB.init();
     }
 }

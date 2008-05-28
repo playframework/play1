@@ -26,7 +26,9 @@ public class TemplateLoader {
     
     public static void cleanCompiledCache() {
         for(Template template : templates.values()) {
-            template.compiledTemplate = null;
+            if(template.needJavaRecompilation) {
+                template.compiledTemplate = null;
+            }
         }
     }
     

@@ -1,5 +1,6 @@
 # Routes
 
+GET /hello			Hello.hello
 GET	/ 				Application.index
 POST    /                               Application.index
 GET	/parsing			Parsing.index

@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,7 +20,9 @@ import org.codehaus.groovy.control.MultipleCompilationErrorsException;
 import org.codehaus.groovy.control.messages.SyntaxErrorMessage;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.codehaus.groovy.syntax.SyntaxException;
+import play.Logger;
 import play.Play;
+import play.classloading.ApplicationClasses.ApplicationClass;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.NoRouteFoundException;
@@ -42,6 +45,7 @@ public class Template {
     public Set<Integer> doBodyLines = new HashSet<Integer>();
     public Class compiledTemplate;
     public Long timestamp = System.currentTimeMillis();
+    Boolean needJavaRecompilation;
     
     
     public Template(String name, String source) {
@@ -55,7 +59,16 @@ public class Template {
             compilerConfiguration.setSourceEncoding("utf-8"); // ouf
             GroovyClassLoader classLoader = new GroovyClassLoader(Play.classloader, compilerConfiguration);
             try {
+                long start = System.currentTimeMillis();
+                Play.classloader.loadingTracer.set(new ArrayList<ApplicationClass>());
                 compiledTemplate = classLoader.parseClass(new ByteArrayInputStream(groovySource.getBytes("utf-8")));
+                if(!Play.classloader.loadingTracer.get().isEmpty()) {
+                    needJavaRecompilation = true;
+                } else {
+                    needJavaRecompilation = false;
+                }
+                Play.classloader.loadingTracer.set(null);
+                Logger.debug("%sms to compile template %s", System.currentTimeMillis()-start, name);
             } catch (UnsupportedEncodingException e) {
                 throw new UnexpectedException(e);
             } catch (MultipleCompilationErrorsException e) {
@@ -89,7 +102,9 @@ public class Template {
         ExecutableTemplate t = (ExecutableTemplate) InvokerHelper.createScript(compiledTemplate, binding);        
         t.template = this;
         try {
+            long start = System.currentTimeMillis();
             t.run();
+            Logger.debug("%sms to render template %s", System.currentTimeMillis()-start, name);
         } catch(NoRouteFoundException e ) {
             throwException(e);
         } catch(PlayException e) {

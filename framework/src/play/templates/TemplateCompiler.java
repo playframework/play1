@@ -1,6 +1,7 @@
 package play.templates;
 
 import java.util.Stack;
+import play.Logger;
 import play.Play.VirtualFile;
 import play.exceptions.TemplateCompilationException;
 import play.exceptions.PlayException;
@@ -13,7 +14,9 @@ public class TemplateCompiler {
             String source = file.contentAsString();
             String name = file.relativePath();
             Template template = new Template(name, source);
+            long start = System.currentTimeMillis();
             new Compiler().hop(template);
+            Logger.debug("%sms to parse template %s", System.currentTimeMillis()-start, file.relativePath());
             return template;
         } catch (PlayException e) {
             throw e;
