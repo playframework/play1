@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javassist.ByteArrayClassPath;
-import javassist.ClassPath;
 import play.Play;
 import play.Play.VirtualFile;
 import play.classloading.enhancers.ControllersEnhancer;
@@ -39,10 +37,10 @@ public class ApplicationClasses {
     }
     
     // Enhancers
-    Enhancer[] enhancers = new Enhancer[] {
-        new ControllersEnhancer(),
-        new LocalvariablesNamesEnhancer(),
-        new PropertiesEnhancer()
+    Class[] enhancers = new Class[] {
+        ControllersEnhancer.class,
+        LocalvariablesNamesEnhancer.class,
+        PropertiesEnhancer.class
     };
 
     public class ApplicationClass {
@@ -53,7 +51,6 @@ public class ApplicationClasses {
         public byte[] javaByteCode;
         public Class javaClass;
         public Long timestamp = 0L;
-        ClassPath classPath;
         boolean compiled;
 
         public ApplicationClass(String name) {
@@ -66,25 +63,17 @@ public class ApplicationClasses {
             this.javaSource = this.javaFile.contentAsString();
             this.javaByteCode = null;  
             this.timestamp = this.javaFile.lastModified();
-            this.compiled = false;
-            if(classPath != null) {
-                Enhancer.classPool.removeClassPath(classPath);
-            }
+            this.compiled = false;            
         }
 
         public void setByteCode(byte[] compiledByteCode) {
-            this.javaByteCode = compiledByteCode;               
-            if(classPath != null) {
-                Enhancer.classPool.removeClassPath(classPath);
-            }
-            classPath = new ByteArrayClassPath(name, javaByteCode);
-            Enhancer.classPool.appendClassPath(classPath);           
+            this.javaByteCode = compiledByteCode;                       
         }
         
         public void enhance() {
             try {       
-                for(Enhancer enhancer : enhancers) {
-                    enhancer.enhanceThisClass(this);
+                for(Class enhancer : enhancers) {
+                    ((Enhancer)enhancer.newInstance()).enhanceThisClass(this);
                 } 
             } catch(Exception e) {
                 throw new UnexpectedException(e);
