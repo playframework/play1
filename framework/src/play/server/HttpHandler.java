@@ -41,7 +41,7 @@ public class HttpHandler implements IoHandler {
             Logger.debug("Serve static: " + uri.getPath());
             serveStatic(session, minaRequest, minaResponse);
         } else {
-            Invoker.invoke(new MinaInvocation(session, minaRequest, minaResponse));           
+            Invoker.invoke(new MinaInvocation(session, minaRequest, minaResponse));
         }
     }
 
@@ -150,11 +150,15 @@ public class HttpHandler implements IoHandler {
             }
         }
 
-        public void execute() throws Exception { 
+        public void execute() throws Exception {
             URI uri = minaRequest.getRequestUri();
             IoBuffer buffer = (IoBuffer) minaRequest.getContent();
             Request request = new Request();
-            request.contentType = minaRequest.getHeader("Content-Type");
+            if (minaRequest.getHeader("Content-Type") != null) {
+                request.contentType = minaRequest.getHeader("Content-Type").split(";")[0].trim().toLowerCase();
+            } else {
+                request.contentType = "text/html";
+            }
             request.method = minaRequest.getMethod().toString();
             request.body = buffer.asInputStream();
             request.domain = ((InetSocketAddress) session.getLocalAddress()).getHostName();
@@ -163,11 +167,18 @@ public class HttpHandler implements IoHandler {
             request.path = uri.getPath();
             request.querystring = uri.getQuery() == null ? "" : uri.getQuery();
 
+            for (String key : minaRequest.getHeaders().keySet()) {
+                Http.Header hd = new Http.Header();
+                hd.name = key.toLowerCase();
+                hd.values = minaRequest.getHeaders().get(key);
+                request.headers.put(hd.name, hd);
+            }
+
             Response response = new Response();
             response.out = new ByteArrayOutputStream();
 
             ActionInvoker.invoke(request, response);
-            response.out.flush();            
+            response.out.flush();
             Logger.debug("Invoke: " + uri.getPath() + ": " + response.status);
             if (response.status == 404) {
                 HttpHandler.serve404(session, minaRequest, minaResponse);

@@ -1,5 +1,6 @@
 package play.data.binding;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -16,60 +17,61 @@ import java.util.TreeSet;
 import play.exceptions.BindingException;
 
 public class Binder {
-    
+
     static Map<Class, SupportedType> supportedTypes = new HashMap<Class, SupportedType>();
+
     static {
         supportedTypes.put(Date.class, new DateBinder());
+        supportedTypes.put(File.class, new FileBinder());
     }
-            
-    
-    public static Object bind(String name, Class clazz, Type type, Map<String,String[]> params) {
+
+    public static Object bind(String name, Class clazz, Type type, Map<String, String[]> params) {
         try {
             String[] value = params.get(name);
-            if(value == null) {
+            if (value == null) {
                 value = new String[0];
             }
             // Arrays types 
-            if(clazz.isArray()) {
+            if (clazz.isArray()) {
                 Object r = Array.newInstance(clazz.getComponentType(), value.length);
-                for(int i=0; i<value.length; i++) {
+                for (int i = 0; i < value.length; i++) {
                     Array.set(r, i, directBind(value[i], clazz.getComponentType()));
                 }
                 return r;
-            }          
+            }
             // Collections types
-            if(Collection.class.isAssignableFrom(clazz)) {
-                if(clazz.isInterface()) {
-                    if(clazz.equals(List.class)) {
+            if (Collection.class.isAssignableFrom(clazz)) {
+                if (clazz.isInterface()) {
+                    if (clazz.equals(List.class)) {
                         clazz = ArrayList.class;
                     }
-                    if(clazz.equals(Set.class)) {
+                    if (clazz.equals(Set.class)) {
                         clazz = HashSet.class;
                     }
-                    if(clazz.equals(SortedSet.class)) {
+                    if (clazz.equals(SortedSet.class)) {
                         clazz = TreeSet.class;
                     }
                 }
-                Collection r = (Collection)clazz.newInstance();
+                Collection r = (Collection) clazz.newInstance();
                 Class componentClass = String.class;
-                if(type instanceof ParameterizedType) {
-                    componentClass = (Class)((ParameterizedType)type).getActualTypeArguments()[0];
+                if (type instanceof ParameterizedType) {
+                    componentClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
                 }
-                for(String v : value) {
+                for (String v : value) {
                     r.add(directBind(v, componentClass));
                 }
                 return r;
             }
             // Simple types
-            if(value.length>0) {
+            if (value.length > 0) {
                 return directBind(value[0], clazz);
             }
             return null;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new BindingException("TODO", e);
         }
     }
-    
+
     public static Object directBind(String value, Class clazz) {
         if (clazz.getName().equals("int") || clazz.equals(Integer.class)) {
             return Integer.parseInt(value);
@@ -92,10 +94,9 @@ public class Binder {
         if (clazz.equals(String.class)) {
             return value;
         }
-        if(supportedTypes.containsKey(clazz)) {
+        if (supportedTypes.containsKey(clazz)) {
             return supportedTypes.get(clazz).bind(value);
         }
         return null;
     }
-
 }

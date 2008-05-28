@@ -40,8 +40,8 @@ public class Http {
         public String contentType;
         public Integer port;
         public Boolean secure;
-        public Map<String, Http.Header> headers;
-        public Map<String, Http.Cookie> cookies;
+        public Map<String, Http.Header> headers = new HashMap<String, Http.Header>();
+        public Map<String, Http.Cookie> cookies = new HashMap<String, Http.Cookie>();
         public InputStream body;   
         public Map<String, String> routeArgs;
         public String format = "html";

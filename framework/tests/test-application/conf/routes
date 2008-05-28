@@ -2,6 +2,8 @@
 
 GET	/ 				Application.index
 POST    /                               Application.index
+GET	/parsing			Parsing.index
+POST	/parsing			Parsing.post
 GET	/test 				Application.test
 GET 	/clients/{name} 		Clients.show
 GET 	/orders 			Orders.index
