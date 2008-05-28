@@ -10,6 +10,7 @@ import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.asyncweb.common.Cookie;
 import org.apache.asyncweb.common.DefaultCookie;
 import org.apache.asyncweb.common.DefaultHttpResponse;
 import org.apache.asyncweb.common.HttpHeaderConstants;
@@ -174,6 +175,16 @@ public class HttpHandler implements IoHandler {
                 request.headers.put(hd.name, hd);
             }
 
+            for (Cookie cookie : minaRequest.getCookies()) {
+                Http.Cookie playCookie = new Http.Cookie();
+                playCookie.domain=cookie.getDomain();
+                playCookie.name=cookie.getName();
+                playCookie.path=cookie.getPath();
+                playCookie.secure=cookie.isSecure();
+                playCookie.value=cookie.getValue();
+                request.cookies.put(playCookie.name, playCookie);
+            }
+            
             Response response = new Response();
             response.out = new ByteArrayOutputStream();
 
