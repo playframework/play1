@@ -96,7 +96,7 @@ if $CYGWIN; then
 	OLD_IFS=$IFS
 	IFS=$'\n'
 fi
-for jar in `ls -c1 "$PLAY_BASE/framework/lib"/**/*.jar`; do 
+for jar in `ls -c1 "$PLAY_BASE/framework/lib"/*.jar`; do 
 	CLASSPATH="$CLASSPATH:$jar";
 done
 if $CYGWIN; then
@@ -115,13 +115,17 @@ if [ "$COMMANDE" = new ] ; then
 	echo -n "~ What is the application name ? "
 	read applicationName
 	echo "~"
-	"$JAVA_PATH" -classpath "$CLASSPATH" -Dapplication.path="`dirname "${path}"`/`basename "${path}"`" -Dapplication.name="${applicationName}" play.utils.NewApp
+	dest="`dirname "${path}"`/`basename "${path}"`"
+	cp -R ${PLAY_BASE}/resources/application-skel ${dest}
+	sed 's/application\.name=Skeleton/application\.name=test/' ${dest}/conf/application.conf > ${dest}/conf/application.conf.tmp
+	mv ${dest}/conf/application.conf.tmp ${dest}/conf/application.conf
+	#echo "`dirname "${path}"`/`basename "${path}"`"
 	echo "~ Ok, application created"
 	COMMANDE="run"
 fi	
 
 # Check if it's a valid application
-if [ ! -r "${path}/conf/routes.yml" ] ; then
+if [ ! -r "${path}/conf/routes" ] ; then
 	echo "~"
 	echo "~ Oops. ${path} does not seem to host a valid application"
 	echo "~"
@@ -133,7 +137,7 @@ if [  "$COMMANDE" = "run" ]; then
 	logo
 	echo "~ Ctrl+C to break"
 	echo "~ "
-	"$JAVA_PATH" -classpath "$CLASSPATH" -Dcom.sun.management.jmxremote -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="`dirname "${path}"`/`basename "${path}"`" play.server.Server
+	"$JAVA_PATH" -javaagent:${PLAY_BASE}/framework/play.jar -classpath "$CLASSPATH" -Dcom.sun.management.jmxremote -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="`dirname "${path}"`/`basename "${path}"`" play.server.Server
 	echo "~ "
 
 # [DEBUG]
@@ -141,11 +145,11 @@ elif [ "$COMMANDE" = "debug" ] ; then
 	
 	logo
 	echo "~"
-	echo "$JAVA_PATH -classpath $CLASSPATH -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -Dplay.debug=yes -Dcom.sun.management.jmxremote -Djava.endorsed.dirs=$PLAY_BASE/framework/endorsed -Dapplication.path=`dirname "${path}"`/`basename ${path}` play.server.Server"
+	echo "$JAVA_PATH  -javaagent:${PLAY_BASE}/framework/play.jar -classpath $CLASSPATH -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -Dplay.debug=yes -Dcom.sun.management.jmxremote -Djava.endorsed.dirs=$PLAY_BASE/framework/endorsed -Dapplication.path=`dirname "${path}"`/`basename ${path}` play.server.Server"
 	echo "~"
 	echo "~ Ctrl+C to break"
 	echo "~ "
-	"$JAVA_PATH" -classpath "$CLASSPATH" -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -Dplay.debug=yes -Dcom.sun.management.jmxremote -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="`dirname "${path}"`/`basename "${path}"`" play.server.Server
+	"$JAVA_PATH" -javaagent:${PLAY_BASE}/framework/play.jar -classpath "$CLASSPATH" -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -Dplay.debug=yes -Dcom.sun.management.jmxremote -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="`dirname "${path}"`/`basename "${path}"`" play.server.Server
 
 # [START]	
 elif [ "$COMMANDE" = start ] ; then

@@ -42,8 +42,9 @@ public class Play {
                 String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
                 frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
             } else if (uri.getScheme().equals("file")) {
-                frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile();
+                frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
             }
+            System.out.println(frameworkPath);
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }

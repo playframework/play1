@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.channels.FileChannel;
+import java.rmi.UnexpectedException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.asyncweb.common.Cookie;
@@ -26,6 +27,7 @@ import org.apache.mina.common.WriteFuture;
 import play.Invoker;
 import play.Logger;
 import play.Play;
+import play.exceptions.PlayException;
 import play.mvc.ActionInvoker;
 import play.mvc.Http;
 import play.mvc.Http.Request;
@@ -70,6 +72,9 @@ public class HttpHandler implements IoHandler {
 
     public static void serve500(Exception e, IoSession session, HttpRequest request, MutableHttpResponse response) {
         Map<String, Object> binding = new HashMap<String, Object>();
+        if(!(e instanceof PlayException)) {
+            e = new play.exceptions.UnexpectedException(e);
+        }
         binding.put("exception", e);
         response.setStatus(HttpResponseStatus.forId(500));
         response.setContentType("text/html");

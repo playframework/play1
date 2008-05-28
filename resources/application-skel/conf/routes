@@ -1,0 +1,7 @@
+#Application routes
+#Higher priority routes first.
+
+
+GET		/	Application.index
+
+    

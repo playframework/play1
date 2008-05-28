@@ -31,11 +31,11 @@ public class Invoker {
 
         @Override
         public void run() {
-            Play.detectChanges();
-            setContextClassLoader(Play.classloader);
-            LocalVariablesNamesTracer.enterMethod();
-            if (Jpa.isEnabled()) Jpa.startTx(false);
             try {
+                Play.detectChanges();
+                setContextClassLoader(Play.classloader);
+                LocalVariablesNamesTracer.enterMethod();
+                if (Jpa.isEnabled()) Jpa.startTx(false);
                 execute();
             } catch (Throwable e) {
                 if (Jpa.isEnabled()) Jpa.closeTx(true);

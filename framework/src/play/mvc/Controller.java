@@ -69,6 +69,7 @@ public abstract class Controller {
         templateBinding.put("request", Http.Request.current());
         templateBinding.put("flash", Scope.Flash.current());
         templateBinding.put("params", Scope.Params.current());
+        templateBinding.put("play", new Play());
         // Template name
         String templateName = null;
         if(args.length>0 && args[0] instanceof String && LocalVariablesNamesTracer.getLocalVariableName(args[0]) == null) {
