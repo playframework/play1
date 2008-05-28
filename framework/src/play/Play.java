@@ -44,7 +44,6 @@ public class Play {
             } else if (uri.getScheme().equals("file")) {
                 frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
             }
-            System.out.println(frameworkPath);
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
@@ -72,7 +71,7 @@ public class Play {
             JPA.init();
             started = true;
             Logger.debug("%sms to start the application", System.currentTimeMillis()-start);
-            Logger.info("Application %s is started !", applicationName);
+            Logger.info("Application '%s' is started !", applicationName);
         } catch(Exception e) {
             throw new UnexpectedException(e);
         }

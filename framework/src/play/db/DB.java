@@ -35,7 +35,7 @@ public class DB {
                 ds.setMaxPoolSize(30);
                 ds.setMinPoolSize(10);
                 datasource = ds;
-                Logger.info("A database is started for url %s", p.getProperty("db.url"));
+                Logger.info("The database is ready");
             } catch (Exception e) {
                 Logger.debug(e);
             }

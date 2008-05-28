@@ -33,7 +33,7 @@ logo() {
 	echo "~ |  __/|_|\\____|\\__ (_)"
 	echo "~ |_|            |__/   "
 	echo "~"
-	echo "~ play! `cat "${PLAY_BASE}/framework/src/play.properties"` 
+	echo "~ play! `cat "${PLAY_BASE}/framework/src/play/version"` 
 - web application framework by zenexity"
 	echo "~"
 }
