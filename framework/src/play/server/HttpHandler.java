@@ -2,13 +2,13 @@ package play.server;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.channels.FileChannel;
-import java.rmi.UnexpectedException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.asyncweb.common.Cookie;
@@ -17,6 +17,7 @@ import org.apache.asyncweb.common.DefaultHttpResponse;
 import org.apache.asyncweb.common.HttpHeaderConstants;
 import org.apache.asyncweb.common.HttpRequest;
 import org.apache.asyncweb.common.HttpResponseStatus;
+import org.apache.asyncweb.common.MutableHttpRequest;
 import org.apache.asyncweb.common.MutableHttpResponse;
 import org.apache.mina.common.IdleStatus;
 import org.apache.mina.common.IoBuffer;
@@ -137,12 +138,12 @@ public class HttpHandler implements IoHandler {
     class MinaInvocation extends Invoker.Invocation {
 
         private IoSession session;
-        private HttpRequest minaRequest;
+        private MutableHttpRequest minaRequest;
         private MutableHttpResponse minaResponse;
 
         public MinaInvocation(IoSession session, HttpRequest minaRequest, MutableHttpResponse minaResponse) {
             this.session = session;
-            this.minaRequest = minaRequest;
+            this.minaRequest = (MutableHttpRequest) minaRequest;
             this.minaResponse = minaResponse;
         }
 
@@ -166,7 +167,10 @@ public class HttpHandler implements IoHandler {
                 request.contentType = "text/html";
             }
             request.method = minaRequest.getMethod().toString();
-            request.body = buffer.asInputStream();
+            if (minaRequest.getFileContent()==null)
+            	request.body = buffer.asInputStream();
+            else
+            	request.body = new FileInputStream (minaRequest.getFileContent());
             request.domain = ((InetSocketAddress) session.getLocalAddress()).getHostName();
             request.port = ((InetSocketAddress) session.getLocalAddress()).getPort();
             request.secure = false;
