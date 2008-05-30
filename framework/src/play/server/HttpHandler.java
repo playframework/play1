@@ -56,11 +56,10 @@ public class HttpHandler implements IoHandler {
             serve404(session, request, response);
         } else {
             RandomAccessFile raf = new RandomAccessFile(target, "r");
-            byte[] buffer = new byte[(int) raf.length()];
-            raf.read(buffer);
-            raf.close();
             response.setStatus(HttpResponseStatus.OK);
-            response.setContent(IoBuffer.wrap(buffer));
+            session.setAttribute("channel", raf.getChannel());
+            response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, ""+raf.length());
+            response.setHeader(HttpHeaderConstants.KEY_TRANSFER_CODING, "pppp");
             writeResponse(session, request, response);
         }
     }
@@ -104,14 +103,13 @@ public class HttpHandler implements IoHandler {
     }
 
     public void messageSent(IoSession session, Object message) throws Exception {
-        if (message instanceof DefaultHttpResponse) {
-            if (session.getAttribute("channel") != null) {
-                FileChannel channel = (FileChannel) session.getAttribute("channel");
-                session.removeAttribute("channel");
-                session.write(channel);
-                Logger.debug("File sent");
-            }
-        }
+    	if (message instanceof DefaultHttpResponse) {
+    		if (session.getAttribute("channel")!=null) {
+    			FileChannel channel = (FileChannel) session.getAttribute("channel");
+    			session.removeAttribute("channel");
+    			session.write(channel);
+    		}
+    	}
     }
 
     public void sessionClosed(IoSession session) throws Exception {
