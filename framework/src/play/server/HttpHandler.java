@@ -184,7 +184,6 @@ public class HttpHandler implements IoHandler {
 
             for (Cookie cookie : minaRequest.getCookies()) {
                 Http.Cookie playCookie = new Http.Cookie();
-                playCookie.domain=cookie.getDomain();
                 playCookie.name=cookie.getName();
                 playCookie.path=cookie.getPath();
                 playCookie.secure=cookie.isSecure();
@@ -218,14 +217,9 @@ public class HttpHandler implements IoHandler {
             }
 
             Map<String, Http.Cookie> cookies = response.cookies;
-            for (String key : cookies.keySet()) {
-                Http.Cookie c = cookies.get(key);
-                DefaultCookie m = new DefaultCookie(c.name);
-                m.setDomain(c.domain);
-                m.setPath(c.path);
-                m.setSecure(c.secure);
-                m.setValue(c.value);
-                minaResponse.addCookie(m);
+            for(String key : cookies.keySet()) {
+                Http.Cookie cookie = cookies.get(key);
+                minaResponse.addHeader("Set-Cookie", String.format("%s=%s; path=%s", cookie.name, cookie.value, cookie.path));
             }
             HttpHandler.writeResponse(session, minaRequest, minaResponse);
         }

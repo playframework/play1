@@ -20,9 +20,8 @@ public class Http {
 
     public static class Cookie {
         public String name;
-        public String domain;
-        public String path;
-        public Boolean secure;
+        public String path = "/";
+        public boolean secure = false;
         public String value;
     }
 
@@ -79,6 +78,13 @@ public class Http {
             h.values = new ArrayList<String>();
             h.values.add(value);
             headers.put(name, h);
+        }
+        
+        public void setSessionCookie(String name, String value) {
+            Cookie cookie = new Cookie();
+            cookie.name = name;
+            cookie.value = value;
+            cookies.put(name, cookie);
         }
         
     }

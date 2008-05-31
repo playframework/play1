@@ -9,7 +9,7 @@ import java.util.List;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.data.parsing.DataParser;
-import play.exceptions.ActionInvocationException;
+import play.exceptions.JavaExecutionException;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
@@ -32,6 +32,7 @@ public class ActionInvoker {
             // 3. Prepare request params
             Scope.Params.current.set(new Scope.Params());
             Scope.RenderArgs.current.set(new Scope.RenderArgs());
+            Scope.Session.current.set(Scope.Session.restore());
             Scope.Params.current().__mergeWith(request.routeArgs);
             Scope.Params.current()._mergeWith(DataParser.parsers.get("application/x-www-form-urlencoded").parse(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
             
@@ -70,13 +71,19 @@ public class ActionInvoker {
                 }
                 StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex.getTargetException());
                 if(element != null) {
-                    throw new ActionInvocationException(Play.classes.getApplicationClass(element.getClassName()), Http.Request.current().action, element.getLineNumber(), ex.getTargetException());
+                    throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(), ex.getTargetException());
                 }
-                throw new ActionInvocationException(Http.Request.current().action, ex);
+                throw new JavaExecutionException(Http.Request.current().action, ex);
             }
 
 
         } catch (Result result) {
+            
+            // Ok there is a result to apply
+            // Save session & flash scope now
+            
+            Scope.Session.current().save();
+            
             result.apply(request, response);
             
         } catch(PlayException e) {

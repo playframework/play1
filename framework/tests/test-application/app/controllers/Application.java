@@ -14,7 +14,10 @@ public class Application extends Controller {
         if ("Guillaume".equals(name)) {
             redirect("http://www.amazon.com");
         }
-        models.Test.test();  
+        models.Test.test();
+        if(name != null) {
+            session.put("name", name);
+        }
     }
 
     public static void index(String name, Integer age, HashSet<Date> date) {
