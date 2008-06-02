@@ -75,7 +75,7 @@ public abstract class Controller {
         if(args.length>0 && args[0] instanceof String && LocalVariablesNamesTracer.getLocalVariableName(args[0]) == null) {
             templateName = args[0].toString();
         } else {
-            templateName = Http.Request.current().action.substring(12).replace(".", "/")+"."+Http.Request.current().format;
+            templateName = Http.Request.current().action.replace(".", "/")+"."+Http.Request.current().format;
         }
         try {
             Template template = TemplateLoader.load(templateName);

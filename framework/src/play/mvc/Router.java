@@ -9,6 +9,7 @@ import java.util.Map;
 import jregex.Matcher;
 import jregex.Pattern;
 import play.Logger;
+import play.Play;
 import play.Play.VirtualFile;
 import play.exceptions.NoRouteFoundException;
 import play.mvc.results.NotFound;
@@ -16,10 +17,11 @@ import play.mvc.results.NotFound;
 public class Router {
     
     static Pattern routePattern = new Pattern("^({method}[A-Za-z\\*]+)?\\s+({path}/[^\\s]*)\\s*({action}[^\\s(]+)({params}.+)?$");
-
-    public static void load(VirtualFile routesFile) {  
+    static long lastLoading;
+    
+    public static void load() {  
         routes.clear();
-        String[] lines = routesFile.contentAsString().split("\n");
+        String[] lines = Play.routesFile.contentAsString().split("\n");
         for(String line : lines) {
             line = line.trim().replaceAll("\\s+", " ");
             if(line.length() == 0 || line.startsWith("#")) {
@@ -31,14 +33,18 @@ public class Router {
                 route.method = matcher.group("method");
                 route.path = matcher.group("path");
                 route.action = matcher.group("action");
-                if(!route.action.startsWith("controllers.")) {
-                    route.action = "controllers."+route.action;
-                }
                 route.compute();
                 routes.add(route);
             } else {
                 Logger.warn("Invalid route definition : %s", line);
             }
+        }
+        lastLoading = System.currentTimeMillis();
+    }
+    
+    public static void detectChanges() {
+        if(Play.routesFile.lastModified() > lastLoading) {
+            load();
         }
     }
     
@@ -57,8 +63,8 @@ public class Router {
     }
     
     public static ActionDefinition reverse(String action, Map<String,String> args) {
-        if(!action.startsWith("controllers.")) {
-            action = "controllers."+action;
+        if(action.startsWith("controllers.")) {
+            action = action.substring(12);
         }
         for(Route route : routes) {
             if(route.action.equals(action)) {

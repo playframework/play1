@@ -30,6 +30,7 @@ public class Play {
     public static ApplicationClassloader classloader;
     public static List<VirtualFile> javaPath;
     public static List<VirtualFile> templatesPath;
+    public static VirtualFile routesFile;
     public static Properties configuration;
     public static String applicationName;
     
@@ -65,7 +66,8 @@ public class Play {
             templatesPath.add(new VirtualFile("app/views"));
             templatesPath.add(new VirtualFile(new File(frameworkPath , "framework")));
             classloader = new ApplicationClassloader();
-            Router.load(new VirtualFile("conf/routes"));
+            routesFile = new VirtualFile("conf/routes");
+            Router.load();
             TemplateLoader.cleanCompiledCache();
             DB.init();
             JPA.init();
@@ -84,11 +86,16 @@ public class Play {
    
     protected static synchronized void detectChanges() {
         try {
+            Router.detectChanges();
             classloader.detectChanges();            
         } catch (UnsupportedOperationException e) {
             // We have to do a clean refresh
             start();
         }
+    }
+    
+    public static String getSecretKey() {
+        return "SLD0FBVG78920DKMLKF39DJ92JO2";
     }
     
     public static VirtualFile getFile(String path) {

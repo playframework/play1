@@ -99,6 +99,9 @@ public class Template {
             writer = new StringWriter();
             binding.setProperty("out", new PrintWriter(writer));
         }
+        if(!args.containsKey("_body") && !args.containsKey("_isLayout")) {
+            layoutData.set(new HashMap());
+        }
         ExecutableTemplate t = (ExecutableTemplate) InvokerHelper.createScript(compiledTemplate, binding);        
         t.template = this;
         try {
@@ -118,6 +121,7 @@ public class Template {
         if(applyLayouts && layout.get() != null) {
             Map<String,Object> layoutArgs = new HashMap<String,Object>(args);
             layoutArgs.remove("out");
+            layoutArgs.put("_isLayout", true);
             String layoutR = layout.get().render(layoutArgs);
             return layoutR.replace("____%LAYOUT%____", writer.toString());
         }
@@ -146,6 +150,7 @@ public class Template {
     }
     
     public static ThreadLocal<Template> layout = new ThreadLocal<Template>();
+    public static ThreadLocal<Map> layoutData = new ThreadLocal<Map>();
 
     public static abstract class ExecutableTemplate extends Script {
         

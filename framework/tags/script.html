@@ -1,0 +1,11 @@
+%{ 
+	if(_arg) { 
+}%
+	<script type="text/javascript" src="/public/javascripts/${_arg}"></script>
+%{ 
+	} else if(_src) {
+}%
+	<script type="text/javascript" src="${_src}"></script>
+%{
+	}
+}%
