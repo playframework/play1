@@ -21,6 +21,7 @@ import org.apache.asyncweb.common.MutableHttpRequest;
 import org.apache.asyncweb.common.MutableHttpResponse;
 import org.apache.mina.common.IdleStatus;
 import org.apache.mina.common.IoBuffer;
+import org.apache.mina.common.IoFuture;
 import org.apache.mina.common.IoFutureListener;
 import org.apache.mina.common.IoHandler;
 import org.apache.mina.common.IoSession;
@@ -57,7 +58,7 @@ public class HttpHandler implements IoHandler {
         } else {
             RandomAccessFile raf = new RandomAccessFile(target, "r");
             response.setStatus(HttpResponseStatus.OK);
-            session.setAttribute("channel", raf.getChannel());
+            session.setAttribute("file", raf);
             response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, ""+raf.length());
             response.setHeader(HttpHeaderConstants.KEY_TRANSFER_CODING, "pppp");
             writeResponse(session, request, response);
@@ -100,14 +101,25 @@ public class HttpHandler implements IoHandler {
         if (!HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION))) {
             future.addListener(IoFutureListener.CLOSE);
         }
+
     }
 
     public void messageSent(IoSession session, Object message) throws Exception {
     	if (message instanceof DefaultHttpResponse) {
-    		if (session.getAttribute("channel")!=null) {
-    			FileChannel channel = (FileChannel) session.getAttribute("channel");
-    			session.removeAttribute("channel");
-    			session.write(channel);
+    		if (session.getAttribute("file")!=null) {
+    			FileChannel channel = ((RandomAccessFile) session.getAttribute("file")).getChannel();
+    			WriteFuture future = session.write(channel);
+    			future.addListener(new IoFutureListener<IoFuture> () {
+					public void operationComplete(IoFuture future) {
+						RandomAccessFile raf = (RandomAccessFile) future.getSession().getAttribute("file");
+						future.getSession().removeAttribute("file");
+						try {
+							raf.close();
+						} catch (IOException e) {
+							Logger.debug(e);
+						}
+					}
+    			});
     		}
     	}
     }
@@ -223,7 +235,6 @@ public class HttpHandler implements IoHandler {
                 c.setSecure(cookie.secure);
                 c.setPath(cookie.path);
                 minaResponse.addCookie(c);
-                //minaResponse.addHeader("Set-Cookie", String.format("%s=%s; path=%s", cookie.name, cookie.value, cookie.path));
             }
             HttpHandler.writeResponse(session, minaRequest, minaResponse);
         }
