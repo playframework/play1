@@ -219,7 +219,11 @@ public class HttpHandler implements IoHandler {
             Map<String, Http.Cookie> cookies = response.cookies;
             for(String key : cookies.keySet()) {
                 Http.Cookie cookie = cookies.get(key);
-                minaResponse.addHeader("Set-Cookie", String.format("%s=%s; path=%s", cookie.name, cookie.value, cookie.path));
+                DefaultCookie c = new DefaultCookie(cookie.name,cookie.value);
+                c.setSecure(cookie.secure);
+                c.setPath(cookie.path);
+                minaResponse.addCookie(c);
+                //minaResponse.addHeader("Set-Cookie", String.format("%s=%s; path=%s", cookie.name, cookie.value, cookie.path));
             }
             HttpHandler.writeResponse(session, minaRequest, minaResponse);
         }

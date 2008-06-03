@@ -53,7 +53,7 @@ public class Invoker {
 
     private static Executor startExecutor () {
         Properties p = Play.configuration;
-        BlockingQueue queue = new LinkedBlockingQueue ();
+        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable> ();
         int core = Integer.parseInt(p.getProperty("play.pool.core", "2"));
         int max = Integer.parseInt(p.getProperty("play.pool.max", "50"));
         int keepalive = Integer.parseInt(p.getProperty("play.pool.keepalive", "5"));
