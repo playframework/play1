@@ -5,6 +5,7 @@ import play.mvc.results.Result;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.List;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
@@ -33,6 +34,7 @@ public class ActionInvoker {
             Scope.Params.current.set(new Scope.Params());
             Scope.RenderArgs.current.set(new Scope.RenderArgs());
             Scope.Session.current.set(Scope.Session.restore());
+            Scope.Flash.current.set(Scope.Flash.restore());
             Scope.Params.current().__mergeWith(request.routeArgs);
             Scope.Params.current()._mergeWith(DataParser.parsers.get("application/x-www-form-urlencoded").parse(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
             
@@ -42,12 +44,22 @@ public class ActionInvoker {
                 List<Method> befores = Java.findAllAnnotatedMethods(actionMethod.getDeclaringClass(), Before.class);
                 ControllerInstrumentation.stopActionCall();
                 for(Method before : befores) {
-                    if(Modifier.isStatic(before.getModifiers())) {
-                        before.setAccessible(true);
-                        if(before.getParameterTypes().length>0) {
-                            Scope.Params.current().checkAndParse();
+                    String[] unless = before.getAnnotation(Before.class).unless();
+                    boolean skip = false;
+                    for(String un : unless) {
+                        if(un.equals(request.action)) {
+                            skip = true;
+                            break;
                         }
-                        Java.invokeStatic(before, Scope.Params.current().data);
+                    }
+                    if(!skip) {
+                        if(Modifier.isStatic(before.getModifiers())) {
+                            before.setAccessible(true);
+                            if(before.getParameterTypes().length>0) {
+                                Scope.Params.current().checkAndParse();
+                            }
+                            Java.invokeStatic(before, Scope.Params.current().data);
+                        }
                     }
                 }
                 // Action
@@ -81,8 +93,8 @@ public class ActionInvoker {
             
             // Ok there is a result to apply
             // Save session & flash scope now
-            
             Scope.Session.current().save();
+            Scope.Flash.current().save();
             
             result.apply(request, response);
             

@@ -56,7 +56,7 @@ public class Scope {
         }
         
         // ThreadLocal access
-        private static ThreadLocal<Flash> current = new ThreadLocal<Flash>();
+        static ThreadLocal<Flash> current = new ThreadLocal<Flash>();
 
         public static Flash current() {
             return current.get();

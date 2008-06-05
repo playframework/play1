@@ -39,8 +39,8 @@ public class ApplicationClasses {
     // Enhancers
     Class[] enhancers = new Class[] {
         ControllersEnhancer.class,
-        LocalvariablesNamesEnhancer.class,
-        PropertiesEnhancer.class
+        LocalvariablesNamesEnhancer.class
+        //PropertiesEnhancer.class
     };
 
     public class ApplicationClass {
