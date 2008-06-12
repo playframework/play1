@@ -117,7 +117,7 @@ if [ "$COMMANDE" = new ] ; then
 	echo "~"
 	dest="`dirname "${path}"`/`basename "${path}"`"
 	cp -R ${PLAY_BASE}/resources/application-skel ${dest}
-	sed 's/application\.name=Skeleton/application\.name=test/' ${dest}/conf/application.conf > ${dest}/conf/application.conf.tmp
+	sed "s/application\.name=Skeleton/application\.name=$applicationName/" ${dest}/conf/application.conf > ${dest}/conf/application.conf.tmp
 	mv ${dest}/conf/application.conf.tmp ${dest}/conf/application.conf
 	#echo "`dirname "${path}"`/`basename "${path}"`"
 	echo "~ Ok, application created"
