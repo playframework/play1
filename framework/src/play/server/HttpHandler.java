@@ -9,8 +9,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.channels.FileChannel;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import org.apache.asyncweb.common.Cookie;
 import org.apache.asyncweb.common.DefaultCookie;
 import org.apache.asyncweb.common.DefaultHttpResponse;
@@ -56,15 +61,55 @@ public class HttpHandler implements IoHandler {
         if (!target.exists() && !target.isFile()) {
             serve404(session, request, response);
         } else {
-            RandomAccessFile raf = new RandomAccessFile(target, "r");
-            response.setStatus(HttpResponseStatus.OK);
-            session.setAttribute("file", raf);
-            response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, ""+raf.length());
-            response.setHeader(HttpHeaderConstants.KEY_TRANSFER_CODING, "pppp");
+            //attachFile(session, response, target);
+            if (Play.configuration.getProperty("mode", "dev").equals("dev")) {
+                response.setHeader("Cache-Control", "no-cache");
+                attachFile(session, response, target);
+            } else {
+                long last = target.lastModified();
+                String etag = last+"-"+target.hashCode();
+                if (!isModified(etag, last, request)) {
+                    response.setHeader("Etag",etag);
+                    response.setStatus(HttpResponseStatus.NOT_MODIFIED);
+                } else {
+                    response.setHeader("Last-Modified", formatter.format(new Date(last)));
+                    response.setHeader("Cache-Control","max-age=3600");
+                    response.setHeader("Etag",etag);
+                    attachFile(session, response, target);
+                }
+            }
             writeResponse(session, request, response);
         }
     }
 
+    public static void attachFile (IoSession session, MutableHttpResponse response, File target) throws IOException {
+        RandomAccessFile raf = new RandomAccessFile(target, "r");
+        response.setStatus(HttpResponseStatus.OK);
+        session.setAttribute("file", raf);
+        response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, ""+raf.length());
+        response.setHeader(HttpHeaderConstants.KEY_TRANSFER_CODING, "pppp");
+    }
+    
+    public static boolean isModified (String etag, long last, HttpRequest request) {
+       if (! (request.getHeaders().containsKey("If-None-Match") && request.getHeaders().containsKey("If-Modified-Since")))
+           return true;
+       else {
+           String browserEtag = request.getHeader("If-None-Match");
+           if (!browserEtag.equals(etag))
+               return true;
+           else {
+                try {
+                    Date browserDate = formatter.parse(request.getHeader("If-Modified-Since"));
+                    if (browserDate.getTime()>=last)
+                        return false;
+                } catch (ParseException ex) {
+                    Logger.error("Can't parse date", ex);
+                }
+                return true;
+           }
+       }
+    }
+        
     public static void serve404(IoSession session, HttpRequest request, MutableHttpResponse response) {
         response.setStatus(HttpResponseStatus.NOT_FOUND);
         response.setContent(IoBuffer.wrap("Page not found".getBytes()));
@@ -113,6 +158,7 @@ public class HttpHandler implements IoHandler {
 					public void operationComplete(IoFuture future) {
 						RandomAccessFile raf = (RandomAccessFile) future.getSession().getAttribute("file");
 						future.getSession().removeAttribute("file");
+                                                Logger.info("finish tx "+raf.toString());
 						try {
 							raf.close();
 						} catch (IOException e) {
@@ -125,9 +171,11 @@ public class HttpHandler implements IoHandler {
     }
 
     public void sessionClosed(IoSession session) throws Exception {
+
     }
 
     public void sessionCreated(IoSession session) throws Exception {
+
     }
 
     public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
@@ -236,7 +284,14 @@ public class HttpHandler implements IoHandler {
                 c.setPath(cookie.path);
                 minaResponse.addCookie(c);
             }
+            if (!response.headers.containsKey("cache-control"))
+                minaResponse.setHeader("Cache-Control", "no-cache");
             HttpHandler.writeResponse(session, minaRequest, minaResponse);
         }
+    }
+    
+    public static SimpleDateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+    static {
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 }
