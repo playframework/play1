@@ -158,7 +158,6 @@ public class HttpHandler implements IoHandler {
 					public void operationComplete(IoFuture future) {
 						RandomAccessFile raf = (RandomAccessFile) future.getSession().getAttribute("file");
 						future.getSession().removeAttribute("file");
-                                                Logger.info("finish tx "+raf.toString());
 						try {
 							raf.close();
 						} catch (IOException e) {
