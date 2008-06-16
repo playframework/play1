@@ -30,7 +30,7 @@ public class Play {
     public static ApplicationClassloader classloader;
     public static List<VirtualFile> javaPath;
     public static List<VirtualFile> templatesPath;
-    public static VirtualFile routesFile;
+    public static List<VirtualFile> routes;
     public static Properties configuration;
     public static String applicationName;
     
@@ -66,7 +66,8 @@ public class Play {
             templatesPath.add(new VirtualFile("app/views"));
             templatesPath.add(new VirtualFile(new File(frameworkPath , "framework")));
             classloader = new ApplicationClassloader();
-            routesFile = new VirtualFile("conf/routes");
+            routes=new ArrayList<Play.VirtualFile>();
+            routes.add(new VirtualFile("conf/routes"));
             Router.load();
             TemplateLoader.cleanCompiledCache();
             DB.init();
