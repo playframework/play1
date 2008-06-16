@@ -52,7 +52,7 @@ public class JPAEnhancer extends Enhancer {
         
         // findBy
         
-        CtMethod findBy = CtMethod.make("javax.persistence.Query q = getEntityManager().createQuery(createFindByQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", query, params)); bindParameters(q,params).getResultList(); }", ctClass);
+        CtMethod findBy = CtMethod.make("public static java.util.List findBy(String query, Object[] params) { javax.persistence.Query q = getEntityManager().createQuery(createFindByQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", query, params)); return bindParameters(q,params).getResultList(); }", ctClass);
         ctClass.addMethod(findBy);
         
         // findOneBy
