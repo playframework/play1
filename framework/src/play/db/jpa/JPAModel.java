@@ -1,16 +1,12 @@
 package play.db.jpa;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Query;
-import javax.persistence.Transient;
-import play.Play;
 
 @MappedSuperclass
 public class JPAModel implements Serializable {
@@ -88,6 +84,9 @@ public class JPAModel implements Serializable {
     @SuppressWarnings("unused")
     protected static String createFindByQuery(String entityName, String entityClass, String query, Object... params) {
         if (query.trim().toLowerCase().startsWith("select ")) {
+            return query;
+        }
+        if (query.trim().toLowerCase().startsWith("from ")) {
             return query;
         }
         if (query.trim().indexOf(" ") == -1 && params.length == 1) {

@@ -14,16 +14,18 @@ public class Hello extends Controller {
 		ResultSet result = DB.executeQuery("SELECT count(*) from toto");
 		result.next();
 		Integer count = result.getInt(1);
-		render(count);
+		render(count); 
 	}
 	
 	public static void hello() {
+		System.out.println("Coucou");
 		Client jojo = new Client();
-		jojo.name = "Jojo";
-		jojo.age = 45;
+		jojo.name = "Yop";
+		jojo.age = 47;
 		jojo.save();
-		List clients = Client.findBy("age = ?", 45);   
-		render(clients);
+		List clients = Client.findBy("age = ?", 47);   
+		System.out.println("//"+clients.size());   
+		render(clients); 
 	}
 	
 }

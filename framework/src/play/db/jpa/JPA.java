@@ -28,7 +28,7 @@ public class JPA {
     public static void init(List<Class> classes, Properties p) {
         Ejb3Configuration cfg = new Ejb3Configuration();
         cfg.setDataSource(DB.datasource);
-        cfg.setProperty("hibernate.hbm2ddl.auto", "create-drop");
+        cfg.setProperty("hibernate.hbm2ddl.auto", "create-update");
         cfg.setProperty("hibernate.dialect", getDefaultDialect(p.getProperty("db.driver")));
         cfg.setProperty("javax.persistence.transaction", "RESOURCE_LOCAL");
         try {

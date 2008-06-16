@@ -55,7 +55,7 @@ public class ApplicationClassloader extends ClassLoader {
             } else {
                 applicationClass.compile();
                 applicationClass.enhance();
-                applicationClass.javaClass = defineClass(name, applicationClass.javaByteCode, 0, applicationClass.javaByteCode.length);
+                applicationClass.javaClass = defineClass(name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length);
                 resolveClass(applicationClass.javaClass);
                 return applicationClass.javaClass;
             }
@@ -102,7 +102,7 @@ public class ApplicationClassloader extends ClassLoader {
             applicationClass.compile();
             applicationClass.enhance();
             if(applicationClass.javaClass != null) {
-                newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.javaByteCode));
+                newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.enhancedByteCode));
             }
             Logger.debug("%sms to compile & enhance %s", System.currentTimeMillis()-start, applicationClass.name);
         }

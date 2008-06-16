@@ -101,7 +101,7 @@ public class PropertiesEnhancer extends Enhancer {
             });
         }
 
-        applicationClass.setByteCode(ctClass.toBytecode());
+        applicationClass.enhancedByteCode = ctClass.toBytecode();
         ctClass.defrost();
     }
 

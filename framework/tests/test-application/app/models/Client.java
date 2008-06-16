@@ -10,7 +10,7 @@ public class Client extends JPAModel {
 	public Integer age;
 	
 	public String toString() {
-		return String.format("%s (%s)", name, age); 
+		return String.format("%s (=%s)", name, age);  
 	}
 	
 }

@@ -65,7 +65,7 @@ public class ControllersEnhancer extends Enhancer {
 
         }
         
-        applicationClass.setByteCode(ctClass.toBytecode());
+        applicationClass.enhancedByteCode = ctClass.toBytecode();
         ctClass.defrost();
 
     }

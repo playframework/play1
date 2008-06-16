@@ -11,7 +11,6 @@ import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.Enhancer;
 import play.classloading.enhancers.JPAEnhancer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer;
-import play.classloading.enhancers.PropertiesEnhancer;
 import play.exceptions.UnexpectedException;
 
 public class ApplicationClasses {
@@ -51,6 +50,7 @@ public class ApplicationClasses {
         public VirtualFile javaFile;
         public String javaSource;
         public byte[] javaByteCode;
+        public byte[] enhancedByteCode;
         public Class javaClass;
         public Long timestamp = 0L;
         boolean compiled;
@@ -63,20 +63,18 @@ public class ApplicationClasses {
 
         public void refresh() {
             this.javaSource = this.javaFile.contentAsString();
-            this.javaByteCode = null;  
+            this.javaByteCode = null;
+            this.enhancedByteCode = null;
             this.timestamp = this.javaFile.lastModified();
             this.compiled = false;            
         }
-
-        public void setByteCode(byte[] compiledByteCode) {
-            this.javaByteCode = compiledByteCode;                       
-        }
         
-        public void enhance() {
+        public byte[] enhance() {
             try {       
                 for(Class enhancer : enhancers) {
                     ((Enhancer)enhancer.newInstance()).enhanceThisClass(this);
                 } 
+                return this.enhancedByteCode;
             } catch(Exception e) {
                 throw new UnexpectedException(e);
             }
