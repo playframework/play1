@@ -93,29 +93,7 @@ public class JPAModel implements Serializable {
         if (query.trim().indexOf(" ") == -1 && params.length == 1) {
             query += " = ?";
         }
-        try {
-            // TODO : Les nouvelle version d'hibernate abandonne le strict JPA-QL et on peut remplacer ca
-            // par une simple requete from
-            query = " " + query + " ";
-            Class clazz = Play.classloader.loadClass(entityClass);
-            for (Field field : clazz.getFields()) {
-                if (!Modifier.isTransient(field.getModifiers()) && !field.isAnnotationPresent(Transient.class)) {
-                    String name = " " + field.getName() + " ";
-                    query = query.replace(name, " o." + field.getName() + " ");
-                }
-            }
-            for (Field field : clazz.getDeclaredFields()) {
-                if (!Modifier.isTransient(field.getModifiers()) && !field.isAnnotationPresent(Transient.class)) {
-                    String name = " " + field.getName() + " ";
-                    query = query.replace(name, " o." + field.getName() + " ");
-                }
-            }
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return "select o from " + entityName + " o where " + query;
+        return  "from " + entityName + " where " + query;       
     }
     
     @SuppressWarnings ("unused")
