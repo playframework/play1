@@ -38,6 +38,7 @@ public class Invoker {
                 LocalVariablesNamesTracer.enterMethod();
                 JPA.startTx(false); 
                 execute();
+                JPA.closeTx(false);
             } catch (Throwable e) {
                 JPA.closeTx(true);
                 if(e instanceof PlayException) {
@@ -45,7 +46,6 @@ public class Invoker {
                 }
                 throw new UnexpectedException(e);
             } finally {
-                JPA.closeTx(false);
                 DB.close();
             }            
         }
