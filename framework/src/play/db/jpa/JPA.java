@@ -76,7 +76,7 @@ public class JPA {
     }
 
     public static void closeTx(boolean rollback) {
-        if(!isEnabled()) {
+        if(!isEnabled() || JPAContext.local.get() == null) {
             return;
         }
         EntityManager manager = JPAContext.get().entityManager;

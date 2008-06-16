@@ -22,7 +22,7 @@ public class Hello extends Controller {
 		jojo.name = "Jojo";
 		jojo.age = 45;
 		jojo.save();
-		List clients = Client.findBy("age = ?", 45);
+		List clients = Client.findBy("age = ?", 45);   
 		render(clients);
 	}
 	
