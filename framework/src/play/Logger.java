@@ -29,9 +29,9 @@ public class Logger {
     }
     
     private static void print(String level, String message, Object... args) {
-        if(!level.equals("DEBUG")) {
+        //if(!level.equals("DEBUG")) {
             System.out.println(String.format("%-6s %-6s %s", time(), level, String.format(message, args)));
-        }
+        //}
     }
    
     private static Long time() {

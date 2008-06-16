@@ -9,6 +9,7 @@ import play.Play;
 import play.Play.VirtualFile;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.Enhancer;
+import play.classloading.enhancers.JPAEnhancer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer;
 import play.classloading.enhancers.PropertiesEnhancer;
 import play.exceptions.UnexpectedException;
@@ -39,8 +40,9 @@ public class ApplicationClasses {
     // Enhancers
     Class[] enhancers = new Class[] {
         ControllersEnhancer.class,
-        LocalvariablesNamesEnhancer.class
+        LocalvariablesNamesEnhancer.class,
         //PropertiesEnhancer.class
+        JPAEnhancer.class
     };
 
     public class ApplicationClass {
