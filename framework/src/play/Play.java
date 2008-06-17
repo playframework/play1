@@ -1,13 +1,10 @@
 package play;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
 import java.util.Properties;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
@@ -15,9 +12,9 @@ import play.db.DB;
 import play.db.jpa.JPA;
 import play.exceptions.UnexpectedException;
 import play.libs.Files;
+import play.libs.vfs.VirtualFile;
 import play.mvc.Router;
 import play.templates.TemplateLoader;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class Play {
     
@@ -59,16 +56,17 @@ public class Play {
                 stop();
             }
             Thread.currentThread().setContextClassLoader(Play.classloader);
-            configuration = Files.readUtf8Properties(new VirtualFile("conf/application.conf").inputstream());
+            VirtualFile appRoot = VirtualFile.open(applicationPath);
+            configuration = Files.readUtf8Properties(appRoot.child("conf/application.conf").inputstream());
             applicationName = configuration.getProperty("application.name", "(no name)");
             javaPath = new ArrayList<VirtualFile>();
-            javaPath.add(new VirtualFile("app"));
+            javaPath.add( appRoot.child("app"));
             templatesPath = new ArrayList<VirtualFile>();
-            templatesPath.add(new VirtualFile("app/views"));
-            templatesPath.add(new VirtualFile(new File(frameworkPath , "framework")));
+            templatesPath.add(appRoot.child("app/views"));
+            templatesPath.add(VirtualFile.open(new File(frameworkPath , "framework")));
             classloader = new ApplicationClassloader();
-            routes=new ArrayList<Play.VirtualFile>();
-            routes.add(new VirtualFile("conf/routes"));
+            routes=new ArrayList<VirtualFile>();
+            routes.add(appRoot.child("conf/routes"));
             if (!configuration.getProperty("plugin.enable","disabled").equals("disabled"))
             	bootstrapPlugins();
             Router.load();
@@ -98,7 +96,16 @@ public class Play {
         }
     }
     
-    public static void bootstrapPlugins () {
+    public static void bootstrapPlugins () throws IOException {
+    	File lib = new File (applicationPath,"lib");
+    	File [] libs = lib.listFiles();
+    	for (int i = 0; i < libs.length; i++) {
+			if (libs[i].isFile()&&(libs[i].toString().endsWith(".zip") || libs[i].toString().endsWith(".jar")))
+				addPlayApp(libs[i]);
+			else if (isPlayApp(libs[i]))
+				addPlayApp(libs[i]);
+		} 
+    	
     	String pluginPath = configuration.getProperty("plugin.path");
     	String[] pluginNames = configuration.getProperty("plugin.enable","").split(",");
     	if (pluginNames==null)
@@ -106,10 +113,8 @@ public class Play {
     	for (int i = 0; i < pluginNames.length; i++) {
 			String pluginName = pluginNames[i];
 			File fl = new File (pluginName);
-			
-			if (fl.isFile() && fl.toString().endsWith(".jar")) {
-				// C'est un jar
-				throw new NotImplementedException();
+			if (fl.isFile() && (fl.toString().endsWith(".jar") || fl.toString().endsWith(".zip"))) {
+				addPlayApp(fl);
 			} else {
 				if (fl.isAbsolute() && isPlayApp(fl))
 					addPlayApp(fl);
@@ -123,12 +128,12 @@ public class Play {
 			}
 		}
     }
-    
+        
     public static void addPlayApp (File fl) {
-    	VirtualFile root = new VirtualFile (fl);
-    	javaPath.add(new VirtualFile(root,"app"));
-    	templatesPath.add(new VirtualFile(root,"app/views"));
-    	routes.add(new VirtualFile(root,"conf/routes"));
+    	VirtualFile root = VirtualFile.open(fl);
+    	javaPath.add(root.child("app"));
+    	templatesPath.add(root.child("app/views"));
+    	routes.add(root.child("conf/routes"));
     	Logger.info("Plugin added: "+fl.getAbsolutePath());
     }
     
@@ -151,146 +156,6 @@ public class Play {
     }
     
     public static VirtualFile getFile(String path) {
-        return new VirtualFile(path);
-    }
-    
-    public static class VirtualFile {
-
-        File realFile;
-        
-        public VirtualFile(String path) {
-            realFile = new File(applicationPath, path);
-        }
-
-        public VirtualFile(File file) {
-            realFile = file;
-        }
-
-        public String getName() {
-            if (realFile != null) {
-                return realFile.getName();
-            } else {
-                throw new UnsupportedOperationException();
-            }
-        }
-
-        public boolean isDirectory() {
-            if (realFile != null) {
-                return realFile.isDirectory();
-            } else {
-                throw new UnsupportedOperationException();
-            }
-        }
-
-        public String relativePath() {
-            if (realFile != null) {
-                List<String> path = new ArrayList<String>();
-                File f = realFile;
-                while(f != null && !f.equals(Play.applicationPath) && !f.equals(Play.frameworkPath)) {
-                    path.add(f.getName());
-                    f = f.getParentFile();
-                }
-                Collections.reverse(path);
-                StringBuilder builder = new StringBuilder();
-                for(String p : path) {
-                    builder.append("/"+p);
-                }
-                return builder.toString();
-            }
-            return null;
-        }
-
-        public VirtualFile get(String path) {
-            if (realFile != null) {
-                return new VirtualFile(new File(realFile, path));
-            }
-            return null;
-        }
-
-        public List<VirtualFile> list() {
-            List<VirtualFile> res = new ArrayList<VirtualFile>();
-            if (realFile != null) {
-                File[] children = realFile.listFiles();
-                for (int i = 0; i < children.length; i++) {
-                    res.add(new VirtualFile(children[i]));
-                }
-            } else {
-                throw new UnsupportedOperationException();
-            }
-            return res;
-        }
-
-        public VirtualFile(VirtualFile parent, String path) {
-            if (parent.realFile != null) {
-                realFile = new File(parent.realFile, path);
-            }
-        }
-
-        public boolean exists() {
-            if (realFile != null) {
-                return realFile.exists();
-            }
-            return false;
-        }
-
-        public InputStream inputstream() {
-            if (realFile != null) {
-                try {
-                    return new FileInputStream(realFile);
-                } catch (Exception e) {
-                    throw new UnexpectedException(e);
-                }
-            }
-            return null;
-        }
-
-        public String contentAsString() {
-            try {
-                return Files.readContentAsString(inputstream());
-            } catch (Exception e) {
-                throw new UnexpectedException(e);
-            }
-        }
-
-        public byte[] content() {
-            if (realFile != null) {
-                byte[] buffer = new byte[(int) realFile.length()];
-                try {
-                    InputStream is = inputstream();
-                    is.read(buffer);
-                    is.close();
-                    return buffer;
-                } catch (Exception e) {
-                    throw new UnexpectedException(e);
-                }
-            }
-            return null;
-        }
-
-        public Long lastModified() {
-            if (realFile != null) {
-                return realFile.lastModified();
-            }
-            return 0L;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if(other instanceof VirtualFile) {
-                VirtualFile vf = (VirtualFile)other;
-                if(realFile != null && vf.realFile != null) {
-                    return realFile.equals(vf.realFile);
-                }
-            }
-            return super.equals(other);
-        }
-
-        @Override
-        public int hashCode() {
-            if(realFile != null) {
-                return realFile.hashCode();
-            }
-            return super.hashCode();
-        }  
+        return VirtualFile.open(path);
     }
 }

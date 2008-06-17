@@ -2,7 +2,7 @@ package play.templates;
 
 import java.util.Stack;
 import play.Logger;
-import play.Play.VirtualFile;
+import play.libs.vfs.VirtualFile;
 import play.exceptions.TemplateCompilationException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;

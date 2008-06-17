@@ -3,7 +3,7 @@ package play.templates;
 import java.util.HashMap;
 import java.util.Map;
 import play.Play;
-import play.Play.VirtualFile;
+import play.libs.vfs.VirtualFile;
 import play.exceptions.TemplateNotFoundException;
 
 public class TemplateLoader {
@@ -34,8 +34,8 @@ public class TemplateLoader {
     
     public static Template load(String path) {
         Template template = null;
-        for(Play.VirtualFile vf : Play.templatesPath) {
-            Play.VirtualFile tf = vf.get(path);
+        for(VirtualFile vf : Play.templatesPath) {
+        	VirtualFile tf = vf.child(path);
             if(tf.exists()) {
                 template = TemplateLoader.load(tf);
                 break;

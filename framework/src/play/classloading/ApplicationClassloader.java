@@ -7,10 +7,9 @@ import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.UnmodifiableClassException;
 import java.util.ArrayList;
 import java.util.List;
-
 import play.Logger;
 import play.Play;
-import play.Play.VirtualFile;
+import play.libs.vfs.VirtualFile;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
 

@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import play.Play;
-import play.Play.VirtualFile;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.Enhancer;
 import play.classloading.enhancers.JPAEnhancer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer;
 import play.exceptions.UnexpectedException;
+import play.libs.vfs.VirtualFile;
 
 public class ApplicationClasses {
 
@@ -99,7 +98,7 @@ public class ApplicationClasses {
     public VirtualFile getJava(String name) {
         name = name.replace(".", "/") + ".java";
         for (VirtualFile path : Play.javaPath) {
-            VirtualFile javaFile = new VirtualFile(path, name);
+            VirtualFile javaFile = path.child(name);
             if (javaFile.exists()) {
                 return javaFile;
             }

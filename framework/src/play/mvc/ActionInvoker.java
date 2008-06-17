@@ -93,6 +93,7 @@ public class ActionInvoker {
             
             // Ok there is a result to apply
             // Save session & flash scope now
+        	
             Scope.Session.current().save();
             Scope.Flash.current().save();
             
