@@ -17,6 +17,7 @@ import play.exceptions.UnexpectedException;
 import play.libs.Files;
 import play.mvc.Router;
 import play.templates.TemplateLoader;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class Play {
     
@@ -68,6 +69,8 @@ public class Play {
             classloader = new ApplicationClassloader();
             routes=new ArrayList<Play.VirtualFile>();
             routes.add(new VirtualFile("conf/routes"));
+            if (!configuration.getProperty("plugin.enable","disabled").equals("disabled"))
+            	bootstrapPlugins();
             Router.load();
             TemplateLoader.cleanCompiledCache();
             DB.init();
@@ -93,6 +96,54 @@ public class Play {
             // We have to do a clean refresh
             start();
         }
+    }
+    
+    public static void bootstrapPlugins () {
+    	String pluginPath = configuration.getProperty("plugin.path");
+    	String[] pluginNames = configuration.getProperty("plugin.enable","").split(",");
+    	if (pluginNames==null)
+    		return;
+    	for (int i = 0; i < pluginNames.length; i++) {
+			String pluginName = pluginNames[i];
+			File fl = new File (pluginName);
+			
+			if (fl.isFile() && fl.toString().endsWith(".jar")) {
+				// C'est un jar
+				throw new NotImplementedException();
+			} else {
+				if (fl.isAbsolute() && isPlayApp(fl))
+					addPlayApp(fl);
+				else {
+					fl = new File (new File (pluginPath),fl.getPath());
+					if (fl.isAbsolute() && isPlayApp(fl))
+						addPlayApp(fl);
+					else
+						new RuntimeException (fl.getAbsolutePath()+" is not a play application/plugin !");
+				}
+			}
+		}
+    }
+    
+    public static void addPlayApp (File fl) {
+    	VirtualFile root = new VirtualFile (fl);
+    	javaPath.add(new VirtualFile(root,"app"));
+    	templatesPath.add(new VirtualFile(root,"app/views"));
+    	routes.add(new VirtualFile(root,"conf/routes"));
+    	Logger.info("Plugin added: "+fl.getAbsolutePath());
+    }
+    
+    public static boolean isPlayApp (File fl) {
+    	if (! (new File(fl,"app").exists()))
+    			return false;
+    	if (! (new File(fl,"app").isDirectory()))
+			return false;
+    	if (! (new File(fl,"app/controllers/").exists()))
+			return false;
+    	if (! (new File(fl,"app/models/").exists()))
+			return false;
+    	if (! (new File(fl,"conf/routes").exists()))
+			return false;
+    	return true;
     }
     
     public static String getSecretKey() {
@@ -240,9 +291,6 @@ public class Play {
                 return realFile.hashCode();
             }
             return super.hashCode();
-        }
-        
-        
-        
+        }  
     }
 }
