@@ -15,20 +15,20 @@ public class JPA {
     public static EntityManagerFactory entityManagerFactory = null;
 
     public static void init() {
-        if (Play.configuration.getProperty("jpa.start", "false").equals("true") && (entityManagerFactory == null)) {
+        if (Play.configuration.getProperty("jpa", "disabled").equals("enabled") && (entityManagerFactory == null)) {
             List<Class> classes = Play.classloader.getAllClasses();
             init(classes, Play.configuration);
         }
     }
  
     public static boolean isEnabled() {
-        return Play.configuration.getProperty("jpa.start", "false").equals("true");
+        return Play.configuration.getProperty("jpa", "disabled").equals("enabled");
     }
 
     public static void init(List<Class> classes, Properties p) {
         Ejb3Configuration cfg = new Ejb3Configuration();
         cfg.setDataSource(DB.datasource);
-        cfg.setProperty("hibernate.hbm2ddl.auto", "create-update");
+        cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty("jpa.ddl", "update"));
         cfg.setProperty("hibernate.dialect", getDefaultDialect(p.getProperty("db.driver")));
         cfg.setProperty("javax.persistence.transaction", "RESOURCE_LOCAL");
         try {
