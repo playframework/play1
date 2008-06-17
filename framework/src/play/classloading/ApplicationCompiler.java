@@ -217,6 +217,7 @@ public class ApplicationCompiler {
                         clazzName.append(compoundName[j]);
                     }
                     applicationClasses.getApplicationClass(clazzName.toString()).javaByteCode = clazzFile.getBytes();
+                    applicationClasses.getApplicationClass(clazzName.toString()).enhancedByteCode = clazzFile.getBytes();
                 }
             }
         };
