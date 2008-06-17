@@ -1,10 +1,12 @@
 package play.libs;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
 import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
@@ -106,5 +108,12 @@ public class Java {
         return methods;
     }
     
-    
+    public static void findAllFields (Class clazz, Set<Field> found) {
+    	Field[] fields = clazz.getDeclaredFields();
+    	for (int i = 0; i < fields.length; i++)
+			found.add(fields[i]);
+    	Class sClazz = clazz.getSuperclass();
+    	if (sClazz!=null && sClazz!=Object.class)
+    		findAllFields(sClazz, found);
+    }
 }
