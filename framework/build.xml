@@ -20,7 +20,8 @@
     <target name="clean" description="clean resources">
         <delete dir="classes" /> 
         <delete dir="dist" />
-        <delete dir="test-results" />
+        <delete dir="tests-results" />
+        <delete dir="tests-tmp" />
         <delete file="play.jar" /> 
         <delete file="src/play/version" /> 
     </target>
@@ -64,6 +65,8 @@
         </jar>
     </target>
     
+    <!-- Run or debug a fake app -->
+    
     <target name="run-test-application" depends="clean,jar">
         <java classname="play.server.Server" dir="${basedir}" fork="true">
             <classpath>
@@ -94,23 +97,29 @@
         </java>	
     </target>
     
-     <target name="compile-tests" depends="compile">
+    <!-- Tests -->
+    
+    <target name="compile-tests" depends="compile">
         <javac encoding="utf-8" nowarn="${compile.nowarn}" debug="true" destdir="classes" classpathref="project.classpath" srcdir="tests/src" >
             <include name="**/*.java"/>
         </javac> 
     </target>
     
+    <!-- Launch all *Test.java -->
+    
     <target name="test" depends="compile-tests" description="run tests suite">                       
         <mkdir dir="tests-results" />
-        <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true">
+        <mkdir dir="${basedir}/tests-tmp" />
+        <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true" tempdir="${basedir}/tests-tmp">
             <batchtest todir="tests-results">
                 <fileset dir="tests/src">
-                    <include name="**/*.java"/>
+                    <include name="**/*Test.java"/>
                 </fileset>
             </batchtest>
             <classpath refid="test.classpath"/>                    
             <formatter type="brief" usefile="false"/>
-            <formatter type="xml"/>                    
+            <formatter type="xml"/>  
+            <sysproperty key="tests-tmp" value="${basedir}/tests-tmp" />
         </junit>
         <mkdir dir="tests-results/html" />
         <junitreport todir="tests-results">
@@ -119,20 +128,37 @@
             </fileset>
             <report format="frames" todir="tests-results/html"/>
         </junitreport>
+        <delete dir="${basedir}/tests-tmp" />
     </target>
     
-    <target name="debug-test-single" depends="compile-tests" description="run a single test">
+    <target name="debug-test-single" depends="compile-tests" description="debug a single test">
         <nbjpdastart addressproperty="jpda.address" name="Play! framework" transport="dt_socket">
             <classpath refid="project.classpath"/>
         </nbjpdastart>
         <mkdir dir="tests-results" />
-        <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true">
-            <test name="${testclass}" />
+        <mkdir dir="${basedir}/tests-tmp" />
+        <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true" tempdir="${basedir}/tests-tmp">
+            <test name="${testclass}" todir="tests-results" />
             <classpath refid="test.classpath"/>                    
             <formatter type="brief" usefile="false"/> 
             <formatter type="xml"/>
-            <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
-        </junit>	
+            <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>  
+            <sysproperty key="tests-tmp" value="${basedir}/tests-tmp" />
+        </junit>
+        <delete dir="${basedir}/tests-tmp" />
+    </target>
+    
+    <target name="test-single" depends="compile-tests" description="run a single test">
+        <mkdir dir="tests-results" />
+        <mkdir dir="${basedir}/tests-tmp" />
+        <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true" tempdir="${basedir}/tests-tmp" >
+            <test name="${testclass}" todir="tests-results" />            
+            <classpath refid="test.classpath"/>                    
+            <formatter type="brief" usefile="false"/> 
+            <formatter type="xml"/>
+            <sysproperty key="tests-tmp" value="${basedir}/tests-tmp" />
+        </junit>
+        <delete dir="${basedir}/tests-tmp" />
     </target>
     
 </project>

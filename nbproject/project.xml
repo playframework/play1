@@ -65,15 +65,28 @@
                         </arity>
                     </context>
                 </action>
+                <action name="run.single">
+                    <script>framework/build.xml</script>
+                    <target>test-single</target>
+                    <context>
+                        <property>testclass</property>
+                        <folder>framework/tests/src</folder>
+                        <pattern>\.java$</pattern>
+                        <format>java-name</format>
+                        <arity>
+                            <one-file-only/>
+                        </arity>
+                    </context>
+                </action>
                 <action name="debug">
                     <script>framework/build.xml</script>
                     <target>debug-test-application</target>
                 </action>
                 <action name="debug.single">
                     <script>framework/build.xml</script>
-                    <target>test-single</target>
+                    <target>debug-test-single</target>
                     <context>
-                        <property>debug.class</property>
+                        <property>testclass</property>
                         <folder>framework/tests/src</folder>
                         <pattern>\.java$</pattern>
                         <format>java-name</format>
@@ -127,7 +140,7 @@
                     <ide-action name="build"/>
                     <ide-action name="rebuild"/>
                     <ide-action name="clean"/>
-                    <ide-action name="test"/>
+                    <ide-action name="test"/>                    
                 </context-menu>
             </view>
             <subprojects/>

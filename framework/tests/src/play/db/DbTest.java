@@ -1,13 +1,17 @@
 package play.db;
 
+import static org.junit.Assert.*; 
+
 import java.sql.Connection;
 import java.util.Properties;
 import javax.sql.DataSource;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import play.Play;
 
-public class TestDb extends TestCase  {
+public class DbTest  {
     
+    @Test
     public void testDatasource () throws Exception{
         DB.init();
         assertNotNull(DB.datasource);
@@ -16,6 +20,7 @@ public class TestDb extends TestCase  {
         c.close();
     }
     
+    @Test
     public void testNoReload () throws Exception{
         DB.init();
         DataSource ds = DB.datasource;
@@ -23,7 +28,8 @@ public class TestDb extends TestCase  {
         assertSame(DB.datasource, ds);
     }
     
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         Properties p = new Properties ();
         p.setProperty("db.driver", "org.hsqldb.jdbcDriver");
         p.setProperty("db.url", "jdbc:hsqldb:mem:aname");

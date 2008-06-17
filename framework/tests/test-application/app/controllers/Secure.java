@@ -9,18 +9,18 @@ public class Secure extends Controller {
 	@Before(unless={"Secure.authenticate"})
 	static void checkAuth() throws Exception {
 		System.out.println(session);
-		if(session.get("openid") == null) {
-			OpenID.verify("http://gbo.myopenid.com", "Secure.authenticate");
+		if(session.get("id") == null) {
+			OpenID.verify("http://guillaume.bort.fr", "Secure.authenticate");
 		} 
 	}
 	
 	public static void authenticate() throws Exception  { 
-		session.put("openid", OpenID.getVerifiedID());
+		session.put("id", OpenID.getVerifiedID());
 		index();
 	}
 	
 	public static void index() {
-		renderText("Hello %s", session.get("openid"));
+		renderText("Hello %s", session.get("id"));
 	}
 	
 }

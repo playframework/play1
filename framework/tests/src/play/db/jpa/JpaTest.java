@@ -1,20 +1,24 @@
 package play.db.jpa;
 
+import static org.junit.Assert.*; 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import play.Play;
 import play.db.DB;
 
-public class TestJpa extends TestCase{
+public class JpaTest {
     
+    @Test
     public void testJpa () {
         List<Class> classes = new ArrayList<Class>();
         classes.add(Dummy.class);
-        JPA.init(classes, new Properties());
+        JPA.init(classes, Play.configuration);
         EntityManager em = JPA.getEntityManager();
         em.getTransaction().begin();
         Dummy dum = new Dummy();
@@ -31,13 +35,14 @@ public class TestJpa extends TestCase{
         em.getTransaction().commit();
     }
     
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         Properties p = new Properties ();
         p.setProperty("db.driver", "org.hsqldb.jdbcDriver");
         p.setProperty("db.url", "jdbc:hsqldb:mem:aname");
         p.setProperty("db.user", "sa");
         p.setProperty("db.pass", "");
-        Play.configuration=p;
+        Play.configuration = p;
         DB.init();
     }
 }
