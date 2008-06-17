@@ -5,7 +5,6 @@ import play.mvc.results.Result;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.List;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
@@ -24,6 +23,11 @@ public class ActionInvoker {
             Http.Request.current.set(request);
             Http.Response.current.set(response);
 
+            Scope.Params.current.set(new Scope.Params());
+            Scope.RenderArgs.current.set(new Scope.RenderArgs());
+            Scope.Session.current.set(Scope.Session.restore());
+            Scope.Flash.current.set(Scope.Flash.restore());
+            
             // 1. Route the request
             Router.route(request);
 
@@ -31,10 +35,6 @@ public class ActionInvoker {
             Method actionMethod = getActionMethod(request.action);
             
             // 3. Prepare request params
-            Scope.Params.current.set(new Scope.Params());
-            Scope.RenderArgs.current.set(new Scope.RenderArgs());
-            Scope.Session.current.set(Scope.Session.restore());
-            Scope.Flash.current.set(Scope.Flash.restore());
             Scope.Params.current().__mergeWith(request.routeArgs);
             Scope.Params.current()._mergeWith(DataParser.parsers.get("application/x-www-form-urlencoded").parse(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
             

@@ -119,6 +119,7 @@
             <classpath refid="test.classpath"/>                    
             <formatter type="brief" usefile="false"/>
             <formatter type="xml"/>  
+            <jvmarg value="-javaagent:${basedir}/play.jar" />
             <sysproperty key="tests-tmp" value="${basedir}/tests-tmp" />
         </junit>
         <mkdir dir="tests-results/html" />
@@ -144,6 +145,7 @@
             <formatter type="brief" usefile="false"/> 
             <formatter type="xml"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>  
+            <jvmarg value="-javaagent:${basedir}/play.jar" />
             <sysproperty key="tests-tmp" value="${basedir}/tests-tmp" />
         </junit>
         <delete dir="${basedir}/tests-tmp" />
@@ -157,6 +159,7 @@
             <classpath refid="test.classpath"/>                    
             <formatter type="brief" usefile="false"/> 
             <formatter type="xml"/>
+            <jvmarg value="-javaagent:${basedir}/play.jar" />
             <sysproperty key="tests-tmp" value="${basedir}/tests-tmp" />
         </junit>
         <delete dir="${basedir}/tests-tmp" />
