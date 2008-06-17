@@ -1,7 +1,7 @@
-#Application routes
-#Higher priority routes first.
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
 
-
-GET		/	Application.index
+# Uncomment this default route to start !
+# GET	/	Application.index
 
     

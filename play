@@ -111,17 +111,13 @@ fi
 # [NEW] 
 if [ "$COMMANDE" = new ] ; then
 	echo "~"
-	echo "~ The new application will be created in `dirname "${path}"`/`basename "${path}"`"
-	echo -n "~ What is the application name ? "
-	read applicationName
-	echo "~"
 	dest="`dirname "${path}"`/`basename "${path}"`"
 	cp -R ${PLAY_BASE}/resources/application-skel ${dest}
-	sed "s/application\.name=Skeleton/application\.name=$applicationName/" ${dest}/conf/application.conf > ${dest}/conf/application.conf.tmp
-	mv ${dest}/conf/application.conf.tmp ${dest}/conf/application.conf
-	#echo "`dirname "${path}"`/`basename "${path}"`"
-	echo "~ Ok, application created"
-	COMMANDE="run"
+	echo "~ Ok, application created `dirname "${path}"`/`basename "${path}"`"
+        echo "~ Start it with 'play run `dirname "${path}"`/`basename "${path}"`'"
+        echo "~ Have fun"
+	echo "~"
+	exit 1;
 fi	
 
 # Check if it's a valid application

@@ -34,6 +34,7 @@ import org.apache.mina.common.WriteFuture;
 import play.Invoker;
 import play.Logger;
 import play.Play;
+import play.exceptions.EmptyAppException;
 import play.exceptions.PlayException;
 import play.mvc.ActionInvoker;
 import play.mvc.Http;
@@ -120,6 +121,25 @@ public class HttpHandler implements IoHandler {
         Map<String, Object> binding = new HashMap<String, Object>();
         if(!(e instanceof PlayException)) {
             e = new play.exceptions.UnexpectedException(e);
+        }
+        // Empty app : 
+        if(e instanceof EmptyAppException) {
+            try {
+                response.setStatus(HttpResponseStatus.forId(500));
+                response.setContentType("text/html");
+                String errorHtml = TemplateLoader.load("templates/empty.html").render(binding);
+                response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
+                writeResponse(session, request, response);
+                return;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                try {
+                    response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
+                    writeResponse(session, request, response);
+                } catch (UnsupportedEncodingException fex) {
+                    fex.printStackTrace();
+                }
+            }
         }
         binding.put("exception", e);
         response.setStatus(HttpResponseStatus.forId(500));

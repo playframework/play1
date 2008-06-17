@@ -45,7 +45,7 @@
                 </action>
                 <action name="test">
                     <script>framework/build.xml</script>
-                    <target>test</target>
+                    <target>test-in-nb</target>
                 </action>
                 <action name="rebuild">
                     <script>framework/build.xml</script>

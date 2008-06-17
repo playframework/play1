@@ -10,6 +10,7 @@ import jregex.Matcher;
 import jregex.Pattern;
 import play.Logger;
 import play.Play;
+import play.exceptions.EmptyAppException;
 import play.libs.vfs.VirtualFile;
 import play.exceptions.NoRouteFoundException;
 import play.mvc.results.NotFound;
@@ -57,6 +58,9 @@ public class Router {
     static List<Route> routes = new ArrayList<Route>();
 
     public static void route(Http.Request request) {
+        if(routes.isEmpty()) {
+            throw new EmptyAppException();
+        }
         for (Route route : routes) {
             Map<String, String> args = route.matches(request);
             if (args != null) {

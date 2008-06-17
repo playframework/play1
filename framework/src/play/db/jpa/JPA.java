@@ -61,6 +61,10 @@ public class JPA {
         if (driver.equals("org.hsqldb.jdbcDriver")) {
             return "org.hibernate.dialect.HSQLDialect";
         } else {
+            String dialect = Play.configuration.getProperty("jpa.dialect");
+            if(dialect != null) {
+                return dialect;
+            }
             throw new UnsupportedOperationException("I do not know which hibernate dialect to use with " +
                     driver + ", use the property jpa.dialect in config file");
         }

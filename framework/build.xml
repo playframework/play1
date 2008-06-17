@@ -107,6 +107,10 @@
     
     <!-- Launch all *Test.java -->
     
+    <target name="test-in-nb" depends="test">
+         <nbbrowse file="tests-results/html/index.html"/>
+    </target>
+    
     <target name="test" depends="compile-tests" description="run tests suite">                       
         <mkdir dir="tests-results" />
         <mkdir dir="${basedir}/tests-tmp" />
@@ -129,8 +133,7 @@
             </fileset>
             <report format="frames" todir="tests-results/html"/>
         </junitreport>
-        <delete dir="${basedir}/tests-tmp" />
-        <nbbrowse file="tests-results/html/index.html"/>
+        <delete dir="${basedir}/tests-tmp" />       
     </target>
     
     <target name="debug-test-single" depends="compile-tests" description="debug a single test">

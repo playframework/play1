@@ -16,74 +16,72 @@ public class FileSystemFile extends VirtualFile {
     public FileSystemFile(File file) {
         realFile = file;
     }
-    
+
     private FileSystemFile(FileSystemFile parent, String path) {
         if (parent.realFile != null) {
             realFile = new File(parent.realFile, path);
         }
     }
 
-	public String getName() {
-		return realFile.getName();
-	}
-	
-	public boolean isDirectory() {
-	    return realFile.isDirectory();
-	}
+    public String getName() {
+        return realFile.getName();
+    }
 
-	public String relativePath() {
+    public boolean isDirectory() {
+        return realFile.isDirectory();
+    }
+
+    public String relativePath() {
         List<String> path = new ArrayList<String>();
         File f = realFile;
-        while(f != null && !f.equals(Play.applicationPath) && !f.equals(Play.frameworkPath)) {
+        while (f != null && !f.equals(Play.applicationPath) && !f.equals(Play.frameworkPath)) {
             path.add(f.getName());
             f = f.getParentFile();
         }
         Collections.reverse(path);
         StringBuilder builder = new StringBuilder();
-        for(String p : path) {
-            builder.append("/"+p);
+        for (String p : path) {
+            builder.append("/" + p);
         }
         return builder.toString();
-	}
+    }
 
-	public List<VirtualFile> list() {
-	    List<VirtualFile> res = new ArrayList<VirtualFile>();
+    public List<VirtualFile> list() {
+        List<VirtualFile> res = new ArrayList<VirtualFile>();
         File[] children = realFile.listFiles();
         for (int i = 0; i < children.length; i++) {
             res.add(new FileSystemFile(children[i]));
         }
-	    return res;
-	}
+        return res;
+    }
 
-	public boolean exists() {
-	    if (realFile != null) {
-	        return realFile.exists();
-	    }
-	    return false;
-	}
+    public boolean exists() {
+        if (realFile != null) {
+            return realFile.exists();
+        }
+        return false;
+    }
 
-	public InputStream inputstream() {
+    public InputStream inputstream() {
         try {
             return new FileInputStream(realFile);
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
-	}
-	
-	
+    }
 
-	public Long lastModified() {
-	    if (realFile != null) {
-	        return realFile.lastModified();
-	    }
-	    return 0L;
-	}
-    
+    public Long lastModified() {
+        if (realFile != null) {
+            return realFile.lastModified();
+        }
+        return 0L;
+    }
+
     @Override
     public boolean equals(Object other) {
-        if(other instanceof FileSystemFile) {
-            FileSystemFile vf = (FileSystemFile)other;
-            if(realFile != null && vf.realFile != null) {
+        if (other instanceof FileSystemFile) {
+            FileSystemFile vf = (FileSystemFile) other;
+            if (realFile != null && vf.realFile != null) {
                 return realFile.equals(vf.realFile);
             }
         }
@@ -92,17 +90,17 @@ public class FileSystemFile extends VirtualFile {
 
     @Override
     public int hashCode() {
-        if(realFile != null) {
+        if (realFile != null) {
             return realFile.hashCode();
         }
         return super.hashCode();
     }
 
-	public long length() {
-		return realFile.length();
-	}
+    public long length() {
+        return realFile.length();
+    }
 
-	public VirtualFile child(String name) {
-		return new FileSystemFile (this,name);
-	}  
+    public VirtualFile child(String name) {
+        return new FileSystemFile(this, name);
+    }
 }
