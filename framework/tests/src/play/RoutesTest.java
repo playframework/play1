@@ -1,8 +1,11 @@
 package play;
 
+import static org.junit.Assert.*;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import play.exceptions.ActionNotFoundException;
 import play.mvc.Http.Response;
 
 public class RoutesTest extends TestSupport {
@@ -15,6 +18,7 @@ public class RoutesTest extends TestSupport {
         testApp.addRoute("GET   /                               Application.index");   
         testApp.addRoute("GET   /hello                          Application.sayHello");  
         testApp.addRoute("GET   /hello/{name}                   Application.sayHelloTo"); 
+        testApp.addRoute("GET   /noaction                       Application.doesNotExist"); 
         testApp.addRoute("GET   /clients/{<[0-9]+>id}           Application.showClient"); 
         testApp.addRoute("GET   /clients/{<[0-9]+>id}/account   Application.showClientAccount"); 
         testApp.addRoute("GET   /clients/{<[0-9]+>id}/admin     admin.Clients.index"); 
@@ -121,11 +125,17 @@ public class RoutesTest extends TestSupport {
         Response response = GET("/yop");
         assertIsNotFound(response);
         //
-        testApp.addRoute("GET   /yop                          Application.yop");  
+        testApp.addRoute("GET   /yop    Application.yop");  
         sleep(1);
         response = GET("/yop");
         assertIsOk(response);
         assertContentEquals("yop", response);
-    }    
+    }   
+    
+    @Test(expected=ActionNotFoundException.class)
+    public void testActionNotFound() throws Exception {        
+        Response response = GET("/noaction");
+        fail("An ActionNotFoundException should occurs !!");
+    }   
 
 }
