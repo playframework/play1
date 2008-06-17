@@ -1,4 +1,4 @@
-package play.libs.vfs;
+package play.vfs;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +11,7 @@ import java.util.zip.ZipFile;
 import play.exceptions.UnexpectedException;
 
 public class ZFile extends VirtualFile {
+    
 	public ZipFile zip;
 	public List<ZFile> childs = new ArrayList<ZFile> ();
 	public ZipEntry entry=null;

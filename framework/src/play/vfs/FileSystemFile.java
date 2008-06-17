@@ -1,4 +1,4 @@
-package play.libs.vfs;
+package play.vfs;
 
 import java.io.File;
 import java.io.FileInputStream;

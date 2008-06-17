@@ -12,7 +12,7 @@ import play.db.DB;
 import play.db.jpa.JPA;
 import play.exceptions.UnexpectedException;
 import play.libs.Files;
-import play.libs.vfs.VirtualFile;
+import play.vfs.VirtualFile;
 import play.mvc.Router;
 import play.templates.TemplateLoader;
 

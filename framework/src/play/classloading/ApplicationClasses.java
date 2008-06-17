@@ -10,7 +10,7 @@ import play.classloading.enhancers.Enhancer;
 import play.classloading.enhancers.JPAEnhancer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer;
 import play.exceptions.UnexpectedException;
-import play.libs.vfs.VirtualFile;
+import play.vfs.VirtualFile;
 
 public class ApplicationClasses {
 

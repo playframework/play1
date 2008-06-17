@@ -3,7 +3,7 @@ package play.templates;
 import java.util.HashMap;
 import java.util.Map;
 import play.Play;
-import play.libs.vfs.VirtualFile;
+import play.vfs.VirtualFile;
 import play.exceptions.TemplateNotFoundException;
 
 public class TemplateLoader {

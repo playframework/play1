@@ -11,7 +11,7 @@ import jregex.Pattern;
 import play.Logger;
 import play.Play;
 import play.exceptions.EmptyAppException;
-import play.libs.vfs.VirtualFile;
+import play.vfs.VirtualFile;
 import play.exceptions.NoRouteFoundException;
 import play.mvc.results.NotFound;
 
