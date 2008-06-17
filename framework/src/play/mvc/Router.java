@@ -68,6 +68,10 @@ public class Router {
         throw new NotFound();
     }
 
+    public static ActionDefinition reverse(String action) {
+        return reverse(action, new HashMap<String, String>());
+    }
+    
     public static ActionDefinition reverse(String action, Map<String, String> args) {
         if (action.startsWith("controllers.")) {
             action = action.substring(12);

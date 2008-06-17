@@ -54,6 +54,12 @@ public class Http {
             return current.get();
         }
         
+        public String getBase() {
+            if(port == 80 || port == 443) {
+                return String.format("%s://%s", secure ? "https" : "http", domain);
+            }
+            return String.format("%s://%s:%s", secure ? "https" : "http", domain, port);
+        }
         
     }
 

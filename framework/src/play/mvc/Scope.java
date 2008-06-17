@@ -217,6 +217,18 @@ public class Scope {
             checkAndParse();
             return data.get(key);
         }
+        
+        public Map<String, String[]> all() {
+            return data;
+        }
+        
+        public Map<String, String> allSimple() {
+            Map<String, String> result = new HashMap<String, String>();
+            for(String key : data.keySet()) {
+                result.put(key, data.get(key)[0]);
+            }                            
+            return result;
+        }
 
         void _mergeWith(Map<String, String[]> map) {
             for (String key : map.keySet()) {

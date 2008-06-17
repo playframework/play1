@@ -6,20 +6,21 @@ import play.libs.OpenID;
 
 public class Secure extends Controller {
 	
-	@Before
+	@Before(unless={"Secure.authenticate"})
 	static void checkAuth() throws Exception {
 		System.out.println(session);
 		if(session.get("openid") == null) {
-			OpenID.verify("http://gbo.myopendid.com", "");
+			OpenID.verify("http://gbo.myopenid.com", "Secure.authenticate");
 		} 
 	}
 	
-	public static void authenticate() { 
-		
+	public static void authenticate() throws Exception  { 
+		session.put("openid", OpenID.getVerifiedID());
+		index();
 	}
 	
 	public static void index() {
-		renderText("Hello");
+		renderText("Hello %s", session.get("openid"));
 	}
 	
 }
