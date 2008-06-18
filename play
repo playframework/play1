@@ -57,7 +57,7 @@ echo "~ | '_ \\| |/ _' | || |_|"
 echo "~ |  __/|_|\\____|\\__ (_)"
 echo "~ |_|            |__/   "
 echo "~"
-echo "~ play! `cat "${PLAY_BASE}/framework/src/play/version"` - http://www.playframework.org"
+echo "~ play! `cat "${PLAY_BASE}/framework/src/play/version"`, http://www.playframework.org"
 echo "~"
 
 
@@ -320,10 +320,10 @@ if [ "$PLAY_COMMAND" = "eclipsify" ] ; then
     sed  -e "s|%PLAY_BASE%|$PLAY_BASE|g" "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp" > "$APPLICATION_PATH/$PROJECT_NAME.launch" 
     rm -rf "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp"
     echo "~ Ok, the application is ready for eclipse"
-    echo "~ Import the project into your eclipse workspace using File/Import/General/Existing project ..."
+    echo "~ Import $APPLICATION_PATH into your eclipse workspace using File/Import/General/Existing project ..."
     echo "~"
     echo "~ Use eclipsify again when you want to update eclipse configuration files."
-    echo "~ But it's saffer to delete and re-import the project into your workspace because eclipse keeps dirty caches ..."
+    echo "~ But it's saffer to delete and re-import the project into your workspace since eclipse keeps dirty caches ..."
     echo "~"
     exit    
 fi
