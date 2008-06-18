@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.ant.freeform</type>
+    <configuration>
+        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
+            <name>%APPLICATION_NAME%</name>
+        </general-data>
+        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/2">
+            <!-- Do not use Project Properties customizer when editing this file manually. -->
+            <name>%APPLICATION_NAME%</name>
+            <properties>
+                <property name="ant.script">%ANT_SCRIPT%</property>
+                <property name="application.path">%APPLICATION_PATH%</property>
+            </properties>
+            <folders>
+                <source-folder>
+                    <label>app</label>
+                    <type>java</type>
+                    <location>app</location>
+                    <encoding>UTF-8</encoding>
+                </source-folder>
+            </folders>
+            <ide-actions>
+                <action name="run">
+                    <script>${ant.script}</script>
+                    <target>run-application</target>
+                    <property name="application.path">${application.path}</property>
+                </action>
+                <action name="debug">
+                    <script>${ant.script}</script>
+                    <target>debug-application</target>
+                    <property name="application.path">${application.path}</property>
+                </action>
+            </ide-actions>
+            <view>
+                <items>
+                    <source-folder style="packages">
+                        <label>app</label>
+                        <location>app</location>
+                    </source-folder>
+                    <source-folder style="tree">
+                        <label>conf</label>
+                        <location>conf</location>
+                    </source-folder>
+                    <source-folder style="tree">
+                        <label>public</label>
+                        <location>public</location>
+                    </source-folder>                   
+                </items>
+            </view>
+            <subprojects/>
+        </general-data>
+        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
+            <compilation-unit>
+                <package-root>app</package-root>
+                <classpath mode="compile">%PLAY_CLASSPATH%</classpath>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+        </java-data>
+    </configuration>
+</project>

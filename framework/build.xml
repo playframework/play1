@@ -65,21 +65,21 @@
         </jar>
     </target>
     
-    <!-- Run or debug a fake app -->
-    
-    <target name="run-test-application" depends="clean,jar">
+    <!-- Run & Debug app -->
+        
+    <target name="run-application">
         <java classname="play.server.Server" dir="${basedir}" fork="true">
             <classpath>
                 <pathelement path="${application.path}/conf"/>
                 <path refid="project.classpath"/>                
             </classpath>
-            <sysproperty key="application.path" value="${basedir}/tests/test-application" />
+            <sysproperty key="application.path" value="${application.path}" />
             <sysproperty key="java.endorsed.dirs" value="${basedir}/endorsed" />
             <jvmarg value="-javaagent:${basedir}/play.jar" />
         </java>	
     </target>
     
-    <target name="debug-test-application" depends="clean,jar">
+    <target name="debug-application">
         <nbjpdastart addressproperty="jpda.address" name="Play! framework" transport="dt_socket">
             <classpath refid="project.classpath"/>
         </nbjpdastart>
@@ -89,7 +89,7 @@
                 <pathelement path="${application.path}/conf"/>
                 <path refid="project.classpath"/>                
             </classpath>
-            <sysproperty key="application.path" value="${basedir}/tests/test-application" />
+            <sysproperty key="application.path" value="${application.path}" />
             <sysproperty key="java.endorsed.dirs" value="${basedir}/endorsed" />
             <jvmarg value="-javaagent:${basedir}/play.jar" />
             <jvmarg value="-Xdebug"/>

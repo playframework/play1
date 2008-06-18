@@ -42,16 +42,14 @@ logo() {
 usage() {
 	logo
 	echo "~ "
-	echo "~ Usage: play {new,run,start,stop,restart,debug,pid,logs} [path] "
+	echo "~ Usage: play command [path] "
 	echo "~ "
 	echo "~ with,  new      Create a new application"                                
 	echo "~        run      Start the application in the current window"
+	echo "~        debug    Start the application under JDPA debugger"
 	echo "~        start    Start the application in background"
 	echo "~        stop     Stop the application"
-	echo "~        restart  Restart the application"
-	echo "~        debug    Start the application under JDPA debugger"
-	echo "~        pid      Show the process ID of the running application"
-	echo "~        logs     Follow application logs"
+	echo "~        help     To show more commands"
 	echo "~"
 	exit 1;
 }
@@ -195,10 +193,24 @@ elif [ "$COMMANDE" = package-plugin ] ; then
     echo "~"
     echo "~ Ok, packaging plugin $PLUGIN_NAME"
     echo "~"
-	ant -f $PLAY_BASE/framework/build.xml package-plugin -Dplugin.dir="${path}" -Dplugin.name="$PLUGIN_NAME"
+    ant -f $PLAY_BASE/framework/build.xml package-plugin -Dplugin.dir="${path}" -Dplugin.name="$PLUGIN_NAME"
     echo "~"
     echo "~ Plugin is built : `dirname ${path}`/`basename ${path}`/dist/$PLUGIN_NAME.plugin"
     echo "~"
+
+# [NETBEANSIFY]
+elif [ "$COMMANDE" = netbeansify ] ; then 
+
+   PROJECT_NAME="`cat $path/conf/application.conf | grep application.name | sed -e 's/application.name=//g'`"	
+   rm -rf "$path/nbproject"
+   mkdir "$path/nbproject"
+   sed  -e "s#%APPLICATION_NAME%#$PROJECT_NAME#g" "$PLAY_BASE/resources/nbproject/project.xml" > "$path/nbproject/project.xml.1.tmp" 
+   sed  -e "s#%ANT_SCRIPT%#$PLAY_BASE/framework/build.xml#g" "$path/nbproject/project.xml.1.tmp" > "$path/nbproject/project.xml.2.tmp" 
+   sed  -e "s#%APPLICATION_PATH%#$path#g" "$path/nbproject/project.xml.2.tmp" > "$path/nbproject/project.xml.3.tmp" 
+   sed  -e "s#%PLAY_CLASSPATH%#$CLASSPATH#g" "$path/nbproject/project.xml.3.tmp" > "$path/nbproject/project.xml" 
+   rm "$path/nbproject/project.xml.1.tmp"
+   rm "$path/nbproject/project.xml.2.tmp"
+   rm "$path/nbproject/project.xml.3.tmp"
 
 # [ECLIPSIFY]
 elif [ "$COMMANDE" = eclipsify ] ; then 
