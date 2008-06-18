@@ -1,7 +1,7 @@
 %{
         // Simple case : #{set title:'Yop' /}
         for(p in binding.getVariables().keySet()) {
-            if(p.startsWith('_') && p != '_body') {
+            if(p.startsWith('_') && p != '_body' && p != '_arg') {
                 play.templates.Template.layoutData.get().put(p.substring(1), binding.getVariables().get(p))
                 return
             }

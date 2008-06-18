@@ -156,6 +156,6 @@ public class Play {
     }
     
     public static VirtualFile getFile(String path) {
-        return VirtualFile.open(path);
+        return VirtualFile.open(applicationPath).child(path);
     }
 }
