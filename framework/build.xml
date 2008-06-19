@@ -116,8 +116,11 @@
                 <fileset dir="tests/src">
                     <include name="**/*Test.java"/>
                 </fileset>
-            </batchtest>
-            <classpath refid="project.classpath"/>                    
+            </batchtest>            
+            <classpath>
+                <pathelement path="classes"/>
+                <path refid="project.classpath"/>                
+            </classpath>               
             <formatter type="brief" usefile="false"/>
             <formatter type="xml"/>  
             <jvmarg value="-javaagent:${basedir}/play.jar" />
