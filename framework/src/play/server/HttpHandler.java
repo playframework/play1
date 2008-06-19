@@ -135,7 +135,7 @@ public class HttpHandler implements IoHandler {
             try {
                 response.setStatus(HttpResponseStatus.forId(500));
                 response.setContentType("text/html");
-                String errorHtml = TemplateLoader.load("empty.html").render(binding);
+                String errorHtml = TemplateLoader.load("errors/empty.html").render(binding);
                 response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
                 writeResponse(session, request, response);
                 return;
