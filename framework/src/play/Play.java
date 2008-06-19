@@ -76,10 +76,10 @@ public class Play {
                 if(matcher.matches()) {
                     String instance = matcher.group(1);
                     if(instance.equals(id)) {
-                        newConfiguration.put(matcher.group(2), configuration.get(key));
+                        newConfiguration.put(matcher.group(2), configuration.get(key).toString().trim());
                     }
                 } else {
-                    newConfiguration.put(key, configuration.get(key));
+                    newConfiguration.put(key, configuration.get(key).toString().trim());
                 }
             }
             configuration = newConfiguration;
