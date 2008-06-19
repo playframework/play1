@@ -117,14 +117,14 @@ public class ActionInvoker {
             String action = fullAction.substring(fullAction.lastIndexOf(".") + 1);
             Class controllerClass = Play.classloader.loadClass(controller);
             actionMethod = Java.findPublicStaticMethod(action, controllerClass);
+            if (actionMethod == null) {
+                throw new ActionNotFoundException(fullAction, new Exception("No method public static void "+action+"() was found in class "+controller));
+            }
         } catch(PlayException e) {
             throw e;
         } catch (Exception e) {
             throw new ActionNotFoundException(fullAction, e);
-        }
-        if (actionMethod == null) {
-            throw new ActionNotFoundException(fullAction);
-        }
+        }        
         return actionMethod;
     }
 }

@@ -143,6 +143,7 @@ public class HttpHandler implements IoHandler {
             }
         }
         binding.put("exception", e);
+        // TODO : use error.txt for AJAX Request and non HTML Request
         response.setStatus(HttpResponseStatus.forId(500));
         response.setContentType("text/html");
         try {
