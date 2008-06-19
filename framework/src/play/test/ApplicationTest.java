@@ -15,7 +15,7 @@ import play.mvc.Http.Response;
 public abstract class ApplicationTest {
     // Application management
     public static void start(File root) {
-        Play.init(root);
+        Play.init(root, "test");
     }
 
     public static void stop() {

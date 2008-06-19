@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Play! command line script
 #
@@ -49,6 +49,16 @@ absname "`dirname $0`"
 PLAY_BASE="${return}"
 
 
+# ~~~~~~~~~~~~~~~~~~~~~~ Which is the framework id ?
+
+PLAY_ID=""
+if [ -f $PLAY_BASE/id ]; then    
+    PLAY_ID="`cat $PLAY_BASE/id`"
+else
+	echo "" > $PLAY_BASE/id
+fi
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~ Display logo
 
 echo "~        _            _ "
@@ -58,6 +68,9 @@ echo "~ |  __/|_|\\____|\\__ (_)"
 echo "~ |_|            |__/   "
 echo "~"
 echo "~ play! `cat "${PLAY_BASE}/framework/src/play/version"`, http://www.playframework.org"
+if [ ! -z "$PLAY_ID" ]; then
+    echo "~ framework ID is $PLAY_ID"
+fi
 echo "~"
 
 
@@ -78,6 +91,7 @@ if [ "$PLAY_COMMAND" = "help" ] ; then
     echo "~        debug        Run the application under JDPA debugger"
     echo "~        eclipsify    Create eclipse configuration files for this application"
     echo "~        help         To show more commands"
+    echo "~        id           Define the framework ID"
     echo "~        logs         Follow logs of the running application"
     echo "~        netbeansify  Create netbeans configuration files for this application"
     echo "~        pid          Display the pid of the running application"
@@ -88,6 +102,30 @@ if [ "$PLAY_COMMAND" = "help" ] ; then
     echo "~"
     echo "~ Check full documentation at http://www.playframework.org/manual"
     echo "~"
+    exit
+fi
+
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~ [id] Define the framework ID
+
+if [ "$PLAY_COMMAND" = "id" ] ; then
+    if [ -z $PLAY_ID ]; then       
+        echo "~ framework ID is not set"
+    fi
+    echo -n "~ What is the new framework ID (or blank to unset) ? "
+    read id
+    if [ -z $id ]; then
+        rm $PLAY_BASE/id
+        echo "~"
+        echo "~ Ok, the framework ID is unset"
+        echo "~"
+    else
+        echo $id > $PLAY_BASE/id
+        echo "~"
+        echo "~ Ok, the framework ID is now $id"
+        echo "~"
+    fi
     exit
 fi
 
@@ -163,7 +201,7 @@ done
 if [ "$PLAY_COMMAND" = "run" ] ; then
     echo "~ Ctrl+C to break"
     echo "~ "
-    "$JAVA_PATH" -javaagent:${PLAY_BASE}/framework/play.jar -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" play.server.Server
+    "$JAVA_PATH" -javaagent:${PLAY_BASE}/framework/play.jar -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID play.server.Server
     echo 
     exit;
 fi
@@ -175,7 +213,7 @@ if [ "$PLAY_COMMAND" = "debug" ] ; then
     echo "~ Ctrl+C to break"
     echo "~ "
     echo -n "~ JPDA -> "
-    "$JAVA_PATH" -javaagent:${PLAY_BASE}/framework/play.jar -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -Dplay.debug=yes -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" play.server.Server
+    "$JAVA_PATH" -javaagent:${PLAY_BASE}/framework/play.jar -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -Dplay.debug=yes -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server
     echo
     exit;
 fi
@@ -192,7 +230,7 @@ if [ "$PLAY_COMMAND" = "start" ] ; then
 	echo "~"
 	exit 1
     else
-	"$JAVA_PATH" -javaagent:${PLAY_BASE}/framework/play.jar -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" play.server.Server > "${APPLICATION_PATH}"/logs/system.out 2>&1 &
+	"$JAVA_PATH" -javaagent:${PLAY_BASE}/framework/play.jar -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server > "${APPLICATION_PATH}"/logs/system.out 2>&1 &
 	echo "~ Ok, $APPLICATION_PATH is started"
 	echo "~ Output is redirected to ${APPLICATION_PATH}/logs/system.out ..."
 	echo $! > "${APPLICATION_PATH}/server.pid"
@@ -267,7 +305,7 @@ if [ "$PLAY_COMMAND" = "restart" ] ; then
 	echo "~"
 	exit 1
     fi
-    "$JAVA_PATH" -javaagent:${PLAY_BASE}/framework/play.jar -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" play.server.Server > "${APPLICATION_PATH}"/logs/system.out 2>&1 &
+    "$JAVA_PATH" -javaagent:${PLAY_BASE}/framework/play.jar -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server > "${APPLICATION_PATH}"/logs/system.out 2>&1 &
     echo "~ $APPLICATION_PATH is started"
     echo "~ Output is redirected to ${APPLICATION_PATH}/logs/system.out ..."
     echo $! > "${APPLICATION_PATH}/server.pid"
@@ -316,9 +354,11 @@ if [ "$PLAY_COMMAND" = "eclipsify" ] ; then
 	fi;
     done;
     sed  -e "s|%PROJECTCLASSPATH%|${XML}|g" "$PLAY_BASE/resources/eclipse/.classpath" > "$APPLICATION_PATH/.classpath"  
-    sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/play.launch" > "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp" 
-    sed  -e "s|%PLAY_BASE%|$PLAY_BASE|g" "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp" > "$APPLICATION_PATH/$PROJECT_NAME.launch" 
-    rm -rf "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp"
+    sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/play.launch" > "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp1" 
+    sed  -e "s|%PLAY_ID%|$PLAY_ID|g" "$PLAY_BASE/resources/eclipse/play.launch.tmp1 > "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp2" 
+    sed  -e "s|%PLAY_BASE%|$PLAY_BASE|g" "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp2" > "$APPLICATION_PATH/$PROJECT_NAME.launch" 
+    rm -rf "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp1"
+    rm -rf "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp2"
     echo "~ Ok, the application is ready for eclipse"
     echo "~ Import $APPLICATION_PATH into your eclipse workspace using File/Import/General/Existing project ..."
     echo "~"

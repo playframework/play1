@@ -103,7 +103,7 @@ public class ApplicationClassloader extends ClassLoader {
             if(applicationClass.javaClass != null) {
                 newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.enhancedByteCode));
             }
-            Logger.debug("%sms to compile & enhance %s", System.currentTimeMillis()-start, applicationClass.name);
+            Logger.trace("%sms to compile & enhance %s", System.currentTimeMillis()-start, applicationClass.name);
         }
         try {
             HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));

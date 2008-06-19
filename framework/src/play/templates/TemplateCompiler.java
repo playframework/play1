@@ -16,7 +16,7 @@ public class TemplateCompiler {
             Template template = new Template(name, source);
             long start = System.currentTimeMillis();
             new Compiler().hop(template);
-            Logger.debug("%sms to parse template %s", System.currentTimeMillis()-start, file.relativePath());
+            Logger.trace("%sms to parse template %s", System.currentTimeMillis()-start, file.relativePath());
             return template;
         } catch (PlayException e) {
             throw e;

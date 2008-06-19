@@ -68,7 +68,7 @@ public class Template {
                     needJavaRecompilation = false;
                 }
                 Play.classloader.loadingTracer.set(null);
-                Logger.debug("%sms to compile template %s", System.currentTimeMillis()-start, name);
+                Logger.trace("%sms to compile template %s", System.currentTimeMillis()-start, name);
             } catch (UnsupportedEncodingException e) {
                 throw new UnexpectedException(e);
             } catch (MultipleCompilationErrorsException e) {
@@ -107,7 +107,7 @@ public class Template {
         try {
             long start = System.currentTimeMillis();
             t.run();
-            Logger.debug("%sms to render template %s", System.currentTimeMillis()-start, name);
+            Logger.trace("%sms to render template %s", System.currentTimeMillis()-start, name);
         } catch(NoRouteFoundException e ) {
             throwException(e);
         } catch(PlayException e) {

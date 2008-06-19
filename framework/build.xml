@@ -1,22 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="play! framework" default="jar" basedir=".">
-    
+
     <path id="project.classpath">
+        <pathelement path="play.jar"/>
         <fileset dir="lib">
             <include name="*.jar"/>                        
-        </fileset>
-        <pathelement path="play.jar"/>
+        </fileset>        
     </path>
-    
-    <path id="test.classpath">
-        <fileset dir="lib">
-            <include name="**/*.jar"/>
-            <exclude name="ant/*.jar"/>
-        </fileset>
-        <pathelement path="classes/"/>
-    </path>  
-    
+        
     <target name="clean" description="clean resources">
         <delete dir="classes" /> 
         <delete dir="dist" />
@@ -68,12 +60,14 @@
     <!-- Run & Debug app -->
         
     <target name="run-application">
+        <loadfile property="play.id" srcFile="../id" failonerror="false" quiet="true" />            
         <java classname="play.server.Server" dir="${basedir}" fork="true">
             <classpath>
                 <pathelement path="${application.path}/conf"/>
                 <path refid="project.classpath"/>                
             </classpath>
             <sysproperty key="application.path" value="${application.path}" />
+            <sysproperty key="play.id" value="${play.id}" />
             <sysproperty key="java.endorsed.dirs" value="${basedir}/endorsed" />
             <jvmarg value="-javaagent:${basedir}/play.jar" />
         </java>	
@@ -84,12 +78,15 @@
             <classpath refid="project.classpath"/>
         </nbjpdastart>
         <echo message="Debugger is listening at ${jpda.address}" />
+        <loadfile property="play.id" srcFile="../id" failonerror="false" quiet="true" />  
         <java classname="play.server.Server" dir="${basedir}" fork="true">
             <classpath>
                 <pathelement path="${application.path}/conf"/>
                 <path refid="project.classpath"/>                
             </classpath>
             <sysproperty key="application.path" value="${application.path}" />
+            <sysproperty key="play.id" value="${play.id}" />
+            <sysproperty key="play.debug" value="${play.debug}" />
             <sysproperty key="java.endorsed.dirs" value="${basedir}/endorsed" />
             <jvmarg value="-javaagent:${basedir}/play.jar" />
             <jvmarg value="-Xdebug"/>
@@ -120,7 +117,7 @@
                     <include name="**/*Test.java"/>
                 </fileset>
             </batchtest>
-            <classpath refid="test.classpath"/>                    
+            <classpath refid="project.classpath"/>                    
             <formatter type="brief" usefile="false"/>
             <formatter type="xml"/>  
             <jvmarg value="-javaagent:${basedir}/play.jar" />
@@ -144,7 +141,7 @@
         <mkdir dir="${basedir}/tests-tmp" />
         <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true" tempdir="${basedir}/tests-tmp">
             <test name="${testclass}" todir="tests-results" />
-            <classpath refid="test.classpath"/>                    
+            <classpath refid="project.classpath"/>                    
             <formatter type="brief" usefile="false"/> 
             <formatter type="xml"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>  
@@ -159,7 +156,7 @@
         <mkdir dir="${basedir}/tests-tmp" />
         <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true" tempdir="${basedir}/tests-tmp" >
             <test name="${testclass}" todir="tests-results" />            
-            <classpath refid="test.classpath"/>                    
+            <classpath refid="project.classpath"/>                    
             <formatter type="brief" usefile="false"/> 
             <formatter type="xml"/>
             <jvmarg value="-javaagent:${basedir}/play.jar" />

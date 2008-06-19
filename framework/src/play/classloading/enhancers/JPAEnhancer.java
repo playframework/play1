@@ -17,7 +17,7 @@ public class JPAEnhancer extends Enhancer {
         }
     	
         String entityName = ctClass.getSimpleName();
-        Logger.debug("Enhacing "+entityName);
+        Logger.trace("Enhacing "+entityName);
         
         // Ajoute le constructeur par défaut (obligatoire pour la peristence)
         try {

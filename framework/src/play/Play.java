@@ -6,6 +6,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.log4j.Level;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
 import play.db.DB;
@@ -20,6 +23,7 @@ public class Play {
     
     // Internal
     public static boolean started = false;
+    public static String id;
     
     // Application
     public static File applicationPath = null;  
@@ -29,10 +33,13 @@ public class Play {
     public static List<VirtualFile> javaPath;
     public static List<VirtualFile> templatesPath;
     public static List<VirtualFile> routes;
+    public static VirtualFile conf;
     public static Properties configuration;
     public static String applicationName;
+    public static Long startedAt;
     
-    public static void init(File root) {
+    public static void init(File root, String id) {
+        Play.id = id;
         Play.started = false;
         Play.applicationPath = root;
         try {
@@ -57,7 +64,26 @@ public class Play {
             }
             Thread.currentThread().setContextClassLoader(Play.classloader);
             VirtualFile appRoot = VirtualFile.open(applicationPath);
-            configuration = Files.readUtf8Properties(appRoot.child("conf/application.conf").inputstream());
+            conf = appRoot.child("conf/application.conf");
+            configuration = Files.readUtf8Properties(conf.inputstream());
+            // Ok, check for instance specifics configuration
+            Properties newConfiguration = new Properties();
+            Pattern pattern = Pattern.compile("^%([a-zA-Z0-9_\\-]+)\\.(.*)$");
+            for(Object key : configuration.keySet()) {
+                Matcher matcher = pattern.matcher(key+"");
+                if(matcher.matches()) {
+                    String instance = matcher.group(1);
+                    if(instance.equals(id)) {
+                        newConfiguration.put(matcher.group(2), configuration.get(key));
+                    }
+                } else {
+                    newConfiguration.put(key, configuration.get(key));
+                }
+            }
+            configuration = newConfiguration;
+            // XLog
+            String logLevel = configuration.getProperty("application.log", "INFO");
+            Logger.log4j.setLevel(Level.toLevel(logLevel));
             applicationName = configuration.getProperty("application.name", "(no name)");
             javaPath = new ArrayList<VirtualFile>();
             javaPath.add( appRoot.child("app"));
@@ -74,8 +100,9 @@ public class Play {
             DB.init();
             JPA.init();
             started = true;
-            Logger.debug("%sms to start the application", System.currentTimeMillis()-start);
-            Logger.info("Application '%s' is started !", applicationName);
+            Logger.trace("%sms to start the application", System.currentTimeMillis()-start);
+            Logger.info("Application '%s' is ready !", applicationName);
+            startedAt = System.currentTimeMillis();
         } catch(Exception e) {
             throw new UnexpectedException(e);
         }
@@ -88,6 +115,10 @@ public class Play {
    
     protected static synchronized void detectChanges() {
         try {
+            if(conf.lastModified() > startedAt) {
+                start();
+                return;
+            }
             Router.detectChanges();
             classloader.detectChanges();            
         } catch (UnsupportedOperationException e) {

@@ -37,7 +37,7 @@ public class DB {
                 datasource = ds;
                 Logger.info("The database is ready");
             } catch (Exception e) {
-                Logger.debug(e);
+                Logger.error(e, "Cannot connected to the database");
             }
         }
     }

@@ -49,7 +49,7 @@ public class HttpHandler implements IoHandler {
         MutableHttpResponse minaResponse = new DefaultHttpResponse();
         URI uri = minaRequest.getRequestUri();
         if (uri.getPath().startsWith("/public/")) {
-            Logger.debug("Serve static: " + uri.getPath());
+            Logger.trace("Serve static: " + uri.getPath());
             serveStatic(session, minaRequest, minaResponse);
         } else {
             Invoker.invoke(new MinaInvocation(session, minaRequest, minaResponse));
@@ -68,14 +68,14 @@ public class HttpHandler implements IoHandler {
                 attachFile(session, response, target);
             } else {
                 long last = target.lastModified();
-                String etag = last+"-"+target.hashCode();
+                String etag = last + "-" + target.hashCode();
                 if (!isModified(etag, last, request)) {
-                    response.setHeader("Etag",etag);
+                    response.setHeader("Etag", etag);
                     response.setStatus(HttpResponseStatus.NOT_MODIFIED);
                 } else {
                     response.setHeader("Last-Modified", formatter.format(new Date(last)));
-                    response.setHeader("Cache-Control","max-age=3600");
-                    response.setHeader("Etag",etag);
+                    response.setHeader("Cache-Control", "max-age=3600");
+                    response.setHeader("Etag", etag);
                     attachFile(session, response, target);
                 }
             }
@@ -83,34 +83,35 @@ public class HttpHandler implements IoHandler {
         }
     }
 
-    public static void attachFile (IoSession session, MutableHttpResponse response, File target) throws IOException {
+    public static void attachFile(IoSession session, MutableHttpResponse response, File target) throws IOException {
         RandomAccessFile raf = new RandomAccessFile(target, "r");
         response.setStatus(HttpResponseStatus.OK);
         session.setAttribute("file", raf);
-        response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, ""+raf.length());
+        response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + raf.length());
         response.setHeader(HttpHeaderConstants.KEY_TRANSFER_CODING, "pppp");
     }
-    
-    public static boolean isModified (String etag, long last, HttpRequest request) {
-       if (! (request.getHeaders().containsKey("If-None-Match") && request.getHeaders().containsKey("If-Modified-Since")))
-           return true;
-       else {
-           String browserEtag = request.getHeader("If-None-Match");
-           if (!browserEtag.equals(etag))
-               return true;
-           else {
+
+    public static boolean isModified(String etag, long last, HttpRequest request) {
+        if (!(request.getHeaders().containsKey("If-None-Match") && request.getHeaders().containsKey("If-Modified-Since"))) {
+            return true;
+        } else {
+            String browserEtag = request.getHeader("If-None-Match");
+            if (!browserEtag.equals(etag)) {
+                return true;
+            } else {
                 try {
                     Date browserDate = formatter.parse(request.getHeader("If-Modified-Since"));
-                    if (browserDate.getTime()>=last)
+                    if (browserDate.getTime() >= last) {
                         return false;
+                    }
                 } catch (ParseException ex) {
                     Logger.error("Can't parse date", ex);
                 }
                 return true;
-           }
-       }
+            }
+        }
     }
-        
+
     public static void serve404(IoSession session, HttpRequest request, MutableHttpResponse response) {
         response.setStatus(HttpResponseStatus.NOT_FOUND);
         response.setContent(IoBuffer.wrap("Page not found".getBytes()));
@@ -119,11 +120,11 @@ public class HttpHandler implements IoHandler {
 
     public static void serve500(Exception e, IoSession session, HttpRequest request, MutableHttpResponse response) {
         Map<String, Object> binding = new HashMap<String, Object>();
-        if(!(e instanceof PlayException)) {
+        if (!(e instanceof PlayException)) {
             e = new play.exceptions.UnexpectedException(e);
         }
         // Empty app : 
-        if(e instanceof EmptyAppException) {
+        if (e instanceof EmptyAppException) {
             try {
                 response.setStatus(HttpResponseStatus.forId(500));
                 response.setContentType("text/html");
@@ -170,31 +171,30 @@ public class HttpHandler implements IoHandler {
     }
 
     public void messageSent(IoSession session, Object message) throws Exception {
-    	if (message instanceof DefaultHttpResponse) {
-    		if (session.getAttribute("file")!=null) {
-    			FileChannel channel = ((RandomAccessFile) session.getAttribute("file")).getChannel();
-    			WriteFuture future = session.write(channel);
-    			future.addListener(new IoFutureListener<IoFuture> () {
-					public void operationComplete(IoFuture future) {
-						RandomAccessFile raf = (RandomAccessFile) future.getSession().getAttribute("file");
-						future.getSession().removeAttribute("file");
-						try {
-							raf.close();
-						} catch (IOException e) {
-							Logger.debug(e);
-						}
-					}
-    			});
-    		}
-    	}
+        if (message instanceof DefaultHttpResponse) {
+            if (session.getAttribute("file") != null) {
+                FileChannel channel = ((RandomAccessFile) session.getAttribute("file")).getChannel();
+                WriteFuture future = session.write(channel);
+                future.addListener(new IoFutureListener<IoFuture>() {
+
+                    public void operationComplete(IoFuture future) {
+                        RandomAccessFile raf = (RandomAccessFile) future.getSession().getAttribute("file");
+                        future.getSession().removeAttribute("file");
+                        try {
+                            raf.close();
+                        } catch (IOException e) {
+                            Logger.error(e, "Unexpected error");
+                        }
+                    }
+                });
+            }
+        }
     }
 
     public void sessionClosed(IoSession session) throws Exception {
-
     }
 
     public void sessionCreated(IoSession session) throws Exception {
-
     }
 
     public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
@@ -244,10 +244,11 @@ public class HttpHandler implements IoHandler {
                 request.contentType = "text/html";
             }
             request.method = minaRequest.getMethod().toString();
-            if (minaRequest.getFileContent()==null)
-            	request.body = buffer.asInputStream();
-            else
-            	request.body = new FileInputStream (minaRequest.getFileContent());
+            if (minaRequest.getFileContent() == null) {
+                request.body = buffer.asInputStream();
+            } else {
+                request.body = new FileInputStream(minaRequest.getFileContent());
+            }
             request.domain = ((InetSocketAddress) session.getLocalAddress()).getHostName();
             request.port = ((InetSocketAddress) session.getLocalAddress()).getPort();
             request.secure = false;
@@ -263,19 +264,19 @@ public class HttpHandler implements IoHandler {
 
             for (Cookie cookie : minaRequest.getCookies()) {
                 Http.Cookie playCookie = new Http.Cookie();
-                playCookie.name=cookie.getName();
-                playCookie.path=cookie.getPath();
-                playCookie.secure=cookie.isSecure();
-                playCookie.value=cookie.getValue();
+                playCookie.name = cookie.getName();
+                playCookie.path = cookie.getPath();
+                playCookie.secure = cookie.isSecure();
+                playCookie.value = cookie.getValue();
                 request.cookies.put(playCookie.name, playCookie);
             }
-            
+
             Response response = new Response();
             response.out = new ByteArrayOutputStream();
 
             ActionInvoker.invoke(request, response);
             response.out.flush();
-            Logger.debug("Invoke: " + uri.getPath() + ": " + response.status);
+            Logger.trace("Invoke: " + uri.getPath() + ": " + response.status);
             if (response.status == 404) {
                 HttpHandler.serve404(session, minaRequest, minaResponse);
                 return;
@@ -296,20 +297,22 @@ public class HttpHandler implements IoHandler {
             }
 
             Map<String, Http.Cookie> cookies = response.cookies;
-            for(String key : cookies.keySet()) {
+            for (String key : cookies.keySet()) {
                 Http.Cookie cookie = cookies.get(key);
-                DefaultCookie c = new DefaultCookie(cookie.name,cookie.value);
+                DefaultCookie c = new DefaultCookie(cookie.name, cookie.value);
                 c.setSecure(cookie.secure);
                 c.setPath(cookie.path);
                 minaResponse.addCookie(c);
             }
-            if (!response.headers.containsKey("cache-control"))
+            if (!response.headers.containsKey("cache-control")) {
                 minaResponse.setHeader("Cache-Control", "no-cache");
+            }
             HttpHandler.writeResponse(session, minaRequest, minaResponse);
         }
     }
-    
     public static SimpleDateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+    
+
     static {
         formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
