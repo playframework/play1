@@ -235,6 +235,9 @@ public class HttpHandler implements IoHandler {
         }
 
         public void execute() throws Exception {
+            if(session.isClosing()) {
+                return;
+            }
             URI uri = minaRequest.getRequestUri();
             IoBuffer buffer = (IoBuffer) minaRequest.getContent();
             Request request = new Request();

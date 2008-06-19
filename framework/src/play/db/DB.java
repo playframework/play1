@@ -35,7 +35,7 @@ public class DB {
                 ds.setMaxPoolSize(30);
                 ds.setMinPoolSize(10);
                 datasource = ds;
-                Logger.info("The database is ready");
+                Logger.debug("The database is ready");
             } catch (Exception e) {
                 Logger.error(e, "Cannot connected to the database");
             }

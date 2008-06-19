@@ -54,12 +54,14 @@ public class Play {
             throw new UnexpectedException(e);
         }
         start();
+        Logger.info("Application '%s' is ready !", applicationName);
     }
 
     public static synchronized void start() {
         try {
             long start = System.currentTimeMillis();
             if(started) {
+                Logger.debug("Reloading ...");
                 stop();
             }
             Thread.currentThread().setContextClassLoader(Play.classloader);
@@ -100,8 +102,7 @@ public class Play {
             DB.init();
             JPA.init();
             started = true;
-            Logger.trace("%sms to start the application", System.currentTimeMillis()-start);
-            Logger.info("Application '%s' is ready !", applicationName);
+            Logger.trace("%sms to start the application", System.currentTimeMillis()-start);            
             startedAt = System.currentTimeMillis();
         } catch(Exception e) {
             throw new UnexpectedException(e);
