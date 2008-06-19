@@ -114,7 +114,14 @@ public class HttpHandler implements IoHandler {
 
     public static void serve404(IoSession session, HttpRequest request, MutableHttpResponse response) {
         response.setStatus(HttpResponseStatus.NOT_FOUND);
-        response.setContent(IoBuffer.wrap("Page not found".getBytes()));
+        response.setContentType("text/html");
+        Map<String, Object> binding = new HashMap<String, Object>();
+        String errorHtml = TemplateLoader.load("errors/404.html").render(binding);
+        try {
+            response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
+        } catch (UnsupportedEncodingException fex) {
+            fex.printStackTrace();
+        }
         writeResponse(session, request, response);
     }
 
@@ -128,7 +135,7 @@ public class HttpHandler implements IoHandler {
             try {
                 response.setStatus(HttpResponseStatus.forId(500));
                 response.setContentType("text/html");
-                String errorHtml = TemplateLoader.load("templates/empty.html").render(binding);
+                String errorHtml = TemplateLoader.load("empty.html").render(binding);
                 response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
                 writeResponse(session, request, response);
                 return;
@@ -147,7 +154,7 @@ public class HttpHandler implements IoHandler {
         response.setStatus(HttpResponseStatus.forId(500));
         response.setContentType("text/html");
         try {
-            String errorHtml = TemplateLoader.load("templates/error.html").render(binding);
+            String errorHtml = TemplateLoader.load("errors/500.html").render(binding);
             response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
             writeResponse(session, request, response);
             e.printStackTrace();
