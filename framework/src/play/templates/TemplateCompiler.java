@@ -34,7 +34,8 @@ public class TemplateCompiler {
         Parser.Token state;
         Stack<Tag> tagsStack = new Stack<Tag>();
         int tagIndex;
-
+        boolean skipLineBreak;
+        
         static class Tag {
 
             String name;
@@ -102,12 +103,18 @@ public class TemplateCompiler {
         }
 
         void plain() {
-            String text = parser.getToken().replaceAll("\"", "\\\\\"").replace("$", "\\$");
+            String text = parser.getToken().replace("\\", "\\\\").replaceAll("\"", "\\\\\"").replace("$", "\\$");
+            if(skipLineBreak && text.startsWith("\n")) {
+                text = text.substring(1);
+            }
+            skipLineBreak = false;
             if (text.indexOf("\n") > -1) {
-                String[] lines = text.split("\n");
+                String[] lines = text.split("\n", 10000);
                 for (int i = 0; i < lines.length; i++) {
                     if (i == lines.length - 1 && !text.endsWith("\n")) {
                         print("\tout.print(\"");
+                    } else if(i == lines.length - 1 && lines[i].equals("")) {
+                        continue;
                     } else {
                         print("\tout.println(\"");
                     }
@@ -139,6 +146,7 @@ public class TemplateCompiler {
                 markLine(parser.getLine());
                 println();
             }
+            skipLineBreak = true;
         }
 
         void expr() {
@@ -194,6 +202,8 @@ public class TemplateCompiler {
                 markLine(parser.getLine());
                 println();
             }
+            skipLineBreak = true;
+            
         }
 
         void endTag() {
@@ -228,6 +238,7 @@ public class TemplateCompiler {
                 println();
             }
             tagIndex--;
+            skipLineBreak = true;
         }  
         
         // Writer

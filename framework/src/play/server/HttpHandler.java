@@ -113,6 +113,7 @@ public class HttpHandler implements IoHandler {
     }
 
     public static void serve404(IoSession session, HttpRequest request, MutableHttpResponse response) {
+        Logger.warn("404 -> %s %s", request.getMethod(), request.getRequestUri());
         response.setStatus(HttpResponseStatus.NOT_FOUND);
         response.setContentType("text/html");
         Map<String, Object> binding = new HashMap<String, Object>();

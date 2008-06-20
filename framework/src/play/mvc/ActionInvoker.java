@@ -33,12 +33,15 @@ public class ActionInvoker {
 
             // 2. Find the action method
             Method actionMethod = getActionMethod(request.action);
+            Controller.class.getField("params").set(null, Scope.Params.current());
             
             // 3. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);
+            
+            // 4. Easy debugging ...
             Scope.Params.current()._mergeWith(DataParser.parsers.get("application/x-www-form-urlencoded").parse(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
             
-            // 4. Invoke the action
+            // 5. Invoke the action
             try {
                 // @Before
                 List<Method> befores = Java.findAllAnnotatedMethods(actionMethod.getDeclaringClass(), Before.class);

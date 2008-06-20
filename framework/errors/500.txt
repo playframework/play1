@@ -11,6 +11,6 @@ In ${exception.sourceFile} (around line ${exception.lineNumber})
     to = exception.lineNumber + 5  < exception.source.size() ? exception.lineNumber + 5 : exception.source.size()-1          
 }%
 #{list items:exception.source, as:'line', start:from, end:to}
-${exception.lineNumber == line_index ? '>':' '} ${line_index}: ${line}
+  ${exception.lineNumber == line_index ? '>':' '} ${line_index}: ${line}
 #{/list}
 #{/if}

@@ -219,10 +219,12 @@ public class Scope {
         }
         
         public Map<String, String[]> all() {
+            checkAndParse();
             return data;
         }
         
         public Map<String, String> allSimple() {
+            checkAndParse();
             Map<String, String> result = new HashMap<String, String>();
             for(String key : data.keySet()) {
                 result.put(key, data.get(key)[0]);
@@ -240,6 +242,28 @@ public class Scope {
             for (String key : map.keySet()) {
                 Utils.Maps.mergeValueInMap(data, key, map.get(key));
             }
+        }
+        
+        public String urlEncode() {
+            checkAndParse();
+            StringBuffer ue = new StringBuffer();
+            for(String key : data.keySet()) {
+                if(key.equals("body")) {
+                    continue;
+                }
+                String[] values = data.get(key);
+                for(String value : values) {
+                    try {
+                        ue.append(URLEncoder.encode(key, "utf-8"));
+                        ue.append("=");
+                        ue.append(URLEncoder.encode(value, "utf-8"));
+                        ue.append("&");
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return ue.toString();
         }
     }
 

@@ -18,12 +18,12 @@ import play.templates.TemplateLoader;
 
 public abstract class Controller {
     
-    public static final Http.Request request = null;
-    public static final Response response = null;
-    public static final Scope.Session session = null;
-    public static final Scope.Flash flash = null;
-    public static final Scope.Params params = null;
-    public static final Scope.RenderArgs renderArgs = null;
+    public static Http.Request request = null;
+    public static Response response = null;
+    public static Scope.Session session = null;
+    public static Scope.Flash flash = null;
+    public static Scope.Params params = null;
+    public static Scope.RenderArgs renderArgs = null;
     
     protected static void renderText(CharSequence text) {
         throw new RenderText(text);

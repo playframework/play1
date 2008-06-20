@@ -73,6 +73,7 @@ public class ControllersEnhancer extends Enhancer {
     static boolean isThreadedFieldAccess(CtField field) {
         if(field.getDeclaringClass().getName().equals("play.mvc.Controller")) {
             return field.getName().equals("params") 
+                || field.getName().equals("request") 
                 || field.getName().equals("response") 
                 || field.getName().equals("session")
                 || field.getName().equals("params")
