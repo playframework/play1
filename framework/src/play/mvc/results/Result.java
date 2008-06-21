@@ -4,6 +4,13 @@ import play.mvc.Http;
 
 public abstract class Result extends RuntimeException {
     
+    public Result() {
+    }
+    
+    public Result(String description) {
+        super(description);
+    }
+    
     public abstract void apply(Http.Request request, Http.Response response);
     
     protected void setContentTypeIfNotSet(Http.Response response, String contentType) {

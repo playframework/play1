@@ -97,6 +97,7 @@ if [ "$PLAY_COMMAND" = "help" ] ; then
     echo "~        pid          Display the pid of the running application"
     echo "~        run          Run the application in the current window"
     echo "~        start        Start the application in background"
+    echo "~        statistics   Display project statistics"
     echo "~        stop         Stop the application"  
     echo "~        test         Run all tests"
     echo "~"
@@ -202,6 +203,17 @@ if [ "$PLAY_COMMAND" = "run" ] ; then
     echo "~ Ctrl+C to break"
     echo "~ "
     "$JAVA_PATH" -javaagent:${PLAY_BASE}/framework/play.jar -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID play.server.Server
+    echo 
+    exit;
+fi
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~ [test] Run the application tests
+
+if [ "$PLAY_COMMAND" = "test" ] ; then
+    echo "~ Running application tests"
+    echo "~ "
+    "$JAVA_PATH" -javaagent:${PLAY_BASE}/framework/play.jar -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID play.test.TestRunner
     echo 
     exit;
 fi
@@ -366,6 +378,16 @@ if [ "$PLAY_COMMAND" = "eclipsify" ] ; then
     echo "~ But it's saffer to delete and re-import the project into your workspace since eclipse keeps dirty caches ..."
     echo "~"
     exit    
+fi
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~ [statistics] Display project statistics
+
+if [ "$PLAY_COMMAND" = "statistics" ] ; then
+    PROJECT_NAME="`cat $APPLICATION_PATH/conf/application.conf | grep application.name | sed -e 's/application.name=//g'`"	
+    echo "~ Project name is $PROJECT_NAME"
+    echo "~"    
+    exit   
 fi
 
 

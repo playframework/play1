@@ -8,7 +8,11 @@ import play.test.ApplicationTest;
 public abstract class TestSupport extends ApplicationTest {
     
     public static void start(TestApp app) {
-        start(app.root);
+        Play.init(app.root, "test");
+    }
+    
+    public static void stop() {
+        Play.stop();
     }
     
     public static TestApp createApp() throws IOException {

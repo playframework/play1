@@ -5,22 +5,13 @@ import static org.junit.Assert.*;
 import java.io.UnsupportedEncodingException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import play.Invoker;
-import play.Play;
 import play.mvc.ActionInvoker;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
 public abstract class ApplicationTest {
-    // Application management
-    public static void start(File root) {
-        Play.init(root, "test");
-    }
 
-    public static void stop() {
-        Play.stop();
-    }
     // Requests
     public static Response GET(String url) throws Exception {
         Request request = newRequest();

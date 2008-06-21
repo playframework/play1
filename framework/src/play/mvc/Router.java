@@ -62,14 +62,28 @@ public class Router {
             throw new EmptyAppException();
         }
         for (Route route : routes) {
-            Map<String, String> args = route.matches(request);
+            Map<String, String> args = route.matches(request.method, request.path);
             if (args != null) {
                 request.routeArgs = args;
                 request.action = route.action;
                 return;
             }
         }
-        throw new NotFound();
+        throw new NotFound(request.method, request.path);
+    }
+    
+    public static Map<String, String> route(String method, String path) {
+        if(routes.isEmpty()) {
+            throw new EmptyAppException();
+        }
+        for (Route route : routes) {
+            Map<String, String> args = route.matches(method, path);
+            if (args != null) {
+                args.put("action", route.action);                
+                return args;
+            }
+        }
+        return new HashMap<String, String>();
     }
 
     public static ActionDefinition reverse(String action) {
@@ -158,9 +172,9 @@ public class Router {
             this.pattern = new Pattern(patternString);
         }
 
-        public Map<String, String> matches(Http.Request request) {
-            if (method == null || method.equals("*") || method.equalsIgnoreCase(request.method)) {
-                Matcher matcher = pattern.matcher(request.path);
+        public Map<String, String> matches(String method, String path) {
+            if (method == null || method.equals("*") || method.equalsIgnoreCase(method)) {
+                Matcher matcher = pattern.matcher(path);
                 if (matcher.matches()) {
                     Map<String, String> localArgs = new HashMap<String, String>();
                     for (Arg arg : args) {

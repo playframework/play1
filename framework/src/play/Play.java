@@ -99,6 +99,7 @@ public class Play {
             // Java source path
             javaPath = new ArrayList<VirtualFile>();
             javaPath.add( appRoot.child("app"));
+            javaPath.add( appRoot.child("test"));
             // Templates path
             templatesPath = new ArrayList<VirtualFile>();
             templatesPath.add(appRoot.child("app/views"));

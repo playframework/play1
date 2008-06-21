@@ -58,4 +58,11 @@ public abstract class VirtualFile {
             throw new UnexpectedException(e);
         }
     }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
+    
+    
 }

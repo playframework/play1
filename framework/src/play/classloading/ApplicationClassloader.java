@@ -37,16 +37,13 @@ public class ApplicationClassloader extends ClassLoader {
 
         // Delegate to the classic classloader
         return super.loadClass(name, resolve);
-    }
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~
-    
+    }    // ~~~~~~~~~~~~~~~~~~~~~~~
     public ThreadLocal<List<ApplicationClass>> loadingTracer = new ThreadLocal<List<ApplicationClass>>();
-    
+
     protected Class loadApplicationClass(String name) {
         ApplicationClass applicationClass = Play.classes.getApplicationClass(name);
         if (applicationClass != null) {
-            if(loadingTracer.get() != null) {
+            if (loadingTracer.get() != null) {
                 loadingTracer.get().add(applicationClass);
             }
             if (applicationClass.isCompiled()) {
@@ -100,10 +97,10 @@ public class ApplicationClassloader extends ClassLoader {
             long start = System.currentTimeMillis();
             applicationClass.compile();
             applicationClass.enhance();
-            if(applicationClass.javaClass != null) {
+            if (applicationClass.javaClass != null) {
                 newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.enhancedByteCode));
             }
-            Logger.trace("%sms to compile & enhance %s", System.currentTimeMillis()-start, applicationClass.name);
+            Logger.trace("%sms to compile & enhance %s", System.currentTimeMillis() - start, applicationClass.name);
         }
         try {
             HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
@@ -113,24 +110,31 @@ public class ApplicationClassloader extends ClassLoader {
             throw new UnexpectedException(e);
         }
     }
-    
-    
+
     public List<Class> getAllClasses() {
         List<Class> res = new ArrayList<Class>();
-        for (VirtualFile virtualFile : Play.javaPath)
-            scan(res, "", virtualFile);
+        for (VirtualFile virtualFile : Play.javaPath) {
+            res.addAll(getAllClasses(virtualFile));
+        }
         return res;
     }
     
-    private void scan (List<Class> classes, String packageName, VirtualFile current) {
+    public List<Class> getAllClasses(VirtualFile path) {
+        List<Class> res = new ArrayList<Class>();
+        scan(res, "", path);
+        return res;
+    }
+
+    private void scan(List<Class> classes, String packageName, VirtualFile current) {
         if (!current.isDirectory()) {
-             if (current.getName().endsWith(".java")) {
-                    String classname = packageName+current.getName().substring(0, current.getName().length() - 5);
-                    classes.add (loadApplicationClass(classname));
-                }
-        } else {    
-            for (VirtualFile virtualFile : current.list())
-               scan(classes, current.getName()+".", virtualFile); 
+            if (current.getName().endsWith(".java")) {
+                String classname = packageName + current.getName().substring(0, current.getName().length() - 5);                
+                classes.add(loadApplicationClass(classname));
+            }
+        } else {
+            for (VirtualFile virtualFile : current.list()) {
+                scan(classes, current.getName() + ".", virtualFile);
+            }
         }
     }
 }
