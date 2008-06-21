@@ -21,9 +21,12 @@ import play.templates.TemplateLoader;
 
 public class Play {
     
+    public enum Mode {DEV, PROD}
+    
     // Internal
     public static boolean started = false;
     public static String id;
+    public static Mode mode;
     
     // Application
     public static File applicationPath = null;  
@@ -41,7 +44,7 @@ public class Play {
     public static void init(File root, String id) {
         Play.id = id;
         Play.started = false;
-        Play.applicationPath = root;
+        Play.applicationPath = root;        
         try {
             URI uri = Play.class.getResource("/play/version").toURI();
             if (uri.getScheme().equals("jar")) {
@@ -54,6 +57,9 @@ public class Play {
             throw new UnexpectedException(e);
         }
         start();
+        if(mode == Mode.DEV) {
+            Logger.warn("You're running Play! in DEV mode");
+        }
         Logger.info("Application '%s' is ready !", applicationName);
     }
 
@@ -86,19 +92,28 @@ public class Play {
             // XLog
             String logLevel = configuration.getProperty("application.log", "INFO");
             Logger.log4j.setLevel(Level.toLevel(logLevel));
+            // Application name
             applicationName = configuration.getProperty("application.name", "(no name)");
+            // Mode
+            mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());            
+            // Java source path
             javaPath = new ArrayList<VirtualFile>();
             javaPath.add( appRoot.child("app"));
+            // Templates path
             templatesPath = new ArrayList<VirtualFile>();
             templatesPath.add(appRoot.child("app/views"));
             templatesPath.add(VirtualFile.open(new File(frameworkPath , "framework")));
+            TemplateLoader.cleanCompiledCache();
+            // Classloader
             classloader = new ApplicationClassloader();
+            // Routes definitions
             routes=new ArrayList<VirtualFile>();
             routes.add(appRoot.child("conf/routes"));
-            if (!configuration.getProperty("plugin.enable","disabled").equals("disabled"))
-            	bootstrapPlugins();
             Router.load();
-            TemplateLoader.cleanCompiledCache();
+            // Plugins
+            if (!configuration.getProperty("plugin.enable","disabled").equals("disabled")) {
+            	bootstrapPlugins();
+            }
             DB.init();
             JPA.init();
             started = true;
@@ -115,6 +130,9 @@ public class Play {
     }
    
     protected static synchronized void detectChanges() {
+        if(mode == Mode.PROD) {
+            return;
+        }
         try {
             if(conf.lastModified() > startedAt) {
                 start();

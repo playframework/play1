@@ -15,7 +15,7 @@ public class TemplateLoader {
             templates.put(file, TemplateCompiler.compile(file));
         }
         Template template = templates.get(file);
-        if(template.timestamp<file.lastModified()) {
+        if(Play.mode == Play.Mode.DEV && template.timestamp < file.lastModified()) {
             templates.put(file, TemplateCompiler.compile(file));
         }
         if(templates.get(file) == null) {

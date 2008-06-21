@@ -140,7 +140,7 @@
                     <ide-action name="build"/>
                     <ide-action name="rebuild"/>
                     <ide-action name="clean"/>
-                    <ide-action name="test"/>                    
+                    <ide-action name="test"/>
                 </context-menu>
             </view>
             <subprojects/>

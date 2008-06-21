@@ -355,7 +355,7 @@ if [ "$PLAY_COMMAND" = "eclipsify" ] ; then
     done;
     sed  -e "s|%PROJECTCLASSPATH%|${XML}|g" "$PLAY_BASE/resources/eclipse/.classpath" > "$APPLICATION_PATH/.classpath"  
     sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/play.launch" > "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp1" 
-    sed  -e "s|%PLAY_ID%|$PLAY_ID|g" "$PLAY_BASE/resources/eclipse/play.launch.tmp1 > "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp2" 
+    sed  -e "s|%PLAY_ID%|$PLAY_ID|g" "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp1" > "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp2" 
     sed  -e "s|%PLAY_BASE%|$PLAY_BASE|g" "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp2" > "$APPLICATION_PATH/$PROJECT_NAME.launch" 
     rm -rf "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp1"
     rm -rf "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp2"

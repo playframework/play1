@@ -32,14 +32,21 @@ public class ActionInvoker {
             Router.route(request);
 
             // 2. Find the action method
-            Method actionMethod = getActionMethod(request.action);
-            Controller.class.getField("params").set(null, Scope.Params.current());
+            Method actionMethod = getActionMethod(request.action);            
             
             // 3. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);
+            Scope.Params.current()._mergeWith(DataParser.parsers.get("application/x-www-form-urlencoded").parse(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
             
             // 4. Easy debugging ...
-            Scope.Params.current()._mergeWith(DataParser.parsers.get("application/x-www-form-urlencoded").parse(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
+            if(Play.mode == Play.Mode.DEV) {
+                Controller.class.getField("params").set(null, Scope.Params.current());
+                Controller.class.getField("request").set(null, Http.Request.current());
+                Controller.class.getField("response").set(null, Http.Response.current());
+                Controller.class.getField("session").set(null, Scope.Session.current());
+                Controller.class.getField("flash").set(null, Scope.Flash.current());
+                Controller.class.getField("renderArgs").set(null, Scope.RenderArgs.current());
+            }
             
             // 5. Invoke the action
             try {
