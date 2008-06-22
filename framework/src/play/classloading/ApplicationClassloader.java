@@ -50,9 +50,10 @@ public class ApplicationClassloader extends ClassLoader {
                 return applicationClass.javaClass;
             } else {
                 applicationClass.compile();
+                // If there was some inner classes, we have to enhance and define them too
                 applicationClass.enhance();
-                applicationClass.javaClass = defineClass(name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length);
-                resolveClass(applicationClass.javaClass);
+                applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length);
+                resolveClass(applicationClass.javaClass);              
                 return applicationClass.javaClass;
             }
         }

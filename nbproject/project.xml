@@ -37,7 +37,8 @@
                 </action>
                 <action name="run">
                     <script>framework/build.xml</script>
-                    <target>run-test-application</target>
+                    <target>nb-run-application</target>
+                    <property name="application.path">tests/test-application</property>
                 </action>
                 <action name="clean">
                     <script>framework/build.xml</script>
@@ -80,7 +81,7 @@
                 </action>
                 <action name="debug">
                     <script>framework/build.xml</script>
-                    <target>debug-test-application</target>
+                    <target>nb-debug</target>
                 </action>
                 <action name="debug.single">
                     <script>framework/build.xml</script>

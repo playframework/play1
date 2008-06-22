@@ -96,6 +96,9 @@ public class ApplicationClasses {
 
     // ~~ Utils
     public VirtualFile getJava(String name) {
+        if(name.contains("$")) {
+            name = name.substring(0, name.indexOf("$"));
+        }
         name = name.replace(".", "/") + ".java";
         for (VirtualFile path : Play.javaPath) {
             VirtualFile javaFile = path.child(name);
