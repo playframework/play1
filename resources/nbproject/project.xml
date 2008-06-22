@@ -20,6 +20,12 @@
                     <location>app</location>
                     <encoding>UTF-8</encoding>
                 </source-folder>
+                <source-folder>
+                    <label>test</label>
+                    <type>java</type>
+                    <location>test</location>
+                    <encoding>UTF-8</encoding>
+                </source-folder>
             </folders>
             <ide-actions>
                 <action name="run">
@@ -38,15 +44,24 @@
                     <source-folder style="packages">
                         <label>app</label>
                         <location>app</location>
+                        <excludes>views/**</excludes>
+                    </source-folder>
+                    <source-folder style="tree">
+                        <label>app/views</label>
+                        <location>app/views</location>
+                    </source-folder>
+                    <source-folder style="tree">
+                        <label>public</label>
+                        <location>public</location>
                     </source-folder>
                     <source-folder style="tree">
                         <label>conf</label>
                         <location>conf</location>
                     </source-folder>
-                    <source-folder style="tree">
-                        <label>public</label>
-                        <location>public</location>
-                    </source-folder>                   
+                    <source-folder style="packages">
+                        <label>test</label>
+                        <location>test</location>
+                    </source-folder>                    
                 </items>
                 <context-menu>
                     <ide-action name="run"/>
@@ -60,6 +75,12 @@
             <compilation-unit>
                 <package-root>app</package-root>
                 <classpath mode="compile">%PLAY_CLASSPATH%</classpath>
+                <source-level>1.5</source-level>
+                <built-to>nbproject/classes</built-to>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>test</package-root>
+                <classpath mode="compile">nbproject/classes:%PLAY_CLASSPATH%</classpath>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>

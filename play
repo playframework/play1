@@ -140,7 +140,10 @@ else
 fi
 if [ "$PLAY_COMMAND" = "new" ]; then
     if [ -d $APPLICATION_PATH ]; then
-        echo "OK" > /dev/null
+        absname $APPLICATION_PATH
+        echo "~ Oops. $return already exists"
+        echo "~"
+        exit 1
     else
         mkdir $APPLICATION_PATH
     fi

@@ -56,6 +56,7 @@ public class Play {
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
+        Logger.info("Starting %s", root.getAbsolutePath());
         start();
         if(mode == Mode.DEV) {
             Logger.warn("You're running Play! in DEV mode");

@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import org.hibernate.ejb.Ejb3Configuration;
+import play.Logger;
 import play.Play;
 import play.db.DB;
 
@@ -26,6 +27,11 @@ public class JPA {
     }
 
     public static void init(List<Class> classes, Properties p) {
+        if(DB.datasource == null) {
+            Logger.fatal("Cannot enable JPA without a valid database");
+            Play.configuration.setProperty("jpa", "disabled");
+            return;
+        }
         Ejb3Configuration cfg = new Ejb3Configuration();
         cfg.setDataSource(DB.datasource);
         cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty("jpa.ddl", "update"));
@@ -38,11 +44,13 @@ public class JPA {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        for (Class clazz : classes) {
+        for (Class clazz : classes) {            
             if (clazz.isAnnotationPresent(Entity.class)) {
                 cfg.addAnnotatedClass(clazz);
+                Logger.debug("JPA Model : %s", clazz);
             }
         }
+        Logger.info("Initializing JPA ...");
         entityManagerFactory = cfg.buildEntityManagerFactory();
     }
 

@@ -123,7 +123,7 @@ public class Template {
             layoutArgs.remove("out");
             layoutArgs.put("_isLayout", true);
             String layoutR = layout.get().render(layoutArgs);
-            return layoutR.replace("____%LAYOUT%____", writer.toString());
+            return layoutR.replace("____%LAYOUT%____", writer.toString().trim());
         }
         if(writer != null) {
             return writer.toString();

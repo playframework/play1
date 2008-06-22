@@ -1,6 +1,7 @@
 package play.test;
 
 import java.io.File;
+import java.util.List;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -22,23 +23,29 @@ public class TestRunner extends RunListener {
         boolean allOk = true;
         
         VirtualFile testPath = Play.getFile("test/application");
-        for(Class testClass : Play.classloader.getAllClasses(testPath)) {
-            Logger.info("");
-            Logger.info("Running %s ...", testClass.getSimpleName());
-            Result result = junit.run(testClass);
-            if(result.wasSuccessful()) {
-                Logger.info("OK", result.getRunCount());
-            } else {
-                Logger.error("FAILED. %s test%s failed", result.getFailureCount(), result.getFailureCount()>1 ? "s have" : " has");
-            }
-            Logger.info("");  
-            allOk = allOk && result.wasSuccessful();
-        }
+        List<Class> testClasses = Play.classloader.getAllClasses(testPath, "application");
         
-        if(allOk) {
-            Logger.info("All tests are OK"); 
-        } else {
-            Logger.error("Tests have failed"); 
+        if(testClasses.isEmpty()) {
+            Logger.info("");
+            Logger.info("No test to run"); 
+        } else {        
+            for(Class testClass : testClasses) {
+                Logger.info("");
+                Logger.info("Running %s ...", testClass.getSimpleName());
+                Result result = junit.run(testClass);
+                if(result.wasSuccessful()) {
+                    Logger.info("OK", result.getRunCount());
+                } else {
+                    Logger.error("FAILED. %s test%s failed", result.getFailureCount(), result.getFailureCount()>1 ? "s have" : " has");
+                }
+                Logger.info("");  
+                allOk = allOk && result.wasSuccessful();
+            }
+            if(allOk) {
+                Logger.info("All tests are OK"); 
+            } else {
+                Logger.error("Tests have failed"); 
+            }        
         }
         
         Play.stop();

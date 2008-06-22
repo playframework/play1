@@ -97,8 +97,7 @@ public class ControllersEnhancer extends Enhancer {
             allow.set(false);
         }
         
-        static ThreadLocal<Boolean> allow = new ThreadLocal<Boolean>();
-        
+        static ThreadLocal<Boolean> allow = new ThreadLocal<Boolean>();       
         
     }
     

@@ -121,20 +121,34 @@ public class ApplicationClassloader extends ClassLoader {
     }
     
     public List<Class> getAllClasses(VirtualFile path) {
+        return getAllClasses(path, "");
+    }
+    
+    public List<Class> getAllClasses(VirtualFile path, String basePackage) {
+        if(basePackage.length()>0 && !basePackage.endsWith(".")) {
+            basePackage += ".";
+        }
         List<Class> res = new ArrayList<Class>();
-        scan(res, "", path);
+        for(VirtualFile virtualFile : path.list()) {
+            scan(res, basePackage, virtualFile);
+        }
         return res;
     }
 
     private void scan(List<Class> classes, String packageName, VirtualFile current) {
         if (!current.isDirectory()) {
             if (current.getName().endsWith(".java")) {
-                String classname = packageName + current.getName().substring(0, current.getName().length() - 5);                
-                classes.add(loadApplicationClass(classname));
+                String classname = packageName + current.getName().substring(0, current.getName().length() - 5);      
+                Class clazz = loadApplicationClass(classname);
+                if(clazz == null) {
+                    Logger.error("%s was found but class %s cannot be loaded", current, classname);
+                } else {
+                    classes.add(clazz);
+                }
             }
         } else {
             for (VirtualFile virtualFile : current.list()) {
-                scan(classes, current.getName() + ".", virtualFile);
+                scan(classes, packageName + current.getName() + ".", virtualFile);
             }
         }
     }
