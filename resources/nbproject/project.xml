@@ -38,6 +38,11 @@
                     <target>nb-debug</target>
                     <property name="application.name">${application.name}</property>
                 </action>
+                <action name="test">
+                    <script>${ant.script}</script>
+                    <target>test-application</target>
+                    <property name="application.path">${application.path}</property>
+                </action>
             </ide-actions>
             <view>
                 <items>
@@ -75,8 +80,8 @@
             <compilation-unit>
                 <package-root>app</package-root>
                 <classpath mode="compile">%PLAY_CLASSPATH%</classpath>
-                <source-level>1.5</source-level>
-                <built-to>nbproject/classes</built-to>
+                <built-to>nbproject/classes</built-to>  
+                <source-level>1.5</source-level>                 
             </compilation-unit>
             <compilation-unit>
                 <package-root>test</package-root>

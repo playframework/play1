@@ -80,7 +80,20 @@
         <nbjpdaconnect name="${application.name}" address="8000" transport="dt_socket" />       
     </target>
     
-     <target name="test-in-nb" depends="test">
+    <target name="test-application">
+        <java classname="play.test.TestRunner" dir="${basedir}" fork="true">
+            <classpath>
+                <pathelement path="${application.path}/conf"/>
+                <path refid="project.classpath"/>                
+            </classpath>
+            <sysproperty key="application.path" value="${application.path}" />
+            <sysproperty key="play.id" value="test" />
+            <sysproperty key="java.endorsed.dirs" value="${basedir}/endorsed" />
+            <jvmarg value="-javaagent:${basedir}/play.jar" />            
+        </java>       
+    </target>
+    
+    <target name="test-in-nb" depends="test">
          <nbbrowse file="tests-results/html/index.html"/>
     </target>
     
@@ -97,7 +110,7 @@
     <target name="test" depends="compile-tests" description="run tests suite">                       
         <mkdir dir="tests-results" />
         <mkdir dir="${basedir}/tests-tmp" />
-        <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true" tempdir="${basedir}/tests-tmp">
+        <junit errorproperty="atests.failed" failureproperty="atests.failed" fork="true" showoutput="true" tempdir="${basedir}/tests-tmp">
             <batchtest todir="tests-results">
                 <fileset dir="tests/src">
                     <include name="**/*Test.java"/>
