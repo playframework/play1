@@ -8,11 +8,11 @@ public class Cache {
     private static CacheImpl cacheImpl = new LocalCacheImpl();
 
     public static Boolean add(String key, Object value, String expiration) {
-        return cacheImpl.add(key, value, Utils.Time.parseDuration(expiration));
+        return cacheImpl.add(key, value, Time.parseDuration(expiration));
     }
 
     public static Boolean add(String key, Object value) {
-        return cacheImpl.add(key, value, Utils.Time.parseDuration(null));
+        return cacheImpl.add(key, value, Time.parseDuration(null));
     }
 
     public static Object get(String key) {
