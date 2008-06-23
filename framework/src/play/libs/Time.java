@@ -9,28 +9,28 @@ public class Time {
         static Pattern minutes = Pattern.compile("^([0-9]+)mn$");
         static Pattern seconds = Pattern.compile("^([0-9]+)s$");
 
-        public static Long parseDuration(String duration) {
+        public static int parseDuration(String duration) {
             if (duration == null) {
-                return Long.MAX_VALUE;
+                return Integer.MAX_VALUE;
             }
-            Long toAdd = null;
+            int toAdd = -1;
             if (hours.matcher(duration).matches()) {
                 Matcher matcher = hours.matcher(duration);
                 matcher.matches();
-                toAdd = Long.parseLong(matcher.group(1)) * (60 * 60 * 1000);
+                toAdd = Integer.parseInt(matcher.group(1)) * (60 * 60);
             } else if (minutes.matcher(duration).matches()) {
                 Matcher matcher = minutes.matcher(duration);
                 matcher.matches();
-                toAdd = Long.parseLong(matcher.group(1)) * (60 * 1000);
+                toAdd = Integer.parseInt(matcher.group(1)) * (60);
             } else if (seconds.matcher(duration).matches()) {
                 Matcher matcher = seconds.matcher(duration);
                 matcher.matches();
-                toAdd = Long.parseLong(matcher.group(1)) * (1000);
+                toAdd = Integer.parseInt(matcher.group(1));
             }
-            if (toAdd == null) {
+            if (toAdd == -1) {
                 throw new IllegalArgumentException("Invalid duration pattern : " + duration);
             }
-            return System.currentTimeMillis() + toAdd;
+            return toAdd;
         }
         
     }

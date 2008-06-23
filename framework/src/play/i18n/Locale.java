@@ -14,7 +14,7 @@ public class Locale {
     }
     
     public static boolean set(String locale) {
-        if(Play.locales.contains(locale)) {
+        if(locale.equals("") || Play.locales.contains(locale)) {
             current.set(locale);
             return true;
         } else {

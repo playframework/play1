@@ -10,6 +10,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.log4j.Level;
+import play.cache.Cache;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
 import play.db.DB;
@@ -98,10 +99,15 @@ public class Play {
             Logger.log4j.setLevel(Level.toLevel(logLevel));
             // Locales
             locales = Arrays.asList(configuration.getProperty("application.locales", "").split(","));
+            if(locales.size() == 1 && locales.get(0).trim().equals("")) {
+                locales = new ArrayList<String>();
+            }
             // Application name
             applicationName = configuration.getProperty("application.name", "(no name)");
             // Mode
             mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
+            // Cache
+            Cache.init();
             // Java source path
             javaPath = new ArrayList<VirtualFile>();
             javaPath.add(appRoot.child("app"));
