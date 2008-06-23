@@ -2,8 +2,9 @@ package application;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
+import play.test.ApplicationTest;
 
-public class SomeTests {
+public class SomeTests extends ApplicationTest {
     
     @Test
     public void fakeTest() {
