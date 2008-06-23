@@ -126,7 +126,7 @@ public class RoutesTest extends TestSupport {
         assertIsNotFound(response);
         //
         testApp.addRoute("GET   /yop    Application.yop");  
-        sleep(1);
+        sleep(2);
         response = GET("/yop");
         assertIsOk(response);
         assertContentEquals("yop", response);

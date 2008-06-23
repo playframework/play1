@@ -140,7 +140,7 @@ public class HttpHandler implements IoHandler {
                 response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
                 writeResponse(session, request, response);
                 return;
-            } catch (Exception ex) {
+            } catch (Throwable ex) {
                 ex.printStackTrace();
                 try {
                     response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
@@ -159,7 +159,7 @@ public class HttpHandler implements IoHandler {
             response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
             writeResponse(session, request, response);
             e.printStackTrace();
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             ex.printStackTrace();
             try {
                 response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
