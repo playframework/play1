@@ -1,12 +1,14 @@
 package play.test;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.util.List;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
+import play.Invoker.Invocation;
 import play.Play;
 import play.Logger;
 import play.vfs.VirtualFile;
@@ -57,6 +59,11 @@ public class TestRunner extends RunListener {
     @Override
     public void testStarted(Description description) throws Exception {
         Logger.info("    - %s", description.getDisplayName());
+        for(Annotation a : description.getAnnotations()) {
+            if(a.annotationType().equals(Internal.class)) {
+                Invocation.before();
+            }
+        }
         lastTestHasFailed = false;
     }
 
@@ -65,12 +72,14 @@ public class TestRunner extends RunListener {
         Logger.info("    ! %s", failure.getMessage() == null ? "Oops" : failure.getMessage());
         if(!(failure.getException() instanceof AssertionError)) {
             Logger.error(failure.getException(), "    ! Exception raised is");
+            Invocation.onException(failure.getException());
         }
         lastTestHasFailed = true;
     }
 
     @Override
     public void testFinished(Description arg0) throws Exception {
+        Invocation._finally();
         if(lastTestHasFailed) {
             Logger.info("");
         }
