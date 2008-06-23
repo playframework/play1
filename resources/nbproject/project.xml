@@ -15,6 +15,11 @@
             </properties>
             <folders>
                 <source-folder>
+                    <label>play</label>
+                    <location>.</location>
+                    <encoding>UTF-8</encoding>
+                </source-folder>
+                <source-folder>
                     <label>app</label>
                     <type>java</type>
                     <location>app</location>

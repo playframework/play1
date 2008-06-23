@@ -11,6 +11,7 @@ import play.db.DB;
 import play.db.jpa.JPA;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
+import play.i18n.Locale;
 
 public class Invoker {
     public static Executor executor =null;
@@ -36,7 +37,12 @@ public class Invoker {
                 Play.detectChanges();
                 setContextClassLoader(Play.classloader);
                 LocalVariablesNamesTracer.enterMethod();
-                JPA.startTx(false); 
+                JPA.startTx(false);
+                if(Play.locales.isEmpty()) {
+                    Locale.set("");
+                } else {
+                    Locale.set(Play.locales.get(0));
+                }
                 execute();
                 JPA.closeTx(false);
             } catch (Throwable e) {

@@ -160,9 +160,7 @@ public class TemplateCompiler {
 
         void message() {
             String expr = parser.getToken().trim();
-            print("\tkey=");
-            print(expr);
-            print(";out.print('Message -> '+key)");
+            print(";out.print(messages.get(" + expr + "))");
             markLine(parser.getLine());
             println();
         }

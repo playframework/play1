@@ -33,6 +33,8 @@ import play.exceptions.TemplateExecutionException;
 import play.exceptions.TemplateExecutionException.DoBodyException;
 import play.exceptions.TemplateNotFoundException;
 import play.exceptions.UnexpectedException;
+import play.i18n.Locale;
+import play.i18n.Messages;
 import play.mvc.ActionInvoker;
 import play.mvc.Router;
 
@@ -91,6 +93,8 @@ public class Template {
             }
         }
         Binding binding = new Binding(args);
+        binding.setVariable("messages", new Messages());
+        binding.setVariable("locale", Locale.get());
         StringWriter writer = null;
         Boolean applyLayouts = false;
         if(!args.containsKey("out")) { 
@@ -98,6 +102,7 @@ public class Template {
             layout.set(null);
             writer = new StringWriter();
             binding.setProperty("out", new PrintWriter(writer));
+            currentTemplate.set(this);
         }
         if(!args.containsKey("_body") && !args.containsKey("_isLayout")) {
             layoutData.set(new HashMap());
@@ -151,6 +156,7 @@ public class Template {
     
     public static ThreadLocal<Template> layout = new ThreadLocal<Template>();
     public static ThreadLocal<Map> layoutData = new ThreadLocal<Map>();
+    public static ThreadLocal<Template> currentTemplate = new ThreadLocal<Template>();
 
     public static abstract class ExecutableTemplate extends Script {
         

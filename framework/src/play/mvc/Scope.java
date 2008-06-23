@@ -49,7 +49,7 @@ public class Scope {
                     flash.append("\u0000");
                 }
                 String flashData = URLEncoder.encode(flash.toString(), "utf-8");
-                Http.Response.current().setSessionCookie("PLAY_FLASH", flashData);
+                Http.Response.current().setCookie("PLAY_FLASH", flashData);
             } catch (Exception e) {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
@@ -151,7 +151,7 @@ public class Scope {
                 }
                 String sessionData = URLEncoder.encode(session.toString(), "utf-8");
                 String sign = Crypto.sign(sessionData, Play.getSecretKey().getBytes());
-                Http.Response.current().setSessionCookie("PLAY_SESSION", sign + "-" + sessionData);
+                Http.Response.current().setCookie("PLAY_SESSION", sign + "-" + sessionData);
             } catch (Exception e) {
                 throw new UnexpectedException("Session serializationProblem", e);
             }

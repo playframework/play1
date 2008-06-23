@@ -86,13 +86,17 @@ public class Http {
             headers.put(name, h);
         }
         
-        public void setSessionCookie(String name, String value) {
-            Cookie cookie = new Cookie();
-            cookie.name = name;
-            cookie.value = value;
-            cookies.put(name, cookie);
+        public void setCookie(String name, String value) {
+            if(cookies.containsKey(name)) {
+                cookies.get(name).value = value;
+            } else {
+                Cookie cookie = new Cookie();
+                cookie.name = name;
+                cookie.value = value;
+                cookies.put(name, cookie);
+            }
         }
-        
+                
     }
 
 }

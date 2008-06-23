@@ -13,6 +13,7 @@ import play.exceptions.JavaExecutionException;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
+import play.i18n.Locale;
 import play.libs.Java;
 
 public class ActionInvoker {
@@ -37,6 +38,7 @@ public class ActionInvoker {
             // 3. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);
             Scope.Params.current()._mergeWith(DataParser.parsers.get("application/x-www-form-urlencoded").parse(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
+            Locale.resolvefrom(request);
             
             // 4. Easy debugging ...
             if(Play.mode == Play.Mode.DEV) {
@@ -57,6 +59,9 @@ public class ActionInvoker {
                     String[] unless = before.getAnnotation(Before.class).unless();
                     boolean skip = false;
                     for(String un : unless) {
+                        if(!un.contains(".")) {
+                           un = before.getDeclaringClass().getName().substring(12) + "." + un; 
+                        }
                         if(un.equals(request.action)) {
                             skip = true;
                             break;
