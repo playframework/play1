@@ -1,6 +1,7 @@
 
 package play.mvc;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import play.Play;
@@ -11,8 +12,10 @@ import play.exceptions.PlayException;
 import play.exceptions.TemplateNotFoundException;
 import play.mvc.Http.Response;
 import play.mvc.results.Redirect;
+import play.mvc.results.RenderBinary;
 import play.mvc.results.RenderTemplate;
 import play.mvc.results.RenderText;
+import play.mvc.results.Unauthorized;
 import play.templates.Template;
 import play.templates.TemplateLoader;
 
@@ -33,8 +36,20 @@ public abstract class Controller {
         throw new RenderText(String.format(pattern.toString(), args));
     }
     
+    protected static void renderBinary(InputStream is) {
+        throw new RenderBinary(is, null);
+    }
+    
+    protected static void renderBinary(InputStream is, String name) {
+        throw new RenderBinary(is, name);
+    }
+    
     protected static void redirect(String url) {
         throw new Redirect(url);
+    }
+    
+    protected static void unauthorized(String realm) {
+        throw new Unauthorized(realm);
     }
     
     protected static void redirect(String action, Object... args) {

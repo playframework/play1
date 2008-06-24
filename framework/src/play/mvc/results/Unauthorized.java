@@ -1,0 +1,19 @@
+package play.mvc.results;
+
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
+
+public class Unauthorized extends Result {
+    
+    String realm;
+    
+    public Unauthorized(String realm) {
+        super(realm);
+        this.realm = realm;
+    }
+
+    public void apply(Request request, Response response) {
+        response.status = 401;
+        response.setHeader("WWW-Authenticate", "Basic realm=\"" + realm + "\"");
+    }
+}
