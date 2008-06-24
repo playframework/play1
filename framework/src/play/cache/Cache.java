@@ -19,17 +19,81 @@ public class Cache {
     public static void add(String key, Object value, String expiration) {
         cacheImpl.add(key, value, Time.parseDuration(expiration));
     }
+    
+    public static boolean safeAdd(String key, Object value, String expiration) {
+        return cacheImpl.safeAdd(key, value, Time.parseDuration(expiration));
+    }
 
     public static void add(String key, Object value) {
         cacheImpl.add(key, value, Time.parseDuration(null));
+    }
+    
+    public static boolean safeAdd(String key, Object value) {
+        return cacheImpl.safeAdd(key, value, Time.parseDuration(null));
+    }
+    
+    public static void set(String key, Object value, String expiration) {
+        cacheImpl.set(key, value, Time.parseDuration(expiration));
+    }
+    
+    public static boolean safeSet(String key, Object value, String expiration) {
+        return cacheImpl.safeAdd(key, value, Time.parseDuration(expiration));
+    }
+
+    public static void set(String key, Object value) {
+        cacheImpl.set(key, value, Time.parseDuration(null));
+    }
+    
+    public static boolean safeSet(String key, Object value) {
+        return cacheImpl.safeSet(key, value, Time.parseDuration(null));
+    }
+    
+    public static void replace(String key, Object value, String expiration) {
+        cacheImpl.replace(key, value, Time.parseDuration(expiration));
+    }
+    
+    public static boolean safeReplace(String key, Object value, String expiration) {
+        return cacheImpl.safeReplace(key, value, Time.parseDuration(expiration));
+    }
+
+    public static void replace(String key, Object value) {
+        cacheImpl.replace(key, value, Time.parseDuration(null));
+    }
+    
+    public static boolean safeReplace(String key, Object value) {
+        return cacheImpl.safeReplace(key, value, Time.parseDuration(null));
+    }
+    
+    public static long incr(String key, int by) {
+        return cacheImpl.incr(key, by);
+    }
+    
+    public static long incr(String key) {
+        return cacheImpl.incr(key, 1);
+    }
+    
+    public static long decr(String key, int by) {
+        return cacheImpl.decr(key, by);
+    }
+    
+    public static long decr(String key) {
+        return cacheImpl.decr(key, 1);
     }
 
     public static Object get(String key) {
         return cacheImpl.get(key);
     }
+    
+    public static Map<String,Object> get(String... key) {
+        return cacheImpl.get(key);
+    }
 
     public static void delete(String key) {
         cacheImpl.delete(key);
+    }
+    
+    public static boolean safeDelete(String key) {
+        return cacheImpl.safeDelete(key);
     }
 
     public static void clear() {
