@@ -163,17 +163,6 @@ if [ "$PLAY_COMMAND" = "id" ] ; then
 fi
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~ [secret] Generate a new secret key
-
-if [ "$PLAY_COMMAND" = "secret" ] ; then
-    echo "~ Generating secret key..."
-    secret
-    echo "~ Keep the secret : $SECRET_KEY"
-    echo "~"
-    exit;
-fi
-
-
 # ~~~~~~~~~~~~~~~~~~~~~~ Where is the application ?
 
 if [ -z "$2" ]; then
@@ -221,6 +210,20 @@ if [ ! -r "${APPLICATION_PATH}/conf/routes" ] ; then
     echo "~ Oops. ${APPLICATION_PATH} does not seem to host a valid application"
     echo "~"
     exit 1;
+fi
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~ [secret] Generate a new secret key
+
+if [ "$PLAY_COMMAND" = "secret" ] ; then
+    echo "~ Generating secret key..."
+    mv "$APPLICATION_PATH/conf/application.conf" "$APPLICATION_PATH/conf/application.conf.tmp" 
+    secret
+    sed -e "s#application.secret=.*#application.secret=$SECRET_KEY#g" "$APPLICATION_PATH/conf/application.conf.tmp" > "$APPLICATION_PATH/conf/application.conf"
+    rm "$APPLICATION_PATH/conf/application.conf.tmp" 
+    echo "~ Keep the secret : $SECRET_KEY"
+    echo "~"
+    exit;
 fi
 
 
