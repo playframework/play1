@@ -9,6 +9,7 @@ import net.spy.memcached.AddrUtil;
 import net.spy.memcached.MemcachedClient;
 import play.Logger;
 import play.Play;
+import play.exceptions.ConfigurationException;
 import play.libs.Time;
 
 public class Cache {
@@ -81,8 +82,18 @@ public class Cache {
         public MemcachedImpl() throws IOException {
             System.setProperty("net.spy.log.LoggerImpl", "net.spy.log.Log4JLogger");
             if(Play.configuration.containsKey("memcached.host")) {
-                client = new MemcachedClient(AddrUtil.getAddresses(Play.configuration.getProperty("memcached.host")));
-            }            
+                client = new MemcachedClient(AddrUtil.getAddresses(Play.configuration.getProperty("memcached.host")));                
+            } else if(Play.configuration.containsKey("memcached.1.host")) {   
+                int nb = 1;
+                String addresses = "";
+                while(Play.configuration.containsKey("memcached."+nb+".host")) {
+                    addresses += Play.configuration.get("memcached."+nb+".host") + " ";
+                    nb++;
+                }
+                client = new MemcachedClient(AddrUtil.getAddresses(addresses));
+            } else {   
+                throw new ConfigurationException(("Bad configuration for memcached"));
+            }
         }
         
         public void add(String key, Object value, int expiration) {

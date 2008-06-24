@@ -216,8 +216,10 @@ AGENT_PATH="${PLAY_BASE}/framework/play.jar"
 CLASSPATH="$APPLICATION_PATH/conf/"
 if $CYGWIN; then
     CLASSPATH="$CLASSPATH;$PLAY_BASE/framework/play.jar"
-	OLD_IFS=$IFS
-	IFS=$'\n'
+    OLD_IFS=$IFS
+    IFS=$'\n'
+else
+    CLASSPATH="$CLASSPATH:$PLAY_BASE/framework/play.jar"
 fi
 for jar in `ls -c1 "$APPLICATION_PATH/lib"/*.jar 2> /dev/null`; do 
     absname "$jar"  
