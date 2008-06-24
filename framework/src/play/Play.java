@@ -44,6 +44,7 @@ public class Play {
     public static String applicationName;
     public static Long startedAt;
     public static List<String> locales;
+    public static String secretKey;
 
     public static void init(File root, String id) {
         Play.id = id;
@@ -119,6 +120,11 @@ public class Play {
             TemplateLoader.cleanCompiledCache();
             // Classloader
             classloader = new ApplicationClassloader();
+            // SecretKey
+            secretKey = configuration.getProperty("application.secret", "");
+            if(secretKey.equals("")) {
+                Logger.warn("No secret key defined. Sessions will not be encrypted");
+            }
             // Routes definitions
             routes = new ArrayList<VirtualFile>();
             routes.add(appRoot.child("conf/routes"));
@@ -226,7 +232,7 @@ public class Play {
     }
 
     public static String getSecretKey() {
-        return "SLD0FBVG78920DKMLKF39DJ92JO2";
+        return secretKey;
     }
 
     public static VirtualFile getFile(String path) {
