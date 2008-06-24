@@ -28,6 +28,22 @@ function absname {
 	fi
 }
 
+function secret {
+    if $CYGWIN; then
+        i=0
+        SECRET_KEY=""
+	while [ $i -lt 64 ]
+            do
+		let HEX="$RANDOM%16"
+		SECRET_KEY="$SECRET_KEY:$HEX"
+		let i++
+            done
+	SECRET_KEY=$(echo $SECRET_KEY | sed -e 's/10/a/g' | sed -e 's/11/b/g' | sed -e 's/12/c/g' | sed -e 's/13/d/g' | sed -e 's/14/e/g' | sed -e 's/15/f/g' | sed -e 's/://g')
+    else
+        SECRET_KEY=`dd if=/dev/random bs=1 count=32 2>/dev/null | xxd -c 256 -ps`
+    fi
+}
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~ Is it a real OS ?
 
@@ -111,6 +127,7 @@ if [ "$PLAY_COMMAND" = "help" ] ; then
 	echo "~        out          Follow system.out of the running application"    
 	echo "~        pid          Display the pid of the running application"
 	echo "~        run          Run the application in the current window"
+        echo "~        secret       Generate a new secret key"
 	echo "~        start        Start the application in background"
 	echo "~        statistics   Display project statistics"
 	echo "~        stop         Stop the application"  
@@ -146,6 +163,17 @@ if [ "$PLAY_COMMAND" = "id" ] ; then
 fi
 
 
+# ~~~~~~~~~~~~~~~~~~~~~~ [secret] Generate a new secret key
+
+if [ "$PLAY_COMMAND" = "secret" ] ; then
+    echo "~ Generating secret key..."
+    secret
+    echo "~ Keep the secret : $SECRET_KEY"
+    echo "~"
+    exit;
+fi
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~ Where is the application ?
 
 if [ -z "$2" ]; then
@@ -175,11 +203,7 @@ if [ "$PLAY_COMMAND" = "new" ] ; then
     read applicationName 
     cp -R "${PLAY_BASE}/resources/application-skel/"* "$APPLICATION_PATH"
     sed -e "s#%APPLICATION_NAME%#$applicationName#g" "$PLAY_BASE/resources/application-skel/conf/application.conf" > "$APPLICATION_PATH/conf/application.conf.tmp" 
-    if $CYGWIN; then
-        SECRET_KEY=$RANDOM$RANDOM$RANDOM$RANDOM
-    else
-        SECRET_KEY=`dd if=/dev/random bs=1 count=32 2>/dev/null |xxd -c 256 -ps`
-    fi
+    secret
     sed -e "s#%SECRET_KEY%#$SECRET_KEY#g" "$APPLICATION_PATH/conf/application.conf.tmp" > "$APPLICATION_PATH/conf/application.conf" 
     rm "$APPLICATION_PATH/conf/application.conf.tmp"
     echo "~"
