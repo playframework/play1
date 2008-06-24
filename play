@@ -397,12 +397,16 @@ fi
 # ~~~~~~~~~~~~~~~~~~~~~~ [eclipsify] Create eclipse configuration files
 
 if [ "$PLAY_COMMAND" = "eclipsify" ] ; then
-    PROJECT_NAME="`cat $APPLICATION_PATH/conf/application.conf | grep application.name | sed -e 's/application.name=//g'`"	
+    PROJECT_NAME="`cat "$APPLICATION_PATH/conf/application.conf" | grep application.name | sed -e 's/application.name=//g'`"	
     rm -rf "$APPLICATION_PATH/.project"
     rm -rf "$APPLICATION_PATH/.classpath"
     rm -rf "$APPLICATION_PATH/*.launch"
     sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/.project" > "$APPLICATION_PATH/.project" 
-    IFS=":"
+    if $CYGWIN; then
+	IFS=";"
+    else
+        IFS=":"
+    fi
     XML=""
     for p in $CLASSPATH; do
         if [ -f "$p" ]; then
