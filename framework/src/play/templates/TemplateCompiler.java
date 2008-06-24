@@ -111,14 +111,18 @@ public class TemplateCompiler {
             if (text.indexOf("\n") > -1) {
                 String[] lines = text.split("\n", 10000);
                 for (int i = 0; i < lines.length; i++) {
+                    String line = lines[i];
+                    if(line.length() > 0 && (int)line.charAt(line.length()-1) == 13)  {
+                        line = line.substring(0, line.length()-1);
+                    }
                     if (i == lines.length - 1 && !text.endsWith("\n")) {
                         print("\tout.print(\"");
-                    } else if(i == lines.length - 1 && lines[i].equals("")) {
+                    } else if(i == lines.length - 1 && line.equals("")) {
                         continue;
                     } else {
                         print("\tout.println(\"");
                     }
-                    print(lines[i]);
+                    print(line);
                     print("\")");
                     markLine(parser.getLine() + i);
                     println();

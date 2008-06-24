@@ -121,7 +121,7 @@ public class Play {
             // Classloader
             classloader = new ApplicationClassloader();
             // SecretKey
-            secretKey = configuration.getProperty("application.secret", "");
+            secretKey = configuration.getProperty("application.secret", "").trim();
             if(secretKey.equals("")) {
                 Logger.warn("No secret key defined. Sessions will not be encrypted");
             }
