@@ -29,7 +29,7 @@ public class Server {
         acceptor.setHandler(new HttpHandler());
         try {
             acceptor.bind(new InetSocketAddress(httpPort));
-            Logger.info("Listening on port %s ...", httpPort);
+            Logger.info("Listening for HTTP on port %s ...", httpPort);
         } catch (IOException e) {
             Logger.error("Could not bind on port " + httpPort, e);
             acceptor.dispose();

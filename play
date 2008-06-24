@@ -18,7 +18,6 @@ function absname {
 			dir=$(dirname "$1")
 			file="/"$(basename "$1")
 		else
-			echo "Error in absname ! ($1)"
 			return 1
 		fi	
 		# Change to the directory and display the absolute pathname.
@@ -242,6 +241,15 @@ if $CYGWIN; then
 fi
 
 
+# ~~~~~~~~~~~~~~~~~~~~~~ Read JDPA configuration
+
+JPDA_PORT="`cat "$APPLICATION_PATH/conf/application.conf" | grep ^jpda.port | sed -e 's/jpda.port=//g'`"
+if [ -z $JPDA_PORT ] ; then
+    JPDA_PORT=8000
+fi
+    
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~ [run] Run the application
 
 if [ "$PLAY_COMMAND" = "run" ] ; then
@@ -270,7 +278,7 @@ if [ "$PLAY_COMMAND" = "debug" ] ; then
     echo "~ Ctrl+C to break"
     echo "~ "
     echo -n "~ JPDA -> "
-    "$JAVA_PATH" -javaagent:"$AGENT_PATH" -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n -Dplay.debug=yes -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server
+    "$JAVA_PATH" -javaagent:"$AGENT_PATH" -Xdebug -Xrunjdwp:transport=dt_socket,address=$JPDA_PORT,server=y,suspend=n -Dplay.debug=yes -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server
     echo
     exit;
 fi
@@ -400,7 +408,8 @@ if [ "$PLAY_COMMAND" = "eclipsify" ] ; then
     PROJECT_NAME="`cat "$APPLICATION_PATH/conf/application.conf" | grep application.name | sed -e 's/application.name=//g'`"	
     rm -rf "$APPLICATION_PATH/.project"
     rm -rf "$APPLICATION_PATH/.classpath"
-    rm -rf "$APPLICATION_PATH/*.launch"
+    rm -rf "$APPLICATION_PATH/eclipse"
+    mkdir "$APPLICATION_PATH/eclipse"
     sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/.project" > "$APPLICATION_PATH/.project" 
     if $CYGWIN; then
 	IFS=";"
@@ -415,11 +424,31 @@ if [ "$PLAY_COMMAND" = "eclipsify" ] ; then
 	fi;
     done;
     sed  -e "s|%PROJECTCLASSPATH%|${XML}|g" "$PLAY_BASE/resources/eclipse/.classpath" > "$APPLICATION_PATH/.classpath"  
-    sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/play.launch" > "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp1" 
-    sed  -e "s|%PLAY_ID%|$PLAY_ID|g" "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp1" > "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp2" 
-    sed  -e "s|%PLAY_BASE%|$PLAY_BASE|g" "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp2" > "$APPLICATION_PATH/$PROJECT_NAME.launch" 
-    rm -rf "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp1"
-    rm -rf "$APPLICATION_PATH/$PROJECT_NAME.launch.tmp2"
+    
+    sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/play.launch" > "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp1" 
+    sed  -e "s|%PLAY_ID%|$PLAY_ID|g" "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp1" > "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp2" 
+    sed  -e "s|%PLAY_BASE%|$PLAY_BASE|g" "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp2" > "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch" 
+    rm -rf "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp1"
+    rm -rf "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp2"
+
+    sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/test.launch" > "$APPLICATION_PATH/eclipse/Test $PROJECT_NAME.launch.tmp1" 
+    sed  -e "s|%PLAY_ID%|$PLAY_ID|g" "$APPLICATION_PATH/eclipse/Test $PROJECT_NAME.launch.tmp1" > "$APPLICATION_PATH/eclipse/Test $PROJECT_NAME.launch.tmp2" 
+    sed  -e "s|%PLAY_BASE%|$PLAY_BASE|g" "$APPLICATION_PATH/eclipse/Test $PROJECT_NAME.launch.tmp2" > "$APPLICATION_PATH/eclipse/Test $PROJECT_NAME.launch" 
+    rm -rf "$APPLICATION_PATH/eclipse/Test $PROJECT_NAME.launch.tmp1"
+    rm -rf "$APPLICATION_PATH/eclipse/Test $PROJECT_NAME.launch.tmp2"
+
+    sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/debug.launch" > "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp1" 
+    sed  -e "s|%PLAY_ID%|$PLAY_ID|g" "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp1" > "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp2"
+    sed  -e "s|%JPDA_PORT%|$JPDA_PORT|g" "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp1" > "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp3"
+    sed  -e "s|%PLAY_BASE%|$PLAY_BASE|g" "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp3" > "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch" 
+    rm -rf "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp1"
+    rm -rf "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp2"
+    rm -rf "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp3"
+
+    sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/connect.launch" > "$APPLICATION_PATH/eclipse/Connect JPDA $PROJECT_NAME.launch.tmp1" 
+    sed  -e "s|%JPDA_PORT%|$JPDA_PORT|g" "$APPLICATION_PATH/eclipse/Connect JPDA $PROJECT_NAME.launch.tmp1" > "$APPLICATION_PATH/eclipse/Connect JPDA $PROJECT_NAME.launch" 
+    rm -rf "$APPLICATION_PATH/eclipse/Connect JPDA $PROJECT_NAME.launch.tmp1"
+
     echo "~ Ok, the application is ready for eclipse"
     echo "~ Import $APPLICATION_PATH into your eclipse workspace using File/Import/General/Existing project ..."
     echo "~"

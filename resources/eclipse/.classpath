@@ -4,5 +4,5 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	%PROJECTCLASSPATH%
-	<classpathentry kind="output" path="work"/>
+	<classpathentry kind="output" path="eclipse/classes"/>
 </classpath>
