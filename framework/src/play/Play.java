@@ -120,7 +120,7 @@ public class Play {
             // Templates path
             templatesPath = new ArrayList<VirtualFile>();
             templatesPath.add(appRoot.child("app/views"));
-            templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework")));
+            templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework/templates")));
             TemplateLoader.cleanCompiledCache();
             // Classloader
             classloader = new ApplicationClassloader();
@@ -141,6 +141,11 @@ public class Play {
             }
             DB.init();
             JPA.init();
+            // PROD mode
+            if(mode == Mode.PROD) {
+                preCompile();
+            }
+            // Yop
             started = true;
             Logger.trace("%sms to start the application", System.currentTimeMillis() - start);
             startedAt = System.currentTimeMillis();
@@ -152,6 +157,17 @@ public class Play {
     public static synchronized void stop() {
         JPA.shutdown();
         started = false;
+    }
+    
+    static void preCompile() {
+        try {
+            Logger.info("Precompiling ...");
+            classloader.getAllClasses();
+            TemplateLoader.getAllTemplate();
+        } catch(Throwable e) {
+            Logger.error(e, "Cannot start in PROD mode with errors");
+            System.exit(-1);
+        }
     }
 
     protected static synchronized void detectChanges() {

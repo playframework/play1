@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.data.parsing.DataParser;
@@ -20,7 +21,6 @@ public class ActionInvoker {
 
     public static void invoke(Http.Request request, Http.Response response) {
         try {
-            
             Http.Request.current.set(request);
             Http.Response.current.set(response);
 
@@ -82,6 +82,7 @@ public class ActionInvoker {
                 if(actionMethod.getParameterTypes().length>0) {
                     Scope.Params.current().checkAndParse();
                 }
+                
                 Java.invokeStatic(actionMethod, Scope.Params.current().data);
             } catch (IllegalAccessException ex) {
                 throw ex;

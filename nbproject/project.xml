@@ -125,8 +125,8 @@
             <view>
                 <items>
                     <source-folder style="tree">
-                        <label>tags</label>
-                        <location>framework/tags</location>
+                        <label>templates</label>
+                        <location>framework/templates</location>
                     </source-folder>
                     <source-folder style="packages">
                         <label>sources</label>

@@ -1,1 +1,0 @@
-${play.templates.Template.layoutData.get().get(_arg)}

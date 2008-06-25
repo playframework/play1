@@ -54,8 +54,8 @@ public class Template {
         this.name = name;
         this.source = source;
     }
-
-    public String render(Map<String, Object> args) {
+    
+    public void compile() {
         if (compiledTemplate == null) {
             CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
             compilerConfiguration.setSourceEncoding("utf-8"); // ouf
@@ -92,6 +92,10 @@ public class Template {
                 throw new UnexpectedException(e);
             }
         }
+    }
+
+    public String render(Map<String, Object> args) {
+        compile();
         Binding binding = new Binding(args);
         binding.setVariable("messages", new Messages());
         binding.setVariable("locale", Locale.get());
@@ -104,7 +108,7 @@ public class Template {
             binding.setProperty("out", new PrintWriter(writer));
             currentTemplate.set(this);
         }
-        if(!args.containsKey("_body") && !args.containsKey("_isLayout")) {
+        if(!args.containsKey("_body") && !args.containsKey("_isLayout") && !args.containsKey("_isInclude")) {
             layoutData.set(new HashMap());
         }
         ExecutableTemplate t = (ExecutableTemplate) InvokerHelper.createScript(compiledTemplate, binding);        
@@ -146,6 +150,8 @@ public class Template {
                 } else if (e instanceof NoRouteFoundException) {
                    NoRouteFoundException ex = (NoRouteFoundException)e;
                    throw new NoRouteFoundException(ex.getAction(), ex.getArgs(), this, this.linesMatrix.get(stackTraceElement.getLineNumber()));
+                } else if (e instanceof TemplateExecutionException ) {
+                   throw (TemplateExecutionException)e;
                 } else {
                     throw new TemplateExecutionException(this, this.linesMatrix.get(stackTraceElement.getLineNumber()), e.getMessage(), e);
                 }

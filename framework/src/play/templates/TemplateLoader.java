@@ -1,6 +1,8 @@
 package play.templates;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import play.Play;
 import play.vfs.VirtualFile;
@@ -51,4 +53,25 @@ public class TemplateLoader {
         }
         return template;
     }
+    
+    public static List<Template> getAllTemplate() {
+        List<Template> res = new ArrayList<Template>();
+        for(VirtualFile virtualFile : Play.templatesPath) {
+            scan(res, virtualFile);
+        }
+        return res;
+    }
+    
+    private static void scan(List<Template> templates, VirtualFile current) {
+        if (!current.isDirectory()) {
+            Template template = load(current);
+            template.compile();
+            templates.add(template);            
+        } else {
+            for (VirtualFile virtualFile : current.list()) {
+                scan(templates, virtualFile);
+            }
+        }
+    }
+    
 }

@@ -1,5 +1,8 @@
 package play.templates;
 
+import groovy.lang.Closure;
+import java.io.PrintWriter;
+import java.util.Map;
 import java.util.Stack;
 import play.Logger;
 import play.vfs.VirtualFile;
@@ -235,7 +238,13 @@ public class TemplateCompiler {
                 print("}");
                 markLine(currentLine);
                 println();
-                print("invokeTag(" + tag.startLine + ",'" + tagName + "',attrs" + tagIndex + ",body" + tagIndex + ")");
+                // Use fastTag if exists
+                try {
+                    FastTags.class.getDeclaredMethod("_" + tag.name, Map.class, Closure.class, PrintWriter.class, Template.ExecutableTemplate.class, int.class);
+                    print("play.templates.FastTags._" + tag.name + "(attrs" + tagIndex + ",body" + tagIndex + ", out, this, " + tag.startLine + ")");
+                } catch(NoSuchMethodException e) {
+                    print("invokeTag(" + tag.startLine + ",'" + tagName + "',attrs" + tagIndex + ",body" + tagIndex + ")");
+                }
                 markLine(tag.startLine);
                 println();
             }
