@@ -173,7 +173,7 @@ public class Router {
         }
 
         public Map<String, String> matches(String method, String path) {
-            if (method == null || method.equals("*") || method.equalsIgnoreCase(this.method)) {
+            if (method == null || this.method.equals("*") || method.equalsIgnoreCase(this.method)) {
                 Matcher matcher = pattern.matcher(path);
                 if (matcher.matches()) {
                     Map<String, String> localArgs = new HashMap<String, String>();

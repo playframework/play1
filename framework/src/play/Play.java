@@ -85,14 +85,18 @@ public class Play {
             Pattern pattern = Pattern.compile("^%([a-zA-Z0-9_\\-]+)\\.(.*)$");
             for (Object key : configuration.keySet()) {
                 Matcher matcher = pattern.matcher(key + "");
+                if (!matcher.matches()) {
+                    newConfiguration.put(key, configuration.get(key).toString().trim());
+                }
+            }
+            for (Object key : configuration.keySet()) {
+                Matcher matcher = pattern.matcher(key + "");
                 if (matcher.matches()) {
                     String instance = matcher.group(1);
                     if (instance.equals(id)) {
                         newConfiguration.put(matcher.group(2), configuration.get(key).toString().trim());
                     }
-                } else {
-                    newConfiguration.put(key, configuration.get(key).toString().trim());
-                }
+                } 
             }
             configuration = newConfiguration;
             // XLog

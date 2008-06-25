@@ -265,7 +265,8 @@ public class HttpHandler implements IoHandler {
             request.port = ((InetSocketAddress) session.getLocalAddress()).getPort();
             request.secure = false;
             request.path = uri.getPath();
-            request.querystring = uri.getQuery() == null ? "" : uri.getQuery();
+            request.querystring = uri.getQuery() == null ? "" : uri.getRawQuery();
+            request.url = minaRequest.getRequestUri().toString();
 
             for (String key : minaRequest.getHeaders().keySet()) {
                 Http.Header hd = new Http.Header();

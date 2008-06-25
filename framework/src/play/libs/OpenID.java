@@ -1,44 +1,87 @@
 package play.libs;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import org.verisign.joid.OpenIdException;
-import org.verisign.joid.consumer.AuthenticationResult;
-import org.verisign.joid.consumer.JoidConsumer;
-import play.exceptions.UnexpectedException;
+import java.util.List;
+import org.openid4java.association.AssociationException;
+import org.openid4java.consumer.ConsumerException;
+import org.openid4java.consumer.ConsumerManager;
+import org.openid4java.consumer.VerificationResult;
+import org.openid4java.discovery.DiscoveryException;
+import org.openid4java.discovery.DiscoveryInformation;
+import org.openid4java.discovery.Identifier;
+import org.openid4java.message.AuthRequest;
+import org.openid4java.message.MessageException;
+import org.openid4java.message.ParameterList;
+import org.openid4java.server.RealmVerifier;
+import play.Logger;
+import play.exceptions.PlayException;
 import play.mvc.Http.Request;
 import play.mvc.Router;
+import play.mvc.Scope.Flash;
 import play.mvc.Scope.Params;
 import play.mvc.results.Redirect;
 
 public class OpenID {
-    
-    static JoidConsumer joidConsumer = new JoidConsumer();
-    
-    public static void verify(String openID, String returnAction) throws OpenIdException {
-        openID = openID.trim();
-        if(!openID.startsWith("http://")) {
-            openID = "http://" + openID;
-        }
-        String rootUrl = Request.current().getBase() + "/";
-        String returnTo =  Request.current().getBase() + Router.reverse(returnAction);
-        String url = joidConsumer.getAuthUrl(openID, returnTo, rootUrl);
-        throw new Redirect(url);
-    }
-    
-    public static void verify(String openID) throws OpenIdException {
-        verify(openID, Request.current().action);
-    }
-    
-    public static String getVerifiedID() throws OpenIdException {
+
+    static ConsumerManager consumerManager;
+
+    public static boolean verify(String openID, String returnAction) {
         try {
-            AuthenticationResult result = joidConsumer.authenticate(Params.current().allSimple());
-            return result.getIdentity();
-        } catch(IOException e) {
-            throw new UnexpectedException(e);
-        } catch(NoSuchAlgorithmException e) {
-            throw new UnexpectedException(e);
+            openID = openID.trim();
+            Flash.current().put("openid.discover", openID);
+            List discoveries = getConsumerManager().discover(openID);
+            DiscoveryInformation discovered = getConsumerManager().associate(discoveries);
+            String returnTo =  Request.current().getBase() + Router.reverse(returnAction);
+            AuthRequest authRequest = getConsumerManager().authenticate(discovered, returnTo);
+            String url = authRequest.getDestinationUrl(true);
+            throw new Redirect(url);
+        } catch(PlayException e) {
+            throw e;
+        } catch(ConsumerException e) {
+            Logger.error(e, "OpenID cannot verify %s", openID);
+        } catch(MessageException e) {
+            Logger.error(e, "OpenID cannot verify %s", openID);
+        } catch(DiscoveryException e) {
+            Logger.error(e, "OpenID cannot verify %s", openID);
         }
+        return false;
+    } 
+
+    public static boolean verify(String openID) {
+        return verify(openID, Request.current().action);
     }
 
+    public static String getVerifiedID() {
+        try {
+            String openID = Flash.current().get("openid.discover");
+            List discoveries = getConsumerManager().discover(openID);
+            DiscoveryInformation discovered = getConsumerManager().associate(discoveries);
+            ParameterList openidResp = new ParameterList(Params.current().allSimple());
+            VerificationResult verification = getConsumerManager().verify(Request.current().getBase() + Request.current().url, openidResp, discovered);
+            Identifier verified = verification.getVerifiedId();
+            if(verified != null) {
+                return verified.toString();
+            }            
+        } catch(PlayException e) {
+            throw e;
+        } catch(ConsumerException e) {
+            Logger.error(e, "OpenID error");
+        } catch(MessageException e) {
+            Logger.error(e, "OpenID error");
+        } catch(DiscoveryException e) {
+            Logger.error(e, "OpenID error");
+        } catch(AssociationException e) {
+            Logger.error(e, "OpenID error");
+        }
+        return null;
+    }
+
+    static ConsumerManager getConsumerManager() throws ConsumerException {
+        if (consumerManager == null) {
+            consumerManager = new ConsumerManager();
+            RealmVerifier realmVerifier = new RealmVerifier();
+            realmVerifier.setEnforceRpId(false);
+            consumerManager.setRealmVerifier(realmVerifier);
+        }
+        return consumerManager;
+    }
 }

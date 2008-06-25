@@ -32,7 +32,9 @@ public class Locale {
     public static void resolvefrom(Request request) {
         // Check a cookie
         if(request.cookies.containsKey("PLAY_LOCALE")) {
-            set(request.cookies.get("PLAY_LOCALE").value);
+            if(!set(request.cookies.get("PLAY_LOCALE").value)) {
+                Response.current().setCookie("PLAY_LOCALE", "");
+            }
             return;
         }
         // Try from accept-language

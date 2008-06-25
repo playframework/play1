@@ -217,10 +217,16 @@ fi
 
 if [ "$PLAY_COMMAND" = "secret" ] ; then
     echo "~ Generating secret key..."
-    mv "$APPLICATION_PATH/conf/application.conf" "$APPLICATION_PATH/conf/application.conf.tmp" 
     secret
-    sed -e "s#application.secret=.*#application.secret=$SECRET_KEY#g" "$APPLICATION_PATH/conf/application.conf.tmp" > "$APPLICATION_PATH/conf/application.conf"
-    rm "$APPLICATION_PATH/conf/application.conf.tmp" 
+    if [ -z `cat "$APPLICATION_PATH/conf/application.conf" | grep application.secret` ] ; then
+        echo "" >>  "$APPLICATION_PATH/conf/application.conf"
+        echo "# Secret key" >>  "$APPLICATION_PATH/conf/application.conf"
+        echo "application.secret=$SECRET_KEY" >>  "$APPLICATION_PATH/conf/application.conf"
+    else
+        mv "$APPLICATION_PATH/conf/application.conf" "$APPLICATION_PATH/conf/application.conf.tmp" 
+        sed -e "s#application.secret=.*#application.secret=$SECRET_KEY#g" "$APPLICATION_PATH/conf/application.conf.tmp" > "$APPLICATION_PATH/conf/application.conf"
+        rm "$APPLICATION_PATH/conf/application.conf.tmp" 
+    fi
     echo "~ Keep the secret : $SECRET_KEY"
     echo "~"
     exit;
