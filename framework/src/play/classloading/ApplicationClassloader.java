@@ -7,10 +7,9 @@ import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.UnmodifiableClassException;
 import java.util.ArrayList;
 import java.util.List;
-
 import play.Logger;
 import play.Play;
-import play.Play.VirtualFile;
+import play.vfs.VirtualFile;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
 
@@ -38,25 +37,23 @@ public class ApplicationClassloader extends ClassLoader {
 
         // Delegate to the classic classloader
         return super.loadClass(name, resolve);
-    }
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~
-    
+    }    // ~~~~~~~~~~~~~~~~~~~~~~~
     public ThreadLocal<List<ApplicationClass>> loadingTracer = new ThreadLocal<List<ApplicationClass>>();
-    
+
     protected Class loadApplicationClass(String name) {
         ApplicationClass applicationClass = Play.classes.getApplicationClass(name);
         if (applicationClass != null) {
-            if(loadingTracer.get() != null) {
+            if (loadingTracer.get() != null) {
                 loadingTracer.get().add(applicationClass);
             }
             if (applicationClass.isCompiled()) {
                 return applicationClass.javaClass;
             } else {
                 applicationClass.compile();
+                // If there was some inner classes, we have to enhance and define them too
                 applicationClass.enhance();
-                applicationClass.javaClass = defineClass(name, applicationClass.javaByteCode, 0, applicationClass.javaByteCode.length);
-                resolveClass(applicationClass.javaClass);
+                applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length);
+                resolveClass(applicationClass.javaClass);              
                 return applicationClass.javaClass;
             }
         }
@@ -101,10 +98,10 @@ public class ApplicationClassloader extends ClassLoader {
             long start = System.currentTimeMillis();
             applicationClass.compile();
             applicationClass.enhance();
-            if(applicationClass.javaClass != null) {
-                newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.javaByteCode));
+            if (applicationClass.javaClass != null) {
+                newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.enhancedByteCode));
             }
-            Logger.debug("%sms to compile & enhance %s", System.currentTimeMillis()-start, applicationClass.name);
+            Logger.trace("%sms to compile & enhance %s", System.currentTimeMillis() - start, applicationClass.name);
         }
         try {
             HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
@@ -114,24 +111,45 @@ public class ApplicationClassloader extends ClassLoader {
             throw new UnexpectedException(e);
         }
     }
-    
-    
+
     public List<Class> getAllClasses() {
         List<Class> res = new ArrayList<Class>();
-        for (VirtualFile virtualFile : Play.javaPath)
-            scan(res, "", virtualFile);
+        for (VirtualFile virtualFile : Play.javaPath) {
+            res.addAll(getAllClasses(virtualFile));
+        }
         return res;
     }
     
-    private void scan (List<Class> classes, String packageName, VirtualFile current) {
+    public List<Class> getAllClasses(VirtualFile path) {
+        return getAllClasses(path, "");
+    }
+    
+    public List<Class> getAllClasses(VirtualFile path, String basePackage) {
+        if(basePackage.length()>0 && !basePackage.endsWith(".")) {
+            basePackage += ".";
+        }
+        List<Class> res = new ArrayList<Class>();
+        for(VirtualFile virtualFile : path.list()) {
+            scan(res, basePackage, virtualFile);
+        }
+        return res;
+    }
+
+    private void scan(List<Class> classes, String packageName, VirtualFile current) {
         if (!current.isDirectory()) {
-             if (current.getName().endsWith(".java")) {
-                    String classname = packageName+current.getName().substring(0, current.getName().length() - 5);
-                    classes.add (loadApplicationClass(classname));
+            if (current.getName().endsWith(".java")) {
+                String classname = packageName + current.getName().substring(0, current.getName().length() - 5);      
+                Class clazz = loadApplicationClass(classname);
+                if(clazz == null) {
+                    Logger.error("%s was found but class %s cannot be loaded", current, classname);
+                } else {
+                    classes.add(clazz);
                 }
-        } else {    
-            for (VirtualFile virtualFile : current.list())
-               scan(classes, current.getName()+".", virtualFile); 
+            }
+        } else {
+            for (VirtualFile virtualFile : current.list()) {
+                scan(classes, packageName + current.getName() + ".", virtualFile);
+            }
         }
     }
 }

@@ -61,16 +61,19 @@ public class ApplicationCompiler {
         final private char[] typeName;
         final private char[][] packageName;
 
-        CompilationUnit(final String pClazzName) {
+        CompilationUnit(String pClazzName) {
             clazzName = pClazzName;
-            fileName = pClazzName.replace('.', '/') + ".java";
-            int dot = clazzName.lastIndexOf('.');
-            if (dot > 0) {
-                typeName = clazzName.substring(dot + 1).toCharArray();
-            } else {
-                typeName = clazzName.toCharArray();
+            if(pClazzName.contains("$")) {
+                pClazzName = pClazzName.substring(0, pClazzName.indexOf("$"));
             }
-            StringTokenizer izer = new StringTokenizer(clazzName, ".");
+            fileName = pClazzName.replace('.', '/') + ".java";
+            int dot = pClazzName.lastIndexOf('.');
+            if (dot > 0) {
+                typeName = pClazzName.substring(dot + 1).toCharArray();
+            } else {
+                typeName = pClazzName.toCharArray();
+            }
+            StringTokenizer izer = new StringTokenizer(pClazzName, ".");
             packageName = new char[izer.countTokens() - 1][];
             for (int i = 0; i < packageName.length; i++) {
                 packageName[i] = izer.nextToken().toCharArray();
@@ -216,7 +219,8 @@ public class ApplicationCompiler {
                         }
                         clazzName.append(compoundName[j]);
                     }
-                    applicationClasses.getApplicationClass(clazzName.toString()).setByteCode(clazzFile.getBytes());
+                    applicationClasses.getApplicationClass(clazzName.toString()).javaByteCode = clazzFile.getBytes();
+                    applicationClasses.getApplicationClass(clazzName.toString()).enhancedByteCode = clazzFile.getBytes();
                 }
             }
         };

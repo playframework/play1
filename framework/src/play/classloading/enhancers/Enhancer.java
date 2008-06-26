@@ -22,7 +22,7 @@ public abstract class Enhancer {
     }
     
     CtClass makeClass(ApplicationClass applicationClass) throws IOException {
-        return classPool.makeClass(new ByteArrayInputStream(applicationClass.javaByteCode));
+        return classPool.makeClass(new ByteArrayInputStream(applicationClass.enhancedByteCode));
     }
     
     public abstract void enhanceThisClass(ApplicationClass applicationClass) throws Exception;
@@ -30,7 +30,7 @@ public abstract class Enhancer {
     public static class ApplicationClassesClasspath implements ClassPath {
 
         public InputStream openClassfile(String className) throws NotFoundException {
-            return new ByteArrayInputStream(Play.classes.getApplicationClass(className).javaByteCode);
+            return new ByteArrayInputStream(Play.classes.getApplicationClass(className).enhancedByteCode);
         }
 
         public URL find(String className) {

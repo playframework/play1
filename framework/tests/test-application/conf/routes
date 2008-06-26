@@ -1,12 +1,14 @@
 # Routes
 
-GET /hello			Hello.hello
-GET	/ 				Application.index
-POST    /                               Application.index
-GET	/parsing			Parsing.index
-POST	/parsing			Parsing.post
-GET	/test 				Application.test
-GET 	/clients/{name} 		Clients.show
-GET 	/orders 			Orders.index
-GET	/orders/{<[0-9]+>id}            Orders.show
-*	/login				Admin.login
+GET 		/hello					Hello.hello
+GET			/ 						Application.index
+POST    	/                       Application.index
+GET			/parsing				Parsing.index
+POST		/parsing				Parsing.post
+GET			/test 					Application.test
+GET 		/clients/{name} 		Clients.show
+GET 		/orders 				Orders.index
+GET			/orders/{<[0-9]+>id}    Orders.show
+*			/login					Admin.login
+GET			/secure					Secure.index
+GET			/authenticate			Secure.authenticate

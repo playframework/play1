@@ -4,7 +4,7 @@ import javax.persistence.EntityManager;
 
 public class JPAContext {
 
-    private static ThreadLocal<JPAContext> local = new ThreadLocal<JPAContext>();
+    public static ThreadLocal<JPAContext> local = new ThreadLocal<JPAContext>();
     public EntityManager entityManager;
     boolean readonly = true;
 

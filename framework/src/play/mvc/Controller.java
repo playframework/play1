@@ -1,6 +1,7 @@
 
 package play.mvc;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import play.Play;
@@ -10,20 +11,23 @@ import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.TemplateNotFoundException;
 import play.mvc.Http.Response;
+import play.mvc.results.NotFound;
 import play.mvc.results.Redirect;
+import play.mvc.results.RenderBinary;
 import play.mvc.results.RenderTemplate;
 import play.mvc.results.RenderText;
+import play.mvc.results.Unauthorized;
 import play.templates.Template;
 import play.templates.TemplateLoader;
 
 public abstract class Controller {
     
-    public static final Http.Request request = null;
-    public static final Response response = null;
-    public static final Scope.Session session = null;
-    public static final Scope.Flash flash = null;
-    public static final Scope.Params params = null;
-    public static final Scope.RenderArgs renderArgs = null;
+    public static Http.Request request = null;
+    public static Response response = null;
+    public static Scope.Session session = null;
+    public static Scope.Flash flash = null;
+    public static Scope.Params params = null;
+    public static Scope.RenderArgs renderArgs = null;
     
     protected static void renderText(CharSequence text) {
         throw new RenderText(text);
@@ -33,8 +37,34 @@ public abstract class Controller {
         throw new RenderText(String.format(pattern.toString(), args));
     }
     
+    protected static void renderBinary(InputStream is) {
+        throw new RenderBinary(is, null);
+    }
+    
+    protected static void renderBinary(InputStream is, String name) {
+        throw new RenderBinary(is, name);
+    }
+    
     protected static void redirect(String url) {
         throw new Redirect(url);
+    }
+    
+    protected static void unauthorized(String realm) {
+        throw new Unauthorized(realm);
+    }
+    
+    protected static void notFound(String what) {
+        throw new NotFound(what);
+    }
+    
+    protected static void notFoundIfNull(Object o) {
+        if(o == null) {
+            notFound();
+        }
+    }
+    
+    protected static void notFound() {
+        throw new NotFound("");
     }
     
     protected static void redirect(String action, Object... args) {
@@ -75,7 +105,7 @@ public abstract class Controller {
         if(args.length>0 && args[0] instanceof String && LocalVariablesNamesTracer.getLocalVariableName(args[0]) == null) {
             templateName = args[0].toString();
         } else {
-            templateName = Http.Request.current().action.substring(12).replace(".", "/")+"."+Http.Request.current().format;
+            templateName = Http.Request.current().action.replace(".", "/")+"."+Http.Request.current().format;
         }
         try {
             Template template = TemplateLoader.load(templateName);

@@ -1,0 +1,16 @@
+${exception.errorTitle}
+
+${exception.errorDescription.replace('<strong>', '').replace('</strong>', '')}
+
+#{if exception.sourceAvailable}
+----------
+In ${exception.sourceFile} (around line ${exception.lineNumber})
+
+%{ 
+    from = exception.lineNumber - 5 >= 0 ? exception.lineNumber - 5 : 0
+    to = exception.lineNumber + 5  < exception.source.size() ? exception.lineNumber + 5 : exception.source.size()-1          
+}%
+#{list items:exception.source, as:'line', start:from, end:to}
+  ${exception.lineNumber == line_index ? '>':' '} ${line_index}: ${line}
+#{/list}
+#{/if}

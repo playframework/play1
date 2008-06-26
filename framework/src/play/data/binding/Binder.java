@@ -2,6 +2,7 @@ package play.data.binding;
 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -15,19 +16,37 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import play.exceptions.BindingException;
+import play.libs.Java;
 
 public class Binder {
 
     static Map<Class, SupportedType> supportedTypes = new HashMap<Class, SupportedType>();
+    
 
     static {
         supportedTypes.put(Date.class, new DateBinder());
         supportedTypes.put(File.class, new FileBinder());
     }
 
-    public static Object bind(String name, Class clazz, Type type, Map<String, String[]> params) {
+    private static Object bindInternal(String name, Class clazz, Type type, Map<String, String[]> params, String prefix) {
         try {
-            String[] value = params.get(name);
+            if (isComposite(name + prefix, params.keySet())) {
+                Object instance = clazz.newInstance();
+                Set<Field> fields = new HashSet<Field>();
+                Java.findAllFields(clazz, fields);
+                for (Field field : fields) {
+                    boolean acess = field.isAccessible();
+                    field.setAccessible(true);
+                    Class fClazz = field.getType();
+                    Type fType = field.getDeclaringClass().getGenericSuperclass();
+                    String newPrefix = prefix + "." + field.getName();
+                    field.set(instance, bindInternal(name, fClazz, fType, params, newPrefix));
+                    field.setAccessible(acess);
+                }
+                return instance;
+            }
+
+            String[] value = params.get(name + prefix);
             if (value == null) {
                 value = new String[0];
             }
@@ -65,11 +84,44 @@ public class Binder {
             // Simple types
             if (value.length > 0) {
                 return directBind(value[0], clazz);
+            } else {
+                if(clazz.equals(boolean.class)) {
+                    return false;
+                }
+                if(clazz.equals(int.class)) {
+                    return 0;
+                }
+                if(clazz.equals(long.class)) {
+                    return 0;
+                }
+                if(clazz.equals(double.class)) {
+                    return 0;
+                }
+                if(clazz.equals(short.class)) {
+                    return 0;
+                }
+                if(clazz.equals(byte.class)) {
+                    return 0;
+                }
             }
+
             return null;
         } catch (Exception e) {
             throw new BindingException("TODO", e);
         }
+    }
+
+    public static Object bind(String name, Class clazz, Type type, Map<String, String[]> params) {
+        return bindInternal(name, clazz, type, params, "");
+    }
+
+    public static boolean isComposite(String name, Set<String> pNames) {
+        for (String pName : pNames) {
+            if (pName.startsWith(name + ".")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static Object directBind(String value, Class clazz) {

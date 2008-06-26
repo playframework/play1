@@ -12,3 +12,7 @@ framework/src/play/version
 framework/src/play/version
 framework/src/play/version
 framework/tests/test-application/db
+.classpath
+.project
+framework/tests/tmp
+id

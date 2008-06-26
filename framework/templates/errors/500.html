@@ -67,11 +67,18 @@
             <h1>
                 ${exception.errorTitle}
             </h1>
+            #{if exception.sourceAvailable && play.Play.mode.name() == 'DEV'}
             <p>
                 ${exception.errorDescription}
             </p>
+            #{/if}
+            #{if exception.sourceAvailable && play.Play.mode.name() == 'PROD'}
+            <p>
+                Error details are not displayed when Play! is in PROD mode. Check server logs for detail.
+            </p>
+            #{/if}
         </div>
-        #{if exception.sourceAvailable}
+        #{if exception.sourceAvailable && play.Play.mode.name() == 'DEV'}
         <div id="source" class="block">
             <h2>In ${exception.sourceFile} (around line ${exception.lineNumber})</h2>
             %{ 

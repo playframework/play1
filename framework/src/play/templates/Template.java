@@ -33,6 +33,8 @@ import play.exceptions.TemplateExecutionException;
 import play.exceptions.TemplateExecutionException.DoBodyException;
 import play.exceptions.TemplateNotFoundException;
 import play.exceptions.UnexpectedException;
+import play.i18n.Locale;
+import play.i18n.Messages;
 import play.mvc.ActionInvoker;
 import play.mvc.Router;
 
@@ -52,8 +54,8 @@ public class Template {
         this.name = name;
         this.source = source;
     }
-
-    public String render(Map<String, Object> args) {
+    
+    public void compile() {
         if (compiledTemplate == null) {
             CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
             compilerConfiguration.setSourceEncoding("utf-8"); // ouf
@@ -68,7 +70,7 @@ public class Template {
                     needJavaRecompilation = false;
                 }
                 Play.classloader.loadingTracer.set(null);
-                Logger.debug("%sms to compile template %s", System.currentTimeMillis()-start, name);
+                Logger.trace("%sms to compile template %s", System.currentTimeMillis()-start, name);
             } catch (UnsupportedEncodingException e) {
                 throw new UnexpectedException(e);
             } catch (MultipleCompilationErrorsException e) {
@@ -90,7 +92,13 @@ public class Template {
                 throw new UnexpectedException(e);
             }
         }
+    }
+
+    public String render(Map<String, Object> args) {
+        compile();
         Binding binding = new Binding(args);
+        binding.setVariable("messages", new Messages());
+        binding.setVariable("locale", Locale.get());
         StringWriter writer = null;
         Boolean applyLayouts = false;
         if(!args.containsKey("out")) { 
@@ -98,13 +106,17 @@ public class Template {
             layout.set(null);
             writer = new StringWriter();
             binding.setProperty("out", new PrintWriter(writer));
+            currentTemplate.set(this);
+        }
+        if(!args.containsKey("_body") && !args.containsKey("_isLayout") && !args.containsKey("_isInclude")) {
+            layoutData.set(new HashMap());
         }
         ExecutableTemplate t = (ExecutableTemplate) InvokerHelper.createScript(compiledTemplate, binding);        
         t.template = this;
         try {
             long start = System.currentTimeMillis();
             t.run();
-            Logger.debug("%sms to render template %s", System.currentTimeMillis()-start, name);
+            Logger.trace("%sms to render template %s", System.currentTimeMillis()-start, name);
         } catch(NoRouteFoundException e ) {
             throwException(e);
         } catch(PlayException e) {
@@ -118,8 +130,9 @@ public class Template {
         if(applyLayouts && layout.get() != null) {
             Map<String,Object> layoutArgs = new HashMap<String,Object>(args);
             layoutArgs.remove("out");
+            layoutArgs.put("_isLayout", true);
             String layoutR = layout.get().render(layoutArgs);
-            return layoutR.replace("____%LAYOUT%____", writer.toString());
+            return layoutR.replace("____%LAYOUT%____", writer.toString().trim());
         }
         if(writer != null) {
             return writer.toString();
@@ -137,6 +150,8 @@ public class Template {
                 } else if (e instanceof NoRouteFoundException) {
                    NoRouteFoundException ex = (NoRouteFoundException)e;
                    throw new NoRouteFoundException(ex.getAction(), ex.getArgs(), this, this.linesMatrix.get(stackTraceElement.getLineNumber()));
+                } else if (e instanceof TemplateExecutionException ) {
+                   throw (TemplateExecutionException)e;
                 } else {
                     throw new TemplateExecutionException(this, this.linesMatrix.get(stackTraceElement.getLineNumber()), e.getMessage(), e);
                 }
@@ -146,6 +161,8 @@ public class Template {
     }
     
     public static ThreadLocal<Template> layout = new ThreadLocal<Template>();
+    public static ThreadLocal<Map> layoutData = new ThreadLocal<Map>();
+    public static ThreadLocal<Template> currentTemplate = new ThreadLocal<Template>();
 
     public static abstract class ExecutableTemplate extends Script {
         
@@ -186,9 +203,17 @@ public class Template {
                     args.put("_"+key, attrs.get(key));
                 }
             }
+            PrintWriter callerOut = (PrintWriter)args.get("out");
+            StringWriter writer = new StringWriter();
             args.put("_body", body);
+            args.put("out", new PrintWriter(writer));
             try {
-                tagTemplate.render(args);   
+                tagTemplate.render(args);  
+                String tagResult = writer.toString().trim();
+                if(callerOut != null) {
+                    callerOut.print(tagResult);
+                    args.put("out", callerOut);
+                }
             } catch(TagInternalException e) {
                 throw new TemplateExecutionException(template, fromLine, e.getMessage(), e);
             } catch(TemplateNotFoundException e) {

@@ -1,13 +1,23 @@
 package play.data.parsing;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import play.exceptions.UnexpectedException;
 import play.libs.Utils;
 
 public class UrlEncodedParser extends DataParser {
+    
+    public static Map<String, String[]> parse(String urlEncoded) {
+        try {
+            return new UrlEncodedParser().parse(new ByteArrayInputStream(urlEncoded.getBytes("utf-8")));
+        } catch (UnsupportedEncodingException ex) {
+            throw new UnexpectedException(ex);
+        }
+    }
 
     @Override
     public Map<String, String[]> parse(InputStream is) {

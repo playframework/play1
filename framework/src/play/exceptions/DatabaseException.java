@@ -12,6 +12,10 @@ public class DatabaseException extends PlayException implements SourceAttachment
     List<String> source;
     Integer line;    
     
+    public DatabaseException(String message) {
+        super(message, null);
+    }
+    
     public DatabaseException(String message, Throwable cause) {
         super(message, cause);
         StackTraceElement element = getInterestingStrackTraceElement(cause);

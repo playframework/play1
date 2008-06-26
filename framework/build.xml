@@ -1,26 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="play! framework" default="jar" basedir=".">
-    
+
     <path id="project.classpath">
+        <pathelement path="play.jar"/>
         <fileset dir="lib">
             <include name="*.jar"/>                        
-        </fileset>
-        <pathelement path="play.jar"/>
+        </fileset>        
     </path>
-    
-    <path id="test.classpath">
-        <fileset dir="lib">
-            <include name="**/*.jar"/>
-            <exclude name="ant/*.jar"/>
-        </fileset>
-        <pathelement path="classes/"/>
-    </path>  
-    
+        
     <target name="clean" description="clean resources">
         <delete dir="classes" /> 
         <delete dir="dist" />
-        <delete dir="test-results" />
+        <delete dir="tests-results" />
+        <delete dir="tests-tmp" />
         <delete file="play.jar" /> 
         <delete file="src/play/version" /> 
     </target>
@@ -29,7 +22,7 @@
         <exec executable="bzr" outputproperty="bzrversion" errorproperty="bzrerror" failonerror="false" failifexecutionfails="false">
             <arg value="revno" />
         </exec>
-        <condition property="version" value="1.0-stable3-hacks-r${bzrversion}" else="1.0-localbuild">
+        <condition property="version" value="1.0-stable3-hacks-r${bzrversion}" else="1.0-stable3-localbuild">
             <equals arg1="" arg2="${bzrerror}" trim="true" />
         </condition> 
         <echo message="Version ${version}"></echo>
@@ -64,53 +57,77 @@
         </jar>
     </target>
     
-    <target name="run-test-application" depends="clean,jar">
+    <!-- Netbeans support -->
+        
+    <target name="nb-run-application">
+        <loadfile property="play.id" srcFile="../id" failonerror="false" quiet="true" />  
+        <loadproperties srcfile="${application.path}/conf/application.conf" />
+        <property name="jpda.port" value="8000" />
         <java classname="play.server.Server" dir="${basedir}" fork="true">
             <classpath>
                 <pathelement path="${application.path}/conf"/>
                 <path refid="project.classpath"/>                
             </classpath>
-            <sysproperty key="application.path" value="${basedir}/tests/test-application" />
+            <sysproperty key="application.path" value="${application.path}" />
+            <sysproperty key="play.id" value="${play.id}" />
             <sysproperty key="java.endorsed.dirs" value="${basedir}/endorsed" />
-            <jvmarg value="-javaagent:${basedir}/play.jar" />
-        </java>	
-    </target>
-    
-    <target name="debug-test-application" depends="clean,jar">
-        <nbjpdastart addressproperty="jpda.address" name="Play! framework" transport="dt_socket">
-            <classpath refid="project.classpath"/>
-        </nbjpdastart>
-        <echo message="Debugger is listening at ${jpda.address}" />
-        <java classname="play.server.Server" dir="${basedir}" fork="true">
-            <classpath>
-                <pathelement path="${application.path}/conf"/>
-                <path refid="project.classpath"/>                
-            </classpath>
-            <sysproperty key="application.path" value="${basedir}/tests/test-application" />
-            <sysproperty key="java.endorsed.dirs" value="${basedir}/endorsed" />
+            <sysproperty key="play.debug" value="true" />
             <jvmarg value="-javaagent:${basedir}/play.jar" />
             <jvmarg value="-Xdebug"/>
-            <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
+            <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.port},server=y,suspend=n"/>
         </java>	
     </target>
     
-     <target name="compile-tests" depends="compile">
+    <target name="nb-debug">
+        <loadproperties srcfile="${application.path}/conf/application.conf" />
+        <property name="jpda.port" value="8000" />
+        <nbjpdaconnect name="${application.name}" address="${jpda.port}" transport="dt_socket" />       
+    </target>
+    
+    <target name="test-application">
+        <java classname="play.test.TestRunner" dir="${basedir}" fork="true">
+            <classpath>
+                <pathelement path="${application.path}/conf"/>
+                <path refid="project.classpath"/>                
+            </classpath>
+            <sysproperty key="application.path" value="${application.path}" />
+            <sysproperty key="play.id" value="test" />
+            <sysproperty key="java.endorsed.dirs" value="${basedir}/endorsed" />
+            <jvmarg value="-javaagent:${basedir}/play.jar" />            
+        </java>       
+    </target>
+    
+    <target name="test-in-nb" depends="test">
+         <nbbrowse file="tests-results/html/index.html"/>
+    </target>
+    
+    <!-- Tests -->
+    
+    <target name="compile-tests" depends="compile">
         <javac encoding="utf-8" nowarn="${compile.nowarn}" debug="true" destdir="classes" classpathref="project.classpath" srcdir="tests/src" >
             <include name="**/*.java"/>
         </javac> 
     </target>
     
+    <!-- Launch all *Test.java -->
+    
     <target name="test" depends="compile-tests" description="run tests suite">                       
         <mkdir dir="tests-results" />
-        <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true">
+        <mkdir dir="${basedir}/tests-tmp" />
+        <junit errorproperty="atests.failed" failureproperty="atests.failed" fork="true" showoutput="true" tempdir="${basedir}/tests-tmp">
             <batchtest todir="tests-results">
                 <fileset dir="tests/src">
-                    <include name="**/*.java"/>
+                    <include name="**/*Test.java"/>
                 </fileset>
-            </batchtest>
-            <classpath refid="test.classpath"/>                    
+            </batchtest>            
+            <classpath>
+                <pathelement path="classes"/>
+                <path refid="project.classpath"/>                
+            </classpath>               
             <formatter type="brief" usefile="false"/>
-            <formatter type="xml"/>                    
+            <formatter type="xml"/>  
+            <jvmarg value="-javaagent:${basedir}/play.jar" />
+            <sysproperty key="tests-tmp" value="${basedir}/tests-tmp" />
         </junit>
         <mkdir dir="tests-results/html" />
         <junitreport todir="tests-results">
@@ -119,20 +136,39 @@
             </fileset>
             <report format="frames" todir="tests-results/html"/>
         </junitreport>
+        <delete dir="${basedir}/tests-tmp" />       
     </target>
     
-    <target name="debug-test-single" depends="compile-tests" description="run a single test">
+    <target name="debug-test-single" depends="compile-tests" description="debug a single test">
         <nbjpdastart addressproperty="jpda.address" name="Play! framework" transport="dt_socket">
             <classpath refid="project.classpath"/>
         </nbjpdastart>
         <mkdir dir="tests-results" />
-        <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true">
-            <test name="${testclass}" />
-            <classpath refid="test.classpath"/>                    
+        <mkdir dir="${basedir}/tests-tmp" />
+        <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true" tempdir="${basedir}/tests-tmp">
+            <test name="${testclass}" todir="tests-results" />
+            <classpath refid="project.classpath"/>                    
             <formatter type="brief" usefile="false"/> 
             <formatter type="xml"/>
-            <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
-        </junit>	
+            <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>  
+            <jvmarg value="-javaagent:${basedir}/play.jar" />
+            <sysproperty key="tests-tmp" value="${basedir}/tests-tmp" />
+        </junit>
+        <delete dir="${basedir}/tests-tmp" />
+    </target>
+    
+    <target name="test-single" depends="compile-tests" description="run a single test">
+        <mkdir dir="tests-results" />
+        <mkdir dir="${basedir}/tests-tmp" />
+        <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true" tempdir="${basedir}/tests-tmp" >
+            <test name="${testclass}" todir="tests-results" />            
+            <classpath refid="project.classpath"/>                    
+            <formatter type="brief" usefile="false"/> 
+            <formatter type="xml"/>
+            <jvmarg value="-javaagent:${basedir}/play.jar" />
+            <sysproperty key="tests-tmp" value="${basedir}/tests-tmp" />
+        </junit>
+        <delete dir="${basedir}/tests-tmp" />
     </target>
     
 </project>

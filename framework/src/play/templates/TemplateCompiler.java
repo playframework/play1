@@ -1,8 +1,11 @@
 package play.templates;
 
+import groovy.lang.Closure;
+import java.io.PrintWriter;
+import java.util.Map;
 import java.util.Stack;
 import play.Logger;
-import play.Play.VirtualFile;
+import play.vfs.VirtualFile;
 import play.exceptions.TemplateCompilationException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
@@ -16,7 +19,7 @@ public class TemplateCompiler {
             Template template = new Template(name, source);
             long start = System.currentTimeMillis();
             new Compiler().hop(template);
-            Logger.debug("%sms to parse template %s", System.currentTimeMillis()-start, file.relativePath());
+            Logger.trace("%sms to parse template %s", System.currentTimeMillis()-start, file.relativePath());
             return template;
         } catch (PlayException e) {
             throw e;
@@ -34,7 +37,8 @@ public class TemplateCompiler {
         Parser.Token state;
         Stack<Tag> tagsStack = new Stack<Tag>();
         int tagIndex;
-
+        boolean skipLineBreak;
+        
         static class Tag {
 
             String name;
@@ -78,7 +82,10 @@ public class TemplateCompiler {
                         message();
                         break;
                     case ACTION:
-                        action();
+                        action(false);
+                        break;
+                    case ABS_ACTION:
+                        action(true);
                         break;
                     case START_TAG:
                         startTag();
@@ -102,16 +109,26 @@ public class TemplateCompiler {
         }
 
         void plain() {
-            String text = parser.getToken().replaceAll("\"", "\\\\\"").replace("$", "\\$");
+            String text = parser.getToken().replace("\\", "\\\\").replaceAll("\"", "\\\\\"").replace("$", "\\$");
+            if(skipLineBreak && text.startsWith("\n")) {
+                text = text.substring(1);
+            }
+            skipLineBreak = false;
             if (text.indexOf("\n") > -1) {
-                String[] lines = text.split("\n");
+                String[] lines = text.split("\n", 10000);
                 for (int i = 0; i < lines.length; i++) {
+                    String line = lines[i];
+                    if(line.length() > 0 && (int)line.charAt(line.length()-1) == 13)  {
+                        line = line.substring(0, line.length()-1);
+                    }
                     if (i == lines.length - 1 && !text.endsWith("\n")) {
                         print("\tout.print(\"");
+                    } else if(i == lines.length - 1 && line.equals("")) {
+                        continue;
                     } else {
                         print("\tout.println(\"");
                     }
-                    print(lines[i]);
+                    print(line);
                     print("\")");
                     markLine(parser.getLine() + i);
                     println();
@@ -139,6 +156,7 @@ public class TemplateCompiler {
                 markLine(parser.getLine());
                 println();
             }
+            skipLineBreak = true;
         }
 
         void expr() {
@@ -152,19 +170,21 @@ public class TemplateCompiler {
 
         void message() {
             String expr = parser.getToken().trim();
-            print("\tkey=");
-            print(expr);
-            print(";out.print('Message -> '+key)");
+            print(";out.print(messages.get(" + expr + "))");
             markLine(parser.getLine());
             println();
         }
 
-        void action() {
+        void action(boolean absolute) {
             String action = parser.getToken().trim();
             if (!action.endsWith(")")) {
                 action = action + "()";
             }
-            print("\tout.print(actionBridge." + action + ");");
+            if(absolute) {
+                print("\tout.print(request.getBase() + actionBridge." + action + ");");
+            } else {
+                print("\tout.print(actionBridge." + action + ");");
+            }
             markLine(parser.getLine());
             println();
         }
@@ -194,6 +214,8 @@ public class TemplateCompiler {
                 markLine(parser.getLine());
                 println();
             }
+            skipLineBreak = true;
+            
         }
 
         void endTag() {
@@ -223,11 +245,18 @@ public class TemplateCompiler {
                 print("}");
                 markLine(currentLine);
                 println();
-                print("invokeTag(" + tag.startLine + ",'" + tagName + "',attrs" + tagIndex + ",body" + tagIndex + ")");
+                // Use fastTag if exists
+                try {
+                    FastTags.class.getDeclaredMethod("_" + tag.name, Map.class, Closure.class, PrintWriter.class, Template.ExecutableTemplate.class, int.class);
+                    print("play.templates.FastTags._" + tag.name + "(attrs" + tagIndex + ",body" + tagIndex + ", out, this, " + tag.startLine + ")");
+                } catch(NoSuchMethodException e) {
+                    print("invokeTag(" + tag.startLine + ",'" + tagName + "',attrs" + tagIndex + ",body" + tagIndex + ")");
+                }
                 markLine(tag.startLine);
                 println();
             }
             tagIndex--;
+            skipLineBreak = true;
         }  
         
         // Writer
@@ -274,6 +303,7 @@ public class TemplateCompiler {
             END_TAG, // #{/...}
             MESSAGE, // &{...}
             ACTION, // @{...}
+            ABS_ACTION, // @@{...}
         }
         private int end,  begin,  end2,  begin2,  len;
         private Token state = Token.PLAIN;
@@ -330,6 +360,9 @@ public class TemplateCompiler {
                         if (c == '&' && c1 == '{') {
                             return found(Token.MESSAGE, 2);
                         }
+                        if (c == '@' && c1 == '@' && c2 == '{') {
+                            return found(Token.ABS_ACTION, 3);
+                        }
                         if (c == '@' && c1 == '{') {
                             return found(Token.ACTION, 2);
                         }
@@ -358,6 +391,11 @@ public class TemplateCompiler {
                         }
                         break;
                     case ACTION:
+                        if (c == '}') {
+                            return found(Token.PLAIN, 1);
+                        }
+                        break;
+                    case ABS_ACTION:
                         if (c == '}') {
                             return found(Token.PLAIN, 1);
                         }

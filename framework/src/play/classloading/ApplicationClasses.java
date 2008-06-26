@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import play.Play;
-import play.Play.VirtualFile;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.Enhancer;
+import play.classloading.enhancers.JPAEnhancer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer;
-import play.classloading.enhancers.PropertiesEnhancer;
 import play.exceptions.UnexpectedException;
+import play.vfs.VirtualFile;
 
 public class ApplicationClasses {
 
@@ -40,7 +39,8 @@ public class ApplicationClasses {
     Class[] enhancers = new Class[] {
         ControllersEnhancer.class,
         LocalvariablesNamesEnhancer.class,
-        PropertiesEnhancer.class
+        //PropertiesEnhancer.class
+        JPAEnhancer.class
     };
 
     public class ApplicationClass {
@@ -49,6 +49,7 @@ public class ApplicationClasses {
         public VirtualFile javaFile;
         public String javaSource;
         public byte[] javaByteCode;
+        public byte[] enhancedByteCode;
         public Class javaClass;
         public Long timestamp = 0L;
         boolean compiled;
@@ -61,20 +62,18 @@ public class ApplicationClasses {
 
         public void refresh() {
             this.javaSource = this.javaFile.contentAsString();
-            this.javaByteCode = null;  
+            this.javaByteCode = null;
+            this.enhancedByteCode = null;
             this.timestamp = this.javaFile.lastModified();
             this.compiled = false;            
         }
-
-        public void setByteCode(byte[] compiledByteCode) {
-            this.javaByteCode = compiledByteCode;                       
-        }
         
-        public void enhance() {
+        public byte[] enhance() {
             try {       
                 for(Class enhancer : enhancers) {
                     ((Enhancer)enhancer.newInstance()).enhanceThisClass(this);
                 } 
+                return this.enhancedByteCode;
             } catch(Exception e) {
                 throw new UnexpectedException(e);
             }
@@ -97,9 +96,12 @@ public class ApplicationClasses {
 
     // ~~ Utils
     public VirtualFile getJava(String name) {
+        if(name.contains("$")) {
+            name = name.substring(0, name.indexOf("$"));
+        }
         name = name.replace(".", "/") + ".java";
         for (VirtualFile path : Play.javaPath) {
-            VirtualFile javaFile = new VirtualFile(path, name);
+            VirtualFile javaFile = path.child(name);
             if (javaFile.exists()) {
                 return javaFile;
             }

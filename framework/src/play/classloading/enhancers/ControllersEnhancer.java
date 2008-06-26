@@ -65,7 +65,7 @@ public class ControllersEnhancer extends Enhancer {
 
         }
         
-        applicationClass.setByteCode(ctClass.toBytecode());
+        applicationClass.enhancedByteCode = ctClass.toBytecode();
         ctClass.defrost();
 
     }
@@ -73,9 +73,11 @@ public class ControllersEnhancer extends Enhancer {
     static boolean isThreadedFieldAccess(CtField field) {
         if(field.getDeclaringClass().getName().equals("play.mvc.Controller")) {
             return field.getName().equals("params") 
+                || field.getName().equals("request") 
                 || field.getName().equals("response") 
                 || field.getName().equals("session")
                 || field.getName().equals("params")
+                || field.getName().equals("renderArgs")
                 || field.getName().equals("flash");
 	}
 	return false;
@@ -95,8 +97,7 @@ public class ControllersEnhancer extends Enhancer {
             allow.set(false);
         }
         
-        static ThreadLocal<Boolean> allow = new ThreadLocal<Boolean>();
-        
+        static ThreadLocal<Boolean> allow = new ThreadLocal<Boolean>();       
         
     }
     

@@ -35,51 +35,55 @@ public class DB {
                 ds.setMaxPoolSize(30);
                 ds.setMinPoolSize(10);
                 datasource = ds;
-                Logger.info("The database is ready");
+                Logger.info("Connected to %s", ds.getJdbcUrl());
             } catch (Exception e) {
-                Logger.debug(e);
+                Logger.error(e, "Cannot connected to the database");
             }
         }
     }
-        
-    public static void close() {  
-        if(localConnection.get() != null) {
+
+    public static void close() {
+        if (localConnection.get() != null) {
             try {
                 Connection connection = localConnection.get();
                 localConnection.set(null);
                 connection.close();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 throw new DatabaseException("It's possible than the connection was not propertly closed !", e);
             }
         }
     }
-    
     static ThreadLocal<Connection> localConnection = new ThreadLocal<Connection>();
-    
+
     public static Connection getConnection() {
         try {
-            if(JPA.isEnabled()) {
+            if (JPA.isEnabled()) {
                 return ((org.hibernate.ejb.EntityManagerImpl) JPAContext.getEntityManager()).getSession().connection();
             }
-            if(localConnection.get() != null) {
+            if (localConnection.get() != null) {
                 return localConnection.get();
             }
             Connection connection = datasource.getConnection();
             localConnection.set(connection);
             return connection;
         } catch (SQLException ex) {
-            throw new DatabaseException("Cannot obtain a new connection ("+ex.getMessage()+")", ex);
+            throw new DatabaseException("Cannot obtain a new connection (" + ex.getMessage() + ")", ex);
+        } catch (NullPointerException e) {
+            if (datasource == null) {
+                throw new DatabaseException("No database found. Check the configuration of your application.", e);
+            }
+            throw e;
         }
     }
-    
+
     public static boolean execute(String SQL) {
         try {
             return getConnection().createStatement().execute(SQL);
         } catch (SQLException ex) {
             throw new DatabaseException(ex.getMessage(), ex);
-        } 
+        }
     }
-    
+
     public static ResultSet executeQuery(String SQL) {
         try {
             return getConnection().createStatement().executeQuery(SQL);
@@ -90,17 +94,17 @@ public class DB {
 
     private static boolean changed() {
         Properties p = Play.configuration;
-        
-        if("mem".equals(p.getProperty("db"))) {
+
+        if ("mem".equals(p.getProperty("db"))) {
             p.put("db.driver", "org.hsqldb.jdbcDriver");
             p.put("db.url", "jdbc:hsqldb:mem:playembed");
             p.put("db.user", "sa");
             p.put("db.pass", "");
         }
-        
-        if("fs".equals(p.getProperty("db"))) {
+
+        if ("fs".equals(p.getProperty("db"))) {
             p.put("db.driver", "org.hsqldb.jdbcDriver");
-            p.put("db.url", "jdbc:hsqldb:file:"+(new File(Play.applicationPath, "db/db").getAbsolutePath()));
+            p.put("db.url", "jdbc:hsqldb:file:" + (new File(Play.applicationPath, "db/db").getAbsolutePath()));
             p.put("db.user", "sa");
             p.put("db.pass", "");
         }

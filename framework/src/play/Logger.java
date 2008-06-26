@@ -2,40 +2,54 @@ package play;
 
 public class Logger {
     
-    static Long start = System.currentTimeMillis();
+    public static org.apache.log4j.Logger log4j = org.apache.log4j.Logger.getLogger("play");
+ 
+    public static void trace(String message, Object... args) { 
+        log4j.trace(String.format(message, args));
+    }
+    
+    public static void trace(Throwable e, String message, Object... args) { 
+        log4j.trace(String.format(message, args), e);
+    }
     
     public static void debug(String message, Object... args) { 
-        print("DEBUG", message, args);
+        log4j.debug(String.format(message, args));
+    }
+    
+    public static void debug(Throwable e, String message, Object... args) { 
+        log4j.debug(String.format(message, args), e);
+    }
+    
+    public static void info(String message, Object... args) { 
+        log4j.info(String.format(message, args));
+    }
+    
+    public static void info(Throwable e, String message, Object... args) { 
+        log4j.info(String.format(message, args), e);
+    }
+    
+    public static void warn(String message, Object... args) { 
+        log4j.warn(String.format(message, args));
+    }
+    
+    public static void warn(Throwable e, String message, Object... args) { 
+        log4j.warn(String.format(message, args), e);
     }
 
-    public static void debug(Throwable e) { 
-        e.printStackTrace();
+    public static void error(String message, Object... args) { 
+        log4j.error(String.format(message, args));
     }
     
-    public static void info(String message, Object... args) {    
-        print("INFO", message, args);
+    public static void error(Throwable e, String message, Object... args) { 
+        log4j.error(String.format(message, args), e);
     }
     
-    public static void warn(String message, Object... args) {
-        print("WARN", message, args);
+    public static void fatal(String message, Object... args) { 
+        log4j.fatal(String.format(message, args));
     }
     
-    public static void error(String message, Object... args) {
-        print("ERROR", message, args);
-    }
-    
-    public static void fatal(String message, Object... args) {
-        print("FATAL", message, args);
-    }
-    
-    private static void print(String level, String message, Object... args) {
-        if(!level.equals("DEBUG")) {
-            System.out.println(String.format("%-6s %-6s %s", time(), level, String.format(message, args)));
-        }
-    }
-   
-    private static Long time() {
-        return System.currentTimeMillis() - start;
+    public static void fatal(Throwable e, String message, Object... args) { 
+        log4j.fatal(String.format(message, args), e);
     }
 
 }

@@ -20,9 +20,8 @@ public class Http {
 
     public static class Cookie {
         public String name;
-        public String domain;
-        public String path;
-        public Boolean secure;
+        public String path = "/";
+        public boolean secure = false;
         public String value;
     }
 
@@ -55,6 +54,12 @@ public class Http {
             return current.get();
         }
         
+        public String getBase() {
+            if(port == 80 || port == 443) {
+                return String.format("%s://%s", secure ? "https" : "http", domain);
+            }
+            return String.format("%s://%s:%s", secure ? "https" : "http", domain, port);
+        }
         
     }
 
@@ -81,6 +86,17 @@ public class Http {
             headers.put(name, h);
         }
         
+        public void setCookie(String name, String value) {
+            if(cookies.containsKey(name)) {
+                cookies.get(name).value = value;
+            } else {
+                Cookie cookie = new Cookie();
+                cookie.name = name;
+                cookie.value = value;
+                cookies.put(name, cookie);
+            }
+        }
+                
     }
 
 }

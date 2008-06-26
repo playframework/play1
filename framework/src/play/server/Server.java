@@ -29,16 +29,16 @@ public class Server {
         acceptor.setHandler(new HttpHandler());
         try {
             acceptor.bind(new InetSocketAddress(httpPort));
-            Logger.info("Play Listening on port %s ...", httpPort);
+            Logger.info("Listening for HTTP on port %s ...", httpPort);
         } catch (IOException e) {
-            Logger.error("Play could not bind on port " + httpPort, e);
+            Logger.error("Could not bind on port " + httpPort, e);
             acceptor.dispose();
         }
     }
 
     public static void main(String[] args) {
         File root = new File(System.getProperty("application.path"));
-        Play.init(root);
+        Play.init(root, System.getProperty("play.id", ""));
         new Server();
     }
 }

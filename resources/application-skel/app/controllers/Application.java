@@ -6,7 +6,7 @@ public class Application extends Controller {
 
     /**
      * Default action.
-     * renders the Application/index.html template
+     * renders the app/views/Application/index.html template
      */
     public static void index() {
         render();

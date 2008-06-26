@@ -37,7 +37,8 @@
                 </action>
                 <action name="run">
                     <script>framework/build.xml</script>
-                    <target>run-test-application</target>
+                    <target>nb-run-application</target>
+                    <property name="application.path">tests/test-application</property>
                 </action>
                 <action name="clean">
                     <script>framework/build.xml</script>
@@ -45,7 +46,7 @@
                 </action>
                 <action name="test">
                     <script>framework/build.xml</script>
-                    <target>test</target>
+                    <target>test-in-nb</target>
                 </action>
                 <action name="rebuild">
                     <script>framework/build.xml</script>
@@ -65,15 +66,28 @@
                         </arity>
                     </context>
                 </action>
-                <action name="debug">
-                    <script>framework/build.xml</script>
-                    <target>debug-test-application</target>
-                </action>
-                <action name="debug.single">
+                <action name="run.single">
                     <script>framework/build.xml</script>
                     <target>test-single</target>
                     <context>
-                        <property>debug.class</property>
+                        <property>testclass</property>
+                        <folder>framework/tests/src</folder>
+                        <pattern>\.java$</pattern>
+                        <format>java-name</format>
+                        <arity>
+                            <one-file-only/>
+                        </arity>
+                    </context>
+                </action>
+                <action name="debug">
+                    <script>framework/build.xml</script>
+                    <target>nb-debug</target>
+                </action>
+                <action name="debug.single">
+                    <script>framework/build.xml</script>
+                    <target>debug-test-single</target>
+                    <context>
+                        <property>testclass</property>
                         <folder>framework/tests/src</folder>
                         <pattern>\.java$</pattern>
                         <format>java-name</format>
@@ -102,11 +116,21 @@
                 <script>framework/build.xml</script>
                 <build-target>jar</build-target>
             </export>
+            <export>
+                <type>folder</type>
+                <location>framework/classes</location>
+                <script>framework/build.xml</script>
+                <build-target>jar</build-target>
+            </export>
             <view>
                 <items>
                     <source-folder style="tree">
-                        <label>tags</label>
-                        <location>framework/tags</location>
+                        <label>templates</label>
+                        <location>framework/templates</location>
+                    </source-folder>
+                    <source-folder style="tree">
+                        <label>resources</label>
+                        <location>resources</location>
                     </source-folder>
                     <source-folder style="packages">
                         <label>sources</label>
@@ -135,7 +159,7 @@
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
             <compilation-unit>
                 <package-root>framework/src</package-root>
-                <classpath mode="compile">framework/lib/antlr-2.7.6.jar:framework/lib/c3p0-0.9.1.jar:framework/lib/commons-collections-3.1.jar:framework/lib/commons-logging-1.1.1.jar:framework/lib/compiler-jdt.jar:framework/lib/dom4j-1.6.1.jar:framework/lib/ejb3-persistence.jar:framework/lib/hibernate-annotations.jar:framework/lib/hibernate-commons-annotations.jar:framework/lib/hibernate-entitymanager.jar:framework/lib/hibernate3.jar:framework/lib/hsqldb.jar:framework/lib/javassist.jar:framework/lib/jregex1.2_01.jar:framework/lib/junit-4.4.jar:framework/lib/log4j-1.2.13.jar:framework/lib/slf4j-api-1.4.2.jar:framework/lib/slf4j-log4j13-1.0.1.jar:framework/lib/groovy-all-1.6-beta-1.jar:framework/lib/openjdk_071012-httpserver.jar:framework/lib/asyncweb-common-0.9.0-SNAPSHOT.jar:framework/lib/mina-core-2.0.0-M2-SNAPSHOT.jar:framework/lib/commons-fileupload-1.2.jar</classpath>
+                <classpath mode="compile">framework/lib/antlr-2.7.6.jar:framework/lib/c3p0-0.9.1.jar:framework/lib/commons-collections-3.1.jar:framework/lib/commons-logging-1.1.1.jar:framework/lib/compiler-jdt.jar:framework/lib/dom4j-1.6.1.jar:framework/lib/ejb3-persistence.jar:framework/lib/hibernate-annotations.jar:framework/lib/hibernate-commons-annotations.jar:framework/lib/hibernate-entitymanager.jar:framework/lib/hibernate3.jar:framework/lib/hsqldb.jar:framework/lib/javassist.jar:framework/lib/jregex1.2_01.jar:framework/lib/junit-4.4.jar:framework/lib/log4j-1.2.13.jar:framework/lib/slf4j-api-1.4.2.jar:framework/lib/slf4j-log4j13-1.0.1.jar:framework/lib/groovy-all-1.6-beta-1.jar:framework/lib/openjdk_071012-httpserver.jar:framework/lib/asyncweb-common-0.9.0-SNAPSHOT.jar:framework/lib/mina-core-2.0.0-M2-SNAPSHOT.jar:framework/lib/commons-fileupload-1.2.jar:framework/lib/joid-1.0.3.jar:framework/lib/tsik.jar:framework/lib/memcached-2.1.jar:framework/lib/spy-2.4.jar:framework/lib/commons-httpclient.jar:framework/lib/ezmorph-1.0.3.jar:framework/lib/flexjson_modified.jar:framework/lib/json-lib-2.2.2-jdk15.jar:framework/lib/jaxen-1.1.jar:framework/lib/java-openid-sxip-0.9.4.339-light.jar</classpath>
                 <built-to>framework/classes</built-to>
                 <source-level>1.5</source-level>
             </compilation-unit>
@@ -143,6 +167,7 @@
                 <package-root>framework/tests/src</package-root>
                 <unit-tests/>
                 <classpath mode="compile">framework/classes:framework/lib/antlr-2.7.6.jar:framework/lib/c3p0-0.9.1.jar:framework/lib/commons-collections-3.1.jar:framework/lib/commons-logging-1.1.1.jar:framework/lib/compiler-jdt.jar:framework/lib/dom4j-1.6.1.jar:framework/lib/ejb3-persistence.jar:framework/lib/hibernate-annotations.jar:framework/lib/hibernate-commons-annotations.jar:framework/lib/hibernate-entitymanager.jar:framework/lib/hibernate3.jar:framework/lib/hsqldb.jar:framework/lib/javassist.jar:framework/lib/jregex1.2_01.jar:framework/lib/junit-4.4.jar:framework/lib/log4j-1.2.13.jar:framework/lib/slf4j-api-1.4.2.jar:framework/lib/slf4j-log4j13-1.0.1.jar</classpath>
+                <built-to>framework/classes</built-to>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>

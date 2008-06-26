@@ -3,8 +3,21 @@ package play.db.jpa;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Query;
 
+@MappedSuperclass
 public class JPAModel implements Serializable {
+
+    @Id
+    @GeneratedValue
+    public Long id;
+
+    public Long getId() {
+        return id;
+    }
 
     public void save() {
         getEntityManager().persist(this);         
@@ -23,6 +36,14 @@ public class JPAModel implements Serializable {
         throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
     }
     
+    public static <T extends JPAModel> List<T> findAll() {
+    	throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
+    }
+    
+    public static <T extends JPAModel> T findById(Long id) {
+    	throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
+    }
+    
     public static <T extends JPAModel> T findOneBy(String query, Object... params) {
         throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
     }
@@ -30,19 +51,11 @@ public class JPAModel implements Serializable {
     public static <T extends JPAModel> List<T> findBy(String query, Object... params) {
         throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
     }
-    
-    public static Integer deleteBy(String query, Object... params) {
-        throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
-    }
-    
-    public EntityManager getEntityManager() {
+       
+    public static EntityManager getEntityManager() {
         return JPAContext.getEntityManager();
     }
-    
-    private Object getId() {
-        return null;
-    }
-    
+        
     @Override
     public boolean equals(Object other) {
         if (other == null) {
@@ -68,4 +81,25 @@ public class JPAModel implements Serializable {
         return this.getId().hashCode();
     }
     
+    @SuppressWarnings("unused")
+    protected static String createFindByQuery(String entityName, String entityClass, String query, Object... params) {
+        if (query.trim().toLowerCase().startsWith("select ")) {
+            return query;
+        }
+        if (query.trim().toLowerCase().startsWith("from ")) {
+            return query;
+        }
+        if (query.trim().indexOf(" ") == -1 && params.length == 1) {
+            query += " = ?";
+        }
+        return  "from " + entityName + " where " + query;       
+    }
+    
+    @SuppressWarnings ("unused")
+    protected static Query bindParameters (Query q, Object... params) {
+    	for (int i=0;i<params.length;i++) {
+    		q.setParameter(i+1, params[i]);
+    	}
+    	return q;
+    }
 }
