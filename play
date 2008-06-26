@@ -44,6 +44,14 @@ function secret {
     fi
 }
 
+function readConf {
+    unset CONF_VALUE
+    CONF_VALUE="`cat "$APPLICATION_PATH"/conf/application.conf | grep ^%$PLAY_ID.$1 | sed -e 's/^.*=//g'`"
+    if [ -z $CONF_VALUE ] ; then
+        CONF_VALUE="`cat "$APPLICATION_PATH"/conf/application.conf | grep ^$1 | sed -e 's/^.*=//g'`"	
+    fi
+}
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~ Is it a real OS ?
 
@@ -241,10 +249,21 @@ else
 fi
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~ Custom Java args
-JAVA_ARGS="`cat "$APPLICATION_PATH"/conf/application.conf | grep ^%$PLAY_ID.java.args | sed -e 's/.*.java.args=//g'`"
-if [ -z $JAVA_ARGS ] ; then
-    JAVA_ARGS="`cat "$APPLICATION_PATH"/conf/application.conf | grep ^java.args | sed -e 's/java.args=//g'`"	
+# ~~~~~~~~~~~~~~~~~~~~~~ Read some configuration from conf/application.conf
+readConf "jvm.memory"
+JAVA_ARGS=$CONF_VALUE
+
+readConf "jpda.port"
+JPDA_PORT=$CONF_VALUE
+if [ -z $JPDA_PORT ] ; then
+    JPDA_PORT=8000
+fi
+
+readConf "application.mode"
+APPLICATION_MODE=$CONF_VALUE
+
+if [ $APPLICATION_MODE = "prod" ] ; then
+    JAVA_ARGS="$JAVA_ARGS -server"
 fi
   
 
@@ -278,17 +297,6 @@ for jar in `ls -c1 "$PLAY_BASE/framework/lib"/*.jar 2> /dev/null`; do
 done
 if $CYGWIN; then
 	IFS=OLD_IFS
-fi
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~ Read JDPA configuration
-
-JPDA_PORT="`cat "$APPLICATION_PATH/conf/application.conf" | grep ^%$PLAY_ID.jpda.port | sed -e 's/.*jpda.port=//g'`"
-if [ -z $JPDA_PORT ] ; then
-    JPDA_PORT="`cat "$APPLICATION_PATH/conf/application.conf" | grep ^jpda.port | sed -e 's/jpda.port=//g'`"
-fi
-if [ -z $JPDA_PORT ] ; then
-    JPDA_PORT=8000
 fi
 
 
