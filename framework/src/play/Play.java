@@ -39,6 +39,7 @@ public class Play {
     public static List<VirtualFile> javaPath;
     public static List<VirtualFile> templatesPath;
     public static List<VirtualFile> routes;
+    public static List<VirtualFile> staticResources;
     public static VirtualFile conf;
     public static Properties configuration;
     public static String applicationName;
@@ -122,6 +123,9 @@ public class Play {
             templatesPath.add(appRoot.child("app/views"));
             templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework/templates")));
             TemplateLoader.cleanCompiledCache();
+            //Static resources
+            staticResources = new ArrayList<VirtualFile>();
+            staticResources.add(appRoot.child("public"));
             // Classloader
             classloader = new ApplicationClassloader();
             // SecretKey
@@ -170,7 +174,7 @@ public class Play {
         }
     }
 
-    protected static synchronized void detectChanges() {
+    public static synchronized void detectChanges() {
         if (mode == Mode.PROD) {
             return;
         }
@@ -228,6 +232,7 @@ public class Play {
         VirtualFile root = VirtualFile.open(fl);
         javaPath.add(root.child("app"));
         templatesPath.add(root.child("app/views"));
+        staticResources.add(root.child("public"));
         routes.add(root.child("conf/routes"));
         Logger.info("Plugin added: " + fl.getAbsolutePath());
     }

@@ -3,6 +3,8 @@ package play.vfs;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.channels.Channel;
+import java.util.Collection;
 import java.util.List;
 import play.exceptions.UnexpectedException;
 import play.libs.Files;
@@ -18,7 +20,7 @@ public abstract class VirtualFile {
     public abstract VirtualFile child(String name);
     public abstract Long lastModified();
     public abstract long length();
-
+    public abstract Channel channel();
     public static VirtualFile open(String file) {
         return open(new File(file));
     }
@@ -64,5 +66,11 @@ public abstract class VirtualFile {
         return getName();
     }
     
-    
+    public static VirtualFile search (Collection<VirtualFile> roots, String path) {
+    	for (VirtualFile file : roots) {
+			if (file.child(path).exists()) 
+				return file.child(path);
+		}
+    	return null;
+    }
 }

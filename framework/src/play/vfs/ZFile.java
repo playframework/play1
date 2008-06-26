@@ -3,11 +3,14 @@ package play.vfs;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.channels.Channel;
+import java.nio.channels.Channels;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import play.exceptions.UnexpectedException;
 
 public class ZFile extends VirtualFile {
@@ -123,4 +126,8 @@ public class ZFile extends VirtualFile {
     public String relativePath() {
         return fullPath;
     }
+
+	public Channel channel() {
+		return Channels.newChannel(inputstream());
+	}
 }
