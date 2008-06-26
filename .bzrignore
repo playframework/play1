@@ -16,3 +16,4 @@ framework/tests/test-application/db
 .project
 framework/tests/tmp
 id
+framework/tests-tmp

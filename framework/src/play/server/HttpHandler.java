@@ -1,10 +1,8 @@
 package play.server;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -41,6 +39,8 @@ import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.templates.TemplateLoader;
+import play.vfs.FileSystemFile;
+import play.vfs.VirtualFile;
 
 public class HttpHandler implements IoHandler {
 
@@ -58,17 +58,16 @@ public class HttpHandler implements IoHandler {
 
     public void serveStatic(IoSession session, HttpRequest request, MutableHttpResponse response) throws IOException {
         URI uri = request.getRequestUri();
-        File target = new File(Play.applicationPath + "/" + uri.getPath());
-        if (!target.exists() && !target.isFile()) {
+        VirtualFile file = VirtualFile.search(Play.staticResources, uri.getPath().substring("/public/".length()));
+        if (file==null || file.isDirectory()) {
             serve404(session, request, response);
         } else {
-            //attachFile(session, response, target);
             if (Play.configuration.getProperty("mode", "dev").equals("dev")) {
                 response.setHeader("Cache-Control", "no-cache");
-                attachFile(session, response, target);
+                attachFile(session, response, file);
             } else {
-                long last = target.lastModified();
-                String etag = last + "-" + target.hashCode();
+                long last = file.lastModified();
+                String etag = last + "-" + file.hashCode();
                 if (!isModified(etag, last, request)) {
                     response.setHeader("Etag", etag);
                     response.setStatus(HttpResponseStatus.NOT_MODIFIED);
@@ -76,19 +75,22 @@ public class HttpHandler implements IoHandler {
                     response.setHeader("Last-Modified", formatter.format(new Date(last)));
                     response.setHeader("Cache-Control", "max-age=3600");
                     response.setHeader("Etag", etag);
-                    attachFile(session, response, target);
+                    attachFile(session, response, file);
                 }
             }
             writeResponse(session, request, response);
         }
     }
 
-    public static void attachFile(IoSession session, MutableHttpResponse response, File target) throws IOException {
-        RandomAccessFile raf = new RandomAccessFile(target, "r");
-        response.setStatus(HttpResponseStatus.OK);
-        session.setAttribute("file", raf);
-        response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + raf.length());
-        response.setHeader(HttpHeaderConstants.KEY_TRANSFER_CODING, "pppp");
+    public static void attachFile(IoSession session, MutableHttpResponse response, VirtualFile file) throws IOException {
+    	response.setStatus(HttpResponseStatus.OK);
+    	if (file instanceof FileSystemFile) {    		
+            session.setAttribute("file", file.channel());
+            response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + file.length());
+            response.setHeader(HttpHeaderConstants.KEY_TRANSFER_CODING, "pppp");
+    	} else {
+    		response.setContent(IoBuffer.wrap(file.content()));
+    	}
     }
 
     public static boolean isModified(String etag, long last, HttpRequest request) {
@@ -186,15 +188,14 @@ public class HttpHandler implements IoHandler {
     public void messageSent(IoSession session, Object message) throws Exception {
         if (message instanceof DefaultHttpResponse) {
             if (session.getAttribute("file") != null) {
-                FileChannel channel = ((RandomAccessFile) session.getAttribute("file")).getChannel();
-                WriteFuture future = session.write(channel);
+                FileChannel channel = ((FileChannel) session.getAttribute("file"));
+            	WriteFuture future = session.write(channel);
                 future.addListener(new IoFutureListener<IoFuture>() {
-
                     public void operationComplete(IoFuture future) {
-                        RandomAccessFile raf = (RandomAccessFile) future.getSession().getAttribute("file");
+                        FileChannel channel = (FileChannel) future.getSession().getAttribute("file");
                         future.getSession().removeAttribute("file");
                         try {
-                            raf.close();
+                        	channel.close();
                         } catch (IOException e) {
                             Logger.error(e, "Unexpected error");
                         }

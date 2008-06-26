@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.Channel;
+import java.util.Collection;
 import java.util.List;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
@@ -20,7 +22,8 @@ public abstract class VirtualFile {
     public abstract VirtualFile child(String name);
     public abstract Long lastModified();
     public abstract long length();
-
+    public abstract Channel channel();
+    
     public static VirtualFile open(String file) {
         return open(new File(file));
     }
@@ -48,7 +51,7 @@ public abstract class VirtualFile {
             throw new UnexpectedException(e);
         }
     }
-    
+
     public void write(CharSequence string) {
         try {
             IO.writeContent(string, outputstream());
@@ -73,6 +76,13 @@ public abstract class VirtualFile {
     public String toString() {
         return getName();
     }
-    
-    
+
+    public static VirtualFile search(Collection<VirtualFile> roots, String path) {
+        for (VirtualFile file : roots) {
+            if (file.child(path).exists()) {
+                return file.child(path);
+            }
+        }
+        return null;
+    }
 }

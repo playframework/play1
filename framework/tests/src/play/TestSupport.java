@@ -37,7 +37,7 @@ public abstract class TestSupport extends ApplicationTest {
         }
         
         public void addRoute(String definition) throws IOException {
-            IO.appendContent(definition, new FileOutputStream(new File(root, "conf/routes")));
+            IO.writeContent(definition, new FileOutputStream(new File(root, "conf/routes"), true));
         }
 
         public void writeController(String name, String code) throws IOException  {

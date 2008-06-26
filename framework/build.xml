@@ -113,6 +113,7 @@
     
     <target name="test" depends="compile-tests" description="run tests suite">                       
         <mkdir dir="tests-results" />
+        <delete dir="${basedir}/tests-tmp" />     
         <mkdir dir="${basedir}/tests-tmp" />
         <junit errorproperty="atests.failed" failureproperty="atests.failed" fork="true" showoutput="true" tempdir="${basedir}/tests-tmp">
             <batchtest todir="tests-results">
@@ -135,8 +136,7 @@
                 <include name="TEST-*.xml"/>
             </fileset>
             <report format="frames" todir="tests-results/html"/>
-        </junitreport>
-        <delete dir="${basedir}/tests-tmp" />       
+        </junitreport>          
     </target>
     
     <target name="debug-test-single" depends="compile-tests" description="debug a single test">

@@ -2,9 +2,12 @@ package play.vfs;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.Channel;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,7 +53,7 @@ public class FileSystemFile extends VirtualFile {
 
     public List<VirtualFile> list() {
         List<VirtualFile> res = new ArrayList<VirtualFile>();
-        if(exists()) {
+        if (exists()) {
             File[] children = realFile.listFiles();
             for (int i = 0; i < children.length; i++) {
                 res.add(new FileSystemFile(children[i]));
@@ -73,7 +76,7 @@ public class FileSystemFile extends VirtualFile {
             throw new UnexpectedException(e);
         }
     }
-    
+
     public OutputStream outputstream() {
         try {
             return new FileOutputStream(realFile);
@@ -114,5 +117,16 @@ public class FileSystemFile extends VirtualFile {
 
     public VirtualFile child(String name) {
         return new FileSystemFile(this, name);
+    }
+
+    public Channel channel() {
+        try {
+            FileInputStream fis = new FileInputStream(realFile);
+            FileChannel ch = fis.getChannel();
+            return ch;
+        } catch (FileNotFoundException e) {
+            return null;
+        }
+
     }
 }

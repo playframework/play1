@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.Channel;
+import java.nio.channels.Channels;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -23,11 +25,11 @@ public class ZFile extends VirtualFile {
         zip = new ZipFile(fl);
         Enumeration entries = zip.entries();
         while (entries.hasMoreElements()) {
-            ZipEntry entry = (ZipEntry) entries.nextElement();
-            ZFile zf = getOrCreate(entry.getName());
+            ZipEntry lentry = (ZipEntry) entries.nextElement();
+            ZFile zf = getOrCreate(lentry.getName());
             zf.zip = zip;
-            zf.entry = entry;
-            zf.fullPath = entry.getName();
+            zf.entry = lentry;
+            zf.fullPath = lentry.getName();
         }
     }
 
@@ -127,5 +129,9 @@ public class ZFile extends VirtualFile {
 
     public String relativePath() {
         return fullPath;
+    }
+
+    public Channel channel() {
+        return Channels.newChannel(inputstream());
     }
 }
