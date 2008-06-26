@@ -45,7 +45,6 @@ import play.vfs.VirtualFile;
 public class HttpHandler implements IoHandler {
 
     public void messageReceived(IoSession session, Object message) throws Exception {
-    	Play.detectChanges();
         HttpRequest minaRequest = (HttpRequest) message;
         MutableHttpResponse minaResponse = new DefaultHttpResponse();
         URI uri = minaRequest.getRequestUri();

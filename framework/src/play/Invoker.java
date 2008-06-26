@@ -33,6 +33,7 @@ public class Invoker {
         public abstract void execute() throws Exception;
 
         public static void before() {
+        	Play.detectChanges();
             Thread.currentThread().setContextClassLoader(Play.classloader);
             LocalVariablesNamesTracer.enterMethod();
             JPA.startTx(false);
