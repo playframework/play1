@@ -17,8 +17,8 @@ public class Messages {
     
     public static String get(String key, Object... args) {
         String value = null;
-        if(locales.containsKey(Locale.get())) {
-            value = locales.get(Locale.get()).getProperty(key);
+        if(locales.containsKey(Lang.get())) {
+            value = locales.get(Lang.get()).getProperty(key);
         }
         if(value == null) {
             value = defaults.getProperty(key);

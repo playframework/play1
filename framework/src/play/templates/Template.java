@@ -33,7 +33,7 @@ import play.exceptions.TemplateExecutionException;
 import play.exceptions.TemplateExecutionException.DoBodyException;
 import play.exceptions.TemplateNotFoundException;
 import play.exceptions.UnexpectedException;
-import play.i18n.Locale;
+import play.i18n.Lang;
 import play.i18n.Messages;
 import play.mvc.ActionInvoker;
 import play.mvc.Router;
@@ -98,7 +98,7 @@ public class Template {
         compile();
         Binding binding = new Binding(args);
         binding.setVariable("messages", new Messages());
-        binding.setVariable("locale", Locale.get());
+        binding.setVariable("lang", Lang.get());
         StringWriter writer = null;
         Boolean applyLayouts = false;
         if(!args.containsKey("out")) { 

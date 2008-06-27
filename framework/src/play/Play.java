@@ -104,7 +104,7 @@ public class Play {
             String logLevel = configuration.getProperty("application.log", "INFO");
             Logger.log4j.setLevel(Level.toLevel(logLevel));
             // Locales
-            locales = Arrays.asList(configuration.getProperty("application.locales", "").split(","));
+            locales = Arrays.asList(configuration.getProperty("application.langs", "").split(","));
             if(locales.size() == 1 && locales.get(0).trim().equals("")) {
                 locales = new ArrayList<String>();
             }

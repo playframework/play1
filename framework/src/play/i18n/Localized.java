@@ -10,7 +10,7 @@ public class Localized<T> {
     private Map<String, T> values = new HashMap<String, T>();
 
     public void set(T value) {
-        this.values.put(Locale.get(), value);
+        this.values.put(Lang.get(), value);
     }
 
     public void set(String lang, T value) {
@@ -18,7 +18,7 @@ public class Localized<T> {
     }
 
     public T get() {
-        return this.values.get(Locale.get());
+        return this.values.get(Lang.get());
     }
 
     public T get(String lang) {
