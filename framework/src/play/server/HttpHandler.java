@@ -59,7 +59,7 @@ public class HttpHandler implements IoHandler {
     public void serveStatic(IoSession session, HttpRequest request, MutableHttpResponse response) throws IOException {
         URI uri = request.getRequestUri();
         VirtualFile file = VirtualFile.search(Play.staticResources, uri.getPath().substring("/public/".length()));
-        if (file==null || file.isDirectory()) {
+        if (file == null || file.isDirectory()) {
             serve404(session, request, response);
         } else {
             if (Play.configuration.getProperty("mode", "dev").equals("dev")) {
@@ -83,14 +83,14 @@ public class HttpHandler implements IoHandler {
     }
 
     public static void attachFile(IoSession session, MutableHttpResponse response, VirtualFile file) throws IOException {
-    	response.setStatus(HttpResponseStatus.OK);
-    	if (file instanceof FileSystemFile) {    		
+        response.setStatus(HttpResponseStatus.OK);
+        if (file instanceof FileSystemFile) {
             session.setAttribute("file", file.channel());
             response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + file.length());
             response.setHeader(HttpHeaderConstants.KEY_TRANSFER_CODING, "pppp");
-    	} else {
-    		response.setContent(IoBuffer.wrap(file.content()));
-    	}
+        } else {
+            response.setContent(IoBuffer.wrap(file.content()));
+        }
     }
 
     public static boolean isModified(String etag, long last, HttpRequest request) {
@@ -189,13 +189,14 @@ public class HttpHandler implements IoHandler {
         if (message instanceof DefaultHttpResponse) {
             if (session.getAttribute("file") != null) {
                 FileChannel channel = ((FileChannel) session.getAttribute("file"));
-            	WriteFuture future = session.write(channel);
+                WriteFuture future = session.write(channel);
                 future.addListener(new IoFutureListener<IoFuture>() {
+
                     public void operationComplete(IoFuture future) {
                         FileChannel channel = (FileChannel) future.getSession().getAttribute("file");
                         future.getSession().removeAttribute("file");
                         try {
-                        	channel.close();
+                            channel.close();
                         } catch (IOException e) {
                             Logger.error(e, "Unexpected error");
                         }

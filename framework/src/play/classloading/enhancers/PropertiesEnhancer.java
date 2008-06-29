@@ -46,6 +46,8 @@ public class PropertiesEnhancer extends Enhancer {
                         CtMethod setMethod = CtMethod.make("public void " + setter + "(" + ctField.getType().getName() + " value) { this." + ctField.getName() + " = value; }", ctClass);
                         ctClass.addMethod(setMethod);
                     }
+                    
+                    ctField.setModifiers(Modifier.PRIVATE);
 
                 }
 
@@ -109,7 +111,7 @@ public class PropertiesEnhancer extends Enhancer {
         if (ctField.getName().equals(ctField.getName().toUpperCase()) || ctField.getName().substring(0, 1).equals(ctField.getName().substring(0, 1).toUpperCase())) {
             return false;
         }
-        return !Modifier.isPrivate(ctField.getModifiers()) &&
+        return Modifier.isPublic(ctField.getModifiers()) &&
                 !Modifier.isFinal(ctField.getModifiers()) &&
                 !Modifier.isStatic(ctField.getModifiers());
     }

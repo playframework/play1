@@ -135,7 +135,7 @@ if [ "$PLAY_COMMAND" = "help" ] ; then
 	echo "~        out          Follow system.out of the running application"    
 	echo "~        pid          Display the pid of the running application"
 	echo "~        run          Run the application in the current window"
-        echo "~        secret       Generate a new secret key"
+    echo "~        secret       Generate a new secret key"
 	echo "~        start        Start the application in background"
 	echo "~        statistics   Display project statistics"
 	echo "~        stop         Stop the application"  

@@ -21,10 +21,11 @@ import play.libs.IO;
 import play.vfs.VirtualFile;
 import play.mvc.Router;
 import play.templates.TemplateLoader;
+import zdb.core.Store;
 
 public class Play {
 
-    public enum Mode {
+    public enum Mode { 
         DEV, PROD
     }    
     
@@ -132,6 +133,10 @@ public class Play {
             secretKey = configuration.getProperty("application.secret", "").trim();
             if(secretKey.equals("")) {
                 Logger.warn("No secret key defined. Sessions will not be encrypted");
+            }
+            // ZDB
+            if(configuration.getProperty("zdb", "disabled").equals("enabled")) {
+                Store.init(new File(applicationPath, "zdb"));
             }
             // Routes definitions
             routes = new ArrayList<VirtualFile>();
