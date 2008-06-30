@@ -145,9 +145,7 @@ public class Play {
             // Init messages
             Messages.load();
             // Plugins
-            if (!configuration.getProperty("plugin.enable", "disabled").equals("disabled")) {
-                bootstrapPlugins();
-            }
+            bootstrapPlugins();
             DB.init();
             JPA.init();
             // PROD mode
@@ -198,25 +196,28 @@ public class Play {
     }
 
     public static void bootstrapPlugins() throws IOException {
-        File lib = new File(applicationPath, "lib");
+        //Auto load things in lib
+    	File lib = new File(applicationPath, "lib");
         File[] libs = lib.listFiles();
-        for (int i = 0; i < libs.length; i++) {
-            if (libs[i].isFile() && (libs[i].toString().endsWith(".zip") || libs[i].toString().endsWith(".jar"))) {
-                addPlayApp(libs[i]);
-            } else if (isPlayApp(libs[i])) {
-                addPlayApp(libs[i]);
-            }
+        if (libs!=null) {
+	        for (int i = 0; i < libs.length; i++) {
+	            if (libs[i].isFile() && (libs[i].toString().endsWith(".zip"))) {
+	                addPlayApp(libs[i]);
+	            } else if (isPlayApp(libs[i])) {
+	                addPlayApp(libs[i]);
+	            }
+	        }
         }
-
+        //Load specific
         String pluginPath = configuration.getProperty("plugin.path");
         String[] pluginNames = configuration.getProperty("plugin.enable", "").split(",");
-        if (pluginNames == null) {
+        if ("".equals(pluginNames[0])) {
             return;
         }
         for (int i = 0; i < pluginNames.length; i++) {
             String pluginName = pluginNames[i];
             File fl = new File(pluginName);
-            if (fl.isFile() && (fl.toString().endsWith(".jar") || fl.toString().endsWith(".zip"))) {
+            if (fl.isFile() && (fl.toString().endsWith(".zip"))) {
                 addPlayApp(fl);
             } else {
                 if (fl.isAbsolute() && isPlayApp(fl)) {

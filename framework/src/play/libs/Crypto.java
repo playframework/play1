@@ -1,8 +1,13 @@
 package play.libs;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Base64;
 
 public class Crypto {
 
@@ -24,5 +29,15 @@ public class Crypto {
             hexChars[charIndex++] = HEX_CHARS[bite & 0xf];
         }
         return new String(hexChars);
+    }
+    
+    public static String passwordHash (String input) {
+    	try {
+			MessageDigest m=MessageDigest.getInstance("MD5");
+			byte[] out = m.digest(input.getBytes());
+			return new String (Base64.encodeBase64(out));
+		} catch (NoSuchAlgorithmException e) {
+			return null;
+		}
     }
 }
