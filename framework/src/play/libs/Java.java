@@ -1,6 +1,7 @@
 package play.libs;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -37,14 +38,14 @@ public class Java {
 
     public static Object invokeStatic(Method method, Map<String, String[]> args) throws Exception {
         String[] paramsNames = SignaturesNamesRepository.get(method);
-        if(paramsNames == null) {
-            throw new UnexpectedException("Parameter names not found");
+        if(paramsNames == null && method.getParameterTypes().length > 0) {
+            throw new UnexpectedException("Parameter names not found for method " + method);
         }
         Object[] rArgs = new Object[method.getParameterTypes().length];
         for (int i = 0; i < method.getParameterTypes().length; i++) {
             rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], args);
         }
-        return method.invoke(null, rArgs);
+        return method.invoke(null, rArgs);        
     }
 
     public static String rawMethodSignature(Method method) {

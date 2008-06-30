@@ -58,6 +58,33 @@
     </target>
     
     <!-- Netbeans support -->
+    
+    <target name="nb-profile-application">
+        <property name="application.path" value="/Users/guillaume/Desktop/webmail" />
+        <loadfile property="play.id" srcFile="../id" failonerror="false" quiet="true" />  
+        <loadproperties srcfile="${application.path}/conf/application.conf" />
+        <property name="jpda.port" value="8000" />
+        <nbprofiledirect>
+            <classpath>
+                <pathelement path="${application.path}/conf"/>
+                <path refid="project.classpath"/>                
+            </classpath>
+        </nbprofiledirect>
+        <java classname="play.server.Server" dir="${basedir}" fork="true" jvm="${profiler.info.jvm}">
+            <classpath>
+                <pathelement path="${application.path}/conf"/>
+                <path refid="project.classpath"/>                
+            </classpath>
+            <sysproperty key="application.path" value="${application.path}" />
+            <sysproperty key="play.id" value="${play.id}" />
+            <sysproperty key="java.endorsed.dirs" value="${basedir}/endorsed" />
+            <sysproperty key="play.debug" value="true" />
+            <jvmarg value="-javaagent:${basedir}/play.jar" />
+            <jvmarg value="-Xdebug"/>
+            <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.port},server=y,suspend=n"/>
+            <jvmarg value="${profiler.info.jvmargs.agent}"/>
+        </java>	
+    </target>
         
     <target name="nb-run-application">
         <loadfile property="play.id" srcFile="../id" failonerror="false" quiet="true" />  
@@ -74,7 +101,7 @@
             <sysproperty key="play.debug" value="true" />
             <jvmarg value="-javaagent:${basedir}/play.jar" />
             <jvmarg value="-Xdebug"/>
-            <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.port},server=y,suspend=n"/>
+            <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.port},server=y,suspend=n"/>            
         </java>	
     </target>
     

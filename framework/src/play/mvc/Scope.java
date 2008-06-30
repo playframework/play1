@@ -124,7 +124,7 @@ public class Scope {
                             session.put(matcher.group(1), matcher.group(2));
                         }
                     } else {
-                        Logger.warn("Corrupted session from "+Http.Request.current().remoteAddress);
+                        Logger.warn("Corrupted session from %s", Http.Request.current().remoteAddress);
                     }
                 }
                 return session;

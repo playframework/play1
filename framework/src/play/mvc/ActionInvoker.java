@@ -82,7 +82,6 @@ public class ActionInvoker {
                 if(actionMethod.getParameterTypes().length>0) {
                     Scope.Params.current().checkAndParse();
                 }
-                
                 Java.invokeStatic(actionMethod, Scope.Params.current().data);
             } catch (IllegalAccessException ex) {
                 throw ex;

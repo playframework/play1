@@ -16,6 +16,9 @@ public class UnexpectedException extends PlayException {
 
     @Override
     public String getErrorTitle() {
+        if(getCause() == null) {
+            return "Unexpected error";
+        }
         return String.format("Unexpected error: %s", getCause().getClass().getSimpleName());
     }
 

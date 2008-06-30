@@ -33,8 +33,9 @@ public class Invoker {
         public abstract void execute() throws Exception;
 
         public static void before() {
-        	Play.detectChanges();
+            Play.detectChanges();
             Thread.currentThread().setContextClassLoader(Play.classloader);
+            LocalVariablesNamesTracer.clear();
             LocalVariablesNamesTracer.enterMethod();
             JPA.startTx(false);
             if (Play.locales.isEmpty()) {
@@ -46,10 +47,12 @@ public class Invoker {
         
         public static void after() {
             JPA.closeTx(false);
+            LocalVariablesNamesTracer.exitMethod();
         }
         
         public static void onException(Throwable e) {
             JPA.closeTx(true);
+            LocalVariablesNamesTracer.exitMethod();
             if (e instanceof PlayException) {
                 throw (PlayException) e;
             }

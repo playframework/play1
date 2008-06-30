@@ -1,7 +1,9 @@
 package play.classloading.enhancers;
 
 import javassist.CtClass;
+import javassist.CtConstructor;
 import javassist.CtMethod;
+import javassist.CtNewConstructor;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 public class ZDBEnhancer extends Enhancer {
@@ -11,6 +13,23 @@ public class ZDBEnhancer extends Enhancer {
 
         if (!ctClass.subtypeOf(classPool.get("play.db.zdb.ZDBModel"))) {
             return;
+        }
+
+        // Ajoute le constructeur par défaut (obligatoire pour la peristence)
+        try {
+            boolean hasDefaultConstructor = false;
+            for (CtConstructor constructor : ctClass.getConstructors()) {
+                if (constructor.getParameterTypes().length == 0) {
+                    hasDefaultConstructor = true;
+                    break;
+                }
+            }
+            if (!hasDefaultConstructor) {
+                CtConstructor defaultConstructor = CtNewConstructor.make("public " + ctClass.getSimpleName() + "() {}", ctClass);
+                ctClass.addConstructor(defaultConstructor);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         // Implémenter les méthodes statiques

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicLong;
 import javassist.CannotCompileException;
 import javassist.CtClass;
 import javassist.CtMethod;
@@ -27,9 +28,9 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
         CtClass ctClass = makeClass(applicationClass);
-       
+
         for (CtMethod method : ctClass.getDeclaredMethods()) {
-            
+
             // Signatures names
             CodeAttribute codeAttribute = (CodeAttribute) method.getMethodInfo().getAttribute("Code");
             if (codeAttribute == null || javassist.Modifier.isAbstract(method.getModifiers())) {
@@ -47,31 +48,30 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 }
             }
             SignaturesNamesRepository.signatures.put(SignaturesNamesRepository.signature(method), names.toArray(new String[names.size()]));
-            
+
             // enterMethod/endMethod
             method.instrument(new ExprEditor() {
 
                 @Override
                 public void edit(MethodCall m) throws CannotCompileException {
                     try {
-                        if(Play.classes.getApplicationClass(m.getMethod().getDeclaringClass().getName()) != null) {
+                        if (Play.classes.getApplicationClass(m.getMethod().getDeclaringClass().getName()) != null) {
                             m.replace(
-                                "play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.enterMethod();"+
-                                "try{" +
+                                    "play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.enterMethod();" +
+                                    "try{" +
                                     "$_ = $proceed($$);" +
                                     "play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.exitMethod();" +
-                                "} catch(Throwable t) {" +
+                                    "} catch(Throwable t) {" +
                                     "play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.exitMethod(); " +
                                     "throw t;" +
-                                "}"
-                            );
+                                    "}");
                         }
                     } catch (Exception e) {
                         throw new UnexpectedException("Unexpected error in LocalvariablesEnhancer while compiling the enter/exit block", e);
                     }
                 }
             });
-                        
+
             // Bon.
             // Alors là il s'agit aprés chaque instruction de creation d'une variable locale
             // d'insérer un appel à play.utils.LocalVariables.addVariable('var', var)
@@ -81,7 +81,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 // le nom de la variable locale
                 String name = localVariableAttribute.getConstPool().getUtf8Info(localVariableAttribute.nameIndex(i));
                 if (name.equals("this")) {
-                    continue;                          
+                    continue;
                 }
                 // l'instruction a laquelle cette variable locale est créée
                 Integer pc = localVariableAttribute.startPc(i);
@@ -104,7 +104,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 codeAttribute.setMaxLocals(locals);
 
                 if (stack > codeAttribute.getMaxStack()) {
-                    codeAttribute.setMaxStack(stack);            
+                    codeAttribute.setMaxStack(stack);
                 }
                 iterator.insert(insertionPc, b.get());
                 iterator.insert(b.getExceptionTable(), insertionPc);
@@ -149,7 +149,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                         codeAttribute.setMaxLocals(locals);
 
                         if (stack > codeAttribute.getMaxStack()) {
-                            codeAttribute.setMaxStack(stack);                    
+                            codeAttribute.setMaxStack(stack);
                         }
                         codeIterator.insert(b.get());
 
@@ -157,22 +157,22 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 }
 
             }
-            
+
         }
-        
+
         applicationClass.enhancedByteCode = ctClass.toBytecode();
         ctClass.defrost();
-    
+
     }
 
     public static class SignaturesNamesRepository {
 
         static Map<String, String[]> signatures = new HashMap<String, String[]>();
 
-        public static String[] get(Method method) {           
+        public static String[] get(Method method) {
             return signatures.get(Java.rawMethodSignature(method));
-        }        
-        
+        }
+
         static String signature(CtMethod ctMethod) {
             StringBuilder sig = new StringBuilder();
             sig.append(ctMethod.getDeclaringClass().getName());
@@ -182,26 +182,26 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             return sig.toString();
         }
     }
-    
+
     public static class LocalVariablesNamesTracer {
 
         static ThreadLocal<Stack<Map<String, Object>>> localVariables = new ThreadLocal<Stack<Map<String, Object>>>();
 
         public static void clear() {
-            if (localVariables.get() != null) {
+            if (localVariables.get() != null) {                
                 localVariables.set(null);
             }
         }
-
+        
         public static void enterMethod() {
             if (localVariables.get() == null) {
                 localVariables.set(new Stack<Map<String, Object>>());
             }
-            localVariables.get().push(new HashMap<String, Object>());
+            localVariables.get().push(new HashMap<String, Object>());            
         }
 
         public static void exitMethod() {
-            localVariables.get().pop().clear();
+            localVariables.get().pop().clear();            
         }
 
         public static Map<String, Object> locals() {
@@ -256,6 +256,9 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 if (getLocalVariables().get(variable) == o) {
                     return variable;
                 }
+                if (o != null && o instanceof Number && o.equals(getLocalVariables().get(variable))) {
+                    return variable;
+                }
             }
             return null;
         }
@@ -264,5 +267,4 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             return getLocalVariables().get(variable);
         }
     }
-    
 }

@@ -12,6 +12,11 @@ public class ZDBModel {
         throw new UnsupportedOperationException("Not implemented. Check the ZDBEnhancer !");
     }
 
+    public void putIn(String bucket) {
+        Bucket b = ZDB.getBucket(bucket);
+        b.put(this);
+    } 
+
     public static class ZDBModelBucket {
 
         String bucket;
@@ -26,21 +31,16 @@ public class ZDBModel {
             return (T) ZDB.getBucket(bucket).get(id, type);
         }
 
-        public <T extends ZDBModel> List<T> findBy(String query, Object... params) {
-            return (List<T>) ZDB.getBucket(bucket).search(createQuery(query, params), type);
+        public Find findBy(String query, Object... params) {
+            return new Find(this, createQuery(query, params));
         }
-
-        public int count(String query, Object... params) {
-            return ZDB.getBucket(bucket).count(query, type);
-        }
-
-        public void save(String bucket) {
-            Bucket b = ZDB.getBucket(bucket);
-            b.put(this);
+        
+        public Find findAll() {
+            return new Find(this, "");
         }
 
         String createQuery(String query, Object... params) {
-            if (!query.contains(":") && !query.contains(" ")) {
+            if (!query.contains(":") && !query.contains(" ") && query.trim().length() > 0) {
                 query = query + ":?";
             }
             Matcher matcher = Pattern.compile(":\\?").matcher(query);
@@ -51,6 +51,37 @@ public class ZDBModel {
             }
             matcher.appendTail(sb);
             return sb.toString();
+        }
+
+        public static class Find {
+
+            String query;
+            ZDBModelBucket bucket;
+
+            public Find(ZDBModelBucket bucket, String query) {
+                this.query = query;
+                this.bucket = bucket;
+            }
+
+            public int count() {
+                return ZDB.getBucket(bucket.bucket).count(query, bucket.type);
+            }
+
+            public <T extends ZDBModel> T one() {
+                return null;
+            }
+
+            public <T extends ZDBModel> List<T> all() {
+                return (List<T>) ZDB.getBucket(bucket.bucket).search(query, bucket.type, 0, 1);
+            }
+
+            public <T extends ZDBModel> List<T> page(int from, int size) {
+                return (List<T>) ZDB.getBucket(bucket.bucket).search(query, bucket.type, from, size);
+            }
+            
+            public Find orderBy(String key) {
+                return new Find(bucket, query+" order by "+key);
+            }
         }
     }
 }

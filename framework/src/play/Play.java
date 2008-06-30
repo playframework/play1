@@ -24,8 +24,8 @@ import play.templates.TemplateLoader;
 import zdb.core.Store;
 
 public class Play {
-
-    public enum Mode { 
+ 
+    public enum Mode {  
         DEV, PROD
     }    
     
