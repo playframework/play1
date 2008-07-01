@@ -49,12 +49,14 @@ public class ApplicationClassloader extends ClassLoader {
             if (applicationClass.isCompiled()) {
                 return applicationClass.javaClass;
             } else {
-                applicationClass.compile();
-                // If there was some inner classes, we have to enhance and define them too
-                applicationClass.enhance();
-                applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length);
-                resolveClass(applicationClass.javaClass);              
-                return applicationClass.javaClass;
+                if(applicationClass.compile() != null) {
+                    applicationClass.enhance();
+                    applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length);
+                    resolveClass(applicationClass.javaClass);              
+                    return applicationClass.javaClass;
+                } else {
+                    Play.classes.classes.remove(name);                    
+                }
             }
         }
         return null;

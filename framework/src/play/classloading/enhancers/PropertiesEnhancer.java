@@ -6,11 +6,14 @@ import java.lang.reflect.Modifier;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
 import javassist.CtClass;
+import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtMethod;
+import javassist.CtNewConstructor;
 import javassist.NotFoundException;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
+import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 public class PropertiesEnhancer extends Enhancer {
@@ -47,7 +50,7 @@ public class PropertiesEnhancer extends Enhancer {
                         ctClass.addMethod(setMethod);
                     }
                     
-                    ctField.setModifiers(Modifier.PRIVATE);
+                    //ctField.setModifiers(Modifier.PRIVATE);
 
                 }
 
@@ -55,6 +58,23 @@ public class PropertiesEnhancer extends Enhancer {
                 e.printStackTrace();
             }
 
+        }
+        
+        // Ajoute le constructeur par défaut
+        try {
+            boolean hasDefaultConstructor = false;
+            for (CtConstructor constructor : ctClass.getConstructors()) {
+                if (constructor.getParameterTypes().length == 0) {
+                    hasDefaultConstructor = true;
+                    break;
+                }
+            }
+            if (!hasDefaultConstructor) {
+                CtConstructor defaultConstructor = CtNewConstructor.make("public " + ctClass.getSimpleName() + "() {}", ctClass);
+                ctClass.addConstructor(defaultConstructor);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         // Intercepte les FieldAccess
@@ -120,7 +140,10 @@ public class PropertiesEnhancer extends Enhancer {
 
         public static Object invokeReadProperty(Object o, String property, String targetType, String invocationPoint) throws Throwable {
             if (o == null) {
-                throw new NullPointerException("Lecture de la propriété " + property + " sur un objet null de type " + targetType + " (" + invocationPoint + ")");
+                throw new NullPointerException("Try to read " + property + " on null object " + targetType + " (" + invocationPoint + ")");
+            }
+            if(!o.getClass().getClassLoader().equals(Play.classloader)) {
+                return o.getClass().getField(property).get(o);
             }
             String getter = "get" + property.substring(0, 1).toUpperCase() + property.substring(1);
             try {
@@ -128,7 +151,7 @@ public class PropertiesEnhancer extends Enhancer {
                 Object result = getterMethod.invoke(o);
                 return result;
             } catch (NoSuchMethodException e) {
-                return o.getClass().getField(property).get(o);
+                throw e;
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }

@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import zdb.client.Bucket;
 import zdb.client.ZDB;
+import org.apache.lucene.queryParser.ParseException;
 
 public class ZDBModel {
 
@@ -15,7 +16,7 @@ public class ZDBModel {
     public void putIn(String bucket) {
         Bucket b = ZDB.getBucket(bucket);
         b.put(this);
-    } 
+    }
 
     public static class ZDBModelBucket {
 
@@ -32,11 +33,11 @@ public class ZDBModel {
         }
 
         public Find findBy(String query, Object... params) {
-            return new Find(this, createQuery(query, params));
+            return new Find(this, createQuery(query, params), type);
         }
-        
+
         public Find findAll() {
-            return new Find(this, "");
+            return new Find(this, null, type);
         }
 
         String createQuery(String query, Object... params) {
@@ -53,34 +54,44 @@ public class ZDBModel {
             return sb.toString();
         }
 
-        public static class Find {
+        public static class Find<T extends ZDBModel> {
 
-            String query;
+            Bucket.ObjectQuery<T> query;
             ZDBModelBucket bucket;
+            Class<T> clazz;
 
-            public Find(ZDBModelBucket bucket, String query) {
-                this.query = query;
-                this.bucket = bucket;
+            public Find(ZDBModelBucket bucket, String query, Class<T> clazz) {
+                try {
+                    this.bucket = bucket;
+                    if (query == null || query.trim().length() == 0) {
+                        this.query = ZDB.getBucket(bucket.bucket).search(clazz);
+                    } else {
+                        this.query = ZDB.getBucket(bucket.bucket).search(query, clazz);
+                    }
+                } catch (ParseException e) {
+                    throw new RuntimeException("Invalid query " + query);
+                } 
             }
 
             public int count() {
-                return ZDB.getBucket(bucket.bucket).count(query, bucket.type);
+                return query.count();
             }
 
-            public <T extends ZDBModel> T one() {
-                return null;
+            public <T> T one() {
+                return (T) query.one();
             }
 
-            public <T extends ZDBModel> List<T> all() {
-                return (List<T>) ZDB.getBucket(bucket.bucket).search(query, bucket.type, 0, 1);
+            public <T> List<T> all() {
+                return (List<T>) query.all();
             }
 
-            public <T extends ZDBModel> List<T> page(int from, int size) {
-                return (List<T>) ZDB.getBucket(bucket.bucket).search(query, bucket.type, from, size);
+            public <T> List<T> page(int from, int size) {
+                return (List<T>) query.page(from, size);
             }
-            
-            public Find orderBy(String key) {
-                return new Find(bucket, query+" order by "+key);
+
+            public Find orderBy(String... key) {
+                query = query.orderBy(key);
+                return this;
             }
         }
     }

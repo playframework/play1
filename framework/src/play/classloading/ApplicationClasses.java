@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.Enhancer;
@@ -28,17 +29,15 @@ public class ApplicationClasses {
         }
         return classes.get(name);
     }
-    
+
     public List<ApplicationClass> all() {
         return new ArrayList<ApplicationClass>(classes.values());
     }
-    
+
     public boolean hasClass(String name) {
         return classes.containsKey(name);
-    }
-    
-    // Enhancers
-    Class[] enhancers = new Class[] {
+    }    // Enhancers
+    Class[] enhancers = new Class[]{
         ControllersEnhancer.class,
         LocalvariablesNamesEnhancer.class,
         PropertiesEnhancer.class,
@@ -68,18 +67,19 @@ public class ApplicationClasses {
             this.javaByteCode = null;
             this.enhancedByteCode = null;
             this.timestamp = this.javaFile.lastModified();
-            this.compiled = false;            
+            this.compiled = false;
         }
-        
+
         public byte[] enhance() {
-            try {       
-                for(Class enhancer : enhancers) {
-                    ((Enhancer)enhancer.newInstance()).enhanceThisClass(this);
-                } 
-                return this.enhancedByteCode;
-            } catch(Exception e) {
-                throw new UnexpectedException(e);
+            for (Class enhancer : enhancers) {
+                try {
+                    ((Enhancer) enhancer.newInstance()).enhanceThisClass(this);
+                } catch (Exception e) {
+                    throw new UnexpectedException("While applying " + enhancer + " on " + name, e);
+                }
             }
+            return this.enhancedByteCode;
+
         }
 
         public boolean isCompiled() {
@@ -91,7 +91,7 @@ public class ApplicationClasses {
             compiled = true;
             return this.javaByteCode;
         }
-                
+
         public void uncompile() {
             this.javaClass = null;
         }
@@ -99,17 +99,17 @@ public class ApplicationClasses {
 
     // ~~ Utils
     public VirtualFile getJava(String name) {
-        if(name.contains("$")) {
-            name = name.substring(0, name.indexOf("$"));
+        String fileName = name;
+        if (fileName.contains("$")) {
+            fileName = fileName.substring(0, fileName.indexOf("$"));
         }
-        name = name.replace(".", "/") + ".java";
+        fileName = fileName.replace(".", "/") + ".java";
         for (VirtualFile path : Play.javaPath) {
-            VirtualFile javaFile = path.child(name);
-            if (javaFile.exists()) {
+            VirtualFile javaFile = path.child(fileName);
+            if (javaFile.exists()) {               
                 return javaFile;
             }
         }
         return null;
     }
-    
 }

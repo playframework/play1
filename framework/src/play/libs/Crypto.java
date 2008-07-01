@@ -14,7 +14,7 @@ public class Crypto {
     static final char[] HEX_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
     public static String sign(String message, byte[] key) throws Exception {
-        if(key.length == 0) {
+        if (key.length == 0) {
             return message;
         }
         SecretKey secretKey = new SecretKeySpec(key, "HmacSHA1");
@@ -30,14 +30,14 @@ public class Crypto {
         }
         return new String(hexChars);
     }
-    
-    public static String passwordHash (String input) {
-    	try {
-			MessageDigest m=MessageDigest.getInstance("MD5");
-			byte[] out = m.digest(input.getBytes());
-			return new String (Base64.encodeBase64(out));
-		} catch (NoSuchAlgorithmException e) {
-			return null;
-		}
+
+    public static String passwordHash(String input) {
+        try {
+            MessageDigest m = MessageDigest.getInstance("MD5");
+            byte[] out = m.digest(input.getBytes());
+            return new String(Base64.encodeBase64(out));
+        } catch (NoSuchAlgorithmException e) {
+            return null;
+        }
     }
 }

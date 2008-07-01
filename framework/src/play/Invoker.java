@@ -33,10 +33,10 @@ public class Invoker {
         public abstract void execute() throws Exception;
 
         public static void before() {
-            Play.detectChanges();
             Thread.currentThread().setContextClassLoader(Play.classloader);
             LocalVariablesNamesTracer.clear();
             LocalVariablesNamesTracer.enterMethod();
+            Play.detectChanges();
             JPA.startTx(false);
             if (Play.locales.isEmpty()) {
                 Lang.set("");
