@@ -51,6 +51,8 @@ public class HttpHandler implements IoHandler {
         if (uri.getPath().startsWith("/public/")) {
             Logger.trace("Serve static: " + uri.getPath());
             serveStatic(session, minaRequest, minaResponse);
+        } else if(Play.mode == Play.Mode.DEV) {
+            Invoker.invokeInThread(new MinaInvocation(session, minaRequest, minaResponse));
         } else {
             Invoker.invoke(new MinaInvocation(session, minaRequest, minaResponse));
         }
@@ -296,6 +298,7 @@ public class HttpHandler implements IoHandler {
             response.out = new ByteArrayOutputStream();
 
             ActionInvoker.invoke(request, response);
+            
             response.out.flush();
             Logger.trace("Invoke: " + uri.getPath() + ": " + response.status);
             if (response.status == 404) {

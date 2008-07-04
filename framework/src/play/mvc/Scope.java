@@ -1,5 +1,7 @@
 package play.mvc;
 
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -36,8 +38,8 @@ public class Scope {
             } catch (Exception e) {
                 throw new UnexpectedException("Flash corrupted", e);
             }
-        }       
-        
+        }
+
         void save() {
             try {
                 StringBuilder flash = new StringBuilder();
@@ -53,9 +55,7 @@ public class Scope {
             } catch (Exception e) {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
-        }
-        
-        // ThreadLocal access
+        }        // ThreadLocal access
         static ThreadLocal<Flash> current = new ThreadLocal<Flash>();
 
         public static Flash current() {
@@ -69,21 +69,21 @@ public class Scope {
             data.put(key, value);
             out.put(key, value);
         }
-        
+
         public void discard(String key) {
             out.remove(key);
         }
-        
+
         public void discard() {
             out.clear();
         }
-        
+
         public void keep(String key) {
-            if(data.containsKey(key)) {
+            if (data.containsKey(key)) {
                 out.put(key, data.get(key));
             }
         }
-        
+
         public void keep() {
             out.putAll(data);
         }
@@ -129,7 +129,7 @@ public class Scope {
                 }
                 return session;
             } catch (Exception e) {
-                throw new UnexpectedException("Corrupted session from "+Http.Request.current().remoteAddress, e);
+                throw new UnexpectedException("Corrupted session from " + Http.Request.current().remoteAddress, e);
             }
         }
         Map<String, String> data = new HashMap<String, String>();        // ThreadLocal access
@@ -199,6 +199,18 @@ public class Scope {
                     DataParser dataParser = DataParser.parsers.get(contentType);
                     if (dataParser != null) {
                         _mergeWith(dataParser.parse(request.body));
+                    } else if (contentType.startsWith("text/")) {
+                        try {
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            byte[] buffer = new byte[1024];
+                            int read = 0;
+                            while ((read = request.body.read(buffer)) > 0) {
+                                baos.write(buffer, 0, read);
+                            }
+                            data.put("body", new String[]{new String(baos.toByteArray(), "utf-8")});
+                        } catch (Exception e) {
+                            throw new UnexpectedException("Bad utf-8", e);
+                        }
                     }
                 }
                 requestIsParsed = true;
@@ -217,18 +229,18 @@ public class Scope {
             checkAndParse();
             return data.get(key);
         }
-        
+
         public Map<String, String[]> all() {
             checkAndParse();
             return data;
         }
-        
+
         public Map<String, String> allSimple() {
             checkAndParse();
             Map<String, String> result = new HashMap<String, String>();
-            for(String key : data.keySet()) {
+            for (String key : data.keySet()) {
                 result.put(key, data.get(key)[0]);
-            }                            
+            }
             return result;
         }
 
@@ -243,22 +255,22 @@ public class Scope {
                 Utils.Maps.mergeValueInMap(data, key, map.get(key));
             }
         }
-        
+
         public String urlEncode() {
             checkAndParse();
             StringBuffer ue = new StringBuffer();
-            for(String key : data.keySet()) {
-                if(key.equals("body")) {
+            for (String key : data.keySet()) {
+                if (key.equals("body")) {
                     continue;
                 }
                 String[] values = data.get(key);
-                for(String value : values) {
+                for (String value : values) {
                     try {
                         ue.append(URLEncoder.encode(key, "utf-8"));
                         ue.append("=");
                         ue.append(URLEncoder.encode(value, "utf-8"));
                         ue.append("&");
-                    } catch(Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }

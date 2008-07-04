@@ -4,6 +4,7 @@ import java.util.List;
 import org.openid4java.association.AssociationException;
 import org.openid4java.consumer.ConsumerException;
 import org.openid4java.consumer.ConsumerManager;
+import org.openid4java.consumer.InMemoryNonceVerifier;
 import org.openid4java.consumer.VerificationResult;
 import org.openid4java.discovery.DiscoveryException;
 import org.openid4java.discovery.DiscoveryInformation;
@@ -58,7 +59,7 @@ public class OpenID {
             ParameterList openidResp = new ParameterList(Params.current().allSimple());
             VerificationResult verification = getConsumerManager().verify(Request.current().getBase() + Request.current().url, openidResp, discovered);
             Identifier verified = verification.getVerifiedId();
-            if(verified != null) {
+            if(verified != null && !verified.equals("null")) {
                 return verified.toString();
             }            
         } catch(PlayException e) {
@@ -81,6 +82,7 @@ public class OpenID {
             RealmVerifier realmVerifier = new RealmVerifier();
             realmVerifier.setEnforceRpId(false);
             consumerManager.setRealmVerifier(realmVerifier);
+            consumerManager.setNonceVerifier(new InMemoryNonceVerifier(1800)); // 1/2 h
         }
         return consumerManager;
     }

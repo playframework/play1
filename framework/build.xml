@@ -93,6 +93,9 @@
         <java classname="play.server.Server" dir="${basedir}" fork="true">
             <classpath>
                 <pathelement path="${application.path}/conf"/>
+                <fileset dir="${application.path}/lib">
+                    <include name="*.jar"/>                        
+                </fileset> 
                 <path refid="project.classpath"/>                
             </classpath>
             <sysproperty key="application.path" value="${application.path}" />

@@ -1,10 +1,16 @@
 package play.classloading;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ClassFile;
@@ -26,6 +32,7 @@ import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.JavaCompilationException;
 import play.exceptions.UnexpectedException;
+import play.vfs.VirtualFile;
 
 public class ApplicationCompiler {
 
@@ -183,7 +190,7 @@ public class ApplicationCompiler {
                 }
                 if (applicationClasses.getApplicationClass(name) != null) {
                     return false;
-                }
+                }                
                 return true;
             }
 
