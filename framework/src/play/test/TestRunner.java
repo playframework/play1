@@ -1,7 +1,6 @@
 package play.test;
 
 import java.io.File;
-import java.lang.annotation.Annotation;
 import java.util.List;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
@@ -24,7 +23,7 @@ public class TestRunner extends RunListener {
         junit.addListener(new TestRunner());
         boolean allOk = true;
         
-        VirtualFile testPath = Play.getFile("test/application");
+        VirtualFile testPath = Play.getVirtualFile("test/application");
         List<Class> testClasses = Play.classloader.getAllClasses(testPath, "application");
         
         if(testClasses.isEmpty()) {
@@ -59,11 +58,7 @@ public class TestRunner extends RunListener {
     @Override
     public void testStarted(Description description) throws Exception {
         Logger.info("    - %s", description.getDisplayName());
-        for(Annotation a : description.getAnnotations()) {
-            if(a.annotationType().equals(Internal.class)) {
-                Invocation.before();
-            }
-        }
+        Invocation.before();
         lastTestHasFailed = false;
     }
 

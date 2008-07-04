@@ -20,6 +20,6 @@ public class JavaExecutionException extends JavaException {
     @Override
     public String getErrorDescription() {
         return String.format("An exception <strong>%s</strong> occured : %s", getCause().getClass().getSimpleName(), getMessage());
-    }
+    } 
 }
 

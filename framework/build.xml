@@ -41,6 +41,26 @@
         </copy>
     </target>
     
+    <target name="Javadoc" description="Generate the Javadoc">
+        <delete dir="docs" />
+        <javadoc packagenames="play.*"
+               sourcepath="src"           
+               defaultexcludes="yes"
+               destdir="docs"
+               author="false"
+               version="true"
+               use="true"
+               windowtitle="Play! API">
+            <classpath refid="project.classpath"/>
+            <doctitle><![CDATA[<h1>Play!</h1>]]></doctitle>
+            <bottom><![CDATA[<a href="http://guillaume.bort.fr">Guillaume Bort</a> & <a href="http://www.zenexity.fr">zenexity</a> - Distributed under <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache 2 licence</a>, without any warrantly]]></bottom>
+            <tag name="todo" scope="all" description="To do:"/>
+            <group title="Libs" packages="play.libs.*"/>
+            <link offline="false" href="http://java.sun.com/j2se/1.5.0/docs/api/" />
+            <link href="http://developer.java.sun.com/developer/products/xml/docs/api/"/>
+        </javadoc>
+    </target>
+    
     <target name="jar" depends="compile,version" description="create play.jar">        
         <echo message="${version}" file="src/play/version" />
         <echo message="${version}" file="classes/play/version" />

@@ -18,7 +18,7 @@ public class ZDBModel {
         b.put(this);
     }
 
-    public static class ZDBModelBucket {
+    public static class ZDBModelBucket { 
 
         String bucket;
         Class<? extends ZDBModel> type;

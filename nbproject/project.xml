@@ -109,6 +109,10 @@
                         </arity>
                     </context>
                 </action>
+                <action name="javadoc">
+                    <script>${ant.script}</script>
+                    <target>Javadoc</target>
+                </action>
             </ide-actions>
             <export>
                 <type>folder</type>
@@ -151,7 +155,10 @@
                     <ide-action name="build"/>
                     <ide-action name="rebuild"/>
                     <ide-action name="clean"/>
+                    <ide-action name="javadoc"/>
+                    <ide-action name="run"/>
                     <ide-action name="test"/>
+                    <ide-action name="debug"/>
                 </context-menu>
             </view>
             <subprojects/>

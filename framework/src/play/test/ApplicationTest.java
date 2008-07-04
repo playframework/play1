@@ -1,17 +1,15 @@
 package play.test;
 
+import java.io.IOException;
 import static org.junit.Assert.*;
 
 import java.io.UnsupportedEncodingException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import play.Invoker;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
-import play.exceptions.UnexpectedException;
 import play.mvc.ActionInvoker;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
-import play.mvc.results.Result;
 
 public abstract class ApplicationTest {
 
@@ -40,34 +38,13 @@ public abstract class ApplicationTest {
     }
 
     public static void makeRequest(final Request request, final Response response) {
-        inPlay(new Invoker.Invocation() {
-
-            @Override
-            public void execute() throws Exception {
-                ActionInvoker.invoke(request, response);
-                response.out.flush();
-            }
-        });
-    }
-    
-    public static void inPlay(Invoker.Invocation invocation) {
-        Invoker.invokeInThread(invocation);
-    }
-    
-    public static Result invokeController(final ControllerInvocation invocation) {
+        ActionInvoker.invoke(request, response);
         try {
-            Invoker.invokeInThread(new Invoker.Invocation() {
-                public void execute() throws Exception {
-                    invocation.run();
-                }
-            });
-        } catch(UnexpectedException r) {
-            if(r.getCause() instanceof Result) {
-                return (Result)r.getCause();
-            }            
+            response.out.flush();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
-        return null;
-    }
+    }   
 
     public static Response newResponse() {
         Response response = new Response();

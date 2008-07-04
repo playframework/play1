@@ -1,12 +1,19 @@
 
 package play.mvc;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
+import play.exceptions.JavaException;
+import play.exceptions.JavaExecutionException;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.TemplateNotFoundException;
@@ -43,6 +50,22 @@ public abstract class Controller {
     
     protected static void renderBinary(InputStream is, String name) {
         throw new RenderBinary(is, name);
+    }
+    
+    protected static void renderBinary(File file) {
+        try {
+            throw new RenderBinary(new FileInputStream(file), null);
+        } catch (FileNotFoundException ex) {
+            throw new JavaExecutionException(Http.Request.current().action, ex);
+        }
+    }
+    
+    protected static void renderBinary(File file, String name) {
+        try {
+            throw new RenderBinary(new FileInputStream(file), name);
+        } catch (FileNotFoundException ex) {
+            throw new JavaExecutionException(Http.Request.current().action, ex);
+        }
     }
     
     protected static void redirect(String url) {

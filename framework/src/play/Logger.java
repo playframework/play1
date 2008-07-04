@@ -125,5 +125,5 @@ public class Logger {
     public static void fatal(Throwable e, String message, Object... args) { 
         log4j.fatal(String.format(message, args), e);
     }
-
+    
 }

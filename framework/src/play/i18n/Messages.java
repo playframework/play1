@@ -30,12 +30,12 @@ public class Messages {
     }
     
     public static void load() {
-        defaults = read(Play.getFile("conf/messages"));
+        defaults = read(Play.getVirtualFile("conf/messages"));
         if(defaults == null) {
             defaults = new Properties();
         }
         for(String locale : Play.locales) {
-            Properties properties = read(Play.getFile("conf/messages."+locale));
+            Properties properties = read(Play.getVirtualFile("conf/messages."+locale));
             if(properties == null) {
                 Logger.warn("conf/messages.%s is missing", locale);
                 locales.put(locale, new Properties());
@@ -59,12 +59,12 @@ public class Messages {
     }
     
     public static void detectChanges() {
-        if(Play.getFile("conf/messages").exists() && Play.getFile("conf/messages").lastModified() > lastLoading) {
+        if(Play.getVirtualFile("conf/messages").exists() && Play.getVirtualFile("conf/messages").lastModified() > lastLoading) {
             load();
             return;
         }
         for(String locale : Play.locales) {
-            if(Play.getFile("conf/messages."+locale).exists() && Play.getFile("conf/messages."+locale).lastModified() > lastLoading) {
+            if(Play.getVirtualFile("conf/messages."+locale).exists() && Play.getVirtualFile("conf/messages."+locale).lastModified() > lastLoading) {
                 load();
                 return;
             }

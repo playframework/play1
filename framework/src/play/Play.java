@@ -362,13 +362,23 @@ public class Play {
         return true;
     }
 
+
     /**
      * Search a VirtualFile in all loaded applications and plugins
-     * @param path Relative path from the application root
+     * @param path Relative path from the applications root
      * @return The virtualFile or null
      */
-    public static VirtualFile getFile(String path) {
+    public static VirtualFile getVirtualFile(String path) {
         return VirtualFile.open(applicationPath).child(path);
     }
     
+    /**
+     * Search a File in the current application
+     * @param path Relative path from the application root
+     * @return The fiel even if it doesn't exist
+     */
+    public static File getFile(String path) {
+        return new File(applicationPath, path);
+    }
+
 }
