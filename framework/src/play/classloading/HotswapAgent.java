@@ -4,6 +4,9 @@ import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 
+/**
+ * Enable HotSwap when it's possible.
+ */
 public class HotswapAgent {
 
     static Instrumentation instrumentation;

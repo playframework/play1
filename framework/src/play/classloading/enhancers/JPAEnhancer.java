@@ -7,6 +7,9 @@ import javassist.CtNewConstructor;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
+/**
+ * Enhance JPAModel classes.
+ */
 public class JPAEnhancer extends Enhancer {
 
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {

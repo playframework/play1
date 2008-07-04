@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.Enhancer;
@@ -15,6 +14,9 @@ import play.classloading.enhancers.ZDBEnhancer;
 import play.exceptions.UnexpectedException;
 import play.vfs.VirtualFile;
 
+/**
+ * Application classes container.
+ */
 public class ApplicationClasses {
 
     ApplicationCompiler compiler = new ApplicationCompiler(this);
@@ -23,6 +25,11 @@ public class ApplicationClasses {
     public ApplicationClasses() {
     }
 
+    /**
+     * Get a class by name
+     * @param name The fully qualified class name
+     * @return The ApplicationClass or null
+     */
     public ApplicationClass getApplicationClass(String name) {
         if (!classes.containsKey(name) && getJava(name) != null) {
             classes.put(name, new ApplicationClass(name));
@@ -30,13 +37,24 @@ public class ApplicationClasses {
         return classes.get(name);
     }
 
+    /**
+     * All loaded classes.
+     * @return All loaded classes
+     */
     public List<ApplicationClass> all() {
         return new ArrayList<ApplicationClass>(classes.values());
     }
 
+    /**
+     * Does this class is already loaded ?
+     * @param name The fully qualified class name
+     * @return
+     */
     public boolean hasClass(String name) {
         return classes.containsKey(name);
-    }    // Enhancers
+    }    
+    
+    // Enhancers
     Class[] enhancers = new Class[]{
         ControllersEnhancer.class,
         LocalvariablesNamesEnhancer.class,
@@ -45,15 +63,49 @@ public class ApplicationClasses {
         ZDBEnhancer.class
     };
 
+    /**
+     * Represent a application class
+     */
     public class ApplicationClass {
 
+        /**
+         * The fully qualified class name
+         */
         public String name;
+        
+        /**
+         * A reference to the java source file
+         */
         public VirtualFile javaFile;
+        
+        /**
+         * The Java source
+         */
         public String javaSource;
+        
+        /**
+         * The compiled byteCode
+         */
         public byte[] javaByteCode;
+        
+        /**
+         * The enhanced byteCode
+         */
         public byte[] enhancedByteCode;
+        
+        /**
+         * The in JVM loaded class
+         */
         public Class javaClass;
+        
+        /**
+         * Last time than this class was compiled
+         */
         public Long timestamp = 0L;
+        
+        /**
+         * Is this class compiled
+         */
         boolean compiled;
 
         public ApplicationClass(String name) {
@@ -62,6 +114,9 @@ public class ApplicationClasses {
             this.refresh();
         }
 
+        /**
+         * Need to refresh this class !
+         */
         public void refresh() {
             this.javaSource = this.javaFile.contentAsString();
             this.javaByteCode = null;
@@ -70,6 +125,10 @@ public class ApplicationClasses {
             this.compiled = false;
         }
 
+        /**
+         * Enhance this class
+         * @return the enhanced byteCode
+         */
         public byte[] enhance() {
             for (Class enhancer : enhancers) {
                 try {
@@ -82,22 +141,40 @@ public class ApplicationClasses {
 
         }
 
+        /**
+         * Is this class already compiled ?
+         * @return
+         */
         public boolean isCompiled() {
             return compiled && javaClass != null;
         }
 
+        /**
+         * Compile the class from Java source
+         * @return
+         */
         public byte[] compile() {
             compiler.compile(this.name);
             compiled = true;
             return this.javaByteCode;
         }
 
+        /**
+         * Unload the class
+         */
         public void uncompile() {
             this.javaClass = null;
         }
     }
 
     // ~~ Utils
+    
+    /**
+     * Retrieve the corresponding source file for a given class name.
+     * It handle innerClass too !
+     * @param name The fully qualified class name 
+     * @return The virtualFile if found
+     */
     public VirtualFile getJava(String name) {
         String fileName = name;
         if (fileName.contains("$")) {

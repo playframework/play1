@@ -13,10 +13,17 @@ import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 
+/**
+ * Run some code in a Play! context
+ */
 public class Invoker {
 
-    public static Executor executor = null;
+    static Executor executor = null;
 
+    /**
+     * Run the code in a new thread took from a thread pool.
+     * @param invocation The code to run
+     */
     public static void invoke(Invocation invocation) {
         if (executor == null) {
             executor = Invoker.startExecutor();
@@ -24,14 +31,28 @@ public class Invoker {
         executor.execute(invocation);
     }
 
+    /**
+     * Run the code in the same thread than caller.
+     * @param invocation The code to run
+     */
     public static void invokeInThread(Invocation invocation) {
         invocation.run();
     }
 
+    /**
+     * An Invocation in something to run in a Play! context
+     */
     public static abstract class Invocation extends Thread {
 
+        /**
+         * Override this method
+         * @throws java.lang.Exception
+         */
         public abstract void execute() throws Exception;
 
+        /**
+         * Things to do before an Invocation
+         */
         public static void before() {
             Thread.currentThread().setContextClassLoader(Play.classloader);
             LocalVariablesNamesTracer.clear();
@@ -45,11 +66,18 @@ public class Invoker {
             }
         }
         
+        /**
+         * Things to do after an Invocation.
+         * (if the Invocation code has not thrown any exception)
+         */
         public static void after() {
             JPA.closeTx(false);
             LocalVariablesNamesTracer.exitMethod();
         }
         
+        /**
+         * Things to do if the Invocation code thrown an exception
+         */
         public static void onException(Throwable e) {
             JPA.closeTx(true);
             LocalVariablesNamesTracer.exitMethod();
@@ -59,6 +87,9 @@ public class Invoker {
             throw new UnexpectedException(e);
         }
         
+        /**
+         * Things to do in all cases after the invocation.
+         */
         public static void _finally() {
             DB.close();
         }

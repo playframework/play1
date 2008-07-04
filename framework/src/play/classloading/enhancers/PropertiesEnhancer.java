@@ -16,6 +16,9 @@ import javassist.expr.FieldAccess;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
+/**
+ * Generate valid JavaBeans.
+ */
 public class PropertiesEnhancer extends Enhancer {
 
     @Override

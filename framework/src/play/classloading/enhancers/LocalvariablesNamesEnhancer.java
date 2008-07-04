@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.util.concurrent.atomic.AtomicLong;
 import javassist.CannotCompileException;
 import javassist.CtClass;
 import javassist.CtMethod;
@@ -23,6 +22,9 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
 import play.libs.Java;
 
+/**
+ * Track names of local variables ...
+ */
 public class LocalvariablesNamesEnhancer extends Enhancer {
 
     @Override

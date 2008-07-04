@@ -24,6 +24,10 @@ import play.exceptions.UnexpectedException;
 import play.mvc.Http.Header;
 import play.mvc.Http.Request;
 
+/**
+ * From Apache commons fileupload.
+ * http://commons.apache.org/fileupload/
+ */
 public class ApacheMultipartParser extends DataParser {
 
     private static FileItemFactory fileItemFactory = new DiskFileItemFactory();

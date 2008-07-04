@@ -9,6 +9,9 @@ import java.util.Map;
 import play.exceptions.UnexpectedException;
 import play.libs.Utils;
 
+/**
+ * Parse urlEncoded requests.
+ */
 public class UrlEncodedParser extends DataParser {
     
     public static Map<String, String[]> parse(String urlEncoded) {

@@ -13,10 +13,20 @@ import play.db.jpa.JPA;
 import play.db.jpa.JPAContext;
 import play.exceptions.DatabaseException;
 
+/**
+ * Database connection utilities.
+ * @author guillaume
+ */
 public class DB {
 
+    /**
+     * The loaded datasource.
+     */
     public static DataSource datasource = null;
 
+    /**
+     * Init the datasource.
+     */
     public static void init() {
         if (changed()) {
             try {
@@ -42,6 +52,9 @@ public class DB {
         }
     }
 
+    /**
+     * Close the connection opened for the current thread.
+     */
     public static void close() {
         if (localConnection.get() != null) {
             try {
@@ -55,6 +68,10 @@ public class DB {
     }
     static ThreadLocal<Connection> localConnection = new ThreadLocal<Connection>();
 
+    /**
+     * Open a connection for the current thread.
+     * @return A valid SQL connection
+     */
     public static Connection getConnection() {
         try {
             if (JPA.isEnabled()) {
@@ -76,6 +93,11 @@ public class DB {
         }
     }
 
+    /**
+     * Execute an SQL update
+     * @param SQL
+     * @return false if update failed
+     */
     public static boolean execute(String SQL) {
         try {
             return getConnection().createStatement().execute(SQL);
@@ -84,6 +106,11 @@ public class DB {
         }
     }
 
+     /**
+     * Execute an SQL query
+     * @param SQL
+     * @return The query resultSet
+     */
     public static ResultSet executeQuery(String SQL) {
         try {
             return getConnection().createStatement().executeQuery(SQL);

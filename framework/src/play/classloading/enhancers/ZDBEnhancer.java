@@ -6,6 +6,9 @@ import javassist.CtMethod;
 import javassist.CtNewConstructor;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
+/**
+ * Enhance ZDBModel classes.
+ */
 public class ZDBEnhancer extends Enhancer {
 
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {

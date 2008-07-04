@@ -12,6 +12,9 @@ import javassist.NotFoundException;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
+/**
+ * Enhance a class.
+ */
 public abstract class Enhancer {
     
     protected ClassPool classPool = new ClassPool();

@@ -18,6 +18,9 @@ import java.util.TreeSet;
 import play.exceptions.BindingException;
 import play.libs.Java;
 
+/**
+ * The binder try to convert String values to Java objects.
+ */
 public class Binder {
 
     static Map<Class, SupportedType> supportedTypes = new HashMap<Class, SupportedType>();

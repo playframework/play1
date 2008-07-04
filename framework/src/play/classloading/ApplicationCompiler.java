@@ -32,8 +32,10 @@ import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.JavaCompilationException;
 import play.exceptions.UnexpectedException;
-import play.vfs.VirtualFile;
 
+/**
+ * Java compiler (uses eclipse JDT)
+ */
 public class ApplicationCompiler {
 
     ApplicationClasses applicationClasses;

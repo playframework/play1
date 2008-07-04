@@ -11,6 +11,9 @@ import javassist.expr.Handler;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
 
+/**
+ * Enhance controllers classes.
+ */
 public class ControllersEnhancer extends Enhancer {
 
     @Override

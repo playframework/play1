@@ -22,32 +22,109 @@ import play.vfs.VirtualFile;
 import play.mvc.Router;
 import play.templates.TemplateLoader;
 import zdb.core.Store;
- 
+
+/**
+ * Main framework class
+ */
 public class Play {
  
+    /**
+     * 2 modes
+     */
     public enum Mode {  
         DEV, PROD
     }    
     
-    // Internal
+    /**
+     * Is the application started
+     */
     public static boolean started = false;
+    
+    /**
+     * The framework ID
+     */
     public static String id;
-    public static Mode mode;    // Application
+    
+    /**
+     * The application mode
+     */
+    public static Mode mode;
+    
+    /**
+     * The application root
+     */
     public static File applicationPath = null;
+    
+    /**
+     * The framework root
+     */
     public static File frameworkPath = null;
+    
+    /**
+     * All loaded application classes
+     */
     public static ApplicationClasses classes = new ApplicationClasses();
+    
+    /**
+     * The application classLoader
+     */
     public static ApplicationClassloader classloader;
+    
+    /**
+     * All paths to search for Java files
+     */
     public static List<VirtualFile> javaPath;
+    
+    /**
+     * All paths to search for templates files
+     */
     public static List<VirtualFile> templatesPath;
+    
+    /**
+     * All routes files
+     */
     public static List<VirtualFile> routes;
+    
+    /**
+     * All paths to search for static resources
+     */
     public static List<VirtualFile> staticResources;
+    
+    /**
+     * The main application.conf
+     */
     public static VirtualFile conf;
+    
+    /**
+     * The app configuration (already resolved from the framework id)
+     */
     public static Properties configuration;
+    
+    /**
+     * The application name (from application.name)
+     */
     public static String applicationName;
+    
+    /**
+     * The last time than the application has started
+     */
     public static Long startedAt;
+    
+    /**
+     * The list of supported locales
+     */
     public static List<String> locales;
+    
+    /**
+     * The very secret key
+     */
     public static String secretKey;
 
+    /**
+     * Init the framework
+     * @param root The application path
+     * @param id The framework id to use
+     */
     public static void init(File root, String id) {
         Play.id = id;
         Play.started = false;
@@ -71,6 +148,10 @@ public class Play {
         Logger.info("Application '%s' is ready !", applicationName);
     }
 
+    /**
+     * Start the application.
+     * Recall to restart !
+     */
     public static synchronized void start() {
         try {
             long start = System.currentTimeMillis();
@@ -161,6 +242,9 @@ public class Play {
         }
     }
 
+    /**
+     * Stop the application
+     */
     public static synchronized void stop() {
         JPA.shutdown();
         started = false;
@@ -177,6 +261,9 @@ public class Play {
         }
     }
 
+    /**
+     * Detect sources modifications
+     */
     public static synchronized void detectChanges() {
         if (mode == Mode.PROD) {
             return;
@@ -195,6 +282,10 @@ public class Play {
         }
     }
 
+    /**
+     * Enable found plugins
+     * @throws java.io.IOException
+     */
     public static void bootstrapPlugins() throws IOException {
         //Auto load things in lib
     	File lib = new File(applicationPath, "lib");
@@ -234,39 +325,50 @@ public class Play {
         }
     }
 
-    public static void addPlayApp(File fl) {
-        VirtualFile root = VirtualFile.open(fl);
+    /**
+     * Add a play application (as plugin)
+     * @param path The application path
+     */
+    public static void addPlayApp(File path) {
+        VirtualFile root = VirtualFile.open(path);
         javaPath.add(root.child("app"));
         templatesPath.add(root.child("app/views"));
         staticResources.add(root.child("public"));
         routes.add(root.child("conf/routes"));
-        Logger.info("Plugin added: " + fl.getAbsolutePath());
+        Logger.info("Plugin added: " + path.getAbsolutePath());
     }
 
-    public static boolean isPlayApp(File fl) {
-        if (!(new File(fl, "app").exists())) {
+    /**
+     * Guess if the path contains a valid application
+     * @param path The application path
+     * @return It depends
+     */
+    public static boolean isPlayApp(File path) {
+        if (!(new File(path, "app").exists())) {
             return false;
         }
-        if (!(new File(fl, "app").isDirectory())) {
+        if (!(new File(path, "app").isDirectory())) {
             return false;
         }
-        if (!(new File(fl, "app/controllers/").exists())) {
+        if (!(new File(path, "app/controllers/").exists())) {
             return false;
         }
-        if (!(new File(fl, "app/models/").exists())) {
+        if (!(new File(path, "app/models/").exists())) {
             return false;
         }
-        if (!(new File(fl, "conf/routes").exists())) {
+        if (!(new File(path, "conf/routes").exists())) {
             return false;
         }
         return true;
     }
 
-    public static String getSecretKey() {
-        return secretKey;
-    }
-
+    /**
+     * Search a VirtualFile in all loaded applications and plugins
+     * @param path Relative path from the application root
+     * @return The virtualFile or null
+     */
     public static VirtualFile getFile(String path) {
         return VirtualFile.open(applicationPath).child(path);
     }
+    
 }

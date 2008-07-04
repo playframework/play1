@@ -13,6 +13,11 @@ import play.vfs.VirtualFile;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
 
+/**
+ * The application classLoader. Load the classes from
+ * the application Java sources files.
+ * @author guillaume
+ */
 public class ApplicationClassloader extends ClassLoader {
 
     public ApplicationClassloader() {
@@ -87,6 +92,9 @@ public class ApplicationClassloader extends ClassLoader {
         }
     }
 
+    /**
+     * Detect Java changes
+     */
     public void detectChanges() {
         List<ApplicationClass> modifieds = new ArrayList<ApplicationClass>();
         for (ApplicationClass applicationClass : Play.classes.all()) {
@@ -114,6 +122,10 @@ public class ApplicationClassloader extends ClassLoader {
         }
     }
 
+    /**
+     * Try to load all .java files found.
+     * @return The list of well defined Class
+     */
     public List<Class> getAllClasses() {
         List<Class> res = new ArrayList<Class>();
         for (VirtualFile virtualFile : Play.javaPath) {
@@ -122,10 +134,18 @@ public class ApplicationClassloader extends ClassLoader {
         return res;
     }
     
+    /**
+     * Try to load all .java files found in a single path.
+     * @return The list of well defined Class
+     */
     public List<Class> getAllClasses(VirtualFile path) {
         return getAllClasses(path, "");
     }
     
+    /**
+     * Try to load all .java files found in a single path within a single package.
+     * @return The list of well defined Class
+     */
     public List<Class> getAllClasses(VirtualFile path, String basePackage) {
         if(basePackage.length()>0 && !basePackage.endsWith(".")) {
             basePackage += ".";

@@ -117,7 +117,7 @@ public class Scope {
                     String value = cookie.value;
                     String sign = value.substring(0, value.indexOf("-"));
                     String data = value.substring(value.indexOf("-") + 1);
-                    if (sign.equals(Crypto.sign(data, Play.getSecretKey().getBytes()))) {
+                    if (sign.equals(Crypto.sign(data, Play.secretKey.getBytes()))) {
                         String sessionData = URLDecoder.decode(data, "utf-8");
                         Matcher matcher = sessionParser.matcher(sessionData);
                         while (matcher.find()) {
@@ -150,7 +150,7 @@ public class Scope {
                     session.append("\u0000");
                 }
                 String sessionData = URLEncoder.encode(session.toString(), "utf-8");
-                String sign = Crypto.sign(sessionData, Play.getSecretKey().getBytes());
+                String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
                 Http.Response.current().setCookie("PLAY_SESSION", sign + "-" + sessionData);
             } catch (Exception e) {
                 throw new UnexpectedException("Session serializationProblem", e);
