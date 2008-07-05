@@ -203,6 +203,9 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         }
 
         public static void exitMethod() {
+            if(localVariables.get().isEmpty()) {
+                return;
+            }
             localVariables.get().pop().clear();            
         }
 

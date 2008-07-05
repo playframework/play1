@@ -37,6 +37,7 @@
             <fileset dir="src">
                 <include name="**/*.properties"/>
                 <include name="**/*.xml"/>
+                <include name="**/play.plugins"/>
             </fileset>
         </copy>
     </target>

@@ -1,10 +1,14 @@
 package play;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -15,8 +19,10 @@ import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
 import play.db.DB;
 import play.db.jpa.JPA;
+import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Messages;
+import play.jobs.Jobs;
 import play.libs.IO;
 import play.vfs.VirtualFile;
 import play.mvc.Router;
@@ -27,98 +33,82 @@ import zdb.core.Store;
  * Main framework class
  */
 public class Play {
- 
+
     /**
      * 2 modes
      */
-    public enum Mode {  
+    public enum Mode {
+
         DEV, PROD
-    }    
-    
+    }
     /**
      * Is the application started
      */
     public static boolean started = false;
-    
     /**
      * The framework ID
      */
     public static String id;
-    
     /**
      * The application mode
      */
     public static Mode mode;
-    
     /**
      * The application root
      */
     public static File applicationPath = null;
-    
     /**
      * The framework root
      */
     public static File frameworkPath = null;
-    
     /**
      * All loaded application classes
      */
     public static ApplicationClasses classes = new ApplicationClasses();
-    
     /**
      * The application classLoader
      */
     public static ApplicationClassloader classloader;
-    
     /**
      * All paths to search for Java files
      */
     public static List<VirtualFile> javaPath;
-    
     /**
      * All paths to search for templates files
      */
     public static List<VirtualFile> templatesPath;
-    
     /**
      * All routes files
      */
     public static List<VirtualFile> routes;
-    
     /**
      * All paths to search for static resources
      */
     public static List<VirtualFile> staticResources;
-    
     /**
      * The main application.conf
      */
     public static VirtualFile conf;
-    
     /**
      * The app configuration (already resolved from the framework id)
      */
     public static Properties configuration;
-    
-    /**
-     * The application name (from application.name)
-     */
-    public static String applicationName;
-    
     /**
      * The last time than the application has started
      */
-    public static Long startedAt;
-    
+    public static long startedAt;
     /**
      * The list of supported locales
      */
-    public static List<String> locales;
-    
+    public static List<String> locales = new ArrayList<String>();
     /**
      * The very secret key
      */
     public static String secretKey;
+    /**
+     * Play plugins
+     */
+    public static List<PlayPlugin> plugins = new ArrayList<PlayPlugin>();
 
     /**
      * Init the framework
@@ -126,9 +116,11 @@ public class Play {
      * @param id The framework id to use
      */
     public static void init(File root, String id) {
+        // Simple things
         Play.id = id;
         Play.started = false;
         Play.applicationPath = root;
+        // Guess the framework path
         try {
             URI uri = Play.class.getResource("/play/version").toURI();
             if (uri.getScheme().equals("jar")) {
@@ -138,14 +130,70 @@ public class Play {
                 frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
             }
         } catch (Exception e) {
-            throw new UnexpectedException(e);
+            throw new UnexpectedException("Where is the framework ?", e);
         }
         Logger.info("Starting %s", root.getAbsolutePath());
-        start();
-        if (mode == Mode.DEV) {
+        // Read the configuration file
+        readConfiguration();
+        // Build basic java source path
+        VirtualFile appRoot = VirtualFile.open(applicationPath);
+        javaPath = new ArrayList<VirtualFile>();
+        javaPath.add(appRoot.child("app"));
+        javaPath.add(appRoot.child("test"));
+        // Build basic templates path
+        templatesPath = new ArrayList<VirtualFile>();
+        templatesPath.add(appRoot.child("app/views"));
+        templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework/templates")));
+        // Build basic static resources path
+        staticResources = new ArrayList<VirtualFile>();
+        staticResources.add(appRoot.child("public"));
+        // Main route file
+        routes = new ArrayList<VirtualFile>();
+        routes.add(appRoot.child("conf/routes"));
+        // Enable a first classloader
+        classloader = new ApplicationClassloader();        
+        // Plugins
+        bootstrapPlugins();
+        // Mode
+        mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
+        if (mode == Mode.PROD) {
+            preCompile();
+            start();
+        } else {
             Logger.warn("You're running Play! in DEV mode");
         }
-        Logger.info("Application '%s' is ready !", applicationName);
+        // Yop
+        Logger.info("Application '%s' is ready !", configuration.getProperty("application.name", ""));
+    }
+
+    static void readConfiguration() {
+        VirtualFile appRoot = VirtualFile.open(applicationPath);
+        conf = appRoot.child("conf/application.conf");
+        try {
+            configuration = IO.readUtf8Properties(conf.inputstream());
+        } catch (IOException ex) {
+            Logger.fatal("Cannot read application.conf");
+            System.exit(0);
+        }
+        // Ok, check for instance specifics configuration
+        Properties newConfiguration = new Properties();
+        Pattern pattern = Pattern.compile("^%([a-zA-Z0-9_\\-]+)\\.(.*)$");
+        for (Object key : configuration.keySet()) {
+            Matcher matcher = pattern.matcher(key + "");
+            if (!matcher.matches()) {
+                newConfiguration.put(key, configuration.get(key).toString().trim());
+            }
+        }
+        for (Object key : configuration.keySet()) {
+            Matcher matcher = pattern.matcher(key + "");
+            if (matcher.matches()) {
+                String instance = matcher.group(1);
+                if (instance.equals(id)) {
+                    newConfiguration.put(matcher.group(2), configuration.get(key).toString().trim());
+                }
+            }
+        }
+        configuration = newConfiguration;
     }
 
     /**
@@ -154,89 +202,54 @@ public class Play {
      */
     public static synchronized void start() {
         try {
-            long start = System.currentTimeMillis();
             if (started) {
                 Logger.debug("Reloading ...");
                 stop();
             }
             Thread.currentThread().setContextClassLoader(Play.classloader);
-            VirtualFile appRoot = VirtualFile.open(applicationPath);
-            conf = appRoot.child("conf/application.conf");
-            configuration = IO.readUtf8Properties(conf.inputstream());
-            // Ok, check for instance specifics configuration
-            Properties newConfiguration = new Properties();
-            Pattern pattern = Pattern.compile("^%([a-zA-Z0-9_\\-]+)\\.(.*)$");
-            for (Object key : configuration.keySet()) {
-                Matcher matcher = pattern.matcher(key + "");
-                if (!matcher.matches()) {
-                    newConfiguration.put(key, configuration.get(key).toString().trim());
-                }
-            }
-            for (Object key : configuration.keySet()) {
-                Matcher matcher = pattern.matcher(key + "");
-                if (matcher.matches()) {
-                    String instance = matcher.group(1);
-                    if (instance.equals(id)) {
-                        newConfiguration.put(matcher.group(2), configuration.get(key).toString().trim());
-                    }
-                } 
-            }
-            configuration = newConfiguration;
-            // XLog
+            // Reload configuration
+            readConfiguration();
+            // Configure logs
             String logLevel = configuration.getProperty("application.log", "INFO");
             Logger.log4j.setLevel(Level.toLevel(logLevel));
             // Locales
             locales = Arrays.asList(configuration.getProperty("application.langs", "").split(","));
-            if(locales.size() == 1 && locales.get(0).trim().equals("")) {
+            if (locales.size() == 1 && locales.get(0).trim().equals("")) {
                 locales = new ArrayList<String>();
             }
-            // Application name
-            applicationName = configuration.getProperty("application.name", "(no name)");
-            // Mode
-            mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
             // Cache
             Cache.init();
-            // Java source path
-            javaPath = new ArrayList<VirtualFile>();
-            javaPath.add(appRoot.child("app"));
-            javaPath.add(appRoot.child("test"));
-            // Templates path
-            templatesPath = new ArrayList<VirtualFile>();
-            templatesPath.add(appRoot.child("app/views"));
-            templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework/templates")));
+            // Clean templates
             TemplateLoader.cleanCompiledCache();
-            //Static resources
-            staticResources = new ArrayList<VirtualFile>();
-            staticResources.add(appRoot.child("public"));
-            // Classloader
+            // Need a new classloader
             classloader = new ApplicationClassloader();
             // SecretKey
             secretKey = configuration.getProperty("application.secret", "").trim();
-            if(secretKey.equals("")) {
+            if (secretKey.equals("")) {
                 Logger.warn("No secret key defined. Sessions will not be encrypted");
             }
-            // ZDB
-            if(configuration.getProperty("zdb", "disabled").equals("enabled")) {
+            // Routes definitions            
+            Router.load();
+
+            // Try to load all classes
+            Play.classloader.getAllClasses();
+
+            // TODO: move as plugins --->            
+            if (configuration.getProperty("zdb", "disabled").equals("enabled")) {
                 Store.init(new File(applicationPath, "zdb"));
             }
-            // Routes definitions
-            routes = new ArrayList<VirtualFile>();
-            routes.add(appRoot.child("conf/routes"));
-            Router.load();
-            // Init messages
             Messages.load();
-            // Plugins
-            bootstrapPlugins();
-            DB.init();
             JPA.init();
-            // PROD mode
-            if(mode == Mode.PROD) {
-                preCompile();
+
+            for (PlayPlugin plugin : plugins) {
+                plugin.onApplicationStart();
             }
-            // Yop
+
+            // We made it
             started = true;
-            Logger.trace("%sms to start the application", System.currentTimeMillis() - start);
             startedAt = System.currentTimeMillis();
+        } catch (PlayException e) {
+            throw e;
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
@@ -249,13 +262,13 @@ public class Play {
         JPA.shutdown();
         started = false;
     }
-    
+
     static void preCompile() {
         try {
             Logger.info("Precompiling ...");
             classloader.getAllClasses();
             TemplateLoader.getAllTemplate();
-        } catch(Throwable e) {
+        } catch (Throwable e) {
             Logger.error(e, "Cannot start in PROD mode with errors");
             System.exit(-1);
         }
@@ -269,14 +282,14 @@ public class Play {
             return;
         }
         try {
+            classloader.detectChanges();
+            Router.detectChanges();
+            Messages.detectChanges();
             if (conf.lastModified() > startedAt) {
                 start();
                 return;
             }
-            Router.detectChanges();
-            classloader.detectChanges();
-            Messages.detectChanges();
-        } catch (UnsupportedOperationException e) {
+        } catch (Exception e) {
             // We have to do a clean refresh
             start();
         }
@@ -284,20 +297,39 @@ public class Play {
 
     /**
      * Enable found plugins
-     * @throws java.io.IOException
      */
-    public static void bootstrapPlugins() throws IOException {
+    public static void bootstrapPlugins() {
+        // Classic modules
+        Enumeration<URL> urls = null;
+        try {
+            urls = Play.class.getClassLoader().getResources("META-INF/play.plugins");
+        } catch (Exception e) {
+        }
+        while (urls.hasMoreElements()) {
+            URL url = urls.nextElement();
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(line).newInstance();
+                    plugin.onLoad();
+                    plugins.add(plugin);
+                }
+            } catch (Exception ex) {
+                Logger.error(ex, "Cannot load %s", url);
+            }
+        }
         //Auto load things in lib
-    	File lib = new File(applicationPath, "lib");
+        File lib = new File(applicationPath, "lib");
         File[] libs = lib.listFiles();
-        if (libs!=null) {
-	        for (int i = 0; i < libs.length; i++) {
-	            if (libs[i].isFile() && (libs[i].toString().endsWith(".zip"))) {
-	                addPlayApp(libs[i]);
-	            } else if (isPlayApp(libs[i])) {
-	                addPlayApp(libs[i]);
-	            }
-	        }
+        if (libs != null) {
+            for (int i = 0; i < libs.length; i++) {
+                if (libs[i].isFile() && (libs[i].toString().endsWith(".zip"))) {
+                    addPlayApp(libs[i]);
+                } else if (isPlayApp(libs[i])) {
+                    addPlayApp(libs[i]);
+                }
+            }
         }
         //Load specific
         String pluginPath = configuration.getProperty("plugin.path");
@@ -362,7 +394,6 @@ public class Play {
         return true;
     }
 
-
     /**
      * Search a VirtualFile in all loaded applications and plugins
      * @param path Relative path from the applications root
@@ -371,7 +402,7 @@ public class Play {
     public static VirtualFile getVirtualFile(String path) {
         return VirtualFile.open(applicationPath).child(path);
     }
-    
+
     /**
      * Search a File in the current application
      * @param path Relative path from the application root
@@ -380,5 +411,4 @@ public class Play {
     public static File getFile(String path) {
         return new File(applicationPath, path);
     }
-
 }

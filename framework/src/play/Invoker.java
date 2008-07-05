@@ -1,6 +1,7 @@
 package play;
 
 import java.util.Properties;
+import java.util.Stack;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -58,6 +59,12 @@ public class Invoker {
             LocalVariablesNamesTracer.clear();
             LocalVariablesNamesTracer.enterMethod();
             Play.detectChanges();
+            if (!Play.started) {
+                Play.start();
+            }
+            for (PlayPlugin plugin : Play.plugins) {
+                plugin.beforeInvocation();                
+            }
             JPA.startTx(false);
             if (Play.locales.isEmpty()) {
                 Lang.set("");
@@ -65,20 +72,28 @@ public class Invoker {
                 Lang.set(Play.locales.get(0));
             }
         }
-        
+
         /**
          * Things to do after an Invocation.
          * (if the Invocation code has not thrown any exception)
          */
         public static void after() {
+            for (PlayPlugin plugin : Play.plugins) {
+                plugin.afterInvocation();                
+            }
+            // TODO: move these as plugin -->
             JPA.closeTx(false);
             LocalVariablesNamesTracer.exitMethod();
         }
-        
+
         /**
          * Things to do if the Invocation code thrown an exception
          */
         public static void onException(Throwable e) {
+            for (PlayPlugin plugin : Play.plugins) {
+                plugin.onInvocationException(e);                
+            }
+            // TODO: move these as plugin -->
             JPA.closeTx(true);
             LocalVariablesNamesTracer.exitMethod();
             if (e instanceof PlayException) {
@@ -86,12 +101,14 @@ public class Invoker {
             }
             throw new UnexpectedException(e);
         }
-        
+
         /**
          * Things to do in all cases after the invocation.
          */
         public static void _finally() {
-            DB.close();
+            for (PlayPlugin plugin : Play.plugins) {
+                plugin.invocationFinally();                
+            }
         }
 
         @Override
@@ -104,6 +121,7 @@ public class Invoker {
                 onException(e);
             } finally {
                 _finally();
+
             }
         }
     }

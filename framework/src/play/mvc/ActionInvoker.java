@@ -8,6 +8,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 import play.Play;
+import play.PlayPlugin;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.data.parsing.DataParser;
 import play.exceptions.JavaExecutionException;
@@ -48,6 +49,10 @@ public class ActionInvoker {
                 Controller.class.getField("session").set(null, Scope.Session.current());
                 Controller.class.getField("flash").set(null, Scope.Flash.current());
                 Controller.class.getField("renderArgs").set(null, Scope.RenderArgs.current());
+            }
+            
+            for(PlayPlugin plugin : Play.plugins) {
+                plugin.beforeActionInvocation();
             }
             
             // 5. Invoke the action
@@ -111,6 +116,10 @@ public class ActionInvoker {
         	
             Scope.Session.current().save();
             Scope.Flash.current().save();
+            
+            for(PlayPlugin plugin : Play.plugins) {
+                plugin.onActionInvocationResult(result);
+            }
             
             result.apply(request, response);
             

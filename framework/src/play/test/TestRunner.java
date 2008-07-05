@@ -24,7 +24,7 @@ public class TestRunner extends RunListener {
         boolean allOk = true;
         
         VirtualFile testPath = Play.getVirtualFile("test/application");
-        List<Class> testClasses = Play.classloader.getAllClasses(testPath, "application");
+        List<Class> testClasses = Play.classloader.getAllClasses();
         
         if(testClasses.isEmpty()) {
             Logger.info("");
