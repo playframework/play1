@@ -7,12 +7,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
-import play.exceptions.JavaException;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
@@ -23,6 +20,7 @@ import play.mvc.results.Redirect;
 import play.mvc.results.RenderBinary;
 import play.mvc.results.RenderTemplate;
 import play.mvc.results.RenderText;
+import play.mvc.results.RenderJson;
 import play.mvc.results.Unauthorized;
 import play.templates.Template;
 import play.templates.TemplateLoader;
@@ -66,6 +64,10 @@ public abstract class Controller {
         } catch (FileNotFoundException ex) {
             throw new JavaExecutionException(Http.Request.current().action, ex);
         }
+    }
+    
+    protected static void renderJSON(Object o, String... includes) {
+        throw new RenderJson(o, includes);
     }
     
     protected static void redirect(String url) {
