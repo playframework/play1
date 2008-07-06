@@ -47,7 +47,7 @@ public class Template {
     public Set<Integer> doBodyLines = new HashSet<Integer>();
     public Class compiledTemplate;
     public Long timestamp = System.currentTimeMillis();
-    Boolean needJavaRecompilation;
+    boolean needJavaRecompilation;
     
     
     public Template(String name, String source) {

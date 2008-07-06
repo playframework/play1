@@ -1,2 +1,5 @@
 play.db.DBPlugin
 play.jobs.JobsPlugin
+play.db.jpa.JPAPlugin
+play.i18n.MessagesPlugin
+play.db.zdb.ZDBPlugin

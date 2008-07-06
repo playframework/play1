@@ -51,7 +51,7 @@ public class HttpHandler implements IoHandler {
         if (uri.getPath().startsWith("/public/")) {
             Logger.trace("Serve static: " + uri.getPath());
             serveStatic(session, minaRequest, minaResponse);
-        } else if(Play.mode == Play.Mode.DEV) {
+        } else if (Play.mode == Play.Mode.DEV) {
             Invoker.invokeInThread(new MinaInvocation(session, minaRequest, minaResponse));
         } else {
             Invoker.invoke(new MinaInvocation(session, minaRequest, minaResponse));
@@ -184,7 +184,6 @@ public class HttpHandler implements IoHandler {
         if (!HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION))) {
             future.addListener(IoFutureListener.CLOSE);
         }
-
     }
 
     public void messageSent(IoSession session, Object message) throws Exception {
@@ -282,7 +281,7 @@ public class HttpHandler implements IoHandler {
                 Http.Header hd = new Http.Header();
                 hd.name = key.toLowerCase();
                 hd.values = minaRequest.getHeaders().get(key);
-                request.headers.put(hd.name, hd);
+                request.headers.put(hd.name, hd);                
             }
 
             for (Cookie cookie : minaRequest.getCookies()) {
@@ -298,14 +297,20 @@ public class HttpHandler implements IoHandler {
             response.out = new ByteArrayOutputStream();
 
             ActionInvoker.invoke(request, response);
-            
+
             response.out.flush();
             Logger.trace("Invoke: " + uri.getPath() + ": " + response.status);
             if (response.status == 404) {
                 HttpHandler.serve404(session, minaRequest, minaResponse);
                 return;
             }
-            minaResponse.setContent(IoBuffer.wrap(((ByteArrayOutputStream) response.out).toByteArray()));
+            if (response.direct != null) {
+                session.setAttribute("file", new FileInputStream(response.direct).getChannel());
+                response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + response.direct.length());
+                response.setHeader(HttpHeaderConstants.KEY_TRANSFER_CODING, "pppp");
+            } else {
+                minaResponse.setContent(IoBuffer.wrap(((ByteArrayOutputStream) response.out).toByteArray()));
+            }
             if (response.contentType != null) {
                 minaResponse.setHeader("Content-Type", response.contentType + (response.contentType.startsWith("text/") ? "; charset=utf-8" : ""));
             } else {
@@ -318,7 +323,7 @@ public class HttpHandler implements IoHandler {
                 for (String value : hd.values) {
                     minaResponse.addHeader(key, value);
                 }
-            }
+            }           
 
             Map<String, Http.Cookie> cookies = response.cookies;
             for (String key : cookies.keySet()) {

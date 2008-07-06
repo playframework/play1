@@ -1,4 +1,3 @@
-
 package play.mvc;
 
 import java.io.File;
@@ -26,97 +25,89 @@ import play.templates.Template;
 import play.templates.TemplateLoader;
 
 public abstract class Controller {
-    
+
     public static Http.Request request = null;
     public static Response response = null;
     public static Scope.Session session = null;
     public static Scope.Flash flash = null;
     public static Scope.Params params = null;
     public static Scope.RenderArgs renderArgs = null;
-    
+
     protected static void renderText(CharSequence text) {
         throw new RenderText(text);
     }
-    
+
     protected static void renderText(CharSequence pattern, Object... args) {
         throw new RenderText(String.format(pattern.toString(), args));
     }
-    
+
     protected static void renderBinary(InputStream is) {
         throw new RenderBinary(is, null);
     }
-    
+
     protected static void renderBinary(InputStream is, String name) {
         throw new RenderBinary(is, name);
     }
-    
+
     protected static void renderBinary(File file) {
-        try {
-            throw new RenderBinary(new FileInputStream(file), null);
-        } catch (FileNotFoundException ex) {
-            throw new JavaExecutionException(Http.Request.current().action, ex);
-        }
+        throw new RenderBinary(file, null);
     }
-    
+
     protected static void renderBinary(File file, String name) {
-        try {
-            throw new RenderBinary(new FileInputStream(file), name);
-        } catch (FileNotFoundException ex) {
-            throw new JavaExecutionException(Http.Request.current().action, ex);
-        }
+        throw new RenderBinary(file, name);
     }
-    
+
     protected static void renderJSON(Object o, String... includes) {
         throw new RenderJson(o, includes);
     }
-    
+
     protected static void redirect(String url) {
         throw new Redirect(url);
     }
-    
+
     protected static void unauthorized(String realm) {
         throw new Unauthorized(realm);
     }
-    
+
     protected static void notFound(String what) {
         throw new NotFound(what);
     }
-    
+
     protected static void notFoundIfNull(Object o) {
-        if(o == null) {
+        if (o == null) {
             notFound();
         }
     }
-    
+
     protected static void notFound() {
         throw new NotFound("");
     }
-    
+
     protected static void redirect(String action, Object... args) {
         Map<String, String> r = new HashMap<String, String>();
         String[] names = SignaturesNamesRepository.get(ActionInvoker.getActionMethod(action));
         assert names.length == args.length : "Problem is action redirection";
-        for(int i=0; i<names.length; i++) {
+        for (int i = 0; i < names.length; i++) {
             r.put(names[i], args[i] == null ? null : args[i].toString());
         }
         try {
             throw new Redirect(Router.reverse(action, r).toString());
-        } catch(NoRouteFoundException e) {
+        } catch (NoRouteFoundException e) {
             StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
-            if(element != null) {
+            if (element != null) {
                 throw new NoRouteFoundException(action, r, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
             } else {
                 throw e;
             }
         }
     }
-    
+
     protected static void render(Object... args) {
         // Template datas
         Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
-        for(Object o:args) {
+        for (Object o : args) {
             String name = LocalVariablesNamesTracer.getLocalVariableName(o);
-            if(name != null) {
+            if (name != null) {
                 templateBinding.put(name, o);
             }
         }
@@ -127,22 +118,21 @@ public abstract class Controller {
         templateBinding.put("play", new Play());
         // Template name
         String templateName = null;
-        if(args.length>0 && args[0] instanceof String && LocalVariablesNamesTracer.getLocalVariableName(args[0]) == null) {
+        if (args.length > 0 && args[0] instanceof String && LocalVariablesNamesTracer.getLocalVariableName(args[0]) == null) {
             templateName = args[0].toString();
         } else {
-            templateName = Http.Request.current().action.replace(".", "/")+"."+Http.Request.current().format;
+            templateName = Http.Request.current().action.replace(".", "/") + "." + Http.Request.current().format;
         }
         try {
             Template template = TemplateLoader.load(templateName);
             throw new RenderTemplate(template, templateBinding.data);
-        } catch(TemplateNotFoundException ex) {
+        } catch (TemplateNotFoundException ex) {
             StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex);
-            if(element != null) {
+            if (element != null) {
                 throw new TemplateNotFoundException(templateName, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
             } else {
                 throw ex;
             }
-        }      
+        }
     }
-
 }

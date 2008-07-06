@@ -1,18 +1,14 @@
 package play;
 
 import java.util.Properties;
-import java.util.Stack;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
-import play.db.DB;
-import play.db.jpa.JPA;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
-import play.i18n.Lang;
 
 /**
  * Run some code in a Play! context
@@ -63,14 +59,9 @@ public class Invoker {
                 Play.start();
             }
             for (PlayPlugin plugin : Play.plugins) {
-                plugin.beforeInvocation();                
+                plugin.beforeInvocation();
             }
-            JPA.startTx(false);
-            if (Play.locales.isEmpty()) {
-                Lang.set("");
-            } else {
-                Lang.set(Play.locales.get(0));
-            }
+
         }
 
         /**
@@ -79,11 +70,9 @@ public class Invoker {
          */
         public static void after() {
             for (PlayPlugin plugin : Play.plugins) {
-                plugin.afterInvocation();                
-            }
-            // TODO: move these as plugin -->
-            JPA.closeTx(false);
-            LocalVariablesNamesTracer.exitMethod();
+                plugin.afterInvocation();
+            }  
+            LocalVariablesNamesTracer.exitMethod();            
         }
 
         /**
@@ -91,10 +80,8 @@ public class Invoker {
          */
         public static void onException(Throwable e) {
             for (PlayPlugin plugin : Play.plugins) {
-                plugin.onInvocationException(e);                
-            }
-            // TODO: move these as plugin -->
-            JPA.closeTx(true);
+                plugin.onInvocationException(e);
+            }            
             LocalVariablesNamesTracer.exitMethod();
             if (e instanceof PlayException) {
                 throw (PlayException) e;
@@ -107,7 +94,7 @@ public class Invoker {
          */
         public static void _finally() {
             for (PlayPlugin plugin : Play.plugins) {
-                plugin.invocationFinally();                
+                plugin.invocationFinally();
             }
         }
 

@@ -10,6 +10,7 @@ import org.apache.mina.transport.socket.SocketAcceptor;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import play.Logger;
 import play.Play;
+import play.Play.Mode;
 
 public class Server {
     private SocketAcceptor acceptor;
@@ -17,7 +18,11 @@ public class Server {
     public Server() {
         Properties p = Play.configuration;
         int httpPort = Integer.parseInt(p.getProperty("http.port", "9000"));
-        acceptor = new NioSocketAcceptor();
+        if(Play.mode == Mode.DEV) {
+            acceptor = new NioSocketAcceptor(1);
+        } else {
+            acceptor = new NioSocketAcceptor();
+        }
         acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new HttpCodecFactory()));
         acceptor.setReuseAddress(true);
         acceptor.getSessionConfig().setReuseAddress(true);

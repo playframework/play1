@@ -3,10 +3,15 @@ package play.classloading;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.UnmodifiableClassException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import play.Logger;
 import play.Play;
 import play.vfs.VirtualFile;
@@ -43,9 +48,7 @@ public class ApplicationClassloader extends ClassLoader {
 
         // Delegate to the classic classloader
         return super.loadClass(name, resolve);
-    }    
-    
-    // ~~~~~~~~~~~~~~~~~~~~~~~
+    }    // ~~~~~~~~~~~~~~~~~~~~~~~
     public ThreadLocal<List<ApplicationClass>> loadingTracer = new ThreadLocal<List<ApplicationClass>>();
 
     protected Class loadApplicationClass(String name) {
@@ -101,7 +104,7 @@ public class ApplicationClassloader extends ClassLoader {
     public void detectChanges() {
         // First check if there is new classes or removed classes
         int hash = computePathHash();
-        if(hash != this.pathHash) {
+        if (hash != this.pathHash) {
             throw new RuntimeException("Path has changed");
         }
         // Now check for file modification
@@ -113,13 +116,13 @@ public class ApplicationClassloader extends ClassLoader {
             }
         }
         List<ClassDefinition> newDefinitions = new ArrayList<ClassDefinition>();
+        Map<Class, Integer> annotationsHashes = new HashMap<Class, Integer>();
         for (ApplicationClass applicationClass : modifieds) {
+            annotationsHashes.put(applicationClass.javaClass, computeAnnotationsHash(applicationClass.javaClass));
             long start = System.currentTimeMillis();
             applicationClass.compile();
             applicationClass.enhance();
-            if (applicationClass.javaClass != null) {
-                newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.enhancedByteCode));
-            }
+            newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.enhancedByteCode));
             Logger.trace("%sms to compile & enhance %s", System.currentTimeMillis() - start, applicationClass.name);
         }
         try {
@@ -129,10 +132,36 @@ public class ApplicationClassloader extends ClassLoader {
         } catch (UnmodifiableClassException e) {
             throw new UnexpectedException(e);
         }
+        // Check new annotations
+        for (Class clazz : annotationsHashes.keySet()) {
+            if (annotationsHashes.get(clazz) != computeAnnotationsHash(clazz)) {
+                throw new RuntimeException("Annotations change !");
+            }
+        }
     }
-    
+
+    int computeAnnotationsHash(Class clazz) {
+        if (clazz == null) {
+            return 0;
+        }
+        StringBuffer buffer = new StringBuffer();
+        for (Annotation annotation : clazz.getAnnotations()) {
+            buffer.append(annotation.toString());
+        }
+        for (Field field : clazz.getDeclaredFields()) {
+            for (Annotation annotation : field.getAnnotations()) {
+                buffer.append(annotation.toString());
+            }
+        }
+        for (Method method : clazz.getDeclaredMethods()) {
+            for (Annotation annotation : method.getAnnotations()) {
+                buffer.append(annotation.toString());
+            }
+        }
+        return buffer.toString().hashCode();
+    }
     int pathHash = 0;
-    
+
     int computePathHash() {
         StringBuffer buf = new StringBuffer();
         for (VirtualFile virtualFile : Play.javaPath) {
@@ -140,7 +169,7 @@ public class ApplicationClassloader extends ClassLoader {
         }
         return buf.toString().hashCode();
     }
-    
+
     void scan(StringBuffer buf, VirtualFile current) {
         if (!current.isDirectory()) {
             if (current.getName().endsWith(".java")) {

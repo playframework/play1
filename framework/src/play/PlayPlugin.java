@@ -6,6 +6,9 @@ public abstract class PlayPlugin {
     
     public void onLoad() {
     }
+    
+    public void detectChange() {
+    }
 
     public void onApplicationStart() {
     }

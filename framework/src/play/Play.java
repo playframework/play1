@@ -151,7 +151,7 @@ public class Play {
         routes = new ArrayList<VirtualFile>();
         routes.add(appRoot.child("conf/routes"));
         // Enable a first classloader
-        classloader = new ApplicationClassloader();        
+        classloader = new ApplicationClassloader();
         // Plugins
         bootstrapPlugins();
         // Mode
@@ -203,7 +203,7 @@ public class Play {
     public static synchronized void start() {
         try {
             if (started) {
-                Logger.debug("Reloading ...");
+                Logger.info("Reloading ...");
                 stop();
             }
             Thread.currentThread().setContextClassLoader(Play.classloader);
@@ -232,15 +232,9 @@ public class Play {
             Router.load();
 
             // Try to load all classes
-            Play.classloader.getAllClasses();
+            Play.classloader.getAllClasses();                    
 
-            // TODO: move as plugins --->            
-            if (configuration.getProperty("zdb", "disabled").equals("enabled")) {
-                Store.init(new File(applicationPath, "zdb"));
-            }
-            Messages.load();
-            JPA.init();
-
+            // Plugins
             for (PlayPlugin plugin : plugins) {
                 plugin.onApplicationStart();
             }
@@ -259,8 +253,10 @@ public class Play {
      * Stop the application
      */
     public static synchronized void stop() {
-        JPA.shutdown();
         started = false;
+        for (PlayPlugin plugin : plugins) {
+            plugin.onApplicationStop();
+        }
     }
 
     static void preCompile() {
@@ -284,10 +280,12 @@ public class Play {
         try {
             classloader.detectChanges();
             Router.detectChanges();
-            Messages.detectChanges();
             if (conf.lastModified() > startedAt) {
                 start();
                 return;
+            }
+            for (PlayPlugin plugin : plugins) {
+                plugin.detectChange();
             }
         } catch (Exception e) {
             // We have to do a clean refresh
