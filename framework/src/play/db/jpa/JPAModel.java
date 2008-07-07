@@ -89,14 +89,20 @@ public class JPAModel implements Serializable {
         if (query.trim().toLowerCase().startsWith("from ")) {
             return query;
         }
-        if (query.trim().indexOf(" ") == -1 && params.length == 1) {
+        if (query.trim().indexOf(" ") == -1 && params != null && params.length == 1) {
             query += " = ?";
+        }
+        if (query.trim().indexOf(" ") == -1 && params == null) {
+            query += " = null";
         }
         return  "from " + entityName + " where " + query;       
     }
     
     @SuppressWarnings ("unused")
     protected static Query bindParameters (Query q, Object... params) {
+        if(params == null) {
+            return q;
+        }
     	for (int i=0;i<params.length;i++) {
     		q.setParameter(i+1, params[i]);
     	}
