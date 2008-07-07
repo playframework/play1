@@ -175,8 +175,10 @@ fi
 
 if [ -z "$2" ]; then
     APPLICATION_PATH="."
+    REMAINING_ARGS=`echo $@ | cut -d" " -f1 --complement`
 else
     APPLICATION_PATH="$2"
+    REMAINING_ARGS=`echo $@ | cut -d" " -f1,2 --complement`
 fi
 if [ "$PLAY_COMMAND" = "new" ]; then
     if [ -d "$APPLICATION_PATH" ]; then
@@ -250,8 +252,10 @@ fi
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~ Read some configuration from conf/application.conf
+JAVA_ARGS="$REMAINING_ARGS"
+
 readConf "jvm.memory"
-JAVA_ARGS=$CONF_VALUE
+JAVA_ARGS="$JAVA_ARGS $CONF_VALUE"
 
 readConf "jpda.port"
 JPDA_PORT=$CONF_VALUE
