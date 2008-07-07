@@ -25,6 +25,8 @@ public class FastTags {
                 v = ((Number) test).intValue() != 0;
             } else if (test instanceof Collection) {
                 v = ((Collection) test).size() != 0;
+            } else {
+                v = true;
             }
         }
         if (v) {

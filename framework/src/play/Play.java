@@ -17,17 +17,12 @@ import org.apache.log4j.Level;
 import play.cache.Cache;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
-import play.db.DB;
-import play.db.jpa.JPA;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
-import play.i18n.Messages;
-import play.jobs.Jobs;
 import play.libs.IO;
 import play.vfs.VirtualFile;
 import play.mvc.Router;
 import play.templates.TemplateLoader;
-import zdb.core.Store;
 
 /**
  * Main framework class

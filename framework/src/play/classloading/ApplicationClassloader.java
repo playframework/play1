@@ -48,7 +48,9 @@ public class ApplicationClassloader extends ClassLoader {
 
         // Delegate to the classic classloader
         return super.loadClass(name, resolve);
-    }    // ~~~~~~~~~~~~~~~~~~~~~~~
+    }    
+    
+    // ~~~~~~~~~~~~~~~~~~~~~~~
     public ThreadLocal<List<ApplicationClass>> loadingTracer = new ThreadLocal<List<ApplicationClass>>();
 
     protected Class loadApplicationClass(String name) {

@@ -72,7 +72,9 @@ public class Http {
         public Map<String, Http.Header> headers = new HashMap<String, Header>();
         public Map<String, Http.Cookie> cookies = new HashMap<String, Cookie>();
         public OutputStream out;
-        public File direct;        // ThreadLocal access
+        public File direct;        
+        
+        // ThreadLocal access
         public static ThreadLocal<Response> current = new ThreadLocal<Response>();        
 
         public static Response current() {

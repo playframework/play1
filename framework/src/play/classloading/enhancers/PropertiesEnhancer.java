@@ -113,14 +113,15 @@ public class PropertiesEnhancer extends Enhancer {
                                 } else if (fieldAccess.isWriter()) {
 
                                     // Réécris l'accés en ecriture à la property
-                                    fieldAccess.replace("play.classloading.enhancers.PropertiesEnhancer.FieldAccessor.invokeWriteProperty($0, \"" + fieldAccess.getFieldName() + "\", $type, $1, \"" + fieldAccess.getClassName() + "\", \"" + invocationPoint + "\");");
-
+                                    fieldAccess.replace("play.classloading.enhancers.PropertiesEnhancer.FieldAccessor.invokeWriteProperty($0, \"" + fieldAccess.getFieldName() + "\", " + fieldAccess.getField().getType().getName() + ".class, $1, \"" + fieldAccess.getClassName() + "\", \"" + invocationPoint + "\");");
+                                    
+                                    
                                 }
                             }
                         }
 
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        throw new RuntimeException(e);
                     }
                 }
             });
