@@ -256,16 +256,17 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             return locals();
         }
 
-        public static String getLocalVariableName(Object o) {
+        public static List<String> getAllLocalVariableNames(Object o) {
+            List<String> allNames = new ArrayList<String>();
             for (String variable : getLocalVariables().keySet()) {
                 if (getLocalVariables().get(variable) == o) {
-                    return variable;
+                    allNames.add(variable);
                 }
                 if (o != null && o instanceof Number && o.equals(getLocalVariables().get(variable))) {
-                    return variable;
+                    allNames.add(variable);
                 }
             }
-            return null;
+            return allNames;
         }
 
         public static Object getLocalVariable(String variable) {

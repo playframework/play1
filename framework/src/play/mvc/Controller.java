@@ -1,15 +1,13 @@
 package play.mvc;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
-import play.exceptions.JavaExecutionException;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.TemplateNotFoundException;
@@ -106,8 +104,8 @@ public abstract class Controller {
         // Template datas
         Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
         for (Object o : args) {
-            String name = LocalVariablesNamesTracer.getLocalVariableName(o);
-            if (name != null) {
+            List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
+            for(String name : names) {
                 templateBinding.put(name, o);
             }
         }
@@ -118,7 +116,7 @@ public abstract class Controller {
         templateBinding.put("play", new Play());
         // Template name
         String templateName = null;
-        if (args.length > 0 && args[0] instanceof String && LocalVariablesNamesTracer.getLocalVariableName(args[0]) == null) {
+        if (args.length > 0 && args[0] instanceof String && LocalVariablesNamesTracer.getAllLocalVariableNames(args[0]).isEmpty()) {
             templateName = args[0].toString();
         } else {
             templateName = Http.Request.current().action.replace(".", "/") + "." + Http.Request.current().format;

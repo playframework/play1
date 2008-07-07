@@ -12,6 +12,9 @@ public abstract class PlayPlugin {
 
     public void onApplicationStart() {
     }
+    
+    public void afterApplicationStart() {
+    }
 
     public void onApplicationStop() {
     }
