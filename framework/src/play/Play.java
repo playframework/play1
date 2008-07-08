@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
@@ -189,6 +190,9 @@ public class Play {
             }
         }
         configuration = newConfiguration;
+        for (PlayPlugin plugin : plugins) {
+            plugin.onConfigurationRead();
+        }
     }
 
     /**
@@ -295,7 +299,7 @@ public class Play {
         // Classic modules
         Enumeration<URL> urls = null;
         try {
-            urls = Play.class.getClassLoader().getResources("META-INF/play.plugins");
+            urls = Play.class.getClassLoader().getResources("play.plugins");
         } catch (Exception e) {
         }
         while (urls.hasMoreElements()) {
@@ -304,14 +308,19 @@ public class Play {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
                 String line = null;
                 while ((line = reader.readLine()) != null) {
-                    PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(line).newInstance();
-                    plugin.onLoad();
+                	String[] infos = line.split(":");
+                    PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(infos[1]).newInstance();
+                    plugin.index=Integer.parseInt(infos[0]);
                     plugins.add(plugin);
                 }
             } catch (Exception ex) {
                 Logger.error(ex, "Cannot load %s", url);
             }
         }
+        Collections.sort(plugins);
+        for (PlayPlugin plugin : plugins) {
+			plugin.onLoad();
+		}
         //Auto load things in lib
         File lib = new File(applicationPath, "lib");
         File[] libs = lib.listFiles();

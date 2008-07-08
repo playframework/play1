@@ -1,0 +1,5 @@
+0:play.db.DBPlugin
+1:play.db.jpa.JPAPlugin
+2:play.jobs.JobsPlugin
+3:play.i18n.MessagesPlugin
+4:play.db.zdb.ZDBPlugin

@@ -1,5 +1,0 @@
-play.db.DBPlugin
-play.db.jpa.JPAPlugin
-play.jobs.JobsPlugin
-play.i18n.MessagesPlugin
-play.db.zdb.ZDBPlugin
