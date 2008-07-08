@@ -16,7 +16,7 @@ import play.exceptions.UnexpectedException;
 
 public class FileSystemFile extends VirtualFile {
 
-    File realFile;
+    public File realFile;
 
     public FileSystemFile(File file) {
         realFile = file;

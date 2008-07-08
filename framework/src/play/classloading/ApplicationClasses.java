@@ -37,6 +37,24 @@ public class ApplicationClasses {
         return classes.get(name);
     }
 
+    public List<ApplicationClass> getAssignableClasses (Class clazz) {
+    	List<ApplicationClass> results = new ArrayList<ApplicationClass>();
+    	for (ApplicationClass applicationClass : classes.values()) {
+			if (clazz.isAssignableFrom(applicationClass.javaClass) && !applicationClass.javaClass.getName().equals(clazz.getName()))
+				results.add(applicationClass);
+		}
+    	return results;
+    }
+    
+    public List<ApplicationClass> getAnnotatedClasses (Class clazz) {
+    	List<ApplicationClass> results = new ArrayList<ApplicationClass>();
+    	for (ApplicationClass applicationClass : classes.values()) {
+			if (applicationClass.javaClass.isAnnotationPresent(clazz))
+				results.add(applicationClass);
+		}
+    	return results;
+    } 
+    
     /**
      * All loaded classes.
      * @return All loaded classes
