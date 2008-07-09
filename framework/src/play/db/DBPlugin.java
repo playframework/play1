@@ -2,10 +2,12 @@ package play.db;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.io.File;
+import java.sql.Connection;
 import java.util.Properties;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
+import play.exceptions.DatabaseException;
 
 public class DBPlugin extends PlayPlugin {
 
@@ -13,6 +15,12 @@ public class DBPlugin extends PlayPlugin {
     public void onApplicationStart() {
         if (changed()) {
             try {
+                String driver = Play.configuration.getProperty("db.driver");
+                try {
+                    Play.classloader.loadClass(driver);
+                } catch (Exception e) {
+                    throw new Exception("Driver not found (" + driver + ")");
+                }
                 System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
                 System.setProperty("com.mchange.v2.log.FallbackMLog.DEFAULT_CUTOFF_LEVEL", "OFF");
                 Properties p = Play.configuration;
@@ -23,14 +31,25 @@ public class DBPlugin extends PlayPlugin {
                 ds.setPassword(p.getProperty("db.pass"));
                 ds.setAcquireRetryAttempts(1);
                 ds.setAcquireRetryDelay(0);
-                ds.setCheckoutTimeout(1000);
+                ds.setCheckoutTimeout(Integer.parseInt(p.getProperty("db.pool.timeout", "1000")));
                 ds.setBreakAfterAcquireFailure(true);
-                ds.setMaxPoolSize(30);
-                ds.setMinPoolSize(10);
+                ds.setMaxPoolSize(Integer.parseInt(p.getProperty("db.pool.maxSize", "30")));
+                ds.setMinPoolSize(Integer.parseInt(p.getProperty("db.pool.minSize", "1")));
+                ds.setTestConnectionOnCheckout(true);
                 DB.datasource = ds;
+                Connection c = null;
+                try {
+                    c = ds.getConnection();
+                } finally {
+                    if (c != null) {
+                        c.close();
+                    }
+                }
                 Logger.info("Connected to %s", ds.getJdbcUrl());
             } catch (Exception e) {
-                Logger.error(e, "Cannot connected to the database");
+                DB.datasource = null;
+                Logger.error(e, "Cannot connected to the database : %s", e.getMessage());
+                throw new DatabaseException("Cannot connected to the database", e);
             }
         }
     }

@@ -286,6 +286,8 @@ public class Play {
             for (PlayPlugin plugin : plugins) {
                 plugin.detectChange();
             }
+        } catch (PlayException e) {
+            throw e;
         } catch (Exception e) {
             // We have to do a clean refresh
             start();

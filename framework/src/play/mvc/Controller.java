@@ -82,7 +82,7 @@ public abstract class Controller {
     }
 
     protected static void redirect(String action, Object... args) {
-        Map<String, String> r = new HashMap<String, String>();
+        Map<String, Object> r = new HashMap<String, Object>();
         String[] names = SignaturesNamesRepository.get(ActionInvoker.getActionMethod(action));
         assert names.length == args.length : "Problem is action redirection";
         for (int i = 0; i < names.length; i++) {

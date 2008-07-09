@@ -175,10 +175,16 @@ fi
 
 if [ -z "$2" ]; then
     APPLICATION_PATH="."
-    REMAINING_ARGS=`echo $@ | cut -d" " -f1 --complement`
 else
     APPLICATION_PATH="$2"
-    REMAINING_ARGS=`echo $@ | cut -d" " -f1,2 --complement`
+    REMAINING_ARGS=""
+    i=1
+    for arg in $@; do
+        if [ $i -gt 2 ]; then   
+            REMAINING_ARGS="$REMAINING_ARGS $arg"
+        fi
+        let i=$i+1
+    done
 fi
 if [ "$PLAY_COMMAND" = "new" ]; then
     if [ -d "$APPLICATION_PATH" ]; then

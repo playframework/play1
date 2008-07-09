@@ -243,7 +243,7 @@ public class Template {
             public Object invokeMethod(String name, Object param) {   
                 String action = controller+"."+name;
                 try {
-                    Map<String, String> r = new HashMap<String, String>();
+                    Map<String, Object> r = new HashMap<String, Object>();
                     String[] names = SignaturesNamesRepository.get(ActionInvoker.getActionMethod(action));
                     if(param instanceof Object[]) {
                         for(int i=0; i<((Object[])param).length; i++) {

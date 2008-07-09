@@ -58,7 +58,7 @@ public class Router {
     static List<Route> routes = new ArrayList<Route>();
 
     public static void route(Http.Request request) {
-        if(routes.isEmpty()) {
+        if (routes.isEmpty()) {
             throw new EmptyAppException();
         }
         for (Route route : routes) {
@@ -71,15 +71,15 @@ public class Router {
         }
         throw new NotFound(request.method, request.path);
     }
-    
+
     public static Map<String, String> route(String method, String path) {
-        if(routes.isEmpty()) {
+        if (routes.isEmpty()) {
             throw new EmptyAppException();
         }
         for (Route route : routes) {
             Map<String, String> args = route.matches(method, path);
             if (args != null) {
-                args.put("action", route.action);                
+                args.put("action", route.action);
                 return args;
             }
         }
@@ -87,18 +87,18 @@ public class Router {
     }
 
     public static ActionDefinition reverse(String action) {
-        return reverse(action, new HashMap<String, String>());
+        return reverse(action, new HashMap<String, Object>());
     }
-    
-    public static String getFullUrl(String action, Map<String, String> args) {
+
+    public static String getFullUrl(String action, Map<String, Object> args) {
         return Http.Request.current().getBase() + reverse(action, args);
     }
-    
-     public static String getFullUrl(String action) {
-        return getFullUrl(action, new HashMap<String, String>());
+
+    public static String getFullUrl(String action) {
+        return getFullUrl(action, new HashMap<String, Object>());
     }
-    
-    public static ActionDefinition reverse(String action, Map<String, String> args) {
+
+    public static ActionDefinition reverse(String action, Map<String, Object> args) {
         if (action.startsWith("controllers.")) {
             action = action.substring(12);
         }
@@ -108,7 +108,7 @@ public class Router {
                 boolean allRequiredArgsAreHere = true;
                 for (Route.Arg arg : route.args) {
                     inPathArgs.add(arg.name);
-                    String value = args.get(arg.name);
+                    String value = args.get(arg.name) == null ? null : args.get(arg.name) + "";
                     if (value == null || !arg.constraint.matches(value)) {
                         allRequiredArgsAreHere = false;
                         break;
@@ -119,15 +119,15 @@ public class Router {
                     String path = route.path;
                     for (String key : args.keySet()) {
                         if (inPathArgs.contains(key) && args.get(key) != null) {
-                            path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", args.get(key));
-                        } else {
+                            path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", args.get(key) + "");
+                        } else if (args.get(key) != null) {
                             try {
                                 queryString.append(URLEncoder.encode(key, "utf-8"));
                                 queryString.append("=");
-                                queryString.append(URLEncoder.encode(args.get(key), "utf-8"));
+                                queryString.append(URLEncoder.encode(args.get(key) + "", "utf-8"));
                                 queryString.append("&");
                             } catch (UnsupportedEncodingException ex) {
-                            //
+                                //
                             }
                         }
                     }
@@ -201,7 +201,7 @@ public class Router {
             String defaultValue;
             Boolean optional = false;
         }
-        
+
         @Override
         public String toString() {
             return method + " " + path + " -> " + action;

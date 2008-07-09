@@ -9,12 +9,12 @@ import java.util.Arrays;
 public class NoRouteFoundException extends PlayException implements SourceAttachment {
     
     String action;
-    Map<String, String> args;
+    Map<String, Object> args;
     String sourceFile;
     List<String> source;
     Integer line;
     
-    public NoRouteFoundException(String action, Map<String, String> args) {
+    public NoRouteFoundException(String action, Map<String, Object> args) {
         super("No route found");
         this.action = action;
         this.args = args;
@@ -23,14 +23,14 @@ public class NoRouteFoundException extends PlayException implements SourceAttach
         }
     } 
     
-    public NoRouteFoundException(String action, Map<String, String> args, ApplicationClass applicationClass, Integer line) {
+    public NoRouteFoundException(String action, Map<String, Object> args, ApplicationClass applicationClass, Integer line) {
         this(action, args);
         this.sourceFile = applicationClass.javaFile.relativePath();
         this.source = Arrays.asList(applicationClass.javaSource.split("\n"));
         this.line = line;
     }
     
-    public NoRouteFoundException(String action, Map<String, String> args, Template template, Integer line) {
+    public NoRouteFoundException(String action, Map<String, Object> args, Template template, Integer line) {
         this(action, args);
         this.sourceFile = template.name;
         this.source = Arrays.asList(template.source.split("\n"));
@@ -41,7 +41,7 @@ public class NoRouteFoundException extends PlayException implements SourceAttach
         return action;
     }
 
-    public Map<String, String> getArgs() {
+    public Map<String, Object> getArgs() {
         return args;
     }    
 

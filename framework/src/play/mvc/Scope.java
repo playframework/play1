@@ -70,6 +70,14 @@ public class Scope {
             out.put(key, value);
         }
 
+        public void error(String value) {
+            put("error", value);
+        }
+
+        public void success(String value) {
+            put("success", value);
+        }
+
         public void discard(String key) {
             out.remove(key);
         }
