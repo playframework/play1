@@ -127,6 +127,7 @@ public class RoutesTest extends TestSupport {
         //
         testApp.addRoute("GET   /yop    Application.yop");  
         sleep(2);
+        Play.detectChanges();
         response = GET("/yop");
         assertIsOk(response);
         assertContentEquals("yop", response);

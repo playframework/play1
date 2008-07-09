@@ -24,6 +24,10 @@ public class ApplicationClasses {
 
     public ApplicationClasses() {
     }
+    
+    public void clear() {
+        classes = new HashMap<String, ApplicationClass>();
+    }
 
     /**
      * Get a class by name

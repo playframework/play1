@@ -10,6 +10,7 @@ public abstract class TestSupport extends ApplicationTest {
     
     public static void start(TestApp app) {
         Play.init(app.root, "test");
+        Play.start();
     }
     
     public static void stop() {
@@ -42,6 +43,14 @@ public abstract class TestSupport extends ApplicationTest {
 
         public void writeController(String name, String code) throws IOException  {
             IO.writeContent(code, new FileOutputStream(new File(root, "app/controllers/"+name+".java")));
+        }
+        
+        public void removeController(String name) throws IOException  {
+            new File(root, "app/controllers/"+name+".java").delete();
+        }
+        
+        public void writeConf(String newConf) throws IOException  {
+            IO.writeContent(newConf, new FileOutputStream(new File(root, "conf/application.conf")));
         }
 
         public void createControllerPackage(String string) {

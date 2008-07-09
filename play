@@ -52,7 +52,6 @@ function readConf {
     fi
 }
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~ Is it a real OS ?
 
 CYGWIN=false

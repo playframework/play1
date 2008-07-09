@@ -49,7 +49,10 @@ public class DBPlugin extends PlayPlugin {
             } catch (Exception e) {
                 DB.datasource = null;
                 Logger.error(e, "Cannot connected to the database : %s", e.getMessage());
-                throw new DatabaseException("Cannot connected to the database", e);
+                if(e.getCause() instanceof InterruptedException) {
+                    throw new DatabaseException("Cannot connected to the database. Check the configuration.", e);
+                }
+                throw new DatabaseException("Cannot connected to the database, "+e.getMessage(), e);
             }
         }
     }

@@ -198,7 +198,10 @@
         <mkdir dir="${basedir}/tests-tmp" />
         <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true" tempdir="${basedir}/tests-tmp">
             <test name="${testclass}" todir="tests-results" />
-            <classpath refid="project.classpath"/>                    
+            <classpath>
+                <pathelement path="classes"/>
+                <path refid="project.classpath"/>                
+            </classpath>                   
             <formatter type="brief" usefile="false"/> 
             <formatter type="xml"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>  
@@ -213,7 +216,10 @@
         <mkdir dir="${basedir}/tests-tmp" />
         <junit errorproperty="tests.failed" failureproperty="tests.failed" fork="true" showoutput="true" tempdir="${basedir}/tests-tmp" >
             <test name="${testclass}" todir="tests-results" />            
-            <classpath refid="project.classpath"/>                    
+            <classpath>
+                <pathelement path="classes"/>
+                <path refid="project.classpath"/>                
+            </classpath>                   
             <formatter type="brief" usefile="false"/> 
             <formatter type="xml"/>
             <jvmarg value="-javaagent:${basedir}/play.jar" />

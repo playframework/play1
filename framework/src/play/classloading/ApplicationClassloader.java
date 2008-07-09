@@ -104,11 +104,6 @@ public class ApplicationClassloader extends ClassLoader {
      * Detect Java changes
      */
     public void detectChanges() {
-        // First check if there is new classes or removed classes
-        int hash = computePathHash();
-        if (hash != this.pathHash) {
-            throw new RuntimeException("Path has changed");
-        }
         // Now check for file modification
         List<ApplicationClass> modifieds = new ArrayList<ApplicationClass>();
         for (ApplicationClass applicationClass : Play.classes.all()) {
@@ -139,6 +134,11 @@ public class ApplicationClassloader extends ClassLoader {
             if (annotationsHashes.get(clazz) != computeAnnotationsHash(clazz)) {
                 throw new RuntimeException("Annotations change !");
             }
+        }
+        // Now check if there is new classes or removed classes
+        int hash = computePathHash();
+        if (hash != this.pathHash) {
+            throw new RuntimeException("Path has changed");
         }
     }
 

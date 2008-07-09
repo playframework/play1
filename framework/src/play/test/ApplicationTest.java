@@ -1,18 +1,30 @@
 package play.test;
 
 import java.io.IOException;
-import static org.junit.Assert.*;
-
 import java.io.UnsupportedEncodingException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import org.junit.After;
+import org.junit.Before;
+import play.Invoker.Invocation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.mvc.ActionInvoker;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
-public abstract class ApplicationTest {
-
+public abstract class ApplicationTest extends org.junit.Assert {
+    
+    @Before
+    public void before() {
+        Invocation.before();
+    }
+    
+    @After
+    public void after() {
+        Invocation.after();
+        Invocation._finally();
+    }
+    
     // Requests
     public static Response GET(String url) {
         Request request = newRequest();
