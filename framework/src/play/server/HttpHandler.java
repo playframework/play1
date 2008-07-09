@@ -268,13 +268,18 @@ public class HttpHandler implements IoHandler {
             } else {
                 request.body = new FileInputStream(minaRequest.getFileContent());
             }
-            request.domain = ((InetSocketAddress) session.getLocalAddress()).getHostName();
-            request.port = ((InetSocketAddress) session.getLocalAddress()).getPort();
             request.secure = false;
             request.path = uri.getPath();
             request.querystring = uri.getQuery() == null ? "" : uri.getRawQuery();
             request.url = minaRequest.getRequestUri().toString();
             request.host = minaRequest.getHeader("host");
+            if(request.host.contains(":")) {
+            	request.port=Integer.parseInt(request.host.split(":")[1]);
+            	request.domain=request.host.split(":")[0];
+            } else {
+            	request.port=80;
+            	request.domain=request.host;
+            }            	
             request.remoteAddress = ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
 
             for (String key : minaRequest.getHeaders().keySet()) {
