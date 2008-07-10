@@ -228,4 +228,11 @@
         <delete dir="${basedir}/tests-tmp" />
     </target>
     
+    <target name="package" depends="clean,version,jar">
+        <mkdir dir="dist" /> 
+        <zip destfile="dist/play-${version}.zip" comment="Play! ${version}" update="false">
+            <zipfileset prefix="play-${version}" dir=".." includes="**/*" excludes=".*,.*/*,framework/dist/**,id,nbproject/**,**/.settings/**,**/.bzr/**,*.bzrignore,framework/classes/**,framework/tests-results/**" />   
+        </zip>
+    </target>
+    
 </project>
