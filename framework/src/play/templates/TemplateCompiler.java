@@ -87,6 +87,9 @@ public class TemplateCompiler {
                     case ABS_ACTION:
                         action(true);
                         break;
+                    case COMMENT:
+                        skipLineBreak = true;
+                        break;
                     case START_TAG:
                         startTag();
                         break;
@@ -304,6 +307,7 @@ public class TemplateCompiler {
             MESSAGE, // &{...}
             ACTION, // @{...}
             ABS_ACTION, // @@{...}
+            COMMENT, // *{...}*
         }
         private int end,  begin,  end2,  begin2,  len;
         private Token state = Token.PLAIN;
@@ -366,9 +370,17 @@ public class TemplateCompiler {
                         if (c == '@' && c1 == '{') {
                             return found(Token.ACTION, 2);
                         }
+                        if (c == '*' && c1 == '{') {
+                            return found(Token.COMMENT, 2);
+                        }
                         break;
                     case SCRIPT:
                         if (c == '}' && c1 == '%') {
+                            return found(Token.PLAIN, 2);
+                        }
+                        break;
+                    case COMMENT:
+                        if (c == '}' && c1 == '*') {
                             return found(Token.PLAIN, 2);
                         }
                         break;
