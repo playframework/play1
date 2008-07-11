@@ -271,7 +271,7 @@ fi
 readConf "application.mode"
 APPLICATION_MODE=$CONF_VALUE
 
-if [ $APPLICATION_MODE = "prod" ] ; then
+if [ "$APPLICATION_MODE" = "prod" ] ; then
     JAVA_ARGS="$JAVA_ARGS -server"
 fi
   
@@ -314,7 +314,7 @@ fi
 if [ "$PLAY_COMMAND" = "run" ] ; then
     echo "~ Ctrl+C to stop"
     echo "~ "
-    "$JAVA_PATH" $JAVA_ARGS -javaagent:"$AGENT_PATH" -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID play.server.Server
+    "$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID play.server.Server
     echo 
     exit;
 fi
@@ -325,7 +325,7 @@ fi
 if [ "$PLAY_COMMAND" = "test" ] ; then
     echo "~ Running application tests"
     echo "~ "
-    "$JAVA_PATH" $JAVA_ARGS -javaagent:"$AGENT_PATH" -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID play.test.TestRunner
+    "$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID play.test.TestRunner
     echo 
     exit;
 fi
@@ -337,7 +337,7 @@ if [ "$PLAY_COMMAND" = "debug" ] ; then
     echo "~ Ctrl+C to break"
     echo "~ "
     echo -n "~ JPDA -> "
-    "$JAVA_PATH" $JAVA_ARGS -javaagent:"$AGENT_PATH" -Xdebug -Xrunjdwp:transport=dt_socket,address=$JPDA_PORT,server=y,suspend=n -Dplay.debug=yes -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server
+    "$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS -Xdebug -Xrunjdwp:transport=dt_socket,address=$JPDA_PORT,server=y,suspend=n -Dplay.debug=yes -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server
     echo
     exit;
 fi
@@ -354,7 +354,7 @@ if [ "$PLAY_COMMAND" = "start" ] ; then
 	echo "~"
 	exit 1
     else
-	"$JAVA_PATH" $JAVA_ARGS -javaagent:"$AGENT_PATH" -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server > "${APPLICATION_PATH}"/logs/system.out 2>&1 &
+	"$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server > "${APPLICATION_PATH}"/logs/system.out 2>&1 &
 	echo "~ Ok, $APPLICATION_PATH is started"
 	echo "~ Output is redirected to ${APPLICATION_PATH}/logs/system.out ..."
 	echo $! > "$APPLICATION_PATH/server.pid"
@@ -429,7 +429,7 @@ if [ "$PLAY_COMMAND" = "restart" ] ; then
 	echo "~"
 	exit 1
     fi
-    "$JAVA_PATH" $JAVA_ARGS -javaagent:$AGENT_PATH -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server > "${APPLICATION_PATH}"/logs/system.out 2>&1 &
+    "$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server > "${APPLICATION_PATH}"/logs/system.out 2>&1 &
     echo "~ $APPLICATION_PATH is started"
     echo "~ Output is redirected to ${APPLICATION_PATH}/logs/system.out ..."
     echo $! > "${APPLICATION_PATH}/server.pid"

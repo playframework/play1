@@ -65,7 +65,7 @@ public class HttpHandler implements IoHandler {
         if (file == null || file.isDirectory()) {
             serve404(session, request, response);
         } else {
-            if (Play.configuration.getProperty("mode", "dev").equals("dev")) {
+            if (Play.mode == Play.Mode.DEV) {
                 response.setHeader("Cache-Control", "no-cache");
                 attachFile(session, response, file);
             } else {
