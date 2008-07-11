@@ -182,9 +182,8 @@ public class HttpHandler implements IoHandler {
     public static void writeResponse(IoSession session, HttpRequest req, MutableHttpResponse res) {
         res.normalize(req);
         WriteFuture future = session.write(res);
-        if (!HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION))) {
-            future.addListener(IoFutureListener.CLOSE);
-        }
+        if ( (session.getAttribute("file")==null) && !HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION)))
+	            future.addListener(IoFutureListener.CLOSE);
     }
 
     public void messageSent(IoSession session, Object message) throws Exception {
@@ -192,8 +191,8 @@ public class HttpHandler implements IoHandler {
             if (session.getAttribute("file") != null) {
                 FileChannel channel = ((FileChannel) session.getAttribute("file"));
                 WriteFuture future = session.write(channel);
+                final DefaultHttpResponse res = (DefaultHttpResponse) message;
                 future.addListener(new IoFutureListener<IoFuture>() {
-
                     public void operationComplete(IoFuture future) {
                         FileChannel channel = (FileChannel) future.getSession().getAttribute("file");
                         future.getSession().removeAttribute("file");
@@ -202,9 +201,11 @@ public class HttpHandler implements IoHandler {
                         } catch (IOException e) {
                             Logger.error(e, "Unexpected error");
                         }
+                        if (!HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION)))
+                        	 future.getSession().close();
                     }
                 });
-            }
+            } 
         }
     }
 
