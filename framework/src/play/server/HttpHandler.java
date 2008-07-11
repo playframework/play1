@@ -31,6 +31,7 @@ import org.apache.mina.common.IoSession;
 import org.apache.mina.common.WriteFuture;
 import play.Invoker;
 import play.Logger;
+import play.MimeTypes;
 import play.Play;
 import play.exceptions.EmptyAppException;
 import play.exceptions.PlayException;
@@ -86,10 +87,10 @@ public class HttpHandler implements IoHandler {
 
     public static void attachFile(IoSession session, MutableHttpResponse response, VirtualFile file) throws IOException {
         response.setStatus(HttpResponseStatus.OK);
+        response.setHeader("Content-Type",MimeTypes.getMimeType(file.getName()));
         if (file instanceof FileSystemFile) {
             session.setAttribute("file", file.channel());
             response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + file.length());
-            response.setHeader(HttpHeaderConstants.KEY_TRANSFER_CODING, "pppp");
         } else {
             response.setContent(IoBuffer.wrap(file.content()));
         }
@@ -312,7 +313,6 @@ public class HttpHandler implements IoHandler {
             if (response.direct != null) {
                 session.setAttribute("file", new FileInputStream(response.direct).getChannel());
                 response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + response.direct.length());
-                response.setHeader(HttpHeaderConstants.KEY_TRANSFER_CODING, "pppp");
             } else {
                 minaResponse.setContent(IoBuffer.wrap(((ByteArrayOutputStream) response.out).toByteArray()));
             }
