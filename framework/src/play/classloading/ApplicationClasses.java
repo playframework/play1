@@ -24,7 +24,7 @@ public class ApplicationClasses {
 
     public ApplicationClasses() {
     }
-    
+
     public void clear() {
         classes = new HashMap<String, ApplicationClass>();
     }
@@ -41,24 +41,26 @@ public class ApplicationClasses {
         return classes.get(name);
     }
 
-    public List<ApplicationClass> getAssignableClasses (Class clazz) {
-    	List<ApplicationClass> results = new ArrayList<ApplicationClass>();
-    	for (ApplicationClass applicationClass : classes.values()) {
-			if (clazz.isAssignableFrom(applicationClass.javaClass) && !applicationClass.javaClass.getName().equals(clazz.getName()))
-				results.add(applicationClass);
-		}
-    	return results;
+    public List<ApplicationClass> getAssignableClasses(Class clazz) {
+        List<ApplicationClass> results = new ArrayList<ApplicationClass>();
+        for (ApplicationClass applicationClass : classes.values()) {
+            if (clazz.isAssignableFrom(applicationClass.javaClass) && !applicationClass.javaClass.getName().equals(clazz.getName())) {
+                results.add(applicationClass);
+            }
+        }
+        return results;
     }
-    
-    public List<ApplicationClass> getAnnotatedClasses (Class clazz) {
-    	List<ApplicationClass> results = new ArrayList<ApplicationClass>();
-    	for (ApplicationClass applicationClass : classes.values()) {
-			if (applicationClass.javaClass.isAnnotationPresent(clazz))
-				results.add(applicationClass);
-		}
-    	return results;
-    } 
-    
+
+    public List<ApplicationClass> getAnnotatedClasses(Class clazz) {
+        List<ApplicationClass> results = new ArrayList<ApplicationClass>();
+        for (ApplicationClass applicationClass : classes.values()) {
+            if (applicationClass.javaClass.isAnnotationPresent(clazz)) {
+                results.add(applicationClass);
+            }
+        }
+        return results;
+    }
+
     /**
      * All loaded classes.
      * @return All loaded classes
@@ -74,9 +76,7 @@ public class ApplicationClasses {
      */
     public boolean hasClass(String name) {
         return classes.containsKey(name);
-    }    
-    
-    // Enhancers
+    }    // Enhancers
     Class[] enhancers = new Class[]{
         ControllersEnhancer.class,
         LocalvariablesNamesEnhancer.class,
@@ -94,37 +94,30 @@ public class ApplicationClasses {
          * The fully qualified class name
          */
         public String name;
-        
         /**
          * A reference to the java source file
          */
         public VirtualFile javaFile;
-        
         /**
          * The Java source
          */
         public String javaSource;
-        
         /**
          * The compiled byteCode
          */
         public byte[] javaByteCode;
-        
         /**
          * The enhanced byteCode
          */
         public byte[] enhancedByteCode;
-        
         /**
          * The in JVM loaded class
          */
         public Class javaClass;
-        
         /**
          * Last time than this class was compiled
          */
         public Long timestamp = 0L;
-        
         /**
          * Is this class compiled
          */
@@ -190,7 +183,6 @@ public class ApplicationClasses {
     }
 
     // ~~ Utils
-    
     /**
      * Retrieve the corresponding source file for a given class name.
      * It handle innerClass too !
@@ -205,7 +197,7 @@ public class ApplicationClasses {
         fileName = fileName.replace(".", "/") + ".java";
         for (VirtualFile path : Play.javaPath) {
             VirtualFile javaFile = path.child(fileName);
-            if (javaFile.exists()) {               
+            if (javaFile.exists()) {
                 return javaFile;
             }
         }

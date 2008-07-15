@@ -221,6 +221,22 @@ public class ApplicationClassloader extends ClassLoader {
         }
         return res;
     }
+    
+    public List<Class> getAssignableClasses (Class clazz) {
+    	List<Class> results = new ArrayList<Class>();
+    	for(ApplicationClass c : Play.classes.getAssignableClasses(clazz)) {
+            results.add(c.javaClass);
+        }
+    	return results;
+    }
+    
+    public List<Class> getAnnotatedClasses (Class clazz) {
+    	List<Class> results = new ArrayList<Class>();
+    	for(ApplicationClass c : Play.classes.getAnnotatedClasses(clazz)) {
+            results.add(c.javaClass);
+        }
+    	return results;
+    } 
 
     private void scan(List<Class> classes, String packageName, VirtualFile current) {
         if (!current.isDirectory()) {

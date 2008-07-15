@@ -14,8 +14,11 @@ public class JPAPlugin extends PlayPlugin {
 
     @Override
     public void onApplicationStart() {
-        if (Play.configuration.getProperty("jpa", "disabled").equals("enabled") && (JPA.entityManagerFactory == null)) {
-            List<Class> classes = Play.classloader.getAllClasses();
+        if (JPA.entityManagerFactory == null) {
+            List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
+            if(classes.isEmpty()) {
+                return;
+            }
             if (DB.datasource == null) {
                 Logger.fatal("Cannot enable JPA without a valid database");
                 Play.configuration.setProperty("jpa", "disabled");
