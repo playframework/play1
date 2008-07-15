@@ -34,7 +34,9 @@ public class ActionInvoker {
             Router.route(request);
 
             // 2. Find the action method
-            Method actionMethod = getActionMethod(request.action);            
+            Method actionMethod = getActionMethod(request.action);  
+            request.controller = actionMethod.getDeclaringClass().getName();
+            request.actionMethod = actionMethod.getName();
             
             // 3. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);

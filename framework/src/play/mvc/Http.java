@@ -42,6 +42,8 @@ public class Http {
         public String remoteAddress;
         public String remoteUser;
         public String contentType;
+        public String controller;
+        public String actionMethod;
         public Integer port;
         public Boolean secure;
         public Map<String, Http.Header> headers = new HashMap<String, Http.Header>();

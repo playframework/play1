@@ -1,4 +1,7 @@
 %{
+    if(!_as) {
+        throw new play.exceptions.TagInternalException("as attribute cannot be empty");
+    }
     if(_items == null) _items = []
     _start = _start ? _start : 0
     _end = _end ? _end : _items.size()
