@@ -35,7 +35,7 @@ public class ActionInvoker {
 
             // 2. Find the action method
             Method actionMethod = getActionMethod(request.action);  
-            request.controller = actionMethod.getDeclaringClass().getName();
+            request.controller = actionMethod.getDeclaringClass().getName().substring(12);
             request.actionMethod = actionMethod.getName();
             
             // 3. Prepare request params
