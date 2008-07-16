@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import play.Logger;
 import play.Play;
 import play.vfs.VirtualFile;
+import play.exceptions.TemplateCompilationException;
 import play.exceptions.TemplateNotFoundException;
 
 public class TemplateLoader {
@@ -65,7 +68,12 @@ public class TemplateLoader {
     private static void scan(List<Template> templates, VirtualFile current) {
         if (!current.isDirectory()) {
             Template template = load(current);
-            template.compile();
+            try {
+				template.compile();
+			} catch (TemplateCompilationException e) {
+				Logger.error("Template %s does not compile at line %d", e.getTemplate().name, e.getLineNumber());
+				throw e;
+			}
             templates.add(template);            
         } else {
             for (VirtualFile virtualFile : current.list()) {
