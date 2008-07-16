@@ -300,7 +300,7 @@ public class TemplateCompiler {
 
             EOF, //
             PLAIN, //
-            SCRIPT, // %{...}
+            SCRIPT, // %{...}% or {%...%}
             EXPR, // ${...}
             START_TAG, // #{...}
             END_TAG, // #{/...}
@@ -352,6 +352,9 @@ public class TemplateCompiler {
                         if (c == '%' && c1 == '{') {
                             return found(Token.SCRIPT, 2);
                         }
+                        if (c == '{' && c1 == '%') {
+                            return found(Token.SCRIPT, 2);
+                        }
                         if (c == '$' && c1 == '{') {
                             return found(Token.EXPR, 2);
                         }
@@ -376,6 +379,9 @@ public class TemplateCompiler {
                         break;
                     case SCRIPT:
                         if (c == '}' && c1 == '%') {
+                            return found(Token.PLAIN, 2);
+                        }
+                        if (c == '%' && c1 == '}') {
                             return found(Token.PLAIN, 2);
                         }
                         break;
