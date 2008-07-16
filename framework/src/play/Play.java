@@ -96,7 +96,7 @@ public class Play {
     /**
      * The list of supported locales
      */
-    public static List<String> locales = new ArrayList<String>();
+    public static List<String> langs = new ArrayList<String>();
     /**
      * The very secret key
      */
@@ -212,9 +212,9 @@ public class Play {
             String logLevel = configuration.getProperty("application.log", "INFO");
             Logger.log4j.setLevel(Level.toLevel(logLevel));
             // Locales
-            locales = Arrays.asList(configuration.getProperty("application.langs", "").split(","));
-            if (locales.size() == 1 && locales.get(0).trim().equals("")) {
-                locales = new ArrayList<String>();
+            langs = Arrays.asList(configuration.getProperty("application.langs", "").split(","));
+            if (langs.size() == 1 && langs.get(0).trim().equals("")) {
+                langs = new ArrayList<String>();
             }
             // Cache
             Cache.init();

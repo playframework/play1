@@ -70,6 +70,13 @@ public class Scope {
             out.put(key, value);
         }
 
+        public void put(String key, Object value) {
+            if (value == null) {
+                put(key, (String) null);
+            }
+            put(key, value + "");
+        }
+
         public void error(String value) {
             put("error", value);
         }
@@ -172,12 +179,25 @@ public class Scope {
             data.put(key, value);
         }
 
+        public void put(String key, Object value) {
+            if (value == null) {
+                put(key, (String) null);
+            }
+            put(key, value + "");
+        }
+
         public String get(String key) {
             return data.get(key);
         }
 
         public boolean remove(String key) {
             return data.remove(key) != null;
+        }
+        
+        public void remove(String... keys) {
+            for(String key : keys) {
+                remove(key);
+            }
         }
 
         public void clear() {
@@ -298,6 +318,14 @@ public class Scope {
 
         public void put(String key, Object arg) {
             this.data.put(key, arg);
+        }
+
+        public Object get(String key) {
+            return data.get(key);
+        }
+
+        public <T> T get(String key, Class<T> clazz) {
+            return (T) this.get(key);
         }
     }
 }

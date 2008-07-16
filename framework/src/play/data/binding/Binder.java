@@ -88,22 +88,22 @@ public class Binder {
             if (value.length > 0) {
                 return directBind(value[0], clazz);
             } else {
-                if(clazz.equals(boolean.class)) {
+                if (clazz.equals(boolean.class)) {
                     return false;
                 }
-                if(clazz.equals(int.class)) {
+                if (clazz.equals(int.class)) {
                     return 0;
                 }
-                if(clazz.equals(long.class)) {
+                if (clazz.equals(long.class)) {
                     return 0;
                 }
-                if(clazz.equals(double.class)) {
+                if (clazz.equals(double.class)) {
                     return 0;
                 }
-                if(clazz.equals(short.class)) {
+                if (clazz.equals(short.class)) {
                     return 0;
                 }
-                if(clazz.equals(byte.class)) {
+                if (clazz.equals(byte.class)) {
                     return 0;
                 }
             }
@@ -129,21 +129,39 @@ public class Binder {
 
     public static Object directBind(String value, Class clazz) {
         if (clazz.getName().equals("int") || clazz.equals(Integer.class)) {
+            if (value == null || value.trim().length() == 0) {
+                return null;
+            }
             return Integer.parseInt(value);
         }
         if (clazz.getName().equals("double") || clazz.equals(Double.class)) {
+            if (value == null || value.trim().length() == 0) {
+                return null;
+            }
             return Double.parseDouble(value);
         }
         if (clazz.getName().equals("short") || clazz.equals(Short.class)) {
+            if (value == null || value.trim().length() == 0) {
+                return null;
+            }
             return Short.parseShort(value);
         }
         if (clazz.getName().equals("long") || clazz.equals(Long.class)) {
+            if (value == null || value.trim().length() == 0) {
+                return null;
+            }
             return Long.parseLong(value);
         }
         if (clazz.getName().equals("float") || clazz.equals(Float.class)) {
+            if (value == null || value.trim().length() == 0) {
+                return null;
+            }
             return Float.parseFloat(value);
         }
         if (clazz.getName().equals("boolean") || clazz.equals(Boolean.class)) {
+            if (value == null || value.trim().length() == 0) {
+                return null;
+            }
             return Boolean.parseBoolean(value);
         }
         if (clazz.equals(String.class)) {

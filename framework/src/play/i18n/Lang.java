@@ -14,7 +14,7 @@ public class Lang {
     }
     
     public static boolean set(String locale) {
-        if(locale.equals("") || Play.locales.contains(locale)) {
+        if(locale.equals("") || Play.langs.contains(locale)) {
             current.set(locale);
             return true;
         } else {
@@ -47,7 +47,7 @@ public class Lang {
                 if(a.indexOf("-") > 0) {
                     a = a.substring(0, a.indexOf("-"));
                 }
-                for(String locale : Play.locales) {
+                for(String locale : Play.langs) {
                     if(locale.equals(a)) {
                         set(locale);
                         return;
@@ -57,10 +57,10 @@ public class Lang {
             }            
         }
         // Use default
-        if(Play.locales.isEmpty()) {
+        if(Play.langs.isEmpty()) {
             set("");
         } else {
-            set(Play.locales.get(0));
+            set(Play.langs.get(0));
         }
     }
 

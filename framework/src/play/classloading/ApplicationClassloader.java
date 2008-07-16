@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import play.Logger;
 import play.Play;
@@ -138,6 +139,12 @@ public class ApplicationClassloader extends ClassLoader {
         // Now check if there is new classes or removed classes
         int hash = computePathHash();
         if (hash != this.pathHash) {
+            // Remove class for deleted files !!
+            for(ApplicationClass applicationClass : Play.classes.all()) {
+                if(!applicationClass.javaFile.exists()) {
+                    Play.classes.classes.remove(applicationClass.name);
+                }
+            }
             throw new RuntimeException("Path has changed");
         }
     }
@@ -192,12 +199,33 @@ public class ApplicationClassloader extends ClassLoader {
         if (allClasses == null) {
             allClasses = new ArrayList<Class>();
             for (VirtualFile virtualFile : Play.javaPath) {
-                allClasses.addAll(getAllClasses(virtualFile));
+                getAllClasses(virtualFile);
+            }
+            for(ApplicationClass applicationClass : Play.classes.all()) {
+                allClasses.add(loadApplicationClass(applicationClass.name));
             }
         }
         return allClasses;
     }
     List<Class> allClasses = null;
+    
+    public List<Class> getAssignableClasses (Class clazz) {
+    	List<Class> results = new ArrayList<Class>();
+    	for(ApplicationClass c : Play.classes.getAssignableClasses(clazz)) {
+            results.add(c.javaClass);
+        }
+    	return results;
+    }
+    
+    public List<Class> getAnnotatedClasses (Class clazz) {
+    	List<Class> results = new ArrayList<Class>();
+    	for(ApplicationClass c : Play.classes.getAnnotatedClasses(clazz)) {
+            results.add(c.javaClass);
+        }
+    	return results;
+    } 
+    
+    // ~~~ Intern
 
     List<Class> getAllClasses(String basePackage) {
         List<Class> res = new ArrayList<Class>();
@@ -222,22 +250,6 @@ public class ApplicationClassloader extends ClassLoader {
         return res;
     }
     
-    public List<Class> getAssignableClasses (Class clazz) {
-    	List<Class> results = new ArrayList<Class>();
-    	for(ApplicationClass c : Play.classes.getAssignableClasses(clazz)) {
-            results.add(c.javaClass);
-        }
-    	return results;
-    }
-    
-    public List<Class> getAnnotatedClasses (Class clazz) {
-    	List<Class> results = new ArrayList<Class>();
-    	for(ApplicationClass c : Play.classes.getAnnotatedClasses(clazz)) {
-            results.add(c.javaClass);
-        }
-    	return results;
-    } 
-
     private void scan(List<Class> classes, String packageName, VirtualFile current) {
         if (!current.isDirectory()) {
             if (current.getName().endsWith(".java")) {

@@ -18,7 +18,7 @@ public class MessagesPlugin extends PlayPlugin {
         if (Messages.defaults == null) {
             Messages.defaults = new Properties();
         }
-        for (String locale : Play.locales) {
+        for (String locale : Play.langs) {
             Properties properties = read(Play.getVirtualFile("conf/messages." + locale));
             if (properties == null) {
                 Logger.warn("conf/messages.%s is missing", locale);
@@ -32,10 +32,10 @@ public class MessagesPlugin extends PlayPlugin {
 
     @Override
     public void beforeInvocation() {
-        if (Play.locales.isEmpty()) {
+        if (Play.langs.isEmpty()) {
             Lang.set("");
         } else {
-            Lang.set(Play.locales.get(0));
+            Lang.set(Play.langs.get(0));
         }
     }
 
@@ -57,7 +57,7 @@ public class MessagesPlugin extends PlayPlugin {
             onApplicationStart();
             return;
         }
-        for (String locale : Play.locales) {
+        for (String locale : Play.langs) {
             if (Play.getVirtualFile("conf/messages." + locale).exists() && Play.getVirtualFile("conf/messages." + locale).lastModified() > lastLoading) {
                 onApplicationStart();
                 return;

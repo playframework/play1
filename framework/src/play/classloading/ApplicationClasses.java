@@ -136,8 +136,8 @@ public class ApplicationClasses {
             this.javaSource = this.javaFile.contentAsString();
             this.javaByteCode = null;
             this.enhancedByteCode = null;
-            this.timestamp = this.javaFile.lastModified();
             this.compiled = false;
+            this.timestamp = 0L;
         }
 
         /**
@@ -171,6 +171,7 @@ public class ApplicationClasses {
         public byte[] compile() {
             compiler.compile(this.name);
             compiled = true;
+            this.timestamp = this.javaFile.lastModified();            
             return this.javaByteCode;
         }
 

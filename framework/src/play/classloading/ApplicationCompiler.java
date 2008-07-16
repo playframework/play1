@@ -150,7 +150,7 @@ public class ApplicationCompiler {
                     // ApplicationClass exists
                     if (applicationClass != null) {
 
-                        if (applicationClass.isCompiled()) {
+                        if (applicationClass.javaByteCode != null) {
                             ClassFileReader classFileReader = new ClassFileReader(applicationClass.javaByteCode, fileName, true);
                             return new NameEnvironmentAnswer(classFileReader, null);
                         } else {

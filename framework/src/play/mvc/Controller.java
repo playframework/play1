@@ -80,6 +80,10 @@ public abstract class Controller {
     protected static void notFound() {
         throw new NotFound("");
     }
+    
+    protected static void flash(String key, String value) {
+        Scope.Flash.current().put(key, value);
+    }
 
     protected static void redirect(String action, Object... args) {
         Map<String, Object> r = new HashMap<String, Object>();

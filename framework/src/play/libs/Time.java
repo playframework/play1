@@ -11,7 +11,7 @@ public class Time {
 
         public static int parseDuration(String duration) {
             if (duration == null) {
-                return Integer.MAX_VALUE;
+                return 60 * 60 * 24 * 365;
             }
             int toAdd = -1;
             if (hours.matcher(duration).matches()) {

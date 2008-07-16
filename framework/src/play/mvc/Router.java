@@ -38,6 +38,7 @@ public class Router {
                 route.method = matcher.group("method");
                 route.path = matcher.group("path");
                 route.action = matcher.group("action");
+                route.addParams(matcher.group("params"));
                 route.compute();
                 routes.add(route);
             } else {
@@ -114,6 +115,12 @@ public class Router {
                         break;
                     }
                 }
+                for(String staticKey : route.staticArgs.keySet()) {
+                    if(!args.containsKey(staticKey) || !args.get(staticKey).equals(route.staticArgs.get(staticKey))) {
+                        allRequiredArgsAreHere = false;
+                        break;
+                    }
+                }
                 if (allRequiredArgsAreHere) {
                     StringBuilder queryString = new StringBuilder();
                     String path = route.path;
@@ -163,8 +170,10 @@ public class Router {
         String action;
         Pattern pattern;
         List<Arg> args = new ArrayList<Arg>();
+        Map<String,String> staticArgs = new HashMap<String, String>();
         static Pattern customRegexPattern = new Pattern("\\{([a-zA-Z_0-9]+)\\}");
-        static Pattern argsPattern = new Pattern("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}");
+        static Pattern argsPattern = new Pattern("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}"); 
+        static Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'"); 
 
         public void compute() {
             String patternString = path;
@@ -179,6 +188,19 @@ public class Router {
             patternString = argsPattern.replacer("({$2}$1)").replace(patternString);
             this.pattern = new Pattern(patternString);
         }
+        
+        public void addParams(String params) {
+            if(params == null) {
+                return;
+            }
+            params = params.substring(1, params.length()-1);
+            for(String param : params.split(",")) {
+                Matcher matcher = paramPattern.matcher(param);
+                if (matcher.matches()) {
+                    staticArgs.put(matcher.group(1), matcher.group(2));
+                }
+            }            
+        }
 
         public Map<String, String> matches(String method, String path) {
             if (method == null || this.method.equals("*") || method.equalsIgnoreCase(this.method)) {
@@ -188,6 +210,7 @@ public class Router {
                     for (Arg arg : args) {
                         localArgs.put(arg.name, matcher.group(arg.name));
                     }
+                    localArgs.putAll(staticArgs);
                     return localArgs;
                 }
             }

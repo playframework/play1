@@ -1,6 +1,9 @@
 package play.libs;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -36,7 +39,29 @@ public class IO {
         return result.toString();        
     }
     
+    public static String readContentAsString(File file) throws IOException {
+        InputStream is = new FileInputStream(file);
+        StringWriter result = new StringWriter();
+        PrintWriter out = new PrintWriter(result);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is, "utf-8"));
+        String line = null;
+        while((line = reader.readLine())!= null) {
+            out.println(line);                    
+        }
+        is.close();
+        return result.toString();        
+    }
+    
     public static void writeContent(CharSequence content, OutputStream os) throws IOException {
+        PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, "utf-8"));
+        printWriter.println(content);
+        printWriter.flush();
+        os.flush();
+        os.close();
+    }
+    
+    public static void writeContent(CharSequence content, File file) throws IOException {
+        OutputStream os = new FileOutputStream(file);
         PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, "utf-8"));
         printWriter.println(content);
         printWriter.flush();
