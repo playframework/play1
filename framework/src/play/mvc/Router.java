@@ -127,6 +127,8 @@ public class Router {
                     for (String key : args.keySet()) {
                         if (inPathArgs.contains(key) && args.get(key) != null) {
                             path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", args.get(key) + "");
+                        } else if(route.staticArgs.containsKey(key)) {
+                            // Do nothing -> The key is static
                         } else if (args.get(key) != null) {
                             try {
                                 queryString.append(URLEncoder.encode(key, "utf-8"));
