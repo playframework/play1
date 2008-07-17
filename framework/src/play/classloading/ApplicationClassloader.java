@@ -117,11 +117,12 @@ public class ApplicationClassloader extends ClassLoader {
         Map<Class, Integer> annotationsHashes = new HashMap<Class, Integer>();
         for (ApplicationClass applicationClass : modifieds) {
             annotationsHashes.put(applicationClass.javaClass, computeAnnotationsHash(applicationClass.javaClass));
-            long start = System.currentTimeMillis();
-            applicationClass.compile();
-            applicationClass.enhance();
-            newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.enhancedByteCode));
-            Logger.trace("%sms to compile & enhance %s", System.currentTimeMillis() - start, applicationClass.name);
+            if(applicationClass.compile() == null) {
+                Play.classes.classes.remove(applicationClass.name);
+            } else {
+                applicationClass.enhance();
+                newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.enhancedByteCode));
+            }
         }
         try {
             HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
