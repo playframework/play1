@@ -78,15 +78,15 @@ public class ZDBModel {
             }
 
             public <T> T one() {
-                return (T) query.one();
+                return (T) query.one(null);
             }
 
             public <T> List<T> all() {
-                return (List<T>) query.all();
+                return (List<T>) query.all(null);
             }
 
             public <T> List<T> page(int from, int size) {
-                return (List<T>) query.page(from, size);
+                return (List<T>) query.page(from, size,null);
             }
 
             public Find orderBy(String... key) {
