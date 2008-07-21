@@ -74,6 +74,11 @@ function usage {
 }
 
 
+function verbosedie {
+	echo $1
+	exit 1
+}
+
 # ~~~~~~~~~~~~~~~~~~~~~~ Where is the framework ?
 
 DIRNAME=`dirname "$0"`
@@ -132,6 +137,7 @@ if [ "$PLAY_COMMAND" = "help" ] ; then
 	echo "~        id           Define the framework ID"
 	echo "~        netbeansify  Create netbeans configuration files for this application"
 	echo "~        out          Follow system.out of the running application"    
+	echo "~        mkplugin    Create a Play! plugin with this application"
 	echo "~        pid          Display the pid of the running application"
 	echo "~        run          Run the application in the current window"
     echo "~        secret       Generate a new secret key"
@@ -449,9 +455,7 @@ if [ "$PLAY_COMMAND" = "netbeansify" ] ; then
     sed  -e "s|%ANT_SCRIPT%|$PLAY_BASE/framework/build.xml|g" "$APPLICATION_PATH/nbproject/project.xml.1.tmp" > "$APPLICATION_PATH/nbproject/project.xml.2.tmp" 
     sed  -e "s|%APPLICATION_PATH%|$APPLICATION_PATH|g" "$APPLICATION_PATH/nbproject/project.xml.2.tmp" > "$APPLICATION_PATH/nbproject/project.xml.3.tmp" 
     sed  -e "s|%PLAY_CLASSPATH%|$CLASSPATH|g" "$APPLICATION_PATH/nbproject/project.xml.3.tmp" > "$APPLICATION_PATH/nbproject/project.xml" 
-    rm "$APPLICATION_PATH/nbproject/project.xml.1.tmp"
-    rm "$APPLICATION_PATH/nbproject/project.xml.2.tmp"
-    rm "$APPLICATION_PATH/nbproject/project.xml.3.tmp"
+    rm "$APPLICATION_PATH/nbproject/project.xml.[123].tmp"
     echo "~ Ok, the application is ready for netbeans"
     echo "~ Just open $APPLICATION_PATH as a netbeans project"
     echo "~"
@@ -515,6 +519,20 @@ if [ "$PLAY_COMMAND" = "eclipsify" ] ; then
     echo "~ But it's saffer to delete and re-import the project into your workspace since eclipse keeps dirty caches ..."
     echo "~"
     exit    
+fi
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~ [mkplugin] Create a play! plugin from the application
+
+if [ "$PLAY_COMMAND" = "mkplugin" ] ; then
+    ( zip -h >/dev/null 2>&1)   || verbosedie "Error : zip executable required for this command"
+    PROJECT_NAME="`cat ${APPLICATION_PATH}/conf/application.conf | grep application.name | sed -e 's/application.name=//g'`"
+    plugin_name="${PROJECT_NAME}.zip"
+    plugin_sources="public app conf data"
+    cd ${APPLICATION_PATH} >/dev/null && zip "$plugin_name" -r $plugin_sources && cd $oldDir >/dev/null 
+    echo "~ Plugin is ready in $plugin_name"
+    echo "~"
+    exit 0
 fi
 
 
