@@ -28,6 +28,8 @@ public class MimeTypes {
         }
         if(ext.length()>0) {
             String mimeType = properties.getProperty(ext);
+            if(mimeType == null)
+            	return "";
             if(mimeType.startsWith("text/")) {
                 mimeType = mimeType + "; charset=utf-8";
             }
@@ -36,5 +38,10 @@ public class MimeTypes {
         }
         return "";
     }
-    
+ 
+    public static boolean isValidMimeType(String mimeType) {
+    	if(mimeType == null)
+    		return false;
+    	return properties.contains(mimeType);
+    }
 }
