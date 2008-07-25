@@ -18,6 +18,11 @@ public class ZDBModel {
         b.put(this);
     }
 
+    public void deleteFrom (String bucket) {
+    	Bucket b = ZDB.getBucket(bucket);
+    	b.delete(this);
+    }
+    
     public static class ZDBModelBucket { 
 
         String bucket;
