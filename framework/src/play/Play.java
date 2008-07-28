@@ -205,7 +205,20 @@ public class Play {
                 Logger.info("Reloading ...");
                 stop();
             }
+            // Need a new classloader
+            classloader = new ApplicationClassloader();
             Thread.currentThread().setContextClassLoader(Play.classloader);
+            // Reload plugins
+            List<PlayPlugin> newPlugins = new ArrayList<PlayPlugin> ();
+            for (PlayPlugin plugin : plugins) {
+            	if (plugin.getClass().getClassLoader().getClass().equals(ApplicationClassloader.class)) {
+            		PlayPlugin newPlugin = (PlayPlugin) classloader.loadClass(plugin.getClass().getName()).getConstructors()[0].newInstance();
+            		newPlugin.onLoad();
+            		newPlugins.add(newPlugin);
+            	} else
+            		newPlugins.add(plugin);
+            }
+            plugins = newPlugins;
             // Reload configuration
             readConfiguration();
             // Configure logs
@@ -220,8 +233,6 @@ public class Play {
             Cache.init();
             // Clean templates
             TemplateLoader.cleanCompiledCache();
-            // Need a new classloader
-            classloader = new ApplicationClassloader();
             // SecretKey
             secretKey = configuration.getProperty("application.secret", "").trim();
             if (secretKey.equals("")) {

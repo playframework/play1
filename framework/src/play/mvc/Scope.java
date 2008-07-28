@@ -309,7 +309,7 @@ public class Scope {
 
     public static class RenderArgs {
 
-        Map<String, Object> data = new HashMap<String, Object>();        // ThreadLocal access
+        public Map<String, Object> data = new HashMap<String, Object>();        // ThreadLocal access
         public static ThreadLocal<RenderArgs> current = new ThreadLocal<RenderArgs>();
 
         public static RenderArgs current() {
