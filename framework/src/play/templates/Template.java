@@ -23,6 +23,7 @@ import org.codehaus.groovy.syntax.SyntaxException;
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.NoRouteFoundException;
@@ -115,6 +116,7 @@ public class Template {
         t.template = this;
         try {
             long start = System.currentTimeMillis();
+            LocalVariablesNamesTracer.enterMethod();
             t.run();
             Logger.trace("%sms to render template %s", System.currentTimeMillis()-start, name);
         } catch(NoRouteFoundException e ) {
@@ -126,6 +128,8 @@ public class Template {
             throwException(ex);
         } catch(Exception e) {
             throwException(e);
+        } finally {
+            LocalVariablesNamesTracer.exitMethod();
         }
         if(applyLayouts && layout.get() != null) {
             Map<String,Object> layoutArgs = new HashMap<String,Object>(args);
