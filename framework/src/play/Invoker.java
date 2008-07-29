@@ -115,10 +115,11 @@ public class Invoker {
 
     private static Executor startExecutor() {
         Properties p = Play.configuration;
-        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>();
+        int queueSize = Integer.parseInt(p.getProperty("play.pool.queue", "200"));
         int core = Integer.parseInt(p.getProperty("play.pool.core", "2"));
-        int max = Integer.parseInt(p.getProperty("play.pool.max", "50"));
+        int max = Integer.parseInt(p.getProperty("play.pool.max", "10"));
         int keepalive = Integer.parseInt(p.getProperty("play.pool.keepalive", "5"));
+        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>(queueSize);
         return new ThreadPoolExecutor(core, max, keepalive * 60, TimeUnit.SECONDS, queue, new ThreadPoolExecutor.AbortPolicy());
     }
 }
