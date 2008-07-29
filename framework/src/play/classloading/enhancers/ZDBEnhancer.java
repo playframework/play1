@@ -4,6 +4,7 @@ import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtMethod;
 import javassist.CtNewConstructor;
+import javassist.Modifier;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 /**
@@ -13,6 +14,10 @@ public class ZDBEnhancer extends Enhancer {
 
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
         CtClass ctClass = makeClass(applicationClass);
+        
+        if(Modifier.isAbstract(ctClass.getModifiers())) {
+            return;
+        }
 
         if (!ctClass.subtypeOf(classPool.get("play.db.zdb.ZDBModel"))) {
             return;

@@ -3,6 +3,7 @@ package play.data.binding;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -38,6 +39,9 @@ public class Binder {
                 Set<Field> fields = new HashSet<Field>();
                 Java.findAllFields(clazz, fields);
                 for (Field field : fields) {
+                    if(Modifier.isFinal(field.getModifiers())) {
+                        continue;
+                    }
                     boolean acess = field.isAccessible();
                     field.setAccessible(true);
                     Class fClazz = field.getType();
