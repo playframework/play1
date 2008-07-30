@@ -7,11 +7,13 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -30,6 +32,9 @@ public class Binder {
     static {
         supportedTypes.put(Date.class, new DateBinder());
         supportedTypes.put(File.class, new FileBinder());
+        supportedTypes.put(Calendar.class, new CalendarBinder());
+        supportedTypes.put(Locale.class, new LocaleBinder());
+        
     }
 
     private static Object bindInternal(String name, Class clazz, Type type, Map<String, String[]> params, String prefix) {

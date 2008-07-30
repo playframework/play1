@@ -15,14 +15,14 @@ public class BindingTest extends TestSupport {
     @BeforeClass
     public static void init() throws Exception {
         testApp = createApp();
-        testApp.addRoute("GET   /action1                         Application.action1");
-        testApp.addRoute("GET   /action2                         Application.action2");
-        testApp.addRoute("GET   /action3                         Application.action3");
-        testApp.addRoute("GET   /action4                         Application.action4");
-        testApp.addRoute("GET   /action5                         Application.action5");
-        testApp.addRoute("GET   /action6                         Application.action6");
-        testApp.addRoute("GET   /action7                         Application.action7");
-        testApp.addRoute("GET   /action8                         Application.action8");
+        testApp.addRoute("*   /action1                         Application.action1");
+        testApp.addRoute("*   /action2                         Application.action2");
+        testApp.addRoute("*   /action3                         Application.action3");
+        testApp.addRoute("*   /action4                         Application.action4");
+        testApp.addRoute("*   /action5                         Application.action5");
+        testApp.addRoute("*   /action6                         Application.action6");
+        testApp.addRoute("*   /action7                         Application.action7");
+        testApp.addRoute("*   /action8                         Application.action8");
         testApp.writeController("Application", 
                 "package controllers;" +                
                 "public class Application extends play.mvc.Controller {" +                
@@ -59,6 +59,26 @@ public class BindingTest extends TestSupport {
     public static void end() {
         stop();
     }
+
+    @Test
+    public void bindJson() throws Exception {        
+        String body = "{ \"p\":\"Jojo\" }";
+        Response response = POST("/action1", "application/javascript", body );
+        assertIsOk(response);
+        assertContentEquals("Jojo", response);
+
+        body = "{ a:14, b:8, c:\"Kiki\",d:true,e:[7,9] }";
+        response = POST("/action8", "application/javascript", body );
+        assertIsOk(response);
+        assertContentEquals("14 8.0 Kiki true 2", response);
+
+        // ko: pas le meme format de parametres multiples
+        //body = "{ \"p\":[\"Jojo\",\"Java\"]}";
+        //response = POST("/action2", "application/javascript", body );
+        //assertIsOk(response);
+        //assertContentEquals("2", response);
+    }
+    
     
     @Test
     public void bindString() throws Exception {        
@@ -70,7 +90,7 @@ public class BindingTest extends TestSupport {
         assertIsOk(response);
         assertContentEquals("Jojo", response);
     }
-    
+
     @Test
     public void bindStringArray() throws Exception {        
         Response response = GET("/action2?p=Jojo");
