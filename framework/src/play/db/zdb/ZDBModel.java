@@ -9,39 +9,60 @@ import org.apache.lucene.queryParser.ParseException;
 
 public class ZDBModel {
 
-    public static ZDBModelBucket in(String bucket) {
+    /**
+     * when ZBModel is loaded from the bucket, keeps the bucket name for later update purposes
+     */
+    public String bucket;
+
+    public static <T> ZDBModelBucket<T> in(String bucket) {
         throw new UnsupportedOperationException("Not implemented. Check the ZDBEnhancer !");
     }
 
-    public void putIn(String bucket) {
-        Bucket b = ZDB.getBucket(bucket);
+    public void save() {
+        Bucket b = ZDB.getBucket(this.bucket);
+        if (b == null) {
+            throw new RuntimeException("Invalid bucket " + this.bucket);
+        }
         b.put(this);
     }
 
-    public void deleteFrom (String bucket) {
-    	Bucket b = ZDB.getBucket(bucket);
-    	b.delete(this);
+    public void deleteFrom(String bucket) {
+        Bucket b = ZDB.getBucket(bucket);
+        b.delete(this);
     }
-    
-    public static class ZDBModelBucket { 
+
+    public static class ZDBModelBucket<T> {
 
         String bucket;
-        Class<? extends ZDBModel> type;
+        Class<T> type;
 
-        public ZDBModelBucket(Class<? extends ZDBModel> type, String bucket) {
+        public ZDBModelBucket(Class<T> type, String bucket) {
             this.bucket = bucket;
             this.type = type;
         }
 
-        public <T extends ZDBModel> T findById(String id) {
-            return (T) ZDB.getBucket(bucket).get(id, type);
+        /**
+         * add or update a object in the bucket
+         * object id is generated if not provided
+         * @param object
+         */
+        public void save(T object) {
+            ZDB.getBucket(bucket).put(object);
         }
 
-        public Find findBy(String query, Object... params) {
+        public <T> T findById(String id) {
+            ZDBModel result = (ZDBModel) ZDB.getBucket(bucket).get(id, type);
+            if (result != null) {
+                result.bucket = bucket;
+            }
+            return (T) result;
+        }
+
+        public <T> Find<T> findBy(String query, Object... params) {
             return new Find(this, createQuery(query, params), type);
         }
 
-        public Find findAll() {
+        public <T> Find<T> findAll() {
             return new Find(this, null, type);
         }
 
@@ -59,7 +80,7 @@ public class ZDBModel {
             return sb.toString();
         }
 
-        public static class Find<T extends ZDBModel> {
+        public static class Find<T> {
 
             Bucket.ObjectQuery<T> query;
             ZDBModelBucket bucket;
@@ -75,7 +96,7 @@ public class ZDBModel {
                     }
                 } catch (ParseException e) {
                     throw new RuntimeException("Invalid query " + query);
-                } 
+                }
             }
 
             public int count() {
@@ -83,15 +104,31 @@ public class ZDBModel {
             }
 
             public <T> T one() {
-                return (T) query.one(null);
+                ZDBModel result = (ZDBModel) query.one(null);
+                if (result != null) {
+                    result.bucket = bucket.bucket;
+                }
+                return (T) result;
             }
 
             public <T> List<T> all() {
-                return (List<T>) query.all(null);
+                List<ZDBModel> result = (List<ZDBModel>) query.all(null);
+                for (ZDBModel item : result) {
+                    if (item != null) {
+                        item.bucket = bucket.bucket;
+                    }
+                }
+                return (List<T>) result;
             }
 
             public <T> List<T> page(int from, int size) {
-                return (List<T>) query.page(from, size,null);
+                List<ZDBModel> result = (List<ZDBModel>) query.page(from, size, null);
+                for (ZDBModel item : result) {
+                    if (item != null) {
+                        item.bucket = bucket.bucket;
+                    }
+                }
+                return (List<T>) result;
             }
 
             public Find orderBy(String... key) {
