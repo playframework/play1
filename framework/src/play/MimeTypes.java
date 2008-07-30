@@ -42,6 +42,6 @@ public class MimeTypes {
     public static boolean isValidMimeType(String mimeType) {
     	if(mimeType == null)
     		return false;
-    	return properties.contains(mimeType);
+    	return properties.contains(mimeType.toLowerCase());
     }
 }
