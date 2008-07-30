@@ -267,6 +267,7 @@ public class Play {
         for (PlayPlugin plugin : plugins) {
             plugin.onApplicationStop();
         }
+        Cache.stop();
     }
 
     static void preCompile() {

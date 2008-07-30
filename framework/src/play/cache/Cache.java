@@ -1,12 +1,19 @@
 package play.cache;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
 import net.spy.memcached.AddrUtil;
 import net.spy.memcached.MemcachedClient;
+import net.spy.memcached.transcoders.SerializingTranscoder;
 import play.Logger;
 import play.Play;
 import play.exceptions.ConfigurationException;
@@ -211,6 +218,7 @@ public class Cache {
         if(Play.configuration.getProperty("memcached", "disabled").equals("enabled")) {
             try {
                 cacheImpl = new MemcachedImpl();
+                Logger.info("Connected to memcached");
             } catch(Exception e) {
                 Logger.error(e, "Error while connecting to memcached");
                 Logger.warn("Fallback to local cache");
@@ -252,7 +260,34 @@ public class Cache {
         public MemcachedImpl() throws IOException {
             System.setProperty("net.spy.log.LoggerImpl", "net.spy.log.Log4JLogger");
             if(Play.configuration.containsKey("memcached.host")) {
-                client = new MemcachedClient(AddrUtil.getAddresses(Play.configuration.getProperty("memcached.host")));                
+                client = new MemcachedClient(AddrUtil.getAddresses(Play.configuration.getProperty("memcached.host")));
+                client.setTranscoder(new SerializingTranscoder(){
+					@Override
+					protected Object deserialize(byte[] data) {
+						try {
+							return new ObjectInputStream(new ByteArrayInputStream(data)) {
+								@Override
+								protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+									return Play.classloader.loadClass(desc.getName());
+								}
+							}.readObject();
+						} catch (Exception e) {
+							Logger.error(e,"Could not deserialize");
+						}
+						return null;
+					}
+					@Override
+					protected byte[] serialize(Object object) {
+						try {
+							ByteArrayOutputStream bos = new ByteArrayOutputStream ();
+							new ObjectOutputStream (bos).writeObject(object);
+							return bos.toByteArray();
+						} catch (IOException e) {
+							Logger.error(e,"Could not serialize");
+						}
+						return null;
+					}
+                });
             } else if(Play.configuration.containsKey("memcached.1.host")) {   
                 int nb = 1;
                 String addresses = "";
