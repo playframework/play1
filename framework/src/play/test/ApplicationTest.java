@@ -49,6 +49,30 @@ public abstract class ApplicationTest extends org.junit.Assert {
         return response;
     }
 
+    public static Response POST(String url, String contenttype, String body ) {
+        Request request = newRequest();
+        String path = "";
+        String queryString = "";
+        if (url.contains("?")) {
+            path = url.substring(0, url.indexOf("?"));
+            queryString = url.substring(url.indexOf("?") + 1);
+        } else {
+            path = url;
+        }
+        request.method = "POST";
+        request.contentType=contenttype;
+        request.url = url;
+        request.path = path;
+        request.querystring = queryString;
+        request.body = new ByteArrayInputStream(body.getBytes());
+        //
+        Response response = newResponse();
+        //
+        makeRequest(request, response);
+        //
+        return response;
+    }
+
     public static void makeRequest(final Request request, final Response response) {
         ActionInvoker.invoke(request, response);
         try {
