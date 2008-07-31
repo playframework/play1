@@ -21,7 +21,7 @@ public class MimeTypes {
     }
         
     public static String getMimeType(String filename) {
-        Matcher matcher = extPattern.matcher(filename);
+        Matcher matcher = extPattern.matcher(filename.toLowerCase());
         String ext = "";
         if(matcher.matches()) {
             ext = matcher.group(1);
@@ -42,6 +42,6 @@ public class MimeTypes {
     public static boolean isValidMimeType(String mimeType) {
     	if(mimeType == null)
     		return false;
-    	return properties.contains(mimeType.toLowerCase());
+    	return properties.contains(mimeType.split(";")[0]);
     }
 }
