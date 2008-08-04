@@ -32,6 +32,9 @@ public class UrlEncodedParser extends DataParser {
                 os.write(b);
             }
             byte[] data = os.toByteArray();
+            // add the complete body as a parameters
+            Utils.Maps.mergeValueInMap(params, "body", new String(data, "utf-8"));
+            
             int ix = 0;
             int ox = 0;
             String key = null;
@@ -70,8 +73,6 @@ public class UrlEncodedParser extends DataParser {
                 value = new String(data, 0, ox, "utf-8");
                 Utils.Maps.mergeValueInMap(params, key, value);
             }
-
-            Utils.Maps.mergeValueInMap(params, "body", new String(data, "utf-8"));
             return params;
         } catch (Exception e) {
             throw new UnexpectedException(e);

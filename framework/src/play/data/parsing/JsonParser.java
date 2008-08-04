@@ -44,9 +44,8 @@ public class JsonParser extends DataParser {
     private void internalParse( String name, Map<String, String[]> result ) {
         String nextname;
         Token tok = jt.nextToken();
-
-        // primitive field found, add it to the map
-        if( tok  == STRING || tok == NULL || tok == NUMBER ) {
+        // primitive field found
+        if( tok  == STRING || tok == NULL || tok == NUMBER || tok == BOOLEAN ) {
             putMapEntry( result, name, tok.value );
         }
         
@@ -61,7 +60,7 @@ public class JsonParser extends DataParser {
                 if( tok == END_ARRAY )
                     break;
                 if( tok != COMMA )
-                    throw new RuntimeException("comma expected");
+                    throw JsonParseException.grammarError( jt, COMMA );
             }   
         }
                 
@@ -81,12 +80,13 @@ public class JsonParser extends DataParser {
                 if( tok == END_MAP )
                     break;
                 if( tok != COMMA )
-                    throw new RuntimeException("comma expected");
+                    throw JsonParseException.grammarError( jt, COMMA );
+
             }
         } 
         
         else {
-            throw new RuntimeException("unexpected byte in json data:"+tok.name());
+           throw JsonParseException.parseError( "unexpected bytes found "+tok, jt );
         }
     }
     

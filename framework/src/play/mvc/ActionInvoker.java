@@ -40,6 +40,7 @@ public class ActionInvoker {
             
             // 3. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);
+            // add parameters from the URI query string 
             Scope.Params.current()._mergeWith(DataParser.parsers.get("application/x-www-form-urlencoded").parse(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
             Lang.resolvefrom(request);
             
@@ -80,7 +81,7 @@ public class ActionInvoker {
                             if(before.getParameterTypes().length>0) {
                                 Scope.Params.current().checkAndParse();
                             }
-                            Java.invokeStatic(before, Scope.Params.current().data);
+                            Java.invokeStatic(before, Scope.Params.current().all());
                         }
                     }
                 }
@@ -89,7 +90,7 @@ public class ActionInvoker {
                 if(actionMethod.getParameterTypes().length>0) {
                     Scope.Params.current().checkAndParse();
                 }
-                Java.invokeStatic(actionMethod, Scope.Params.current().data);
+                Java.invokeStatic(actionMethod, Scope.Params.current().all());
             } catch (IllegalAccessException ex) {
                 throw ex;
             } catch (IllegalArgumentException ex) {
