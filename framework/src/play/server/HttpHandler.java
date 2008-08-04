@@ -261,6 +261,7 @@ public class HttpHandler implements IoHandler {
             Request request = new Request();
             if (minaRequest.getHeader("Content-Type") != null) {
                 request.contentType = minaRequest.getHeader("Content-Type").split(";")[0].trim().toLowerCase();
+                // todo : keep charset encoding ?
             } else {
                 request.contentType = "text/html";
             }

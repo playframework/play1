@@ -91,6 +91,15 @@ public class Router {
         return reverse(action, new HashMap<String, Object>());
     }
 
+    public static ActionDefinition reverse(String action, Map<String, Object> r, boolean forceGetOrPost) {
+        ActionDefinition actionDef = reverse(action, r);
+        if ( forceGetOrPost && ! ("GET".equals(actionDef.method) || "POST".equals(actionDef.method))) {
+            actionDef.url += "&x-http-method-override=" + actionDef.method;
+            // replace method ??
+        }
+        return actionDef;
+    }
+
     public static String getFullUrl(String action, Map<String, Object> args) {
         return Http.Request.current().getBase() + reverse(action, args);
     }
@@ -107,6 +116,7 @@ public class Router {
             if (route.action.equals(action)) {
                 List<String> inPathArgs = new ArrayList<String>();
                 boolean allRequiredArgsAreHere = true;
+                // les noms de parametres matchent ils ?
                 for (Route.Arg arg : route.args) {
                     inPathArgs.add(arg.name);
                     String value = args.get(arg.name) == null ? null : args.get(arg.name) + "";
@@ -115,8 +125,9 @@ public class Router {
                         break;
                     }
                 }
-                for(String staticKey : route.staticArgs.keySet()) {
-                    if(!args.containsKey(staticKey) || !args.get(staticKey).equals(route.staticArgs.get(staticKey))) {
+                // les parametres codes en dur dans la route matchent-ils ?
+                for (String staticKey : route.staticArgs.keySet()) {
+                    if (!args.containsKey(staticKey) || !args.get(staticKey).equals(route.staticArgs.get(staticKey))) {
                         allRequiredArgsAreHere = false;
                         break;
                     }
@@ -127,7 +138,7 @@ public class Router {
                     for (String key : args.keySet()) {
                         if (inPathArgs.contains(key) && args.get(key) != null) {
                             path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", args.get(key) + "");
-                        } else if(route.staticArgs.containsKey(key)) {
+                        } else if (route.staticArgs.containsKey(key)) {
                             // Do nothing -> The key is static
                         } else if (args.get(key) != null) {
                             try {
@@ -172,10 +183,10 @@ public class Router {
         String action;
         Pattern pattern;
         List<Arg> args = new ArrayList<Arg>();
-        Map<String,String> staticArgs = new HashMap<String, String>();
+        Map<String, String> staticArgs = new HashMap<String, String>();
         static Pattern customRegexPattern = new Pattern("\\{([a-zA-Z_0-9]+)\\}");
-        static Pattern argsPattern = new Pattern("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}"); 
-        static Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'"); 
+        static Pattern argsPattern = new Pattern("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}");
+        static Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'");
 
         public void compute() {
             String patternString = path;
@@ -190,18 +201,18 @@ public class Router {
             patternString = argsPattern.replacer("({$2}$1)").replace(patternString);
             this.pattern = new Pattern(patternString);
         }
-        
+
         public void addParams(String params) {
-            if(params == null) {
+            if (params == null) {
                 return;
             }
-            params = params.substring(1, params.length()-1);
-            for(String param : params.split(",")) {
+            params = params.substring(1, params.length() - 1);
+            for (String param : params.split(",")) {
                 Matcher matcher = paramPattern.matcher(param);
                 if (matcher.matches()) {
                     staticArgs.put(matcher.group(1), matcher.group(2));
                 }
-            }            
+            }
         }
 
         public Map<String, String> matches(String method, String path) {

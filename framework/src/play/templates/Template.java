@@ -254,7 +254,8 @@ public class Template {
                             r.put(names[i], ((Object[])param)[i] == null ? null : ((Object[])param)[i].toString());
                         }
                     }
-                    return Router.reverse(action, r);
+                    // true : false GET method. from a template, only GETs (or potentially POSTs) are possible. so we ask the router to override the GET
+                    return Router.reverse(action, r, true );
                 } catch(ActionNotFoundException e) {
                     throw new NoRouteFoundException(action, null);
                 }

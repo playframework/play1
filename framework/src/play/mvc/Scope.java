@@ -217,7 +217,7 @@ public class Scope {
             return current.get();
         }
         boolean requestIsParsed;
-        Map<String, String[]> data = new HashMap<String, String[]>();
+        private Map<String, String[]> data = new HashMap<String, String[]>();
 
         void checkAndParse() {
             if (!requestIsParsed) {
@@ -294,10 +294,10 @@ public class Scope {
                 String[] values = data.get(key);
                 for (String value : values) {
                     try {
-                        ue.append(URLEncoder.encode(key, "utf-8"));
-                        ue.append("=");
-                        ue.append(URLEncoder.encode(value, "utf-8"));
-                        ue.append("&");
+                        ue.append(URLEncoder.encode(key, "utf-8"))
+                                .append("=")
+                                .append(URLEncoder.encode(value, "utf-8"))
+                                .append("&");
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
