@@ -66,8 +66,19 @@ public class JsonParserTest {
 
     @Test
     public void testComposedKeys() {
-
         parseProxy("{user.name:\"BORT\",user.firstname:\"Guillaume\" }");
         assertEquals("BORT", result.get("user.name")[0]);
+    }
+
+    @Test
+    public void testLimits() {
+        parseProxy("{a:12}");
+        assertNull(result.get("user"));
+
+        parseProxy("{empty:[]}");
+        assertNull(result.get("empty[]")[0]);
+
+        parseProxy("{emptymap:{}}");
+        assertNull(result.get("emptymap")[0]);
     }
 }
