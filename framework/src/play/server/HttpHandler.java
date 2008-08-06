@@ -312,7 +312,7 @@ public class HttpHandler implements IoHandler {
                 HttpHandler.serve404(session, minaRequest, minaResponse);
                 return;
             }
-            if (response.direct != null) {
+            if ((response.direct != null) && response.direct.isFile()) {
                 session.setAttribute("file", new FileInputStream(response.direct).getChannel());
                 response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + response.direct.length());
             } else {

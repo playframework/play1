@@ -32,6 +32,12 @@ public class RenderBinary extends Result {
                 response.setHeader("Content-disposition", "attachment; filename="+name);
             }
             if(file != null) {
+            	if (!file.exists())
+            		throw new UnexpectedException ("Your file buffer does not exists");
+            	if (!file.canRead())
+            		throw new UnexpectedException ("Can't read your file buffer");
+            	if (!file.isFile())
+            		throw new UnexpectedException ("Your file buffer is not a file");
                 response.direct = file;
             } else {
                 byte[] buffer = new byte[8092];
