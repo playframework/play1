@@ -22,6 +22,7 @@ public class RoutesTest extends TestSupport {
         testApp.addRoute("GET   /clients/{<[0-9]+>id}           Application.showClient"); 
         testApp.addRoute("GET   /clients/{<[0-9]+>id}/account   Application.showClientAccount"); 
         testApp.addRoute("GET   /clients/{<[0-9]+>id}/admin     admin.Clients.index"); 
+        testApp.addRoute("DELETE   /clients/{<[0-9]+>id}        admin.Clients.delete"); 
         testApp.writeController("Application", 
                 "package controllers;" +                
                 "public class Application extends play.mvc.Controller {" +                
@@ -51,6 +52,9 @@ public class RoutesTest extends TestSupport {
                 "public class Clients extends play.mvc.Controller {" +                
                 "   public static void index() {" +
                 "       renderText(\"Admin\");" +
+                "   }" +
+                "   public static void delete(Integer id) {" +
+                "       renderText(\"DELETED \"+id);" +
                 "   }" +
                 "}"                
         );
@@ -138,5 +142,12 @@ public class RoutesTest extends TestSupport {
         Response response = GET("/noaction");
         fail("An ActionNotFoundException should occurs !!");
     }   
+
+    @Test
+    public void testHttpMethodOverride() throws Exception {
+        Response response = GET("/clients/15?x-http-method-override=DELETE");
+        assertIsOk(response);
+        assertContentEquals("DELETED 15", response);
+    }
 
 }

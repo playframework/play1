@@ -18,6 +18,10 @@ import play.mvc.results.NotFound;
 public class Router {
 
     static Pattern routePattern = new Pattern("^({method}[A-Za-z\\*]+)?\\s+({path}/[^\\s]*)\\s*({action}[^\\s(]+)({params}.+)?$");
+    /**
+     * Pattern used to locate a method override instruction in request.querystring
+     */
+    static Pattern methodOverride = new Pattern("^.*x-http-method-override=({method}GET|PUT|POST|DELETE).*$");
     static long lastLoading;
 
     public static void load() {
@@ -61,6 +65,14 @@ public class Router {
     public static void route(Http.Request request) {
         if (routes.isEmpty()) {
             throw new EmptyAppException();
+        }
+        // request method may be overriden if a x-http-method-override parameter is given
+        if( request.querystring != null && methodOverride.matches(request.querystring)) {
+            Matcher matcher = methodOverride.matcher(request.querystring);
+            if (matcher.matches()) {
+                Logger.info("request method %s overriden to %s ", request.method, matcher.group("method") );
+                request.method = matcher.group("method");
+            }            
         }
         for (Route route : routes) {
             Map<String, String> args = route.matches(request.method, request.path);
