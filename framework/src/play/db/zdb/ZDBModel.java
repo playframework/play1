@@ -50,6 +50,14 @@ public class ZDBModel {
             ZDB.getBucket(bucket).put(object);
         }
 
+        /**
+         * remove an object from the bucket given object's ID
+         * @param object identifier
+         */
+        public void delete(String id) {
+            ZDB.getBucket(bucket).delete(id);
+        }
+
         public <T> T findById(String id) {
             ZDBModel result = (ZDBModel) ZDB.getBucket(bucket).get(id, type);
             if (result != null) {
