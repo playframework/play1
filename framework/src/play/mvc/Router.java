@@ -103,11 +103,12 @@ public class Router {
         return reverse(action, new HashMap<String, Object>());
     }
 
-    public static ActionDefinition reverse(String action, Map<String, Object> r, boolean forceGetOrPost) {
+    public static ActionDefinition reverseForTemplate(String action, Map<String, Object> r) {
         ActionDefinition actionDef = reverse(action, r);
-        if ( forceGetOrPost && ! ("GET".equals(actionDef.method) || "POST".equals(actionDef.method))) {
-            actionDef.url += "&x-http-method-override=" + actionDef.method;
-            // replace method ??
+        if ( !("GET".equals(actionDef.method) || "POST".equals(actionDef.method))) {
+            String separator = actionDef.url.indexOf('?') != -1 ? "&" : "?";
+            actionDef.url += separator +"x-http-method-override=" + actionDef.method;
+            // todo shall we also replace the method ?
         }
         return actionDef;
     }

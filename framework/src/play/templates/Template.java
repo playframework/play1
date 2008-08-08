@@ -254,8 +254,8 @@ public class Template {
                             r.put(names[i], ((Object[])param)[i] == null ? null : ((Object[])param)[i].toString());
                         }
                     }
-                    // true : false GET method. from a template, only GETs (or potentially POSTs) are possible. so we ask the router to override the GET
-                    return Router.reverse(action, r, true );
+                    // reverse using the x-http-method-override hack if necessary (when the route requires a PUT or DELETE)
+                    return Router.reverseForTemplate(action, r );
                 } catch(ActionNotFoundException e) {
                     throw new NoRouteFoundException(action, null);
                 }
