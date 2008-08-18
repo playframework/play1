@@ -118,25 +118,14 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                     int index = codeIterator.next();
                     int op = codeIterator.byteAt(index);
                     int varNumber = -1;
-                    // Si c'est un ASTORE
-                    switch (op) {
-                        case CodeIterator.ASTORE_0:
-                            varNumber = 0;
-                            break;
-                        case CodeIterator.ASTORE_1:
-                            varNumber = 1;
-                            break;
-                        case CodeIterator.ASTORE_2:
-                            varNumber = 2;
-                            break;
-                        case CodeIterator.ASTORE_3:
-                            varNumber = 3;
-                            break;
-                        case CodeIterator.ASTORE:
-                            varNumber = codeIterator.byteAt(index + 1);
-                            break;
-
+                    // La variable change
+                    if(storeByCode.containsKey(op)) {
+                    	varNumber = storeByCode.get(op);
+                    	if(varNumber == -2) {
+                    		varNumber = codeIterator.byteAt(index+1);
+                    	}
                     }
+                    
                     // Si c'est un store de la variable en cours d'examination
                     // et que c'est dans la frame d'utilisation de cette variable on trace l'affectation.
                     // (en fait la frame commence à localVariableAttribute.startPc(i)-1 qui est la première affectation
@@ -272,5 +261,40 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         public static Object getLocalVariable(String variable) {
             return getLocalVariables().get(variable);
         }
+    }
+    
+    private static Map<Integer, Integer> storeByCode = new HashMap<Integer, Integer> ();
+    
+    static  {
+    	storeByCode.put(CodeIterator.ASTORE_0, 0);
+    	storeByCode.put(CodeIterator.ASTORE_1, 1);
+    	storeByCode.put(CodeIterator.ASTORE_2, 2);
+    	storeByCode.put(CodeIterator.ASTORE_3, 3);
+    	storeByCode.put(CodeIterator.ASTORE, -2);
+    	
+    	storeByCode.put(CodeIterator.ISTORE_0, 0);
+    	storeByCode.put(CodeIterator.ISTORE_1, 1);
+    	storeByCode.put(CodeIterator.ISTORE_2, 2);
+    	storeByCode.put(CodeIterator.ISTORE_3, 3);
+    	storeByCode.put(CodeIterator.ISTORE, -2);
+    	storeByCode.put(CodeIterator.IINC, -2);
+    	
+    	storeByCode.put(CodeIterator.LSTORE_0, 0);
+    	storeByCode.put(CodeIterator.LSTORE_1, 1);
+    	storeByCode.put(CodeIterator.LSTORE_2, 2);
+    	storeByCode.put(CodeIterator.LSTORE_3, 3);
+    	storeByCode.put(CodeIterator.LSTORE, -2);
+    	
+    	storeByCode.put(CodeIterator.FSTORE_0, 0);
+    	storeByCode.put(CodeIterator.FSTORE_1, 1);
+    	storeByCode.put(CodeIterator.FSTORE_2, 2);
+    	storeByCode.put(CodeIterator.FSTORE_3, 3);
+    	storeByCode.put(CodeIterator.FSTORE, -2);
+    	
+    	storeByCode.put(CodeIterator.DSTORE_0, 0);
+    	storeByCode.put(CodeIterator.DSTORE_1, 1);
+    	storeByCode.put(CodeIterator.DSTORE_2, 2);
+    	storeByCode.put(CodeIterator.DSTORE_3, 3);
+    	storeByCode.put(CodeIterator.DSTORE, -2);
     }
 }
