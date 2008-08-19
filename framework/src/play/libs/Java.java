@@ -4,7 +4,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,14 +41,14 @@ public class Java {
 
     public static Object invokeStatic(Method method, Map<String, String[]> args) throws Exception {
         String[] paramsNames = SignaturesNamesRepository.get(method);
-        if(paramsNames == null && method.getParameterTypes().length > 0) {
+        if (paramsNames == null && method.getParameterTypes().length > 0) {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }
         Object[] rArgs = new Object[method.getParameterTypes().length];
         for (int i = 0; i < method.getParameterTypes().length; i++) {
             rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], args);
         }
-        return method.invoke(null, rArgs);        
+        return method.invoke(null, rArgs);
     }
 
     public static String rawMethodSignature(Method method) {
@@ -95,12 +98,12 @@ public class Java {
         }
         return "L" + (clazz.getName().replace('.', '/')) + ";";
     }
-    
+
     public static List<Method> findAllAnnotatedMethods(Class clazz, Class annotationType) {
         List<Method> methods = new ArrayList<Method>();
-        while(!clazz.equals(Object.class)) {
-            for(Method method : clazz.getDeclaredMethods()) {
-                if(method.isAnnotationPresent(annotationType)) {
+        while (!clazz.equals(Object.class)) {
+            for (Method method : clazz.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(annotationType)) {
                     methods.add(method);
                 }
             }
@@ -108,13 +111,145 @@ public class Java {
         }
         return methods;
     }
+
+    public static void findAllFields(Class clazz, Set<Field> found) {
+        Field[] fields = clazz.getDeclaredFields();
+        for (int i = 0; i < fields.length; i++) {
+            found.add(fields[i]);
+        }
+        Class sClazz = clazz.getSuperclass();
+        if (sClazz != null && sClazz != Object.class) {
+            findAllFields(sClazz, found);
+        }
+    }
+
+    /**
+     * Extract fields and setters without field from a bean class
+     * @param clazz the class to introspect
+     * @return set of FieldWrapper
+     */
+    public static Set<FieldWrapper> findSettableProperties(Class clazz) {
+        Set<FieldWrapper> result = new HashSet<FieldWrapper>();
+        
+        
+        while( clazz != Object.class ) {
+            Method[] methods = clazz.getDeclaredMethods();
+            for (Method method : methods) {
+                if( method.getName().startsWith("set") && method.getParameterTypes().length == 1 ) {
+                    String pseudofieldname =  method.getName().substring(3,3).toLowerCase() + method.getName().substring(4);                    
+                    
+                }
+            }
+            
+            
+            Field[] fields = clazz.getDeclaredFields();
+            for (int i = 0; i < fields.length; i++) {
+                FieldWrapper fw = new FieldWrapper(fields[i]);
+                result.add(fw);
+            }            
+            clazz = clazz.getSuperclass();
+        }
+        return result;
+    }
+
+
     
-    public static void findAllFields (Class clazz, Set<Field> found) {
-    	Field[] fields = clazz.getDeclaredFields();
-    	for (int i = 0; i < fields.length; i++)
-			found.add(fields[i]);
-    	Class sClazz = clazz.getSuperclass();
-    	if (sClazz!=null && sClazz!=Object.class)
-    		findAllFields(sClazz, found);
+    /** cache */
+    private static Map<Field, FieldWrapper> wrappers = new HashMap<Field, FieldWrapper>();
+
+    
+    public static FieldWrapper getFieldWrapper(Field field) {
+        if (wrappers.get(field) == null) {
+            FieldWrapper fw = new FieldWrapper(field);
+            play.Logger.debug("caching %s", fw );
+            wrappers.put(field, fw);
+        }
+        return wrappers.get(field);
+    }
+
+    /**
+     * Field accessor
+     * set and get value for a property, using the getter/setter when it exists or direct access otherwise.
+     * final, native or static properties are safely ignored
+     */
+    public static class FieldWrapper {
+
+        final static int unwritableModifiers = Modifier.FINAL | Modifier.NATIVE | Modifier.STATIC;
+        private Type type;
+        private Method setter;
+        private Method getter;
+        private Field field;
+        /** can we update this field value ? */
+        private boolean writable;
+        private boolean accessible;
+
+        private FieldWrapper(Method setter, Method getter) {
+            this.setter = setter;
+            this.getter = getter;
+        }
+        
+        private FieldWrapper(Field field) {
+            this.field = field;
+            accessible = field.isAccessible();
+            writable = ((field.getModifiers() & unwritableModifiers) == 0);
+            String property = field.getName();
+            try {
+                String setterMethod = "set" + property.substring(0, 1).toUpperCase() + property.substring(1);
+                setter = field.getDeclaringClass().getMethod(setterMethod, field.getType());
+            } catch (Exception ex) {
+            }
+            try {
+                String getterMethod = "get" + property.substring(0, 1).toUpperCase() + property.substring(1);
+                getter = field.getDeclaringClass().getMethod(getterMethod);
+            } catch (Exception ex) {
+            }
+        }
+
+        public boolean isModifiable() {
+            return writable;
+        }
+
+        public void setValue(Object instance, Object value) {
+            if (! writable) {
+                return;
+            }
+            try {
+                if (setter != null) {
+                    play.Logger.debug( "invoke setter %s on %s with value %s", setter, instance, value );
+                    setter.invoke(instance, value);
+                } else {
+                    if (!accessible) {
+                        field.setAccessible(true);
+                    }
+                    play.Logger.debug( "field.set(%s, %s)", instance, value );
+                    field.set(instance, value);
+                    if (!accessible) {
+                        field.setAccessible(accessible);
+                    }
+                }
+            } catch (Exception ex) {
+                play.Logger.info( "ERROR: when setting value for field %s - %s", field, ex);
+            }
+        }
+
+        public Object getValue(Object instance) {
+            try {
+                if (getter != null) {
+                    return getter.invoke(instance);
+                } else {
+                    return field.get(instance);
+                }
+            } catch (Exception ex) {
+                play.Logger.info( "ERROR: when getting value for field %s - %s", field, ex);
+            }
+            return null;
+        }
+
+        
+        @Override
+        public String toString() {
+            return "FieldWrapper ("+(writable ? "RW" : "R ") +") for "+field;
+        }
+        
     }
 }

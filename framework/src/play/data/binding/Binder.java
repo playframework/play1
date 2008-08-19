@@ -2,8 +2,6 @@ package play.data.binding;
 
 import java.io.File;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -19,7 +17,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import play.exceptions.BindingException;
-import play.libs.Java;
 
 /**
  * The binder try to convert String values to Java objects.
@@ -28,42 +25,36 @@ public class Binder {
 
     static Map<Class, SupportedType> supportedTypes = new HashMap<Class, SupportedType>();
     
-
     static {
         supportedTypes.put(Date.class, new DateBinder());
         supportedTypes.put(File.class, new FileBinder());
         supportedTypes.put(Calendar.class, new CalendarBinder());
         supportedTypes.put(Locale.class, new LocaleBinder());
-        
+
     }
 
-    private static Object bindInternal(String name, Class clazz, Type type, Map<String, String[]> params, String prefix) {
+    static Map<Class, BeanWrapper> beanwrappers = new HashMap<Class, BeanWrapper>();
+
+    static BeanWrapper getBeanWrapper(Class clazz) {
+        if (!beanwrappers.containsKey(clazz)) {
+            BeanWrapper beanwrapper = new BeanWrapper(clazz);
+            beanwrappers.put(clazz, beanwrapper);
+        }
+        return beanwrappers.get(clazz);
+    }
+
+    static Object bindInternal(String name, Class clazz, Type type, Map<String, String[]> params, String prefix) {
         try {
             if (isComposite(name + prefix, params.keySet())) {
-                Object instance = clazz.newInstance();
-                Set<Field> fields = new HashSet<Field>();
-                Java.findAllFields(clazz, fields);
-                for (Field field : fields) {
-                    if(Modifier.isFinal(field.getModifiers())) {
-                        continue;
-                    }
-                    boolean acess = field.isAccessible();
-                    field.setAccessible(true);
-                    Class fClazz = field.getType();
-                    Type fType = field.getDeclaringClass().getGenericSuperclass();
-                    String newPrefix = prefix + "." + field.getName();
-                    field.set(instance, bindInternal(name, fClazz, fType, params, newPrefix));
-                    field.setAccessible(acess);
-                }
-                return instance;
+                BeanWrapper beanWrapper = getBeanWrapper(clazz);
+                return beanWrapper.bind(name, type, params, prefix);
             }
-
             String[] value = params.get(name + prefix);
-            if (value == null) {
-                value = new String[0];
-            }
             // Arrays types 
             if (clazz.isArray()) {
+                if (value == null) {
+                    return null;
+                }
                 Object r = Array.newInstance(clazz.getComponentType(), value.length);
                 for (int i = 0; i < value.length; i++) {
                     Array.set(r, i, directBind(value[i], clazz.getComponentType()));
@@ -72,6 +63,9 @@ public class Binder {
             }
             // Collections types
             if (Collection.class.isAssignableFrom(clazz)) {
+                if (value == null) {
+                    return null;
+                }
                 if (clazz.isInterface()) {
                     if (clazz.equals(List.class)) {
                         clazz = ArrayList.class;
@@ -92,6 +86,9 @@ public class Binder {
                     r.add(directBind(v, componentClass));
                 }
                 return r;
+            }
+            if (value == null) {
+                value = new String[0];
             }
             // Simple types
             if (value.length > 0) {
@@ -116,7 +113,6 @@ public class Binder {
                     return 0;
                 }
             }
-
             return null;
         } catch (Exception e) {
             throw new BindingException("TODO", e);
@@ -137,6 +133,12 @@ public class Binder {
     }
 
     public static Object directBind(String value, Class clazz) {
+        if (clazz.equals(String.class)) {
+            return value;
+        }
+        if (supportedTypes.containsKey(clazz)) {
+            return supportedTypes.get(clazz).bind(value);
+        }
         if (clazz.getName().equals("int") || clazz.equals(Integer.class)) {
             if (value == null || value.trim().length() == 0) {
                 return null;
@@ -172,12 +174,6 @@ public class Binder {
                 return null;
             }
             return Boolean.parseBoolean(value);
-        }
-        if (clazz.equals(String.class)) {
-            return value;
-        }
-        if (supportedTypes.containsKey(clazz)) {
-            return supportedTypes.get(clazz).bind(value);
         }
         return null;
     }

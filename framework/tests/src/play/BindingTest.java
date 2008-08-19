@@ -12,6 +12,11 @@ public class BindingTest extends TestSupport {
     
     static TestApp testApp;
     
+    public static class Person {
+        public String name;
+        public String email;
+    }
+    
     @BeforeClass
     public static void init() throws Exception {
         testApp = createApp();
@@ -23,6 +28,7 @@ public class BindingTest extends TestSupport {
         testApp.addRoute("*   /action6                         Application.action6");
         testApp.addRoute("*   /action7                         Application.action7");
         testApp.addRoute("*   /action8                         Application.action8");
+        testApp.addRoute("*   /action9                         Application.action9");
         testApp.writeController("Application", 
                 "package controllers;" +                
                 "public class Application extends play.mvc.Controller {" +                
@@ -49,6 +55,9 @@ public class BindingTest extends TestSupport {
                 "   }" +
                 "   public static void action8(int a, Double b, String c, Boolean d, Integer[] e) {" +
                 "       renderText(\"%s %s %s %s %s\", a, b, c, d, e.length);" +
+                "   }" +
+                "   public static void action9( play.BindingTest.Person p) {" +
+                "       renderText( p.name+\" \"+p.email  );" +
                 "   }" +
                 "}"                
         );
@@ -184,6 +193,13 @@ public class BindingTest extends TestSupport {
         Response response = GET("/action8?a=14&b=8&c=Kiki&d=true&e=7&e=9");
         assertIsOk(response);
         assertContentEquals("14 8.0 Kiki true 2", response);
+    }
+
+    @Test
+    public void bindComposite() throws Exception {        
+        Response response = GET("/action9?p.name=Doe&p.email=john.doe@foo.com");
+        assertIsOk(response);
+        assertContentEquals("Doe john.doe@foo.com", response);
     }
 
 }
