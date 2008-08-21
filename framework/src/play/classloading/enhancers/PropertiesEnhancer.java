@@ -24,7 +24,9 @@ public class PropertiesEnhancer extends Enhancer {
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
         final CtClass ctClass = makeClass(applicationClass);
-
+        if (ctClass.isInterface()) {
+            return;
+        }
         for (CtField ctField : ctClass.getDeclaredFields()) {
             try {
 
@@ -52,8 +54,8 @@ public class PropertiesEnhancer extends Enhancer {
                         CtMethod setMethod = CtMethod.make("public void " + setter + "(" + ctField.getType().getName() + " value) { this." + ctField.getName() + " = value; }", ctClass);
                         ctClass.addMethod(setMethod);
                     }
-                    
-                    //ctField.setModifiers(Modifier.PRIVATE);
+
+                //ctField.setModifiers(Modifier.PRIVATE);
 
                 }
 
@@ -62,7 +64,7 @@ public class PropertiesEnhancer extends Enhancer {
             }
 
         }
-        
+
         // Ajoute le constructeur par défaut
         try {
             boolean hasDefaultConstructor = false;
@@ -114,8 +116,8 @@ public class PropertiesEnhancer extends Enhancer {
 
                                     // Réécris l'accés en ecriture à la property
                                     fieldAccess.replace("play.classloading.enhancers.PropertiesEnhancer.FieldAccessor.invokeWriteProperty($0, \"" + fieldAccess.getFieldName() + "\", " + fieldAccess.getField().getType().getName() + ".class, $1, \"" + fieldAccess.getClassName() + "\", \"" + invocationPoint + "\");");
-                                    
-                                    
+
+
                                 }
                             }
                         }
@@ -146,7 +148,7 @@ public class PropertiesEnhancer extends Enhancer {
             if (o == null) {
                 throw new NullPointerException("Try to read " + property + " on null object " + targetType + " (" + invocationPoint + ")");
             }
-            if(!o.getClass().getClassLoader().equals(Play.classloader)) {
+            if (!o.getClass().getClassLoader().equals(Play.classloader)) {
                 return o.getClass().getField(property).get(o);
             }
             String getter = "get" + property.substring(0, 1).toUpperCase() + property.substring(1);

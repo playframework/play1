@@ -20,7 +20,7 @@ public class JPAEnhancer extends Enhancer {
         }
     	
         String entityName = ctClass.getSimpleName();
-        Logger.trace("Enhacing "+entityName);
+        Logger.trace("Enhancing "+entityName);
         
         // Ajoute le constructeur par défaut (obligatoire pour la peristence)
         try {
@@ -31,7 +31,7 @@ public class JPAEnhancer extends Enhancer {
                     break;
                 }
             }
-            if (!hasDefaultConstructor) {
+            if (!hasDefaultConstructor && !ctClass.isInterface()) {
                 CtConstructor defaultConstructor = CtNewConstructor.make("private " + ctClass.getSimpleName() + "() {}", ctClass);
                 ctClass.addConstructor(defaultConstructor);
             }
