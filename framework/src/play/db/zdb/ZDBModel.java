@@ -3,6 +3,8 @@ package play.db.zdb;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import zdb.client.Bucket;
 import zdb.client.ZDB;
 import org.apache.lucene.queryParser.ParseException;
@@ -67,11 +69,15 @@ public class ZDBModel {
         }
 
         public <T> Find<T> findBy(String query, Object... params) {
-            return new Find(this, createQuery(query, params), type);
+            return new Find(this, createQuery(query, params), type, new StandardAnalyzer() );
+        }
+
+        public <T> Find<T> findBy( Analyzer analyzer, String query, Object... params) {
+            return new Find(this, createQuery(query, params), type, analyzer );
         }
 
         public <T> Find<T> findAll() {
-            return new Find(this, null, type);
+            return new Find(this, null, type, new StandardAnalyzer() );
         }
 
         String createQuery(String query, Object... params) {
@@ -94,13 +100,13 @@ public class ZDBModel {
             ZDBModelBucket bucket;
             Class<T> clazz;
 
-            public Find(ZDBModelBucket bucket, String query, Class<T> clazz) {
+            public Find(ZDBModelBucket bucket, String query, Class<T> clazz, Analyzer analyzer ) {
                 try {
                     this.bucket = bucket;
                     if (query == null || query.trim().length() == 0) {
                         this.query = ZDB.getBucket(bucket.bucket).search(clazz);
                     } else {
-                        this.query = ZDB.getBucket(bucket.bucket).search(query, clazz);
+                        this.query = ZDB.getBucket(bucket.bucket).search(query, clazz, analyzer);
                     }
                 } catch (ParseException e) {
                     throw new RuntimeException("Invalid query " + query);
@@ -129,6 +135,13 @@ public class ZDBModel {
                 return (List<T>) result;
             }
 
+            /**
+             * 
+             * @param <T> Type of item
+             * @param from offset in the complete results set
+             * @param size number of items to return
+             * @return a list of items
+             */
             public <T> List<T> page(int from, int size) {
                 List<ZDBModel> result = (List<ZDBModel>) query.page(from, size, null);
                 for (ZDBModel item : result) {
