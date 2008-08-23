@@ -103,9 +103,9 @@ public abstract class Controller {
             }
         }
     }
-
-    protected static void render(Object... args) {
-        // Template datas
+    
+    protected static void renderTemplate(String templateName, Object... args) {
+    	// Template datas
         Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
         for (Object o : args) {
             List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
@@ -118,13 +118,6 @@ public abstract class Controller {
         templateBinding.put("flash", Scope.Flash.current());
         templateBinding.put("params", Scope.Params.current());
         templateBinding.put("play", new Play());
-        // Template name
-        String templateName = null;
-        if (args.length > 0 && args[0] instanceof String && LocalVariablesNamesTracer.getAllLocalVariableNames(args[0]).isEmpty()) {
-            templateName = args[0].toString();
-        } else {
-            templateName = Http.Request.current().action.replace(".", "/") + "." + Http.Request.current().format;
-        }
         try {
             Template template = TemplateLoader.load(templateName);
             throw new RenderTemplate(template, templateBinding.data);
@@ -136,5 +129,15 @@ public abstract class Controller {
                 throw ex;
             }
         }
+    }
+
+    protected static void render(Object... args) {
+        String templateName = null;
+        if (args.length > 0 && args[0] instanceof String && LocalVariablesNamesTracer.getAllLocalVariableNames(args[0]).isEmpty()) {
+            templateName = args[0].toString();
+        } else {
+            templateName = Http.Request.current().action.replace(".", "/") + "." + Http.Request.current().format;
+        }
+        renderTemplate(templateName, args);
     }
 }
