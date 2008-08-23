@@ -16,20 +16,20 @@ import play.classloading.ApplicationClasses.ApplicationClass;
  * Enhance a class.
  */
 public abstract class Enhancer {
-    
+
     protected ClassPool classPool = new ClassPool();
-    
+
     public Enhancer() {
         classPool.appendSystemPath();
         classPool.appendClassPath(new ApplicationClassesClasspath());
     }
-    
+
     CtClass makeClass(ApplicationClass applicationClass) throws IOException {
         return classPool.makeClass(new ByteArrayInputStream(applicationClass.enhancedByteCode));
     }
-    
+
     public abstract void enhanceThisClass(ApplicationClass applicationClass) throws Exception;
-    
+
     public static class ApplicationClassesClasspath implements ClassPath {
 
         public InputStream openClassfile(String className) throws NotFoundException {
@@ -37,20 +37,36 @@ public abstract class Enhancer {
         }
 
         public URL find(String className) {
-            if(Play.classes.getApplicationClass(className) != null) {
+            if (Play.classes.getApplicationClass(className) != null) {
                 String cname = className.replace('.', '/') + ".class";
                 try {
                     // return new File(cname).toURL();
                     return new URL("file:/ApplicationClassesClasspath/" + cname);
+                } catch (MalformedURLException e) {
                 }
-                catch (MalformedURLException e) {}
             }
             return null;
         }
 
-        public void close() {            
+        public void close() {
         }
-        
     }
 
+    /**
+     * test if a class is annotated with an annotation
+     * @param ctClass
+     * @param annotation fully qualified name of the annotation
+     * @return true if class has the annotation
+     * @throws java.lang.ClassNotFoundException
+     */
+    protected boolean hasAnnotation(CtClass ctClass, String annotation) throws ClassNotFoundException {
+        annotation = "@" + annotation;
+        Object[] annotations = ctClass.getAnnotations();
+        for (Object object : annotations) {
+            if (annotation.equals(object.toString())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
