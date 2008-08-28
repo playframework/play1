@@ -225,7 +225,7 @@ public class HttpHandler implements IoHandler {
 
     public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
         if (!(cause instanceof IOException)) {
-            Logger.error("Caught ", cause);
+            Logger.error(cause,"Caught ");
         }
         session.close();
     }
