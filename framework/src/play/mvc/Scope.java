@@ -121,13 +121,13 @@ public class Scope {
     }
 
     public static class Session {
-
+    	static String COOKIE_NAME=Play.configuration.getProperty("application.session.cookie", "PLAY_SESSION");
         static Pattern sessionParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
-
+        
         static Session restore() {
             try {
                 Session session = new Session();
-                Http.Cookie cookie = Http.Request.current().cookies.get("PLAY_SESSION");
+                Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_NAME);
                 if (cookie != null) {
                     String value = cookie.value;
                     String sign = value.substring(0, value.indexOf("-"));
@@ -166,7 +166,7 @@ public class Scope {
                 }
                 String sessionData = URLEncoder.encode(session.toString(), "utf-8");
                 String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
-                Http.Response.current().setCookie("PLAY_SESSION", sign + "-" + sessionData);
+                Http.Response.current().setCookie(COOKIE_NAME, sign + "-" + sessionData);
             } catch (Exception e) {
                 throw new UnexpectedException("Session serializationProblem", e);
             }
