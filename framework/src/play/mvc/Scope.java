@@ -1,13 +1,13 @@
 package play.mvc;
 
 import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import play.Logger;
 import play.Play;
 import play.data.parsing.DataParser;
@@ -16,7 +16,7 @@ import play.libs.Crypto;
 import play.libs.Utils;
 
 public class Scope {
-
+	static String COOKIE_PREFIX=Play.configuration.getProperty("application.session.cookie", "PLAY");
     public static class Flash {
 
         Map<String, String> data = new HashMap<String, String>();
@@ -26,7 +26,7 @@ public class Scope {
         static Flash restore() {
             try {
                 Flash flash = new Flash();
-                Http.Cookie cookie = Http.Request.current().cookies.get("PLAY_FLASH");
+                Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX+"_FLASH");
                 if (cookie != null) {
                     String flashData = URLDecoder.decode(cookie.value, "utf-8");
                     Matcher matcher = flashParser.matcher(flashData);
@@ -51,7 +51,7 @@ public class Scope {
                     flash.append("\u0000");
                 }
                 String flashData = URLEncoder.encode(flash.toString(), "utf-8");
-                Http.Response.current().setCookie("PLAY_FLASH", flashData);
+                Http.Response.current().setCookie(COOKIE_PREFIX+"_FLASH", flashData);
             } catch (Exception e) {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
@@ -121,13 +121,12 @@ public class Scope {
     }
 
     public static class Session {
-    	static String COOKIE_NAME=Play.configuration.getProperty("application.session.cookie", "PLAY_SESSION");
         static Pattern sessionParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
         
         static Session restore() {
             try {
                 Session session = new Session();
-                Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_NAME);
+                Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX+"_SESSION");
                 if (cookie != null) {
                     String value = cookie.value;
                     String sign = value.substring(0, value.indexOf("-"));
@@ -166,7 +165,7 @@ public class Scope {
                 }
                 String sessionData = URLEncoder.encode(session.toString(), "utf-8");
                 String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
-                Http.Response.current().setCookie(COOKIE_NAME, sign + "-" + sessionData);
+                Http.Response.current().setCookie(COOKIE_PREFIX+"_SESSION", sign + "-" + sessionData);
             } catch (Exception e) {
                 throw new UnexpectedException("Session serializationProblem", e);
             }
