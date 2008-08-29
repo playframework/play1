@@ -8,7 +8,7 @@ import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 /**
- * Enhance JPAModel classes.
+ * Enhance JPAModel entities classes
  */
 public class JPAEnhancer extends Enhancer {
 
@@ -18,8 +18,8 @@ public class JPAEnhancer extends Enhancer {
         if (!ctClass.subtypeOf(classPool.get("play.db.jpa.JPAModel"))) {
             return;
         }
-        // les classes intermediaires ne doivent pas etre instrumentees
-        if (!hasAnnotation(ctClass, "javax.persistence.Entity")) {
+        // les classes non entity ne doivent pas etre instrumentees
+         if (!hasAnnotation(ctClass, "javax.persistence.Entity")) {
             return;
         }
         String entityName = ctClass.getSimpleName();
@@ -41,7 +41,6 @@ public class JPAEnhancer extends Enhancer {
             e.printStackTrace();
         }
 
-        // Implémenter les méthodes statiques sur les entity seulement
         // count
         CtMethod count = CtMethod.make("public static Long count() { return (Long) getEntityManager().createQuery(\"select count(*) from " + ctClass.getName() + "\").getSingleResult(); }", ctClass);
         ctClass.addMethod(count);

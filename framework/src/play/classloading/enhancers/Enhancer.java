@@ -3,6 +3,7 @@ package play.classloading.enhancers;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javassist.ClassPath;
@@ -53,17 +54,16 @@ public abstract class Enhancer {
     }
 
     /**
-     * test if a class is annotated with an annotation
-     * @param ctClass
-     * @param annotation fully qualified name of the annotation
+     * test if a class has the provided annotation 
+     * @param ctClass the javassist class representation 
+     * @param annotation fully qualified name of the annotation class eg."javax.persistence.Entity"
      * @return true if class has the annotation
      * @throws java.lang.ClassNotFoundException
      */
     protected boolean hasAnnotation(CtClass ctClass, String annotation) throws ClassNotFoundException {
-        annotation = "@" + annotation;
-        Object[] annotations = ctClass.getAnnotations();
-        for (Object object : annotations) {
-            if (annotation.equals(object.toString())) {
+        for (Object object : ctClass.getAnnotations()) {
+            Annotation ann = (Annotation) object;
+            if (ann.annotationType().getName().equals(annotation)) {
                 return true;
             }
         }
