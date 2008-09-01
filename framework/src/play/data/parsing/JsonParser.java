@@ -56,7 +56,7 @@ public class JsonParser extends DataParser {
                     break;
                 }
                 if (tok != COMMA) {
-                    throw ParseException.grammarError(jt, COMMA);
+                    throw JSONException.grammarError(jt, COMMA);
                 }
                 tok = jt.nextToken();
             }
@@ -74,7 +74,7 @@ public class JsonParser extends DataParser {
             }
             for (;;) {
                 if (tok != STRING) {
-                    throw ParseException.grammarError(jt, STRING);
+                    throw JSONException.grammarError(jt, STRING);
                 }
                 String key = tok.value;
                 jt.expect(SEMICOLON);
@@ -85,13 +85,13 @@ public class JsonParser extends DataParser {
                     break;
                 }
                 if (tok != COMMA) {
-                    throw ParseException.grammarError(jt, COMMA);
+                    throw JSONException.grammarError(jt, COMMA);
                 }
                 // next map key
                 tok = jt.nextToken();
             }
         } else {
-            throw ParseException.parseError("unexpected bytes found " + tok, jt);
+            throw JSONException.parseError("unexpected bytes found " + tok, jt);
         }
     }
 }
