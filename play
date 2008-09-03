@@ -311,7 +311,7 @@ for jar in `ls -c1 "$PLAY_BASE/framework/lib"/*.jar 2> /dev/null`; do
     fi
 done
 if $CYGWIN; then
-	IFS=OLD_IFS
+	IFS=$OLD_IFS
 fi
 
 
