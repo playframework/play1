@@ -11,6 +11,20 @@ import play.libs.I18N;
 
 public class JavaExtensions {
 
+    public static String capitalizeWords(String source) {
+        char prevc=' '; // first char of source is capitalized
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < source.length(); i++) {
+            char c = source.charAt(i);
+            if( c != ' ' && prevc == ' ')
+                sb.append(Character.toUpperCase(c));
+            else
+                sb.append(c);
+            prevc = c;
+        }
+        return sb.toString();
+    }
+    
     public static String escape(String htmlToEscape) {
         return htmlToEscape.replace("<", "&lt;").replace(">", "&gt;");
     }
