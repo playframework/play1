@@ -366,7 +366,14 @@ public class Play {
                     if (fl.isAbsolute() && isPlayApp(fl)) {
                         addPlayApp(fl);
                     } else {
-                        new RuntimeException(fl.getAbsolutePath() + " is not a play application/plugin !");
+                    	if (fl.exists() && isPlayApp(fl))
+							try {
+								addPlayApp(fl.getCanonicalFile());
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+						else
+                    		throw new RuntimeException(fl.getAbsolutePath() + " is not a play application/plugin !");
                     }
                 }
             }
