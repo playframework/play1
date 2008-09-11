@@ -447,7 +447,7 @@ fi
 
 # ~~~~~~~~~~~~~~~~~~~~~~ [netbeansify] Create netbeans configuration files
 
-if [ "$PLAY_COMMAND" = "netbeansify" ] ; then
+if [ "$PLAY_COMMAND" = "netbeansify" ] || [ "$PLAY_COMMAND" = "nb" ] ; then
     PROJECT_NAME="`cat "$APPLICATION_PATH"/conf/application.conf | grep application.name | sed -e 's/application.name=//g'`"	
     rm -rf "$APPLICATION_PATH/nbproject"
     mkdir "$APPLICATION_PATH/nbproject"
