@@ -6,6 +6,9 @@ import java.text.SimpleDateFormat;
 import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
+
+import org.apache.commons.lang.StringEscapeUtils;
+
 import play.i18n.Lang;
 import play.libs.I18N;
 
@@ -25,10 +28,18 @@ public class JavaExtensions {
         return sb.toString();
     }
     
-    public static String escape(String htmlToEscape) {
-        return htmlToEscape.replace("<", "&lt;").replace(">", "&gt;");
+    public static String escapeHtml(String htmlToEscape) {
+        return StringEscapeUtils.escapeHtml(htmlToEscape);
     }
 
+    public static String escapeJavaScript(String str) {
+        return StringEscapeUtils.escapeJavaScript(str);
+    }
+	
+    public static String escapeXml(String str) {
+        return StringEscapeUtils.escapeXml(str);
+    }
+    
     public static String format(Number number, String pattern) {
         return new DecimalFormat(pattern).format(number);
     }
