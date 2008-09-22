@@ -88,7 +88,7 @@
             #{list items:exception.source, as:'line', start:from, end:to}
                 <div class="line ${exception.lineNumber == line_index ? 'error':''}">
                     <span class="lineNumber">${line_index}:</span>
-                    <pre>&nbsp;${line.escape()}</pre>
+                    <pre>&nbsp;${line.escapeHtml()}</pre>
                 </div>
              #{/list}
         </div>
