@@ -47,6 +47,11 @@ public class JavaExtensions {
     public static String format(Date date, String pattern) {
         return new SimpleDateFormat(pattern).format(date);
     }
+    
+    public static String nl2br(String data) {
+        return data.replace("\\n", "<br/>");
+    }
+   
 
     public static String formatCurrency(Number number, String currencyCode) {
         Currency currency = Currency.getInstance(currencyCode);
