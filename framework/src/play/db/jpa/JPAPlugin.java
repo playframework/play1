@@ -83,6 +83,11 @@ public class JPAPlugin extends PlayPlugin {
         closeTx(true);
     }    
     
+    /**
+     * initialize the JPA context and starts a JPA transaction
+     * 
+     * @param readonly true for a readonly transaction
+     */
     public static void startTx(boolean readonly) {
         if(!JPA.isEnabled()) {
             return;
@@ -92,6 +97,10 @@ public class JPAPlugin extends PlayPlugin {
         JPAContext.createContext(manager, readonly);
     }
 
+    /**
+     * clear current JPA context and transaction 
+     * @param rollback shall current transaction be committed (false) or cancelled (true)
+     */
     public static void closeTx(boolean rollback) {
         if(!JPA.isEnabled() || JPAContext.local.get() == null) {
             return;
