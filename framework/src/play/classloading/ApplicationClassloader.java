@@ -253,7 +253,7 @@ public class ApplicationClassloader extends ClassLoader {
     
     private void scan(List<Class> classes, String packageName, VirtualFile current) {
         if (!current.isDirectory()) {
-            if (current.getName().endsWith(".java")) {
+            if (current.getName().endsWith(".java") && !current.getName().startsWith(".")) {
                 String classname = packageName + current.getName().substring(0, current.getName().length() - 5);
                 Class clazz = loadApplicationClass(classname);
                 if (clazz == null) {
