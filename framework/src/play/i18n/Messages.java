@@ -35,6 +35,10 @@ public class Messages {
      */
     public static String get(String key, Object... args) {
         String value = null;
+        if( key == null ) {
+            System.out.println("Messages.get key is null");
+            return "";
+        }
         if (locales.containsKey(Lang.get())) {
             value = locales.get(Lang.get()).getProperty(key);
         }
