@@ -1,5 +1,6 @@
 package play.libs;
 
+import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URLEncoder;
 import java.util.Map;
@@ -99,6 +100,14 @@ public class WS {
             }
         }
 
+        public InputStream getStream() {
+            try {
+                return methodBase.getResponseBodyAsStream();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        
         public JSONObject getJSONObject() {
             try {
                 String json = methodBase.getResponseBodyAsString();
