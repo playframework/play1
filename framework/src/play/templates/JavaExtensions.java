@@ -51,7 +51,13 @@ public class JavaExtensions {
     public static String nl2br(String data) {
         return data.replace("\\n", "<br/>");
     }
-   
+
+    public static String formatSize(Long bytes) {
+        if( bytes < 1024L ) return bytes + " B";
+        if( bytes < 1048576L ) return bytes/1024L + "KB";
+        if( bytes < 1073741824L ) return bytes/1048576L +"."+ "MB";
+        return bytes/1073741824L + "GB";
+    }
 
     public static String formatCurrency(Number number, String currencyCode) {
         Currency currency = Currency.getInstance(currencyCode);
