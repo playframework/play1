@@ -136,6 +136,8 @@
     </target>
     
     <target name="test-application">
+        <loadproperties srcfile="${application.path}/conf/application.conf" />
+        <property name="jpda.port" value="8000" />
         <java classname="play.test.TestRunner" dir="${basedir}" fork="true">
             <classpath>
                 <pathelement path="${application.path}/conf"/>
@@ -144,8 +146,10 @@
             <sysproperty key="application.path" value="${application.path}" />
             <sysproperty key="play.id" value="test" />
             <sysproperty key="java.endorsed.dirs" value="${basedir}/endorsed" />
-            <jvmarg value="-javaagent:${basedir}/play.jar" />            
-        </java>       
+            <jvmarg value="-javaagent:${basedir}/play.jar" />    
+            <jvmarg value="-Xdebug"/>
+            <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.port},server=y,suspend=n"/>
+        </java>  
     </target>
     
     <target name="test-in-nb" depends="test">

@@ -17,6 +17,7 @@ public class TestRunner {
         
         File root = new File(System.getProperty("application.path"));
         Play.init(root, "test");  
+        Play.start();
                 
         JUnitCore junit = new JUnitCore();
         junit.addListener(new Listener());
@@ -50,6 +51,7 @@ public class TestRunner {
         }
         
         Play.stop();
+        System.exit(0);
         
     }     
     
@@ -69,13 +71,13 @@ public class TestRunner {
             if(!(failure.getException() instanceof AssertionError)) {
                 Logger.error(failure.getException(), "    ! Exception raised is");
                 Invocation.onException(failure.getException());
+                Invocation._finally();
             }
             lastTestHasFailed = true;
         }
 
         @Override
         public void testFinished(Description arg0) throws Exception {
-            Invocation._finally();
             if(lastTestHasFailed) {
                 Logger.info("");
             }

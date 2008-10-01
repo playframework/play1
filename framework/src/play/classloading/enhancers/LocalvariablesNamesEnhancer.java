@@ -111,7 +111,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 iterator.insert(insertionPc, b.get());
                 iterator.insert(b.getExceptionTable(), insertionPc);
 
-                // Ensuite il faut tracer également chaque reffectation de la variable.
+                // Ensuite il faut tracer également chaque reaffectation de la variable.
                 CodeIterator codeIterator = codeAttribute.iterator();
                 // Bon chaque instruction de cette méthode
                 while (codeIterator.hasNext()) {
