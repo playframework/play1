@@ -11,7 +11,7 @@ public class JPA {
         return entityManagerFactory != null;
     }
 
-    public static EntityManager getEntityManager() {
+    public static EntityManager newEntityManager() {
         return entityManagerFactory.createEntityManager();
     }    
 

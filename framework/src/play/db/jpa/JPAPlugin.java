@@ -29,6 +29,7 @@ public class JPAPlugin extends PlayPlugin {
             cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty("jpa.ddl", "update"));
             cfg.setProperty("hibernate.dialect", getDefaultDialect(Play.configuration.getProperty("db.driver")));
             cfg.setProperty("javax.persistence.transaction", "RESOURCE_LOCAL");
+            cfg.setProperty("hibernate.show_sql", Play.configuration.getProperty("jpa.debugSQL", "false"));
             try {
                 Field field = cfg.getClass().getDeclaredField("overridenClassLoader");
                 field.setAccessible(true);

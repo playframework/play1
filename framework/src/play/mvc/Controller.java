@@ -31,8 +31,8 @@ public abstract class Controller {
     public static Scope.Params params = null;
     public static Scope.RenderArgs renderArgs = null;
 
-    protected static void renderText(CharSequence text) {
-        throw new RenderText(text);
+    protected static void renderText(Object text) {
+        throw new RenderText(text == null ? "" : text.toString());
     }
 
     protected static void renderText(CharSequence pattern, Object... args) {

@@ -30,6 +30,10 @@ public class JPAModel implements Serializable {
         getEntityManager().persist(this);         
     }
     
+    public void refresh() {
+        getEntityManager().refresh(this);
+    }
+    
     public <T> T delete() {
         try {
             getEntityManager().remove(this);
