@@ -209,14 +209,15 @@ public class Play {
             classloader = new ApplicationClassloader();
             Thread.currentThread().setContextClassLoader(Play.classloader);
             // Reload plugins
-            List<PlayPlugin> newPlugins = new ArrayList<PlayPlugin> ();
+            List<PlayPlugin> newPlugins = new ArrayList<PlayPlugin>();
             for (PlayPlugin plugin : plugins) {
-            	if (plugin.getClass().getClassLoader().getClass().equals(ApplicationClassloader.class)) {
-            		PlayPlugin newPlugin = (PlayPlugin) classloader.loadClass(plugin.getClass().getName()).getConstructors()[0].newInstance();
-            		newPlugin.onLoad();
-            		newPlugins.add(newPlugin);
-            	} else
-            		newPlugins.add(plugin);
+                if (plugin.getClass().getClassLoader().getClass().equals(ApplicationClassloader.class)) {
+                    PlayPlugin newPlugin = (PlayPlugin) classloader.loadClass(plugin.getClass().getName()).getConstructors()[0].newInstance();
+                    newPlugin.onLoad();
+                    newPlugins.add(newPlugin);
+                } else {
+                    newPlugins.add(plugin);
+                }
             }
             plugins = newPlugins;
             // Reload configuration
@@ -242,7 +243,7 @@ public class Play {
             Router.load();
 
             // Try to load all classes
-            Play.classloader.getAllClasses();                    
+            Play.classloader.getAllClasses();
 
             // Plugins
             for (PlayPlugin plugin : plugins) {
@@ -322,9 +323,9 @@ public class Play {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
                 String line = null;
                 while ((line = reader.readLine()) != null) {
-                	String[] infos = line.split(":");
+                    String[] infos = line.split(":");
                     PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(infos[1]).newInstance();
-                    plugin.index=Integer.parseInt(infos[0]);
+                    plugin.index = Integer.parseInt(infos[0]);
                     plugins.add(plugin);
                 }
             } catch (Exception ex) {
@@ -333,8 +334,8 @@ public class Play {
         }
         Collections.sort(plugins);
         for (PlayPlugin plugin : plugins) {
-			plugin.onLoad();
-		}
+            plugin.onLoad();
+        }
         //Auto load things in lib
         File lib = new File(applicationPath, "lib");
         File[] libs = lib.listFiles();
@@ -366,14 +367,15 @@ public class Play {
                     if (fl.isAbsolute() && isPlayApp(fl)) {
                         addPlayApp(fl);
                     } else {
-                    	if (fl.exists() && isPlayApp(fl))
-							try {
-								addPlayApp(fl.getCanonicalFile());
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
-						else
-                    		throw new RuntimeException(fl.getAbsolutePath() + " is not a play application/plugin !");
+                        if (fl.exists() && isPlayApp(fl)) {
+                            try {
+                                addPlayApp(fl.getCanonicalFile());
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else {
+                            throw new RuntimeException(fl.getAbsolutePath() + " is not a play application/plugin !");
+                        }
                     }
                 }
             }

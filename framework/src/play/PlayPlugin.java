@@ -3,17 +3,18 @@ package play;
 import play.mvc.results.Result;
 
 public abstract class PlayPlugin implements Comparable<PlayPlugin> {
+
     public int index;
-    
+
     public void onLoad() {
     }
-    
+
     public void detectChange() {
     }
 
     public void onApplicationStart() {
     }
-    
+
     public void afterApplicationStart() {
     }
 
@@ -30,18 +31,18 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     public void invocationFinally() {
-    } 
-    
-    public void beforeActionInvocation() {        
-    }
-    
-    public void onActionInvocationResult(Result result) {
-    }
-    
-    public void onConfigurationRead () {
     }
 
-	public int compareTo(PlayPlugin o) {
-		return (index<o.index ? -1 : (index==o.index ? 0 : 1));
-	}
+    public void beforeActionInvocation() {
+    }
+
+    public void onActionInvocationResult(Result result) {
+    }
+
+    public void onConfigurationRead() {
+    }
+
+    public int compareTo(PlayPlugin o) {
+        return (index < o.index ? -1 : (index == o.index ? 0 : 1));
+    }
 }
