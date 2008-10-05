@@ -50,12 +50,20 @@ public class JPAModel implements Serializable {
         throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
     }
     
+    public static Long count(String query, Object... params) {
+        throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
+    }
+    
     public static <T extends JPAModel> List<T> findAll() {
     	throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
     }
     
     public static <T extends JPAModel> T findById(Long id) {
     	throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
+    }
+    
+    public static JPAQuery query(String query, Object... params) {
+        throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
     }
     
     /**
@@ -131,6 +139,17 @@ public class JPAModel implements Serializable {
         return  "from " + entityName + " where " + query;       
     }
     
+    @SuppressWarnings("unused")
+    protected static String createCountQuery(String entityName, String entityClass, String query, Object... params) {
+        if (query.trim().indexOf(" ") == -1 && params != null && params.length == 1) {
+            query += " = ?";
+        }
+        if (query.trim().indexOf(" ") == -1 && params == null) {
+            query += " = null";
+        }
+        return  "select count(*) from " + entityName + " where " + query;       
+    }
+    
     @SuppressWarnings ("unused")
     protected static Query bindParameters (Query q, Object... params) {
         if(params == null) {
@@ -141,4 +160,29 @@ public class JPAModel implements Serializable {
     	}
     	return q;
     }
+    
+    public static class JPAQuery {
+        
+        public Query query;
+        
+        public JPAQuery(Query query) {
+            this.query = query;
+        }
+        
+        public Object one() {
+            return query.getSingleResult();
+        }
+                
+        public List<Object> all() {
+            return query.getResultList();
+        }
+        
+        public List<Object> page(int from, int length) {
+            query.setFirstResult(from);
+            query.setMaxResults(length);
+            return query.getResultList();
+        }
+        
+    }
+    
 }

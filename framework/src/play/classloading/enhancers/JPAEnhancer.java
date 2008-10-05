@@ -44,6 +44,11 @@ public class JPAEnhancer extends Enhancer {
         // count
         CtMethod count = CtMethod.make("public static Long count() { return (Long) getEntityManager().createQuery(\"select count(*) from " + ctClass.getName() + "\").getSingleResult(); }", ctClass);
         ctClass.addMethod(count);
+        
+        // count2
+        CtMethod count2 = CtMethod.make("public static Long count(String query, Object[] params) { return (Long) bindParameters(getEntityManager().createQuery(createCountQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", query, params)), params).getSingleResult(); }", ctClass);
+        ctClass.addMethod(count2);
+
 
         // findAll
         CtMethod findAll = CtMethod.make("public static java.util.List findAll() { return getEntityManager().createQuery(\"select e from " + entityName + " e\").getResultList();}", ctClass);
@@ -56,6 +61,10 @@ public class JPAEnhancer extends Enhancer {
         // findBy        
         CtMethod findBy = CtMethod.make("public static java.util.List findBy(String query, Object[] params) { javax.persistence.Query q = getEntityManager().createQuery(createFindByQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", query, params)); return bindParameters(q,params).getResultList(); }", ctClass);
         ctClass.addMethod(findBy);
+        
+        // query        
+        CtMethod query = CtMethod.make("public static play.db.jpa.JPAModel.JPAQuery query(String query, Object[] params) { javax.persistence.Query q = getEntityManager().createQuery(createFindByQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", query, params)); return new play.db.jpa.JPAModel.JPAQuery(bindParameters(q,params)); }", ctClass);
+        ctClass.addMethod(query);
 
         // findOneBy
         CtMethod findOneBy = CtMethod.make("public static play.db.jpa.JPAModel findOneBy(String query, Object[] params) { javax.persistence.Query q = getEntityManager().createQuery(createFindByQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", query, params)); try { return (" + ctClass.getName() + ") bindParameters(q,params).getSingleResult();} catch (javax.persistence.NoResultException e) { return null;} }", ctClass);
