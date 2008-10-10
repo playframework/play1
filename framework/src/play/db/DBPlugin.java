@@ -3,6 +3,7 @@ package play.db;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.io.File;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.Properties;
 import play.Logger;
 import play.Play;
@@ -15,15 +16,33 @@ public class DBPlugin extends PlayPlugin {
     public void onApplicationStart() {
         if (changed()) {
             try {
-                String driver = Play.configuration.getProperty("db.driver");
+                
+                Properties p = Play.configuration;
+                
+                // Try the driver
+                String driver = p.getProperty("db.driver");
                 try {
-                    Play.classloader.loadClass(driver);
+                    Class.forName(driver);                    
                 } catch (Exception e) {
                     throw new Exception("Driver not found (" + driver + ")");
                 }
+                
+                // Try the connection
+                Connection fake = null;
+                try {
+                    if(p.getProperty("db.user") == null) {
+                        DriverManager.getConnection(p.getProperty("db.url"));
+                    } else {
+                        DriverManager.getConnection(p.getProperty("db.url"), p.getProperty("db.user"), p.getProperty("db.pass"));
+                    }
+                } finally {
+                    if(fake != null) {
+                        fake.close();
+                    }
+                }
+                
                 System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
                 System.setProperty("com.mchange.v2.log.FallbackMLog.DEFAULT_CUTOFF_LEVEL", "OFF");
-                Properties p = Play.configuration;
                 ComboPooledDataSource ds = new ComboPooledDataSource();
                 ds.setDriverClass(p.getProperty("db.driver"));
                 ds.setJdbcUrl(p.getProperty("db.url"));
@@ -79,7 +98,7 @@ public class DBPlugin extends PlayPlugin {
             p.put("db.pass", "");
         }
 
-        if ((p.getProperty("db.driver") == null) || (p.getProperty("db.url") == null) || (p.getProperty("db.user") == null) || (p.getProperty("db.pass") == null)) {
+        if ((p.getProperty("db.driver") == null) || (p.getProperty("db.url") == null)) {
             return false;
         }
         if (DB.datasource == null) {
@@ -92,10 +111,10 @@ public class DBPlugin extends PlayPlugin {
             if (!p.getProperty("db.url").equals(ds.getJdbcUrl())) {
                 return true;
             }
-            if (!p.getProperty("db.user").equals(ds.getUser())) {
+            if (!p.getProperty("db.user", "").equals(ds.getUser())) {
                 return true;
             }
-            if (!p.getProperty("db.pass").equals(ds.getPassword())) {
+            if (!p.getProperty("db.pass", "").equals(ds.getPassword())) {
                 return true;
             }
         }

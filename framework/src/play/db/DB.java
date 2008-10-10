@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAContext;
 import play.exceptions.DatabaseException;
+import play.exceptions.PlayException;
 
 /**
  * Database connection utilities.

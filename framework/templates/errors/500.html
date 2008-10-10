@@ -67,12 +67,12 @@
             <h1>
                 ${exception.errorTitle}
             </h1>
-            #{if exception.sourceAvailable && play.Play.mode.name() == 'DEV'}
+            #{if play.Play.mode.name() == 'DEV'}
             <p>
                 ${exception.errorDescription}
             </p>
             #{/if}
-            #{if exception.sourceAvailable && play.Play.mode.name() == 'PROD'}
+            #{if play.Play.mode.name() == 'PROD'}
             <p>
                 Error details are not displayed when Play! is in PROD mode. Check server logs for detail.
             </p>
