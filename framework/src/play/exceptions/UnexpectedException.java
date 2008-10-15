@@ -24,7 +24,9 @@ public class UnexpectedException extends PlayException {
 
     @Override
     public String getErrorDescription() {
-        return String.format("An unexpected error occured caused by exception <strong>%s</strong>:<br/> <strong>%s</strong>", getCause().getClass().getSimpleName(), getCause().getMessage());
+    	if(getCause() != null && getCause().getClass() != null)
+    		return String.format("An unexpected error occured caused by exception <strong>%s</strong>:<br/> <strong>%s</strong>", getCause().getClass().getSimpleName(), getCause().getMessage());
+    	else return String.format("Unexpected error : %s", getMessage());
     } 
 }
 

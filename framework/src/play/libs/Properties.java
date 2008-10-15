@@ -38,8 +38,10 @@ public class Properties extends HashMap<String,String> {
 			if (tmp.startsWith("#"))
 				continue;
 			
-			if (!tmp.contains("="))
+			if (!tmp.contains("=")) {
+				put(tmp,"");
 				continue;
+			}
 
 			String[] kv = tmp.split ("=",2);
 			if (kv.length==2)
