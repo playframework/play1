@@ -70,15 +70,17 @@ public class RenderBinary extends Result {
     public void apply(Request request, Response response) {
         try {
             setContentTypeIfNotSet(response, "application/octet-stream");
-            if( inline ) {
-                response.setHeader("Content-Disposition", "inline");
-            } else if(name == null) {
-                response.setHeader("Content-Disposition", "attachment");
-            } else {
-                // filename must be quoted and encoded (space, etc)
-                name = encoder.encode(name);
-                // see RFC2231 we dont support locale for now
-                response.setHeader("Content-Disposition", "attachment; filename*=utf-8'en-us'"+name);
+            if (! response.headers.containsKey("Content-Disposition")) {
+	            if( inline ) {
+	                response.setHeader("Content-Disposition", "inline");
+	            } else if(name == null) {
+	                response.setHeader("Content-Disposition", "attachment");
+	            } else {
+	                // filename must be quoted and encoded (space, etc)
+	                name = encoder.encode(name);
+	                // see RFC2231 we dont support locale for now
+	                response.setHeader("Content-Disposition", "attachment; filename*=utf-8'en-us'"+name);
+	            }
             }
             if(file != null) {
             	if (!file.exists())
