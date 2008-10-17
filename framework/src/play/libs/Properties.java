@@ -67,7 +67,8 @@ public class Properties extends HashMap<String,String> {
 			new NullPointerException("Can't store to null stream");
 	   BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out,encoding));
 	   for (String key : keySet()) {
-		   wr.write(key+"="+get(key));
+		   if(key.length() > 0)
+			   wr.write(key+"="+get(key)+System.getProperties().getProperty("line.separator"));
 	   }
 	   wr.flush();
 	   wr.close();
