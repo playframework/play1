@@ -331,8 +331,7 @@ fi
 if [ "$PLAY_COMMAND" = "test" ] ; then
     echo "~ Running application tests"
     echo "~ "
-    #DBGARGS="-Xdebug -Xrunjdwp:transport=dt_socket,address=$JPDA_PORT,server=y,suspend=n"
-    "$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS $DBGARGS -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID play.test.TestRunner
+    "$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID play.test.TestRunner
     echo 
     exit;
 fi
