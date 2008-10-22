@@ -33,7 +33,7 @@ public class RenderJson extends Result {
     public void apply(Request request, Response response) {
         try {
             String json = JSON.toJSON(o);
-            setContentTypeIfNotSet(response, "text/html");
+            setContentTypeIfNotSet(response, "application/json");
             response.out.write(json.getBytes("utf-8"));
         } catch (Exception e) {
             throw new UnexpectedException(e);

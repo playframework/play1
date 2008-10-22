@@ -29,8 +29,9 @@ public class WS {
 
     public static HttpResponse GET(Map<String, String> headers, String url, Object... params) {
         url = String.format(url, params);
+        GetMethod getMethod = null;
         try {
-            GetMethod getMethod = new GetMethod(url);
+             getMethod = new GetMethod(url);
             if (headers != null) {
                 for (String key : headers.keySet()) {
                     getMethod.addRequestHeader(key, headers.get(key) + "");
@@ -40,6 +41,9 @@ public class WS {
             return new HttpResponse(getMethod);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+//            if( getMethod != null )
+//                getMethod.releaseConnection();
         }
     }
 
@@ -125,5 +129,16 @@ public class WS {
                 throw new RuntimeException(e);
             }
         }
+
+        public void recycle() {
+            methodBase.releaseConnection();
+        }
+        
+        @Override
+        protected void finalize() throws Throwable {
+            super.finalize();
+        }
+        
+        
     }
 }

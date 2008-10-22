@@ -149,6 +149,7 @@ public class PropertiesEnhancer extends Enhancer {
                 throw new NullPointerException("Try to read " + property + " on null object " + targetType + " (" + invocationPoint + ")");
             }
             if (!o.getClass().getClassLoader().equals(Play.classloader)) {
+                System.out.println("no access, classloader is "+o.getClass().getClassLoader());
                 return o.getClass().getField(property).get(o);
             }
             String getter = "get" + property.substring(0, 1).toUpperCase() + property.substring(1);
@@ -157,8 +158,10 @@ public class PropertiesEnhancer extends Enhancer {
                 Object result = getterMethod.invoke(o);
                 return result;
             } catch (NoSuchMethodException e) {
+                System.out.println(e);
                 throw e;
             } catch (InvocationTargetException e) {
+                System.out.println(e);
                 throw e.getCause();
             }
         }
