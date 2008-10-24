@@ -48,6 +48,10 @@ public class JavaExtensions {
         return new SimpleDateFormat(pattern).format(date);
     }
     
+    public static String asdate(Long timestamp, String pattern) {
+        return new SimpleDateFormat(pattern).format( new Date(timestamp));
+    }
+    
     public static String nl2br(String data) {
         return data.replace("\\n", "<br/>");
     }
