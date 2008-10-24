@@ -1,6 +1,6 @@
 %{
  // @since play rev138  
- js_messages=fr.zenexity.json.JSON.toJSON( play.i18n.Messages.all("fr"));
+ js_messages=fr.zenexity.json.JSON.toJSON( play.i18n.Messages.all(play.i18n.Lang.get()));
  
 }%
 <script type="text/javascript" language="javascript" charset="utf-8">
