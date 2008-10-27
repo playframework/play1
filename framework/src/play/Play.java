@@ -131,6 +131,9 @@ public class Play {
         Logger.info("Starting %s", root.getAbsolutePath());
         // Read the configuration file
         readConfiguration();
+        // Configure logs
+        String logLevel = configuration.getProperty("application.log", "INFO");
+        Logger.log4j.setLevel(Level.toLevel(logLevel));
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         javaPath = new ArrayList<VirtualFile>();
@@ -205,21 +208,23 @@ public class Play {
                 Logger.info("Reloading ...");
                 stop();
             }
-            // Need a new classloader
-            classloader = new ApplicationClassloader();
-            Thread.currentThread().setContextClassLoader(Play.classloader);
-            // Reload plugins
-            List<PlayPlugin> newPlugins = new ArrayList<PlayPlugin>();
-            for (PlayPlugin plugin : plugins) {
-                if (plugin.getClass().getClassLoader().getClass().equals(ApplicationClassloader.class)) {
-                    PlayPlugin newPlugin = (PlayPlugin) classloader.loadClass(plugin.getClass().getName()).getConstructors()[0].newInstance();
-                    newPlugin.onLoad();
-                    newPlugins.add(newPlugin);
-                } else {
-                    newPlugins.add(plugin);
+            if(mode == Mode.DEV) {
+                // Need a new classloader
+                classloader = new ApplicationClassloader();
+                Thread.currentThread().setContextClassLoader(Play.classloader);
+                // Reload plugins
+                List<PlayPlugin> newPlugins = new ArrayList<PlayPlugin>();
+                for (PlayPlugin plugin : plugins) {
+                    if (plugin.getClass().getClassLoader().getClass().equals(ApplicationClassloader.class)) {
+                        PlayPlugin newPlugin = (PlayPlugin) classloader.loadClass(plugin.getClass().getName()).getConstructors()[0].newInstance();
+                        newPlugin.onLoad();
+                        newPlugins.add(newPlugin);
+                    } else {
+                        newPlugins.add(plugin);
+                    }
                 }
+                plugins = newPlugins;
             }
-            plugins = newPlugins;
             // Reload configuration
             readConfiguration();
             // Configure logs
@@ -274,8 +279,12 @@ public class Play {
     static void preCompile() {
         try {
             Logger.info("Precompiling ...");
+            long start = System.currentTimeMillis();
             classloader.getAllClasses();
+            Logger.trace("%sms to precompile the Java stuff", System.currentTimeMillis()-start);
+            start = System.currentTimeMillis();
             TemplateLoader.getAllTemplate();
+            Logger.trace("%sms to precompile the templates", System.currentTimeMillis()-start);
         } catch (Throwable e) {
             Logger.error(e, "Cannot start in PROD mode with errors");
             System.exit(-1);

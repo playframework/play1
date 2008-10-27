@@ -48,7 +48,7 @@ public class TemplateLoader {
         }
         if (template == null) {
             VirtualFile tf = Play.getVirtualFile(path);
-            if(tf.exists()) {
+            if (tf.exists()) {
                 template = TemplateLoader.load(tf);
             } else {
                 throw new TemplateNotFoundException(path);
@@ -56,30 +56,31 @@ public class TemplateLoader {
         }
         return template;
     }
-    
+
     public static List<Template> getAllTemplate() {
         List<Template> res = new ArrayList<Template>();
-        for(VirtualFile virtualFile : Play.templatesPath) {
+        for (VirtualFile virtualFile : Play.templatesPath) {
             scan(res, virtualFile);
         }
         return res;
     }
-    
+
     private static void scan(List<Template> templates, VirtualFile current) {
         if (!current.isDirectory()) {
+            long start = System.currentTimeMillis();
             Template template = load(current);
             try {
-				template.compile();
-			} catch (TemplateCompilationException e) {
-				Logger.error("Template %s does not compile at line %d", e.getTemplate().name, e.getLineNumber());
-				throw e;
-			}
-            templates.add(template);            
+                template.compile();
+                Logger.trace("%sms to load %s", System.currentTimeMillis()-start, current.getName());
+            } catch (TemplateCompilationException e) {
+                Logger.error("Template %s does not compile at line %d", e.getTemplate().name, e.getLineNumber());
+                throw e;
+            }
+            templates.add(template);
         } else {
             for (VirtualFile virtualFile : current.list()) {
                 scan(templates, virtualFile);
             }
         }
     }
-    
 }

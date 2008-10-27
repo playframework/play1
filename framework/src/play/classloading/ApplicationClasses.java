@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import play.Logger;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.Enhancer;
@@ -169,9 +170,11 @@ public class ApplicationClasses {
          * @return
          */
         public byte[] compile() {
+            long start = System.currentTimeMillis();
             compiler.compile(this.name);
             compiled = true;
-            this.timestamp = this.javaFile.lastModified();            
+            this.timestamp = this.javaFile.lastModified();   
+            Logger.trace("%sms to compile class %s", System.currentTimeMillis()-start, name);
             return this.javaByteCode;
         }
 

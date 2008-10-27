@@ -1,16 +1,10 @@
 package play.classloading;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ClassFile;
@@ -38,6 +32,7 @@ import play.exceptions.UnexpectedException;
  */
 public class ApplicationCompiler {
 
+    Map<String,Boolean> packagesCache = new HashMap<String, Boolean>();
     ApplicationClasses applicationClasses;
     Map<String, String> settings;
 
@@ -143,7 +138,17 @@ public class ApplicationCompiler {
 
             private NameEnvironmentAnswer findType(final String name) {
                 try {
-
+                    
+                    if(name.startsWith("play.") || name.startsWith("java.") || name.startsWith("javax.")) {
+                        byte[] bytes = Play.classloader.getClassDefinition(name);
+                        if (bytes != null) {
+                            ClassFileReader classFileReader = new ClassFileReader(bytes, name.toCharArray(), true);
+                            return new NameEnvironmentAnswer(classFileReader, null);
+                        } else {
+                            return null;
+                        }
+                    }
+                    
                     char[] fileName = name.toCharArray();
                     ApplicationClass applicationClass = applicationClasses.getApplicationClass(name);
 
@@ -174,7 +179,7 @@ public class ApplicationCompiler {
                     throw new UnexpectedException(e);
                 }
             }
-
+            
             public boolean isPackage(char[][] parentPackageName, char[] packageName) {
                 // Rebuild something usable
                 StringBuilder sb = new StringBuilder();
@@ -186,13 +191,19 @@ public class ApplicationCompiler {
                 }
                 sb.append(new String(packageName));
                 String name = sb.toString();
+                if(packagesCache.containsKey(name)) {
+                    return packagesCache.get(name).booleanValue();
+                }        
                 // Check if thera a .java or .class for this ressource
                 if (Play.classloader.getClassDefinition(name) != null) {
+                    packagesCache.put(name, false);
                     return false;
                 }
                 if (applicationClasses.getApplicationClass(name) != null) {
+                    packagesCache.put(name, false);
                     return false;
-                }                
+                }        
+                packagesCache.put(name, true);
                 return true;
             }
 

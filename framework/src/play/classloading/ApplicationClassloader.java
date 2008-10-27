@@ -11,7 +11,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import play.Logger;
 import play.Play;
@@ -55,6 +54,7 @@ public class ApplicationClassloader extends ClassLoader {
     public ThreadLocal<List<ApplicationClass>> loadingTracer = new ThreadLocal<List<ApplicationClass>>();
 
     protected Class loadApplicationClass(String name) {
+        long start = System.currentTimeMillis();
         ApplicationClass applicationClass = Play.classes.getApplicationClass(name);
         if (applicationClass != null) {
             if (loadingTracer.get() != null) {
@@ -67,6 +67,7 @@ public class ApplicationClassloader extends ClassLoader {
                     applicationClass.enhance();
                     applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length);
                     resolveClass(applicationClass.javaClass);
+                    Logger.trace("%sms to load class %s", System.currentTimeMillis()-start, name);
                     return applicationClass.javaClass;
                 } else {
                     Play.classes.classes.remove(name);
