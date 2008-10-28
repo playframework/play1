@@ -148,7 +148,9 @@ public class ApplicationClasses {
         public byte[] enhance() {
             for (Class enhancer : enhancers) {
                 try {
+                    long start = System.currentTimeMillis();
                     ((Enhancer) enhancer.newInstance()).enhanceThisClass(this);
+                    Logger.trace("%sms to apply %s to %s", System.currentTimeMillis()-start, enhancer.getSimpleName(), name);
                 } catch (Exception e) {
                     throw new UnexpectedException("While applying " + enhancer + " on " + name, e);
                 }
