@@ -30,6 +30,9 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
         CtClass ctClass = makeClass(applicationClass);
+        if (!ctClass.subtypeOf(classPool.get("play.mvc.Controller"))) {
+            return;
+        }
 
         for (CtMethod method : ctClass.getDeclaredMethods()) {
 
@@ -52,7 +55,10 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             SignaturesNamesRepository.signatures.put(SignaturesNamesRepository.signature(method), names.toArray(new String[names.size()]));
 
             // enterMethod/endMethod
-            method.instrument(new ExprEditor() {
+            // Supprimé car la tracage n'est plus fait en dehors des controllers ...
+            // On va voir ...
+            
+            /*method.instrument(new ExprEditor() {
 
                 @Override
                 public void edit(MethodCall m) throws CannotCompileException {
@@ -72,7 +78,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                         throw new UnexpectedException("Unexpected error in LocalvariablesEnhancer while compiling the enter/exit block", e);
                     }
                 }
-            });
+            });*/
 
             // Bon.
             // Alors là il s'agit aprés chaque instruction de creation d'une variable locale

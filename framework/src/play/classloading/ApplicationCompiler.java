@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.eclipse.jdt.internal.compiler.Compiler;
 
+import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.JavaCompilationException;
@@ -242,6 +243,7 @@ public class ApplicationCompiler {
                         }
                         clazzName.append(compoundName[j]);
                     }
+                    Logger.trace("Compiled %s", clazzName);
                     applicationClasses.getApplicationClass(clazzName.toString()).compiled(clazzFile.getBytes());
                 }
             }
