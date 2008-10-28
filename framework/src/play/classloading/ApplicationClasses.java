@@ -161,7 +161,7 @@ public class ApplicationClasses {
          * Is this class already compiled ?
          * @return
          */
-        public boolean isCompiled() {
+        public boolean isDefinable() {
             return compiled && javaClass != null;
         }
 
@@ -171,9 +171,7 @@ public class ApplicationClasses {
          */
         public byte[] compile() {
             long start = System.currentTimeMillis();
-            compiler.compile(this.name);
-            compiled = true;
-            this.timestamp = this.javaFile.lastModified();   
+            compiler.compile(new String[] {this.name});             
             Logger.trace("%sms to compile class %s", System.currentTimeMillis()-start, name);
             return this.javaByteCode;
         }
@@ -183,6 +181,13 @@ public class ApplicationClasses {
          */
         public void uncompile() {
             this.javaClass = null;
+        }
+        
+        public void compiled(byte[] code) {
+            javaByteCode = code;
+            enhancedByteCode = code;
+            compiled = true;
+            this.timestamp = this.javaFile.lastModified();  
         }
     }
 

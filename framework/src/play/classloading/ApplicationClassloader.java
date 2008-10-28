@@ -60,11 +60,11 @@ public class ApplicationClassloader extends ClassLoader {
             if (loadingTracer.get() != null) {
                 loadingTracer.get().add(applicationClass);
             }
-            if (applicationClass.isCompiled()) {
+            if (applicationClass.isDefinable()) {
                 return applicationClass.javaClass;
             } else {
-                if (applicationClass.compile() != null) {
-                    applicationClass.enhance();
+                if (applicationClass.enhancedByteCode != null || applicationClass.compile() != null) {
+                    applicationClass.enhance();                     
                     applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length);
                     resolveClass(applicationClass.javaClass);
                     Logger.trace("%sms to load class %s", System.currentTimeMillis()-start, name);
@@ -200,12 +200,18 @@ public class ApplicationClassloader extends ClassLoader {
     public List<Class> getAllClasses() {
         if (allClasses == null) {
             allClasses = new ArrayList<Class>();
+            List<ApplicationClass> all = new ArrayList<ApplicationClass>();
             for (VirtualFile virtualFile : Play.javaPath) {
-                getAllClasses(virtualFile);
+                all.addAll(getAllClasses(virtualFile));
             }
+            String[] classNames = new String[all.size()];
+            for(int i=0; i<all.size(); i++) {
+                classNames[i] = all.get(i).name;
+            }
+            Play.classes.compiler.compile(classNames);
             for(ApplicationClass applicationClass : Play.classes.all()) {
                 allClasses.add(loadApplicationClass(applicationClass.name));
-            }
+            }                        
         }
         return allClasses;
     }
@@ -229,39 +235,34 @@ public class ApplicationClassloader extends ClassLoader {
     
     // ~~~ Intern
 
-    List<Class> getAllClasses(String basePackage) {
-        List<Class> res = new ArrayList<Class>();
+    List<ApplicationClass> getAllClasses(String basePackage) {
+        List<ApplicationClass> res = new ArrayList<ApplicationClass>();
         for (VirtualFile virtualFile : Play.javaPath) {
             res.addAll(getAllClasses(virtualFile, basePackage));
         }
         return res;
     }
 
-    List<Class> getAllClasses(VirtualFile path) {
+    List<ApplicationClass> getAllClasses(VirtualFile path) {
         return getAllClasses(path, "");
     }
 
-    List<Class> getAllClasses(VirtualFile path, String basePackage) {
+    List<ApplicationClass> getAllClasses(VirtualFile path, String basePackage) {
         if (basePackage.length() > 0 && !basePackage.endsWith(".")) {
             basePackage += ".";
         }
-        List<Class> res = new ArrayList<Class>();
+        List<ApplicationClass> res = new ArrayList<ApplicationClass>();
         for (VirtualFile virtualFile : path.list()) {
             scan(res, basePackage, virtualFile);
         }
         return res;
     }
     
-    private void scan(List<Class> classes, String packageName, VirtualFile current) {
+    private void scan(List<ApplicationClass> classes, String packageName, VirtualFile current) {
         if (!current.isDirectory()) {
             if (current.getName().endsWith(".java") && !current.getName().startsWith(".")) {
                 String classname = packageName + current.getName().substring(0, current.getName().length() - 5);
-                Class clazz = loadApplicationClass(classname);
-                if (clazz == null) {
-                    Logger.error("%s was found but class %s cannot be loaded", current, classname);
-                } else {
-                    classes.add(clazz);
-                }
+                classes.add(Play.classes.getApplicationClass(classname));                
             }
         } else {
             for (VirtualFile virtualFile : current.list()) {

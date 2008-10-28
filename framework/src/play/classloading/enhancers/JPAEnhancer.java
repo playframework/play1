@@ -4,7 +4,6 @@ import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtMethod;
 import javassist.CtNewConstructor;
-import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 /**
@@ -23,7 +22,6 @@ public class JPAEnhancer extends Enhancer {
             return;
         }
         String entityName = ctClass.getSimpleName();
-        Logger.trace("Enhancing " + entityName);
         // Ajoute le constructeur par défaut (obligatoire pour la peristence)
         try {
             boolean hasDefaultConstructor = false;

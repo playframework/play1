@@ -104,9 +104,12 @@ public class ApplicationCompiler {
     /**
      * Please compile this className
      */
-    public void compile(String className) {
+    public void compile(String[] classNames) {
 
-        ICompilationUnit compilationUnit = new CompilationUnit(className);
+        ICompilationUnit[] compilationUnits = new CompilationUnit[classNames.length];
+        for(int i=0; i<classNames.length; i++) {
+            compilationUnits[i] = new CompilationUnit(classNames[i]);
+        }
         IErrorHandlingPolicy policy = DefaultErrorHandlingPolicies.exitOnFirstError();
         IProblemFactory problemFactory = new DefaultProblemFactory(Locale.ENGLISH);
 
@@ -239,8 +242,7 @@ public class ApplicationCompiler {
                         }
                         clazzName.append(compoundName[j]);
                     }
-                    applicationClasses.getApplicationClass(clazzName.toString()).javaByteCode = clazzFile.getBytes();
-                    applicationClasses.getApplicationClass(clazzName.toString()).enhancedByteCode = clazzFile.getBytes();
+                    applicationClasses.getApplicationClass(clazzName.toString()).compiled(clazzFile.getBytes());
                 }
             }
         };
@@ -256,7 +258,7 @@ public class ApplicationCompiler {
         };
 
         // Go !
-        jdtCompiler.compile(new ICompilationUnit[]{compilationUnit});
+        jdtCompiler.compile(compilationUnits);
 
     }
 }
