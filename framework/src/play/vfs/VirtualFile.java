@@ -33,7 +33,6 @@ public abstract class VirtualFile {
             try {
                 return new ZFile(file);
             } catch (IOException e) {
-                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }

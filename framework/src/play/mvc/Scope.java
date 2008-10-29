@@ -298,7 +298,7 @@ public class Scope {
                                 .append(URLEncoder.encode(value, "utf-8"))
                                 .append("&");
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.error(e, "Error (utf-8 ?)");
                     }
                 }
             }

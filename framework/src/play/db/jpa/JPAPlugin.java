@@ -35,7 +35,7 @@ public class JPAPlugin extends PlayPlugin {
                 field.setAccessible(true);
                 field.set(cfg, Play.classloader);
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.error(e, "Error trying to override the hibernate classLoader (new hibernate version ???)");
             }
             for (Class clazz : classes) {
                 if (clazz.isAnnotationPresent(Entity.class)) {

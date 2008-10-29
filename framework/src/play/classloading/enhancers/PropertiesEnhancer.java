@@ -13,6 +13,7 @@ import javassist.CtNewConstructor;
 import javassist.NotFoundException;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
+import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
@@ -60,7 +61,7 @@ public class PropertiesEnhancer extends Enhancer {
                 }
 
             } catch (Exception e) {
-                e.printStackTrace();
+                Logger.error(e, "Error in PropertiesEnhancer");
             }
 
         }
@@ -79,7 +80,7 @@ public class PropertiesEnhancer extends Enhancer {
                 ctClass.addConstructor(defaultConstructor);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.error(e, "Error in PropertiesEnhancer");
         }
 
         // Intercepte les FieldAccess

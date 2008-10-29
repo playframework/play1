@@ -4,6 +4,7 @@ import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtMethod;
 import javassist.CtNewConstructor;
+import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 /**
@@ -36,7 +37,7 @@ public class JPAEnhancer extends Enhancer {
                 ctClass.addConstructor(defaultConstructor);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.error(e, "Error in JPAEnhancer");
         }
 
         // count

@@ -5,6 +5,7 @@ import javassist.CtConstructor;
 import javassist.CtMethod;
 import javassist.CtNewConstructor;
 import javassist.Modifier;
+import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 /**
@@ -37,7 +38,7 @@ public class ZDBEnhancer extends Enhancer {
                 ctClass.addConstructor(defaultConstructor);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.error(e, "Error in ZDBEnhancer");
         }
 
         // Implémenter les méthodes statiques

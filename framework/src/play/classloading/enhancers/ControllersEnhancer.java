@@ -8,6 +8,7 @@ import javassist.Modifier;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
 import javassist.expr.Handler;
+import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
 
@@ -52,7 +53,7 @@ public class ControllersEnhancer extends Enhancer {
                                "play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.stopActionCall();"
                     );
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.error(e, "Error in ControllersEnhancer");
                 }
             }
             

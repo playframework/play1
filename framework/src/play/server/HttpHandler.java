@@ -31,7 +31,7 @@ import org.apache.mina.common.IoSession;
 import org.apache.mina.common.WriteFuture;
 import play.Invoker;
 import play.Logger;
-import play.MimeTypes;
+import play.utils.MimeTypes;
 import play.Play;
 import play.exceptions.EmptyAppException;
 import play.exceptions.PlayException;
@@ -126,7 +126,7 @@ public class HttpHandler implements IoHandler {
         try {
             response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
         } catch (UnsupportedEncodingException fex) {
-            fex.printStackTrace();
+            Logger.error(fex, "(utf-8 ?)");
         }
         writeResponse(session, request, response);
     }
@@ -146,12 +146,12 @@ public class HttpHandler implements IoHandler {
                 writeResponse(session, request, response);
                 return;
             } catch (Throwable ex) {
-                ex.printStackTrace();
+                Logger.error(ex, "Internal Server Error (500)");
                 try {
                     response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
                     writeResponse(session, request, response);
                 } catch (UnsupportedEncodingException fex) {
-                    fex.printStackTrace();
+                    Logger.error(fex, "(utf-8 ?)");
                 }
             }
         }
@@ -167,14 +167,15 @@ public class HttpHandler implements IoHandler {
             String errorHtml = TemplateLoader.load("errors/500." + (ajax ? "txt" : "html")).render(binding);
             response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
             writeResponse(session, request, response);
-            e.printStackTrace();
+            Logger.error(e, "Internal Server Error (500)");
         } catch (Throwable ex) {
-            ex.printStackTrace();
+            Logger.error(e, "Internal Server Error (500)");
+            Logger.error(ex, "Error during the 500 response generation");
             try {
                 response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
                 writeResponse(session, request, response);
             } catch (UnsupportedEncodingException fex) {
-                fex.printStackTrace();
+                Logger.error(fex, "(utf-8 ?)");
             }
         }
     }

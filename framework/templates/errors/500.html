@@ -19,6 +19,11 @@
                 font-size: 28px;
                 margin: 0;
             }
+            #more {
+                color: #666;
+                font-size: 80%;
+                border: none;
+            }
             #header {
                 background: #fcd2da;
             }
@@ -65,7 +70,7 @@
     <body>
         <div id="header" class="block">
             <h1>
-                ${exception.errorTitle}
+                ${exception.errorTitle} 
             </h1>
             #{if play.Play.mode.name() == 'DEV'}
             <p>
@@ -93,5 +98,8 @@
              #{/list}
         </div>
         #{/if}
+        <div id="more" class="block">
+            This exception has been logged with id <strong>${exception.id}</strong>
+        </div>
     </body>
 </html>

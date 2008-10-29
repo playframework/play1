@@ -1,5 +1,6 @@
-package play;
+package play.utils;
 
+import play.*;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -13,7 +14,7 @@ public class MimeTypes {
 
     static {
         try {
-            InputStream is = MimeTypes.class.getClassLoader().getResourceAsStream("play/mime-types.properties");
+            InputStream is = MimeTypes.class.getClassLoader().getResourceAsStream("play/utils/mime-types.properties");
             mimetypes = new Properties();
             mimetypes.load(is);
             extPattern = Pattern.compile("^.*\\.([^.]+)$");

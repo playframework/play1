@@ -255,7 +255,7 @@ public class ApplicationCompiler {
         Compiler jdtCompiler = new Compiler(nameEnvironment, policy, settings, compilerRequestor, problemFactory) {
             @Override
             protected void handleInternalException(Throwable e, CompilationUnitDeclaration ud, CompilationResult result) {
-                super.handleInternalException(e, ud, result);
+                //super.handleInternalException(e, ud, result);
             }
         };
 
