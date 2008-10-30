@@ -1,4 +1,4 @@
-package play.utils;
+package play.libs;
 
 import play.*;
 import java.io.InputStream;
@@ -14,7 +14,7 @@ public class MimeTypes {
 
     static {
         try {
-            InputStream is = MimeTypes.class.getClassLoader().getResourceAsStream("play/utils/mime-types.properties");
+            InputStream is = MimeTypes.class.getClassLoader().getResourceAsStream("play/libs/mime-types.properties");
             mimetypes = new Properties();
             mimetypes.load(is);
             extPattern = Pattern.compile("^.*\\.([^.]+)$");

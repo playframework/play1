@@ -18,4 +18,8 @@ public class Codec {
             throw new UnexpectedException(ex);
         }
     }
+    
+    public static String encodeBASE64(byte[] value) {
+        return new String(Base64.encodeBase64(value));
+    }
 }

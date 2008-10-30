@@ -1,7 +1,7 @@
 package play.mvc.results;
 
 import java.util.Map;
-import play.utils.MimeTypes;
+import play.libs.MimeTypes;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;

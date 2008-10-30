@@ -31,7 +31,7 @@ import org.apache.mina.common.IoSession;
 import org.apache.mina.common.WriteFuture;
 import play.Invoker;
 import play.Logger;
-import play.utils.MimeTypes;
+import play.libs.MimeTypes;
 import play.Play;
 import play.exceptions.EmptyAppException;
 import play.exceptions.PlayException;

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.w3c.dom.Document;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
@@ -18,6 +19,7 @@ import play.mvc.results.RenderBinary;
 import play.mvc.results.RenderTemplate;
 import play.mvc.results.RenderText;
 import play.mvc.results.RenderJson;
+import play.mvc.results.RenderXml;
 import play.mvc.results.Unauthorized;
 import play.templates.Template;
 import play.templates.TemplateLoader;
@@ -38,6 +40,14 @@ public abstract class Controller {
     protected static void renderText(CharSequence pattern, Object... args) {
         throw new RenderText(String.format(pattern.toString(), args));
     }
+    
+    protected static void renderXml(String xml) {
+        throw new RenderXml(xml);
+    }
+    
+    protected static void renderXml(Document xml) {
+        throw new RenderXml(xml);
+    }
 
     protected static void renderBinary(InputStream is) {
         throw new RenderBinary(is, null);
@@ -55,6 +65,10 @@ public abstract class Controller {
         throw new RenderBinary(file, name);
     }
 
+    protected static void renderJSON(String jsonString) {
+        throw new RenderJson(jsonString);
+    }
+    
     protected static void renderJSON(Object o, String... includes) {
         throw new RenderJson(o, includes);
     }
