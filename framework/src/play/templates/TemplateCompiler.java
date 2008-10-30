@@ -251,9 +251,11 @@ public class TemplateCompiler {
                 // Use fastTag if exists
                 try {
                     FastTags.class.getDeclaredMethod("_" + tag.name, Map.class, Closure.class, PrintWriter.class, Template.ExecutableTemplate.class, int.class);
-                    print("play.templates.FastTags._" + tag.name + "(attrs" + tagIndex + ",body" + tagIndex + ", out, this, " + tag.startLine + ")");
+                    print("play.templates.TagContext.enterTag();");
+                    print("play.templates.FastTags._" + tag.name + "(attrs" + tagIndex + ",body" + tagIndex + ", out, this, " + tag.startLine + ");");
+                    print("play.templates.TagContext.exitTag();");
                 } catch(NoSuchMethodException e) {
-                    print("invokeTag(" + tag.startLine + ",'" + tagName + "',attrs" + tagIndex + ",body" + tagIndex + ")");
+                    print("invokeTag(" + tag.startLine + ",'" + tagName + "',attrs" + tagIndex + ",body" + tagIndex + ");");
                 }
                 markLine(tag.startLine);
                 println();

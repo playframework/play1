@@ -14,24 +14,60 @@ import play.templates.Template.ExecutableTemplate;
 public class FastTags {
 
     public static void _if(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        Object test = args.get("arg");
-        boolean v = false;
+        if (_evaluateCondition(args.get("arg"))) {
+            body.call();
+            TagContext.parent().data.put("_executeNextElse", false);
+        } else {
+            TagContext.parent().data.put("_executeNextElse", true);
+        }
+    }
+    
+    public static void _else(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        if(TagContext.parent().data.containsKey("_executeNextElse")) {
+            if((Boolean)TagContext.parent().data.get("_executeNextElse")) {
+                body.call();                
+            }
+            TagContext.parent().data.remove("_executeNextElse");
+        } else {
+            throw new TemplateExecutionException(template.template, fromLine, "else tag without a preceding if tag", new TagInternalException("else tag without a preceding if tag"));
+        }
+    }
+    
+    public static void _elseif(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        if(TagContext.parent().data.containsKey("_executeNextElse")) {
+            if((Boolean)TagContext.parent().data.get("_executeNextElse") && _evaluateCondition(args.get("arg"))) {
+                body.call(); 
+                TagContext.parent().data.put("_executeNextElse", false);
+            }            
+        } else {
+            throw new TemplateExecutionException(template.template, fromLine, "elseif tag without a preceding if tag", new TagInternalException("elseif tag without a preceding if tag"));
+        }
+    }
+        
+    public static void _ifnot(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        if (!_evaluateCondition(args.get("arg"))) {
+            body.call();
+            TagContext.parent().data.put("_executeNextElse", false);
+        } else {
+            TagContext.parent().data.put("_executeNextElse", true);
+        }
+    }
+    
+    static boolean _evaluateCondition(Object test) {
         if (test != null) {
             if (test instanceof Boolean) {
-                v = ((Boolean) test).booleanValue();
+                return ((Boolean) test).booleanValue();
             } else if (test instanceof String) {
-                v = ((String) test).length() > 0;
+                return ((String) test).length() > 0;
             } else if (test instanceof Number) {
-                v = ((Number) test).intValue() != 0;
+                return ((Number) test).intValue() != 0;
             } else if (test instanceof Collection) {
-                v = ((Collection) test).size() != 0;
+                return ((Collection) test).size() != 0;
             } else {
-                v = true;
+                return true;
             }
         }
-        if (v) {
-            body.call();
-        }
+        return false;
     }
 
     public static void _doLayout(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {

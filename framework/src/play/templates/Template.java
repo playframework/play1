@@ -111,6 +111,7 @@ public class Template {
         }
         if(!args.containsKey("_body") && !args.containsKey("_isLayout") && !args.containsKey("_isInclude")) {
             layoutData.set(new HashMap());
+            TagContext.init();
         }
         ExecutableTemplate t = (ExecutableTemplate) InvokerHelper.createScript(compiledTemplate, binding);        
         t.template = this;
@@ -200,6 +201,7 @@ public class Template {
                     throw new TemplateNotFoundException("tags/"+templateName+"."+callerExtension+" or tags/"+templateName+".tag", template, fromLine);
                 }
             }
+            TagContext.enterTag(tag);            
             Map<String, Object> args = new HashMap<String, Object>();
             args.putAll(getBinding().getVariables());
             if(attrs != null) {
@@ -223,7 +225,7 @@ public class Template {
             } catch(TemplateNotFoundException e) {
                 throw new TemplateNotFoundException(e.getPath(), template, fromLine);
             }
-                    
+            TagContext.exitTag();       
         }
 
         static class ActionBridge extends GroovyObjectSupport {
