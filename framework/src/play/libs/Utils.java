@@ -1,8 +1,6 @@
 package play.libs;
 
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Utils {
     
@@ -27,7 +25,6 @@ public class Utils {
                 mergeValueInMap(map, name, value);
             }
         }
-    
     }
     
 }
