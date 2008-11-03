@@ -1,18 +1,35 @@
 package play.libs;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.HeadMethod;
+import org.apache.commons.httpclient.methods.OptionsMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.PutMethod;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.commons.httpclient.methods.TraceMethod;
+import org.apache.commons.httpclient.methods.multipart.FilePart;
+import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
+import org.apache.commons.httpclient.methods.multipart.Part;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+import play.utils.MimeTypes;
 
 public class WS {
 
@@ -27,10 +44,10 @@ public class WS {
         return GET(null, url, params);
     }
 
-    public static HttpResponse GET(Map<String, String> headers, String url, Object... params) {
+    public static HttpResponse GET(Map<String, Object> headers, String url, Object... params) {
         url = String.format(url, params);
+        GetMethod getMethod = new GetMethod(url);
         try {
-            GetMethod getMethod = new GetMethod(url);
             if (headers != null) {
                 for (String key : headers.keySet()) {
                     getMethod.addRequestHeader(key, headers.get(key) + "");
@@ -40,9 +57,207 @@ public class WS {
             return new HttpResponse(getMethod);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+                getMethod.releaseConnection();
+                
         }
     }
 
+    // OK
+    public static HttpResponse POST(String url, File body) {
+        String mimeType = MimeTypes.getMimeType(body.getName());
+        return POST(null, url, body, mimeType);
+    }
+    
+    // OK
+    public static HttpResponse POST(String url, File body, String mimeType) {
+        return POST(null, url, body, mimeType);
+    }
+    
+    // OK
+    public static HttpResponse POST(Map<String, String> headers, String url, File body) {
+        return POST(headers, url, body, null);
+    }
+    
+    // OK
+    private static HttpResponse POST(Map<String, String> headers, String url, File body, String mimeType) {
+        PostMethod postMethod = new PostMethod(url);
+
+        try {
+            if (headers != null) {
+                for (String key : headers.keySet()) {
+                    postMethod.addRequestHeader(key, headers.get(key) + "");
+                }
+            }
+            if(mimeType != null) {
+                postMethod.addRequestHeader("content-type", mimeType);
+            }
+            
+            Part[] parts = {
+                new FilePart(body.getName(), body)
+            };
+            
+            postMethod.setRequestEntity(new MultipartRequestEntity(parts, postMethod.getParams()));
+            
+            httpClient.executeMethod(postMethod);
+            return new HttpResponse(postMethod);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            postMethod.releaseConnection();
+        }
+    }
+    
+    // OK
+   public static HttpResponse POST(String url, Map<String, Object> body) {
+        return POST(null, url, body);
+    }
+    
+   // OK
+    public static HttpResponse POST(Map<String, Object> headers, String url, Map<String, Object> body) {
+        PostMethod postMethod = new PostMethod(url);
+        try {
+            if (headers != null) {
+                for (String key : headers.keySet()) {
+                    postMethod.addRequestHeader(key, headers.get(key) + "");
+                }
+            }
+            
+            postMethod.addRequestHeader("content-type", "application/x-www-form-urlencoded");
+            
+            ArrayList<NameValuePair> nvps = new ArrayList<NameValuePair>();
+            Set<String> keySet = body.keySet();
+            for(String key : keySet) {
+                NameValuePair nvp = new NameValuePair();
+                nvp.setName(key);
+                nvp.setValue(body.get(key).toString());
+            }
+
+            postMethod.setRequestBody((NameValuePair[]) nvps.toArray());
+            
+            httpClient.executeMethod(postMethod);
+            return new HttpResponse(postMethod);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+                postMethod.releaseConnection();
+        }
+    }
+                
+    // OK
+    public static HttpResponse POST(String url, String body, String mimeType) {
+        return POST((Map<String, Object>)null, url, body);
+    }
+    
+    // OK
+    public static HttpResponse POST(Map<String, Object> headers, String url, String body) {
+        PostMethod postMethod = new PostMethod(url);
+        try {
+            if (headers != null) {
+                for (String key : headers.keySet()) {
+                    postMethod.addRequestHeader(key, headers.get(key) + "");
+                }
+            }
+            
+            postMethod.setRequestEntity(new StringRequestEntity(body));
+            
+            httpClient.executeMethod(postMethod);
+            return new HttpResponse(postMethod);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+                postMethod.releaseConnection();
+        }
+    }
+    
+    public static HttpResponse DELETE(String url) {
+        return DELETE(null, url);
+    }
+
+    public static HttpResponse DELETE(Map<String, String> headers, String url) {
+        DeleteMethod deleteMethod = new DeleteMethod(url);
+        try {
+            if (headers != null) {
+                for (String key : headers.keySet()) {
+                    deleteMethod.addRequestHeader(key, headers.get(key) + "");
+                }
+            }
+            
+            httpClient.executeMethod(deleteMethod);
+            return new HttpResponse(deleteMethod);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+                deleteMethod.releaseConnection();   
+        }
+    }
+    
+    public static HttpResponse HEAD(String url, Object... params) {
+        return HEAD(null, url, params);
+    }
+
+    public static HttpResponse HEAD(Map<String, String> headers, String url, Object... params) {
+        url = String.format(url, params);
+        HeadMethod headMethod = new HeadMethod(url);
+        try {
+            if (headers != null) {
+                for (String key : headers.keySet()) {
+                    headMethod.addRequestHeader(key, headers.get(key) + "");
+                }
+            }
+            httpClient.executeMethod(headMethod);
+            return new HttpResponse(headMethod);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+                headMethod.releaseConnection();   
+        }
+    }
+
+    public static HttpResponse TRACE(String url, Object... params) {
+        return TRACE(null, url, params);
+    }
+
+    public static HttpResponse TRACE(Map<String, String> headers, String url, Object... params) {
+        url = String.format(url, params);
+        TraceMethod traceMethod = new TraceMethod(url);
+        try {
+            if (headers != null) {
+                for (String key : headers.keySet()) {
+                    traceMethod.addRequestHeader(key, headers.get(key) + "");
+                }
+            }
+            httpClient.executeMethod(traceMethod);
+            return new HttpResponse(traceMethod);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+                traceMethod.releaseConnection();   
+        }
+    }
+    
+    public static HttpResponse OPTIONS(String url, Object... params) {
+        return OPTIONS(null, url, params);
+    }
+
+    public static HttpResponse OPTIONS(Map<String, String> headers, String url, Object... params) {
+        url = String.format(url, params);
+        OptionsMethod optionsMethod = new OptionsMethod(url);
+        try {
+            if (headers != null) {
+                for (String key : headers.keySet()) {
+                    optionsMethod.addRequestHeader(key, headers.get(key) + "");
+                }
+            }
+            httpClient.executeMethod(optionsMethod);
+            return new HttpResponse(optionsMethod);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+                optionsMethod.releaseConnection();   
+        }
+    }
+    
     public static String encode(String part) {
         try {
             return URLEncoder.encode(part, "utf-8");
