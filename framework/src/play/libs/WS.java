@@ -30,6 +30,12 @@ import org.xml.sax.InputSource;
 public class WS {
 
     private static HttpClient httpClient;
+    private static GetMethod getMethod;
+    private static PostMethod postMethod;
+    private static DeleteMethod deleteMethod;
+    private static OptionsMethod optionsMethod;
+    private static TraceMethod traceMethod;
+    private static HeadMethod headMethod;
 
     static {
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
@@ -42,7 +48,9 @@ public class WS {
 
     public static HttpResponse GET(Map<String, Object> headers, String url, Object... params) {
         url = String.format(url, params);
-        GetMethod getMethod = new GetMethod(url);
+        if(getMethod != null)
+            getMethod.releaseConnection();
+        getMethod = new GetMethod(url);
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
@@ -53,9 +61,6 @@ public class WS {
             return new HttpResponse(getMethod);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-                getMethod.releaseConnection();
-                
         }
     }
 
@@ -71,9 +76,12 @@ public class WS {
     public static HttpResponse POST(Map<String, String> headers, String url, File body) {
         return POST(headers, url, body, null);
     }
-    
+
     private static HttpResponse POST(Map<String, String> headers, String url, File body, String mimeType) {
-        PostMethod postMethod = new PostMethod(url);
+        if (postMethod != null) {
+            postMethod.releaseConnection();
+        }
+        postMethod = new PostMethod(url);
 
         try {
             if (headers != null) {
@@ -95,8 +103,6 @@ public class WS {
             return new HttpResponse(postMethod);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            postMethod.releaseConnection();
         }
     }
     
@@ -105,7 +111,10 @@ public class WS {
     }
     
     public static HttpResponse POST(Map<String, Object> headers, String url, Map<String, Object> body) {
-        PostMethod postMethod = new PostMethod(url);
+        if (postMethod != null) {
+            postMethod.releaseConnection();
+        }
+        postMethod = new PostMethod(url);
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
@@ -129,8 +138,6 @@ public class WS {
             return new HttpResponse(postMethod);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-                postMethod.releaseConnection();
         }
     }
                 
@@ -139,7 +146,11 @@ public class WS {
     }
     
     public static HttpResponse POST(Map<String, Object> headers, String url, String body) {
-        PostMethod postMethod = new PostMethod(url);
+        if (postMethod != null) {
+            postMethod.releaseConnection();
+        }
+        postMethod = new PostMethod(url);
+        
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
@@ -153,8 +164,6 @@ public class WS {
             return new HttpResponse(postMethod);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-                postMethod.releaseConnection();
         }
     }
     
@@ -163,7 +172,10 @@ public class WS {
     }
 
     public static HttpResponse DELETE(Map<String, String> headers, String url) {
-        DeleteMethod deleteMethod = new DeleteMethod(url);
+        if (deleteMethod != null) {
+            deleteMethod.releaseConnection();
+        }
+        deleteMethod = new DeleteMethod(url);
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
@@ -175,8 +187,6 @@ public class WS {
             return new HttpResponse(deleteMethod);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-                deleteMethod.releaseConnection();   
         }
     }
     
@@ -186,7 +196,11 @@ public class WS {
 
     public static HttpResponse HEAD(Map<String, String> headers, String url, Object... params) {
         url = String.format(url, params);
-        HeadMethod headMethod = new HeadMethod(url);
+        if (headMethod != null) {
+            headMethod.releaseConnection();
+        }
+        headMethod = new HeadMethod(url);
+
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
@@ -197,8 +211,6 @@ public class WS {
             return new HttpResponse(headMethod);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-                headMethod.releaseConnection();   
         }
     }
 
@@ -208,7 +220,11 @@ public class WS {
 
     public static HttpResponse TRACE(Map<String, String> headers, String url, Object... params) {
         url = String.format(url, params);
-        TraceMethod traceMethod = new TraceMethod(url);
+        if (traceMethod != null) {
+            traceMethod.releaseConnection();
+        }
+        traceMethod = new TraceMethod(url);
+
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
@@ -219,8 +235,6 @@ public class WS {
             return new HttpResponse(traceMethod);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-                traceMethod.releaseConnection();   
         }
     }
     
@@ -230,7 +244,11 @@ public class WS {
 
     public static HttpResponse OPTIONS(Map<String, String> headers, String url, Object... params) {
         url = String.format(url, params);
-        OptionsMethod optionsMethod = new OptionsMethod(url);
+        if (optionsMethod != null) {
+            optionsMethod.releaseConnection();
+        }
+        optionsMethod = new OptionsMethod(url);
+
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
@@ -241,8 +259,6 @@ public class WS {
             return new HttpResponse(optionsMethod);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-                optionsMethod.releaseConnection();   
         }
     }
     
