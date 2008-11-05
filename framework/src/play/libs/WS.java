@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -127,9 +128,18 @@ public class WS {
             ArrayList<NameValuePair> nvps = new ArrayList<NameValuePair>();
             Set<String> keySet = body.keySet();
             for(String key : keySet) {
-                NameValuePair nvp = new NameValuePair();
-                nvp.setName(key);
-                nvp.setValue(body.get(key).toString());
+                Object value = body.get(key);
+                if(value instanceof Collection) {
+                    for(Object v : (Collection)value) {
+                        NameValuePair nvp = new NameValuePair();
+                        nvp.setName(key);
+                        nvp.setValue(v.toString());                   
+                    }
+                } else {
+                    NameValuePair nvp = new NameValuePair();
+                    nvp.setName(key);
+                    nvp.setValue(value.toString());                   
+                }
             }
 
             postMethod.setRequestBody((NameValuePair[]) nvps.toArray());
