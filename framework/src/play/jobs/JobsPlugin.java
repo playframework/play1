@@ -69,6 +69,8 @@ public class JobsPlugin extends PlayPlugin {
             // @On
             if (clazz.isAnnotationPresent(On.class)) {
                 String cron = ((On) (clazz.getAnnotation(On.class))).value();
+                if (cron.startsWith("cron.")) 
+                	cron = Play.configuration.getProperty(cron);
                 try {
                     CronTrigger trigger = new CronTrigger(clazz.getName(), "play", cron);
                     JobDetail jobDetail = new JobDetail(clazz.getName(), null, clazz);
