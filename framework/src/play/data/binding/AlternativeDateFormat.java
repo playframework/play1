@@ -39,4 +39,21 @@ public class AlternativeDateFormat {
         }
         throw new ParseException("Date format not understood",0);
     }
+    
+    static ThreadLocal<AlternativeDateFormat> dateformat = new ThreadLocal<AlternativeDateFormat>();
+
+    public static AlternativeDateFormat getDefaultFormatter () {
+    	if (dateformat.get()==null) {
+    		 dateformat.set(new AlternativeDateFormat(Locale.US,
+    	                "yyyy-MM-dd'T'hh:mm:ss'Z'", // ISO8601 + timezone
+    	                "yyyy-MM-dd'T'hh:mm:ss", // ISO8601
+    	                "yyyy-MM-dd",
+    	                "yyyyMMdd'T'hhmmss",
+    	                "yyyyMMddhhmmss",
+    	                "dd'/'MM'/'yyyy",
+    	                "dd-MM-yyyy",
+    	                "ddMMyyyy"));
+    	}
+    	return dateformat.get();
+    }
 }
