@@ -1,9 +1,6 @@
 package play.data.binding;
 
-import java.text.DateFormat;
-import java.text.FieldPosition;
 import java.text.ParseException;
-import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,7 +11,7 @@ import java.util.Locale;
  * Date formatter that tries multiple formats before failing
  *
  */
-public class AlternativeDateFormat extends DateFormat {
+public class AlternativeDateFormat {
 
     Locale locale;
     List<SimpleDateFormat> formats = new ArrayList<SimpleDateFormat>();
@@ -31,13 +28,7 @@ public class AlternativeDateFormat extends DateFormat {
         }
     }
 
-    @Override
-    public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition fieldPosition) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Date parse(String source, ParsePosition pos) {
+    public Date parse(String source) throws ParseException {
         for (SimpleDateFormat dateFormat : formats) {
             if (source.length() == dateFormat.toPattern().replace("\'", "").length()) {
                 try {
@@ -46,6 +37,6 @@ public class AlternativeDateFormat extends DateFormat {
                 }
             }
         }
-        return null;
+        throw new ParseException("Date format not understood",0);
     }
 }
