@@ -107,7 +107,7 @@ public class JPAPlugin extends PlayPlugin {
             return;
         }
         EntityManager manager = JPAContext.get().entityManager;
-        if (JPAContext.get().readonly || rollback || manager.getTransaction().getRollbackOnly()) {
+        if ((JPAContext.get().readonly || rollback || manager.getTransaction().getRollbackOnly()) && manager.getTransaction().isActive()) {
             manager.getTransaction().rollback();
         } else {
             manager.getTransaction().commit();
