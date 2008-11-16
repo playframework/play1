@@ -33,17 +33,17 @@ public class Messages {
      * @param args optional message format arguments
      * @return translated message
      */
-    public static String get(String key, Object... args) {
+    public static String get(Object key, Object... args) {
         String value = null;
         if( key == null ) {
             System.out.println("Messages.get key is null");
             return "";
         }
         if (locales.containsKey(Lang.get())) {
-            value = locales.get(Lang.get()).getProperty(key);
+            value = locales.get(Lang.get()).getProperty(key.toString());
         }
         if (value == null) {
-            value = defaults.getProperty(key);
+            value = defaults.getProperty(key.toString());
         }
         if (value == null) {
             value = "!" + key + "!";
