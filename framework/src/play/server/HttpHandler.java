@@ -309,10 +309,10 @@ public class HttpHandler implements IoHandler {
 
             response.out.flush();
             Logger.trace("Invoke: " + uri.getPath() + ": " + response.status);
-            if (response.status == 404) {
-                HttpHandler.serve404(session, minaRequest, minaResponse);
-                return;
-            }
+            //if (response.status == 404) {
+            //    HttpHandler.serve404(session, minaRequest, minaResponse);
+            //    return;
+            //}
             if ((response.direct != null) && response.direct.isFile()) {
                 session.setAttribute("file", new FileInputStream(response.direct).getChannel());
                 response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + response.direct.length());

@@ -13,6 +13,8 @@ import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.TemplateNotFoundException;
 import play.mvc.Http.Response;
+import play.mvc.results.Error;
+import play.mvc.results.Forbidden;
 import play.mvc.results.NotFound;
 import play.mvc.results.Redirect;
 import play.mvc.results.RenderBinary;
@@ -93,6 +95,26 @@ public abstract class Controller {
 
     protected static void notFound() {
         throw new NotFound("");
+    }
+    
+    protected static void forbidden (String reason) {
+    	throw new Forbidden (reason);
+    }
+    
+    protected static void forbidden () {
+    	throw new Forbidden ("Access denied");
+    }
+    
+    protected static void error (Throwable throwable) {
+    	throw new Error (throwable);
+    }
+    
+    protected static void error (String reason) {
+    	throw new Error (reason);
+    }
+  
+    protected static void error () {
+    	throw new Error ("Internal Error");
     }
     
     protected static void flash(String key, String value) {
