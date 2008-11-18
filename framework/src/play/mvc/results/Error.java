@@ -11,9 +11,17 @@ import play.templates.TemplateLoader;
 public class Error extends Result {
 	
 	Throwable throwable;
+        
+        private int status;
 	
 	public Error(String reason) {
 	    	super (reason);
+                this.status = 500;
+	}
+        
+        public Error(int status, String reason) {
+	    	super (reason);
+                this.status = status;
 	}
 	
 	public Error (Throwable throwable) {
@@ -21,12 +29,12 @@ public class Error extends Result {
 	}
 	
 	public void apply(Request request, Response response) {
-        response.status = 500;
+        response.status = status;
         response.contentType="text/html";
         Map<String, Object> binding = new HashMap<String, Object>();
         binding.put("exception", new UnexpectedException(throwable == null ? this : throwable));
         binding.put("result",this);
-        String errorHtml = TemplateLoader.load("errors/500.html").render(binding);
+        String errorHtml = TemplateLoader.load("errors/" + this.status + ".html").render(binding);
         try {
 			response.out.write(errorHtml.getBytes("utf-8"));
 		} catch (Exception e) {
