@@ -1,5 +1,6 @@
 package play.templates;
 
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -53,7 +54,7 @@ public class JavaExtensions {
     }
     
     public static String nl2br(String data) {
-        return data.replace("\\n", "<br/>");
+        return data.replace("\n", "<br/>");
     }
 
     public static String formatSize(Long bytes) {
