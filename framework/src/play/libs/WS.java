@@ -388,10 +388,22 @@ public class WS extends PlayPlugin{
             }
             
             @Override
-            public int read() throws IOException {
-                return this.wrapped.read();
-            }
-
+            public int read() throws IOException {return this.wrapped.read();}
+            @Override
+            public int read(byte[] arg0) throws IOException {return this.wrapped.read(arg0);}
+            @Override
+            public synchronized void mark(int arg0) {this.wrapped.mark(arg0);}
+            @Override
+            public int read(byte[] arg0, int arg1, int arg2) throws IOException {return this.wrapped.read(arg0, arg1, arg2);}
+            @Override
+            public synchronized void reset() throws IOException {this.wrapped.reset();}
+            @Override
+            public long skip(long arg0) throws IOException {return this.wrapped.skip(arg0);}
+            @Override
+            public int available() throws IOException {return this.wrapped.available();}
+            @Override
+            public boolean markSupported() {return this.wrapped.markSupported();}
+            
             @Override
             public void close() throws IOException {
                 try {
