@@ -109,6 +109,10 @@ public abstract class Controller {
     	throw new Error (throwable);
     }
     
+    protected static void error(int status, String reason) {
+    	throw new Error(status, reason);    
+    }
+    
     protected static void error (String reason) {
     	throw new Error (reason);
     }
