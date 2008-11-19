@@ -1,6 +1,7 @@
 package play.libs;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URLEncoder;
@@ -27,17 +28,32 @@ import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+import play.Logger;
+import play.PlayPlugin;
 
-public class WS {
+public class WS extends PlayPlugin{
 
     private static HttpClient httpClient;
-    private static GetMethod getMethod;
-    private static PostMethod postMethod;
-    private static DeleteMethod deleteMethod;
-    private static OptionsMethod optionsMethod;
-    private static TraceMethod traceMethod;
-    private static HeadMethod headMethod;
+  
+    private static ThreadLocal<GetMethod> getMethod = new ThreadLocal<GetMethod>();
+    private static ThreadLocal<PostMethod> postMethod = new ThreadLocal<PostMethod>();
+    private static ThreadLocal<DeleteMethod> deleteMethod = new ThreadLocal<DeleteMethod>();
+    private static ThreadLocal<OptionsMethod> optionsMethod = new ThreadLocal<OptionsMethod>();
+    private static ThreadLocal<TraceMethod> traceMethod = new ThreadLocal<TraceMethod>();
+    private static ThreadLocal<HeadMethod> headMethod = new ThreadLocal<HeadMethod>();
 
+    @Override
+    public void invocationFinally() {
+        Logger.trace("Releasing http client connections...");
+        if (getMethod.get() != null) getMethod.get().releaseConnection();
+        if (postMethod.get() != null) postMethod.get().releaseConnection();
+        if (deleteMethod.get() != null) deleteMethod.get().releaseConnection();
+        if (optionsMethod.get() != null) optionsMethod.get().releaseConnection();
+        if (traceMethod.get() != null) traceMethod.get().releaseConnection();
+        if (headMethod.get() != null) headMethod.get().releaseConnection();
+    }
+
+    
     static {
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
         httpClient = new HttpClient(connectionManager);
@@ -49,17 +65,17 @@ public class WS {
 
     public static HttpResponse GET(Map<String, Object> headers, String url, Object... params) {
         url = String.format(url, params);
-        if(getMethod != null)
-            getMethod.releaseConnection();
-        getMethod = new GetMethod(url);
+        if(getMethod.get() != null)
+            getMethod.get().releaseConnection();
+        getMethod.set(new GetMethod(url));
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
-                    getMethod.addRequestHeader(key, headers.get(key) + "");
+                    getMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
-            httpClient.executeMethod(getMethod);
-            return new HttpResponse(getMethod);
+            httpClient.executeMethod(getMethod.get());
+            return new HttpResponse(getMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -79,30 +95,31 @@ public class WS {
     }
 
     private static HttpResponse POST(Map<String, String> headers, String url, File body, String mimeType) {
-        if (postMethod != null) {
-            postMethod.releaseConnection();
+        if (postMethod.get() != null) {
+            postMethod.get().releaseConnection();
         }
-        postMethod = new PostMethod(url);
+        postMethod.set(new PostMethod(url));
 
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
-                    postMethod.addRequestHeader(key, headers.get(key) + "");
+                    postMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
             if(mimeType != null) {
-                postMethod.addRequestHeader("content-type", mimeType);
+                postMethod.get().addRequestHeader("content-type", mimeType);
             }
             
             Part[] parts = {
                 new FilePart(body.getName(), body)
             };
             
-            postMethod.setRequestEntity(new MultipartRequestEntity(parts, postMethod.getParams()));
+            postMethod.get().setRequestEntity(new MultipartRequestEntity(parts, postMethod.get().getParams()));
             
-            httpClient.executeMethod(postMethod);
-            return new HttpResponse(postMethod);
+            httpClient.executeMethod(postMethod.get());
+            return new HttpResponse(postMethod.get());
         } catch (Exception e) {
+            postMethod.get().releaseConnection();
             throw new RuntimeException(e);
         }
     }
@@ -112,18 +129,18 @@ public class WS {
     }
     
     public static HttpResponse POST(Map<String, Object> headers, String url, Map<String, Object> body) {
-        if (postMethod != null) {
-            postMethod.releaseConnection();
+        if (postMethod.get() != null) {
+            postMethod.get().releaseConnection();
         }
-        postMethod = new PostMethod(url);
+        postMethod.set(new PostMethod(url));
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
-                    postMethod.addRequestHeader(key, headers.get(key) + "");
+                    postMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
             
-            postMethod.addRequestHeader("content-type", "application/x-www-form-urlencoded");
+            postMethod.get().addRequestHeader("content-type", "application/x-www-form-urlencoded");
             
             ArrayList<NameValuePair> nvps = new ArrayList<NameValuePair>();
             Set<String> keySet = body.keySet();
@@ -142,10 +159,10 @@ public class WS {
                 }
             }
 
-            postMethod.setRequestBody((NameValuePair[]) nvps.toArray());
+            postMethod.get().setRequestBody((NameValuePair[]) nvps.toArray());
             
-            httpClient.executeMethod(postMethod);
-            return new HttpResponse(postMethod);
+            httpClient.executeMethod(postMethod.get());
+            return new HttpResponse(postMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -156,22 +173,22 @@ public class WS {
     }
     
     public static HttpResponse POST(Map<String, Object> headers, String url, String body) {
-        if (postMethod != null) {
-            postMethod.releaseConnection();
+        if (postMethod.get() != null) {
+            postMethod.get().releaseConnection();
         }
-        postMethod = new PostMethod(url);
+        postMethod.set(new PostMethod(url));
         
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
-                    postMethod.addRequestHeader(key, headers.get(key) + "");
+                    postMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
             
-            postMethod.setRequestEntity(new StringRequestEntity(body));
+            postMethod.get().setRequestEntity(new StringRequestEntity(body));
             
-            httpClient.executeMethod(postMethod);
-            return new HttpResponse(postMethod);
+            httpClient.executeMethod(postMethod.get());
+            return new HttpResponse(postMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -182,19 +199,19 @@ public class WS {
     }
 
     public static HttpResponse DELETE(Map<String, String> headers, String url) {
-        if (deleteMethod != null) {
-            deleteMethod.releaseConnection();
+        if (deleteMethod.get() != null) {
+            deleteMethod.get().releaseConnection();
         }
-        deleteMethod = new DeleteMethod(url);
+        deleteMethod.set(new DeleteMethod(url));
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
-                    deleteMethod.addRequestHeader(key, headers.get(key) + "");
+                    deleteMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
             
-            httpClient.executeMethod(deleteMethod);
-            return new HttpResponse(deleteMethod);
+            httpClient.executeMethod(deleteMethod.get());
+            return new HttpResponse(deleteMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -206,19 +223,19 @@ public class WS {
 
     public static HttpResponse HEAD(Map<String, String> headers, String url, Object... params) {
         url = String.format(url, params);
-        if (headMethod != null) {
-            headMethod.releaseConnection();
+        if (headMethod.get() != null) {
+            headMethod.get().releaseConnection();
         }
-        headMethod = new HeadMethod(url);
+        headMethod.set(new HeadMethod(url));
 
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
-                    headMethod.addRequestHeader(key, headers.get(key) + "");
+                    headMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
-            httpClient.executeMethod(headMethod);
-            return new HttpResponse(headMethod);
+            httpClient.executeMethod(headMethod.get());
+            return new HttpResponse(headMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -230,19 +247,19 @@ public class WS {
 
     public static HttpResponse TRACE(Map<String, String> headers, String url, Object... params) {
         url = String.format(url, params);
-        if (traceMethod != null) {
-            traceMethod.releaseConnection();
+        if (traceMethod.get() != null) {
+            traceMethod.get().releaseConnection();
         }
-        traceMethod = new TraceMethod(url);
+        traceMethod.set(new TraceMethod(url));
 
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
-                    traceMethod.addRequestHeader(key, headers.get(key) + "");
+                    traceMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
-            httpClient.executeMethod(traceMethod);
-            return new HttpResponse(traceMethod);
+            httpClient.executeMethod(traceMethod.get());
+            return new HttpResponse(traceMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -254,19 +271,19 @@ public class WS {
 
     public static HttpResponse OPTIONS(Map<String, String> headers, String url, Object... params) {
         url = String.format(url, params);
-        if (optionsMethod != null) {
-            optionsMethod.releaseConnection();
+        if (optionsMethod.get() != null) {
+            optionsMethod.get().releaseConnection();
         }
-        optionsMethod = new OptionsMethod(url);
+        optionsMethod.set( new OptionsMethod(url));
 
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
-                    optionsMethod.addRequestHeader(key, headers.get(key) + "");
+                    optionsMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
-            httpClient.executeMethod(optionsMethod);
-            return new HttpResponse(optionsMethod);
+            httpClient.executeMethod(optionsMethod.get());
+            return new HttpResponse(optionsMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -298,12 +315,13 @@ public class WS {
         public Document getXml() {
             try {
                 String xml = methodBase.getResponseBodyAsString();
-                methodBase.releaseConnection();
                 StringReader reader = new StringReader(xml);
                 Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(reader));
                 return doc;
             } catch (Exception e) {
                 throw new RuntimeException(e);
+            }finally{
+                methodBase.releaseConnection();
             }
         }
         /*
@@ -314,10 +332,11 @@ public class WS {
                 InputSource source = new InputSource(methodBase.getResponseBodyAsStream());
                 source.setEncoding(encoding);
                 Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(source);
-                methodBase.releaseConnection();
                 return doc;
             } catch (Exception e) {
                 throw new RuntimeException(e);
+            }finally{
+                methodBase.releaseConnection();
             }
         }
         
@@ -326,12 +345,14 @@ public class WS {
                 return methodBase.getResponseBodyAsString();
             } catch (Exception e) {
                 throw new RuntimeException(e);
+            } finally{
+                methodBase.releaseConnection();
             }
         }
 
         public InputStream getStream() {
             try {
-                return methodBase.getResponseBodyAsStream();
+                return new ConnectionReleaserStream(methodBase.getResponseBodyAsStream(), methodBase);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -343,6 +364,8 @@ public class WS {
                 return JSONObject.fromObject(json);
             } catch (Exception e) {
                 throw new RuntimeException(e);
+            } finally{
+                methodBase.releaseConnection();
             }
         }
 
@@ -352,7 +375,35 @@ public class WS {
                 return JSONArray.fromObject(json);
             } catch (Exception e) {
                 throw new RuntimeException(e);
+            } finally{
+                methodBase.releaseConnection();
             }
+        }
+        class ConnectionReleaserStream extends InputStream {
+            InputStream wrapped;
+            HttpMethodBase method;
+            public ConnectionReleaserStream(InputStream wrapped, HttpMethodBase method) {
+                this.wrapped = wrapped;
+                this.method = method;
+            }
+            
+            @Override
+            public int read() throws IOException {
+                return this.wrapped.read();
+            }
+
+            @Override
+            public void close() throws IOException {
+                try {
+                this.wrapped.close();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }finally {
+                    if (method != null) method.releaseConnection();
+                }
+                
+            }
+            
         }
     }
 }

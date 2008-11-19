@@ -3,3 +3,4 @@
 2:play.jobs.JobsPlugin
 3:play.i18n.MessagesPlugin
 4:play.db.zdb.ZDBPlugin
+5:play.libs.WS
