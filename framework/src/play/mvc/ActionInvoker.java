@@ -114,17 +114,21 @@ public class ActionInvoker {
 
         } catch (Result result) {
             
+            for(PlayPlugin plugin : Play.plugins) {
+                plugin.onActionInvocationResult(result);
+            }
+            
             // Ok there is a result to apply
             // Save session & flash scope now
         	
             Scope.Session.current().save();
             Scope.Flash.current().save();
             
-            for(PlayPlugin plugin : Play.plugins) {
-                plugin.onActionInvocationResult(result);
-            }
-            
             result.apply(request, response);
+            
+            for(PlayPlugin plugin : Play.plugins) {
+                plugin.afterActionInvocation();
+            }
             
         } catch(PlayException e) {
             throw e;

@@ -9,6 +9,8 @@ import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.db.DB;
+import play.exceptions.JPAException;
+import play.exceptions.JavaExecutionException;
 
 public class JPAPlugin extends PlayPlugin {
 
@@ -78,6 +80,11 @@ public class JPAPlugin extends PlayPlugin {
     public void afterInvocation() {
         closeTx(false);
     }
+    
+    @Override
+    public void afterActionInvocation() {
+        closeTx(false);
+    }
 
     @Override
     public void onInvocationException(Throwable e) {
@@ -107,10 +114,16 @@ public class JPAPlugin extends PlayPlugin {
             return;
         }
         EntityManager manager = JPAContext.get().entityManager;
-        if ((JPAContext.get().readonly || rollback || manager.getTransaction().getRollbackOnly()) && manager.getTransaction().isActive()) {
-            manager.getTransaction().rollback();
-        } else {
-            manager.getTransaction().commit();
+        if(manager.getTransaction().isActive()) {
+            if (JPAContext.get().readonly || rollback || manager.getTransaction().getRollbackOnly()) {
+                manager.getTransaction().rollback();
+            } else {
+                try {
+                    manager.getTransaction().commit();
+                } catch(Exception e) {
+                    throw new JPAException("Cannot commit", e);
+                }
+            }
         }
         JPAContext.clearContext();
     }

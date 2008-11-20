@@ -11,6 +11,10 @@ public class JavaExecutionException extends JavaException {
     public JavaExecutionException(String action, Throwable e) {
         super(null, null, e.getMessage(), e);
     }
+    
+    public JavaExecutionException(Throwable e) {
+        super(null, null, e.getMessage(), e);
+    }
 
     @Override
     public String getErrorTitle() {
