@@ -18,10 +18,12 @@ public class JPAEnhancer extends Enhancer {
         if (!ctClass.subtypeOf(classPool.get("play.db.jpa.JPAModel"))) {
             return;
         }
+        
         // les classes non entity ne doivent pas etre instrumentees
-         if (!hasAnnotation(ctClass, "javax.persistence.Entity")) {
+        if (!hasAnnotation(ctClass, "javax.persistence.Entity")) {
             return;
         }
+        
         String entityName = ctClass.getSimpleName();
         // Ajoute le constructeur par défaut (obligatoire pour la peristence)
         try {

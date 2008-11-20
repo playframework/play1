@@ -13,20 +13,20 @@ import play.exceptions.TemplateNotFoundException;
 
 public class TemplateLoader {
 
-    static Map<VirtualFile, Template> templates = new HashMap<VirtualFile, Template>();
+    protected static Map<String, Template> templates = new HashMap<String, Template>();
 
     static Template load(VirtualFile file) {
-        if (!templates.containsKey(file)) {
-            templates.put(file, TemplateCompiler.compile(file));
+        if (!templates.containsKey(file.relativePath())) {
+            templates.put(file.relativePath(), TemplateCompiler.compile(file));
         }
-        Template template = templates.get(file);
+        Template template = templates.get(file.relativePath());
         if (Play.mode == Play.Mode.DEV && template.timestamp < file.lastModified()) {
-            templates.put(file, TemplateCompiler.compile(file));
+            templates.put(file.relativePath(), TemplateCompiler.compile(file));
         }
-        if (templates.get(file) == null) {
+        if (templates.get(file.relativePath()) == null) {
             throw new TemplateNotFoundException(file.relativePath());
         }
-        return templates.get(file);
+        return templates.get(file.relativePath());
     }
 
     public static void cleanCompiledCache() {

@@ -10,7 +10,7 @@ public class JPAContext {
 
     public static JPAContext get() {
         if (local.get() == null) {
-            throw new IllegalStateException("The JPA context is not initialized, enable it in your conf/application.conf");
+            throw new IllegalStateException("The JPA context is not initialized.");
         }
         return local.get();
     }

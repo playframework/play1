@@ -1,5 +1,7 @@
 package play;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.log4j.Priority;
 import play.exceptions.PlayException;
 
@@ -122,6 +124,23 @@ public class Logger {
     // If e is a PlayException -> a very clean report
     static boolean niceThrowable(Priority priority, Throwable e, String message, Object... args) {
         if (e instanceof PlayException) {
+            
+            Throwable toClean = e;
+            for(int i=0; i<5; i++) {
+                // Clean stack trace
+                List<StackTraceElement> cleanTrace = new ArrayList<StackTraceElement>();
+                for(StackTraceElement se : toClean.getStackTrace()) {
+                    if(se.getClassName().startsWith("org.apache.mina.")) {
+                        cleanTrace.add(new StackTraceElement("Play!", "HTTP Server", "Mina", -1));
+                        break;
+                    }
+                    cleanTrace.add(se);
+                }
+                toClean.setStackTrace(cleanTrace.toArray(new StackTraceElement[cleanTrace.size()]));
+                toClean = toClean.getCause();
+                if(toClean == null) break;
+            }
+            
             PlayException playException = (PlayException) e;
             log4j.log(priority, "");
             log4j.log(priority, "@" + playException.getId());

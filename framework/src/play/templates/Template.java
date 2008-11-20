@@ -13,6 +13,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -40,22 +41,21 @@ import play.mvc.ActionInvoker;
 import play.mvc.Router;
 
 public class Template {
-    
+
     public String name;
     public String source;
     public String groovySource;
-    public Map<Integer,Integer> linesMatrix = new HashMap<Integer, Integer>();
+    public Map<Integer, Integer> linesMatrix = new HashMap<Integer, Integer>();
     public Set<Integer> doBodyLines = new HashSet<Integer>();
     public Class compiledTemplate;
     public Long timestamp = System.currentTimeMillis();
     boolean needJavaRecompilation;
-    
-    
+
     public Template(String name, String source) {
         this.name = name;
-        this.source = source;        
+        this.source = source;
     }
-    
+
     public void compile() {
         if (compiledTemplate == null) {
             CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
@@ -65,13 +65,13 @@ public class Template {
                 long start = System.currentTimeMillis();
                 Play.classloader.loadingTracer.set(new ArrayList<ApplicationClass>());
                 compiledTemplate = classLoader.parseClass(new ByteArrayInputStream(groovySource.getBytes("utf-8")));
-                if(!Play.classloader.loadingTracer.get().isEmpty()) {
+                if (!Play.classloader.loadingTracer.get().isEmpty()) {
                     needJavaRecompilation = true;
                 } else {
                     needJavaRecompilation = false;
                 }
                 Play.classloader.loadingTracer.set(null);
-                Logger.trace("%sms to compile template %s", System.currentTimeMillis()-start, name);
+                Logger.trace("%sms to compile template %s", System.currentTimeMillis() - start, name);
             } catch (UnsupportedEncodingException e) {
                 throw new UnexpectedException(e);
             } catch (MultipleCompilationErrorsException e) {
@@ -83,7 +83,7 @@ public class Template {
                         line = 0;
                     }
                     String message = syntaxException.getMessage();
-                    if(message.indexOf("@")>0) {
+                    if (message.indexOf("@") > 0) {
                         message = message.substring(0, message.lastIndexOf("@"));
                     }
                     throw new TemplateCompilationException(this, line, message);
@@ -102,75 +102,101 @@ public class Template {
         binding.setVariable("lang", Lang.get());
         StringWriter writer = null;
         Boolean applyLayouts = false;
-        if(!args.containsKey("out")) { 
+        if (!args.containsKey("out")) {
             applyLayouts = true;
             layout.set(null);
             writer = new StringWriter();
             binding.setProperty("out", new PrintWriter(writer));
             currentTemplate.set(this);
         }
-        if(!args.containsKey("_body") && !args.containsKey("_isLayout") && !args.containsKey("_isInclude")) {
+        if (!args.containsKey("_body") && !args.containsKey("_isLayout") && !args.containsKey("_isInclude")) {
             layoutData.set(new HashMap());
             TagContext.init();
         }
-        ExecutableTemplate t = (ExecutableTemplate) InvokerHelper.createScript(compiledTemplate, binding);        
+        ExecutableTemplate t = (ExecutableTemplate) InvokerHelper.createScript(compiledTemplate, binding);
         t.template = this;
         try {
             long start = System.currentTimeMillis();
             LocalVariablesNamesTracer.enterMethod();
             t.run();
-            Logger.trace("%sms to render template %s", System.currentTimeMillis()-start, name);
-        } catch(NoRouteFoundException e ) {
+            Logger.trace("%sms to render template %s", System.currentTimeMillis() - start, name);
+        } catch (NoRouteFoundException e) {
             throwException(e);
-        } catch(PlayException e) {
-            throw e;
-        } catch(DoBodyException e) {
+        } catch (PlayException e) {
+            throw (PlayException) cleanStackTrace(e);
+        } catch (DoBodyException e) {
             Exception ex = (Exception) e.getCause();
             throwException(ex);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throwException(e);
         } finally {
             LocalVariablesNamesTracer.exitMethod();
         }
-        if(applyLayouts && layout.get() != null) {
-            Map<String,Object> layoutArgs = new HashMap<String,Object>(args);
+        if (applyLayouts && layout.get() != null) {
+            Map<String, Object> layoutArgs = new HashMap<String, Object>(args);
             layoutArgs.remove("out");
             layoutArgs.put("_isLayout", true);
             String layoutR = layout.get().render(layoutArgs);
             return layoutR.replace("____%LAYOUT%____", writer.toString().trim());
         }
-        if(writer != null) {
+        if (writer != null) {
             return writer.toString();
         }
         return null;
     }
-    
+
     void throwException(Exception e) {
         for (StackTraceElement stackTraceElement : e.getStackTrace()) {
             if (stackTraceElement.getClassName().equals(compiledTemplate.getName()) || stackTraceElement.getClassName().startsWith(compiledTemplate.getName() + "$_run_closure")) {
                 if (doBodyLines.contains(stackTraceElement.getLineNumber())) {
                     throw new DoBodyException(e);
                 } else if (e instanceof TagInternalException) {
-                    throw (TagInternalException) e;
+                    throw (TagInternalException) cleanStackTrace(e);
                 } else if (e instanceof NoRouteFoundException) {
-                   NoRouteFoundException ex = (NoRouteFoundException)e;
-                   throw new NoRouteFoundException(ex.getAction(), ex.getArgs(), this, this.linesMatrix.get(stackTraceElement.getLineNumber()));
-                } else if (e instanceof TemplateExecutionException ) {
-                   throw (TemplateExecutionException)e;
+                    NoRouteFoundException ex = (NoRouteFoundException) cleanStackTrace(e);
+                    throw new NoRouteFoundException(ex.getAction(), ex.getArgs(), this, this.linesMatrix.get(stackTraceElement.getLineNumber()));
+                } else if (e instanceof TemplateExecutionException) {
+                    throw (TemplateExecutionException) cleanStackTrace(e);
                 } else {
-                    throw new TemplateExecutionException(this, this.linesMatrix.get(stackTraceElement.getLineNumber()), e.getMessage(), e);
+                    throw new TemplateExecutionException(this, this.linesMatrix.get(stackTraceElement.getLineNumber()), e.getMessage(), cleanStackTrace(e));
                 }
             }
         }
         throw new RuntimeException(e);
     }
-    
+
+    static Exception cleanStackTrace(Exception e) {
+        List<StackTraceElement> cleanTrace = new ArrayList<StackTraceElement>();
+        for (StackTraceElement se : e.getStackTrace()) {
+            if (se.getClassName().startsWith("Template_")) {
+                String tn = se.getClassName().substring(9).replace("_s_", "/").replace("_p_", ".").replace("_t_", "-");
+                if (tn.indexOf("$") > -1) {
+                    tn = tn.substring(0, tn.indexOf("$"));
+                }
+                Integer line = TemplateLoader.templates.get(tn).linesMatrix.get(se.getLineNumber());
+                if (line != null) {
+                    String ext = "";
+                    if (tn.indexOf(".") > -1) {
+                        ext = tn.substring(tn.indexOf(".") + 1);
+                        tn = tn.substring(0, tn.indexOf("."));
+                    }
+                    StackTraceElement nse = new StackTraceElement(tn, ext, "line", line);
+                    cleanTrace.add(nse);
+                }
+            }
+            if(!se.getClassName().startsWith("org.codehaus.groovy.") && !se.getClassName().startsWith("groovy.") && !se.getClassName().startsWith("sun.reflect.") && !se.getClassName().startsWith("java.lang.reflect.") && !se.getClassName().startsWith("Template_")) {
+                cleanTrace.add(se);
+            }
+        }
+        e.setStackTrace(cleanTrace.toArray(new StackTraceElement[cleanTrace.size()]));
+        return e;
+    }
     public static ThreadLocal<Template> layout = new ThreadLocal<Template>();
     public static ThreadLocal<Map> layoutData = new ThreadLocal<Map>();
     public static ThreadLocal<Template> currentTemplate = new ThreadLocal<Template>();
 
     public static abstract class ExecutableTemplate extends Script {
-        
+
         Template template;
 
         @Override
@@ -184,48 +210,48 @@ public class Template {
                 return null;
             }
         }
-        
+
         public void invokeTag(Integer fromLine, String tag, Map<String, Object> attrs, Closure body) {
             String templateName = tag.replace(".", "/");
             String callerExtension = "tag";
-            if(template.name.indexOf(".")>0) {
-                callerExtension = template.name.substring(template.name.lastIndexOf(".")+1);
+            if (template.name.indexOf(".") > 0) {
+                callerExtension = template.name.substring(template.name.lastIndexOf(".") + 1);
             }
             Template tagTemplate = null;
             try {
-                tagTemplate = TemplateLoader.load("tags/"+templateName+"."+callerExtension);
-            } catch(TemplateNotFoundException e) {
+                tagTemplate = TemplateLoader.load("tags/" + templateName + "." + callerExtension);
+            } catch (TemplateNotFoundException e) {
                 try {
-                    tagTemplate = TemplateLoader.load("tags/"+templateName+".tag");
-                } catch(TemplateNotFoundException ex) {
-                    throw new TemplateNotFoundException("tags/"+templateName+"."+callerExtension+" or tags/"+templateName+".tag", template, fromLine);
+                    tagTemplate = TemplateLoader.load("tags/" + templateName + ".tag");
+                } catch (TemplateNotFoundException ex) {
+                    throw new TemplateNotFoundException("tags/" + templateName + "." + callerExtension + " or tags/" + templateName + ".tag", template, fromLine);
                 }
             }
-            TagContext.enterTag(tag);            
+            TagContext.enterTag(tag);
             Map<String, Object> args = new HashMap<String, Object>();
             args.putAll(getBinding().getVariables());
-            if(attrs != null) {
-                for(String key:attrs.keySet()) {
-                    args.put("_"+key, attrs.get(key));
+            if (attrs != null) {
+                for (String key : attrs.keySet()) {
+                    args.put("_" + key, attrs.get(key));
                 }
             }
-            PrintWriter callerOut = (PrintWriter)args.get("out");
+            PrintWriter callerOut = (PrintWriter) args.get("out");
             StringWriter writer = new StringWriter();
             args.put("_body", body);
             args.put("out", new PrintWriter(writer));
             try {
-                tagTemplate.render(args);  
+                tagTemplate.render(args);
                 String tagResult = writer.toString().trim();
-                if(callerOut != null) {
+                if (callerOut != null) {
                     callerOut.print(tagResult);
                     args.put("out", callerOut);
                 }
-            } catch(TagInternalException e) {
-                throw new TemplateExecutionException(template, fromLine, e.getMessage(), e);
-            } catch(TemplateNotFoundException e) {
+            } catch (TagInternalException e) {
+                throw new TemplateExecutionException(template, fromLine, e.getMessage(), cleanStackTrace(e));
+            } catch (TemplateNotFoundException e) {
                 throw new TemplateNotFoundException(e.getPath(), template, fromLine);
             }
-            TagContext.exitTag();       
+            TagContext.exitTag();
         }
 
         static class ActionBridge extends GroovyObjectSupport {
@@ -246,23 +272,22 @@ public class Template {
 
             @Override
             @SuppressWarnings("unchecked")
-            public Object invokeMethod(String name, Object param) {   
-                String action = controller+"."+name;
+            public Object invokeMethod(String name, Object param) {
+                String action = controller + "." + name;
                 try {
                     Map<String, Object> r = new HashMap<String, Object>();
                     String[] names = SignaturesNamesRepository.get(ActionInvoker.getActionMethod(action));
-                    if(param instanceof Object[]) {
-                        for(int i=0; i<((Object[])param).length; i++) {
-                            r.put(names[i], ((Object[])param)[i] == null ? null : ((Object[])param)[i].toString());
+                    if (param instanceof Object[]) {
+                        for (int i = 0; i < ((Object[]) param).length; i++) {
+                            r.put(names[i], ((Object[]) param)[i] == null ? null : ((Object[]) param)[i].toString());
                         }
                     }
                     // reverse using the x-http-method-override hack if necessary (when the route requires a PUT or DELETE)
-                    return Router.reverseForTemplate(action, r );
-                } catch(ActionNotFoundException e) {
+                    return Router.reverseForTemplate(action, r);
+                } catch (ActionNotFoundException e) {
                     throw new NoRouteFoundException(action, null);
                 }
             }
         }
     }
-    
 }

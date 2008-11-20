@@ -47,23 +47,23 @@ public class JPAModel implements Serializable {
      * @return number of entities of this class
      */
     public static Long count() {
-        throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
     
     public static Long count(String query, Object... params) {
-        throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
     
     public static <T extends JPAModel> List<T> findAll() {
-    	throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
+    	throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
     
     public static <T extends JPAModel> T findById(Long id) {
-    	throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
+    	throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
     
     public static JPAQuery query(String query, Object... params) {
-        throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
     
     /**
@@ -74,7 +74,7 @@ public class JPAModel implements Serializable {
      * @return <T> the first item matching the query or null
      */
     public static <T extends JPAModel> T findOneBy(String query, Object... params) {
-        throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
     
     /**
@@ -85,7 +85,7 @@ public class JPAModel implements Serializable {
      * @return a list<T> of items matching the query
      */
     public static <T extends JPAModel> List<T> findBy(String query, Object... params) {
-        throw new UnsupportedOperationException("Not implemented. Check the JPAEnhancer !");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
        
     public static EntityManager getEntityManager() {

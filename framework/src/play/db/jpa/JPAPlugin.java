@@ -11,7 +11,6 @@ import play.Play;
 import play.PlayPlugin;
 import play.db.DB;
 import play.exceptions.JPAException;
-import play.exceptions.JavaExecutionException;
 
 public class JPAPlugin extends PlayPlugin {
 
@@ -23,9 +22,7 @@ public class JPAPlugin extends PlayPlugin {
                 return;
             }
             if (DB.datasource == null) {
-                Logger.fatal("Cannot enable JPA without a valid database");
-                Play.configuration.setProperty("jpa", "disabled");
-                return;
+                throw new JPAException("Cannot start a JPA manager without a properly configured database", new NullPointerException("No datasource"));
             }
             Ejb3Configuration cfg = new Ejb3Configuration();
             cfg.setDataSource(DB.datasource);
