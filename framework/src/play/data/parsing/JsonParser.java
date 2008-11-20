@@ -1,6 +1,7 @@
 package play.data.parsing;
 
-import fr.zenexity.json.*;
+import fr.zenexity.json.JSONException;
+import fr.zenexity.json.JSONTokenizer;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,8 +41,7 @@ public class JsonParser extends DataParser {
         // arrays
         } else if (tok == START_ARRAY) {
             tok = jt.nextToken();
-            // empty arrays need a special treatment
-            // stored as "arrayname[]": null in the result map
+            // empty arrays need a special treatment - stored as "arrayname[]": null in the result map
             if (tok == END_ARRAY) {
                 putMapEntry(result, name + "[]", null);
                 return;
