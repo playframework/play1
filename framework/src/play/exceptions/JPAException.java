@@ -18,7 +18,7 @@ public class JPAException extends PlayException {
 
     @Override
     public String getErrorDescription() {
-        return String.format("A JPA error occured : <strong>%s</strong>", getMessage());
+        return String.format("A JPA error occured (%s): <strong>%s</strong>", getMessage(), getCause() == null ? "" : getCause().getMessage());
     }
 
 }

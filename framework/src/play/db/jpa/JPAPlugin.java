@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.RollbackException;
 import org.hibernate.ejb.Ejb3Configuration;
 import play.Logger;
 import play.Play;
@@ -120,7 +121,15 @@ public class JPAPlugin extends PlayPlugin {
             } else {
                 try {
                     manager.getTransaction().commit();
-                } catch(Exception e) {
+                } catch(Throwable e) {
+                    for(int i=0; i<10; i++ ) {
+                        if(e instanceof RollbackException && e.getCause() != null) {
+                            e = e.getCause();
+                            break;
+                        }
+                        e = e.getCause();
+                        if(e == null) break;
+                    }
                     throw new JPAException("Cannot commit", e);
                 }
             }
