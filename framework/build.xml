@@ -109,7 +109,7 @@
         
     <target name="nb-run-application">
         <loadfile property="play.id" srcFile="../id" failonerror="false" quiet="true" />  
-        <loadproperties srcfile="${application.path}/conf/application.conf" />
+        <loadproperties srcfile="/home/loic/zenexity/projects/comox/conf/application.conf" />
         <property name="jpda.port" value="8000" />
         <java classname="play.server.Server" dir="${basedir}" fork="true">
             <classpath>
