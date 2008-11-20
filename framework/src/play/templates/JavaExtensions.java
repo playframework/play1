@@ -128,11 +128,11 @@ public class JavaExtensions {
         return "";
     }
 
-    public static String pluralize(Number n, String normal, String plural) {
+    public static String pluralize(Number n, String[] forms) {
         long l = n.longValue();
         if (l > 1) {
-            return plural;
+            return forms[1];
         }
-        return normal;
+        return forms[0];
     }
 }
