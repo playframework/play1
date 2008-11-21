@@ -24,8 +24,6 @@ import org.codehaus.groovy.syntax.SyntaxException;
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
@@ -117,7 +115,6 @@ public class Template {
         t.template = this;
         try {
             long start = System.currentTimeMillis();
-            LocalVariablesNamesTracer.enterMethod();
             t.run();
             Logger.trace("%sms to render template %s", System.currentTimeMillis() - start, name);
         } catch (NoRouteFoundException e) {
@@ -130,7 +127,6 @@ public class Template {
         } catch (Exception e) {
             throwException(e);
         } finally {
-            LocalVariablesNamesTracer.exitMethod();
         }
         if (applyLayouts && layout.get() != null) {
             Map<String, Object> layoutArgs = new HashMap<String, Object>(args);
@@ -184,7 +180,7 @@ public class Template {
                     cleanTrace.add(nse);
                 }
             }
-            if(!se.getClassName().startsWith("org.codehaus.groovy.") && !se.getClassName().startsWith("groovy.") && !se.getClassName().startsWith("sun.reflect.") && !se.getClassName().startsWith("java.lang.reflect.") && !se.getClassName().startsWith("Template_")) {
+            if (!se.getClassName().startsWith("org.codehaus.groovy.") && !se.getClassName().startsWith("groovy.") && !se.getClassName().startsWith("sun.reflect.") && !se.getClassName().startsWith("java.lang.reflect.") && !se.getClassName().startsWith("Template_")) {
                 cleanTrace.add(se);
             }
         }
@@ -273,19 +269,26 @@ public class Template {
             @Override
             @SuppressWarnings("unchecked")
             public Object invokeMethod(String name, Object param) {
-                String action = controller + "." + name;
                 try {
-                    Map<String, Object> r = new HashMap<String, Object>();
-                    String[] names = SignaturesNamesRepository.get(ActionInvoker.getActionMethod(action));
-                    if (param instanceof Object[]) {
-                        for (int i = 0; i < ((Object[]) param).length; i++) {
-                            r.put(names[i], ((Object[]) param)[i] == null ? null : ((Object[]) param)[i].toString());
+                    String action = controller + "." + name;
+                    try {
+                        Map<String, Object> r = new HashMap<String, Object>();
+                        String[] names = (String[]) ActionInvoker.getActionMethod(action).getDeclaringClass().getDeclaredField("$" + ActionInvoker.getActionMethod(action).getName()).get(null);
+                        if (param instanceof Object[]) {
+                            for (int i = 0; i < ((Object[]) param).length; i++) {
+                                r.put(names[i], ((Object[]) param)[i] == null ? null : ((Object[]) param)[i].toString());
+                            }
                         }
+                        // reverse using the x-http-method-override hack if necessary (when the route requires a PUT or DELETE)
+                        return Router.reverseForTemplate(action, r);
+                    } catch (ActionNotFoundException e) {
+                        throw new NoRouteFoundException(action, null);
                     }
-                    // reverse using the x-http-method-override hack if necessary (when the route requires a PUT or DELETE)
-                    return Router.reverseForTemplate(action, r);
-                } catch (ActionNotFoundException e) {
-                    throw new NoRouteFoundException(action, null);
+                } catch (Exception e) {
+                    if (e instanceof PlayException) {
+                        throw (PlayException) e;
+                    }
+                    throw new UnexpectedException(e);
                 }
             }
         }

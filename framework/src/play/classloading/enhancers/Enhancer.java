@@ -16,7 +16,7 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 /**
  * Enhance a class.
  */
-public abstract class Enhancer {
+public abstract class Enhancer { 
 
     protected ClassPool classPool = new ClassPool();
 

@@ -8,10 +8,10 @@ import java.util.Map;
 import org.w3c.dom.Document;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.TemplateNotFoundException;
+import play.exceptions.UnexpectedException;
 import play.mvc.Http.Response;
 import play.mvc.results.Error;
 import play.mvc.results.Forbidden;
@@ -42,11 +42,11 @@ public abstract class Controller {
     protected static void renderText(CharSequence pattern, Object... args) {
         throw new RenderText(String.format(pattern.toString(), args));
     }
-    
+
     protected static void renderXml(String xml) {
         throw new RenderXml(xml);
     }
-    
+
     protected static void renderXml(Document xml) {
         throw new RenderXml(xml);
     }
@@ -70,7 +70,7 @@ public abstract class Controller {
     protected static void renderJSON(String jsonString) {
         throw new RenderJson(jsonString);
     }
-    
+
     protected static void renderJSON(Object o, String... includes) {
         throw new RenderJson(o, includes);
     }
@@ -96,60 +96,70 @@ public abstract class Controller {
     protected static void notFound() {
         throw new NotFound("");
     }
-    
-    protected static void forbidden (String reason) {
-    	throw new Forbidden (reason);
+
+    protected static void forbidden(String reason) {
+        throw new Forbidden(reason);
     }
-    
-    protected static void forbidden () {
-    	throw new Forbidden ("Access denied");
+
+    protected static void forbidden() {
+        throw new Forbidden("Access denied");
     }
-    
-    protected static void error (Throwable throwable) {
-    	throw new Error (throwable);
+
+    protected static void error(Throwable throwable) {
+        throw new Error(throwable);
     }
-    
+
     protected static void error(int status, String reason) {
-    	throw new Error(status, reason);    
+        throw new Error(status, reason);
     }
-    
-    protected static void error (String reason) {
-    	throw new Error (reason);
+
+    protected static void error(String reason) {
+        throw new Error(reason);
     }
-  
-    protected static void error () {
-    	throw new Error ("Internal Error");
+
+    protected static void error() {
+        throw new Error("Internal Error");
     }
-    
+
     protected static void flash(String key, String value) {
         Scope.Flash.current().put(key, value);
     }
 
     protected static void redirect(String action, Object... args) {
-        Map<String, Object> r = new HashMap<String, Object>();
-        String[] names = SignaturesNamesRepository.get(ActionInvoker.getActionMethod(action));
-        assert names.length == args.length : "Problem is action redirection";
-        for (int i = 0; i < names.length; i++) {
-            r.put(names[i], args[i] == null ? null : args[i].toString());
-        }
         try {
-            throw new Redirect(Router.reverse(action, r).toString());
-        } catch (NoRouteFoundException e) {
-            StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
-            if (element != null) {
-                throw new NoRouteFoundException(action, r, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
-            } else {
-                throw e;
+            Map<String, Object> r = new HashMap<String, Object>();
+            String[] names = (String[]) ActionInvoker.getActionMethod(action).getDeclaringClass().getDeclaredField("$" + ActionInvoker.getActionMethod(action).getName()).get(null);
+            assert names.length == args.length : "Problem is action redirection";
+            for (int i = 0; i < names.length; i++) {
+                r.put(names[i], args[i] == null ? null : args[i].toString());
             }
+            try {
+                throw new Redirect(Router.reverse(action, r).toString());
+            } catch (NoRouteFoundException e) {
+                StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
+                if (element != null) {
+                    throw new NoRouteFoundException(action, r, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
+                } else {
+                    throw e;
+                }
+            }
+        } catch (Exception e) {
+            if (e instanceof Redirect) {
+                throw (Redirect) e;
+            }
+            if (e instanceof PlayException) {
+                throw (PlayException) e;
+            }
+            throw new UnexpectedException(e);
         }
     }
-    
+
     protected static void renderTemplate(String templateName, Object... args) {
-    	// Template datas
+        // Template datas
         Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
         for (Object o : args) {
             List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
-            for(String name : names) {
+            for (String name : names) {
                 templateBinding.put(name, o);
             }
         }

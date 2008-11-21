@@ -1,13 +1,13 @@
 package play.classloading.enhancers;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import javassist.CannotCompileException;
 import javassist.CtClass;
+import javassist.CtField;
 import javassist.CtMethod;
 import javassist.Modifier;
 import javassist.bytecode.Bytecode;
@@ -15,12 +15,8 @@ import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.CodeIterator;
 import javassist.bytecode.LocalVariableAttribute;
 import javassist.compiler.Javac;
-import javassist.expr.ExprEditor;
-import javassist.expr.MethodCall;
-import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.exceptions.UnexpectedException;
-import play.libs.Java;
+import play.mvc.Controller;
 
 /**
  * Track names of local variables ...
@@ -30,11 +26,15 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
         CtClass ctClass = makeClass(applicationClass);
-        if (!ctClass.subtypeOf(classPool.get("play.mvc.Controller"))) {
+        if (!ctClass.subtypeOf(classPool.get(Controller.class.getName()))) {
             return;
         }
 
         for (CtMethod method : ctClass.getDeclaredMethods()) {
+
+            if (!Modifier.isStatic(method.getModifiers())) {
+                continue;
+            }
 
             // Signatures names
             CodeAttribute codeAttribute = (CodeAttribute) method.getMethodInfo().getAttribute("Code");
@@ -52,33 +52,27 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                     names.add(name);
                 }
             }
-            SignaturesNamesRepository.signatures.put(SignaturesNamesRepository.signature(method), names.toArray(new String[names.size()]));
-
-            // enterMethod/endMethod
-            // Supprimé car la tracage n'est plus fait en dehors des controllers ...
-            // On va voir ...
-            
-            /*method.instrument(new ExprEditor() {
-
-                @Override
-                public void edit(MethodCall m) throws CannotCompileException {
-                    try {
-                        if (Play.classes.getApplicationClass(m.getMethod().getDeclaringClass().getName()) != null) {
-                            m.replace(
-                                    "play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.enterMethod();" +
-                                    "try{" +
-                                    "$_ = $proceed($$);" +
-                                    "play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.exitMethod();" +
-                                    "} catch(Throwable t) {" +
-                                    "play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.exitMethod(); " +
-                                    "throw t;" +
-                                    "}");
-                        }
-                    } catch (Exception e) {
-                        throw new UnexpectedException("Unexpected error in LocalvariablesEnhancer while compiling the enter/exit block", e);
+            StringBuilder iv = new StringBuilder();
+            if (names.size() == 0) {
+                iv.append("new String[0];");
+            } else {
+                iv.append("new String[] {");
+                for (Iterator i = names.iterator(); i.hasNext();) {
+                    iv.append("\"");
+                    iv.append(i.next());
+                    iv.append("\"");
+                    if (i.hasNext()) {
+                        iv.append(",");
                     }
                 }
-            });*/
+                iv.append("};");
+            }
+            CtField signature = CtField.make("public static String[] $"+method.getName()+" = "+iv.toString(), ctClass);
+            ctClass.addField(signature);
+            
+            // init variable tracer
+            method.insertBefore("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.enter();");
+            method.insertAfter("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.exit();");
 
             // Bon.
             // Alors là il s'agit aprés chaque instruction de creation d'une variable locale
@@ -125,13 +119,13 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                     int op = codeIterator.byteAt(index);
                     int varNumber = -1;
                     // La variable change
-                    if(storeByCode.containsKey(op)) {
-                    	varNumber = storeByCode.get(op);
-                    	if(varNumber == -2) {
-                    		varNumber = codeIterator.byteAt(index+1);
-                    	}
+                    if (storeByCode.containsKey(op)) {
+                        varNumber = storeByCode.get(op);
+                        if (varNumber == -2) {
+                            varNumber = codeIterator.byteAt(index + 1);
+                        }
                     }
-                    
+
                     // Si c'est un store de la variable en cours d'examination
                     // et que c'est dans la frame d'utilisation de cette variable on trace l'affectation.
                     // (en fait la frame commence à localVariableAttribute.startPc(i)-1 qui est la première affectation
@@ -156,31 +150,13 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             }
 
         }
-
         applicationClass.enhancedByteCode = ctClass.toBytecode();
+
         ctClass.defrost();
-
     }
 
-    public static class SignaturesNamesRepository {
-
-        static Map<String, String[]> signatures = new HashMap<String, String[]>();
-
-        public static String[] get(Method method) {
-            return signatures.get(Java.rawMethodSignature(method));
-        }
-
-        static String signature(CtMethod ctMethod) {
-            StringBuilder sig = new StringBuilder();
-            sig.append(ctMethod.getDeclaringClass().getName());
-            sig.append(".");
-            sig.append(ctMethod.getName());
-            sig.append(ctMethod.getSignature());
-            return sig.toString();
-        }
-    }
-
-    public static class LocalVariablesNamesTracer {
+ 
+       public static class LocalVariablesNamesTracer {
 
         static ThreadLocal<Stack<Map<String, Object>>> localVariables = new ThreadLocal<Stack<Map<String, Object>>>();
 
@@ -190,18 +166,18 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             }
         }
         
-        public static void enterMethod() {
+        public static void enter() {
             if (localVariables.get() == null) {
                 localVariables.set(new Stack<Map<String, Object>>());
             }
-            localVariables.get().push(new HashMap<String, Object>());            
+            localVariables.get().push(new HashMap<String, Object>());               
         }
 
-        public static void exitMethod() {
+        public static void exit() {
             if(localVariables.get().isEmpty()) {
                 return;
             }
-            localVariables.get().pop().clear();            
+            localVariables.get().pop().clear();     
         }
 
         public static Map<String, Object> locals() {
@@ -268,39 +244,42 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             return getLocalVariables().get(variable);
         }
     }
+
     
-    private static Map<Integer, Integer> storeByCode = new HashMap<Integer, Integer> ();
+    private static Map<Integer, Integer> storeByCode = new HashMap<Integer, Integer>();
     
-    static  {
-    	storeByCode.put(CodeIterator.ASTORE_0, 0);
-    	storeByCode.put(CodeIterator.ASTORE_1, 1);
-    	storeByCode.put(CodeIterator.ASTORE_2, 2);
-    	storeByCode.put(CodeIterator.ASTORE_3, 3);
-    	storeByCode.put(CodeIterator.ASTORE, -2);
-    	
-    	storeByCode.put(CodeIterator.ISTORE_0, 0);
-    	storeByCode.put(CodeIterator.ISTORE_1, 1);
-    	storeByCode.put(CodeIterator.ISTORE_2, 2);
-    	storeByCode.put(CodeIterator.ISTORE_3, 3);
-    	storeByCode.put(CodeIterator.ISTORE, -2);
-    	storeByCode.put(CodeIterator.IINC, -2);
-    	
-    	storeByCode.put(CodeIterator.LSTORE_0, 0);
-    	storeByCode.put(CodeIterator.LSTORE_1, 1);
-    	storeByCode.put(CodeIterator.LSTORE_2, 2);
-    	storeByCode.put(CodeIterator.LSTORE_3, 3);
-    	storeByCode.put(CodeIterator.LSTORE, -2);
-    	
-    	storeByCode.put(CodeIterator.FSTORE_0, 0);
-    	storeByCode.put(CodeIterator.FSTORE_1, 1);
-    	storeByCode.put(CodeIterator.FSTORE_2, 2);
-    	storeByCode.put(CodeIterator.FSTORE_3, 3);
-    	storeByCode.put(CodeIterator.FSTORE, -2);
-    	
-    	storeByCode.put(CodeIterator.DSTORE_0, 0);
-    	storeByCode.put(CodeIterator.DSTORE_1, 1);
-    	storeByCode.put(CodeIterator.DSTORE_2, 2);
-    	storeByCode.put(CodeIterator.DSTORE_3, 3);
-    	storeByCode.put(CodeIterator.DSTORE, -2);
+
+    static {
+
+        storeByCode.put(CodeIterator.ASTORE_0, 0);
+        storeByCode.put(CodeIterator.ASTORE_1, 1);
+        storeByCode.put(CodeIterator.ASTORE_2, 2);
+        storeByCode.put(CodeIterator.ASTORE_3, 3);
+        storeByCode.put(CodeIterator.ASTORE, -2);
+
+        storeByCode.put(CodeIterator.ISTORE_0, 0);
+        storeByCode.put(CodeIterator.ISTORE_1, 1);
+        storeByCode.put(CodeIterator.ISTORE_2, 2);
+        storeByCode.put(CodeIterator.ISTORE_3, 3);
+        storeByCode.put(CodeIterator.ISTORE, -2);
+        storeByCode.put(CodeIterator.IINC, -2);
+
+        storeByCode.put(CodeIterator.LSTORE_0, 0);
+        storeByCode.put(CodeIterator.LSTORE_1, 1);
+        storeByCode.put(CodeIterator.LSTORE_2, 2);
+        storeByCode.put(CodeIterator.LSTORE_3, 3);
+        storeByCode.put(CodeIterator.LSTORE, -2);
+
+        storeByCode.put(CodeIterator.FSTORE_0, 0);
+        storeByCode.put(CodeIterator.FSTORE_1, 1);
+        storeByCode.put(CodeIterator.FSTORE_2, 2);
+        storeByCode.put(CodeIterator.FSTORE_3, 3);
+        storeByCode.put(CodeIterator.FSTORE, -2);
+
+        storeByCode.put(CodeIterator.DSTORE_0, 0);
+        storeByCode.put(CodeIterator.DSTORE_1, 1);
+        storeByCode.put(CodeIterator.DSTORE_2, 2);
+        storeByCode.put(CodeIterator.DSTORE_3, 3);
+        storeByCode.put(CodeIterator.DSTORE, -2);
     }
 }

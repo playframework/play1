@@ -79,8 +79,8 @@ public class ApplicationClasses {
         return classes.containsKey(name);
     }    // Enhancers
     Class[] enhancers = new Class[]{
-        ControllersEnhancer.class,
         LocalvariablesNamesEnhancer.class,
+        ControllersEnhancer.class,
         PropertiesEnhancer.class,
         JPAEnhancer.class,
         ZDBEnhancer.class

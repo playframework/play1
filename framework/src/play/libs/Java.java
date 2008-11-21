@@ -1,7 +1,6 @@
 package play.libs;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -11,7 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer.SignaturesNamesRepository;
 import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
 
@@ -40,7 +38,7 @@ public class Java {
     }
 
     public static Object invokeStatic(Method method, Map<String, String[]> args) throws Exception {
-        String[] paramsNames = SignaturesNamesRepository.get(method);
+        String[] paramsNames = (String[])method.getDeclaringClass().getDeclaredField("$"+method.getName()).get(null);
         if (paramsNames == null && method.getParameterTypes().length > 0) {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }

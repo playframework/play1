@@ -53,7 +53,6 @@ public class Invoker {
         public static void before() {
             Thread.currentThread().setContextClassLoader(Play.classloader);
             LocalVariablesNamesTracer.clear();
-            LocalVariablesNamesTracer.enterMethod();
             if(!Play.id.equals("test")) {
                 Play.detectChanges();
                 if (!Play.started) {
@@ -74,7 +73,7 @@ public class Invoker {
             for (PlayPlugin plugin : Play.plugins) {
                 plugin.afterInvocation();
             }  
-            LocalVariablesNamesTracer.exitMethod();            
+            LocalVariablesNamesTracer.clear();            
         }
 
         /**
@@ -84,7 +83,7 @@ public class Invoker {
             for (PlayPlugin plugin : Play.plugins) {
                 plugin.onInvocationException(e);
             }            
-            LocalVariablesNamesTracer.exitMethod();
+            LocalVariablesNamesTracer.clear();
             if (e instanceof PlayException) {
                 throw (PlayException) e;
             }
