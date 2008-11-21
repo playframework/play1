@@ -92,9 +92,9 @@ public class JavaExtensions {
         }
         return ("" + string.charAt(0)).toUpperCase() + string.substring(1);
     }
-    
+
     public static String capAll(Object o) {
-        String string = o.toString();        
+        String string = o.toString();
         return capitalizeWords(string);
     }
 
@@ -134,5 +134,46 @@ public class JavaExtensions {
             return forms[1];
         }
         return forms[0];
+    }
+
+    public static String noAccents(String string) {
+        string = string.replaceAll("[éèêëæ]", "e");
+        string = string.replaceAll("[àâä]", "a");
+        string = string.replaceAll("[iïîì]", "i");
+        string = string.replaceAll("[oôöò]", "o");
+        string = string.replaceAll("[uûüù]", "u");
+        string = string.replaceAll("[ñ]", "n");
+        string = string.replaceAll("[ç]", "ç");
+        string = string.replaceAll("[ÀÄÂÁ]", "A");
+        string = string.replaceAll("[ËÊÈ]", "E");
+        string = string.replaceAll("[ÎÏÌ]", "I");
+        string = string.replaceAll("[ÛÙÜ]", "U");
+        string = string.replaceAll("[ÔÖÒ]", "O");
+        string = string.replaceAll("[Ñ]", "N");
+        string = string.replaceAll("[Ç]", "C");
+        return string;
+    }
+
+    public static String slugify(String string) {
+        string = noAccents(string);
+        return string.replaceAll("[^\\w]", "-").replaceAll("-{2,}", "-").replaceAll("-$", "").toLowerCase();
+    }
+
+    public static String camelCase(String string) {
+        string = noAccents(string);
+        string = string.replaceAll("[^\\w ]", "");
+        StringBuilder result = new StringBuilder();
+        for (String part : string.split(" ")) {
+            result.append(capFirst(part));
+        }
+        return result.toString();
+    }
+
+    public static String yesno(Object o, String[] values) {
+        boolean value = play.templates.FastTags._evaluateCondition(o);
+        if (value) {
+            return values[0];
+        }
+        return values[1];
     }
 }

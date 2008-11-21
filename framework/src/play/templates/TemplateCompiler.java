@@ -2,9 +2,11 @@ package play.templates;
 
 import groovy.lang.Closure;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import play.Logger;
+import play.Play;
 import play.vfs.VirtualFile;
 import play.exceptions.TemplateCompilationException;
 import play.exceptions.PlayException;
@@ -12,14 +14,24 @@ import play.exceptions.UnexpectedException;
 
 public class TemplateCompiler {
 
+    static String extensionsClassname = JavaExtensions.class.getName();
+
     public static Template compile(VirtualFile file) {
         try {
+
+            List<Class> extensionsClasses = Play.classloader.getAssignableClasses(JavaExtensions.class);
+            if (!extensionsClasses.isEmpty()) {
+                extensionsClassname = extensionsClasses.get(0).getName();
+            } else {
+                extensionsClassname = JavaExtensions.class.getName();
+            }
+
             String source = file.contentAsString();
             String name = file.relativePath();
             Template template = new Template(name, source);
             long start = System.currentTimeMillis();
             new Compiler().hop(template);
-            Logger.trace("%sms to parse template %s", System.currentTimeMillis()-start, file.relativePath());
+            Logger.trace("%sms to parse template %s", System.currentTimeMillis() - start, file.relativePath());
             return template;
         } catch (PlayException e) {
             throw e;
@@ -38,7 +50,7 @@ public class TemplateCompiler {
         Stack<Tag> tagsStack = new Stack<Tag>();
         int tagIndex;
         boolean skipLineBreak;
-        
+
         static class Tag {
 
             String name;
@@ -54,7 +66,7 @@ public class TemplateCompiler {
             String className = "Template_" + template.name.replaceAll("/", "_s_").replaceAll("\\.", "_p_").replaceAll("-", "_t_");
             print(className);
             println(" extends play.templates.Template.ExecutableTemplate {");
-            println("public Object run() { use(play.templates.JavaExtensions) {");
+            println("public Object run() { use(" + extensionsClassname + ") {");
 
             // Parse
             loop:
@@ -101,8 +113,8 @@ public class TemplateCompiler {
 
             println("} }");
             println("}");
-            
-            if(!tagsStack.empty()) {
+
+            if (!tagsStack.empty()) {
                 Tag tag = tagsStack.peek();
                 throw new TemplateCompilationException(template, tag.startLine, "#{" + tag.name + "} is not closed.");
             }
@@ -113,7 +125,7 @@ public class TemplateCompiler {
 
         void plain() {
             String text = parser.getToken().replace("\\", "\\\\").replaceAll("\"", "\\\\\"").replace("$", "\\$");
-            if(skipLineBreak && text.startsWith("\n")) {
+            if (skipLineBreak && text.startsWith("\n")) {
                 text = text.substring(1);
             }
             skipLineBreak = false;
@@ -121,12 +133,12 @@ public class TemplateCompiler {
                 String[] lines = text.split("\n", 10000);
                 for (int i = 0; i < lines.length; i++) {
                     String line = lines[i];
-                    if(line.length() > 0 && (int)line.charAt(line.length()-1) == 13)  {
-                        line = line.substring(0, line.length()-1);
+                    if (line.length() > 0 && (int) line.charAt(line.length() - 1) == 13) {
+                        line = line.substring(0, line.length() - 1);
                     }
                     if (i == lines.length - 1 && !text.endsWith("\n")) {
                         print("\tout.print(\"");
-                    } else if(i == lines.length - 1 && line.equals("")) {
+                    } else if (i == lines.length - 1 && line.equals("")) {
                         continue;
                     } else {
                         print("\tout.println(\"");
@@ -183,7 +195,7 @@ public class TemplateCompiler {
             if (!action.endsWith(")")) {
                 action = action + "()";
             }
-            if(absolute) {
+            if (absolute) {
                 print("\tout.print(request.getBase() + actionBridge." + action + ");");
             } else {
                 print("\tout.print(actionBridge." + action + ");");
@@ -218,7 +230,7 @@ public class TemplateCompiler {
                 println();
             }
             skipLineBreak = true;
-            
+
         }
 
         void endTag() {
@@ -254,7 +266,7 @@ public class TemplateCompiler {
                     print("play.templates.TagContext.enterTag();");
                     print("play.templates.FastTags._" + tag.name + "(attrs" + tagIndex + ",body" + tagIndex + ", out, this, " + tag.startLine + ");");
                     print("play.templates.TagContext.exitTag();");
-                } catch(NoSuchMethodException e) {
+                } catch (NoSuchMethodException e) {
                     print("invokeTag(" + tag.startLine + ",'" + tagName + "',attrs" + tagIndex + ",body" + tagIndex + ");");
                 }
                 markLine(tag.startLine);
@@ -262,9 +274,7 @@ public class TemplateCompiler {
             }
             tagIndex--;
             skipLineBreak = true;
-        }  
-        
-        // Writer
+        }        // Writer
         int currentLine = 1;
 
         void markLine(int line) {

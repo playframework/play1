@@ -53,7 +53,7 @@ public class FastTags {
         }
     }
     
-    static boolean _evaluateCondition(Object test) {
+    public static boolean _evaluateCondition(Object test) {
         if (test != null) {
             if (test instanceof Boolean) {
                 return ((Boolean) test).booleanValue();
