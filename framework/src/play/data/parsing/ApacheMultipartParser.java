@@ -267,6 +267,11 @@ public class ApacheMultipartParser extends DataParser {
                     fileName = (String) params.get("filename");
                     if (fileName != null) {
                         fileName = fileName.trim();
+                        // IE7 returning fullpath name (#300920)
+                        if( fileName.indexOf('\\') != -1) {
+                            fileName = fileName.substring(fileName.lastIndexOf('\\')+1);
+                        }
+                            
                     } else {
                         // Even if there is no value, the parameter is present,
                         // so we return an empty file name rather than no file
