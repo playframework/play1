@@ -53,6 +53,30 @@ public class Http {
         public String action;        
         public static ThreadLocal<Request> current = new ThreadLocal<Request>();
 
+        public void resolveFormat () {
+        	String accept = headers.get("accept").value();
+        	
+        	if (accept.indexOf("application/xhtml") !=-1 || accept.indexOf("text/html")!=-1) {
+        		format="html";
+        		return;
+        	}
+        	
+        	if (accept.indexOf("text/plain")!=-1) {
+        		format="txt";
+        		return;
+        	}
+        	
+        	if (accept.indexOf("application/json")!=-1 || accept.indexOf("text/javascript")!=-1) {
+        		format="json";
+        		return;
+        	}
+        
+        	if (accept.indexOf("application/xml")!=-1 || accept.indexOf("text/xml")!=-1) {
+        		format="xml";
+        		return;
+        	}
+        }
+        
         public static Request current() {
             return current.get();
         }
