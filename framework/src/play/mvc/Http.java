@@ -54,6 +54,12 @@ public class Http {
         public static ThreadLocal<Request> current = new ThreadLocal<Request>();
 
         public void resolveFormat () {
+        	
+        	if (headers.get("accept")==null) {
+        		format="html";
+        		return;
+        	}
+        	
         	String accept = headers.get("accept").value();
         	
         	if (accept.indexOf("application/xhtml") !=-1 || accept.indexOf("text/html")!=-1) {

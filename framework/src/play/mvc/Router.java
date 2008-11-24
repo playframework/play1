@@ -10,14 +10,16 @@ import jregex.Matcher;
 import jregex.Pattern;
 import play.Logger;
 import play.Play;
+import play.Play.Mode;
 import play.exceptions.EmptyAppException;
 import play.vfs.VirtualFile;
 import play.exceptions.NoRouteFoundException;
 import play.mvc.results.NotFound;
+import play.mvc.results.RenderStatic;
 
 public class Router {
 
-    static Pattern routePattern = new Pattern("^({method}[A-Za-z\\*]+)?\\s+({path}/[^\\s]*)\\s*({action}[^\\s(]+)({params}.+)?$");
+    static Pattern routePattern = new Pattern("^({method}[A-Za-z\\*]+)?\\s+({path}/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?$");
     /**
      * Pattern used to locate a method override instruction in request.querystring
      */
@@ -53,6 +55,8 @@ public class Router {
     }
 
     public static void detectChanges() {
+    	if (Play.mode==Mode.PROD)
+    		return;
         for (VirtualFile file : Play.routes) {
             if (file.lastModified() > lastLoading) {
                 load();
@@ -194,6 +198,7 @@ public class Router {
         String method;
         String path;
         String action;
+        String staticDir;
         Pattern pattern;
         List<Arg> args = new ArrayList<Arg>();
         Map<String, String> staticArgs = new HashMap<String, String>();
@@ -202,17 +207,30 @@ public class Router {
         static Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'");
 
         public void compute() {
-            String patternString = path;
-            patternString = customRegexPattern.replacer("\\{<[^/]+>$1\\}").replace(patternString);
-            Matcher matcher = argsPattern.matcher(patternString);
-            while (matcher.find()) {
-                Arg arg = new Arg();
-                arg.name = matcher.group(2);
-                arg.constraint = new Pattern(matcher.group(1));
-                args.add(arg);
-            }
-            patternString = argsPattern.replacer("({$2}$1)").replace(patternString);
-            this.pattern = new Pattern(patternString);
+        	// staticDir
+        	if(action.startsWith("staticDir:")) {
+        		if(!method.equalsIgnoreCase("*") && !method.equalsIgnoreCase("GET")) {
+        			Logger.warn("Static route only support GET method");
+        			return;
+        		}
+        		if(!this.path.endsWith("/") && !this.path.equals("/")) {
+        			this.path += "/"; 
+        		}
+        		this.pattern = new Pattern(path+"({resource}.*)");
+        		this.staticDir = action.substring("staticDir:".length());
+        	} else {        	
+	            String patternString = path;
+	            patternString = customRegexPattern.replacer("\\{<[^/]+>$1\\}").replace(patternString);
+	            Matcher matcher = argsPattern.matcher(patternString);
+	            while (matcher.find()) {
+	                Arg arg = new Arg();
+	                arg.name = matcher.group(2);
+	                arg.constraint = new Pattern(matcher.group(1));
+	                args.add(arg);
+	            }
+	            patternString = argsPattern.replacer("({$2}$1)").replace(patternString);
+	            this.pattern = new Pattern(patternString);
+        	}
         }
 
         public void addParams(String params) {
@@ -232,12 +250,17 @@ public class Router {
             if (method == null || this.method.equals("*") || method.equalsIgnoreCase(this.method)) {
                 Matcher matcher = pattern.matcher(path);
                 if (matcher.matches()) {
-                    Map<String, String> localArgs = new HashMap<String, String>();
-                    for (Arg arg : args) {
-                        localArgs.put(arg.name, matcher.group(arg.name));
-                    }
-                    localArgs.putAll(staticArgs);
-                    return localArgs;
+                	// Static dir
+                	if(staticDir != null) {
+                		throw new RenderStatic(staticDir + "/" + matcher.group("resource"));
+                	} else {
+	                    Map<String, String> localArgs = new HashMap<String, String>();
+	                    for (Arg arg : args) {
+	                        localArgs.put(arg.name, matcher.group(arg.name));
+	                    }
+	                    localArgs.putAll(staticArgs);
+	                    return localArgs;
+                	}
                 }
             }
             return null;

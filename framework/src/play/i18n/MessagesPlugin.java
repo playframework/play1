@@ -41,7 +41,7 @@ public class MessagesPlugin extends PlayPlugin {
 
     static Properties read(VirtualFile vf) {
         try {
-            if (vf.exists()) {
+            if (vf!=null) {
                 return IO.readUtf8Properties(vf.inputstream());
             }
             return null;
@@ -53,12 +53,12 @@ public class MessagesPlugin extends PlayPlugin {
 
     @Override
     public void detectChange() {
-        if (Play.getVirtualFile("conf/messages").exists() && Play.getVirtualFile("conf/messages").lastModified() > lastLoading) {
+        if (Play.getVirtualFile("conf/messages")!=null && Play.getVirtualFile("conf/messages").lastModified() > lastLoading) {
             onApplicationStart();
             return;
         }
         for (String locale : Play.langs) {
-            if (Play.getVirtualFile("conf/messages." + locale).exists() && Play.getVirtualFile("conf/messages." + locale).lastModified() > lastLoading) {
+            if (Play.getVirtualFile("conf/messages." + locale)!=null && Play.getVirtualFile("conf/messages." + locale).lastModified() > lastLoading) {
                 onApplicationStart();
                 return;
             }

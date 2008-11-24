@@ -66,6 +66,10 @@ public class Play {
      */
     public static ApplicationClassloader classloader;
     /**
+     * All paths to search for files
+     */
+    public static List<VirtualFile> roots = new ArrayList<VirtualFile>();
+    /**
      * All paths to search for Java files
      */
     public static List<VirtualFile> javaPath;
@@ -77,10 +81,7 @@ public class Play {
      * All routes files
      */
     public static List<VirtualFile> routes;
-    /**
-     * All paths to search for static resources
-     */
-    public static List<VirtualFile> staticResources;
+    
     /**
      * The main application.conf
      */
@@ -136,6 +137,7 @@ public class Play {
         Logger.log4j.setLevel(Level.toLevel(logLevel));
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
+        roots.add(appRoot);
         javaPath = new ArrayList<VirtualFile>();
         javaPath.add(appRoot.child("app"));
         javaPath.add(appRoot.child("test"));
@@ -143,9 +145,7 @@ public class Play {
         templatesPath = new ArrayList<VirtualFile>();
         templatesPath.add(appRoot.child("app/views"));
         templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework/templates")));
-        // Build basic static resources path
-        staticResources = new ArrayList<VirtualFile>();
-        staticResources.add(appRoot.child("public"));
+       
         // Main route file
         routes = new ArrayList<VirtualFile>();
         routes.add(appRoot.child("conf/routes"));
@@ -155,6 +155,9 @@ public class Play {
         bootstrapPlugins();
         // Mode
         mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
+        
+        Router.load();
+        
         if (mode == Mode.PROD) {
             preCompile();
             start();
@@ -244,8 +247,6 @@ public class Play {
             if (secretKey.equals("")) {
                 Logger.warn("No secret key defined. Sessions will not be encrypted");
             }
-            // Routes definitions            
-            Router.load();
 
             // Try to load all classes
             Play.classloader.getAllClasses();
@@ -300,7 +301,6 @@ public class Play {
         }
         try {
             classloader.detectChanges();
-            Router.detectChanges();
             if (conf.lastModified() > startedAt) {
                 start();
                 return;
@@ -399,8 +399,8 @@ public class Play {
         VirtualFile root = VirtualFile.open(path);
         javaPath.add(root.child("app"));
         templatesPath.add(root.child("app/views"));
-        staticResources.add(root.child("public"));
         routes.add(root.child("conf/routes"));
+        roots.add(root);
         Logger.info("Plugin added: " + path.getAbsolutePath());
     }
 
@@ -419,9 +419,6 @@ public class Play {
         if (!(new File(path, "app/controllers/").exists())) {
             return false;
         }
-        if (!(new File(path, "app/models/").exists())) {
-            return false;
-        }
         if (!(new File(path, "conf/routes").exists())) {
             return false;
         }
@@ -434,7 +431,7 @@ public class Play {
      * @return The virtualFile or null
      */
     public static VirtualFile getVirtualFile(String path) {
-        return VirtualFile.open(applicationPath).child(path);
+        return VirtualFile.search(roots, path);
     }
 
     /**
