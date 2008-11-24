@@ -50,7 +50,6 @@ import play.vfs.VirtualFile;
 
 public class HttpHandler implements IoHandler {
 
-	@Override
 	public void messageReceived(IoSession session, Object message) throws Exception {
 		MutableHttpRequest minaRequest = (MutableHttpRequest) message;
 		MutableHttpResponse minaResponse = new DefaultHttpResponse();
@@ -129,7 +128,6 @@ public class HttpHandler implements IoHandler {
 		return request;
 	}
 
-	@Override
 	public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
 		if (!(cause instanceof IOException)) {
 			Logger.error(cause, "Caught ");
@@ -137,7 +135,6 @@ public class HttpHandler implements IoHandler {
 		session.close();
 	}
 
-	@Override
 	public void messageSent(IoSession session, Object message) throws Exception {
 		if (message instanceof DefaultHttpResponse) {
 			if (session.getAttribute("file") != null) {
@@ -161,24 +158,16 @@ public class HttpHandler implements IoHandler {
 		}
 	}
 
-	@Override
 	public void sessionClosed(IoSession session) throws Exception {
-		// TODO Auto-generated method stub
-
 	}
 
-	@Override
 	public void sessionCreated(IoSession session) throws Exception {
-		// TODO Auto-generated method stub
-
 	}
 
-	@Override
 	public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
 		session.close();
 	}
 
-	@Override
 	public void sessionOpened(IoSession session) throws Exception {
 		session.getConfig().setIdleTime(IdleStatus.BOTH_IDLE, 300);
 	}
