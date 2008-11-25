@@ -140,7 +140,9 @@ public class Play {
         roots.add(appRoot);
         javaPath = new ArrayList<VirtualFile>();
         javaPath.add(appRoot.child("app"));
-        javaPath.add(appRoot.child("test"));
+        if(id.equals("test")) {
+            javaPath.add(appRoot.child("test"));
+        }
         // Build basic templates path
         templatesPath = new ArrayList<VirtualFile>();
         templatesPath.add(appRoot.child("app/views"));

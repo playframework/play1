@@ -1,7 +1,7 @@
 ${exception.errorTitle} 
 ${exception.errorDescription.replace('<strong>', '').replace('</strong>', '')}
  
-#{if exception.sourceAvailable}
+#{if exception.sourceAvailable && exception.lineNumber && play.Play.mode.name() == 'DEV'}
 ----------
 In ${exception.sourceFile} (around line ${exception.lineNumber})
 

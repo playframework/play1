@@ -36,7 +36,6 @@ public class Messages {
     public static String get(Object key, Object... args) {
         String value = null;
         if( key == null ) {
-            System.out.println("Messages.get key is null");
             return "";
         }
         if (locales.containsKey(Lang.get())) {

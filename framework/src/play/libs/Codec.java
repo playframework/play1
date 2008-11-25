@@ -10,7 +10,7 @@ public class Codec {
     public static String UUID() {
         return UUID.randomUUID().toString();
     }
-    
+
     public static String encodeBASE64(String value) {
         try {
             return new String(Base64.encodeBase64(value.getBytes("utf-8")));
@@ -18,8 +18,16 @@ public class Codec {
             throw new UnexpectedException(ex);
         }
     }
-    
+
     public static String encodeBASE64(byte[] value) {
         return new String(Base64.encodeBase64(value));
+    }
+
+    public static byte[] decodeBASE64(String value) {
+        try {
+            return Base64.decodeBase64(value.getBytes("utf-8"));
+        } catch (UnsupportedEncodingException ex) {
+            throw new UnexpectedException(ex);
+        }
     }
 }

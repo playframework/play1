@@ -7,6 +7,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import play.exceptions.ActionNotFoundException;
 import play.mvc.Http.Response;
+import play.mvc.Router;
 
 public class RoutesTest extends TestSupport {
     
@@ -131,7 +132,7 @@ public class RoutesTest extends TestSupport {
         //
         testApp.addRoute("GET   /yop    Application.yop");  
         sleep(2);
-        Play.detectChanges();
+        Router.detectChanges();
         response = GET("/yop");
         assertIsOk(response);
         assertContentEquals("yop", response);

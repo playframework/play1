@@ -19,7 +19,7 @@ public class TemplateExecutionException extends TemplateException {
     }
     
     public static class DoBodyException extends RuntimeException {
-        public DoBodyException(Exception cause) {
+        public DoBodyException(Throwable cause) {
             super(cause);
         }
     }

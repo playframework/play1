@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import play.Logger;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer;
@@ -38,13 +39,18 @@ public class ApplicationClasses {
     public ApplicationClass getApplicationClass(String name) {
         if (!classes.containsKey(name) && getJava(name) != null) {
             classes.put(name, new ApplicationClass(name));
-        }
+        } 
         return classes.get(name);
     }
 
     public List<ApplicationClass> getAssignableClasses(Class clazz) {
         List<ApplicationClass> results = new ArrayList<ApplicationClass>();
         for (ApplicationClass applicationClass : classes.values()) {
+            try {
+                Play.classloader.loadClass(applicationClass.name);
+            } catch (ClassNotFoundException ex) {
+                throw new UnexpectedException(ex);
+            }
             if (clazz.isAssignableFrom(applicationClass.javaClass) && !applicationClass.javaClass.getName().equals(clazz.getName())) {
                 results.add(applicationClass);
             }
@@ -55,6 +61,11 @@ public class ApplicationClasses {
     public List<ApplicationClass> getAnnotatedClasses(Class clazz) {
         List<ApplicationClass> results = new ArrayList<ApplicationClass>();
         for (ApplicationClass applicationClass : classes.values()) {
+            try {
+                Play.classloader.loadClass(applicationClass.name);
+            } catch (ClassNotFoundException ex) {
+                throw new UnexpectedException(ex);
+            }
             if (applicationClass.javaClass.isAnnotationPresent(clazz)) {
                 results.add(applicationClass);
             }
@@ -77,7 +88,9 @@ public class ApplicationClasses {
      */
     public boolean hasClass(String name) {
         return classes.containsKey(name);
-    }    // Enhancers
+    }    
+    
+    // Enhancers
     Class[] enhancers = new Class[]{
         LocalvariablesNamesEnhancer.class,
         ControllersEnhancer.class,

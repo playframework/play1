@@ -83,7 +83,7 @@
             </p>
             #{/if}
         </div>
-        #{if exception.sourceAvailable && play.Play.mode.name() == 'DEV'}
+        #{if exception.sourceAvailable && exception.lineNumber && play.Play.mode.name() == 'DEV'}
         <div id="source" class="block">
             <h2>In ${exception.sourceFile} (around line ${exception.lineNumber})</h2>
             %{ 

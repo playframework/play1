@@ -4,33 +4,57 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.MessageDigest;
+import play.Logger;
 import play.Play;
 
 public class BytecodeCache {
 
+    static String version = "1";
+
     public static byte[] getBytecode(String name, String source) {
         try {
-            File f = cacheFile(hash(name) + "-" + hash(source));
+            if (!Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
+                return null;
+            }
+            File f = cacheFile(name.replace("/", "_"));
             if (f.exists()) {
-                byte[] byteCode = new byte[(int) f.length()];
                 FileInputStream fis = new FileInputStream(f);
+                // Read hash
+                int offset = 0;
+                int read = -1;
+                StringBuilder hash = new StringBuilder();
+                while ((read = fis.read()) != 0) {
+                    hash.append((char) read);
+                    offset++;
+                }
+                if (!hash(source).equals(hash.toString())) {
+                    Logger.trace("Bytecode too old (%s != %s)", hash, hash(source));
+                    return null;
+                }
+                byte[] byteCode = new byte[(int) f.length() - (offset + 1)];
                 fis.read(byteCode);
                 fis.close();
                 return byteCode;
             }
             return null;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     public static void cacheBytecode(byte[] byteCode, String name, String source) {
         try {
-            File f = cacheFile(hash(name) + "-" + hash(source));
+            if (!Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
+                return;
+            }
+            File f = cacheFile(name.replace("/", "_"));
             FileOutputStream fos = new FileOutputStream(f);
+            fos.write(hash(source).getBytes("utf-8"));
+            fos.write(0);
             fos.write(byteCode);
             fos.close();
-        } catch(Exception e) {
+            Logger.trace("%s cached", name);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -39,7 +63,7 @@ public class BytecodeCache {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             messageDigest.reset();
-            messageDigest.update(text.getBytes("utf-8"));
+            messageDigest.update((version + text).getBytes("utf-8"));
             byte[] digest = messageDigest.digest();
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < digest.length; ++i) {
@@ -50,15 +74,15 @@ public class BytecodeCache {
                 builder.append(Integer.toHexString(value));
             }
             return builder.toString();
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     static File cacheFile(String id) {
-        if (!Play.getFile("work/bytecode").exists()) {
-            Play.getFile("work/bytecode").mkdirs();
+        if (!Play.getFile("tmp/bytecode/"+Play.mode.name()).exists()) {
+            Play.getFile("tmp/bytecode/"+Play.mode.name()).mkdirs();
         }
-        return Play.getFile("work/bytecode/" + id);
+        return Play.getFile("tmp/bytecode/"+Play.mode.name() + "/" + id);
     }
 }

@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import play.Logger;
 import play.Play;
 import play.vfs.VirtualFile;
@@ -37,6 +39,11 @@ public class ApplicationClassloader extends ClassLoader {
     @Override
     protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
 
+        Class c = findLoadedClass(name);
+        if (c != null) {
+            return c;
+        }
+
         // First check if it's an application Class
         Class applicationClass = loadApplicationClass(name);
         if (applicationClass != null) {
@@ -48,26 +55,30 @@ public class ApplicationClassloader extends ClassLoader {
 
         // Delegate to the classic classloader
         return super.loadClass(name, resolve);
-    }    
-    
+    }
     // ~~~~~~~~~~~~~~~~~~~~~~~
-    public ThreadLocal<List<ApplicationClass>> loadingTracer = new ThreadLocal<List<ApplicationClass>>();
-
     protected Class loadApplicationClass(String name) {
         long start = System.currentTimeMillis();
         ApplicationClass applicationClass = Play.classes.getApplicationClass(name);
         if (applicationClass != null) {
-            if (loadingTracer.get() != null) {
-                loadingTracer.get().add(applicationClass);
-            }
             if (applicationClass.isDefinable()) {
+                BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, name, applicationClass.javaSource);
                 return applicationClass.javaClass;
             } else {
-                if (applicationClass.enhancedByteCode != null || applicationClass.compile() != null) {
-                    applicationClass.enhance();                     
+                byte[] bc = BytecodeCache.getBytecode(name, applicationClass.javaSource);
+                if (bc != null) {
+                    applicationClass.enhancedByteCode = bc;
                     applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length);
                     resolveClass(applicationClass.javaClass);
-                    Logger.trace("%sms to load class %s", System.currentTimeMillis()-start, name);
+                    Logger.trace("%sms to load class %s from cache", System.currentTimeMillis() - start, name);
+                    return applicationClass.javaClass;
+                }
+                if (applicationClass.enhancedByteCode != null || applicationClass.compile() != null) {
+                    applicationClass.enhance();
+                    applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length);
+                    BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, name, applicationClass.javaSource);
+                    resolveClass(applicationClass.javaClass);
+                    Logger.trace("%sms to load class %s", System.currentTimeMillis() - start, name);
                     return applicationClass.javaClass;
                 } else {
                     Play.classes.classes.remove(name);
@@ -118,10 +129,11 @@ public class ApplicationClassloader extends ClassLoader {
         Map<Class, Integer> annotationsHashes = new HashMap<Class, Integer>();
         for (ApplicationClass applicationClass : modifieds) {
             annotationsHashes.put(applicationClass.javaClass, computeAnnotationsHash(applicationClass.javaClass));
-            if(applicationClass.compile() == null) {
+            if (applicationClass.compile() == null) {
                 Play.classes.classes.remove(applicationClass.name);
             } else {
                 applicationClass.enhance();
+                BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, applicationClass.name, applicationClass.javaSource);
                 newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.enhancedByteCode));
             }
         }
@@ -142,8 +154,11 @@ public class ApplicationClassloader extends ClassLoader {
         int hash = computePathHash();
         if (hash != this.pathHash) {
             // Remove class for deleted files !!
-            for(ApplicationClass applicationClass : Play.classes.all()) {
-                if(!applicationClass.javaFile.exists()) {
+            for (ApplicationClass applicationClass : Play.classes.all()) {
+                if (!applicationClass.javaFile.exists()) {
+                    Play.classes.classes.remove(applicationClass.name);
+                }
+                if(applicationClass.name.contains("$")) {
                     Play.classes.classes.remove(applicationClass.name);
                 }
             }
@@ -184,7 +199,14 @@ public class ApplicationClassloader extends ClassLoader {
     void scan(StringBuffer buf, VirtualFile current) {
         if (!current.isDirectory()) {
             if (current.getName().endsWith(".java")) {
+                Matcher matcher = Pattern.compile("\\s+class\\s([a-zA-Z0-9_]+)\\s+").matcher(current.contentAsString());
                 buf.append(current.getName());
+                buf.append("(");
+                while(matcher.find()) {
+                    buf.append(matcher.group(1));
+                    buf.append(",");
+                }
+                buf.append(")");
             }
         } else {
             for (VirtualFile virtualFile : current.list()) {
@@ -205,36 +227,34 @@ public class ApplicationClassloader extends ClassLoader {
                 all.addAll(getAllClasses(virtualFile));
             }
             String[] classNames = new String[all.size()];
-            for(int i=0; i<all.size(); i++) {
+            for (int i = 0; i < all.size(); i++) {
                 classNames[i] = all.get(i).name;
             }
             Play.classes.compiler.compile(classNames);
-            for(ApplicationClass applicationClass : Play.classes.all()) {
+            for (ApplicationClass applicationClass : Play.classes.all()) {
                 allClasses.add(loadApplicationClass(applicationClass.name));
-            }                        
+            }
         }
         return allClasses;
     }
     List<Class> allClasses = null;
-    
-    public List<Class> getAssignableClasses (Class clazz) {
-    	List<Class> results = new ArrayList<Class>();
-    	for(ApplicationClass c : Play.classes.getAssignableClasses(clazz)) {
-            results.add(c.javaClass);
-        }
-    	return results;
-    }
-    
-    public List<Class> getAnnotatedClasses (Class clazz) {
-    	List<Class> results = new ArrayList<Class>();
-    	for(ApplicationClass c : Play.classes.getAnnotatedClasses(clazz)) {
-            results.add(c.javaClass);
-        }
-    	return results;
-    } 
-    
-    // ~~~ Intern
 
+    public List<Class> getAssignableClasses(Class clazz) {
+        List<Class> results = new ArrayList<Class>();
+        for (ApplicationClass c : Play.classes.getAssignableClasses(clazz)) {
+            results.add(c.javaClass);
+        }
+        return results;
+    }
+
+    public List<Class> getAnnotatedClasses(Class clazz) {
+        List<Class> results = new ArrayList<Class>();
+        for (ApplicationClass c : Play.classes.getAnnotatedClasses(clazz)) {
+            results.add(c.javaClass);
+        }
+        return results;
+    }
+    // ~~~ Intern
     List<ApplicationClass> getAllClasses(String basePackage) {
         List<ApplicationClass> res = new ArrayList<ApplicationClass>();
         for (VirtualFile virtualFile : Play.javaPath) {
@@ -257,12 +277,12 @@ public class ApplicationClassloader extends ClassLoader {
         }
         return res;
     }
-    
+
     private void scan(List<ApplicationClass> classes, String packageName, VirtualFile current) {
         if (!current.isDirectory()) {
             if (current.getName().endsWith(".java") && !current.getName().startsWith(".")) {
                 String classname = packageName + current.getName().substring(0, current.getName().length() - 5);
-                classes.add(Play.classes.getApplicationClass(classname));                
+                classes.add(Play.classes.getApplicationClass(classname));
             }
         } else {
             for (VirtualFile virtualFile : current.list()) {

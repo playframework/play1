@@ -2,28 +2,33 @@ package play.templates;
 
 import groovy.lang.Binding;
 import groovy.lang.Closure;
-import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObjectSupport;
 import groovy.lang.MissingPropertyException;
 import groovy.lang.Script;
-import java.io.ByteArrayInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.codehaus.groovy.control.CompilationUnit;
+import org.codehaus.groovy.control.CompilationUnit.GroovyClassOperation;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.MultipleCompilationErrorsException;
+import org.codehaus.groovy.control.Phases;
+import org.codehaus.groovy.control.SourceUnit;
 import org.codehaus.groovy.control.messages.SyntaxErrorMessage;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.codehaus.groovy.syntax.SyntaxException;
+import org.codehaus.groovy.tools.GroovyClass;
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.classloading.BytecodeCache;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
@@ -35,6 +40,7 @@ import play.exceptions.TemplateNotFoundException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.i18n.Messages;
+import play.libs.Codec;
 import play.mvc.ActionInvoker;
 import play.mvc.Router;
 
@@ -53,25 +59,79 @@ public class Template {
         this.name = name;
         this.source = source;
     }
+    
+    public static class TClassLoader extends ClassLoader {
+        
+        public TClassLoader() {
+            super(Play.classloader);
+        }
+        
+        public Class defineTemplate(String name, byte[] byteCode) {
+            return defineClass(name, byteCode, 0, byteCode.length);
+        }
+        
+    }
 
     public void compile() {
         if (compiledTemplate == null) {
-            CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
-            compilerConfiguration.setSourceEncoding("utf-8"); // ouf
-            GroovyClassLoader classLoader = new GroovyClassLoader(Play.classloader, compilerConfiguration);
             try {
                 long start = System.currentTimeMillis();
-                Play.classloader.loadingTracer.set(new ArrayList<ApplicationClass>());
-                compiledTemplate = classLoader.parseClass(new ByteArrayInputStream(groovySource.getBytes("utf-8")));
-                if (!Play.classloader.loadingTracer.get().isEmpty()) {
-                    needJavaRecompilation = true;
+                
+                TClassLoader tClassLoader = new TClassLoader();                    
+                
+                // Try the cache
+                byte[] bc = BytecodeCache.getBytecode(name, groovySource);
+                if(bc != null) {
+                    
+                    String[] lines = new String(bc, "utf-8").split("\n");
+                    for(int i=0; i<lines.length; i=i+2) {
+                        String className = lines[i];
+                        byte[] byteCode = Codec.decodeBASE64(lines[i+1]);
+                        Class c = tClassLoader.defineTemplate(className, byteCode);
+                        if(compiledTemplate == null) {
+                            compiledTemplate = c;
+                        }
+                    }
+                    Logger.trace("%sms to load template %s from cache", System.currentTimeMillis() - start, name);
+                    
                 } else {
-                    needJavaRecompilation = false;
+                
+                    // Let's compile the groovy source
+                    final List<GroovyClass> groovyClassesForThisTemplate = new ArrayList<GroovyClass>();
+                    // ~~~ Please !
+                    CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
+                    compilerConfiguration.setSourceEncoding("utf-8"); // ouf
+                    CompilationUnit compilationUnit = new CompilationUnit(compilerConfiguration);
+                    compilationUnit.addSource( new SourceUnit(name, groovySource, compilerConfiguration, compilationUnit.getClassLoader(), compilationUnit.getErrorCollector()) );
+                    Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
+                    phasesF.setAccessible(true);
+                    LinkedList[] phases = (LinkedList[])phasesF.get(compilationUnit);
+                    LinkedList output = new LinkedList();
+                    phases[Phases.OUTPUT] = output;
+                    output.add(new GroovyClassOperation() {
+                        public void call(GroovyClass gclass) {
+                           groovyClassesForThisTemplate.add(gclass);
+                        }
+                    });
+                    compilationUnit.compile();
+                    // ouf 
+
+                    // Define script classes
+                    StringBuilder sb = new StringBuilder();                
+                    for(GroovyClass gclass: groovyClassesForThisTemplate) {
+                        tClassLoader.defineTemplate(gclass.getName(), gclass.getBytes());
+                        sb.append(gclass.getName()+"\n");
+                        sb.append(Codec.encodeBASE64(gclass.getBytes()).replaceAll("\\s", ""));
+                        sb.append("\n");
+                    }
+                    // Cache
+                    BytecodeCache.cacheBytecode(sb.toString().getBytes("utf-8"), name, groovySource);
+                    compiledTemplate = tClassLoader.loadClass(groovyClassesForThisTemplate.get(0).getName());
+
+                    Logger.trace("%sms to compile template %s", System.currentTimeMillis() - start, name);
+                    
                 }
-                Play.classloader.loadingTracer.set(null);
-                Logger.trace("%sms to compile template %s", System.currentTimeMillis() - start, name);
-            } catch (UnsupportedEncodingException e) {
-                throw new UnexpectedException(e);
+                
             } catch (MultipleCompilationErrorsException e) {
                 if (e.getErrorCollector().getLastError() != null) {
                     SyntaxErrorMessage errorMessage = (SyntaxErrorMessage) e.getErrorCollector().getLastError();
@@ -124,7 +184,7 @@ public class Template {
         } catch (DoBodyException e) {
             Exception ex = (Exception) e.getCause();
             throwException(ex);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throwException(e);
         } finally {
         }
@@ -141,7 +201,7 @@ public class Template {
         return null;
     }
 
-    void throwException(Exception e) {
+    void throwException(Throwable e) {
         for (StackTraceElement stackTraceElement : e.getStackTrace()) {
             if (stackTraceElement.getClassName().equals(compiledTemplate.getName()) || stackTraceElement.getClassName().startsWith(compiledTemplate.getName() + "$_run_closure")) {
                 if (doBodyLines.contains(stackTraceElement.getLineNumber())) {
@@ -161,7 +221,7 @@ public class Template {
         throw new RuntimeException(e);
     }
 
-    static Exception cleanStackTrace(Exception e) {
+    static Throwable cleanStackTrace(Throwable e) {
         List<StackTraceElement> cleanTrace = new ArrayList<StackTraceElement>();
         for (StackTraceElement se : e.getStackTrace()) {
             if (se.getClassName().startsWith("Template_")) {
@@ -248,6 +308,10 @@ public class Template {
                 throw new TemplateNotFoundException(e.getPath(), template, fromLine);
             }
             TagContext.exitTag();
+        }
+        
+        public Class _(String className) throws Exception {
+            return Play.classloader.loadClass(className);
         }
 
         static class ActionBridge extends GroovyObjectSupport {

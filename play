@@ -137,14 +137,15 @@ if [ "$PLAY_COMMAND" = "help" ] ; then
 	echo "~        id           Define the framework ID"
 	echo "~        netbeansify  Create netbeans configuration files for this application"
 	echo "~        out          Follow system.out of the running application"    
-	echo "~        mkplugin    Create a Play! plugin with this application"
+	echo "~        mkplugin     Create a Play! plugin with this application"
 	echo "~        pid          Display the pid of the running application"
 	echo "~        run          Run the application in the current window"
-    echo "~        secret       Generate a new secret key"
+        echo "~        secret       Generate a new secret key"
 	echo "~        start        Start the application in background"
 	echo "~        statistics   Display project statistics"
 	echo "~        stop         Stop the application"  
 	echo "~        test         Run all tests"
+        echo "~        clean        Delete tmp files"
 	echo "~"
 	echo "~ Check full documentation at http://www.playframework.org/manual"
 	echo "~"
@@ -252,6 +253,17 @@ if [ "$PLAY_COMMAND" = "secret" ] ; then
     echo "~"
     exit;
 fi
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~ [clean] Clean temporary files
+
+if [ "$PLAY_COMMAND" = "clean" ] ; then
+    echo "~ Deleting $APPLICATION_PATH/tmp/*"
+    rm -rf "$APPLICATION_PATH/tmp"
+    echo "~"
+    exit;
+fi
+
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~ JAVA_HOME/bin/java is used if defined

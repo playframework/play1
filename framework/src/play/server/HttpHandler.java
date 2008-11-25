@@ -62,7 +62,10 @@ public class HttpHandler implements IoHandler {
 		} catch (RenderStatic e) {
 			serveStatic(session, minaResponse, minaRequest, e);
 			return;
-		}
+		} catch (EmptyAppException e) {
+	        serve500(e, session, minaRequest, minaResponse);
+	        return;
+	    }
 		Response response = new Response();
 		response.out = new ByteArrayOutputStream();
 
