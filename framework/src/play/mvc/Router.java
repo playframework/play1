@@ -114,7 +114,6 @@ public class Router {
         if ( !("GET".equals(actionDef.method) || "POST".equals(actionDef.method))) {
             String separator = actionDef.url.indexOf('?') != -1 ? "&" : "?";
             actionDef.url += separator +"x-http-method-override=" + actionDef.method;
-            // todo shall we also replace the method ?
         }
         return actionDef;
     }

@@ -132,6 +132,10 @@ public class Play {
         Logger.info("Starting %s", root.getAbsolutePath());
         // Read the configuration file
         readConfiguration();
+        
+        // Mode
+        mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
+        
         // Configure logs
         String logLevel = configuration.getProperty("application.log", "INFO");
         Logger.log4j.setLevel(Level.toLevel(logLevel));
@@ -155,8 +159,6 @@ public class Play {
         classloader = new ApplicationClassloader();
         // Plugins
         bootstrapPlugins();
-        // Mode
-        mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
         
         Router.load();
         
