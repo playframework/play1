@@ -158,11 +158,9 @@ public class HttpHandler implements IoHandler {
 		}
 	}
 
-	public void sessionClosed(IoSession session) throws Exception {
-	}
+	public void sessionClosed(IoSession session) throws Exception {}
 
-	public void sessionCreated(IoSession session) throws Exception {
-	}
+	public void sessionCreated(IoSession session) throws Exception {}
 
 	public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
 		session.close();
@@ -198,7 +196,7 @@ public class HttpHandler implements IoHandler {
 					minaResponse.setHeader("Etag", etag);
 					minaResponse.setStatus(HttpResponseStatus.NOT_MODIFIED);
 				} else {
-					minaResponse.setHeader("Last-Modified", formatter.format(new Date(last)));
+					minaResponse.setHeader("Last-Modified", getHttpDateFormatter().format(new Date(last)));
 					minaResponse.setHeader("Cache-Control", "max-age=3600");
 					minaResponse.setHeader("Etag", etag);
 					attachFile(session, minaResponse, file);
@@ -231,7 +229,7 @@ public class HttpHandler implements IoHandler {
                 return true;
             } else {
                 try {
-                    Date browserDate = formatter.parse(request.getHeader("If-Modified-Since"));
+                    Date browserDate = getHttpDateFormatter().parse(request.getHeader("If-Modified-Since"));
                     if (browserDate.getTime() >= last) {
                         return false;
                     }
@@ -371,10 +369,13 @@ public class HttpHandler implements IoHandler {
 
 	}
 	
-	public static SimpleDateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
-
-    static {
-        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
-    }
-
+	private static ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat> ();
+	
+	public static SimpleDateFormat getHttpDateFormatter () {
+		if (formatter.get()==null) {
+			formatter.set(new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US));
+			formatter.get().setTimeZone(TimeZone.getTimeZone("GMT"));
+		}
+		return formatter.get();
+	}
 }
