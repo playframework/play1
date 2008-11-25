@@ -67,12 +67,8 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 }
                 iv.append("};");
             }
-            CtField signature = CtField.make("public static String[] $"+method.getName()+" = "+iv.toString(), ctClass);
+            CtField signature = CtField.make("public static String[] $" + method.getName() + " = " + iv.toString(), ctClass);
             ctClass.addField(signature);
-            
-            // init variable tracer
-            method.insertBefore("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.enter();");
-            method.insertAfter("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.exit();");
 
             // Bon.
             // Alors là il s'agit aprés chaque instruction de creation d'une variable locale
@@ -149,35 +145,39 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
             }
 
+            // init variable tracer
+            method.insertBefore("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.enter();");
+            method.insertAfter("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.exit();");
+
         }
+
         applicationClass.enhancedByteCode = ctClass.toBytecode();
 
         ctClass.defrost();
     }
 
- 
-       public static class LocalVariablesNamesTracer {
+    public static class LocalVariablesNamesTracer {
 
         static ThreadLocal<Stack<Map<String, Object>>> localVariables = new ThreadLocal<Stack<Map<String, Object>>>();
 
         public static void clear() {
-            if (localVariables.get() != null) {                
+            if (localVariables.get() != null) {
                 localVariables.set(null);
             }
         }
-        
+
         public static void enter() {
             if (localVariables.get() == null) {
                 localVariables.set(new Stack<Map<String, Object>>());
             }
-            localVariables.get().push(new HashMap<String, Object>());               
+            localVariables.get().push(new HashMap<String, Object>());
         }
 
         public static void exit() {
-            if(localVariables.get().isEmpty()) {
+            if (localVariables.get().isEmpty()) {
                 return;
             }
-            localVariables.get().pop().clear();     
+            localVariables.get().pop().clear();
         }
 
         public static Map<String, Object> locals() {
@@ -244,8 +244,6 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             return getLocalVariables().get(variable);
         }
     }
-
-    
     private static Map<Integer, Integer> storeByCode = new HashMap<Integer, Integer>();
     
 
