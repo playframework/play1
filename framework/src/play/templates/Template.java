@@ -28,6 +28,7 @@ import org.codehaus.groovy.syntax.SyntaxException;
 import org.codehaus.groovy.tools.GroovyClass;
 import play.Logger;
 import play.Play;
+import play.Play.Mode;
 import play.classloading.BytecodeCache;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.NoRouteFoundException;
@@ -52,6 +53,7 @@ public class Template {
     public Map<Integer, Integer> linesMatrix = new HashMap<Integer, Integer>();
     public Set<Integer> doBodyLines = new HashSet<Integer>();
     public Class compiledTemplate;
+    public String compiledTemplateName;
     public Long timestamp = System.currentTimeMillis();
 
     public Template(String name, String source) {
@@ -150,6 +152,7 @@ public class Template {
                 throw new UnexpectedException(e);
             }
         }
+        compiledTemplateName = compiledTemplate.getName();
     }
 
     public String render(Map<String, Object> args) {
@@ -181,9 +184,17 @@ public class Template {
         } catch (PlayException e) {
             throw (PlayException) cleanStackTrace(e);
         } catch (DoBodyException e) {
+            if(Play.mode == Mode.DEV) {
+                compiledTemplate = null;
+                BytecodeCache.deleteBytecode(name);
+            }
             Exception ex = (Exception) e.getCause();
             throwException(ex);
         } catch (Throwable e) {
+            if(Play.mode == Mode.DEV) {
+                compiledTemplate = null;
+                BytecodeCache.deleteBytecode(name);
+            }
             throwException(e);
         } finally {
         }
@@ -202,7 +213,7 @@ public class Template {
 
     void throwException(Throwable e) {
         for (StackTraceElement stackTraceElement : e.getStackTrace()) {
-            if (stackTraceElement.getClassName().equals(compiledTemplate.getName()) || stackTraceElement.getClassName().startsWith(compiledTemplate.getName() + "$_run_closure")) {
+            if (stackTraceElement.getClassName().equals(compiledTemplateName) || stackTraceElement.getClassName().startsWith(compiledTemplateName + "$_run_closure")) {
                 if (doBodyLines.contains(stackTraceElement.getLineNumber())) {
                     throw new DoBodyException(e);
                 } else if (e instanceof TagInternalException) {

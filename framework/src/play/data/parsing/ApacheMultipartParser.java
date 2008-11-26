@@ -20,6 +20,7 @@ import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.ParameterParser;
 import org.apache.commons.fileupload.ProgressListener;
+import play.Play;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http.Header;
 import play.mvc.Http.Request;
@@ -89,7 +90,7 @@ public class ApacheMultipartParser extends DataParser {
                     putMapEntry(result, fileItem.getFieldName(), fileItem.getString("UTF-8"));
                 } else {
                     // create temp file with current millis _ count static / fieldName / original file name. 
-                    File file = new File(System.getProperty("java.io.tmpdir") + File.separator + System.currentTimeMillis() + "_" + format.format(countLocal) + File.separator + item.getFieldName() + File.separator + item.getName());
+                    File file = new File(Play.tmpDir + File.separator + "uploads" + File.separator + System.currentTimeMillis() + "_" + format.format(countLocal) + File.separator + item.getFieldName() + File.separator + item.getName());
                     file.getParentFile().mkdirs();
                     try {
                         fileItem.write(file);

@@ -10,6 +10,20 @@ import play.Play;
 public class BytecodeCache {
 
     static String version = "1";
+    
+    public static void deleteBytecode(String name) {
+        try {
+            if (!Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
+                return;
+            }
+            File f = cacheFile(name.replace("/", "_"));
+            if (f.exists()) {
+                f.delete();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static byte[] getBytecode(String name, String source) {
         try {
@@ -80,9 +94,10 @@ public class BytecodeCache {
     }
 
     static File cacheFile(String id) {
-        if (!Play.getFile("tmp/bytecode/"+Play.mode.name()).exists()) {
-            Play.getFile("tmp/bytecode/"+Play.mode.name()).mkdirs();
+        File dir = new File(Play.tmpDir, "bytecode/" + Play.mode.name());
+        if (!dir.exists()) {
+            dir.mkdirs();
         }
-        return Play.getFile("tmp/bytecode/"+Play.mode.name() + "/" + id);
+        return new File(dir, id);
     }
 }

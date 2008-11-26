@@ -54,6 +54,10 @@ public class Play {
      */
     public static File applicationPath = null;
     /**
+     * tmp dir
+     */
+    public static File tmpDir = null;
+    /**
      * The framework root
      */
     public static File frameworkPath = null;
@@ -157,6 +161,12 @@ public class Play {
         routes.add(appRoot.child("conf/routes"));
         // Enable a first classloader
         classloader = new ApplicationClassloader();
+        // tmp dir
+        tmpDir = new File(configuration.getProperty("play.tmp", "tmp"));
+        if(!tmpDir.isAbsolute()) {
+            tmpDir = new File(applicationPath, tmpDir.getPath());
+        }
+        tmpDir.mkdirs();
         // Plugins
         bootstrapPlugins();
         
@@ -200,6 +210,25 @@ public class Play {
             }
         }
         configuration = newConfiguration;
+        // Resolve ${..}
+        pattern = Pattern.compile("\\$\\{([^}]+)}");
+        for (Object key : configuration.keySet()) {
+            String value = configuration.getProperty(key.toString());
+            Matcher matcher = pattern.matcher(value);
+            StringBuffer newValue = new StringBuffer();
+            while(matcher.find()) {
+                String jp = matcher.group(1);
+                String r = System.getProperty(jp);
+                if(r == null) {
+                    Logger.warn("Cannot replace %s in configuration (%s=%s)", jp, key, value);
+                    continue;
+                } 
+                matcher.appendReplacement(newValue, System.getProperty(jp));
+            }
+            matcher.appendTail(newValue);
+            configuration.setProperty(key.toString(), newValue.toString());
+        }
+        // Plugins
         for (PlayPlugin plugin : plugins) {
             plugin.onConfigurationRead();
         }
@@ -234,6 +263,12 @@ public class Play {
             }
             // Reload configuration
             readConfiguration();
+            // tmp dir
+            tmpDir = new File(configuration.getProperty("play.tmp", "tmp"));
+            if(!tmpDir.isAbsolute()) {
+                tmpDir = new File(applicationPath, tmpDir.getPath());
+            }
+            tmpDir.mkdirs();
             // Configure logs
             String logLevel = configuration.getProperty("application.log", "INFO");
             Logger.log4j.setLevel(Level.toLevel(logLevel));
