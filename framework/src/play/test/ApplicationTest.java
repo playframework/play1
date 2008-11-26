@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.regex.Pattern;
 import org.junit.After;
 import org.junit.Before;
 import play.Invoker.Invocation;
@@ -13,18 +14,18 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
 public abstract class ApplicationTest extends org.junit.Assert {
-    
+
     @Before
     public void before() {
         Invocation.before();
     }
-    
+
     @After
     public void after() {
         Invocation.after();
         Invocation._finally();
     }
-    
+
     // Requests
     public static Response GET(String url) {
         Request request = newRequest();
@@ -49,7 +50,7 @@ public abstract class ApplicationTest extends org.junit.Assert {
         return response;
     }
 
-    public static Response POST(String url, String contenttype, String body ) {
+    public static Response POST(String url, String contenttype, String body) {
         Request request = newRequest();
         String path = "";
         String queryString = "";
@@ -60,7 +61,7 @@ public abstract class ApplicationTest extends org.junit.Assert {
             path = url;
         }
         request.method = "POST";
-        request.contentType=contenttype;
+        request.contentType = contenttype;
         request.url = url;
         request.path = path;
         request.querystring = queryString;
@@ -80,7 +81,7 @@ public abstract class ApplicationTest extends org.junit.Assert {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-    }   
+    }
 
     public static Response newResponse() {
         Response response = new Response();
@@ -97,51 +98,67 @@ public abstract class ApplicationTest extends org.junit.Assert {
         request.querystring = "";
         return request;
     }
-    
+
     // Assertions
-    
     public static void assertIsOk(Response response) {
-        assertEquals((Object) 200, response.status);
+        assertStatus(200, response);
     }
-    
+
     public static void assertIsNotFound(Response response) {
-        assertEquals((Object) 404, response.status);
+        assertStatus(404, response);
     }
-    
+
+    public static void assertStatus(int status, Response response) {
+        assertEquals("Response status ", (Object) status, response.status);
+    }
+
     public static void assertContentEquals(String content, Response response) {
         assertEquals(content, getContent(response));
     }
-    
+
+    public static void assertContentMatch(String pattern, Response response) {
+        Pattern ptn = Pattern.compile(pattern);
+        boolean ok = ptn.matcher(getContent(response)).find();
+        assertTrue("Response content does not match '" + pattern + "' : " + getContent(response), ok);
+    }
+
+    public static void assertCharset(String charset, Response response) {
+        int pos=response.contentType.indexOf("charset=")+8;
+        String responseCharset = (  pos > 7 ) ? response.contentType.substring(pos).toLowerCase() : "";
+        assertEquals("Response charset", charset.toLowerCase(), responseCharset);
+    }
+
+    public static void assertContentType(String contentType, Response response) {
+        assertTrue("Response contentType unmatched : '" + contentType + "' !~ '" + response.contentType + "'",
+                response.contentType.startsWith(contentType));
+    }
+
     public static String getContent(Response response) {
-        byte[] data = ((ByteArrayOutputStream)response.out).toByteArray();
+        byte[] data = ((ByteArrayOutputStream) response.out).toByteArray();
         try {
             return new String(data, "utf-8");
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
     }
-    
+
     // Utils
-    
     public void sleep(int seconds) {
         try {
             Thread.sleep(seconds * 1000);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-    
+
     // Some classes
-       
     public abstract static class ControllerInvocation {
 
         public abstract void execute();
-        
+
         public void run() {
             ControllerInstrumentation.initActionCall();
-            execute();            
+            execute();
         }
-        
     }
-    
 }
