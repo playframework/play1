@@ -6,7 +6,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +37,7 @@ public class Java {
     }
 
     public static Object invokeStatic(Method method, Map<String, String[]> args) throws Exception {
-        String[] paramsNames = (String[])method.getDeclaringClass().getDeclaredField("$"+method.getName()).get(null);
+        String[] paramsNames = (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName()).get(null);
         if (paramsNames == null && method.getParameterTypes().length > 0) {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }
@@ -120,46 +119,13 @@ public class Java {
             findAllFields(sClazz, found);
         }
     }
-
-    /**
-     * Extract fields and setters without field from a bean class
-     * @param clazz the class to introspect
-     * @return set of FieldWrapper
-     */
-    public static Set<FieldWrapper> findSettableProperties(Class clazz) {
-        Set<FieldWrapper> result = new HashSet<FieldWrapper>();
-        
-        
-        while( clazz != Object.class ) {
-            Method[] methods = clazz.getDeclaredMethods();
-            for (Method method : methods) {
-                if( method.getName().startsWith("set") && method.getParameterTypes().length == 1 ) {
-                    String pseudofieldname =  method.getName().substring(3,3).toLowerCase() + method.getName().substring(4);                    
-                    
-                }
-            }
-            
-            
-            Field[] fields = clazz.getDeclaredFields();
-            for (int i = 0; i < fields.length; i++) {
-                FieldWrapper fw = new FieldWrapper(fields[i]);
-                result.add(fw);
-            }            
-            clazz = clazz.getSuperclass();
-        }
-        return result;
-    }
-
-
-    
     /** cache */
     private static Map<Field, FieldWrapper> wrappers = new HashMap<Field, FieldWrapper>();
 
-    
     public static FieldWrapper getFieldWrapper(Field field) {
         if (wrappers.get(field) == null) {
             FieldWrapper fw = new FieldWrapper(field);
-            play.Logger.debug("caching %s", fw );
+            play.Logger.debug("caching %s", fw);
             wrappers.put(field, fw);
         }
         return wrappers.get(field);
@@ -185,7 +151,7 @@ public class Java {
             this.setter = setter;
             this.getter = getter;
         }
-        
+
         private FieldWrapper(Field field) {
             this.field = field;
             accessible = field.isAccessible();
@@ -208,25 +174,25 @@ public class Java {
         }
 
         public void setValue(Object instance, Object value) {
-            if (! writable) {
+            if (!writable) {
                 return;
             }
             try {
                 if (setter != null) {
-                    play.Logger.debug( "invoke setter %s on %s with value %s", setter, instance, value );
+                    play.Logger.debug("invoke setter %s on %s with value %s", setter, instance, value);
                     setter.invoke(instance, value);
                 } else {
                     if (!accessible) {
                         field.setAccessible(true);
                     }
-                    play.Logger.debug( "field.set(%s, %s)", instance, value );
+                    play.Logger.debug("field.set(%s, %s)", instance, value);
                     field.set(instance, value);
                     if (!accessible) {
                         field.setAccessible(accessible);
                     }
                 }
             } catch (Exception ex) {
-                play.Logger.info( "ERROR: when setting value for field %s - %s", field, ex);
+                play.Logger.info("ERROR: when setting value for field %s - %s", field, ex);
             }
         }
 
@@ -238,16 +204,14 @@ public class Java {
                     return field.get(instance);
                 }
             } catch (Exception ex) {
-                play.Logger.info( "ERROR: when getting value for field %s - %s", field, ex);
+                play.Logger.info("ERROR: when getting value for field %s - %s", field, ex);
             }
             return null;
         }
 
-        
         @Override
         public String toString() {
-            return "FieldWrapper ("+(writable ? "RW" : "R ") +") for "+field;
+            return "FieldWrapper (" + (writable ? "RW" : "R ") + ") for " + field;
         }
-        
     }
 }

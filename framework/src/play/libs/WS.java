@@ -31,10 +31,9 @@ import org.xml.sax.InputSource;
 import play.Logger;
 import play.PlayPlugin;
 
-public class WS extends PlayPlugin{
+public class WS extends PlayPlugin {
 
     private static HttpClient httpClient;
-  
     private static ThreadLocal<GetMethod> getMethod = new ThreadLocal<GetMethod>();
     private static ThreadLocal<PostMethod> postMethod = new ThreadLocal<PostMethod>();
     private static ThreadLocal<DeleteMethod> deleteMethod = new ThreadLocal<DeleteMethod>();
@@ -45,15 +44,27 @@ public class WS extends PlayPlugin{
     @Override
     public void invocationFinally() {
         Logger.trace("Releasing http client connections...");
-        if (getMethod.get() != null) getMethod.get().releaseConnection();
-        if (postMethod.get() != null) postMethod.get().releaseConnection();
-        if (deleteMethod.get() != null) deleteMethod.get().releaseConnection();
-        if (optionsMethod.get() != null) optionsMethod.get().releaseConnection();
-        if (traceMethod.get() != null) traceMethod.get().releaseConnection();
-        if (headMethod.get() != null) headMethod.get().releaseConnection();
+        if (getMethod.get() != null) {
+            getMethod.get().releaseConnection();
+        }
+        if (postMethod.get() != null) {
+            postMethod.get().releaseConnection();
+        }
+        if (deleteMethod.get() != null) {
+            deleteMethod.get().releaseConnection();
+        }
+        if (optionsMethod.get() != null) {
+            optionsMethod.get().releaseConnection();
+        }
+        if (traceMethod.get() != null) {
+            traceMethod.get().releaseConnection();
+        }
+        if (headMethod.get() != null) {
+            headMethod.get().releaseConnection();
+        }
     }
-
     
+
     static {
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
         httpClient = new HttpClient(connectionManager);
@@ -65,8 +76,9 @@ public class WS extends PlayPlugin{
 
     public static HttpResponse GET(Map<String, Object> headers, String url, Object... params) {
         url = String.format(url, params);
-        if(getMethod.get() != null)
+        if (getMethod.get() != null) {
             getMethod.get().releaseConnection();
+        }
         getMethod.set(new GetMethod(url));
         try {
             if (headers != null) {
@@ -85,11 +97,11 @@ public class WS extends PlayPlugin{
         String mimeType = MimeTypes.getMimeType(body.getName());
         return POST(null, url, body, mimeType);
     }
-    
+
     public static HttpResponse POST(String url, File body, String mimeType) {
         return POST(null, url, body, mimeType);
     }
-    
+
     public static HttpResponse POST(Map<String, String> headers, String url, File body) {
         return POST(headers, url, body, null);
     }
@@ -106,16 +118,16 @@ public class WS extends PlayPlugin{
                     postMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
-            if(mimeType != null) {
+            if (mimeType != null) {
                 postMethod.get().addRequestHeader("content-type", mimeType);
             }
-            
+
             Part[] parts = {
                 new FilePart(body.getName(), body)
             };
-            
+
             postMethod.get().setRequestEntity(new MultipartRequestEntity(parts, postMethod.get().getParams()));
-            
+
             httpClient.executeMethod(postMethod.get());
             return new HttpResponse(postMethod.get());
         } catch (Exception e) {
@@ -123,11 +135,11 @@ public class WS extends PlayPlugin{
             throw new RuntimeException(e);
         }
     }
-    
-   public static HttpResponse POST(String url, Map<String, Object> body) {
+
+    public static HttpResponse POST(String url, Map<String, Object> body) {
         return POST(null, url, body);
     }
-    
+
     public static HttpResponse POST(Map<String, Object> headers, String url, Map<String, Object> body) {
         if (postMethod.get() != null) {
             postMethod.get().releaseConnection();
@@ -139,61 +151,61 @@ public class WS extends PlayPlugin{
                     postMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
-            
+
             postMethod.get().addRequestHeader("content-type", "application/x-www-form-urlencoded");
-            
+
             ArrayList<NameValuePair> nvps = new ArrayList<NameValuePair>();
             Set<String> keySet = body.keySet();
-            for(String key : keySet) {
+            for (String key : keySet) {
                 Object value = body.get(key);
-                if(value instanceof Collection) {
-                    for(Object v : (Collection)value) {
+                if (value instanceof Collection) {
+                    for (Object v : (Collection) value) {
                         NameValuePair nvp = new NameValuePair();
                         nvp.setName(key);
-                        nvp.setValue(v.toString());                   
+                        nvp.setValue(v.toString());
                     }
                 } else {
                     NameValuePair nvp = new NameValuePair();
                     nvp.setName(key);
-                    nvp.setValue(value.toString());                   
+                    nvp.setValue(value.toString());
                 }
             }
 
             postMethod.get().setRequestBody((NameValuePair[]) nvps.toArray());
-            
+
             httpClient.executeMethod(postMethod.get());
             return new HttpResponse(postMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-                
+
     public static HttpResponse POST(String url, String body, String mimeType) {
-        return POST((Map<String, Object>)null, url, body);
+        return POST((Map<String, Object>) null, url, body);
     }
-    
+
     public static HttpResponse POST(Map<String, Object> headers, String url, String body) {
         if (postMethod.get() != null) {
             postMethod.get().releaseConnection();
         }
         postMethod.set(new PostMethod(url));
-        
+
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
                     postMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
-            
+
             postMethod.get().setRequestEntity(new StringRequestEntity(body));
-            
+
             httpClient.executeMethod(postMethod.get());
             return new HttpResponse(postMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-    
+
     public static HttpResponse DELETE(String url) {
         return DELETE(null, url);
     }
@@ -209,14 +221,14 @@ public class WS extends PlayPlugin{
                     deleteMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
-            
+
             httpClient.executeMethod(deleteMethod.get());
             return new HttpResponse(deleteMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-    
+
     public static HttpResponse HEAD(String url, Object... params) {
         return HEAD(null, url, params);
     }
@@ -264,7 +276,7 @@ public class WS extends PlayPlugin{
             throw new RuntimeException(e);
         }
     }
-    
+
     public static HttpResponse OPTIONS(String url, Object... params) {
         return OPTIONS(null, url, params);
     }
@@ -274,7 +286,7 @@ public class WS extends PlayPlugin{
         if (optionsMethod.get() != null) {
             optionsMethod.get().releaseConnection();
         }
-        optionsMethod.set( new OptionsMethod(url));
+        optionsMethod.set(new OptionsMethod(url));
 
         try {
             if (headers != null) {
@@ -288,7 +300,7 @@ public class WS extends PlayPlugin{
             throw new RuntimeException(e);
         }
     }
-    
+
     public static String encode(String part) {
         try {
             return URLEncoder.encode(part, "utf-8");
@@ -316,36 +328,36 @@ public class WS extends PlayPlugin{
             try {
                 String xml = methodBase.getResponseBodyAsString();
                 StringReader reader = new StringReader(xml);
-                Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(reader));
-                return doc;
+                return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(reader));
             } catch (Exception e) {
                 throw new RuntimeException(e);
-            }finally{
+            } finally {
                 methodBase.releaseConnection();
             }
         }
         /*
          * Parses the xml with the given encoding. 
          */
-        public Document getXml(String encoding){
-             try {
+
+        public Document getXml(String encoding) {
+            try {
                 InputSource source = new InputSource(methodBase.getResponseBodyAsStream());
                 source.setEncoding(encoding);
                 Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(source);
                 return doc;
             } catch (Exception e) {
                 throw new RuntimeException(e);
-            }finally{
+            } finally {
                 methodBase.releaseConnection();
             }
         }
-        
+
         public String getString() {
             try {
                 return methodBase.getResponseBodyAsString();
             } catch (Exception e) {
                 throw new RuntimeException(e);
-            } finally{
+            } finally {
                 methodBase.releaseConnection();
             }
         }
@@ -357,14 +369,14 @@ public class WS extends PlayPlugin{
                 throw new RuntimeException(e);
             }
         }
-        
+
         public JSONObject getJSONObject() {
             try {
                 String json = methodBase.getResponseBodyAsString();
                 return JSONObject.fromObject(json);
             } catch (Exception e) {
                 throw new RuntimeException(e);
-            } finally{
+            } finally {
                 methodBase.releaseConnection();
             }
         }
@@ -375,47 +387,74 @@ public class WS extends PlayPlugin{
                 return JSONArray.fromObject(json);
             } catch (Exception e) {
                 throw new RuntimeException(e);
-            } finally{
+            } finally {
                 methodBase.releaseConnection();
             }
         }
+
         class ConnectionReleaserStream extends InputStream {
-            InputStream wrapped;
-            HttpMethodBase method;
+
+            private InputStream wrapped;
+            private HttpMethodBase method;
+
             public ConnectionReleaserStream(InputStream wrapped, HttpMethodBase method) {
                 this.wrapped = wrapped;
                 this.method = method;
             }
-            
+
             @Override
-            public int read() throws IOException {return this.wrapped.read();}
+            public int read() throws IOException {
+                return this.wrapped.read();
+            }
+
             @Override
-            public int read(byte[] arg0) throws IOException {return this.wrapped.read(arg0);}
+            public int read(byte[] arg0) throws IOException {
+                return this.wrapped.read(arg0);
+            }
+
             @Override
-            public synchronized void mark(int arg0) {this.wrapped.mark(arg0);}
+            public synchronized void mark(int arg0) {
+                this.wrapped.mark(arg0);
+            }
+
             @Override
-            public int read(byte[] arg0, int arg1, int arg2) throws IOException {return this.wrapped.read(arg0, arg1, arg2);}
+            public int read(byte[] arg0, int arg1, int arg2) throws IOException {
+                return this.wrapped.read(arg0, arg1, arg2);
+            }
+
             @Override
-            public synchronized void reset() throws IOException {this.wrapped.reset();}
+            public synchronized void reset() throws IOException {
+                this.wrapped.reset();
+            }
+
             @Override
-            public long skip(long arg0) throws IOException {return this.wrapped.skip(arg0);}
+            public long skip(long arg0) throws IOException {
+                return this.wrapped.skip(arg0);
+            }
+
             @Override
-            public int available() throws IOException {return this.wrapped.available();}
+            public int available() throws IOException {
+                return this.wrapped.available();
+            }
+
             @Override
-            public boolean markSupported() {return this.wrapped.markSupported();}
-            
+            public boolean markSupported() {
+                return this.wrapped.markSupported();
+            }
+
             @Override
             public void close() throws IOException {
                 try {
-                this.wrapped.close();
+                    this.wrapped.close();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
-                }finally {
-                    if (method != null) method.releaseConnection();
+                } finally {
+                    if (method != null) {
+                        method.releaseConnection();
+                    }
                 }
-                
+
             }
-            
         }
     }
 }
