@@ -154,7 +154,6 @@ public class Http {
             int maxAge = Time.parseDuration(duration);
             setHeader("Cache-Control", "max-age=" + maxAge);
         }
-        
-        
+                
     }
 }
