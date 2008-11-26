@@ -7,6 +7,15 @@
 function absname {
   if $CYGWIN; then
     return=`cygpath -ma "$1"`
+  elif $MACOS; then
+    # this switch sucks. needs rewrite.
+    if [ -d "$1" ] ; then   # a directory
+      return="$(cd $1 && pwd -P)"
+    elif [ -h "$1" ] ; then   # a symlink
+      return="$(cd $(dirname $(readlink $1)) && pwd -P)/$(basename $1)"
+    else # regular file, hopefully
+      return="$(cd $(dirname $1) && pwd -P)/$(basename $1)"
+    fi
   else
     return=`readlink -f $1`
   fi
@@ -47,8 +56,10 @@ function runAppOrDie {
 # ~~~~~~~~~~~~~~~~~~~~~~ Is it a real OS ?
 
 CYGWIN=false
+MACOS=false
 case "`uname`" in
   CYGWIN*) CYGWIN=true;;
+  Darwin*) MACOS=true;;
 esac
 
 
