@@ -1,11 +1,16 @@
 package play.libs;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
+import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -17,8 +22,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import play.Logger;
 import play.Play;
-import play.templates.Template;
-import play.templates.TemplateLoader;
 
 public class Mail {
     
@@ -26,49 +29,45 @@ public class Mail {
 
     /**
      * 
-     * @param templateName name of the template to be used. can be null
      * @param from email which will be shown to the receiver
      * @param recipient email of the recipient
      * @param params contains "subject", "body", "charset" and "contentType"
      */
-    public static void send(String templateName, String from, String recipient, Map<String, Object> params) {
-        send(templateName, from, recipient, params);
+    public static void send(String from, String recipient, Map<String, Object> params) {
+        send(from, recipient, params, new File[0]);
     }
 
     /**
      * 
-     * @param templateName name of the template to be used. can be null
      * @param from email which will be shown to the receiver
      * @param recipient email of the recipient
      * @param params contains "subject", "body", "charset" and "contentType"
      * @param attachments files to attach
      */
-    public static void send(String templateName, String from, String recipient, Map<String, Object> params, File... attachments) {
+    public static void send(String from, String recipient, Map<String, Object> params, File... attachments) {
         String[] recipients = {recipient};
-        send(templateName, from, recipients, params, attachments);
+        send(from, recipients, params, attachments);
     }
 
     
     /**
      * 
-     * @param templateName name of the template to be used. can be null
      * @param from email which will be shown to the receiver
      * @param recipients emails of the recipients
      * @param params contains "subject", "body", "charset" and "contentType"
      */
-    public static void send(String templateName, String from, String[] recipients, Map<String, Object> params) {
-        send(templateName, from, recipients, params);
+    public static void send(String from, String[] recipients, Map<String, Object> params) {
+        send(from, recipients, params, new File[0]);
     }
 
     /**
      * 
-     * @param templateName name of the template to be used. can be null
      * @param from email which will be shown to the receiver
      * @param recipients emails of the recipients
      * @param params contains "subject", "body", "charset" and "contentType"
      * @param attachments files to attach
      */
-    public static void send(String templateName, String from, String[] recipients, Map<String, Object> params, File... attachments) {
+    public static void send(String from, String[] recipients, Map<String, Object> params, File... attachments) {
         try {
             Message msg = new MimeMessage(getSession());
 
@@ -80,11 +79,13 @@ public class Mail {
                 addressTo[i] = new InternetAddress(recipients[i]);
             }
             msg.setRecipients(javax.mail.Message.RecipientType.TO, addressTo);
-            msg.setSubject(params.get("subject").toString());
+
+            msg.setSubject(params.containsKey("subject") ? params.get("subject").toString() : "");
+
 
             Multipart mp = new MimeMultipart();
 
-            handleContent(mp, templateName, params);
+            handleContent(mp, params);
             handleAttachments(mp, attachments);
 
             msg.setContent(mp);
@@ -105,22 +106,16 @@ public class Mail {
         return session;
     }
     
-    private static void handleContent(Multipart mp, String templateName, Map<String, Object> params) {
+    private static void handleContent(Multipart mp, Map<String, Object> params) {
         try {
             String charset = (params.containsKey("charset")) ? (String) params.get("charset") : "utf-8";
             String contentType = (params.containsKey("contentType")) ? (String) params.get("contentType") : "text/html; charset=" + charset;
             MimeBodyPart body = new MimeBodyPart();
-            if (params.get("body") != null) {
-                body.setContent(params.get("body").toString(), contentType);
-                mp.addBodyPart(body);
-            } else {
-                Template template = TemplateLoader.load(templateName);
-                body.setContent(template.render(params), contentType);
-                
-                mp.addBodyPart(body);
-            }
+            String bodyContent = (params.containsKey("body")) ? params.get("body").toString() : "";
+            body.setContent(bodyContent, contentType);
+            mp.addBodyPart(body);
         } catch (MessagingException ex) {
-            Logger.error("An error occurred while processing mail content");
+            ex.printStackTrace();
         }
     }
     
@@ -134,21 +129,21 @@ public class Mail {
                     part.setFileName(fds.getName());
                     mp.addBodyPart(part);
                 } catch (MessagingException ex) {
-                    Logger.error("An error occurred while processing mail attachments");
+                    ex.printStackTrace();
                 }
             }
         }
     }
     
     public synchronized static void sendMessage(Message msg) {
-        try {
+        try {          
             msg.setSentDate(new Date());
             Transport transport = getSession().getTransport("smtp");
             transport.connect(getSession().getProperty("mail.smtp.host"), Play.configuration.getProperty("mail.smtp.user"), Play.configuration.getProperty("mail.smtp.pass"));
             transport.sendMessage(msg, msg.getAllRecipients());
             transport.close();
         } catch (MessagingException ex) {
-            Logger.error("An error occurred while sending mail");
+            java.util.logging.Logger.getLogger(Mail.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }
