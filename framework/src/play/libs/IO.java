@@ -76,4 +76,11 @@ public class IO {
         os.flush();
         os.close();
     }
+    
+    public static void write(byte[] data, File file) throws IOException {
+        OutputStream os = new FileOutputStream(file);
+        os.write(data);
+        os.flush();
+        os.close();
+    }
 }

@@ -283,6 +283,8 @@ public class Play {
 
     static void preCompile() {
         try {
+            ClassLoader l = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(classloader);
             Logger.info("Precompiling ...");
             long start = System.currentTimeMillis();
             classloader.getAllClasses();
@@ -290,6 +292,7 @@ public class Play {
             start = System.currentTimeMillis();
             TemplateLoader.getAllTemplate();
             Logger.trace("%sms to precompile the templates", System.currentTimeMillis()-start);
+            Thread.currentThread().setContextClassLoader(l);
         } catch (Throwable e) {
             Logger.error(e, "Cannot start in PROD mode with errors");
             System.exit(-1);

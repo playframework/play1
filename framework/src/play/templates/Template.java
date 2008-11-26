@@ -2,6 +2,7 @@ package play.templates;
 
 import groovy.lang.Binding;
 import groovy.lang.Closure;
+import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObjectSupport;
 import groovy.lang.MissingPropertyException;
 import groovy.lang.Script;
@@ -27,7 +28,6 @@ import org.codehaus.groovy.syntax.SyntaxException;
 import org.codehaus.groovy.tools.GroovyClass;
 import play.Logger;
 import play.Play;
-import play.classloading.ApplicationClasses.ApplicationClass;
 import play.classloading.BytecodeCache;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.NoRouteFoundException;
@@ -53,19 +53,18 @@ public class Template {
     public Set<Integer> doBodyLines = new HashSet<Integer>();
     public Class compiledTemplate;
     public Long timestamp = System.currentTimeMillis();
-    boolean needJavaRecompilation;
 
     public Template(String name, String source) {
         this.name = name;
         this.source = source;
     }
     
-    public static class TClassLoader extends ClassLoader {
+    public static class TClassLoader extends GroovyClassLoader {
         
         public TClassLoader() {
             super(Play.classloader);
         }
-        
+
         public Class defineTemplate(String name, byte[] byteCode) {
             return defineClass(name, byteCode, 0, byteCode.length);
         }
@@ -102,7 +101,7 @@ public class Template {
                     CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
                     compilerConfiguration.setSourceEncoding("utf-8"); // ouf
                     CompilationUnit compilationUnit = new CompilationUnit(compilerConfiguration);
-                    compilationUnit.addSource( new SourceUnit(name, groovySource, compilerConfiguration, compilationUnit.getClassLoader(), compilationUnit.getErrorCollector()) );
+                    compilationUnit.addSource( new SourceUnit(name, groovySource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()) );
                     Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
                     phasesF.setAccessible(true);
                     LinkedList[] phases = (LinkedList[])phasesF.get(compilationUnit);
