@@ -8,7 +8,6 @@ function absname {
   if $CYGWIN; then
     return=`cygpath -ma "$1"`
   elif $MACOS; then
-    # this switch sucks. needs rewrite.
     if [ -d "$1" ] ; then   # a directory
       return="$(cd $1 && pwd -P)"
     elif [ -h "$1" ] ; then   # a symlink
