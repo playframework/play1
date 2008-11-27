@@ -23,6 +23,7 @@ public abstract class TestSupport extends ApplicationTest {
         new File(root, "app").mkdir();
         new File(root, "app/controllers").mkdir();
         new File(root, "app/models").mkdir();
+        new File(root, "app/views/Application").mkdirs();
         new File(root, "conf").mkdir();
         IO.writeContent("application.name=Test", new FileOutputStream(new File(root, "conf/application.conf")));
         IO.writeContent("# Routes", new FileOutputStream(new File(root, "conf/routes")));
@@ -43,6 +44,10 @@ public abstract class TestSupport extends ApplicationTest {
 
         public void writeController(String name, String code) throws IOException  {
             IO.writeContent(code, new FileOutputStream(new File(root, "app/controllers/"+name+".java")));
+        }
+        
+        public void writeView(String name, String code) throws IOException  {
+            IO.writeContent(code, new FileOutputStream(new File(root, "app/views/"+name)));
         }
         
         public void removeController(String name) throws IOException  {
