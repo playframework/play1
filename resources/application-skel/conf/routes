@@ -7,4 +7,4 @@
 
 
 # Map static resources from the app/public folder to /public
-GET			/public							staticDir:public    
+GET			/public						staticDir:public    

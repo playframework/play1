@@ -133,7 +133,7 @@ public class Mailer {
         if(infos.get().containsKey("subject"))
             params.put("subject", infos.get().get("subject"));
 
-        Mail.send(from, recipients, params, files);
+        //Mail.send(from, recipients, params, files);
     }
     
 }
