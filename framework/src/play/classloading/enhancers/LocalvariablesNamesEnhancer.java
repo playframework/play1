@@ -15,6 +15,7 @@ import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.CodeIterator;
 import javassist.bytecode.LocalVariableAttribute;
 import javassist.compiler.Javac;
+import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.mvc.Controller;
 
@@ -25,6 +26,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
+        
         CtClass ctClass = makeClass(applicationClass);
         if (!ctClass.subtypeOf(classPool.get(Controller.class.getName()))) {
             return;
@@ -147,7 +149,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
             // init variable tracer
             method.insertBefore("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.enter();");
-            method.insertAfter("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.exit();");
+            method.insertAfter("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.exit();", true);
 
         }
 
@@ -158,8 +160,14 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
     public static class LocalVariablesNamesTracer {
 
-        static ThreadLocal<Stack<Map<String, Object>>> localVariables = new ThreadLocal<Stack<Map<String, Object>>>();
-
+        static ThreadLocal<Stack<Map<String, Object>>> localVariables = new ThreadLocal();
+        
+        public static void checkEmpty() {
+            if(localVariables.get().size() != 0) {
+                Logger.error("LocalVariablesNamesTracer.checkEmpty, constraint violated (%s)", localVariables.get().size());
+            }
+        }
+        
         public static void clear() {
             if (localVariables.get() != null) {
                 localVariables.set(null);

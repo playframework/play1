@@ -92,11 +92,11 @@ public class ApplicationClasses {
     
     // Enhancers
     Class[] enhancers = new Class[]{
-        LocalvariablesNamesEnhancer.class,
         ControllersEnhancer.class,
         PropertiesEnhancer.class,
         JPAEnhancer.class,
-        ZDBEnhancer.class
+        ZDBEnhancer.class,
+        LocalvariablesNamesEnhancer.class
     };
 
     /**
