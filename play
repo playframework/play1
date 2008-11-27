@@ -45,7 +45,7 @@ function readConf {
 }
 
 function runAppOrDie {
-   [  -f "${APPLICATION_PATH}/server.pid" ] || {
+   [  -f "${PLAY_PID_PATH}" ] || {
   echo "~ Oops! ${APPLICATION_PATH} is not started (server.pid not found)"
   echo "~"
   exit 1
@@ -298,6 +298,13 @@ fi
 absname "$APPLICATION_PATH"
 APPLICATION_PATH="${return}"
 
+if [ -z "$PLAY_PID_PATH" ]; then
+	PLAY_PID_PATH="${APPLICATION_PATH}/server.pid";
+fi
+
+if [ -z "$PLAY_LOG_PATH" ]; then
+	PLAY_LOG_PATH="${APPLICATION_PATH}/logs/";
+fi
 
 # ~~~~~~~~~~~~~~~~~~~~~~ [new] Create a new application
 
@@ -455,19 +462,19 @@ fi
 # ~~~~~~~~~~~~~~~~~~~~~~ [start] Start the application in background
 
 if [ "$PLAY_COMMAND" = "start" ] ; then
-  if [ ! -r "${APPLICATION_PATH}/logs" ] ; then
-    mkdir -p "${APPLICATION_PATH}/logs";
+  if [ ! -r "${PLAY_LOG_PATH}" ] ; then
+    mkdir -p "${PLAY_LOG_PATH}";
   fi
-  if [ -f "${APPLICATION_PATH}/server.pid" ] ; then
-    echo "~ Oops. $APPLICATION_PATH is already started ! (or delete ${APPLICATION_PATH}/server.pid)"
+  if [ -f "${PLAY_PID_PATH}" ] ; then
+    echo "~ Oops. $APPLICATION_PATH is already started ! (or delete ${PLAY_PID_PATH})"
     echo "~"
     exit 1
   else
-    "$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server > "${APPLICATION_PATH}"/logs/system.out 2>&1 &
+    "$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server > "${PLAY_LOG_PATH}"/system.out 2>&1 &
     echo "~ Ok, $APPLICATION_PATH is started"
-    echo "~ output is redirected to ${APPLICATION_PATH}/logs/system.out"
-    echo $! > "$APPLICATION_PATH/server.pid"
-      echo "~ pid is `cat "$APPLICATION_PATH"/server.pid`"
+    echo "~ output is redirected to ${PLAY_LOG_PATH}/system.out"
+    echo $! > "${PLAY_PID_PATH}"
+      echo "~ pid is `cat "${PLAY_PID_PATH}"`"
     echo "~"
     exit
   fi
@@ -478,10 +485,10 @@ fi
 
 if [ "$PLAY_COMMAND" = "stop" ] ; then
   runAppOrDie;
-  echo "~ kill `cat "${APPLICATION_PATH}"/server.pid`"
-  kill `cat "$APPLICATION_PATH/server.pid"`
-  rm "${APPLICATION_PATH}/server.pid"
-  rm "${APPLICATION_PATH}/logs/system.out"
+  echo "~ kill `cat ${PLAY_PID_PATH}`"
+  kill `cat "${PLAY_PID_PATH}"`
+  rm "${PLAY_PID_PATH}"
+  rm "${PLAY_LOG_PATH}/system.out"
   echo "~ Ok, $APPLICATION_PATH is stopped"
   echo "~"
   exit
@@ -492,7 +499,7 @@ fi
 
 if [ "$PLAY_COMMAND" = "pid" ] ; then
   runAppOrDie;
-  echo "~ The pid for $APPLICATION_PATH is `cat "${APPLICATION_PATH}/server.pid"`"
+  echo "~ The pid for $APPLICATION_PATH is `cat "${PLAY_PID_PATH}"`"
   echo "~"
   exit
 fi
@@ -502,7 +509,7 @@ fi
 
 if [ "$PLAY_COMMAND" = "log" ] || [ "$PLAY_COMMAND" = "out" ] ; then
   runAppOrDie;
-  tail -f "${APPLICATION_PATH}/logs/system.out"
+  tail -f "${PLAY_LOG_PATH}/system.out"
   exit
 fi
 
@@ -511,16 +518,16 @@ fi
 
 if [ "$PLAY_COMMAND" = "restart" ] ; then
   runAppOrDie;
-  echo "~ killing process `cat "${APPLICATION_PATH}"/server.pid`"
-  kill `cat "$APPLICATION_PATH/server.pid"`
-  rm "${APPLICATION_PATH}/server.pid"
-  rm "${APPLICATION_PATH}/logs/system.out"
+  echo "~ killing process `cat "${PLAY_PID_PATH}`"
+  kill `cat "${PLAY_PID_PATH}"`
+  rm "${PLAY_PID_PATH}"
+  rm "${PLAY_LOG_PATH}/system.out"
   echo "~ $APPLICATION_PATH is stopped"
-  "$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server > "${APPLICATION_PATH}"/logs/system.out 2>&1 &
+  "$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server > ${PLAY_LOG_PATH}/system.out 2>&1 &
   echo "~ $APPLICATION_PATH is started"
-  echo "~ Output is redirected to ${APPLICATION_PATH}/logs/system.out ..."
-  echo $! > "${APPLICATION_PATH}/server.pid"
-  echo "~ pid is `cat "${APPLICATION_PATH}/server.pid"`"
+  echo "~ Output is redirected to ${PLAY_LOG_PATH}/system.out ..."
+  echo $! > "${PLAY_PID_PATH}"
+  echo "~ pid is `cat "${PLAY_PID_PATH}"`"
   echo "~"
   exit
 fi
