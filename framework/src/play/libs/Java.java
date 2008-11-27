@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
 
@@ -37,7 +38,7 @@ public class Java {
     }
 
     public static Object invokeStatic(Method method, Map<String, String[]> args) throws Exception {
-        String[] paramsNames = (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName()).get(null);
+        String[] paramsNames = (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes())).get(null);
         if (paramsNames == null && method.getParameterTypes().length > 0) {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }

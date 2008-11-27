@@ -19,11 +19,15 @@ public class TemplateCompiler {
     public static Template compile(VirtualFile file) {
         try {
 
-            List<Class> extensionsClasses = Play.classloader.getAssignableClasses(JavaExtensions.class);
-            if (!extensionsClasses.isEmpty()) {
-                extensionsClassname = extensionsClasses.get(0).getName();
-            } else {
-                extensionsClassname = JavaExtensions.class.getName();
+            try {
+                List<Class> extensionsClasses = Play.classloader.getAssignableClasses(JavaExtensions.class);
+                if (!extensionsClasses.isEmpty()) {
+                    extensionsClassname = extensionsClasses.get(0).getName();
+                } else {
+                    extensionsClassname = JavaExtensions.class.getName();
+                }
+            } catch(Throwable e) {
+                // ok
             }
 
             String source = file.contentAsString();

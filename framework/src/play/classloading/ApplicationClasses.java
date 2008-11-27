@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import play.Logger;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.Enhancer;
 import play.classloading.enhancers.JPAEnhancer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer;
+import play.classloading.enhancers.MailerEnhancer;
 import play.classloading.enhancers.PropertiesEnhancer;
 import play.classloading.enhancers.ZDBEnhancer;
 import play.exceptions.UnexpectedException;
@@ -93,6 +93,7 @@ public class ApplicationClasses {
     // Enhancers
     Class[] enhancers = new Class[]{
         ControllersEnhancer.class,
+        MailerEnhancer.class,
         PropertiesEnhancer.class,
         JPAEnhancer.class,
         ZDBEnhancer.class,

@@ -18,6 +18,7 @@ import javassist.compiler.Javac;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.mvc.Controller;
+import play.mvc.Mailer;
 
 /**
  * Track names of local variables ...
@@ -26,9 +27,9 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
-        
+
         CtClass ctClass = makeClass(applicationClass);
-        if (!ctClass.subtypeOf(classPool.get(Controller.class.getName()))) {
+        if (!ctClass.subtypeOf(classPool.get(Controller.class.getName())) && !ctClass.subtypeOf(classPool.get(Mailer.class.getName()))) {
             return;
         }
 
@@ -69,7 +70,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 }
                 iv.append("};");
             }
-            CtField signature = CtField.make("public static String[] $" + method.getName() + " = " + iv.toString(), ctClass);
+            CtField signature = CtField.make("public static String[] $" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes()) + " = " + iv.toString(), ctClass);
             ctClass.addField(signature);
 
             // Bon.
@@ -160,14 +161,46 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
     public static class LocalVariablesNamesTracer {
 
+        public static Integer computeMethodHash(CtClass[] parameters) {
+            String[] names = new String[parameters.length];
+            for (int i = 0; i < parameters.length; i++) {
+                names[i] = parameters[i].getName();
+            }
+            return computeMethodHash(names);
+        }
+
+        public static Integer computeMethodHash(Class[] parameters) {
+            String[] names = new String[parameters.length];
+            for (int i = 0; i < parameters.length; i++) {
+                if (parameters[i].isArray()) {
+                    names[i] = parameters[i].getComponentType().getName() + "[]";
+                } else {
+                    names[i] = parameters[i].getName();
+                }
+            }
+            return computeMethodHash(names);
+        }
+
+        public static Integer computeMethodHash(String[] parameters) {
+            StringBuffer buffer = new StringBuffer();
+            for (String param : parameters) {
+                buffer.append(param);
+            }
+            Integer hash = buffer.toString().hashCode();
+            ;
+            if (hash < 0) {
+                return -hash;
+            }
+            return hash;
+        }
         static ThreadLocal<Stack<Map<String, Object>>> localVariables = new ThreadLocal();
-        
+
         public static void checkEmpty() {
-            if(localVariables.get().size() != 0) {
+            if (localVariables.get().size() != 0) {
                 Logger.error("LocalVariablesNamesTracer.checkEmpty, constraint violated (%s)", localVariables.get().size());
             }
         }
-        
+
         public static void clear() {
             if (localVariables.get() != null) {
                 localVariables.set(null);

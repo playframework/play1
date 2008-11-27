@@ -11,6 +11,7 @@ import javassist.expr.Handler;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
+import play.mvc.Controller;
 
 /**
  * Enhance controllers classes.
@@ -21,7 +22,7 @@ public class ControllersEnhancer extends Enhancer {
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
         CtClass ctClass = makeClass(applicationClass);
         
-        if(!ctClass.subtypeOf(classPool.get("play.mvc.Controller"))) {
+        if(!ctClass.subtypeOf(classPool.get(Controller.class.getName()))) {
             return;
         }
 

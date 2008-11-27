@@ -30,6 +30,7 @@ import play.Logger;
 import play.Play;
 import play.Play.Mode;
 import play.classloading.BytecodeCache;
+import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
@@ -347,7 +348,7 @@ public class Template {
                     String action = controller + "." + name;
                     try {
                         Map<String, Object> r = new HashMap<String, Object>();
-                        String[] names = (String[]) ActionInvoker.getActionMethod(action).getDeclaringClass().getDeclaredField("$" + ActionInvoker.getActionMethod(action).getName()).get(null);
+                        String[] names = (String[]) ActionInvoker.getActionMethod(action).getDeclaringClass().getDeclaredField("$" + ActionInvoker.getActionMethod(action).getName() + LocalVariablesNamesTracer.computeMethodHash(ActionInvoker.getActionMethod(action).getParameterTypes())).get(null);
                         if (param instanceof Object[]) {
                             for (int i = 0; i < ((Object[]) param).length; i++) {
                                 r.put(names[i], ((Object[]) param)[i] == null ? null : ((Object[]) param)[i].toString());

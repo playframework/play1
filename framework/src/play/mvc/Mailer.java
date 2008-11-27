@@ -5,29 +5,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
+import play.exceptions.UnexpectedException;
 import play.libs.Mail;
 import play.templates.Template;
 import play.templates.TemplateLoader;
 
-
 public class Mailer {
 
-    private static ThreadLocal<HashMap<String, Object>> infos = new ThreadLocal<HashMap<String, Object>>();
-    
-    public static void setSubject(String subject) {
+    protected static ThreadLocal<HashMap<String, Object>> infos = new ThreadLocal<HashMap<String, Object>>();
+
+    public static void setSubject(String subject, Object... args) {
         HashMap map = infos.get();
         if (map == null) {
-            map = new HashMap<String, String>();
+            throw new UnexpectedException("Mailer not instrumented ?");
         }
-        map.put("subject", subject);
+        map.put("subject", String.format(subject, args));
         infos.set(map);
     }
 
-    public static void addRecipient(String ... recipients) {
+    public static void addRecipient(String... recipients) {
         HashMap map = infos.get();
         if (map == null) {
-            map = new HashMap<String, String>();
+            throw new UnexpectedException("Mailer not instrumented ?");
         }
         List recipientsList = (List<String>) map.get("recipients");
         if (recipientsList == null) {
@@ -38,10 +39,10 @@ public class Mailer {
         infos.set(map);
     }
 
-    public static void addAttachment(File ... attachments) {
+    public static void addAttachment(File... attachments) {
         HashMap map = infos.get();
         if (map == null) {
-            map = new HashMap<String, String>();
+            throw new UnexpectedException("Mailer not instrumented ?");
         }
         List attachmentsList = (List) map.get("attachments");
         if (attachmentsList == null) {
@@ -55,65 +56,73 @@ public class Mailer {
     public static void setContentType(String contentType) {
         HashMap map = infos.get();
         if (map == null) {
-            map = new HashMap<String, String>();
+            throw new UnexpectedException("Mailer not instrumented ?");
         }
         map.put("contentType", contentType);
-        infos.set(map);
-    }
-
-    public static void setCharset(String charset) {
-        HashMap map = infos.get();
-        if (map == null) {
-            map = new HashMap<String, String>();
-        }
-        map.put("charset", charset);
         infos.set(map);
     }
 
     public static void setFrom(String from) {
         HashMap map = infos.get();
         if (map == null) {
-            map = new HashMap<String, String>();
+            throw new UnexpectedException("Mailer not instrumented ?");
         }
         map.put("from", from);
         infos.set(map);
     }
 
-    public static void renderBody(Object... args) {
+    public static void send(Object... args) {
+        HashMap map = infos.get();
+        if (map == null) {
+            throw new UnexpectedException("Mailer not instrumented ?");
+        }
 
-        String templateName = null;
+        // Content type
+        String contentType = (String) infos.get().get("contentType");
+        if(contentType == null) {
+            contentType = "text/plain";
+        }
 
-        String className = null;
-        String methodName = null;
+        // Subject
+        String subject = (String) infos.get().get("subject");
 
-        StackTraceElement st = Thread.currentThread().getStackTrace()[2];
-        className = st.getClassName();
-        methodName = st.getMethodName();
-        templateName = className.replaceAll("\\.", File.separator) + File.separator + methodName + ".html";
+        String templateName = (String)infos.get().get("method");
+        if(templateName.startsWith("notifiers.")) {
+            templateName = templateName.substring("notifiers.".length());
+        }
+        templateName = templateName.substring(0, templateName.indexOf("("));
+        templateName = templateName.replace(".", "/");
+        if(contentType.equals("text/html")) {
+            templateName += ".html";
+        } else {
+            templateName += ".txt";
+        }
 
         HashMap<String, Object> params = new HashMap<String, Object>();
         Template template = TemplateLoader.load(templateName);
 
-        Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
+        Map<String, Object> templateBinding = new HashMap();
         for (Object o : args) {
             List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
-            for(String name : names) {
+            for (String name : names) {
                 templateBinding.put(name, o);
             }
         }
-        params.put("body", template.render(templateBinding.data));
-        params.remove("messages");
-        params.remove("out");
-        params.remove("lang");
+        String body = template.render(templateBinding);
 
+        // Recipients
         List<String> recipientList = (List<String>) infos.get().get("recipients");
         String[] recipients = new String[recipientList.size()];
         int i = 0;
-        for(String recipient : recipientList) {
+        for (String recipient : recipientList) {
             recipients[i] = recipient;
             i++;
         }
+
+        // From
         String from = (String) infos.get().get("from");
+
+        // Attachment
         File[] files = new File[0];
         if (infos.get().get("attachments") != null) {
             List<File> fileList = (List<File>) infos.get().get("attachments");
@@ -126,14 +135,9 @@ public class Mailer {
 
         }
         
-        if(infos.get().containsKey("contentType"))
-            params.put("contentType", infos.get().get("contentType"));
-        if(infos.get().containsKey("charset"))
-            params.put("charset", infos.get().get("charset"));
-        if(infos.get().containsKey("subject"))
-            params.put("subject", infos.get().get("subject"));
+        System.out.println(body);
 
-        //Mail.send(from, recipients, params, files);
+        // Send
+        Mail.send(from, recipients, subject, body, contentType, files);
     }
-    
 }

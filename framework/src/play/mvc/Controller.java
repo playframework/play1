@@ -128,7 +128,7 @@ public abstract class Controller {
     protected static void redirect(String action, Object... args) {
         try {
             Map<String, Object> r = new HashMap<String, Object>();
-            String[] names = (String[]) ActionInvoker.getActionMethod(action).getDeclaringClass().getDeclaredField("$" + ActionInvoker.getActionMethod(action).getName()).get(null);
+            String[] names = (String[]) ActionInvoker.getActionMethod(action).getDeclaringClass().getDeclaredField("$" + ActionInvoker.getActionMethod(action).getName() + LocalVariablesNamesTracer.computeMethodHash(ActionInvoker.getActionMethod(action).getParameterTypes())).get(null);
             assert names.length == args.length : "Problem is action redirection";
             for (int i = 0; i < names.length; i++) {
                 r.put(names[i], args[i] == null ? null : args[i].toString());

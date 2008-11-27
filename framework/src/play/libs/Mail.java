@@ -15,8 +15,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import play.Logger;
 import play.Play;
+import play.exceptions.MailException;
 
 public class Mail {
 
@@ -53,6 +53,23 @@ public class Mail {
     public static void send(String from, String[] recipients, String subject, String body, String contentType, File... attachments) {
         try {
             MimeMessage msg = new MimeMessage(getSession());
+            
+            if(from == null) {
+                from = Play.configuration.getProperty("mail.smtp.from");
+            }
+            if(from == null) {
+                throw new MailException("Please define a 'from' email address");
+            }
+            if(recipients == null || recipients.length == 0) {
+                throw new MailException("Please define a recipient email address");
+            }
+            if(subject == null) {
+                throw new MailException("Please define a subject");
+            }
+            
+            if(contentType == null) {
+                contentType = "text/plain";
+            }
 
             InternetAddress addressFrom = new InternetAddress(from);
             msg.setFrom(addressFrom);
@@ -77,7 +94,7 @@ public class Mail {
 
             sendMessage(msg);
         } catch (MessagingException ex) {
-            Logger.error("An error occurred while processing mail");
+            throw new MailException("Cannot send email", ex);
         }
     }
 
