@@ -135,8 +135,6 @@ public class Mailer {
 
         }
         
-        System.out.println(body);
-
         // Send
         Mail.send(from, recipients, subject, body, contentType, files);
     }

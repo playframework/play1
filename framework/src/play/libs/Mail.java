@@ -58,13 +58,13 @@ public class Mail {
                 from = Play.configuration.getProperty("mail.smtp.from");
             }
             if(from == null) {
-                throw new MailException("Please define a 'from' email address");
+                throw new MailException("Please define a 'from' email address", new NullPointerException());
             }
             if(recipients == null || recipients.length == 0) {
-                throw new MailException("Please define a recipient email address");
+                throw new MailException("Please define a recipient email address", new NullPointerException());
             }
             if(subject == null) {
-                throw new MailException("Please define a subject");
+                throw new MailException("Please define a subject", new NullPointerException());
             }
             
             if(contentType == null) {
