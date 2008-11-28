@@ -196,7 +196,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         static ThreadLocal<Stack<Map<String, Object>>> localVariables = new ThreadLocal();
 
         public static void checkEmpty() {
-            if (localVariables.get().size() != 0) {
+            if(localVariables.get() != null && localVariables.get().size() != 0) {
                 Logger.error("LocalVariablesNamesTracer.checkEmpty, constraint violated (%s)", localVariables.get().size());
             }
         }
