@@ -4,3 +4,4 @@
 3:play.i18n.MessagesPlugin
 4:play.db.zdb.ZDBPlugin
 5:play.libs.WS
+6:play.data.parsing.TempFilePlugin

@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -20,7 +19,6 @@ import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.ParameterParser;
 import org.apache.commons.fileupload.ProgressListener;
-import play.Play;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http.Header;
 import play.mvc.Http.Request;
@@ -32,27 +30,11 @@ import play.mvc.Http.Request;
 public class ApacheMultipartParser extends DataParser {
 
     private static FileItemFactory fileItemFactory = new DiskFileItemFactory();
-    private static DecimalFormat format = new DecimalFormat("##########");
 
-    static {
-        format.setMinimumIntegerDigits(10);
-        format.setGroupingUsed(false);
 
-    }
-    private static long count = 0;
-
-    /**
-     * Return a unique long used to store files.
-     * 
-     * @return
-     */
-    private static synchronized long getCountLocal() {
-        return count++;
-    }
 
     public Map<String, String[]> parse(InputStream body) {
         Map<String, String[]> result = new HashMap<String, String[]>();
-        long countLocal = getCountLocal();
         /**
          * Processes an <a href="http://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>
          * compliant <code>multipart/form-data</code> stream.
@@ -90,7 +72,7 @@ public class ApacheMultipartParser extends DataParser {
                     putMapEntry(result, fileItem.getFieldName(), fileItem.getString("UTF-8"));
                 } else {
                     // create temp file with current millis _ count static / fieldName / original file name. 
-                    File file = new File(Play.tmpDir + File.separator + "uploads" + File.separator + System.currentTimeMillis() + "_" + format.format(countLocal) + File.separator + item.getFieldName() + File.separator + item.getName());
+                    File file =  new File ( TempFilePlugin.createTempFolder(), item.getFieldName() + File.separator + item.getName());
                     file.getParentFile().mkdirs();
                     try {
                         fileItem.write(file);
