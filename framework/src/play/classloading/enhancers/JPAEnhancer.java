@@ -63,12 +63,16 @@ public class JPAEnhancer extends Enhancer {
         CtMethod findBy = CtMethod.make("public static java.util.List findBy(String query, Object[] params) { javax.persistence.Query q = getEntityManager().createQuery(createFindByQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", query, params)); return bindParameters(q,params).getResultList(); }", ctClass);
         ctClass.addMethod(findBy);
         
-        // query        
-        CtMethod query = CtMethod.make("public static play.db.jpa.JPAModel.JPAQuery query(String query, Object[] params) { javax.persistence.Query q = getEntityManager().createQuery(createFindByQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", query, params)); return new play.db.jpa.JPAModel.JPAQuery(bindParameters(q,params)); }", ctClass);
-        ctClass.addMethod(query);
+        // find        
+        CtMethod find = CtMethod.make("public static play.db.jpa.JPAModel.JPAQuery find(String query, Object[] params) { javax.persistence.Query q = getEntityManager().createQuery(createFindByQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", query, params)); return new play.db.jpa.JPAModel.JPAQuery(bindParameters(q,params)); }", ctClass);
+        ctClass.addMethod(find);
+        
+        // find        
+        CtMethod find2 = CtMethod.make("public static play.db.jpa.JPAModel.JPAQuery find() { javax.persistence.Query q = getEntityManager().createQuery(createFindByQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", null, null)); return new play.db.jpa.JPAModel.JPAQuery(bindParameters(q,null)); }", ctClass);
+        ctClass.addMethod(find2);
 
         // findOneBy
-        CtMethod findOneBy = CtMethod.make("public static play.db.jpa.JPAModel findOneBy(String query, Object[] params) { javax.persistence.Query q = getEntityManager().createQuery(createFindByQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", query, params)); try { return (" + ctClass.getName() + ") bindParameters(q,params).getSingleResult();} catch (javax.persistence.NoResultException e) { return null;} }", ctClass);
+        CtMethod findOneBy = CtMethod.make("public static play.db.jpa.JPAModel findOneBy(String query, Object[] params) { javax.persistence.Query q = getEntityManager().createQuery(createFindByQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", query, params)); java.util.List results = bindParameters(q,params).getResultList(); if(results.size() == 0) return null; return (play.db.jpa.JPAModel)results.get(0); }", ctClass);
         ctClass.addMethod(findOneBy);
 
         applicationClass.enhancedByteCode = ctClass.toBytecode();

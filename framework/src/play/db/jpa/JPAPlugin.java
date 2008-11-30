@@ -4,7 +4,9 @@ import java.lang.reflect.Field;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.persistence.RollbackException;
+import org.hibernate.MappingException;
 import org.hibernate.ejb.Ejb3Configuration;
 import play.Logger;
 import play.Play;
@@ -44,7 +46,11 @@ public class JPAPlugin extends PlayPlugin {
                 }
             }
             Logger.debug("Initializing JPA ...");
-            JPA.entityManagerFactory = cfg.buildEntityManagerFactory();
+            try {
+                JPA.entityManagerFactory = cfg.buildEntityManagerFactory();
+            } catch(PersistenceException e) {
+                throw new JPAException(e.getMessage(), e.getCause() != null ? e.getCause() : e);
+            }
         }
     }
 

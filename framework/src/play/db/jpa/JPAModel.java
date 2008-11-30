@@ -62,7 +62,11 @@ public class JPAModel implements Serializable {
     	throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
     
-    public static JPAQuery query(String query, Object... params) {
+    public static JPAQuery find(String query, Object... params) {
+        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
+    }
+    
+    public static JPAQuery find() {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
     
@@ -130,6 +134,9 @@ public class JPAModel implements Serializable {
         if (query.trim().toLowerCase().startsWith("from ")) {
             return query;
         }
+        if(query == null) {
+            return "from " + entityName;
+        }
         if (query.trim().indexOf(" ") == -1 && params != null && params.length == 1) {
             query += " = ?";
         }
@@ -169,15 +176,19 @@ public class JPAModel implements Serializable {
             this.query = query;
         }
         
-        public Object one() {
-            return query.getSingleResult();
+        public <T extends JPAModel> T one() {
+            List<T> results = query.setMaxResults(1).getResultList();
+            if(results.size() == 0) {
+                return null;
+            }
+            return (T)results.get(0);
         }
                 
-        public List<Object> all() {
+        public <T extends JPAModel> List<T> all() {
             return query.getResultList();
         }
         
-        public List<Object> page(int from, int length) {
+        public <T extends JPAModel> List<T> page(int from, int length) {
             query.setFirstResult(from);
             query.setMaxResults(length);
             return query.getResultList();

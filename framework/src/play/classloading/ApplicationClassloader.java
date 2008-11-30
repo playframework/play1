@@ -208,7 +208,7 @@ public class ApplicationClassloader extends ClassLoader {
                 }
                 buf.append(")");
             }
-        } else {
+        } else if (!current.getName().startsWith(".")) {
             for (VirtualFile virtualFile : current.list()) {
                 scan(buf, virtualFile);
             }

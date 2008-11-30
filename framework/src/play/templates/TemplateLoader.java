@@ -47,7 +47,7 @@ public class TemplateLoader {
         //TODO: remove ?
         if (template == null) {
             VirtualFile tf = Play.getVirtualFile(path);
-            if (tf!=null && tf.exists()) {
+            if (tf != null && tf.exists()) {
                 template = TemplateLoader.load(tf);
             } else {
                 throw new TemplateNotFoundException(path);
@@ -70,13 +70,13 @@ public class TemplateLoader {
             Template template = load(current);
             try {
                 template.compile();
-                Logger.trace("%sms to load %s", System.currentTimeMillis()-start, current.getName());
+                Logger.trace("%sms to load %s", System.currentTimeMillis() - start, current.getName());
             } catch (TemplateCompilationException e) {
                 Logger.error("Template %s does not compile at line %d", e.getTemplate().name, e.getLineNumber());
                 throw e;
             }
             templates.add(template);
-        } else {
+        } else if (!current.getName().startsWith(".")) {
             for (VirtualFile virtualFile : current.list()) {
                 scan(templates, virtualFile);
             }

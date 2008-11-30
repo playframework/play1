@@ -9,7 +9,7 @@ import play.Play;
 
 public class BytecodeCache {
 
-    static String version = "3";
+    static String version = "4";
     
     public static void deleteBytecode(String name) {
         try {

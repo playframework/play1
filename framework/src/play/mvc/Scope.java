@@ -16,7 +16,9 @@ import play.libs.Crypto;
 import play.libs.Utils;
 
 public class Scope {
-	static String COOKIE_PREFIX=Play.configuration.getProperty("application.session.cookie", "PLAY");
+
+    static String COOKIE_PREFIX = Play.configuration.getProperty("application.session.cookie", "PLAY");
+
     public static class Flash {
 
         Map<String, String> data = new HashMap<String, String>();
@@ -26,7 +28,7 @@ public class Scope {
         static Flash restore() {
             try {
                 Flash flash = new Flash();
-                Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX+"_FLASH");
+                Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_FLASH");
                 if (cookie != null) {
                     String flashData = URLDecoder.decode(cookie.value, "utf-8");
                     Matcher matcher = flashParser.matcher(flashData);
@@ -51,7 +53,7 @@ public class Scope {
                     flash.append("\u0000");
                 }
                 String flashData = URLEncoder.encode(flash.toString(), "utf-8");
-                Http.Response.current().setCookie(COOKIE_PREFIX+"_FLASH", flashData);
+                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", flashData);
             } catch (Exception e) {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
@@ -77,12 +79,12 @@ public class Scope {
             put(key, value + "");
         }
 
-        public void error(String value) {
-            put("error", value);
+        public void error(String value, Object... args) {
+            put("error", String.format(value, args));
         }
 
-        public void success(String value) {
-            put("success", value);
+        public void success(String value, Object... args) {
+            put("success", String.format(value, args));
         }
 
         public void discard(String key) {
@@ -121,12 +123,13 @@ public class Scope {
     }
 
     public static class Session {
+
         static Pattern sessionParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
-        
+
         static Session restore() {
             try {
                 Session session = new Session();
-                Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX+"_SESSION");
+                Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_SESSION");
                 if (cookie != null) {
                     String value = cookie.value;
                     String sign = value.substring(0, value.indexOf("-"));
@@ -165,7 +168,7 @@ public class Scope {
                 }
                 String sessionData = URLEncoder.encode(session.toString(), "utf-8");
                 String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
-                Http.Response.current().setCookie(COOKIE_PREFIX+"_SESSION", sign + "-" + sessionData);
+                Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData);
             } catch (Exception e) {
                 throw new UnexpectedException("Session serializationProblem", e);
             }
@@ -192,9 +195,9 @@ public class Scope {
         public boolean remove(String key) {
             return data.remove(key) != null;
         }
-        
+
         public void remove(String... keys) {
-            for(String key : keys) {
+            for (String key : keys) {
                 remove(key);
             }
         }
@@ -293,10 +296,7 @@ public class Scope {
                 String[] values = data.get(key);
                 for (String value : values) {
                     try {
-                        ue.append(URLEncoder.encode(key, "utf-8"))
-                                .append("=")
-                                .append(URLEncoder.encode(value, "utf-8"))
-                                .append("&");
+                        ue.append(URLEncoder.encode(key, "utf-8")).append("=").append(URLEncoder.encode(value, "utf-8")).append("&");
                     } catch (Exception e) {
                         Logger.error(e, "Error (utf-8 ?)");
                     }
