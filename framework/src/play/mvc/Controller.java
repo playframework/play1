@@ -8,6 +8,7 @@ import java.util.Map;
 import org.w3c.dom.Document;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
+import play.data.binding.Unbinder;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.TemplateNotFoundException;
@@ -131,7 +132,7 @@ public abstract class Controller {
             String[] names = (String[]) ActionInvoker.getActionMethod(action).getDeclaringClass().getDeclaredField("$" + ActionInvoker.getActionMethod(action).getName() + LocalVariablesNamesTracer.computeMethodHash(ActionInvoker.getActionMethod(action).getParameterTypes())).get(null);
             assert names.length == args.length : "Problem is action redirection";
             for (int i = 0; i < names.length; i++) {
-                r.put(names[i], args[i] == null ? null : args[i].toString());
+            	Unbinder.unBind(r, args[i], names[i]);
             }
             try {
                 throw new Redirect(Router.reverse(action, r).toString());

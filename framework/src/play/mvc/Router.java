@@ -137,7 +137,12 @@ public class Router {
                 // les noms de parametres matchent ils ?
                 for (Route.Arg arg : route.args) {
                     inPathArgs.add(arg.name);
-                    String value = args.get(arg.name) == null ? null : args.get(arg.name) + "";
+                    String value=null;
+                    if (List.class.isAssignableFrom(args.get(arg.name).getClass())) {
+                    	Object o = ((List<Object>) args.get(arg.name)).get(0);
+                    	value = o == null ? null : o.toString();
+                    } else
+                    	value = args.get(arg.name) == null ? null : args.get(arg.name) + "";
                     if (value == null || !arg.constraint.matches(value)) {
                         allRequiredArgsAreHere = false;
                         break;
@@ -155,18 +160,32 @@ public class Router {
                     String path = route.path;
                     for (String key : args.keySet()) {
                         if (inPathArgs.contains(key) && args.get(key) != null) {
-                            path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", args.get(key) + "");
+                        	if (List.class.isAssignableFrom(args.get(key).getClass())) {
+                        		List<Object> vals = (List<Object>) args.get(key);
+                        		path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", vals.get(0) + "");
+                        	} else 
+                        		path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", args.get(key) + "");
                         } else if (route.staticArgs.containsKey(key)) {
                             // Do nothing -> The key is static
                         } else if (args.get(key) != null) {
-                            try {
-                                queryString.append(URLEncoder.encode(key, "utf-8"));
-                                queryString.append("=");
-                                queryString.append(URLEncoder.encode(args.get(key) + "", "utf-8"));
-                                queryString.append("&");
-                            } catch (UnsupportedEncodingException ex) {
-                                //
-                            }
+							if (List.class.isAssignableFrom(args.get(key).getClass())) {
+								List<Object> vals = (List<Object>) args.get(key);
+								for (Object object : vals) {
+									try {
+										queryString.append(URLEncoder.encode(key, "utf-8"));
+										queryString.append("=");
+										queryString.append(URLEncoder.encode(object.toString() + "", "utf-8"));
+										queryString.append("&");
+									} catch (UnsupportedEncodingException ex) {}
+								}
+							} else {
+	                            try {
+	                                queryString.append(URLEncoder.encode(key, "utf-8"));
+	                                queryString.append("=");
+	                                queryString.append(URLEncoder.encode(args.get(key) + "", "utf-8"));
+	                                queryString.append("&");
+	                            } catch (UnsupportedEncodingException ex) {}
+                        	}
                         }
                     }
                     String qs = queryString.toString();
