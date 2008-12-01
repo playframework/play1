@@ -137,15 +137,17 @@ public class Router {
                 // les noms de parametres matchent ils ?
                 for (Route.Arg arg : route.args) {
                     inPathArgs.add(arg.name);
-                    String value=null;
-                    if (List.class.isAssignableFrom(args.get(arg.name).getClass())) {
-                    	Object o = ((List<Object>) args.get(arg.name)).get(0);
-                    	value = o == null ? null : o.toString();
-                    } else
-                    	value = args.get(arg.name) == null ? null : args.get(arg.name) + "";
-                    if (value == null || !arg.constraint.matches(value)) {
-                        allRequiredArgsAreHere = false;
+                    Object value = args.get(arg.name);
+                    if (value==null) {
+                    	allRequiredArgsAreHere = false;
                         break;
+                    } else {
+	                	if (value instanceof List)
+	                		value = ((List<Object>) value).get(0);
+	                	if (!arg.constraint.matches((String)value)) {
+	                		allRequiredArgsAreHere = false;
+	                        break;
+	                	}
                     }
                 }
                 // les parametres codes en dur dans la route matchent-ils ?
