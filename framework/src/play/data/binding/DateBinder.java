@@ -3,6 +3,9 @@ package play.data.binding;
 import java.text.ParseException;
 import java.util.Date;
 
+/**
+ * Binder that support Date class
+ */
 public class DateBinder implements SupportedType<Date> {
 	
     public Date bind(String value) {

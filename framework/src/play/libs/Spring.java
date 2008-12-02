@@ -21,10 +21,10 @@ import play.vfs.VirtualFile;
  * SpringApplication context support
  * 
  * To enable it, edit or create a new play.plugins file, and add 
- * something like 5:play.libs.SpringPlugin
+ * something like 5:play.libs.Spring
  *
  */
-public class SpringPlugin extends PlayPlugin {
+public class Spring extends PlayPlugin {
 
     public static GenericApplicationContext applicationContext;
     private long startDate = 0;

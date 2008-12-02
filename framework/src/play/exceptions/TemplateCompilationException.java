@@ -2,7 +2,9 @@ package play.exceptions;
 
 import play.templates.Template;
 
-
+/**
+ * A exception during template compilation
+ */
 public class TemplateCompilationException extends TemplateException {
 
     public TemplateCompilationException(Template template, Integer lineNumber, String message) {

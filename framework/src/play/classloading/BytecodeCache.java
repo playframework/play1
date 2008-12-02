@@ -7,10 +7,18 @@ import java.security.MessageDigest;
 import play.Logger;
 import play.Play;
 
+/**
+ * Used to speed up compilation time
+ */
 public class BytecodeCache {
 
-    static String version = "4";
+    // Please update the cache version at each release
+    static String version = "stable4";
     
+    /**
+     * Delete the bytecode
+     * @param name Cache name
+     */
     public static void deleteBytecode(String name) {
         try {
             if (!Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
@@ -25,6 +33,12 @@ public class BytecodeCache {
         }
     }
 
+    /**
+     * Retrieve the bytecode if source has not changed
+     * @param name The cache name
+     * @param source The source code
+     * @return The bytecode
+     */
     public static byte[] getBytecode(String name, String source) {
         try {
             if (!Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
@@ -56,6 +70,12 @@ public class BytecodeCache {
         }
     }
 
+    /**
+     * Cache the bytecode
+     * @param byteCode The bytecode
+     * @param name The cache name
+     * @param source The corresponding source
+     */
     public static void cacheBytecode(byte[] byteCode, String name, String source) {
         try {
             if (!Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {

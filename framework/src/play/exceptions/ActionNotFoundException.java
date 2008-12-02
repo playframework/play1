@@ -1,5 +1,8 @@
 package play.exceptions;
 
+/**
+ * Missing action
+ */
 public class ActionNotFoundException extends PlayException {
 
     private String action;

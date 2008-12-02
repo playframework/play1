@@ -3,6 +3,9 @@ package play.mvc.results;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
+/**
+ * 401 Unauthorized
+ */
 public class Unauthorized extends Result {
     
     String realm;

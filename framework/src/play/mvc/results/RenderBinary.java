@@ -7,6 +7,9 @@ import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
+/**
+ * 200 OK with application/octet-stream
+ */
 public class RenderBinary extends Result {
 
     private static URLCodec encoder = new URLCodec();

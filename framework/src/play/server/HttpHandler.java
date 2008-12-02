@@ -48,182 +48,189 @@ import play.templates.TemplateLoader;
 import play.vfs.FileSystemFile;
 import play.vfs.VirtualFile;
 
+/**
+ * HTTP Handler
+ */
 public class HttpHandler implements IoHandler {
 
-	public void messageReceived(IoSession session, Object message) throws Exception {
-		MutableHttpRequest minaRequest = (MutableHttpRequest) message;
-		MutableHttpResponse minaResponse = new DefaultHttpResponse();
-		Request request = null;
-		try {
-			request = parseRequest(minaRequest, session);
-		} catch (NotFound e) {
-			serve404(session, minaResponse, minaRequest);
-			return;
-		} catch (RenderStatic e) {
-			serveStatic(session, minaResponse, minaRequest, e);
-			return;
-		} catch (EmptyAppException e) {
-	        serve500(e, session, minaRequest, minaResponse);
-	        return;
-	    }
-		Response response = new Response();
-		response.out = new ByteArrayOutputStream();
+    public void messageReceived(IoSession session, Object message) throws Exception {
+        MutableHttpRequest minaRequest = (MutableHttpRequest) message;
+        MutableHttpResponse minaResponse = new DefaultHttpResponse();
+        Request request = null;
+        try {
+            request = parseRequest(minaRequest, session);
+        } catch (NotFound e) {
+            serve404(session, minaResponse, minaRequest);
+            return;
+        } catch (RenderStatic e) {
+            serveStatic(session, minaResponse, minaRequest, e);
+            return;
+        } catch (EmptyAppException e) {
+            serve500(e, session, minaRequest, minaResponse);
+            return;
+        }
+        Response response = new Response();
+        response.out = new ByteArrayOutputStream();
 
-		if (Play.mode == Play.Mode.DEV) {
-			Invoker.invokeInThread(new MinaInvocation(session, minaRequest, minaResponse, request, response));
-		} else {
-			Invoker.invoke(new MinaInvocation(session, minaRequest, minaResponse, request, response));
-		}
-	}
+        if (Play.mode == Play.Mode.DEV) {
+            Invoker.invokeInThread(new MinaInvocation(session, minaRequest, minaResponse, request, response));
+        } else {
+            Invoker.invoke(new MinaInvocation(session, minaRequest, minaResponse, request, response));
+        }
+    }
 
-	public static Request parseRequest(MutableHttpRequest minaRequest, IoSession session) throws IOException {
-		URI uri = minaRequest.getRequestUri();
-		Request request = new Request();
-		request.method = minaRequest.getMethod().toString();
-		request.path = uri.getPath();
-		request.querystring = uri.getQuery() == null ? "" : uri.getRawQuery();
+    public static Request parseRequest(MutableHttpRequest minaRequest, IoSession session) throws IOException {
+        URI uri = minaRequest.getRequestUri();
+        Request request = new Request();
+        request.method = minaRequest.getMethod().toString();
+        request.path = uri.getPath();
+        request.querystring = uri.getQuery() == null ? "" : uri.getRawQuery();
 
-		Router.detectChanges();
-		Router.route(request);
+        Router.detectChanges();
+        Router.route(request);
 
-		IoBuffer buffer = (IoBuffer) minaRequest.getContent();
+        IoBuffer buffer = (IoBuffer) minaRequest.getContent();
 
-		if (minaRequest.getHeader("Content-Type") != null) {
-			request.contentType = minaRequest.getHeader("Content-Type").split(";")[0].trim().toLowerCase();
-		} else {
-			request.contentType = "text/html";
-		}
+        if (minaRequest.getHeader("Content-Type") != null) {
+            request.contentType = minaRequest.getHeader("Content-Type").split(";")[0].trim().toLowerCase();
+        } else {
+            request.contentType = "text/html";
+        }
 
-		if (minaRequest.getFileContent() == null) {
-			request.body = buffer.asInputStream();
-		} else {
-			request.body = new FileInputStream(minaRequest.getFileContent());
-		}
-		request.secure = false;
+        if (minaRequest.getFileContent() == null) {
+            request.body = buffer.asInputStream();
+        } else {
+            request.body = new FileInputStream(minaRequest.getFileContent());
+        }
+        request.secure = false;
 
-		request.url = minaRequest.getRequestUri().toString();
-		request.host = minaRequest.getHeader("host");
-		if (request.host.contains(":")) {
-			request.port = Integer.parseInt(request.host.split(":")[1]);
-			request.domain = request.host.split(":")[0];
-		} else {
-			request.port = 80;
-			request.domain = request.host;
-		}
-		request.remoteAddress = ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
+        request.url = minaRequest.getRequestUri().toString();
+        request.host = minaRequest.getHeader("host");
+        if (request.host.contains(":")) {
+            request.port = Integer.parseInt(request.host.split(":")[1]);
+            request.domain = request.host.split(":")[0];
+        } else {
+            request.port = 80;
+            request.domain = request.host;
+        }
+        request.remoteAddress = ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
 
-		for (String key : minaRequest.getHeaders().keySet()) {
-			Http.Header hd = new Http.Header();
-			hd.name = key.toLowerCase();
-			hd.values = minaRequest.getHeaders().get(key);
-			request.headers.put(hd.name, hd);
-		}
-		request.resolveFormat();
+        for (String key : minaRequest.getHeaders().keySet()) {
+            Http.Header hd = new Http.Header();
+            hd.name = key.toLowerCase();
+            hd.values = minaRequest.getHeaders().get(key);
+            request.headers.put(hd.name, hd);
+        }
+        request.resolveFormat();
 
-		for (Cookie cookie : minaRequest.getCookies()) {
-			Http.Cookie playCookie = new Http.Cookie();
-			playCookie.name = cookie.getName();
-			playCookie.path = cookie.getPath();
-			playCookie.secure = cookie.isSecure();
-			playCookie.value = cookie.getValue();
-			request.cookies.put(playCookie.name, playCookie);
-		}
-		return request;
-	}
+        for (Cookie cookie : minaRequest.getCookies()) {
+            Http.Cookie playCookie = new Http.Cookie();
+            playCookie.name = cookie.getName();
+            playCookie.path = cookie.getPath();
+            playCookie.secure = cookie.isSecure();
+            playCookie.value = cookie.getValue();
+            request.cookies.put(playCookie.name, playCookie);
+        }
+        return request;
+    }
 
-	public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
-		if (!(cause instanceof IOException)) {
-			Logger.error(cause, "Caught ");
-		}
-		session.close();
-	}
+    public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
+        if (!(cause instanceof IOException)) {
+            Logger.error(cause, "Caught ");
+        }
+        session.close();
+    }
 
-	public void messageSent(IoSession session, Object message) throws Exception {
-		if (message instanceof DefaultHttpResponse) {
-			if (session.getAttribute("file") != null) {
-				FileChannel channel = ((FileChannel) session.getAttribute("file"));
-				WriteFuture future = session.write(channel);
-				final DefaultHttpResponse res = (DefaultHttpResponse) message;
-				future.addListener(new IoFutureListener<IoFuture>() {
-					public void operationComplete(IoFuture future) {
-						FileChannel channel = (FileChannel) future.getSession().getAttribute("file");
-						future.getSession().removeAttribute("file");
-						try {
-							channel.close();
-						} catch (IOException e) {
-							Logger.error(e, "Unexpected error");
-						}
-						if (!HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION)))
-							future.getSession().close();
-					}
-				});
-			}
-		}
-	}
+    public void messageSent(IoSession session, Object message) throws Exception {
+        if (message instanceof DefaultHttpResponse) {
+            if (session.getAttribute("file") != null) {
+                FileChannel channel = ((FileChannel) session.getAttribute("file"));
+                WriteFuture future = session.write(channel);
+                final DefaultHttpResponse res = (DefaultHttpResponse) message;
+                future.addListener(new IoFutureListener<IoFuture>() {
 
-	public void sessionClosed(IoSession session) throws Exception {}
+                    public void operationComplete(IoFuture future) {
+                        FileChannel channel = (FileChannel) future.getSession().getAttribute("file");
+                        future.getSession().removeAttribute("file");
+                        try {
+                            channel.close();
+                        } catch (IOException e) {
+                            Logger.error(e, "Unexpected error");
+                        }
+                        if (!HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION))) {
+                            future.getSession().close();
+                        }
+                    }
+                });
+            }
+        }
+    }
 
-	public void sessionCreated(IoSession session) throws Exception {}
+    public void sessionClosed(IoSession session) throws Exception {
+    }
 
-	public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
-		session.close();
-	}
+    public void sessionCreated(IoSession session) throws Exception {
+    }
 
-	public void sessionOpened(IoSession session) throws Exception {
-		session.getConfig().setIdleTime(IdleStatus.BOTH_IDLE, 300);
-	}
+    public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
+        session.close();
+    }
+
+    public void sessionOpened(IoSession session) throws Exception {
+        session.getConfig().setIdleTime(IdleStatus.BOTH_IDLE, 300);
+    }
 
     public static void attachFile(IoSession session, MutableHttpResponse response, VirtualFile file) throws IOException {
         response.setStatus(HttpResponseStatus.OK);
-        response.setHeader("Content-Type",MimeTypes.getMimeType(file.getName()));
+        response.setHeader("Content-Type", MimeTypes.getMimeType(file.getName()));
         if (file instanceof FileSystemFile) {
             session.setAttribute("file", file.channel());
             response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + file.length());
         } else {
             response.setContent(IoBuffer.wrap(file.content()));
         }
-    }	
-	
-	public void serveStatic(IoSession session, MutableHttpResponse minaResponse, HttpRequest minaRequest, RenderStatic renderStatic) throws IOException {
-		VirtualFile file = Play.getVirtualFile(renderStatic.file);
-		if (file == null || file.isDirectory() || !file.exists()) {
-			serve404(session, minaResponse, minaRequest);
-		} else {
-			if (Play.mode == Play.Mode.DEV) {
-				minaResponse.setHeader("Cache-Control", "no-cache");
-				attachFile(session, minaResponse, file);
-			} else {
-				long last = file.lastModified();
-				String etag = last + "-" + file.hashCode();
-				if (!isModified(etag, last, minaRequest)) {
-					minaResponse.setHeader("Etag", etag);
-					minaResponse.setStatus(HttpResponseStatus.NOT_MODIFIED);
-				} else {
-					minaResponse.setHeader("Last-Modified", getHttpDateFormatter().format(new Date(last)));
-					minaResponse.setHeader("Cache-Control", "max-age=3600");
-					minaResponse.setHeader("Etag", etag);
-					attachFile(session, minaResponse, file);
-				}
-			}
-			writeResponse(session, minaRequest, minaResponse);
-		}
-	}
+    }
 
-	public static void serve404(IoSession session, MutableHttpResponse minaResponse, HttpRequest minaRequest) {
-		Logger.warn("404 -> %s %s", minaRequest.getMethod(), minaRequest.getRequestUri());
-		minaResponse.setStatus(HttpResponseStatus.NOT_FOUND);
-		minaResponse.setContentType("text/html");
-		Map<String, Object> binding = new HashMap<String, Object>();
-		String errorHtml = TemplateLoader.load("errors/404.html").render(binding);
-		try {
-			minaResponse.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
-		} catch (UnsupportedEncodingException fex) {
-			Logger.error(fex, "(utf-8 ?)");
-		}
-		writeResponse(session, minaRequest, minaResponse);
-	}
-	
-	public static boolean isModified(String etag, long last, HttpRequest request) {
+    public void serveStatic(IoSession session, MutableHttpResponse minaResponse, HttpRequest minaRequest, RenderStatic renderStatic) throws IOException {
+        VirtualFile file = Play.getVirtualFile(renderStatic.file);
+        if (file == null || file.isDirectory() || !file.exists()) {
+            serve404(session, minaResponse, minaRequest);
+        } else {
+            if (Play.mode == Play.Mode.DEV) {
+                minaResponse.setHeader("Cache-Control", "no-cache");
+                attachFile(session, minaResponse, file);
+            } else {
+                long last = file.lastModified();
+                String etag = last + "-" + file.hashCode();
+                if (!isModified(etag, last, minaRequest)) {
+                    minaResponse.setHeader("Etag", etag);
+                    minaResponse.setStatus(HttpResponseStatus.NOT_MODIFIED);
+                } else {
+                    minaResponse.setHeader("Last-Modified", getHttpDateFormatter().format(new Date(last)));
+                    minaResponse.setHeader("Cache-Control", "max-age=3600");
+                    minaResponse.setHeader("Etag", etag);
+                    attachFile(session, minaResponse, file);
+                }
+            }
+            writeResponse(session, minaRequest, minaResponse);
+        }
+    }
+
+    public static void serve404(IoSession session, MutableHttpResponse minaResponse, HttpRequest minaRequest) {
+        Logger.warn("404 -> %s %s", minaRequest.getMethod(), minaRequest.getRequestUri());
+        minaResponse.setStatus(HttpResponseStatus.NOT_FOUND);
+        minaResponse.setContentType("text/html");
+        Map<String, Object> binding = new HashMap<String, Object>();
+        String errorHtml = TemplateLoader.load("errors/404.html").render(binding);
+        try {
+            minaResponse.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
+        } catch (UnsupportedEncodingException fex) {
+            Logger.error(fex, "(utf-8 ?)");
+        }
+        writeResponse(session, minaRequest, minaResponse);
+    }
+
+    public static boolean isModified(String etag, long last, HttpRequest request) {
         if (!(request.getHeaders().containsKey("If-None-Match") && request.getHeaders().containsKey("If-Modified-Since"))) {
             return true;
         } else {
@@ -244,141 +251,140 @@ public class HttpHandler implements IoHandler {
         }
     }
 
-	public static void serve500(Exception e, IoSession session, HttpRequest request, MutableHttpResponse response) {
-		Map<String, Object> binding = new HashMap<String, Object>();
-		if (!(e instanceof PlayException)) {
-			e = new play.exceptions.UnexpectedException(e);
-		}
-		// Empty app :
-		if (e instanceof EmptyAppException) {
-			try {
-				response.setStatus(HttpResponseStatus.forId(200));
-				response.setContentType("text/html");
-				String errorHtml = TemplateLoader.load("errors/empty.html").render(binding);
-				response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
-				writeResponse(session, request, response);
-				return;
-			} catch (Throwable ex) {
-				Logger.error(ex, "Internal Server Error (500)");
-				try {
-					response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
-					writeResponse(session, request, response);
-				} catch (UnsupportedEncodingException fex) {
-					Logger.error(fex, "(utf-8 ?)");
-				}
-			}
-		}
-		binding.put("exception", e);
-		boolean ajax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
-		response.setStatus(HttpResponseStatus.forId(500));
-		if (ajax) {
-			response.setContentType("text/plain");
-		} else {
-			response.setContentType("text/html");
-		}
-		try {
-			String errorHtml = TemplateLoader.load("errors/500." + (ajax ? "txt" : "html")).render(binding);
-			response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
-			writeResponse(session, request, response);
-			Logger.error(e, "Internal Server Error (500)");
-		} catch (Throwable ex) {
-			Logger.error(e, "Internal Server Error (500)");
-			Logger.error(ex, "Error during the 500 response generation");
-			try {
-				response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
-				writeResponse(session, request, response);
-			} catch (UnsupportedEncodingException fex) {
-				Logger.error(fex, "(utf-8 ?)");
-			}
-		}
-	}
+    public static void serve500(Exception e, IoSession session, HttpRequest request, MutableHttpResponse response) {
+        Map<String, Object> binding = new HashMap<String, Object>();
+        if (!(e instanceof PlayException)) {
+            e = new play.exceptions.UnexpectedException(e);
+        }
+        // Empty app :
+        if (e instanceof EmptyAppException) {
+            try {
+                response.setStatus(HttpResponseStatus.forId(200));
+                response.setContentType("text/html");
+                String errorHtml = TemplateLoader.load("errors/empty.html").render(binding);
+                response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
+                writeResponse(session, request, response);
+                return;
+            } catch (Throwable ex) {
+                Logger.error(ex, "Internal Server Error (500)");
+                try {
+                    response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
+                    writeResponse(session, request, response);
+                } catch (UnsupportedEncodingException fex) {
+                    Logger.error(fex, "(utf-8 ?)");
+                }
+            }
+        }
+        binding.put("exception", e);
+        boolean ajax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+        response.setStatus(HttpResponseStatus.forId(500));
+        if (ajax) {
+            response.setContentType("text/plain");
+        } else {
+            response.setContentType("text/html");
+        }
+        try {
+            String errorHtml = TemplateLoader.load("errors/500." + (ajax ? "txt" : "html")).render(binding);
+            response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
+            writeResponse(session, request, response);
+            Logger.error(e, "Internal Server Error (500)");
+        } catch (Throwable ex) {
+            Logger.error(e, "Internal Server Error (500)");
+            Logger.error(ex, "Error during the 500 response generation");
+            try {
+                response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
+                writeResponse(session, request, response);
+            } catch (UnsupportedEncodingException fex) {
+                Logger.error(fex, "(utf-8 ?)");
+            }
+        }
+    }
 
-	public static void writeResponse(IoSession session, HttpRequest req, MutableHttpResponse res) {
-		res.normalize(req);
-		WriteFuture future = session.write(res);
-		if ((session.getAttribute("file") == null) && !HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION)))
-			future.addListener(IoFutureListener.CLOSE);
-	}
+    public static void writeResponse(IoSession session, HttpRequest req, MutableHttpResponse res) {
+        res.normalize(req);
+        WriteFuture future = session.write(res);
+        if ((session.getAttribute("file") == null) && !HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION))) {
+            future.addListener(IoFutureListener.CLOSE);
+        }
+    }
 
-	static class MinaInvocation extends Invoker.Invocation {
+    static class MinaInvocation extends Invoker.Invocation {
 
-		private IoSession session;
-		private MutableHttpRequest minaRequest;
-		private MutableHttpResponse minaResponse;
-		private Request request;
-		private Response response;
+        private IoSession session;
+        private MutableHttpRequest minaRequest;
+        private MutableHttpResponse minaResponse;
+        private Request request;
+        private Response response;
 
-		public MinaInvocation(IoSession session, MutableHttpRequest minaRequest, MutableHttpResponse minaResponse, Request request, Response response) {
-			super();
-			this.minaRequest = minaRequest;
-			this.minaResponse = minaResponse;
-			this.request = request;
-			this.response = response;
-			this.session = session;
-		}
+        public MinaInvocation(IoSession session, MutableHttpRequest minaRequest, MutableHttpResponse minaResponse, Request request, Response response) {
+            super();
+            this.minaRequest = minaRequest;
+            this.minaResponse = minaResponse;
+            this.request = request;
+            this.response = response;
+            this.session = session;
+        }
 
-		@Override
-		public void run() {
-			try {
-				super.run();
-			} catch (Exception e) {
-				serve500(e, session, minaRequest, minaResponse);
-				return;
-			}
-		}
+        @Override
+        public void run() {
+            try {
+                super.run();
+            } catch (Exception e) {
+                serve500(e, session, minaRequest, minaResponse);
+                return;
+            }
+        }
 
-		@Override
-		public void execute() throws Exception {
-			if (session.isClosing()) {
-				return;
-			}
-			ActionInvoker.invoke(request, response);
+        @Override
+        public void execute() throws Exception {
+            if (session.isClosing()) {
+                return;
+            }
+            ActionInvoker.invoke(request, response);
 
-			response.out.flush();
-			Logger.trace("Invoke: " + request.path + ": " + response.status);
-			if ((response.direct != null) && response.direct.isFile()) {
-				session.setAttribute("file", new FileInputStream(response.direct).getChannel());
-				response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + response.direct.length());
-			} else {
-				minaResponse.setContent(IoBuffer.wrap(((ByteArrayOutputStream) response.out).toByteArray()));
-			}
-			if (response.contentType != null) {
-				minaResponse.setHeader("Content-Type", response.contentType + (response.contentType.startsWith("text/") ? "; charset=utf-8" : ""));
-			} else {
-				minaResponse.setHeader("Content-Type", "text/plain;charset=utf-8");
-			}
-			minaResponse.setStatus(HttpResponseStatus.forId(response.status));
-			Map<String, Http.Header> headers = response.headers;
-			for (String key : headers.keySet()) {
-				Http.Header hd = headers.get((key));
-				for (String value : hd.values) {
-					minaResponse.addHeader(key, value);
-				}
-			}
+            response.out.flush();
+            Logger.trace("Invoke: " + request.path + ": " + response.status);
+            if ((response.direct != null) && response.direct.isFile()) {
+                session.setAttribute("file", new FileInputStream(response.direct).getChannel());
+                response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + response.direct.length());
+            } else {
+                minaResponse.setContent(IoBuffer.wrap(((ByteArrayOutputStream) response.out).toByteArray()));
+            }
+            if (response.contentType != null) {
+                minaResponse.setHeader("Content-Type", response.contentType + (response.contentType.startsWith("text/") ? "; charset=utf-8" : ""));
+            } else {
+                minaResponse.setHeader("Content-Type", "text/plain;charset=utf-8");
+            }
+            minaResponse.setStatus(HttpResponseStatus.forId(response.status));
+            Map<String, Http.Header> headers = response.headers;
+            for (String key : headers.keySet()) {
+                Http.Header hd = headers.get((key));
+                for (String value : hd.values) {
+                    minaResponse.addHeader(key, value);
+                }
+            }
 
-			Map<String, Http.Cookie> cookies = response.cookies;
-			for (String key : cookies.keySet()) {
-				Http.Cookie cookie = cookies.get(key);
-				DefaultCookie c = new DefaultCookie(cookie.name, cookie.value);
-				c.setSecure(cookie.secure);
-				c.setPath(cookie.path);
-				minaResponse.addCookie(c);
-			}
-			if (!response.headers.containsKey("cache-control")) {
-				minaResponse.setHeader("Cache-Control", "no-cache");
-			}
-			HttpHandler.writeResponse(session, minaRequest, minaResponse);
-		}
+            Map<String, Http.Cookie> cookies = response.cookies;
+            for (String key : cookies.keySet()) {
+                Http.Cookie cookie = cookies.get(key);
+                DefaultCookie c = new DefaultCookie(cookie.name, cookie.value);
+                c.setSecure(cookie.secure);
+                c.setPath(cookie.path);
+                minaResponse.addCookie(c);
+            }
+            if (!response.headers.containsKey("cache-control")) {
+                minaResponse.setHeader("Cache-Control", "no-cache");
+            }
+            HttpHandler.writeResponse(session, minaRequest, minaResponse);
+        }
+    }
+    private static ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>();
 
-	}
-	
-	private static ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat> ();
-	
-	public static SimpleDateFormat getHttpDateFormatter () {
-		if (formatter.get()==null) {
-			formatter.set(new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US));
-			formatter.get().setTimeZone(TimeZone.getTimeZone("GMT"));
-		}
-		return formatter.get();
-	}
+    public static SimpleDateFormat getHttpDateFormatter() {
+        if (formatter.get() == null) {
+            formatter.set(new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US));
+            formatter.get().setTimeZone(TimeZone.getTimeZone("GMT"));
+        }
+        return formatter.get();
+    }
 }

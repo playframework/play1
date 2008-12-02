@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * A localized object
+ */
 public class Localized<T> {
 
     private Map<String, T> values = new HashMap<String, T>();

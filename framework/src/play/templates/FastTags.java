@@ -11,6 +11,9 @@ import play.exceptions.TemplateExecutionException;
 import play.exceptions.TemplateNotFoundException;
 import play.templates.Template.ExecutableTemplate;
 
+/**
+ * Fast tags implementation
+ */
 public class FastTags {
 
     public static void _if(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {

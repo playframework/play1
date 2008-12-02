@@ -12,6 +12,9 @@ import play.exceptions.TemplateCompilationException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 
+/**
+ * The template compiler
+ */
 public class TemplateCompiler {
 
     static String extensionsClassname = JavaExtensions.class.getName();
@@ -26,8 +29,8 @@ public class TemplateCompiler {
                 } else {
                     extensionsClassname = JavaExtensions.class.getName();
                 }
-            } catch(Throwable e) {
-                // ok
+            } catch (Throwable e) {
+                extensionsClassname = JavaExtensions.class.getName();
             }
 
             String source = file.contentAsString();
@@ -302,6 +305,9 @@ public class TemplateCompiler {
         }
     }
 
+    /**
+     * Template parser
+     */
     public static class Parser {
 
         private String pageSource;

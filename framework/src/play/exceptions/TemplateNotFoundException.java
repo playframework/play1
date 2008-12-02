@@ -5,6 +5,9 @@ import java.util.List;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.templates.Template;
 
+/**
+ * A template is missing (tag, ...)
+ */
 public class TemplateNotFoundException extends PlayException implements SourceAttachment {
 
     private String path;

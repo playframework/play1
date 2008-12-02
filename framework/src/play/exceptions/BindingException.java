@@ -1,5 +1,8 @@
 package play.exceptions;
 
+/**
+ * HTTP to Java Binding error
+ */
 public class BindingException extends PlayException {
     
     public BindingException(String message, Throwable cause) {
@@ -8,7 +11,7 @@ public class BindingException extends PlayException {
 
     @Override
     public String getErrorTitle() {
-        return "TODO";
+        return "Binding exception";
     }
 
     @Override

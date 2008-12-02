@@ -14,6 +14,9 @@ import java.util.List;
 import play.Play;
 import play.exceptions.UnexpectedException;
 
+/**
+ * A real file-system implementation
+ */
 public class FileSystemFile extends VirtualFile {
 
     public File realFile;

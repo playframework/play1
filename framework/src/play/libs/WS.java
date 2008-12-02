@@ -31,6 +31,9 @@ import org.xml.sax.InputSource;
 import play.Logger;
 import play.PlayPlugin;
 
+/**
+ * Webservice utils
+ */
 public class WS extends PlayPlugin {
 
     private static HttpClient httpClient;

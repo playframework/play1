@@ -18,6 +18,9 @@ import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.libs.Java;
 
+/**
+ * Invoke an action after an HTTP request
+ */
 public class ActionInvoker {
 
     public static void invoke(Http.Request request, Http.Response response) {

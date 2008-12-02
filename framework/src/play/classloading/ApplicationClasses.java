@@ -24,9 +24,9 @@ public class ApplicationClasses {
     ApplicationCompiler compiler = new ApplicationCompiler(this);
     Map<String, ApplicationClass> classes = new HashMap<String, ApplicationClass>();
 
-    public ApplicationClasses() {
-    }
-
+    /**
+     * Cleat the classes cache
+     */
     public void clear() {
         classes = new HashMap<String, ApplicationClass>();
     }
@@ -43,6 +43,11 @@ public class ApplicationClasses {
         return classes.get(name);
     }
 
+    /**
+     * Retrieve all application classes assignable to this class.
+     * @param clazz The superclass, or the interface.
+     * @return A list of application classes.
+     */
     public List<ApplicationClass> getAssignableClasses(Class clazz) {
         List<ApplicationClass> results = new ArrayList<ApplicationClass>();
         for (ApplicationClass applicationClass : classes.values()) {
@@ -58,6 +63,11 @@ public class ApplicationClasses {
         return results;
     }
 
+    /**
+     * Retrieve all application classes with a specific annotation.
+     * @param clazz The annotation class.
+     * @return A list of application classes.
+     */
     public List<ApplicationClass> getAnnotatedClasses(Class clazz) {
         List<ApplicationClass> results = new ArrayList<ApplicationClass>();
         for (ApplicationClass applicationClass : classes.values()) {
@@ -174,7 +184,7 @@ public class ApplicationClasses {
         }
 
         /**
-         * Is this class already compiled ?
+         * Is this class already compiled but not defined ?
          * @return
          */
         public boolean isDefinable() {
@@ -199,6 +209,10 @@ public class ApplicationClasses {
             this.javaClass = null;
         }
         
+        /**
+         * Call back when a class is compiled.
+         * @param code The bytecode.
+         */
         public void compiled(byte[] code) {
             javaByteCode = code;
             enhancedByteCode = code;
@@ -208,6 +222,7 @@ public class ApplicationClasses {
     }
 
     // ~~ Utils
+    
     /**
      * Retrieve the corresponding source file for a given class name.
      * It handle innerClass too !

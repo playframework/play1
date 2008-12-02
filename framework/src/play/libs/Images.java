@@ -12,8 +12,18 @@ import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
 
+/**
+ * Images utils
+ */
 public class Images {
 
+    /**
+     * Resize an image
+     * @param originalImage The image file
+     * @param to The destination file
+     * @param w The new width (or -1 to proportionally resize)
+     * @param h The new height (or -1 to proportionally resize)
+     */
     public static void resize(File originalImage, File to, Integer w, Integer h) {
         try {
             BufferedImage source = ImageIO.read(originalImage);
@@ -59,6 +69,12 @@ public class Images {
 
     }
 
+    /**
+     * Encode an image to base64
+     * @param image The image file
+     * @return The base64 encoded value
+     * @throws java.io.IOException
+     */
     public static String toBase64(File image) throws IOException {
         return "data:" + MimeTypes.getMimeType(image.getName()) + ";base64," + Codec.encodeBASE64(IO.readContent(image));
     }

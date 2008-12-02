@@ -13,6 +13,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import play.exceptions.UnexpectedException;
 
+/**
+ * A ZIP implementation
+ */
 public class ZFile extends VirtualFile {
 
     public ZipFile zip;

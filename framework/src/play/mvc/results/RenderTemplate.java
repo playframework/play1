@@ -7,6 +7,9 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.templates.Template;
 
+/**
+ * 200 OK with a template rendering
+ */
 public class RenderTemplate extends Result {
     
     private Template template;

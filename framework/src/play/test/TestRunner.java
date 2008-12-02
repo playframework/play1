@@ -11,6 +11,9 @@ import play.Invoker.Invocation;
 import play.Play;
 import play.Logger;
 
+/**
+ * Run application tests
+ */
 public class TestRunner {
     
     public static void main(String[] args) {

@@ -3,6 +3,9 @@ package play.exceptions;
 import java.util.concurrent.atomic.AtomicLong;
 import play.Play;
 
+/**
+ * The super class for all Play! exceptions
+ */
 public abstract class PlayException extends RuntimeException {
 
     static AtomicLong atomicLong = new AtomicLong(System.currentTimeMillis());

@@ -17,6 +17,9 @@ import play.exceptions.NoRouteFoundException;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 
+/**
+ * The router matches HTTP requests to action invocations
+ */
 public class Router {
 
     static Pattern routePattern = new Pattern("^({method}[A-Za-z\\*]+)?\\s+({path}/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?$");

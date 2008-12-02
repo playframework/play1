@@ -11,6 +11,9 @@ import play.vfs.VirtualFile;
 import play.exceptions.TemplateCompilationException;
 import play.exceptions.TemplateNotFoundException;
 
+/**
+ * Load templates
+ */
 public class TemplateLoader {
 
     protected static Map<String, Template> templates = new HashMap<String, Template>();
@@ -35,6 +38,11 @@ public class TemplateLoader {
         }
     }
 
+    /**
+     * Load a template
+     * @param path The path of the template (ex: Application/index.html)
+     * @return The executable template
+     */
     public static Template load(String path) {
         Template template = null;
         for (VirtualFile vf : Play.templatesPath) {
@@ -56,6 +64,10 @@ public class TemplateLoader {
         return template;
     }
 
+    /**
+     * List all found templates
+     * @return A list of executable templates
+     */
     public static List<Template> getAllTemplate() {
         List<Template> res = new ArrayList<Template>();
         for (VirtualFile virtualFile : Play.templatesPath) {

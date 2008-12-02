@@ -2,8 +2,14 @@ package play.libs;
 
 import java.util.Map;
 
+/**
+ * Generic utils
+ */
 public class Utils {
     
+    /**
+     * for java.util.Map
+     */
     public static class Maps {
 
         public static void mergeValueInMap(Map<String, String[]> map, String name, String value) {

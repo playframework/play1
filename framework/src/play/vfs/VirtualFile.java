@@ -10,6 +10,9 @@ import java.util.List;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
 
+/**
+ * The VFS used by Play!
+ */
 public abstract class VirtualFile {
 
     public abstract String getName();

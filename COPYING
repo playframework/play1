@@ -1,13 +1,20 @@
 Copyright 2008 
 
-	Guillaume Bort(http://guillaume.bort.fr) 
-	and zenexity(http://www.zenexity.fr)
+    Guillaume Bort(http://guillaume.bort.fr) 
+    The Play! developers team (https://launchpad.net/~play-developers)
+        Jean-Francois POUX (https://launchpad.net/~jfp-taldius)
+        Leonard WEST (https://launchpad.net/~lwe-zen)
+        Sébastien Crème (https://launchpad.net/~sebastien-creme)
+        Stéphane Godbillon (https://launchpad.net/~sgo)
+        Sylvain Mathieu (https://launchpad.net/~sma-zenexity)
+        Loïc Guillois (https://launchpad.net/~loic-guillois)   
+    zenexity(http://www.zenexity.fr)
 
 Licensed under the Apache License, Version 2.0 (the "License"); 
 you may not use this file except in compliance with the License. Y
 ou may obtain a copy of the License at 
 
-	http://www.apache.org/licenses/LICENSE-2.0 
+    http://www.apache.org/licenses/LICENSE-2.0 
 	
 Unless required by applicable law or agreed to in writing, software 
 distributed under the License is distributed on an "AS IS" BASIS, 

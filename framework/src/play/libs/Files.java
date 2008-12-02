@@ -4,8 +4,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
+/**
+ * Files utils
+ */
 public class Files {
 
+    /**
+     * Just copy a file
+     * @param from
+     * @param to
+     */
     public static void copy(File from, File to) {
         FileInputStream is = null;
         FileOutputStream os = null;
@@ -31,6 +39,10 @@ public class Files {
         }
     }
 
+    /**
+     * Just delete a file
+     * @param file The file to delete
+     */
     public static void delete(File file) {
         file.delete();
     }

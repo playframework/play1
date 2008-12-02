@@ -23,7 +23,6 @@ import play.exceptions.UnexpectedException;
 /**
  * The application classLoader. Load the classes from
  * the application Java sources files.
- * @author guillaume
  */
 public class ApplicationClassloader extends ClassLoader {
 
@@ -56,6 +55,7 @@ public class ApplicationClassloader extends ClassLoader {
         // Delegate to the classic classloader
         return super.loadClass(name, resolve);
     }
+    
     // ~~~~~~~~~~~~~~~~~~~~~~~
     protected Class loadApplicationClass(String name) {
         long start = System.currentTimeMillis();
@@ -186,6 +186,7 @@ public class ApplicationClassloader extends ClassLoader {
         }
         return buffer.toString().hashCode();
     }
+    
     int pathHash = 0;
 
     int computePathHash() {
@@ -239,6 +240,11 @@ public class ApplicationClassloader extends ClassLoader {
     }
     List<Class> allClasses = null;
 
+    /**
+     * Retrieve all application classes assignable to this class.
+     * @param clazz The superclass, or the interface.
+     * @return A list of class
+     */
     public List<Class> getAssignableClasses(Class clazz) {
         List<Class> results = new ArrayList<Class>();
         for (ApplicationClass c : Play.classes.getAssignableClasses(clazz)) {
@@ -247,6 +253,11 @@ public class ApplicationClassloader extends ClassLoader {
         return results;
     }
 
+    /**
+     * Retrieve all application classes with a specific annotation.
+     * @param clazz The annotation class.
+     * @return A list of class
+     */
     public List<Class> getAnnotatedClasses(Class clazz) {
         List<Class> results = new ArrayList<Class>();
         for (ApplicationClass c : Play.classes.getAnnotatedClasses(clazz)) {
@@ -254,6 +265,7 @@ public class ApplicationClassloader extends ClassLoader {
         }
         return results;
     }
+    
     // ~~~ Intern
     List<ApplicationClass> getAllClasses(String basePackage) {
         List<ApplicationClass> res = new ArrayList<ApplicationClass>();

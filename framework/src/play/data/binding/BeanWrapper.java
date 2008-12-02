@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package play.data.binding;
 
 import java.lang.reflect.*;
@@ -12,7 +8,6 @@ import play.Logger;
 
 /**
  * Parameters map to POJO binder
- * 
  */
 public class BeanWrapper {
 

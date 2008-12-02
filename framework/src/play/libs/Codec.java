@@ -6,12 +6,23 @@ import java.util.UUID;
 import org.apache.commons.codec.binary.Base64;
 import play.exceptions.UnexpectedException;
 
+/**
+ * Codec utils
+ */
 public class Codec {
 
+    /**
+     * @return an UUID String
+     */
     public static String UUID() {
         return UUID.randomUUID().toString();
     }
 
+    /**
+     * Encode a String to base64
+     * @param value The plain String
+     * @return The base64 encoded String
+     */
     public static String encodeBASE64(String value) {
         try {
             return new String(Base64.encodeBase64(value.getBytes("utf-8")));
@@ -20,10 +31,20 @@ public class Codec {
         }
     }
 
+    /**
+     * Encode binary data to base64 
+     * @param value The binary data
+     * @return The base64 encoded String
+     */
     public static String encodeBASE64(byte[] value) {
         return new String(Base64.encodeBase64(value));
     }
 
+    /**
+     * Decode a base64 value
+     * @param value The base64 encoded String
+     * @return decoded binary data
+     */
     public static byte[] decodeBASE64(String value) {
         try {
             return Base64.decodeBase64(value.getBytes("utf-8"));
@@ -32,6 +53,11 @@ public class Codec {
         }
     }
 
+    /**
+     * Build an hexadecimal MD5 hash for a String
+     * @param value The String to hash
+     * @return An hexadecimal Hash
+     */
     public static String hexMD5(String value) {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");

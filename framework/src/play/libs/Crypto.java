@@ -9,10 +9,20 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
 
+/**
+ * Crypto utils
+ */
 public class Crypto {
 
     static final char[] HEX_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
+    /**
+     * Sign a message with a key
+     * @param message The message to sign
+     * @param key The key to use
+     * @return The signed message (in hexadecimal)
+     * @throws java.lang.Exception
+     */
     public static String sign(String message, byte[] key) throws Exception {
         if (key.length == 0) {
             return message;
@@ -31,6 +41,11 @@ public class Crypto {
         return new String(hexChars);
     }
 
+    /**
+     * Create a password hash
+     * @param input The password
+     * @return The password hash
+     */
     public static String passwordHash(String input) {
         try {
             MessageDigest m = MessageDigest.getInstance("MD5");

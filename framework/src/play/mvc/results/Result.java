@@ -2,6 +2,9 @@ package play.mvc.results;
 
 import play.mvc.Http;
 
+/**
+ * Result support
+ */
 public abstract class Result extends RuntimeException {
     
     public Result() {

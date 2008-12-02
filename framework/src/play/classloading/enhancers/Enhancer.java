@@ -14,7 +14,7 @@ import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 /**
- * Enhance a class.
+ * Enhancer support
  */
 public abstract class Enhancer { 
 

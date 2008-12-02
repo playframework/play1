@@ -6,6 +6,9 @@ import java.util.List;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
+/**
+ * Database error
+ */
 public class DatabaseException extends PlayException implements SourceAttachment {
     
     String sourceFile;

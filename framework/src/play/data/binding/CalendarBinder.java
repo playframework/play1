@@ -6,6 +6,9 @@ import java.util.Locale;
 
 import play.i18n.Lang;
 
+/**
+ * Binder that support Calendar class
+ */
 public class CalendarBinder implements SupportedType<Calendar> {    
     public Calendar bind(String value) {
         try {

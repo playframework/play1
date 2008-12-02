@@ -5,6 +5,9 @@ import play.PlayPlugin;
 import zdb.core.Store;
 import play.Play;
 
+/**
+ * ZDB Plugin
+ */
 public class ZDBPlugin extends PlayPlugin {
 
     @Override

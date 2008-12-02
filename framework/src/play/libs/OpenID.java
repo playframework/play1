@@ -42,7 +42,6 @@ public class OpenID {
 
     static Map<String, String> attributesURI = new HashMap<String, String>();
     static Map<String, Boolean> attributesMandatory = new HashMap<String, Boolean>();
-    
 
     static {
         for (Object oKey : Play.configuration.keySet()) {
@@ -70,6 +69,12 @@ public class OpenID {
     }
     static ConsumerManager consumerManager;
 
+    /**
+     * Verify the openID and redirect to the OpenID server
+     * @param openID The OpenID url
+     * @param returnAction The action to return
+     * @return
+     */
     public static boolean verify(String openID, String returnAction) {
         try {
             openID = openID.trim();
@@ -97,10 +102,19 @@ public class OpenID {
         return false;
     }
 
+    /**
+     * Verify the openID and redirect to the OpenID server and return to the current action
+     * @param openID The OpenID url
+     * @return
+     */
     public static boolean verify(String openID) {
         return verify(openID, Request.current().action);
     }
 
+    /**
+     * Retrieve the verified OpenID
+     * @return A UserInfo object
+     */
     public static UserInfo getVerifiedID() {
         try {
             String openID = Flash.current().get("openid.discover");
@@ -138,7 +152,14 @@ public class OpenID {
 
     public static class UserInfo {
 
+        /**
+         * OpenID
+         */
         public String id;
+        
+        /**
+         * Extensions values
+         */
         public Map<String, String> extensions = new HashMap<String, String>();
     }
 

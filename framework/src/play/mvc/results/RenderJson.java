@@ -5,6 +5,9 @@ import play.mvc.Http.Response;
 import fr.zenexity.json.JSON;
 import play.exceptions.UnexpectedException;
 
+/**
+ * 200 OK with application/json
+ */
 public class RenderJson extends Result {
 
     String json;

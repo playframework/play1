@@ -8,6 +8,9 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Query;
 
+/**
+ * A super class for JPA entities
+ */
 @MappedSuperclass
 public class JPAModel implements Serializable {
 
@@ -24,19 +27,33 @@ public class JPAModel implements Serializable {
     }
 
     /**
-     * store (ie insert or update) the entity
+     * store (ie insert or update) the entity.
      */
     public void save() {
-        getEntityManager().persist(this);         
+        em().persist(this);         
     }
     
+    /**
+     * Refresh the entity state.
+     */
     public void refresh() {
-        getEntityManager().refresh(this);
+        em().refresh(this);
     }
     
+    /**
+     * Merge this object to obtain a manager entity.
+     */
+    public <T> T merge() {
+        return (T) em().merge(this);
+    }
+    
+    /**
+     * Delete the entity.
+     * @return The deleted entity.
+     */
     public <T> T delete() {
         try {
-            getEntityManager().remove(this);
+            em().remove(this);
             return (T) this;
         } catch (Throwable e) {
             throw new RuntimeException(e);
@@ -44,36 +61,75 @@ public class JPAModel implements Serializable {
     }
   
     /**
+     * Count entities
      * @return number of entities of this class
      */
     public static Long count() {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
     
+    /**
+     * Count entities with a special query.
+     * Example : Long moderatedPosts = Post.count("moderated", true);
+     * @param query HQL query or shortcut
+     * @param params Params to bind to the query
+     * @return A long
+     */
     public static Long count(String query, Object... params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
     
+    /**
+     * Find all entities for this class
+     * @return A list of entity
+     */
     public static <T extends JPAModel> List<T> findAll() {
     	throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
     
+    /**
+     * Find the entity with the corresponding id.
+     * @param id The entity id
+     * @return The entity
+     */
     public static <T extends JPAModel> T findById(Long id) {
     	throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
     
+    /**
+     * Prepare a query to find entities.
+     * @param query HQL query or shortcut
+     * @param params Params to bind to the query
+     * @return A JPAQuery
+     */
     public static JPAQuery find(String query, Object... params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
     
+    /**
+     * Prepare a query to find *all* entities.
+     * @param query HQL query or shortcut
+     * @param params Params to bind to the query
+     * @return A JPAQuery
+     */
     public static JPAQuery find() {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
     
+    /**
+     * Batch delete of entities
+     * @param query HQL query or shortcut
+     * @param params Params to bind to the query
+     * @return Number of entities deleted
+     */
     public static int delete(String query, Object... params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
-    
+
+    /**
+     * Delete all entities
+     * @return Number of entities deleted
+     */
     public static int deleteAll() {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
@@ -99,15 +155,15 @@ public class JPAModel implements Serializable {
     public static <T extends JPAModel> List<T> findBy(String query, Object... params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
-       
-    public static EntityManager getEntityManager() {
-        return JPAContext.getEntityManager();
-    }
     
+    /**
+     * Retrieve the current entityManager
+     * @return the current entityManager
+     */
     public static EntityManager em() {
-        return JPAContext.getEntityManager();
+        return JPA.getEntityManager();
     }
-
+   
     /**
      * JPAModel instances a and b are equals if either <strong>a == b</strong> or a and b have same </strong>{@link #id id} and class</strong>
      * @param other 
@@ -206,6 +262,9 @@ public class JPAModel implements Serializable {
     	return q;
     }
     
+    /**
+     * A JPAQuery
+     */
     public static class JPAQuery {
         
         public Query query;
@@ -214,6 +273,10 @@ public class JPAModel implements Serializable {
             this.query = query;
         }
         
+        /**
+         * Retrieve the first result of the query or null
+         * @return An entity or null
+         */
         public <T extends JPAModel> T one() {
             List<T> results = query.setMaxResults(1).getResultList();
             if(results.size() == 0) {
@@ -221,11 +284,21 @@ public class JPAModel implements Serializable {
             }
             return (T)results.get(0);
         }
-                
+
+        /**
+         * Retrieve all results of the query
+         * @return A list of entities
+         */
         public <T extends JPAModel> List<T> all() {
             return query.getResultList();
         }
         
+        /**
+         * Retrieve a page of result
+         * @param from Page number (start at 1)
+         * @param length (page length)
+         * @return A list of entities
+         */
         public <T extends JPAModel> List<T> page(int from, int length) {
             if(from < 1) {
                 throw new IllegalArgumentException("Page start at 1");

@@ -8,6 +8,9 @@ import play.PlayPlugin;
 import play.libs.IO;
 import play.vfs.VirtualFile;
 
+/**
+ * Messages plugin
+ */
 public class MessagesPlugin extends PlayPlugin {
 
     static Long lastLoading = 0L;

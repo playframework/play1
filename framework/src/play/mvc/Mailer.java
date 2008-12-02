@@ -12,6 +12,9 @@ import play.libs.Mail;
 import play.templates.Template;
 import play.templates.TemplateLoader;
 
+/**
+ * Application mailer support
+ */
 public class Mailer {
 
     protected static ThreadLocal<HashMap<String, Object>> infos = new ThreadLocal<HashMap<String, Object>>();

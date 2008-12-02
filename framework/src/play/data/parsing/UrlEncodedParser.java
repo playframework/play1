@@ -10,7 +10,7 @@ import play.exceptions.UnexpectedException;
 import play.libs.Utils;
 
 /**
- * Parse urlEncoded requests.
+ * Parse url-encoded requests.
  */
 public class UrlEncodedParser extends DataParser {
     

@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
+/**
+ * Tag Context (retrieve who call you)
+ */
 public class TagContext {
     
     static ThreadLocal<Stack<TagContext>> currentStack = new ThreadLocal();

@@ -85,7 +85,6 @@ public class Play {
      * All routes files
      */
     public static List<VirtualFile> routes;
-    
     /**
      * The main application.conf
      */
@@ -479,7 +478,7 @@ public class Play {
     /**
      * Search a File in the current application
      * @param path Relative path from the application root
-     * @return The fiel even if it doesn't exist
+     * @return The file even if it doesn't exist
      */
     public static File getFile(String path) {
         return new File(applicationPath, path);

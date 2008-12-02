@@ -6,6 +6,9 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * MimeTypes utils
+ */
 public class MimeTypes {
 
     private static Properties mimetypes;

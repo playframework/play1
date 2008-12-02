@@ -2,6 +2,9 @@ package play.exceptions;
 
 import play.classloading.ApplicationClasses.ApplicationClass;
 
+/**
+ * An exception occured during Java execution
+ */
 public class JavaExecutionException extends JavaException {
 
     public JavaExecutionException(ApplicationClass applicationClass, Integer lineNumber, Throwable e) {

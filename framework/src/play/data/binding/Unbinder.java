@@ -7,6 +7,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Try to unbind an object to a Map<String,String>
+ */
 public class Unbinder {
 
     public static void unBind(Map<String, Object> result, Object src, String name) {

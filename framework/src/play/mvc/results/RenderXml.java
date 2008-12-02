@@ -6,6 +6,9 @@ import play.libs.XML;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
+/**
+ * 200 OK with a text/xml
+ */
 public class RenderXml extends Result {
     
     String xml;

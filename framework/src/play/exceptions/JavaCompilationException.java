@@ -3,6 +3,9 @@ package play.exceptions;
 import org.eclipse.jdt.core.compiler.IProblem;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
+/**
+ * A java compilation error
+ */
 public class JavaCompilationException extends JavaException {
 
     private IProblem problem;

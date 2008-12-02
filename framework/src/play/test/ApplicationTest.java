@@ -13,6 +13,9 @@ import play.mvc.ActionInvoker;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
+/**
+ * Application tests support
+ */
 public abstract class ApplicationTest extends org.junit.Assert {
 
   @Before

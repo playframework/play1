@@ -1,5 +1,8 @@
 package play.exceptions;
 
+/**
+ * The application is empty (no routes)
+ */
 public class EmptyAppException extends PlayException {
 
     @Override

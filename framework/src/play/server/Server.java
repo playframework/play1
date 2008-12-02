@@ -14,6 +14,9 @@ import play.Logger;
 import play.Play;
 import play.Play.Mode;
 
+/**
+ * Play! server
+ */
 public class Server {
     private SocketAcceptor acceptor;
 

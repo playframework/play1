@@ -6,6 +6,9 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 import play.templates.Template;
 import java.util.Arrays;
 
+/**
+ * No route found (during reverse routing)
+ */
 public class NoRouteFoundException extends PlayException implements SourceAttachment {
     
     String action;

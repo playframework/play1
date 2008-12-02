@@ -6,6 +6,9 @@ import java.util.List;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
+/**
+ * Error while sending an email
+ */
 public class MailException extends PlayException implements SourceAttachment {
     
     String sourceFile;

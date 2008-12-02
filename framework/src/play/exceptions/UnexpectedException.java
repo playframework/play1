@@ -1,5 +1,8 @@
 package play.exceptions;
 
+/**
+ * An unexpected exception
+ */
 public class UnexpectedException extends PlayException {
     
     public UnexpectedException(String message) {

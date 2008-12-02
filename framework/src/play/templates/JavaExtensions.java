@@ -15,6 +15,9 @@ import org.apache.commons.lang.StringEscapeUtils;
 import play.i18n.Lang;
 import play.libs.I18N;
 
+/**
+ * Java extensions in templates
+ */
 public class JavaExtensions {
     
     public static String toString(Closure closure) {

@@ -4,6 +4,9 @@ import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
+/**
+ * 200 OK with a text/plain
+ */
 public class RenderText extends Result {
     
     String text;

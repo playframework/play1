@@ -18,38 +18,105 @@ import javax.mail.internet.MimeMultipart;
 import play.Play;
 import play.exceptions.MailException;
 
+/**
+ * Mail utils
+ */
 public class Mail {
 
     private static Session session;
 
+    /**
+     * Send an email
+     * @param from From address
+     * @param recipient To address
+     * @param subject Subject
+     * @param body Body
+     */
     public static void send(String from, String recipient, String subject, String body) {
         send(from, new String[]{recipient}, subject, body, "text/plain", new File[0]);
     }
 
+    /**
+     * Send an email
+     * @param from From address
+     * @param recipient To address
+     * @param subject Subject
+     * @param body Body
+     * @param contentType The content type (text/plain or text/html)
+     */
     public static void send(String from, String recipient, String subject, String body, String contentType) {
         send(from, new String[]{recipient}, subject, body, contentType, new File[0]);
     }
 
+    /**
+     * Send an email
+     * @param from From address
+     * @param recipients To addresses
+     * @param subject Subject
+     * @param body Body
+     */
     public static void send(String from, String[] recipients, String subject, String body) {
         send(from, recipients, subject, body, "text/plain", new File[0]);
     }
 
+    /**
+     * Send an email
+     * @param from From address
+     * @param recipients To addresses
+     * @param subject Subject
+     * @param body Body
+     * @param contentType The content type (text/plain or text/html)
+     */
     public static void send(String from, String[] recipients, String subject, String body, String contentType) {
         send(from, recipients, subject, body, contentType, new File[0]);
     }
 
+    /**
+     * Send an email
+     * @param from From address
+     * @param recipient To address
+     * @param subject Subject
+     * @param body Body
+     * @param attachments File attachments
+     */
     public static void send(String from, String recipient, String subject, String body, File... attachments) {
         send(from, new String[]{recipient}, subject, body, "text/plain", attachments);
     }
 
+    /**
+     * Send an email
+     * @param from From address
+     * @param recipient To address
+     * @param subject Subject
+     * @param body Body
+     * @param contentType The content type (text/plain or text/html)
+     * @param attachments File attachments
+     */
     public static void send(String from, String recipient, String subject, String body, String contentType, File... attachments) {
         send(from, new String[]{recipient}, subject, body, contentType, attachments);
     }
 
+    /**
+     * Send an email
+     * @param from From address
+     * @param recipients To addresses
+     * @param subject Subject
+     * @param body Body
+     * @param attachments File attachments
+     */
     public static void send(String from, String[] recipients, String subject, String body, File... attachments) {
         send(from, recipients, subject, body, "text/plain", attachments);
     }
 
+    /**
+     * Send an email
+     * @param from From address
+     * @param recipients To addresses
+     * @param subject Subject
+     * @param body Body
+     * @param contentType The content type (text/plain or text/html)
+     * @param attachments File attachments
+     */
     public static void send(String from, String[] recipients, String subject, String body, String contentType, File... attachments) {
         try {
             MimeMessage msg = new MimeMessage(getSession());
@@ -124,6 +191,10 @@ public class Mail {
         }
     }
 
+    /**
+     * Send a JavaMail message
+     * @param msg A JavaMail message
+     */
     public synchronized static void sendMessage(Message msg) {
         try {
             msg.setSentDate(new Date());

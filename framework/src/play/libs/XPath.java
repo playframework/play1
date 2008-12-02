@@ -5,6 +5,9 @@ import org.jaxen.dom.DOMXPath;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
+/**
+ * XPath for parsing
+ */
 public class XPath {
 
     @SuppressWarnings("unchecked")

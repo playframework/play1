@@ -13,8 +13,17 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Properties;
 
+/**
+ * IO utils
+ */
 public class IO {
 
+    /**
+     * Read a properties file with the utf-8 encoding
+     * @param is Stream to properties file
+     * @return The Properties object
+     * @throws java.io.IOException
+     */
     public static Properties readUtf8Properties(InputStream is) throws IOException {
         Properties properties = new Properties();
         properties.load(is);
@@ -27,6 +36,12 @@ public class IO {
         return properties;
     }
 
+    /**
+     * Read the Stream conten as a string (always use utf-8)
+     * @param is The stream to read
+     * @return The String content
+     * @throws java.io.IOException
+     */
     public static String readContentAsString(InputStream is) throws IOException {
         StringWriter result = new StringWriter();
         PrintWriter out = new PrintWriter(result);
@@ -39,6 +54,12 @@ public class IO {
         return result.toString();
     }
 
+    /**
+     * Read file content to a String (always use utf-8)
+     * @param file The file to read
+     * @return The String content
+     * @throws java.io.IOException
+     */
     public static String readContentAsString(File file) throws IOException {
         InputStream is = new FileInputStream(file);
         StringWriter result = new StringWriter();
@@ -52,6 +73,12 @@ public class IO {
         return result.toString();
     }
 
+    /**
+     * Read binary content of a file (warning does not use on large file !)
+     * @param file The file te read
+     * @return The binary data
+     * @throws java.io.IOException
+     */
     public static byte[] readContent(File file) throws IOException {
         InputStream is = new FileInputStream(file);
         byte[] result = new byte[(int) file.length()];
@@ -60,6 +87,12 @@ public class IO {
         return result;
     }
 
+    /**
+     * Write String content to a stream (always use utf-8)
+     * @param content The content to write
+     * @param os The stream to write
+     * @throws java.io.IOException
+     */
     public static void writeContent(CharSequence content, OutputStream os) throws IOException {
         PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, "utf-8"));
         printWriter.println(content);
@@ -68,6 +101,12 @@ public class IO {
         os.close();
     }
 
+    /**
+     * Write String content to a file (always use utf-8)
+     * @param content The content to write
+     * @param file The file to write
+     * @throws java.io.IOException
+     */
     public static void writeContent(CharSequence content, File file) throws IOException {
         OutputStream os = new FileOutputStream(file);
         PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, "utf-8"));
@@ -77,6 +116,12 @@ public class IO {
         os.close();
     }
     
+    /**
+     * Write binay data to a file
+     * @param data The binary data to write
+     * @param file The file to write
+     * @throws java.io.IOException
+     */
     public static void write(byte[] data, File file) throws IOException {
         OutputStream os = new FileOutputStream(file);
         os.write(data);

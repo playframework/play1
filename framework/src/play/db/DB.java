@@ -5,13 +5,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import play.db.jpa.JPA;
-import play.db.jpa.JPAContext;
 import play.exceptions.DatabaseException;
-import play.exceptions.PlayException;
 
 /**
  * Database connection utilities.
- * @author guillaume
  */
 public class DB {
 
@@ -43,7 +40,7 @@ public class DB {
     public static Connection getConnection() {
         try {
             if (JPA.isEnabled()) {
-                return ((org.hibernate.ejb.EntityManagerImpl) JPAContext.getEntityManager()).getSession().connection();
+                return ((org.hibernate.ejb.EntityManagerImpl) JPA.getEntityManager()).getSession().connection();
             }
             if (localConnection.get() != null) {
                 return localConnection.get();

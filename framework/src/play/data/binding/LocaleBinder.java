@@ -2,6 +2,9 @@ package play.data.binding;
 
 import java.util.Locale;
 
+/**
+ * Binder that support Locale class
+ */
 public class LocaleBinder implements SupportedType<Locale> {
 
     public Locale bind(String value) {

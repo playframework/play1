@@ -42,7 +42,7 @@
         </copy>
     </target>
     
-    <target name="Javadoc" description="Generate the Javadoc">
+    <target name="javadoc" description="Generate the Javadoc">
         <delete dir="docs" />
         <javadoc packagenames="play.*"
                sourcepath="src"           
@@ -232,10 +232,11 @@
         <delete dir="${basedir}/tests-tmp" />
     </target>
     
-    <target name="package" depends="clean,version,jar">
+    <target name="package" depends="clean,version,jar,javadoc">
         <mkdir dir="dist" /> 
         <zip destfile="dist/play-${version}.zip" comment="Play! ${version}" update="false">
-            <zipfileset prefix="play-${version}" dir=".." includes="**/*" excludes=".*,.*/*,framework/dist/**,id,nbproject/**,**/.settings/**,**/.bzr/**,*.bzrignore,framework/classes/**,framework/tests-results/**" />   
+            <zipfileset prefix="play-${version}" dir=".." includes="**/*" excludes=".*,.*/*,framework/dist/**,id,play,nbproject/**,**/.settings/**,**/.bzr/**,*.bzrignore,framework/classes/**,framework/tests-results/**" />   
+            <zipfileset prefix="play-${version}" dir=".." includes="play" filemode="777" />
         </zip>
     </target>
     

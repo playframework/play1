@@ -15,10 +15,16 @@ import play.exceptions.UnexpectedException;
 import play.libs.Crypto;
 import play.libs.Utils;
 
+/**
+ * All application Scopes
+ */
 public class Scope {
 
     static String COOKIE_PREFIX = Play.configuration.getProperty("application.session.cookie", "PLAY");
 
+    /**
+     * Flash scope
+     */
     public static class Flash {
 
         Map<String, String> data = new HashMap<String, String>();
@@ -122,6 +128,9 @@ public class Scope {
         }
     }
 
+    /**
+     * Session scope
+     */
     public static class Session {
 
         static Pattern sessionParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
@@ -211,6 +220,9 @@ public class Scope {
         }
     }
 
+    /**
+     * HTTP params
+     */
     public static class Params {
         // ThreadLocal access
         public static ThreadLocal<Params> current = new ThreadLocal<Params>();
@@ -306,6 +318,9 @@ public class Scope {
         }
     }
 
+    /**
+     * Render args (used in template rendering)
+     */
     public static class RenderArgs {
 
         public Map<String, Object> data = new HashMap<String, Object>();        // ThreadLocal access

@@ -9,6 +9,9 @@ import zdb.client.Bucket;
 import zdb.client.ZDB;
 import org.apache.lucene.queryParser.ParseException;
 
+/**
+ * ZDB support 
+ */
 public class ZDBModel {
 
     /**

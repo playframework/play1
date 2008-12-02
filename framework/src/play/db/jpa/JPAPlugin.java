@@ -13,13 +13,16 @@ import play.PlayPlugin;
 import play.db.DB;
 import play.exceptions.JPAException;
 
+/**
+ * JPA Plugin
+ */
 public class JPAPlugin extends PlayPlugin {
 
     @Override
     public void onApplicationStart() {
         if (JPA.entityManagerFactory == null) {
             List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
-            if(classes.isEmpty()) {
+            if (classes.isEmpty()) {
                 return;
             }
             if (DB.datasource == null) {
@@ -47,7 +50,7 @@ public class JPAPlugin extends PlayPlugin {
             Logger.debug("Initializing JPA ...");
             try {
                 JPA.entityManagerFactory = cfg.buildEntityManagerFactory();
-            } catch(PersistenceException e) {
+            } catch (PersistenceException e) {
                 throw new JPAException(e.getMessage(), e.getCause() != null ? e.getCause() : e);
             }
         }
@@ -83,7 +86,7 @@ public class JPAPlugin extends PlayPlugin {
     public void afterInvocation() {
         closeTx(false);
     }
-    
+
     @Override
     public void afterActionInvocation() {
         closeTx(false);
@@ -92,20 +95,20 @@ public class JPAPlugin extends PlayPlugin {
     @Override
     public void onInvocationException(Throwable e) {
         closeTx(true);
-    }    
-    
+    }
+
     /**
      * initialize the JPA context and starts a JPA transaction
      * 
      * @param readonly true for a readonly transaction
      */
     public static void startTx(boolean readonly) {
-        if(!JPA.isEnabled()) {
+        if (!JPA.isEnabled()) {
             return;
         }
         EntityManager manager = JPA.entityManagerFactory.createEntityManager();
         manager.getTransaction().begin();
-        JPAContext.createContext(manager, readonly);
+        JPA.createContext(manager, readonly);
     }
 
     /**
@@ -113,30 +116,31 @@ public class JPAPlugin extends PlayPlugin {
      * @param rollback shall current transaction be committed (false) or cancelled (true)
      */
     public static void closeTx(boolean rollback) {
-        if(!JPA.isEnabled() || JPAContext.local.get() == null) {
+        if (!JPA.isEnabled() || JPA.local.get() == null) {
             return;
         }
-        EntityManager manager = JPAContext.get().entityManager;
-        if(manager.getTransaction().isActive()) {
-            if (JPAContext.get().readonly || rollback || manager.getTransaction().getRollbackOnly()) {
+        EntityManager manager = JPA.get().entityManager;
+        if (manager.getTransaction().isActive()) {
+            if (JPA.get().readonly || rollback || manager.getTransaction().getRollbackOnly()) {
                 manager.getTransaction().rollback();
             } else {
                 try {
                     manager.getTransaction().commit();
-                } catch(Throwable e) {
-                    for(int i=0; i<10; i++ ) {
-                        if(e instanceof RollbackException && e.getCause() != null) {
+                } catch (Throwable e) {
+                    for (int i = 0; i < 10; i++) {
+                        if (e instanceof RollbackException && e.getCause() != null) {
                             e = e.getCause();
                             break;
                         }
                         e = e.getCause();
-                        if(e == null) break;
+                        if (e == null) {
+                            break;
+                        }
                     }
                     throw new JPAException("Cannot commit", e);
                 }
             }
         }
-        JPAContext.clearContext();
+        JPA.clearContext();
     }
-    
 }

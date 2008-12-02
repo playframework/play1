@@ -5,14 +5,26 @@ import play.Play;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
+/**
+ * Language support
+ */
 public class Lang {
 
     public static ThreadLocal<String> current = new ThreadLocal<String>();
 
+    /**
+     * Retrieve the current language or null
+     * @return The current language (fr, ja, it ...) or null
+     */
     public static String get() {
         return current.get();
     }
 
+    /**
+     * Force the current language
+     * @param locale (fr, ja, it ...)
+     * @return false if the language is not supported by the application
+     */
     public static boolean set(String locale) {
         if (locale.equals("") || Play.langs.contains(locale)) {
             current.set(locale);
@@ -23,6 +35,10 @@ public class Lang {
         }
     }
 
+    /**
+     * Change language for next requests 
+     * @param locale (fr, ja, it ...)
+     */
     public static void change(String locale) {
         if (set(locale)) {
             Response.current().setCookie("PLAY_LANG", locale);

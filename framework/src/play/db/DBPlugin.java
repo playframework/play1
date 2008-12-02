@@ -10,6 +10,9 @@ import play.Play;
 import play.PlayPlugin;
 import play.exceptions.DatabaseException;
 
+/**
+ * The DB plugin
+ */
 public class DBPlugin extends PlayPlugin {
 
     @Override

@@ -12,6 +12,9 @@ import java.io.UnsupportedEncodingException;
 import fr.zenexity.json.JSONTokenizer.Token;
 import static fr.zenexity.json.JSONTokenizer.Token.*;
 
+/**
+ * JSON Parser
+ */
 public class JsonParser extends DataParser {
 
     private JSONTokenizer jt;

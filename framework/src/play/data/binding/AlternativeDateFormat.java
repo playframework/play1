@@ -9,7 +9,6 @@ import java.util.Locale;
 
 /**
  * Date formatter that tries multiple formats before failing
- *
  */
 public class AlternativeDateFormat {
 

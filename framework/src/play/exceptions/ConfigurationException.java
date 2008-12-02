@@ -1,5 +1,8 @@
 package play.exceptions;
 
+/**
+ * Error in application.conf
+ */
 public class ConfigurationException extends PlayException {
 
     public ConfigurationException(String message) {

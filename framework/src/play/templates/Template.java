@@ -46,6 +46,9 @@ import play.libs.Codec;
 import play.mvc.ActionInvoker;
 import play.mvc.Router;
 
+/**
+ * A template
+ */
 public class Template {
 
     public String name;
@@ -262,6 +265,9 @@ public class Template {
     public static ThreadLocal<Map> layoutData = new ThreadLocal<Map>();
     public static ThreadLocal<Template> currentTemplate = new ThreadLocal<Template>();
 
+    /**
+     * Groovy template
+     */
     public static abstract class ExecutableTemplate extends Script {
 
         Template template;

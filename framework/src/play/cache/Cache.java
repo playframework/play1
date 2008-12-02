@@ -34,8 +34,8 @@ public class Cache {
      */
     public static void add(String key, Object value, String expiration) {
         cacheImpl.add(key, value, Time.parseDuration(expiration));
-    }    
-    
+    }
+
     /**
      * Add an element only if it doesn't exist, and return only when 
      * the element is effectivly cached.
@@ -66,7 +66,7 @@ public class Cache {
     public static void set(String key, Object value, String expiration) {
         cacheImpl.set(key, value, Time.parseDuration(expiration));
     }
-    
+
     /**
      * Set an element and return only when the element is effectivly cached.
      * @param key Element key
@@ -86,17 +86,17 @@ public class Cache {
     public static void set(String key, Object value) {
         cacheImpl.set(key, value, Time.parseDuration(null));
     }
-    
+
     /**
      * Replace an element only if it already exists.
      * @param key Element key
      * @param value Element value
      * @param expiration Ex: 10s, 3mn, 8h
-     */    
+     */
     public static void replace(String key, Object value, String expiration) {
         cacheImpl.replace(key, value, Time.parseDuration(expiration));
     }
-    
+
     /**
      * Replace an element only if it already exists and return only when the 
      * element is effectivly cached.
@@ -104,7 +104,7 @@ public class Cache {
      * @param value Element value
      * @param expiration Ex: 10s, 3mn, 8h
      * @return If the element an eventually been cached
-     */  
+     */
     public static boolean safeReplace(String key, Object value, String expiration) {
         return cacheImpl.safeReplace(key, value, Time.parseDuration(expiration));
     }
@@ -113,11 +113,11 @@ public class Cache {
      * Replace an element only if it already exists and store it indefinitly.
      * @param key Element key
      * @param value Element value
-     */ 
+     */
     public static void replace(String key, Object value) {
         cacheImpl.replace(key, value, Time.parseDuration(null));
     }
-    
+
     /**
      * Increment the element value (must be a Number).
      * @param key Element key 
@@ -136,8 +136,7 @@ public class Cache {
     public static long incr(String key) {
         return cacheImpl.incr(key, 1);
     }
-    
-    
+
     /**
      * Decrement the element value (must be a Number).
      * @param key Element key 
@@ -147,7 +146,7 @@ public class Cache {
     public static long decr(String key, int by) {
         return cacheImpl.decr(key, by);
     }
-    
+
     /**
      * Decrement the element value (must be a Number) by 1.
      * @param key Element key 
@@ -165,13 +164,13 @@ public class Cache {
     public static Object get(String key) {
         return cacheImpl.get(key);
     }
-    
+
     /**
      * Bulk retrieve.
      * @param key List of keys
      * @return Map of keys & values
      */
-    public static Map<String,Object> get(String... key) {
+    public static Map<String, Object> get(String... key) {
         return cacheImpl.get(key);
     }
 
@@ -182,7 +181,7 @@ public class Cache {
     public static void delete(String key) {
         cacheImpl.delete(key);
     }
-    
+
     /**
      * Delete an element from the cache and return only when the 
      * element is effectivly removed.
@@ -210,16 +209,16 @@ public class Cache {
     public static <T> T get(String key, Class<T> clazz) {
         return (T) cacheImpl.get(key);
     }
-    
+
     /**
      * Init the cache system.
      */
     public static void init() {
-        if(Play.configuration.getProperty("memcached", "disabled").equals("enabled")) {
+        if (Play.configuration.getProperty("memcached", "disabled").equals("enabled")) {
             try {
                 cacheImpl = new MemcachedImpl();
                 Logger.info("Connected to memcached");
-            } catch(Exception e) {
+            } catch (Exception e) {
                 Logger.error(e, "Error while connecting to memcached");
                 Logger.warn("Fallback to local cache");
                 cacheImpl = new LocalCacheImpl();
@@ -228,97 +227,120 @@ public class Cache {
             cacheImpl = new LocalCacheImpl();
         }
     }
-    
+
     /**
      * Stop the cache system.
      */
     public static void stop() {
         cacheImpl.stop();
     }
-    
+
+    /**
+     * A cache implementation
+     */
     static interface CacheImpl {
+
         public void add(String key, Object value, int expiration);
+
         public boolean safeAdd(String key, Object value, int expiration);
+
         public void set(String key, Object value, int expiration);
+
         public boolean safeSet(String key, Object value, int expiration);
+
         public void replace(String key, Object value, int expiration);
+
         public boolean safeReplace(String key, Object value, int expiration);
+
         public Object get(String key);
-        public Map<String,Object> get(String[] keys);
-        public long incr(String key, int by); 
-        public long decr(String key, int by); 
+
+        public Map<String, Object> get(String[] keys);
+
+        public long incr(String key, int by);
+
+        public long decr(String key, int by);
+
         public void clear();
+
         public void delete(String key);
+
         public boolean safeDelete(String key);
+
         public void stop();
     }
-    
+
+    /**
+     * Memcached implementation
+     */
     static class MemcachedImpl implements CacheImpl {
-        
+
         MemcachedClient client;
-        
+
         public MemcachedImpl() throws IOException {
             System.setProperty("net.spy.log.LoggerImpl", "net.spy.log.Log4JLogger");
-            if(Play.configuration.containsKey("memcached.host")) {
+            if (Play.configuration.containsKey("memcached.host")) {
                 client = new MemcachedClient(AddrUtil.getAddresses(Play.configuration.getProperty("memcached.host")));
-                client.setTranscoder(new SerializingTranscoder(){
-					@Override
-					protected Object deserialize(byte[] data) {
-						try {
-							return new ObjectInputStream(new ByteArrayInputStream(data)) {
-								@Override
-								protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-									return Play.classloader.loadClass(desc.getName());
-								}
-							}.readObject();
-						} catch (Exception e) {
-							Logger.error(e,"Could not deserialize");
-						}
-						return null;
-					}
-					@Override
-					protected byte[] serialize(Object object) {
-						try {
-							ByteArrayOutputStream bos = new ByteArrayOutputStream ();
-							new ObjectOutputStream (bos).writeObject(object);
-							return bos.toByteArray();
-						} catch (IOException e) {
-							Logger.error(e,"Could not serialize");
-						}
-						return null;
-					}
+                client.setTranscoder(new SerializingTranscoder() {
+
+                    @Override
+                    protected Object deserialize(byte[] data) {
+                        try {
+                            return new ObjectInputStream(new ByteArrayInputStream(data)) {
+
+                                @Override
+                                protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+                                    return Play.classloader.loadClass(desc.getName());
+                                }
+                            }.readObject();
+                        } catch (Exception e) {
+                            Logger.error(e, "Could not deserialize");
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected byte[] serialize(Object object) {
+                        try {
+                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                            new ObjectOutputStream(bos).writeObject(object);
+                            return bos.toByteArray();
+                        } catch (IOException e) {
+                            Logger.error(e, "Could not serialize");
+                        }
+                        return null;
+                    }
                 });
-            } else if(Play.configuration.containsKey("memcached.1.host")) {   
+            } else if (Play.configuration.containsKey("memcached.1.host")) {
                 int nb = 1;
                 String addresses = "";
-                while(Play.configuration.containsKey("memcached."+nb+".host")) {
-                    addresses += Play.configuration.get("memcached."+nb+".host") + " ";
+                while (Play.configuration.containsKey("memcached." + nb + ".host")) {
+                    addresses += Play.configuration.get("memcached." + nb + ".host") + " ";
                     nb++;
                 }
                 client = new MemcachedClient(AddrUtil.getAddresses(addresses));
-            } else {   
+            } else {
                 throw new ConfigurationException(("Bad configuration for memcached"));
             }
         }
-        
+
         public void add(String key, Object value, int expiration) {
             client.add(key, expiration, value);
         }
-        
+
         public Object get(String key) {
             Future<Object> future = client.asyncGet(key);
             try {
                 return future.get(1, TimeUnit.SECONDS);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 future.cancel(false);
             }
             return null;
         }
-        
+
         public void clear() {
             client.flush();
         }
-        
+
         public void delete(String key) {
             client.delete(key);
         }
@@ -327,7 +349,7 @@ public class Cache {
             Future<Map<String, Object>> future = client.asyncGetBulk(keys);
             try {
                 return future.get(1, TimeUnit.SECONDS);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 future.cancel(false);
             }
             return new HashMap<String, Object>();
@@ -349,7 +371,7 @@ public class Cache {
             Future<Boolean> future = client.add(key, expiration, value);
             try {
                 return future.get(1, TimeUnit.SECONDS);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 future.cancel(false);
             }
             return false;
@@ -359,7 +381,7 @@ public class Cache {
             Future<Boolean> future = client.delete(key);
             try {
                 return future.get(1, TimeUnit.SECONDS);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 future.cancel(false);
             }
             return false;
@@ -369,7 +391,7 @@ public class Cache {
             Future<Boolean> future = client.replace(key, expiration, value);
             try {
                 return future.get(1, TimeUnit.SECONDS);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 future.cancel(false);
             }
             return false;
@@ -379,7 +401,7 @@ public class Cache {
             Future<Boolean> future = client.set(key, expiration, value);
             try {
                 return future.get(1, TimeUnit.SECONDS);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 future.cancel(false);
             }
             return false;
@@ -392,15 +414,17 @@ public class Cache {
         public void stop() {
             client.shutdown();
         }
-        
     }
 
+    /**
+     * In JVM heap implementation
+     */
     static class LocalCacheImpl implements CacheImpl {
 
         private Map<String, CachedElement> cache = new HashMap<String, CachedElement>();
 
         public void add(String key, Object value, int expiration) {
-           safeAdd(key, value, expiration);
+            safeAdd(key, value, expiration);
         }
 
         public Object get(String key) {
@@ -418,7 +442,7 @@ public class Cache {
 
         public Map<String, Object> get(String[] keys) {
             Map<String, Object> result = new HashMap<String, Object>();
-            for(String key : keys) {
+            for (String key : keys) {
                 result.put(key, get(key));
             }
             return result;
@@ -426,21 +450,21 @@ public class Cache {
 
         public synchronized long incr(String key, int by) {
             CachedElement cachedElement = cache.get(key);
-            if(cachedElement == null) {
+            if (cachedElement == null) {
                 return -1;
             }
-            long newValue = (Long)cachedElement.getValue() + by;
+            long newValue = (Long) cachedElement.getValue() + by;
             cachedElement.setValue(newValue);
             return newValue;
         }
 
         public synchronized long decr(String key, int by) {
             CachedElement cachedElement = cache.get(key);
-            if(cachedElement == null) {
+            if (cachedElement == null) {
                 return -1;
             }
-            long newValue = (Long)cachedElement.getValue() - by;
-            cachedElement.setValue(newValue);  
+            long newValue = (Long) cachedElement.getValue() - by;
+            cachedElement.setValue(newValue);
             return newValue;
         }
 
@@ -449,13 +473,13 @@ public class Cache {
         }
 
         public void set(String key, Object value, int expiration) {
-             safeSet(key, value, expiration);
+            safeSet(key, value, expiration);
         }
 
         public boolean safeAdd(String key, Object value, int expiration) {
             Object v = get(key);
             if (v == null) {
-                set(key, value, expiration); 
+                set(key, value, expiration);
                 return true;
             }
             return false;
@@ -464,7 +488,7 @@ public class Cache {
         public boolean safeDelete(String key) {
             CachedElement cachedElement = cache.get(key);
             if (cachedElement != null) {
-                cache.remove(key);   
+                cache.remove(key);
                 return true;
             }
             return false;
@@ -472,7 +496,7 @@ public class Cache {
 
         public boolean safeReplace(String key, Object value, int expiration) {
             CachedElement cachedElement = cache.get(key);
-            if(cachedElement == null) {
+            if (cachedElement == null) {
                 return false;
             }
             cachedElement.setExpiration(expiration * 1000 + System.currentTimeMillis());
@@ -481,17 +505,16 @@ public class Cache {
         }
 
         public boolean safeSet(String key, Object value, int expiration) {
-            cache.put(key, new CachedElement(key, value, expiration * 1000 + System.currentTimeMillis())); 
+            cache.put(key, new CachedElement(key, value, expiration * 1000 + System.currentTimeMillis()));
             return true;
         }
 
-        public void stop() { 
-        }    
+        public void stop() {
+        }
 
         public void clear() {
             cache.clear();
         }
-        
         //
         class CachedElement {
 

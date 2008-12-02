@@ -13,8 +13,17 @@ import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNam
 import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
 
+/**
+ * Java utils
+ */
 public class Java {
 
+    /**
+     * Find the first public static method
+     * @param name The method name
+     * @param clazz The class
+     * @return The method or null
+     */
     public static Method findPublicStaticMethod(String name, Class clazz) {
         for (Method m : clazz.getDeclaredMethods()) {
             if (m.getName().equals(name) && Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers())) {
@@ -24,10 +33,25 @@ public class Java {
         return null;
     }
 
+    /**
+     * Invoke a static method
+     * @param clazz The class
+     * @param method The method name
+     * @return The result
+     * @throws java.lang.Exception
+     */
     public static Object invokeStatic(Class clazz, String method) throws Exception {
         return invokeStatic(clazz, method, new Object[0]);
     }
 
+    /**
+     * Invoke a static method with args
+     * @param clazz The class
+     * @param method The method name
+     * @param args Arguments
+     * @return The result
+     * @throws java.lang.Exception
+     */
     public static Object invokeStatic(Class clazz, String method, Object... args) throws Exception {
         Class[] types = new Class[args.length];
         for (int i = 0; i < args.length; i++) {
@@ -97,6 +121,12 @@ public class Java {
         return "L" + (clazz.getName().replace('.', '/')) + ";";
     }
 
+    /**
+     * Find all annotated method from a class
+     * @param clazz The class
+     * @param annotationType The annotation class
+     * @return A list of method object
+     */
     public static List<Method> findAllAnnotatedMethods(Class clazz, Class annotationType) {
         List<Method> methods = new ArrayList<Method>();
         while (!clazz.equals(Object.class)) {
@@ -120,6 +150,7 @@ public class Java {
             findAllFields(sClazz, found);
         }
     }
+    
     /** cache */
     private static Map<Field, FieldWrapper> wrappers = new HashMap<Field, FieldWrapper>();
 
@@ -144,7 +175,6 @@ public class Java {
         private Method setter;
         private Method getter;
         private Field field;
-        /** can we update this field value ? */
         private boolean writable;
         private boolean accessible;
 
