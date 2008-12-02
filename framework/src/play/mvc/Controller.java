@@ -2,6 +2,8 @@ package play.mvc;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,7 +134,7 @@ public abstract class Controller {
             String[] names = (String[]) ActionInvoker.getActionMethod(action).getDeclaringClass().getDeclaredField("$" + ActionInvoker.getActionMethod(action).getName() + LocalVariablesNamesTracer.computeMethodHash(ActionInvoker.getActionMethod(action).getParameterTypes())).get(null);
             assert names.length == args.length : "Problem is action redirection";
             for (int i = 0; i < names.length; i++) {
-            	Unbinder.unBind(r, args[i], names[i]);
+                Unbinder.unBind(r, args[i], names[i]);
             }
             try {
                 throw new Redirect(Router.reverse(action, r).toString());
@@ -190,5 +192,13 @@ public abstract class Controller {
             templateName = Http.Request.current().action.replace(".", "/") + "." + Http.Request.current().format;
         }
         renderTemplate(templateName, args);
+    }
+
+    public static <T extends Annotation> T getActionAnnotation(Class<T> clazz) {
+        Method m = ActionInvoker.getActionMethod(Http.Request.current().action);
+        if (m.isAnnotationPresent(clazz)) {
+            return m.getAnnotation(clazz);
+        }
+        return null;
     }
 }

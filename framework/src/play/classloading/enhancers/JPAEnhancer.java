@@ -70,6 +70,14 @@ public class JPAEnhancer extends Enhancer {
         // find        
         CtMethod find2 = CtMethod.make("public static play.db.jpa.JPAModel.JPAQuery find() { javax.persistence.Query q = getEntityManager().createQuery(createFindByQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", null, null)); return new play.db.jpa.JPAModel.JPAQuery(bindParameters(q,null)); }", ctClass);
         ctClass.addMethod(find2);
+        
+        // delete        
+        CtMethod delete = CtMethod.make("public static int delete(String query, Object[] params) { javax.persistence.Query q = getEntityManager().createQuery(createDeleteQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", query, params)); return bindParameters(q,params).executeUpdate(); }", ctClass);
+        ctClass.addMethod(delete);
+        
+        // deleteAll        
+        CtMethod deleteAll = CtMethod.make("public static int deleteAll() { javax.persistence.Query q = getEntityManager().createQuery(createDeleteQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", null, null)); return bindParameters(q,null).executeUpdate(); }", ctClass);
+        ctClass.addMethod(deleteAll);
 
         // findOneBy
         CtMethod findOneBy = CtMethod.make("public static play.db.jpa.JPAModel findOneBy(String query, Object[] params) { javax.persistence.Query q = getEntityManager().createQuery(createFindByQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", query, params)); java.util.List results = bindParameters(q,params).getResultList(); if(results.size() == 0) return null; return (play.db.jpa.JPAModel)results.get(0); }", ctClass);

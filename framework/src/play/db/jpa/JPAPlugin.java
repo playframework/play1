@@ -6,7 +6,6 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.RollbackException;
-import org.hibernate.MappingException;
 import org.hibernate.ejb.Ejb3Configuration;
 import play.Logger;
 import play.Play;

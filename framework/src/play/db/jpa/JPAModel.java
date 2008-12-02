@@ -70,6 +70,14 @@ public class JPAModel implements Serializable {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
     
+    public static int delete(String query, Object... params) {
+        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
+    }
+    
+    public static int deleteAll() {
+        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
+    }
+    
     /**
      * find one item matching the parametrized query
      * @param <T>
@@ -93,6 +101,10 @@ public class JPAModel implements Serializable {
     }
        
     public static EntityManager getEntityManager() {
+        return JPAContext.getEntityManager();
+    }
+    
+    public static EntityManager em() {
         return JPAContext.getEntityManager();
     }
 
@@ -144,6 +156,26 @@ public class JPAModel implements Serializable {
             query += " = null";
         }
         return  "from " + entityName + " where " + query;       
+    }
+    
+    @SuppressWarnings("unused")
+    protected static String createDeleteQuery(String entityName, String entityClass, String query, Object... params) {
+        if(query == null) {
+            return "delete from " + entityName;
+        }
+        if (query.trim().toLowerCase().startsWith("delete ")) {
+            return query;
+        }
+        if (query.trim().toLowerCase().startsWith("from ")) {
+            return "delete " + query;
+        }
+        if (query.trim().indexOf(" ") == -1 && params != null && params.length == 1) {
+            query += " = ?";
+        }
+        if (query.trim().indexOf(" ") == -1 && params == null) {
+            query += " = null";
+        }
+        return  "delete from " + entityName + " where " + query;       
     }
     
     @SuppressWarnings("unused")

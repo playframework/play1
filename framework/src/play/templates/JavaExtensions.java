@@ -1,5 +1,8 @@
 package play.templates;
 
+import groovy.lang.Closure;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -13,6 +16,15 @@ import play.i18n.Lang;
 import play.libs.I18N;
 
 public class JavaExtensions {
+    
+    public static String toString(Closure closure) {
+        PrintWriter oldWriter = (PrintWriter)closure.getProperty("out");
+        StringWriter newWriter = new StringWriter();
+        closure.setProperty("out", new PrintWriter(newWriter));
+        closure.call();
+        closure.setProperty("out", oldWriter);
+        return newWriter.toString();
+    }
 
     public static String capitalizeWords(String source) {
         char prevc = ' '; // first char of source is capitalized
@@ -47,6 +59,27 @@ public class JavaExtensions {
 
     public static String format(Date date, String pattern) {
         return new SimpleDateFormat(pattern).format(date);
+    }
+    
+    public static String since(Date date) {
+        Date now = new Date();
+        if(now.before(date)) {
+            return "";
+        }
+        long delta = (now.getTime() - date.getTime()) / 1000;
+        if(delta < 60) {
+            return String.format("%s seconds ago", delta);
+        }
+        if(delta < 60 * 60) {
+            return String.format("%s minutes ago", delta / 60);
+        }
+        if(delta < 24 * 60 * 60) {
+            return String.format("%s hours ago", delta / (60 * 60) );
+        }
+        if(delta < 30 * 24 * 60 * 60) {
+            return String.format("%s days ago", delta / (24 * 60 * 60) );
+        }
+        return String.format("%s months ago", delta / (30 * 24 * 60 * 60) );
     }
 
     public static String asdate(Long timestamp, String pattern) {

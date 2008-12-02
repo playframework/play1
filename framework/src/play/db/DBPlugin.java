@@ -16,31 +16,31 @@ public class DBPlugin extends PlayPlugin {
     public void onApplicationStart() {
         if (changed()) {
             try {
-                
+
                 Properties p = Play.configuration;
-                
+
                 // Try the driver
                 String driver = p.getProperty("db.driver");
                 try {
-                    Class.forName(driver);                    
+                    Class.forName(driver);
                 } catch (Exception e) {
                     throw new Exception("Driver not found (" + driver + ")");
                 }
-                
+
                 // Try the connection
                 Connection fake = null;
                 try {
-                    if(p.getProperty("db.user") == null) {
+                    if (p.getProperty("db.user") == null) {
                         DriverManager.getConnection(p.getProperty("db.url"));
                     } else {
                         DriverManager.getConnection(p.getProperty("db.url"), p.getProperty("db.user"), p.getProperty("db.pass"));
                     }
                 } finally {
-                    if(fake != null) {
+                    if (fake != null) {
                         fake.close();
                     }
                 }
-                
+
                 System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
                 System.setProperty("com.mchange.v2.log.FallbackMLog.DEFAULT_CUTOFF_LEVEL", "OFF");
                 ComboPooledDataSource ds = new ComboPooledDataSource();
@@ -68,10 +68,10 @@ public class DBPlugin extends PlayPlugin {
             } catch (Exception e) {
                 DB.datasource = null;
                 Logger.error(e, "Cannot connected to the database : %s", e.getMessage());
-                if(e.getCause() instanceof InterruptedException) {
+                if (e.getCause() instanceof InterruptedException) {
                     throw new DatabaseException("Cannot connected to the database. Check the configuration.", e);
                 }
-                throw new DatabaseException("Cannot connected to the database, "+e.getMessage(), e);
+                throw new DatabaseException("Cannot connected to the database, " + e.getMessage(), e);
             }
         }
     }

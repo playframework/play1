@@ -200,7 +200,7 @@ public class TemplateCompiler {
                 action = action + "()";
             }
             if (absolute) {
-                print("\tout.print(request.getBase() + actionBridge." + action + ");");
+                print("\tout.print(play.mvc.Http.Request.current().getBase() + actionBridge." + action + ");");
             } else {
                 print("\tout.print(actionBridge." + action + ");");
             }
