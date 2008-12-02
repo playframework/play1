@@ -1,5 +1,7 @@
 package play;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Priority;
@@ -142,19 +144,23 @@ public class Logger {
             }
             
             PlayException playException = (PlayException) e;
-            log4j.log(priority, "");
-            log4j.log(priority, "@" + playException.getId());
-            log4j.log(priority, String.format(message, args));
-            log4j.log(priority, "");
+            StringWriter sw = new StringWriter();
+            PrintWriter errorOut = new PrintWriter(sw);
+            
+            
+            errorOut.println("");
+            errorOut.println("");
+            errorOut.println("@" + playException.getId());
+            errorOut.println(String.format(message, args));
+            errorOut.println("");
             if(playException.isSourceAvailable()) {
-                log4j.log(priority, playException.getErrorTitle() + " (In " + playException.getSourceFile() + " around line " + playException.getLineNumber() +")");
+                errorOut.println(playException.getErrorTitle() + " (In " + playException.getSourceFile() + " around line " + playException.getLineNumber() +")");
             
             } else {
-                log4j.log(priority, playException.getErrorTitle());            
+                errorOut.println(playException.getErrorTitle());            
             }
-            log4j.log(priority, playException.getErrorDescription().replace("<strong>", "").replace("</strong>", "").replace("\n", " "));
-            log4j.log(priority, null, e);
-            log4j.log(priority, "");
+            errorOut.println(playException.getErrorDescription().replace("<strong>", "").replace("</strong>", "").replace("\n", " "));
+            log4j.log(priority, sw.toString(), e);
             return true;
         }
         return false;

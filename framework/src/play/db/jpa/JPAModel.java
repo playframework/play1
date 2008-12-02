@@ -128,14 +128,14 @@ public class JPAModel implements Serializable {
     
     @SuppressWarnings("unused")
     protected static String createFindByQuery(String entityName, String entityClass, String query, Object... params) {
+        if(query == null) {
+            return "from " + entityName;
+        }
         if (query.trim().toLowerCase().startsWith("select ")) {
             return query;
         }
         if (query.trim().toLowerCase().startsWith("from ")) {
             return query;
-        }
-        if(query == null) {
-            return "from " + entityName;
         }
         if (query.trim().indexOf(" ") == -1 && params != null && params.length == 1) {
             query += " = ?";
@@ -148,6 +148,12 @@ public class JPAModel implements Serializable {
     
     @SuppressWarnings("unused")
     protected static String createCountQuery(String entityName, String entityClass, String query, Object... params) {
+        if (query.trim().toLowerCase().startsWith("select ")) {
+            return query;
+        }
+        if (query.trim().toLowerCase().startsWith("from ")) {
+            return "select count(*) " + query;
+        }
         if (query.trim().indexOf(" ") == -1 && params != null && params.length == 1) {
             query += " = ?";
         }
@@ -189,7 +195,10 @@ public class JPAModel implements Serializable {
         }
         
         public <T extends JPAModel> List<T> page(int from, int length) {
-            query.setFirstResult(from);
+            if(from < 1) {
+                throw new IllegalArgumentException("Page start at 1");
+            }
+            query.setFirstResult((from-1) * length);
             query.setMaxResults(length);
             return query.getResultList();
         }
