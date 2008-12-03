@@ -64,6 +64,10 @@ public class JavaExtensions {
         return new SimpleDateFormat(pattern).format(date);
     }
     
+    public static Integer page(Number number, Integer pageSize) {
+        return number.intValue() / pageSize + (number.intValue() % pageSize > 0 ? 1 : 0);
+    }
+    
     public static String since(Date date) {
         Date now = new Date();
         if(now.before(date)) {
