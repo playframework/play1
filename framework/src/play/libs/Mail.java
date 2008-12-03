@@ -3,7 +3,6 @@ package play.libs;
 import java.io.File;
 import java.util.Date;
 import java.util.Properties;
-import java.util.logging.Level;
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.mail.Message;
@@ -170,7 +169,7 @@ public class Mail {
         if (session == null || (Play.mode == Play.Mode.DEV)) {
             Properties props = new Properties();
             props.put("mail.smtp.host", Play.configuration.getProperty("mail.smtp.host"));
-            props.put("mail.smtp.starttls.enable", Play.configuration.getProperty("mail.smtp.starttls", "false"));
+            props.put("mail.smtp.starttls.enable", Play.configuration.getProperty("mail.smtp.protocol", "stmp").equals("smtps") ? "true" : "false");
             session = Session.getDefaultInstance(props, null);
         }
         return session;
