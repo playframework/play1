@@ -163,6 +163,15 @@ public class JPAModel implements Serializable {
     public static EntityManager em() {
         return JPA.getEntityManager();
     }
+    
+    /**
+     * Retrieve the current entityManager
+     * @return the current entityManager
+     * @deprecated 
+     */
+    public static EntityManager getEntityManager() {
+        return JPA.getEntityManager();
+    }
    
     /**
      * JPAModel instances a and b are equals if either <strong>a == b</strong> or a and b have same </strong>{@link #id id} and class</strong>
