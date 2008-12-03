@@ -15,6 +15,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import play.Logger;
 import play.Play;
 import play.exceptions.MailException;
 
@@ -195,15 +196,21 @@ public class Mail {
      * Send a JavaMail message
      * @param msg A JavaMail message
      */
-    public synchronized static void sendMessage(Message msg) {
-        try {
-            msg.setSentDate(new Date());
-            Transport transport = getSession().getTransport("smtp");
-            transport.connect(getSession().getProperty("mail.smtp.host"), Play.configuration.getProperty("mail.smtp.user"), Play.configuration.getProperty("mail.smtp.pass"));
-            transport.sendMessage(msg, msg.getAllRecipients());
-            transport.close();
-        } catch (MessagingException ex) {
-            java.util.logging.Logger.getLogger(Mail.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    public static void sendMessage(final Message msg) {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    msg.setSentDate(new Date());
+                    Transport transport = getSession().getTransport("smtp");
+                    transport.connect(getSession().getProperty("mail.smtp.host"), Play.configuration.getProperty("mail.smtp.user"), Play.configuration.getProperty("mail.smtp.pass"));
+                    transport.sendMessage(msg, msg.getAllRecipients());
+                    transport.close();
+                } catch(Exception e) {
+                    MailException me = new MailException("Error while sending email", e);
+                    Logger.error(me, "The email has not been sent");
+                }
+            }
+        }.start();
     }
 }
