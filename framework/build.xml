@@ -53,7 +53,7 @@
                use="true"
                windowtitle="Play! API">
             <classpath refid="project.classpath"/>
-            <doctitle><![CDATA[<h1>Play!</h1>]]></doctitle>
+            <doctitle><![CDATA[<h1>Play! ${version}</h1>]]></doctitle>
             <bottom><![CDATA[<a href="http://guillaume.bort.fr">Guillaume Bort</a> & <a href="http://www.zenexity.fr">zenexity</a> - Distributed under <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache 2 licence</a>, without any warrantly]]></bottom>
             <tag name="todo" scope="all" description="To do:"/>
             <group title="Libs" packages="play.libs.*"/>
