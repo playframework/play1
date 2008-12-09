@@ -145,7 +145,11 @@ public class Router {
                 Matcher matcher = route.actionPattern.matcher(action);
                 if (matcher.matches()) {
                     for (String group : route.actionArgs) {
-                        args.put(group, matcher.group(group));
+                        String v = matcher.group(group);
+                        if(v == null) {
+                            continue;
+                        }
+                        args.put(group, v.toLowerCase());
                     }
                     List<String> inPathArgs = new ArrayList<String>();
                     boolean allRequiredArgsAreHere = true;
