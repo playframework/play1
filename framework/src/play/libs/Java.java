@@ -24,9 +24,9 @@ public class Java {
      * @param clazz The class
      * @return The method or null
      */
-    public static Method findPublicStaticMethod(String name, Class clazz) {
+    public static Method findActionMethod(String name, Class clazz) {
         for (Method m : clazz.getDeclaredMethods()) {
-            if (m.getName().equals(name) && Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers())) {
+            if (m.getName().equalsIgnoreCase(name) && Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers())) {
                 return m;
             }
         }

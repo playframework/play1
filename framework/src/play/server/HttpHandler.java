@@ -60,7 +60,7 @@ public class HttpHandler implements IoHandler {
         try {
             request = parseRequest(minaRequest, session);
         } catch (NotFound e) {
-            serve404(session, minaResponse, minaRequest);
+            serve404(session, minaResponse, minaRequest, e);
             return;
         } catch (RenderStatic e) {
             serveStatic(session, minaResponse, minaRequest, e);
@@ -194,7 +194,7 @@ public class HttpHandler implements IoHandler {
     public void serveStatic(IoSession session, MutableHttpResponse minaResponse, HttpRequest minaRequest, RenderStatic renderStatic) throws IOException {
         VirtualFile file = Play.getVirtualFile(renderStatic.file);
         if (file == null || file.isDirectory() || !file.exists()) {
-            serve404(session, minaResponse, minaRequest);
+            serve404(session, minaResponse, minaRequest, new NotFound(renderStatic.file+ " not found"));
         } else {
             if (Play.mode == Play.Mode.DEV) {
                 minaResponse.setHeader("Cache-Control", "no-cache");
@@ -216,8 +216,8 @@ public class HttpHandler implements IoHandler {
         }
     }
 
-    public static void serve404(IoSession session, MutableHttpResponse minaResponse, HttpRequest minaRequest) {
-        Logger.warn("404 -> %s %s", minaRequest.getMethod(), minaRequest.getRequestUri());
+    public static void serve404(IoSession session, MutableHttpResponse minaResponse, HttpRequest minaRequest, NotFound e) {
+        Logger.warn("404 -> %s %s (%s)", minaRequest.getMethod(), minaRequest.getRequestUri(), e.getMessage());
         minaResponse.setStatus(HttpResponseStatus.NOT_FOUND);
         minaResponse.setContentType("text/html");
         Map<String, Object> binding = new HashMap<String, Object>();

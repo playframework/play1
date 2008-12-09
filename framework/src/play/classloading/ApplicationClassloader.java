@@ -252,6 +252,20 @@ public class ApplicationClassloader extends ClassLoader {
         }
         return results;
     }
+    
+    /**
+     * Find a class in a case insensitive way
+     * @param nale The class name.
+     * @return A class
+     */
+    public Class getClassIgnoreCase(String name) {
+        for (ApplicationClass c : Play.classes.all()) {
+            if(c.name.equalsIgnoreCase(name)) {
+                return loadApplicationClass(c.name);
+            }
+        }
+        return null;
+    }
 
     /**
      * Retrieve all application classes with a specific annotation.

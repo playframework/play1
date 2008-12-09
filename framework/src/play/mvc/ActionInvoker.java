@@ -17,6 +17,7 @@ import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.libs.Java;
+import play.mvc.results.NotFound;
 
 /**
  * Invoke an action after an HTTP request
@@ -37,9 +38,15 @@ public class ActionInvoker {
             Router.route(request);
 
             // 2. Find the action method
-            Method actionMethod = getActionMethod(request.action);  
+            Method actionMethod = null;
+            try {
+                actionMethod = getActionMethod(request.action); 
+            } catch(ActionNotFoundException e) {
+                throw new NotFound(String.format("%s action not found", e.getAction()));
+            }
             request.controller = actionMethod.getDeclaringClass().getName().substring(12);
             request.actionMethod = actionMethod.getName();
+            request.action = request.controller + "." + request.actionMethod;
             
             // 3. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);
@@ -149,8 +156,8 @@ public class ActionInvoker {
             }
             String controller = fullAction.substring(0, fullAction.lastIndexOf("."));
             String action = fullAction.substring(fullAction.lastIndexOf(".") + 1);
-            Class controllerClass = Play.classloader.loadClass(controller);
-            actionMethod = Java.findPublicStaticMethod(action, controllerClass);
+            Class controllerClass = Play.classloader.getClassIgnoreCase(controller);
+            actionMethod = Java.findActionMethod(action, controllerClass);
             if (actionMethod == null) {
                 throw new ActionNotFoundException(fullAction, new Exception("No method public static void "+action+"() was found in class "+controller));
             }

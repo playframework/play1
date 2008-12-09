@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import jregex.Matcher;
 import jregex.Pattern;
+import jregex.REFlags;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
@@ -60,8 +61,9 @@ public class Router {
     }
 
     public static void detectChanges() {
-    	if (Play.mode==Mode.PROD)
-    		return;
+        if (Play.mode == Mode.PROD) {
+            return;
+        }
         for (VirtualFile file : Play.routes) {
             if (file.lastModified() > lastLoading) {
                 load();
@@ -76,18 +78,23 @@ public class Router {
             throw new EmptyAppException();
         }
         // request method may be overriden if a x-http-method-override parameter is given
-        if( request.querystring != null && methodOverride.matches(request.querystring)) {
+        if (request.querystring != null && methodOverride.matches(request.querystring)) {
             Matcher matcher = methodOverride.matcher(request.querystring);
             if (matcher.matches()) {
-                Logger.info("request method %s overriden to %s ", request.method, matcher.group("method") );
+                Logger.info("request method %s overriden to %s ", request.method, matcher.group("method"));
                 request.method = matcher.group("method");
-            }            
+            }
         }
         for (Route route : routes) {
             Map<String, String> args = route.matches(request.method, request.path);
             if (args != null) {
                 request.routeArgs = args;
                 request.action = route.action;
+                if (request.action.indexOf("{") > -1) { // more optimization ?
+                    for (String arg : request.routeArgs.keySet()) {
+                        request.action = request.action.replace("{" + arg + "}", request.routeArgs.get(arg));
+                    }
+                }
                 return;
             }
         }
@@ -114,9 +121,9 @@ public class Router {
 
     public static ActionDefinition reverseForTemplate(String action, Map<String, Object> r) {
         ActionDefinition actionDef = reverse(action, r);
-        if ( !("GET".equals(actionDef.method) || "POST".equals(actionDef.method))) {
+        if (!("GET".equals(actionDef.method) || "POST".equals(actionDef.method))) {
             String separator = actionDef.url.indexOf('?') != -1 ? "&" : "?";
-            actionDef.url += separator +"x-http-method-override=" + actionDef.method;
+            actionDef.url += separator + "x-http-method-override=" + actionDef.method;
         }
         return actionDef;
     }
@@ -134,73 +141,83 @@ public class Router {
             action = action.substring(12);
         }
         for (Route route : routes) {
-            if (route.action.equals(action)) {
-                List<String> inPathArgs = new ArrayList<String>();
-                boolean allRequiredArgsAreHere = true;
-                // les noms de parametres matchent ils ?
-                for (Route.Arg arg : route.args) {
-                    inPathArgs.add(arg.name);
-                    Object value = args.get(arg.name);
-                    if (value==null) {
-                    	allRequiredArgsAreHere = false;
-                        break;
-                    } else {
-	                	if (value instanceof List)
-	                		value = ((List<Object>) value).get(0);
-	                	if (!arg.constraint.matches((String)value)) {
-	                		allRequiredArgsAreHere = false;
-	                        break;
-	                	}
+            if (route.actionPattern != null) {
+                Matcher matcher = route.actionPattern.matcher(action);
+                if (matcher.matches()) {
+                    for (String group : route.actionArgs) {
+                        args.put(group, matcher.group(group));
                     }
-                }
-                // les parametres codes en dur dans la route matchent-ils ?
-                for (String staticKey : route.staticArgs.keySet()) {
-                    if (!args.containsKey(staticKey) || !args.get(staticKey).equals(route.staticArgs.get(staticKey))) {
-                        allRequiredArgsAreHere = false;
-                        break;
-                    }
-                }
-                if (allRequiredArgsAreHere) {
-                    StringBuilder queryString = new StringBuilder();
-                    String path = route.path;
-                    for (String key : args.keySet()) {
-                        if (inPathArgs.contains(key) && args.get(key) != null) {
-                        	if (List.class.isAssignableFrom(args.get(key).getClass())) {
-                        		List<Object> vals = (List<Object>) args.get(key);
-                        		path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", vals.get(0) + "");
-                        	} else 
-                        		path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", args.get(key) + "");
-                        } else if (route.staticArgs.containsKey(key)) {
-                            // Do nothing -> The key is static
-                        } else if (args.get(key) != null) {
-							if (List.class.isAssignableFrom(args.get(key).getClass())) {
-								List<Object> vals = (List<Object>) args.get(key);
-								for (Object object : vals) {
-									try {
-										queryString.append(URLEncoder.encode(key, "utf-8"));
-										queryString.append("=");
-										queryString.append(URLEncoder.encode(object.toString() + "", "utf-8"));
-										queryString.append("&");
-									} catch (UnsupportedEncodingException ex) {}
-								}
-							} else {
-	                            try {
-	                                queryString.append(URLEncoder.encode(key, "utf-8"));
-	                                queryString.append("=");
-	                                queryString.append(URLEncoder.encode(args.get(key) + "", "utf-8"));
-	                                queryString.append("&");
-	                            } catch (UnsupportedEncodingException ex) {}
-                        	}
+                    List<String> inPathArgs = new ArrayList<String>();
+                    boolean allRequiredArgsAreHere = true;
+                    // les noms de parametres matchent ils ?
+                    for (Route.Arg arg : route.args) {
+                        inPathArgs.add(arg.name);
+                        Object value = args.get(arg.name);
+                        if (value == null) {
+                            allRequiredArgsAreHere = false;
+                            break;
+                        } else {
+                            if (value instanceof List) {
+                                value = ((List<Object>) value).get(0);
+                            }
+                            if (!arg.constraint.matches((String) value)) {
+                                allRequiredArgsAreHere = false;
+                                break;
+                            }
                         }
                     }
-                    String qs = queryString.toString();
-                    if (qs.endsWith("&")) {
-                        qs = qs.substring(0, qs.length() - 1);
+                    // les parametres codes en dur dans la route matchent-ils ?
+                    for (String staticKey : route.staticArgs.keySet()) {
+                        if (!args.containsKey(staticKey) || !args.get(staticKey).equals(route.staticArgs.get(staticKey))) {
+                            allRequiredArgsAreHere = false;
+                            break;
+                        }
                     }
-                    ActionDefinition actionDefinition = new ActionDefinition();
-                    actionDefinition.url = qs.length() == 0 ? path : path + "?" + qs;
-                    actionDefinition.method = route.method == null || route.method.equals("*") ? "GET" : route.method.toUpperCase();
-                    return actionDefinition;
+                    if (allRequiredArgsAreHere) {
+                        StringBuilder queryString = new StringBuilder();
+                        String path = route.path;
+                        for (String key : args.keySet()) {
+                            if (inPathArgs.contains(key) && args.get(key) != null) {
+                                if (List.class.isAssignableFrom(args.get(key).getClass())) {
+                                    List<Object> vals = (List<Object>) args.get(key);
+                                    path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", vals.get(0) + "");
+                                } else {
+                                    path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", args.get(key) + "");
+                                }
+                            } else if (route.staticArgs.containsKey(key)) {
+                                // Do nothing -> The key is static
+                            } else if (args.get(key) != null) {
+                                if (List.class.isAssignableFrom(args.get(key).getClass())) {
+                                    List<Object> vals = (List<Object>) args.get(key);
+                                    for (Object object : vals) {
+                                        try {
+                                            queryString.append(URLEncoder.encode(key, "utf-8"));
+                                            queryString.append("=");
+                                            queryString.append(URLEncoder.encode(object.toString() + "", "utf-8"));
+                                            queryString.append("&");
+                                        } catch (UnsupportedEncodingException ex) {
+                                        }
+                                    }
+                                } else {
+                                    try {
+                                        queryString.append(URLEncoder.encode(key, "utf-8"));
+                                        queryString.append("=");
+                                        queryString.append(URLEncoder.encode(args.get(key) + "", "utf-8"));
+                                        queryString.append("&");
+                                    } catch (UnsupportedEncodingException ex) {
+                                    }
+                                }
+                            }
+                        }
+                        String qs = queryString.toString();
+                        if (qs.endsWith("&")) {
+                            qs = qs.substring(0, qs.length() - 1);
+                        }
+                        ActionDefinition actionDefinition = new ActionDefinition();
+                        actionDefinition.url = qs.length() == 0 ? path : path + "?" + qs;
+                        actionDefinition.method = route.method == null || route.method.equals("*") ? "GET" : route.method.toUpperCase();
+                        return actionDefinition;
+                    }
                 }
             }
         }
@@ -223,6 +240,8 @@ public class Router {
         String method;
         String path;
         String action;
+        Pattern actionPattern;
+        List<String> actionArgs = new ArrayList<String>();
         String staticDir;
         Pattern pattern;
         List<Arg> args = new ArrayList<Arg>();
@@ -232,31 +251,42 @@ public class Router {
         static Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'");
 
         public void compute() {
-        	// staticDir
-        	if(action.startsWith("staticDir:")) {
-        		if(!method.equalsIgnoreCase("*") && !method.equalsIgnoreCase("GET")) {
-        			Logger.warn("Static route only support GET method");
-        			return;
-        		}
-        		if(!this.path.endsWith("/") && !this.path.equals("/")) {
-        			this.path += "/"; 
-        		}
-        		this.pattern = new Pattern(path+"({resource}.*)");
-        		this.staticDir = action.substring("staticDir:".length());
-        	} else {        	
-	            String patternString = path;
-	            patternString = customRegexPattern.replacer("\\{<[^/]+>$1\\}").replace(patternString);
-	            Matcher matcher = argsPattern.matcher(patternString);
-	            while (matcher.find()) {
-	                Arg arg = new Arg();
-	                arg.name = matcher.group(2);
-	                arg.constraint = new Pattern(matcher.group(1));
-	                args.add(arg);
-	            }
-	            patternString = argsPattern.replacer("({$2}$1)").replace(patternString);
-	            this.pattern = new Pattern(patternString);
-                    Router.empty = false;
-        	}
+            // staticDir
+            if (action.startsWith("staticDir:")) {
+                if (!method.equalsIgnoreCase("*") && !method.equalsIgnoreCase("GET")) {
+                    Logger.warn("Static route only support GET method");
+                    return;
+                }
+                if (!this.path.endsWith("/") && !this.path.equals("/")) {
+                    this.path += "/";
+                }
+                this.pattern = new Pattern(path + "({resource}.*)");
+                this.staticDir = action.substring("staticDir:".length());
+            } else {
+                // URL pattern
+                String patternString = path;
+                patternString = customRegexPattern.replacer("\\{<[^/]+>$1\\}").replace(patternString);
+                Matcher matcher = argsPattern.matcher(patternString);
+                while (matcher.find()) {
+                    Arg arg = new Arg();
+                    arg.name = matcher.group(2);
+                    arg.constraint = new Pattern(matcher.group(1));
+                    args.add(arg);
+                }
+                patternString = argsPattern.replacer("({$2}$1)").replace(patternString);
+                this.pattern = new Pattern(patternString);
+                Router.empty = false;
+                // Action pattern
+                patternString = action;
+                patternString = patternString.replace(".", "[.]");
+                for (Arg arg : args) {
+                    if (patternString.contains("{" + arg.name + "}")) {
+                        patternString = patternString.replace("{" + arg.name + "}", "({" + arg.name + "}" + arg.constraint.toString() + ")");
+                        actionArgs.add(arg.name);
+                    }
+                }
+                actionPattern = new Pattern(patternString, REFlags.IGNORE_CASE);
+            }
         }
 
         public void addParams(String params) {
@@ -276,17 +306,17 @@ public class Router {
             if (method == null || this.method.equals("*") || method.equalsIgnoreCase(this.method)) {
                 Matcher matcher = pattern.matcher(path);
                 if (matcher.matches()) {
-                	// Static dir
-                	if(staticDir != null) {
-                		throw new RenderStatic(staticDir + "/" + matcher.group("resource"));
-                	} else {
-	                    Map<String, String> localArgs = new HashMap<String, String>();
-	                    for (Arg arg : args) {
-	                        localArgs.put(arg.name, matcher.group(arg.name));
-	                    }
-	                    localArgs.putAll(staticArgs);
-	                    return localArgs;
-                	}
+                    // Static dir
+                    if (staticDir != null) {
+                        throw new RenderStatic(staticDir + "/" + matcher.group("resource"));
+                    } else {
+                        Map<String, String> localArgs = new HashMap<String, String>();
+                        for (Arg arg : args) {
+                            localArgs.put(arg.name, matcher.group(arg.name));
+                        }
+                        localArgs.putAll(staticArgs);
+                        return localArgs;
+                    }
                 }
             }
             return null;

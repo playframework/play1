@@ -16,11 +16,14 @@ import play.templates.TemplateLoader;
  */
 public class NotFound extends Result {
 
+    private String why;
+    
     /**
      * @param why a description of the problem
      */
     public NotFound(String why) {
         super(why);
+        this.why = why;
     }
 
     /**
@@ -33,7 +36,7 @@ public class NotFound extends Result {
 
     public void apply(Request request, Response response) {
         response.status = 404;
-        Logger.warn("404 -> %s %s", request.method, request.url);
+        Logger.warn("404 -> %s %s (%s)", request.method, request.url, why);
         response.contentType = "text/html";
         Map<String, Object> binding = Scope.RenderArgs.current().data;
         binding.put("result", this);
