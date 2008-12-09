@@ -3,8 +3,11 @@
 # ~~~~
 
 # Uncomment this default route to start !
-# GET		/								Application.index
+# GET			/							Application.index
 
 
 # Map static resources from the app/public folder to /public
-GET			/public						staticDir:public    
+GET			/public						staticDir:public
+
+# Catch all
+*			/{controller}/{action}		{controller}.{action}

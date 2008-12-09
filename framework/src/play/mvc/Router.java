@@ -29,10 +29,8 @@ public class Router {
      */
     static Pattern methodOverride = new Pattern("^.*x-http-method-override=({method}GET|PUT|POST|DELETE).*$");
     static long lastLoading;
-    static boolean empty = true;
 
     public static void load() {
-        empty = true;
         routes.clear();
         String config = "";
         for (VirtualFile file : Play.routes) {
@@ -74,9 +72,6 @@ public class Router {
     static List<Route> routes = new ArrayList<Route>();
 
     public static void route(Http.Request request) {
-        if (empty) {
-            throw new EmptyAppException();
-        }
         // request method may be overriden if a x-http-method-override parameter is given
         if (request.querystring != null && methodOverride.matches(request.querystring)) {
             Matcher matcher = methodOverride.matcher(request.querystring);
@@ -97,6 +92,9 @@ public class Router {
                 }
                 return;
             }
+        }
+        if (request.path.equals("/")) {
+            throw new EmptyAppException();
         }
         throw new NotFound(request.method, request.path);
     }
@@ -279,7 +277,6 @@ public class Router {
                 }
                 patternString = argsPattern.replacer("({$2}$1)").replace(patternString);
                 this.pattern = new Pattern(patternString);
-                Router.empty = false;
                 // Action pattern
                 patternString = action;
                 patternString = patternString.replace(".", "[.]");
