@@ -376,8 +376,10 @@ fi
 # ~~~~~~~~~~~~~~~~~~~~~~ Read some configuration from conf/application.conf
 JAVA_ARGS="$REMAINING_ARGS"
 
-readConf "jvm.memory"
-JAVA_ARGS="$JAVA_ARGS $CONF_VALUE"
+if [[ ! $JAVA_ARGS =~ .*Xmx.* ]] ; then
+	readConf "jvm.memory"
+	JAVA_ARGS="$JAVA_ARGS $CONF_VALUE"
+fi
 
 readConf "jpda.port"
 JPDA_PORT=$CONF_VALUE

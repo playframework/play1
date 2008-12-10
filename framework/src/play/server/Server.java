@@ -23,6 +23,8 @@ public class Server {
     public Server() {
         Properties p = Play.configuration;
         int httpPort = Integer.parseInt(p.getProperty("http.port", "9000"));
+        if (System.getProperties().containsKey("http.port"))
+        	httpPort = Integer.parseInt(System.getProperty("http.port"));
         if(Play.mode == Mode.DEV) {
             acceptor = new NioSocketAcceptor(1);
         } else {
