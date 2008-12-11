@@ -124,21 +124,21 @@ public class Mail {
     public static void send(String from, String[] recipients, String subject, String body, String contentType, File... attachments) {
         try {
             MimeMessage msg = new MimeMessage(getSession());
-            
-            if(from == null) {
+
+            if (from == null) {
                 from = Play.configuration.getProperty("mail.smtp.from");
             }
-            if(from == null) {
+            if (from == null) {
                 throw new MailException("Please define a 'from' email address", new NullPointerException());
             }
-            if(recipients == null || recipients.length == 0) {
+            if (recipients == null || recipients.length == 0) {
                 throw new MailException("Please define a recipient email address", new NullPointerException());
             }
-            if(subject == null) {
+            if (subject == null) {
                 throw new MailException("Please define a subject", new NullPointerException());
             }
-            
-            if(contentType == null) {
+
+            if (contentType == null) {
                 contentType = "text/plain";
             }
 
@@ -173,43 +173,51 @@ public class Mail {
         if (session == null || (Play.mode == Play.Mode.DEV)) {
             Properties props = new Properties();
             props.put("mail.smtp.host", Play.configuration.getProperty("mail.smtp.host"));
-            
-            String channelEncryption = Play.configuration.getProperty("mail.smtp.channel","clear") ;
-            
+
+            String channelEncryption = "clear";
+            if(Play.configuration.containsKey("mail.smtp.protocol") && Play.configuration.getProperty("mail.smtp.protocol", "smtp").equals("smtps")) {
+                // Backward compatibility before stable5
+                channelEncryption = "starttls";
+            } else {
+                channelEncryption = Play.configuration.getProperty("mail.smtp.channel", "clear");
+            }
+
             if (channelEncryption.equals("clear")) {
-            	props.put("mail.smtp.port", "25");
+                props.put("mail.smtp.port", "25");
             } else if (channelEncryption.equals("ssl")) {
-				// port 465 + setup yes ssl socket factory (won't verify that the server certificate is signed with a root ca.)
-            	props.put("mail.smtp.port", "465");
-            	props.put("mail.smtp.socketFactory.port", "465");
-            	props.put("mail.smtp.socketFactory.class","play.libs.YesSSLSocketFactory");
-            	props.put("mail.smtp.socketFactory.fallback", "false");
-			} else if (channelEncryption.equals("starttls")) {
-				// port 25 + enable starttls + ssl socket factory
-				props.put("mail.smtp.port", "25");
-				props.put("mail.smtp.starttls.enable", "true");
-				// can't install our socket factory. will work only with server that has a signed certificate
-				// story to be continued in javamail 1.4.2 : https://glassfish.dev.java.net/issues/show_bug.cgi?id=5189
-			}
-            
+                // port 465 + setup yes ssl socket factory (won't verify that the server certificate is signed with a root ca.)
+                props.put("mail.smtp.port", "465");
+                props.put("mail.smtp.socketFactory.port", "465");
+                props.put("mail.smtp.socketFactory.class", "play.libs.YesSSLSocketFactory");
+                props.put("mail.smtp.socketFactory.fallback", "false");
+            } else if (channelEncryption.equals("starttls")) {
+                // port 25 + enable starttls + ssl socket factory
+                props.put("mail.smtp.port", "25");
+                props.put("mail.smtp.starttls.enable", "true");
+                // can't install our socket factory. will work only with server that has a signed certificate
+                // story to be continued in javamail 1.4.2 : https://glassfish.dev.java.net/issues/show_bug.cgi?id=5189
+            }
+
             //override defaults
-            if (Play.configuration.containsKey("mail.smtp.socketFactory.class")) 
-            	props.put("mail.smtp.socketFactory.class",Play.configuration.get("mail.smtp.socketFactory.class"));
-            
-            if (Play.configuration.containsKey("mail.smtp.port")) 
-            	props.put("mail.smtp.port",Play.configuration.get("mail.smtp.port"));
-            
+            if (Play.configuration.containsKey("mail.smtp.socketFactory.class")) {
+                props.put("mail.smtp.socketFactory.class", Play.configuration.get("mail.smtp.socketFactory.class"));
+            }
+            if (Play.configuration.containsKey("mail.smtp.port")) {
+                props.put("mail.smtp.port", Play.configuration.get("mail.smtp.port"));
+            }
             String user = Play.configuration.getProperty("mail.smtp.user");
-			String password = Play.configuration.getProperty("mail.smtp.password");
-            
-			if(user != null && password != null) {
-				session = Session.getInstance(props, new SMTPAuthenticator(user, password));
-			} else {
-				session = Session.getInstance(props);
-			}
-			
+            String password = Play.configuration.getProperty("mail.smtp.password");
+
+            if (user != null && password != null) {
+                session = Session.getInstance(props, new SMTPAuthenticator(user, password));
+            } else {
+                session = Session.getInstance(props);
+            }
+
             session = Session.getDefaultInstance(props, null);
-            if (Boolean.parseBoolean(Play.configuration.getProperty("mail.debug","false"))) session.setDebug(true);
+            if (Boolean.parseBoolean(Play.configuration.getProperty("mail.debug", "false"))) {
+                session.setDebug(true);
+            }
         }
         return session;
     }
@@ -236,6 +244,7 @@ public class Mail {
      */
     public static void sendMessage(final Message msg) {
         new Thread() {
+
             @Override
             public void run() {
                 try {
@@ -244,26 +253,26 @@ public class Mail {
                     transport.connect(getSession().getProperty("mail.smtp.host"), Play.configuration.getProperty("mail.smtp.user"), Play.configuration.getProperty("mail.smtp.pass"));
                     transport.sendMessage(msg, msg.getAllRecipients());
                     transport.close();
-                } catch(Exception e) {
+                } catch (Exception e) {
                     MailException me = new MailException("Error while sending email", e);
                     Logger.error(me, "The email has not been sent");
                 }
             }
         }.start();
     }
-    
-    
-	public static class SMTPAuthenticator extends Authenticator {
-		private String user;
-		private String password;
-		
-		public SMTPAuthenticator(String user, String password) {
-			this.user = user;
-			this.password = password;
-		}
 
-		protected PasswordAuthentication getPasswordAuthentication() {
-			return new PasswordAuthentication(user, password);
-		}
-	}
+    public static class SMTPAuthenticator extends Authenticator {
+
+        private String user;
+        private String password;
+
+        public SMTPAuthenticator(String user, String password) {
+            this.user = user;
+            this.password = password;
+        }
+
+        protected PasswordAuthentication getPasswordAuthentication() {
+            return new PasswordAuthentication(user, password);
+        }
+    }
 }

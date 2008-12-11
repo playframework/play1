@@ -259,7 +259,7 @@ public class TemplateCompiler {
                 print("attrs" + tagIndex + "['vars'].each() {");
                 print("_body.setProperty(it.key, it.value);");
                 print("}};");
-                print("_body.call() };");
+                print("out.print(_body.toString()) };");
                 markLine(tag.startLine);
                 template.doBodyLines.add(currentLine);
                 println();

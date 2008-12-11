@@ -308,17 +308,12 @@ public class Template {
                     args.put("_" + key, attrs.get(key));
                 }
             }
-            PrintWriter callerOut = (PrintWriter) args.get("out");
             StringWriter writer = new StringWriter();
             args.put("_body", body);
-            args.put("out", new PrintWriter(writer));
+            args.put("__sw", new PrintWriter(writer));
             try {
                 tagTemplate.render(args);
                 String tagResult = writer.toString().trim();
-                if (callerOut != null) {
-                    callerOut.print(tagResult);
-                    args.put("out", callerOut);
-                }
             } catch (TagInternalException e) {
                 throw new TemplateExecutionException(template, fromLine, e.getMessage(), cleanStackTrace(e));
             } catch (TemplateNotFoundException e) {
