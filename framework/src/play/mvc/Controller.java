@@ -248,7 +248,8 @@ public abstract class Controller {
     protected static void redirect(String action, Object... args) {
         try {
             Map<String, Object> r = new HashMap<String, Object>();
-            String[] names = (String[]) ActionInvoker.getActionMethod(action).getDeclaringClass().getDeclaredField("$" + ActionInvoker.getActionMethod(action).getName() + LocalVariablesNamesTracer.computeMethodHash(ActionInvoker.getActionMethod(action).getParameterTypes())).get(null);
+            Method actionMethod = (Method)ActionInvoker.getActionMethod(action)[1];
+            String[] names = (String[]) actionMethod.getDeclaringClass().getDeclaredField("$" + actionMethod.getName() + LocalVariablesNamesTracer.computeMethodHash(actionMethod.getParameterTypes())).get(null);
             assert names.length == args.length : "Problem is action redirection";
             for (int i = 0; i < names.length; i++) {
                 Unbinder.unBind(r, args[i], names[i]);
@@ -327,10 +328,19 @@ public abstract class Controller {
      * @return Annotation object or null if not found
      */
     public static <T extends Annotation> T getActionAnnotation(Class<T> clazz) {
-        Method m = ActionInvoker.getActionMethod(Http.Request.current().action);
+        Method m = (Method)ActionInvoker.getActionMethod(Http.Request.current().action)[1];
         if (m.isAnnotationPresent(clazz)) {
             return m.getAnnotation(clazz);
         }
         return null;
+    }
+    
+    /**
+     * Retrieve annotation for the action method
+     * @param clazz The annotation class
+     * @return Annotation object or null if not found
+     */
+    public static Class getControllerClass() {
+        return Play.classloader.getClassIgnoreCase("controllers." + Http.Request.current().controller);
     }
 }

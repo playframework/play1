@@ -9,6 +9,7 @@ import groovy.lang.Script;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,6 +45,7 @@ import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.Codec;
 import play.mvc.ActionInvoker;
+import play.mvc.Http.Request;
 import play.mvc.Router;
 
 /**
@@ -64,9 +66,9 @@ public class Template {
         this.name = name;
         this.source = source;
     }
-    
+
     public static class TClassLoader extends GroovyClassLoader {
-        
+
         public TClassLoader() {
             super(Play.classloader);
         }
@@ -74,58 +76,58 @@ public class Template {
         public Class defineTemplate(String name, byte[] byteCode) {
             return defineClass(name, byteCode, 0, byteCode.length);
         }
-        
     }
 
     public void compile() {
         if (compiledTemplate == null) {
             try {
                 long start = System.currentTimeMillis();
-                
-                TClassLoader tClassLoader = new TClassLoader();                    
-                
+
+                TClassLoader tClassLoader = new TClassLoader();
+
                 // Try the cache
                 byte[] bc = BytecodeCache.getBytecode(name, groovySource);
-                if(bc != null) {
-                    
+                if (bc != null) {
+
                     String[] lines = new String(bc, "utf-8").split("\n");
-                    for(int i=0; i<lines.length; i=i+2) {
+                    for (int i = 0; i < lines.length; i = i + 2) {
                         String className = lines[i];
-                        byte[] byteCode = Codec.decodeBASE64(lines[i+1]);
+                        byte[] byteCode = Codec.decodeBASE64(lines[i + 1]);
                         Class c = tClassLoader.defineTemplate(className, byteCode);
-                        if(compiledTemplate == null) {
+                        if (compiledTemplate == null) {
                             compiledTemplate = c;
                         }
                     }
                     Logger.trace("%sms to load template %s from cache", System.currentTimeMillis() - start, name);
-                    
+
                 } else {
-                
+
                     // Let's compile the groovy source
                     final List<GroovyClass> groovyClassesForThisTemplate = new ArrayList<GroovyClass>();
                     // ~~~ Please !
                     CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
                     compilerConfiguration.setSourceEncoding("utf-8"); // ouf
                     CompilationUnit compilationUnit = new CompilationUnit(compilerConfiguration);
-                    compilationUnit.addSource( new SourceUnit(name, groovySource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()) );
+                    compilationUnit.addSource(new SourceUnit(name, groovySource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()));
                     Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
                     phasesF.setAccessible(true);
-                    LinkedList[] phases = (LinkedList[])phasesF.get(compilationUnit);
+                    LinkedList[] phases = (LinkedList[]) phasesF.get(compilationUnit);
                     LinkedList output = new LinkedList();
                     phases[Phases.OUTPUT] = output;
                     output.add(new GroovyClassOperation() {
+
                         public void call(GroovyClass gclass) {
-                           groovyClassesForThisTemplate.add(gclass);
+                            groovyClassesForThisTemplate.add(gclass);
                         }
                     });
                     compilationUnit.compile();
                     // ouf 
 
                     // Define script classes
-                    StringBuilder sb = new StringBuilder();                
-                    for(GroovyClass gclass: groovyClassesForThisTemplate) {
+                    StringBuilder sb = new StringBuilder();
+                    for (GroovyClass gclass : groovyClassesForThisTemplate) {
                         tClassLoader.defineTemplate(gclass.getName(), gclass.getBytes());
-                        sb.append(gclass.getName()+"\n");
+                        sb.append(gclass.getName() + "\n");
                         sb.append(Codec.encodeBASE64(gclass.getBytes()).replaceAll("\\s", ""));
                         sb.append("\n");
                     }
@@ -134,9 +136,9 @@ public class Template {
                     compiledTemplate = tClassLoader.loadClass(groovyClassesForThisTemplate.get(0).getName());
 
                     Logger.trace("%sms to compile template %s", System.currentTimeMillis() - start, name);
-                    
+
                 }
-                
+
             } catch (MultipleCompilationErrorsException e) {
                 if (e.getErrorCollector().getLastError() != null) {
                     SyntaxErrorMessage errorMessage = (SyntaxErrorMessage) e.getErrorCollector().getLastError();
@@ -188,14 +190,14 @@ public class Template {
         } catch (PlayException e) {
             throw (PlayException) cleanStackTrace(e);
         } catch (DoBodyException e) {
-            if(Play.mode == Mode.DEV) {
+            if (Play.mode == Mode.DEV) {
                 compiledTemplate = null;
                 BytecodeCache.deleteBytecode(name);
             }
             Exception ex = (Exception) e.getCause();
             throwException(ex);
         } catch (Throwable e) {
-            if(Play.mode == Mode.DEV) {
+            if (Play.mode == Mode.DEV) {
                 compiledTemplate = null;
                 BytecodeCache.deleteBytecode(name);
             }
@@ -321,7 +323,7 @@ public class Template {
             }
             TagContext.exitTag();
         }
-        
+
         public Class _(String className) throws Exception {
             return Play.classloader.loadClass(className);
         }
@@ -346,10 +348,14 @@ public class Template {
             @SuppressWarnings("unchecked")
             public Object invokeMethod(String name, Object param) {
                 try {
+                    if(controller == null) {
+                        controller = Request.current().controller;
+                    }
                     String action = controller + "." + name;
                     try {
                         Map<String, Object> r = new HashMap<String, Object>();
-                        String[] names = (String[]) ActionInvoker.getActionMethod(action).getDeclaringClass().getDeclaredField("$" + ActionInvoker.getActionMethod(action).getName() + LocalVariablesNamesTracer.computeMethodHash(ActionInvoker.getActionMethod(action).getParameterTypes())).get(null);
+                        Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
+                        String[] names = (String[]) actionMethod.getDeclaringClass().getDeclaredField("$" + actionMethod.getName() + LocalVariablesNamesTracer.computeMethodHash(actionMethod.getParameterTypes())).get(null);
                         if (param instanceof Object[]) {
                             for (int i = 0; i < ((Object[]) param).length; i++) {
                                 r.put(names[i], ((Object[]) param)[i] == null ? null : ((Object[]) param)[i].toString());
@@ -366,7 +372,6 @@ public class Template {
                     throw new UnexpectedException(e);
                 }
             }
-            
         }
     }
 }

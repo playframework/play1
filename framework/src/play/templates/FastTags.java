@@ -31,6 +31,9 @@ public class FastTags {
             actionDef.url += separator + "x-http-method-override=" + actionDef.method;
             actionDef.method = "POST";
         }
+        if(actionDef.star) {
+            actionDef.method = "POST"; // prefer POST for form ....
+        }
         out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method + "\" accept-charset=\"utf-8\" enctype=\"" + enctype + "\">");
         out.println(JavaExtensions.toString(body));
         out.print("</form>");

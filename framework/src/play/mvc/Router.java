@@ -209,6 +209,7 @@ public class Router {
                         ActionDefinition actionDefinition = new ActionDefinition();
                         actionDefinition.url = qs.length() == 0 ? path : path + "?" + qs;
                         actionDefinition.method = route.method == null || route.method.equals("*") ? "GET" : route.method.toUpperCase();
+                        actionDefinition.star = route.method.equals("*");
                         return actionDefinition;
                     }
                 }
@@ -221,6 +222,7 @@ public class Router {
 
         public String method;
         public String url;
+        public boolean star;
 
         @Override
         public String toString() {

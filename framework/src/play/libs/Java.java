@@ -25,10 +25,13 @@ public class Java {
      * @return The method or null
      */
     public static Method findActionMethod(String name, Class clazz) {
-        for (Method m : clazz.getDeclaredMethods()) {
-            if (m.getName().equalsIgnoreCase(name) && Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers())) {
-                return m;
+        while(!clazz.getName().equals("play.mvc.Controller") && !clazz.getName().equals("java.lang.Object")) {
+            for (Method m : clazz.getDeclaredMethods()) {
+                if (m.getName().equalsIgnoreCase(name) && Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers())) {
+                    return m;
+                }
             }
+            clazz = clazz.getSuperclass();
         }
         return null;
     }

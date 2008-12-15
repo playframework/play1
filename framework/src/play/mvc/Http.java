@@ -23,7 +23,6 @@ public class Http {
          * Header name
          */
         public String name;
-        
         /**
          * Header value
          */
@@ -47,18 +46,14 @@ public class Http {
          * Cookie name
          */
         public String name;
-        
         /**
          * Cookie path
          */
         public String path = "/";
-        
         /**
          * for HTTPS ?
          */
         public boolean secure = false;
-        
-        
         /**
          * Cookie value
          */
@@ -74,92 +69,74 @@ public class Http {
          * Server host
          */
         public String host;
-        
         /**
          * Request path
          */
         public String path;
-        
         /**
          * QueryString
          */
         public String querystring;
-        
         /**
          * Full url
          */
         public String url;
-        
         /**
          * HTPP method
          */
         public String method;
-        
         /**
          * Server domain
          */
         public String domain;
-        
         /**
          * Client address
          */
         public String remoteAddress;
-        
         /**
          * Request content-type
          */
         public String contentType;
-        
         /**
          * Controller to invoke
          */
         public String controller;
-        
         /**
          * Action method name
          */
         public String actionMethod;
-        
         /**
          * HTTP port
          */
         public Integer port;
-        
         /**
          * is HTTPS ?
          */
         public Boolean secure;
-        
         /**
          * HTTP Headers
          */
         public Map<String, Http.Header> headers = new HashMap<String, Http.Header>();
-        
         /**
          * HTTP Cookies
          */
         public Map<String, Http.Cookie> cookies = new HashMap<String, Http.Cookie>();
-        
         /**
          * Body stream
          */
         public InputStream body;
-        
         /**
          * Additinal HTTP params extracted from route
          */
         public Map<String, String> routeArgs;
-        
         /**
          * Format (html,xml,json,text)
          */
-        public String format = "html";       
-        
+        public String format = "html";
         /**
          * Full action (ex: Application.index)
          */
-        public String action;    
-        
+        public String action;
         /**
          * Bind to thread
          */
@@ -169,36 +146,36 @@ public class Http {
          * Automatically resolve request format from the Accept header
          * (in this order : html > xml > json > text)
          */
-        public void resolveFormat () {
-        	if (headers.get("accept")==null) {
-        		format="html";
-        		return;
-        	}
-        	
-        	String accept = headers.get("accept").value();
-        	
-        	if (accept.indexOf("application/xhtml") !=-1 || accept.indexOf("text/html")!=-1) {
-        		format="html";
-        		return;
-        	}
-                
-                if (accept.indexOf("application/xml")!=-1 || accept.indexOf("text/xml")!=-1) {
-        		format="xml";
-        		return;
-        	}
-        	
-        	if (accept.indexOf("text/plain")!=-1) {
-        		format="txt";
-        		return;
-        	}
-        	
-        	if (accept.indexOf("application/json")!=-1 || accept.indexOf("text/javascript")!=-1) {
-        		format="json";
-        		return;
-        	}
-        
+        public void resolveFormat() {
+            if (headers.get("accept") == null) {
+                format = "html";
+                return;
+            }
+
+            String accept = headers.get("accept").value();
+
+            if (accept.indexOf("application/xhtml") != -1 || accept.indexOf("text/html") != -1) {
+                format = "html";
+                return;
+            }
+
+            if (accept.indexOf("application/xml") != -1 || accept.indexOf("text/xml") != -1) {
+                format = "xml";
+                return;
+            }
+
+            if (accept.indexOf("text/plain") != -1) {
+                format = "txt";
+                return;
+            }
+
+            if (accept.indexOf("application/json") != -1 || accept.indexOf("text/javascript") != -1) {
+                format = "json";
+                return;
+            }
+
         }
-        
+
         /**
          * Retrieve the current request
          * @return
@@ -217,7 +194,6 @@ public class Http {
             }
             return String.format("%s://%s:%s", secure ? "https" : "http", domain, port);
         }
-
     }
 
     /**
@@ -229,32 +205,26 @@ public class Http {
          * Response status code
          */
         public Integer status = 200;
-        
         /**
          * Response content type
          */
         public String contentType;
-        
         /**
          * Response headers
          */
         public Map<String, Http.Header> headers = new HashMap<String, Header>();
-        
         /**
          * Response cookies
          */
         public Map<String, Http.Cookie> cookies = new HashMap<String, Cookie>();
-        
         /**
          * Response body stream
          */
         public OutputStream out;
-        
         /**
          * Send this file directly
          */
         public File direct;
-        
         /**
          * Bind to thread
          */
@@ -305,6 +275,5 @@ public class Http {
             int maxAge = Time.parseDuration(duration);
             setHeader("Cache-Control", "max-age=" + maxAge);
         }
-                
     }
 }
