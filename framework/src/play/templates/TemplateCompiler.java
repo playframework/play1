@@ -222,6 +222,7 @@ public class TemplateCompiler {
                 if (!tagArgs.matches("^[a-zA-Z0-9]+:.*$")) {
                     tagArgs = "arg:" + tagArgs;
                 }
+                tagArgs = tagArgs.replaceAll("[:]\\s*[@]", ":actionBridge.");
             } else {
                 tagName = tagText;
                 tagArgs = ":";

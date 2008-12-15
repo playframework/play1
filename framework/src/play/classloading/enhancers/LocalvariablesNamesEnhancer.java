@@ -32,6 +32,8 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         if (!ctClass.subtypeOf(classPool.get(Controller.class.getName())) && !ctClass.subtypeOf(classPool.get(Mailer.class.getName()))) {
             return;
         }
+        
+        StringBuilder sigChecksum = new StringBuilder();
 
         for (CtMethod method : ctClass.getDeclaredMethods()) {
 
@@ -72,6 +74,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             }
             CtField signature = CtField.make("public static String[] $" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes()) + " = " + iv.toString(), ctClass);
             ctClass.addField(signature);
+            sigChecksum.append(iv);
 
             // Bon.
             // Alors là il s'agit aprés chaque instruction de creation d'une variable locale
@@ -157,6 +160,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         applicationClass.enhancedByteCode = ctClass.toBytecode();
 
         ctClass.defrost();
+        applicationClass.sigChecksum = sigChecksum.toString().hashCode();
     }
 
     public static class LocalVariablesNamesTracer {

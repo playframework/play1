@@ -62,7 +62,6 @@ public class ApplicationClassloader extends ClassLoader {
         ApplicationClass applicationClass = Play.classes.getApplicationClass(name);
         if (applicationClass != null) {
             if (applicationClass.isDefinable()) {
-                BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, name, applicationClass.javaSource);
                 return applicationClass.javaClass;
             } else {
                 byte[] bc = BytecodeCache.getBytecode(name, applicationClass.javaSource);
@@ -127,12 +126,17 @@ public class ApplicationClassloader extends ClassLoader {
         }
         List<ClassDefinition> newDefinitions = new ArrayList<ClassDefinition>();
         Map<Class, Integer> annotationsHashes = new HashMap<Class, Integer>();
+        boolean dirtySig = false;
         for (ApplicationClass applicationClass : modifieds) {
             annotationsHashes.put(applicationClass.javaClass, computeAnnotationsHash(applicationClass.javaClass));
             if (applicationClass.compile() == null) {
                 Play.classes.classes.remove(applicationClass.name);
             } else {
+                int sigChecksum = applicationClass.sigChecksum;
                 applicationClass.enhance();
+                if(sigChecksum != applicationClass.sigChecksum) {
+                    dirtySig = true;
+                }
                 BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, applicationClass.name, applicationClass.javaSource);
                 newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.enhancedByteCode));
             }
@@ -149,6 +153,10 @@ public class ApplicationClassloader extends ClassLoader {
             if (annotationsHashes.get(clazz) != computeAnnotationsHash(clazz)) {
                 throw new RuntimeException("Annotations change !");
             }
+        }
+        // Check signature (variable name aware !)
+        if(dirtySig) {
+            throw new RuntimeException("Signature change !");
         }
         // Now check if there is new classes or removed classes
         int hash = computePathHash();

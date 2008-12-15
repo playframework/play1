@@ -147,6 +147,10 @@ public class ApplicationClasses {
          * Is this class compiled
          */
         boolean compiled;
+        /**
+         * Signatures checksum
+         */
+        public int sigChecksum;
 
         public ApplicationClass(String name) {
             this.name = name;

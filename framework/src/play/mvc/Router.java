@@ -76,7 +76,7 @@ public class Router {
         if (request.querystring != null && methodOverride.matches(request.querystring)) {
             Matcher matcher = methodOverride.matcher(request.querystring);
             if (matcher.matches()) {
-                Logger.info("request method %s overriden to %s ", request.method, matcher.group("method"));
+                Logger.debug("request method %s overriden to %s ", request.method, matcher.group("method"));
                 request.method = matcher.group("method");
             }
         }
@@ -115,15 +115,6 @@ public class Router {
 
     public static ActionDefinition reverse(String action) {
         return reverse(action, new HashMap<String, Object>());
-    }
-
-    public static ActionDefinition reverseForTemplate(String action, Map<String, Object> r) {
-        ActionDefinition actionDef = reverse(action, r);
-        if (!("GET".equals(actionDef.method) || "POST".equals(actionDef.method))) {
-            String separator = actionDef.url.indexOf('?') != -1 ? "&" : "?";
-            actionDef.url += separator + "x-http-method-override=" + actionDef.method;
-        }
-        return actionDef;
     }
 
     public static String getFullUrl(String action, Map<String, Object> args) {

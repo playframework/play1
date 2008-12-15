@@ -355,8 +355,7 @@ public class Template {
                                 r.put(names[i], ((Object[]) param)[i] == null ? null : ((Object[]) param)[i].toString());
                             }
                         }
-                        // reverse using the x-http-method-override hack if necessary (when the route requires a PUT or DELETE)
-                        return Router.reverseForTemplate(action, r);
+                        return Router.reverse(action, r);
                     } catch (ActionNotFoundException e) {
                         throw new NoRouteFoundException(action, null);
                     }
@@ -367,6 +366,7 @@ public class Template {
                     throw new UnexpectedException(e);
                 }
             }
+            
         }
     }
 }

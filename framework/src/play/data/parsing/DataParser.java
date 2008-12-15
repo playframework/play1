@@ -13,27 +13,26 @@ import play.mvc.Http.Request;
  */
 public abstract class DataParser {
 
-    
     public static Map<String, String[]> resolveAndParse(Request request) throws UnsupportedEncodingException {
         // 1. determine content-type in request
-        Logger.info( "request contentType is %s", request.contentType );
+        Logger.info("request contentType is %s", request.contentType);
         String mimeType = request.contentType;
-        if( mimeType.indexOf(';') != -1 )
+        if (mimeType.indexOf(';') != -1) {
             mimeType = mimeType.substring(0, mimeType.indexOf(';'));
-        DataParser parser  = parsers.get(mimeType);
-        if( parser == null ) {
-            Logger.warn( "no parser registered for content type %s", mimeType );
+        }
+        DataParser parser = parsers.get(mimeType);
+        if (parser == null) {
+            Logger.warn("no parser registered for content type %s", mimeType);
             parser = parsers.get("application/x-www-form-urlencoded");
-        } 
+        }
         return parser.parse(new ByteArrayInputStream(request.querystring.getBytes("utf-8")));
     }
 
-    public abstract Map<String, String[]> parse(InputStream is);
-    
     // ~~~~~~~~ Repository 
-    
+    public abstract Map<String, String[]> parse(InputStream is);    
     public static Map<String, DataParser> parsers = new HashMap<String, DataParser>();
     
+
     static {
         parsers.put("application/x-www-form-urlencoded", new UrlEncodedParser());
         parsers.put("multipart/form-data", new ApacheMultipartParser());
@@ -42,7 +41,7 @@ public abstract class DataParser {
         parsers.put("application/json", jsonparser);
         parsers.put("application/javascript", jsonparser);
     }
-    
+
     public static void putMapEntry(Map<String, String[]> map, String name, String value) {
         String[] newValues = null;
         String[] oldValues = map.get(name);

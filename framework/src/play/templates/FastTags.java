@@ -9,12 +9,32 @@ import java.util.Map;
 import play.exceptions.TagInternalException;
 import play.exceptions.TemplateExecutionException;
 import play.exceptions.TemplateNotFoundException;
+import play.mvc.Router.ActionDefinition;
 import play.templates.Template.ExecutableTemplate;
 
 /**
  * Fast tags implementation
  */
 public class FastTags {
+
+    public static void _form(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        ActionDefinition actionDef = (ActionDefinition) args.get("arg");
+        if (actionDef == null) {
+            actionDef = (ActionDefinition) args.get("action");
+        }
+        String enctype = (String) args.get("enctype");
+        if (enctype == null) {
+            enctype = "application/x-www-form-urlencoded";
+        }
+        if (!("GET".equals(actionDef.method) || "POST".equals(actionDef.method))) {
+            String separator = actionDef.url.indexOf('?') != -1 ? "&" : "?";
+            actionDef.url += separator + "x-http-method-override=" + actionDef.method;
+            actionDef.method = "POST";
+        }
+        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method + "\" accept-charset=\"utf-8\" enctype=\"" + enctype + "\">");
+        out.println(JavaExtensions.toString(body));
+        out.print("</form>");
+    }
 
     public static void _if(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         if (_evaluateCondition(args.get("arg"))) {
@@ -24,29 +44,29 @@ public class FastTags {
             TagContext.parent().data.put("_executeNextElse", true);
         }
     }
-    
+
     public static void _else(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        if(TagContext.parent().data.containsKey("_executeNextElse")) {
-            if((Boolean)TagContext.parent().data.get("_executeNextElse")) {
-                body.call();                
+        if (TagContext.parent().data.containsKey("_executeNextElse")) {
+            if ((Boolean) TagContext.parent().data.get("_executeNextElse")) {
+                body.call();
             }
             TagContext.parent().data.remove("_executeNextElse");
         } else {
             throw new TemplateExecutionException(template.template, fromLine, "else tag without a preceding if tag", new TagInternalException("else tag without a preceding if tag"));
         }
     }
-    
+
     public static void _elseif(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        if(TagContext.parent().data.containsKey("_executeNextElse")) {
-            if((Boolean)TagContext.parent().data.get("_executeNextElse") && _evaluateCondition(args.get("arg"))) {
-                body.call(); 
+        if (TagContext.parent().data.containsKey("_executeNextElse")) {
+            if ((Boolean) TagContext.parent().data.get("_executeNextElse") && _evaluateCondition(args.get("arg"))) {
+                body.call();
                 TagContext.parent().data.put("_executeNextElse", false);
-            }            
+            }
         } else {
             throw new TemplateExecutionException(template.template, fromLine, "elseif tag without a preceding if tag", new TagInternalException("elseif tag without a preceding if tag"));
         }
     }
-        
+
     public static void _ifnot(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         if (!_evaluateCondition(args.get("arg"))) {
             body.call();
@@ -55,7 +75,7 @@ public class FastTags {
             TagContext.parent().data.put("_executeNextElse", true);
         }
     }
-    
+
     public static boolean _evaluateCondition(Object test) {
         if (test != null) {
             if (test instanceof Boolean) {
@@ -79,11 +99,11 @@ public class FastTags {
 
     public static void _get(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         Object name = args.get("arg");
-        if(name == null) {
+        if (name == null) {
             throw new TemplateExecutionException(template.template, fromLine, "Specify a variable name", new TagInternalException("Specify a variable name"));
         }
         Object value = Template.layoutData.get().get(name);
-        if(value != null) {
+        if (value != null) {
             out.print(Template.layoutData.get().get(name));
         }
     }
@@ -110,7 +130,7 @@ public class FastTags {
 
     public static void _extends(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         try {
-            if(!args.containsKey("arg") || args.get("arg") == null) {
+            if (!args.containsKey("arg") || args.get("arg") == null) {
                 throw new TemplateExecutionException(template.template, fromLine, "Specify a template name", new TagInternalException("Specify a template name"));
             }
             String name = args.get("arg").toString();
@@ -120,14 +140,14 @@ public class FastTags {
                 name = ct + name.substring(1);
             }
             Template.layout.set(TemplateLoader.load(name));
-        } catch(TemplateNotFoundException e) {
+        } catch (TemplateNotFoundException e) {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
         }
     }
-    
+
     public static void _include(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         try {
-            if(!args.containsKey("arg") || args.get("arg") == null) {
+            if (!args.containsKey("arg") || args.get("arg") == null) {
                 throw new TemplateExecutionException(template.template, fromLine, "Specify a template name", new TagInternalException("Specify a template name"));
             }
             String name = args.get("arg").toString();
@@ -136,7 +156,7 @@ public class FastTags {
             newArgs.putAll(template.getBinding().getVariables());
             newArgs.put("_isInclude", true);
             t.render(newArgs);
-        } catch(TemplateNotFoundException e) {
+        } catch (TemplateNotFoundException e) {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
         }
     }
