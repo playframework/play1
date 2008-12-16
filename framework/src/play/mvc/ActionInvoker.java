@@ -159,9 +159,6 @@ public class ActionInvoker {
             String controller = fullAction.substring(0, fullAction.lastIndexOf("."));
             String action = fullAction.substring(fullAction.lastIndexOf(".") + 1);
             controllerClass = Play.classloader.getClassIgnoreCase(controller);
-            if (Modifier.isAbstract(controllerClass.getModifiers())) {
-                throw new ActionNotFoundException(fullAction, new Exception(controllerClass.getName() + " is abstract"));
-            }
             actionMethod = Java.findActionMethod(action, controllerClass);
             if (actionMethod == null) {
                 throw new ActionNotFoundException(fullAction, new Exception("No method public static void " + action + "() was found in class " + controller));
