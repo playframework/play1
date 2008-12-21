@@ -6,6 +6,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import play.Logger;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.UnexpectedException;
 import play.libs.Mail;
@@ -74,7 +77,7 @@ public class Mailer {
         infos.set(map);
     }
 
-    public static void send(Object... args) {
+    public static Future send(Object... args) {
         HashMap map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
@@ -82,20 +85,20 @@ public class Mailer {
 
         // Content type
         String contentType = (String) infos.get().get("contentType");
-        if(contentType == null) {
+        if (contentType == null) {
             contentType = "text/plain";
         }
 
         // Subject
         String subject = (String) infos.get().get("subject");
 
-        String templateName = (String)infos.get().get("method");
-        if(templateName.startsWith("notifiers.")) {
+        String templateName = (String) infos.get().get("method");
+        if (templateName.startsWith("notifiers.")) {
             templateName = templateName.substring("notifiers.".length());
         }
         templateName = templateName.substring(0, templateName.indexOf("("));
         templateName = templateName.replace(".", "/");
-        if(contentType.equals("text/html")) {
+        if (contentType.equals("text/html")) {
             templateName += ".html";
         } else {
             templateName += ".txt";
@@ -137,8 +140,20 @@ public class Mailer {
             }
 
         }
-        
+
         // Send
-        Mail.send(from, recipients, subject, body, contentType, files);
+        return Mail.send(from, recipients, subject, body, contentType, files);
+    }
+
+    public static boolean sendAndWait(Object... args) {
+        try {
+            Future<Boolean> result = send(args);
+            return result.get();
+        } catch (InterruptedException e) {
+            Logger.error(e, "Error while waiting Mail.send result");
+        } catch (ExecutionException e) {
+            Logger.error(e, "Error while waiting Mail.send result");
+        }
+        return false;
     }
 }

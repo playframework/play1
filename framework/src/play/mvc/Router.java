@@ -135,7 +135,7 @@ public class Router {
                 if (matcher.matches()) {
                     for (String group : route.actionArgs) {
                         String v = matcher.group(group);
-                        if(v == null) {
+                        if (v == null) {
                             continue;
                         }
                         args.put(group, v.toLowerCase());

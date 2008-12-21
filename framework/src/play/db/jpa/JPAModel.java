@@ -30,23 +30,23 @@ public class JPAModel implements Serializable {
      * store (ie insert or update) the entity.
      */
     public void save() {
-        em().persist(this);         
+        em().persist(this);
     }
-    
+
     /**
      * Refresh the entity state.
      */
     public void refresh() {
         em().refresh(this);
     }
-    
+
     /**
      * Merge this object to obtain a manager entity.
      */
     public <T> T merge() {
         return (T) em().merge(this);
     }
-    
+
     /**
      * Delete the entity.
      * @return The deleted entity.
@@ -59,7 +59,7 @@ public class JPAModel implements Serializable {
             throw new RuntimeException(e);
         }
     }
-  
+
     /**
      * Count entities
      * @return number of entities of this class
@@ -67,7 +67,7 @@ public class JPAModel implements Serializable {
     public static Long count() {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
-    
+
     /**
      * Count entities with a special query.
      * Example : Long moderatedPosts = Post.count("moderated", true);
@@ -78,24 +78,24 @@ public class JPAModel implements Serializable {
     public static Long count(String query, Object... params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
-    
+
     /**
      * Find all entities for this class
      * @return A list of entity
      */
     public static <T extends JPAModel> List<T> findAll() {
-    	throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
-    
+
     /**
      * Find the entity with the corresponding id.
      * @param id The entity id
      * @return The entity
      */
     public static <T extends JPAModel> T findById(Long id) {
-    	throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
+        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
-    
+
     /**
      * Prepare a query to find entities.
      * @param query HQL query or shortcut
@@ -105,7 +105,7 @@ public class JPAModel implements Serializable {
     public static JPAQuery find(String query, Object... params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
-    
+
     /**
      * Prepare a query to find *all* entities.
      * @param query HQL query or shortcut
@@ -115,7 +115,7 @@ public class JPAModel implements Serializable {
     public static JPAQuery find() {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
-    
+
     /**
      * Batch delete of entities
      * @param query HQL query or shortcut
@@ -133,7 +133,7 @@ public class JPAModel implements Serializable {
     public static int deleteAll() {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
-    
+
     /**
      * find one item matching the parametrized query
      * @param <T>
@@ -144,7 +144,7 @@ public class JPAModel implements Serializable {
     public static <T extends JPAModel> T findOneBy(String query, Object... params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
-    
+
     /**
      * find all items matching a parametrized query
      * @param <T>
@@ -155,7 +155,7 @@ public class JPAModel implements Serializable {
     public static <T extends JPAModel> List<T> findBy(String query, Object... params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
-    
+
     /**
      * Retrieve the current entityManager
      * @return the current entityManager
@@ -163,7 +163,7 @@ public class JPAModel implements Serializable {
     public static EntityManager em() {
         return JPA.getEntityManager();
     }
-    
+
     /**
      * Retrieve the current entityManager
      * @return the current entityManager
@@ -172,7 +172,7 @@ public class JPAModel implements Serializable {
     public static EntityManager getEntityManager() {
         return JPA.getEntityManager();
     }
-   
+
     /**
      * JPAModel instances a and b are equals if either <strong>a == b</strong> or a and b have same </strong>{@link #id id} and class</strong>
      * @param other 
@@ -202,10 +202,15 @@ public class JPAModel implements Serializable {
         }
         return this.getId().hashCode();
     }
-    
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[" + id + "]";
+    }
+
     @SuppressWarnings("unused")
     protected static String createFindByQuery(String entityName, String entityClass, String query, Object... params) {
-        if(query == null) {
+        if (query == null) {
             return "from " + entityName;
         }
         if (query.trim().toLowerCase().startsWith("select ")) {
@@ -220,12 +225,12 @@ public class JPAModel implements Serializable {
         if (query.trim().indexOf(" ") == -1 && params == null) {
             query += " = null";
         }
-        return  "from " + entityName + " where " + query;       
+        return "from " + entityName + " where " + query;
     }
-    
+
     @SuppressWarnings("unused")
     protected static String createDeleteQuery(String entityName, String entityClass, String query, Object... params) {
-        if(query == null) {
+        if (query == null) {
             return "delete from " + entityName;
         }
         if (query.trim().toLowerCase().startsWith("delete ")) {
@@ -240,9 +245,9 @@ public class JPAModel implements Serializable {
         if (query.trim().indexOf(" ") == -1 && params == null) {
             query += " = null";
         }
-        return  "delete from " + entityName + " where " + query;       
+        return "delete from " + entityName + " where " + query;
     }
-    
+
     @SuppressWarnings("unused")
     protected static String createCountQuery(String entityName, String entityClass, String query, Object... params) {
         if (query.trim().toLowerCase().startsWith("select ")) {
@@ -257,41 +262,41 @@ public class JPAModel implements Serializable {
         if (query.trim().indexOf(" ") == -1 && params == null) {
             query += " = null";
         }
-        return  "select count(*) from " + entityName + " where " + query;       
+        return "select count(*) from " + entityName + " where " + query;
     }
-    
-    @SuppressWarnings ("unused")
-    protected static Query bindParameters (Query q, Object... params) {
-        if(params == null) {
+
+    @SuppressWarnings("unused")
+    protected static Query bindParameters(Query q, Object... params) {
+        if (params == null) {
             return q;
         }
-    	for (int i=0;i<params.length;i++) {
-    		q.setParameter(i+1, params[i]);
-    	}
-    	return q;
+        for (int i = 0; i < params.length; i++) {
+            q.setParameter(i + 1, params[i]);
+        }
+        return q;
     }
-    
+
     /**
      * A JPAQuery
      */
     public static class JPAQuery {
-        
+
         public Query query;
-        
+
         public JPAQuery(Query query) {
             this.query = query;
         }
-        
+
         /**
          * Retrieve the first result of the query or null
          * @return An entity or null
          */
         public <T extends JPAModel> T one() {
             List<T> results = query.setMaxResults(1).getResultList();
-            if(results.size() == 0) {
+            if (results.size() == 0) {
                 return null;
             }
-            return (T)results.get(0);
+            return (T) results.get(0);
         }
 
         /**
@@ -301,7 +306,7 @@ public class JPAModel implements Serializable {
         public <T extends JPAModel> List<T> all() {
             return query.getResultList();
         }
-        
+
         /**
          * Retrieve a page of result
          * @param from Page number (start at 1)
@@ -309,14 +314,12 @@ public class JPAModel implements Serializable {
          * @return A list of entities
          */
         public <T extends JPAModel> List<T> page(int from, int length) {
-            if(from < 1) {
+            if (from < 1) {
                 throw new IllegalArgumentException("Page start at 1");
             }
-            query.setFirstResult((from-1) * length);
+            query.setFirstResult((from - 1) * length);
             query.setMaxResults(length);
             return query.getResultList();
         }
-        
     }
-    
 }

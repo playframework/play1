@@ -72,7 +72,7 @@ public class ActionInvoker {
             // 5. Invoke the action
             try {
                 // @Before
-                List<Method> befores = Java.findAllAnnotatedMethods(actionMethod.getDeclaringClass(), Before.class);
+                List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);
                 ControllerInstrumentation.stopActionCall();
                 for (Method before : befores) {
                     String[] unless = before.getAnnotation(Before.class).unless();

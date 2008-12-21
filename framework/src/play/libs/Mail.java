@@ -4,6 +4,11 @@ import java.io.File;
 import java.util.Date;
 import java.util.Properties;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.mail.Authenticator;
@@ -36,8 +41,8 @@ public class Mail {
      * @param subject Subject
      * @param body Body
      */
-    public static void send(String from, String recipient, String subject, String body) {
-        send(from, new String[]{recipient}, subject, body, "text/plain", new File[0]);
+    public static Future send(String from, String recipient, String subject, String body) {
+        return send(from, new String[]{recipient}, subject, body, "text/plain", new File[0]);
     }
 
     /**
@@ -48,8 +53,8 @@ public class Mail {
      * @param body Body
      * @param contentType The content type (text/plain or text/html)
      */
-    public static void send(String from, String recipient, String subject, String body, String contentType) {
-        send(from, new String[]{recipient}, subject, body, contentType, new File[0]);
+    public static Future send(String from, String recipient, String subject, String body, String contentType) {
+        return send(from, new String[]{recipient}, subject, body, contentType, new File[0]);
     }
 
     /**
@@ -59,8 +64,8 @@ public class Mail {
      * @param subject Subject
      * @param body Body
      */
-    public static void send(String from, String[] recipients, String subject, String body) {
-        send(from, recipients, subject, body, "text/plain", new File[0]);
+    public static Future send(String from, String[] recipients, String subject, String body) {
+        return send(from, recipients, subject, body, "text/plain", new File[0]);
     }
 
     /**
@@ -71,8 +76,8 @@ public class Mail {
      * @param body Body
      * @param contentType The content type (text/plain or text/html)
      */
-    public static void send(String from, String[] recipients, String subject, String body, String contentType) {
-        send(from, recipients, subject, body, contentType, new File[0]);
+    public static Future send(String from, String[] recipients, String subject, String body, String contentType) {
+        return send(from, recipients, subject, body, contentType, new File[0]);
     }
 
     /**
@@ -83,8 +88,8 @@ public class Mail {
      * @param body Body
      * @param attachments File attachments
      */
-    public static void send(String from, String recipient, String subject, String body, File... attachments) {
-        send(from, new String[]{recipient}, subject, body, "text/plain", attachments);
+    public static Future send(String from, String recipient, String subject, String body, File... attachments) {
+        return send(from, new String[]{recipient}, subject, body, "text/plain", attachments);
     }
 
     /**
@@ -96,8 +101,8 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static void send(String from, String recipient, String subject, String body, String contentType, File... attachments) {
-        send(from, new String[]{recipient}, subject, body, contentType, attachments);
+    public static Future send(String from, String recipient, String subject, String body, String contentType, File... attachments) {
+        return send(from, new String[]{recipient}, subject, body, contentType, attachments);
     }
 
     /**
@@ -108,8 +113,8 @@ public class Mail {
      * @param body Body
      * @param attachments File attachments
      */
-    public static void send(String from, String[] recipients, String subject, String body, File... attachments) {
-        send(from, recipients, subject, body, "text/plain", attachments);
+    public static Future send(String from, String[] recipients, String subject, String body, File... attachments) {
+        return send(from, recipients, subject, body, "text/plain", attachments);
     }
 
     /**
@@ -121,7 +126,7 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static void send(String from, String[] recipients, String subject, String body, String contentType, File... attachments) {
+    public static Future send(String from, String[] recipients, String subject, String body, String contentType, File... attachments) {
         try {
             MimeMessage msg = new MimeMessage(getSession());
 
@@ -163,7 +168,7 @@ public class Mail {
 
             msg.setContent(mp);
 
-            sendMessage(msg);
+            return sendMessage(msg);
         } catch (MessagingException ex) {
             throw new MailException("Cannot send email", ex);
         }
@@ -175,7 +180,7 @@ public class Mail {
             props.put("mail.smtp.host", Play.configuration.getProperty("mail.smtp.host"));
 
             String channelEncryption = "clear";
-            if(Play.configuration.containsKey("mail.smtp.protocol") && Play.configuration.getProperty("mail.smtp.protocol", "smtp").equals("smtps")) {
+            if (Play.configuration.containsKey("mail.smtp.protocol") && Play.configuration.getProperty("mail.smtp.protocol", "smtp").equals("smtps")) {
                 // Backward compatibility before stable5
                 channelEncryption = "starttls";
             } else {
@@ -194,8 +199,8 @@ public class Mail {
                 // port 25 + enable starttls + ssl socket factory
                 props.put("mail.smtp.port", "25");
                 props.put("mail.smtp.starttls.enable", "true");
-                // can't install our socket factory. will work only with server that has a signed certificate
-                // story to be continued in javamail 1.4.2 : https://glassfish.dev.java.net/issues/show_bug.cgi?id=5189
+            // can't install our socket factory. will work only with server that has a signed certificate
+            // story to be continued in javamail 1.4.2 : https://glassfish.dev.java.net/issues/show_bug.cgi?id=5189
             }
 
             //override defaults
@@ -242,24 +247,26 @@ public class Mail {
      * Send a JavaMail message
      * @param msg A JavaMail message
      */
-    public static void sendMessage(final Message msg) {
-        new Thread() {
+    public static Future<Boolean> sendMessage(final Message msg) {
+        return executor.submit(new Callable<Boolean>() {
 
-            @Override
-            public void run() {
+            public Boolean call() {
                 try {
                     msg.setSentDate(new Date());
                     Transport transport = getSession().getTransport("smtp");
                     transport.connect(getSession().getProperty("mail.smtp.host"), Play.configuration.getProperty("mail.smtp.user"), Play.configuration.getProperty("mail.smtp.pass"));
                     transport.sendMessage(msg, msg.getAllRecipients());
                     transport.close();
-                } catch (Exception e) {
+                    return true;
+                } catch (Throwable e) {
                     MailException me = new MailException("Error while sending email", e);
                     Logger.error(me, "The email has not been sent");
+                    return false;
                 }
             }
-        }.start();
+        });
     }
+    static ExecutorService executor = Executors.newCachedThreadPool();
 
     public static class SMTPAuthenticator extends Authenticator {
 

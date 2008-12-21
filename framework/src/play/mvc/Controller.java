@@ -343,4 +343,5 @@ public abstract class Controller {
     public static Class getControllerClass() {
         return Play.classloader.getClassIgnoreCase("controllers." + Http.Request.current().controller);
     }
+
 }
