@@ -13,6 +13,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Properties;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  * IO utils
  */
@@ -43,15 +45,9 @@ public class IO {
      * @throws java.io.IOException
      */
     public static String readContentAsString(InputStream is) throws IOException {
-        StringWriter result = new StringWriter();
-        PrintWriter out = new PrintWriter(result);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is, "utf-8"));
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-            out.println(line);
-        }
+        String res = IOUtils.toString(is, "utf-8");
         is.close();
-        return result.toString();
+        return res;
     }
 
     /**
