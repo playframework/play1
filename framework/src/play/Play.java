@@ -297,6 +297,12 @@ public class Play {
             // We made it
             started = true;
             startedAt = System.currentTimeMillis();
+            
+            // Plugins
+            for (PlayPlugin plugin : plugins) {
+                plugin.afterApplicationStart();
+            }
+            
         } catch (PlayException e) {
             throw e;
         } catch (Exception e) {
