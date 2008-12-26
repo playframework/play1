@@ -45,14 +45,14 @@ public class Mailer {
         infos.set(map);
     }
 
-    public static void addAttachment(File... attachments) {
+    public static void addAttachment(Object... attachments) {
         HashMap map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
         }
         List attachmentsList = (List) map.get("attachments");
         if (attachmentsList == null) {
-            attachmentsList = new ArrayList<File>();
+            attachmentsList = new ArrayList<Object>();
             map.put("attachments", attachmentsList);
         }
         attachmentsList.addAll(Arrays.asList(attachments));
@@ -129,20 +129,20 @@ public class Mailer {
         String from = (String) infos.get().get("from");
 
         // Attachment
-        File[] files = new File[0];
+        Object[] attachements = new Object[0];
         if (infos.get().get("attachments") != null) {
-            List<File> fileList = (List<File>) infos.get().get("attachments");
-            files = new File[fileList.size()];
+            List<Object> objectList = (List<Object>) infos.get().get("attachments");
+            attachements = new Object[objectList.size()];
             i = 0;
-            for (File file : fileList) {
-                files[i] = file;
+            for (Object object : objectList) {
+            	attachements[i] = object;
                 i++;
             }
 
         }
 
         // Send
-        return Mail.send(from, recipients, subject, body, contentType, files);
+        return Mail.send(from, recipients, subject, body, contentType, attachements);
     }
 
     public static boolean sendAndWait(Object... args) {

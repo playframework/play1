@@ -3,13 +3,13 @@ package play.libs;
 import java.io.File;
 import java.util.Date;
 import java.util.Properties;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.mail.Authenticator;
 import javax.mail.Message;
@@ -26,6 +26,7 @@ import javax.mail.internet.MimeMultipart;
 import play.Logger;
 import play.Play;
 import play.exceptions.MailException;
+import play.exceptions.UnexpectedException;
 
 /**
  * Mail utils
@@ -42,7 +43,7 @@ public class Mail {
      * @param body Body
      */
     public static Future send(String from, String recipient, String subject, String body) {
-        return send(from, new String[]{recipient}, subject, body, "text/plain", new File[0]);
+        return send(from, new String[]{recipient}, subject, body, "text/plain", new Object[0]);
     }
 
     /**
@@ -54,7 +55,7 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      */
     public static Future send(String from, String recipient, String subject, String body, String contentType) {
-        return send(from, new String[]{recipient}, subject, body, contentType, new File[0]);
+        return send(from, new String[]{recipient}, subject, body, contentType, new Object[0]);
     }
 
     /**
@@ -65,7 +66,7 @@ public class Mail {
      * @param body Body
      */
     public static Future send(String from, String[] recipients, String subject, String body) {
-        return send(from, recipients, subject, body, "text/plain", new File[0]);
+        return send(from, recipients, subject, body, "text/plain", new Object[0]);
     }
 
     /**
@@ -77,7 +78,7 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      */
     public static Future send(String from, String[] recipients, String subject, String body, String contentType) {
-        return send(from, recipients, subject, body, contentType, new File[0]);
+        return send(from, recipients, subject, body, contentType, new Object[0]);
     }
 
     /**
@@ -88,7 +89,7 @@ public class Mail {
      * @param body Body
      * @param attachments File attachments
      */
-    public static Future send(String from, String recipient, String subject, String body, File... attachments) {
+    public static Future send(String from, String recipient, String subject, String body, Object... attachments) {
         return send(from, new String[]{recipient}, subject, body, "text/plain", attachments);
     }
 
@@ -101,7 +102,7 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static Future send(String from, String recipient, String subject, String body, String contentType, File... attachments) {
+    public static Future send(String from, String recipient, String subject, String body, String contentType, Object... attachments) {
         return send(from, new String[]{recipient}, subject, body, contentType, attachments);
     }
 
@@ -113,7 +114,7 @@ public class Mail {
      * @param body Body
      * @param attachments File attachments
      */
-    public static Future send(String from, String[] recipients, String subject, String body, File... attachments) {
+    public static Future send(String from, String[] recipients, String subject, String body, Object... attachments) {
         return send(from, recipients, subject, body, "text/plain", attachments);
     }
 
@@ -126,7 +127,7 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static Future send(String from, String[] recipients, String subject, String body, String contentType, File... attachments) {
+    public static Future send(String from, String[] recipients, String subject, String body, String contentType, Object... attachments) {
         try {
             MimeMessage msg = new MimeMessage(getSession());
 
@@ -227,19 +228,22 @@ public class Mail {
         return session;
     }
 
-    private static void handleAttachments(Multipart mp, File... attachments) {
+    private static void handleAttachments(Multipart mp, Object... attachments) throws MessagingException {
         if (attachments != null) {
-            for (File attachment : attachments) {
-                try {
-                    MimeBodyPart part = new MimeBodyPart();
-                    FileDataSource fds = new FileDataSource(attachment);
-                    part.setDataHandler(new DataHandler(fds));
-                    part.setFileName(fds.getName());
-                    mp.addBodyPart(part);
-                } catch (MessagingException ex) {
-                    ex.printStackTrace();
-                }
-            }
+        	 for (Object attachment : attachments) {
+        		 DataSource datasource = null;
+        		 if (attachment instanceof File) {
+        			 datasource = new FileDataSource((File)attachment);
+        		 } else if (attachment instanceof DataSource )
+        			 datasource = (DataSource) attachment;
+        		 else
+        			 throw new UnexpectedException (attachment.getClass().getName()+" type is not supported as attachement.");
+        		 
+        		 MimeBodyPart part = new MimeBodyPart();
+        		 part.setDataHandler(new DataHandler(datasource));
+        		 part.setFileName(datasource.getName());
+        		 mp.addBodyPart(part);
+        	 }
         }
     }
 
