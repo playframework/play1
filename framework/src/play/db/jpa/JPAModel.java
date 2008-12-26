@@ -29,15 +29,17 @@ public class JPAModel implements Serializable {
     /**
      * store (ie insert or update) the entity.
      */
-    public void save() {
+    public <T> T save() {
         em().persist(this);
+        return (T)this;
     }
 
     /**
      * Refresh the entity state.
      */
-    public void refresh() {
+    public <T> T refresh() {
         em().refresh(this);
+        return (T)this;
     }
 
     /**
