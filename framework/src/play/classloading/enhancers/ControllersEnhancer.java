@@ -63,8 +63,13 @@ public class ControllersEnhancer extends Enhancer {
                 @Override
                 public void edit(Handler handler) throws CannotCompileException {
                     StringBuffer code = new StringBuffer();
-                    code.append("if($1 instanceof play.mvc.results.Result) throw $1;");
-                    handler.insertBefore(code.toString());
+                    try {
+                    	code.append("if($1 instanceof play.mvc.results.Result) throw $1;");
+                    	handler.insertBefore(code.toString());
+                    } catch(NullPointerException  e) {
+                    	// TODO: finally clause ? 
+                    	// There are no $1 in finally statements in javassist
+                    }
                 }
             });
 
