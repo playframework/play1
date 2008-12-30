@@ -30,6 +30,7 @@ public class Error extends Result {
 
     public Error(Throwable throwable) {
         this.throwable = throwable;
+        this.status = 500;
     }
 
     public void apply(Request request, Response response) {
