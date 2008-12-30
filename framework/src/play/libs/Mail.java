@@ -242,6 +242,7 @@ public class Mail {
         		 MimeBodyPart part = new MimeBodyPart();
         		 part.setDataHandler(new DataHandler(datasource));
         		 part.setFileName(datasource.getName());
+        		 part.setContentID(datasource.getName());
         		 mp.addBodyPart(part);
         	 }
         }
