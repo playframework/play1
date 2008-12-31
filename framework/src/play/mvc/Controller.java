@@ -200,14 +200,6 @@ public abstract class Controller {
     }
 
     /**
-     * Send a 500 Error response
-     * @param throwable The cause exception
-     */
-    protected static void error(Throwable throwable) {
-        throw new Error(throwable);
-    }
-
-    /**
      * Send a 5xx Error response
      * @param status The exact status code
      * @param reason The reason

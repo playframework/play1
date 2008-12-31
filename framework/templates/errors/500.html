@@ -68,38 +68,45 @@
         </style>
     </head>
     <body>
-        <div id="header" class="block">
-            <h1>
-                ${exception.errorTitle} 
-            </h1>
-            #{if play.Play.mode.name() == 'DEV'}
-            <p>
-                ${exception.errorDescription}
-            </p>
+        #{if exception instanceof play.exceptions.PlayException}
+            <div id="header" class="block">
+                <h1>
+                    ${exception.errorTitle} 
+                </h1>
+                #{if play.Play.mode.name() == 'DEV'}
+                <p>
+                    ${exception.errorDescription}
+                </p>
+                #{/if}
+                #{if play.Play.mode.name() == 'PROD'}
+                <p>
+                    Error details are not displayed when Play! is in PROD mode. Check server logs for detail.
+                </p>
+                #{/if}
+            </div>
+            #{if exception.sourceAvailable && exception.lineNumber && play.Play.mode.name() == 'DEV'}
+            <div id="source" class="block">
+                <h2>In ${exception.sourceFile} (around line ${exception.lineNumber})</h2>
+                %{ 
+                    from = exception.lineNumber - 5 >= 0 ? exception.lineNumber - 5 : 0
+                    to = exception.lineNumber + 5  < exception.source.size() ? exception.lineNumber + 5 : exception.source.size()-1          
+                }%
+                #{list items:exception.source, as:'line', start:from, end:to}
+                    <div class="line ${exception.lineNumber == line_index ? 'error':''}">
+                        <span class="lineNumber">${line_index}:</span>
+                        <pre>&nbsp;${line.escapeHtml()}</pre>
+                    </div>
+                 #{/list}
+            </div>
             #{/if}
-            #{if play.Play.mode.name() == 'PROD'}
-            <p>
-                Error details are not displayed when Play! is in PROD mode. Check server logs for detail.
-            </p>
-            #{/if}
-        </div>
-        #{if exception.sourceAvailable && exception.lineNumber && play.Play.mode.name() == 'DEV'}
-        <div id="source" class="block">
-            <h2>In ${exception.sourceFile} (around line ${exception.lineNumber})</h2>
-            %{ 
-                from = exception.lineNumber - 5 >= 0 ? exception.lineNumber - 5 : 0
-                to = exception.lineNumber + 5  < exception.source.size() ? exception.lineNumber + 5 : exception.source.size()-1          
-            }%
-            #{list items:exception.source, as:'line', start:from, end:to}
-                <div class="line ${exception.lineNumber == line_index ? 'error':''}">
-                    <span class="lineNumber">${line_index}:</span>
-                    <pre>&nbsp;${line.escapeHtml()}</pre>
-                </div>
-             #{/list}
-        </div>
+            <div id="more" class="block">
+                This exception has been logged with id <strong>${exception.id}</strong>
+            </div>
         #{/if}
-        <div id="more" class="block">
-            This exception has been logged with id <strong>${exception.id}</strong>
-        </div>
+        #{else}
+            <div id="header" class="block">
+                <h1>${exception.message}</h1>
+            </div>
+        #{/else}
     </body>
 </html>

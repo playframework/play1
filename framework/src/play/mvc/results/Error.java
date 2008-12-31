@@ -15,7 +15,6 @@ import play.templates.TemplateLoader;
  */
 public class Error extends Result {
 
-    Throwable throwable;
     private int status;
 
     public Error(String reason) {
@@ -28,16 +27,11 @@ public class Error extends Result {
         this.status = status;
     }
 
-    public Error(Throwable throwable) {
-        this.throwable = throwable;
-        this.status = 500;
-    }
-
     public void apply(Request request, Response response) {
         response.status = status;
         response.contentType = "text/html";
         Map<String, Object> binding = Scope.RenderArgs.current().data;
-        binding.put("exception", new UnexpectedException(throwable == null ? this : throwable));
+        binding.put("exception", this);
         binding.put("result", this);
         binding.put("session", Scope.Session.current());
         binding.put("request", Http.Request.current());

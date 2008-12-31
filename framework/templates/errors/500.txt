@@ -1,3 +1,4 @@
+#{if exception instanceof play.exceptions.PlayException}
 ${exception.errorTitle} 
 ${exception.errorDescription.replace('<strong>', '').replace('</strong>', '')}
  
@@ -15,3 +16,7 @@ ${exception.lineNumber == line_index ? '>':' '} ${line_index}: ${line}
 #{/if}
  
 This exception has been logged with id ${exception.id}
+#{/if}
+#{else}
+${exception.message}
+#{/else}
