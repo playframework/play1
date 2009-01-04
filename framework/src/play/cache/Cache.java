@@ -75,7 +75,7 @@ public class Cache {
      * @return If the element an eventually been cached
      */
     public static boolean safeSet(String key, Object value, String expiration) {
-        return cacheImpl.safeAdd(key, value, Time.parseDuration(expiration));
+        return cacheImpl.safeSet(key, value, Time.parseDuration(expiration));
     }
 
     /**
