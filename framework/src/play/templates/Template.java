@@ -352,6 +352,9 @@ public class Template {
                         controller = Request.current().controller;
                     }
                     String action = controller + "." + name;
+                    if(action.endsWith(".call")) {
+                        action = action.substring(0, action.length()-5);
+                    }
                     try {
                         Map<String, Object> r = new HashMap<String, Object>();
                         Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
