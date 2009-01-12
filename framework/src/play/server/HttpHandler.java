@@ -52,7 +52,7 @@ import play.vfs.VirtualFile;
  * HTTP Handler
  */
 public class HttpHandler implements IoHandler {
-
+    
     public void messageReceived(IoSession session, Object message) throws Exception {
         MutableHttpRequest minaRequest = (MutableHttpRequest) message;
         MutableHttpResponse minaResponse = new DefaultHttpResponse();
@@ -85,7 +85,8 @@ public class HttpHandler implements IoHandler {
         request.method = minaRequest.getMethod().toString();
         request.path = uri.getPath();
         request.querystring = uri.getQuery() == null ? "" : uri.getRawQuery();
-
+        Http.Request.current.set(request);
+        
         Router.detectChanges();
         Router.route(request);
 

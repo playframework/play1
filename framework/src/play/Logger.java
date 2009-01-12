@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Priority;
 import play.exceptions.PlayException;
+import play.mvc.Http.Request;
 
 /**
  * Main logger of the application.
@@ -151,6 +152,7 @@ public class Logger {
             errorOut.println("");
             errorOut.println("");
             errorOut.println("@" + playException.getId());
+            errorOut.println("For request " + Request.current());
             errorOut.println(String.format(message, args));
             errorOut.println("");
             if(playException.isSourceAvailable()) {

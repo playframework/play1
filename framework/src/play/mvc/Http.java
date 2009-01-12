@@ -194,6 +194,12 @@ public class Http {
             }
             return String.format("%s://%s:%s", secure ? "https" : "http", domain, port);
         }
+
+        @Override
+        public String toString() {
+            return method + " " + path + (querystring != null && querystring.length()>0 ? "?" + querystring : "");
+        }
+        
     }
 
     /**
