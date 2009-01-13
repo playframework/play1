@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import play.data.validation.Validation;
 import play.exceptions.TagInternalException;
 import play.exceptions.TemplateExecutionException;
 import play.exceptions.TemplateNotFoundException;
@@ -31,7 +32,7 @@ public class FastTags {
             actionDef.url += separator + "x-http-method-override=" + actionDef.method;
             actionDef.method = "POST";
         }
-        if(actionDef.star) {
+        if (actionDef.star) {
             actionDef.method = "POST"; // prefer POST for form ....
         }
         out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method + "\" accept-charset=\"utf-8\" enctype=\"" + enctype + "\">");
@@ -39,8 +40,42 @@ public class FastTags {
         out.print("</form>");
     }
 
+    public static void _a(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        ActionDefinition actionDef = (ActionDefinition) args.get("arg");
+        if (actionDef == null) {
+            actionDef = (ActionDefinition) args.get("action");
+        }
+        if (!("GET".equals(actionDef.method))) {
+            out.print("Not implemented yet");
+        }
+        out.print("<a href=\"" + actionDef.url + "\">");
+        out.println(JavaExtensions.toString(body));
+        out.print("</a>");
+    }
+
     public static void _if(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         if (_evaluateCondition(args.get("arg"))) {
+            body.call();
+            TagContext.parent().data.put("_executeNextElse", false);
+        } else {
+            TagContext.parent().data.put("_executeNextElse", true);
+        }
+    }
+    
+    public static void _ifErrors(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        if (Validation.hasErrors()) {
+            body.call();
+            TagContext.parent().data.put("_executeNextElse", false);
+        } else {
+            TagContext.parent().data.put("_executeNextElse", true);
+        }
+    }
+    
+    public static void _ifError(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        if (args.get("arg") == null) {
+            throw new TemplateExecutionException(template.template, fromLine, "Please specify the error key", new TagInternalException("Please specify the error key"));
+        }
+        if (Validation.hasError(args.get("arg").toString())) {
             body.call();
             TagContext.parent().data.put("_executeNextElse", false);
         } else {

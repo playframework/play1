@@ -11,6 +11,7 @@ import play.Play;
 import play.PlayPlugin;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.data.parsing.DataParser;
+import play.data.validation.Validation;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.PlayException;
@@ -64,10 +65,11 @@ public class ActionInvoker {
                 Controller.class.getField("session").set(null, Scope.Session.current());
                 Controller.class.getField("flash").set(null, Scope.Flash.current());
                 Controller.class.getField("renderArgs").set(null, Scope.RenderArgs.current());
+                Controller.class.getField("validation").set(null, Validation.current());
             }
 
             for (PlayPlugin plugin : Play.plugins) {
-                plugin.beforeActionInvocation();
+                plugin.beforeActionInvocation(actionMethod);
             }
 
             // 5. Invoke the action
@@ -100,9 +102,6 @@ public class ActionInvoker {
                 // Action
                 Result actionResult = null;
                 ControllerInstrumentation.initActionCall();
-                if (actionMethod.getParameterTypes().length > 0) {
-                    Scope.Params.current().checkAndParse();
-                }
                 try {
                     Java.invokeStatic(actionMethod, Scope.Params.current().all());
                 } catch (InvocationTargetException ex) {

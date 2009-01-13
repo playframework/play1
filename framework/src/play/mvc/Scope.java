@@ -20,7 +20,7 @@ import play.libs.Utils;
  */
 public class Scope {
 
-    static String COOKIE_PREFIX = Play.configuration.getProperty("application.session.cookie", "PLAY");
+    public static String COOKIE_PREFIX = Play.configuration.getProperty("application.session.cookie", "PLAY");
 
     /**
      * Flash scope
@@ -233,7 +233,7 @@ public class Scope {
         boolean requestIsParsed;
         private Map<String, String[]> data = new HashMap<String, String[]>();
 
-        void checkAndParse() {
+        public void checkAndParse() {
             if (!requestIsParsed) {
                 Http.Request request = Http.Request.current();
                 String contentType = request.contentType;
@@ -315,6 +315,18 @@ public class Scope {
                 }
             }
             return ue.toString();
+        }
+        
+        public void flash(String... params) {
+            if(params.length == 0) {
+                for(String key : all().keySet()) {
+                    Flash.current().put(key, get(key));
+                }
+            } else {
+                for(String key : params) {
+                    Flash.current().put(key, get(key));
+                }
+            }
         }
     }
 

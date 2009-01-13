@@ -11,6 +11,7 @@ import org.w3c.dom.Document;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.data.binding.Unbinder;
+import play.data.validation.Validation;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.TemplateNotFoundException;
@@ -59,6 +60,10 @@ public abstract class Controller {
      * The current renderArgs (used in templates)
      */
     public static Scope.RenderArgs renderArgs = null;
+    /**
+     * The current Validation
+     */
+    public static Validation validation = null;
 
     /**
      * Return a 200 OK text/plain response
@@ -294,6 +299,7 @@ public abstract class Controller {
         templateBinding.put("flash", Scope.Flash.current());
         templateBinding.put("params", Scope.Params.current());
         templateBinding.put("play", new Play());
+        templateBinding.put("errors", Validation.errorsMap());
         try {
             Template template = TemplateLoader.load(templateName);
             throw new RenderTemplate(template, templateBinding.data);

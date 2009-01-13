@@ -45,7 +45,7 @@ public class Messages {
             value = defaults.getProperty(key.toString());
         }
         if (value == null) {
-            value = "!" + key + "!";
+            value = key.toString();
         }
         return String.format(value, args);
     }

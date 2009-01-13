@@ -12,6 +12,7 @@ import java.util.Set;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
+import play.mvc.Scope;
 
 /**
  * Java utils
@@ -65,6 +66,15 @@ public class Java {
     }
 
     public static Object invokeStatic(Method method, Map<String, String[]> args) throws Exception {
+        return method.invoke(null, prepareArgs(method, args));
+    }
+    
+    public static Object[] prepareArgs(Method method, Map<String, String[]> args) throws Exception {
+        //
+        if (method.getParameterTypes().length > 0) {
+            Scope.Params.current().checkAndParse();
+        }
+        //
         String[] paramsNames = (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes())).get(null);
         if (paramsNames == null && method.getParameterTypes().length > 0) {
             throw new UnexpectedException("Parameter names not found for method " + method);
@@ -73,7 +83,11 @@ public class Java {
         for (int i = 0; i < method.getParameterTypes().length; i++) {
             rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], args);
         }
-        return method.invoke(null, rArgs);
+        return rArgs;
+    }
+    
+    public static String[] parameterNames(Method method) throws Exception {
+        return (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes())).get(null);
     }
 
     public static String rawMethodSignature(Method method) {

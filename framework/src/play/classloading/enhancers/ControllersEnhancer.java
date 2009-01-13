@@ -88,6 +88,7 @@ public class ControllersEnhancer extends Enhancer {
                 || field.getName().equals("session")
                 || field.getName().equals("params")
                 || field.getName().equals("renderArgs")
+                || field.getName().equals("validation")
                 || field.getName().equals("flash");
 	}
 	return false;

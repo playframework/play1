@@ -1,5 +1,6 @@
 package play;
 
+import java.lang.reflect.Method;
 import play.mvc.results.Result;
 
 /**
@@ -79,7 +80,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * Called before an 'action' invocation,
      * ie an HTTP request processing.
      */
-    public void beforeActionInvocation() {
+    public void beforeActionInvocation(Method actionMethod) {
     }
 
     /**

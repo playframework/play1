@@ -5,3 +5,4 @@
 4:play.db.zdb.ZDBPlugin
 5:play.libs.WS
 6:play.data.parsing.TempFilePlugin
+7:play.data.validation.ValidationPlugin
