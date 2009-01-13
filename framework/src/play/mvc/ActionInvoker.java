@@ -18,6 +18,7 @@ import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.libs.Java;
 import play.mvc.results.NotFound;
+import play.mvc.results.Ok;
 
 /**
  * Invoke an action after an HTTP request
@@ -97,11 +98,55 @@ public class ActionInvoker {
                     }
                 }
                 // Action
+                Result actionResult = null;
                 ControllerInstrumentation.initActionCall();
                 if (actionMethod.getParameterTypes().length > 0) {
                     Scope.Params.current().checkAndParse();
                 }
-                Java.invokeStatic(actionMethod, Scope.Params.current().all());
+                try {
+                    Java.invokeStatic(actionMethod, Scope.Params.current().all());
+                } catch (InvocationTargetException ex) {
+                    // It's a Result ? (expected)
+                    if (ex.getTargetException() instanceof Result) {
+                        actionResult = (Result) ex.getTargetException();
+                    } else {
+                        throw ex;
+                    }
+                }
+                
+                // @After
+                List<Method> afters = Java.findAllAnnotatedMethods(Controller.getControllerClass(), After.class);
+                ControllerInstrumentation.stopActionCall();
+                for (Method after : afters) {
+                    String[] unless = after.getAnnotation(After.class).unless();
+                    boolean skip = false;
+                    for (String un : unless) {
+                        if (!un.contains(".")) {
+                            un = after.getDeclaringClass().getName().substring(12) + "." + un;
+                        }
+                        if (un.equals(request.action)) {
+                            skip = true;
+                            break;
+                        }
+                    }
+                    if (!skip) {
+                        if (Modifier.isStatic(after.getModifiers())) {
+                            after.setAccessible(true);
+                            if (after.getParameterTypes().length > 0) {
+                                Scope.Params.current().checkAndParse();
+                            }
+                            Java.invokeStatic(after, Scope.Params.current().all());
+                        }
+                    }
+                }
+                
+                // Ok, rethrow the original action result
+                if(actionResult != null) {
+                    throw actionResult;
+                }
+                
+                throw new Ok();
+                
             } catch (IllegalAccessException ex) {
                 throw ex;
             } catch (IllegalArgumentException ex) {

@@ -19,6 +19,7 @@ import play.mvc.Http.Response;
 import play.mvc.results.Error;
 import play.mvc.results.Forbidden;
 import play.mvc.results.NotFound;
+import play.mvc.results.Ok;
 import play.mvc.results.Redirect;
 import play.mvc.results.RenderBinary;
 import play.mvc.results.RenderTemplate;
@@ -165,6 +166,13 @@ public abstract class Controller {
      */
     protected static void notFound(String what) {
         throw new NotFound(what);
+    }
+    
+    /**
+     * Send a 200 OK reponse
+     */
+    protected static void ok() {
+        throw new Ok();
     }
 
     /**
