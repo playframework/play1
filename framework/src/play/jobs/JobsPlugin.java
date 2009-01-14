@@ -104,7 +104,8 @@ public class JobsPlugin extends PlayPlugin {
             for (Class clazz : crons) {
                 scheduler.unscheduleJob(clazz.getName(), "play");
             }
-        } catch (SchedulerException ex) {
+            crons.clear();
+	} catch (SchedulerException ex) {
             throw new UnexpectedException("Cannot shutdow scheduler", ex);
         }
     }
