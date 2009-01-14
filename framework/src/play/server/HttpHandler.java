@@ -52,7 +52,7 @@ import play.vfs.VirtualFile;
  * HTTP Handler
  */
 public class HttpHandler implements IoHandler {
-    
+
     public void messageReceived(IoSession session, Object message) throws Exception {
         MutableHttpRequest minaRequest = (MutableHttpRequest) message;
         MutableHttpResponse minaResponse = new DefaultHttpResponse();
@@ -86,7 +86,7 @@ public class HttpHandler implements IoHandler {
         request.path = uri.getPath();
         request.querystring = uri.getQuery() == null ? "" : uri.getRawQuery();
         Http.Request.current.set(request);
-        
+
         Router.detectChanges();
         Router.route(request);
 
@@ -137,7 +137,7 @@ public class HttpHandler implements IoHandler {
 
     public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
         if (!(cause instanceof IOException)) {
-            Logger.error(cause, "Caught ");
+            Logger.error(cause, "Caught in Server !");
         }
         session.close();
     }
@@ -195,7 +195,7 @@ public class HttpHandler implements IoHandler {
     public void serveStatic(IoSession session, MutableHttpResponse minaResponse, HttpRequest minaRequest, RenderStatic renderStatic) throws IOException {
         VirtualFile file = Play.getVirtualFile(renderStatic.file);
         if (file == null || file.isDirectory() || !file.exists()) {
-            serve404(session, minaResponse, minaRequest, new NotFound(renderStatic.file+ " not found"));
+            serve404(session, minaResponse, minaRequest, new NotFound(renderStatic.file + " not found"));
         } else {
             if (Play.mode == Play.Mode.DEV) {
                 minaResponse.setHeader("Cache-Control", "no-cache");
@@ -253,21 +253,61 @@ public class HttpHandler implements IoHandler {
     }
 
     public static void serve500(Exception e, IoSession session, HttpRequest request, MutableHttpResponse response) {
-        Map<String, Object> binding = new HashMap<String, Object>();
-        if (!(e instanceof PlayException)) {
-            e = new play.exceptions.UnexpectedException(e);
-        }
-        // Empty app :
-        if (e instanceof EmptyAppException) {
+        try {
+            Map<String, Object> binding = new HashMap<String, Object>();
+            if (!(e instanceof PlayException)) {
+                e = new play.exceptions.UnexpectedException(e);
+            }
+            // Flush some cookies
             try {
-                response.setStatus(HttpResponseStatus.forId(200));
+                Map<String, Http.Cookie> cookies = Response.current().cookies;
+                for (String key : cookies.keySet()) {
+                    Http.Cookie cookie = cookies.get(key);
+                    if (cookie.sendOnError) {
+                        DefaultCookie c = new DefaultCookie(cookie.name, cookie.value);
+                        c.setSecure(cookie.secure);
+                        c.setPath(cookie.path);
+                        response.addCookie(c);
+                    }
+                }
+            } catch(Exception exx) {
+                // humm ?
+            }
+            // Empty app :
+            if (e instanceof EmptyAppException) {
+                try {
+                    response.setStatus(HttpResponseStatus.forId(200));
+                    response.setContentType("text/html");
+                    String errorHtml = TemplateLoader.load("errors/empty.html").render(binding);
+                    response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
+                    writeResponse(session, request, response);
+                    return;
+                } catch (Throwable ex) {
+                    Logger.error(ex, "Internal Server Error (500)");
+                    try {
+                        response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
+                        writeResponse(session, request, response);
+                    } catch (UnsupportedEncodingException fex) {
+                        Logger.error(fex, "(utf-8 ?)");
+                    }
+                }
+            }
+            binding.put("exception", e);
+            boolean ajax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+            response.setStatus(HttpResponseStatus.forId(500));
+            if (ajax) {
+                response.setContentType("text/plain");
+            } else {
                 response.setContentType("text/html");
-                String errorHtml = TemplateLoader.load("errors/empty.html").render(binding);
+            }
+            try {
+                String errorHtml = TemplateLoader.load("errors/500." + (ajax ? "txt" : "html")).render(binding);
                 response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
                 writeResponse(session, request, response);
-                return;
+                Logger.error(e, "Internal Server Error (500)");
             } catch (Throwable ex) {
-                Logger.error(ex, "Internal Server Error (500)");
+                Logger.error(e, "Internal Server Error (500)");
+                Logger.error(ex, "Error during the 500 response generation");
                 try {
                     response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
                     writeResponse(session, request, response);
@@ -275,29 +315,15 @@ public class HttpHandler implements IoHandler {
                     Logger.error(fex, "(utf-8 ?)");
                 }
             }
-        }
-        binding.put("exception", e);
-        boolean ajax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
-        response.setStatus(HttpResponseStatus.forId(500));
-        if (ajax) {
-            response.setContentType("text/plain");
-        } else {
-            response.setContentType("text/html");
-        }
-        try {
-            String errorHtml = TemplateLoader.load("errors/500." + (ajax ? "txt" : "html")).render(binding);
-            response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
-            writeResponse(session, request, response);
-            Logger.error(e, "Internal Server Error (500)");
-        } catch (Throwable ex) {
-            Logger.error(e, "Internal Server Error (500)");
-            Logger.error(ex, "Error during the 500 response generation");
+        } catch (Throwable exxx) {
             try {
                 response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
                 writeResponse(session, request, response);
             } catch (UnsupportedEncodingException fex) {
                 Logger.error(fex, "(utf-8 ?)");
             }
+            if(exxx instanceof RuntimeException) throw (RuntimeException)exxx;
+            throw new RuntimeException(exxx);
         }
     }
 

@@ -349,5 +349,22 @@ public abstract class Controller {
     public static Class getControllerClass() {
         return Play.classloader.getClassIgnoreCase("controllers." + Http.Request.current().controller);
     }
+    
+    // ~~~~~~ Validations
+    
+    public static boolean check(Object o, String... message) {
+        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        return Validation.check(key, o, message);
+    }
+    
+    public static boolean checkRequired(Object o, String... message) {
+        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        return Validation.checkRequired(key, o, message);
+    }
+    
+    public static boolean checkMin(Object o, double min, String... message) {
+        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        return Validation.checkMin(key, o, min, message);
+    }
 
 }

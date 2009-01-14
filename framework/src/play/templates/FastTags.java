@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.exceptions.TagInternalException;
 import play.exceptions.TemplateExecutionException;
@@ -80,6 +81,30 @@ public class FastTags {
             TagContext.parent().data.put("_executeNextElse", false);
         } else {
             TagContext.parent().data.put("_executeNextElse", true);
+        }
+    }
+    
+    public static void _errorClass(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        if (args.get("arg") == null) {
+            throw new TemplateExecutionException(template.template, fromLine, "Please specify the error key", new TagInternalException("Please specify the error key"));
+        }
+        if (Validation.hasError(args.get("arg").toString())) {
+            out.print("error");
+        }
+    }
+    
+    public static void _error(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        if (args.get("arg") == null && args.get("key") == null) {
+            throw new TemplateExecutionException(template.template, fromLine, "Please specify the error key", new TagInternalException("Please specify the error key"));
+        }
+        String key = args.get("arg") == null ? args.get("key") + "" : args.get("arg") + "";
+        Error error = Validation.error(key);
+        if(error != null) {
+            if(args.get("field") == null) {
+                out.print(error.message());
+            } else {
+                out.print(error.message(args.get("field") + ""));
+            }
         }
     }
 

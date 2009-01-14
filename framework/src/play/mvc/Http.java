@@ -58,6 +58,8 @@ public class Http {
          * Cookie value
          */
         public String value;
+        
+        public boolean sendOnError = false;
     }
 
     /**

@@ -4,7 +4,9 @@ import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.sf.oval.ConstraintViolation;
@@ -14,24 +16,24 @@ import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
 import play.libs.Java;
 import play.mvc.Http;
+import play.mvc.Http.Cookie;
 import play.mvc.Scope;
 import play.mvc.results.Result;
 
 public class ValidationPlugin extends PlayPlugin {
-
-    @Override
-    public void beforeInvocation() {
-        Validation.current.set(restore());
-    }
+    
+    static ThreadLocal<Map<Object,String>> keys = new ThreadLocal();
 
     @Override
     public void beforeActionInvocation(Method actionMethod) {
         try {
+            keys.set(new HashMap<Object, String>());
+            Validation.current.set(restore());
             List<ConstraintViolation> violations = new Validator().validateAction(actionMethod);
             ArrayList errors = new ArrayList();
             String[] paramNames = Java.parameterNames(actionMethod);
             for (ConstraintViolation violation : violations) {
-                errors.add(new Error(paramNames[((MethodParameterContext) violation.getContext()).getParameterIndex()], violation.getMessage()));
+                errors.add(new Error(paramNames[((MethodParameterContext) violation.getContext()).getParameterIndex()], violation.getMessage(), violation.getMessageVariables() == null ? new String[0] : violation.getMessageVariables().values().toArray(new String[0])));
             }
             Validation.current.get().errors.addAll(errors);
         } catch (Exception e) {
@@ -43,6 +45,19 @@ public class ValidationPlugin extends PlayPlugin {
     public void onActionInvocationResult(Result result) {
         save();
     }
+
+    @Override
+    public void onInvocationException(Throwable e) {
+        clear();
+    }
+
+    @Override
+    public void invocationFinally() {
+        if(keys.get() != null) {
+            keys.get().clear();
+            keys.set(null);
+        }
+    }    
 
     
     // ~~~~~~
@@ -68,12 +83,16 @@ public class ValidationPlugin extends PlayPlugin {
                 String errorsData = URLDecoder.decode(cookie.value, "utf-8");
                 Matcher matcher = errorsParser.matcher(errorsData);
                 while (matcher.find()) {
-                    validation.errors.add(new Error(matcher.group(1), matcher.group(2)));
+                    String[] g2 = matcher.group(2).split("\u0001");
+                    String message = g2[0];
+                    String[] args = new String[g2.length - 1];
+                    System.arraycopy(g2, 1, args, 0, args.length);
+                    validation.errors.add(new Error(matcher.group(1), message, args));
                 }
             }
             return validation;
         } catch (Exception e) {
-            throw new UnexpectedException("Errors corrupted", e);
+            return new Validation();
         }
     }
 
@@ -86,11 +105,29 @@ public class ValidationPlugin extends PlayPlugin {
                     errors.append(error.key);
                     errors.append(":");
                     errors.append(error.message);
+                    for(String variable : error.variables) {
+                        errors.append("\u0001");
+                        errors.append(variable);
+                    }
                     errors.append("\u0000");
                 }
             }
             String errorsData = URLEncoder.encode(errors.toString(), "utf-8");
             Http.Response.current().setCookie(Scope.COOKIE_PREFIX + "_ERRORS", errorsData);
+        } catch (Exception e) {
+            throw new UnexpectedException("Errors serializationProblem", e);
+        }
+    }     
+    
+    static void clear() {
+        try {
+            if(Http.Response.current() != null && Http.Response.current().cookies != null) {
+                Cookie cookie = new Cookie();
+                cookie.name = Scope.COOKIE_PREFIX + "_ERRORS";
+                cookie.value = "";
+                cookie.sendOnError = true;
+                Http.Response.current().cookies.put(cookie.name, cookie);
+            }
         } catch (Exception e) {
             throw new UnexpectedException("Errors serializationProblem", e);
         }

@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import play.exceptions.BindingException;
 
 /**
  * The binder try to convert String values to Java objects.
@@ -115,7 +114,7 @@ public class Binder {
             }
             return null;
         } catch (Exception e) {
-            throw new BindingException("TODO", e);
+            return null;
         }
     }
 
@@ -143,6 +142,9 @@ public class Binder {
             if (value == null || value.trim().length() == 0) {
                 return null;
             }
+            if(value.contains(".")) {
+                value = value.substring(0, value.indexOf("."));
+            }
             return Integer.parseInt(value);
         }
         if (clazz.getName().equals("double") || clazz.equals(Double.class)) {
@@ -155,11 +157,17 @@ public class Binder {
             if (value == null || value.trim().length() == 0) {
                 return null;
             }
+            if(value.contains(".")) {
+                value = value.substring(0, value.indexOf("."));
+            }
             return Short.parseShort(value);
         }
         if (clazz.getName().equals("long") || clazz.equals(Long.class)) {
             if (value == null || value.trim().length() == 0) {
                 return null;
+            }
+            if(value.contains(".")) {
+                value = value.substring(0, value.indexOf("."));
             }
             return Long.parseLong(value);
         }

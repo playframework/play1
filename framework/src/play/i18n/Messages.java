@@ -3,6 +3,9 @@ package play.i18n;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import play.data.binding.Binder;
 
 /**
  * I18n Helper
@@ -47,7 +50,45 @@ public class Messages {
         if (value == null) {
             value = key.toString();
         }
-        return String.format(value, args);
+        return String.format(value, coolStuff(value, (Object[])args));
+    }
+    
+    static Pattern formatterPattern = Pattern.compile("%((\\d+)\\$)?([-#+ 0,(]+)?(\\d+)?([.]\\d+)?([bBhHsScCdoxXeEfgGaAtT])");
+    
+    static Object[] coolStuff(String pattern, Object[] args) {
+        
+        Class[] conversions = new Class[args.length];
+        
+        Matcher matcher = formatterPattern.matcher(pattern);
+        int incrementalPosition = 1;        
+        while(matcher.find()) {
+            String conversion = matcher.group(6);
+            Integer position;
+            if(matcher.group(2) == null) {
+                position = incrementalPosition++;
+            } else {
+                position = Integer.parseInt(matcher.group(2));
+            }
+            if(conversion.equals("d") && position <= conversions.length) {
+                conversions[position-1] = Long.class;
+            }
+            if(conversion.equals("f") && position <= conversions.length) {
+                conversions[position-1] = Double.class;
+            }
+        }
+        
+        Object[] result = new Object[args.length];
+        for(int i=0; i<args.length; i++) {
+            if(args[i] == null) {
+                continue;
+            }
+            if(conversions[i] == null) {
+                result[i] = args[i];
+            } else {
+                result[i] = Binder.directBind(args[i] + "", conversions[i]);
+            }
+        }
+        return result;
     }
 
     /**
