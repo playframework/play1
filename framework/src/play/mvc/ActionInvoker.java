@@ -65,7 +65,7 @@ public class ActionInvoker {
                 Controller.class.getField("session").set(null, Scope.Session.current());
                 Controller.class.getField("flash").set(null, Scope.Flash.current());
                 Controller.class.getField("renderArgs").set(null, Scope.RenderArgs.current());
-                Controller.class.getField("validation").set(null, Validation.current());
+                Controller.class.getField("validation").set(null, Java.invokeStatic(Validation.class, "current"));
             }
 
             for (PlayPlugin plugin : Play.plugins) {

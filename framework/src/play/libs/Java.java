@@ -62,6 +62,7 @@ public class Java {
             types[0] = args[0].getClass();
         }
         Method m = clazz.getDeclaredMethod(method, types);
+        m.setAccessible(true);
         return m.invoke(null, args);
     }
 

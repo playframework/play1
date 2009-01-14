@@ -7,6 +7,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.w3c.dom.Document;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
@@ -16,6 +18,7 @@ import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.TemplateNotFoundException;
 import play.exceptions.UnexpectedException;
+import play.libs.Java;
 import play.mvc.Http.Response;
 import play.mvc.results.Error;
 import play.mvc.results.Forbidden;
@@ -89,7 +92,7 @@ public abstract class Controller {
     protected static void renderXml(String xml) {
         throw new RenderXml(xml);
     }
-    
+
     /**
      * Return a 200 OK text/xml response
      * @param xml The DOM document object
@@ -114,7 +117,7 @@ public abstract class Controller {
     protected static void renderBinary(InputStream is, String name) {
         throw new RenderBinary(is, name);
     }
-    
+
     /**
      * Return a 200 OK application/binary response
      * @param file The file to copy
@@ -122,7 +125,7 @@ public abstract class Controller {
     protected static void renderBinary(File file) {
         throw new RenderBinary(file, null);
     }
-    
+
     /**
      * Return a 200 OK application/binary response with content-disposition attachment
      * @param file The file to copy
@@ -139,7 +142,7 @@ public abstract class Controller {
     protected static void renderJSON(String jsonString) {
         throw new RenderJson(jsonString);
     }
-    
+
     /**
      * Render a 200 OK application/json response
      * @param o The Java object to serialize
@@ -172,7 +175,7 @@ public abstract class Controller {
     protected static void notFound(String what) {
         throw new NotFound(what);
     }
-    
+
     /**
      * Send a 200 OK reponse
      */
@@ -253,7 +256,7 @@ public abstract class Controller {
     protected static void redirect(String action, Object... args) {
         try {
             Map<String, Object> r = new HashMap<String, Object>();
-            Method actionMethod = (Method)ActionInvoker.getActionMethod(action)[1];
+            Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
             String[] names = (String[]) actionMethod.getDeclaringClass().getDeclaredField("$" + actionMethod.getName() + LocalVariablesNamesTracer.computeMethodHash(actionMethod.getParameterTypes())).get(null);
             assert names.length == args.length : "Problem is action redirection";
             for (int i = 0; i < names.length; i++) {
@@ -299,7 +302,11 @@ public abstract class Controller {
         templateBinding.put("flash", Scope.Flash.current());
         templateBinding.put("params", Scope.Params.current());
         templateBinding.put("play", new Play());
-        templateBinding.put("errors", Validation.errorsMap());
+        try {
+            templateBinding.put("errors", ((Validation) (Java.invokeStatic(Validation.class, "current"))).errorsMap());
+        } catch (Exception ex) {
+            throw new UnexpectedException(ex);
+        }
         try {
             Template template = TemplateLoader.load(templateName);
             throw new RenderTemplate(template, templateBinding.data);
@@ -334,13 +341,13 @@ public abstract class Controller {
      * @return Annotation object or null if not found
      */
     public static <T extends Annotation> T getActionAnnotation(Class<T> clazz) {
-        Method m = (Method)ActionInvoker.getActionMethod(Http.Request.current().action)[1];
+        Method m = (Method) ActionInvoker.getActionMethod(Http.Request.current().action)[1];
         if (m.isAnnotationPresent(clazz)) {
             return m.getAnnotation(clazz);
         }
         return null;
     }
-    
+
     /**
      * Retrieve annotation for the action method
      * @param clazz The annotation class
@@ -349,22 +356,4 @@ public abstract class Controller {
     public static Class getControllerClass() {
         return Play.classloader.getClassIgnoreCase("controllers." + Http.Request.current().controller);
     }
-    
-    // ~~~~~~ Validations
-    
-    public static boolean check(Object o, String... message) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
-        return Validation.check(key, o, message);
-    }
-    
-    public static boolean checkRequired(Object o, String... message) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
-        return Validation.checkRequired(key, o, message);
-    }
-    
-    public static boolean checkMin(Object o, double min, String... message) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
-        return Validation.checkMin(key, o, min, message);
-    }
-
 }
