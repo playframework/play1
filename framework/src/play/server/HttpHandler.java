@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -83,7 +84,7 @@ public class HttpHandler implements IoHandler {
         URI uri = minaRequest.getRequestUri();
         Request request = new Request();
         request.method = minaRequest.getMethod().toString();
-        request.path = uri.getPath();
+        request.path = URLDecoder.decode(uri.getRawPath(), "utf-8");
         request.querystring = uri.getQuery() == null ? "" : uri.getRawQuery();
         Http.Request.current.set(request);
 
