@@ -179,7 +179,7 @@ public class Binder {
         }
         if (clazz.getName().equals("boolean") || clazz.equals(Boolean.class)) {
             if (value == null || value.trim().length() == 0) {
-                return null;
+                return false;
             }
             return Boolean.parseBoolean(value);
         }

@@ -1,5 +1,7 @@
 package play.data.validation;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +70,52 @@ public class Validation {
         return error(key) != null;
     }
     
+    // ~~~~ Integration helper
+    
+    public static Map<String,List<Validator>> getValidators(Class clazz, String name) {
+        Map<String,List<Validator>> result = new HashMap<String,List<Validator>>();
+        searchValidator(clazz, name, result);
+        return result;
+    }
+    
+    static void searchValidator(Class clazz, String name, Map<String,List<Validator>> result) {
+        for(Field field : clazz.getDeclaredFields()) {
+            
+            List<Validator> validators = new ArrayList<Validator>();
+            String key = name + "." + field.getName();
+            boolean containsAtValid = false;
+            for(Annotation annotation : field.getDeclaredAnnotations()) {
+                if(annotation.annotationType().getName().startsWith("play.data.validation")) {
+                    Validator validator = new Validator(annotation);
+                    validators.add(validator);
+                    if(annotation.annotationType().equals(Equals.class)) {
+                        validator.params.put("equalsTo", name + "." + ((Equals)annotation).value());
+                    }
+                }
+                if(annotation.annotationType().equals(Valid.class)) {
+                    containsAtValid = true;
+                }
+            }
+            if(!validators.isEmpty()) {
+                result.put(key, validators);
+            }
+            if(containsAtValid) {
+                searchValidator(field.getType(), key, result);
+            }
+        }
+    }
+    
+    public static class Validator {
+        
+        public Annotation annotation;
+        public Map<String,Object> params = new HashMap();
+        
+        public Validator(Annotation annotation) {
+            this.annotation = annotation;
+        }
+        
+    }
+    
     // ~~~~ Validations
     
     public static class ValidationResult {
@@ -110,6 +158,63 @@ public class Validation {
     public ValidationResult min(Object o, double min) {
         String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
         return Validation.min(key, o, min);
+    }
+    
+    public static ValidationResult email(String key, Object o) {
+        EmailCheck check = new EmailCheck();
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult email(Object o) {
+        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        return Validation.email(key, o);
+    }
+    
+    public static ValidationResult isTrue(String key, Object o) {
+        IsTrueCheck check = new IsTrueCheck();
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult isTrue(Object o) {
+        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        return Validation.isTrue(key, o);
+    }
+    
+    
+    public static ValidationResult equals(String key, Object o, String otherName, Object to) {
+        EqualsCheck check = new EqualsCheck();
+        check.otherKey = otherName;
+        check.otherValue = to;
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult equals(Object o, Object to) {
+        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        String otherKey = LocalVariablesNamesTracer.getAllLocalVariableNames(to).get(0);
+        return Validation.equals(key, o, otherKey, to);
+    }
+    
+    public static ValidationResult range(String key, Object o, double min, double max) {
+        RangeCheck check = new RangeCheck();
+        check.min = min;
+        check.max = max;
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult range(Object o, double min, double max) {
+        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        return Validation.range(key, o, min, max);
+    }
+    
+    public static ValidationResult minSize(String key, Object o, int minSize) {
+        MinSizeCheck check = new MinSizeCheck();
+        check.minSize = minSize;
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult minSize(Object o, int minSize) {
+        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        return Validation.minSize(key, o, minSize);
     }
 
     public static ValidationResult valid(String key, Object o) {

@@ -36,7 +36,7 @@ public class FastTags {
         if (actionDef.star) {
             actionDef.method = "POST"; // prefer POST for form ....
         }
-        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method + "\" accept-charset=\"utf-8\" enctype=\"" + enctype + "\">");
+        out.print("<form " + (args.get("id") == null ? "" : "id=\"" + args.get("id") + "\" ") + "action=\"" + actionDef.url + "\" method=\"" + actionDef.method + "\" accept-charset=\"utf-8\" enctype=\"" + enctype + "\">");
         out.println(JavaExtensions.toString(body));
         out.print("</form>");
     }
@@ -89,7 +89,7 @@ public class FastTags {
             throw new TemplateExecutionException(template.template, fromLine, "Please specify the error key", new TagInternalException("Please specify the error key"));
         }
         if (Validation.hasError(args.get("arg").toString())) {
-            out.print("error");
+            out.print("hasError");
         }
     }
     
