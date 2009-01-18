@@ -15,6 +15,7 @@ import net.sf.oval.guard.Guard;
 import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
 import play.libs.Java;
+import play.mvc.ActionInvoker;
 import play.mvc.Http;
 import play.mvc.Http.Cookie;
 import play.mvc.Scope;
@@ -66,7 +67,7 @@ public class ValidationPlugin extends PlayPlugin {
 
         public List<ConstraintViolation> validateAction(Method actionMethod) throws Exception {
             List<ConstraintViolation> violations = new ArrayList<ConstraintViolation>();
-            Object[] rArgs = Java.prepareArgs(actionMethod, Scope.Params.current().all());
+            Object[] rArgs = ActionInvoker.getActionMethodArgs(actionMethod);
             validateMethodParameters(null, actionMethod, rArgs, violations);
             validateMethodPre(null, actionMethod, rArgs, violations);
             return violations;

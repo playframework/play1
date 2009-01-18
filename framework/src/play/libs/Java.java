@@ -70,13 +70,12 @@ public class Java {
         return method.invoke(null, prepareArgs(method, args));
     }
     
-    public static Object[] prepareArgs(Method method, Map<String, String[]> args) throws Exception {
-        //
-        if (method.getParameterTypes().length > 0) {
-            Scope.Params.current().checkAndParse();
-        }
-        //
-        String[] paramsNames = (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes())).get(null);
+    public static Object invokeStatic(Method method, Object[] args) throws Exception {
+        return method.invoke(null, args);
+    }
+    
+    static Object[] prepareArgs(Method method, Map<String, String[]> args) throws Exception {
+        String[] paramsNames = parameterNames(method);       
         if (paramsNames == null && method.getParameterTypes().length > 0) {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }

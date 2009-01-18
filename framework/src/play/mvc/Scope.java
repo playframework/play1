@@ -260,15 +260,23 @@ public class Scope {
         }
 
         public String get(String key) {
-            checkAndParse();
+            if(!_contains(key)) {
+                checkAndParse();
+            }
             if (data.containsKey(key)) {
                 return data.get(key)[0];
             }
             return null;
         }
+        
+        public boolean _contains(String key) {
+            return data.containsKey(key);
+        }
 
         public String[] getAll(String key) {
-            checkAndParse();
+            if(!_contains(key)) {
+                checkAndParse();
+            }
             return data.get(key);
         }
 

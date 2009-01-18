@@ -5,11 +5,14 @@ import play.mvc.results.Result;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.List;
 
+import java.util.Map;
 import play.Play;
 import play.PlayPlugin;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
+import play.data.binding.Binder;
 import play.data.parsing.DataParser;
 import play.data.validation.Validation;
 import play.exceptions.JavaExecutionException;
@@ -35,9 +38,6 @@ public class ActionInvoker {
             Scope.RenderArgs.current.set(new Scope.RenderArgs());
             Scope.Session.current.set(Scope.Session.restore());
             Scope.Flash.current.set(Scope.Flash.restore());
-
-            // 1. Route the request
-            Router.route(request);
 
             // 2. Find the action method
             Method actionMethod = null;
@@ -92,10 +92,7 @@ public class ActionInvoker {
                     if (!skip) {
                         if (Modifier.isStatic(before.getModifiers())) {
                             before.setAccessible(true);
-                            if (before.getParameterTypes().length > 0) {
-                                Scope.Params.current().checkAndParse();
-                            }
-                            Java.invokeStatic(before, Scope.Params.current().all());
+                            Java.invokeStatic(before, getActionMethodArgs(before));
                         }
                     }
                 }
@@ -103,7 +100,7 @@ public class ActionInvoker {
                 Result actionResult = null;
                 ControllerInstrumentation.initActionCall();
                 try {
-                    Java.invokeStatic(actionMethod, Scope.Params.current().all());
+                    Java.invokeStatic(actionMethod, getActionMethodArgs(actionMethod));
                 } catch (InvocationTargetException ex) {
                     // It's a Result ? (expected)
                     if (ex.getTargetException() instanceof Result) {
@@ -131,10 +128,7 @@ public class ActionInvoker {
                     if (!skip) {
                         if (Modifier.isStatic(after.getModifiers())) {
                             after.setAccessible(true);
-                            if (after.getParameterTypes().length > 0) {
-                                Scope.Params.current().checkAndParse();
-                            }
-                            Java.invokeStatic(after, Scope.Params.current().all());
+                            Java.invokeStatic(after, getActionMethodArgs(after));
                         }
                     }
                 }
@@ -213,5 +207,24 @@ public class ActionInvoker {
             throw new ActionNotFoundException(fullAction, e);
         }
         return new Object[]{controllerClass, actionMethod};
+    }
+    
+    public static Object[] getActionMethodArgs(Method method) throws Exception {
+        String[] paramsNames = Java.parameterNames(method);      
+        if (paramsNames == null && method.getParameterTypes().length > 0) {
+            throw new UnexpectedException("Parameter names not found for method " + method);
+        }
+        Object[] rArgs = new Object[method.getParameterTypes().length];
+        for (int i = 0; i < method.getParameterTypes().length; i++) {
+            Class type = method.getParameterTypes()[i];
+            Map<String, String[]> params = new HashMap();
+            if(type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {
+                params.put(paramsNames[i], Scope.Params.current().getAll(paramsNames[i]));
+            } else {
+                params.putAll(Scope.Params.current().all());
+            }
+            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], params);
+        }
+        return rArgs;
     }
 }
