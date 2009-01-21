@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -82,9 +84,13 @@ public class Play {
      */
     public static List<VirtualFile> templatesPath;
     /**
-     * All routes files
+     * Main routes file
      */
-    public static List<VirtualFile> routes;
+    public static VirtualFile routes;
+    /**
+     * Plugin routes files
+     */
+    public static Map<String, VirtualFile> pluginRoutes;
     /**
      * The main application.conf
      */
@@ -156,8 +162,11 @@ public class Play {
         templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework/templates")));
        
         // Main route file
-        routes = new ArrayList<VirtualFile>();
-        routes.add(appRoot.child("conf/routes"));
+        routes = appRoot.child("conf/routes");
+        
+        // Plugin route files
+        pluginRoutes = new HashMap<String, VirtualFile>();
+        
         // Enable a first classloader
         classloader = new ApplicationClassloader();
         // tmp dir
@@ -444,9 +453,22 @@ public class Play {
      */
     public static void addPlayApp(File path) {
         VirtualFile root = VirtualFile.open(path);
+        conf = root.child("conf/application.conf");
+        String name = null;
+        try {
+            configuration = IO.readUtf8Properties(conf.inputstream());
+            name = configuration.getProperty("application.name");
+        } catch (IOException ex) {
+            Logger.fatal("Cannot read plugin's application.conf (%s)", root);
+            System.exit(0);
+        }
+        if(name == null) {
+        	Logger.fatal("Plugin's name not set in application.conf (%s)", root);
+            System.exit(0);
+        }
         javaPath.add(root.child("app"));
         templatesPath.add(root.child("app/views"));
-        routes.add(root.child("conf/routes"));
+        pluginRoutes.put(name, root.child("conf/routes"));
         roots.add(root);
         Logger.info("Plugin added: " + path.getAbsolutePath());
     }

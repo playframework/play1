@@ -32,43 +32,73 @@ public class Router {
 
     public static void load() {
         routes.clear();
-        String config = "";
-        for (VirtualFile file : Play.routes) {
-            config += file.contentAsString() + "\n";
-        }
-        String[] lines = config.split("\n");
-        for (String line : lines) {
-            line = line.trim().replaceAll("\\s+", " ");
-            if (line.length() == 0 || line.startsWith("#")) {
-                continue;
-            }
-            Matcher matcher = routePattern.matcher(line);
-            if (matcher.matches()) {
-                Route route = new Route();
-                route.method = matcher.group("method");
-                route.path = matcher.group("path");
-                route.action = matcher.group("action");
-                route.addParams(matcher.group("params"));
-                route.compute();
-                routes.add(route);
-            } else {
-                Logger.warn("Invalid route definition : %s", line);
-            }
-        }
+        parse(Play.routes, "");
         lastLoading = System.currentTimeMillis();
     }
+    
+    /**
+     * Parse a route file.
+     * If an action starts with <i>"plugin:name"</i>, replace that route by the ones declared
+     * in the plugin route file denoted by that <i>name</i>, if found.
+     * @param routeFile
+     * @param prefix The prefix that the path of all routes in this route file start with. This prefix should not
+     * end with a '/' character.
+     */
+    static void parse(VirtualFile routeFile, String prefix) {
+		String content = routeFile.contentAsString();
+		for (String line : content.split("\n")) {
+			line = line.trim().replaceAll("\\s+", " ");
+			if (line.length() == 0 || line.startsWith("#")) {
+				continue;
+			}
+			Matcher matcher = routePattern.matcher(line);
+			if (matcher.matches()) {
+				String action = matcher.group("action");
+				if (action.startsWith("plugin:")) {
+					String pluginName = action.substring("plugin:".length());
+					String newPrefix = prefix + matcher.group("path");
+					if (!newPrefix.endsWith("/"))
+						newPrefix += "/";
+					if (pluginName.equals("*")) {
+						for (String p : Play.pluginRoutes.keySet()) {
+							parse(Play.pluginRoutes.get(p), newPrefix + p);
+						}
+					} else if (Play.pluginRoutes.containsKey(pluginName)) {
+						parse(Play.pluginRoutes.get(pluginName), newPrefix
+								+ pluginName);
+					} else {
+						Logger.warn("Cannot include route file %s : file not found", pluginName);
+					}
+				} else {
+					Route route = new Route();
+					route.method = matcher.group("method");
+					route.path = prefix + matcher.group("path");
+					route.action = action;
+					route.addParams(matcher.group("params"));
+					route.compute();
+					routes.add(route);
+				}
+			} else {
+				Logger.warn("Invalid route definition : %s", line);
+			}
+		}
+	}
 
     public static void detectChanges() {
-        if (Play.mode == Mode.PROD) {
-            return;
-        }
-        for (VirtualFile file : Play.routes) {
-            if (file.lastModified() > lastLoading) {
-                load();
-                return;
-            }
-        }
-    }
+		if (Play.mode == Mode.PROD) {
+			return;
+		}
+		if (Play.routes.lastModified() > lastLoading) {
+			load();
+		} else {
+			for (VirtualFile file : Play.pluginRoutes.values()) {
+				if (file.lastModified() > lastLoading) {
+					load();
+					return;
+				}
+			}
+		}
+	}
     static List<Route> routes = new ArrayList<Route>();
 
     public static void route(Http.Request request) {

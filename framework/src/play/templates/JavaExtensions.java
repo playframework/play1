@@ -105,7 +105,7 @@ public class JavaExtensions {
             return bytes / 1024L + "KB";
         }
         if (bytes < 1073741824L) {
-            return bytes / 1048576L + "." + "MB";
+            return bytes / 1048576L + "MB";
         }
         return bytes / 1073741824L + "GB";
     }
