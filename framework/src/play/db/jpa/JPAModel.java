@@ -1,12 +1,22 @@
 package play.db.jpa;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Query;
+import play.data.binding.BeanWrapper;
+import play.exceptions.UnexpectedException;
 
 /**
  * A super class for JPA entities
@@ -26,12 +36,60 @@ public class JPAModel implements Serializable {
         return id;
     }
 
+    public <T> T edit(Map<String, String[]> params) {
+        try {
+            BeanWrapper bw = new BeanWrapper(this.getClass());
+            bw.bind("", this.getClass(), params, "", this);
+            // relations
+            for (Field field : this.getClass().getDeclaredFields()) {
+                boolean isEntity = false;
+                String relation = null;
+                boolean multiple = false;
+                //
+                if (field.isAnnotationPresent(OneToOne.class) || field.isAnnotationPresent(ManyToOne.class)) {
+                    isEntity = true;
+                    relation = field.getType().getSimpleName();
+                }
+                if (field.isAnnotationPresent(OneToMany.class) || field.isAnnotationPresent(ManyToMany.class)) {
+                    Class fieldType = (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                    isEntity = true;
+                    relation = fieldType.getSimpleName();
+                    multiple = true;
+                }
+
+                if (isEntity) {
+                    if (multiple) {
+                        List l = new ArrayList();
+                        String[] ids = params.get(field.getName());
+                        if (ids != null) {
+                            for (String _id : ids) {
+                                l.add(JPA.getEntityManager().createQuery("from " + relation + " where id = " + _id).getSingleResult());
+                            }
+                        }
+                        field.set(this, l);
+                    } else {
+                        String[] ids = params.get(field.getName());
+                        if (ids != null && ids.length > 0 && !ids[0].equals("")) {
+                            JPAModel to = (JPAModel) JPA.getEntityManager().createQuery("from " + relation + " where id = " + ids[0]).getSingleResult();
+                            field.set(this, to);
+                        } else {
+                            field.set(this, null);
+                        }
+                    }
+                }
+            }
+            return (T) this;
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
+    }
+
     /**
      * store (ie insert or update) the entity.
      */
     public <T> T save() {
         em().persist(this);
-        return (T)this;
+        return (T) this;
     }
 
     /**
@@ -39,7 +97,7 @@ public class JPAModel implements Serializable {
      */
     public <T> T refresh() {
         em().refresh(this);
-        return (T)this;
+        return (T) this;
     }
 
     /**
@@ -60,6 +118,10 @@ public class JPAModel implements Serializable {
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    public static <T> T create(Map<String, String[]> params) {
+        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 
     /**

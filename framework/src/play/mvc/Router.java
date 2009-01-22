@@ -35,7 +35,7 @@ public class Router {
         parse(Play.routes, "");
         lastLoading = System.currentTimeMillis();
     }
-    
+
     /**
      * Parse a route file.
      * If an action starts with <i>"plugin:name"</i>, replace that route by the ones declared
@@ -45,60 +45,60 @@ public class Router {
      * end with a '/' character.
      */
     static void parse(VirtualFile routeFile, String prefix) {
-		String content = routeFile.contentAsString();
-		for (String line : content.split("\n")) {
-			line = line.trim().replaceAll("\\s+", " ");
-			if (line.length() == 0 || line.startsWith("#")) {
-				continue;
-			}
-			Matcher matcher = routePattern.matcher(line);
-			if (matcher.matches()) {
-				String action = matcher.group("action");
-				if (action.startsWith("plugin:")) {
-					String pluginName = action.substring("plugin:".length());
-					String newPrefix = prefix + matcher.group("path");
-					if (!newPrefix.endsWith("/"))
-						newPrefix += "/";
-					if (pluginName.equals("*")) {
-						for (String p : Play.pluginRoutes.keySet()) {
-							parse(Play.pluginRoutes.get(p), newPrefix + p);
-						}
-					} else if (Play.pluginRoutes.containsKey(pluginName)) {
-						parse(Play.pluginRoutes.get(pluginName), newPrefix
-								+ pluginName);
-					} else {
-						Logger.warn("Cannot include route file %s : file not found", pluginName);
-					}
-				} else {
-					Route route = new Route();
-					route.method = matcher.group("method");
-					route.path = prefix + matcher.group("path");
-					route.action = action;
-					route.addParams(matcher.group("params"));
-					route.compute();
-					routes.add(route);
-				}
-			} else {
-				Logger.warn("Invalid route definition : %s", line);
-			}
-		}
-	}
+        String content = routeFile.contentAsString();
+        for (String line : content.split("\n")) {
+            line = line.trim().replaceAll("\\s+", " ");
+            if (line.length() == 0 || line.startsWith("#")) {
+                continue;
+            }
+            Matcher matcher = routePattern.matcher(line);
+            if (matcher.matches()) {
+                String action = matcher.group("action");
+                if (action.startsWith("plugin:")) {
+                    String pluginName = action.substring("plugin:".length());
+                    String newPrefix = prefix + matcher.group("path");
+                    if (!newPrefix.endsWith("/")) {
+                        newPrefix += "/";
+                    }
+                    if (pluginName.equals("*")) {
+                        for (String p : Play.pluginRoutes.keySet()) {
+                            parse(Play.pluginRoutes.get(p), newPrefix + p);
+                        }
+                    } else if (Play.pluginRoutes.containsKey(pluginName)) {
+                        parse(Play.pluginRoutes.get(pluginName), newPrefix + pluginName);
+                    } else {
+                        Logger.warn("Cannot include route file %s : file not found", pluginName);
+                    }
+                } else {
+                    Route route = new Route();
+                    route.method = matcher.group("method");
+                    route.path = prefix + matcher.group("path");
+                    route.action = action;
+                    route.addParams(matcher.group("params"));
+                    route.compute();
+                    routes.add(route);
+                }
+            } else {
+                Logger.warn("Invalid route definition : %s", line);
+            }
+        }
+    }
 
     public static void detectChanges() {
-		if (Play.mode == Mode.PROD) {
-			return;
-		}
-		if (Play.routes.lastModified() > lastLoading) {
-			load();
-		} else {
-			for (VirtualFile file : Play.pluginRoutes.values()) {
-				if (file.lastModified() > lastLoading) {
-					load();
-					return;
-				}
-			}
-		}
-	}
+        if (Play.mode == Mode.PROD) {
+            return;
+        }
+        if (Play.routes.lastModified() > lastLoading) {
+            load();
+        } else {
+            for (VirtualFile file : Play.pluginRoutes.values()) {
+                if (file.lastModified() > lastLoading) {
+                    load();
+                    return;
+                }
+            }
+        }
+    }
     static List<Route> routes = new ArrayList<Route>();
 
     public static void route(Http.Request request) {
@@ -183,7 +183,7 @@ public class Router {
                             if (value instanceof List) {
                                 value = ((List<Object>) value).get(0);
                             }
-                            if (!arg.constraint.matches((String) value)) {
+                            if (!arg.constraint.matches(value.toString())) {
                                 allRequiredArgsAreHere = false;
                                 break;
                             }
@@ -240,6 +240,8 @@ public class Router {
                         actionDefinition.url = qs.length() == 0 ? path : path + "?" + qs;
                         actionDefinition.method = route.method == null || route.method.equals("*") ? "GET" : route.method.toUpperCase();
                         actionDefinition.star = route.method.equals("*");
+                        actionDefinition.action = action;
+                        actionDefinition.args = args;
                         return actionDefinition;
                     }
                 }
@@ -253,6 +255,18 @@ public class Router {
         public String method;
         public String url;
         public boolean star;
+        public String action;
+        public Map<String, Object> args;
+        
+        public ActionDefinition add(String key, Object value) {
+            args.put(key, value);
+            return reverse(action, args);
+        }
+        
+        public ActionDefinition remove(String key) {
+            args.remove(key);
+            return reverse(action, args);
+        }
 
         @Override
         public String toString() {

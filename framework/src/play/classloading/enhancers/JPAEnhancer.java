@@ -82,6 +82,10 @@ public class JPAEnhancer extends Enhancer {
         // findOneBy
         CtMethod findOneBy = CtMethod.make("public static play.db.jpa.JPAModel findOneBy(String query, Object[] params) { javax.persistence.Query q = em().createQuery(createFindByQuery(\"" + ctClass.getSimpleName() + "\", \"" + ctClass.getName() + "\", query, params)); java.util.List results = bindParameters(q,params).getResultList(); if(results.size() == 0) return null; return (play.db.jpa.JPAModel)results.get(0); }", ctClass);
         ctClass.addMethod(findOneBy);
+        
+        // create     
+        CtMethod create = CtMethod.make("public static play.db.jpa.JPAModel create(java.util.Map params) { return (play.db.jpa.JPAModel)((play.db.jpa.JPAModel)" + ctClass.getName() + ".class.newInstance()).edit(params); }", ctClass);
+        ctClass.addMethod(create);
 
         applicationClass.enhancedByteCode = ctClass.toBytecode();
         ctClass.defrost();

@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import play.Logger;
 import play.Play;
+import play.data.binding.Binder;
 import play.data.parsing.DataParser;
 import play.exceptions.UnexpectedException;
 import play.libs.Crypto;
@@ -269,6 +270,10 @@ public class Scope {
             return null;
         }
         
+        public <T> T get(String key, Class<T> type) {
+            return (T)Binder.directBind(get(key), type);
+        }
+        
         public boolean _contains(String key) {
             return data.containsKey(key);
         }
@@ -283,6 +288,17 @@ public class Scope {
         public Map<String, String[]> all() {
             checkAndParse();
             return data;
+        }
+        
+        public Map<String, String[]> sub(String prefix) {
+            checkAndParse();
+            Map<String, String[]> result = new HashMap<String, String[]>();
+            for(String key : data.keySet()) {
+                if(key.startsWith(prefix + ".")) {
+                    result.put(key.substring(prefix.length() + 1), data.get(key));
+                }
+            }
+            return result;
         }
 
         public Map<String, String> allSimple() {

@@ -41,6 +41,9 @@ public class BeanWrapper {
     public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Object instance) throws Exception {
         for (Property prop : wrappers.values()) {
             String newPrefix = prefix + "." + prop.getName();
+            if(newPrefix.startsWith(".")) {
+                newPrefix = newPrefix.substring(1);
+            }
             prop.setValue(instance, Binder.bindInternal(name, prop.getType(), prop.getGenericType(), params, newPrefix));
         }
         return instance;

@@ -394,6 +394,7 @@ if [ "$APPLICATION_MODE" = "prod" ] ; then
   JAVA_ARGS="$JAVA_ARGS -server"
 fi
 
+JAVA_ARGS="$JAVA_ARGS -Dcom.sun.management.jmxremote"
 
 # ~~~~~~~~~~~~~~~~~~~~~~ Build classpath
 

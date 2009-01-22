@@ -100,7 +100,7 @@ public class ValidationPlugin extends PlayPlugin {
     static void save() {
         try {
             StringBuilder errors = new StringBuilder();
-            if(Validation.current().keep) {
+            if(Validation.current() != null && Validation.current().keep) {
                 for (Error error : Validation.errors()) {
                     errors.append("\u0000");
                     errors.append(error.key);
