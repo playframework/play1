@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,8 @@ public class Http {
         public String value;
         
         public boolean sendOnError = false;
+        
+        public Integer maxAge;
     }
 
     /**
@@ -264,17 +267,36 @@ public class Http {
          * @param name Cookie name
          * @param value Cookie value
          */
-        public void setCookie(String name, String value) {
+        public void setCookie (String name, String value) {
+        	setCookie(name, value, (Integer) null);
+        }
+        
+        /**
+         * Set a new cookie that will expire in (current) + duration
+         * @param name
+         * @param value
+         * @param duration Ex: 3d
+         */
+        public void setCookie (String name, String value, String duration) {
+        	int expire = Time.parseDuration(duration);
+        	setCookie(name, value, Integer.valueOf(expire));
+        }
+        
+        public void setCookie(String name, String value, Integer maxAge) {
             if (cookies.containsKey(name)) {
                 cookies.get(name).value = value;
+                if (maxAge!=null)
+                	 cookies.get(name).maxAge = maxAge; 
             } else {
                 Cookie cookie = new Cookie();
                 cookie.name = name;
                 cookie.value = value;
+                if (maxAge!=null)
+                	cookie.maxAge=maxAge;
                 cookies.put(name, cookie);
             }
         }
-
+        
         /**
          * Add a cache-control header 
          * @param duration Ex: 3h

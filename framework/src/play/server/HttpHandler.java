@@ -329,6 +329,7 @@ public class HttpHandler implements IoHandler {
     }
 
     public static void writeResponse(IoSession session, HttpRequest req, MutableHttpResponse res) {
+    	res.setHeader("Server", "Play! Framework");
         res.normalize(req);
         WriteFuture future = session.write(res);
         if ((session.getAttribute("file") == null) && !HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION))) {
@@ -398,6 +399,8 @@ public class HttpHandler implements IoHandler {
                 DefaultCookie c = new DefaultCookie(cookie.name, cookie.value);
                 c.setSecure(cookie.secure);
                 c.setPath(cookie.path);
+                if (cookie.maxAge!=null)
+                	c.setMaxAge(cookie.maxAge);
                 minaResponse.addCookie(c);
             }
             if (!response.headers.containsKey("cache-control")) {
