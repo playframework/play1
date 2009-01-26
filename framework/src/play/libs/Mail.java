@@ -204,6 +204,9 @@ public class Mail {
             // story to be continued in javamail 1.4.2 : https://glassfish.dev.java.net/issues/show_bug.cgi?id=5189
             }
 
+            if (Play.configuration.containsKey("mail.smtp.localhost"))
+            	props.put("mail.smtp.localhost", Play.configuration.get("mail.smtp.localhost"));
+            
             //override defaults
             if (Play.configuration.containsKey("mail.smtp.socketFactory.class")) {
                 props.put("mail.smtp.socketFactory.class", Play.configuration.get("mail.smtp.socketFactory.class"));
