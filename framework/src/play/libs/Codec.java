@@ -2,7 +2,10 @@ package play.libs;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.codec.binary.Base64;
 import play.exceptions.UnexpectedException;
 
@@ -64,17 +67,39 @@ public class Codec {
             messageDigest.reset();
             messageDigest.update(value.getBytes("utf-8"));
             byte[] digest = messageDigest.digest();
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < digest.length; ++i) {
-                int v = digest[i];
-                if (v < 0) {
-                    v += 256;
-                }
-                builder.append(Integer.toHexString(v));
-            }
-            return builder.toString();
+            return byteToHexString(digest);
         } catch (Exception ex) {
             throw new UnexpectedException(ex);
         }
+    }
+
+    /**
+     * Build an hexadecimal SHA1 hash for a String
+     * @param value The String to hash
+     * @return An hexadecimal Hash
+     */    
+    public static String hexSHA1(String value) {
+        try {
+            MessageDigest md;
+            md = MessageDigest.getInstance("SHA-1");
+            byte[] digest = new byte[40];
+            md.update(value.getBytes("utf-8"));
+            digest = md.digest();
+            return byteToHexString(digest);
+        } catch (Exception ex) {
+            throw new UnexpectedException(ex);
+        }
+    }
+
+    private static String byteToHexString(byte[] bytes) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < bytes.length; ++i) {
+            int v = bytes[i];
+            if (v < 0) {
+                v += 256;
+            }
+            builder.append(Integer.toHexString(v));
+        }
+        return builder.toString();
     }
 }
