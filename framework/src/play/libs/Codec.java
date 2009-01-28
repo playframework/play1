@@ -1,21 +1,9 @@
 package play.libs;
 
 import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
-import play.Play;
 import play.exceptions.UnexpectedException;
 
 /**
@@ -95,60 +83,6 @@ public class Codec {
             md.update(value.getBytes("utf-8"));
             digest = md.digest();
             return byteToHexString(digest);
-        } catch (Exception ex) {
-            throw new UnexpectedException(ex);
-        }
-    }
-
-    /**
-     * Encrypt a String with the AES encryption standard using the application secret
-     * @param value The String to encrypt
-     * @return An hexadecimal encrypted string
-     */
-    public static String encryptAES(String value) {
-        return encryptAES(value, Play.configuration.getProperty("application.secret").substring(0, 16));
-    }
-
-    /**
-     * Encrypt a String with the AES encryption standard. Private key must have a length of 16 bytes
-     * @param value The String to encrypt
-     * @param privateKey The key used to encrypt
-     * @return An hexadecimal encrypted string
-     */
-    public static String encryptAES(String value, String privateKey) {
-        try {
-            byte[] raw = privateKey.getBytes();
-            SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-            Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
-            return byteToHexString(cipher.doFinal(value.getBytes()));
-        } catch (Exception ex) {
-            throw new UnexpectedException(ex);
-        }
-    }
-
-    /**
-     * Decrypt a String with the AES encryption standard using the application secret
-     * @param value An hexadecimal encrypted string
-     * @return The decrypted String
-     */
-    public static String decryptAES(String value) {
-        return decryptAES(value, Play.configuration.getProperty("application.secret").substring(0, 16));
-    }
-
-    /**
-     * Decrypt a String with the AES encryption standard. Private key must have a length of 16 bytes
-     * @param value An hexadecimal encrypted string
-     * @param privateKey The key used to encrypt
-     * @return The decrypted String
-     */
-    public static String decryptAES(String value, String privateKey) {
-        try {
-            byte[] raw = privateKey.getBytes();
-            SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-            Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.DECRYPT_MODE, skeySpec);
-            return new String(cipher.doFinal(hexStringToByte(value)));
         } catch (Exception ex) {
             throw new UnexpectedException(ex);
         }
