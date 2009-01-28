@@ -53,7 +53,7 @@ public class FastTags {
             out.print("Not implemented yet");
         }
         out.print("<a href=\"" + actionDef.url + "\">");
-        out.println(JavaExtensions.toString(body));
+        out.print(JavaExtensions.toString(body));
         out.print("</a>");
     }
 

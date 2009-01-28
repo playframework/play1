@@ -255,17 +255,17 @@ public class TemplateCompiler {
                 throw new TemplateCompilationException(template, tag.startLine, "#{" + tag.name + "} is not closed.");
             }
             if (tag.name.equals("doBody")) {
-                print("if(_body) {");
-                print("if(attrs" + tagIndex + "['vars']) {");
+                print("if(_body || attrs" + tagIndex + "['body']) {");
+                print("def toExecute = attrs" + tagIndex + "['body'] ?: _body; toUnset = []; if(attrs" + tagIndex + "['vars']) {");
                 print("attrs" + tagIndex + "['vars'].each() {");
-                print("_body.setProperty(it.key, it.value);");
+                print("if(toExecute.getProperty(it.key) == null) {toUnset.add(it.key);}; toExecute.setProperty(it.key, it.value);");
                 print("}};");
-                print("out.print(_body.toString()) };");
+                print("if(attrs" + tagIndex + "['as']) { setProperty(attrs" + tagIndex + "['as'], toExecute.toString()); } else { out.print(toExecute.toString()); }; toUnset.each() {toExecute.setProperty(it, null)} };");
                 markLine(tag.startLine);
                 template.doBodyLines.add(currentLine);
                 println();
             } else {
-                print("}");
+                print("};");
                 markLine(currentLine);
                 println();
                 // Use fastTag if exists

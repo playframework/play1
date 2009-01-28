@@ -27,6 +27,8 @@ public class Messages {
     static protected Properties defaults;
 
     static protected Map<String, Properties> locales = new HashMap<String, Properties>();
+    
+    static Pattern recursive = Pattern.compile("&\\{(.*?)\\}");
 
     /**
      * Given a message code, translate it using current locale.
@@ -50,7 +52,14 @@ public class Messages {
         if (value == null) {
             value = key.toString();
         }
-        return String.format(value, coolStuff(value, (Object[])args));
+        String message = String.format(value, coolStuff(value, (Object[])args));
+        Matcher matcher = recursive.matcher(message);
+        StringBuffer sb = new StringBuffer();
+        while(matcher.find()) {
+            matcher.appendReplacement(sb, get(matcher.group(1)));
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
     }
     
     static Pattern formatterPattern = Pattern.compile("%((\\d+)\\$)?([-#+ 0,(]+)?(\\d+)?([.]\\d+)?([bBhHsScCdoxXeEfgGaAtT])");

@@ -164,6 +164,7 @@ public class Template {
     public String render(Map<String, Object> args) {
         compile();
         Binding binding = new Binding(args);
+        binding.setVariable("play", new Play());
         binding.setVariable("messages", new Messages());
         binding.setVariable("lang", Lang.get());
         StringWriter writer = null;
@@ -304,18 +305,16 @@ public class Template {
             }
             TagContext.enterTag(tag);
             Map<String, Object> args = new HashMap<String, Object>();
-            args.putAll(getBinding().getVariables());
+            args.put("out", getBinding().getVariable("out"));
+            args.put("_caller", getBinding().getVariables());
             if (attrs != null) {
                 for (String key : attrs.keySet()) {
                     args.put("_" + key, attrs.get(key));
                 }
             }
-            StringWriter writer = new StringWriter();
             args.put("_body", body);
-            args.put("__sw", new PrintWriter(writer));
             try {
                 tagTemplate.render(args);
-                String tagResult = writer.toString().trim();
             } catch (TagInternalException e) {
                 throw new TemplateExecutionException(template, fromLine, e.getMessage(), cleanStackTrace(e));
             } catch (TemplateNotFoundException e) {

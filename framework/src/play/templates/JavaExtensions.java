@@ -20,6 +20,15 @@ import play.libs.I18N;
  */
 public class JavaExtensions {
     
+    public static boolean contains(String[] array, String value) {
+        for(String v : array) {
+            if(v.equals(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public static String toString(Closure closure) {
         PrintWriter oldWriter = (PrintWriter)closure.getProperty("out");
         StringWriter newWriter = new StringWriter();

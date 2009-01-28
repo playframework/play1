@@ -261,7 +261,7 @@ public class Scope {
         }
 
         public String get(String key) {
-            if(!_contains(key)) {
+            if (!_contains(key)) {
                 checkAndParse();
             }
             if (data.containsKey(key)) {
@@ -269,17 +269,17 @@ public class Scope {
             }
             return null;
         }
-        
+
         public <T> T get(String key, Class<T> type) {
-            return (T)Binder.directBind(get(key), type);
+            return (T) Binder.directBind(get(key), type);
         }
-        
+
         public boolean _contains(String key) {
             return data.containsKey(key);
         }
 
         public String[] getAll(String key) {
-            if(!_contains(key)) {
+            if (!_contains(key)) {
                 checkAndParse();
             }
             return data.get(key);
@@ -289,12 +289,12 @@ public class Scope {
             checkAndParse();
             return data;
         }
-        
+
         public Map<String, String[]> sub(String prefix) {
             checkAndParse();
             Map<String, String[]> result = new HashMap<String, String[]>();
-            for(String key : data.keySet()) {
-                if(key.startsWith(prefix + ".")) {
+            for (String key : data.keySet()) {
+                if (key.startsWith(prefix + ".")) {
                     result.put(key.substring(prefix.length() + 1), data.get(key));
                 }
             }
@@ -340,15 +340,37 @@ public class Scope {
             }
             return ue.toString();
         }
-        
+
         public void flash(String... params) {
-            if(params.length == 0) {
-                for(String key : all().keySet()) {
-                    Flash.current().put(key, get(key));
+            if (params.length == 0) {
+                for (String key : all().keySet()) {
+                    if (data.get(key).length > 1) {
+                        StringBuilder sb = new StringBuilder();
+                        boolean coma = false;
+                        for (String d : data.get(key)) {
+                            if(coma) sb.append(",");
+                            sb.append(d);
+                            coma = true;
+                        }
+                        Flash.current().put(key, sb.toString());
+                    } else {
+                        Flash.current().put(key, get(key));
+                    }
                 }
             } else {
-                for(String key : params) {
-                    Flash.current().put(key, get(key));
+                for (String key : params) {
+                    if (data.get(key).length > 1) {
+                        StringBuilder sb = new StringBuilder();
+                        boolean coma = false;
+                        for (String d : data.get(key)) {
+                            if(coma) sb.append(",");
+                            sb.append(d);
+                            coma = true;
+                        }
+                        Flash.current().put(key, sb.toString());
+                    } else {
+                        Flash.current().put(key, get(key));
+                    }
                 }
             }
         }

@@ -7,8 +7,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.w3c.dom.Document;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
@@ -153,14 +151,6 @@ public abstract class Controller {
     }
 
     /**
-     * Send a 302 Redirect response
-     * @param url The Location to redirect
-     */
-    protected static void redirect(String url) {
-        throw new Redirect(url);
-    }
-
-    /**
      * Send a 401 Unauthorized response
      * @param realm The realm name
      */
@@ -247,6 +237,17 @@ public abstract class Controller {
     protected static void flash(String key, Object value) {
         Scope.Flash.current().put(key, value);
     }
+    
+    /**
+     * Send a 302 Redirect response
+     * @param url The Location to redirect
+     */
+    protected static void redirect(String url) {
+        if(url.matches("^\\w+[.]\\w+$")) { // fix Java !
+            redirect(url, new Object[0]);
+        }
+        throw new Redirect(url);
+    }
 
     /**
      * Redirect to another action
@@ -260,7 +261,11 @@ public abstract class Controller {
             String[] names = (String[]) actionMethod.getDeclaringClass().getDeclaredField("$" + actionMethod.getName() + LocalVariablesNamesTracer.computeMethodHash(actionMethod.getParameterTypes())).get(null);
             assert names.length == args.length : "Problem is action redirection";
             for (int i = 0; i < names.length; i++) {
-                Unbinder.unBind(r, args[i], names[i]);
+                try {
+                    Unbinder.unBind(r, args[i], names[i]);
+                } catch(Exception e) {
+                    // hmm ...
+                }
             }
             try {
                 throw new Redirect(Router.reverse(action, r).toString());
@@ -301,7 +306,6 @@ public abstract class Controller {
         templateBinding.put("request", Http.Request.current());
         templateBinding.put("flash", Scope.Flash.current());
         templateBinding.put("params", Scope.Params.current());
-        templateBinding.put("play", new Play());
         try {
             templateBinding.put("errors", ((Validation) (Java.invokeStatic(Validation.class, "current"))).errorsMap());
         } catch (Exception ex) {

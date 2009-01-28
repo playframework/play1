@@ -76,7 +76,7 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
     @Override
     public Map<String, String> createMessageVariables() {
         Map<String, String> messageVariables = new HashMap();
-        messageVariables.put("to", Messages.get(otherKey));
+        messageVariables.put("to", otherKey);
         return messageVariables;
     }
    
