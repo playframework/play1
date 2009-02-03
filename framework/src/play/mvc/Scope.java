@@ -178,7 +178,11 @@ public class Scope {
                 }
                 String sessionData = URLEncoder.encode(session.toString(), "utf-8");
                 String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
-                Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData);
+                if(Play.configuration.getProperty("application.sessionMaxAge") == null) {
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData);
+                } else {
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, Play.configuration.getProperty("application.sessionMaxAge"));
+                }                
             } catch (Exception e) {
                 throw new UnexpectedException("Session serializationProblem", e);
             }

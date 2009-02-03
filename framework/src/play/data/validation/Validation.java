@@ -78,6 +78,25 @@ public class Validation {
         return result;
     }
     
+    public static List<Validator> getValidators(Class clazz, String property, String name) {
+        try {
+            Field field = clazz.getDeclaredField(property);
+            List<Validator> validators = new ArrayList<Validator>();
+            for(Annotation annotation : field.getDeclaredAnnotations()) {
+                if(annotation.annotationType().getName().startsWith("play.data.validation")) {
+                    Validator validator = new Validator(annotation);
+                    validators.add(validator);
+                    if(annotation.annotationType().equals(Equals.class)) {
+                        validator.params.put("equalsTo", name + "." + ((Equals)annotation).value());
+                    }
+                }
+            }
+            return validators;
+        } catch(Exception e) {
+            return new ArrayList<Validator>();
+        }
+    }
+    
     static void searchValidator(Class clazz, String name, Map<String,List<Validator>> result) {
         for(Field field : clazz.getDeclaredFields()) {
             
@@ -215,6 +234,17 @@ public class Validation {
     public ValidationResult minSize(Object o, int minSize) {
         String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
         return Validation.minSize(key, o, minSize);
+    }
+    
+    public static ValidationResult maxSize(String key, Object o, int maxSize) {
+        MaxSizeCheck check = new MaxSizeCheck();
+        check.maxSize = maxSize;
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult maxSize(Object o, int maxSize) {
+        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        return Validation.maxSize(key, o, maxSize);
     }
 
     public static ValidationResult valid(String key, Object o) {

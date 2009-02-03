@@ -305,13 +305,13 @@ public class Template {
             }
             TagContext.enterTag(tag);
             Map<String, Object> args = new HashMap<String, Object>();
-            args.put("session", getBinding().getVariable("session"));
-            args.put("flash", getBinding().getVariable("flash"));
-            args.put("request", getBinding().getVariable("request"));
-            args.put("params", getBinding().getVariable("params"));
-            args.put("play", getBinding().getVariable("play"));
-            args.put("lang", getBinding().getVariable("lang"));
-            args.put("messages", getBinding().getVariable("messages"));
+            args.put("session", getBinding().getVariables().get("session"));
+            args.put("flash", getBinding().getVariables().get("flash"));
+            args.put("request", getBinding().getVariables().get("request"));
+            args.put("params", getBinding().getVariables().get("params"));
+            args.put("play", getBinding().getVariables().get("play"));
+            args.put("lang", getBinding().getVariables().get("lang"));
+            args.put("messages", getBinding().getVariables().get("messages"));
             args.put("out", getBinding().getVariable("out"));
             // all other vars are template-specific
             args.put("_caller", getBinding().getVariables());

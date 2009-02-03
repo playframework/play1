@@ -399,8 +399,9 @@ public class HttpHandler implements IoHandler {
                 DefaultCookie c = new DefaultCookie(cookie.name, cookie.value);
                 c.setSecure(cookie.secure);
                 c.setPath(cookie.path);
-                if (cookie.maxAge!=null)
-                	c.setMaxAge(cookie.maxAge);
+                if (cookie.maxAge!=null) {
+                    c.setMaxAge(cookie.maxAge);
+                }
                 minaResponse.addCookie(c);
             }
             if (!response.headers.containsKey("cache-control")) {
