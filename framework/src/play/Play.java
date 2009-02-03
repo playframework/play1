@@ -463,7 +463,7 @@ public class Play {
             System.exit(0);
         }
         if(name == null) {
-        	Logger.fatal("Plugin's name not set in application.conf (%s)", root);
+            Logger.fatal("Plugin's name not set in application.conf (%s)", root);
             System.exit(0);
         }
         javaPath.add(root.child("app"));
@@ -483,12 +483,6 @@ public class Play {
             return false;
         }
         if (!(new File(path, "app").isDirectory())) {
-            return false;
-        }
-        if (!(new File(path, "app/controllers/").exists())) {
-            return false;
-        }
-        if (!(new File(path, "conf/routes").exists())) {
             return false;
         }
         return true;
