@@ -184,7 +184,7 @@ public class Play {
             preCompile();
             start();
         } else {
-            Logger.warn("You're running Play! in DEV mode");
+        	Logger.warn("You're running Play! in DEV mode");
         }
         // Yop
         Logger.info("Application '%s' is ready !", configuration.getProperty("application.name", ""));
@@ -414,8 +414,19 @@ public class Play {
             }
         }
         //Load specific
-        String pluginPath = configuration.getProperty("plugin.path");
-        String[] pluginNames = configuration.getProperty("plugin.enable", "").split(",");
+        String pluginPath="";
+        if (System.getProperty("plugin.path")!=null)
+        	pluginPath = System.getProperty("plugin.path");
+        else
+        	pluginPath = configuration.getProperty("plugin.path");
+        
+        String[] pluginNames;
+        if (System.getProperty("plugin.enable")!=null) {
+        	pluginNames = System.getProperty("plugin.enable", "").split(",");
+        } else {
+        	pluginNames = configuration.getProperty("plugin.enable", "").split(",");
+        }
+        
         if ("".equals(pluginNames[0])) {
             return;
         }
@@ -453,22 +464,9 @@ public class Play {
      */
     public static void addPlayApp(File path) {
         VirtualFile root = VirtualFile.open(path);
-        conf = root.child("conf/application.conf");
-        String name = null;
-        try {
-            configuration = IO.readUtf8Properties(conf.inputstream());
-            name = configuration.getProperty("application.name");
-        } catch (IOException ex) {
-            Logger.fatal("Cannot read plugin's application.conf (%s)", root);
-            System.exit(0);
-        }
-        if(name == null) {
-            Logger.fatal("Plugin's name not set in application.conf (%s)", root);
-            System.exit(0);
-        }
         javaPath.add(root.child("app"));
         templatesPath.add(root.child("app/views"));
-        pluginRoutes.put(name, root.child("conf/routes"));
+        pluginRoutes.put(root.getName(), root.child("conf/routes"));
         roots.add(root);
         Logger.info("Plugin added: " + path.getAbsolutePath());
     }
