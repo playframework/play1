@@ -213,7 +213,7 @@ public class TemplateCompiler {
 
         void startTag() {
             tagIndex++;
-            String tagText = parser.getToken().trim();
+            String tagText = parser.getToken().trim().replaceAll("\n", " ");
             String tagName = "";
             String tagArgs = "";
             if (tagText.indexOf(" ") > 0) {
