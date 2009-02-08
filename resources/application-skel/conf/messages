@@ -1,0 +1,7 @@
+# For use in JavaExtensions.since tag
+since.seconds = %s seconds ago
+since.minutes = %s minutes ago
+since.hours   = %s hours ago
+since.days    = %s days ago
+since.months  = %s months ago
+since.years   = %s years ago

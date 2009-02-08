@@ -76,28 +76,32 @@ public class JavaExtensions {
     public static Integer page(Number number, Integer pageSize) {
         return number.intValue() / pageSize + (number.intValue() % pageSize > 0 ? 1 : 0);
     }
-    
-    public static String since(Date date) {
-        Date now = new Date();
-        if(now.before(date)) {
-            return "";
-        }
-        long delta = (now.getTime() - date.getTime()) / 1000;
-        if(delta < 60) {
-            return String.format("%s seconds ago", delta);
-        }
-        if(delta < 60 * 60) {
-            return String.format("%s minutes ago", delta / 60);
-        }
-        if(delta < 24 * 60 * 60) {
-            return String.format("%s hours ago", delta / (60 * 60) );
-        }
-        if(delta < 30 * 24 * 60 * 60) {
-            return String.format("%s days ago", delta / (24 * 60 * 60) );
-        }
-        return String.format("%s months ago", delta / (30 * 24 * 60 * 60) );
-    }
 
+   public static String since(Date date) {
+       Date now = new Date();
+       if(now.before(date)) {
+           return "";
+       }
+       long delta = (now.getTime() - date.getTime()) / 1000;
+       if(delta < 60) {
+           return Messages.get("since.seconds", delta);
+       }
+       if(delta < 60 * 60) {
+           return Messages.get("since.minutes", delta / 60);
+       }
+       if(delta < 24 * 60 * 60) {
+           return Messages.get("since.hours", delta / (60 * 60) );
+       }
+       if(delta < 30 * 24 * 60 * 60) {
+           return Messages.get("since.days", delta / (24 * 60 * 60) );
+       }
+       if(delta < 365 * 24 * 60 * 60) {
+           return Messages.get("since.months", delta / (30 * 24 * 60 * 60) );
+       }
+       return Messages.get("since.years", delta / (365 * 24 * 60 * 60) );
+   }
+
+  
     public static String asdate(Long timestamp, String pattern) {
         return new SimpleDateFormat(pattern).format(new Date(timestamp));
     }
