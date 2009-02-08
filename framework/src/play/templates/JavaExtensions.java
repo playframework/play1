@@ -187,19 +187,20 @@ public class JavaExtensions {
 
     public static String noAccents(String string) {
         string = string.replaceAll("[éèêëæ]", "e");
-        string = string.replaceAll("[àâä]", "a");
-        string = string.replaceAll("[iïîì]", "i");
-        string = string.replaceAll("[oôöò]", "o");
-        string = string.replaceAll("[uûüù]", "u");
+        string = string.replaceAll("[àâäá]", "a");
+        string = string.replaceAll("[iïîìí]", "i");
+        string = string.replaceAll("[oôöòó]", "o");
+        string = string.replaceAll("[uûüùú]", "u");
         string = string.replaceAll("[ñ]", "n");
         string = string.replaceAll("[ç]", "ç");
-        string = string.replaceAll("[ÀÄÂÁ]", "A");
-        string = string.replaceAll("[ËÊÈ]", "E");
-        string = string.replaceAll("[ÎÏÌ]", "I");
-        string = string.replaceAll("[ÛÙÜ]", "U");
-        string = string.replaceAll("[ÔÖÒ]", "O");
+        string = string.replaceAll("[ÀÄÂÁÁ]", "A");
+        string = string.replaceAll("[ËÊÈÉ]", "E");
+        string = string.replaceAll("[ÎÏÌÍ]", "I");
+        string = string.replaceAll("[ÛÙÜÚ]", "U");
+        string = string.replaceAll("[ÔÖÒÓ]", "O");
         string = string.replaceAll("[Ñ]", "N");
         string = string.replaceAll("[Ç]", "C");
+        string = string.replaceAll("[ß]", "ss");
         return string;
     }
 
