@@ -13,6 +13,7 @@ import java.util.Locale;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import play.i18n.Lang;
+import play.i18n.Messages;
 import play.libs.I18N;
 
 /**
@@ -190,22 +191,47 @@ public class JavaExtensions {
     }
 
     public static String noAccents(String string) {
-        string = string.replaceAll("[éèêëæ]", "e");
-        string = string.replaceAll("[àâäá]", "a");
-        string = string.replaceAll("[iïîìí]", "i");
-        string = string.replaceAll("[oôöòó]", "o");
-        string = string.replaceAll("[uûüùú]", "u");
-        string = string.replaceAll("[ñ]", "n");
-        string = string.replaceAll("[ç]", "ç");
-        string = string.replaceAll("[ÀÄÂÁÁ]", "A");
-        string = string.replaceAll("[ËÊÈÉ]", "E");
-        string = string.replaceAll("[ÎÏÌÍ]", "I");
-        string = string.replaceAll("[ÛÙÜÚ]", "U");
-        string = string.replaceAll("[ÔÖÒÓ]", "O");
-        string = string.replaceAll("[Ñ]", "N");
-        string = string.replaceAll("[Ç]", "C");
-        string = string.replaceAll("[ß]", "ss");
-        return string;
+        return string.replaceAll("[àáâãäåāąă]", "a")
+		.replaceAll("[çćčĉċ]", "c")
+		.replaceAll("[ďđð]", "d")
+		.replaceAll("[èéêëēęěĕė]", "e")
+		.replaceAll("[ƒſ]", "f")
+		.replaceAll("[ĝğġģ]", "g")
+		.replaceAll("[ĥħ]", "h")
+		.replaceAll("[ìíîïīĩĭįı]", "i")
+		.replaceAll("[ĳĵ]", "j")
+		.replaceAll("[ķĸ]", "k")
+		.replaceAll("[łľĺļŀ]", "l")
+		.replaceAll("[ñńňņŉŋ]", "n")
+		.replaceAll("[òóôõöøōőŏœ]", "o")
+		.replaceAll("[Þþ]", "p")
+		.replaceAll("[ŕřŗ]", "r")
+		.replaceAll("[śšşŝș]", "s")
+		.replaceAll("[ťţŧț]", "t")
+		.replaceAll("[ùúûüūůűŭũų]", "u")
+		.replaceAll("[ŵ]", "w")
+		.replaceAll("[ýÿŷ]", "y")
+		.replaceAll("[žżź]", "z")
+        .replaceAll("[æ]", "ae")
+		.replaceAll("[ÀÁÂÃÄÅĀĄĂ]", "A")
+		.replaceAll("[ÇĆČĈĊ]", "C")
+		.replaceAll("[ĎĐÐ]", "D")
+		.replaceAll("[ÈÉÊËĒĘĚĔĖ]", "E")
+		.replaceAll("[ĜĞĠĢ]", "G")
+		.replaceAll("[ĤĦ]", "H")
+		.replaceAll("[ÌÍÎÏĪĨĬĮİ]", "I")
+		.replaceAll("[Ĵ]", "J")
+		.replaceAll("[Ķ]", "K")
+		.replaceAll("[ŁĽĹĻĿ]", "L")
+		.replaceAll("[ÑŃŇŅŊ]", "N")
+		.replaceAll("[ÒÓÔÕÖØŌŐŎ]", "O")
+		.replaceAll("[ŔŘŖ]", "R")
+		.replaceAll("[ŚŠŞŜȘ]", "S")
+		.replaceAll("[ÙÚÛÜŪŮŰŬŨŲ]", "U")
+		.replaceAll("[Ŵ]", "W")
+		.replaceAll("[ÝŶŸ]", "Y")
+		.replaceAll("[ŹŽŻ]", "Z")
+        .replaceAll("[ß]", "ss");
     }
 
     public static String slugify(String string) {
