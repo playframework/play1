@@ -12,6 +12,7 @@ import play.Logger;
 import play.Play;
 import play.data.binding.Binder;
 import play.data.parsing.DataParser;
+import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
 import play.libs.Crypto;
 import play.libs.Utils;
@@ -275,7 +276,12 @@ public class Scope {
         }
 
         public <T> T get(String key, Class<T> type) {
-            return (T) Binder.directBind(get(key), type);
+            try {
+                return (T) Binder.directBind(get(key), type);
+            } catch(Exception e) {
+                Validation.addError(key, "validation.invalid");
+                return null;
+            }
         }
 
         public boolean _contains(String key) {

@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import play.data.validation.Validation;
 
 /**
  * The binder try to convert String values to Java objects.
@@ -111,9 +112,34 @@ public class Binder {
                 if (clazz.equals(byte.class)) {
                     return 0;
                 }
+                if (clazz.equals(char.class)) {
+                    return ' ';
+                }
             }
             return null;
         } catch (Exception e) {
+            Validation.addError(name+prefix, "validation.invalid");
+                if (clazz.equals(boolean.class)) {
+                    return false;
+                }
+                if (clazz.equals(int.class)) {
+                    return 0;
+                }
+                if (clazz.equals(long.class)) {
+                    return 0;
+                }
+                if (clazz.equals(double.class)) {
+                    return 0;
+                }
+                if (clazz.equals(short.class)) {
+                    return 0;
+                }
+                if (clazz.equals(byte.class)) {
+                    return 0;
+                }
+                if (clazz.equals(char.class)) {
+                    return ' ';
+                }
             return null;
         }
     }
@@ -131,11 +157,14 @@ public class Binder {
         return false;
     }
 
-    public static Object directBind(String value, Class clazz) {
+    public static Object directBind(String value, Class clazz) throws Exception {
         if (clazz.equals(String.class)) {
             return value;
         }
         if (supportedTypes.containsKey(clazz)) {
+            if (value == null || value.trim().length() == 0) {
+                return null;
+            }
             return supportedTypes.get(clazz).bind(value);
         }
         if (clazz.getName().equals("int") || clazz.equals(Integer.class)) {
@@ -179,7 +208,7 @@ public class Binder {
         }
         if (clazz.getName().equals("boolean") || clazz.equals(Boolean.class)) {
             if (value == null || value.trim().length() == 0) {
-                return false;
+                return null;
             }
             return Boolean.parseBoolean(value);
         }

@@ -69,6 +69,9 @@ public class HttpHandler implements IoHandler {
         } catch (EmptyAppException e) {
             serve500(e, session, minaRequest, minaResponse);
             return;
+        } catch (Exception e) {
+            serve500(e, session, minaRequest, minaResponse);
+            return;
         }
         Response response = new Response();
         response.out = new ByteArrayOutputStream();
@@ -88,7 +91,7 @@ public class HttpHandler implements IoHandler {
         request.querystring = uri.getQuery() == null ? "" : uri.getRawQuery();
         Http.Request.current.set(request);
 
-        Router.detectChanges();
+        Play.detectChanges();
         Router.route(request);
 
         IoBuffer buffer = (IoBuffer) minaRequest.getContent();

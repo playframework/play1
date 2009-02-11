@@ -18,7 +18,7 @@ public class TemplateLoader {
 
     protected static Map<String, Template> templates = new HashMap<String, Template>();
 
-    static Template load(VirtualFile file) {
+    public static Template load(VirtualFile file) {
         if (!templates.containsKey(file.relativePath())) {
             templates.put(file.relativePath(), TemplateCompiler.compile(file));
         }

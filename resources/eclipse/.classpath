@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry excluding="views/**" kind="src" path="app"/>
 	<classpathentry kind="src" path="test"/>
+	%MODULES%
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	%PROJECTCLASSPATH%
 	<classpathentry kind="output" path="eclipse/classes"/>

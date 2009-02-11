@@ -1,0 +1,18 @@
+# For use in JavaExtensions.since tag
+since.seconds = %s seconds ago
+since.minutes = %s minutes ago
+since.hours   = %s hours ago
+since.days    = %s days ago
+since.months  = %s months ago
+since.years   = %s years ago
+
+# Validation messages
+validation.required=Required
+validation.minSize=Minimal size is %2$d
+validation.maxSize=Maximal size is %2$d
+validation.email=Invalid email address
+validation.range=Not in the range %2$d through %3$d
+validation.min=Must be greater than %2$d
+validation.isTrue=Must be checked
+validation.equals=Must be equals to &{%2$s}
+validation.invalid=Incorrect value

@@ -94,7 +94,11 @@ public class Messages {
             if(conversions[i] == null) {
                 result[i] = args[i];
             } else {
-                result[i] = Binder.directBind(args[i] + "", conversions[i]);
+                try {
+                    result[i] = Binder.directBind(args[i] + "", conversions[i]);
+                } catch(Exception e) {
+                    result[i] = null;
+                }
             }
         }
         return result;

@@ -17,6 +17,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Query;
 import play.data.binding.BeanWrapper;
 import play.exceptions.UnexpectedException;
+import play.mvc.Scope.Params;
 
 /**
  * A super class for JPA entities
@@ -36,10 +37,10 @@ public class JPAModel implements Serializable {
         return id;
     }
 
-    public <T> T edit(Map<String, String[]> params) {
+    public <T> T edit(String name, Params params) {
         try {
             BeanWrapper bw = new BeanWrapper(this.getClass());
-            bw.bind("", this.getClass(), params, "", this);
+            bw.bind(name, this.getClass(), params.all(), "", this);
             // relations
             for (Field field : this.getClass().getDeclaredFields()) {
                 boolean isEntity = false;
@@ -60,7 +61,7 @@ public class JPAModel implements Serializable {
                 if (isEntity) {
                     if (multiple) {
                         List l = new ArrayList();
-                        String[] ids = params.get(field.getName());
+                        String[] ids = params.getAll(name + "." + field.getName());
                         if (ids != null) {
                             for (String _id : ids) {
                                 l.add(JPA.getEntityManager().createQuery("from " + relation + " where id = " + _id).getSingleResult());
@@ -68,7 +69,7 @@ public class JPAModel implements Serializable {
                         }
                         field.set(this, l);
                     } else {
-                        String[] ids = params.get(field.getName());
+                        String[] ids = params.getAll(name + "." + field.getName());
                         if (ids != null && ids.length > 0 && !ids[0].equals("")) {
                             JPAModel to = (JPAModel) JPA.getEntityManager().createQuery("from " + relation + " where id = " + ids[0]).getSingleResult();
                             field.set(this, to);
@@ -120,7 +121,7 @@ public class JPAModel implements Serializable {
         }
     }
     
-    public static <T> T create(Map<String, String[]> params) {
+    public static <T> T create(String name, Params params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 

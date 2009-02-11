@@ -90,7 +90,7 @@ public class Play {
     /**
      * Plugin routes files
      */
-    public static Map<String, VirtualFile> pluginRoutes;
+    public static Map<String, VirtualFile> modulesRoutes;
     /**
      * The main application.conf
      */
@@ -115,6 +115,10 @@ public class Play {
      * Play plugins
      */
     public static List<PlayPlugin> plugins = new ArrayList<PlayPlugin>();
+    /**
+     * Modules
+     */
+    public static List<VirtualFile> modules = new ArrayList<VirtualFile>();
 
     /**
      * Init the framework
@@ -156,6 +160,7 @@ public class Play {
         if(id.equals("test")) {
             javaPath.add(appRoot.child("test"));
         }
+        
         // Build basic templates path
         templatesPath = new ArrayList<VirtualFile>();
         templatesPath.add(appRoot.child("app/views"));
@@ -165,7 +170,7 @@ public class Play {
         routes = appRoot.child("conf/routes");
         
         // Plugin route files
-        pluginRoutes = new HashMap<String, VirtualFile>();
+        modulesRoutes = new HashMap<String, VirtualFile>();
         
         // Enable a first classloader
         classloader = new ApplicationClassloader();
@@ -178,13 +183,11 @@ public class Play {
         // Plugins
         bootstrapPlugins();
         
-        Router.load();
-        
         if (mode == Mode.PROD) {
             preCompile();
             start();
         } else {
-        	Logger.warn("You're running Play! in DEV mode");
+            Logger.warn("You're running Play! in DEV mode");
         }
         // Yop
         Logger.info("Application '%s' is ready !", configuration.getProperty("application.name", ""));
@@ -297,6 +300,9 @@ public class Play {
 
             // Try to load all classes
             Play.classloader.getAllClasses();
+            
+            // Routes
+            Router.detectChanges();
 
             // Plugins
             for (PlayPlugin plugin : plugins) {
@@ -328,6 +334,7 @@ public class Play {
             plugin.onApplicationStop();
         }
         Cache.stop();
+        Router.lastLoading = 0L;
     }
 
     static void preCompile() {
@@ -357,6 +364,7 @@ public class Play {
         }
         try {
             classloader.detectChanges();
+            Router.detectChanges();
             if (conf.lastModified() > startedAt) {
                 start();
                 return;
@@ -464,11 +472,12 @@ public class Play {
      */
     public static void addPlayApp(File path) {
         VirtualFile root = VirtualFile.open(path);
+        modules.add(root);
         javaPath.add(root.child("app"));
         templatesPath.add(root.child("app/views"));
-        pluginRoutes.put(root.getName(), root.child("conf/routes"));
+        modulesRoutes.put(root.getName(), root.child("conf/routes"));
         roots.add(root);
-        Logger.info("Plugin added: " + path.getAbsolutePath());
+        Logger.info("Module %s is available (%s)", path.getName(), path.getAbsolutePath());
     }
 
     /**

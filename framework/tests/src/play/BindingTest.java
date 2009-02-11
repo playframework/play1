@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import play.exceptions.BindingException;
+import play.data.validation.Validation;
 import play.mvc.Http.Response;
 
 public class BindingTest extends TestSupport {
@@ -182,10 +182,10 @@ public class BindingTest extends TestSupport {
         assertContentEquals("14", response);
     }
     
-    @Test(expected=BindingException.class)
+    @Test
     public void bindBadValue() throws Exception {        
         Response response = GET("/action7?p=kiki");
-        fail("Oops. A binding exception should occur");
+        assertTrue(Validation.hasError("p"));
     }
     
     @Test

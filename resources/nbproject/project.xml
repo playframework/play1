@@ -85,14 +85,11 @@
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
             <compilation-unit>
                 <package-root>app</package-root>
-                <classpath mode="compile">%PLAY_CLASSPATH%</classpath>
+                <package-root>test</package-root>
+                %MODULES%
+                <classpath mode="compile">nbproject/classes:%PLAY_CLASSPATH%</classpath>
                 <built-to>nbproject/classes</built-to>  
                 <source-level>1.5</source-level>                 
-            </compilation-unit>
-            <compilation-unit>
-                <package-root>test</package-root>
-                <classpath mode="compile">nbproject/classes:%PLAY_CLASSPATH%</classpath>
-                <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>
     </configuration>

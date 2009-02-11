@@ -36,7 +36,9 @@ public class Validation {
     }
 
     public static void addError(String key, String message, String... variables) {
-        Validation.current().errors.add(new Error(key, message, variables));
+        if(error(key) == null || !error(key).message.equals(message)) {
+            Validation.current().errors.add(new Error(key, message, variables));
+        }
     }
 
     public static boolean hasErrors() {

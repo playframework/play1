@@ -129,6 +129,25 @@
         </java>	
     </target>
     
+    <target name="package-module">
+        <delete dir="${application.path}/tmp/pm" />
+        <mkdir dir="${application.path}/tmp/pm" />
+        <javac encoding="utf-8" nowarn="${compile.nowarn}" debug="true" destdir="${application.path}/tmp/pm" classpathref="project.classpath" srcdir="${application.path}/lib/${module}/app" >
+            <include name="**/*.java"/>
+        </javac>
+        <mkdir dir="${application.path}/tmp/pm/_module" />
+        <copy todir="${application.path}/tmp/pm/_module">
+            <fileset dir="${application.path}/lib/${module}">
+                <include name="**/*" />
+                <exclude name=".*" />
+            </fileset>
+        </copy>
+        <zip destfile="${application.path}/lib/${module}.zip" update="false">
+            <zipfileset dir="${application.path}/tmp/pm" includes="**/*" />   
+        </zip>
+        <delete dir="${application.path}/tmp/pm" />
+    </target>
+    
     <target name="nb-debug">
         <loadproperties srcfile="${application.path}/conf/application.conf" />
         <property name="jpda.port" value="8000" />

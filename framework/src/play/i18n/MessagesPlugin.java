@@ -1,5 +1,7 @@
 package play.i18n;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 import play.Logger;
@@ -17,18 +19,38 @@ public class MessagesPlugin extends PlayPlugin {
 
     @Override
     public void onApplicationStart() {
-        Messages.defaults = read(Play.getVirtualFile("conf/messages"));
-        if (Messages.defaults == null) {
-            Messages.defaults = new Properties();
+        Messages.defaults = new Properties();
+        try {
+            FileInputStream is = new FileInputStream(new File(Play.frameworkPath, "resources/messages"));
+            Messages.defaults.putAll(IO.readUtf8Properties(is));
+        } catch(Exception e) {
+            Logger.warn("Defaults messsages file missing");
+        }
+        for(VirtualFile module : Play.modules) {
+            VirtualFile messages = module.child("conf/messages");
+            if(messages != null && messages.exists()) {
+                Messages.defaults.putAll(read(messages)); 
+            }
+        }
+        VirtualFile appDM = Play.getVirtualFile("conf/messages");
+        if(appDM != null && appDM.exists()) {
+            Messages.defaults.putAll(read(appDM));
         }
         for (String locale : Play.langs) {
-            Properties properties = read(Play.getVirtualFile("conf/messages." + locale));
-            if (properties == null) {
-                Logger.warn("conf/messages.%s is missing", locale);
-                Messages.locales.put(locale, new Properties());
-            } else {
-                Messages.locales.put(locale, properties);
+            Properties properties = new Properties();
+            for(VirtualFile module : Play.modules) {
+                VirtualFile messages = module.child("conf/messages." + locale);
+                if(messages != null && messages.exists()) {
+                    properties.putAll(read(messages)); 
+                }
             }
+            VirtualFile appM = Play.getVirtualFile("conf/messages." + locale);
+            if(appM != null && appM.exists()) {
+                properties.putAll(read(appM));
+            } else {
+                Logger.warn("Messages file missing for locale %s", locale);
+            }     
+            Messages.locales.put(locale, properties);
         }
         lastLoading = System.currentTimeMillis();
     }

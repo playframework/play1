@@ -300,6 +300,9 @@ public class Template {
                 try {
                     tagTemplate = TemplateLoader.load("tags/" + templateName + ".tag");
                 } catch (TemplateNotFoundException ex) {
+                    if(callerExtension.equals("tag")) {
+                        throw new TemplateNotFoundException("tags/" + templateName + ".tag", template, fromLine);
+                    }
                     throw new TemplateNotFoundException("tags/" + templateName + "." + callerExtension + " or tags/" + templateName + ".tag", template, fromLine);
                 }
             }

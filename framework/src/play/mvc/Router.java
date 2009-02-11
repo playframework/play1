@@ -17,18 +17,19 @@ import play.vfs.VirtualFile;
 import play.exceptions.NoRouteFoundException;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
+import play.templates.TemplateLoader;
 
 /**
  * The router matches HTTP requests to action invocations
  */
 public class Router {
 
-    static Pattern routePattern = new Pattern("^({method}[A-Za-z\\*]+)?\\s+({path}/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?$");
+    static Pattern routePattern = new Pattern("^({method}GET|POST|PUT|DELETE|OPTIONS|HEAD|\\*)?\\s+({path}/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?$");
     /**
      * Pattern used to locate a method override instruction in request.querystring
      */
     static Pattern methodOverride = new Pattern("^.*x-http-method-override=({method}GET|PUT|POST|DELETE).*$");
-    static long lastLoading;
+    public static long lastLoading = -1;
 
     public static void load() {
         routes.clear();
@@ -45,7 +46,7 @@ public class Router {
      * end with a '/' character.
      */
     static void parse(VirtualFile routeFile, String prefix) {
-        String content = routeFile.contentAsString();
+        String content = TemplateLoader.load(routeFile).render(new HashMap<String, Object>());
         for (String line : content.split("\n")) {
             line = line.trim().replaceAll("\\s+", " ");
             if (line.length() == 0 || line.startsWith("#")) {
@@ -54,44 +55,48 @@ public class Router {
             Matcher matcher = routePattern.matcher(line);
             if (matcher.matches()) {
                 String action = matcher.group("action");
-                if (action.startsWith("plugin:")) {
-                    String pluginName = action.substring("plugin:".length());
+                // module:
+                if (action.startsWith("module:")) {
+                    String moduleName = action.substring("module:".length());
                     String newPrefix = prefix + matcher.group("path");
-                    if (!newPrefix.endsWith("/")) {
-                        newPrefix += "/";
+                    if (newPrefix.endsWith("/")) {
+                        newPrefix = newPrefix.substring(0, newPrefix.length() - 1);
                     }
-                    if (pluginName.equals("*")) {
-                        for (String p : Play.pluginRoutes.keySet()) {
-                            parse(Play.pluginRoutes.get(p), newPrefix + p);
+                    if (moduleName.equals("*")) {
+                        for (String p : Play.modulesRoutes.keySet()) {
+                            parse(Play.modulesRoutes.get(p), newPrefix + p);
                         }
-                    } else if (Play.pluginRoutes.containsKey(pluginName)) {
-                        parse(Play.pluginRoutes.get(pluginName), newPrefix + pluginName);
+                    } else if (Play.modulesRoutes.containsKey(moduleName)) {
+                        parse(Play.modulesRoutes.get(moduleName), newPrefix);
                     } else {
-                        Logger.warn("Cannot include route file %s : file not found", pluginName);
+                        Logger.warn("Cannot include routes for module %s (not found)", moduleName);
                     }
                 } else {
                     Route route = new Route();
                     route.method = matcher.group("method");
                     route.path = prefix + matcher.group("path");
+                    if (route.path.endsWith("/") && !route.path.equals("/")) {
+                        route.path = route.path.substring(0, route.path.length() - 1);
+                    }
                     route.action = action;
                     route.addParams(matcher.group("params"));
                     route.compute();
                     routes.add(route);
                 }
             } else {
-                Logger.warn("Invalid route definition : %s", line);
+                Logger.error("Invalid route definition : %s", line);
             }
         }
     }
 
     public static void detectChanges() {
-        if (Play.mode == Mode.PROD) {
+        if (Play.mode == Mode.PROD && lastLoading > 0) {
             return;
         }
         if (Play.routes.lastModified() > lastLoading) {
             load();
         } else {
-            for (VirtualFile file : Play.pluginRoutes.values()) {
+            for (VirtualFile file : Play.modulesRoutes.values()) {
                 if (file.lastModified() > lastLoading) {
                     load();
                     return;
@@ -257,12 +262,12 @@ public class Router {
         public boolean star;
         public String action;
         public Map<String, Object> args;
-        
+
         public ActionDefinition add(String key, Object value) {
             args.put(key, value);
             return reverse(action, args);
         }
-        
+
         public ActionDefinition remove(String key) {
             args.remove(key);
             return reverse(action, args);
