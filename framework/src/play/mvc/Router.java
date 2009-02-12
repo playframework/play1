@@ -59,7 +59,7 @@ public class Router {
                 if (action.startsWith("module:")) {
                     String moduleName = action.substring("module:".length());
                     String newPrefix = prefix + matcher.group("path");
-                    if (newPrefix.endsWith("/")) {
+                    if (newPrefix.length() > 1 && newPrefix.endsWith("/")) {
                         newPrefix = newPrefix.substring(0, newPrefix.length() - 1);
                     }
                     if (moduleName.equals("*")) {
