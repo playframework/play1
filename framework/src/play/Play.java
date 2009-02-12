@@ -421,33 +421,33 @@ public class Play {
                 }
             }
         }
-        //Load specific
-        String pluginPath="";
-        if (System.getProperty("plugin.path")!=null)
-        	pluginPath = System.getProperty("plugin.path");
+        //Load specific modules
+        String modulePath="";
+        if (System.getProperty("module.path")!=null)
+        	modulePath = System.getProperty("module.path");
         else
-        	pluginPath = configuration.getProperty("plugin.path");
+        	modulePath = configuration.getProperty("module.path");
         
-        String[] pluginNames;
-        if (System.getProperty("plugin.enable")!=null) {
-        	pluginNames = System.getProperty("plugin.enable", "").split(",");
+        String[] moduleNames;
+        if (System.getProperty("module.enable")!=null) {
+        	moduleNames = System.getProperty("module.enable", "").split(" ");
         } else {
-        	pluginNames = configuration.getProperty("plugin.enable", "").split(",");
+        	moduleNames = configuration.getProperty("module.enable", "").split(" ");
         }
         
-        if ("".equals(pluginNames[0])) {
+        if ("".equals(moduleNames[0])) {
             return;
         }
-        for (int i = 0; i < pluginNames.length; i++) {
-            String pluginName = pluginNames[i];
-            File fl = new File(pluginName);
+        for (int i = 0; i < moduleNames.length; i++) {
+            String moduleName = moduleNames[i];
+            File fl = new File(moduleName);
             if (fl.isFile() && (fl.toString().endsWith(".zip"))) {
                 addPlayApp(fl);
             } else {
                 if (fl.isAbsolute() && isPlayApp(fl)) {
                     addPlayApp(fl);
                 } else {
-                    fl = new File(new File(pluginPath), fl.getPath());
+                    fl = new File(new File(modulePath), fl.getPath());
                     if (fl.isAbsolute() && isPlayApp(fl)) {
                         addPlayApp(fl);
                     } else {
@@ -458,7 +458,7 @@ public class Play {
                                 throw new RuntimeException(e);
                             }
                         } else {
-                            throw new RuntimeException(fl.getAbsolutePath() + " is not a play application/plugin !");
+                            throw new RuntimeException(fl.getAbsolutePath() + " is not a play module !");
                         }
                     }
                 }

@@ -38,13 +38,9 @@ function secret {
 
 function readConf {
   unset CONF_VALUE
-  if [ -f "$APPLICATION_PATH/conf/application.conf" ] ; then	
-  	CONF_VALUE="`cat "$APPLICATION_PATH"/conf/application.conf | grep ^%$PLAY_ID.$1 | sed -e 's/^.*=//g'`"
-  	if [ -z $CONF_VALUE ] ; then
-    	CONF_VALUE="`cat "$APPLICATION_PATH"/conf/application.conf | grep ^$1 | sed -e 's/^.*=//g'`"
-  	fi
-  else
-	CONF_VALUE=""
+  CONF_VALUE="`cat "$APPLICATION_PATH"/conf/application.conf | grep ^%$PLAY_ID.$1 | sed -e 's/^.*=//g'`"
+  if [ -z $CONF_VALUE ] ; then
+    CONF_VALUE="`cat "$APPLICATION_PATH"/conf/application.conf | grep ^$1 | sed -e 's/^.*=//g'`"
   fi
 }
 
@@ -428,6 +424,30 @@ for jar in `ls -c1 "$PLAY_BASE/framework/lib"/*.jar 2> /dev/null`; do
   	CLASSPATH="$CLASSPATH:$return";
   fi
 done
+
+# Add path for exploded modules
+if [ -z "$MODULES" ]; then
+	readConf "module.enable"
+	MODULES="$CONF_VALUE"
+fi
+
+if [ "$MODULES" != "" ] ; then 
+	readConf "module.path"
+	MODULE_PATH="$CONF_VALUE"
+
+	for MOD in $MODULES; do
+		for jar in `ls -c1 "$MODULE_PATH/$MOD/lib"/*.jar 2> /dev/null`; do
+			absname "$jar"
+			if $CYGWIN; then
+				CLASSPATH="$CLASSPATH;$return";
+			else
+				CLASSPATH="$CLASSPATH:$return";
+			fi
+		done
+	done
+fi
+
+
 if $CYGWIN; then
   IFS=$OLD_IFS
 fi
@@ -551,22 +571,10 @@ if [ "$PLAY_COMMAND" = "netbeansify" ] || [ "$PLAY_COMMAND" = "nb" ] ; then
   sed  -e "s|%APPLICATION_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/nbproject/project.xml" > "$APPLICATION_PATH/nbproject/project.xml.1.tmp"
   sed  -e "s|%ANT_SCRIPT%|$PLAY_BASE/framework/build.xml|g" "$APPLICATION_PATH/nbproject/project.xml.1.tmp" > "$APPLICATION_PATH/nbproject/project.xml.2.tmp"
   sed  -e "s|%APPLICATION_PATH%|$APPLICATION_PATH|g" "$APPLICATION_PATH/nbproject/project.xml.2.tmp" > "$APPLICATION_PATH/nbproject/project.xml.3.tmp"
-  sed  -e "s|%PLAY_CLASSPATH%|$CLASSPATH|g" "$APPLICATION_PATH/nbproject/project.xml.3.tmp" > "$APPLICATION_PATH/nbproject/project.xml.4.tmp"
-
-  MODULES=""
-  for lib in `ls -1 "$APPLICATION_PATH/lib" 2> /dev/null`; do
-	  if [ -d lib ] ; then
-		absname "$lib"
-	    MODULES="$MODULES<package-root>lib/${lib}/app</package-root>"
-	  fi
-  done
-  sed  -e "s|%MODULES%|$MODULES|g" "$APPLICATION_PATH/nbproject/project.xml.4.tmp" > "$APPLICATION_PATH/nbproject/project.xml"
-
+  sed  -e "s|%PLAY_CLASSPATH%|$CLASSPATH|g" "$APPLICATION_PATH/nbproject/project.xml.3.tmp" > "$APPLICATION_PATH/nbproject/project.xml"
   rm "$APPLICATION_PATH/nbproject/project.xml.1.tmp"
   rm "$APPLICATION_PATH/nbproject/project.xml.2.tmp"
   rm "$APPLICATION_PATH/nbproject/project.xml.3.tmp"
-  rm "$APPLICATION_PATH/nbproject/project.xml.4.tmp"
-
   echo "~ Ok, the application is ready for netbeans"
   echo "~ Just open $APPLICATION_PATH as a netbeans project"
   echo "~"
@@ -597,18 +605,7 @@ if [ "$PLAY_COMMAND" = "eclipsify" ] || [ "$PLAY_COMMAND" = "ec" ] ; then
       XML="$XML<classpathentry kind=\"lib\" path=\"${return}\" /> "
     fi;
   done;
-  sed  -e "s|%PROJECTCLASSPATH%|${XML}|g" "$PLAY_BASE/resources/eclipse/.classpath" > "$APPLICATION_PATH/.classpath.tmp1"
-
-  MODULES=""
-  for lib in `ls -1 "$APPLICATION_PATH/lib" 2> /dev/null`; do
-	  if [ -d lib ] ; then
-		absname "$lib"
-	    MODULES="$MODULES<classpathentry kind=\"src\" path=\"lib/${lib}/app\" />"
-	  fi
-  done
-  sed  -e "s|%MODULES%|$MODULES|g" "$APPLICATION_PATH/.classpath.tmp1" > "$APPLICATION_PATH/.classpath"
-  rm -rf "$APPLICATION_PATH/.classpath.tmp1"
-
+  sed  -e "s|%PROJECTCLASSPATH%|${XML}|g" "$PLAY_BASE/resources/eclipse/.classpath" > "$APPLICATION_PATH/.classpath"
   sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/play.launch" > "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp1"
   sed  -e "s|%PLAY_ID%|$PLAY_ID|g" "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp1" > "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp2"
   sed  -e "s|%PLAY_BASE%|$PLAY_BASE|g" "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp2" > "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch"
