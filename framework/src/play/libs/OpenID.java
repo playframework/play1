@@ -27,7 +27,9 @@ import org.openid4java.message.ax.FetchRequest;
 import org.openid4java.message.ax.FetchResponse;
 import org.openid4java.server.RealmVerifier;
 
+import org.openid4java.util.HttpClientFactory;
 import org.openid4java.util.InternetDateFormat;
+import org.openid4java.util.ProxyProperties;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
@@ -123,7 +125,7 @@ public class OpenID {
             ParameterList openidResp = new ParameterList(Params.current().allSimple());
             VerificationResult verification = getConsumerManager().verify(Request.current().getBase() + Request.current().url, openidResp, discovered);
             Identifier verified = verification.getVerifiedId();
-            if (verified != null && !verified.equals("null")) {
+            if (verified != null && !verified.getIdentifier().equals("null")) {
                 UserInfo userInfo = new UserInfo();
                 userInfo.id = verified.toString();
                 AuthSuccess authSuccess = (AuthSuccess) verification.getAuthResponse();
@@ -165,6 +167,16 @@ public class OpenID {
 
     static ConsumerManager getConsumerManager() throws ConsumerException {
         if (consumerManager == null) {
+            // HTTP proxy
+            if(Play.configuration.getProperty("http.proxy.hostname") != null) {
+                ProxyProperties proxyProperties = new ProxyProperties();
+                proxyProperties.setProxyHostName(Play.configuration.getProperty("http.proxy.hostname"));
+                proxyProperties.setProxyPort(Integer.parseInt(Play.configuration.getProperty("http.proxy.port", "80")));
+                proxyProperties.setUserName(Play.configuration.getProperty("http.proxy.user", ""));
+                proxyProperties.setPassword(Play.configuration.getProperty("http.proxy.password", ""));
+                HttpClientFactory.setProxyProperties(proxyProperties);
+            }
+            // OpenID4J
             consumerManager = new ConsumerManager();
             RealmVerifier realmVerifier = new RealmVerifier();
             realmVerifier.setEnforceRpId(false);
