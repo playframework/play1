@@ -86,6 +86,9 @@ public class HttpHandler implements IoHandler {
     public static Request parseRequest(MutableHttpRequest minaRequest, IoSession session) throws IOException {
         URI uri = minaRequest.getRequestUri();
         Request request = new Request();
+        
+        boolean xForwardedSupport = "enabled".equals(Play.configuration.getProperty("XForwardedSupport"));
+        
         request.method = minaRequest.getMethod().toString();
         request.path = URLDecoder.decode(uri.getRawPath(), "utf-8");
         request.querystring = uri.getQuery() == null ? "" : uri.getRawQuery();
@@ -107,10 +110,24 @@ public class HttpHandler implements IoHandler {
         } else {
             request.body = new FileInputStream(minaRequest.getFileContent());
         }
-        request.secure = false;
-
-        request.url = minaRequest.getRequestUri().toString();
-        request.host = minaRequest.getHeader("host");
+        
+        request.secure = xForwardedSupport && ( "https".equals(Play.configuration.get("XForwardedProto")) ||
+        		"https".equals(minaRequest.getHeader("X-Forwarded-Proto")) ||
+        		"on".equals(minaRequest.getHeader("X-Forwarded-Ssl")) );
+        
+		request.url = minaRequest.getRequestUri().toString();
+		
+		if(xForwardedSupport) {
+			if(Play.configuration.containsKey("XForwardedHost"))
+        		request.host = (String)Play.configuration.get("XForwardedHost");
+        	else if(minaRequest.containsHeader("X-Forwarded-Host"))
+        		request.host = minaRequest.getHeader("X-Forwarded-Host");
+		}
+		
+		if(request.host == null) {
+			request.host = minaRequest.getHeader("host");
+		}
+		
         if (request.host.contains(":")) {
             request.port = Integer.parseInt(request.host.split(":")[1]);
             request.domain = request.host.split(":")[0];
@@ -118,8 +135,10 @@ public class HttpHandler implements IoHandler {
             request.port = 80;
             request.domain = request.host;
         }
-        request.remoteAddress = ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
-
+        
+        request.remoteAddress = xForwardedSupport && minaRequest.containsHeader("X-Forwarded-For") ?
+        		minaRequest.getHeader("X-Forwarded-For") : ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
+        
         for (String key : minaRequest.getHeaders().keySet()) {
             Http.Header hd = new Http.Header();
             hd.name = key.toLowerCase();
