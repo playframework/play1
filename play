@@ -431,11 +431,20 @@ if [ -z "$MODULES" ]; then
 	MODULES="$CONF_VALUE"
 fi
 
-if [ "$MODULES" != "" ] ; then 
+if [ "$MODULES" != "" ] ; then
 	readConf "module.path"
 	MODULE_PATH="$CONF_VALUE"
-
+	
+	if $CYGWIN; then
+	  IFS=$' '
+	fi
+	
 	for MOD in $MODULES; do
+		
+		if $CYGWIN; then
+		  IFS=$'\n'
+		fi
+		
 		for jar in `ls -c1 "$MODULE_PATH/$MOD/lib"/*.jar 2> /dev/null`; do
 			absname "$jar"
 			if $CYGWIN; then
@@ -444,6 +453,11 @@ if [ "$MODULES" != "" ] ; then
 				CLASSPATH="$CLASSPATH:$return";
 			fi
 		done
+		
+		if $CYGWIN; then
+		  IFS=$' '
+		fi
+
 	done
 fi
 
