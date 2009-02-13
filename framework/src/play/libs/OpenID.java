@@ -168,7 +168,7 @@ public class OpenID {
     static ConsumerManager getConsumerManager() throws ConsumerException {
         if (consumerManager == null) {
             // HTTP proxy
-            if(Play.configuration.getProperty("http.proxy.hostname") != null) {
+            if(Play.configuration.getProperty("http.proxy.hostname") != null && "true".equals(Play.configuration.getProperty("openid.proxy.enable"))) {
                 ProxyProperties proxyProperties = new ProxyProperties();
                 proxyProperties.setProxyHostName(Play.configuration.getProperty("http.proxy.hostname"));
                 proxyProperties.setProxyPort(Integer.parseInt(Play.configuration.getProperty("http.proxy.port", "80")));
