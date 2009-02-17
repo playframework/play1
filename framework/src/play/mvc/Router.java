@@ -69,7 +69,7 @@ public class Router {
                     } else if (Play.modulesRoutes.containsKey(moduleName)) {
                         parse(Play.modulesRoutes.get(moduleName), newPrefix);
                     } else {
-                        Logger.warn("Cannot include routes for module %s (not found)", moduleName);
+                        Logger.error("Cannot include routes for module %s (not found)", moduleName);
                     }
                 } else {
                     Route route = new Route();

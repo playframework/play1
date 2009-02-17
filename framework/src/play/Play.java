@@ -130,6 +130,7 @@ public class Play {
         Play.id = id;
         Play.started = false;
         Play.applicationPath = root;
+        
         // Guess the framework path
         try {
             URI uri = Play.class.getResource("/play/version").toURI();
@@ -142,47 +143,50 @@ public class Play {
         } catch (Exception e) {
             throw new UnexpectedException("Where is the framework ?", e);
         }
+        System.setProperty("play.path", Play.frameworkPath.getAbsolutePath());
         Logger.info("Starting %s", root.getAbsolutePath());
+        
         // Read the configuration file
         readConfiguration();
-        
+
         // Mode
         mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
-        
+
         // Configure logs
         String logLevel = configuration.getProperty("application.log", "INFO");
         Logger.log4j.setLevel(Level.toLevel(logLevel));
+        
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         roots.add(appRoot);
         javaPath = new ArrayList<VirtualFile>();
         javaPath.add(appRoot.child("app"));
-        if(id.equals("test")) {
+        if (id.equals("test")) {
             javaPath.add(appRoot.child("test"));
         }
-        
+
         // Build basic templates path
         templatesPath = new ArrayList<VirtualFile>();
         templatesPath.add(appRoot.child("app/views"));
         templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework/templates")));
-       
+
         // Main route file
         routes = appRoot.child("conf/routes");
-        
+
         // Plugin route files
         modulesRoutes = new HashMap<String, VirtualFile>();
-        
+
         // Enable a first classloader
         classloader = new ApplicationClassloader();
         // tmp dir
         tmpDir = new File(configuration.getProperty("play.tmp", "tmp"));
-        if(!tmpDir.isAbsolute()) {
+        if (!tmpDir.isAbsolute()) {
             tmpDir = new File(applicationPath, tmpDir.getPath());
         }
         tmpDir.mkdirs();
         // Plugins
-        bootstrapPlugins();
-        
+        bootstrapExtensions();
+
         if (mode == Mode.PROD) {
             preCompile();
             start();
@@ -227,13 +231,13 @@ public class Play {
             String value = configuration.getProperty(key.toString());
             Matcher matcher = pattern.matcher(value);
             StringBuffer newValue = new StringBuffer();
-            while(matcher.find()) {
+            while (matcher.find()) {
                 String jp = matcher.group(1);
                 String r = System.getProperty(jp);
-                if(r == null) {
+                if (r == null) {
                     Logger.warn("Cannot replace %s in configuration (%s=%s)", jp, key, value);
                     continue;
-                } 
+                }
                 matcher.appendReplacement(newValue, System.getProperty(jp));
             }
             matcher.appendTail(newValue);
@@ -255,7 +259,7 @@ public class Play {
                 Logger.info("Reloading ...");
                 stop();
             }
-            if(mode == Mode.DEV) {
+            if (mode == Mode.DEV) {
                 // Need a new classloader
                 classloader = new ApplicationClassloader();
                 Thread.currentThread().setContextClassLoader(Play.classloader);
@@ -276,7 +280,7 @@ public class Play {
             readConfiguration();
             // tmp dir
             tmpDir = new File(configuration.getProperty("play.tmp", "tmp"));
-            if(!tmpDir.isAbsolute()) {
+            if (!tmpDir.isAbsolute()) {
                 tmpDir = new File(applicationPath, tmpDir.getPath());
             }
             tmpDir.mkdirs();
@@ -300,7 +304,7 @@ public class Play {
 
             // Try to load all classes
             Play.classloader.getAllClasses();
-            
+
             // Routes
             Router.detectChanges();
 
@@ -312,12 +316,12 @@ public class Play {
             // We made it
             started = true;
             startedAt = System.currentTimeMillis();
-            
+
             // Plugins
             for (PlayPlugin plugin : plugins) {
                 plugin.afterApplicationStart();
             }
-            
+
         } catch (PlayException e) {
             throw e;
         } catch (Exception e) {
@@ -344,10 +348,10 @@ public class Play {
             Logger.info("Precompiling ...");
             long start = System.currentTimeMillis();
             classloader.getAllClasses();
-            Logger.trace("%sms to precompile the Java stuff", System.currentTimeMillis()-start);
+            Logger.trace("%sms to precompile the Java stuff", System.currentTimeMillis() - start);
             start = System.currentTimeMillis();
             TemplateLoader.getAllTemplate();
-            Logger.trace("%sms to precompile the templates", System.currentTimeMillis()-start);
+            Logger.trace("%sms to precompile the templates", System.currentTimeMillis() - start);
             Thread.currentThread().setContextClassLoader(l);
         } catch (Throwable e) {
             Logger.error(e, "Cannot start in PROD mode with errors");
@@ -383,8 +387,9 @@ public class Play {
     /**
      * Enable found plugins
      */
-    public static void bootstrapPlugins() {
-        // Classic modules
+    public static void bootstrapExtensions() {
+        
+        // Play! plugings
         Enumeration<URL> urls = null;
         try {
             urls = Play.class.getClassLoader().getResources("play.plugins");
@@ -409,90 +414,52 @@ public class Play {
         for (PlayPlugin plugin : plugins) {
             plugin.onLoad();
         }
-        //Auto load things in lib
-        File lib = new File(applicationPath, "lib");
-        File[] libs = lib.listFiles();
-        if (libs != null) {
-            for (int i = 0; i < libs.length; i++) {
-                if (libs[i].isFile() && (libs[i].toString().endsWith(".zip"))) {
-                    addPlayApp(libs[i]);
-                } else if (isPlayApp(libs[i])) {
-                    addPlayApp(libs[i]);
+        
+        // Load modules
+        if (System.getenv("MODULES") != null) { 
+            // Modules path is overriden with a env property
+            for(String m : System.getenv("MODULES").split(System.getProperty("os.name").startsWith("Windows") ? ";" : ":")) {
+                File modulePath = new File(m);
+                if(!modulePath.exists() || !modulePath.isDirectory()) {
+                    Logger.error("Module %s will not be loaded because %s does not exist", modulePath.getName(), modulePath.getAbsolutePath());
+                } else {
+                    addModule(modulePath.getName(), modulePath);
                 }
             }
-        }
-        //Load specific modules
-        String modulePath="";
-        if (System.getProperty("module.path")!=null)
-        	modulePath = System.getProperty("module.path");
-        else
-        	modulePath = configuration.getProperty("module.path");
-        
-        String[] moduleNames;
-        if (System.getProperty("module.enable")!=null) {
-        	moduleNames = System.getProperty("module.enable", "").split(" ");
         } else {
-        	moduleNames = configuration.getProperty("module.enable", "").split(" ");
-        }
-        
-        if ("".equals(moduleNames[0])) {
-            return;
-        }
-        for (int i = 0; i < moduleNames.length; i++) {
-            String moduleName = moduleNames[i];
-            File fl = new File(moduleName);
-            if (fl.isFile() && (fl.toString().endsWith(".zip"))) {
-                addPlayApp(fl);
-            } else {
-                if (fl.isAbsolute() && isPlayApp(fl)) {
-                    addPlayApp(fl);
-                } else {
-                    fl = new File(new File(modulePath), fl.getPath());
-                    if (fl.isAbsolute() && isPlayApp(fl)) {
-                        addPlayApp(fl);
+                for(Enumeration e = configuration.propertyNames(); e.hasMoreElements(); ) {
+                String pName = e.nextElement().toString();
+                if(pName.startsWith("module.")) {
+                    String moduleName = pName.substring(7);
+                    File modulePath = new File(configuration.getProperty(pName));
+                    if(!modulePath.isAbsolute()) {
+                        modulePath = new File(applicationPath, configuration.getProperty(pName));
+                    }
+                    if(!modulePath.exists() || !modulePath.isDirectory()) {
+                        Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
                     } else {
-                        if (fl.exists() && isPlayApp(fl)) {
-                            try {
-                                addPlayApp(fl.getCanonicalFile());
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        } else {
-                            throw new RuntimeException(fl.getAbsolutePath() + " is not a play module !");
-                        }
+                        addModule(moduleName, modulePath);
                     }
                 }
             }
         }
+        
+        
+        
     }
 
     /**
      * Add a play application (as plugin)
      * @param path The application path
      */
-    public static void addPlayApp(File path) {
+    public static void addModule(String name, File path) {
         VirtualFile root = VirtualFile.open(path);
         modules.add(root);
         javaPath.add(root.child("app"));
         templatesPath.add(root.child("app/views"));
-        modulesRoutes.put(root.getName(), root.child("conf/routes"));
+        modulesRoutes.put(name, root.child("conf/routes"));
         roots.add(root);
-        Logger.info("Module %s is available (%s)", path.getName(), path.getAbsolutePath());
-    }
-
-    /**
-     * Guess if the path contains a valid application
-     * @param path The application path
-     * @return It depends
-     */
-    public static boolean isPlayApp(File path) {
-        if (!(new File(path, "app").exists())) {
-            return false;
-        }
-        if (!(new File(path, "app").isDirectory())) {
-            return false;
-        }
-        return true;
+        Logger.info("Module %s is available (%s)", name, path.getAbsolutePath());
     }
 
     /**
