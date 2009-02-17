@@ -76,10 +76,10 @@ try:
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command ?
-	available_commands = ('help', 'id', 'new', 'clean', 'cp', 'pid', 'out', 'modules', 'nb', 'netbeansify', 'ec', 'eclipsify', 'secret', 'run', 'test', 'debug', 'start', 'stop', 'restart')
+	available_commands = ('help', 'id', 'new', 'clean', 'cp', 'pid', 'out', 'overrides', 'ov', 'modules', 'nb', 'netbeansify', 'ec', 'eclipsify', 'secret', 'run', 'test', 'debug', 'start', 'stop', 'restart')
 
 	if len(sys.argv) < 2 or sys.argv[1] not in available_commands:
-	  	print "~ Usage: play command [path or current directory] "
+	  	print "~ Usage: play command [application path or current directory] "
 	  	print "~ "
 	  	print "~ with,  new      Create a new application"
 	  	print "~        run      Run the application in the current window"
@@ -103,19 +103,19 @@ try:
 		print "~        run          Run the application in the current window"
 		print "~        start        Start the application in background"
 		print "~        stop         Stop the application"
+		print "~        restart      Restart the application in background"
 		print "~        debug        Run the application under JDPA debugger"
-		print "~        log          Output latest log messages"
-		print "~        eclipsify    Create eclipse project"
-		print "~        netbeansify  Create netbeans project"
-		print "~        mkplugin     Create a Play! plugin with this application"
+		print "~        out          Output latest log messages"
+		print "~        eclipsify    Create eclipse project (use ec as shortcut command)"
+		print "~        netbeansify  Create netbeans project (use nb as shortcut command)"
 		print "~        pid          Show the pid of an application"
-		print "~        clean        Delete temporary files"
+		print "~        cp           Display the computed classpath"
+		print "~        modules      Display the computed modules list"
 		print "~        test         Run all tests"
+		print "~        clean        Delete temporary files"
 		print "~        id           Define the framework ID"
 		print "~        secret       Generate a new secret key"
-		print "~        statistics   Display project statistics (soon)"
-		print "~        help         To show more commands"
-		print "~        help cmd     Show help for cmd"
+		print "~        help         Show more commands"
 		print "~ "
 		print "~ Also refer to documentation at http://www.playframework.org/manual"
 		print "~ "
@@ -135,7 +135,8 @@ try:
 			print "~"
 			print "~ Ok, the framework ID is unset"
 			print "~"
-			os.remove(id_file)
+			if os.path.exists(id_file):
+				os.remove(id_file)
 		sys.exit(0)
 
 
@@ -168,7 +169,7 @@ try:
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Check if it's a valid application
-	if not os.path.exists(os.path.join(application_path, 'conf/routes')):
+	if not (play_command == 'overrides' or play_command == 'ov') and not os.path.exists(os.path.join(application_path, 'conf/routes')):
 		print "~ Oops. %s does not seem to host a valid application" % os.path.normpath(application_path)
 		print "~"
 		sys.exit(-1)
@@ -292,6 +293,11 @@ try:
 		else:
 			print "~ No modules"
 		print "~ "
+		sys.exit(0)	
+		
+		
+	# ~~~~~~~~~~~~~~~~~~~~~~ [overrides] Overrides a module file
+	if play_command == 'overrides' or play_command == 'ov':
 		sys.exit(0)	
 
 
@@ -498,16 +504,15 @@ try:
 		for el in classpath:
 			cpXML += '<classpathentry kind="lib" path="%s" />' % os.path.normpath(el)
 		replaceAll(dotClasspath, r'%PROJECTCLASSPATH%', cpXML)
-		replaceAll(dotClasspath, r'%MODULES%', '')
 		
 		if len(modules):
 			lXML = ""
 			cXML = ""
 			for module in modules:
-				lXML += '<link><name>%s</name><location>%s</location></link>' % (os.path.basename(module), os.path.join(module, 'app'))
+				lXML += '<link><name>%s</name><type>2</type><location>%s</location></link>' % (os.path.basename(module), os.path.join(module, 'app'))
 				cXML += '<classpathentry kind="src" path="%s"/>' % (os.path.basename(module))
 			replaceAll(dotProject, r'%LINKS%', '<linkedResources>%s</linkedResources>' % lXML)
-			replaceAll(dotClasspath, r'%MODULES%', '%s' % cXML)
+			replaceAll(dotClasspath, r'%MODULES%', cXML)
 		else:
 			replaceAll(dotProject, r'%LINKS%', '')
 			replaceAll(dotClasspath, r'%MODULES%', '')
