@@ -1,0 +1,9 @@
+#{field 'object.' + _name}
+	<label for="${field.id}">
+		&{_name}
+	</label>
+	<input id="${field.id}" class="${field.errorClass}" type="text" name="${field.name}" value="${field.flash ?: field.error?.message == 'validation.required' ? '' : _value?.format('yyyy-MM-dd')}" size="8" />
+	#{ifError field.name}
+		<span class="error">${field.error}</span>
+	#{/ifError}
+#{/field}
