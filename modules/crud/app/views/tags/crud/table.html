@@ -1,0 +1,70 @@
+%{
+	// Eval fields tags
+	def fieldsHandler = [:]
+	if(_body) {
+		_body.setProperty('fieldsHandler', fieldsHandler);
+}%
+		#{doBody as:'skip' /}
+%{
+	}
+}%
+
+<table>
+	<thead>
+		<tr>
+		%{ if(_fields) { }%
+			%{ _fields.each() { }%
+			<th width="${100 / _fields.size()}%">
+				<a class="${_caller.orderBy == it ? (_caller.order == 'DESC' ? 'crudSortedDesc' : 'crudSortedAsc') : ''}" href="@{list().remove('page').add('search', params.search).add('orderBy', it).add('order', (_caller.orderBy == it && _caller.order == 'ASC' ? 'DESC' : 'ASC'))}">
+					&{it}
+				</a>
+			</th>
+			%{ } }%
+		%{ } else { }%
+			<th>
+				<a class="${_caller.order == 'DESC' ? 'crudSortedDesc' : 'crudSortedAsc'}" href="@{list().remove('page').add('search', params.search).add('order', (_caller.order == 'DESC' ? 'ASC' : 'DESC'))}">
+					&{_caller.type.name}
+				</a>
+			</th>
+		%{ } }%
+		</tr>
+	</thead>
+	%{ _caller.objects.eachWithIndex() { object, k -> }%
+	<tr class="${k % 2 ? 'even' : 'odd'}">
+		%{ if(_fields) { }%
+			%{ _fields.eachWithIndex() { field, i -> }%
+			<td>
+				%{ if(fieldsHandler[field]) { }%
+					%{
+						def handler = fieldsHandler[field];
+						handler.setProperty('object', object);
+					}%
+					#{doBody body:handler /}
+					%{
+						handler.setProperty('object', null);
+					}%
+				%{ } else { }%
+					%{ if(i == 0) { }%
+						<a href="@{show(object.id)}">${object[field].toString() ?: '(no value)'}</a>
+					%{ } else { }%
+						${object[field]}
+					%{ } }%
+				%{ } }%
+			</td>
+			%{ } }%
+		%{ } else { }%
+			%{ if(fieldsHandler['default']) { }%
+				%{
+					def handler = fieldsHandler['default'];
+					handler.setProperty('object', object);
+				}%
+				#{doBody body:handler /}
+			%{ } else { }%
+				<td>
+					<a href="@{show(object.id)}">${object.toString() ?: '(no value)'}</a>
+				</td>
+			%{ } }%
+		%{ } }%
+	</tr>
+	%{ } }%
+</table>

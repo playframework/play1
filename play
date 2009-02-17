@@ -1,687 +1,549 @@
-#!/bin/bash
+#!/usr/bin/python
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Play! command line script www.playframework.org/
-#
-# ~~~~~~~~~~~~~~~~~~~~~~ Utilities
 
-function absname {
-  if $CYGWIN; then
-    return=`cygpath -ma "$1"`
-  elif $MACOS; then
-    if [ -d "$1" ] ; then   # a directory
-      return="$(cd $1 && pwd -P)"
-    elif [ -h "$1" ] ; then   # a symlink
-      return="$(cd $(dirname $(readlink $1)) && pwd -P)/$(basename $1)"
-    else # regular file, hopefully
-      return="$(cd $(dirname $1) && pwd -P)/$(basename $1)"
-    fi
-  else
-    return=`readlink -f $1`
-  fi
-}
-
-function secret {
-  if $CYGWIN; then
-    i=0
-    SECRET_KEY=""
-    while [ $i -lt 64 ]
-      do
-    let HEX="$RANDOM%16"
-    SECRET_KEY="$SECRET_KEY:$HEX"
-    let i++
-      done
-    SECRET_KEY=$(echo $SECRET_KEY | sed -e 's/10/a/g' | sed -e 's/11/b/g' | sed -e 's/12/c/g' | sed -e 's/13/d/g' | sed -e 's/14/e/g' | sed -e 's/15/f/g' | sed -e 's/://g')
-  else
-    SECRET_KEY=`dd if=/dev/random bs=1 count=32 2>/dev/null | xxd -c 256 -ps`
-  fi
-}
-
-function readConf {
-  unset CONF_VALUE
-  CONF_VALUE="`cat "$APPLICATION_PATH"/conf/application.conf | grep ^%$PLAY_ID.$1 | sed -e 's/^.*=//g'`"
-  if [ -z $CONF_VALUE ] ; then
-    CONF_VALUE="`cat "$APPLICATION_PATH"/conf/application.conf | grep ^$1 | sed -e 's/^.*=//g'`"
-  fi
-}
-
-function runAppOrDie {
-   [  -f "${PLAY_PID_PATH}" ] || {
-  echo "~ Oops! ${APPLICATION_PATH} is not started (server.pid not found)"
-  echo "~"
-  exit 1
-  }
-}
-
-# ~~~~~~~~~~~~~~~~~~~~~~ Is it a real OS ?
-
-CYGWIN=false
-MACOS=false
-case "`uname`" in
-  CYGWIN*) CYGWIN=true;;
-  Darwin*) MACOS=true;;
-esac
+import sys
+import os
+import os.path
+import shutil
+import fileinput
+import random
+import re
+import subprocess
+import time
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~ Display usage
+# Utilities
 
-function usage {
-  echo "~ Usage: play command [path or current directory] "
-  echo "~ "
-  echo "~ with,  new      Create a new application"
-  echo "~        run      Run the application in the current window"
-  echo "~        debug    Run the application under JDPA debugger"
-  echo "~        test     Run all tests"
-  echo "~        help     Show more commands"
-  echo "~"
-}
+def replaceAll(file, searchExp, replaceExp):
+	replaceExp = replaceExp.replace('\\', '\\\\')
+	for line in fileinput.input(file, inplace=1):
+		line = re.sub(searchExp, replaceExp, line)
+		sys.stdout.write(line)
 
+def secretKey():
+	return ''.join([random.choice('abcdefghijklmnopqrstuvwxyz0123456789') for i in range(64)])
 
-function verbosedie {
-  echo "~  $1"
-  exit 1
-}
+def readConf(key):
+	for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
+		if line.startswith('%' + play_id + '.' + key + "="):
+			return line[line.find('=')+1:].strip()
+		if line.startswith(key + "="):
+			return line[line.find('=')+1:].strip()
 
-# ~~~~~~~~~~~~~~~~~~~~~~ Where is the framework ?
-absname "$0"
-PLAY_BASE=`dirname "${return}"`
+def readConfs(key):
+	result = []
+	for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
+		if line.startswith('%' + play_id + '.' + key):
+			result.append(line[line.find('=')+1:].strip())
+		if line.startswith(key):
+			result.append(line[line.find('=')+1:].strip())
+	return result
 
+try:
 
-# ~~~~~~~~~~~~~~~~~~~~~~ Which is the framework id ?
-
-PLAY_ID=""
-if [ -f "$PLAY_BASE/id" ]; then
-  PLAY_ID=`cat "$PLAY_BASE/id"`
-else
-  echo "" > "$PLAY_BASE/id"
-fi
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~ Display logo
-
-echo "~        _            _ "
-echo "~  _ __ | | __ _ _  _| |"
-echo "~ | '_ \\| |/ _' | || |_|"
-echo "~ |  __/|_|\\____|\\__ (_)"
-echo "~ |_|            |__/   "
-echo "~"
-if [ ! -f "${PLAY_BASE}/framework/src/play/version" ]; then
-  echo "~ Oops. ${PLAY_BASE}/framework/src/play/version file not found"
-  echo "~ Is Play framework compiled ? "
-  echo "~"
-  exit 1
-fi
-echo "~ play! `cat "${PLAY_BASE}/framework/src/play/version"`, http://www.playframework.org"
-if [ ! -z "$PLAY_ID" ]; then
-  echo "~ framework ID is $PLAY_ID"
-fi
-echo "~"
+	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the framework ?
+	play_base = os.path.normpath(os.path.dirname(os.path.abspath(sys.argv[0])))
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~ Which is the command ?
-if [ -z "$1" ]; then
-  usage
-  exit
-fi
-
-PLAY_COMMAND=$1
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~ [help] Display help
-
-if [ "$PLAY_COMMAND" = "help" ] ; then
-  topic=$2
-  case "$topic" in
-  debug)
-    echo "~ debug - start application in remote debug mode"
-    echo "~ "
-    echo "~ Usage : play debug PATH    where PATH is the application directory to be created"
-    echo "~ JPDA listens on port 8000. "
-	echo "~ Application may be remotely debugged from your IDE."
-    ;;
-  new)
-    echo "~ new - create a new Play application"
-    echo "~ "
-    echo "~ Usage : play new PATH - PATH is the application directory (created by play)."
-    echo "~ An application skeleton is created under PATH with this structure:"
-	echo "~ "
-    echo "~   |   app                          Source files come here"
-    echo "~   |   + controllers                Controllers package"
-    echo "~   |     + Application.java         Sample controller"
-    echo "~   |   + models                     Place for business objects"
-    echo "~   |     + views"
-    echo "~   |       + main.html              Default layout"
-    echo "~   |       + Application"
-    echo "~   |         + index.html           Default view for Application.index action"
-    echo "~   |   conf"
-    echo "~   |   + application.conf           Application settings"
-    echo "~   |   + routes                     Routing configuration"
-    echo "~   |   lib                          Place for external libraries"
-    echo "~   |   public                       Place for static resources"
-    echo "~   |   + images"
-    echo "~   |   + javascripts"
-    echo "~   |   + stylesheets"
-    echo "~   |   test                         Place for unit tests"
-    echo "~   |   + application"
-    echo "~   |     + SampleTest.java          A test example"
-    ;;
-  start)
-    echo "~ start - start application as a background process"
-    echo "~ "
-    echo "~ Usage : play start [PATH] - PATH represents a valid play application directory. If omitted, current directory is assumed."
-    echo "~ STDOUT is redirected under logs/ directory"
-    ;;
-  stop)
-    echo "~ stop - stop a running application"
-    echo "~ "
-    echo "~ Usage : play stop [PATH] - PATH is the application directory. If omitted, current directory is assumed."
-    ;;
-  restart)
-    echo "~ restart - restart a running application"
-    echo "~ "
-    echo "~ Usage : play restart [PATH] - PATH is the application directory. If omitted, current directory is assumed."
-    ;;
-  run)
-    echo "~ run - start application in the console"
-    echo "~ "
-    echo "~ Usage : play run [PATH] - PATH represents a valid play application directory. If omitted, current directory is assumed"
-    ;;
-  log)
-    echo "~ log - follow application logs in console"
-    echo "~ "
-    echo "~ Usage : play log [PATH] - PATH is the application directory. If omitted, current directory is assumed."
-    ;;
-  test)
-    echo "~ test - run application tests"
-    echo "~ "
-    echo "~ Usage : play test [PATH] - PATH represents a valid play application directory. If omitted, current directory is assumed."
-    echo "~ Tests classes are located in test/ and methods must be annotated with @org.junit.Test."
-    echo "~ You can define test-only settings using a %test prefix in application.conf file."
-    echo "~ Refer to http://www.playframework.org/manual/contents/test for more informations."
-    ;;
-  id)
-    echo "~ id - set or change the Play! instance ID"
-    echo "~ "
-    echo "~ Usage : play id"
-    echo "~ Use instance ID to define alternative application settings, with a %id%. prefix : "
-    echo "~  |  %local.db.pass = scott"
-    echo "~  |  %demo.db.pass = tiger"
-    echo "~ Please note instance ID is not application specific but global. See comments in conf/application.conf for more examples."
-    ;;
-  netbeansify|nb)
-    echo "~ netbeansify | nb - configure a Netbeans project"
-    echo "~ "
-    echo "~ Usage : play netbeansify [PATH]    - PATH represents an existing play application directory. If omitted, current directory is assumed."
-    echo "~ You can safely re-run command on a 'netbeansified' project."
-    ;;
-  eclipsify|ec)
-    echo "~ eclipsify | ec - configure an Eclipse project"
-    echo "~ "
-    echo "~ Usage : play eclipsify [PATH] - PATH represents an existing play application directory. If omitted, current directory is assumed."
-    echo "~ You can safely re-run command on an 'eclipsified' project."
-    ;;
-  *)
-    echo "~ Play commands : "
-    echo "~ "
-    echo "~        new          Create a new application"
-    echo "~        run          Run the application in the current window"
-    echo "~        start        Start the application in background"
-    echo "~        stop         Stop the application"
-    echo "~        debug        Run the application under JDPA debugger"
-    echo "~        log          Output latest log messages"
-    echo "~        eclipsify    Create eclipse project"
-    echo "~        netbeansify  Create netbeans project"
-    echo "~        mkplugin     Create a Play! plugin with this application"
-    echo "~        pid          Show the pid of an application"
-    echo "~        clean        Delete temporary files"
-    echo "~        test         Run all tests"
-    echo "~        id           Define the framework ID"
-    echo "~        secret       Generate a new secret key"
-    echo "~        statistics   Display project statistics (soon)"
-    echo "~        help         To show more commands"
-    echo "~        help cmd     Show help for cmd"
-    echo "~ "
-    echo "~ Also refer to documentation at http://www.playframework.org/manual"
-    echo "~ "
-  esac
-  echo "~"
-  exit
-fi
+	# ~~~~~~~~~~~~~~~~~~~~~~ What is the framework id ?
+	id_file = os.path.join(play_base, 'id')
+	if os.path.exists(id_file):
+		play_id = open(id_file).readline().strip()
+	else:
+		play_id = ''
 
 
+	# ~~~~~~~~~~~~~~~~~~~~~~ Display logo
+	print r"~        _            _ "
+	print r"~  _ __ | | __ _ _  _| |"
+	print r"~ | '_ \| |/ _' | || |_|"
+	print r"~ |  __/|_|\____|\__ (_)"
+	print r"~ |_|            |__/   "
+	print r"~"
 
-# ~~~~~~~~~~~~~~~~~~~~~~ [id] Define the framework ID
+	play_version_file = os.path.join(play_base, 'framework/src/play/version')
+	if not os.path.exists(play_version_file):
+		print "~ Oops. %s file not found" % os.path.normpath(os.path.join(play_base, 'framework/src/play/version'))
+		print "~ Is the framework compiled ? "
+		print "~"
+		sys.exit(-1)
 
-if [ "$PLAY_COMMAND" = "id" ] ; then
-  if [ -z $PLAY_ID ]; then
-    echo "~ framework ID is not set"
-  fi
-  echo -n "~ What is the new framework ID (or blank to unset) ? "
-  read id
-  if [ -z $id ]; then
-    rm "$PLAY_BASE/id"
-    echo "~"
-    echo "~ Ok, the framework ID is unset"
-    echo "~"
-  else
-    echo $id > "$PLAY_BASE/id"
-    echo "~"
-    echo "~ Ok, the framework ID is now $id"
-    echo "~"
-  fi
-  exit
-fi
+	print "~ play! %s, http://www.playframework.org" % (open(play_version_file).readline().strip())
+	if play_id:
+		print "~ framework ID is %s" % play_id
+	print "~"
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~ Where is the application ?
+	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command ?
+	available_commands = ('help', 'id', 'new', 'clean', 'cp', 'pid', 'out', 'modules', 'nb', 'netbeansify', 'ec', 'eclipsify', 'secret', 'run', 'test', 'debug', 'start', 'stop', 'restart')
 
-if [ -z "$2" ]; then
-  APPLICATION_PATH="."
-else
-  APPLICATION_PATH="$2"
-  REMAINING_ARGS=""
-  i=1
-  for arg in $@; do
-  if [ $i -gt 2 ]; then
-    REMAINING_ARGS="$REMAINING_ARGS $arg"
-  fi
-  let i=$i+1
-  done
-fi
-if [ "$PLAY_COMMAND" = "new" ]; then
-  if [ -d "$APPLICATION_PATH" ]; then
-    absname "$APPLICATION_PATH"
-    echo "~ Oops. ${return} already exists"
-    echo "~"
-    exit 1
-  else
-    mkdir "$APPLICATION_PATH"
-  fi
-fi
-absname "$APPLICATION_PATH"
-APPLICATION_PATH="${return}"
+	if len(sys.argv) < 2 or sys.argv[1] not in available_commands:
+	  	print "~ Usage: play command [path or current directory] "
+	  	print "~ "
+	  	print "~ with,  new      Create a new application"
+	  	print "~        run      Run the application in the current window"
+	  	print "~        debug    Run the application under JDPA debugger"
+	  	print "~        test     Run all tests"
+	  	print "~        help     Show more commands"
+	  	print "~"
+		if len(sys.argv) > 1 and sys.argv[1] not in available_commands:
+			print "~ Invalid command : %s" % sys.argv[1]
+			print "~"
+		sys.exit(-1)
 
-if [ -z "$PLAY_PID_PATH" ]; then
-	PLAY_PID_PATH="${APPLICATION_PATH}/server.pid";
-fi
-
-if [ -z "$PLAY_LOG_PATH" ]; then
-	PLAY_LOG_PATH="${APPLICATION_PATH}/logs/";
-fi
-
-# ~~~~~~~~~~~~~~~~~~~~~~ [new] Create a new application
-
-if [ "$PLAY_COMMAND" = "new" ] ; then
-  echo "~ The new application will be created in ${APPLICATION_PATH}"
-  echo -n "~ What is the application name ? "
-  read applicationName
-  cp -R "${PLAY_BASE}/resources/application-skel/"* "$APPLICATION_PATH"
-  sed -e "s#%APPLICATION_NAME%#$applicationName#g" "$PLAY_BASE/resources/application-skel/conf/application.conf" > "$APPLICATION_PATH/conf/application.conf.tmp"
-  secret
-  sed -e "s#%SECRET_KEY%#$SECRET_KEY#g" "$APPLICATION_PATH/conf/application.conf.tmp" > "$APPLICATION_PATH/conf/application.conf"
-  rm "$APPLICATION_PATH/conf/application.conf.tmp"
-  echo "~"
-  echo "~ Ok, the application is created."
-  echo "~ Start it with : play run $2"
-  echo "~ Have fun !"
-  echo "~"
-  exit;
-fi
+	play_command = sys.argv[1]
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~ Check if it's a valid application
-
-if [ ! -r "${APPLICATION_PATH}/conf/routes" ] ; then
-  echo "~ Oops. ${APPLICATION_PATH} does not seem to host a valid application"
-  echo "~"
-  exit 1;
-fi
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~ [secret] Generate a new secret key
-
-if [ "$PLAY_COMMAND" = "secret" ] ; then
-  echo "~ Generating secret key..."
-  secret
-  if [ -z `cat "$APPLICATION_PATH/conf/application.conf" | grep application.secret` ] ; then
-    echo "" >>  "$APPLICATION_PATH/conf/application.conf"
-    echo "# Secret key" >>  "$APPLICATION_PATH/conf/application.conf"
-    echo "application.secret=$SECRET_KEY" >>  "$APPLICATION_PATH/conf/application.conf"
-  else
-    mv "$APPLICATION_PATH/conf/application.conf" "$APPLICATION_PATH/conf/application.conf.tmp"
-    sed -e "s#application.secret=.*#application.secret=$SECRET_KEY#g" "$APPLICATION_PATH/conf/application.conf.tmp" > "$APPLICATION_PATH/conf/application.conf"
-    rm "$APPLICATION_PATH/conf/application.conf.tmp"
-  fi
-  echo "~ Keep the secret : $SECRET_KEY"
-  echo "~"
-  exit;
-fi
-
-# ~~~~~~~~~~~~~~~~~~~~~~ [clean] Clean temporary files
-
-if [ "$PLAY_COMMAND" = "clean" ] ; then
-  echo "~ Deleting $APPLICATION_PATH/tmp/*"
-  rm -rf "$APPLICATION_PATH/tmp"
-  echo "~"
-  exit;
-fi
-
-# ~~~~~~~~~~~~~~~~~~~~~~ JAVA_HOME/bin/java is used if defined
-if [ ! -d "$JAVA_HOME" ] ; then
-  JAVA_PATH="java"
-else
-  JAVA_PATH="$JAVA_HOME/bin/java"
-fi
+	# ~~~~~~~~~~~~~~~~~~~~~~ [help] Display help
+	if play_command == 'help':
+		print "~ Play commands : "
+		print "~ "
+		print "~        new          Create a new application"
+		print "~        run          Run the application in the current window"
+		print "~        start        Start the application in background"
+		print "~        stop         Stop the application"
+		print "~        debug        Run the application under JDPA debugger"
+		print "~        log          Output latest log messages"
+		print "~        eclipsify    Create eclipse project"
+		print "~        netbeansify  Create netbeans project"
+		print "~        mkplugin     Create a Play! plugin with this application"
+		print "~        pid          Show the pid of an application"
+		print "~        clean        Delete temporary files"
+		print "~        test         Run all tests"
+		print "~        id           Define the framework ID"
+		print "~        secret       Generate a new secret key"
+		print "~        statistics   Display project statistics (soon)"
+		print "~        help         To show more commands"
+		print "~        help cmd     Show help for cmd"
+		print "~ "
+		print "~ Also refer to documentation at http://www.playframework.org/manual"
+		print "~ "
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~ Read some configuration from conf/application.conf
-JAVA_ARGS="$REMAINING_ARGS"
+	# ~~~~~~~~~~~~~~~~~~~~~~ [id] Define the framework ID
+	if play_command == 'id':
+		if not play_id:
+			print "~ framework ID is not set"
+		new_id = raw_input("~ What is the new framework ID (or blank to unset) ? ")
+		if new_id:
+			print "~"
+			print "~ Ok, the framework ID is now %s" % new_id
+			print "~"
+			open(id_file, 'w').write(new_id)
+		else:
+			print "~"
+			print "~ Ok, the framework ID is unset"
+			print "~"
+			os.remove(id_file)
+		sys.exit(0)
 
-if [[ ! $JAVA_ARGS =~ .*Xmx.* ]] ; then
-	readConf "jvm.memory"
-	JAVA_ARGS="$JAVA_ARGS $CONF_VALUE"
-fi
 
-readConf "jpda.port"
-JPDA_PORT=$CONF_VALUE
-if [ -z $JPDA_PORT ] ; then
-  JPDA_PORT=8000
-fi
+	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the application ?
+	if len(sys.argv) == 2:
+		application_path = os.getcwd()
+		remaining_args = sys.argv[2:]
+	else:
+		application_path = os.path.normpath(os.path.abspath(sys.argv[2]))
+		remaining_args = sys.argv[3:]
 
-readConf "application.mode"
-APPLICATION_MODE=$CONF_VALUE
 
-if [ "$APPLICATION_MODE" = "prod" ] ; then
-  JAVA_ARGS="$JAVA_ARGS -server"
-fi
+	# ~~~~~~~~~~~~~~~~~~~~~~ [new] Create a new application
+	if play_command == 'new':
+		if os.path.exists(application_path):
+			print "~ Oops. %s already exists" % application_path
+			print "~"
+			sys.exit(-1)
+		print "~ The new application will be created in %s" % os.path.normpath(application_path)
+		application_name = raw_input("~ What is the application name ? ")
+		shutil.copytree(os.path.join(play_base, 'resources/application-skel'), application_path)
+		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%APPLICATION_NAME%', application_name)
+		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%SECRET_KEY%', secretKey())
+		print "~"
+		print "~ Ok, the application is created."
+		print "~ Start it with : play run %s" % sys.argv[2]
+		print "~ Have fun !"
+		print "~"
+		sys.exit(0)
 
-JAVA_ARGS="$JAVA_ARGS -Dcom.sun.management.jmxremote"
 
-# ~~~~~~~~~~~~~~~~~~~~~~ Build classpath
-
-AGENT_PATH="${PLAY_BASE}/framework/play.jar"
-
-CLASSPATH="$APPLICATION_PATH/conf/"
-if $CYGWIN; then
-  CLASSPATH="$CLASSPATH;$PLAY_BASE/framework/play.jar"
-  OLD_IFS=$IFS
-  IFS=$'\n'
-else
-  CLASSPATH="$CLASSPATH:$PLAY_BASE/framework/play.jar"
-fi
-for jar in `ls -c1 "$APPLICATION_PATH/lib"/*.jar 2> /dev/null`; do
-  absname "$jar"
-  if $CYGWIN; then
-  	CLASSPATH="$CLASSPATH;${return}";
-  else
-  	CLASSPATH="$CLASSPATH:${return}";
-  fi
-done
-for jar in `ls -c1 "$PLAY_BASE/framework/lib"/*.jar 2> /dev/null`; do
-  absname "$jar"
-  if $CYGWIN; then
-  	CLASSPATH="$CLASSPATH;$return";
-  else
-  	CLASSPATH="$CLASSPATH:$return";
-  fi
-done
-
-# Add path for exploded modules
-if [ -z "$MODULES" ]; then
-	readConf "module.enable"
-	MODULES="$CONF_VALUE"
-fi
-
-if [ "$MODULES" != "" ] ; then
-	readConf "module.path"
-	MODULE_PATH="$CONF_VALUE"
+	# ~~~~~~~~~~~~~~~~~~~~~~ Check if it's a valid application
+	if not os.path.exists(os.path.join(application_path, 'conf/routes')):
+		print "~ Oops. %s does not seem to host a valid application" % os.path.normpath(application_path)
+		print "~"
+		sys.exit(-1)
 	
-	if $CYGWIN; then
-	  IFS=$' '
-	fi
 	
-	for MOD in $MODULES; do
+	# ~~~~~~~~~~~~~~~~~~~~~~ [secret] Generate a new secret key
+	if play_command == 'secret':
+		print "~ Generating secret key..."
+		sk = secretKey()
+		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'application.secret=.*', 'application.secret=%s' % sk)
+		print "~ Keep the secret : %s" % sk
+		print "~"
+		sys.exit(0)
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ [clean] Clean temporary files
+	if play_command == 'clean':
+		print "~ Deleting %s" % os.path.normpath(os.path.join(application_path, 'tmp'))
+		if os.path.exists(os.path.join(application_path, 'tmp')):
+			shutil.rmtree(os.path.join(application_path, 'tmp'))
+		print "~"
+		sys.exit(0)
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ JAVA_HOME/bin/java is used if defined
+	if not os.environ.has_key('JAVA_HOME'):
+		java_path = "java"
+	else:
+		java_path = "%s/bin/java" % os.environ['JAVA_HOME']
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ Read some configuration from conf/application.conf
+	java_args=remaining_args
+
+	memory_in_args=False
+	for arg in java_args:
+		if arg.startswith('Xm'):
+			memory_in_args=True
+	if not memory_in_args:
+		memory = readConf('jvm.memory')
+		if memory:
+			java_args = java_args + memory.split(' ')
+
+	jpda_port = readConf('jpda.port')
+	if not jpda_port:
+		jpda_port = '8000'
+
+	application_mode = readConf('application.mode')
+
+	if application_mode == 'prod':
+		java_args.append('-server')
+
+	java_args.append('-Dcom.sun.management.jmxremote')
+	
+	# ~~~~~~~~~~~~~~~~~~~~~~ Modules list
+	if os.environ.has_key('MODULES'):
+		if os.name == 'nt':
+			modules = os.environ['MODULES'].split(';')
+		else:
+			modules = os.environ['MODULES'].split(':')
+	else:
+		modules = []
+		pm = readConfs('module.')
+		for m in pm:
+			if '${play.path}' in m:
+				m = m.replace('${play.path}', play_base)
+			if not m[0] == '/':
+				m = os.path.normpath(os.path.join(application_path, m))
+			modules.append(m)
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ Build classpath
+	agent_path=os.path.join(play_base, 'framework/play.jar')
+	
+	classpath = []
+
+	# The default
+	classpath.append(os.path.normpath(os.path.join(application_path, 'conf')))
+	classpath.append(os.path.normpath(os.path.join(play_base, 'framework/play.jar')))
+
+	# The application
+	for jar in os.listdir(os.path.join(application_path, 'lib')):
+		if jar.endswith('.jar'):
+			classpath.append(os.path.normpath(os.path.join(application_path, 'lib/%s' % jar)))
+			
+	# The modules
+	for module in modules:
+		libs = os.path.join(module, 'lib')
+		if os.path.exists(libs):
+			for jar in os.listdir(libs):
+				if jar.endswith('.jar'):
+					classpath.append(os.path.normpath(os.path.join(libs, '%s' % jar)))
+
+	# The framework
+	for jar in os.listdir(os.path.join(play_base, 'framework/lib')):
+		if jar.endswith('.jar'):
+			classpath.append(os.path.normpath(os.path.join(play_base, 'framework/lib/%s' % jar)))
+			
 		
-		if $CYGWIN; then
-		  IFS=$'\n'
-		fi
+
+	cp_args = ':'.join(classpath)
+	if os.name == 'nt':
+		cp_args = ';'.join(classpath)
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ [cp] Display the application classpath
+	if play_command == 'cp':
+		print "~ Computed classpath is :"
+		print "~ "
+		print cp_args
+		print "~ "
+		sys.exit(0)
+	
+	
+	# ~~~~~~~~~~~~~~~~~~~~~~ [modules] Display the application modules
+	if play_command == 'modules':
+		if len(modules):
+			print "~ Application modules are :"
+			print "~ "
+			for module in modules:
+				print "~ %s" % module
+		else:
+			print "~ No modules"
+		print "~ "
+		sys.exit(0)	
+
+
+	java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, 'play.server.Server']
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ [run] Run the application
+	if play_command == 'run':
+		print "~ Ctrl+C to stop"
+		print "~ "
+		subprocess.call(java_cmd, env=os.environ)
+		print
+		sys.exit(0)
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ [test] Run the application tests
+	if play_command == 'test':
+		print "~ Running application tests..."
+		print "~ "
+		java_cmd[-1] = 'play.test.TestRunner'
+		subprocess.call(java_cmd, env=os.environ)
+		print
+		sys.exit(0)
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ [debug] Debug the application
+	if play_command == 'debug':
+		print "~ Ctrl+C to stop"
+		print "~ "
+		java_cmd.insert(2, '-Xdebug')
+		java_cmd.insert(2, '-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % jpda_port)
+		java_cmd.insert(2, '-Dplay.debug=yes')
+		subprocess.call(java_cmd, env=os.environ)
+		print
+		sys.exit(0)
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ [start] Start the application
+	if play_command == 'start':
+		pid_path = os.path.join(application_path, 'server.pid')
+		if os.path.exists(pid_path):
+			print "~ Oops. %s is already started ! (or delete %s)" % (os.path.normpath(application_path), os.path.normpath(pid_path))
+			print "~"
+			sys.exit(1)
+		if not os.path.exists(os.path.join(application_path, 'logs')):
+			os.mkdir(os.path.join(application_path, 'logs'))
+		sout = open(os.path.join(application_path, 'logs/system.out'), 'w')
+		pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
+		print "~ Ok, %s is started" % os.path.normpath(application_path)
+		print "~ output is redirected to %s" % os.path.normpath(os.path.join(application_path, 'logs/system.out'))
+		pid_file = open(pid_path, 'w')
+		pid_file.write(str(pid))
+		print "~ pid is %s" % pid
+		print "~"
+		sys.exit(0)
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ [stop] Stop the application
+	if play_command == 'stop':
+		pid_path = os.path.join(application_path, 'server.pid')
+		if not os.path.exists(pid_path):
+			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
+			print "~"
+			sys.exit(-1)
+		pid = open(pid_path).readline().strip()
+		if os.name == 'nt':
+			import ctypes
+			handle = ctypes.windll.kernel32.OpenProcess(1, False, int(pid))
+			if not ctypes.windll.kernel32.TerminateProcess(handle, 0):
+				print "~ Cannot kill the process with pid %s (ERROR %s)" % (pid, ctypes.windll.kernel32.GetLastError())
+				print "~ "
+				sys.exit(-1)
+		else:
+			os.kill(int(pid), 15)
+		os.remove(pid_path)
+		print "~ Ok, %s is stopped" % application_path
+		print "~"
+		sys.exit(0)
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ [restart] Restart the application
+	if play_command == 'restart':
+		pid_path = os.path.join(application_path, 'server.pid')
+		if not os.path.exists(pid_path):
+			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
+			print "~"
+			sys.exit(-1)
+		pid = open(pid_path).readline().strip()
+		if os.name == 'nt':
+			import ctypes
+			handle = ctypes.windll.kernel32.OpenProcess(1, False, int(pid))
+			if not ctypes.windll.kernel32.TerminateProcess(handle, 0):
+				print "~ Cannot kill the process with pid %s (%s)" % (pid, ctypes.windll.kernel32.GetLastError())
+				print "~ "
+				sys.exit(-1)
+		else:
+			os.kill(int(pid), 15)
+		os.remove(pid_path)
+		if not os.path.exists(os.path.join(application_path, 'logs')):
+			os.mkdir(os.path.join(application_path, 'logs'))
+		sout = open(os.path.join(application_path, 'logs/system.out'), 'w')
+		pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
+		print "~ Ok, %s is restarted" % os.path.normpath(application_path)
+		print "~ output is redirected to %s" % os.path.normpath(os.path.join(application_path, 'logs/system.out'))
+		pid_file = open(pid_path, 'w')
+		pid_file.write(str(pid))
+		print "~ New pid is %s" % pid
+		print "~"
+		sys.exit(0)
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ [pid] Display the pid of the running application
+	if play_command == 'pid':
+		pid_path = os.path.join(application_path, 'server.pid')
+		if not os.path.exists(pid_path):
+			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
+			print "~"
+			sys.exit(-1)
+		pid = open(pid_path).readline().strip()
+		print "~ PID of the running applications is %s" % pid
+		print "~ "
+		sys.exit(0)
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ [out] Follow logs of the running application
+	if play_command == 'out':
+		pid_path = os.path.join(application_path, 'server.pid')
+		if not os.path.exists(pid_path):
+			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
+			print "~"
+			sys.exit(-1)
+		sout = open(os.path.join(application_path, 'logs/system.out'))
+		while True:
+			where = sout.tell()
+			line = sout.readline().strip()
+			if not line:
+				time.sleep(1)
+				sout.seek(where)
+			else:
+				print line
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ [netbeansify] Create netbeans configuration files
+	if play_command == 'nb' or play_command == 'netbeansify':
+		application_name = readConf('application.name')
+		if not application_name:
+			application_name = os.path.dirname(application_path)
+		nbproject = os.path.join(application_path, 'nbproject')
+		if os.path.exists(nbproject):
+			shutil.rmtree(nbproject)
+			if os.name == 'nt':
+				time.sleep(1)
+		shutil.copytree(os.path.join(play_base, 'resources/nbproject'), nbproject)
+		replaceAll(os.path.join(nbproject, 'project.xml'), r'%APPLICATION_NAME%', application_name)
+		replaceAll(os.path.join(nbproject, 'project.xml'), r'%ANT_SCRIPT%', os.path.normpath(os.path.join(play_base, 'framework/build.xml')))
+		replaceAll(os.path.join(nbproject, 'project.xml'), r'%APPLICATION_PATH%', os.path.normpath(application_path))
+		if os.name == 'nt':
+			replaceAll(os.path.join(nbproject, 'project.xml'), r'%PLAY_CLASSPATH%', ';'.join(classpath + ['nbproject\\classes']))
+		else:
+			replaceAll(os.path.join(nbproject, 'project.xml'), r'%PLAY_CLASSPATH%', ':'.join(classpath + ['nbproject/classes']))
+		mr = ""
+		for module in modules:
+			mr += "<package-root>%s</package-root>" % os.path.normpath(os.path.join(module, 'app'))
+		replaceAll(os.path.join(nbproject, 'project.xml'), r'%MODULES%', mr)
+		mr = ""
+		for dir in os.listdir(application_path):
+			if os.path.isdir(os.path.join(application_path, dir)) and dir not in ['app', 'conf', 'test', 'public', 'tmp', 'logs', 'nbproject', 'lib']:
+				mr = '<source-folder style="tree"><label>%s</label><location>%s</location></source-folder>' % (dir, dir)
+		replaceAll(os.path.join(nbproject, 'project.xml'), r'%MORE%', mr)
+		print "~ Ok, the application is ready for netbeans"
+		print "~ Just open %s as a netbeans project" % os.path.normpath(application_path)
+		print "~"
+		print "~ Use netbeansify again when you want to update netbeans configuration files, then close and open you project again."
+		print "~"
+		sys.exit(0)
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ [eclipsify] Create eclipse configuration files
+	if play_command == 'ec' or play_command == 'eclipsify':
+		application_name = readConf('application.name')
+		if not application_name:
+			application_name = os.path.dirname(application_path)
+		dotProject = os.path.join(application_path, '.project')
+		dotClasspath = os.path.join(application_path, '.classpath')
+		dotSettings = os.path.join(application_path, '.settings')
+		eclipse = os.path.join(application_path, 'eclipse')
+		if os.path.exists(eclipse):
+			shutil.rmtree(eclipse)
+			if os.name == 'nt':
+				time.sleep(1)
+				
+		if os.path.exists(dotSettings):
+			shutil.rmtree(dotSettings)
+			if os.name == 'nt':
+				time.sleep(1)
+				
+		shutil.copyfile(os.path.join(play_base, 'resources/eclipse/.project'), dotProject)
+		shutil.copyfile(os.path.join(play_base, 'resources/eclipse/.classpath'), dotClasspath)
+		shutil.copytree(os.path.join(play_base, 'resources/eclipse'), eclipse)
+		shutil.copytree(os.path.join(play_base, 'resources/eclipse/.settings'), dotSettings)
+		replaceAll(dotProject, r'%PROJECT_NAME%', application_name)
 		
-		for jar in `ls -c1 "$MODULE_PATH/$MOD/lib"/*.jar 2> /dev/null`; do
-			absname "$jar"
-			if $CYGWIN; then
-				CLASSPATH="$CLASSPATH;$return";
-			else
-				CLASSPATH="$CLASSPATH:$return";
-			fi
-		done
+		cpXML = ""
+		for el in classpath:
+			cpXML += '<classpathentry kind="lib" path="%s" />' % os.path.normpath(el)
+		replaceAll(dotClasspath, r'%PROJECTCLASSPATH%', cpXML)
+		replaceAll(dotClasspath, r'%MODULES%', '')
 		
-		if $CYGWIN; then
-		  IFS=$' '
-		fi
-
-	done
-fi
-
-
-if $CYGWIN; then
-  IFS=$OLD_IFS
-fi
-
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~ [run] Run the application
-
-if [ "$PLAY_COMMAND" = "run" ] ; then
-  echo "~ Ctrl+C to stop"
-  echo "~ "
-  "$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID play.server.Server
-  echo
-  exit;
-fi
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~ [test] Run the application tests
-
-if [ "$PLAY_COMMAND" = "test" ] ; then
-  echo "~ Running application tests..."
-  echo "~ "
-  "$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID play.test.TestRunner
-  echo
-  exit;
-fi
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~ [debug] Run the application with JPDA enabled
-
-if [ "$PLAY_COMMAND" = "debug" ] ; then
-  echo "~ Ctrl+C to break"
-  echo "~ "
-  echo -n "~ JPDA -> "
-  "$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS -Xdebug -Xrunjdwp:transport=dt_socket,address=$JPDA_PORT,server=y,suspend=n -Dplay.debug=yes -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server
-  echo
-  exit;
-fi
+		if len(modules):
+			lXML = ""
+			cXML = ""
+			for module in modules:
+				lXML += '<link><name>%s</name><location>%s</location></link>' % (os.path.basename(module), os.path.join(module, 'app'))
+				cXML += '<classpathentry kind="src" path="%s"/>' % (os.path.basename(module))
+			replaceAll(dotProject, r'%LINKS%', '<linkedResources>%s</linkedResources>' % lXML)
+			replaceAll(dotClasspath, r'%MODULES%', '%s' % cXML)
+		else:
+			replaceAll(dotProject, r'%LINKS%', '')
+			replaceAll(dotClasspath, r'%MODULES%', '')
+		
+		replaceAll(os.path.join(application_path, 'eclipse/play.launch'), r'%PROJECT_NAME%', application_name)
+		replaceAll(os.path.join(application_path, 'eclipse/play.launch'), r'%PLAY_BASE%', play_base)
+		replaceAll(os.path.join(application_path, 'eclipse/play.launch'), r'%PLAY_ID%', play_id)
+		os.rename(os.path.join(application_path, 'eclipse/play.launch'), os.path.join(application_path, 'eclipse/%s.launch' % application_name))
+		
+		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%PROJECT_NAME%', application_name)
+		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%PLAY_BASE%', play_base)
+		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%PLAY_ID%', play_id)
+		os.rename(os.path.join(application_path, 'eclipse/test.launch'), os.path.join(application_path, 'eclipse/Test %s.launch' % application_name))	
+		
+		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%PROJECT_NAME%', application_name)
+		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%PLAY_BASE%', play_base)
+		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%PLAY_ID%', play_id)
+		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%JPDA_PORT%', jpda_port)
+		os.rename(os.path.join(application_path, 'eclipse/debug.launch'), os.path.join(application_path, 'eclipse/Debug %s.launch' % application_name))
+		
+		replaceAll(os.path.join(application_path, 'eclipse/connect.launch'), r'%PROJECT_NAME%', application_name)
+		replaceAll(os.path.join(application_path, 'eclipse/connect.launch'), r'%JPDA_PORT%', jpda_port)
+		os.rename(os.path.join(application_path, 'eclipse/connect.launch'), os.path.join(application_path, 'eclipse/Connect JPDA to %s.launch' % application_name))
+		
+		print "~ Ok, the application is ready for eclipse"
+		print "~ Use File/Import/General/Existing project to import %s into eclipse" % os.path.normpath(application_path)
+		print "~"
+		print "~ Use eclipsify again when you want to update eclipse configuration files."
+		print "~ However, it's often better to delete and re-import the project into your workspace since eclipse keeps dirty caches ..."
+		print "~"
+				
+		sys.exit(0)
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~ [start] Start the application in background
-
-if [ "$PLAY_COMMAND" = "start" ] ; then
-  if [ ! -r "${PLAY_LOG_PATH}" ] ; then
-    mkdir -p "${PLAY_LOG_PATH}";
-  fi
-  if [ -f "${PLAY_PID_PATH}" ] ; then
-    echo "~ Oops. $APPLICATION_PATH is already started ! (or delete ${PLAY_PID_PATH})"
-    echo "~"
-    exit 1
-  else
-    "$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server > "${PLAY_LOG_PATH}"/system.out 2>&1 &
-    echo "~ Ok, $APPLICATION_PATH is started"
-    echo "~ output is redirected to ${PLAY_LOG_PATH}/system.out"
-    echo $! > "${PLAY_PID_PATH}"
-      echo "~ pid is `cat "${PLAY_PID_PATH}"`"
-    echo "~"
-    exit
-  fi
-fi
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~ [stop] Stop the application running in background
-
-if [ "$PLAY_COMMAND" = "stop" ] ; then
-  runAppOrDie;
-  echo "~ kill `cat ${PLAY_PID_PATH}`"
-  kill `cat "${PLAY_PID_PATH}"`
-  rm "${PLAY_PID_PATH}"
-  rm "${PLAY_LOG_PATH}/system.out"
-  echo "~ Ok, $APPLICATION_PATH is stopped"
-  echo "~"
-  exit
-fi
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~ [pid] Display the pid of the running application
-
-if [ "$PLAY_COMMAND" = "pid" ] ; then
-  runAppOrDie;
-  echo "~ The pid for $APPLICATION_PATH is `cat "${PLAY_PID_PATH}"`"
-  echo "~"
-  exit
-fi
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~ [out] Follow logs of the running application
-
-if [ "$PLAY_COMMAND" = "log" ] || [ "$PLAY_COMMAND" = "out" ] ; then
-  runAppOrDie;
-  tail -f "${PLAY_LOG_PATH}/system.out"
-  exit
-fi
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~ [restart] Restart the running application
-
-if [ "$PLAY_COMMAND" = "restart" ] ; then
-  runAppOrDie;
-  echo "~ killing process `cat "${PLAY_PID_PATH}`"
-  kill `cat "${PLAY_PID_PATH}"`
-  rm "${PLAY_PID_PATH}"
-  rm "${PLAY_LOG_PATH}/system.out"
-  echo "~ $APPLICATION_PATH is stopped"
-  "$JAVA_PATH" -javaagent:"$AGENT_PATH" $JAVA_ARGS -classpath "$CLASSPATH" -Djava.endorsed.dirs="$PLAY_BASE/framework/endorsed" -Dapplication.path="${APPLICATION_PATH}" -Dplay.id=$PLAY_ID  play.server.Server > ${PLAY_LOG_PATH}/system.out 2>&1 &
-  echo "~ $APPLICATION_PATH is started"
-  echo "~ Output is redirected to ${PLAY_LOG_PATH}/system.out ..."
-  echo $! > "${PLAY_PID_PATH}"
-  echo "~ pid is `cat "${PLAY_PID_PATH}"`"
-  echo "~"
-  exit
-fi
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~ [netbeansify] Create netbeans configuration files
-
-if [ "$PLAY_COMMAND" = "netbeansify" ] || [ "$PLAY_COMMAND" = "nb" ] ; then
-  PROJECT_NAME="`cat "$APPLICATION_PATH"/conf/application.conf | grep application.name | sed -e 's/application.name=//g'`"
-  rm -rf "$APPLICATION_PATH/nbproject"
-  mkdir "$APPLICATION_PATH/nbproject"
-  sed  -e "s|%APPLICATION_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/nbproject/project.xml" > "$APPLICATION_PATH/nbproject/project.xml.1.tmp"
-  sed  -e "s|%ANT_SCRIPT%|$PLAY_BASE/framework/build.xml|g" "$APPLICATION_PATH/nbproject/project.xml.1.tmp" > "$APPLICATION_PATH/nbproject/project.xml.2.tmp"
-  sed  -e "s|%APPLICATION_PATH%|$APPLICATION_PATH|g" "$APPLICATION_PATH/nbproject/project.xml.2.tmp" > "$APPLICATION_PATH/nbproject/project.xml.3.tmp"
-  sed  -e "s|%PLAY_CLASSPATH%|$CLASSPATH|g" "$APPLICATION_PATH/nbproject/project.xml.3.tmp" > "$APPLICATION_PATH/nbproject/project.xml"
-  rm "$APPLICATION_PATH/nbproject/project.xml.1.tmp"
-  rm "$APPLICATION_PATH/nbproject/project.xml.2.tmp"
-  rm "$APPLICATION_PATH/nbproject/project.xml.3.tmp"
-  echo "~ Ok, the application is ready for netbeans"
-  echo "~ Just open $APPLICATION_PATH as a netbeans project"
-  echo "~"
-  echo "~ Use netbeansify again when you want to update netbeans configuration files"
-  echo "~"
-  exit
-fi
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~ [eclipsify] Create eclipse configuration files
-
-if [ "$PLAY_COMMAND" = "eclipsify" ] || [ "$PLAY_COMMAND" = "ec" ] ; then
-  PROJECT_NAME="`cat "$APPLICATION_PATH/conf/application.conf" | grep application.name | sed -e 's/application.name=//g'`"
-  rm -rf "$APPLICATION_PATH/.project"
-  rm -rf "$APPLICATION_PATH/.classpath"
-  rm -rf "$APPLICATION_PATH/eclipse"
-  mkdir "$APPLICATION_PATH/eclipse"
-  sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/.project" > "$APPLICATION_PATH/.project"
-  if $CYGWIN; then
-    IFS=";"
-  else
-    IFS=":"
-  fi
-  XML=""
-  for p in $CLASSPATH; do
-    if [ -f "$p" ]; then
-      absname $p # really ?
-      XML="$XML<classpathentry kind=\"lib\" path=\"${return}\" /> "
-    fi;
-  done;
-  sed  -e "s|%PROJECTCLASSPATH%|${XML}|g" "$PLAY_BASE/resources/eclipse/.classpath" > "$APPLICATION_PATH/.classpath"
-  sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/play.launch" > "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp1"
-  sed  -e "s|%PLAY_ID%|$PLAY_ID|g" "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp1" > "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp2"
-  sed  -e "s|%PLAY_BASE%|$PLAY_BASE|g" "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp2" > "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch"
-  rm -rf "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp1"
-  rm -rf "$APPLICATION_PATH/eclipse/$PROJECT_NAME.launch.tmp2"
-
-  sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/test.launch" > "$APPLICATION_PATH/eclipse/Test $PROJECT_NAME.launch.tmp1"
-  sed  -e "s|%PLAY_ID%|$PLAY_ID|g" "$APPLICATION_PATH/eclipse/Test $PROJECT_NAME.launch.tmp1" > "$APPLICATION_PATH/eclipse/Test $PROJECT_NAME.launch.tmp2"
-  sed  -e "s|%PLAY_BASE%|$PLAY_BASE|g" "$APPLICATION_PATH/eclipse/Test $PROJECT_NAME.launch.tmp2" > "$APPLICATION_PATH/eclipse/Test $PROJECT_NAME.launch"
-  rm -rf "$APPLICATION_PATH/eclipse/Test $PROJECT_NAME.launch.tmp1"
-  rm -rf "$APPLICATION_PATH/eclipse/Test $PROJECT_NAME.launch.tmp2"
-
-  sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/debug.launch" > "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp1"
-  sed  -e "s|%PLAY_ID%|$PLAY_ID|g" "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp1" > "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp2"
-  sed  -e "s|%JPDA_PORT%|$JPDA_PORT|g" "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp1" > "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp3"
-  sed  -e "s|%PLAY_BASE%|$PLAY_BASE|g" "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp3" > "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch"
-  rm -rf "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp1"
-  rm -rf "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp2"
-  rm -rf "$APPLICATION_PATH/eclipse/JPDA $PROJECT_NAME.launch.tmp3"
-
-  sed  -e "s|%PROJECT_NAME%|$PROJECT_NAME|g" "$PLAY_BASE/resources/eclipse/connect.launch" > "$APPLICATION_PATH/eclipse/Connect JPDA $PROJECT_NAME.launch.tmp1"
-  sed  -e "s|%JPDA_PORT%|$JPDA_PORT|g" "$APPLICATION_PATH/eclipse/Connect JPDA $PROJECT_NAME.launch.tmp1" > "$APPLICATION_PATH/eclipse/Connect JPDA $PROJECT_NAME.launch"
-  rm -rf "$APPLICATION_PATH/eclipse/Connect JPDA $PROJECT_NAME.launch.tmp1"
-
-  echo "~ Ok, the application is ready for eclipse"
-  echo "~ Use File/Import/General/Existing project to import $APPLICATION_PATH into eclipse"
-  echo "~"
-  echo "~ Use eclipsify again when you want to update eclipse configuration files."
-  echo "~ However, it's often better to delete and re-import the project into your workspace since eclipse keeps dirty caches ..."
-  echo "~"
-  exit
-fi
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~ [mkplugin] Create a play! plugin from the application
-
-if [ "$PLAY_COMMAND" = "mkplugin" ] ; then
-  ( zip -h >/dev/null 2>&1)   || verbosedie "Error : zip executable required for this command"
-  PROJECT_NAME="`cat ${APPLICATION_PATH}/conf/application.conf | grep application.name | sed -e 's/application.name=//g'`"
-  plugin_name="${PROJECT_NAME}.zip"
-  plugin_sources="public app conf data"
-  cd ${APPLICATION_PATH} >/dev/null && zip "$plugin_name" -r $plugin_sources && cd $oldDir >/dev/null
-  echo "~ Plugin is ready in $plugin_name"
-  echo "~"
-  exit 0
-fi
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~ [statistics] Display project statistics
-
-if [ "$PLAY_COMMAND" = "statistics" ] ; then
-  PROJECT_NAME="`cat $APPLICATION_PATH/conf/application.conf | grep application.name | sed -e 's/application.name=//g'`"
-  echo "~ Project name is $PROJECT_NAME"
-  echo "~"
-  exit
-fi
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~ Bad command
-
-echo "~ Oops. Unknown command : $PLAY_COMMAND"
-echo "~"
-usage
-exit 1
-
+except KeyboardInterrupt:
+	print '~ ...'
+	sys.exit(0)

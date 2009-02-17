@@ -1,0 +1,34 @@
+# Default CRUD messages
+# ~~~~~~
+
+crud.title=Administration
+crud.home=Home
+crud.blank=New
+crud.index.title=Choose the object to edit
+crud.index.objectType=Object type
+crud.index.action=
+crud.index.add=Add
+crud.add=Add &{%s}
+crud.list.title=&{%s}
+crud.list.size=%d &{%s}
+crud.list.totalSize=%d total
+crud.pagination.previous=« Previous
+crud.pagination.next=Next »
+crud.show.title=Edit &{%s}
+crud.save=Save
+crud.saveAndContinue=Save and continue editing
+crud.cancel=Cancel
+crud.hasErrors=Please correct errors
+crud.blank.title=Add &{%s}
+crud.saveAndAddAnother=Save and create another
+crud.delete=Delete &{%s}
+crud.created=The &{%s} has been created
+crud.saved=The &{%s} has been saved
+crud.deleted=The &{%s} has been deleted
+
+crud.help.required=Required.
+crud.help.minlength=Minimal size is %d.
+crud.help.email=Valid email address.
+crud.help.dateformat=Format AAAA-MM-JJ.
+crud.help.numeric=Numeric.
+crud.help.min=Must be greater than %d.

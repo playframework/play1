@@ -1,0 +1,45 @@
+#{field 'object.' + _name}
+	<label for="${field.id}">
+		&{_name}
+	</label>
+	
+	#{if _field.multiple}
+		<select id="${field.id}" name="${field.name}" multiple="yes">
+			%{ play.db.jpa.JPA.getEntityManager().createQuery("from " + _field.relation).getResultList().sort{ it.toString() }.each() { }%
+			%{
+				selected = false;
+				if(field.error?.message != 'validation.required') {
+					if(field.flash) {
+						selected = field.flashArray.contains(it.id.toString())
+					} else {
+						selected = _value?.contains(it)
+					}
+				}
+			}%
+			<option value="${it.id}" ${selected ? 'selected="true"' : ''}>${it}</option>
+			%{ } }%
+		</select>
+	#{/if}
+	#{else}
+		<select name="${field.name}">
+			<option value="">(None)</option>
+			%{ play.db.jpa.JPA.getEntityManager().createQuery("from " + _field.relation).getResultList().sort{ it.toString() }.each() { }%
+			%{
+				selected = false
+				if(field.error?.message != 'validation.required') {
+					if(field.flash) {
+						selected = (it.id.toString() == field.flash)
+					} else {
+						selected = it.id == _value?.id
+					}
+				}
+			}%
+			<option value="${it.id}" ${selected ? 'selected="true"' : ''}>${it}</option>
+			%{ } }%
+		</select>
+	#{/else}
+	
+	#{ifError field.name}
+		<span class="error">${field.error}</span>
+	#{/ifError}
+#{/field}

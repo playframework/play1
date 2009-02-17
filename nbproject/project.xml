@@ -149,6 +149,10 @@
                         <label>resources</label>
                         <location>resources</location>
                     </source-folder>
+                    <source-folder style="tree">
+                        <label>modules</label>
+                        <location>modules</location>
+                    </source-folder>
                     <source-folder style="packages">
                         <label>sources</label>
                         <location>framework/src</location>
