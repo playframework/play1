@@ -4,6 +4,7 @@ import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -205,6 +206,12 @@ public class Binder {
                 return null;
             }
             return Float.parseFloat(value);
+        }
+        if ( clazz.equals(BigDecimal.class)) {
+            if (value == null || value.trim().length() == 0) {
+                return null;
+            }
+            return new BigDecimal(value);
         }
         if (clazz.getName().equals("boolean") || clazz.equals(Boolean.class)) {
             if (value == null || value.trim().length() == 0) {

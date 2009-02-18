@@ -2,6 +2,7 @@ package play.data.binding;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -65,6 +66,8 @@ public class Unbinder {
     }
 
     public static boolean isDirect(Class clazz) {
-        return clazz.equals(String.class) || clazz.equals(Integer.class) || clazz.equals(Boolean.class) || clazz.equals(Long.class) || clazz.equals(Double.class) || clazz.equals(Float.class) || clazz.equals(Short.class) || clazz.isPrimitive();
+        return clazz.equals(String.class) || clazz.equals(Integer.class) || clazz.equals(Boolean.class) || clazz.equals(Long.class)
+                || clazz.equals(Double.class) || clazz.equals(Float.class) || clazz.equals(Short.class) || clazz.equals(BigDecimal.class)
+                || clazz.isPrimitive();
     }
 }
