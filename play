@@ -339,7 +339,19 @@ try:
 
 	java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, 'play.server.Server']
 
-
+	if not os.environ.has_key('PLAY_PID_PATH'):
+		pid_path = os.path.join(application_path, 'server.pid');
+	else:
+		pid_path = os.environ['PLAY_PID_PATH'];
+	
+	if not os.environ.has_key('PLAY_LOG_PATH'):	
+		log_path = os.path.join(application_path, 'logs');
+	else:
+		log_path = os.environ['PLAY_LOG_PATH'];
+		
+	if not os.path.exists(log_path):
+		os.mkdir(log_path);
+		
 	# ~~~~~~~~~~~~~~~~~~~~~~ [run] Run the application
 	if play_command == 'run':
 		print "~ Ctrl+C to stop"
@@ -373,17 +385,14 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [start] Start the application
 	if play_command == 'start':
-		pid_path = os.path.join(application_path, 'server.pid')
 		if os.path.exists(pid_path):
 			print "~ Oops. %s is already started ! (or delete %s)" % (os.path.normpath(application_path), os.path.normpath(pid_path))
 			print "~"
 			sys.exit(1)
-		if not os.path.exists(os.path.join(application_path, 'logs')):
-			os.mkdir(os.path.join(application_path, 'logs'))
-		sout = open(os.path.join(application_path, 'logs/system.out'), 'w')
+		sout = open(os.path.join(log_path, 'system.out'), 'w')
 		pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
 		print "~ Ok, %s is started" % os.path.normpath(application_path)
-		print "~ output is redirected to %s" % os.path.normpath(os.path.join(application_path, 'logs/system.out'))
+		print "~ output is redirected to %s" % os.path.normpath(os.path.join(log_path, 'system.out'))
 		pid_file = open(pid_path, 'w')
 		pid_file.write(str(pid))
 		print "~ pid is %s" % pid
@@ -393,7 +402,6 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [stop] Stop the application
 	if play_command == 'stop':
-		pid_path = os.path.join(application_path, 'server.pid')
 		if not os.path.exists(pid_path):
 			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
 			print "~"
@@ -416,7 +424,6 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [restart] Restart the application
 	if play_command == 'restart':
-		pid_path = os.path.join(application_path, 'server.pid')
 		if not os.path.exists(pid_path):
 			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
 			print "~"
@@ -432,12 +439,11 @@ try:
 		else:
 			os.kill(int(pid), 15)
 		os.remove(pid_path)
-		if not os.path.exists(os.path.join(application_path, 'logs')):
-			os.mkdir(os.path.join(application_path, 'logs'))
-		sout = open(os.path.join(application_path, 'logs/system.out'), 'w')
+		
+		sout = open(os.path.join(log_path, 'system.out'), 'w')
 		pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
 		print "~ Ok, %s is restarted" % os.path.normpath(application_path)
-		print "~ output is redirected to %s" % os.path.normpath(os.path.join(application_path, 'logs/system.out'))
+		print "~ output is redirected to %s" % os.path.normpath(os.path.join(log_path, 'system.out'))
 		pid_file = open(pid_path, 'w')
 		pid_file.write(str(pid))
 		print "~ New pid is %s" % pid
@@ -447,7 +453,6 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [pid] Display the pid of the running application
 	if play_command == 'pid':
-		pid_path = os.path.join(application_path, 'server.pid')
 		if not os.path.exists(pid_path):
 			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
 			print "~"
@@ -460,12 +465,11 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [out] Follow logs of the running application
 	if play_command == 'out':
-		pid_path = os.path.join(application_path, 'server.pid')
 		if not os.path.exists(pid_path):
 			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
 			print "~"
 			sys.exit(-1)
-		sout = open(os.path.join(application_path, 'logs/system.out'))
+		sout = open(os.path.join(log_path, 'system.out'), 'w')
 		while True:
 			where = sout.tell()
 			line = sout.readline().strip()
