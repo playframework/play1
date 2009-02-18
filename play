@@ -115,6 +115,7 @@ try:
 		print "~        clean        Delete temporary files"
 		print "~        id           Define the framework ID"
 		print "~        secret       Generate a new secret key"
+		print "~        override     Override a module file in the application"
 		print "~        help         Show more commands"
 		print "~ "
 		print "~ Also refer to documentation at http://www.playframework.org/manual"
@@ -147,6 +148,9 @@ try:
 	else:
 		application_path = os.path.normpath(os.path.abspath(sys.argv[2]))
 		remaining_args = sys.argv[3:]
+		
+	if play_command == 'override' or play_command == 'ov':
+		application_path = os.getcwd()
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [new] Create a new application
@@ -169,7 +173,7 @@ try:
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Check if it's a valid application
-	if not (play_command == 'overrides' or play_command == 'ov') and not os.path.exists(os.path.join(application_path, 'conf/routes')):
+	if not os.path.exists(os.path.join(application_path, 'conf/routes')):
 		print "~ Oops. %s does not seem to host a valid application" % os.path.normpath(application_path)
 		print "~"
 		sys.exit(-1)
@@ -192,7 +196,73 @@ try:
 			shutil.rmtree(os.path.join(application_path, 'tmp'))
 		print "~"
 		sys.exit(0)
+		
+		
+	# ~~~~~~~~~~~~~~~~~~~~~~ Modules list
+	if os.environ.has_key('MODULES'):
+		if os.name == 'nt':
+			modules = os.environ['MODULES'].split(';')
+		else:
+			modules = os.environ['MODULES'].split(':')
+	else:
+		modules = []
+		pm = readConfs('module.')
+		for m in pm:
+			if '${play.path}' in m:
+				m = m.replace('${play.path}', play_base)
+			if not m[0] == '/':
+				m = os.path.normpath(os.path.join(application_path, m))
+			modules.append(m)
+		
+		
+	# ~~~~~~~~~~~~~~~~~~~~~~ [modules] Display the application modules
+	if play_command == 'modules':
+		if len(modules):
+			print "~ Application modules are :"
+			print "~ "
+			for module in modules:
+				print "~ %s" % module
+		else:
+			print "~ No modules"
+		print "~ "
+		sys.exit(0)	
 
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ [overrides] Overrides a module file
+	if play_command == 'override' or play_command == 'ov':
+		file = sys.argv[2]
+		if file[0] == '/': file = file[1:]
+		fromFile = None
+		for module in modules:
+			pc = os.path.join(module, file)
+			if os.path.exists(pc): fromFile = pc
+		if not fromFile:
+			print "~ %s not found in any modules" % file
+			print "~ "
+			sys.exit(-1)
+		if len(sys.argv) > 3:
+			t = sys.argv[3]
+			if t[0] == '/': t = t[1:]
+			toFile = os.path.join(application_path, t)
+		else:
+			toFile = os.path.join(application_path, file)
+		if os.path.exists(toFile):
+			print "~ Warning ! %s already exists and will be overriden" % toFile
+		response = raw_input("~ Copy %s to %s (y/n) ? " % (fromFile, toFile))
+		if response == 'y':
+			if not os.path.exists(os.path.dirname(toFile)):
+				os.makedirs(os.path.dirname(toFile))
+			shutil.copyfile(fromFile, toFile)
+			print "~ "
+			print "~ Ok"
+			print "~"
+			sys.exit(0)
+		else:
+			print "~ "
+			print "~ Cancelled"
+			print "~"
+		sys.exit(0)	
+	
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ JAVA_HOME/bin/java is used if defined
 	if not os.environ.has_key('JAVA_HOME'):
@@ -224,22 +294,6 @@ try:
 
 	java_args.append('-Dcom.sun.management.jmxremote')
 	
-	# ~~~~~~~~~~~~~~~~~~~~~~ Modules list
-	if os.environ.has_key('MODULES'):
-		if os.name == 'nt':
-			modules = os.environ['MODULES'].split(';')
-		else:
-			modules = os.environ['MODULES'].split(':')
-	else:
-		modules = []
-		pm = readConfs('module.')
-		for m in pm:
-			if '${play.path}' in m:
-				m = m.replace('${play.path}', play_base)
-			if not m[0] == '/':
-				m = os.path.normpath(os.path.join(application_path, m))
-			modules.append(m)
-
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Build classpath
 	agent_path=os.path.join(play_base, 'framework/play.jar')
@@ -282,24 +336,6 @@ try:
 		print "~ "
 		sys.exit(0)
 	
-	
-	# ~~~~~~~~~~~~~~~~~~~~~~ [modules] Display the application modules
-	if play_command == 'modules':
-		if len(modules):
-			print "~ Application modules are :"
-			print "~ "
-			for module in modules:
-				print "~ %s" % module
-		else:
-			print "~ No modules"
-		print "~ "
-		sys.exit(0)	
-		
-		
-	# ~~~~~~~~~~~~~~~~~~~~~~ [overrides] Overrides a module file
-	if play_command == 'overrides' or play_command == 'ov':
-		sys.exit(0)	
-
 
 	java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, 'play.server.Server']
 
