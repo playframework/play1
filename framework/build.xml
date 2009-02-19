@@ -22,7 +22,7 @@
         <exec executable="bzr" outputproperty="bzrversion" errorproperty="bzrerror" failonerror="false" failifexecutionfails="false">
             <arg value="revno" />
         </exec>
-        <condition property="version" value="1.0-stable4-r${bzrversion}" else="1.0-stable4-localbuild">
+        <condition property="version" value="1.0-stable5-r${bzrversion}" else="1.0-stable4-localbuild">
             <equals arg1="" arg2="${bzrerror}" trim="true" />
         </condition> 
         <echo message="Version ${version}"></echo>
@@ -254,7 +254,7 @@
     <target name="package" depends="clean,version,jar,javadoc">
         <mkdir dir="dist" /> 
         <zip destfile="dist/play-${version}.zip" comment="Play! ${version}" update="false">
-            <zipfileset prefix="play-${version}" dir=".." includes="**/*" excludes=".*,.*/*,framework/dist/**,id,play,nbproject/**,**/.settings/**,**/.bzr/**,*.bzrignore,framework/classes/**,framework/tests-results/**" />   
+            <zipfileset prefix="play-${version}" dir=".." includes="**/*" excludes=".*,.*/*,framework/dist/**,id,play,nbproject/**,**/.bzr/**,*.bzrignore,framework/classes/**,framework/tests-results/**" />   
             <zipfileset prefix="play-${version}" dir=".." includes="play" filemode="777" />
         </zip>
     </target>
