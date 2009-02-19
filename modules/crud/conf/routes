@@ -1,13 +1,13 @@
 # Routes for the CRUD module
 # ~~~~~~~~~~~
 
+GET			/												CRUD.index
 #{crud.types}
-GET			/											CRUD.index
-GET			/${type.controllerName}						${type.controllerName}.list
-GET			/${type.controllerName}/new					${type.controllerName}.blank
-GET			/${type.controllerName}/{id}				${type.controllerName}.show
-GET			/${type.controllerName}/{id}/edit			${type.controllerName}.edit
-POST		/${type.controllerName}						${type.controllerName}.create
-PUT			/${type.controllerName}/{id}				${type.controllerName}.save
-DELETE		/${type.controllerName}/{id}				${type.controllerName}.delete
+GET			/${type.controllerName}							${type.controllerName}.list
+GET			/${type.controllerName}/new						${type.controllerName}.blank
+GET			/${type.controllerName}/{<\d+>id}				${type.controllerName}.show
+GET			/${type.controllerName}/{<\d+>id}/edit			${type.controllerName}.edit
+POST		/${type.controllerName}							${type.controllerName}.create
+PUT			/${type.controllerName}/{<\d+>id}				${type.controllerName}.save
+DELETE		/${type.controllerName}/{<\d+>id}				${type.controllerName}.delete
 #{/crud.types}

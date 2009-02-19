@@ -1,18 +1,19 @@
 package controllers;
 
+import java.util.*;
+
 import play.*;
 import play.mvc.*;
 import play.libs.*;
-import java.util.*;
 
 public class Application extends Controller {
 
 	/**
-	 * Default action.
-	 * renders the app/views/Application/index.html template
+	 * Change render("welcome.html"); to render();
+	 * and it will display the /app/views/Application/index.html template
 	 */
 	public static void index() {
-		render();
+		render("welcome.html");
 	}
-    
+
 }

@@ -12,7 +12,6 @@ import jregex.REFlags;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
-import play.exceptions.EmptyAppException;
 import play.vfs.VirtualFile;
 import play.exceptions.NoRouteFoundException;
 import play.mvc.results.NotFound;
@@ -128,16 +127,10 @@ public class Router {
                 return;
             }
         }
-        if (request.path.equals("/")) {
-            throw new EmptyAppException();
-        }
         throw new NotFound(request.method, request.path);
     }
 
     public static Map<String, String> route(String method, String path) {
-        if (routes.isEmpty()) {
-            throw new EmptyAppException();
-        }
         for (Route route : routes) {
             Map<String, String> args = route.matches(method, path);
             if (args != null) {

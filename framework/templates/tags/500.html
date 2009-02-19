@@ -1,0 +1,109 @@
+%{
+	exception = _arg ?: _exception
+}%
+
+<style type="text/css">
+    html, body {
+        margin: 0;
+        padding: 0;
+        font-family: Helvetica, Arial, Sans;
+        background: #EEEEEE;
+    }            
+    .block {
+        padding: 20px;
+        border-bottom: 1px solid #aaa;
+    }
+    #header h1 {
+        font-weight: normal;
+        font-size: 28px;
+        margin: 0;
+    }
+    #more {
+        color: #666;
+        font-size: 80%;
+        border: none;
+    }
+    #header {
+        background: #fcd2da;
+    }
+    #header p {
+        color: #333;
+    }
+    #source {
+        background: #f6f6f6;
+    }
+    #source h2 {
+        font-weight: normal;
+        font-size: 18px;
+        margin: 0 0 10px 0;
+    }
+    #source .lineNumber {
+        float: left;
+        display: block;
+        width: 40px;
+        text-align: right;
+        margin-right: 10px;
+        font-size: 14px;
+        font-family: monospace;  
+        background: #333;
+        color: #fff;
+    }
+    #source .line {
+        clear: both;
+        color: #333;
+        margin-bottom: 1px;
+    }
+    #source pre {
+        font-size: 14px;
+        margin: 0;
+        overflow-x: hidden;
+    }
+    #source .error {
+        color: #c00 !important;
+    }
+    #source .error .lineNumber {
+        background: #c00;
+    }
+</style>
+
+#{if exception instanceof play.exceptions.PlayException}
+    <div id="header" class="block">
+        <h1>
+            ${exception.errorTitle} 
+        </h1>
+        #{if play.Play.mode.name() == 'DEV'}
+        <p>
+            ${exception.errorDescription}
+        </p>
+        #{/if}
+        #{if play.Play.mode.name() == 'PROD'}
+        <p>
+            Error details are not displayed when Play! is in PROD mode. Check server logs for detail.
+        </p>
+        #{/if}
+    </div>
+    #{if exception.sourceAvailable && exception.lineNumber && play.Play.mode.name() == 'DEV'}
+    <div id="source" class="block">
+        <h2>In ${exception.sourceFile} (around line ${exception.lineNumber})</h2>
+        %{ 
+            from = exception.lineNumber - 5 >= 0 ? exception.lineNumber - 5 : 0
+            to = exception.lineNumber + 5  < exception.source.size() ? exception.lineNumber + 5 : exception.source.size()-1          
+        }%
+        #{list items:exception.source, as:'line', start:from, end:to}
+            <div class="line ${exception.lineNumber == line_index ? 'error':''}">
+                <span class="lineNumber">${line_index}:</span>
+                <pre>&nbsp;${line.escapeHtml()}</pre>
+            </div>
+         #{/list}
+    </div>
+    #{/if}
+    <div id="more" class="block">
+        This exception has been logged with id <strong>${exception.id}</strong>
+    </div>
+#{/if}
+#{else}
+    <div id="header" class="block">
+        <h1>${exception.message}</h1>
+    </div>
+#{/else}
+

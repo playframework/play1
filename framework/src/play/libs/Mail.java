@@ -42,7 +42,7 @@ public class Mail {
      * @param subject Subject
      * @param body Body
      */
-    public static Future send(String from, String recipient, String subject, String body) {
+    public static Future<Boolean> send(String from, String recipient, String subject, String body) {
         return send(from, new String[]{recipient}, subject, body, "text/plain", new Object[0]);
     }
 
@@ -54,7 +54,7 @@ public class Mail {
      * @param body Body
      * @param contentType The content type (text/plain or text/html)
      */
-    public static Future send(String from, String recipient, String subject, String body, String contentType) {
+    public static Future<Boolean> send(String from, String recipient, String subject, String body, String contentType) {
         return send(from, new String[]{recipient}, subject, body, contentType, new Object[0]);
     }
 
@@ -65,7 +65,7 @@ public class Mail {
      * @param subject Subject
      * @param body Body
      */
-    public static Future send(String from, String[] recipients, String subject, String body) {
+    public static Future<Boolean> send(String from, String[] recipients, String subject, String body) {
         return send(from, recipients, subject, body, "text/plain", new Object[0]);
     }
 
@@ -77,7 +77,7 @@ public class Mail {
      * @param body Body
      * @param contentType The content type (text/plain or text/html)
      */
-    public static Future send(String from, String[] recipients, String subject, String body, String contentType) {
+    public static Future<Boolean> send(String from, String[] recipients, String subject, String body, String contentType) {
         return send(from, recipients, subject, body, contentType, new Object[0]);
     }
 
@@ -89,7 +89,7 @@ public class Mail {
      * @param body Body
      * @param attachments File attachments
      */
-    public static Future send(String from, String recipient, String subject, String body, Object... attachments) {
+    public static Future<Boolean> send(String from, String recipient, String subject, String body, Object... attachments) {
         return send(from, new String[]{recipient}, subject, body, "text/plain", attachments);
     }
 
@@ -102,7 +102,7 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static Future send(String from, String recipient, String subject, String body, String contentType, Object... attachments) {
+    public static Future<Boolean> send(String from, String recipient, String subject, String body, String contentType, Object... attachments) {
         return send(from, new String[]{recipient}, subject, body, contentType, attachments);
     }
 
@@ -114,7 +114,7 @@ public class Mail {
      * @param body Body
      * @param attachments File attachments
      */
-    public static Future send(String from, String[] recipients, String subject, String body, Object... attachments) {
+    public static Future<Boolean> send(String from, String[] recipients, String subject, String body, Object... attachments) {
         return send(from, recipients, subject, body, "text/plain", attachments);
     }
 
@@ -127,7 +127,7 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static Future send(String from, String[] recipients, String subject, String body, String contentType, Object... attachments) {
+    public static Future<Boolean> send(String from, String[] recipients, String subject, String body, String contentType, Object... attachments) {
         try {
             MimeMessage msg = new MimeMessage(getSession());
 

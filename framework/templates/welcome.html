@@ -24,7 +24,10 @@
             }
             #header p, #header li {
                 color: #333;
-            }           
+            }        
+            #why {
+                font-size: 80%;
+            }
         </style>
     </head>
     <body>
@@ -36,10 +39,12 @@
                 But is empty ... What to do now ?                
             </p>
             <ol>
-                <li>Add some routes to the <strong>conf/routes</strong> file</li>
-                <li>Create a Controller in the <strong>app/controllers</strong> package</li>
+                <li>Edit the <strong>/app/controllers/Application.java</strong> controller</li>
                 <li><a href="/">And reload !</a></li>
             </ol>
-        </div>        
+        </div> 
+        <div id="why" class="block">
+            You see this page because your application display the "welcome.html" template.
+        </div>
     </body>
 </html>

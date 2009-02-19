@@ -77,7 +77,7 @@ public class Mailer {
         infos.set(map);
     }
 
-    public static Future send(Object... args) {
+    public static Future<Boolean> send(Object... args) {
         HashMap map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");

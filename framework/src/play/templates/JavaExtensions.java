@@ -53,6 +53,14 @@ public class JavaExtensions {
         }
         return sb.toString();
     }
+    
+    public static String pad(String str, int size) {
+        int t = size - str.length();
+        for(int i=0; i<t; i++) {
+            str += "&nbsp;";
+        }
+        return str;
+    }
 
     public static String escapeHtml(String htmlToEscape) {
         return StringEscapeUtils.escapeHtml(htmlToEscape);

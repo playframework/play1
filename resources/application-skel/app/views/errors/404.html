@@ -5,14 +5,14 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>	
     </head>
     <body>
-	#{if play.mode.name() == 'DEV'}
-            #{404 result /}
-	#{/if}
+		#{if play.mode.name() == 'DEV'}
+			#{404 result /}
+		#{/if}
         #{else}
-            <h1>Not found</h1>
-            <p>
-                ${result.message}
-            </p>
+        	<h1>Not found</h1>
+			<p>
+				${result.message}
+			</p>
         #{/else}
     </body>
 </html>

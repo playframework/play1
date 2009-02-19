@@ -35,7 +35,6 @@ import org.apache.mina.common.WriteFuture;
 import play.Invoker;
 import play.Logger;
 import play.Play;
-import play.exceptions.EmptyAppException;
 import play.exceptions.PlayException;
 import play.libs.MimeTypes;
 import play.mvc.ActionInvoker;
@@ -65,9 +64,6 @@ public class HttpHandler implements IoHandler {
             return;
         } catch (RenderStatic e) {
             serveStatic(session, minaResponse, minaRequest, e);
-            return;
-        } catch (EmptyAppException e) {
-            serve500(e, session, minaRequest, minaResponse);
             return;
         } catch (Exception e) {
             serve500(e, session, minaRequest, minaResponse);
@@ -218,7 +214,7 @@ public class HttpHandler implements IoHandler {
     public void serveStatic(IoSession session, MutableHttpResponse minaResponse, HttpRequest minaRequest, RenderStatic renderStatic) throws IOException {
         VirtualFile file = Play.getVirtualFile(renderStatic.file);
         if (file == null || file.isDirectory() || !file.exists()) {
-            serve404(session, minaResponse, minaRequest, new NotFound(renderStatic.file + " not found"));
+            serve404(session, minaResponse, minaRequest, new NotFound("The file " + renderStatic.file + " does not exist"));
         } else {
             if (Play.mode == Play.Mode.DEV) {
                 minaResponse.setHeader("Cache-Control", "no-cache");
@@ -245,6 +241,7 @@ public class HttpHandler implements IoHandler {
         minaResponse.setStatus(HttpResponseStatus.NOT_FOUND);
         minaResponse.setContentType("text/html");
         Map<String, Object> binding = new HashMap<String, Object>();
+        binding.put("result", e);
         String errorHtml = TemplateLoader.load("errors/404.html").render(binding);
         try {
             minaResponse.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
@@ -295,25 +292,6 @@ public class HttpHandler implements IoHandler {
                 }
             } catch(Exception exx) {
                 // humm ?
-            }
-            // Empty app :
-            if (e instanceof EmptyAppException) {
-                try {
-                    response.setStatus(HttpResponseStatus.forId(200));
-                    response.setContentType("text/html");
-                    String errorHtml = TemplateLoader.load("errors/empty.html").render(binding);
-                    response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
-                    writeResponse(session, request, response);
-                    return;
-                } catch (Throwable ex) {
-                    Logger.error(ex, "Internal Server Error (500)");
-                    try {
-                        response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
-                        writeResponse(session, request, response);
-                    } catch (UnsupportedEncodingException fex) {
-                        Logger.error(fex, "(utf-8 ?)");
-                    }
-                }
             }
             binding.put("exception", e);
             boolean ajax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
