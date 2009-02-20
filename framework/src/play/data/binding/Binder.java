@@ -62,6 +62,12 @@ public class Binder {
                 }
                 return r;
             }
+            // Enums
+            if(Enum.class.isAssignableFrom(clazz)) {
+            	if(value == null || value.length == 0)
+            		return null;
+            	return Enum.valueOf(clazz, value[0]);
+            }
             // Collections types
             if (Collection.class.isAssignableFrom(clazz)) {
                 if (value == null) {
