@@ -415,7 +415,12 @@ try:
 				print "~ "
 				sys.exit(-1)
 		else:
-			os.kill(int(pid), 15)
+			try:
+				os.kill(int(pid), 15)
+			except OSError:
+				print "~ Play was not running (Process id %s not found)" % pid
+				print "~ "
+		
 		os.remove(pid_path)
 		print "~ Ok, %s is stopped" % application_path
 		print "~"
@@ -437,7 +442,12 @@ try:
 				print "~ "
 				sys.exit(-1)
 		else:
-			os.kill(int(pid), 15)
+			try:
+				os.kill(int(pid), 15)
+			except OSError:
+				print "~ Play was not running (Process id %s not found)" % pid
+				print "~ "
+		
 		os.remove(pid_path)
 		
 		sout = open(os.path.join(log_path, 'system.out'), 'w')
