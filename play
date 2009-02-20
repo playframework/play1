@@ -43,7 +43,7 @@ def readConfs(key):
 try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the framework ?
-	play_base = os.path.normpath(os.path.dirname(os.path.abspath(sys.argv[0])))
+	play_base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ What is the framework id ?
