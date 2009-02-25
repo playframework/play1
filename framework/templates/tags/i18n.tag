@@ -18,7 +18,7 @@ var i18n=function(code) {
           }
           return message;
       }
-      return i18nMessages[code] || "!"+code+"!";
+      return i18nMessages && i18nMessages[code] || "";
  };
 
 </script>
