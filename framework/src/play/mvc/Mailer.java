@@ -103,6 +103,10 @@ public class Mailer {
         } else {
             templateName += ".txt";
         }
+        // overrides Template name
+        if (args.length > 0 && args[0] instanceof String && LocalVariablesNamesTracer.getAllLocalVariableNames(args[0]).isEmpty()) {
+            templateName = args[0].toString();
+        }
 
         HashMap<String, Object> params = new HashMap<String, Object>();
         Template template = TemplateLoader.load(templateName);
