@@ -54,8 +54,8 @@ public class JavaExtensions {
         return sb.toString();
     }
     
-    public static String pad(String str, int size) {
-        int t = size - str.length();
+    public static String pad(String str, Integer size) {
+        int t = size - str.length();    
         for(int i=0; i<t; i++) {
             str += "&nbsp;";
         }
