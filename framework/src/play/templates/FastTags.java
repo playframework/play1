@@ -17,7 +17,7 @@ import play.templates.Template.ExecutableTemplate;
 /**
  * Fast tags implementation
  */
-public class FastTags {
+public class FastTags { 
 
     public static void _form(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         ActionDefinition actionDef = (ActionDefinition) args.get("arg");

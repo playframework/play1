@@ -3,12 +3,15 @@ package play.mvc;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.w3c.dom.Document;
 import play.Play;
+import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.data.binding.Unbinder;
 import play.data.validation.Validation;
@@ -28,6 +31,7 @@ import play.mvc.results.RenderTemplate;
 import play.mvc.results.RenderText;
 import play.mvc.results.RenderJson;
 import play.mvc.results.RenderXml;
+import play.mvc.results.Result;
 import play.mvc.results.Unauthorized;
 import play.templates.Template;
 import play.templates.TemplateLoader;
@@ -359,5 +363,63 @@ public abstract class Controller {
      */
     public static Class getControllerClass() {
         return Play.classloader.getClassIgnoreCase("controllers." + Http.Request.current().controller);
+    }
+    
+    public static void parent(Object... args) {
+        Map<String,Object> map = new HashMap();
+        for (Object o : args) {
+            List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
+            for (String name : names) {
+                map.put(name, o);
+            }
+        }
+        parent(map);
+    }
+    
+    public static void parent() {
+        parent(new HashMap());
+    }
+    
+    public static void parent(Map<String,Object> map) {
+        try {
+            Method method = Http.Request.current().invokedMethod;
+            String name = method.getName();
+            Class clazz = method.getDeclaringClass().getSuperclass();
+            Method superMethod = null;
+            while(!clazz.getName().equals("play.mvc.Controller") && !clazz.getName().equals("java.lang.Object")) {
+                for (Method m : clazz.getDeclaredMethods()) {
+                    if (m.getName().equalsIgnoreCase(name) && Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers())) {
+                        superMethod = m;
+                        break;
+                    }
+                }
+                if(superMethod != null) {
+                    break;
+                }
+                clazz = clazz.getSuperclass();
+            }
+            if(superMethod == null) {
+                throw new RuntimeException("PAF");
+            }
+            Map<String,String> mapss = new HashMap();
+            for (String key : map.keySet()) {
+                mapss.put(key, map.get(key) == null ? null : map.get(key).toString());
+            }
+            params.__mergeWith(mapss);
+            ControllerInstrumentation.initActionCall();
+            Java.invokeStatic(superMethod, ActionInvoker.getActionMethodArgs(superMethod));
+        } catch (InvocationTargetException ex) {
+            // It's a Result ? (expected)
+            if (ex.getTargetException() instanceof Result) {
+                throw (Result)ex.getTargetException();
+            } else {
+                throw new RuntimeException(ex.getTargetException());
+            }
+        }
+        catch(RuntimeException e) {
+            throw e;
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

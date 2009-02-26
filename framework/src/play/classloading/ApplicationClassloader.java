@@ -241,7 +241,10 @@ public class ApplicationClassloader extends ClassLoader {
             }
             Play.classes.compiler.compile(classNames);
             for (ApplicationClass applicationClass : Play.classes.all()) {
-                allClasses.add(loadApplicationClass(applicationClass.name));
+                Class clazz = loadApplicationClass(applicationClass.name);
+                if(clazz != null) {
+                    allClasses.add(clazz);
+                }
             }
         }
         return allClasses;

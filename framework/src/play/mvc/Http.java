@@ -3,6 +3,7 @@ package play.mvc;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -146,6 +147,10 @@ public class Http {
          * Bind to thread
          */
         public static ThreadLocal<Request> current = new ThreadLocal<Request>();
+        /**
+         * 
+         */
+        Method invokedMethod;
 
         /**
          * Automatically resolve request format from the Accept header

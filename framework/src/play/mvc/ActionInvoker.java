@@ -13,7 +13,7 @@ import play.Play;
 import play.PlayPlugin;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.data.binding.Binder;
-import play.data.parsing.DataParser;
+import play.data.parsing.UrlEncodedParser;
 import play.data.validation.Validation;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.ActionNotFoundException;
@@ -47,6 +47,7 @@ public class ActionInvoker {
                 request.controller = ((Class) ca[0]).getName().substring(12);
                 request.actionMethod = actionMethod.getName();
                 request.action = request.controller + "." + request.actionMethod;
+                request.invokedMethod = actionMethod;
             } catch (ActionNotFoundException e) {
                 throw new NotFound(String.format("%s action not found", e.getAction()));
             }
@@ -54,7 +55,7 @@ public class ActionInvoker {
             // 3. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);
             // add parameters from the URI query string 
-            Scope.Params.current()._mergeWith(DataParser.parsers.get("application/x-www-form-urlencoded").parse(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
+            Scope.Params.current()._mergeWith(UrlEncodedParser.parseQueryString(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
             Lang.resolvefrom(request);
 
             // 4. Easy debugging ...

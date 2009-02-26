@@ -14,12 +14,20 @@ import play.libs.Utils;
  */
 public class UrlEncodedParser extends DataParser {
     
+    boolean forQueryString = false;
+    
     public static Map<String, String[]> parse(String urlEncoded) {
         try {
             return new UrlEncodedParser().parse(new ByteArrayInputStream(urlEncoded.getBytes("utf-8")));
         } catch (UnsupportedEncodingException ex) {
             throw new UnexpectedException(ex);
         }
+    }
+    
+    public static Map<String, String[]> parseQueryString(InputStream is) {
+        UrlEncodedParser parser = new UrlEncodedParser();
+        parser.forQueryString = true;
+        return parser.parse(is);
     }
 
     @Override
@@ -33,7 +41,9 @@ public class UrlEncodedParser extends DataParser {
             }
             byte[] data = os.toByteArray();
             // add the complete body as a parameters
-            Utils.Maps.mergeValueInMap(params, "body", new String(data, "utf-8"));
+            if(!forQueryString) {
+                params.put("body", new String[] {new String(data, "utf-8")});
+            }
             
             int ix = 0;
             int ox = 0;

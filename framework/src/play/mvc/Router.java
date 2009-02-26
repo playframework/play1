@@ -74,6 +74,7 @@ public class Router {
                     Route route = new Route();
                     route.method = matcher.group("method");
                     route.path = prefix + matcher.group("path");
+                    route.path = route.path.replace("//", "/");
                     if (route.path.endsWith("/") && !route.path.equals("/")) {
                         route.path = route.path.substring(0, route.path.length() - 1);
                     }
@@ -339,6 +340,9 @@ public class Router {
         }
 
         public Map<String, String> matches(String method, String path) {
+            if(!path.equals("/") && path.endsWith("/")) {
+                path = path.substring(0, path.length()-1);
+            }
             if (method == null || this.method.equals("*") || method.equalsIgnoreCase(this.method)) {
                 Matcher matcher = pattern.matcher(path);
                 if (matcher.matches()) {
