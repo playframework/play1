@@ -9,7 +9,9 @@ import java.text.SimpleDateFormat;
 import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
-
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import play.i18n.Lang;
@@ -29,8 +31,21 @@ public class JavaExtensions {
         }
         return false;
     }
+
+    public static String[] add(String[] array, String o){
+		String[] newArray = new String[array.length + 1];
+		System.arraycopy(array, 0, newArray, 0, array.length);
+		newArray[array.length] = o;
+		return newArray;
+	}
+	
+	public static String[] remove(String[] array, String s){
+		List temp = new ArrayList(Arrays.asList(array));
+		temp.remove(s);
+		return (String []) temp.toArray(new String[temp.size()]);
+	}
     
-    public static String toString(Closure closure) {
+	public static String toString(Closure closure) {
         PrintWriter oldWriter = (PrintWriter)closure.getProperty("out");
         StringWriter newWriter = new StringWriter();
         closure.setProperty("out", new PrintWriter(newWriter));

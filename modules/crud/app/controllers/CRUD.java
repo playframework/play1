@@ -21,16 +21,16 @@ public abstract class CRUD extends Controller {
             render("CRUD/index.html");
         }
     }
-
+	
     public static void list(int page, String search, String searchFields, String orderBy, String order) {
         if (page < 1) {
             page = 1;
         }
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        List<JPAModel> objects = type.findPage(page, search, searchFields, orderBy, order);
-        Long count = type.count(search, searchFields);
-        Long totalCount = type.count(null, null);
+        List<JPAModel> objects = type.findPage(page, search, searchFields, orderBy, order, params.get("where"));
+        Long count = type.count(search, searchFields, params.get("where"));
+        Long totalCount = type.count(null, null, params.get("where"));
         try {
             render(type, objects, count, totalCount, page, orderBy, order);
         } catch (TemplateNotFoundException e) {
@@ -166,11 +166,14 @@ public abstract class CRUD extends Controller {
             return Router.reverse(controllerClass.getName() + ".blank");
         }
 
-        public Long count(String search, String searchFields) {
+        public Long count(String search, String searchFields, String where) {
             String q = "select count(*) from " + entityClass.getSimpleName();
             if (search != null && !search.equals("")) {
                 q += getSearchQuery(searchFields);
-            }
+				q += (where != null ? " and "+where : "" );
+            } else {
+				q += (where != null ? " where "+where : "" );
+			}
             Query query = JPA.getEntityManager().createQuery(q);
             if (search != null && !search.equals("") && q.indexOf("?1") != -1) {
                 query.setParameter(1, "%" + search.toLowerCase() + "%");
@@ -178,12 +181,15 @@ public abstract class CRUD extends Controller {
             return (Long) query.getSingleResult();
         }
 
-        public List findPage(int page, String search, String searchFields, String orderBy, String order) {
+        public List findPage(int page, String search, String searchFields, String orderBy, String order, String where) {
             int pageLength = getPageSize();
             String q = "from " + entityClass.getSimpleName();
             if (search != null && !search.equals("")) {
                 q += getSearchQuery(searchFields);
-            }
+				q += (where != null ? " and "+where : "" );
+            } else {
+				q += (where != null ? " where "+where : "" );
+			}
             if (orderBy == null) {
                 orderBy = "id";
             }
