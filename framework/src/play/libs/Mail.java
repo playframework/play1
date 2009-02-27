@@ -129,50 +129,64 @@ public class Mail {
      */
     public static Future<Boolean> send(String from, String[] recipients, String subject, String body, String contentType, Object... attachments) {
         try {
-            MimeMessage msg = new MimeMessage(getSession());
-
-            if (from == null) {
-                from = Play.configuration.getProperty("mail.smtp.from");
-            }
-            if (from == null) {
-                throw new MailException("Please define a 'from' email address", new NullPointerException());
-            }
-            if (recipients == null || recipients.length == 0) {
-                throw new MailException("Please define a recipient email address", new NullPointerException());
-            }
-            if (subject == null) {
-                throw new MailException("Please define a subject", new NullPointerException());
-            }
-
-            if (contentType == null) {
-                contentType = "text/plain";
-            }
-
-            InternetAddress addressFrom = new InternetAddress(from);
-            msg.setFrom(addressFrom);
-
-            InternetAddress[] addressTo = new InternetAddress[recipients.length];
-            for (int i = 0; i < recipients.length; i++) {
-                addressTo[i] = new InternetAddress(recipients[i]);
-            }
-            msg.setRecipients(javax.mail.Message.RecipientType.TO, addressTo);
-
-            msg.setSubject(subject, "utf-8");
-
-            Multipart mp = new MimeMultipart();
-            MimeBodyPart bodyPart = new MimeBodyPart();
-
-            bodyPart.setContent(body, contentType + "; charset=utf-8");
-            mp.addBodyPart(bodyPart);
-
-            handleAttachments(mp, attachments);
-
-            msg.setContent(mp);
-
-            return sendMessage(msg);
+            return sendMessage(buildMessage(from, recipients, subject, body, contentType, attachments));
         } catch (MessagingException ex) {
             throw new MailException("Cannot send email", ex);
         }
+    }
+    
+    /**
+     * Construct a MimeMessage
+     * @param from From address
+     * @param recipients To addresses
+     * @param subject Subject
+     * @param body Body
+     * @param contentType The content type (text/plain or text/html)
+     * @param attachments File attachments
+     */
+    public static MimeMessage buildMessage(String from, String[] recipients, String subject, String body, String contentType, Object... attachments) throws MessagingException {
+        MimeMessage msg = new MimeMessage(getSession());
+
+        if (from == null) {
+            from = Play.configuration.getProperty("mail.smtp.from");
+        }
+        if (from == null) {
+            throw new MailException("Please define a 'from' email address", new NullPointerException());
+        }
+        if (recipients == null || recipients.length == 0) {
+            throw new MailException("Please define a recipient email address", new NullPointerException());
+        }
+        if (subject == null) {
+            throw new MailException("Please define a subject", new NullPointerException());
+        }
+
+        if (contentType == null) {
+            contentType = "text/plain";
+        }
+
+        InternetAddress addressFrom = new InternetAddress(from);
+        msg.setFrom(addressFrom);
+        msg.setReplyTo(new InternetAddress[] { addressFrom });
+
+        InternetAddress[] addressTo = new InternetAddress[recipients.length];
+        for (int i = 0; i < recipients.length; i++) {
+            addressTo[i] = new InternetAddress(recipients[i]);
+        }
+        msg.setRecipients(javax.mail.Message.RecipientType.TO, addressTo);
+
+        msg.setSubject(subject, "utf-8");
+
+        Multipart mp = new MimeMultipart();
+        MimeBodyPart bodyPart = new MimeBodyPart();
+
+        bodyPart.setContent(body, contentType + "; charset=utf-8");
+        mp.addBodyPart(bodyPart);
+
+        handleAttachments(mp, attachments);
+
+        msg.setContent(mp);
+
+        return msg;
     }
 
     private static Session getSession() {
