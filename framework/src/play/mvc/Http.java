@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,7 +137,7 @@ public class Http {
         /**
          * Format (html,xml,json,text)
          */
-        public String format = "html";
+        public String format = null;
         /**
          * Full action (ex: Application.index)
          */
@@ -157,6 +156,10 @@ public class Http {
          * (in this order : html > xml > json > text)
          */
         public void resolveFormat() {
+            if(format != null) {
+                return;
+            }          
+            
             if (headers.get("accept") == null) {
                 format = "html";
                 return;

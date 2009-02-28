@@ -120,6 +120,9 @@ public class Router {
             if (args != null) {
                 request.routeArgs = args;
                 request.action = route.action;
+                if(args.containsKey("format")) {
+                    request.format = args.get("format");
+                }
                 if (request.action.indexOf("{") > -1) { // more optimization ?
                     for (String arg : request.routeArgs.keySet()) {
                         request.action = request.action.replace("{" + arg + "}", request.routeArgs.get(arg));

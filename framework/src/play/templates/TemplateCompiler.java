@@ -2,6 +2,7 @@ package play.templates;
 
 import groovy.lang.Closure;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -17,20 +18,19 @@ import play.exceptions.UnexpectedException;
  */
 public class TemplateCompiler {
 
-    static String extensionsClassname = JavaExtensions.class.getName();
+    static List<String> extensionsClassnames = new ArrayList();
 
     public static Template compile(VirtualFile file) {
         try {
 
-            try {
+            try {   
+                extensionsClassnames.clear();
                 List<Class> extensionsClasses = Play.classloader.getAssignableClasses(JavaExtensions.class);
-                if (!extensionsClasses.isEmpty()) {
-                    extensionsClassname = extensionsClasses.get(0).getName();
-                } else {
-                    extensionsClassname = JavaExtensions.class.getName();
+                for(Class extensionsClass : extensionsClasses) {
+                    extensionsClassnames.add(extensionsClass.getName());
                 }
             } catch (Throwable e) {
-                extensionsClassname = JavaExtensions.class.getName();
+                //
             }
 
             String source = file.contentAsString();
@@ -73,7 +73,10 @@ public class TemplateCompiler {
             String className = "Template_" + template.name.replaceAll("/", "_s_").replaceAll("\\.", "_p_").replaceAll("-", "_t_");
             print(className);
             println(" extends play.templates.Template.ExecutableTemplate {");
-            println("public Object run() { use(" + extensionsClassname + ") {");
+            println("public Object run() { use(play.templates.JavaExtensions) {");
+            for(String n : extensionsClassnames) {
+                println("use(" + n +") {");
+            }
 
             // Parse
             loop:
@@ -118,6 +121,9 @@ public class TemplateCompiler {
                 }
             }
 
+            for(String n : extensionsClassnames) {
+                println(" } ");
+            }
             println("} }");
             println("}");
 

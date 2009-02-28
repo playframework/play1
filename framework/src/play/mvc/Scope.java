@@ -264,6 +264,14 @@ public class Scope {
                 requestIsParsed = true;
             }
         }
+        
+        public void put(String key, String value) {
+            data.put(key, new String[] {value});
+        }
+        
+        public void put(String key, String[] values) {
+            data.put(key, values);
+        }
 
         public String get(String key) {
             if (!_contains(key)) {

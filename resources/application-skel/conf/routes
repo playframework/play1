@@ -5,7 +5,7 @@
 GET			/							Application.index
 
 # Import the default CRUD routes
-GET			/admin						module:crud
+*			/admin						module:crud
 
 # Map static resources from the /app/public folder to the /public path
 GET			/public						staticDir:public
