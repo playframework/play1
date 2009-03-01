@@ -19,7 +19,15 @@ import play.templates.Template.ExecutableTemplate;
  */
 public class FastTags { 
 
-    public static void _form(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+	/**
+	 * Generates a html form element linked to a controller action
+	 * @param args tag attributes
+	 * @param body tag inner body
+	 * @param out the output writer
+	 * @param template encloding template
+	 * @param fromLine template line number where the tag is defined
+	 */
+	public static void _form(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         ActionDefinition actionDef = (ActionDefinition) args.get("arg");
         if (actionDef == null) {
             actionDef = (ActionDefinition) args.get("action");
@@ -44,7 +52,15 @@ public class FastTags {
         out.print("</form>");
     }
 
-    public static void _a(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+	/**
+	 * Generates a html link to a controller action
+	 * @param args tag attributes
+	 * @param body tag inner body
+	 * @param out the output writer
+	 * @param template encloding template
+	 * @param fromLine template line number where the tag is defined
+	 */
+	public static void _a(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         ActionDefinition actionDef = (ActionDefinition) args.get("arg");
         if (actionDef == null) {
             actionDef = (ActionDefinition) args.get("action");

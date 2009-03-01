@@ -12,6 +12,8 @@ import java.util.Locale;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import play.i18n.Lang;
@@ -279,4 +281,29 @@ public class JavaExtensions {
         }
         return values[1];
     }
+	
+	/**
+	 * return the last item of a list or null if the List is null
+	 */
+    public static Object last(List items) {
+		return (items==null) ? null : items.get(items.size()-1);
+    }
+
+	/**
+	 * concatenate items of a collection as a string separated with <tt>separator</tt>
+	 *  items toString() method should be implemented to provide a string representation
+	 */
+    public static String join(Collection items, String separator ) {
+		if( items == null ) return "";
+		StringBuffer sb = new StringBuffer();
+		Iterator ite = items.iterator();
+		int i=0;
+		while( ite.hasNext()) {
+			if( i++ > 0)
+				sb.append(separator);
+			sb.append( ite.next());
+		}
+		return sb.toString();
+    }
+
 }
