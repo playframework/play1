@@ -23,7 +23,7 @@ public class BeanWrapper {
     private Map<String, Property> wrappers = new HashMap();
 
     public BeanWrapper(Class forClass) {
-        Logger.debug("new bean wrapper for class %s", forClass.getName());
+        Logger.trace("Bean wrapper for class %s", forClass.getName());
         this.beanClass = forClass;
         registerSetters(forClass);
         registerFields(forClass);
@@ -131,16 +131,16 @@ public class BeanWrapper {
             }
             try {
                 if (setter != null) {
-                    play.Logger.debug("invoke setter %s on %s with value %s", setter, instance, value);
+                    Logger.trace("invoke setter %s on %s with value %s", setter, instance, value);
                     setter.invoke(instance, value);
                     return;
                 } else {
-                    play.Logger.debug("field.set(%s, %s)", instance, value);
+                    Logger.trace("field.set(%s, %s)", instance, value);
                     field.set(instance, value);
                 }
 
             } catch (Exception ex) {
-                play.Logger.info(ex, "ERROR in BeanWrapper when setting property %s value is %s", name, value);
+                Logger.warn(ex, "ERROR in BeanWrapper when setting property %s value is %s", name, value);
             }
         }
 
