@@ -9,12 +9,9 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 import org.apache.asyncweb.common.Cookie;
 import org.apache.asyncweb.common.DefaultCookie;
@@ -37,6 +34,7 @@ import play.Logger;
 import play.Play;
 import play.exceptions.PlayException;
 import play.libs.MimeTypes;
+import play.libs.Utils;
 import play.mvc.ActionInvoker;
 import play.mvc.Http;
 import play.mvc.Router;
@@ -226,7 +224,7 @@ public class HttpHandler implements IoHandler {
                     minaResponse.setHeader("Etag", etag);
                     minaResponse.setStatus(HttpResponseStatus.NOT_MODIFIED);
                 } else {
-                    minaResponse.setHeader("Last-Modified", getHttpDateFormatter().format(new Date(last)));
+                    minaResponse.setHeader("Last-Modified", Utils.getHttpDateFormatter().format(new Date(last)));
                     minaResponse.setHeader("Cache-Control", "max-age=3600");
                     minaResponse.setHeader("Etag", etag);
                     attachFile(session, minaResponse, file);
@@ -260,7 +258,7 @@ public class HttpHandler implements IoHandler {
                 return true;
             } else {
                 try {
-                    Date browserDate = getHttpDateFormatter().parse(request.getHeader("If-Modified-Since"));
+                    Date browserDate = Utils.getHttpDateFormatter().parse(request.getHeader("If-Modified-Since"));
                     if (browserDate.getTime() >= last) {
                         return false;
                     }
@@ -409,14 +407,5 @@ public class HttpHandler implements IoHandler {
             }
             HttpHandler.writeResponse(session, minaRequest, minaResponse);
         }
-    }
-    private static ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>();
-
-    public static SimpleDateFormat getHttpDateFormatter() {
-        if (formatter.get() == null) {
-            formatter.set(new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US));
-            formatter.get().setTimeZone(TimeZone.getTimeZone("GMT"));
-        }
-        return formatter.get();
     }
 }

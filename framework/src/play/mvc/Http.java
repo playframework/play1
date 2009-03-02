@@ -4,11 +4,16 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import play.Logger;
 import play.libs.Time;
+import play.libs.Utils;
 
 /**
  * HTTP interface
@@ -213,6 +218,26 @@ public class Http {
             return method + " " + path + (querystring != null && querystring.length()>0 ? "?" + querystring : "");
         }
         
+        public boolean isModified (String etag, long last) {
+            if (!(headers.containsKey("if-none-match") && headers.containsKey("if-modified-since"))) {
+                return true;
+            } else {
+                String browserEtag = headers.get("if-none-match").value();
+                if (!browserEtag.equals(etag)) {
+                    return true;
+                } else {
+                    try {
+                        Date browserDate = Utils.getHttpDateFormatter().parse(headers.get("if-modified-since").value());
+                        if (browserDate.getTime() >= last) {
+                            return false;
+                        }
+                    } catch (ParseException ex) {
+                        Logger.error("Can't parse date", ex);
+                    }
+                    return true;
+                }
+            }
+        }
     }
 
     /**
@@ -312,6 +337,17 @@ public class Http {
         public void cacheFor(String duration) {
             int maxAge = Time.parseDuration(duration);
             setHeader("Cache-Control", "max-age=" + maxAge);
+        }
+        
+        /**
+         * Add cache-control headers
+         * @param duration Ex: 3h
+         */
+        public void cacheFor(String etag, String duration, long lastModified) {
+            int maxAge = Time.parseDuration(duration);
+            setHeader("Cache-Control", "max-age=" + maxAge);
+            setHeader("Last-Modified", Utils.getHttpDateFormatter().format(new Date(lastModified)));
+            setHeader("Etag", etag);
         }
     }
 }
