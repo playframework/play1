@@ -108,7 +108,7 @@ public abstract class Controller {
      * @param is The stream to copy
      */
     protected static void renderBinary(InputStream is) {
-        throw new RenderBinary(is, null);
+        throw new RenderBinary(is, null, true);
     }
 
     /**
@@ -117,7 +117,7 @@ public abstract class Controller {
      * @param name The attachment name
      */
     protected static void renderBinary(InputStream is, String name) {
-        throw new RenderBinary(is, name);
+        throw new RenderBinary(is, name, false);
     }
 
     /**
@@ -125,7 +125,7 @@ public abstract class Controller {
      * @param file The file to copy
      */
     protected static void renderBinary(File file) {
-        throw new RenderBinary(file, null);
+        throw new RenderBinary(file, null, true);
     }
 
     /**
@@ -134,7 +134,7 @@ public abstract class Controller {
      * @param name The attachment name
      */
     protected static void renderBinary(File file, String name) {
-        throw new RenderBinary(file, name);
+        throw new RenderBinary(file, name, false);
     }
 
     /**
