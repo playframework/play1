@@ -161,7 +161,8 @@ public class Http {
          * (in this order : html > xml > json > text)
          */
         public void resolveFormat() {
-            if(format != null) {
+
+        	if(format != null) {
                 return;
             }          
             
@@ -172,7 +173,7 @@ public class Http {
 
             String accept = headers.get("accept").value();
 
-            if (accept.indexOf("application/xhtml") != -1 || accept.indexOf("text/html") != -1) {
+            if (accept.indexOf("application/xhtml") != -1 || accept.indexOf("text/html") != -1 || accept.startsWith("*/*")) {
                 format = "html";
                 return;
             }
@@ -191,7 +192,11 @@ public class Http {
                 format = "json";
                 return;
             }
-
+            
+            if (accept.endsWith("*/*")) {
+            	 format = "html";
+                 return;
+            }
         }
 
         /**
