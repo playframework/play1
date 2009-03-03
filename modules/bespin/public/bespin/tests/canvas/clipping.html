@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Canvas Text Rendering</title>
+    <script type="text/javascript">
+        function renderCanvasText() {
+            var ctx = document.getElementById("myCanvas").getContext("2d");
+            var ctx2 = document.getElementById("hiddenCanvas").getContext("2d");
+
+            ctx.fillStyle = "blue";
+            ctx.fillRect(0, 0, 500, 500);
+
+            ctx2.rect(50, 50, 100, 100);
+            ctx2.rect(170, 170, 200, 200);
+            ctx2.clip();
+
+            ctx2.fillStyle = "red";
+            ctx2.fillRect(0, 0, 500, 500);
+
+            ctx.drawImage(ctx2.canvas, 0, 0);
+        }
+    </script>
+</head>
+<body onload="renderCanvasText()">
+    <p id="error"></p>
+    <canvas id="myCanvas" height="500" width="500">This browser doesn't support canvas</canvas>
+    <canvas id="hiddenCanvas" style="display: none" height="500" width="500">This browser doesn't support canvas</canvas>
+</body>
+</html>

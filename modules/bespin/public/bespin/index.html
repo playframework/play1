@@ -1,0 +1,191 @@
+<!doctype html>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    Version: MPL 1.1
+
+    The contents of this file are subject to the Mozilla Public License Version
+    1.1 (the "License"); you may not use this file except in compliance with
+    the License. You may obtain a copy of the License at
+    http://www.mozilla.org/MPL/
+
+    Software distributed under the License is distributed on an "AS IS" basis,
+    WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+    for the specific language governing rights and limitations under the
+    License.
+
+    The Original Code is Bespin.
+
+    The Initial Developer of the Original Code is Mozilla.
+    Portions created by the Initial Developer are Copyright (C) 2009
+    the Initial Developer. All Rights Reserved.
+
+    Contributor(s):
+        Bespin Team (bespin@mozilla.com)
+
+    ***** END LICENSE BLOCK *****
+-->
+<html>
+<head>
+    <title>Bespin &raquo; Code in the Cloud</title>
+    <link type="text/css" rel="stylesheet" href="css/index.css"/>
+
+    <!-- begin script tags -->
+    <script type="text/javascript" src="js/external/prototype-1.6.0.3.js"></script>
+    <script type="text/javascript" src="js/external/scriptaculous-1.8.2/effects.js"></script>
+
+    <script type="text/javascript" src="js/bespin.js"></script>
+
+    <script type="text/javascript" src="js/client/server.js"></script>
+    <script type="text/javascript" src="js/util/navigate.js"></script>
+    <script type="text/javascript" src="js/registration.js"></script>
+    <!-- end script tags -->
+</head>
+<body>
+
+<div id="loginpane">
+  <div id="version"></div>
+
+  <div id="not_logged_in" style="display: none;">
+      <form onsubmit="login(); return false;">
+          <input id="loginbutton" type="image" src="images/splash_btn_login.gif" />
+          <div id="login-holder"><span id="login_label"><a href="#" onclick="register.showForm();">Sign up</a> or log in:</span>
+              <label for="username">Username: </label><input id="username" type="text" /> <label id="psw-label" for="password">Password: </label><input id="password" type="password" /> <div id="status" style="display: none;"></div>
+          </div>
+      </form>
+  </div>
+  <div id="logged_in" style="display: none;">
+    <div>
+      Welcome back, <span id="display_username"></span>!
+      Go to the <a href="dashboard.html">dashboard</a> to start coding.
+      You can also <a href="#" onclick="logout()">logout</a>.
+    </div>
+  </div>
+</div>
+
+<div id="browser_not_compat" style="display:none;">
+    <div id="inner_browser_not_compat">
+        <h3>Browser compatibility</h3>
+        <div id="sorry_browser_text">
+        <img src="images/splash_browser_compat.png" style="float: left; padding: 6px; margin-top: 4px">
+        <p><em>We would love to have you try Bespin</em></p>
+        <p>Unfortunately, we are using exciting new technology in HTML 5 that only leading browsers have implemented.</p>
+        <p>This message is not shown to you because we flag a particular browser.</p>
+        <p>We are specifically testing for Canvas and the ability to draw text in Canvas. As soon as your current browser supports these technologies, Bespin will work.</p>
+        <p>We have successfully tested Bespin on <a href="http://apple.com/safari/">Safari 4</a> and <a href="http://getfirefox.com/">Firefox 3</a>, so try one of them!</p>
+        <center><img src="images/splash_browser_cancel.png" id="sorry_browser_cancel" onclick="hideBrowserCompatScreen()"></center>
+        </div>
+    </div>
+</div>
+
+<div id="register_border" style="display:none;">
+<div id="register_form">
+  <div id="register_title">
+    <p>Register for Bespin</p>
+  </div>
+  <table>
+    <tbody>
+      <tr>
+        <th>Username:</th>
+        <td><input type="text" id="register_username" onchange="register.checkUsername();"/></td>
+      </tr>
+      <tr>
+        <td class="register_error" colspan="2">
+          <div id="register_username_error"></div>
+        </td>
+      </tr>
+      <tr>
+        <th>Password:</th>
+        <td><input type="password" id="register_password" onchange="register.checkPassword();"/></td>
+      </tr>
+      <tr>
+        <td class="register_error" colspan="2">
+          <div id="register_password_error"></div>
+        </td>
+      </tr>
+      <tr>
+        <th>Confirm Password:</th>
+        <td><input type="password" id="register_confirm" onchange="register.checkConfirm();"/></td>
+      </tr>
+      <tr>
+        <td class="register_error" colspan="2">
+          <div id="register_confirm_error"></div>
+        </td>
+      </tr>
+      <tr>
+        <th>Email:</th>
+        <td><input type="text" id="register_email" onchange="register.checkEmail();"/></td>
+      </tr>
+      <tr>
+        <td class="register_error" colspan="2">
+          <div id="register_email_error"></div>
+        </td>
+      </tr>
+      <tr>
+        <th>&nbsp;</th>
+        <th>
+          <input type="button" class="darkButton" value="Cancel >" onclick="register.cancel();"/>
+          <input type="button" class="darkButton" value="Register >" onclick="register.send();"/>
+        </th>
+        <td><div id="register_register_error"></div></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+<div id="welcome" align="center">
+    <div id="logo"></div>
+</div>
+
+<div id="toolbar" align="center">Log in above to work on your projects, or select an option below.</div>
+
+<div id="main" align="center">
+    <div id="usebespin">
+        <h2>Use Bespin</h2>
+        
+        <img src="images/splash_icn_editnow.png" style="float: left; padding: 4px;">
+        
+        <h3>Edit Open Source</h3>
+        
+        <p>
+            Give us an open-source project name or a publicly accessible repository URL and we'll create a project for you.
+        </p>
+        <p>
+            <input type="text" size="10" id="vcsurl" style="width: 220px;" value="coming soon!" disabled>
+            <br>
+            <!-- <img src="images/splash_btn_editnow.png" align="right" style="padding-right: 16px"> -->
+            <br clear="all">
+        </p>
+        
+        <img src="images/splash_icn_register.png" style="float: left; padding: 4px;">
+
+        <h3 style="padding-top: 12px;">Register for Bespin</h3>
+        
+        <p>
+            No account? No problem! Click below to create an account. Registration is free.
+            
+            <img src="images/splash_btn_register.png" align="right" onclick="register.showForm();" style="padding-right: 20px">
+        </p>
+    </div>
+
+    <div id="learnbespin">
+        <h2>Learn about Bespin</h2>
+        <h3>What is Bespin?</h3>
+        <p>Bespin is a Mozilla Labs experiment on how to build an extensible Web code editor using HTML 5 technology.</p>
+        <a href="http://vimeo.com/3195079"><img src="images/splash_video.png" border="0"></a>
+        
+        <p>
+            <a href="http://labs.mozilla.com/projects/bespin/" style="padding-right: 10px;">Read more &gt;</a>
+            <a href="http://groups.google.com/group/bespin">Participate &gt;</a>
+        </p>
+    </div>
+</div>
+
+<br clear="all"/>
+
+<div id="footer" align="center">&copy; 2009 Mozilla. All rights reserved.</div>
+
+<div id="opaque" style="display: none"></div>
+<canvas id="testcanvas" style="display: none"></canvas>
+</body>
+</html>

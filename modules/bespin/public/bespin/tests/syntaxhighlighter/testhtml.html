@@ -1,0 +1,29 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+    <head>
+        <title>Testing the HTML syntax highlighter</title>
+        <link type="text/css" rel="stylesheet" href="../../css/SyntaxHighlighter.css"></link>
+        <script src="../../research/syntaxhighlighting/dp.SyntaxHighlighter/shCore.js"></script>
+        <script src="../../research/syntaxhighlighter/shBrushXml.js"></script>
+    </head>
+
+    <body>
+
+        <textarea name="code" class="html">
+            <div>foo</div>
+        </textarea>
+
+        <textarea>
+            <div>bar</div>
+        </textarea>
+
+
+        <script>
+        dp.SyntaxHighlighter.BloggerMode();
+        dp.SyntaxHighlighter.HighlightAll('code');
+        </script>
+
+    </body>
+</html>

@@ -1,0 +1,26 @@
+<html>
+<head>
+<title>Disable Selection</title>
+</head>
+
+<body>
+	
+	<script src="../../js/external/prototype-1.6.0.3.js"></script>
+	<script src="../../js/util/textselections.js"></script>
+	
+	<script>
+    Event.observe(document, "dom:loaded", function() {
+        // $('cannotselect').enableTextSelection(false);
+        // $('cannotselecteither').enableTextSelection(false);
+        $('cannotselect', 'cannotselecteither').invoke('enableTextSelection', false);
+    });
+	</script>
+	
+	<div id="canselect">here is something you can select</div>
+	
+	<div id="cannotselect">here is something you can NOT select</div>
+
+	<div id="cannotselecteither">here is something you can NOT select</div>
+	
+</body>
+</html>

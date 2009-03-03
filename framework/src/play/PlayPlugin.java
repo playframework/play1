@@ -1,6 +1,8 @@
 package play;
 
 import java.lang.reflect.Method;
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
 import play.mvc.results.Result;
 
 /**
@@ -17,6 +19,16 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * Called at plugin loading
      */
     public void onLoad() {
+    }
+    
+    /**
+     * Let a chance to this plugin to fully manage this request
+     * @param request The Play request
+     * @param response The Play response
+     * @return true if this plugin has managed this request
+     */
+    public boolean rawInvocation(Request request, Response response) {
+        return false;
     }
 
     /**

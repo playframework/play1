@@ -1,0 +1,74 @@
+<html>
+<head>
+<title>Testing Copy and Paste through a hidden text area</title>
+</head>
+
+<body>
+    <script src="../../js/external/prototype-1.6.0.3.js"></script>
+    <script src="../../js/util/keys.js"></script>
+	
+	<style>
+	#copynpaster {
+      display: none;
+      left: -10000px;
+    }
+	</style>
+	
+	<script>
+	var Key = Bespin.Key;
+	var action;
+	
+    Event.observe(document, "keydown", function(e) {
+        if (e.keyCode == Key.V) {
+            $('copynpaster').focus();
+            $('result').innerHTML = "Paste";
+        }
+    });
+    
+    Event.observe(document, "dom:loaded", function() {
+        
+        // Wow div key handling is wack in FF
+        //
+        // Event.observe($('tocopy'), 'mouseover', function(e) {
+        //     e.target.focus();
+        //     e.target.writeAttribute('tabIndex', '-1');
+        // });
+        // 
+        // Event.observe($('tocopy'), 'mouseout', function(e) {
+        //     e.target.blur();
+        // });
+        
+        Event.observe($('tocopy'), 'keydown', function(e) {
+    	    if (e.metaKey) {
+    	        if (e.keyCode == Key.C) {
+    	            action = "COPY";
+                    $('copynpaster').value = $('tocopy').value;
+                    $('copynpaster').focus();
+                    $('result').innerHTML = "Copy";
+       	        }
+    	    }
+    	});
+    	
+    	Event.observe($("copynpaster"), 'focus', function(e) {
+    	    e.target.select();
+    	    if (action == "COPY") {
+    	        e.explicitOriginalTarget.focus();
+    	        action = undefined;
+	        } else {
+                e.explicitOriginalTarget.value = e.target.value;
+                e.explicitOriginalTarget.focus();
+	        }
+    	});
+    });
+	</script>
+	
+    <input type="text" id="tocopy"/>
+	
+    <!-- <div id="tocopy">foo</div> -->
+		
+	<textarea id="copynpaster"></textarea>
+	
+	<div id="result" style="padding: 8px;"></div>
+	
+</body>
+</html>

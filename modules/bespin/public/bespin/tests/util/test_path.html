@@ -1,0 +1,30 @@
+<html>
+<head>
+<title>Path Tester</title>
+<script src="../../js/bespin.js" type="text/javascript"></script>
+<script src="../../js/util/path.js" type="text/javascript"></script>
+</head>
+
+<body>
+	
+	<script>		
+	function check(value) {
+		document.getElementById("result").value = Bespin.Path.escape(value);
+	}
+
+	function checkMulti() {
+		document.getElementById("result").value = Bespin.Path.escape('//path//to/', "/foo");
+	}
+	
+	</script>
+	
+	<input type="text" id="clean" value="/foo/abar" onclick="check(this.value)"/><br />
+	<input type="text" id="space" value=" /foo/bar " onclick="check(this.value)"/><br />
+	<input type="text" id="double" value="/foo//bar" onclick="check(this.value)"/><br />
+	<input type="text" id="yours" value=""/> <input type="button" onclick="check(document.getElementById('yours').value)" value="check"/><br />
+	<input type="button" onclick="checkMulti()" value="check multi"/><br />
+	
+	<textarea id="result"></textarea>
+	
+</body>
+</html>

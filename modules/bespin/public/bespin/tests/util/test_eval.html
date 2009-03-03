@@ -1,0 +1,39 @@
+<html>
+<head>
+<title>Eval Tester</title>
+</head>
+
+<body>
+	
+	<script>		
+	function runEval() {
+		var toeval = document.getElementById("toeval").value;
+		
+		try {
+			document.getElementById("result").value = eval(toeval);
+		} catch (ex) {
+			document.getElementById("result").value = ex;
+		}
+	}
+	
+	function runEvalWithWith() {
+	    var scope = { key: 'value' };
+	    
+	    var toeval = document.getElementById("toeval").value;
+	    
+	    with (scope) {
+	        document.getElementById("result").value = eval(toeval);
+	    }
+	}
+
+	</script>
+	
+	<input type="text" id="toeval"/>
+	
+	<input type="button" onclick="runEval()" value="Run Eval"/>
+	<input type="button" onclick="runEvalWithWith()" value="Run Eval with 'with'"/><br />
+	
+	<textarea id="result"></textarea>
+	
+</body>
+</html>

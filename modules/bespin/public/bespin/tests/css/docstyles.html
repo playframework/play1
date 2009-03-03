@@ -1,0 +1,67 @@
+<html>
+<head>
+<title>Getting style sheet info</title>
+<style type="text/css" id="css">
+#foo {
+    background-color: #000;
+}
+
+#bar {
+    border: 1px solid red;
+    margin: 0;
+}
+</style>
+</head>
+
+<body>
+	
+	<script>		
+	window.onload = function() {
+	    document.getElementById("source").value = document.getElementById("css").innerHTML;
+	    
+		try {
+			document.getElementById("result").value = getCssText();
+		} catch (ex) {
+			document.getElementById("result").value = ex;
+		}
+	}
+	
+	getCssText = function() {
+      var cssNode = document.getElementById('css');
+      var cssRules = cssNode.sheet ?
+          cssNode.sheet.cssRules : // W3C
+          document.styleSheets[cssNode.id].rules; // IE
+
+      var cssText = [];
+      for (var i = 0, n = cssRules.length; i < n; i++) {
+        var cssRule = cssRules[i];
+        // W3C
+        if (cssRule.cssText) {
+          cssText.push(cssRule.cssText);
+        // IE
+        } else if (cssRule.style && cssRule.style.cssText && cssRule.selectorText) {
+          // The spacing here is intended to make the result consistent with
+          // FF and Webkit.
+          var styleCssText = cssRule.style.cssText;
+          var thisCssText = cssRule.selectorText + ' { ' + styleCssText + ' }';
+          cssText.push(thisCssText);
+        }
+      }
+      // Get it out of the DOM in case they added any CSS that might
+      // screw up the page.
+      //cssNode.parentNode.removeChild(cssNode);
+      return cssText.join("\n");
+    };
+    
+
+	</script>
+	
+	<b>Source</b><br>
+	<textarea id="source" cols=80 rows=10></textarea>
+	<br><br>
+	
+	<b>Output the browser has</b><br>
+	<textarea id="result" cols=80 rows=10></textarea>
+	
+</body>
+</html>

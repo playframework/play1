@@ -62,7 +62,7 @@
         </javadoc>
     </target>
     
-    <target name="jar" depends="compile,version" description="create play.jar">        
+    <target name="jar" depends="compile,version,modules" description="create play.jar">        
         <echo message="${version}" file="src/play/version" />
         <echo message="${version}" file="classes/play/version" />
         <jar destfile="play.jar" basedir="classes">
@@ -76,6 +76,10 @@
                 </section>
             </manifest>
         </jar>
+    </target>
+    
+    <target name="modules">
+        <ant antfile="build.xml" target="build" dir="../modules/bespin" />
     </target>
     
     <!-- Netbeans support -->

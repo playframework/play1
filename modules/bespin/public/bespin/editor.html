@@ -1,0 +1,204 @@
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    Version: MPL 1.1
+
+    The contents of this file are subject to the Mozilla Public License Version
+    1.1 (the "License"); you may not use this file except in compliance with
+    the License. You may obtain a copy of the License at
+    http://www.mozilla.org/MPL/
+
+    Software distributed under the License is distributed on an "AS IS" basis,
+    WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+    for the specific language governing rights and limitations under the
+    License.
+
+    The Original Code is Bespin.
+
+    The Initial Developer of the Original Code is Mozilla.
+    Portions created by the Initial Developer are Copyright (C) 2009
+    the Initial Developer. All Rights Reserved.
+
+    Contributor(s):
+        Bespin Team (bespin@mozilla.com)
+
+    ***** END LICENSE BLOCK *****
+-->
+<!doctype html>
+<html>
+<head>
+    <title>Bespin &raquo; Your Community Editor</title>
+  	<link type="text/css" rel="stylesheet" href="css/editor.css">
+
+    <!-- begin script tags -->
+    <script type="text/javascript" src="js/external/prototype-1.6.0.3.js"></script>
+    <script type="text/javascript" src="js/external/scriptaculous-1.8.2/effects.js"></script>
+    <script type="text/javascript" src="js/external/cookiejar-0.4.js"></script>
+
+    <script type="text/javascript" src="js/bespin.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+	<script type="text/javascript" src="js/events.js"></script>
+
+    <script type="text/javascript" src="js/util/clipboard.js"></script>
+    <script type="text/javascript" src="js/util/fixcanvas.js"></script>
+    <script type="text/javascript" src="js/util/keys.js"></script>
+    <script type="text/javascript" src="js/util/tokenobject.js"></script>
+    <script type="text/javascript" src="js/util/path.js"></script>
+    <script type="text/javascript" src="js/util/urlbar.js"></script>
+    <script type="text/javascript" src="js/util/navigate.js"></script>
+    <script type="text/javascript" src="js/util/mousewheelevent.js"></script>
+
+    <script type="text/javascript" src="js/editor/actions.js"></script>
+    <script type="text/javascript" src="js/editor/editor.js"></script>
+    <script type="text/javascript" src="js/editor/model.js"></script>
+    <script type="text/javascript" src="js/editor/toolbar.js"></script>
+    <script type="text/javascript" src="js/editor/themes.js"></script>
+    <script type="text/javascript" src="js/editor/undo.js"></script>
+
+    <script type="text/javascript" src="js/syntax/syntax.js"></script>
+    <script type="text/javascript" src="js/syntax/javascript.js"></script>
+    <script type="text/javascript" src="js/syntax/css.js"></script>
+    <script type="text/javascript" src="js/syntax/html.js"></script>
+    
+    <script type="text/javascript" src="js/commandline/commandline.js"></script>
+    <script type="text/javascript" src="js/commandline/commands.js"></script>
+    <script type="text/javascript" src="js/commandline/editorcommands.js"></script>
+
+    <script type="text/javascript" src="js/client/filesystem.js"></script>
+    <script type="text/javascript" src="js/client/settings.js"></script>
+    <script type="text/javascript" src="js/client/server.js"></script>
+    <script type="text/javascript" src="js/client/status.js"></script>
+    <script type="text/javascript" src="js/client/session.js"></script>
+
+    <script type="text/javascript" src="js/external/jstraits.js"></script>
+    <script type="text/javascript" src="js/th/traits.js"></script>
+    <script type="text/javascript" src="js/th/th.js"></script>
+    <script type="text/javascript" src="js/th/models.js"></script>
+    <script type="text/javascript" src="js/th/borders.js"></script>
+    <script type="text/javascript" src="js/th/components.js"></script>
+    <!-- end script tags -->
+</head>
+<body>
+    <div id="header">
+        <img id="toolbar_collaboration" src="images/icn_collab_dim.png" alt="Collaboration">
+        <div id="collab_line"></div>
+        <div id="version"></div>
+        <a href="dashboard.html" title="Go Home"><img id="logo" src="images/logo.png" alt="Bespin" border="0"></a>
+        <a href="dashboard.html" title="Visit the Dashboard"><img id="toolbar_dashboard" src="images/icn_dashboard_off.png" alt="Dashboard" border="0"></a>
+
+        <!-- coming soon -->
+        <!--<img id="toolbar_files" src="images/icn_files_off.png" alt="Files" title="Show Files">-->
+        <!--<img id="toolbar_target_browsers" src="images/icn_target_off.png" alt="Target Browsers" title="Show Target Browsers">-->
+
+        <span id="selected_browsers"></span>
+    </div>
+    <div id="subheader">
+        <!-- coming soon :-) -->
+        <!--<div id="search">-->
+            <!--<div style="float: left"><input id="searchquery" type="text"></div>-->
+            <!--<div style="float: right"><img id="searchbutton" src="images/icn_findincode.png" alt="Search"></div>-->
+        <!--</div>-->
+
+        <div id="status"><canvas id="projectLabel"></canvas></div>
+        <div id="bar"></div>
+        <img id="toolbar_save" src="images/icn_save.png" alt="Save" title="Save">
+        <img id="toolbar_undo" src="images/icn_undo.png" alt="Undo" title="Undo">
+        <img id="toolbar_redo" src="images/icn_redo.png" alt="Redo" title="Redo" style="padding-right: 20px">
+        <img id="toolbar_cut" src="images/icn_cut.png" alt="Cut" title="Cut">
+        <img id="toolbar_copy" src="images/icn_copy.png" alt="Copy" title="Copy">
+        <img id="toolbar_paste" src="images/icn_paste.png" alt="Paste" title="Paste" style="padding-right: 20px">
+        <!-- img id="toolbar_history" src="images/icn_history.png" alt="History" title="History" -->
+        <img id="toolbar_fontsize" src="images/icn_fontsize.png" alt="Font Size" title="Font Size">
+    </div>
+    <div id="editor" width="500" height="500"></div>
+    <div id="footer">
+        <table cellpadding="0">
+            <tr>
+                <td id="prompt"><img id="promptimg" src="images/icn_command.png" alt=">" ></td>
+                <td id="commandline"><input id="command"></td>
+                <!-- <td id="error_bar">
+                    <div style="float: left"><img src="images/icn_error.png" alt="Errors"></div>
+                    <div id="error_bar_text" style="float: right">3</div>
+                </td> -->
+                <td id="message" align="right" nowrap><a href="https://wiki.mozilla.org/Labs/Bespin/Tips" target="_blank" title="Ctrl-J jumps you between the command line and the editor">Hint: Try Ctrl-J</a></td>
+            </tr>
+        </table>
+    </div>
+    <div id="files">
+        <div id="files_find">
+            <div id="files_find_text">Quick Find</div>
+            <div id="files_find_input"><input id="quickfind" type="text"></div>
+            <div id="files_find_icon"><img src="images/icn_findincode.png" alt="Quick Find"></div>
+        </div>
+        <div id="files_project">
+            <div id="files_project_name">Project Name</div>
+            <div id="files_project_pulldown"><img src="images/files_icn_projectdropdown.png" alt="Change Project"></div>
+        </div>
+        <div class="comingsoon" style="padding: 10px 0 0 10px;">COMING SOON!</div>
+    </div>
+    <div id="info" style="display: none;"></div>
+    <div id="target_browsers">
+        <table id="target_browsers_table">
+            <tr>
+                <td>
+                    Specify Target Browsers<br><span class="comingsoon">COMING SOON!</span>
+                </td>
+                <td class="spacer">
+                    <img src="images/icn_browser_div.png" alt="">
+                </td>
+                <td class="icon">
+                    <img src="images/icn_browser_ie.png" alt="Internet Explorer">
+                </td>
+                <td>
+                    <select name="target_ie" disabled>
+                        <option></option>
+                        <option>6+</option>
+                        <option>7+</option>
+                    </select>
+                </td>
+                <td class="icon">
+                    <img src="images/icn_browser_ff.png" alt="Firefox">
+                </td>
+                <td>
+                    <select name="target_ff" disabled>
+                        <option></option>
+                        <option>2+</option>
+                        <option>3+</option>
+                    </select>
+                </td>
+                <td class="icon">
+                    <img src="images/icn_browser_safari.png" alt="Safari">
+                </td>
+                <td>
+                    <select name="target_safari" disabled>
+                        <option></option>
+                        <option>2+</option>
+                        <option>3+</option>
+                    </select>
+                </td>
+                <td class="icon">
+                    <img src="images/icn_browser_opera.png" alt="Opera">
+                </td>
+                <td>
+                    <select name="target_opera" disabled>
+                        <option></option>
+                        <option>8+</option>
+                        <option>9+</option>
+                        <option>9.5+</option>
+                    </select>
+                </td>
+                <td class="icon">
+                    <img src="images/icn_browser_w3c.png" alt="W3C">
+                </td>
+                <td>
+                    <select name="target_w3c" disabled>
+                        <option></option>
+                        <option>HTML 4</option>
+                        <option>HTML 5</option>
+                        <option>XHTML 1</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

@@ -24,6 +24,12 @@
                     <encoding>UTF-8</encoding>
                 </source-folder>
                 <source-folder>
+                    <label>modules/bespin/sources</label>
+                    <type>java</type>
+                    <location>modules/bespin/src</location>
+                    <encoding>UTF-8</encoding>
+                </source-folder>
+                <source-folder>
                     <label>tests</label>
                     <type>java</type>
                     <location>framework/tests/src</location>
