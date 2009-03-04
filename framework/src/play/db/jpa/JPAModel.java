@@ -1,11 +1,13 @@
 package play.db.jpa;
 
+import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -14,6 +16,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
+import javax.persistence.PostUpdate;
 import javax.persistence.Query;
 import play.data.binding.BeanWrapper;
 import play.exceptions.UnexpectedException;
@@ -78,6 +83,19 @@ public class JPAModel implements Serializable {
                         }
                     }
                 }
+                if(field.getType().equals(FileAttachment.class)) {
+                    FileAttachment fileAttachment = ((FileAttachment)field.get(this));
+                    if(fileAttachment == null) {
+                        fileAttachment = new FileAttachment(this, field.getName());
+                        field.setAccessible(true);
+                        field.set(this, fileAttachment);
+                    }
+                    File file = params.get(name + "." +field.getName(), File.class);
+                    if(file != null && file.exists() && file.length() > 0) {
+                        fileAttachment.set(params.get(name + "." +field.getName(), File.class));
+                        fileAttachment.filename = file.getName();
+                    }
+                }
             }
             return (T) this;
         } catch (Exception e) {
@@ -120,7 +138,7 @@ public class JPAModel implements Serializable {
             throw new RuntimeException(e);
         }
     }
-    
+
     public static <T> T create(String name, Params params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
@@ -271,6 +289,40 @@ public class JPAModel implements Serializable {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "[" + id + "]";
+    }
+
+    @PostLoad
+    public void setupAttachment() {
+        for (Field field : getClass().getFields()) {
+            if (field.getType().equals(FileAttachment.class)) {
+                try {
+                    FileAttachment attachment = (FileAttachment)field.get(this);
+                    if(attachment != null) {
+                        attachment.model = this;
+                        attachment.name = field.getName();
+                    }
+                } catch (Exception ex) {
+                    throw new UnexpectedException(ex);
+                }
+            }
+        }
+    }
+    
+    @PostPersist
+    @PostUpdate
+    public void saveAttachment() {
+        for (Field field : getClass().getFields()) {
+            if (field.getType().equals(FileAttachment.class)) {
+                try {
+                    FileAttachment attachment = (FileAttachment)field.get(this);
+                    if(attachment != null) {
+                        attachment.save();
+                    }
+                } catch (Exception ex) {
+                    throw new UnexpectedException(ex);
+                }
+            }
+        }
     }
 
     @SuppressWarnings("unused")

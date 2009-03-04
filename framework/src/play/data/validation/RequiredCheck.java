@@ -4,6 +4,7 @@ import java.util.Collection;
 import net.sf.oval.Validator;
 import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import net.sf.oval.context.OValContext;
+import play.db.jpa.FileAttachment;
 import play.exceptions.UnexpectedException;
 
 public class RequiredCheck extends AbstractAnnotationCheck<Required> {
@@ -19,6 +20,9 @@ public class RequiredCheck extends AbstractAnnotationCheck<Required> {
         }
         if (value instanceof Collection) {
             return ((Collection)value).size() > 0;
+        }
+        if (value instanceof FileAttachment) {
+            return ((FileAttachment)value).isSet();
         }
         if (value.getClass().isArray()) {
             try {

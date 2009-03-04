@@ -19,3 +19,4 @@ id
 framework/tests-tmp
 framework/docs
 dist
+modules/bespin/lib/bespin.jar

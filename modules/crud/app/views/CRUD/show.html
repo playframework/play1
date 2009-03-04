@@ -5,7 +5,7 @@
 	<h2 id="crudShowTitle">&{'crud.show.title', type.modelName}</h2>
 	
 	<div class="objectForm">
-	#{form @save(object.id)}
+	#{form action:@save(object.id), enctype:'multipart/form-data'}
 		#{crud.form /}
 		<p class="crudButtons">
 			<input type="submit" name="_save" value="&{'crud.save', type.modelName}" />

@@ -1,0 +1,12 @@
+#{field 'object.' + _name}
+	<label for="${field.id}">
+		&{_name}
+	</label>
+	<input id="${field.id}" class="${field.errorClass}" type="file" name="${field.name}" />
+	#{ifError field.name}
+		<span class="error">${field.error}</span>
+	#{/ifError}
+	#{if _value && _value.get()}
+		<a class="currentAttachment" href="@{attachment(_id, _name)}">${_value.filename} (${_value.get().size().formatSize()})</a>
+	#{/if}
+#{/field}

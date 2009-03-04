@@ -202,6 +202,13 @@ label {
 	margin-top: 5px;
 }
 
+.currentAttachment {
+	display: block;
+	font-size: 80%;
+	margin-left: 20%;
+	padding-top: 4px;
+}
+
 /** Footer **/
 
 #crud #crudFooter {

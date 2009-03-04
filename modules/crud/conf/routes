@@ -6,6 +6,7 @@ GET			/												CRUD.index
 GET			/${type.controllerName}							${type.controllerName}.list
 GET			/${type.controllerName}/new						${type.controllerName}.blank
 GET			/${type.controllerName}/{<\d+>id}				${type.controllerName}.show
+GET			/${type.controllerName}/{<\d+>id}/{field}		${type.controllerName}.attachment
 GET			/${type.controllerName}/{<\d+>id}/edit			${type.controllerName}.edit
 POST		/${type.controllerName}							${type.controllerName}.create
 PUT			/${type.controllerName}/{<\d+>id}				${type.controllerName}.save

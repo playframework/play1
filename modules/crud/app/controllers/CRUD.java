@@ -49,6 +49,17 @@ public abstract class CRUD extends Controller {
         }
     }
 
+	public static void attachment(Long id, String field) throws Exception {
+		ObjectType type = ObjectType.get(getControllerClass());
+        notFoundIfNull(type);
+        JPAModel object = type.findById(id);
+		FileAttachment attachment = (FileAttachment)object.getClass().getField(field).get(object);
+		if(attachment == null) {
+			notFound();
+		}
+		renderBinary(attachment.get(), attachment.filename);
+	}
+
     public static void save(Long id) throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
@@ -274,6 +285,9 @@ public abstract class CRUD extends Controller {
                 }
                 if (Date.class.isAssignableFrom(field.getType())) {
                     type = "date";
+                }
+				if (FileAttachment.class.isAssignableFrom(field.getType())) {
+                    type = "file";
                 }
                 if (JPAModel.class.isAssignableFrom(field.getType())) {
                     if (field.isAnnotationPresent(OneToOne.class)) {

@@ -32,6 +32,10 @@
 			#{crud.textField name:field.name, value:(_caller.object ? _caller.object[field.name] : null) /}
 		#{/if}
 		
+		#{if field.type == 'file'}
+			#{crud.fileField name:field.name, value:(_caller.object ? _caller.object[field.name] : null), id:_caller.object?.id /}
+		#{/if}
+		
 		#{if field.type == 'longtext'}
 			#{crud.longtextField name:field.name, value:(_caller.object ? _caller.object[field.name] : null) /}
 		#{/if}
