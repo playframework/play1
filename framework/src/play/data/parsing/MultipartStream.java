@@ -378,7 +378,9 @@ public class MultipartStream {
                 // No more data available.
                 throw new IOException("No more data is available");
             }
-            notifier.noteBytesRead(tail);
+            if(notifier != null) {
+                notifier.noteBytesRead(tail);
+            }
         }
         return buffer[head++];
     }
