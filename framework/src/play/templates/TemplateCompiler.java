@@ -75,7 +75,7 @@ public class TemplateCompiler {
             println(" extends play.templates.Template.ExecutableTemplate {");
             println("public Object run() { use(play.templates.JavaExtensions) {");
             for(String n : extensionsClassnames) {
-                println("use(" + n +") {");
+                println("use(_('" + n +"')) {");
             }
 
             // Parse
