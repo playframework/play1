@@ -4,7 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.SocketException;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -12,6 +17,7 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -26,6 +32,10 @@ import org.apache.commons.httpclient.methods.TraceMethod;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
+import org.apache.commons.httpclient.params.HttpConnectionParams;
+import org.apache.commons.httpclient.protocol.ControllerThreadSocketFactory;
+import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import play.Logger;
@@ -70,7 +80,65 @@ public class WS extends PlayPlugin {
 
     static {
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+        ProtocolSocketFactory factory = new ProtocolSocketFactory() {
+
+            /**
+             * @see #createSocket(java.lang.String,int,java.net.InetAddress,int)
+             */
+            public Socket createSocket(
+                    String host,
+                    int port,
+                    InetAddress localAddress,
+                    int localPort) throws IOException, UnknownHostException {
+                // get inetAddersses
+                InetAddress[] inetAddresses = InetAddress.getAllByName(host);
+
+
+                for (int i = 0; i < inetAddresses.length; i++) {
+                    try {
+                        Socket socket = new Socket(inetAddresses[i], port, localAddress,
+                                localPort);
+
+                        return socket;
+                    } catch (SocketException se) {
+                        System.out.println("Socket exception on "+inetAddresses[i]);
+                    }
+                }
+                // tried all
+                throw new SocketException("Cannot connect to " + host);
+            }
+
+            public Socket createSocket(
+                    final String host,
+                    final int port,
+                    final InetAddress localAddress,
+                    final int localPort,
+                    final HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
+                if (params == null) {
+                    throw new IllegalArgumentException("Parameters may not be null");
+                }
+                int timeout = params.getConnectionTimeout();
+                if (timeout == 0) {
+                    return createSocket(host, port, localAddress, localPort);
+                }
+                return ControllerThreadSocketFactory.createSocket(
+                        this, host, port, localAddress, localPort, timeout);
+            }
+
+            /**
+             * @see ProtocolSocketFactory#createSocket(java.lang.String,int,InetAddress,int)
+            )
+             */
+            public Socket createSocket(String host, int port) throws IOException,
+                    UnknownHostException {
+                return createSocket(host, port, null, 0);
+            }
+        };
+
+        Protocol protocol = new Protocol("http", factory, 80);
+        Protocol.registerProtocol("http", protocol);
         httpClient = new HttpClient(connectionManager);
+
     }
 
     public static HttpResponse GET(String url, Object... params) {
