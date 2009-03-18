@@ -60,13 +60,13 @@ public class ActionInvoker {
 
             // 4. Easy debugging ...
             if (Play.mode == Play.Mode.DEV) {
-                Controller.class.getField("params").set(null, Scope.Params.current());
-                Controller.class.getField("request").set(null, Http.Request.current());
-                Controller.class.getField("response").set(null, Http.Response.current());
-                Controller.class.getField("session").set(null, Scope.Session.current());
-                Controller.class.getField("flash").set(null, Scope.Flash.current());
-                Controller.class.getField("renderArgs").set(null, Scope.RenderArgs.current());
-                Controller.class.getField("validation").set(null, Java.invokeStatic(Validation.class, "current"));
+                Controller.class.getDeclaredField("params").set(null, Scope.Params.current());
+                Controller.class.getDeclaredField("request").set(null, Http.Request.current());
+                Controller.class.getDeclaredField("response").set(null, Http.Response.current());
+                Controller.class.getDeclaredField("session").set(null, Scope.Session.current());
+                Controller.class.getDeclaredField("flash").set(null, Scope.Flash.current());
+                Controller.class.getDeclaredField("renderArgs").set(null, Scope.RenderArgs.current());
+                Controller.class.getDeclaredField("validation").set(null, Java.invokeStatic(Validation.class, "current"));
             }
 
             for (PlayPlugin plugin : Play.plugins) {

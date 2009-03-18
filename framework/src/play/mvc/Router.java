@@ -193,7 +193,7 @@ public class Router {
                     }
                     // les parametres codes en dur dans la route matchent-ils ?
                     for (String staticKey : route.staticArgs.keySet()) {
-                        if (!args.containsKey(staticKey) || !args.get(staticKey).equals(route.staticArgs.get(staticKey))) {
+                        if (!args.containsKey(staticKey) || args.get(staticKey) == null || !args.get(staticKey).equals(route.staticArgs.get(staticKey))) {
                             allRequiredArgsAreHere = false;
                             break;
                         }

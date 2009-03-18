@@ -44,31 +44,31 @@ public abstract class Controller {
     /**
      * The current HTTP request
      */
-    public static Http.Request request = null;
+    protected static Http.Request request = null;
     /**
      * The current HTTP response
      */
-    public static Response response = null;
+    protected static Response response = null;
     /**
      * The current HTTP session
      */
-    public static Scope.Session session = null;
+    protected static Scope.Session session = null;
     /**
      * The current flash scope
      */
-    public static Scope.Flash flash = null;
+    protected static Scope.Flash flash = null;
     /**
      * The current HTTP params
      */
-    public static Scope.Params params = null;
+    protected static Scope.Params params = null;
     /**
      * The current renderArgs (used in templates)
      */
-    public static Scope.RenderArgs renderArgs = null;
+    protected static Scope.RenderArgs renderArgs = null;
     /**
      * The current Validation
      */
-    public static Validation validation = null;
+    protected static Validation validation = null;
 
     /**
      * Return a 200 OK text/plain response
