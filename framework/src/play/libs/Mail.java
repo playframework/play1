@@ -134,7 +134,7 @@ public class Mail {
             throw new MailException("Cannot send email", ex);
         }
     }
-    
+
     /**
      * Construct a MimeMessage
      * @param from From address
@@ -166,7 +166,7 @@ public class Mail {
 
         InternetAddress addressFrom = new InternetAddress(from);
         msg.setFrom(addressFrom);
-        msg.setReplyTo(new InternetAddress[] { addressFrom });
+        msg.setReplyTo(new InternetAddress[]{addressFrom});
 
         InternetAddress[] addressTo = new InternetAddress[recipients.length];
         for (int i = 0; i < recipients.length; i++) {
@@ -218,10 +218,9 @@ public class Mail {
             // story to be continued in javamail 1.4.2 : https://glassfish.dev.java.net/issues/show_bug.cgi?id=5189
             }
 
-            if (Play.configuration.containsKey("mail.smtp.localhost"))
-            	props.put("mail.smtp.localhost", Play.configuration.get("mail.smtp.localhost"));
-            
-            //override defaults
+            if (Play.configuration.containsKey("mail.smtp.localhost")) {
+                props.put("mail.smtp.localhost", Play.configuration.get("mail.smtp.localhost"));            //override defaults
+            }
             if (Play.configuration.containsKey("mail.smtp.socketFactory.class")) {
                 props.put("mail.smtp.socketFactory.class", Play.configuration.get("mail.smtp.socketFactory.class"));
             }
@@ -229,15 +228,33 @@ public class Mail {
                 props.put("mail.smtp.port", Play.configuration.get("mail.smtp.port"));
             }
             String user = Play.configuration.getProperty("mail.smtp.user");
-            String password = Play.configuration.getProperty("mail.smtp.password");
+            String password = Play.configuration.getProperty("mail.smtp.pass");
+            if (password == null) {
+                // Fallback to old convention
+                password = Play.configuration.getProperty("mail.smtp.password");
+            }
+            String authenticator = Play.configuration.getProperty("mail.smtp.authenticator");
+            session = null;
 
-            if (user != null && password != null) {
-                session = Session.getInstance(props, new SMTPAuthenticator(user, password));
-            } else {
-                session = Session.getInstance(props);
+            if (authenticator != null) {
+                props.put("mail.smtp.auth", "true");
+                try {
+                    session = Session.getInstance(props, (Authenticator) Play.classloader.loadClass(authenticator).newInstance());
+                } catch (Exception e) {
+                    Logger.error(e, "Cannot instanciate custom SMTP authenticator (%s)", authenticator);
+                }
             }
 
-            session = Session.getDefaultInstance(props, null);
+            if (session == null) {
+                if (user != null && password != null) {
+                    props.put("mail.smtp.auth", "true");
+                    session = Session.getInstance(props, new SMTPAuthenticator(user, password));
+                } else {
+                    props.remove("mail.smtp.auth");
+                    session = Session.getInstance(props);
+                }
+            }
+
             if (Boolean.parseBoolean(Play.configuration.getProperty("mail.debug", "false"))) {
                 session.setDebug(true);
             }
@@ -247,21 +264,21 @@ public class Mail {
 
     private static void handleAttachments(Multipart mp, Object... attachments) throws MessagingException {
         if (attachments != null) {
-        	 for (Object attachment : attachments) {
-        		 DataSource datasource = null;
-        		 if (attachment instanceof File) {
-        			 datasource = new FileDataSource((File)attachment);
-        		 } else if (attachment instanceof DataSource )
-        			 datasource = (DataSource) attachment;
-        		 else
-        			 throw new UnexpectedException (attachment.getClass().getName()+" type is not supported as attachement.");
-        		 
-        		 MimeBodyPart part = new MimeBodyPart();
-        		 part.setDataHandler(new DataHandler(datasource));
-        		 part.setFileName(datasource.getName());
-        		 part.setContentID(datasource.getName());
-        		 mp.addBodyPart(part);
-        	 }
+            for (Object attachment : attachments) {
+                DataSource datasource = null;
+                if (attachment instanceof File) {
+                    datasource = new FileDataSource((File) attachment);
+                } else if (attachment instanceof DataSource) {
+                    datasource = (DataSource) attachment;
+                } else {
+                    throw new UnexpectedException(attachment.getClass().getName() + " type is not supported as attachement.");
+                }
+                MimeBodyPart part = new MimeBodyPart();
+                part.setDataHandler(new DataHandler(datasource));
+                part.setFileName(datasource.getName());
+                part.setContentID(datasource.getName());
+                mp.addBodyPart(part);
+            }
         }
     }
 
@@ -275,10 +292,7 @@ public class Mail {
             public Boolean call() {
                 try {
                     msg.setSentDate(new Date());
-                    Transport transport = getSession().getTransport("smtp");
-                    transport.connect(getSession().getProperty("mail.smtp.host"), Play.configuration.getProperty("mail.smtp.user"), Play.configuration.getProperty("mail.smtp.pass"));
-                    transport.sendMessage(msg, msg.getAllRecipients());
-                    transport.close();
+                    Transport.send(msg);
                     return true;
                 } catch (Throwable e) {
                     MailException me = new MailException("Error while sending email", e);
