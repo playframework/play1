@@ -21,7 +21,7 @@ public class Unbinder {
     }
 
     private static void unBind(Map<String, Object> result, Object src, Class srcClazz, String name) {
-        if (isDirect(srcClazz)) {
+        if (isDirect(srcClazz) || src == null) {
             if (!result.containsKey(name)) {
                 result.put(name, src != null ? src.toString() : null);
             } else {
@@ -66,7 +66,7 @@ public class Unbinder {
     }
 
     public static boolean isDirect(Class clazz) {
-        return clazz.equals(String.class) || clazz.equals(Integer.class) || clazz.equals(Boolean.class) || clazz.equals(Long.class)
+        return clazz.equals(String.class) || clazz.equals(Integer.class) || Enum.class.isAssignableFrom(clazz) || clazz.equals(Boolean.class) || clazz.equals(Long.class)
                 || clazz.equals(Double.class) || clazz.equals(Float.class) || clazz.equals(Short.class) || clazz.equals(BigDecimal.class)
                 || clazz.isPrimitive();
     }
