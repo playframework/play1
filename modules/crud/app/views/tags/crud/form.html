@@ -31,6 +31,10 @@
 		#{if field.type == 'text'}
 			#{crud.textField name:field.name, value:(_caller.object ? _caller.object[field.name] : null) /}
 		#{/if}
+                
+                #{if field.type == 'password'}
+			#{crud.passwordField name:field.name, value:(_caller.object ? _caller.object[field.name] : null) /}
+		#{/if}
 		
 		#{if field.type == 'file'}
 			#{crud.fileField name:field.name, value:(_caller.object ? _caller.object[field.name] : null), id:_caller.object?.id /}

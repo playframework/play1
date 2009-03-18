@@ -25,6 +25,8 @@ crud.delete=Delete &{%s}
 crud.created=The &{%s} has been created
 crud.saved=The &{%s} has been saved
 crud.deleted=The &{%s} has been deleted
+crud.search=Search
+crud.none=(None)
 
 crud.help.required=Required.
 crud.help.minlength=Minimal size is %d.

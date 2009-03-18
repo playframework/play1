@@ -21,7 +21,7 @@ public abstract class CRUD extends Controller {
             render("CRUD/index.html");
         }
     }
-	
+
     public static void list(int page, String search, String searchFields, String orderBy, String order) {
         if (page < 1) {
             page = 1;
@@ -49,16 +49,16 @@ public abstract class CRUD extends Controller {
         }
     }
 
-	public static void attachment(Long id, String field) throws Exception {
-		ObjectType type = ObjectType.get(getControllerClass());
+    public static void attachment(Long id, String field) throws Exception {
+        ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         JPAModel object = type.findById(id);
-		FileAttachment attachment = (FileAttachment)object.getClass().getField(field).get(object);
-		if(attachment == null) {
-			notFound();
-		}
-		renderBinary(attachment.get(), attachment.filename);
-	}
+        FileAttachment attachment = (FileAttachment) object.getClass().getField(field).get(object);
+        if (attachment == null) {
+            notFound();
+        }
+        renderBinary(attachment.get(), attachment.filename);
+    }
 
     public static void save(Long id) throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
@@ -146,7 +146,6 @@ public abstract class CRUD extends Controller {
             if (entityClass == null || !JPAModel.class.isAssignableFrom(entityClass)) {
                 return null;
             }
-            ;
             ObjectType type = new ObjectType();
             type.name = controllerClass.getSimpleName();
             type.modelName = entityClass.getSimpleName();
@@ -180,11 +179,14 @@ public abstract class CRUD extends Controller {
         public Long count(String search, String searchFields, String where) {
             String q = "select count(*) from " + entityClass.getSimpleName();
             if (search != null && !search.equals("")) {
-                q += getSearchQuery(searchFields);
-				q += (where != null ? " and "+where : "" );
+                String searchQuery = getSearchQuery(searchFields);
+                if (!searchQuery.equals("")) {
+                    q += " where (" + searchQuery + ")";
+                }
+                q += (where != null ? " and " + where : "");
             } else {
-				q += (where != null ? " where "+where : "" );
-			}
+                q += (where != null ? " where " + where : "");
+            }
             Query query = JPA.getEntityManager().createQuery(q);
             if (search != null && !search.equals("") && q.indexOf("?1") != -1) {
                 query.setParameter(1, "%" + search.toLowerCase() + "%");
@@ -196,13 +198,17 @@ public abstract class CRUD extends Controller {
             int pageLength = getPageSize();
             String q = "from " + entityClass.getSimpleName();
             if (search != null && !search.equals("")) {
-                q += getSearchQuery(searchFields);
-				q += (where != null ? " and "+where : "" );
+                String searchQuery = getSearchQuery(searchFields);
+                if (!searchQuery.equals("")) {
+                    q += " where (" + searchQuery + ")";
+                }
+                q += (where != null ? " and " + where : "");
             } else {
-				q += (where != null ? " where "+where : "" );
-			}
+                q += (where != null ? " where " + where : "");
+            }
             if (orderBy == null) {
                 orderBy = "id";
+                order = "DESC";
             }
             if (order == null || (!order.equals("ASC") && !order.equals("DESC"))) {
                 order = "ASC";
@@ -225,11 +231,11 @@ public abstract class CRUD extends Controller {
             String q = "";
             for (ObjectField field : getFields()) {
                 if (field.searchable && (fields == null ? true : fields.contains(field.name))) {
-                    q += " or lower(" + field.name + ") like ?1";
+                    if (!q.equals("")) {
+                        q += " or ";
+                    }
+                    q += "lower(" + field.name + ") like ?1";
                 }
-            }
-            if (q.length() > 0) {
-                q = " where " + q.substring(3);
             }
             return q;
         }
@@ -276,6 +282,9 @@ public abstract class CRUD extends Controller {
                             type = "longtext";
                         }
                     }
+                    if (field.isAnnotationPresent(Password.class)) {
+                        type = "password";
+                    }
                 }
                 if (Number.class.isAssignableFrom(field.getType())) {
                     type = "number";
@@ -286,7 +295,7 @@ public abstract class CRUD extends Controller {
                 if (Date.class.isAssignableFrom(field.getType())) {
                     type = "date";
                 }
-				if (FileAttachment.class.isAssignableFrom(field.getType())) {
+                if (FileAttachment.class.isAssignableFrom(field.getType())) {
                     type = "file";
                 }
                 if (JPAModel.class.isAssignableFrom(field.getType())) {
