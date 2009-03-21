@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.results.Result;
+import play.vfs.VirtualFile;
 
 /**
  * A framework plugin
@@ -28,6 +29,16 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * @return true if this plugin has managed this request
      */
     public boolean rawInvocation(Request request, Response response) {
+        return false;
+    }
+    
+    /**
+     * Let a chance to this plugin to manage a static ressource
+     * @param request The Play request
+     * @param response The Play response
+     * @return true if this plugin has managed this request
+     */
+    public boolean serveStatic(VirtualFile file, Request request, Response response) {
         return false;
     }
 

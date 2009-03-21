@@ -58,9 +58,10 @@ public class HttpHandler implements IoHandler {
         Request request = null;
         Response response = null;
         try {
-            request = parseRequest(minaRequest, session);
             response = new Response();
+            Http.Response.current.set(response);
             response.out = new ByteArrayOutputStream();
+            request = parseRequest(minaRequest, session);
             boolean raw = false;
             for (PlayPlugin plugin : Play.plugins) {
                 if (plugin.rawInvocation(request, response)) {
@@ -98,13 +99,13 @@ public class HttpHandler implements IoHandler {
     public static Request parseRequest(MutableHttpRequest minaRequest, IoSession session) throws IOException {
         URI uri = minaRequest.getRequestUri();
         Request request = new Request();
+        Http.Request.current.set(request);
 
         boolean xForwardedSupport = "enabled".equals(Play.configuration.getProperty("XForwardedSupport"));
 
         request.method = minaRequest.getMethod().toString();
         request.path = URLDecoder.decode(uri.getRawPath(), "utf-8");
         request.querystring = uri.getQuery() == null ? "" : uri.getRawQuery();
-        Http.Request.current.set(request);
 
         IoBuffer buffer = (IoBuffer) minaRequest.getContent();
 
@@ -224,28 +225,39 @@ public class HttpHandler implements IoHandler {
         }
     }
 
-    public void serveStatic(IoSession session, MutableHttpResponse minaResponse, HttpRequest minaRequest, RenderStatic renderStatic) throws IOException {
+    public void serveStatic(IoSession session, MutableHttpResponse minaResponse, MutableHttpRequest minaRequest, RenderStatic renderStatic) throws IOException {
         VirtualFile file = Play.getVirtualFile(renderStatic.file);
         if (file == null || file.isDirectory() || !file.exists()) {
             serve404(session, minaResponse, minaRequest, new NotFound("The file " + renderStatic.file + " does not exist"));
         } else {
-            if (Play.mode == Play.Mode.DEV) {
-                minaResponse.setHeader("Cache-Control", "no-cache");
-                attachFile(session, minaResponse, file);
-            } else {
-                long last = file.lastModified();
-                String etag = last + "-" + file.hashCode();
-                if (!isModified(etag, last, minaRequest)) {
-                    minaResponse.setHeader("Etag", etag);
-                    minaResponse.setStatus(HttpResponseStatus.NOT_MODIFIED);
-                } else {
-                    minaResponse.setHeader("Last-Modified", Utils.getHttpDateFormatter().format(new Date(last)));
-                    minaResponse.setHeader("Cache-Control", "max-age=3600");
-                    minaResponse.setHeader("Etag", etag);
-                    attachFile(session, minaResponse, file);
+            boolean raw = false;
+            for (PlayPlugin plugin : Play.plugins) {
+                if (plugin.serveStatic(file, Request.current(), Response.current())) {
+                    raw = true;
+                    break;
                 }
             }
-            writeResponse(session, minaRequest, minaResponse);
+            if (raw) {
+                copyResponse(session, Request.current(), Response.current(), minaRequest, minaResponse);
+            } else {
+                if (Play.mode == Play.Mode.DEV) {
+                    minaResponse.setHeader("Cache-Control", "no-cache");
+                    attachFile(session, minaResponse, file);
+                } else {
+                    long last = file.lastModified();
+                    String etag = last + "-" + file.hashCode();
+                    if (!isModified(etag, last, minaRequest)) {
+                        minaResponse.setHeader("Etag", etag);
+                        minaResponse.setStatus(HttpResponseStatus.NOT_MODIFIED);
+                    } else {
+                        minaResponse.setHeader("Last-Modified", Utils.getHttpDateFormatter().format(new Date(last)));
+                        minaResponse.setHeader("Cache-Control", "max-age=3600");
+                        minaResponse.setHeader("Etag", etag);
+                        attachFile(session, minaResponse, file);
+                    }
+                }
+                writeResponse(session, minaRequest, minaResponse);
+            }
         }
     }
 

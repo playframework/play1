@@ -130,7 +130,7 @@ public class Play {
         Play.id = id;
         Play.started = false;
         Play.applicationPath = root;
-        
+
         // Guess the framework path
         try {
             URI uri = Play.class.getResource("/play/version").toURI();
@@ -145,7 +145,7 @@ public class Play {
         }
         System.setProperty("play.path", Play.frameworkPath.getAbsolutePath());
         Logger.info("Starting %s", root.getAbsolutePath());
-        
+
         // Read the configuration file
         readConfiguration();
 
@@ -155,7 +155,7 @@ public class Play {
         // Configure logs
         String logLevel = configuration.getProperty("application.log", "INFO");
         Logger.log4j.setLevel(Level.toLevel(logLevel));
-        
+
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         roots.add(appRoot);
@@ -388,7 +388,7 @@ public class Play {
      * Enable found plugins
      */
     public static void bootstrapExtensions() {
-        
+
         // Play! plugings
         Enumeration<URL> urls = null;
         try {
@@ -414,28 +414,28 @@ public class Play {
         for (PlayPlugin plugin : plugins) {
             plugin.onLoad();
         }
-        
+
         // Load modules
-        if (System.getenv("MODULES") != null) { 
+        if (System.getenv("MODULES") != null) {
             // Modules path is overriden with a env property
-            for(String m : System.getenv("MODULES").split(System.getProperty("os.name").startsWith("Windows") ? ";" : ":")) {
+            for (String m : System.getenv("MODULES").split(System.getProperty("os.name").startsWith("Windows") ? ";" : ":")) {
                 File modulePath = new File(m);
-                if(!modulePath.exists() || !modulePath.isDirectory()) {
+                if (!modulePath.exists() || !modulePath.isDirectory()) {
                     Logger.error("Module %s will not be loaded because %s does not exist", modulePath.getName(), modulePath.getAbsolutePath());
                 } else {
                     addModule(modulePath.getName(), modulePath);
                 }
             }
         } else {
-                for(Enumeration e = configuration.propertyNames(); e.hasMoreElements(); ) {
+            for (Enumeration e = configuration.propertyNames(); e.hasMoreElements();) {
                 String pName = e.nextElement().toString();
-                if(pName.startsWith("module.")) {
+                if (pName.startsWith("module.")) {
                     String moduleName = pName.substring(7);
                     File modulePath = new File(configuration.getProperty(pName));
-                    if(!modulePath.isAbsolute()) {
+                    if (!modulePath.isAbsolute()) {
                         modulePath = new File(applicationPath, configuration.getProperty(pName));
                     }
-                    if(!modulePath.exists() || !modulePath.isDirectory()) {
+                    if (!modulePath.exists() || !modulePath.isDirectory()) {
                         Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
                     } else {
                         addModule(moduleName, modulePath);
@@ -452,9 +452,15 @@ public class Play {
     public static void addModule(String name, File path) {
         VirtualFile root = VirtualFile.open(path);
         modules.add(root);
-        javaPath.add(root.child("app"));
-        templatesPath.add(root.child("app/views"));
-        modulesRoutes.put(name, root.child("conf/routes"));
+        if (root.child("app").exists()) {
+            javaPath.add(root.child("app"));
+        }
+        if (root.child("app/views").exists()) {
+            templatesPath.add(root.child("app/views"));
+        }
+        if (root.child("conf/routes").exists()) {
+            modulesRoutes.put(name, root.child("conf/routes"));
+        }
         roots.add(root);
         Logger.info("Module %s is available (%s)", name, path.getAbsolutePath());
     }

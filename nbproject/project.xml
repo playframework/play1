@@ -30,6 +30,12 @@
                     <encoding>UTF-8</encoding>
                 </source-folder>
                 <source-folder>
+                    <label>modules/ecss/sources</label>
+                    <type>java</type>
+                    <location>modules/ecss/src</location>
+                    <encoding>UTF-8</encoding>
+                </source-folder>
+                <source-folder>
                     <label>tests</label>
                     <type>java</type>
                     <location>framework/tests/src</location>
