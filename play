@@ -206,13 +206,13 @@ try:
 			modules = os.environ['MODULES'].split(':')
 	else:
 		modules = []
-		pm = readConfs('module.')
-		for m in pm:
-			if '${play.path}' in m:
-				m = m.replace('${play.path}', play_base)
-			if not m[0] == '/':
-				m = os.path.normpath(os.path.join(application_path, m))
-			modules.append(m)
+	pm = readConfs('module.')
+	for m in pm:
+		if '${play.path}' in m:
+			m = m.replace('${play.path}', play_base)
+		if not m[0] == '/':
+			m = os.path.normpath(os.path.join(application_path, m))
+		modules.append(m)
 		
 		
 	# ~~~~~~~~~~~~~~~~~~~~~~ [modules] Display the application modules

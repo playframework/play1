@@ -417,7 +417,7 @@ public class Play {
 
         // Load modules
         if (System.getenv("MODULES") != null) {
-            // Modules path is overriden with a env property
+            // Modules path is prepended with a env property
             for (String m : System.getenv("MODULES").split(System.getProperty("os.name").startsWith("Windows") ? ";" : ":")) {
                 File modulePath = new File(m);
                 if (!modulePath.exists() || !modulePath.isDirectory()) {
@@ -426,20 +426,19 @@ public class Play {
                     addModule(modulePath.getName(), modulePath);
                 }
             }
-        } else {
-            for (Enumeration e = configuration.propertyNames(); e.hasMoreElements();) {
-                String pName = e.nextElement().toString();
-                if (pName.startsWith("module.")) {
-                    String moduleName = pName.substring(7);
-                    File modulePath = new File(configuration.getProperty(pName));
-                    if (!modulePath.isAbsolute()) {
-                        modulePath = new File(applicationPath, configuration.getProperty(pName));
-                    }
-                    if (!modulePath.exists() || !modulePath.isDirectory()) {
-                        Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
-                    } else {
-                        addModule(moduleName, modulePath);
-                    }
+        }
+        for (Enumeration e = configuration.propertyNames(); e.hasMoreElements();) {
+            String pName = e.nextElement().toString();
+            if (pName.startsWith("module.")) {
+                String moduleName = pName.substring(7);
+                File modulePath = new File(configuration.getProperty(pName));
+                if (!modulePath.isAbsolute()) {
+                    modulePath = new File(applicationPath, configuration.getProperty(pName));
+                }
+                if (!modulePath.exists() || !modulePath.isDirectory()) {
+                    Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
+                } else {
+                    addModule(moduleName, modulePath);
                 }
             }
         }
