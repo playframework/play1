@@ -251,7 +251,7 @@ public class HttpHandler implements IoHandler {
                         minaResponse.setStatus(HttpResponseStatus.NOT_MODIFIED);
                     } else {
                         minaResponse.setHeader("Last-Modified", Utils.getHttpDateFormatter().format(new Date(last)));
-                        minaResponse.setHeader("Cache-Control", "max-age=3600");
+                        minaResponse.setHeader("Cache-Control", "max-age=" + Play.configuration.getProperty("http.cacheControl", "3600"));
                         minaResponse.setHeader("Etag", etag);
                         attachFile(session, minaResponse, file);
                     }
