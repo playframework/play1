@@ -122,7 +122,7 @@ public class Http {
         /**
          * is HTTPS ?
          */
-        public Boolean secure;
+        public Boolean secure = false;
         /**
          * HTTP Headers
          */
