@@ -129,7 +129,25 @@ public class Mail {
      */
     public static Future<Boolean> send(String from, String[] recipients, String subject, String body, String contentType, Object... attachments) {
         try {
-            return sendMessage(buildMessage(from, recipients, subject, body, contentType, attachments));
+            return sendMessage(buildMessage(from, from, recipients, subject, body, contentType, attachments));
+        } catch (MessagingException ex) {
+            throw new MailException("Cannot send email", ex);
+        }
+    }
+    
+        /**
+     * Send an email
+     * @param from From address
+       @param replyTo ReplyTo address
+     * @param recipients To addresses
+     * @param subject Subject
+     * @param body Body
+     * @param contentType The content type (text/plain or text/html)
+     * @param attachments File attachments
+     */
+    public static Future<Boolean> send(String from, String replyTo, String[] recipients, String subject, String body, String contentType, Object... attachments) {
+        try {
+            return sendMessage(buildMessage(from, replyTo, recipients, subject, body, contentType, attachments));
         } catch (MessagingException ex) {
             throw new MailException("Cannot send email", ex);
         }
@@ -144,7 +162,7 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static MimeMessage buildMessage(String from, String[] recipients, String subject, String body, String contentType, Object... attachments) throws MessagingException {
+    public static MimeMessage buildMessage(String from, String replyTo, String[] recipients, String subject, String body, String contentType, Object... attachments) throws MessagingException {
         MimeMessage msg = new MimeMessage(getSession());
 
         if (from == null) {
@@ -164,9 +182,8 @@ public class Mail {
             contentType = "text/plain";
         }
 
-        InternetAddress addressFrom = new InternetAddress(from);
-        msg.setFrom(addressFrom);
-        msg.setReplyTo(new InternetAddress[]{addressFrom});
+        msg.setFrom( new InternetAddress(from));
+        msg.setReplyTo(new InternetAddress[]{new InternetAddress(replyTo == null ? from : replyTo)});
 
         InternetAddress[] addressTo = new InternetAddress[recipients.length];
         for (int i = 0; i < recipients.length; i++) {

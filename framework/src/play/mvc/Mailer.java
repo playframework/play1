@@ -76,6 +76,16 @@ public class Mailer {
         map.put("from", from);
         infos.set(map);
     }
+    
+    public static void setReplyTo(String replyTo) {
+        HashMap map = infos.get();
+        if (map == null) {
+            throw new UnexpectedException("Mailer not instrumented ?");
+        }
+        map.put("replyTo", replyTo);
+        infos.set(map);
+    }
+
 
     public static Future<Boolean> send(Object... args) {
         HashMap map = infos.get();
@@ -131,6 +141,7 @@ public class Mailer {
 
         // From
         String from = (String) infos.get().get("from");
+        String replyTo = (String) infos.get().get("replyTo");
 
         // Attachment
         Object[] attachements = new Object[0];
@@ -146,7 +157,7 @@ public class Mailer {
         }
 
         // Send
-        return Mail.send(from, recipients, subject, body, contentType, attachements);
+        return Mail.send(from, replyTo, recipients, subject, body, contentType, attachements);
     }
 
     public static boolean sendAndWait(Object... args) {
