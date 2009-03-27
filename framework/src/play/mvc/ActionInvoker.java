@@ -33,6 +33,11 @@ public class ActionInvoker {
         try {
             Http.Request.current.set(request);
             Http.Response.current.set(response);
+            
+            // Route if not already done
+            if(request.action == null) {
+                Router.route(request);
+            }
 
             Scope.Params.current.set(new Scope.Params());
             Scope.RenderArgs.current.set(new Scope.RenderArgs());
