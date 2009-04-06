@@ -51,7 +51,8 @@ import play.vfs.VirtualFile;
  * HTTP Handler
  */
 public class HttpHandler implements IoHandler {
-
+    private static String signature = "Play! Framework;" +Play.version+";"+Play.mode.name().toLowerCase();
+    
     public void messageReceived(IoSession session, Object message) throws Exception {
         MutableHttpRequest minaRequest = (MutableHttpRequest) message;
         MutableHttpResponse minaResponse = new DefaultHttpResponse();
@@ -356,7 +357,7 @@ public class HttpHandler implements IoHandler {
     }
 
     public static void writeResponse(IoSession session, HttpRequest req, MutableHttpResponse res) {
-        res.setHeader("Server", "Play! Framework ( " + Play.mode.name()+" )");
+        res.setHeader("Server", signature);
         res.normalize(req);
         WriteFuture future = session.write(res);
         if ((session.getAttribute("file") == null) && !HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION))) {

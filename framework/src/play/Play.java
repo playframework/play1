@@ -119,6 +119,8 @@ public class Play {
      */
     public static List<VirtualFile> modules = new ArrayList<VirtualFile>();
 
+    public static String version=null;
+    
     /**
      * Init the framework
      * @param root The application path
@@ -132,13 +134,15 @@ public class Play {
 
         // Guess the framework path
         try {
-            URI uri = Play.class.getResource("/play/version").toURI();
+            URL versionUrl = Play.class.getResource("/play/version");
+            URI uri = versionUrl.toURI();
             if (uri.getScheme().equals("jar")) {
                 String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
                 frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
             } else if (uri.getScheme().equals("file")) {
                 frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
             }
+            version = IO.readContentAsString(versionUrl.openStream());
         } catch (Exception e) {
             throw new UnexpectedException("Where is the framework ?", e);
         }
@@ -151,6 +155,8 @@ public class Play {
         // Mode
         mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
 
+        
+        
         // Configure logs
         String logLevel = configuration.getProperty("application.log", "INFO");
         Logger.log4j.setLevel(Level.toLevel(logLevel));
