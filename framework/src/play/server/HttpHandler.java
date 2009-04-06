@@ -356,7 +356,7 @@ public class HttpHandler implements IoHandler {
     }
 
     public static void writeResponse(IoSession session, HttpRequest req, MutableHttpResponse res) {
-        res.setHeader("Server", "Play! Framework");
+        res.setHeader("Server", "Play! Framework ( " + Play.mode.name()+" )");
         res.normalize(req);
         WriteFuture future = session.write(res);
         if ((session.getAttribute("file") == null) && !HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION))) {

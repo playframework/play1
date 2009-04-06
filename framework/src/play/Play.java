@@ -36,7 +36,6 @@ public class Play {
      * 2 modes
      */
     public enum Mode {
-
         DEV, PROD
     }
     /**
