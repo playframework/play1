@@ -152,12 +152,12 @@ public class Scope {
                             session.put(matcher.group(1), matcher.group(2));
                         }
                     } else {
-                        Logger.warn("Corrupted session from %s", Http.Request.current().remoteAddress);
+                        Logger.warn("Corrupted HTTP session from %s", Http.Request.current().remoteAddress);
                     }
                 }
                 return session;
             } catch (Exception e) {
-                throw new UnexpectedException("Corrupted session from " + Http.Request.current().remoteAddress, e);
+                throw new UnexpectedException("Corrupted HTTP session from " + Http.Request.current().remoteAddress, e);
             }
         }
         Map<String, String> data = new HashMap<String, String>();        // ThreadLocal access

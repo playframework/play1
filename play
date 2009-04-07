@@ -53,7 +53,6 @@ try:
 	else:
 		play_id = ''
 
-
 	# ~~~~~~~~~~~~~~~~~~~~~~ Display logo
 	print r"~        _            _ "
 	print r"~  _ __ | | __ _ _  _| |"
@@ -70,10 +69,6 @@ try:
 		sys.exit(-1)
 
 	print "~ play! %s, http://www.playframework.org" % (open(play_version_file).readline().strip())
-	if play_id:
-		print "~ framework ID is %s" % play_id
-	print "~"
-
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command ?
 	available_commands = ('help', 'id', 'new', 'clean', 'cp', 'pid', 'out', 'overrides', 'ov', 'modules', 'nb', 'netbeansify', 'ec', 'eclipsify', 'secret', 'run', 'test', 'debug', 'start', 'stop', 'restart')
@@ -94,6 +89,12 @@ try:
 
 	play_command = sys.argv[1]
 
+	if play_command == 'test':
+		play_id = 'test'
+
+	if play_id:
+		print "~ framework ID is %s" % play_id
+	print "~"
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [help] Display help
 	if play_command == 'help':
@@ -213,6 +214,8 @@ try:
 		if not m[0] == '/':
 			m = os.path.normpath(os.path.join(application_path, m))
 		modules.append(m)
+	if play_id == 'test':
+		modules.append(os.path.normpath(os.path.join(play_base, 'modules/test-runner')))
 		
 		
 	# ~~~~~~~~~~~~~~~~~~~~~~ [modules] Display the application modules
@@ -268,7 +271,7 @@ try:
 	if not os.environ.has_key('JAVA_HOME'):
 		java_path = "java"
 	else:
-		java_path = "%s/bin/java" % os.environ['JAVA_HOME']
+		java_path = os.path.normpath("%s/bin/java" % os.environ['JAVA_HOME'])
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Read some configuration from conf/application.conf
@@ -335,7 +338,6 @@ try:
 		print cp_args
 		print "~ "
 		sys.exit(0)
-	
 
 	java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, 'play.server.Server']
 
@@ -363,9 +365,9 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [test] Run the application tests
 	if play_command == 'test':
-		print "~ Running application tests..."
+		print "~ Running in test mode"
+		print "~ Ctrl+C to stop"
 		print "~ "
-		java_cmd[-1] = 'play.test.TestRunner'
 		subprocess.call(java_cmd, env=os.environ)
 		print
 		sys.exit(0)

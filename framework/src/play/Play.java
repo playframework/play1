@@ -155,8 +155,6 @@ public class Play {
         // Mode
         mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
 
-        
-        
         // Configure logs
         String logLevel = configuration.getProperty("application.log", "INFO");
         Logger.log4j.setLevel(Level.toLevel(logLevel));
@@ -446,6 +444,9 @@ public class Play {
                     addModule(moduleName, modulePath);
                 }
             }
+        }
+        if(Play.id.equals("test")) {
+            addModule("test-runner", new File(Play.frameworkPath, "modules/test-runner"));
         }
     }
 
