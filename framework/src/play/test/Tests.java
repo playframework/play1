@@ -5,8 +5,6 @@ import play.Play;
 
 public class Tests {
 
-    public static List<Class> allApplicationTests() {
-        return Play.classloader.getAssignableClasses(ApplicationTest.class);
-    }
+
 
 }

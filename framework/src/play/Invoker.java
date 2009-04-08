@@ -52,11 +52,9 @@ public class Invoker {
          */
         public static void before() {
             Thread.currentThread().setContextClassLoader(Play.classloader);
-            if(!Play.id.equals("test")) {
-                Play.detectChanges();
-                if (!Play.started) {
-                    Play.start();
-                }
+            Play.detectChanges();
+            if (!Play.started) {
+                Play.start();
             }
             for (PlayPlugin plugin : Play.plugins) {
                 plugin.beforeInvocation();

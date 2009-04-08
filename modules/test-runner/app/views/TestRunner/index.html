@@ -30,6 +30,20 @@
                 font-size: 80%;
             }
         </style>
+        <script>
+            var run = function(test) {
+                $.ajax({
+                    type: 'GET',
+                    url: '@{TestRunner.run("XXX")}'.replace('XXX', test),
+                    success: function(){
+                        alert('SUCCESS');
+                    },
+                    error: function(){
+                        alert('FAILED');
+                    }
+                });
+            }
+        </script>
     </head>
     <body>
         <div id="header" class="block">
@@ -38,10 +52,21 @@
             </h1>
         </div>
         <ul>
-        #{list items:applicationTests, as:'test'}
-            <li><a href="javascript:run('')">${test}</a></li>
+
+        <h2>Simple tests</h2>
+        <ul>
+        #{list items:simpleTests, as:'test'}
+            <li><a href="javascript:run('${test.name}')">${test}</a></li>
         #{/list}
         </ul>
+
+        <h2>Virtual client tests</h2>
+        <ul>
+        #{list items:virtualClientTests, as:'test'}
+            <li><a href="javascript:run('${test.name}')">${test}</a></li>
+        #{/list}
+        </ul>
+
     </body>
 </html>
 
