@@ -13,12 +13,14 @@ import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
+import play.PlayPlugin;
 
 /**
  * Play! server
  */
 public class Server {
     private SocketAcceptor acceptor;
+    public static int port;
 
     public Server() {
         Properties p = Play.configuration;
@@ -30,6 +32,7 @@ public class Server {
         } else {
             acceptor = new NioSocketAcceptor();
         }
+        Server.port = httpPort;
         acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new HttpCodecFactory()));
         acceptor.setReuseAddress(true);
         acceptor.getSessionConfig().setReuseAddress(true);
@@ -45,6 +48,11 @@ public class Server {
         } catch (IOException e) {
             Logger.error("Could not bind on port " + httpPort, e);
             acceptor.dispose();
+        }
+
+        // Plugins
+        for (PlayPlugin plugin : Play.plugins) {
+            plugin.onServerReady();
         }
     }
 

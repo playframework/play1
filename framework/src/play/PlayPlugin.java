@@ -125,6 +125,18 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public void onConfigurationRead() {
     }
 
+    /**
+     * Called when the server is ready.
+     */
+    public void onServerReady() {
+    }
+
+    /**
+     * Called after routes loading.
+     */
+    public void onRoutesLoaded() {
+    }
+
     public int compareTo(PlayPlugin o) {
         return (index < o.index ? -1 : (index == o.index ? 0 : 1));
     }

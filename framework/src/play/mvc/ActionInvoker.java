@@ -34,15 +34,16 @@ public class ActionInvoker {
             Http.Request.current.set(request);
             Http.Response.current.set(response);
             
-            // Route if not already done
-            if(request.action == null) {
-                Router.route(request);
-            }
-
             Scope.Params.current.set(new Scope.Params());
             Scope.RenderArgs.current.set(new Scope.RenderArgs());
             Scope.Session.current.set(Scope.Session.restore());
             Scope.Flash.current.set(Scope.Flash.restore());
+
+            // 1. Route and resolve format if not already done
+            if(request.action == null) {
+                Router.route(request);
+            }
+            request.resolveFormat();
 
             // 2. Find the action method
             Method actionMethod = null;

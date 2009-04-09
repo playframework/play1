@@ -12,6 +12,7 @@ import jregex.REFlags;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
+import play.PlayPlugin;
 import play.vfs.VirtualFile;
 import play.exceptions.NoRouteFoundException;
 import play.mvc.results.NotFound;
@@ -34,6 +35,27 @@ public class Router {
         routes.clear();
         parse(Play.routes, "");
         lastLoading = System.currentTimeMillis();
+        // Plugins
+        for (PlayPlugin plugin : Play.plugins) {
+            plugin.onRoutesLoaded();
+        }
+    }
+
+    public static void addRoute(String method, String path, String action) {
+        Route route = new Route();
+        route.method = method;
+        route.path = path;
+        route.path = route.path.replace("//", "/");
+        if (route.path.endsWith("/") && !route.path.equals("/")) {
+            route.path = route.path.substring(0, route.path.length() - 1);
+        }
+        route.action = action;
+        route.compute();
+        if(routes.size() == 0) {
+            routes.add(route);
+        }else {
+            routes.add(0, route);
+        }
     }
 
     /**
@@ -104,7 +126,7 @@ public class Router {
             }
         }
     }
-    static List<Route> routes = new ArrayList<Route>();
+    public static List<Route> routes = new ArrayList<Route>();
 
     public static void route(Http.Request request) {
         // request method may be overriden if a x-http-method-override parameter is given
@@ -120,7 +142,7 @@ public class Router {
             if (args != null) {
                 request.routeArgs = args;
                 request.action = route.action;
-                if(args.containsKey("format")) {
+                if (args.containsKey("format")) {
                     request.format = args.get("format");
                 }
                 if (request.action.indexOf("{") > -1) { // more optimization ?
@@ -276,11 +298,11 @@ public class Router {
         }
     }
 
-    static class Route {
+    public static class Route {
 
-        String method;
-        String path;
-        String action;
+        public String method;
+        public String path;
+        public String action;
         Pattern actionPattern;
         List<String> actionArgs = new ArrayList<String>();
         String staticDir;
@@ -343,8 +365,8 @@ public class Router {
         }
 
         public Map<String, String> matches(String method, String path) {
-            if(!path.equals("/") && path.endsWith("/")) {
-                path = path.substring(0, path.length()-1);
+            if (!path.equals("/") && path.endsWith("/")) {
+                path = path.substring(0, path.length() - 1);
             }
             if (method == null || this.method.equals("*") || method.equalsIgnoreCase(this.method)) {
                 Matcher matcher = pattern.matcher(path);

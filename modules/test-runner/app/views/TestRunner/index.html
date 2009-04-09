@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <title>Tests runner</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <script src="/public/test-runner/jquery-1.3.2.min.js"></script>
+        <style type="text/css">
+            html, body {
+                margin: 0;
+                padding: 0;
+                font-family: Helvetica, Arial, Sans;
+                background: #EEEEEE;
+            }
+            .block {
+                padding: 20px;
+                border-bottom: 1px solid #aaa;
+            }
+            #header h1 {
+                font-weight: normal;
+                font-size: 28px;
+                margin: 0;
+            }
+            #header {
+                background: #DCFCD2;
+            }
+            #header p, #header li {
+                color: #333;
+            }
+            #why {
+                font-size: 80%;
+            }
+        </style>
+        <script>
+            var run = function(test) {
+                $.ajax({
+                    type: 'GET',
+                    url: '@{TestRunner.run("XXX")}'.replace('XXX', test),
+                    success: function(){
+                        alert('SUCCESS');
+                    },
+                    error: function(){
+                        alert('FAILED');
+                    }
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <div id="header" class="block">
+            <h1>
+                Test runner
+            </h1>
+        </div>
+        <ul>
+
+        <h2>Simple tests</h2>
+        <ul>
+        #{list items:simpleTests, as:'test'}
+            <li><a href="javascript:run('${test.name}')">${test}</a></li>
+        #{/list}
+        </ul>
+
+        <h2>Virtual client tests</h2>
+        <ul>
+        #{list items:virtualClientTests, as:'test'}
+            <li><a href="javascript:run('${test.name}')">${test}</a></li>
+        #{/list}
+        </ul>
+
+    </body>
+</html>
+
