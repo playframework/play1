@@ -127,6 +127,18 @@ public class Router {
         }
     }
     public static List<Route> routes = new ArrayList<Route>();
+    
+    public static void routeOnlyStatic(Http.Request request) {
+        for (Route route : routes) {
+            try {
+                route.matches(request.method, request.path);
+            } catch(Throwable t) {
+                if(t instanceof RenderStatic) {
+                    throw (RenderStatic)t;
+                }
+            }
+        }
+    }
 
     public static void route(Http.Request request) {
         // request method may be overriden if a x-http-method-override parameter is given

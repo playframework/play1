@@ -3,6 +3,7 @@ package play.libs;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import java.security.Security;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 
@@ -11,6 +12,11 @@ import org.apache.commons.codec.binary.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.macs.HMac;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import play.Play;
 import play.exceptions.UnexpectedException;
 
@@ -29,21 +35,29 @@ public class Crypto {
      * @throws java.lang.Exception
      */
     public static String sign(String message, byte[] key) throws Exception {
+
         if (key.length == 0) {
             return message;
         }
-        SecretKey secretKey = new SecretKeySpec(key, "HmacSHA1");
-        Mac mac = Mac.getInstance("HmacSHA1");
-        mac.init(secretKey);
-        mac.update(message.getBytes("utf-8"));
-        byte[] result = mac.doFinal();
-        char[] hexChars = new char[result.length * 2];
+
+        byte[] messageBytes = message.getBytes("utf-8");
+        KeyParameter secretKey = new KeyParameter(key);
+        Digest digest = new SHA1Digest();
+        HMac hmac = new HMac(digest);
+        hmac.init(secretKey);
+        hmac.update(messageBytes, 0, messageBytes.length);
+        byte[] result = new byte[1000];
+        int len = hmac.doFinal(result, 0);
+        char[] hexChars = new char[len * 2];
+
+
         for (int charIndex = 0, startIndex = 0; charIndex < hexChars.length;) {
             int bite = result[startIndex++] & 0xff;
             hexChars[charIndex++] = HEX_CHARS[bite >> 4];
             hexChars[charIndex++] = HEX_CHARS[bite & 0xf];
         }
         return new String(hexChars);
+
     }
 
     /**

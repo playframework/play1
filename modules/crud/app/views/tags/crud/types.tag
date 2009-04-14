@@ -1,5 +1,5 @@
 %{
-	models = [];
+        models = [];
 	for(controllerClass in play.Play.classloader.getAssignableClasses(controllers.CRUD.class)) {
 		resourceModel = controllers.CRUD.ObjectType.get(controllerClass);
 		if(resourceModel != null) {

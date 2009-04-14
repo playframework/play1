@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
+import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,6 +37,7 @@ public class Play {
      * 2 modes
      */
     public enum Mode {
+
         DEV, PROD
     }
     /**
@@ -118,9 +120,8 @@ public class Play {
      * Modules
      */
     public static List<VirtualFile> modules = new ArrayList<VirtualFile>();
+    public static String version = null;
 
-    public static String version=null;
-    
     /**
      * Init the framework
      * @param root The application path
@@ -155,8 +156,6 @@ public class Play {
         // Mode
         mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
 
-        
-        
         // Configure logs
         String logLevel = configuration.getProperty("application.log", "INFO");
         Logger.log4j.setLevel(Level.toLevel(logLevel));
@@ -181,16 +180,24 @@ public class Play {
         // Plugin route files
         modulesRoutes = new HashMap<String, VirtualFile>();
 
+        // Load modules
+        loadModules();
+
         // Enable a first classloader
         classloader = new ApplicationClassloader();
+
         // tmp dir
-        tmpDir = new File(configuration.getProperty("play.tmp", "tmp"));
-        if (!tmpDir.isAbsolute()) {
-            tmpDir = new File(applicationPath, tmpDir.getPath());
+        if (configuration.getProperty("play.tmp", "tmp").equals("none")) {
+            tmpDir = null;
+        } else {
+            tmpDir = new File(configuration.getProperty("play.tmp", "tmp"));
+            if (!tmpDir.isAbsolute()) {
+                tmpDir = new File(applicationPath, tmpDir.getPath());
+            }
+            tmpDir.mkdirs();
         }
-        tmpDir.mkdirs();
         // Plugins
-        bootstrapExtensions();
+        loadPlugins();
 
         if (mode == Mode.PROD) {
             preCompile();
@@ -267,7 +274,6 @@ public class Play {
             if (mode == Mode.DEV) {
                 // Need a new classloader
                 classloader = new ApplicationClassloader();
-                Thread.currentThread().setContextClassLoader(Play.classloader);
                 // Reload plugins
                 List<PlayPlugin> newPlugins = new ArrayList<PlayPlugin>();
                 for (PlayPlugin plugin : plugins) {
@@ -283,12 +289,15 @@ public class Play {
             }
             // Reload configuration
             readConfiguration();
-            // tmp dir
-            tmpDir = new File(configuration.getProperty("play.tmp", "tmp"));
-            if (!tmpDir.isAbsolute()) {
-                tmpDir = new File(applicationPath, tmpDir.getPath());
+            if (configuration.getProperty("play.tmp", "tmp").equals("none")) {
+                tmpDir = null;
+            } else {
+                tmpDir = new File(configuration.getProperty("play.tmp", "tmp"));
+                if (!tmpDir.isAbsolute()) {
+                    tmpDir = new File(applicationPath, tmpDir.getPath());
+                }
+                tmpDir.mkdirs();
             }
-            tmpDir.mkdirs();
             // Configure logs
             String logLevel = configuration.getProperty("application.log", "INFO");
             Logger.log4j.setLevel(Level.toLevel(logLevel));
@@ -349,7 +358,6 @@ public class Play {
     static void preCompile() {
         try {
             ClassLoader l = Thread.currentThread().getContextClassLoader();
-            Thread.currentThread().setContextClassLoader(classloader);
             Logger.info("Precompiling ...");
             long start = System.currentTimeMillis();
             classloader.getAllClasses();
@@ -357,7 +365,6 @@ public class Play {
             start = System.currentTimeMillis();
             TemplateLoader.getAllTemplate();
             Logger.trace("%sms to precompile the templates", System.currentTimeMillis() - start);
-            Thread.currentThread().setContextClassLoader(l);
         } catch (Throwable e) {
             Logger.error(e, "Cannot start in PROD mode with errors");
             System.exit(-1);
@@ -372,6 +379,9 @@ public class Play {
             return;
         }
         try {
+            if(!Play.started) {
+                throw new RuntimeException("Not started");
+            }
             classloader.detectChanges();
             Router.detectChanges();
             if (conf.lastModified() > startedAt) {
@@ -392,12 +402,11 @@ public class Play {
     /**
      * Enable found plugins
      */
-    public static void bootstrapExtensions() {
-
+    public static void loadPlugins() {
         // Play! plugings
         Enumeration<URL> urls = null;
         try {
-            urls = Play.class.getClassLoader().getResources("play.plugins");
+            urls = ApplicationClassloader.otherLibs.getResources("play.plugins");
         } catch (Exception e) {
         }
         while (urls.hasMoreElements()) {
@@ -419,8 +428,13 @@ public class Play {
         for (PlayPlugin plugin : plugins) {
             plugin.onLoad();
         }
+    }
 
-        // Load modules
+    public static void addPlugins(URL playPluginManifest) {
+        
+    }
+
+    public static void loadModules() {
         if (System.getenv("MODULES") != null) {
             // Modules path is prepended with a env property
             for (String m : System.getenv("MODULES").split(System.getProperty("os.name").startsWith("Windows") ? ";" : ":")) {
@@ -447,7 +461,7 @@ public class Play {
                 }
             }
         }
-        if(Play.id.equals("test")) {
+        if (Play.id.equals("test")) {
             addModule("test-runner", new File(Play.frameworkPath, "modules/test-runner"));
         }
     }

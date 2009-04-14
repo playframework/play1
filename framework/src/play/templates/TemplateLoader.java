@@ -33,9 +33,7 @@ public class TemplateLoader {
     }
 
     public static void cleanCompiledCache() {
-        for (Template template : templates.values()) {
-            template.compiledTemplate = null;
-        }
+        // nothing to do in this version
     }
 
     /**
@@ -46,6 +44,9 @@ public class TemplateLoader {
     public static Template load(String path) {
         Template template = null;
         for (VirtualFile vf : Play.templatesPath) {
+            if(vf == null) {
+                continue;
+            }
             VirtualFile tf = vf.child(path);
             if (tf.exists()) {
                 template = TemplateLoader.load(tf);

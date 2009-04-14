@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilationUnit;
 import org.codehaus.groovy.control.CompilationUnit.GroovyClassOperation;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -30,6 +32,7 @@ import org.codehaus.groovy.tools.GroovyClass;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
+import play.classloading.ApplicationClassloader;
 import play.classloading.BytecodeCache;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.ActionNotFoundException;
@@ -74,15 +77,17 @@ public class Template {
         }
 
         public Class defineTemplate(String name, byte[] byteCode) {
-            return defineClass(name, byteCode, 0, byteCode.length);
+            return defineClass(name, byteCode, 0, byteCode.length, Play.classloader.protectionDomain);
         }
+
+        
     }
 
     public void compile() {
         if (compiledTemplate == null) {
             try {
-                long start = System.currentTimeMillis();
-
+                long start = System.currentTimeMillis();                
+                
                 TClassLoader tClassLoader = new TClassLoader();
 
                 // Try the cache
@@ -101,12 +106,17 @@ public class Template {
                     Logger.trace("%sms to load template %s from cache", System.currentTimeMillis() - start, name);
 
                 } else {
-
+                    
                     // Let's compile the groovy source
                     final List<GroovyClass> groovyClassesForThisTemplate = new ArrayList<GroovyClass>();
                     // ~~~ Please !
                     CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
                     compilerConfiguration.setSourceEncoding("utf-8"); // ouf
+                    LinkedList additionalClasspath = new LinkedList();
+                    for(URL url : ApplicationClassloader.otherLibs.getURLs()) {
+                        additionalClasspath.add(url.getFile());
+                    }
+                    compilerConfiguration.setClasspathList(additionalClasspath);                        
                     CompilationUnit compilationUnit = new CompilationUnit(compilerConfiguration);
                     compilationUnit.addSource(new SourceUnit(name, groovySource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()));
                     Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");

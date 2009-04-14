@@ -10,6 +10,7 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.StdSchedulerFactory;
 
+import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.exceptions.JavaExecutionException;
@@ -75,7 +76,8 @@ public class JobsPlugin extends PlayPlugin {
                 scheduler = factory.getScheduler();
                 scheduler.start();
             } catch (Exception e) {
-                throw new UnexpectedException("Cannot start scheduler");
+                Logger.error("Cannot start Jobs scheduler (restricted environement ?)");
+                return;
             }
         }
         // Register triggers

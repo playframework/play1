@@ -21,7 +21,7 @@ public class BytecodeCache {
      */
     public static void deleteBytecode(String name) {
         try {
-            if (!Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
+            if (Play.tmpDir == null || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
                 return;
             }
             File f = cacheFile(name.replace("/", "_"));
@@ -41,7 +41,7 @@ public class BytecodeCache {
      */
     public static byte[] getBytecode(String name, String source) {
         try {
-            if (!Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
+            if (Play.tmpDir == null || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
                 return null;
             }
             File f = cacheFile(name.replace("/", "_"));
@@ -78,7 +78,7 @@ public class BytecodeCache {
      */
     public static void cacheBytecode(byte[] byteCode, String name, String source) {
         try {
-            if (!Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
+            if (Play.tmpDir == null || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
                 return;
             }
             File f = cacheFile(name.replace("/", "_"));

@@ -71,7 +71,7 @@ try:
 	print "~ play! %s, http://www.playframework.org" % (open(play_version_file).readline().strip())
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command ?
-	available_commands = ('help', 'id', 'new', 'clean', 'cp', 'pid', 'out', 'overrides', 'ov', 'modules', 'nb', 'netbeansify', 'ec', 'eclipsify', 'secret', 'run', 'test', 'debug', 'start', 'stop', 'restart')
+	available_commands = ('help', 'id', 'war', 'new', 'clean', 'cp', 'pid', 'out', 'overrides', 'ov', 'modules', 'nb', 'netbeansify', 'ec', 'eclipsify', 'secret', 'run', 'test', 'debug', 'start', 'stop', 'restart')
 
 	if len(sys.argv) < 2 or sys.argv[1] not in available_commands:
 	  	print "~ Usage: play command [application path or current directory] "
@@ -150,7 +150,7 @@ try:
 		application_path = os.path.normpath(os.path.abspath(sys.argv[2]))
 		remaining_args = sys.argv[3:]
 		
-	if play_command == 'override' or play_command == 'ov':
+	if play_command == 'override' or play_command == 'ov' or play_command == 'war':
 		application_path = os.getcwd()
 
 
@@ -178,7 +178,46 @@ try:
 		print "~ Oops. %s does not seem to host a valid application" % os.path.normpath(application_path)
 		print "~"
 		sys.exit(-1)
-	
+		
+		
+	# ~~~~~~~~~~~~~~~~~~~~~~ [war] Generate a WAR
+	if play_command == 'war':
+		if len(sys.argv) == 2:
+			print "~ Oops. Please specify a path where to generate the WAR"
+			print "~"
+			sys.exit(-1)
+		war_path = sys.argv[2]
+		if os.path.exists(war_path) and not os.path.exists(os.path.join(war_path, 'WEB-INF')):
+			print "~ Oops. The destination path already exists but does not seem to host a valid WAR structure"
+			print "~"
+			sys.exit(-1)
+		print "~ Packaging current version of the framework and the application to %s ..." % (os.path.normpath(war_path))
+		if not os.path.exists(war_path): os.mkdir(war_path)
+		if not os.path.exists(os.path.join(war_path, 'WEB-INF')): os.mkdir(os.path.join(war_path, 'WEB-INF'))
+		shutil.copyfile(os.path.join(play_base, 'resources/war/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
+		application_name = readConf('application.name')
+		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%APPLICATION_NAME%', application_name)
+		if os.path.exists(os.path.join(war_path, 'WEB-INF/application')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/application'))
+		shutil.copytree(application_path, os.path.join(war_path, 'WEB-INF/application'))
+		if os.path.exists(os.path.join(war_path, 'WEB-INF/lib')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/lib'))
+		shutil.copytree(os.path.join(play_base, 'framework/lib'), os.path.join(war_path, 'WEB-INF/lib'))
+		shutil.copyfile(os.path.join(play_base, 'framework/play.jar'), os.path.join(war_path, 'WEB-INF/lib/play.jar'))
+		if os.path.exists(os.path.join(war_path, 'WEB-INF/framework')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/framework'))
+		os.mkdir(os.path.join(war_path, 'WEB-INF/framework'))
+		shutil.copytree(os.path.join(play_base, 'framework/templates'), os.path.join(war_path, 'WEB-INF/framework/templates'))
+		if os.path.exists(os.path.join(war_path, 'WEB-INF/modules')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/modules'))
+		shutil.copytree(os.path.join(play_base, 'modules'), os.path.join(war_path, 'WEB-INF/modules'))
+		if not os.path.exists(os.path.join(war_path, 'WEB-INF/resources')): os.mkdir(os.path.join(war_path, 'WEB-INF/resources'))
+		shutil.copyfile(os.path.join(play_base, 'resources/messages'), os.path.join(war_path, 'WEB-INF/resources/messages'))
+		print "~ Done !"
+		print "~"
+		print "~ You can now load %s as a standard WAR into your servlet container" % (os.path.normpath(war_path))
+		print "~ You can't use play standard commands to run/stop/debug the WAR application ..."
+		print "~ ... just use your servlet container commands instead"
+		print "~"
+		print "~ Have fun !"
+		print "~"
+				
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [secret] Generate a new secret key
 	if play_command == 'secret':
@@ -306,19 +345,6 @@ try:
 	# The default
 	classpath.append(os.path.normpath(os.path.join(application_path, 'conf')))
 	classpath.append(os.path.normpath(os.path.join(play_base, 'framework/play.jar')))
-
-	# The application
-	for jar in os.listdir(os.path.join(application_path, 'lib')):
-		if jar.endswith('.jar'):
-			classpath.append(os.path.normpath(os.path.join(application_path, 'lib/%s' % jar)))
-			
-	# The modules
-	for module in modules:
-		libs = os.path.join(module, 'lib')
-		if os.path.exists(libs):
-			for jar in os.listdir(libs):
-				if jar.endswith('.jar'):
-					classpath.append(os.path.normpath(os.path.join(libs, '%s' % jar)))
 
 	# The framework
 	for jar in os.listdir(os.path.join(play_base, 'framework/lib')):

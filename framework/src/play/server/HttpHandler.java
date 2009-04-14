@@ -73,12 +73,7 @@ public class HttpHandler implements IoHandler {
             if (raw) {
                 copyResponse(session, request, response, minaRequest, minaResponse);
             } else {
-                try {
-                    Play.detectChanges();
-                } catch(Exception e) {
-                    Router.detectChanges();
-                }
-                Router.route(request);
+                Router.routeOnlyStatic(request);
                 if (Play.mode == Play.Mode.DEV) {
                     Invoker.invokeInThread(new MinaInvocation(session, minaRequest, minaResponse, request, response));
                 } else {
@@ -382,10 +377,9 @@ public class HttpHandler implements IoHandler {
             this.session = session;
         }
 
-        @Override
-        public void run() {
+        public void doIt() {
             try {
-                super.run();
+                super.doIt();
             } catch (Exception e) {
                 serve500(e, session, minaRequest, minaResponse);
                 return;

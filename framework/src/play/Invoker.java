@@ -1,5 +1,6 @@
 package play;
 
+import java.security.AccessControlException;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -21,11 +22,17 @@ public class Invoker {
      * Run the code in a new thread took from a thread pool.
      * @param invocation The code to run
      */
-    public static void invoke(Invocation invocation) {
+    public static void invoke(final Invocation invocation) {
         if (executor == null) {
             executor = Invoker.startExecutor();
         }
-        executor.execute(invocation);
+        executor.execute(new Thread() {
+            @Override
+            public void run() {
+                invocation.doIt();
+            }
+            
+        });
     }
 
     /**
@@ -33,13 +40,13 @@ public class Invoker {
      * @param invocation The code to run
      */
     public static void invokeInThread(Invocation invocation) {
-        invocation.run();
+        invocation.doIt();
     }
 
     /**
      * An Invocation in something to run in a Play! context
      */
-    public static abstract class Invocation extends Thread {
+    public static abstract class Invocation {
 
         /**
          * Override this method
@@ -51,7 +58,6 @@ public class Invoker {
          * Things to do before an Invocation
          */
         public static void before() {
-            Thread.currentThread().setContextClassLoader(Play.classloader);
             Play.detectChanges();
             if (!Play.started) {
                 Play.start();
@@ -59,7 +65,6 @@ public class Invoker {
             for (PlayPlugin plugin : Play.plugins) {
                 plugin.beforeInvocation();
             }
-
         }
 
         /**
@@ -95,8 +100,7 @@ public class Invoker {
             }
         }
 
-        @Override
-        public void run() {
+        public void doIt() {
             try {
                 before();
                 execute();

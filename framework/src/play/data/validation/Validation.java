@@ -19,7 +19,7 @@ public class Validation {
     protected Validation() {
     }
 
-    static Validation current() {
+    public static Validation current() {
         return current.get();
     }
 

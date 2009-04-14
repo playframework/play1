@@ -22,7 +22,7 @@ import play.classloading.ApplicationClasses.ApplicationClass;
  */
 public class PropertiesEnhancer extends Enhancer {
 
-    @Override
+    @Override 
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
         final CtClass ctClass = makeClass(applicationClass);
         if (ctClass.isInterface()) {
