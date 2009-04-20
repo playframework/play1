@@ -155,6 +155,8 @@ public class Play {
         // Mode
         mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
 
+        
+        
         // Configure logs
         String logLevel = configuration.getProperty("application.log", "INFO");
         Logger.log4j.setLevel(Level.toLevel(logLevel));
