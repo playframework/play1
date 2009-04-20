@@ -37,7 +37,6 @@ import play.vfs.FileSystemFile;
 public class ApplicationClassloader extends ClassLoader {
 
     public ProtectionDomain protectionDomain;
-    public static URLClassLoader otherLibs;
 
     public ApplicationClassloader() {
         super(ApplicationClassloader.class.getClassLoader());
@@ -53,29 +52,6 @@ public class ApplicationClassloader extends ClassLoader {
             protectionDomain = new ProtectionDomain(codeSource, permissions);
         } catch (MalformedURLException e) {
             throw new UnexpectedException(e);
-        }
-        // other libs
-        if(otherLibs == null) {
-            List<URL> urls = new ArrayList();
-            List<File> libs = new ArrayList<File>();
-            libs.add(Play.getFile("lib"));
-            for(VirtualFile module : Play.modules) {
-                libs.add(new File(((FileSystemFile)module).realFile, "lib"));
-            }
-            for(File applicationLibs : libs) {
-                if(applicationLibs.exists()) {
-                    for(File jar : applicationLibs.listFiles()) {
-                        if(jar.isFile() && jar.getName().endsWith(".jar")) {
-                            try {
-                                urls.add(jar.toURL());
-                            } catch (MalformedURLException ex) {
-                                Logger.error(ex, "Problem while loading jar %s", jar);
-                            }
-                        }
-                    }
-                }
-            }
-            otherLibs = new URLClassLoader(urls.toArray(new URL[0]), ApplicationClassloader.class.getClassLoader());
         }
     }
 
@@ -93,12 +69,6 @@ public class ApplicationClassloader extends ClassLoader {
             if (resolve) {
                 resolveClass(applicationClass);
             }
-            return applicationClass;
-        }
-        
-        // Then check if it's a lib
-        applicationClass = otherLibs.loadClass(name);
-        if(applicationClass != null) {
             return applicationClass;
         }
 
@@ -141,10 +111,7 @@ public class ApplicationClassloader extends ClassLoader {
         name = name.replace(".", "/") + ".class";
         InputStream is = getResourceAsStream(name);
         if (is == null) {
-            is = otherLibs.getResourceAsStream(name);
-            if (is == null) {
-                return null;
-            }
+            return null;
         }
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();

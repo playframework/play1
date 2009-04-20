@@ -24,3 +24,4 @@ modules/ecss/lib/ecss.jar
 modules/test-runner/lib/test-runner.jar
 resources/catalog.xml
 resources/nbproject/private
+modules/gae/lib/gae.jar

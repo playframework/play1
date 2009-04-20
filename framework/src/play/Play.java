@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
-import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,7 +16,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.log4j.Level;
 import play.cache.Cache;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
@@ -158,7 +156,7 @@ public class Play {
 
         // Configure logs
         String logLevel = configuration.getProperty("application.log", "INFO");
-        Logger.log4j.setLevel(Level.toLevel(logLevel));
+        Logger.setUp(logLevel); 
 
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
@@ -186,16 +184,6 @@ public class Play {
         // Enable a first classloader
         classloader = new ApplicationClassloader();
 
-        // tmp dir
-        if (configuration.getProperty("play.tmp", "tmp").equals("none")) {
-            tmpDir = null;
-        } else {
-            tmpDir = new File(configuration.getProperty("play.tmp", "tmp"));
-            if (!tmpDir.isAbsolute()) {
-                tmpDir = new File(applicationPath, tmpDir.getPath());
-            }
-            tmpDir.mkdirs();
-        }
         // Plugins
         loadPlugins();
 
@@ -291,16 +279,22 @@ public class Play {
             readConfiguration();
             if (configuration.getProperty("play.tmp", "tmp").equals("none")) {
                 tmpDir = null;
+                Logger.warn("No tmp folder will be used (play.tmp is set to none)");
             } else {
                 tmpDir = new File(configuration.getProperty("play.tmp", "tmp"));
                 if (!tmpDir.isAbsolute()) {
                     tmpDir = new File(applicationPath, tmpDir.getPath());
                 }
-                tmpDir.mkdirs();
+                try {
+                    tmpDir.mkdirs();
+                } catch(Throwable e) {
+                    tmpDir = null;
+                    Logger.warn("No tmp folder will be used (cannot create the tmp dir)");
+                }
             }
             // Configure logs
             String logLevel = configuration.getProperty("application.log", "INFO");
-            Logger.log4j.setLevel(Level.toLevel(logLevel));
+            Logger.setUp(logLevel); 
             // Locales
             langs = Arrays.asList(configuration.getProperty("application.langs", "").split(","));
             if (langs.size() == 1 && langs.get(0).trim().equals("")) {
@@ -406,7 +400,7 @@ public class Play {
         // Play! plugings
         Enumeration<URL> urls = null;
         try {
-            urls = ApplicationClassloader.otherLibs.getResources("play.plugins");
+            urls = Play.classloader.getResources("play.plugins");
         } catch (Exception e) {
         }
         while (urls.hasMoreElements()) {
@@ -470,7 +464,7 @@ public class Play {
      * Add a play application (as plugin)
      * @param path The application path
      */
-    public static void addModule(String name, File path) {
+    public static void addModule(String name, File path) {            
         VirtualFile root = VirtualFile.open(path);
         modules.add(root);
         if (root.child("app").exists()) {

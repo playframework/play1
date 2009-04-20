@@ -13,7 +13,6 @@ import javassist.LoaderClassPath;
 import javassist.NotFoundException;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.classloading.ApplicationClassloader;
 
 /**
  * Enhancer support
@@ -25,7 +24,6 @@ public abstract class Enhancer {
     public Enhancer() {
         classPool.appendSystemPath();
         classPool.appendClassPath(new LoaderClassPath(Enhancer.class.getClassLoader()));
-        classPool.appendClassPath(new LoaderClassPath(ApplicationClassloader.otherLibs));
         classPool.appendClassPath(new ApplicationClassesClasspath());
     }
 
