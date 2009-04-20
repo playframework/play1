@@ -9,8 +9,12 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.asyncweb.common.Cookie;
@@ -96,14 +100,12 @@ public class HttpHandler implements IoHandler {
         URI uri = minaRequest.getRequestUri();
         Request request = new Request();
         Http.Request.current.set(request);
-
-        boolean xForwardedSupport = "enabled".equals(Play.configuration.getProperty("XForwardedSupport"));
-
+        IoBuffer buffer = (IoBuffer) minaRequest.getContent();
+        
+        request.remoteAddress=((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
         request.method = minaRequest.getMethod().toString();
         request.path = URLDecoder.decode(uri.getRawPath(), "utf-8");
         request.querystring = uri.getQuery() == null ? "" : uri.getRawQuery();
-
-        IoBuffer buffer = (IoBuffer) minaRequest.getContent();
 
         if (minaRequest.getHeader("Content-Type") != null) {
             request.contentType = minaRequest.getHeader("Content-Type").split(";")[0].trim().toLowerCase();
@@ -117,23 +119,8 @@ public class HttpHandler implements IoHandler {
             request.body = new FileInputStream(minaRequest.getFileContent());
         }
 
-        request.secure = xForwardedSupport && ("https".equals(Play.configuration.get("XForwardedProto")) ||
-                "https".equals(minaRequest.getHeader("X-Forwarded-Proto")) ||
-                "on".equals(minaRequest.getHeader("X-Forwarded-Ssl")));
-
         request.url = minaRequest.getRequestUri().toString();
-
-        if (xForwardedSupport) {
-            if (Play.configuration.containsKey("XForwardedHost")) {
-                request.host = (String) Play.configuration.get("XForwardedHost");
-            } else if (minaRequest.containsHeader("X-Forwarded-Host")) {
-                request.host = minaRequest.getHeader("X-Forwarded-Host");
-            }
-        }
-
-        if (request.host == null) {
-            request.host = minaRequest.getHeader("host");
-        }
+        request.host = minaRequest.getHeader("host");
 
         if (request.host.contains(":")) {
             request.port = Integer.parseInt(request.host.split(":")[1]);
@@ -142,9 +129,25 @@ public class HttpHandler implements IoHandler {
             request.port = 80;
             request.domain = request.host;
         }
-
-        request.remoteAddress = xForwardedSupport && minaRequest.containsHeader("X-Forwarded-For") ? minaRequest.getHeader("X-Forwarded-For") : ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
-
+    
+        if (minaRequest.containsHeader("X-Forwarded-For")) {
+            if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport","").split(",")).contains(request.remoteAddress))
+                throw new RuntimeException ("This proxy request is not authorized");
+            else {
+                request.secure = ("https".equals(Play.configuration.get("XForwardedProto")) 
+                        || "https".equals(minaRequest.getHeader("X-Forwarded-Proto")) 
+                        || "on".equals(minaRequest.getHeader("X-Forwarded-Ssl")));
+                
+                if (Play.configuration.containsKey("XForwardedHost")) {
+                    request.host = (String) Play.configuration.get("XForwardedHost");
+                } else if (minaRequest.containsHeader("X-Forwarded-Host")) {
+                    request.host = minaRequest.getHeader("X-Forwarded-Host");
+                }
+                if (minaRequest.containsHeader("X-Forwarded-For"))
+                    request.remoteAddress=minaRequest.getHeader("X-Forwarded-For");
+            }
+        }
+        
         for (String key : minaRequest.getHeaders().keySet()) {
             Http.Header hd = new Http.Header();
             hd.name = key.toLowerCase();

@@ -243,22 +243,41 @@ public abstract class Controller {
     }
     
     /**
-     * Send a 302 Redirect response
+     * Send a 302 redirect response.
      * @param url The Location to redirect
      */
     protected static void redirect(String url) {
+        redirect(url,false);
+    }
+    
+    /**
+     * Send a Redirect response.
+     * @param url The Location to redirect
+     * @param permanent true -> 301, false -> 302
+     */
+    protected static void redirect(String url,boolean permanent) {
         if(url.matches("^\\w+[.]\\w+$")) { // fix Java !
-            redirect(url, new Object[0]);
+            redirect(url, permanent, new Object[0]);
         }
-        throw new Redirect(url);
+        throw new Redirect(url,permanent);
     }
 
     /**
-     * Redirect to another action
+     * 302 Redirect to another action
      * @param action The fully qualified action name (ex: Application.index)
      * @param args Method arguments
      */
     protected static void redirect(String action, Object... args) {
+        redirect(action, false, args);
+    }
+    
+    /**
+     * Redirect to another action
+     * @param action The fully qualified action name (ex: Application.index)
+     * @param permanent true -> 301, false -> 302
+     * @param args Method arguments
+     */
+    protected static void redirect(String action, boolean permanent, Object... args) {
         try {
             Map<String, Object> r = new HashMap<String, Object>();
             Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
@@ -272,7 +291,7 @@ public abstract class Controller {
                 }
             }
             try {
-                throw new Redirect(Router.reverse(action, r).toString());
+                throw new Redirect(Router.reverse(action, r).toString(),permanent);
             } catch (NoRouteFoundException e) {
                 StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
                 if (element != null) {
