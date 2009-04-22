@@ -177,7 +177,7 @@ public abstract class CRUD extends Controller {
         }
 
         public Long count(String search, String searchFields, String where) {
-            String q = "select count(*) from " + entityClass.getSimpleName();
+            String q = "select count(e) from " + entityClass.getName() + " e";
             if (search != null && !search.equals("")) {
                 String searchQuery = getSearchQuery(searchFields);
                 if (!searchQuery.equals("")) {
@@ -191,12 +191,12 @@ public abstract class CRUD extends Controller {
             if (search != null && !search.equals("") && q.indexOf("?1") != -1) {
                 query.setParameter(1, "%" + search.toLowerCase() + "%");
             }
-            return (Long) query.getSingleResult();
+            return Long.decode(query.getSingleResult().toString());
         }
 
         public List findPage(int page, String search, String searchFields, String orderBy, String order, String where) {
             int pageLength = getPageSize();
-            String q = "from " + entityClass.getSimpleName();
+            String q = "select from " + entityClass.getName();
             if (search != null && !search.equals("")) {
                 String searchQuery = getSearchQuery(searchFields);
                 if (!searchQuery.equals("")) {
@@ -241,7 +241,7 @@ public abstract class CRUD extends Controller {
         }
 
         public JPASupport findById(Object id) {
-            return (JPASupport) JPA.getEntityManager().createQuery("from " + entityClass.getSimpleName() + " where id = " + id).getSingleResult();
+            return (JPASupport) JPA.getEntityManager().createQuery("select from " + entityClass.getName() + " where id = " + id).getSingleResult();
         }
 
         public List<ObjectField> getFields() {
