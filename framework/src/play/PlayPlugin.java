@@ -1,6 +1,7 @@
 package play;
 
 import java.lang.reflect.Method;
+import play.classloading.ApplicationClasses.ApplicationClass;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.results.Result;
@@ -20,6 +21,9 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * Called at plugin loading
      */
     public void onLoad() {
+    }
+    
+    public void enhance(ApplicationClass applicationClass) {
     }
     
     /**

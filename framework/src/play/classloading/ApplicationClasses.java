@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import play.Logger;
 import play.Play;
+import play.PlayPlugin;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.Enhancer;
 import play.classloading.enhancers.JPAEnhancer;
@@ -181,6 +182,15 @@ public class ApplicationClasses {
                     Logger.trace("%sms to apply %s to %s", System.currentTimeMillis()-start, enhancer.getSimpleName(), name);
                 } catch (Exception e) {
                     throw new UnexpectedException("While applying " + enhancer + " on " + name, e);
+                }
+            }
+            for (PlayPlugin plugin : Play.plugins) {
+                try {
+                    long start = System.currentTimeMillis();
+                    plugin.enhance(this);
+                    Logger.trace("%sms to apply %s to %s", System.currentTimeMillis()-start, plugin, name);
+                } catch (Exception e) {
+                    throw new UnexpectedException("While applying " + plugin + " on " + name, e);
                 }
             }
             return this.enhancedByteCode;

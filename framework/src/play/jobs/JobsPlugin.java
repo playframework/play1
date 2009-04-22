@@ -76,7 +76,7 @@ public class JobsPlugin extends PlayPlugin {
                 scheduler = factory.getScheduler();
                 scheduler.start();
             } catch (Exception e) {
-                Logger.error("Cannot start Jobs scheduler (restricted environement ?)");
+                Logger.warn("Cannot start Jobs scheduler (restricted environement ?)");
                 return;
             }
         }

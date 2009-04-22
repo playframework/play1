@@ -50,12 +50,9 @@ public class ServletWrapper extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
-        Logger.trace("ServletWrapper>init");
         String appDir = appDir = config.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
-        Logger.trace("ServletWrapper>load: " + root.getAbsolutePath());
-        Logger.info("");
-        Play.init(root, System.getProperty("play.id", ""));
+        Play.init(root, System.getProperty("play.id", ""));       
     }
 
     @Override

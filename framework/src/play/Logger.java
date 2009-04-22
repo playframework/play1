@@ -65,6 +65,11 @@ public class Logger {
      * The application logger (play).
      */
     public static org.apache.log4j.Logger log4j = org.apache.log4j.Logger.getLogger("play");
+    static {
+        if(!org.apache.log4j.Logger.getRootLogger().getAllAppenders().hasMoreElements()) {
+            Logger.log4j = null;
+        }
+    }
     public static java.util.logging.Logger juli = java.util.logging.Logger.getLogger("play");
 
     /**
