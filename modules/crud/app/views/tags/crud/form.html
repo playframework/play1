@@ -21,9 +21,10 @@
 		%{
 			def handler = fieldsHandler[fieldName];
 			handler.setProperty('fieldName', 'object.' + field.name);
+            def oldObject = handler.getProperty('object');
 			handler.setProperty('object', _caller.object);
 			out.println(handler.toString());
-			handler.setProperty('object', null);
+			handler.setProperty('object', oldObject);
 			handler.setProperty('fieldName', null);
 		}%
 	%{ } else { }%
@@ -32,7 +33,7 @@
 			#{crud.textField name:field.name, value:(_caller.object ? _caller.object[field.name] : null) /}
 		#{/if}
                 
-                #{if field.type == 'password'}
+        #{if field.type == 'password'}
 			#{crud.passwordField name:field.name, value:(_caller.object ? _caller.object[field.name] : null) /}
 		#{/if}
 		
