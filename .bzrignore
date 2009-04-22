@@ -26,3 +26,4 @@ resources/catalog.xml
 resources/nbproject/private
 modules/gae/lib/gae.jar
 catalog.xml
+modules/gae/lib/gae.jar

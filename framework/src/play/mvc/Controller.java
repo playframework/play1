@@ -247,7 +247,7 @@ public abstract class Controller {
      * @param url The Location to redirect
      */
     protected static void redirect(String url) {
-        redirect(url,false);
+        redirect(url, false);
     }
     
     /**
@@ -255,11 +255,11 @@ public abstract class Controller {
      * @param url The Location to redirect
      * @param permanent true -> 301, false -> 302
      */
-    protected static void redirect(String url,boolean permanent) {
-        if(url.matches("^\\w+[.]\\w+$")) { // fix Java !
+    protected static void redirect(String url, boolean permanent) {
+        if(url.matches("^(\\w+[.]?)+$")) { // fix Java !
             redirect(url, permanent, new Object[0]);
         }
-        throw new Redirect(url,permanent);
+        throw new Redirect(url, permanent);
     }
 
     /**

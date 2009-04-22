@@ -1,10 +1,10 @@
 package models;
 
 import javax.persistence.Entity;
-import play.db.jpa.JPAModel;
+import play.db.jpa.JPASupport;
 
 @Entity
-public class Client extends JPAModel {
+public class Client extends JPASupport {
 	
 	public String name;
 	public Integer age;

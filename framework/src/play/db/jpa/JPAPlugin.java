@@ -5,7 +5,6 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
-import javax.persistence.RollbackException;
 import org.hibernate.ejb.Ejb3Configuration;
 import play.Logger;
 import play.Play;
@@ -17,6 +16,8 @@ import play.exceptions.JPAException;
  * JPA Plugin
  */
 public class JPAPlugin extends PlayPlugin {
+
+    public static boolean autoTxs = true;
 
     @Override
     public void onApplicationStart() {
@@ -107,7 +108,9 @@ public class JPAPlugin extends PlayPlugin {
             return;
         }
         EntityManager manager = JPA.entityManagerFactory.createEntityManager();
-        manager.getTransaction().begin();
+        if (autoTxs) {
+            manager.getTransaction().begin();
+        }
         JPA.createContext(manager, readonly);
     }
 
@@ -120,27 +123,35 @@ public class JPAPlugin extends PlayPlugin {
             return;
         }
         EntityManager manager = JPA.get().entityManager;
-        if (manager.getTransaction().isActive()) {
-            if (JPA.get().readonly || rollback || manager.getTransaction().getRollbackOnly()) {
-                manager.getTransaction().rollback();
-            } else {
-                try {
-                    manager.getTransaction().commit();
-                } catch (Throwable e) {
-                    for (int i = 0; i < 10; i++) {
-                        if (e instanceof RollbackException && e.getCause() != null) {
-                            e = e.getCause();
-                            break;
-                        }
-                        e = e.getCause();
-                        if (e == null) {
-                            break;
+        try {
+            if (autoTxs) {
+                if (manager.getTransaction().isActive()) {
+                    if (JPA.get().readonly || rollback || manager.getTransaction().getRollbackOnly()) {
+                        manager.getTransaction().rollback();
+                    } else {
+                        try {
+                            if (autoTxs) {
+                                manager.getTransaction().commit();
+                            }
+                        } catch (Throwable e) {
+                            for (int i = 0; i < 10; i++) {
+                                if (e instanceof PersistenceException && e.getCause() != null) {
+                                    e = e.getCause();
+                                    break;
+                                }
+                                e = e.getCause();
+                                if (e == null) {
+                                    break;
+                                }
+                            }
+                            throw new JPAException("Cannot commit", e);
                         }
                     }
-                    throw new JPAException("Cannot commit", e);
                 }
             }
+        } finally {
+            manager.close();
+            JPA.clearContext();
         }
-        JPA.clearContext();
     }
 }

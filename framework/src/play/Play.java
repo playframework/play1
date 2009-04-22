@@ -419,7 +419,7 @@ public class Play {
             }
         }
         Collections.sort(plugins);
-        for (PlayPlugin plugin : plugins) {
+        for (PlayPlugin plugin : new ArrayList<PlayPlugin>(plugins)) { // wrap a new collection to allow some plugins to modify the list
             plugin.onLoad();
         }
     }

@@ -4,24 +4,34 @@ import com.google.appengine.tools.development.ApiProxyLocalImpl;
 import com.google.apphosting.api.ApiProxy;
 import java.io.File;
 import java.util.List;
-import javax.jdo.JDOHelper;
+import java.util.ListIterator;
 import javax.persistence.Entity;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import org.datanucleus.JDOClassLoaderResolver;
 import org.datanucleus.enhancer.DataNucleusEnhancer;
-import org.datanucleus.enhancer.asm.ASMClassEnhancer;
-import org.datanucleus.metadata.FileMetaData;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.classloading.enhancers.Enhancer;
 import play.db.jpa.JPA;
+import play.db.jpa.JPAPlugin;
+import play.jobs.JobsPlugin;
 
 public class GAEPlugin extends PlayPlugin {
     
     public ApiProxy.Environment devEnvironment = null;
+   
+
+    @Override
+    public void onLoad() {
+        for(ListIterator<PlayPlugin> it = Play.plugins.listIterator(); it.hasNext();) {
+            if(it.next() instanceof JobsPlugin) {
+                it.remove();
+            }
+        }
+        if(ApiProxy.getCurrentEnvironment() != null && ApiProxy.getCurrentEnvironment().getClass().getName().indexOf("development") == -1) {
+            Play.mode = Play.Mode.PROD;
+        }
+    }
 
     @Override
     public void onApplicationStart() {
@@ -31,17 +41,15 @@ public class GAEPlugin extends PlayPlugin {
             devEnvironment = new PlayDevEnvironment();
             ApiProxy.setDelegate(new ApiProxyLocalImpl(new File(Play.applicationPath, "gae-dev")){});
             ApiProxy.setEnvironmentForCurrentThread(new PlayDevEnvironment());
-        }
+            System.setProperty("appengine.orm.disable.duplicate.emf.exception", "yes");
+        } 
         
         // it's time to set up JPA
         List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
         if(!classes.isEmpty()) {
-            EntityManagerFactory emf = Persistence.createEntityManagerFactory("default");
-        
             // Hack the JPA plugin
-            JPA.entityManagerFactory = emf;
-            
-            // Hack Datanucleus
+            JPAPlugin.autoTxs = false;
+            JPA.entityManagerFactory = Persistence.createEntityManagerFactory("default");
         }
         
     }
@@ -51,7 +59,6 @@ public class GAEPlugin extends PlayPlugin {
         if(!applicationClass.javaSource.contains("@Entity")) {
             return;
         }
-        System.out.println("ENHANCING "+applicationClass.name);
         DataNucleusEnhancer dataNucleusEnhancer = new DataNucleusEnhancer("JPA", "ASM");
         dataNucleusEnhancer.setVerbose(true);
         ClassLoader tempCl = new ClassLoader() {
@@ -81,7 +88,6 @@ public class GAEPlugin extends PlayPlugin {
         if(devEnvironment != null) {
             ApiProxy.setEnvironmentForCurrentThread(new PlayDevEnvironment());
         }
-        new JDOClassLoaderResolver().setPrimary(Play.classloader);
     }    
     
 

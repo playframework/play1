@@ -28,7 +28,7 @@ public abstract class CRUD extends Controller {
         }
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        List<JPAModel> objects = type.findPage(page, search, searchFields, orderBy, order, params.get("where"));
+        List<JPASupport> objects = type.findPage(page, search, searchFields, orderBy, order, params.get("where"));
         Long count = type.count(search, searchFields, params.get("where"));
         Long totalCount = type.count(null, null, params.get("where"));
         try {
@@ -38,10 +38,10 @@ public abstract class CRUD extends Controller {
         }
     }
 
-    public static void show(Long id) {
+    public static void show(String id) {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        JPAModel object = type.findById(id);
+        JPASupport object = type.findById(id);
         try {
             render(type, object);
         } catch (TemplateNotFoundException e) {
@@ -49,10 +49,10 @@ public abstract class CRUD extends Controller {
         }
     }
 
-    public static void attachment(Long id, String field) throws Exception {
+    public static void attachment(String id, String field) throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        JPAModel object = type.findById(id);
+        JPASupport object = type.findById(id);
         FileAttachment attachment = (FileAttachment) object.getClass().getField(field).get(object);
         if (attachment == null) {
             notFound();
@@ -60,23 +60,23 @@ public abstract class CRUD extends Controller {
         renderBinary(attachment.get(), attachment.filename);
     }
 
-    public static void save(Long id) throws Exception {
+    public static void save(String id) throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        JPAModel object = type.findById(id);
+        JPASupport object = type.findById(id);
         validation.valid(object.edit("object", params));
         if (validation.hasErrors()) {
             object.refresh();
             validation.keep();
             params.flash();
             flash.error(Messages.get("crud.hasErrors"));
-            redirect(request.controller + ".show", object.id);
+            redirect(request.controller + ".show", object.getId());
         }
-        flash.success(Messages.get("crud.saved", type.modelName, object.id));
+        flash.success(Messages.get("crud.saved", type.modelName, object.getId()));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
         }
-        redirect(request.controller + ".show", object.id);
+        redirect(request.controller + ".show", object.getId());
     }
 
     public static void blank() {
@@ -92,7 +92,7 @@ public abstract class CRUD extends Controller {
     public static void create() throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        JPAModel object = type.entityClass.newInstance();
+        JPASupport object = type.entityClass.newInstance();
         validation.valid(object.edit("object", params));
         if (validation.hasErrors()) {
             validation.keep();
@@ -101,22 +101,22 @@ public abstract class CRUD extends Controller {
             redirect(request.controller + ".blank");
         }
         object.save();
-        flash.success(Messages.get("crud.created", type.name, object.id));
+        flash.success(Messages.get("crud.created", type.name, object.getId()));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
         }
         if (params.get("_saveAndAddAnother") != null) {
             redirect(request.controller + ".blank");
         }
-        redirect(request.controller + ".show", object.id);
+        redirect(request.controller + ".show", object.getId());
     }
 
-    public static void delete(Long id) {
+    public static void delete(String id) {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        JPAModel object = type.findById(id);
+        JPASupport object = type.findById(id);
         object.delete();
-        flash.success(Messages.get("crud.deleted", type.name, object.id));
+        flash.success(Messages.get("crud.deleted", type.name, object.getId()));
         redirect(request.controller + ".list");
     }
 
@@ -136,14 +136,14 @@ public abstract class CRUD extends Controller {
     public static class ObjectType {
 
         public Class<? extends CRUD> controllerClass;
-        public Class<? extends JPAModel> entityClass;
+        public Class<? extends JPASupport> entityClass;
         public String name;
         public String modelName;
         public String controllerName;
 
         public static ObjectType get(Class controllerClass) {
             Class entityClass = getEntityClassForController(controllerClass);
-            if (entityClass == null || !JPAModel.class.isAssignableFrom(entityClass)) {
+            if (entityClass == null || !JPASupport.class.isAssignableFrom(entityClass)) {
                 return null;
             }
             ObjectType type = new ObjectType();
@@ -240,8 +240,8 @@ public abstract class CRUD extends Controller {
             return q;
         }
 
-        public JPAModel findById(Long id) {
-            return (JPAModel) JPA.getEntityManager().createQuery("from " + entityClass.getSimpleName() + " where id = " + id).getSingleResult();
+        public JPASupport findById(Object id) {
+            return (JPASupport) JPA.getEntityManager().createQuery("from " + entityClass.getSimpleName() + " where id = " + id).getSingleResult();
         }
 
         public List<ObjectField> getFields() {
@@ -298,7 +298,7 @@ public abstract class CRUD extends Controller {
                 if (FileAttachment.class.isAssignableFrom(field.getType())) {
                     type = "file";
                 }
-                if (JPAModel.class.isAssignableFrom(field.getType())) {
+                if (JPASupport.class.isAssignableFrom(field.getType())) {
                     if (field.isAnnotationPresent(OneToOne.class)) {
                         if (field.getAnnotation(OneToOne.class).mappedBy().equals("")) {
                             type = "relation";
