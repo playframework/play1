@@ -13,7 +13,7 @@ import play.Play;
 public class BytecodeCache {
 
     // Please update the cache version at each release
-    static String version = "7";
+    static String version = "a";
     
     /**
      * Delete the bytecode
@@ -97,7 +97,7 @@ public class BytecodeCache {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             messageDigest.reset();
-            messageDigest.update((version + text).getBytes("utf-8"));
+            messageDigest.update((BytecodeCache.version + "-" + Play.version + text).getBytes("utf-8"));
             byte[] digest = messageDigest.digest();
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < digest.length; ++i) {

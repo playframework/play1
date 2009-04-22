@@ -10,7 +10,7 @@ import play.libs.Files;
 public class FileAttachment {
     
     @Transient
-    JPAModel model;
+    JPASupport model;
     
     @Transient
     String name;
@@ -23,13 +23,13 @@ public class FileAttachment {
     FileAttachment() {
     }
 
-    FileAttachment(JPAModel model, String name) {
+    FileAttachment(JPASupport model, String name) {
         this.model = model;
         this.name = name;
     }
     
     public File get() {
-        File file = new File(getStore(), model.getClass().getName()+"."+name+"_"+model.id);
+        File file = new File(getStore(), model.getClass().getName()+"."+name+"_"+model.getId());
         if(file.exists()) {
             return file;
         }
@@ -42,7 +42,7 @@ public class FileAttachment {
     
     void save() {
         if(f != null) {
-            File to = new File(getStore(), model.getClass().getName()+"."+name+"_"+model.id);
+            File to = new File(getStore(), model.getClass().getName()+"."+name+"_"+model.getId());
             Files.copy(f, to);
         }
     }
