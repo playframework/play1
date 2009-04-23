@@ -3,9 +3,11 @@ package play.cache;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -16,6 +18,7 @@ import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.transcoders.SerializingTranscoder;
 import play.Logger;
 import play.Play;
+import play.exceptions.CacheException;
 import play.exceptions.ConfigurationException;
 import play.libs.Time;
 
@@ -24,7 +27,7 @@ import play.libs.Time;
  */
 public class Cache {
 
-    private static CacheImpl cacheImpl = new LocalCacheImpl();
+    public static CacheImpl cacheImpl = new LocalCacheImpl();
 
     /**
      * Add an element only if it doesn't exist.
@@ -33,6 +36,7 @@ public class Cache {
      * @param expiration Ex: 10s, 3mn, 8h
      */
     public static void add(String key, Object value, String expiration) {
+        checkSerializable(value);
         cacheImpl.add(key, value, Time.parseDuration(expiration));
     }
 
@@ -45,6 +49,7 @@ public class Cache {
      * @return If the element an eventually been cached
      */
     public static boolean safeAdd(String key, Object value, String expiration) {
+        checkSerializable(value);
         return cacheImpl.safeAdd(key, value, Time.parseDuration(expiration));
     }
 
@@ -54,6 +59,7 @@ public class Cache {
      * @param value Element value
      */
     public static void add(String key, Object value) {
+        checkSerializable(value);
         cacheImpl.add(key, value, Time.parseDuration(null));
     }
 
@@ -64,6 +70,7 @@ public class Cache {
      * @param expiration Ex: 10s, 3mn, 8h
      */
     public static void set(String key, Object value, String expiration) {
+        checkSerializable(value);
         cacheImpl.set(key, value, Time.parseDuration(expiration));
     }
 
@@ -75,6 +82,7 @@ public class Cache {
      * @return If the element an eventually been cached
      */
     public static boolean safeSet(String key, Object value, String expiration) {
+        checkSerializable(value);
         return cacheImpl.safeSet(key, value, Time.parseDuration(expiration));
     }
 
@@ -84,6 +92,7 @@ public class Cache {
      * @param value Element value
      */
     public static void set(String key, Object value) {
+        checkSerializable(value);
         cacheImpl.set(key, value, Time.parseDuration(null));
     }
 
@@ -94,6 +103,7 @@ public class Cache {
      * @param expiration Ex: 10s, 3mn, 8h
      */
     public static void replace(String key, Object value, String expiration) {
+        checkSerializable(value);
         cacheImpl.replace(key, value, Time.parseDuration(expiration));
     }
 
@@ -106,6 +116,7 @@ public class Cache {
      * @return If the element an eventually been cached
      */
     public static boolean safeReplace(String key, Object value, String expiration) {
+        checkSerializable(value);
         return cacheImpl.safeReplace(key, value, Time.parseDuration(expiration));
     }
 
@@ -115,6 +126,7 @@ public class Cache {
      * @param value Element value
      */
     public static void replace(String key, Object value) {
+        checkSerializable(value);
         cacheImpl.replace(key, value, Time.parseDuration(null));
     }
 
@@ -234,11 +246,17 @@ public class Cache {
     public static void stop() {
         cacheImpl.stop();
     }
+    
+    static void checkSerializable(Object value) {
+        if(!(value instanceof Serializable)) {
+            throw new CacheException("Cannot cache a non-serializable value of type " + value.getClass().getName(), new NotSerializableException(value.getClass().getName()));
+        }
+    }
 
     /**
      * A cache implementation
      */
-    static interface CacheImpl {
+    public static interface CacheImpl {
 
         public void add(String key, Object value, int expiration);
 
@@ -515,7 +533,14 @@ public class Cache {
         public void clear() {
             cache.clear();
         }
+
+        @Override
+        public String toString() {
+            return cache.toString();
+        }
+        
         //
+        
         class CachedElement {
 
             private String key;
@@ -526,6 +551,12 @@ public class Cache {
                 this.key = key;
                 this.value = value;
                 this.expiration = expiration;
+                try {
+                    ObjectOutputStream oos = new ObjectOutputStream(new ByteArrayOutputStream());
+                    oos.writeObject(value);
+                } catch(Exception e) {
+                    throw new CacheException("Cannot cache a non-serializable value of type " + value.getClass().getName(), e);
+                }
             }
 
             public String getKey() {
@@ -551,6 +582,12 @@ public class Cache {
             public void setExpiration(Long expiration) {
                 this.expiration = expiration;
             }
+
+            @Override
+            public String toString() {
+                return key + ":" + value + "("+expiration+")";
+            }            
+            
         }
     }
 }

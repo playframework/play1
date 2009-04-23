@@ -11,47 +11,86 @@ import org.datanucleus.enhancer.DataNucleusEnhancer;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
+import play.cache.Cache;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.jobs.JobsPlugin;
+import play.libs.IO;
+import play.mvc.Router;
 
 public class GAEPlugin extends PlayPlugin {
     
     public ApiProxy.Environment devEnvironment = null;
    
-
     @Override
     public void onLoad() {
+        // Remove Jobs from plugin list
         for(ListIterator<PlayPlugin> it = Play.plugins.listIterator(); it.hasNext();) {
             if(it.next() instanceof JobsPlugin) {
                 it.remove();
             }
         }
+        // Force to PROD mode when hosted on production GAE
         if(ApiProxy.getCurrentEnvironment() != null && ApiProxy.getCurrentEnvironment().getClass().getName().indexOf("development") == -1) {
             Play.mode = Play.Mode.PROD;
+        }
+        // Create a fake development environment if not run in the Google SDK
+        if(ApiProxy.getCurrentEnvironment() == null) {
+            Logger.warn("");
+            Logger.warn("Google App Engine module");
+            Logger.warn("~~~~~~~~~~~~~~~~~~~~~~~");
+            Logger.warn("No Google App Engine environment found. Setting up a development environement");
+            devEnvironment = new PlayDevEnvironment();
+            ApiProxy.setDelegate(new ApiProxyLocalImpl(new File(Play.applicationPath, "war")){});
+            ApiProxy.setEnvironmentForCurrentThread(new PlayDevEnvironment());
+            System.setProperty("appengine.orm.disable.duplicate.emf.exception", "yes");
+            File warExt = Play.getFile("war");
+            if(!warExt.exists()) {
+                warExt.mkdir();
+            }
+            File webInf = Play.getFile("war/WEB-INF");
+            if(!webInf.exists()) {
+                webInf.mkdir();
+            }
+            File xml = Play.getFile("war/WEB-INF/appengine-web.xml");
+            try {
+                if(!xml.exists()) {
+                    IO.writeContent("<appengine-web-app xmlns=\"http://appengine.google.com/ns/1.0\">\n" +                    
+                    "\t<application><!-- Replace this with your application id from http://appengine.google.com --></application>\n" +
+                    "\t<version>1</version>\n" +
+                    "</appengine-web-app>\n", xml);
+                }
+                if(IO.readContentAsString(xml).contains("<!-- Replace this with your application id from http://appengine.google.com -->")) {
+                    Logger.warn("Don't forget to define your GAE application id in the 'war/WEB-INF/appengine-web.xml' file");
+                }
+            } catch(Exception e) {
+                Logger.error(e, "Cannot init GAE files");
+            }
+            Logger.warn("");
         }
     }
 
     @Override
-    public void onApplicationStart() {
+    public void onRoutesLoaded() {
+        Router.addRoute("GET",  "/_ah/login", "GAEActions.login");
+        Router.addRoute("POST", "/_ah/login", "GAEActions.doLogin");
+        Router.addRoute("GET",  "/_ah/logout", "GAEActions.logout");
+    }
 
-        if(ApiProxy.getCurrentEnvironment() == null) {
-            Logger.warn("No Google App Engine environment found. Setting up a development environement.");
-            devEnvironment = new PlayDevEnvironment();
-            ApiProxy.setDelegate(new ApiProxyLocalImpl(new File(Play.applicationPath, "gae-dev")){});
-            ApiProxy.setEnvironmentForCurrentThread(new PlayDevEnvironment());
-            System.setProperty("appengine.orm.disable.duplicate.emf.exception", "yes");
-        } 
-        
-        // it's time to set up JPA
+    @Override
+    public void onApplicationStart() {
+        // It's time to set up JPA
         List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
         if(!classes.isEmpty()) {
             // Hack the JPA plugin
             JPAPlugin.autoTxs = false;
             JPA.entityManagerFactory = Persistence.createEntityManagerFactory("default");
+        }        
+        if(devEnvironment == null) {
+            // Wrap the GAE cache
+            Cache.cacheImpl = new GAECache();
         }
-        
     }
 
     @Override
@@ -85,14 +124,15 @@ public class GAEPlugin extends PlayPlugin {
     
     @Override
     public void beforeInvocation() {
+        // Set the current developement environment if needed
         if(devEnvironment != null) {
             ApiProxy.setEnvironmentForCurrentThread(new PlayDevEnvironment());
         }
-    }    
-    
+    }        
 
     @Override
     public void onConfigurationRead() {
+        // Disable tmp directory
         Play.configuration.setProperty("play.tmp", "none");
     }
 

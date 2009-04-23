@@ -2,6 +2,7 @@ package play.modules.gae;
 
 import com.google.apphosting.api.ApiProxy.Environment;
 import play.Play;
+import play.mvc.Scope.Session;
 
 public class PlayDevEnvironment implements Environment {
 
@@ -14,27 +15,27 @@ public class PlayDevEnvironment implements Environment {
     }
 
     public String getEmail() {
-        return null;
+        return Session.current().get("__GAE_EMAIL");
     }
 
     public boolean isLoggedIn() {
-        return false;
+        return Session.current().contains("__GAE_EMAIL");
     }
 
     public boolean isAdmin() {
-        return false;
+        return Session.current().contains("__GAE_ISADMIN") && Session.current().get("__GAE_ISADMIN").equals("true");
     }
 
     public String getAuthDomain() {
-        return null;
+        return "gmail.com";
     }
 
     public String getRequestNamespace() {
-        return null;
+        return "";
     }
 
     public String getDefaultNamespace() {
-        return null;
+        return "";
     }
 
     public void setDefaultNamespace(String ns) {

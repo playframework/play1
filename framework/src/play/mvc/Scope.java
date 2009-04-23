@@ -224,6 +224,12 @@ public class Scope {
         public boolean contains(String key) {
             return data.containsKey(key);
         }
+
+        @Override
+        public String toString() {
+            return data.toString();
+        }
+
     }
 
     /**
