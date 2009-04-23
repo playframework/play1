@@ -55,8 +55,9 @@ import play.vfs.VirtualFile;
  * HTTP Handler
  */
 public class HttpHandler implements IoHandler {
-    private static String signature = "Play! Framework;" +Play.version+";"+Play.mode.name().toLowerCase();
-    
+
+    private static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
+
     public void messageReceived(IoSession session, Object message) throws Exception {
         MutableHttpRequest minaRequest = (MutableHttpRequest) message;
         MutableHttpResponse minaResponse = new DefaultHttpResponse();
@@ -79,7 +80,7 @@ public class HttpHandler implements IoHandler {
             } else {
                 try {
                     Play.detectChanges();
-                } catch(Exception e) {
+                } catch (Exception e) {
                     Router.detectChanges();
                 }
                 Router.route(request);
@@ -88,7 +89,7 @@ public class HttpHandler implements IoHandler {
                 } else {
                     Invoker.invoke(new MinaInvocation(session, minaRequest, minaResponse, request, response));
                 }
-            }            
+            }
         } catch (NotFound e) {
             serve404(session, minaResponse, minaRequest, e);
             return;
@@ -106,8 +107,8 @@ public class HttpHandler implements IoHandler {
         Request request = new Request();
         Http.Request.current.set(request);
         IoBuffer buffer = (IoBuffer) minaRequest.getContent();
-        
-        request.remoteAddress=((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
+
+        request.remoteAddress = ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
         request.method = minaRequest.getMethod().toString();
         request.path = URLDecoder.decode(uri.getRawPath(), "utf-8");
         request.querystring = uri.getQuery() == null ? "" : uri.getRawQuery();
@@ -134,25 +135,23 @@ public class HttpHandler implements IoHandler {
             request.port = 80;
             request.domain = request.host;
         }
-    
+
         if (minaRequest.containsHeader("X-Forwarded-For")) {
-            if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport","").split(",")).contains(request.remoteAddress))
-                throw new RuntimeException ("This proxy request is not authorized");
-            else {
-                request.secure = ("https".equals(Play.configuration.get("XForwardedProto")) 
-                        || "https".equals(minaRequest.getHeader("X-Forwarded-Proto")) 
-                        || "on".equals(minaRequest.getHeader("X-Forwarded-Ssl")));
-                
+            if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(",")).contains(request.remoteAddress)) {
+                throw new RuntimeException("This proxy request is not authorized");
+            } else {
+                request.secure = ("https".equals(Play.configuration.get("XForwardedProto")) || "https".equals(minaRequest.getHeader("X-Forwarded-Proto")) || "on".equals(minaRequest.getHeader("X-Forwarded-Ssl")));
                 if (Play.configuration.containsKey("XForwardedHost")) {
                     request.host = (String) Play.configuration.get("XForwardedHost");
                 } else if (minaRequest.containsHeader("X-Forwarded-Host")) {
                     request.host = minaRequest.getHeader("X-Forwarded-Host");
                 }
-                if (minaRequest.containsHeader("X-Forwarded-For"))
-                    request.remoteAddress=minaRequest.getHeader("X-Forwarded-For");
+                if (minaRequest.containsHeader("X-Forwarded-For")) {
+                    request.remoteAddress = minaRequest.getHeader("X-Forwarded-For");
+                }
             }
         }
-        
+
         for (String key : minaRequest.getHeaders().keySet()) {
             Http.Header hd = new Http.Header();
             hd.name = key.toLowerCase();
@@ -444,5 +443,4 @@ public class HttpHandler implements IoHandler {
         }
         HttpHandler.writeResponse(session, minaRequest, minaResponse);
     }
-
 }
