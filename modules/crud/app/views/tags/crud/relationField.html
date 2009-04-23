@@ -9,8 +9,8 @@
 			%{
 				selected = false;
 				if(field.error?.message != 'validation.required') {
-					if(field.flash) {
-						selected = field.flashArray.contains(it.id.toString())
+					if(params[field.name]) {
+						selected = params.getAll(field.name).contains(it.id.toString())
 					} else {
 						selected = _value?.contains(it)
 					}
@@ -27,8 +27,8 @@
 			%{
 				selected = false
 				if(field.error?.message != 'validation.required') {
-					if(field.flash) {
-						selected = (it.id.toString() == field.flash)
+					if(params[field.name]) {
+						selected = (it.id.toString() == params[field.name])
 					} else {
 						selected = it.id == _value?.id
 					}

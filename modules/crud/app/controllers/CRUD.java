@@ -67,10 +67,12 @@ public abstract class CRUD extends Controller {
         validation.valid(object.edit("object", params));
         if (validation.hasErrors()) {
             object.refresh();
-            validation.keep();
-            params.flash();
-            flash.error(Messages.get("crud.hasErrors"));
-            redirect(request.controller + ".show", object.getId());
+            renderArgs.put("error", Messages.get("crud.hasErrors"));
+            try {
+                render(type, object);
+            } catch (TemplateNotFoundException e) {
+                render("CRUD/show.html", type, object);
+            }
         }
         flash.success(Messages.get("crud.saved", type.modelName, object.getId()));
         if (params.get("_save") != null) {
@@ -95,10 +97,12 @@ public abstract class CRUD extends Controller {
         JPASupport object = type.entityClass.newInstance();
         validation.valid(object.edit("object", params));
         if (validation.hasErrors()) {
-            validation.keep();
-            params.flash();
-            flash.error(Messages.get("crud.hasErrors"));
-            redirect(request.controller + ".blank");
+            renderArgs.put("error", Messages.get("crud.hasErrors"));
+             try {
+                render(type);
+            } catch (TemplateNotFoundException e) {
+                render("CRUD/blank.html", type);
+            }
         }
         object.save();
         flash.success(Messages.get("crud.created", type.name, object.getId()));
