@@ -69,7 +69,7 @@ public abstract class CRUD extends Controller {
             object.refresh();
             renderArgs.put("error", Messages.get("crud.hasErrors"));
             try {
-                render(type, object);
+                render(request.controller.replace(".", "/") + "/show.html", type, object);
             } catch (TemplateNotFoundException e) {
                 render("CRUD/show.html", type, object);
             }
@@ -98,8 +98,8 @@ public abstract class CRUD extends Controller {
         validation.valid(object.edit("object", params));
         if (validation.hasErrors()) {
             renderArgs.put("error", Messages.get("crud.hasErrors"));
-             try {
-                render(type);
+            try {
+                render(request.controller.replace(".", "/") + "/blank.html", type);
             } catch (TemplateNotFoundException e) {
                 render("CRUD/blank.html", type);
             }
