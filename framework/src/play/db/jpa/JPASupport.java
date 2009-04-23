@@ -11,9 +11,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.PostPersist;
-import javax.persistence.PostUpdate;
 import javax.persistence.Query;
 import play.data.binding.BeanWrapper;
 import play.exceptions.JPAException;
@@ -284,39 +281,7 @@ public class JPASupport implements Serializable {
         return getClass().getSimpleName() + "[" + getId() + "]";
     }
 
-    @PostLoad
-    public void setupAttachment() {
-        for (Field field : getClass().getFields()) {
-            if (field.getType().equals(FileAttachment.class)) {
-                try {
-                    FileAttachment attachment = (FileAttachment)field.get(this);
-                    if(attachment != null) {
-                        attachment.model = this;
-                        attachment.name = field.getName();
-                    }
-                } catch (Exception ex) {
-                    throw new UnexpectedException(ex);
-                }
-            }
-        }
-    }
-    
-    @PostPersist
-    @PostUpdate
-    public void saveAttachment() {
-        for (Field field : getClass().getFields()) {
-            if (field.getType().equals(FileAttachment.class)) {
-                try {
-                    FileAttachment attachment = (FileAttachment)field.get(this);
-                    if(attachment != null) {
-                        attachment.save();
-                    }
-                } catch (Exception ex) {
-                    throw new UnexpectedException(ex);
-                }
-            }
-        }
-    }
+   
 
     @SuppressWarnings("unused")
     protected static String createFindByQuery(String entityName, String entityClass, String query, Object... params) {
