@@ -15,43 +15,50 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.jobs.JobsPlugin;
+import play.mvc.Router;
 
 public class GAEPlugin extends PlayPlugin {
     
     public ApiProxy.Environment devEnvironment = null;
    
-
     @Override
     public void onLoad() {
+        // Remove Jobs from plugin list
         for(ListIterator<PlayPlugin> it = Play.plugins.listIterator(); it.hasNext();) {
             if(it.next() instanceof JobsPlugin) {
                 it.remove();
             }
         }
+        // Force to PROD mode when hosted on production GAE
         if(ApiProxy.getCurrentEnvironment() != null && ApiProxy.getCurrentEnvironment().getClass().getName().indexOf("development") == -1) {
             Play.mode = Play.Mode.PROD;
         }
-    }
-
-    @Override
-    public void onApplicationStart() {
-
+        // Create a fake development environment if not run in the Google SDK
         if(ApiProxy.getCurrentEnvironment() == null) {
             Logger.warn("No Google App Engine environment found. Setting up a development environement.");
             devEnvironment = new PlayDevEnvironment();
             ApiProxy.setDelegate(new ApiProxyLocalImpl(new File(Play.applicationPath, "gae-dev")){});
             ApiProxy.setEnvironmentForCurrentThread(new PlayDevEnvironment());
             System.setProperty("appengine.orm.disable.duplicate.emf.exception", "yes");
-        } 
-        
-        // it's time to set up JPA
+        }
+    }
+
+    @Override
+    public void onRoutesLoaded() {
+        Router.addRoute("GET",  "/_ah/login", "GAEActions.login");
+        Router.addRoute("POST", "/_ah/login", "GAEActions.doLogin");
+        Router.addRoute("GET",  "/_ah/logout", "GAEActions.logout");
+    }
+
+    @Override
+    public void onApplicationStart() {
+        // It's time to set up JPA
         List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
         if(!classes.isEmpty()) {
             // Hack the JPA plugin
             JPAPlugin.autoTxs = false;
             JPA.entityManagerFactory = Persistence.createEntityManagerFactory("default");
-        }
-        
+        }        
     }
 
     @Override
@@ -85,14 +92,15 @@ public class GAEPlugin extends PlayPlugin {
     
     @Override
     public void beforeInvocation() {
+        // Set the current developement environment if needed
         if(devEnvironment != null) {
             ApiProxy.setEnvironmentForCurrentThread(new PlayDevEnvironment());
         }
-    }    
-    
+    }        
 
     @Override
     public void onConfigurationRead() {
+        // Disable tmp directory
         Play.configuration.setProperty("play.tmp", "none");
     }
 
