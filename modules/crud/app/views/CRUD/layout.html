@@ -24,9 +24,9 @@
 				${flash.success}
 			</div>
 		#{/if}
-		#{if flash.error}
+		#{if flash.error || error}
 			<div class="crudFlash flashError">
-				${flash.error}
+				${error ?: flash.error}
 			</div>
 		#{/if}
 		

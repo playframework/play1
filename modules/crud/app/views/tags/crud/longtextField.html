@@ -2,7 +2,7 @@
 	<label for="${field.id}">
 		&{_name}
 	</label>
-	<textarea id="${field.id}" cols="48" rows="5" class="${field.errorClass}" name="${field.name}">${field.flash ?: field.error?.message == 'validation.required' ? '' : _value}</textarea>
+	<textarea id="${field.id}" cols="48" rows="5" class="${field.errorClass}" name="${field.name}">${params[field.name] ?: field.error?.message == 'validation.required' ? '' : _value}</textarea>
 	#{ifError field.name}
 		<span class="error">${field.error}</span>
 	#{/ifError}
