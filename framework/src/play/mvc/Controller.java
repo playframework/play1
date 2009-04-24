@@ -383,7 +383,9 @@ public abstract class Controller {
     public static Class getControllerClass() {
         return Play.classloader.getClassIgnoreCase("controllers." + Http.Request.current().controller);
     }
-    
+    /**
+	* 
+	*/
     public static void parent(Object... args) {
         Map<String,Object> map = new HashMap();
         for (Object o : args) {
@@ -424,7 +426,7 @@ public abstract class Controller {
             for (String key : map.keySet()) {
                 mapss.put(key, map.get(key) == null ? null : map.get(key).toString());
             }
-            params.__mergeWith(mapss);
+            Scope.Params.current().__mergeWith(mapss);
             ControllerInstrumentation.initActionCall();
             Java.invokeStatic(superMethod, ActionInvoker.getActionMethodArgs(superMethod));
         } catch (InvocationTargetException ex) {
