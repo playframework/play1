@@ -347,7 +347,11 @@ try:
 			print "~"
 			sys.exit(-1)
 		print "~ Packaging current version of the framework and the application to %s ..." % (os.path.normpath(war_path))
-		if not os.path.exists(war_path): os.mkdir(war_path)
+		if os.path.exists(war_path): shutil.rmtree(war_path)
+		if os.path.exists(os.path.join(application_path, 'war')):
+			shutil.copytree(os.path.join(application_path, 'war'), war_path)
+		else:
+			os.mkdir(war_path)
 		if not os.path.exists(os.path.join(war_path, 'WEB-INF')): os.mkdir(os.path.join(war_path, 'WEB-INF'))
 		shutil.copyfile(os.path.join(play_base, 'resources/war/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
 		application_name = readConf('application.name')

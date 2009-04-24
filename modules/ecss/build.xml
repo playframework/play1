@@ -21,7 +21,7 @@
                 <include name="**/play.plugins"/>
             </fileset>
         </copy>
-        <jar destfile="lib/ecss.jar" basedir="tmp/classes">
+        <jar destfile="lib/play-ecss.jar" basedir="tmp/classes">
             <manifest>
                 <section name="Play">
                     <attribute name="Specification-Title" value="ECss module"/>

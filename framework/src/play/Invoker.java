@@ -7,6 +7,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import play.Play.Mode;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
@@ -60,6 +61,9 @@ public class Invoker {
         public static void before() {
             Play.detectChanges();
             if (!Play.started) {
+                if(Play.mode == Mode.PROD) {
+                    throw new UnexpectedException("Application is not started");
+                }
                 Play.start();
             }
             for (PlayPlugin plugin : Play.plugins) {

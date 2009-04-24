@@ -188,8 +188,11 @@ public class Play {
         loadPlugins();
 
         if (mode == Mode.PROD) {
-            preCompile();
-            start();
+            if(preCompile()) {
+                start();
+            } else {
+                return;
+            }
         } else {
             Logger.warn("You're running Play! in DEV mode");
         }
@@ -356,9 +359,8 @@ public class Play {
         Router.lastLoading = 0L;
     }
 
-    static void preCompile() {
+    static boolean preCompile() {
         try {
-            ClassLoader l = Thread.currentThread().getContextClassLoader();
             Logger.info("Precompiling ...");
             long start = System.currentTimeMillis();
             classloader.getAllClasses();
@@ -366,9 +368,15 @@ public class Play {
             start = System.currentTimeMillis();
             TemplateLoader.getAllTemplate();
             Logger.trace("%sms to precompile the templates", System.currentTimeMillis() - start);
+            return true;
         } catch (Throwable e) {
             Logger.error(e, "Cannot start in PROD mode with errors");
-            System.exit(-1);
+            try {
+                System.exit(-1);
+            } catch(Exception ex) {
+                // Will not work in some application server
+            }
+            return false;
         }
     }
 

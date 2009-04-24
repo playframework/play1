@@ -22,7 +22,7 @@ public class UnexpectedException extends PlayException {
         if(getCause() == null) {
             return "Unexpected error";
         }
-        return String.format("Unexpected error: %s", getCause().getClass().getSimpleName());
+        return String.format("Oops: %s", getCause().getClass().getSimpleName());
     }
 
     @Override

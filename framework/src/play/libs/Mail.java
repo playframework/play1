@@ -4,10 +4,13 @@ import java.io.File;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
@@ -33,7 +36,8 @@ import play.exceptions.UnexpectedException;
  */
 public class Mail {
 
-    private static Session session;
+    public static Session session;
+    public static boolean asynchronousSend = true;
 
     /**
      * Send an email
@@ -207,7 +211,7 @@ public class Mail {
     }
 
     private static Session getSession() {
-        if (session == null || (Play.mode == Play.Mode.DEV)) {
+        if (session == null) {
             Properties props = new Properties();
             props.put("mail.smtp.host", Play.configuration.getProperty("mail.smtp.host"));
 
@@ -231,8 +235,8 @@ public class Mail {
                 // port 25 + enable starttls + ssl socket factory
                 props.put("mail.smtp.port", "25");
                 props.put("mail.smtp.starttls.enable", "true");
-            // can't install our socket factory. will work only with server that has a signed certificate
-            // story to be continued in javamail 1.4.2 : https://glassfish.dev.java.net/issues/show_bug.cgi?id=5189
+                // can't install our socket factory. will work only with server that has a signed certificate
+                // story to be continued in javamail 1.4.2 : https://glassfish.dev.java.net/issues/show_bug.cgi?id=5189
             }
 
             if (Play.configuration.containsKey("mail.smtp.localhost")) {
@@ -304,20 +308,54 @@ public class Mail {
      * @param msg A JavaMail message
      */
     public static Future<Boolean> sendMessage(final Message msg) {
-        return executor.submit(new Callable<Boolean>() {
+        if(asynchronousSend) {
+            return executor.submit(new Callable<Boolean>() {
 
-            public Boolean call() {
-                try {
-                    msg.setSentDate(new Date());
-                    Transport.send(msg);
-                    return true;
-                } catch (Throwable e) {
-                    MailException me = new MailException("Error while sending email", e);
-                    Logger.error(me, "The email has not been sent");
-                    return false;
+                public Boolean call() {
+                    try {
+                        msg.setSentDate(new Date());
+                        Transport.send(msg);
+                        return true;
+                    } catch (Throwable e) {
+                        MailException me = new MailException("Error while sending email", e);
+                        Logger.error(me, "The email has not been sent");
+                        return false;
+                    }
                 }
+            });
+        } else {
+            final StringBuffer result = new StringBuffer();
+            try {
+                msg.setSentDate(new Date());
+                Transport.send(msg);                
+            } catch (Throwable e) {
+                MailException me = new MailException("Error while sending email", e);
+                Logger.error(me, "The email has not been sent");
+                result.append("oops");
             }
-        });
+            return new Future<Boolean>() {
+
+                    public boolean cancel(boolean mayInterruptIfRunning) {
+                        return false;
+                    }
+
+                    public boolean isCancelled() {
+                        return false;
+                    }
+
+                    public boolean isDone() {
+                        return true;
+                    }
+
+                    public Boolean get() throws InterruptedException, ExecutionException {
+                        return result.length() == 0;
+                    }
+
+                    public Boolean get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                        return result.length() == 0;
+                    }
+                };
+        }
     }
     static ExecutorService executor = Executors.newCachedThreadPool();
 
@@ -331,6 +369,7 @@ public class Mail {
             this.password = password;
         }
 
+        @Override
         protected PasswordAuthentication getPasswordAuthentication() {
             return new PasswordAuthentication(user, password);
         }
