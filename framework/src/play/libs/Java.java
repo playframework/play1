@@ -173,7 +173,7 @@ public class Java {
     public static FieldWrapper getFieldWrapper(Field field) {
         if (wrappers.get(field) == null) {
             FieldWrapper fw = new FieldWrapper(field);
-            play.Logger.debug("caching %s", fw);
+            play.Logger.trace("caching %s", fw);
             wrappers.put(field, fw);
         }
         return wrappers.get(field);
@@ -226,13 +226,13 @@ public class Java {
             }
             try {
                 if (setter != null) {
-                    play.Logger.debug("invoke setter %s on %s with value %s", setter, instance, value);
+                    play.Logger.trace("invoke setter %s on %s with value %s", setter, instance, value);
                     setter.invoke(instance, value);
                 } else {
                     if (!accessible) {
                         field.setAccessible(true);
                     }
-                    play.Logger.debug("field.set(%s, %s)", instance, value);
+                    play.Logger.trace("field.set(%s, %s)", instance, value);
                     field.set(instance, value);
                     if (!accessible) {
                         field.setAccessible(accessible);

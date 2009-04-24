@@ -130,12 +130,6 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
-     * Called when the server is ready.
-     */
-    public void onServerReady() {
-    }
-
-    /**
      * Called after routes loading.
      */
     public void onRoutesLoaded() {

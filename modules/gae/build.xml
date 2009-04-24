@@ -25,6 +25,7 @@
                 <include name="**/*.properties"/>
                 <include name="**/*.xml"/>
                 <include name="**/play.plugins"/>
+                <include name="**/play.static"/>
             </fileset>
         </copy>
         <jar destfile="lib/play-gae.jar" basedir="tmp/classes">

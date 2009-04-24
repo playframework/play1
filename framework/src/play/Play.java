@@ -130,6 +130,8 @@ public class Play {
         Play.id = id;
         Play.started = false;
         Play.applicationPath = root;
+        
+        initStaticStuff();
 
         // Guess the framework path
         try {
@@ -284,7 +286,7 @@ public class Play {
             readConfiguration();
             if (configuration.getProperty("play.tmp", "tmp").equals("none")) {
                 tmpDir = null;
-                Logger.warn("No tmp folder will be used (play.tmp is set to none)");
+                Logger.debug("No tmp folder will be used (play.tmp is set to none)");
             } else {
                 tmpDir = new File(configuration.getProperty("play.tmp", "tmp"));
                 if (!tmpDir.isAbsolute()) {
@@ -418,7 +420,7 @@ public class Play {
             urls = Play.classloader.getResources("play.plugins");
         } catch (Exception e) {
         }
-        while (urls.hasMoreElements()) {
+        while (urls != null && urls.hasMoreElements()) {
             URL url = urls.nextElement();
             try {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
@@ -438,10 +440,35 @@ public class Play {
             plugin.onLoad();
         }
     }
-
-    public static void addPlugins(URL playPluginManifest) {
-        
+    
+    /**
+     * Allow some code to run very eraly in Play! - Use with caution !
+     */
+    public static void initStaticStuff() {
+        // Play! plugings
+        Enumeration<URL> urls = null;
+        try {
+            urls = Play.class.getClassLoader().getResources("play.static");
+        } catch (Exception e) {
+        }
+        while (urls != null && urls.hasMoreElements()) {
+            URL url = urls.nextElement();
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    try {
+                        Class.forName(line);
+                    } catch(Exception e) {
+                        System.out.println("! Cannot init static : " + line);
+                    }
+                }
+            } catch (Exception ex) {
+                Logger.error(ex, "Cannot load %s", url);
+            }
+        }
     }
+
 
     public static void loadModules() {
         if (System.getenv("MODULES") != null) {

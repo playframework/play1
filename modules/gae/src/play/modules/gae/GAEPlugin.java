@@ -25,6 +25,7 @@ import play.mvc.Router;
 public class GAEPlugin extends PlayPlugin {
     
     public ApiProxy.Environment devEnvironment = null;
+    public boolean prodGAE;
    
     @Override
     public void onLoad() {
@@ -37,6 +38,7 @@ public class GAEPlugin extends PlayPlugin {
         // Force to PROD mode when hosted on production GAE
         if(ApiProxy.getCurrentEnvironment() != null && ApiProxy.getCurrentEnvironment().getClass().getName().indexOf("development") == -1) {
             Play.mode = Play.Mode.PROD;
+            prodGAE = true;
         }
         // Create a fake development environment if not run in the Google SDK
         if(ApiProxy.getCurrentEnvironment() == null) {
@@ -142,6 +144,9 @@ public class GAEPlugin extends PlayPlugin {
     public void onConfigurationRead() {
         // Disable tmp directory
         Play.configuration.setProperty("play.tmp", "none");
+        if(devEnvironment == null) {
+            Play.configuration.setProperty("application.log", "DEBUG");
+        }
     }
 
 }

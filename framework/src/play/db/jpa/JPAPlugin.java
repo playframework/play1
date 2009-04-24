@@ -45,7 +45,7 @@ public class JPAPlugin extends PlayPlugin {
             for (Class clazz : classes) {
                 if (clazz.isAnnotationPresent(Entity.class)) {
                     cfg.addAnnotatedClass(clazz);
-                    Logger.debug("JPA Model : %s", clazz);
+                    Logger.trace("JPA Model : %s", clazz);
                 }
             }
             Logger.debug("Initializing JPA ...");

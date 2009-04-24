@@ -145,7 +145,7 @@ public class Router {
         if (request.querystring != null && methodOverride.matches(request.querystring)) {
             Matcher matcher = methodOverride.matcher(request.querystring);
             if (matcher.matches()) {
-                Logger.debug("request method %s overriden to %s ", request.method, matcher.group("method"));
+                Logger.trace("request method %s overriden to %s ", request.method, matcher.group("method"));
                 request.method = matcher.group("method");
             }
         }

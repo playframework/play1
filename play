@@ -553,7 +553,7 @@ try:
 			shutil.rmtree(nbproject)
 			if os.name == 'nt':
 				time.sleep(1)
-		shutil.copytree(os.path.join(play_base, 'resources/nbproject'), nbproject)
+		shutil.copytree(os.path.join(play_base, 'resources/_nbproject'), nbproject)
 		replaceAll(os.path.join(nbproject, 'project.xml'), r'%APPLICATION_NAME%', application_name)
 		replaceAll(os.path.join(nbproject, 'project.xml'), r'%ANT_SCRIPT%', os.path.normpath(os.path.join(play_base, 'framework/build.xml')))
 		replaceAll(os.path.join(nbproject, 'project.xml'), r'%APPLICATION_PATH%', os.path.normpath(application_path))

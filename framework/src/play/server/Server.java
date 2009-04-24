@@ -50,11 +50,8 @@ public class Server {
             Logger.error("Could not bind on port " + httpPort, e);
             acceptor.dispose();
         }
-
-        // Plugins
-        for (PlayPlugin plugin : Play.plugins) {
-            plugin.onServerReady();
-        }
+        
+        Logger.info("");
     }
 
     public static void main(String[] args) {
