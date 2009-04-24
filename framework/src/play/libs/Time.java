@@ -15,7 +15,7 @@ public class Time {
     /**
      * Parse a duration
      * @param duration 3h, 2mn, 7s
-     * @return The number of millis
+     * @return The number of seconds
      */
     public static int parseDuration(String duration) {
         if (duration == null) {

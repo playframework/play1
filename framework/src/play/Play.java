@@ -259,6 +259,7 @@ public class Play {
                 Logger.info("Reloading ...");
                 stop();
             }
+            
             if (mode == Mode.DEV) {
                 // Need a new classloader
                 classloader = new ApplicationClassloader();
@@ -275,6 +276,7 @@ public class Play {
                 }
                 plugins = newPlugins;
             }
+            
             // Reload configuration
             readConfiguration();
             if (configuration.getProperty("play.tmp", "tmp").equals("none")) {
@@ -292,18 +294,23 @@ public class Play {
                     Logger.warn("No tmp folder will be used (cannot create the tmp dir)");
                 }
             }
+            
             // Configure logs
             String logLevel = configuration.getProperty("application.log", "INFO");
             Logger.setUp(logLevel); 
+            
             // Locales
             langs = Arrays.asList(configuration.getProperty("application.langs", "").split(","));
             if (langs.size() == 1 && langs.get(0).trim().equals("")) {
                 langs = new ArrayList<String>();
             }
+            
             // Cache
             Cache.init();
+            
             // Clean templates
             TemplateLoader.cleanCompiledCache();
+            
             // SecretKey
             secretKey = configuration.getProperty("application.secret", "").trim();
             if (secretKey.equals("")) {

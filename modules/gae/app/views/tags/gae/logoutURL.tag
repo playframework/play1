@@ -1,0 +1,1 @@
+${play.modules.gae.GAE.userService.createLogoutURL(_arg.toString())}

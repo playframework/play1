@@ -11,10 +11,12 @@ import org.datanucleus.enhancer.DataNucleusEnhancer;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
+import play.cache.Cache;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.jobs.JobsPlugin;
+import play.libs.IO;
 import play.mvc.Router;
 
 public class GAEPlugin extends PlayPlugin {
@@ -35,11 +37,37 @@ public class GAEPlugin extends PlayPlugin {
         }
         // Create a fake development environment if not run in the Google SDK
         if(ApiProxy.getCurrentEnvironment() == null) {
-            Logger.warn("No Google App Engine environment found. Setting up a development environement.");
+            Logger.warn("");
+            Logger.warn("Google App Engine module");
+            Logger.warn("~~~~~~~~~~~~~~~~~~~~~~~");
+            Logger.warn("No Google App Engine environment found. Setting up a development environement");
             devEnvironment = new PlayDevEnvironment();
-            ApiProxy.setDelegate(new ApiProxyLocalImpl(new File(Play.applicationPath, "gae-dev")){});
+            ApiProxy.setDelegate(new ApiProxyLocalImpl(new File(Play.applicationPath, "war")){});
             ApiProxy.setEnvironmentForCurrentThread(new PlayDevEnvironment());
             System.setProperty("appengine.orm.disable.duplicate.emf.exception", "yes");
+            File warExt = Play.getFile("war");
+            if(!warExt.exists()) {
+                warExt.mkdir();
+            }
+            File webInf = Play.getFile("war/WEB-INF");
+            if(!webInf.exists()) {
+                webInf.mkdir();
+            }
+            File xml = Play.getFile("war/WEB-INF/appengine-web.xml");
+            try {
+                if(!xml.exists()) {
+                    IO.writeContent("<appengine-web-app xmlns=\"http://appengine.google.com/ns/1.0\">\n" +                    
+                    "\t<application><!-- Replace this with your application id from http://appengine.google.com --></application>\n" +
+                    "\t<version>1</version>\n" +
+                    "</appengine-web-app>\n", xml);
+                }
+                if(IO.readContentAsString(xml).contains("<!-- Replace this with your application id from http://appengine.google.com -->")) {
+                    Logger.warn("Don't forget to define your GAE application id in the 'war/WEB-INF/appengine-web.xml' file");
+                }
+            } catch(Exception e) {
+                Logger.error(e, "Cannot init GAE files");
+            }
+            Logger.warn("");
         }
     }
 
@@ -59,6 +87,10 @@ public class GAEPlugin extends PlayPlugin {
             JPAPlugin.autoTxs = false;
             JPA.entityManagerFactory = Persistence.createEntityManagerFactory("default");
         }        
+        if(devEnvironment == null) {
+            // Wrap the GAE cache
+            Cache.cacheImpl = new GAECache();
+        }
     }
 
     @Override

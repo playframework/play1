@@ -31,11 +31,11 @@ public class PlayDevEnvironment implements Environment {
     }
 
     public String getRequestNamespace() {
-        return null;
+        return "";
     }
 
     public String getDefaultNamespace() {
-        return null;
+        return "";
     }
 
     public void setDefaultNamespace(String ns) {

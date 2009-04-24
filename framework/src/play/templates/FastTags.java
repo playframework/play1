@@ -17,17 +17,17 @@ import play.templates.Template.ExecutableTemplate;
 /**
  * Fast tags implementation
  */
-public class FastTags { 
+public class FastTags {
 
-	/**
-	 * Generates a html form element linked to a controller action
-	 * @param args tag attributes
-	 * @param body tag inner body
-	 * @param out the output writer
-	 * @param template encloding template
-	 * @param fromLine template line number where the tag is defined
-	 */
-	public static void _form(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    /**
+     * Generates a html form element linked to a controller action
+     * @param args tag attributes
+     * @param body tag inner body
+     * @param out the output writer
+     * @param template encloding template
+     * @param fromLine template line number where the tag is defined
+     */
+    public static void _form(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         ActionDefinition actionDef = (ActionDefinition) args.get("arg");
         if (actionDef == null) {
             actionDef = (ActionDefinition) args.get("action");
@@ -39,7 +39,7 @@ public class FastTags {
         if (actionDef.star) {
             actionDef.method = "POST"; // prefer POST for form ....
         }
-        if(args.containsKey("method")) {
+        if (args.containsKey("method")) {
             actionDef.method = args.get("method").toString();
         }
         if (!("GET".equals(actionDef.method) || "POST".equals(actionDef.method))) {
@@ -52,15 +52,15 @@ public class FastTags {
         out.print("</form>");
     }
 
-	/**
-	 * Generates a html link to a controller action
-	 * @param args tag attributes
-	 * @param body tag inner body
-	 * @param out the output writer
-	 * @param template encloding template
-	 * @param fromLine template line number where the tag is defined
-	 */
-	public static void _a(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    /**
+     * Generates a html link to a controller action
+     * @param args tag attributes
+     * @param body tag inner body
+     * @param out the output writer
+     * @param template encloding template
+     * @param fromLine template line number where the tag is defined
+     */
+    public static void _a(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         ActionDefinition actionDef = (ActionDefinition) args.get("arg");
         if (actionDef == null) {
             actionDef = (ActionDefinition) args.get("action");
@@ -81,7 +81,7 @@ public class FastTags {
             TagContext.parent().data.put("_executeNextElse", true);
         }
     }
-    
+
     public static void _ifErrors(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         if (Validation.hasErrors()) {
             body.call();
@@ -90,7 +90,7 @@ public class FastTags {
             TagContext.parent().data.put("_executeNextElse", true);
         }
     }
-    
+
     public static void _ifError(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         if (args.get("arg") == null) {
             throw new TemplateExecutionException(template.template, fromLine, "Please specify the error key", new TagInternalException("Please specify the error key"));
@@ -102,7 +102,7 @@ public class FastTags {
             TagContext.parent().data.put("_executeNextElse", true);
         }
     }
-    
+
     public static void _errorClass(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         if (args.get("arg") == null) {
             throw new TemplateExecutionException(template.template, fromLine, "Please specify the error key", new TagInternalException("Please specify the error key"));
@@ -111,15 +111,15 @@ public class FastTags {
             out.print("hasError");
         }
     }
-    
+
     public static void _error(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         if (args.get("arg") == null && args.get("key") == null) {
             throw new TemplateExecutionException(template.template, fromLine, "Please specify the error key", new TagInternalException("Please specify the error key"));
         }
         String key = args.get("arg") == null ? args.get("key") + "" : args.get("arg") + "";
         Error error = Validation.error(key);
-        if(error != null) {
-            if(args.get("field") == null) {
+        if (error != null) {
+            if (args.get("field") == null) {
                 out.print(error.message());
             } else {
                 out.print(error.message(args.get("field") + ""));
@@ -218,7 +218,7 @@ public class FastTags {
             String name = args.get("arg").toString();
             if (name.startsWith("./")) {
                 String ct = Template.currentTemplate.get().name;
-                if(ct.matches("^/lib/[^/]+/app/views/.*")) {
+                if (ct.matches("^/lib/[^/]+/app/views/.*")) {
                     ct = ct.substring(ct.indexOf("/", 5));
                 }
                 ct = ct.substring(0, ct.lastIndexOf("/"));
