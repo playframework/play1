@@ -19,8 +19,8 @@ import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.SimpleHttpConnectionManager;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
@@ -94,7 +94,7 @@ public class WS extends PlayPlugin {
 
 
     static {
-        MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+        SimpleHttpConnectionManager connectionManager = new SimpleHttpConnectionManager();
         ProtocolSocketFactory factory = new ProtocolSocketFactory() {
 
             /**

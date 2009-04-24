@@ -21,7 +21,7 @@
                 <include name="**/play.plugins"/>
             </fileset>
         </copy>
-        <jar destfile="lib/bespin.jar" basedir="tmp/classes">
+        <jar destfile="lib/play-bespin.jar" basedir="tmp/classes">
             <manifest>
                 <section name="Play">
                     <attribute name="Specification-Title" value="Bespin module"/>

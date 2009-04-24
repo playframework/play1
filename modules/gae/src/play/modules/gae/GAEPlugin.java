@@ -5,6 +5,8 @@ import com.google.apphosting.api.ApiProxy;
 import java.io.File;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Properties;
+import javax.mail.Session;
 import javax.persistence.Entity;
 import javax.persistence.Persistence;
 import org.datanucleus.enhancer.DataNucleusEnhancer;
@@ -17,6 +19,7 @@ import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.jobs.JobsPlugin;
 import play.libs.IO;
+import play.libs.Mail;
 import play.mvc.Router;
 
 public class GAEPlugin extends PlayPlugin {
@@ -86,11 +89,16 @@ public class GAEPlugin extends PlayPlugin {
             // Hack the JPA plugin
             JPAPlugin.autoTxs = false;
             JPA.entityManagerFactory = Persistence.createEntityManagerFactory("default");
-        }        
+        } 
+        
+        // Wrap the GAE cache
         if(devEnvironment == null) {
-            // Wrap the GAE cache
             Cache.cacheImpl = new GAECache();
         }
+
+        // Provide the correct JavaMail session
+        Mail.session = Session.getDefaultInstance(new Properties(), null);
+        Mail.asynchronousSend = false;
     }
 
     @Override
