@@ -28,3 +28,4 @@ modules/gae/lib/gae.jar
 catalog.xml
 modules/gae/lib/gae.jar
 play-*.jar
+modules/gae/bin

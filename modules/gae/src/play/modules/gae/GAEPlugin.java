@@ -17,6 +17,7 @@ import play.cache.Cache;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
+import play.db.jpa.JPQLDialect;
 import play.jobs.JobsPlugin;
 import play.libs.IO;
 import play.libs.Mail;
@@ -91,6 +92,7 @@ public class GAEPlugin extends PlayPlugin {
             // Hack the JPA plugin
             JPAPlugin.autoTxs = false;
             JPA.entityManagerFactory = Persistence.createEntityManagerFactory("default");
+            JPQLDialect.instance = new DataNucleusDialect ();
         } 
         
         // Wrap the GAE cache
