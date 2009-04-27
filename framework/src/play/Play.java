@@ -390,9 +390,6 @@ public class Play {
             return;
         }
         try {
-            if(!Play.started) {
-                throw new RuntimeException("Not started");
-            }
             classloader.detectChanges();
             Router.detectChanges();
             if (conf.lastModified() > startedAt) {
@@ -401,6 +398,9 @@ public class Play {
             }
             for (PlayPlugin plugin : plugins) {
                 plugin.detectChange();
+            }
+            if(!Play.started) {
+                throw new RuntimeException("Not started");
             }
         } catch (PlayException e) {
             throw e;
