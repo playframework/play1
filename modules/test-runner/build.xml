@@ -21,7 +21,7 @@
                 <include name="**/play.plugins"/>
             </fileset>
         </copy>
-        <jar destfile="lib/test-runner.jar" basedir="tmp/classes">
+        <jar destfile="lib/play-test-runner.jar" basedir="tmp/classes">
             <manifest>
                 <section name="Play">
                     <attribute name="Specification-Title" value="Test runner module"/>

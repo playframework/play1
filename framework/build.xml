@@ -6,7 +6,10 @@
         <pathelement path="play.jar"/>
         <fileset dir="lib">
             <include name="*.jar"/>                        
-        </fileset>        
+        </fileset> 
+        <fileset dir="provided">
+            <include name="*.jar"/>                        
+        </fileset> 
     </path>
         
     <target name="clean" description="clean resources">
@@ -82,6 +85,7 @@
         <ant antfile="build.xml" target="build" dir="../modules/test-runner" />
         <ant antfile="build.xml" target="build" dir="../modules/bespin" />
         <ant antfile="build.xml" target="build" dir="../modules/ecss" />
+        <ant antfile="build.xml" target="build" dir="../modules/gae" />
     </target>
     
     <!-- Netbeans support -->

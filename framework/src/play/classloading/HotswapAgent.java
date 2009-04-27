@@ -10,9 +10,11 @@ import java.lang.instrument.UnmodifiableClassException;
 public class HotswapAgent {
 
     static Instrumentation instrumentation;
+    public static boolean enabled = false;
 
     public static void premain(String agentArgs, Instrumentation instrumentation) {
         HotswapAgent.instrumentation = instrumentation;
+        HotswapAgent.enabled = true;
     }
 
     public static void reload(ClassDefinition... definitions) throws UnmodifiableClassException, ClassNotFoundException {

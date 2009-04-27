@@ -42,6 +42,12 @@
                     <encoding>UTF-8</encoding>
                 </source-folder>
                 <source-folder>
+                    <label>modules/gae/sources</label>
+                    <type>java</type>
+                    <location>modules/gae/src</location>
+                    <encoding>UTF-8</encoding>
+                </source-folder>
+                <source-folder>
                     <label>tests</label>
                     <type>java</type>
                     <location>framework/tests/src</location>
@@ -157,6 +163,12 @@
                 <script>framework/build.xml</script>
                 <build-target>jar</build-target>
             </export>
+            <export>
+                <type>folder</type>
+                <location>framework/classes</location>
+                <script>framework/build.xml</script>
+                <build-target>jar</build-target>
+            </export>
             <view>
                 <items>
                     <source-folder style="tree">
@@ -174,6 +186,22 @@
                     <source-folder style="packages">
                         <label>sources</label>
                         <location>framework/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>modules/bespin/sources</label>
+                        <location>modules/bespin/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>modules/test-runner/sources</label>
+                        <location>modules/test-runner/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>modules/ecss/sources</label>
+                        <location>modules/ecss/src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>modules/gae/sources</label>
+                        <location>modules/gae/src</location>
                     </source-folder>
                     <source-folder style="packages">
                         <label>tests</label>
@@ -201,7 +229,13 @@
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
             <compilation-unit>
                 <package-root>framework/src</package-root>
-                <classpath mode="compile">framework/lib/antlr-2.7.6.jar:framework/lib/c3p0-0.9.1.jar:framework/lib/commons-collections-3.1.jar:framework/lib/commons-logging-1.1.1.jar:framework/lib/compiler-jdt.jar:framework/lib/dom4j-1.6.1.jar:framework/lib/ejb3-persistence.jar:framework/lib/hibernate-annotations.jar:framework/lib/hibernate-commons-annotations.jar:framework/lib/hibernate-entitymanager.jar:framework/lib/hibernate3.jar:framework/lib/hsqldb.jar:framework/lib/javassist.jar:framework/lib/jregex1.2_01.jar:framework/lib/junit-4.4.jar:framework/lib/slf4j-api-1.4.2.jar:framework/lib/slf4j-log4j13-1.0.1.jar:framework/lib/openjdk_071012-httpserver.jar:framework/lib/asyncweb-common-0.9.0-SNAPSHOT.jar:framework/lib/mina-core-2.0.0-M2-SNAPSHOT.jar:framework/lib/commons-fileupload-1.2.jar:framework/lib/joid-1.0.3.jar:framework/lib/tsik.jar:framework/lib/memcached-2.1.jar:framework/lib/spy-2.4.jar:framework/lib/commons-httpclient.jar:framework/lib/ezmorph-1.0.3.jar:framework/lib/flexjson_modified.jar:framework/lib/json-lib-2.2.2-jdk15.jar:framework/lib/jaxen-1.1.jar:framework/lib/java-openid-sxip-0.9.4.339-light.jar:framework/lib/ZDB.jar:framework/lib/commons-codec.jar:framework/lib/lucene-core-2.3.1.jar:framework/lib/quartz-1.6.1-RC1.jar:framework/lib/jsonutils.jar:framework/lib/commons-lang.jar:framework/lib/spring-context.jar:framework/lib/spring-beans.jar:framework/lib/spring-core.jar:framework/lib/mail.jar:framework/lib/activation.jar:framework/lib/commons-io.jar:framework/lib/log4j-1.2.16.jar:framework/lib/oval-1.31.jar:framework/lib/groovy-all-1.6.0.jar:framework/lib/groovy-all-1.6.0.jar</classpath>
+                <classpath mode="compile">framework/lib/antlr-2.7.6.jar:framework/lib/c3p0-0.9.1.jar:framework/lib/commons-collections-3.1.jar:framework/lib/commons-logging-1.1.1.jar:framework/lib/compiler-jdt.jar:framework/lib/dom4j-1.6.1.jar:framework/lib/ejb3-persistence.jar:framework/lib/hibernate-annotations.jar:framework/lib/hibernate-commons-annotations.jar:framework/lib/hibernate-entitymanager.jar:framework/lib/hibernate3.jar:framework/lib/hsqldb.jar:framework/lib/javassist.jar:framework/lib/jregex1.2_01.jar:framework/lib/junit-4.4.jar:framework/lib/slf4j-api-1.4.2.jar:framework/lib/slf4j-log4j13-1.0.1.jar:framework/lib/openjdk_071012-httpserver.jar:framework/lib/asyncweb-common-0.9.0-SNAPSHOT.jar:framework/lib/mina-core-2.0.0-M2-SNAPSHOT.jar:framework/lib/commons-fileupload-1.2.jar:framework/lib/joid-1.0.3.jar:framework/lib/tsik.jar:framework/lib/memcached-2.1.jar:framework/lib/spy-2.4.jar:framework/lib/commons-httpclient.jar:framework/lib/ezmorph-1.0.3.jar:framework/lib/flexjson_modified.jar:framework/lib/json-lib-2.2.2-jdk15.jar:framework/lib/jaxen-1.1.jar:framework/lib/java-openid-sxip-0.9.4.339-light.jar:framework/lib/ZDB.jar:framework/lib/commons-codec.jar:framework/lib/lucene-core-2.3.1.jar:framework/lib/quartz-1.6.1-RC1.jar:framework/lib/jsonutils.jar:framework/lib/commons-lang.jar:framework/lib/spring-context.jar:framework/lib/spring-beans.jar:framework/lib/spring-core.jar:framework/lib/mail.jar:framework/lib/activation.jar:framework/lib/commons-io.jar:framework/lib/log4j-1.2.16.jar:framework/lib/oval-1.31.jar:framework/provided/geronimo-servlet_2.5_spec-1.2.jar:framework/lib/bcprov-jdk15-142.jar:framework/lib/groovy-all-1.6.1.jar:framework/provided/appengine-api-stubs.jar:framework/provided/appengine-local-runtime.jar:modules/gae/lib/appengine-api-1.0-sdk-1.2.0.jar</classpath>
+                <built-to>framework/classes</built-to>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>modules/gae/src</package-root>
+                <classpath mode="compile">framework/classes:framework/lib/antlr-2.7.6.jar:framework/lib/c3p0-0.9.1.jar:framework/lib/commons-collections-3.1.jar:framework/lib/commons-logging-1.1.1.jar:framework/lib/compiler-jdt.jar:framework/lib/dom4j-1.6.1.jar:framework/lib/ejb3-persistence.jar:framework/lib/hibernate-annotations.jar:framework/lib/hibernate-commons-annotations.jar:framework/lib/hibernate-entitymanager.jar:framework/lib/hibernate3.jar:framework/lib/hsqldb.jar:framework/lib/javassist.jar:framework/lib/jregex1.2_01.jar:framework/lib/junit-4.4.jar:framework/lib/slf4j-api-1.4.2.jar:framework/lib/slf4j-log4j13-1.0.1.jar:framework/lib/openjdk_071012-httpserver.jar:framework/lib/asyncweb-common-0.9.0-SNAPSHOT.jar:framework/lib/mina-core-2.0.0-M2-SNAPSHOT.jar:framework/lib/commons-fileupload-1.2.jar:framework/lib/joid-1.0.3.jar:framework/lib/tsik.jar:framework/lib/memcached-2.1.jar:framework/lib/spy-2.4.jar:framework/lib/commons-httpclient.jar:framework/lib/ezmorph-1.0.3.jar:framework/lib/flexjson_modified.jar:framework/lib/json-lib-2.2.2-jdk15.jar:framework/lib/jaxen-1.1.jar:framework/lib/java-openid-sxip-0.9.4.339-light.jar:framework/lib/ZDB.jar:framework/lib/commons-codec.jar:framework/lib/lucene-core-2.3.1.jar:framework/lib/quartz-1.6.1-RC1.jar:framework/lib/jsonutils.jar:framework/lib/commons-lang.jar:framework/lib/spring-context.jar:framework/lib/spring-beans.jar:framework/lib/spring-core.jar:framework/lib/mail.jar:framework/lib/activation.jar:framework/lib/commons-io.jar:framework/lib/log4j-1.2.16.jar:framework/lib/oval-1.31.jar:framework/provided/geronimo-servlet_2.5_spec-1.2.jar:framework/lib/bcprov-jdk15-142.jar:framework/lib/groovy-all-1.6.1.jar:framework/provided/appengine-api-stubs.jar:framework/provided/appengine-local-runtime.jar:modules/gae/lib/appengine-api-1.0-sdk-1.2.0.jar:modules/gae/lib/datanucleus-appengine-1.0.0.final.jar:modules/gae/lib/datanucleus-core-1.1.0.jar:modules/gae/lib/datanucleus-jpa-1.1.0.jar:modules/gae/lib/jdo2-api-2.3-SNAPSHOT.jar:modules/gae/lib/datanucleus-enhancer-1.1.0.jar</classpath>
                 <built-to>framework/classes</built-to>
                 <source-level>1.5</source-level>
             </compilation-unit>

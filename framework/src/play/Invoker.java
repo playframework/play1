@@ -1,11 +1,13 @@
 package play;
 
+import java.security.AccessControlException;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import play.Play.Mode;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
@@ -21,11 +23,17 @@ public class Invoker {
      * Run the code in a new thread took from a thread pool.
      * @param invocation The code to run
      */
-    public static void invoke(Invocation invocation) {
+    public static void invoke(final Invocation invocation) {
         if (executor == null) {
             executor = Invoker.startExecutor();
         }
-        executor.execute(invocation);
+        executor.execute(new Thread() {
+            @Override
+            public void run() {
+                invocation.doIt();
+            }
+            
+        });
     }
 
     /**
@@ -33,13 +41,13 @@ public class Invoker {
      * @param invocation The code to run
      */
     public static void invokeInThread(Invocation invocation) {
-        invocation.run();
+        invocation.doIt();
     }
 
     /**
      * An Invocation in something to run in a Play! context
      */
-    public static abstract class Invocation extends Thread {
+    public static abstract class Invocation {
 
         /**
          * Override this method
@@ -51,15 +59,16 @@ public class Invoker {
          * Things to do before an Invocation
          */
         public static void before() {
-            Thread.currentThread().setContextClassLoader(Play.classloader);
             Play.detectChanges();
             if (!Play.started) {
+                if(Play.mode == Mode.PROD) {
+                    throw new UnexpectedException("Application is not started");
+                }
                 Play.start();
             }
             for (PlayPlugin plugin : Play.plugins) {
                 plugin.beforeInvocation();
             }
-
         }
 
         /**
@@ -95,8 +104,7 @@ public class Invoker {
             }
         }
 
-        @Override
-        public void run() {
+        public void doIt() {
             try {
                 before();
                 execute();

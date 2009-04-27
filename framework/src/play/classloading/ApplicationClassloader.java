@@ -1,6 +1,7 @@
 package play.classloading;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -8,6 +9,14 @@ import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.UnmodifiableClassException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.AllPermission;
+import java.security.CodeSource;
+import java.security.Permissions;
+import java.security.ProtectionDomain;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,12 +28,15 @@ import play.Play;
 import play.vfs.VirtualFile;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
+import play.vfs.FileSystemFile;
 
 /**
  * The application classLoader. Load the classes from
  * the application Java sources files.
  */
 public class ApplicationClassloader extends ClassLoader {
+
+    public ProtectionDomain protectionDomain;
 
     public ApplicationClassloader() {
         super(ApplicationClassloader.class.getClassLoader());
@@ -33,6 +45,14 @@ public class ApplicationClassloader extends ClassLoader {
             applicationClass.uncompile();
         }
         pathHash = computePathHash();
+        try {
+            CodeSource codeSource = new CodeSource(new URL("file:" + Play.applicationPath.getAbsolutePath()), (Certificate[]) null);
+            Permissions permissions = new Permissions();
+            permissions.add(new AllPermission());
+            protectionDomain = new ProtectionDomain(codeSource, permissions);
+        } catch (MalformedURLException e) {
+            throw new UnexpectedException(e);
+        }
     }
 
     @Override
@@ -67,14 +87,14 @@ public class ApplicationClassloader extends ClassLoader {
                 byte[] bc = BytecodeCache.getBytecode(name, applicationClass.javaSource);
                 if (bc != null) {
                     applicationClass.enhancedByteCode = bc;
-                    applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length);
+                    applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
                     resolveClass(applicationClass.javaClass);
                     Logger.trace("%sms to load class %s from cache", System.currentTimeMillis() - start, name);
                     return applicationClass.javaClass;
                 }
                 if (applicationClass.enhancedByteCode != null || applicationClass.compile() != null) {
                     applicationClass.enhance();
-                    applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length);
+                    applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
                     BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, name, applicationClass.javaSource);
                     resolveClass(applicationClass.javaClass);
                     Logger.trace("%sms to load class %s", System.currentTimeMillis() - start, name);
@@ -134,19 +154,25 @@ public class ApplicationClassloader extends ClassLoader {
             } else {
                 int sigChecksum = applicationClass.sigChecksum;
                 applicationClass.enhance();
-                if(sigChecksum != applicationClass.sigChecksum) {
+                if (sigChecksum != applicationClass.sigChecksum) {
                     dirtySig = true;
                 }
                 BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, applicationClass.name, applicationClass.javaSource);
                 newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.enhancedByteCode));
             }
         }
-        try {
-            HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
-        } catch (ClassNotFoundException e) {
-            throw new UnexpectedException(e);
-        } catch (UnmodifiableClassException e) {
-            throw new UnexpectedException(e);
+        if(newDefinitions.size() > 0) {
+            if(HotswapAgent.enabled) {
+                try {
+                    HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
+                } catch (ClassNotFoundException e) {
+                    throw new UnexpectedException(e);
+                } catch (UnmodifiableClassException e) {
+                    throw new UnexpectedException(e);
+                }
+            } else {
+                throw new RuntimeException("Need reload");
+            }
         }
         // Check new annotations
         for (Class clazz : annotationsHashes.keySet()) {
@@ -155,7 +181,7 @@ public class ApplicationClassloader extends ClassLoader {
             }
         }
         // Check signature (variable name aware !)
-        if(dirtySig) {
+        if (dirtySig) {
             throw new RuntimeException("Signature change !");
         }
         // Now check if there is new classes or removed classes
@@ -166,7 +192,7 @@ public class ApplicationClassloader extends ClassLoader {
                 if (!applicationClass.javaFile.exists()) {
                     Play.classes.classes.remove(applicationClass.name);
                 }
-                if(applicationClass.name.contains("$")) {
+                if (applicationClass.name.contains("$")) {
                     Play.classes.classes.remove(applicationClass.name);
                 }
             }
@@ -194,7 +220,6 @@ public class ApplicationClassloader extends ClassLoader {
         }
         return buffer.toString().hashCode();
     }
-    
     int pathHash = 0;
 
     int computePathHash() {
@@ -211,7 +236,7 @@ public class ApplicationClassloader extends ClassLoader {
                 Matcher matcher = Pattern.compile("\\s+class\\s([a-zA-Z0-9_]+)\\s+").matcher(current.contentAsString());
                 buf.append(current.getName());
                 buf.append("(");
-                while(matcher.find()) {
+                while (matcher.find()) {
                     buf.append(matcher.group(1));
                     buf.append(",");
                 }
@@ -242,7 +267,7 @@ public class ApplicationClassloader extends ClassLoader {
             Play.classes.compiler.compile(classNames);
             for (ApplicationClass applicationClass : Play.classes.all()) {
                 Class clazz = loadApplicationClass(applicationClass.name);
-                if(clazz != null) {
+                if (clazz != null) {
                     allClasses.add(clazz);
                 }
             }
@@ -263,7 +288,7 @@ public class ApplicationClassloader extends ClassLoader {
         }
         return results;
     }
-    
+
     /**
      * Find a class in a case insensitive way
      * @param nale The class name.
@@ -271,7 +296,7 @@ public class ApplicationClassloader extends ClassLoader {
      */
     public Class getClassIgnoreCase(String name) {
         for (ApplicationClass c : Play.classes.all()) {
-            if(c.name.equalsIgnoreCase(name)) {
+            if (c.name.equalsIgnoreCase(name)) {
                 return loadApplicationClass(c.name);
             }
         }
@@ -290,7 +315,6 @@ public class ApplicationClassloader extends ClassLoader {
         }
         return results;
     }
-    
     // ~~~ Intern
     List<ApplicationClass> getAllClasses(String basePackage) {
         List<ApplicationClass> res = new ArrayList<ApplicationClass>();
@@ -327,4 +351,11 @@ public class ApplicationClassloader extends ClassLoader {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return allClasses.toString();
+    }
+    
+    
 }

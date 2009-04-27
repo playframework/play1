@@ -3,9 +3,13 @@ package play.templates;
 import groovy.lang.Closure;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.regex.Pattern;
 import play.Logger;
 import play.Play;
 import play.vfs.VirtualFile;
@@ -23,10 +27,10 @@ public class TemplateCompiler {
     public static Template compile(VirtualFile file) {
         try {
 
-            try {   
+            try {
                 extensionsClassnames.clear();
                 List<Class> extensionsClasses = Play.classloader.getAssignableClasses(JavaExtensions.class);
-                for(Class extensionsClass : extensionsClasses) {
+                for (Class extensionsClass : extensionsClasses) {
                     extensionsClassnames.add(extensionsClass.getName());
                 }
             } catch (Throwable e) {
@@ -74,8 +78,8 @@ public class TemplateCompiler {
             print(className);
             println(" extends play.templates.Template.ExecutableTemplate {");
             println("public Object run() { use(play.templates.JavaExtensions) {");
-            for(String n : extensionsClassnames) {
-                println("use(_('" + n +"')) {");
+            for (String n : extensionsClassnames) {
+                println("use(_('" + n + "')) {");
             }
 
             // Parse
@@ -121,7 +125,7 @@ public class TemplateCompiler {
                 }
             }
 
-            for(String n : extensionsClassnames) {
+            for (String n : extensionsClassnames) {
                 println(" } ");
             }
             println("} }");
@@ -134,6 +138,24 @@ public class TemplateCompiler {
 
             // Done !            
             template.groovySource = groovySource.toString();
+
+            // Static access
+            List<String> names = new ArrayList();
+            Map<String,String> originalNames = new HashMap<String, String>();
+            for (Class clazz : Play.classloader.getAllClasses()) {
+                names.add(clazz.getName().replace("$", "."));
+                originalNames.put(clazz.getName().replace("$", "."), clazz.getName());
+            }
+            Collections.sort(names, new Comparator<String>() {
+                public int compare(String o1, String o2) {
+                    return o2.length() - o1.length();
+                }
+            });
+            for (String cName : names) {                
+                template.groovySource = template.groovySource.replaceAll(Pattern.quote(cName) + ".class", "_('" + originalNames.get(cName) + "')");
+                template.groovySource = template.groovySource.replaceAll("([^'\"])" + Pattern.quote(cName) + "([^'\"])", "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')$2");
+            }
+                
         }
 
         void plain() {

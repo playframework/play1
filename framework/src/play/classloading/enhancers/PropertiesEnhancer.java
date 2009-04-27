@@ -21,7 +21,7 @@ import play.classloading.ApplicationClasses.ApplicationClass;
  * Generate valid JavaBeans.
  */
 public class PropertiesEnhancer extends Enhancer {
-
+ 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
         final CtClass ctClass = makeClass(applicationClass);

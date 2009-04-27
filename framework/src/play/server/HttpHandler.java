@@ -9,12 +9,9 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.asyncweb.common.Cookie;
@@ -78,12 +75,7 @@ public class HttpHandler implements IoHandler {
             if (raw) {
                 copyResponse(session, request, response, minaRequest, minaResponse);
             } else {
-                try {
-                    Play.detectChanges();
-                } catch (Exception e) {
-                    Router.detectChanges();
-                }
-                Router.route(request);
+                Router.routeOnlyStatic(request);
                 if (Play.mode == Play.Mode.DEV) {
                     Invoker.invokeInThread(new MinaInvocation(session, minaRequest, minaResponse, request, response));
                 } else {
@@ -384,10 +376,9 @@ public class HttpHandler implements IoHandler {
             this.session = session;
         }
 
-        @Override
-        public void run() {
+        public void doIt() {
             try {
-                super.run();
+                super.doIt();
             } catch (Exception e) {
                 serve500(e, session, minaRequest, minaResponse);
                 return;

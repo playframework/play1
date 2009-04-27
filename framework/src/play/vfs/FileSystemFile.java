@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
+import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -66,10 +67,15 @@ public class FileSystemFile extends VirtualFile {
     }
 
     public boolean exists() {
-        if (realFile != null) {
-            return realFile.exists();
+        try {
+            if (realFile != null) {
+                boolean exists = realFile.exists();
+                return exists;
+            }
+            return false;
+        } catch(AccessControlException e) {
+            return false;
         }
-        return false;
     }
 
     public InputStream inputstream() {

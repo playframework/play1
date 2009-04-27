@@ -14,6 +14,7 @@ import play.data.binding.Binder;
 import play.data.parsing.DataParser;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
+import play.libs.Codec;
 import play.libs.Crypto;
 import play.libs.Utils;
 
@@ -155,6 +156,9 @@ public class Scope {
                         Logger.warn("Corrupted HTTP session from %s", Http.Request.current().remoteAddress);
                     }
                 }
+                if(!session.contains("___ID")) {
+                    session.put("___ID", Codec.UUID());
+                }
                 return session;
             } catch (Exception e) {
                 throw new UnexpectedException("Corrupted HTTP session from " + Http.Request.current().remoteAddress, e);
@@ -165,6 +169,10 @@ public class Scope {
 
         public static Session current() {
             return current.get();
+        }
+        
+        public String getId() {
+            return data.get("___ID");
         }
 
         void save() {
@@ -224,6 +232,12 @@ public class Scope {
         public boolean contains(String key) {
             return data.containsKey(key);
         }
+
+        @Override
+        public String toString() {
+            return data.toString();
+        }
+
     }
 
     /**

@@ -74,15 +74,17 @@ public class Template {
         }
 
         public Class defineTemplate(String name, byte[] byteCode) {
-            return defineClass(name, byteCode, 0, byteCode.length);
+            return defineClass(name, byteCode, 0, byteCode.length, Play.classloader.protectionDomain);
         }
+
+        
     }
 
     public void compile() {
         if (compiledTemplate == null) {
             try {
-                long start = System.currentTimeMillis();
-
+                long start = System.currentTimeMillis();                
+                
                 TClassLoader tClassLoader = new TClassLoader();
 
                 // Try the cache
@@ -101,12 +103,12 @@ public class Template {
                     Logger.trace("%sms to load template %s from cache", System.currentTimeMillis() - start, name);
 
                 } else {
-
+                    
                     // Let's compile the groovy source
                     final List<GroovyClass> groovyClassesForThisTemplate = new ArrayList<GroovyClass>();
                     // ~~~ Please !
                     CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
-                    compilerConfiguration.setSourceEncoding("utf-8"); // ouf
+                    compilerConfiguration.setSourceEncoding("utf-8"); // ouf                        
                     CompilationUnit compilationUnit = new CompilationUnit(compilerConfiguration);
                     compilationUnit.addSource(new SourceUnit(name, groovySource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()));
                     Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");

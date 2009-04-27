@@ -6,26 +6,33 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import javassist.ClassPath;
 import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.CtField;
+import javassist.LoaderClassPath;
 import javassist.NotFoundException;
+import javassist.bytecode.AnnotationsAttribute;
+import javassist.bytecode.annotation.MemberValue;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 /**
  * Enhancer support
  */
-public abstract class Enhancer { 
+public abstract class Enhancer {
 
     protected ClassPool classPool = new ClassPool();
 
     public Enhancer() {
         classPool.appendSystemPath();
+        classPool.appendClassPath(new LoaderClassPath(Enhancer.class.getClassLoader()));
         classPool.appendClassPath(new ApplicationClassesClasspath());
     }
 
-    CtClass makeClass(ApplicationClass applicationClass) throws IOException {
+    public CtClass makeClass(ApplicationClass applicationClass) throws IOException {
         return classPool.makeClass(new ByteArrayInputStream(applicationClass.enhancedByteCode));
     }
 
@@ -68,5 +75,35 @@ public abstract class Enhancer {
             }
         }
         return false;
+    }
+
+    protected static void createAnnotation(AnnotationsAttribute attribute, Class annotationType, Map<String, MemberValue> members) {
+        javassist.bytecode.annotation.Annotation annotation = new javassist.bytecode.annotation.Annotation(annotationType.getName(), attribute.getConstPool());
+        for (Map.Entry<String, MemberValue> member : members.entrySet()) {
+            annotation.addMemberValue(member.getKey(), member.getValue());
+        }
+        attribute.addAnnotation(annotation);
+    }
+
+    protected static void createAnnotation(AnnotationsAttribute attribute, Class annotationType) {
+        createAnnotation(attribute, annotationType, new HashMap<String, MemberValue>());
+    }
+
+    protected static AnnotationsAttribute getAnnotations(CtClass ctClass) {
+        AnnotationsAttribute annotationsAttribute = (AnnotationsAttribute) ctClass.getClassFile().getAttribute(AnnotationsAttribute.visibleTag);
+        if (annotationsAttribute == null) {
+            annotationsAttribute = new AnnotationsAttribute(ctClass.getClassFile().getConstPool(), AnnotationsAttribute.visibleTag);
+            ctClass.getClassFile().addAttribute(annotationsAttribute);
+        }
+        return annotationsAttribute;
+    }
+
+    protected static AnnotationsAttribute getAnnotations(CtField ctField) {
+        AnnotationsAttribute annotationsAttribute = (AnnotationsAttribute) ctField.getFieldInfo().getAttribute(AnnotationsAttribute.visibleTag);
+        if (annotationsAttribute == null) {
+            annotationsAttribute = new AnnotationsAttribute(ctField.getFieldInfo().getConstPool(), AnnotationsAttribute.visibleTag);
+            ctField.getFieldInfo().addAttribute(annotationsAttribute);
+        }
+        return annotationsAttribute;
     }
 }
