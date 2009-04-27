@@ -54,6 +54,7 @@ public class JPAPlugin extends PlayPlugin {
             } catch (PersistenceException e) {
                 throw new JPAException(e.getMessage(), e.getCause() != null ? e.getCause() : e);
             }
+            JPQLDialect.instance = new JPQLDialect ();
         }
     }
 

@@ -13,7 +13,7 @@ import play.Play;
 public class BytecodeCache {
 
     // Please update the cache version at each release
-    static String version = "a";
+    static String version = "b";
     
     /**
      * Delete the bytecode
