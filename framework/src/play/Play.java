@@ -148,6 +148,7 @@ public class Play {
             throw new UnexpectedException("Where is the framework ?", e);
         }
         System.setProperty("play.path", Play.frameworkPath.getAbsolutePath());
+        System.setProperty("application.path", Play.applicationPath.getAbsolutePath());
         Logger.info("Starting %s", root.getAbsolutePath());
 
         // Read the configuration file
