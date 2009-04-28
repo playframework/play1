@@ -227,6 +227,9 @@ public class Router {
                     }
                     // les parametres codes en dur dans la route matchent-ils ?
                     for (String staticKey : route.staticArgs.keySet()) {
+                        if(staticKey.equals("format")) {
+                            continue; // format is a sepcial key
+                        }
                         if (!args.containsKey(staticKey) || args.get(staticKey) == null || !args.get(staticKey).equals(route.staticArgs.get(staticKey))) {
                             allRequiredArgsAreHere = false;
                             break;
@@ -372,6 +375,8 @@ public class Router {
                 Matcher matcher = paramPattern.matcher(param);
                 if (matcher.matches()) {
                     staticArgs.put(matcher.group(1), matcher.group(2));
+                } else {
+                    Logger.warn("Ignoring %s (static params must be specified as key:'value',...)", params);
                 }
             }
         }

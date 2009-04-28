@@ -19,13 +19,13 @@ import play.mvc.Controller;
 public class ControllersEnhancer extends Enhancer {
 
     @Override
-    public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
+    public void enhanceThisClass(final ApplicationClass applicationClass) throws Exception {
         CtClass ctClass = makeClass(applicationClass);
         
         if(!ctClass.subtypeOf(classPool.get(Controller.class.getName()))) {
             return;
         }
-
+        
         for (final CtMethod ctMethod : ctClass.getDeclaredMethods()) {
 
             // Threaded access		
@@ -39,6 +39,7 @@ public class ControllersEnhancer extends Enhancer {
                             }
                         }
                     } catch (Exception e) {
+                        Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (fieldAccess %s).", applicationClass.name, ctMethod.getName(), fieldAccess);
                         throw new UnexpectedException(e);
                     }
                 }
@@ -49,12 +50,13 @@ public class ControllersEnhancer extends Enhancer {
                 try {
                     ctMethod.insertBefore(
                                "if(!play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.isActionCallAllowed()) {"+
-                                    "redirect(\""+ctClass.getName()+"."+ctMethod.getName()+"\", $args);"+
+                                    "play.mvc.Controller.redirect(\""+ctClass.getName()+"."+ctMethod.getName()+"\", $args);"+
                                "}"+
                                "play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.stopActionCall();"
                     );
                 } catch (Exception e) {
-                    Logger.error(e, "Error in ControllersEnhancer");
+                    Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (autoredirect).", applicationClass.name, ctMethod.getName());
+                    throw new UnexpectedException(e);
                 }
             }
             

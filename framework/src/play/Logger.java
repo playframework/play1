@@ -432,9 +432,9 @@ public class Logger {
             } else if (java.util.logging.Level.INFO == level) {
                 return org.apache.log4j.Level.INFO;
             } else if (java.util.logging.Level.OFF == level) {
-                return org.apache.log4j.Level.OFF;
+                return org.apache.log4j.Level.TRACE;
             }
-            return org.apache.log4j.Level.OFF;
+            return org.apache.log4j.Level.TRACE;
         }
 
         @Override

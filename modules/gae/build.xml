@@ -15,11 +15,14 @@
         </fileset> 
     </path>
     
-    <target name="build">
-        <mkdir dir="tmp/classes" />
-        <javac srcdir="src" destdir="tmp/classes">
-            <classpath refid="project.classpath" />
-        </javac>
+    <target name="checkVersion">
+        <condition property="java6">
+            <matches pattern="1.6" string="${ant.java.version}"/>
+        </condition>
+    </target>
+    
+    <target name="build" depends="compile-java6,compile-java5">
+        
         <copy todir="tmp/classes">
             <fileset dir="src">
                 <include name="**/*.properties"/>
@@ -36,6 +39,22 @@
             </manifest>
         </jar>
         <delete dir="tmp" />
+    </target>
+    
+    <target name="compile-java6" depends="checkVersion" if="java6">
+        <echo>Disabling annotation processing</echo>
+        <mkdir dir="tmp/classes" />
+        <javac srcdir="src" destdir="tmp/classes" target="1.5">
+            <classpath refid="project.classpath" />
+            <compilerarg value="-proc:none" />
+        </javac>
+    </target>
+    
+    <target name="compile-java5" depends="checkVersion" unless="java6">
+        <mkdir dir="tmp/classes" />
+        <javac srcdir="src" destdir="tmp/classes" target="1.5">
+            <classpath refid="project.classpath" />
+        </javac>
     </target>
     
 </project>

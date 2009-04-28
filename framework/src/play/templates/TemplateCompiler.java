@@ -70,7 +70,28 @@ public class TemplateCompiler {
 
         void hop(Template template) {
             this.template = template;
-            this.parser = new Parser(template.source);
+            
+            String source = template.source;
+            
+            // Static access
+            List<String> names = new ArrayList();
+            Map<String,String> originalNames = new HashMap<String, String>();
+            for (Class clazz : Play.classloader.getAllClasses()) {
+                names.add(clazz.getName().replace("$", "."));
+                originalNames.put(clazz.getName().replace("$", "."), clazz.getName());
+            }
+            Collections.sort(names, new Comparator<String>() {
+                public int compare(String o1, String o2) {
+                    return o2.length() - o1.length();
+                }
+            });
+            for (String cName : names) {                
+                source = source.replaceAll("([a-zA-Z0-9.-_$]+)\\s+instanceof\\s+"+Pattern.quote(cName), "_('" + originalNames.get(cName).replace("$", "\\$") + "').isAssignableFrom($1.class)");
+                source = source.replaceAll(Pattern.quote(cName) + ".class", "_('" + originalNames.get(cName) + "')");
+                source = source.replaceAll("([^'\"])" + Pattern.quote(cName) + "([^'\"])", "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')$2");
+            }
+            
+            this.parser = new Parser(source);
 
             // Class header
             print("class ");
@@ -138,23 +159,8 @@ public class TemplateCompiler {
 
             // Done !            
             template.groovySource = groovySource.toString();
-
-            // Static access
-            List<String> names = new ArrayList();
-            Map<String,String> originalNames = new HashMap<String, String>();
-            for (Class clazz : Play.classloader.getAllClasses()) {
-                names.add(clazz.getName().replace("$", "."));
-                originalNames.put(clazz.getName().replace("$", "."), clazz.getName());
-            }
-            Collections.sort(names, new Comparator<String>() {
-                public int compare(String o1, String o2) {
-                    return o2.length() - o1.length();
-                }
-            });
-            for (String cName : names) {                
-                template.groovySource = template.groovySource.replaceAll(Pattern.quote(cName) + ".class", "_('" + originalNames.get(cName) + "')");
-                template.groovySource = template.groovySource.replaceAll("([^'\"])" + Pattern.quote(cName) + "([^'\"])", "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')$2");
-            }
+            
+            Logger.trace("%s is compiled to %s", template.name, template.groovySource);
                 
         }
 

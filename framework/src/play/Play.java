@@ -149,6 +149,7 @@ public class Play {
         }
         System.setProperty("play.path", Play.frameworkPath.getAbsolutePath());
         System.setProperty("application.path", Play.applicationPath.getAbsolutePath());
+        Logger.info("");
         Logger.info("Starting %s", root.getAbsolutePath());
 
         // Read the configuration file
