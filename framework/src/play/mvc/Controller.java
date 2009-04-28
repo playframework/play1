@@ -256,7 +256,7 @@ public abstract class Controller {
      * @param permanent true -> 301, false -> 302
      */
     protected static void redirect(String url, boolean permanent) {
-        if(url.matches("^([^.]+[.]?)+$")) { // fix Java !
+        if(url.matches("^([^./]+[.]?)+$")) { // fix Java !
             redirect(url, permanent, new Object[0]);
         }
         throw new Redirect(url, permanent);
