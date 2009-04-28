@@ -1,5 +1,9 @@
 package play.classloading.enhancers;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -46,6 +50,7 @@ public class PropertiesEnhancer extends Enhancer {
                         String code = "public " + ctField.getType().getName() + " " + getter + "() { return this." + ctField.getName() + "; }";
                         CtMethod getMethod = CtMethod.make(code, ctClass);
                         ctClass.addMethod(getMethod);
+                        createAnnotation(getAnnotations(getMethod), Generated.class);
                     }
 
                     try {
@@ -54,6 +59,7 @@ public class PropertiesEnhancer extends Enhancer {
                         // Créé le setter
                         CtMethod setMethod = CtMethod.make("public void " + setter + "(" + ctField.getType().getName() + " value) { this." + ctField.getName() + " = value; }", ctClass);
                         ctClass.addMethod(setMethod);
+                        createAnnotation(getAnnotations(setMethod), Generated.class);
                     }
 
                 //ctField.setModifiers(Modifier.PRIVATE);
@@ -210,5 +216,11 @@ public class PropertiesEnhancer extends Enhancer {
                 throw e.getCause();
             }
         }
+    }
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    public @interface Generated { 
+
     }
 }

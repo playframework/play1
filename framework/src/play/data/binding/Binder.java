@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import play.data.validation.Validation;
 
 /**
@@ -67,6 +69,38 @@ public class Binder {
             	if(value == null || value.length == 0)
             		return null;
             	return Enum.valueOf(clazz, value[0]);
+            }
+            // Map 
+            if(Map.class.isAssignableFrom(clazz)) {
+                Class keyClass = String.class;
+                Class valueClass = String.class;
+                if (type instanceof ParameterizedType) {
+                    keyClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
+                    valueClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[1];
+                }
+                // Search for all params
+                Map r = new HashMap();
+                for(String param : params.keySet()) {
+                    Pattern p = Pattern.compile("^"+name + prefix+"\\[([^\\]]+)\\](.*)$");
+                    Matcher m = p.matcher(param);
+                    if(m.matches()) {
+                        String key = m.group(1);
+                        Map<String,String[]> tP = new HashMap();
+                        tP.put("key", new String[] {key});
+                        Object oKey = bindInternal("key", keyClass, keyClass, tP, "");
+                        if (isComposite(name + prefix  +"[" + key + "]", params.keySet())) {
+                            BeanWrapper beanWrapper = getBeanWrapper(valueClass);
+                            Object oValue = beanWrapper.bind("", type, params, name + prefix  +"[" + key + "]");
+                            r.put(oKey, oValue);
+                        } else {
+                            tP = new HashMap();
+                            tP.put("value", params.get(name + prefix  +"[" + key + "]"));
+                            Object oValue = bindInternal("value", valueClass, valueClass, tP, "");
+                            r.put(oKey, oValue);
+                        }
+                    }
+                }
+                return r;
             }
             // Collections types
             if (Collection.class.isAssignableFrom(clazz)) {

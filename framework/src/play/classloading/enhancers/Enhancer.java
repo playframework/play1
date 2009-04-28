@@ -12,6 +12,7 @@ import javassist.ClassPath;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtField;
+import javassist.CtMethod;
 import javassist.LoaderClassPath;
 import javassist.NotFoundException;
 import javassist.bytecode.AnnotationsAttribute;
@@ -103,6 +104,15 @@ public abstract class Enhancer {
         if (annotationsAttribute == null) {
             annotationsAttribute = new AnnotationsAttribute(ctField.getFieldInfo().getConstPool(), AnnotationsAttribute.visibleTag);
             ctField.getFieldInfo().addAttribute(annotationsAttribute);
+        }
+        return annotationsAttribute;
+    }
+    
+    protected static AnnotationsAttribute getAnnotations(CtMethod ctMethod) {
+        AnnotationsAttribute annotationsAttribute = (AnnotationsAttribute) ctMethod.getMethodInfo().getAttribute(AnnotationsAttribute.visibleTag);
+        if (annotationsAttribute == null) {
+            annotationsAttribute = new AnnotationsAttribute(ctMethod.getMethodInfo().getConstPool(), AnnotationsAttribute.visibleTag);
+            ctMethod.getMethodInfo().addAttribute(annotationsAttribute);
         }
         return annotationsAttribute;
     }
