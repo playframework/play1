@@ -8,7 +8,8 @@ import java.io.File;
 public class FileBinder implements SupportedType<File> {
 
     public File bind(String value) {
+        if(value == null) return null;
         File fl = new File(value);
-        return fl;
+        return fl.length() == 0 ? null : fl;
     }
 }

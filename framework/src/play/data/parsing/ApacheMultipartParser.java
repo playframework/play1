@@ -31,8 +31,6 @@ public class ApacheMultipartParser extends DataParser {
 
     private static FileItemFactory fileItemFactory = new DiskFileItemFactory();
 
-
-
     public Map<String, String[]> parse(InputStream body) {
         Map<String, String[]> result = new HashMap<String, String[]>();
         /**
@@ -71,15 +69,19 @@ public class ApacheMultipartParser extends DataParser {
                 if (fileItem.isFormField()) {
                     putMapEntry(result, fileItem.getFieldName(), fileItem.getString("UTF-8"));
                 } else {
-                    // create temp file with current millis _ count static / fieldName / original file name. 
-                    File file =  new File ( TempFilePlugin.createTempFolder(), item.getFieldName() + File.separator + item.getName());
-                    file.getParentFile().mkdirs();
-                    try {
-                        fileItem.write(file);
-                    } catch (Exception e) {
-                        throw new IllegalStateException("Error when trying to write to file " + file.getAbsolutePath(), e);
+                    // create temp file with current millis _ count static / fieldName / original file name.
+                    if(item.getName() == null || item.getName().equals("")) {
+                         // File item not filled
+                    } else {
+                        File file =  new File ( TempFilePlugin.createTempFolder(), item.getFieldName() + File.separator + item.getName());
+                        file.getParentFile().mkdirs();
+                        try {
+                            fileItem.write(file);
+                        } catch (Exception e) {
+                            throw new IllegalStateException("Error when trying to write to file " + file.getAbsolutePath(), e);
+                        }
+                        putMapEntry(result, fileItem.getFieldName(), file.getAbsolutePath());
                     }
-                    putMapEntry(result, fileItem.getFieldName(), file.getAbsolutePath());
                 }
             }
         } catch (FileUploadIOException e) {

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import org.apache.commons.codec.net.URLCodec;
 import play.exceptions.UnexpectedException;
+import play.libs.MimeTypes;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
@@ -47,6 +48,7 @@ public class RenderBinary extends Result {
      */
     public RenderBinary(File file, String name) {
         this(file, name, false);
+        if(file == null) throw new RuntimeException("file is null");
     }
 
     /**
@@ -55,7 +57,8 @@ public class RenderBinary extends Result {
      * @param file readable file to send back
      */
     public RenderBinary(File file) {
-        this(file, null, true);
+        this(file, file.getName(), true);
+        if(file == null) throw new RuntimeException("file is null");
     }
 
     /**
@@ -67,15 +70,20 @@ public class RenderBinary extends Result {
         this.file = file;
         this.name = name;
         this.inline = inline;
+        if(file == null) throw new RuntimeException("file is null");
     }
 
     @Override
     public void apply(Request request, Response response) {
         try {
-            setContentTypeIfNotSet(response, "application/octet-stream");
+            setContentTypeIfNotSet(response, MimeTypes.getMimeType(file.getName(), "application/octet-stream"));
             if (!response.headers.containsKey("Content-Disposition")) {
                 if (inline) {
-                    response.setHeader("Content-Disposition", "inline");
+                    if(name == null) {
+                        response.setHeader("Content-Disposition", "inline");
+                    } else {
+                        response.setHeader("Content-Disposition", "inline; filename*=utf-8'en-us'" + name);
+                    }
                 } else if (name == null) {
                     response.setHeader("Content-Disposition", "attachment");
                 } else {

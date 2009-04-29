@@ -6,7 +6,6 @@ import java.text.DecimalFormat;
 
 import org.apache.commons.io.FileUtils;
 
-import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 
@@ -17,8 +16,7 @@ import play.PlayPlugin;
 public class TempFilePlugin extends PlayPlugin {
 
     private static DecimalFormat format = new DecimalFormat("##########");
-    
-
+   
     static {
         format.setMinimumIntegerDigits(10);
         format.setGroupingUsed(false);
@@ -48,7 +46,6 @@ public class TempFilePlugin extends PlayPlugin {
             try {
                 FileUtils.deleteDirectory(file);
             } catch (IOException e) {
-                Logger.warn(e, "Can't delete temporary folder");
             }
         }
     }
