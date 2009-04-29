@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import play.Logger;
-import play.classloading.enhancers.PropertiesEnhancer.Generated;
+import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
 
 /**
  * Parameters map to POJO binder
@@ -51,7 +51,7 @@ public class BeanWrapper {
     }
 
     private boolean isSetter(Method method) {
-        return (!method.isAnnotationPresent(Generated.class) && method.getName().startsWith("set") && method.getName().length() > 3 && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
+        return (!method.isAnnotationPresent(PlayPropertyAccessor.class) && method.getName().startsWith("set") && method.getName().length() > 3 && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
     }
 
     protected Object newBeanInstance() throws InstantiationException,

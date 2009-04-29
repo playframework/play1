@@ -18,6 +18,7 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.db.jpa.JPQLDialect;
+import play.exceptions.UnexpectedException;
 import play.jobs.JobsPlugin;
 import play.libs.IO;
 import play.libs.Mail;
@@ -107,11 +108,6 @@ public class GAEPlugin extends PlayPlugin {
 
     @Override
     public void enhance(ApplicationClass applicationClass) {
-        if(!applicationClass.javaSource.contains("@Entity")) {
-            return;
-        }
-        DataNucleusEnhancer dataNucleusEnhancer = new DataNucleusEnhancer("JPA", "ASM");
-        dataNucleusEnhancer.setVerbose(true);
         ClassLoader tempCl = new ClassLoader() {
 
             @Override
@@ -119,6 +115,10 @@ public class GAEPlugin extends PlayPlugin {
              * Temporarely define this class, just for need of enhancing
              */
             public Class<?> loadClass(String name) throws ClassNotFoundException {
+                Class c = findLoadedClass(name);
+                if (c != null) {
+                    return c;
+                }
                 ApplicationClass tempClass = Play.classes.getApplicationClass(name);
                 if(tempClass != null) {
                     return defineClass(tempClass.name, tempClass.javaByteCode, 0, tempClass.javaByteCode.length, Play.classloader.protectionDomain);
@@ -127,6 +127,16 @@ public class GAEPlugin extends PlayPlugin {
             }
             
         };
+        try {
+            if(!tempCl.loadClass(applicationClass.name).isAnnotationPresent(Entity.class)) {
+                return;
+            }
+        } catch(Exception e) {
+            throw new UnexpectedException(e);
+        }
+                
+        DataNucleusEnhancer dataNucleusEnhancer = new DataNucleusEnhancer("JDO", "ASM");
+        dataNucleusEnhancer.setVerbose(true);
         dataNucleusEnhancer.setClassLoader(tempCl);
         dataNucleusEnhancer.getMetaDataManager().loadClasses(new String[] {applicationClass.name}, tempCl);
         dataNucleusEnhancer.addClass(applicationClass.name, applicationClass.enhancedByteCode);

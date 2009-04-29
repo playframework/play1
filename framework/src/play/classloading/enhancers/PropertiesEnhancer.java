@@ -50,7 +50,7 @@ public class PropertiesEnhancer extends Enhancer {
                         String code = "public " + ctField.getType().getName() + " " + getter + "() { return this." + ctField.getName() + "; }";
                         CtMethod getMethod = CtMethod.make(code, ctClass);
                         ctClass.addMethod(getMethod);
-                        createAnnotation(getAnnotations(getMethod), Generated.class);
+                        createAnnotation(getAnnotations(getMethod), PlayPropertyAccessor.class);
                     }
 
                     try {
@@ -59,7 +59,7 @@ public class PropertiesEnhancer extends Enhancer {
                         // Créé le setter
                         CtMethod setMethod = CtMethod.make("public void " + setter + "(" + ctField.getType().getName() + " value) { this." + ctField.getName() + " = value; }", ctClass);
                         ctClass.addMethod(setMethod);
-                        createAnnotation(getAnnotations(setMethod), Generated.class);
+                        createAnnotation(getAnnotations(setMethod), PlayPropertyAccessor.class);
                     }
 
                 //ctField.setModifiers(Modifier.PRIVATE);
@@ -220,7 +220,7 @@ public class PropertiesEnhancer extends Enhancer {
     
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
-    public @interface Generated { 
+    public @interface PlayPropertyAccessor { 
 
     }
 }
