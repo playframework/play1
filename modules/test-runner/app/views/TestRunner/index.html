@@ -66,6 +66,20 @@
             <li><a href="javascript:run('${test.name}')">${test}</a></li>
         #{/list}
         </ul>
+        
+        <p>
+            <a id="l" href="#" >Selenium</a> 
+        </p>
+        
+        <script>
+            var runAndWait = function() {
+                window.open('/public/test-runner/selenium/TestRunner.html?baseUrl=http://localhost:9000&test=../../../@tests/ts&auto=true&close=true&resultsUrl=/@tests/ts', 'selenium');
+            }
+            $('#l').click(function(e) {
+               e.preventDefault();
+               runAndWait();
+            });
+        </script>
 
     </body>
 </html>
