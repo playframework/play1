@@ -45,9 +45,17 @@
 					}%
 				%{ } else { }%
 					%{ if(i == 0) { }%
-						<a href="@{show(object.id)}">${object[field].toString() ?: '(no value)'}</a>
+						<a href="@{show(object.id)}">${object[field]?.toString()?.escape() ?: '(no value)'}</a>
 					%{ } else { }%
-						${object[field]}
+                        %{ if(_caller.type.getField(field).type == 'file') { }%
+                            %{ if(object[field]) { }%
+                                <a class="currentAttachment" href="@{attachment(object.id, field)}">${object[field].filename} (${object[field].get().size().formatSize()})</a>
+                             %{ } else { }%
+                                
+                             %{ } }%
+                        %{ } else { }%
+                            ${object[field]?.escape()}
+                        %{ } }%
 					%{ } }%
 				%{ } }%
 			</td>
@@ -61,7 +69,7 @@
 				#{doBody body:handler /}
 			%{ } else { }%
 				<td>
-					<a href="@{show(object.id)}">${object.toString() ?: '(no value)'}</a>
+					<a href="@{show(object.id)}">${object.toString()?.escape() ?: '(no value)'}</a>
 				</td>
 			%{ } }%
 		%{ } }%

@@ -84,6 +84,12 @@ public class JPASupport implements Serializable {
                     if(file != null && file.exists() && file.length() > 0) {
                         fileAttachment.set(params.get(name + "." +field.getName(), File.class));
                         fileAttachment.filename = file.getName();
+                    } else {
+                        String df = params.get(name + "." +field.getName()+"_delete_", String.class);
+                        if(df != null && df.equals("true")) {
+                            fileAttachment.delete();
+                            field.set(this, null);
+                        }
                     }
                 }
             }

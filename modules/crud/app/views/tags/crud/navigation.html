@@ -4,7 +4,7 @@
 		<li>&gt; <a href="@{list()}">&{_caller.type.name}</a></li>
 	#{/if}
 	#{if _caller.object}
-		<li>&gt; <a href="@{show(_caller.object.id)}">${_caller.object}</a></li>
+		<li>&gt; <a href="@{show(_caller.object.id)}">${_caller.object?.toString()?.escape()}</a></li>
 	#{/if}
 	#{if request.actionMethod == 'blank'}
 		<li>&gt; <a href="@{blank()}">&{'crud.blank'}</a></li>

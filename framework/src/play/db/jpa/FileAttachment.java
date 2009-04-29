@@ -46,6 +46,14 @@ public class FileAttachment {
             Files.copy(f, to);
         }
     }
+
+    void delete() {
+        File to = new File(getStore(), model.getClass().getName()+"."+name+"_"+model.getId());
+        if(to.exists()) {
+            to.delete();
+        }
+        name = null;
+    }
     
     public boolean isSet() {
         return f != null || get() != null;
