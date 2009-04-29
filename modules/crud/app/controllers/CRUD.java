@@ -200,7 +200,7 @@ public abstract class CRUD extends Controller {
 
         public List findPage(int page, String search, String searchFields, String orderBy, String order, String where) {
             int pageLength = getPageSize();
-            String q = "select from " + entityClass.getName();
+            String q = "from " + entityClass.getName();
             if (search != null && !search.equals("")) {
                 String searchQuery = getSearchQuery(searchFields);
                 if (!searchQuery.equals("")) {
@@ -245,7 +245,7 @@ public abstract class CRUD extends Controller {
         }
 
         public JPASupport findById(Object id) {
-            return (JPASupport) JPA.getEntityManager().createQuery("select from " + entityClass.getName() + " where id = " + id).getSingleResult();
+            return (JPASupport) JPA.getEntityManager().createQuery("from " + entityClass.getName() + " where id = " + id).getSingleResult();
         }
 
         public List<ObjectField> getFields() {
