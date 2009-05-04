@@ -15,20 +15,19 @@ public class TestRunner extends Controller {
         render(simpleTests, virtualClientTests);
     }
 
-    public static void run(String test) {
+    public static void run(String test) throws Exception {
         if(test.equals("ts")) {
             render();
         }
         if(test.equals("montest.html")) {
             render("TestRunner/montest.html");
         }
-        boolean success = TestEngine.run(test);
-        if(success) {
-            response.status = 200;
-        } else {
-            response.status = 500;
-        }
-        renderText("finished");
+		if(test.endsWith(".class")) {
+			Thread.sleep(250);
+			TestEngine.TestResults results = TestEngine.run(test.substring(0, test.length()-6));
+			response.status = results.passed ? 200 : 500;
+	        render("TestRunner/results.html", results);
+		}        
     }
     
     public static void saveResult(String test) {

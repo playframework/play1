@@ -1,0 +1,15 @@
+<table>
+#{list items:results.results, as:'result'}
+	<tr>
+		<td width="30%" class="${result.passed ? 'passed' : 'failed'}">
+			<span>${result.name}</span>
+		</td>
+		<td class="error">
+			${result.error}
+		</td>
+		<td width="5%" align="right" class="time">
+			${result.time} ms
+		</td>
+	</tr>
+#{/list}
+</table>

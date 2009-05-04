@@ -1,19 +1,16 @@
 package play.test;
 
-import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
-import play.Invoker.Invocation;
 import play.Play;
 import play.Logger;
 
@@ -24,45 +21,7 @@ import play.Logger;
 public class TestEngine {
 
     public static void main(String[] args) {
-
-        File root = new File(System.getProperty("application.path"));
-        Play.init(root, "test");
-        Play.start();
-
-        JUnitCore junit = new JUnitCore();
-        junit.addListener(new Listener());
-        boolean allOk = true;
-
-        List<Class> testClasses = Play.classloader.getAllClasses();
-
-        if (testClasses.isEmpty()) {
-            Logger.info("");
-            Logger.info("No test to run");
-        } else {
-            for (Class testClass : testClasses) {
-                if (VirtualClientTest.class.isAssignableFrom(testClass)) {
-                    Logger.info("");
-                    Logger.info("Running %s ...", testClass.getSimpleName());
-                    Result result = junit.run(testClass);
-                    if (result.wasSuccessful()) {
-                        Logger.info("OK", result.getRunCount());
-                    } else {
-                        Logger.error("FAILED. %s test%s failed", result.getFailureCount(), result.getFailureCount() > 1 ? "s have" : " has");
-                    }
-                    Logger.info("");
-                    allOk = allOk && result.wasSuccessful();
-                }
-            }
-            if (allOk) {
-                Logger.info("All tests are OK");
-            } else {
-                Logger.error("Tests have failed");
-            }
-        }
-
-        Play.stop();
-        System.exit(0);
-
+        // TODO
     }
 
     static ExecutorService executor = Executors.newCachedThreadPool();
@@ -75,9 +34,8 @@ public class TestEngine {
         return Play.classloader.getAssignableClasses(VirtualClientTest.class);
     }
 
-    public static boolean run(final String name) {
-        // Result
-        Result result = null;
+    public static TestResults run(final String name) {
+        final TestResults testResults = new TestResults();
 
         try {
             // Load test class
@@ -86,8 +44,8 @@ public class TestEngine {
             // Simple test
             if(SimpleTest.class.isAssignableFrom(testClass)) {
                 JUnitCore junit = new JUnitCore();
-                junit.addListener(new Listener());
-                result = junit.run(testClass);
+                junit.addListener(new Listener(testResults));
+                junit.run(testClass);
             }
 
             // VirtualClient test
@@ -95,12 +53,12 @@ public class TestEngine {
                 Future<Result> futureResult = executor.submit(new Callable<Result>() {
                     public Result call() throws Exception {
                         JUnitCore junit = new JUnitCore();
-                        junit.addListener(new Listener());
+                        junit.addListener(new Listener(testResults));
                         return junit.run(testClass);
                     }
                 });
                 try {
-                    result = futureResult.get();
+                    futureResult.get();
                 } catch(Exception e) {
                     Logger.error("VirtualClient test has failed", e);
                 }
@@ -109,35 +67,53 @@ public class TestEngine {
             Logger.error(e, "Test not found %s", name);
         }
 
-        return result != null && result.wasSuccessful();
+        return testResults;
     }
 
     // ~~~~~~ Run listener
     static class Listener extends RunListener {
+        
+        TestResults results;
+        TestResult current;
+        
+        public Listener(TestResults results) {
+            this.results = results;
+        }
 
         @Override
         public void testStarted(Description description) throws Exception {
-            Logger.info("    - %s", description.getDisplayName());
-            lastTestHasFailed = false;
+            current = new TestResult();
+            current.name = description.getDisplayName().substring(0,description.getDisplayName().indexOf("(") );
+            current.time = System.currentTimeMillis();
         }
 
         @Override
         public void testFailure(Failure failure) throws Exception {
-            Logger.info("    ! %s", failure.getMessage() == null ? "Oops" : failure.getMessage());
-            if (!(failure.getException() instanceof AssertionError)) {
-                Logger.error(failure.getException(), "    ! Exception raised is");
-                Invocation.onException(failure.getException());
-                Invocation._finally();
-            }
-            lastTestHasFailed = true;
+            current.error = failure.getMessage();
+            current.passed = false;
+            results.passed = false;
         }
 
         @Override
-        public void testFinished(Description arg0) throws Exception {
-            if (lastTestHasFailed) {
-                Logger.info("");
-            }
+        public void testFinished(Description description) throws Exception {
+            current.time = System.currentTimeMillis() - current.time;
+            results.results.add(current);
         }
-        boolean lastTestHasFailed = false;
     }
+    
+    public static class TestResults {
+        
+        public List<TestResult> results = new ArrayList<TestResult>();
+        public boolean passed = true;
+        
+    }
+    
+    public static class TestResult {
+        public String name;
+        public String error;
+        public boolean passed = true;
+        public long time;
+    }
+    
+    
 }
