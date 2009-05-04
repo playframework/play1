@@ -286,9 +286,6 @@ public class JPASupport implements Serializable {
     public String toString() {
         return getClass().getSimpleName() + "[" + getId() + "]";
     }
-
-   
-
     
     /**
      * A JPAQuery
@@ -296,9 +293,11 @@ public class JPASupport implements Serializable {
     public static class JPAQuery {
 
         public Query query;
+        public String sq;
 
-        public JPAQuery(Query query) {
+        public JPAQuery(String sq, Query query) {
             this.query = query;
+            this.sq = sq;
         }
 
         /**
@@ -306,11 +305,15 @@ public class JPASupport implements Serializable {
          * @return An entity or null
          */
         public <T extends JPASupport> T one() {
-            List<T> results = query.setMaxResults(1).getResultList();
-            if (results.size() == 0) {
-                return null;
+            try {
+                List<T> results = query.setMaxResults(1).getResultList();
+                if (results.size() == 0) {
+                    return null;
+                }
+                return (T) results.get(0);
+            } catch(Exception e) {
+                throw new IllegalArgumentException("Error while executing query <strong>"+sq+"</strong>", e);
             }
-            return (T) results.get(0);
         }
 
         /**
@@ -318,7 +321,11 @@ public class JPASupport implements Serializable {
          * @return A list of entities
          */
         public <T extends JPASupport> List<T> all() {
-            return query.getResultList();
+            try {
+                return query.getResultList();
+            } catch(Exception e) {
+                throw new IllegalArgumentException("Error while executing query <strong>"+sq+"</strong>", e);
+            }
         }
 
         /**
@@ -333,7 +340,11 @@ public class JPASupport implements Serializable {
             }
             query.setFirstResult((from - 1) * length);
             query.setMaxResults(length);
-            return query.getResultList();
+            try {
+                return query.getResultList();
+            } catch(Exception e) {
+                throw new IllegalArgumentException("Error while executing query <strong>"+sq+"</strong>", e);
+            }
         }
     }
 }

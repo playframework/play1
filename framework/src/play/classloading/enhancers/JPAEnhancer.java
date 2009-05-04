@@ -63,11 +63,11 @@ public class JPAEnhancer extends Enhancer {
         ctClass.addMethod(findBy);
         
         // find        
-        CtMethod find = CtMethod.make("public static play.db.jpa.JPASupport.JPAQuery find(String query, Object[] params) { javax.persistence.Query q = em().createQuery(play.db.jpa.JPQLDialect.instance.createFindByQuery(\"" + entityName + "\", \"" + entityName + "\", query, params)); return new play.db.jpa.JPASupport.JPAQuery(play.db.jpa.JPQLDialect.instance.bindParameters(q,params)); }", ctClass);
+        CtMethod find = CtMethod.make("public static play.db.jpa.JPASupport.JPAQuery find(String query, Object[] params) { javax.persistence.Query q = em().createQuery(play.db.jpa.JPQLDialect.instance.createFindByQuery(\"" + entityName + "\", \"" + entityName + "\", query, params)); return new play.db.jpa.JPASupport.JPAQuery(play.db.jpa.JPQLDialect.instance.createFindByQuery(\"" + entityName + "\", \"" + entityName + "\", query, params), play.db.jpa.JPQLDialect.instance.bindParameters(q,params)); }", ctClass);
         ctClass.addMethod(find);
         
         // find        
-        CtMethod find2 = CtMethod.make("public static play.db.jpa.JPASupport.JPAQuery find() { javax.persistence.Query q = em().createQuery(play.db.jpa.JPQLDialect.instance.createFindByQuery(\"" + entityName + "\", \"" + entityName + "\", null, null)); return new play.db.jpa.JPASupport.JPAQuery(play.db.jpa.JPQLDialect.instance.bindParameters(q,null)); }", ctClass);
+        CtMethod find2 = CtMethod.make("public static play.db.jpa.JPASupport.JPAQuery find() { javax.persistence.Query q = em().createQuery(play.db.jpa.JPQLDialect.instance.createFindByQuery(\"" + entityName + "\", \"" + entityName + "\", null, null)); return new play.db.jpa.JPASupport.JPAQuery(play.db.jpa.JPQLDialect.instance.createFindByQuery(\"" + entityName + "\", \"" + entityName + "\", null, null), play.db.jpa.JPQLDialect.instance.bindParameters(q,null)); }", ctClass);
         ctClass.addMethod(find2);
         
         // delete        
