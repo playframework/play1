@@ -43,7 +43,25 @@ public class Files {
      * Just delete a file
      * @param file The file to delete
      */
-    public static void delete(File file) {
-        file.delete();
+    public static boolean delete(File file) {
+        if(file.isDirectory()) {
+            return deleteDirectory(file);
+        } else {
+            return file.delete();
+        }
+    }
+
+    public static boolean deleteDirectory(File path) {
+        if (path.exists()) {
+            File[] files = path.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].isDirectory()) {
+                    deleteDirectory(files[i]);
+                } else {
+                    files[i].delete();
+                }
+            }
+        }
+        return (path.delete());
     }
 }

@@ -17,8 +17,8 @@ public class TestRunnerPlugin extends PlayPlugin {
     @Override
     public void onRoutesLoaded() {
         Router.addRoute("GET", "/@tests", "TestRunner.index");
-        Router.addRoute("GET", "/@tests/{test}", "TestRunner.run");
-        Router.addRoute("POST", "/@tests/{test}", "TestRunner.saveResult");
+        Router.addRoute("GET", "/@tests/{<.*>test}", "TestRunner.run");
+        Router.addRoute("POST", "/@tests/{<.*>test}", "TestRunner.saveResult");
     }
 
 }

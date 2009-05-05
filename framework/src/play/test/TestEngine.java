@@ -1,5 +1,6 @@
 package play.test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -32,6 +33,30 @@ public class TestEngine {
 
     public static List<Class> allFunctionalTests() {
         return Play.classloader.getAssignableClasses(FunctionalTest.class);
+    }
+    
+    public static List<String> allSeleniumTests() {
+        List<String> results = new ArrayList<String>();
+        File testDir = Play.getFile("test");
+        if(testDir.exists()) {
+            scanForSeleniumTests(testDir, results);
+        }
+        return results;
+    }
+    
+    private static void scanForSeleniumTests(File dir, List<String> tests) {
+        for(File f : dir.listFiles()) {
+            if(f.isDirectory()) {
+                scanForSeleniumTests(f, tests);
+            } else if(f.getName().endsWith(".test.html")) {
+                String test = f.getName();
+                while(!f.getParentFile().getName().equals("test")) {
+                    test = f.getParentFile().getName() + "/" + test;
+                    f = f.getParentFile();
+                }
+                tests.add(test);
+            }
+        }
     }
 
     public static TestResults run(final String name) {

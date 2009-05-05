@@ -10,18 +10,18 @@
                 padding: 0;
                 font-family: Helvetica, Arial, Sans;
                 background: #EEEEEE;
-				-moz-user-select: none;
+                -moz-user-select: none;
             }
-			a {
-				outline: none;
-			}
+            a {
+                outline: none;
+            }
             .block {
                 padding: 20px;
                 border-bottom: 1px solid #aaa;
             }
-			#header {
-				position: relative;
-			}
+            #header {
+                position: relative;
+            }
             #header h1 {
                 font-weight: normal;
                 font-size: 28px;
@@ -50,145 +50,159 @@
                 top: -3px;
             }
             #tests h2 {
-            	color: #333;
-            	font-weight: normal;               	
-            	border-left: 4px solid #ccc; 
-            	padding-left: 5px;  
-            	-moz-user-select: none;   	
+                color: #333;
+                font-weight: normal;               	
+                border-left: 4px solid #ccc; 
+                padding-left: 5px;  
+                -moz-user-select: none;   	
             }
             #tests h2 span {
-            	cursor: pointer;   
+                cursor: pointer;   
             }
             ul {
-            	list-style: none;
-            	margin-bottom: 40px;
+                list-style: none;
+                margin-bottom: 40px;
                 padding-left: 20px;
             }
             li {
-            	padding: 2px;
-            	margin-bottom: 4px;
+                padding: 2px;
+                margin-bottom: 4px;
             }
             .test a {
-            	background: #fafafa;
-            	padding: 3px 6px;
-            	color: #666;   
-            	font-weight: bold;
-            	text-decoration: none;   
-            	cursor: pointer;  
-            	-moz-user-select: none;
+                background: #fafafa;
+                padding: 3px 6px;
+                color: #666;   
+                font-weight: bold;
+                text-decoration: none;   
+                cursor: pointer;  
+                -moz-user-select: none;
             }
             .selected a {
-            	background: #fff2ab;
-            	color: #333;
+                background: #fff2ab;
+                color: #333;
             }
-			#bms {
-				color: #888;
-				font-size: 80%;
-			}
-			#bms a {
-				color: #888;
-			}
+            #bms {
+                color: #888;
+                font-size: 80%;
+            }
+            #bms a {
+                color: #888;
+            }
             #start {
-            	background: #70c111;
-            	color: #fff;
-            	font-size: 120%;
-            	border: 1px double #70c111;
-            	cursor: pointer;
-				padding: 3px 8px;
-				-moz-user-select: none;
+                background: #70c111;
+                color: #fff;
+                font-size: 120%;
+                border: 1px double #70c111;
+                cursor: pointer;
+                padding: 3px 8px;
+                -moz-user-select: none;
             }
             #stop {
-            	background: #c00;
-            	color: #fff;
-            	font-size: 120%;
-            	border: 1px double #c00;
-            	cursor: pointer;
-				padding: 3px 8px;
-				-moz-user-select: none;
+                background: #c00;
+                color: #fff;
+                font-size: 120%;
+                border: 1px double #c00;
+                cursor: pointer;
+                padding: 3px 8px;
+                -moz-user-select: none;
             }
             #start.disabled {
-            	background: #b7d2aa;
-            	cursor: default;
+                background: #b7d2aa;
+                cursor: default;
             }
             #results {
-            	font-size: 110%;
-            	color: #999;
+                font-size: 110%;
+                color: #999;
             }
             #started {
-            	display: none;
+                display: none;
             }
             .running #started {
-            	display: block;
+                display: block;
             }
             .running #stopped {
-            	display: none;
+                display: none;
             }
             .running #tests h2 span {
-            	cursor: default;
+                cursor: default;
             }
             .running .test {
-            	cursor: default;
+                cursor: default;
             }
-			.passed a, #header.passed {
-				background: #81CF5A !important;
-			}
-			.failed a, #header.failed {
-				background: #EF6868 !important;
-			}
-			.passing .touch {
-				background: url(/public/test-runner/running.gif) no-repeat;
-			}
-			.passing a {
-				background: #95D7EF;
-			}
-			.passed .touch {
-				color: #81CF5A !important;
-			}
-			.failed .touch {
-				color: #EF6868 !important;
-			}
-			.touch {
-				color: #bbb;				
-				padding: 2px 10px 2px 5px;
-				cursor: default;
-				font-family: monospace;
-				font-size: 110%;
-				font-weight: bold;
-			}
-			.failed .touch, .passed .touch {
-				cursor: pointer;
-			}
-			.testResult {
-				display: none;
-				background: #fff;
-				margin-left: 23px;
-				margin-top: 6px;
-				margin-bottom: 10px;
-				padding: 8px;
-				font-size: 80%;
-				border-left: 6px solid #ccc;
+            .passed a, #header.passed {
+                background: #81CF5A !important;
+            }
+            .failed a, #header.failed {
+                background: #EF6868 !important;
+            }
+            .passing .touch {
+                background: url(/public/test-runner/running.gif) no-repeat;
+            }
+            .passing a {
+                background: #95D7EF;
+            }
+            .passed .touch {
+                color: #81CF5A !important;
+            }
+            .failed .touch {
+                color: #EF6868 !important;
+            }
+            .touch {
+                color: #bbb;				
+                padding: 2px 10px 2px 5px;
+                cursor: default;
+                font-family: monospace;
+                font-size: 110%;
+                font-weight: bold;
+            }
+            .failed .touch, .passed .touch {
+                cursor: pointer;
+            }
+            .testResult {
+                display: none;
+                background: #fff;
+                margin-left: 24px;
+                margin-top: 6px;
+                margin-bottom: 10px;
+                padding: 8px;
+                font-size: 80%;
+                border-left: 6px solid #ccc;
                 -moz-user-select: text !important;
-			}
-			.testResult table {
-				width: 100%;
-			}
-			.testResult table td {
-				padding: 5px 0;
-			}
-			.testResult .error {
-				color: #c00;
-			}
-			.testResult .time {
-				color: #999;
-			}
-			.testResult table .passed span {
-				background: #9BCF81 !important;
-				padding: 3px 5px;
-			}
-			.testResult table .failed span {
-				background: #EF8686 !important;
-				padding: 3px 5px;
-			}
+            }
+            .testResult .status_passed {
+                background: #9BCF81 !important;
+            }
+            .testResult .status_failed {
+                background: #EF8686 !important;
+            }
+            .testResult .status_done {
+                background: #EFEFD1 !important;
+            }            
+            .testResult table {
+                width: 100%;
+                border: none;
+            }
+            .testResult table thead {
+                display: none;
+            }
+            .testResult table td {
+                padding: 5px;
+                border: none;
+            }
+            .testResult .error {
+                color: #c00;
+            }
+            .testResult .time {
+                color: #999;
+            }
+            .testResult table .passed span {
+                background: #9BCF81 !important;
+                padding: 3px 5px;
+            }
+            .testResult table .failed span {
+                background: #EF8686 !important;
+                padding: 3px 5px;
+            }
             .testResult table .source {
                 margin-top: 10px;
             }
@@ -210,44 +224,59 @@
             }
         </style>
         <script type="text/javascript">
-        	$(function() {
-        		
-        		var run = function() {
-					updateSelected();
-        			$(document.body).addClass('running');
-					$('.test, #header').removeClass('passed').removeClass('failed');
-					runNextTest();
-        		}
+            $(function() {
+                
+                var testError = function() {
+                    alert('An unexpected error occured. Check server logs !');
+                    updateSelected();
+                }
+                        
+                var run = function() {
+                    updateSelected();
+                    $(document.body).addClass('running');
+                    $('.test, #header').removeClass('passed').removeClass('failed');
+                    $.ajax({
+                       type: 'GET',
+                       url: '@{TestRunner.run("init")}',
+                       success: function() {
+                           runNextTest();
+                       },
+                       error: function() {
+                           testError();
+                       }
+                    });
+                }
 
-				var runNextTest = function() {
-					if($(document.body).is('.running')) {
-						var test = $('.test.selected:not(.passed,.failed):first');
-						if(test.size()) {
-							var testId = test.attr('id');
-							runTest(testId, test);
-						} else {
-							result();
-						}
-					}					
-				}
-				
-				var result = function() {
-					$(document.body).removeClass('running');
-					if($('.test.failed').size()) {
-						$('#header').addClass('failed');
-					} else {
-						$('#header').addClass('passed');
-					}
-				};
-				
-				var runTest = function(testId, test) {
-					test.addClass('passing');
-					$('.touch', test).html('&nbsp;');
-					if(/.class$/.test(testId)) {
-						$.ajax({
-		                    type: 'GET',
+                var runNextTest = function() {
+                    if($(document.body).is('.running')) {
+                        var test = $('.test.selected:not(.passed,.failed):first');
+                        if(test.size()) {
+                            var testId = test.attr('id');
+                            runTest(testId, test);
+                        } else {
+                            result();
+                        }
+                    }					
+                }
+                                
+                var result = function() {
+                    $(document.body).removeClass('running');
+                    $('.passing').removeClass('passing');
+                    if($('.test.failed').size()) {
+                        $('#header').addClass('failed');
+                    } else {
+                        $('#header').addClass('passed');
+                    }
+                };
+                                
+                var runTest = function(testId, test) {
+                    test.addClass('passing');
+                    $('.touch', test).html('&nbsp;');
+                    if(/.class$/.test(testId)) {
+                        $.ajax({
+                            type: 'GET',
                             dataType: 'html',
-		                    url: '@{TestRunner.run("XXX")}'.replace('XXX', testId),
+                            url: '@{TestRunner.run("XXX")}'.replace('XXX', testId),
                             complete: function(res, status) {
                                 var results = jQuery("<div/>").append(res.responseText).find('table');
                                 if(!results || !results.size()) {
@@ -259,118 +288,134 @@
                                     testFail(test, results);
                                 };
                             }
-		                });
-					}
-				};
-				
-				var testSuccess = function(test, result) {
-					test.removeClass('passing').addClass('passed');
-					$('.touch', test).html('+');
-					$('.testResult', test).html(result);
-					runNextTest();
-				};
-				
-				var testFail = function(test, result) {
-					test.removeClass('passing').addClass('failed');
-					$('.touch', test).html('+');
-					$('.testResult', test).html(result);					
-					runNextTest();
-				};
-        		
-        		var stop = function() {
-        			result();
-        		};
-        		
-        		var updateSelected = function() {
-        			var nb = $('.test.selected').size();
-        			if(nb) {
-        				$('.nbToRun').text(nb);
-        				$('.nbToRunPluralize').text((nb>1) ? 's' : '');
-        				$('#start').removeAttr('disabled').removeClass('disabled');
-						$('#bms').show();
-						$('#bms a').attr('href', bookmark());
-        			} else {
-        				$('.nbToRun').text('no');
-        				$('.nbToRunPluralize').text('');
-        				$('#start').attr('disabled', 'true').addClass('disabled');
-						$('#bms').hide();
-        			}
-					$('.test, #header').removeClass('passed').removeClass('failed');
-					$('.touch').html('&sim;');
-					$('.testResult').hide();
-        		}
+                        });
+                    }
+                    if(/.test.html/.test(testId)) {
+                        window.open('/public/test-runner/selenium/TestRunner.html?baseUrl=http://localhost:9000&test=/@tests/'+testId+'.suite&auto=true&close=true&resultsUrl=/@tests/'+testId);
+                        var checkResult = setInterval(function() {
+                             var req = $.ajax({url: '@{TestRunner.run("XXX.result")}'.replace('XXX', testId), async: false});
+                             if(req.status == 200) {
+                                 var results = jQuery("<div/>").append(req.responseText).find('table');
+                                 clearInterval(checkResult);
+                                 testSuccess(test, results);
+                             }
+                             if(req.status == 500) {
+                                 var results = jQuery("<div/>").append(req.responseText).find('table');
+                                 clearInterval(checkResult);
+                                 testFail(test, results);
+                             }
+                        }, 1000);
+                    }
+                };
+                                
+                var testSuccess = function(test, result) {
+                    test.removeClass('passing').addClass('passed');
+                    $('.touch', test).html('+');
+                    $('.testResult', test).html(result);
+                    runNextTest();
+                };
+                                
+                var testFail = function(test, result) {
+                    test.removeClass('passing').addClass('failed');
+                    $('.touch', test).html('+');
+                    $('.testResult', test).html(result);					
+                    runNextTest();
+                };
+                        
+                var stop = function() {
+                    result();
+                };
+                        
+                var updateSelected = function() {
+                    var nb = $('.test.selected').size();
+                    if(nb) {
+                        $('.nbToRun').text(nb);
+                        $('.nbToRunPluralize').text((nb>1) ? 's' : '');
+                        $('#start').removeAttr('disabled').removeClass('disabled');
+                        $('#bms').show();
+                        $('#bms a').attr('href', bookmark());
+                    } else {
+                        $('.nbToRun').text('no');
+                        $('.nbToRunPluralize').text('');
+                        $('#start').attr('disabled', 'true').addClass('disabled');
+                        $('#bms').hide();
+                    }
+                    $('.test, #header').removeClass('passed').removeClass('failed');
+                    $('.touch').html('&sim;');
+                    $('.testResult').hide();
+                }
 
-				var bookmark = function() {
-					var url = 'http://'+document.location.host;
-					if(document.location.port) {
-						url += ':'+document.location.port;
-					}
-					url += document.location.pathname;
-					url += '?select=';
-					var v = false;
-					$('.test.selected').each(function() {
-						if(v) url += ',';
-						url += $(this).attr('id');	
-						v = true;					
-					});
-					if(url)
-					return url;
-				}
-        		
-        		$('.test a').click(function(e) {
-					e.preventDefault();
-        			if($(document.body).is('.running')) return;
-        			$(this).closest('.test').toggleClass('selected');
-        			updateSelected();
-        		});
+                var bookmark = function() {
+                    var url = 'http://'+document.location.host;
+                    if(document.location.port) {
+                        url += ':'+document.location.port;
+                    }
+                    url += document.location.pathname;
+                    url += '?select=';
+                    var v = false;
+                    $('.test.selected').each(function() {
+                        if(v) url += ',';
+                        url += $(this).attr('id');	
+                        v = true;					
+                    });
+                    if(url)
+                        return url;
+                }
+                        
+                $('.test a').click(function(e) {
+                    e.preventDefault();
+                    if($(document.body).is('.running')) return;
+                    $(this).closest('.test').toggleClass('selected');
+                    updateSelected();
+                });
 
-				$('.test .touch').click(function(e) {
-					e.preventDefault();
-        			var test = $(this).closest('.test')
-					if($(test).is('.failed,.passed')) {
-						$('.testResult', test).toggle();
-						$(this).html( $(this).html() == '-' ? '+' : '-' );
-					}
-        		});
-        		
-        		$('#tests h2 span').click(function() {
-        			if($(document.body).is('.running')) return;
-        			var ul = $(this).parent().next('ul');
-        			if( $('.test', ul).size() ==  $('.test.selected', ul).size() ) {
-        				$('.test', ul).removeClass('selected');
-        			} else {
-        				$('.test', ul).addClass('selected');
-        			}
-        			updateSelected();
-        		});
-        		
-        		$('#start').click(function() {
-					if($(this).is('.disabled')) return;
-        			run();
-        		});
-        		
-        		$('#stop').click(function() {
-        			stop();
-        		});
+                $('.test .touch').click(function(e) {
+                    e.preventDefault();
+                    var test = $(this).closest('.test')
+                    if($(test).is('.failed,.passed')) {
+                        $('.testResult', test).toggle();
+                        $(this).html( $(this).html() == '-' ? '+' : '-' );
+                    }
+                });
+                        
+                $('#tests h2 span').click(function() {
+                    if($(document.body).is('.running')) return;
+                    var ul = $(this).parent().next('ul');
+                    if( $('.test', ul).size() ==  $('.test.selected', ul).size() ) {
+                        $('.test', ul).removeClass('selected');
+                    } else {
+                        $('.test', ul).addClass('selected');
+                    }
+                    updateSelected();
+                });
+                        
+                $('#start').click(function() {
+                    if($(this).is('.disabled')) return;
+                    run();
+                });
+                        
+                $('#stop').click(function() {
+                    stop();
+                });
 
-				if(/select=/.exec(document.location.search)) {
-					var toSelect = /select=([^&]+)/.exec(document.location.search)[1].split(',');
-					if(toSelect[0] == 'all') {
-						$('.test').addClass('selected');
-					} else {
-						$(toSelect).each(function() {
-							$(document.getElementById(this)).addClass('selected');
-						});
-					}
-				}
-        		
-        		updateSelected();
+                if(/select=/.exec(document.location.search)) {
+                    var toSelect = /select=([^&]+)/.exec(document.location.search)[1].split(',');
+                    if(toSelect[0] == 'all') {
+                        $('.test').addClass('selected');
+                    } else {
+                        $(toSelect).each(function() {
+                            $(document.getElementById(this)).addClass('selected');
+                        });
+                    }
+                }
+                        
+                updateSelected();
 
-				if(/auto=yes/.exec(document.location.search)) {
-					run();
-				}
-        		
-        	});
+                if(/auto=yes/.exec(document.location.search)) {
+                    run();
+                }
+                        
+            });
         </script>
     </head>
     <body>
@@ -385,55 +430,70 @@
         <div id="results" class="block">
             
             <div id="stopped">
-            	<span id="start">Start !</span>
-            	&nbsp; <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span> to run <span id="bms">(<a id="" href="#">Bookmark this link to save this configuration</a>)</span>
+                <span id="start">Start !</span>
+                &nbsp; <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span> to run <span id="bms">(<a id="" href="#">Bookmark this link to save this configuration</a>)</span>
             </div>
             
             <div id="started">
-            	<span id="stop">Stop ...</span>
-				&nbsp;(running <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span>)
+                <span id="stop">Stop ...</span>
+                &nbsp;(running <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span>)
             </div>
-
-			<div id="finished">
-            	
+            
+            <div id="finished">
+                
             </div>
             
         </div>
         <div id="tests" class="block">
-	
-			#{if unitTests}
-				<h2><span>There ${unitTests.size().pluralize('is', 'are')} ${unitTests.size()} unit test${unitTests.size().pluralize()},</span></h2>
-	        	<ul>
-					#{list items:unitTests, as:'test'}
-						<li>
-		        			<div class="test" id="${test.name}.class">
-		        				<span class="touch">+</span><a href="@{TestRunner.run(test.name+'.class')}">${test.name.replace('.','/')}.java</a>
-								<div class="testResult"></div>
-		        			</div>
-		        		</li>
-				    #{/list}
-	        	</ul>
-                %{ tis = true; }%
-			#{/if}
-
-			#{if functionalTests}
-				<h2><span>${tis ? '' : 'There '+functionalTests.size().pluralize('is', 'are')} ${functionalTests.size()} functional test${functionalTests.size().pluralize()},</span></h2>
-	        	<ul>
-					#{list items:functionalTests, as:'test'}
-						<li>
-		        			<div class="test" id="${test.name}.class">
-		        				<span class="touch">+</span><a href="@{TestRunner.run(test.name+'.class')}">${test.name.replace('.','/')}.java</a>
-								<div class="testResult"></div>
-		        			</div>
-		        		</li>
-				    #{/list}
-	        	</ul>
-			#{/if}
-
-            #{if !functionalTests && !unitTests}
-                <h2><span>There is no test to run</span></h2>
+            
+            #{if unitTests}
+            <h2><span>There ${unitTests.size().pluralize('is', 'are')} ${unitTests.size()} unit test${unitTests.size().pluralize()},</span></h2>
+            <ul>
+                #{list items:unitTests, as:'test'}
+                <li>
+                    <div class="test" id="${test.name}.class">
+                        <span class="touch">+</span><a href="@{TestRunner.run(test.name+'.class')}">${test.name.replace('.','/')}.java</a>
+                        <div class="testResult"></div>
+                    </div>
+                </li>
+                #{/list}
+            </ul>
+            %{ tis = true; }%
             #{/if}
-
+            
+            #{if functionalTests}
+            <h2><span>${tis ? '' : 'There '+functionalTests.size().pluralize('is', 'are')} ${tis && !seleniumTests ? 'and' : ''} ${functionalTests.size()} functional test${functionalTests.size().pluralize()},</span></h2>
+            <ul>
+                #{list items:functionalTests, as:'test'}
+                <li>
+                    <div class="test" id="${test.name}.class">
+                        <span class="touch">+</span><a href="@{TestRunner.run(test.name+'.class')}">${test.name.replace('.','/')}.java</a>
+                        <div class="testResult"></div>
+                    </div>
+                </li>
+                #{/list}
+            </ul>
+            %{ tis = true; }%
+            #{/if}
+            
+            #{if seleniumTests}
+            <h2><span>${tis ? '' : 'There '+seleniumTests.size().pluralize('is', 'are')} ${tis ? 'and' : ''} ${seleniumTests.size()} selenium test${seleniumTests.size().pluralize()},</span></h2>
+            <ul>
+                #{list items:seleniumTests, as:'test'}
+                <li>
+                    <div class="test" id="${test}">
+                        <span class="touch">+</span><a href="/public/test-runner/selenium/TestRunner.html?baseUrl=http://localhost:9000&test=/@tests/${test}.suite">${test}</a>
+                        <div class="testResult"></div>
+                    </div>
+                </li>
+                #{/list}
+            </ul>
+            #{/if}
+            
+            #{if !functionalTests && !unitTests && !seleniumTests}
+            <h2><span>There is no test to run</span></h2>
+            #{/if}
+            
         </div>
     </body>
 </html>
