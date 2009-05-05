@@ -62,6 +62,7 @@
             ul {
             	list-style: none;
             	margin-bottom: 40px;
+                padding-left: 20px;
             }
             li {
             	padding: 2px;
@@ -166,6 +167,7 @@
 				padding: 8px;
 				font-size: 80%;
 				border-left: 6px solid #ccc;
+                -moz-user-select: text !important;
 			}
 			.testResult table {
 				width: 100%;
@@ -187,6 +189,25 @@
 				background: #EF8686 !important;
 				padding: 3px 5px;
 			}
+            .testResult table .source {
+                margin-top: 10px;
+            }
+            .testResult table .source span {
+                color: #fff;
+                font-size: 85%;
+                padding: 1px 3px;
+                background: #666;
+            }
+            .testResult table pre {
+                display: none;
+            }
+            .testResult table .sourceLine {
+                border-left: 3px solid #c00;
+                padding: 4px 3px;
+                color: #000;
+                font-size: 85%;
+                margin-bottom: 10px;
+            }
         </style>
         <script type="text/javascript">
         	$(function() {
@@ -225,13 +246,19 @@
 					if(/.class$/.test(testId)) {
 						$.ajax({
 		                    type: 'GET',
+                            dataType: 'html',
 		                    url: '@{TestRunner.run("XXX")}'.replace('XXX', testId),
-		                    success: function(html){
-								testSuccess(test, html);
-		                    },
-		                    error: function(req){
-								testFail(test, req.responseText);
-		                    }
+                            complete: function(res, status) {
+                                var results = jQuery("<div/>").append(res.responseText).find('table');
+                                if(!results || !results.size()) {
+                                    results = '<strong class="error">Error, the test has not been properly run. Check the server logs, or open this test in another browser tab to see the error page.</strong>';
+                                }
+                                if(status == 'success') {
+                                    testSuccess(test, results);
+                                } else {
+                                    testFail(test, results);
+                                };
+                            }
 		                });
 					}
 				};
@@ -374,19 +401,38 @@
         </div>
         <div id="tests" class="block">
 	
-			#{if simpleTests}
-				<h2><span>There is ${simpleTests.size()} simple${simpleTests.size().pluralize()} test${simpleTests.size().pluralize()},</span></h2>
+			#{if unitTests}
+				<h2><span>There ${unitTests.size().pluralize('is', 'are')} ${unitTests.size()} unit test${unitTests.size().pluralize()},</span></h2>
 	        	<ul>
-					#{list items:simpleTests, as:'test'}
+					#{list items:unitTests, as:'test'}
 						<li>
 		        			<div class="test" id="${test.name}.class">
-		        				<span class="touch">+</span><a href="@{TestRunner.run(test.name+'.class')}">${test.name}</a>
+		        				<span class="touch">+</span><a href="@{TestRunner.run(test.name+'.class')}">${test.name.replace('.','/')}.java</a>
 								<div class="testResult"></div>
 		        			</div>
 		        		</li>
 				    #{/list}
 	        	</ul>
-			#{/if}        	
+                %{ tis = true; }%
+			#{/if}
+
+			#{if functionalTests}
+				<h2><span>${tis ? '' : 'There '+functionalTests.size().pluralize('is', 'are')} ${functionalTests.size()} functional test${functionalTests.size().pluralize()},</span></h2>
+	        	<ul>
+					#{list items:functionalTests, as:'test'}
+						<li>
+		        			<div class="test" id="${test.name}.class">
+		        				<span class="touch">+</span><a href="@{TestRunner.run(test.name+'.class')}">${test.name.replace('.','/')}.java</a>
+								<div class="testResult"></div>
+		        			</div>
+		        		</li>
+				    #{/list}
+	        	</ul>
+			#{/if}
+
+            #{if !functionalTests && !unitTests}
+                <h2><span>There is no test to run</span></h2>
+            #{/if}
 
         </div>
     </body>

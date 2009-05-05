@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import play.libs.IO;
-import play.test.VirtualClientTest;
+import play.test.FunctionalTest;
 
-public abstract class TestSupport extends VirtualClientTest {
+public abstract class TestSupport extends FunctionalTest {
     
     public static void start(TestApp app) {
         Play.init(app.root, "test");

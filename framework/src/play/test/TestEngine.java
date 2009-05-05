@@ -26,12 +26,12 @@ public class TestEngine {
 
     static ExecutorService executor = Executors.newCachedThreadPool();
 
-    public static List<Class> allSimpleTests() {
-        return Play.classloader.getAssignableClasses(SimpleTest.class);
+    public static List<Class> allUnitTests() {
+        return Play.classloader.getAssignableClasses(UnitTest.class);
     }
 
-    public static List<Class> allVirtualClientTests() {
-        return Play.classloader.getAssignableClasses(VirtualClientTest.class);
+    public static List<Class> allFunctionalTests() {
+        return Play.classloader.getAssignableClasses(FunctionalTest.class);
     }
 
     public static TestResults run(final String name) {
@@ -42,18 +42,18 @@ public class TestEngine {
             final Class testClass = Play.classloader.loadClass(name);
 
             // Simple test
-            if(SimpleTest.class.isAssignableFrom(testClass)) {
+            if(UnitTest.class.isAssignableFrom(testClass)) {
                 JUnitCore junit = new JUnitCore();
-                junit.addListener(new Listener(testResults));
+                junit.addListener(new Listener(testClass.getName(), testResults));
                 junit.run(testClass);
             }
 
             // VirtualClient test
-            if(VirtualClientTest.class.isAssignableFrom(testClass)) {
+            if(FunctionalTest.class.isAssignableFrom(testClass)) {
                 Future<Result> futureResult = executor.submit(new Callable<Result>() {
                     public Result call() throws Exception {
                         JUnitCore junit = new JUnitCore();
-                        junit.addListener(new Listener(testResults));
+                        junit.addListener(new Listener(testClass.getName(), testResults));
                         return junit.run(testClass);
                     }
                 });
@@ -75,9 +75,11 @@ public class TestEngine {
         
         TestResults results;
         TestResult current;
+        String className;
         
-        public Listener(TestResults results) {
+        public Listener(String className, TestResults results) {
             this.results = results;
+            this.className = className;
         }
 
         @Override
@@ -89,7 +91,18 @@ public class TestEngine {
 
         @Override
         public void testFailure(Failure failure) throws Exception {
-            current.error = failure.getMessage();
+            if(failure.getException() instanceof AssertionError) {
+                current.error = "Failure, " + failure.getMessage();
+            } else {
+                current.error = "A " + failure.getException().getClass().getName() + " has been caught, " + failure.getMessage();
+                current.trace = failure.getTrace();
+            }
+            for(StackTraceElement stackTraceElement : failure.getException().getStackTrace()) {
+                if(stackTraceElement.getClassName().equals(className)) {
+                    current.sourceInfos = "In " + Play.classes.getApplicationClass(className).javaFile.relativePath() + ", line " + stackTraceElement.getLineNumber();
+                    current.sourceCode = Play.classes.getApplicationClass(className).javaSource.split("\n")[stackTraceElement.getLineNumber()-1];
+                }
+            }
             current.passed = false;
             results.passed = false;
         }
@@ -113,6 +126,9 @@ public class TestEngine {
         public String error;
         public boolean passed = true;
         public long time;
+        public String trace;
+        public String sourceInfos;
+        public String sourceCode;
     }
     
     

@@ -2,17 +2,15 @@ package controllers;
 
 import java.util.*;
 
-import play.*;
 import play.mvc.*;
 import play.test.*;
-import play.exceptions.*;
 
 public class TestRunner extends Controller {
 
     public static void index() {
-        List<Class> simpleTests = TestEngine.allSimpleTests();
-        List<Class> virtualClientTests = TestEngine.allVirtualClientTests();
-        render(simpleTests, virtualClientTests);
+        List<Class> unitTests = TestEngine.allUnitTests();
+        List<Class> functionalTests = TestEngine.allFunctionalTests();
+        render(unitTests, functionalTests);
     }
 
     public static void run(String test) throws Exception {
@@ -26,7 +24,7 @@ public class TestRunner extends Controller {
 			Thread.sleep(250);
 			TestEngine.TestResults results = TestEngine.run(test.substring(0, test.length()-6));
 			response.status = results.passed ? 200 : 500;
-	        render("TestRunner/results.html", results);
+	        render("TestRunner/results.html", test, results);
 		}        
     }
     

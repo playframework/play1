@@ -16,7 +16,7 @@ import play.mvc.Http.Response;
 /**
  * Application tests support
  */
-public abstract class VirtualClientTest extends org.junit.Assert {
+public abstract class FunctionalTest extends org.junit.Assert {
 
     @Before
     public void before() {
@@ -210,7 +210,7 @@ public abstract class VirtualClientTest extends org.junit.Assert {
     public static void assertContentMatch(String pattern, Response response) {
         Pattern ptn = Pattern.compile(pattern);
         boolean ok = ptn.matcher(getContent(response)).find();
-        assertTrue("Response content does not match '" + pattern + "' : " + getContent(response), ok);
+        assertTrue("Response content does not match '" + pattern + "'", ok);
     }
 
     /**
