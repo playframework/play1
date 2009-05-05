@@ -222,9 +222,25 @@
                 font-size: 85%;
                 margin-bottom: 10px;
             }
+            #loading {
+                background: #c00;
+                color: #fff;
+                position: absolute;
+                top: 0;
+                right: 0;
+                padding: 4px 5px;
+                font-size: 80%;
+                display: none;
+            }
         </style>
         <script type="text/javascript">
             $(function() {
+                
+                $('#loading').ajaxStart(function() {
+                    $(this).show();
+                }).ajaxStop(function() {
+                    $(this).hide();
+                });
                 
                 var testError = function() {
                     alert('An unexpected error occured. Check server logs !');
@@ -267,6 +283,11 @@
                     } else {
                         $('#header').addClass('passed');
                     }
+                    $.ajax({
+                       type: 'GET',
+                       url: '@{TestRunner.run("end")}',
+                       data: {result: $('.test.failed').size() ? 'failed' : 'passed'}
+                    });
                 };
                                 
                 var runTest = function(testId, test) {
@@ -304,7 +325,7 @@
                                  clearInterval(checkResult);
                                  testFail(test, results);
                              }
-                        }, 1000);
+                        }, 2000);
                     }
                 };
                                 
@@ -426,6 +447,7 @@
             <p>
                 <strong>Select the tests to run</strong>, then click [Start] and pray
             </p>
+            <div id="loading">working ...</div>
         </div>
         <div id="results" class="block">
             

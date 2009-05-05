@@ -11,6 +11,7 @@ import random
 import re
 import subprocess
 import time
+import webbrowser
 
 
 # Utilities
@@ -71,7 +72,7 @@ try:
 	print "~ play! %s, http://www.playframework.org" % (open(play_version_file).readline().strip())
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command ?
-	available_commands = ('help', 'id', 'war', 'new', 'clean', 'cp', 'pid', 'out', 'overrides', 'ov', 'modules', 'nb', 'netbeansify', 'ec', 'eclipsify', 'secret', 'run', 'test', 'debug', 'start', 'stop', 'restart')
+	available_commands = ('help', 'id', 'war', 'new', 'auto-test', 'clean', 'cp', 'pid', 'out', 'overrides', 'ov', 'modules', 'nb', 'netbeansify', 'ec', 'eclipsify', 'secret', 'run', 'test', 'debug', 'start', 'stop', 'restart')
 
 	if len(sys.argv) < 2 or sys.argv[1] not in available_commands:
 	  	print "~ Usage: play command [application path or current directory] "
@@ -89,7 +90,7 @@ try:
 
 	play_command = sys.argv[1]
 
-	if play_command == 'test':
+	if play_command == 'test' or play_command == 'auto-test':
 		play_id = 'test'
 
 	if play_id:
@@ -421,6 +422,45 @@ try:
 		print "~ "
 		subprocess.call(java_cmd, env=os.environ)
 		print
+		sys.exit(0)
+		
+		
+	# ~~~~~~~~~~~~~~~~~~~~~~ [auto-test] Run the application tests
+	if play_command == 'auto-test':
+		print "~ Running in test mode"
+		print "~ Ctrl+C to stop"
+		print "~ "
+		test_result = os.path.join(application_path, 'test-result')
+		if os.path.exists(test_result):
+			shutil.rmtree(test_result)
+		play_process = subprocess.Popen(java_cmd, env=os.environ, stdout=subprocess.PIPE)
+		while True:
+			line = play_process.stdout.readline().strip()
+			print line
+			if not line:
+				print "~"
+				print "~ Oops..."
+				print "~"
+				os.kill(play_process.pid, 15)
+				sys.exit(-1)
+			if line.find('Listening for HTTP') > -1:
+				break
+		# Launch the browser
+		webbrowser.open('http://localhost:9000/@tests?select=all&auto=yes')
+		while True:
+			time.sleep(1)
+			if os.path.exists(os.path.join(application_path, 'test-result/result.passed')):
+				print "~"
+				print "~ All tests passed"
+				print "~"
+				os.kill(play_process.pid, 15)
+				break
+			if os.path.exists(os.path.join(application_path, 'test-result/result.failed')):
+				print "~"
+				print "~ Some tests have failed. See %s for results" % test_result
+				print "~"
+				os.kill(play_process.pid, 15)
+				break
 		sys.exit(0)
 
 

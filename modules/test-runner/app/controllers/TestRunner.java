@@ -32,6 +32,11 @@ public class TestRunner extends Controller {
             testResults.mkdir();
             renderText("done");
         }
+        if(test.equals("end")) {
+            File testResults = Play.getFile("test-result/result."+params.get("result"));
+            IO.writeContent(params.get("result"), testResults);
+            renderText("done");
+        }
 	if(test.endsWith(".class")) {
             Thread.sleep(250);
             TestEngine.TestResults results = TestEngine.run(test.substring(0, test.length() - 6));
@@ -75,7 +80,8 @@ public class TestRunner extends Controller {
                 response.status = 500;
                 renderText(IO.readContentAsString(testResults));
             }
-            notFound("No test result");         
+            response.status = 404;
+            renderText("No test result");         
         }
     }
     
