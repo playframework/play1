@@ -34,6 +34,22 @@ public class Utils {
                 mergeValueInMap(map, name, value);
             }
         }
+		
+		public static Map filterMap( Map map, String keypattern ) {
+			try { 
+				Map filtered = (Map) map.getClass().newInstance();
+				System.out.println(filtered);
+				for( Object key : map.keySet() ) {
+					if( key.toString().matches(keypattern)) {
+						filtered.put(key, map.get(key));
+					}
+				}
+				return filtered;
+			} catch( Exception iex ) {
+				return null;
+			}
+		}
+		
     }
     
     

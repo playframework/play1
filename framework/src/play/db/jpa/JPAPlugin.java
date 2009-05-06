@@ -2,6 +2,7 @@ package play.db.jpa;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Properties;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
@@ -11,6 +12,7 @@ import play.Play;
 import play.PlayPlugin;
 import play.db.DB;
 import play.exceptions.JPAException;
+import play.libs.Utils;
 
 /**
  * JPA Plugin
@@ -35,6 +37,9 @@ public class JPAPlugin extends PlayPlugin {
             cfg.setProperty("hibernate.dialect", getDefaultDialect(Play.configuration.getProperty("db.driver")));
             cfg.setProperty("javax.persistence.transaction", "RESOURCE_LOCAL");
             cfg.setProperty("hibernate.show_sql", Play.configuration.getProperty("jpa.debugSQL", "false"));
+			// inject additional  hibernate.* settings declared in Play! configuration
+			cfg.addProperties( (Properties) Utils.Maps.filterMap( Play.configuration, "^hibernate\\..*"));
+			
             try {
                 Field field = cfg.getClass().getDeclaredField("overridenClassLoader");
                 field.setAccessible(true);
