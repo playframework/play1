@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import java.util.Set;
+import java.util.Map.Entry;
+
 import org.openid4java.association.Association;
 import org.openid4java.association.AssociationException;
 import org.openid4java.consumer.ConsumerAssociationStore;
@@ -25,6 +27,9 @@ import org.openid4java.message.ParameterList;
 import org.openid4java.message.ax.AxMessage;
 import org.openid4java.message.ax.FetchRequest;
 import org.openid4java.message.ax.FetchResponse;
+import org.openid4java.message.sreg.SRegMessage;
+import org.openid4java.message.sreg.SRegRequest;
+import org.openid4java.message.sreg.SRegResponse;
 import org.openid4java.server.RealmVerifier;
 
 import org.openid4java.util.HttpClientFactory;
@@ -42,33 +47,46 @@ import play.mvc.results.Redirect;
 
 public class OpenID {
 
-    static Map<String, String> attributesURI = new HashMap<String, String>();
-    static Map<String, Boolean> attributesMandatory = new HashMap<String, Boolean>();
+	static class OpenIDAttribute {
+		public String alias;
+		public String schema;
+		public boolean mandatory;
+	}
+	
+	static HashMap<String, OpenIDAttribute> attributes = new HashMap<String, OpenIDAttribute>();
+	static String dataRetrievalMethod = (String) Play.configuration.get("openid.dataRetrievalMethod");
 
     static {
-        for (Object oKey : Play.configuration.keySet()) {
-            String key = (String) oKey;
-            if (key.startsWith("openid.attribute")) {
-                String alias = key.substring(("openid.attribute".length()));
-                attributesURI.put(alias, Play.configuration.getProperty(key));
-                attributesMandatory.put(alias, false);
-            }
-            if (key.startsWith("openid.mandatory.attribute")) {
-                String alias = key.substring(("openid.mandatory.attribute".length()));
-                attributesURI.put(alias, Play.configuration.getProperty(key));
-                attributesMandatory.put(alias, true);
-            }
-        }
-        // If nothing in config, 3 optional attributes.
-        if (attributesURI.size() == 0) {
-            attributesURI.put("FirstName", "http://schema.openid.net/namePerson/first");
-            attributesURI.put("LastName", "http://schema.openid.net/namePerson/last");
-            attributesURI.put("Email", "http://schema.openid.net/namePerson/email");
-            attributesMandatory.put("FirstName", false);
-            attributesMandatory.put("LastName", false);
-            attributesMandatory.put("Email", false);
-        }
+    	/*
+    	 * sample config :
+    	 * openid.attribute.<attr>
+    	 * openid.attribute.<attr>=schema
+    	 * openid.mandatoryAttribute.<attr>=schema
+    	 * 
+    	 */
+    	
+    	if(!"ax".equals(dataRetrievalMethod) && !"sreg".equals(dataRetrievalMethod)) {
+    		dataRetrievalMethod = "ax";
+    	}
+    	
+    	for(Entry<Object, Object> entry : Play.configuration.entrySet()) {
+    		String key = (String) entry.getKey();
+    		if(key.startsWith("openid.attribute.")) {
+    			putAttribute(key.substring("openid.attribute.".length()), entry.getValue() != null ? (String) entry.getValue() : null, false);
+    		}
+    		if(key.startsWith("openid.mandatoryAttribute.")) {
+    			putAttribute(key.substring("openid.mandatoryAttribute.".length()), entry.getValue() != null ? (String) entry.getValue() : null, true);
+    		}
+    	}
+    	
+    	// default 3 optional attributes (ax)
+    	if(attributes.size() == 0) {
+    		putAttribute("FirstName", "http://schema.openid.net/namePerson/first", false);
+    		putAttribute("LastName", "http://schema.openid.net/namePerson/last", false);
+    		putAttribute("Email", "http://schema.openid.net/namePerson/email", false);
+    	}
     }
+    
     static ConsumerManager consumerManager;
 
     /**
@@ -85,11 +103,20 @@ public class OpenID {
             DiscoveryInformation discovered = getConsumerManager().associate(discoveries);
             String returnTo = Request.current().getBase() + Router.reverse(returnAction);
             AuthRequest authRequest = getConsumerManager().authenticate(discovered, returnTo);
-            FetchRequest fetch = FetchRequest.createFetchRequest();
-            for (String aliasKey : attributesURI.keySet()) {
-                fetch.addAttribute(aliasKey, attributesURI.get(aliasKey), attributesMandatory.get(aliasKey));
+            
+            if(dataRetrievalMethod.equals("ax")) {
+	            FetchRequest fetch = FetchRequest.createFetchRequest();
+	            for(OpenIDAttribute attr : attributes.values()) {
+	            	fetch.addAttribute(attr.alias, attr.schema, attr.mandatory);
+	            }
+	            authRequest.addExtension(fetch);
+            } else if(dataRetrievalMethod.equals("sreg")) {
+            	SRegRequest fetch = SRegRequest.createFetchRequest();
+            	for(OpenIDAttribute attr : attributes.values()) {
+            		fetch.addAttribute(attr.alias, attr.mandatory);
+            	}
+            	authRequest.addExtension(fetch);
             }
-            authRequest.addExtension(fetch);
             String url = authRequest.getDestinationUrl(true);
             throw new Redirect(url);
         } catch (PlayException e) {
@@ -129,6 +156,13 @@ public class OpenID {
                 UserInfo userInfo = new UserInfo();
                 userInfo.id = verified.toString();
                 AuthSuccess authSuccess = (AuthSuccess) verification.getAuthResponse();
+                if(authSuccess.hasExtension(SRegMessage.OPENID_NS_SREG)) {
+                	SRegResponse fetchResp = (SRegResponse) authSuccess.getExtension(SRegMessage.OPENID_NS_SREG);
+                	Map<String, String> attributes = (Map<String, String>) fetchResp.getAttributes();
+                    for (String key : attributes.keySet()) {
+                        userInfo.extensions.put(key, attributes.get(key));
+                    }
+                }
                 if (authSuccess.hasExtension(AxMessage.OPENID_NS_AX)) {
                     FetchResponse fetchResp = (FetchResponse) authSuccess.getExtension(AxMessage.OPENID_NS_AX);
                     Map<String, List<String>> attributes = (Map<String, List<String>>) fetchResp.getAttributes();
@@ -310,5 +344,13 @@ public class OpenID {
             long age = now.getTime() - nonce.getTime();
             return (age > _maxAge * 1000);
         }
+    }
+    
+    private static void putAttribute(String alias, String schema, boolean mandatory) {
+    	OpenIDAttribute attr = new OpenIDAttribute();
+    	attr.alias = alias;
+    	attr.schema = schema;
+    	attr.mandatory = mandatory;
+    	attributes.put(alias, attr);
     }
 }
