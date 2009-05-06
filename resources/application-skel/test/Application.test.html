@@ -1,0 +1,7 @@
+*{ You can use plain selenium command using the selenium tag }*
+
+#{selenium}
+	open('/')
+	waitForPageToLoad(1000)
+	assertNotTitle('Application error')
+#{/selenium}

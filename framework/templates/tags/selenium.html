@@ -1,0 +1,19 @@
+<table cellpadding="1" cellspacing="1" border="1" width="100%">
+    <thead>
+        <tr>
+            <th colspan="3">All tests</th>
+        </tr>
+    </thead>
+    <tbody>
+      #{list items:_body.toString().split('\n'), as:'command'}
+      %{ def parts = play.test.Helpers.seleniumCommand(command); }%
+      %{ if(parts && parts[0]) { }%
+      <tr>
+        <td width="33%">${parts[0] ?: '&nbsp;'}</td>
+        <td width="33%">${parts[1] ?: '&nbsp;'}</td>
+        <td>${parts[2] ?: '&nbsp;'}</td>
+      </tr>
+      %{ } }%
+      #{/list}
+    </tbody>
+  </table>

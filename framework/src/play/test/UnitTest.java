@@ -1,5 +1,5 @@
 package play.test;
 
-public class UnitTest extends org.junit.Assert {
+public class UnitTest extends BaseTest{
 
 }

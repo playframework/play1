@@ -12,7 +12,7 @@ import re
 import subprocess
 import time
 import webbrowser
-
+import urllib2
 
 # Utilities
 
@@ -40,6 +40,22 @@ def readConfs(key):
 		if line.startswith(key):
 			result.append(line[line.find('=')+1:].strip())
 	return result
+	
+def kill(pid):
+	if os.name == 'nt':
+			import ctypes
+			handle = ctypes.windll.kernel32.OpenProcess(1, False, int(pid))
+			if not ctypes.windll.kernel32.TerminateProcess(handle, 0):
+				print "~ Cannot kill the process with pid %s (ERROR %s)" % (pid, ctypes.windll.kernel32.GetLastError())
+				print "~ "
+				sys.exit(-1)
+	else:
+		try:
+			os.kill(int(pid), 15)
+		except OSError:
+			print "~ Play was not running (Process id %s not found)" % pid
+			print "~"
+			sys.exit(-1)
 
 try:
 
@@ -431,6 +447,8 @@ try:
 		print "~ Ctrl+C to stop"
 		print "~ "
 		test_result = os.path.join(application_path, 'test-result')
+		if os.path.exists(log_path):
+			shutil.rmtree(log_path)
 		if os.path.exists(test_result):
 			shutil.rmtree(test_result)
 		play_process = subprocess.Popen(java_cmd, env=os.environ, stdout=subprocess.PIPE)
@@ -441,11 +459,24 @@ try:
 				print "~"
 				print "~ Oops..."
 				print "~"
-				os.kill(play_process.pid, 15)
+				kill(play_process.pid)
 				sys.exit(-1)
 			if line.find('Listening for HTTP') > -1:
 				break
 		# Launch the browser
+		print "~"
+		print "~ Loading the test runner ..."
+		try:
+			proxy_handler = urllib2.ProxyHandler({})
+			opener = urllib2.build_opener(proxy_handler)
+			opener.open('http://localhost:9000/@tests', );
+		except urllib2.HTTPError, e:
+			print "~"
+			print "~ There are compilation errors..."
+			print "~"
+			kill(play_process.pid)
+			sys.exit(-1)
+		print "~ Launching a web browser at http://localhost:9000/@tests?select=all&auto=yes ..."
 		webbrowser.open('http://localhost:9000/@tests?select=all&auto=yes')
 		while True:
 			time.sleep(1)
@@ -453,13 +484,13 @@ try:
 				print "~"
 				print "~ All tests passed"
 				print "~"
-				os.kill(play_process.pid, 15)
+				kill(play_process.pid)
 				break
 			if os.path.exists(os.path.join(application_path, 'test-result/result.failed')):
 				print "~"
-				print "~ Some tests have failed. See %s for results" % test_result
+				print "~ Some tests have failed. See file://%s for results" % test_result
 				print "~"
-				os.kill(play_process.pid, 15)
+				kill(play_process.pid)
 				break
 		sys.exit(0)
 
@@ -500,20 +531,7 @@ try:
 			print "~"
 			sys.exit(-1)
 		pid = open(pid_path).readline().strip()
-		if os.name == 'nt':
-			import ctypes
-			handle = ctypes.windll.kernel32.OpenProcess(1, False, int(pid))
-			if not ctypes.windll.kernel32.TerminateProcess(handle, 0):
-				print "~ Cannot kill the process with pid %s (ERROR %s)" % (pid, ctypes.windll.kernel32.GetLastError())
-				print "~ "
-				sys.exit(-1)
-		else:
-			try:
-				os.kill(int(pid), 15)
-			except OSError:
-				print "~ Play was not running (Process id %s not found)" % pid
-				print "~ "
-		
+		kill(pid)		
 		os.remove(pid_path)
 		print "~ Ok, %s is stopped" % application_path
 		print "~"

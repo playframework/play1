@@ -16,7 +16,7 @@ import play.mvc.Http.Response;
 /**
  * Application tests support
  */
-public abstract class FunctionalTest extends org.junit.Assert {
+public abstract class FunctionalTest extends BaseTest {
 
     @Before
     public void before() {
