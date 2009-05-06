@@ -9,7 +9,7 @@ import java.util.TimeZone;
  * Generic utils
  */
 public class Utils {
-    
+
     /**
      * for java.util.Map
      */
@@ -34,25 +34,22 @@ public class Utils {
                 mergeValueInMap(map, name, value);
             }
         }
-		
-		public static Map filterMap( Map map, String keypattern ) {
-			try { 
-				Map filtered = (Map) map.getClass().newInstance();
-				System.out.println(filtered);
-				for( Object key : map.keySet() ) {
-					if( key.toString().matches(keypattern)) {
-						filtered.put(key, map.get(key));
-					}
-				}
-				return filtered;
-			} catch( Exception iex ) {
-				return null;
-			}
-		}
-		
+
+        public static Map filterMap(Map map, String keypattern) {
+            try {
+                Map filtered = (Map) map.getClass().newInstance();
+                System.out.println(filtered);
+                for (Object key : map.keySet()) {
+                    if (key.toString().matches(keypattern)) {
+                        filtered.put(key, map.get(key));
+                    }
+                }
+                return filtered;
+            } catch (Exception iex) {
+                return null;
+            }
+        }
     }
-    
-    
     private static ThreadLocal<SimpleDateFormat> httpFormatter = new ThreadLocal<SimpleDateFormat>();
 
     public static SimpleDateFormat getHttpDateFormatter() {

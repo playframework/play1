@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -31,13 +32,26 @@ public class JPASupport implements Serializable {
             throw new JPAException("The class " + this.getClass() + " does not define any id field.");
         }
     }
-
-    public <T> T edit(String name, Params params) {
+    
+    public static <T> T create(Class type, String name, Map<String, String[]> params) {
         try {
-            BeanWrapper bw = new BeanWrapper(this.getClass());
-            bw.bind(name, this.getClass(), params.all(), "", this);
+            Object model = type.newInstance();
+            return (T)edit(model, name, params);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public <T> T edit(String name, Params params) {
+        return (T)edit(this, name, params.all());
+    }
+
+    public static <T> T edit(Object o, String name, Map<String, String[]> params) {
+        try {
+            BeanWrapper bw = new BeanWrapper(o.getClass());
+            bw.bind(name, o.getClass(), params, "", o);
             // relations
-            for (Field field : this.getClass().getDeclaredFields()) {
+            for (Field field : o.getClass().getDeclaredFields()) {
                 boolean isEntity = false;
                 String relation = null;
                 boolean multiple = false;
@@ -56,44 +70,44 @@ public class JPASupport implements Serializable {
                 if (isEntity) {
                     if (multiple) {
                         List l = new ArrayList();
-                        String[] ids = params.getAll(name + "." + field.getName());
+                        String[] ids = params.get(name + "." + field.getName());
                         if (ids != null) {
                             for (String _id : ids) {
                                 l.add(JPA.getEntityManager().createQuery("from " + relation + " where id = " + _id).getSingleResult());
                             }
                         }
-                        field.set(this, l);
+                        field.set(o, l);
                     } else {
-                        String[] ids = params.getAll(name + "." + field.getName());
+                        String[] ids = params.get(name + "." + field.getName());
                         if (ids != null && ids.length > 0 && !ids[0].equals("")) {
-                            JPASupport to = (JPASupport) JPA.getEntityManager().createQuery("from " + relation + " where id = " + ids[0]).getSingleResult();
-                            field.set(this, to);
+                            Object to = (Object) JPA.getEntityManager().createQuery("from " + relation + " where id = " + ids[0]).getSingleResult();
+                            field.set(o, to);
                         } else {
-                            field.set(this, null);
+                            field.set(o, null);
                         }
                     }
                 }
-                if(field.getType().equals(FileAttachment.class)) {
-                    FileAttachment fileAttachment = ((FileAttachment)field.get(this));
+                if(o instanceof JPAModel && field.getType().equals(FileAttachment.class)) {
+                    FileAttachment fileAttachment = ((FileAttachment)field.get(o));
                     if(fileAttachment == null) {
-                        fileAttachment = new FileAttachment(this, field.getName());
+                        fileAttachment = new FileAttachment((JPAModel)o, field.getName());
                         field.setAccessible(true);
-                        field.set(this, fileAttachment);
+                        field.set(o, fileAttachment);
                     }
-                    File file = params.get(name + "." +field.getName(), File.class);
+                    File file = Params.current().get(name + "." +field.getName(), File.class);
                     if(file != null && file.exists() && file.length() > 0) {
-                        fileAttachment.set(params.get(name + "." +field.getName(), File.class));
+                        fileAttachment.set(Params.current().get(name + "." +field.getName(), File.class));
                         fileAttachment.filename = file.getName();
                     } else {
-                        String df = params.get(name + "." +field.getName()+"_delete_", String.class);
+                        String df = Params.current().get(name + "." +field.getName()+"_delete_", String.class);
                         if(df != null && df.equals("true")) {
                             fileAttachment.delete();
-                            field.set(this, null);
+                            field.set(o, null);
                         }
                     }
                 }
             }
-            return (T) this;
+            return (T) o;
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }

@@ -1,7 +1,6 @@
 package play.classloading;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -11,7 +10,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.Permissions;
@@ -28,7 +26,6 @@ import play.Play;
 import play.vfs.VirtualFile;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
-import play.vfs.FileSystemFile;
 
 /**
  * The application classLoader. Load the classes from
@@ -130,6 +127,17 @@ public class ApplicationClassloader extends ClassLoader {
                 throw new UnexpectedException(e);
             }
         }
+    }
+
+    @Override
+    public InputStream getResourceAsStream(String name) {
+        for(VirtualFile vf : Play.javaPath) {
+            VirtualFile res = vf.child(name);
+            if(res != null && res.exists()) {
+                return res.inputstream();
+            }
+        }
+        return super.getResourceAsStream(name);
     }
 
     /**

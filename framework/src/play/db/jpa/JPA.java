@@ -49,6 +49,10 @@ public class JPA {
     public static boolean isEnabled() {
         return entityManagerFactory != null;
     }
+    
+    public static int execute(String query) {
+        return getEntityManager().createQuery(query).executeUpdate();
+    }
 
     /*
      * Build a new entityManager.
