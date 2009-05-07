@@ -94,9 +94,8 @@ try:
 	  	print "~ Usage: play command [application path or current directory] "
 	  	print "~ "
 	  	print "~ with,  new      Create a new application"
-	  	print "~        run      Run the application in the current window"
-	  	print "~        debug    Run the application under JDPA debugger"
-	  	print "~        test     Run all tests"
+	  	print "~        run      Run the application in the current window (JPDA is enabled in DEV mode)"
+	  	print "~        test     Run the application in test mode"
 	  	print "~        help     Show more commands"
 	  	print "~"
 		if len(sys.argv) > 1 and sys.argv[1] not in available_commands:
@@ -122,7 +121,6 @@ try:
 		print "~        start        Start the application in background"
 		print "~        stop         Stop the application"
 		print "~        restart      Restart the application in background"
-		print "~        debug        Run the application under JDPA debugger"
 		print "~        out          Output latest log messages"
 		print "~        eclipsify    Create eclipse project (use ec as shortcut command)"
 		print "~        netbeansify  Create netbeans project (use nb as shortcut command)"
@@ -426,6 +424,10 @@ try:
 	if play_command == 'run':
 		print "~ Ctrl+C to stop"
 		print "~ "
+		if application_mode == 'dev':
+			java_cmd.insert(2, '-Xdebug')
+			java_cmd.insert(2, '-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % jpda_port)
+			java_cmd.insert(2, '-Dplay.debug=yes')
 		subprocess.call(java_cmd, env=os.environ)
 		print
 		sys.exit(0)

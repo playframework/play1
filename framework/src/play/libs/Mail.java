@@ -2,6 +2,8 @@ package play.libs;
 
 import java.io.File;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -132,11 +134,7 @@ public class Mail {
      * @param attachments File attachments
      */
     public static Future<Boolean> send(String from, String[] recipients, String subject, String body, String contentType, Object... attachments) {
-        try {
-            return sendMessage(buildMessage(from, from, recipients, subject, body, contentType, attachments));
-        } catch (MessagingException ex) {
-            throw new MailException("Cannot send email", ex);
-        }
+        return send(from, from, recipients, subject, body, contentType, attachments);
     }
     
         /**
@@ -151,6 +149,31 @@ public class Mail {
      */
     public static Future<Boolean> send(String from, String replyTo, String[] recipients, String subject, String body, String contentType, Object... attachments) {
         try {
+            if(Play.configuration.getProperty("mail.smtp", "").equals("mock")) {
+                Mock.send(from, replyTo, recipients, subject, body, contentType, attachments);
+                return new Future<Boolean>() {
+
+                    public boolean cancel(boolean mayInterruptIfRunning) {
+                        return false;
+                    }
+
+                    public boolean isCancelled() {
+                        return false;
+                    }
+
+                    public boolean isDone() {
+                        return true;
+                    }
+
+                    public Boolean get() throws InterruptedException, ExecutionException {
+                        return true;
+                    }
+
+                    public Boolean get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                        return true;
+                    }
+                };
+            }
             return sendMessage(buildMessage(from, replyTo, recipients, subject, body, contentType, attachments));
         } catch (MessagingException ex) {
             throw new MailException("Cannot send email", ex);
@@ -166,7 +189,7 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static MimeMessage buildMessage(String from, String replyTo, String[] recipients, String subject, String body, String contentType, Object... attachments) throws MessagingException {
+    public static MimeMessage buildMessage(String from, String replyTo, String[] recipients, String subject, String body, String contentType, Object... attachments) throws MessagingException {       
         MimeMessage msg = new MimeMessage(getSession());
 
         if (from == null) {
@@ -374,4 +397,32 @@ public class Mail {
             return new PasswordAuthentication(user, password);
         }
     }
+    
+    public static class Mock {
+        
+        static Map<String,String> emails = new HashMap();
+        
+        static void send(String from, String replyTo, String[] recipients, String subject, String body, String contentType, Object... attachments) {
+            StringBuffer email = new StringBuffer();
+            email.append("From Mock Mailer\n\tNew email received by");
+            for(String to : recipients) {
+                email.append(", " + to);
+            }
+            email.append(".");
+            email.append("\n\tFrom: "+from);
+            email.append("\n\tSubject: "+subject);
+            email.append("\n\tAttachments: "+attachments.length);
+            email.append("\n\tBody("+contentType+"): "+body);
+            email.append("\n");
+            Logger.info(email.toString());
+            for(String to : recipients) {
+                emails.put(to, email.toString());
+            }
+        }
+        
+        static String getLastMessageReceivedBy(String email) {
+            return emails.get(email);
+        }
+        
+    } 
 }
