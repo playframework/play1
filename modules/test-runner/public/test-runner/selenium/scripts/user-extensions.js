@@ -1,3 +1,5 @@
-// User extensions can be added here.
-//
-// Keep this file to avoid  mystifying "Invalid Character" error in IE
+// For Play!
+
+Selenium.prototype.doClearSession = function() {
+    this.doDeleteAllVisibleCookies();
+};
