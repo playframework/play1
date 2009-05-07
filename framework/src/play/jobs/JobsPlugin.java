@@ -13,7 +13,6 @@ import org.quartz.impl.StdSchedulerFactory;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
-import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 
@@ -40,9 +39,8 @@ public class JobsPlugin extends PlayPlugin {
                 } catch (IllegalAccessException e) {
                     throw new UnexpectedException("Job could not be instantiated", e);
                 } catch (Exception ex) {
-                    StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex);
-                    if (element != null) {
-                        throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(), ex);
+                    if(ex instanceof PlayException) {
+                        throw (PlayException)ex;
                     }
                     throw new UnexpectedException(ex);
                 }

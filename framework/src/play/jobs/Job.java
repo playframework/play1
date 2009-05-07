@@ -4,6 +4,9 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import play.Invoker;
 import play.Play;
+import play.exceptions.JavaExecutionException;
+import play.exceptions.PlayException;
+import play.exceptions.UnexpectedException;
 
 public abstract class Job implements org.quartz.Job {
 
@@ -16,7 +19,15 @@ public abstract class Job implements org.quartz.Job {
                 if (hasRestarted) {
                     return;
                 }
-                job.doJob();
+                try {
+                    job.doJob();
+                } catch(Exception e) {
+                    StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
+                    if (element != null) {
+                        throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(), e);
+                    }
+                    throw new UnexpectedException(e);
+                }
             }
         });
     }

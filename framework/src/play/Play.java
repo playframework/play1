@@ -345,8 +345,10 @@ public class Play {
             }
 
         } catch (PlayException e) {
+            started = false;
             throw e;
         } catch (Exception e) {
+            started = false;
             throw new UnexpectedException(e);
         }
     }

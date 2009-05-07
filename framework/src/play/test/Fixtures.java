@@ -104,6 +104,9 @@ public class Fixtures {
     public static void load(String name) {
         try {
             InputStream is = Play.classloader.getResourceAsStream(name);
+            if(is == null) {
+                throw new RuntimeException("Cannot load fixture " + name + ", the file was not found");
+            }
             Yaml yaml = new Yaml();
             Object o = yaml.load(is);
             if (o instanceof LinkedHashMap) {
