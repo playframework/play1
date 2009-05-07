@@ -3,7 +3,10 @@ package play.test;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -21,20 +24,80 @@ import javax.persistence.OneToOne;
 import org.yaml.snakeyaml.Yaml;
 import play.Logger;
 import play.Play;
+import play.db.DB;
+import play.db.DBPlugin;
 import play.db.jpa.JPA;
 import play.db.jpa.JPASupport;
 
 public class Fixtures {
 
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
-    
+
     public static int jpql(String query) {
         return JPA.execute(query);
     }
-    
-    public static void delete(Class type) {
-        for(Object o : JPA.getEntityManager().createQuery("select o from "+type.getName()+" o").getResultList()) {
-            JPA.getEntityManager().remove(o);
+
+    public static void delete(Class... types) {
+        if (getForeignKeyToggleStmt(false) != null) {
+            DB.execute(getForeignKeyToggleStmt(false));
+        }
+        for (Class type : types) {
+            JPA.getEntityManager().createQuery("delete from " + type.getName()).executeUpdate();
+        }
+        if (getForeignKeyToggleStmt(true) != null) {
+            DB.execute(getForeignKeyToggleStmt(true));
+        }
+        JPA.getEntityManager().clear();
+    }
+
+    public static void delete(List<Class> classes) {
+        Class[] types = new Class[classes.size()];
+        for (int i = 0; i < types.length; i++) {
+            types[i] = classes.get(i);
+        }
+        delete(types);
+    }
+
+    static String getForeignKeyToggleStmt(boolean enable) {
+        if (DBPlugin.url.startsWith("jdbc:hsqldb:")) {
+            return "SET REFERENTIAL_INTEGRITY " + (enable ? "TRUE" : "FALSE");
+        }
+        if (DBPlugin.url.startsWith("jdbc:mysql:")) {
+            return "SET foreign_key_checks = " + (enable ? "1" : "0") + ";";
+        }
+        return null;
+    }
+
+    static String getDeleteTableStmt(String name) {
+        if (DBPlugin.url.startsWith("jdbc:mysql:")) {
+            return "TRUNCATE TABLE " + name;
+        }
+        return "DELETE FROM " + name;
+    }
+
+    public static void deleteAll() {
+        try {
+            List<String> names = new ArrayList();
+            ResultSet rs = DB.getConnection().getMetaData().getTables(null, null, null, new String[]{"TABLE"});
+            while (rs.next()) {
+                String name = rs.getString("TABLE_NAME");
+                names.add(name);
+            }
+            if (getForeignKeyToggleStmt(false) != null) {
+                DB.execute(getForeignKeyToggleStmt(false));
+            }
+            for (String name : names) {
+                Logger.trace("Dropping content of table %s", name);
+                DB.execute(getDeleteTableStmt(name));
+            }
+            if (getForeignKeyToggleStmt(true) != null) {
+                DB.execute(getForeignKeyToggleStmt(true));
+            }
+            if(JPA.isEnabled()) {
+                JPA.getEntityManager().clear();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot delete all table data : " + e.getMessage(), e);
         }
     }
 
@@ -54,8 +117,8 @@ public class Fixtures {
                         if (!type.startsWith("models.")) {
                             type = "models." + type;
                         }
-                        if(idCache.containsKey(type + "-" + id)) {
-                            throw new RuntimeException("Cannot load fixture " + name + ", duplicate id '"+id+"' for type "+type);
+                        if (idCache.containsKey(type + "-" + id)) {
+                            throw new RuntimeException("Cannot load fixture " + name + ", duplicate id '" + id + "' for type " + type);
                         }
                         Map<String, String[]> params = new HashMap();
                         serialize((Map) objects.get(key), "object", params);
@@ -69,7 +132,7 @@ public class Fixtures {
             }
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Class " + e.getMessage() + " was not found", e);
-        } catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Cannot load fixture " + name, e);
@@ -84,10 +147,10 @@ public class Fixtures {
             } else if (value instanceof Date) {
                 serialized.put(prefix + "." + key.toString(), new String[]{new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss").format(((Date) value))});
             } else if (value instanceof List) {
-                List l = (List)value;
+                List l = (List) value;
                 String[] r = new String[l.size()];
-                int i=0;
-                for(Object el : l) {
+                int i = 0;
+                for (Object el : l) {
                     r[i++] = el.toString();
                 }
                 serialized.put(prefix + "." + key.toString(), r);
@@ -134,8 +197,8 @@ public class Fixtures {
                     for (int i = 0; i < ids.length; i++) {
                         String id = ids[i];
                         id = relation + "-" + id;
-                        if(!idCache.containsKey(id)) {
-                            throw new RuntimeException("No previous reference found for object of type "+relation+" with id "+ids[i]);
+                        if (!idCache.containsKey(id)) {
+                            throw new RuntimeException("No previous reference found for object of type " + relation + " with id " + ids[i]);
                         }
                         ids[i] = idCache.get(id).toString();
                     }

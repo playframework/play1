@@ -43,11 +43,11 @@ public class JPAEnhancer extends Enhancer {
         }
 
         // count
-        CtMethod count = CtMethod.make("public static Long count() { return Long.decode(em().createQuery(\"select count(e) from " + entityName + " e\").getSingleResult().toString()); }", ctClass);
+        CtMethod count = CtMethod.make("public static long count() { return Long.parseLong(em().createQuery(\"select count(e) from " + entityName + " e\").getSingleResult().toString()); }", ctClass);
         ctClass.addMethod(count);
         
         // count2
-        CtMethod count2 = CtMethod.make("public static Long count(String query, Object[] params) { return Long.decode(play.db.jpa.JPQLDialect.instance.bindParameters(em().createQuery(play.db.jpa.JPQLDialect.instance.createCountQuery(\"" + entityName + "\", \"" + entityName + "\", query, params)), params).getSingleResult().toString()); }", ctClass);
+        CtMethod count2 = CtMethod.make("public static long count(String query, Object[] params) { return Long.parseLong(play.db.jpa.JPQLDialect.instance.bindParameters(em().createQuery(play.db.jpa.JPQLDialect.instance.createCountQuery(\"" + entityName + "\", \"" + entityName + "\", query, params)), params).getSingleResult().toString()); }", ctClass);
         ctClass.addMethod(count2);
 
         // findAll

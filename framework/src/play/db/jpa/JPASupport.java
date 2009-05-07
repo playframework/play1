@@ -157,7 +157,7 @@ public class JPASupport implements Serializable {
      * Count entities
      * @return number of entities of this class
      */
-    public static Long count() {
+    public static long count() {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 
@@ -168,7 +168,7 @@ public class JPASupport implements Serializable {
      * @param params Params to bind to the query
      * @return A long
      */
-    public static Long count(String query, Object... params) {
+    public static long count(String query, Object... params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 

@@ -18,6 +18,8 @@ import play.exceptions.DatabaseException;
  */
 public class DBPlugin extends PlayPlugin {
 
+    public static String url = "";
+
     @Override
     public void onApplicationStart() {
         if (changed()) {
@@ -63,6 +65,7 @@ public class DBPlugin extends PlayPlugin {
                 ds.setMinPoolSize(Integer.parseInt(p.getProperty("db.pool.minSize", "1")));
                 ds.setTestConnectionOnCheckout(true);
                 DB.datasource = ds;
+                url = ds.getJdbcUrl();
                 Connection c = null;
                 try {
                     c = ds.getConnection();
