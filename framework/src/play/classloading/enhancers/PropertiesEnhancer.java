@@ -50,7 +50,6 @@ public class PropertiesEnhancer extends Enhancer {
                         String code = "public " + ctField.getType().getName() + " " + getter + "() { return this." + ctField.getName() + "; }";
                         CtMethod getMethod = CtMethod.make(code, ctClass);
                         ctClass.addMethod(getMethod);
-                        createAnnotation(getAnnotations(getMethod), PlayPropertyAccessor.class);
                     }
 
                     try {
@@ -61,8 +60,6 @@ public class PropertiesEnhancer extends Enhancer {
                         ctClass.addMethod(setMethod);
                         createAnnotation(getAnnotations(setMethod), PlayPropertyAccessor.class);
                     }
-
-                //ctField.setModifiers(Modifier.PRIVATE);
 
                 }
 
