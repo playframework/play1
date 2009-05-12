@@ -361,4 +361,37 @@ public class JPASupport implements Serializable {
             }
         }
     }
+
+    // File attachments
+
+    public void setupAttachment() {
+        for (Field field : getClass().getFields()) {
+            if (field.getType().equals(FileAttachment.class)) {
+                try {
+                    FileAttachment attachment = (FileAttachment)field.get(this);
+                    if(attachment != null) {
+                        attachment.model = this;
+                        attachment.name = field.getName();
+                    }
+                } catch (Exception ex) {
+                    throw new UnexpectedException(ex);
+                }
+            }
+        }
+    }
+
+    public void saveAttachment() {
+        for (Field field : getClass().getFields()) {
+            if (field.getType().equals(FileAttachment.class)) {
+                try {
+                    FileAttachment attachment = (FileAttachment)field.get(this);
+                    if(attachment != null) {
+                        attachment.save();
+                    }
+                } catch (Exception ex) {
+                    throw new UnexpectedException(ex);
+                }
+            }
+        }
+    }
 }
