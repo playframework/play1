@@ -7,9 +7,12 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Query;
@@ -87,10 +90,10 @@ public class JPASupport implements Serializable {
                         }
                     }
                 }
-                if(o instanceof JPAModel && field.getType().equals(FileAttachment.class)) {
+                if(field.getType().equals(FileAttachment.class)) {
                     FileAttachment fileAttachment = ((FileAttachment)field.get(o));
                     if(fileAttachment == null) {
-                        fileAttachment = new FileAttachment((JPAModel)o, field.getName());
+                        fileAttachment = new FileAttachment(o, field.getName());
                         field.setAccessible(true);
                         field.set(o, fileAttachment);
                     }
@@ -393,5 +396,25 @@ public class JPASupport implements Serializable {
                 }
             }
         }
+    }
+
+    // More utils
+
+    public static Object findKey(Object entity) {
+        try {
+            Class c = entity.getClass();
+            while (c.isAnnotationPresent(Entity.class) || c.isAnnotationPresent(MappedSuperclass.class)) {
+                for (Field field : c.getDeclaredFields()) {
+                    if (field.isAnnotationPresent(Id.class)) {
+                        field.setAccessible(true);
+                        return field.get(entity);
+                    }
+                }
+                c = c.getSuperclass();
+            }
+        } catch (Exception e) {
+            throw new UnexpectedException("Error while determining the object @Id for an object of type " + entity.getClass());
+        }
+        return null;
     }
 }

@@ -129,7 +129,7 @@ public class Fixtures {
                         resolveDependencies(cType, params, idCache);
                         Object model = JPASupport.create(cType, "object", params);
                         JPA.getEntityManager().persist(model);
-                        idCache.put(type + "-" + id, findKey(model));
+                        idCache.put(type + "-" + id, JPASupport.findKey(model));
                     }
                 }
             }
@@ -162,25 +162,7 @@ public class Fixtures {
             }
         }
     }
-
-    static Object findKey(Object entity) {
-        try {
-            Class c = entity.getClass();
-            while (c.isAnnotationPresent(Entity.class) || c.isAnnotationPresent(MappedSuperclass.class)) {
-                for (Field field : c.getDeclaredFields()) {
-                    if (field.isAnnotationPresent(Id.class)) {
-                        field.setAccessible(true);
-                        return field.get(entity);
-                    }
-                }
-                c = c.getSuperclass();
-            }
-        } catch (Exception e) {
-            Logger.error(e, "Error while determining the object @Id for an object of tyoe " + entity.getClass());
-        }
-        return null;
-    }
-
+    
     static void resolveDependencies(Class type, Map<String, String[]> serialized, Map<String, Object> idCache) {
         for (Field field : type.getDeclaredFields()) {
             boolean isEntity = false;
