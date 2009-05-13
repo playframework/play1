@@ -222,7 +222,13 @@ public class HttpHandler implements IoHandler {
 
     public void serveStatic(IoSession session, MutableHttpResponse minaResponse, MutableHttpRequest minaRequest, RenderStatic renderStatic) throws IOException {
         VirtualFile file = Play.getVirtualFile(renderStatic.file);
-        if (file == null || file.isDirectory() || !file.exists()) {
+        if(file != null && file.exists() && file.isDirectory()) {
+            file = file.child("index.html");
+            if(file != null) {
+                renderStatic.file = file.relativePath();
+            }
+        }
+        if ( (file == null || !file.exists() )) {
             serve404(session, minaResponse, minaRequest, new NotFound("The file " + renderStatic.file + " does not exist"));
         } else {
             boolean raw = false;

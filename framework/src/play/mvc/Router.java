@@ -131,7 +131,9 @@ public class Router {
     public static void routeOnlyStatic(Http.Request request) {
         for (Route route : routes) {
             try {
-                route.matches(request.method, request.path);
+                if(route.matches(request.method, request.path) != null) {
+                    break;
+                }
             } catch(Throwable t) {
                 if(t instanceof RenderStatic) {
                     throw (RenderStatic)t;
@@ -189,6 +191,31 @@ public class Router {
 
     public static String getFullUrl(String action) {
         return getFullUrl(action, new HashMap<String, Object>());
+    }
+
+    public static String reverse(VirtualFile file) {
+        if(file == null || !file.exists()) {
+            throw new NoRouteFoundException("File not found (" + file + ")");
+        }
+        for (Route route : routes) {
+            String staticDir = route.staticDir;
+            if(staticDir != null) {
+                if(!staticDir.startsWith("/")) {
+                    staticDir = "/" + staticDir;
+                }
+                if(!staticDir.equals("/") && !staticDir.endsWith("/")) {
+                    staticDir = staticDir + "/";
+                }
+                if(file.relativePath().startsWith(staticDir)) {
+                    String to = route.path + file.relativePath().substring(staticDir.length());
+                    if(to.endsWith("/index.html")) {
+                        to = to.substring(0, to.length() - "/index.html".length() + 1);
+                    }
+                    return to;
+                }
+            }
+        }
+        throw new NoRouteFoundException(file.relativePath());
     }
 
     public static ActionDefinition reverse(String action, Map<String, Object> args) {
@@ -338,7 +365,7 @@ public class Router {
                 if (!this.path.endsWith("/") && !this.path.equals("/")) {
                     this.path += "/";
                 }
-                this.pattern = new Pattern(path + "({resource}.*)");
+                this.pattern = new Pattern("^" + path + "({resource}.*)$");
                 this.staticDir = action.substring("staticDir:".length());
             } else {
                 // URL pattern
@@ -382,9 +409,6 @@ public class Router {
         }
 
         public Map<String, String> matches(String method, String path) {
-            if (!path.equals("/") && path.endsWith("/")) {
-                path = path.substring(0, path.length() - 1);
-            }
             if (method == null || this.method.equals("*") || method.equalsIgnoreCase(this.method)) {
                 Matcher matcher = pattern.matcher(path);
                 if (matcher.matches()) {

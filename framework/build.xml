@@ -86,6 +86,7 @@
         <ant antfile="build.xml" target="build" dir="../modules/bespin" />
         <ant antfile="build.xml" target="build" dir="../modules/ecss" />
         <ant antfile="build.xml" target="build" dir="../modules/gae" />
+        <ant antfile="build.xml" target="build" dir="../modules/gwt" />
     </target>
     
     <!-- Netbeans support -->

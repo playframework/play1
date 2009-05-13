@@ -70,27 +70,28 @@ public class TemplateCompiler {
 
         void hop(Template template) {
             this.template = template;
-            
+
             String source = template.source;
-            
+
             // Static access
             List<String> names = new ArrayList();
-            Map<String,String> originalNames = new HashMap<String, String>();
+            Map<String, String> originalNames = new HashMap<String, String>();
             for (Class clazz : Play.classloader.getAllClasses()) {
                 names.add(clazz.getName().replace("$", "."));
                 originalNames.put(clazz.getName().replace("$", "."), clazz.getName());
             }
             Collections.sort(names, new Comparator<String>() {
+
                 public int compare(String o1, String o2) {
                     return o2.length() - o1.length();
                 }
             });
-            for (String cName : names) {                
-                source = source.replaceAll("([a-zA-Z0-9.-_$]+)\\s+instanceof\\s+"+Pattern.quote(cName), "_('" + originalNames.get(cName).replace("$", "\\$") + "').isAssignableFrom($1.class)");
+            for (String cName : names) {
+                source = source.replaceAll("([a-zA-Z0-9.-_$]+)\\s+instanceof\\s+" + Pattern.quote(cName), "_('" + originalNames.get(cName).replace("$", "\\$") + "').isAssignableFrom($1.class)");
                 source = source.replaceAll(Pattern.quote(cName) + ".class", "_('" + originalNames.get(cName) + "')");
                 source = source.replaceAll("([^'\"])" + Pattern.quote(cName) + "([^'\"])", "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')$2");
             }
-            
+
             this.parser = new Parser(source);
 
             // Class header
@@ -159,9 +160,9 @@ public class TemplateCompiler {
 
             // Done !            
             template.groovySource = groovySource.toString();
-            
+
             Logger.trace("%s is compiled to %s", template.name, template.groovySource);
-                
+
         }
 
         void plain() {
@@ -233,13 +234,21 @@ public class TemplateCompiler {
 
         void action(boolean absolute) {
             String action = parser.getToken().trim();
-            if (!action.endsWith(")")) {
-                action = action + "()";
-            }
-            if (absolute) {
-                print("\tout.print(play.mvc.Http.Request.current().getBase() + actionBridge." + action + ");");
+            if (action.trim().matches("^'.+'$")) {
+                if (absolute) {
+                    print("\tout.print(play.mvc.Http.Request.current().getBase() + play.mvc.Router.reverse(play.Play.getVirtualFile(" + action + ")));");
+                } else {
+                    print("\tout.print(play.mvc.Router.reverse(play.Play.getVirtualFile(" + action + ")));");
+                }
             } else {
-                print("\tout.print(actionBridge." + action + ");");
+                if (!action.endsWith(")")) {
+                    action = action + "()";
+                }
+                if (absolute) {
+                    print("\tout.print(play.mvc.Http.Request.current().getBase() + actionBridge." + action + ");");
+                } else {
+                    print("\tout.print(actionBridge." + action + ");");
+                }
             }
             markLine(parser.getLine());
             println();

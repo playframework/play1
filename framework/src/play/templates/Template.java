@@ -229,6 +229,9 @@ public class Template {
                     throw (TagInternalException) cleanStackTrace(e);
                 } else if (e instanceof NoRouteFoundException) {
                     NoRouteFoundException ex = (NoRouteFoundException) cleanStackTrace(e);
+                    if(ex.getFile() != null) {
+                        throw new NoRouteFoundException(ex.getFile(), this, this.linesMatrix.get(stackTraceElement.getLineNumber()));
+                    }
                     throw new NoRouteFoundException(ex.getAction(), ex.getArgs(), this, this.linesMatrix.get(stackTraceElement.getLineNumber()));
                 } else if (e instanceof TemplateExecutionException) {
                     throw (TemplateExecutionException) cleanStackTrace(e);

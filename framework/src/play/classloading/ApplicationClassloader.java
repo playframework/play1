@@ -1,6 +1,7 @@
 package play.classloading;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import play.Logger;
@@ -26,6 +28,7 @@ import play.Play;
 import play.vfs.VirtualFile;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
+import play.vfs.FileSystemFile;
 
 /**
  * The application classLoader. Load the classes from
@@ -54,7 +57,6 @@ public class ApplicationClassloader extends ClassLoader {
 
     @Override
     protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
-
         Class c = findLoadedClass(name);
         if (c != null) {
             return c;
@@ -138,6 +140,21 @@ public class ApplicationClassloader extends ClassLoader {
             }
         }
         return super.getResourceAsStream(name);
+    }
+
+    @Override
+    public URL getResource(String name) {
+        for(VirtualFile vf : Play.javaPath) {
+            VirtualFile res = vf.child(name);
+            if(res != null && res.exists() && res instanceof FileSystemFile) {
+                try {
+                    return ((FileSystemFile) res).realFile.toURI().toURL();
+                } catch (MalformedURLException ex) {
+                    throw new UnexpectedException(ex);
+                }
+            }
+        }
+        return super.getResource(name);
     }
 
     /**

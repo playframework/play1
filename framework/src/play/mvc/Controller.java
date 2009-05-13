@@ -26,6 +26,7 @@ import play.mvc.results.Forbidden;
 import play.mvc.results.NotFound;
 import play.mvc.results.Ok;
 import play.mvc.results.Redirect;
+import play.mvc.results.RedirectToStatic;
 import play.mvc.results.RenderBinary;
 import play.mvc.results.RenderTemplate;
 import play.mvc.results.RenderText;
@@ -35,6 +36,7 @@ import play.mvc.results.Result;
 import play.mvc.results.Unauthorized;
 import play.templates.Template;
 import play.templates.TemplateLoader;
+import play.vfs.VirtualFile;
 
 /**
  * Application controller support
@@ -241,7 +243,7 @@ public abstract class Controller {
     protected static void flash(String key, Object value) {
         Scope.Flash.current().put(key, value);
     }
-    
+
     /**
      * Send a 302 redirect response.
      * @param url The Location to redirect
@@ -249,14 +251,35 @@ public abstract class Controller {
     protected static void redirect(String url) {
         redirect(url, false);
     }
-    
+
+    /**
+     * Send a 302 redirect response.
+     * @param url The Location to redirect
+     */
+    protected static void redirectToStatic(String file) {
+        try {
+            VirtualFile vf = Play.getVirtualFile(file);
+            if(vf == null || !vf.exists()) {
+                throw new NoRouteFoundException(file);
+            }
+            throw new RedirectToStatic(Router.reverse(Play.getVirtualFile(file)));
+        } catch (NoRouteFoundException e) {
+            StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
+            if (element != null) {
+                throw new NoRouteFoundException(file, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
+            } else {
+                throw e;
+            }
+        }
+    }
+
     /**
      * Send a Redirect response.
      * @param url The Location to redirect
      * @param permanent true -> 301, false -> 302
      */
     protected static void redirect(String url, boolean permanent) {
-        if(url.matches("^([^./]+[.]?)+$")) { // fix Java !
+        if (url.matches("^([^./]+[.]?)+$")) { // fix Java !
             redirect(url, permanent, new Object[0]);
         }
         throw new Redirect(url, permanent);
@@ -270,7 +293,7 @@ public abstract class Controller {
     protected static void redirect(String action, Object... args) {
         redirect(action, false, args);
     }
-    
+
     /**
      * Redirect to another action
      * @param action The fully qualified action name (ex: Application.index)
@@ -286,12 +309,12 @@ public abstract class Controller {
             for (int i = 0; i < names.length; i++) {
                 try {
                     Unbinder.unBind(r, args[i], names[i]);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     // hmm ...
                 }
             }
             try {
-                throw new Redirect(Router.reverse(action, r).toString(),permanent);
+                throw new Redirect(Router.reverse(action, r).toString(), permanent);
             } catch (NoRouteFoundException e) {
                 StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
                 if (element != null) {
@@ -383,11 +406,12 @@ public abstract class Controller {
     public static Class getControllerClass() {
         return Play.classloader.getClassIgnoreCase("controllers." + Http.Request.current().controller);
     }
+
     /**
-	* 
-	*/
+     *
+     */
     public static void parent(Object... args) {
-        Map<String,Object> map = new HashMap();
+        Map<String, Object> map = new HashMap();
         for (Object o : args) {
             List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
             for (String name : names) {
@@ -396,33 +420,33 @@ public abstract class Controller {
         }
         parent(map);
     }
-    
+
     public static void parent() {
         parent(new HashMap());
     }
-    
-    public static void parent(Map<String,Object> map) {
+
+    public static void parent(Map<String, Object> map) {
         try {
             Method method = Http.Request.current().invokedMethod;
             String name = method.getName();
             Class clazz = method.getDeclaringClass().getSuperclass();
             Method superMethod = null;
-            while(!clazz.getName().equals("play.mvc.Controller") && !clazz.getName().equals("java.lang.Object")) {
+            while (!clazz.getName().equals("play.mvc.Controller") && !clazz.getName().equals("java.lang.Object")) {
                 for (Method m : clazz.getDeclaredMethods()) {
                     if (m.getName().equalsIgnoreCase(name) && Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers())) {
                         superMethod = m;
                         break;
                     }
                 }
-                if(superMethod != null) {
+                if (superMethod != null) {
                     break;
                 }
                 clazz = clazz.getSuperclass();
             }
-            if(superMethod == null) {
+            if (superMethod == null) {
                 throw new RuntimeException("PAF");
             }
-            Map<String,String> mapss = new HashMap();
+            Map<String, String> mapss = new HashMap();
             for (String key : map.keySet()) {
                 mapss.put(key, map.get(key) == null ? null : map.get(key).toString());
             }
@@ -432,14 +456,13 @@ public abstract class Controller {
         } catch (InvocationTargetException ex) {
             // It's a Result ? (expected)
             if (ex.getTargetException() instanceof Result) {
-                throw (Result)ex.getTargetException();
+                throw (Result) ex.getTargetException();
             } else {
                 throw new RuntimeException(ex.getTargetException());
             }
-        }
-        catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             throw e;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
