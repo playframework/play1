@@ -1,0 +1,22 @@
+#{extends 'main.html' /}
+
+<div id="breadcrumb">
+	<a href="@{Users.index}">Users</a> →
+</div>
+
+<h1 id="title">${user.name}</h1>
+<p class="light">
+	#{pluralize size:user.postsCount, word:'post' /} in #{pluralize size:user.topicsCount, word:'topic' /}
+</p>
+
+#{if user.recentsPosts}
+	<h2>Recents posts ...</h2>
+
+	#{list items:user.recentsPosts, as:'post'}
+		#{showPost arg:post, showTopic:true /}
+	#{/list}
+#{/if}
+
+#{else}
+	<h2>No post by this user</h2>
+#{/else}

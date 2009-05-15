@@ -1,0 +1,102 @@
+# Users
+
+User(admin):
+    email:              admin@sampleforum.com
+    passwordHash:       5d41402abc4b2a76b9719d911017c592    # hello
+    name:               Admin
+    
+User(jojo):
+    email:              jojo@sampleforum.com
+    passwordHash:       5d41402abc4b2a76b9719d911017c592    # hello
+    name:               Jojo
+    
+User(guillaume):
+    email:              guillaume@sampleforum.com
+    passwordHash:       5d41402abc4b2a76b9719d911017c592    # hello
+    name:               Guillaume
+    needConfirmation:   1234567890
+    
+
+# Forums
+
+Forum(help):
+    name:               Play help
+    description:        Users help
+    
+Forum(about):
+    name:               About
+    description:        About this sample application
+    
+
+# Topics
+    
+Topic(needHelpToo):
+    subject:            Please help !
+    views:              0
+    forum:              help         
+
+Topic(needHelp):
+    subject:            I need help !
+    views:              8
+    forum:              help     
+
+Topic(doesnotWork):
+    subject:            It does not work ...
+    views:              3
+    forum:              help        
+    
+Topic(whatIsPlay):
+    subject:            About play
+    views:              75
+    forum:              about      
+    
+    
+# Posts
+
+Post(post1):
+    postedAt:           2009-05-10 
+    postedBy:           admin
+    topic:              needHelp
+    content:            > 
+                        I need help
+                        Please.
+                        
+                        Thank you.
+                                                  
+Post(post2):
+    postedAt:           2009-05-12
+    postedBy:           jojo
+    topic:              needHelp
+    content:            Me too.
+
+Post(post3):
+    postedAt:           2009-05-18 
+    postedBy:           admin
+    topic:              needHelp
+    content:            It's ok for me ...
+
+Post(post4):
+    postedAt:           2009-05-12 
+    postedBy:           admin
+    topic:              needHelpToo
+    content:            Héhé
+    
+Post(post5):
+    postedAt:           2009-05-12
+    postedBy:           admin
+    topic:              doesnotWork
+    content:            Play doesn't work ...
+    
+Post(post6):
+    postedAt:           2009-05-14 
+    postedBy:           guillaume
+    topic:              doesnotWork
+    content:            Well, it works for me
+    
+Post(post7):
+    postedAt:           2009-05-15 
+    postedBy:           jojo
+    topic:              whatIsPlay
+    content:            A brief play description here ...
+    
+    

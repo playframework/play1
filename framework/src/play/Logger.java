@@ -10,6 +10,9 @@ import java.util.Properties;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+import org.apache.log4j.Appender;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.PatternLayout;
 import org.apache.log4j.Priority;
 import org.apache.log4j.PropertyConfigurator;
 import play.exceptions.PlayException;
@@ -37,6 +40,19 @@ public class Logger {
         } else {
             PropertyConfigurator.configure(log4jConf);
             Logger.log4j = org.apache.log4j.Logger.getLogger("play");
+            if(Play.id.equals("test")) {
+                org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
+                try {
+                    if(!Play.getFile("test-result").exists()) {
+                        Play.getFile("test-result").mkdir();
+                    }
+                    Appender testLog = new FileAppender(new PatternLayout("%d{DATE} %-5p ~ %m%n"), Play.getFile("test-result/application.log").getAbsolutePath(), false);
+                    rootLogger.addAppender(testLog);
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+                
+            }
         }
     }
     

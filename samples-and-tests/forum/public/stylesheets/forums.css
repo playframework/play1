@@ -1,0 +1,31 @@
+#forums-list .infos {
+	width: 20%;
+}
+
+#forums-list td.main a {
+	font-size: 130%;
+}
+
+#forums-list td.main .light {
+	font-size: 90%;
+}
+
+#newTopic {
+	float: right;
+	position: relative;
+	top: -35px;
+}
+
+#post label {
+	display: block;
+	color: #666;
+}
+
+#post input[type=text] {
+	width: 60%;
+	font-size: 130%;
+}
+
+#post textarea {
+	width: 100%;
+}

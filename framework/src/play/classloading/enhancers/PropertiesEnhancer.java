@@ -43,7 +43,10 @@ public class PropertiesEnhancer extends Enhancer {
                     String setter = "set" + propertyName;
 
                     try {
-                        ctClass.getDeclaredMethod(getter);
+                        CtMethod ctMethod = ctClass.getDeclaredMethod(getter);
+                        if(ctMethod.getParameterTypes().length > 0) {
+                            throw new NotFoundException("it's not a getter !");
+                        }
                     } catch (NotFoundException noGetter) {
 
                         // Créé le getter
@@ -53,7 +56,10 @@ public class PropertiesEnhancer extends Enhancer {
                     }
 
                     try {
-                        ctClass.getDeclaredMethod(setter);
+                        CtMethod ctMethod = ctClass.getDeclaredMethod(setter);
+                        if(ctMethod.getParameterTypes().length != 1 || !ctMethod.getParameterTypes()[0].equals(ctField.getType()) ) {
+                            throw new NotFoundException("it's not a setter !");
+                        }
                     } catch (NotFoundException noSetter) {
                         // Créé le setter
                         CtMethod setMethod = CtMethod.make("public void " + setter + "(" + ctField.getType().getName() + " value) { this." + ctField.getName() + " = value; }", ctClass);

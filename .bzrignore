@@ -30,3 +30,6 @@ modules/gae/lib/gae.jar
 play-*.jar
 modules/gae/bin
 modules/gwt/lib/play-gwt.jar
+tmp
+test-result
+logs

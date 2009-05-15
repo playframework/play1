@@ -1,0 +1,90 @@
+body, html {
+	margin: 0;
+	padding: 0;
+	background: #444444;
+	font-family: 'Lucida Grande','Trebuchet MS',Arial,Helvetica,sans-serif;
+	font-size: 90%;
+}
+
+a {
+	color: #2244BB;
+}
+
+a.action {
+	color: #c00;
+}
+
+.light {
+	color: #888;
+}
+
+.last {
+	color: #666;
+	font-size: 11px;
+}
+
+div.error {
+	background: #CC0000;
+	color: #fff;
+	font-weight: bold;
+	padding: 4px;
+	margin-bottom: 10px;
+}
+
+div.success {
+	background: #2E9F27;
+	color: #fff;
+	font-weight: bold;
+	padding: 4px;
+	margin-bottom: 10px;
+}
+
+p {
+	margin: 2px 0 20px 0;
+}
+
+h1,h2,h3,h4,h5 {
+	margin-bottom: 1em;
+}
+
+h1 {
+	font-size: 24px;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	border-right: 1px solid #ccc;
+}
+
+thead {
+	background: #111;
+	color: #fff;
+}
+
+th {
+	text-align: left;
+	padding: 5px 10px;
+	font-size: 14px;
+	border: 1px solid #333;
+	border-bottom: 1px solid #ccc;
+}
+
+td {
+	border-left: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+	padding: 10px;
+	vertical-align: middle;
+}
+
+td.infos {
+	background: #EEEEEE;
+	width: 30%;
+	font-size: 11px;
+}
+
+form .error {
+	color: #c00;
+	background: white;
+	font-weight: normal;
+}

@@ -1,0 +1,38 @@
+%{ nbPages = _size.page(_caller.pageSize) }%
+
+#{if nbPages > 1}
+	
+	<div class="pagination">
+
+	*{ Previous }*
+
+	#{if _page == 1}
+		<strong>« Previous</strong>
+	#{/if}
+	#{else}
+		<a href="${request.path}?page=${_page-1}">« Previous</a>
+	#{/else}
+
+	*{ Pages }*
+
+	%{ for (i in 1..nbPages) { }%
+		#{if _page == i}
+			<strong>${i}</strong>
+		#{/if}
+		#{else}
+			<a href="${request.path}?page=${i}">${i}</a>
+		#{/else}
+	%{ } }%
+
+	*{ Next }*
+
+	#{if _page == nbPages}
+		<strong>Next »</strong>
+	#{/if}
+	#{else}
+		<a href="${request.path}?page=${_page+1}">Next »</a>
+	#{/else}
+
+	</div>
+
+#{/if}

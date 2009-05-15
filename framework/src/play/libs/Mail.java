@@ -408,7 +408,6 @@ public class Mail {
             for(String to : recipients) {
                 email.append(", " + to);
             }
-            email.append(".");
             email.append("\n\tFrom: "+from);
             email.append("\n\tSubject: "+subject);
             email.append("\n\tAttachments: "+attachments.length);

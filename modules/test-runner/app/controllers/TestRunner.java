@@ -5,7 +5,6 @@ import java.util.*;
 
 import play.Logger;
 import play.Play;
-import play.libs.Files;
 import play.libs.IO;
 import play.mvc.*;
 import play.templates.Template;
@@ -25,12 +24,14 @@ public class TestRunner extends Controller {
     public static void run(String test) throws Exception {
         if (test.equals("init")) {
             File testResults = Play.getFile("test-result");
-            if (testResults.exists()) {
-                if (!Files.delete(testResults)) {
-                    Logger.warn("Cannot delete the old test-results directory ... Do you still use windows ?");
+            if (!testResults.exists()) {
+                testResults.mkdir();
+            }
+            for(File tr : testResults.listFiles()) {
+                if ((tr.getName().endsWith(".html") || tr.getName().startsWith("result.")) && !tr.delete()) {
+                    Logger.warn("Cannot delete %s ...", tr.getAbsolutePath());
                 }
             }
-            testResults.mkdir();
             renderText("done");
         }
         if (test.equals("end")) {

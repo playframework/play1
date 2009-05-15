@@ -1,0 +1,125 @@
+/** Page layout **/
+
+#header {
+	padding: 10px 60px;
+	background: #111;
+	margin-bottom: 10px;
+	color: #99CC66;
+	position: relative;
+}
+
+#header p {
+	margin: 5px 0;
+}
+
+#header a {
+	color: gold;
+}
+
+#header #menu {
+	position: absolute;
+	bottom: 0;
+	right: 60px;
+	list-style: none;
+}
+
+#header #menu li {
+	float: left;
+}
+
+#header #menu li a {
+	display: block;
+	background: #222;
+	padding: 10px 20px;
+	margin-left: 3px;
+}
+
+#header #menu li a.selected {
+	background: #444;
+}
+
+#content {
+	margin: 20px 60px;
+	background: #fff;
+	padding: 20px;
+	min-height: 400px;
+}
+
+#breadcrumb {
+	margin-bottom: 20px;
+	color: #888;
+}
+
+#title {
+	margin: 0;
+}
+
+#youreadmin {
+	font-weight: bold;
+	color: #c00;
+	margin: 20px 0 10px 0;
+	background: pink;
+	padding: 5px;
+}
+
+#footer {
+	margin: 0 60px;
+	color: #999;
+}
+
+#footer a {
+	color: gold;
+}
+
+.pagination {
+	padding-bottom: 5px;
+	margin-bottom: 10px;
+	font-weight: bold;
+	border-bottom: 1px dotted #ccc;
+}
+
+
+.box {
+	background: #f5f5f5;
+	padding: 10px;
+}
+
+.box h2 {
+	color: #222;
+	font-size: 14px;
+}
+
+.box label {
+	display: block;
+	color: #666;
+	margin-top: 10px;
+}
+
+.box textarea {
+	width: 90%;
+}
+
+.box input[type=text] {
+	width: 90%;
+}
+
+.box hr {
+	height: 1px;
+	border: none;
+	border-bottom: 1px dashed #ccc;
+	margin: 15px 0;
+}
+
+.nobox h2 {
+	color: #222;
+	font-size: 14px;
+}
+
+.nobox {
+	margin-bottom: 20px;
+}
+
+.nobox input {
+	display: block;
+	width: 80%;
+}

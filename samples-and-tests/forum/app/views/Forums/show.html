@@ -1,0 +1,65 @@
+#{extends 'main.html' /}
+
+<div id="breadcrumb">
+	<a href="@{Forums.index}">Forums</a> →
+</div>
+
+<h1 id="title">${forum.name}</h1>
+<p class="light">
+	<strong>
+		#{pluralize size:forum.postsCount, word:'post' /} in #{pluralize size:forum.topicsCount, word:'topic' /}
+	</strong>
+</p>
+
+#{if connected}
+	<div id="newTopic">
+		<a class="action" href="@{Topics.post(forum.id)}">Post a new topic</a>
+	</div>
+#{/if}
+
+#{pagination page:page ?: 1, size:forum.topicsCount /}
+
+<table id="topics-list">
+	<thead>
+		<tr>
+			<th>Topics</th>
+			<th>Posts</th>
+			<th>Views</th>
+			<th>Last Post</th>
+		</tr>
+	</thead>
+	#{list items:forum.getTopics(page ?: 1, pageSize), as:'topic'}
+		<tr>
+			<td class="main">
+				<a href="@{Topics.show(topic.forum.id, topic.id)}">${topic.subject}</a>
+				#{if topic.postsCount > pageSize}
+					&nbsp;<a class="last" href="@{Topics.show(topic.forum.id, topic.id, topic.postsCount.page(pageSize))}">last page</a>
+				#{/if}
+			</td>
+			<td class="infos count">
+				${topic.postsCount}
+			</td>
+			<td class="infos count">
+				${topic.views}
+			</td>
+			<td class="infos">
+				${topic.lastPost.postedAt.since()} <br /> 
+				by <strong>${forum.lastPost.postedBy.name}</strong> (<a href="@{Topics.show(topic.forum.id, topic.id, topic.postsCount.page(pageSize))}">view</a>)
+			</td>
+		</tr>
+	#{/list}
+</table>
+
+#{if connected?.admin}
+	<div id="youreadmin">
+		Administrator options
+	</div>
+
+	<div class="box">
+		<h2>Delete this forum</h2>
+		<form action="@{Forums.delete(forum.id)}" method="POST">
+			<input type="submit" value="Delete it !" />
+		</form>
+	</div>
+#{/if}
+

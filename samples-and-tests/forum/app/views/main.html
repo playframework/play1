@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <title>Play! forums - #{get 'title' /}</title>		
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <link rel="stylesheet" type="text/css" media="screen" href="/public/stylesheets/main.css" />
+        <link rel="shortcut icon" type="image/png" href="/public/images/favicon.png" />
+    </head>
+    <body>
+	
+		<div id="main">
+	
+			<div id="header">
+				#{if connected}
+					<p>
+						Welcome <a class="connectedUser" href="@{Users.show(connected.id)}">${connected.name}</a>
+						(<a href="@{Application.logout}">Logout</a>)
+					</p>
+				#{/if}
+				#{else}
+					<p>
+						Still not a member ? <a href="@{Application.signup}">Signup</a>.
+						Or if you already have an account, just <a href="@{Application.login}">Login</a>.
+					</p>
+				#{/else}
+		
+				<ul id="menu">
+					<li><a class="${request?.controller == 'Forums' || request?.controller == 'Topics' ? 'selected' : ''}" href="@{Forums.index}">Forums</a></li>
+					<li><a class="${request?.controller == 'Users' ? 'selected' : ''}" href="@{Users.index}">Users</a></li>
+				</ul>
+			</div>
+			
+			<div id="content">
+				#{if flash?.error}
+					<div class="error">${flash.error}</div>
+				#{/if}
+				
+				#{if flash?.success}
+					<div class="success">${flash.success}</div>
+				#{/if}
+				
+	       		#{doLayout /}
+			</div>
+			
+			<div id="footer">
+				<p>
+					Just a sample application made with <a href="http://www.playframework.org">Play!</a>
+				</p>
+			</div>
+		
+		</div>
+		
+    </body>
+</html>
