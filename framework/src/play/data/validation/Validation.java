@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.UnexpectedException;
@@ -179,6 +180,28 @@ public class Validation {
     public ValidationResult min(Object o, double min) {
         String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
         return Validation.min(key, o, min);
+    }
+
+    public static ValidationResult max(String key, Object o, double max) {
+        MaxCheck check = new MaxCheck();
+        check.max = max;
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult max(Object o, double max) {
+        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        return Validation.max(key, o, max);
+    }
+
+    public static ValidationResult match(String key, Object o, String pattern) {
+        MatchCheck check = new MatchCheck();
+        check.pattern = Pattern.compile(pattern);
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult match(Object o, String pattern) {
+        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        return Validation.match(key, o, pattern);
     }
     
     public static ValidationResult email(String key, Object o) {
