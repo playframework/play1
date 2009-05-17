@@ -1,0 +1,67 @@
+*{ Create a new user }*
+
+#{fixture delete:'all', load:'test-data.yml' /}
+
+#{selenium}
+	clearSession()
+	
+	// Home page
+	open('/')
+	assertTextPresent('Still not a member ?')
+	assertTextPresent('Forums')
+	assertTextPresent('Users help')
+	assertTextPresent('About this sample application')
+	assertTextPresent('7 posts in 4 topics')
+	
+	// Sign up
+	clickAndWait('link=Signup')
+	assertTextPresent('Signup')
+	assertTextPresent('We will send you an email for confirmation')
+	
+	// Errors
+	clickAndWait('signupButton')
+	assertTextPresent('Please correct these errors !')
+	
+	// Try a bad email
+	type('email', 'yop')
+	type('name', 'yop')
+	type('password', 'hello')
+	type('password2', 'hello')
+	clickAndWait('signupButton')
+	assertTextPresent('Please correct these errors !')
+	assertTextPresent('Invalid email address')
+	
+	// Forget the name
+	type('email', 'toto@sampleforum.com')
+	type('name', '')
+	type('password', 'hello')
+	type('password2', 'hello')
+	clickAndWait('signupButton')
+	assertTextPresent('Please correct these errors !')
+	assertTextPresent('Required')
+	
+	// Bad password
+	type('email', 'toto@sampleforum.com')
+	type('name', 'Toto')
+	type('password', 'hello')
+	type('password2', 'hello2')
+	clickAndWait('signupButton')
+	assertTextPresent('Please correct these errors !')
+	assertTextPresent('Must be equals to password')
+	
+	// Ok
+	type('password', 'hello')
+	type('password2', 'hello')
+	clickAndWait('signupButton')
+	assertTextPresent('Your account is created. Please check your emails ...')
+	
+	// Login
+	assertTextPresent('Login')
+	assertTextPresent('Email')
+	assertTextPresent('Password')
+	type('email', 'toto@sampleforum.com')
+	type('password', 'hello')
+	clickAndWait('loginButton')
+	assertTextPresent('This account is not confirmed')
+	
+#{/selenium}

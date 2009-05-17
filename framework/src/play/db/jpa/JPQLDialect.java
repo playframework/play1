@@ -52,6 +52,9 @@ public class JPQLDialect {
         if (query.trim().toLowerCase().startsWith("select ")) {
             return query;
         }
+        if (query.matches("^by[A-Z].*$")) {
+            return "select count(*) from " + entityName +" where " + findByToJPQL(query);
+        }
         if (query.trim().toLowerCase().startsWith("from ")) {
             return "select count(*) " + query;
         }

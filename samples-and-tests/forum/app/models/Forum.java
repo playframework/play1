@@ -10,7 +10,7 @@ public class Forum extends JPAModel {
 	
 	public String name;
 	public String description;
-	@OneToMany(cascade=CascadeType.REMOVE, mappedBy="forum") public List<Topic> topics;
+	@OneToMany(cascade=CascadeType.ALL, mappedBy="forum") public List<Topic> topics;
 	
 	// ~~~~~~~~~~~~ 
 
@@ -23,7 +23,9 @@ public class Forum extends JPAModel {
 	// ~~~~~~~~~~~~ 
 	
 	public Topic newTopic(User by, String subject, String content) {
-		return new Topic(this, by, subject, content);
+		Topic t = new Topic(this, by, subject, content);
+		this.refresh();
+		return t;
 	}
 	
 	// ~~~~~~~~~~~~ 

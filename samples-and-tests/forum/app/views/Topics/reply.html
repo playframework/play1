@@ -11,9 +11,9 @@
 
 <form id="post" action="@{Topics.createReply(topic.forum.id, topic.id)}" method="POST" accept-charset="utf-8">
 	<p>
-		<textarea name="content" rows="8" cols="40"></textarea>
+		<textarea name="content" rows="8" cols="40" id="contentText"></textarea>
 	</p>
 	<p class="buttons">
-		<input type="submit" value="Post the reply"> or <a class="action" href="@{Topics.show(topic.forum.id, topic.id)}">cancel</a>
+		<input type="submit" value="Post the reply" id="postReply" /> or <a class="action" href="@{Topics.show(topic.forum.id, topic.id)}">cancel</a>
 	</p>
 </form>

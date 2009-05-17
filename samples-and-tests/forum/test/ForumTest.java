@@ -1,6 +1,7 @@
 
 import org.junit.*;
 import play.test.*;
+
 import models.*;
 
 public class ForumTest extends UnitTest {
@@ -40,5 +41,13 @@ public class ForumTest extends UnitTest {
         assertEquals("Please help !", help.getTopics(1, 2).get(0).subject);
         assertEquals("It does not work ...", help.getTopics(2, 2).get(0).subject);        
     }
+
+	@Test
+	public void newForum() {
+		Forum test = new Forum("Test", "Yop");
+		assertEquals(3, Forum.count());
+		assertNotNull(Forum.find("byName", "Test").one());
+		assertEquals(test, Forum.find("byName", "Test").one());
+	}
     
 }

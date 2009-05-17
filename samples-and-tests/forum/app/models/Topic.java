@@ -11,7 +11,7 @@ public class Topic extends JPAModel {
 	public String subject;
 	public Integer views;
 	@ManyToOne public Forum forum;
-	@OneToMany(cascade=CascadeType.REMOVE, mappedBy="topic") public List<Post> posts;
+	@OneToMany(cascade=CascadeType.ALL, mappedBy="topic") public List<Post> posts;
 	
 	// ~~~~~~~~~~~~ 
 	

@@ -1,6 +1,7 @@
 
 import org.junit.*;
 import play.test.*;
+
 import models.*;
 
 public class UserTest extends UnitTest {
@@ -58,6 +59,18 @@ public class UserTest extends UnitTest {
         assertEquals(3L, (long)admin.getTopicsCount());
         assertTrue(admin.getRecentsPosts().get(0).content.contains("Please."));
         assertTrue(admin.getRecentsPosts().get(3).content.contains("It's ok"));
+    }
+
+	@Test
+	public void freshData() {
+		assertEquals(3, User.count());
+		assertNull(User.find("byEmail", "toto@sampleforum.com").one());
+	}
+
+    @Test
+    public void someFinder() {
+		assertEquals(0, User.count("byName", "toto"));
+		assertEquals(1, User.count("byName", "Guillaume"));
     }
     
 }

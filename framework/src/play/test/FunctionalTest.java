@@ -57,6 +57,10 @@ public abstract class FunctionalTest extends BaseTest {
         //
         return response;
     }
+    
+    public static Response POST(String url) {
+        return POST(url, "application/x-www-form-urlencoded", "");
+    }
 
     /**
      * Sends a POST request to the application under tests.

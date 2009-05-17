@@ -1,6 +1,7 @@
 
 import org.junit.*;
 import play.test.*;
+
 import models.*;
 
 public class TopicTest extends UnitTest {
@@ -26,6 +27,29 @@ public class TopicTest extends UnitTest {
         assertEquals("It's ok for me ...", help.getLastPost().content);
         assertEquals("Play help", help.forum.name);
     }   
+
+	@Test
+	public void newTopic() {
+		Forum test = new Forum("Test", "Yop");
+		User guillaume = User.find("byName", "Guillaume").one();
+		test.newTopic(guillaume, "Hello", "Yop ...");
+		assertEquals(2L, (long)guillaume.getTopicsCount());
+		assertEquals(1, test.topics.size());
+		assertEquals(1, test.getTopicsCount());
+		assertEquals(5, Topic.count());
+	}
+	
+	@Test
+	public void testCascadeDelete() {
+		Forum help = Forum.find("byName", "Play help").one();
+		assertEquals(4, Topic.count());
+		assertEquals(7, Post.count());
+		help.delete();
+		assertEquals(1, Topic.count());
+		assertEquals(1, Post.count());
+		User guillaume = User.find("byName", "Guillaume").one();
+		assertEquals(0L, (long)guillaume.getTopicsCount());
+	}
     
     
 }

@@ -419,7 +419,7 @@ public class Mail {
             }
         }
         
-        static String getLastMessageReceivedBy(String email) {
+        public static String getLastMessageReceivedBy(String email) {
             return emails.get(email);
         }
         

@@ -1,6 +1,7 @@
 
 import org.junit.*;
 import play.test.*;
+
 import models.*;
 
 public class PostTest extends UnitTest {
@@ -25,6 +26,5 @@ public class PostTest extends UnitTest {
         assertEquals("Play help", post.topic.forum.name);
         assertEquals(1242086400000L, post.postedAt.getTime());
     }   
-    
     
 }

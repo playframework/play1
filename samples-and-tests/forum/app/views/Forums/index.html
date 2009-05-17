@@ -45,11 +45,11 @@
 	<div class="box">
 		<h2>Create a new forum</h2>
 		<form action="@{Forums.create}" method="POST">
-			<input type="text" name="name" size="30" /> 
+			<input type="text" name="name" size="30" id="name" /> 
 			<label for="description">Set a description</label>
-			<textarea name="description" rows="6">${flash.description}</textarea>
+			<textarea name="description" rows="6" id="description">${flash.description}</textarea>
 			<hr />
-			<input type="submit" value="Add this forum" />
+			<input type="submit" value="Add this forum" id="addForum" />
 		</form>
 	</div>
 #{/if}
