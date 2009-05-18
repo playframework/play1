@@ -1,3 +1,4 @@
+package unit;
 
 import org.junit.*;
 import play.test.*;

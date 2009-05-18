@@ -64,4 +64,24 @@
 	clickAndWait('loginButton')
 	assertTextPresent('This account is not confirmed')
 	
+	// Go to confirmation page
+	storeLastReceivedEmailBy('toto@sampleforum.com', 'email')
+	store('javascript{/http:[^\s]+/.exec(storedVars["email"])[0]}', 'confirmationUrl')
+	open('$[confirmationUrl]')
+	assertTextPresent('Welcome Toto !')
+	assertTextPresent('No post by this user')
+	assertTextNotPresent('Still not a member ?')
+	
+	// Logout
+	clickAndWait('link=Logout')
+	assertTextPresent('logged out')
+	clickAndWait('link=Login')
+	assertTextPresent('Login')
+	assertTextPresent('Email')
+	assertTextPresent('Password')
+	type('email', 'toto@sampleforum.com')
+	type('password', 'hello')
+	clickAndWait('loginButton')
+	assertTextPresent('Welcome back Toto !')
+	
 #{/selenium}

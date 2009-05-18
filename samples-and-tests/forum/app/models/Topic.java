@@ -1,24 +1,31 @@
 package models;
 
-import play.*;
-import play.db.jpa.*;
 import javax.persistence.*;
 import java.util.*;
+
+import play.*;
+import play.db.jpa.*;
+import play.data.validation.*;
 
 @Entity
 public class Topic extends JPAModel {
 	
+	@Required
 	public String subject;
-	public Integer views;
-	@ManyToOne public Forum forum;
-	@OneToMany(cascade=CascadeType.ALL, mappedBy="topic") public List<Post> posts;
+	
+	public Integer views = 0;
+	
+	@ManyToOne	    
+	public Forum forum;
+	
+	@OneToMany(cascade=CascadeType.ALL, mappedBy="topic") 	    
+	public List<Post> posts;
 	
 	// ~~~~~~~~~~~~ 
 	
 	public Topic(Forum forum, User by, String subject, String content) {
 		this.forum = forum;
 		this.subject = subject;
-		this.views = 0;
 		new Post(this, by, content);
 		save();
 	}

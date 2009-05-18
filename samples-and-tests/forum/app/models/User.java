@@ -1,17 +1,26 @@
 package models;
 
-import play.*;
-import play.db.jpa.*;
 import javax.persistence.*;
 import java.util.*;
+
+import play.*;
+import play.db.jpa.*;
 import play.libs.*;
+import play.data.validation.*;
 
 @Entity
 public class User extends JPAModel {
 	
+	@Email
+	@Required
 	public String email;
+	
+	@Required
 	public String passwordHash;
+	
+	@Required
 	public String name;
+	
 	public String needConfirmation;
 	
 	// ~~~~~~~~~~~~ 

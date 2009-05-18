@@ -2384,7 +2384,7 @@ Selenium.prototype.replaceVariables = function(str) {
     var stringResult = str;
 
     // Find all of the matching variable references
-    var match = stringResult.match(/\$\{\w+\}/g);
+    var match = stringResult.match(/\$\[\w+\]/g);
     if (!match) {
         return stringResult;
     }

@@ -19,6 +19,7 @@ public class TestRunnerPlugin extends PlayPlugin {
         Router.addRoute("GET", "/@tests", "TestRunner.index");
         Router.addRoute("GET", "/@tests/{<.*>test}", "TestRunner.run");
         Router.addRoute("POST", "/@tests/{<.*>test}", "TestRunner.saveResult");
+        Router.addRoute("GET", "/@tests/emails", "TestRunner.mockEmail");
     }
 
 }

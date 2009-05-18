@@ -1,3 +1,4 @@
+package functional;
 
 import org.junit.*;
 import play.test.*;

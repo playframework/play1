@@ -138,27 +138,7 @@
             <jvmarg value="-Xdebug"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.port},server=y,suspend=n"/>            
         </java>	
-    </target>
-    
-    <target name="package-module">
-        <delete dir="${application.path}/tmp/pm" />
-        <mkdir dir="${application.path}/tmp/pm" />
-        <javac encoding="utf-8" nowarn="${compile.nowarn}" debug="true" destdir="${application.path}/tmp/pm" classpathref="project.classpath" srcdir="${application.path}/lib/${module}/app" >
-            <include name="**/*.java"/>
-        </javac>
-        <mkdir dir="${application.path}/tmp/pm/_module" />
-        <copy todir="${application.path}/tmp/pm/_module">
-            <fileset dir="${application.path}/lib/${module}">
-                <include name="**/*" />
-                <exclude name=".*" />
-            </fileset>
-        </copy>
-        <zip destfile="${application.path}/lib/${module}.zip" update="false">
-            <zipfileset dir="${application.path}/tmp/pm" includes="**/*" />   
-        </zip>
-        <delete dir="${application.path}/tmp/pm" />
-    </target>
-    
+    </target>    
     <target name="nb-debug">
         <loadproperties srcfile="${application.path}/conf/application.conf" />
         <property name="jpda.port" value="8000" />
@@ -196,32 +176,16 @@
     
     <!-- Launch all *Test.java -->
     
-    <target name="test" depends="compile-tests" description="run tests suite">                       
-        <mkdir dir="tests-results" />
-        <delete dir="${basedir}/tests-tmp" />     
-        <mkdir dir="${basedir}/tests-tmp" />
-        <junit errorproperty="atests.failed" failureproperty="atests.failed" fork="true" showoutput="true" tempdir="${basedir}/tests-tmp">
-            <batchtest todir="tests-results">
-                <fileset dir="tests/src">
-                    <include name="**/*Test.java"/>
-                </fileset>
-            </batchtest>            
-            <classpath>
-                <pathelement path="classes"/>
-                <path refid="project.classpath"/>                
-            </classpath>               
-            <formatter type="brief" usefile="false"/>
-            <formatter type="xml"/>  
-            <jvmarg value="-javaagent:${basedir}/play.jar" />
-            <sysproperty key="tests-tmp" value="${basedir}/tests-tmp" />
-        </junit>
-        <mkdir dir="tests-results/html" />
-        <junitreport todir="tests-results">
-            <fileset dir="tests-results">
-                <include name="TEST-*.xml"/>
-            </fileset>
-            <report format="frames" todir="tests-results/html"/>
-        </junitreport>          
+    <target name="test" depends="jar" description="run tests suite">
+        <echo message="Forum application" />
+        <exec executable="${basedir}/../play.bat" osfamily="windows">
+            <arg value="auto-test"/>
+            <arg value="${basedir}/../samples-and-tests/forum"/>
+        </exec>
+        <exec executable="${basedir}/../play" osfamily="unix">
+            <arg value="auto-test"/>
+            <arg value="${basedir}/../samples-and-tests/forum"/>
+        </exec>
     </target>
     
     <target name="debug-test-single" depends="compile-tests" description="debug a single test">

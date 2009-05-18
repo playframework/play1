@@ -1,9 +1,11 @@
 package controllers;
 
-import models.*;
+import java.util.*;
+
 import play.*;
 import play.mvc.*;
-import java.util.*;
+
+import models.*;
 
 public class Users extends Application {
 

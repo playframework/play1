@@ -1,17 +1,23 @@
 package models;
 
-import play.*;
-import play.db.jpa.*;
 import javax.persistence.*;
 import java.util.*;
+
+import play.*;
+import play.db.jpa.*;
+import play.data.validation.*;
 
 @Entity
 public class Post extends JPAModel {
 	
-	public String content;
+	public String content;	
 	public Date postedAt;
-	@OneToOne public User postedBy;	
-	@ManyToOne public Topic topic;
+	
+	@OneToOne 	    
+	public User postedBy;	
+	
+	@ManyToOne 	    
+	public Topic topic;
 	
 	// ~~~~~~~~~~~~ 
 	

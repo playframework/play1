@@ -1,16 +1,22 @@
 package models;
 
-import play.*;
-import play.db.jpa.*;
 import javax.persistence.*;
 import java.util.*;
+
+import play.*;
+import play.db.jpa.*;
+import play.data.validation.*;
 
 @Entity
 public class Forum extends JPAModel {
 	
+	@Required
 	public String name;
+	
 	public String description;
-	@OneToMany(cascade=CascadeType.ALL, mappedBy="forum") public List<Topic> topics;
+	
+	@OneToMany(cascade=CascadeType.ALL, mappedBy="forum") 	    
+	public List<Topic> topics;
 	
 	// ~~~~~~~~~~~~ 
 

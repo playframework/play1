@@ -6,6 +6,7 @@ import java.util.*;
 import play.Logger;
 import play.Play;
 import play.libs.IO;
+import play.libs.Mail;
 import play.mvc.*;
 import play.templates.Template;
 import play.templates.TemplateLoader;
@@ -100,5 +101,14 @@ public class TestRunner extends Controller {
         IO.writeContent(rf, testResults);
         renderText("done");
     }
+
+    public static void mockEmail(String by) {
+        String email = Mail.Mock.getLastMessageReceivedBy(by);
+        if(email == null) {
+            notFound();
+        }
+        renderText(email);
+    }
+
 }
 

@@ -1,9 +1,12 @@
 package controllers;
 
-import models.*;
+import java.util.*;
+
 import play.*;
 import play.mvc.*;
-import java.util.*;
+import play.data.validation.*;
+
+import models.*;
 
 public class Topics extends Application {
 	
@@ -22,7 +25,13 @@ public class Topics extends Application {
 	}
 	
 	@Secure
-	public static void create(Long forumId, String subject, String content) {
+	public static void create(Long forumId, @Required String subject, String content) {
+	    if(validation.hasErrors()) {
+			validation.keep();
+			params.flash();
+			flash.error("Please correct these errors !");
+			post(forumId);
+		}
 		Forum forum = Forum.findById(forumId);
 		notFoundIfNull(forum);
 		Topic newTopic = forum.newTopic(connectedUser(), subject, content);
@@ -49,6 +58,7 @@ public class Topics extends Application {
 		Topic topic = Topic.findById(topicId);
 		notFoundIfNull(topic);
 		topic.delete();
+		flash.success("The topic has been deleted");
 		Forums.show(forumId, null);
 	}
     
