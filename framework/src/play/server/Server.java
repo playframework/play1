@@ -50,8 +50,6 @@ public class Server {
             Logger.error("Could not bind on port " + httpPort, e);
             acceptor.dispose();
         }
-        
-        Logger.info("");
     }
 
     public static void main(String[] args) {

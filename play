@@ -13,7 +13,10 @@ import subprocess
 import time
 import webbrowser
 import urllib2
+import socket
+import getopt
 
+# ~~~~~~~~~
 # Utilities
 
 def replaceAll(file, searchExp, replaceExp):
@@ -26,29 +29,32 @@ def secretKey():
 	return ''.join([random.choice('abcdefghijklmnopqrstuvwxyz0123456789') for i in range(64)])
 
 def readConf(key):
-	for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
-		if line.startswith('%' + play_id + '.' + key + "="):
-			return line[line.find('=')+1:].strip()
-		if line.startswith(key + "="):
-			return line[line.find('=')+1:].strip()
+	if application_path:
+		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
+			if line.startswith('%' + play_id + '.' + key + "="):
+				return line[line.find('=')+1:].strip()
+			if line.startswith(key + "="):
+				return line[line.find('=')+1:].strip()
+	return ''
 
 def readConfs(key):
 	result = []
-	for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
-		if line.startswith('%' + play_id + '.' + key):
-			result.append(line[line.find('=')+1:].strip())
-		if line.startswith(key):
-			result.append(line[line.find('=')+1:].strip())
+	if application_path:
+		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
+			if line.startswith('%' + play_id + '.' + key):
+				result.append(line[line.find('=')+1:].strip())
+			if line.startswith(key):
+				result.append(line[line.find('=')+1:].strip())
 	return result
-	
+
 def kill(pid):
 	if os.name == 'nt':
-			import ctypes
-			handle = ctypes.windll.kernel32.OpenProcess(1, False, int(pid))
-			if not ctypes.windll.kernel32.TerminateProcess(handle, 0):
-				print "~ Cannot kill the process with pid %s (ERROR %s)" % (pid, ctypes.windll.kernel32.GetLastError())
-				print "~ "
-				sys.exit(-1)
+		import ctypes
+		handle = ctypes.windll.kernel32.OpenProcess(1, False, int(pid))
+		if not ctypes.windll.kernel32.TerminateProcess(handle, 0):
+			print "~ Cannot kill the process with pid %s (ERROR %s)" % (pid, ctypes.windll.kernel32.GetLastError())
+			print "~ "
+			sys.exit(-1)
 	else:
 		try:
 			os.kill(int(pid), 15)
@@ -56,6 +62,29 @@ def kill(pid):
 			print "~ Play was not running (Process id %s not found)" % pid
 			print "~"
 			sys.exit(-1)
+
+def override(f, t):
+	fromFile = None
+	for module in modules:
+		pc = os.path.join(module, f)
+		if os.path.exists(pc): fromFile = pc
+	if not fromFile:
+		print "~ %s not found in any modules" % f
+		print "~ "
+		sys.exit(-1)
+	toFile = os.path.join(application_path, t)
+	if os.path.exists(toFile):
+		response = raw_input("~ Warning ! %s already exists and will be overriden (y/n) ? " % toFile)
+		if not response == 'y':	
+			return
+	if not os.path.exists(os.path.dirname(toFile)):
+		os.makedirs(os.path.dirname(toFile))
+	shutil.copyfile(fromFile, toFile)
+	print "~ Copied %s to %s " % (fromFile, toFile)
+			
+			
+# ~~~~~~~~~
+# Main
 
 try:
 
@@ -88,23 +117,12 @@ try:
 	print "~ play! %s, http://www.playframework.org" % (open(play_version_file).readline().strip())
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command ?
-	available_commands = ('help', 'id', 'war', 'new', 'auto-test', 'clean', 'cp', 'pid', 'out', 'overrides', 'ov', 'modules', 'nb', 'netbeansify', 'ec', 'eclipsify', 'secret', 'run', 'test', 'debug', 'start', 'stop', 'restart')
+	if len(sys.argv) > 1:
+		play_command = sys.argv[1]
+	else:
+		play_command = 'none'
 
-	if len(sys.argv) < 2 or sys.argv[1] not in available_commands:
-	  	print "~ Usage: play command [application path or current directory] "
-	  	print "~ "
-	  	print "~ with,  new      Create a new application"
-	  	print "~        run      Run the application in the current window (JPDA is enabled in DEV mode)"
-	  	print "~        test     Run the application in test mode"
-	  	print "~        help     Show more commands"
-	  	print "~"
-		if len(sys.argv) > 1 and sys.argv[1] not in available_commands:
-			print "~ Invalid command : %s" % sys.argv[1]
-			print "~"
-		sys.exit(-1)
-
-	play_command = sys.argv[1]
-
+	# Override ID
 	if play_command == 'test' or play_command == 'auto-test':
 		play_id = 'test'
 
@@ -112,6 +130,163 @@ try:
 		print "~ framework ID is %s" % play_id
 	print "~"
 
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the application ?
+	application_path = None
+	remaining_args = []
+	if len(sys.argv) == 2:
+		application_path = os.getcwd()
+		remaining_args = sys.argv[2:]
+	if len(sys.argv) > 2:
+		if sys.argv[2].startswith('-'):
+			application_path = os.getcwd()
+			remaining_args = sys.argv[2:]
+		else:
+			application_path = os.path.normpath(os.path.abspath(sys.argv[2]))
+			remaining_args = sys.argv[3:]
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ Check if it's a valid application
+	def check_application():
+		if application_path and not os.path.exists(os.path.join(application_path, 'conf/routes')):
+			print "~ Oops. %s does not seem to host a valid application" % os.path.normpath(application_path)
+			print "~"
+			sys.exit(-1)
+			
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ Modules list
+	def load_modules():
+		global modules
+  		if os.environ.has_key('MODULES'):
+  			if os.name == 'nt':
+  				modules = os.environ['MODULES'].split(';')
+  			else:
+  				modules = os.environ['MODULES'].split(':')
+  		else:
+  			modules = []
+  		pm = readConfs('module.')
+  		for m in pm:
+  			if '${play.path}' in m:
+  				m = m.replace('${play.path}', play_base)
+  			if not m[0] == '/':
+  				m = os.path.normpath(os.path.join(application_path, m))
+  			modules.append(m)
+  		if play_id == 'test':
+  			modules.append(os.path.normpath(os.path.join(play_base, 'modules/test-runner')))
+		
+		
+	# ~~~~~~~~~~~~~~~~~~~~~~ Build classpath
+	def do_classpath():
+		global classpath
+		global cp_args
+		global agent_path
+		
+		agent_path=os.path.join(play_base, 'framework/play.jar')
+
+		classpath = []
+
+		# The default		
+		classpath.append(os.path.normpath(os.path.join(application_path, 'conf')))
+		classpath.append(os.path.normpath(os.path.join(play_base, 'framework/play.jar')))
+
+		# The application
+		for jar in os.listdir(os.path.join(application_path, 'lib')):
+			if jar.endswith('.jar'):
+				classpath.append(os.path.normpath(os.path.join(application_path, 'lib/%s' % jar)))
+
+		# The modules
+		for module in modules:
+			libs = os.path.join(module, 'lib')
+			if os.path.exists(libs):
+				for jar in os.listdir(libs):
+					if jar.endswith('.jar'):
+						classpath.append(os.path.normpath(os.path.join(libs, '%s' % jar)))
+
+		# The framework
+		for jar in os.listdir(os.path.join(play_base, 'framework/lib')):
+			if jar.endswith('.jar'):
+				classpath.append(os.path.normpath(os.path.join(play_base, 'framework/lib/%s' % jar)))
+
+		for jar in os.listdir(os.path.join(play_base, 'framework/provided')):
+			if jar.endswith('.jar'):
+				classpath.append(os.path.normpath(os.path.join(play_base, 'framework/provided/%s' % jar)))
+
+
+
+		cp_args = ':'.join(classpath)
+		if os.name == 'nt':
+			cp_args = ';'.join(classpath)
+			
+	def check_jpda():
+		global jpda_port
+		try:
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)			
+			s.bind(('127.0.0.1', int(jpda_port)))
+			s.close()
+		except socket.error, e:
+			print 'JPDA port %s is already used. Will try to use any free port for debugging' % jpda_port
+			jpda_port = 0
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~ Build java path
+	def do_java():	
+		global java_cmd	
+		global pid_path
+		global application_mode 
+		global jpda_port
+		global log_path
+		
+		# ~~~~~~~~~~~~~~~~~~~~~~ JAVA_HOME/bin/java is used if defined
+		if not os.environ.has_key('JAVA_HOME'):
+			java_path = "java"
+		else:
+			java_path = os.path.normpath("%s/bin/java" % os.environ['JAVA_HOME'])
+
+
+		# ~~~~~~~~~~~~~~~~~~~~~~ Read some configuration from conf/application.conf
+		java_args = remaining_args[:]
+
+		memory_in_args=False
+		for arg in java_args:
+			if arg.startswith('Xm'):
+				memory_in_args=True
+		if not memory_in_args:
+			memory = readConf('jvm.memory')
+			if memory:
+				java_args = java_args + memory.split(' ')
+
+		jpda_port = readConf('jpda.port')
+		if not jpda_port:
+			jpda_port = '8000'
+
+		application_mode = readConf('application.mode')
+
+		if application_mode == 'prod':
+			java_args.append('-server')
+
+		java_args.append('-Dcom.sun.management.jmxremote')
+
+		# The Java stuff
+		java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, 'play.server.Server']
+
+		if not os.environ.has_key('PLAY_PID_PATH'):
+			pid_path = os.path.join(application_path, 'server.pid');
+		else:
+			pid_path = os.environ['PLAY_PID_PATH'];
+
+		if not os.environ.has_key('PLAY_LOG_PATH'):	
+			log_path = os.path.join(application_path, 'logs');
+		else:
+			log_path = os.environ['PLAY_LOG_PATH'];
+
+		if not os.path.exists(log_path):
+			os.mkdir(log_path);
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	# ~~~~~~~~~~~~~~~~~~~~~~ The commands ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [help] Display help
 	if play_command == 'help':
 		print "~ Play commands : "
@@ -127,7 +302,8 @@ try:
 		print "~        pid          Show the pid of an application"
 		print "~        cp           Display the computed classpath"
 		print "~        modules      Display the computed modules list"
-		print "~        test         Run all tests"
+		print "~        test         Run the application in test mode"
+		print "~        auto-test    Automactically run all tests"
 		print "~        clean        Delete temporary files"
 		print "~        id           Define the framework ID"
 		print "~        secret       Generate a new secret key"
@@ -136,6 +312,7 @@ try:
 		print "~ "
 		print "~ Also refer to documentation at http://www.playframework.org/manual"
 		print "~ "
+		sys.exit(0)	
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [id] Define the framework ID
@@ -155,19 +332,7 @@ try:
 			if os.path.exists(id_file):
 				os.remove(id_file)
 		sys.exit(0)
-
-
-	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the application ?
-	if len(sys.argv) == 2:
-		application_path = os.getcwd()
-		remaining_args = sys.argv[2:]
-	else:
-		application_path = os.path.normpath(os.path.abspath(sys.argv[2]))
-		remaining_args = sys.argv[3:]
 		
-	if play_command == 'override' or play_command == 'ov' or play_command == 'war':
-		application_path = os.getcwd()
-
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [new] Create a new application
 	if play_command == 'new':
@@ -178,6 +343,7 @@ try:
 		print "~ The new application will be created in %s" % os.path.normpath(application_path)
 		application_name = raw_input("~ What is the application name ? ")
 		shutil.copytree(os.path.join(play_base, 'resources/application-skel'), application_path)
+		check_application()
 		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%APPLICATION_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%SECRET_KEY%', secretKey())
 		print "~"
@@ -186,16 +352,10 @@ try:
 		print "~ Have fun !"
 		print "~"
 		sys.exit(0)
-
-
-	# ~~~~~~~~~~~~~~~~~~~~~~ Check if it's a valid application
-	if not os.path.exists(os.path.join(application_path, 'conf/routes')):
-		print "~ Oops. %s does not seem to host a valid application" % os.path.normpath(application_path)
-		print "~"
-		sys.exit(-1)
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [secret] Generate a new secret key
 	if play_command == 'secret':
+		check_application()
 		print "~ Generating secret key..."
 		sk = secretKey()
 		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'application.secret=.*', 'application.secret=%s' % sk)
@@ -206,6 +366,7 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [clean] Clean temporary files
 	if play_command == 'clean':
+		check_application()
 		print "~ Deleting %s" % os.path.normpath(os.path.join(application_path, 'tmp'))
 		if os.path.exists(os.path.join(application_path, 'tmp')):
 			shutil.rmtree(os.path.join(application_path, 'tmp'))
@@ -213,27 +374,10 @@ try:
 		sys.exit(0)
 		
 		
-	# ~~~~~~~~~~~~~~~~~~~~~~ Modules list
-	if os.environ.has_key('MODULES'):
-		if os.name == 'nt':
-			modules = os.environ['MODULES'].split(';')
-		else:
-			modules = os.environ['MODULES'].split(':')
-	else:
-		modules = []
-	pm = readConfs('module.')
-	for m in pm:
-		if '${play.path}' in m:
-			m = m.replace('${play.path}', play_base)
-		if not m[0] == '/':
-			m = os.path.normpath(os.path.join(application_path, m))
-		modules.append(m)
-	if play_id == 'test':
-		modules.append(os.path.normpath(os.path.join(play_base, 'modules/test-runner')))
-		
-		
 	# ~~~~~~~~~~~~~~~~~~~~~~ [modules] Display the application modules
 	if play_command == 'modules':
+		check_application()
+		load_modules()
 		if len(modules):
 			print "~ Application modules are :"
 			print "~ "
@@ -243,120 +387,32 @@ try:
 			print "~ No modules"
 		print "~ "
 		sys.exit(0)	
-
-
-	# ~~~~~~~~~~~~~~~~~~~~~~ [overrides] Overrides a module file
-	if play_command == 'override' or play_command == 'ov':
-		file = sys.argv[2]
-		if file[0] == '/': file = file[1:]
-		fromFile = None
-		for module in modules:
-			pc = os.path.join(module, file)
-			if os.path.exists(pc): fromFile = pc
-		if not fromFile:
-			print "~ %s not found in any modules" % file
-			print "~ "
-			sys.exit(-1)
-		if len(sys.argv) > 3:
-			t = sys.argv[3]
-			if t[0] == '/': t = t[1:]
-			toFile = os.path.join(application_path, t)
-		else:
-			toFile = os.path.join(application_path, file)
-		if os.path.exists(toFile):
-			print "~ Warning ! %s already exists and will be overriden" % toFile
-		response = raw_input("~ Copy %s to %s (y/n) ? " % (fromFile, toFile))
-		if response == 'y':
-			if not os.path.exists(os.path.dirname(toFile)):
-				os.makedirs(os.path.dirname(toFile))
-			shutil.copyfile(fromFile, toFile)
-			print "~ "
-			print "~ Ok"
-			print "~"
-			sys.exit(0)
-		else:
-			print "~ "
-			print "~ Cancelled"
-			print "~"
-		sys.exit(0)	
 	
-
-	# ~~~~~~~~~~~~~~~~~~~~~~ JAVA_HOME/bin/java is used if defined
-	if not os.environ.has_key('JAVA_HOME'):
-		java_path = "java"
-	else:
-		java_path = os.path.normpath("%s/bin/java" % os.environ['JAVA_HOME'])
-
-
-	# ~~~~~~~~~~~~~~~~~~~~~~ Read some configuration from conf/application.conf
-	java_args=remaining_args
-
-	memory_in_args=False
-	for arg in java_args:
-		if arg.startswith('Xm'):
-			memory_in_args=True
-	if not memory_in_args:
-		memory = readConf('jvm.memory')
-		if memory:
-			java_args = java_args + memory.split(' ')
-
-	jpda_port = readConf('jpda.port')
-	if not jpda_port:
-		jpda_port = '8000'
-
-	application_mode = readConf('application.mode')
-
-	if application_mode == 'prod':
-		java_args.append('-server')
-
-	java_args.append('-Dcom.sun.management.jmxremote')
 	
-
-	# ~~~~~~~~~~~~~~~~~~~~~~ Build classpath
-	agent_path=os.path.join(play_base, 'framework/play.jar')
-	
-	classpath = []
-
-	# The default
-	classpath.append(os.path.normpath(os.path.join(application_path, 'conf')))
-	classpath.append(os.path.normpath(os.path.join(play_base, 'framework/play.jar')))
-	
-	# The application
-	for jar in os.listdir(os.path.join(application_path, 'lib')):
-		if jar.endswith('.jar'):
-			classpath.append(os.path.normpath(os.path.join(application_path, 'lib/%s' % jar)))
-			
-	# The modules
-	for module in modules:
-		libs = os.path.join(module, 'lib')
-		if os.path.exists(libs):
-			for jar in os.listdir(libs):
-				if jar.endswith('.jar'):
-					classpath.append(os.path.normpath(os.path.join(libs, '%s' % jar)))
-
-	# The framework
-	for jar in os.listdir(os.path.join(play_base, 'framework/lib')):
-		if jar.endswith('.jar'):
-			classpath.append(os.path.normpath(os.path.join(play_base, 'framework/lib/%s' % jar)))
-			
-	for jar in os.listdir(os.path.join(play_base, 'framework/provided')):
-		if jar.endswith('.jar'):
-			classpath.append(os.path.normpath(os.path.join(play_base, 'framework/provided/%s' % jar)))
-			
-		
-
-	cp_args = ':'.join(classpath)
-	if os.name == 'nt':
-		cp_args = ';'.join(classpath)
-		
-		
 	# ~~~~~~~~~~~~~~~~~~~~~~ [war] Generate a WAR
 	if play_command == 'war':
-		if len(sys.argv) == 2:
-			print "~ Oops. Please specify a path where to generate the WAR"
+		check_application()
+		load_modules()
+		do_classpath()
+		do_java()
+		
+		war_path = None
+		try:
+			optlist, args = getopt.getopt(remaining_args, 'o:', ['output='])
+			for o, a in optlist:
+				if o in ('-o', '--output'):
+					war_path = os.path.normpath(os.path.abspath(a))
+		except getopt.GetoptError, err:
+			print "~ %s" % str(err)
+			print "~ Please specify a path where to generate the WAR, using the -o or --output option"
+			print "~ "
+			sys.exit(-1)
+		
+		if not war_path:
+			print "~ Oops. Please specify a path where to generate the WAR, using the -o or --output option"
 			print "~"
 			sys.exit(-1)
-		war_path = sys.argv[2]
+		
 		if os.path.exists(war_path) and not os.path.exists(os.path.join(war_path, 'WEB-INF')):
 			print "~ Oops. The destination path already exists but does not seem to host a valid WAR structure"
 			print "~"
@@ -394,37 +450,29 @@ try:
 		print "~ Have fun !"
 		print "~"
 		sys.exit(0)
-
 		
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [cp] Display the application classpath
-	if play_command == 'cp':
+	if play_command == 'cp' or play_command == 'classpath':
+		check_application()
+		do_classpath()
 		print "~ Computed classpath is :"
 		print "~ "
 		print cp_args
 		print "~ "
 		sys.exit(0)
-
-	java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, 'play.server.Server']
-
-	if not os.environ.has_key('PLAY_PID_PATH'):
-		pid_path = os.path.join(application_path, 'server.pid');
-	else:
-		pid_path = os.environ['PLAY_PID_PATH'];
-	
-	if not os.environ.has_key('PLAY_LOG_PATH'):	
-		log_path = os.path.join(application_path, 'logs');
-	else:
-		log_path = os.environ['PLAY_LOG_PATH'];
 		
-	if not os.path.exists(log_path):
-		os.mkdir(log_path);
 		
 	# ~~~~~~~~~~~~~~~~~~~~~~ [run] Run the application
 	if play_command == 'run':
+		check_application()
+		load_modules()
+		do_classpath()
+		do_java()
 		print "~ Ctrl+C to stop"
 		print "~ "
 		if application_mode == 'dev':
+			check_jpda()
 			java_cmd.insert(2, '-Xdebug')
 			java_cmd.insert(2, '-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % jpda_port)
 			java_cmd.insert(2, '-Dplay.debug=yes')
@@ -435,9 +483,14 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [test] Run the application tests
 	if play_command == 'test':
+		check_application()
+		load_modules()
+		do_classpath()
+		do_java()
 		print "~ Running in test mode"
 		print "~ Ctrl+C to stop"
 		print "~ "
+		check_jpda()
 		java_cmd.insert(2, '-Xdebug')
 		java_cmd.insert(2, '-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % jpda_port)
 		java_cmd.insert(2, '-Dplay.debug=yes')
@@ -448,6 +501,10 @@ try:
 		
 	# ~~~~~~~~~~~~~~~~~~~~~~ [auto-test] Run the application tests
 	if play_command == 'auto-test':
+		check_application()
+		load_modules()
+		do_classpath()
+		do_java()
 		print "~ Running in test mode"
 		print "~ Ctrl+C to stop"
 		print "~ "
@@ -500,20 +557,12 @@ try:
 		sys.exit(0)
 
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ [debug] Debug the application
-	if play_command == 'debug':
-		print "~ Ctrl+C to stop"
-		print "~ "
-		java_cmd.insert(2, '-Xdebug')
-		java_cmd.insert(2, '-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % jpda_port)
-		java_cmd.insert(2, '-Dplay.debug=yes')
-		subprocess.call(java_cmd, env=os.environ)
-		print
-		sys.exit(0)
-
-
 	# ~~~~~~~~~~~~~~~~~~~~~~ [start] Start the application
 	if play_command == 'start':
+		check_application()
+		load_modules()
+		do_classpath()
+		do_java()
 		if os.path.exists(pid_path):
 			print "~ Oops. %s is already started ! (or delete %s)" % (os.path.normpath(application_path), os.path.normpath(pid_path))
 			print "~"
@@ -531,13 +580,17 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [stop] Stop the application
 	if play_command == 'stop':
+		check_application()
+		load_modules()
+		do_classpath()
+		do_java()
 		if not os.path.exists(pid_path):
 			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
 			print "~"
 			sys.exit(-1)
 		pid = open(pid_path).readline().strip()
-		kill(pid)		
 		os.remove(pid_path)
+		kill(pid)		
 		print "~ Ok, %s is stopped" % application_path
 		print "~"
 		sys.exit(0)
@@ -545,26 +598,17 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [restart] Restart the application
 	if play_command == 'restart':
+		check_application()
+		load_modules()
+		do_classpath()
+		do_java()
 		if not os.path.exists(pid_path):
 			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
 			print "~"
-			sys.exit(-1)
-		pid = open(pid_path).readline().strip()
-		if os.name == 'nt':
-			import ctypes
-			handle = ctypes.windll.kernel32.OpenProcess(1, False, int(pid))
-			if not ctypes.windll.kernel32.TerminateProcess(handle, 0):
-				print "~ Cannot kill the process with pid %s (%s)" % (pid, ctypes.windll.kernel32.GetLastError())
-				print "~ "
-				sys.exit(-1)
 		else:
-			try:
-				os.kill(int(pid), 15)
-			except OSError:
-				print "~ Play was not running (Process id %s not found)" % pid
-				print "~ "
-		
-		os.remove(pid_path)
+			pid = open(pid_path).readline().strip()
+			os.remove(pid_path)
+			kill(pid)
 		
 		sout = open(os.path.join(log_path, 'system.out'), 'w')
 		pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
@@ -579,6 +623,10 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [pid] Display the pid of the running application
 	if play_command == 'pid':
+		check_application()
+		load_modules()
+		do_classpath()
+		do_java()
 		if not os.path.exists(pid_path):
 			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
 			print "~"
@@ -591,11 +639,15 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [out] Follow logs of the running application
 	if play_command == 'out':
+		check_application()
+		load_modules()
+		do_classpath()
+		do_java()
 		if not os.path.exists(pid_path):
 			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
 			print "~"
 			sys.exit(-1)
-		sout = open(os.path.join(log_path, 'system.out'), 'w')
+		sout = open(os.path.join(log_path, 'system.out'), 'r')
 		while True:
 			where = sout.tell()
 			line = sout.readline().strip()
@@ -608,6 +660,9 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [netbeansify] Create netbeans configuration files
 	if play_command == 'nb' or play_command == 'netbeansify':
+		check_application()
+		load_modules()
+		do_classpath()
 		application_name = readConf('application.name')
 		if not application_name:
 			application_name = os.path.dirname(application_path)
@@ -643,6 +698,10 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [eclipsify] Create eclipse configuration files
 	if play_command == 'ec' or play_command == 'eclipsify':
+		check_application()
+		load_modules()
+		do_classpath()
+		do_java()
 		application_name = readConf('application.name')
 		if not application_name:
 			application_name = os.path.dirname(application_path)
@@ -712,9 +771,35 @@ try:
 				
 		sys.exit(0)
 
+	
+	# Module command ?
+	if play_command.find(':') > 0:
+		check_application()
+		load_modules()
+		for module in modules:
+			commands = os.path.join(module, 'commands.py')
+			if os.path.exists(commands):
+				execfile(commands)
 
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ Invalid command
+	print "~ Usage: play command [application path] [-options]"
+  	print "~ "
+  	print "~ with,  new      Create a new application"
+  	print "~        run      Run the application in the current window"
+  	print "~        test     Run the application in test mode"
+  	print "~        help     Show more commands"
+  	print "~"
+	if len(sys.argv) > 1:
+		print "~ Invalid command : %s" % sys.argv[1]
+		print "~"
+	sys.exit(-1)
 
 
 except KeyboardInterrupt:
 	print '~ ...'
 	sys.exit(0)
+
+	
+
+
