@@ -135,6 +135,13 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public void onRoutesLoaded() {
     }
 
+    /**
+     * Let some plugins route themself
+     * @param request
+     */
+    public void routeRequest(Request request) {
+    }
+
     public int compareTo(PlayPlugin o) {
         return (index < o.index ? -1 : (index == o.index ? 0 : 1));
     }

@@ -1,0 +1,4 @@
+<module rename-to="main">
+	<inherits name="com.google.gwt.user.User"/>
+	<entry-point class="gwt.client.Main"/>
+</module>

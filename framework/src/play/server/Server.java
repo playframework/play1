@@ -13,7 +13,6 @@ import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
-import play.PlayPlugin;
 
 /**
  * Play! server

@@ -41,6 +41,9 @@ public class ActionInvoker {
 
             // 1. Route and resolve format if not already done
             if(request.action == null) {
+                for (PlayPlugin plugin : Play.plugins) {
+                    plugin.routeRequest(request);
+                }
                 Router.route(request);
             }
             request.resolveFormat();

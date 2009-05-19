@@ -2,6 +2,7 @@ package play.classloading.enhancers;
 
 import javassist.CtClass;
 import javassist.CtMethod;
+import javassist.CtPrimitiveType;
 import javassist.Modifier;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
@@ -22,9 +23,9 @@ public class MailerEnhancer extends Enhancer {
 
         for (final CtMethod ctMethod : ctClass.getDeclaredMethods()) {
 
-            if (Modifier.isPublic(ctMethod.getModifiers()) && Modifier.isStatic(ctMethod.getModifiers())) {
+            if (Modifier.isPublic(ctMethod.getModifiers()) && Modifier.isStatic(ctMethod.getModifiers()) && ctMethod.getReturnType().isPrimitive() && ctMethod.getReturnType().equals(CtPrimitiveType.voidType)) {
                 try {
-                    ctMethod.insertBefore("infos.set(new java.util.HashMap());((java.util.Map)infos.get()).put(\"method\", \"" + ctMethod.getLongName() + "\");");
+                    ctMethod.insertBefore("if(infos.get() != null) {play.Logger.warn(\"Found an old Mail in the current thread. A Mailer action must not call another Mailer action. It will propably fail...\", new Object[0]);}; infos.set(new java.util.HashMap());((java.util.Map)infos.get()).put(\"method\", \"" + ctMethod.getLongName() + "\");");
                     ctMethod.insertAfter("infos.set(null);", true);
                 } catch (Exception e) {
                     Logger.error(e, "Error in ControllersEnhancer");

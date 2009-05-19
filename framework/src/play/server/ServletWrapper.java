@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -14,7 +13,6 @@ import java.util.Enumeration;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -144,7 +142,7 @@ public class ServletWrapper extends HttpServlet {
     public static Request parseRequest(HttpServletRequest httpServletRequest) throws Exception {
         Request request = new Http.Request();
         URI uri = new URI(httpServletRequest.getRequestURI());
-        request.method = httpServletRequest.getMethod();
+        request.method = httpServletRequest.getMethod().intern();
         request.path = StringUtils.substringAfter(uri.getPath(), httpServletRequest.getContextPath());
         request.querystring = httpServletRequest.getQueryString() == null ? "" : httpServletRequest.getQueryString();
         Logger.trace("httpServletRequest.getContextPath(): " + httpServletRequest.getContextPath());
@@ -153,9 +151,9 @@ public class ServletWrapper extends HttpServlet {
         Router.routeOnlyStatic(request);
 
         if (httpServletRequest.getHeader("Content-Type") != null) {
-            request.contentType = httpServletRequest.getHeader("Content-Type").split(";")[0].trim().toLowerCase();
+            request.contentType = httpServletRequest.getHeader("Content-Type").split(";")[0].trim().toLowerCase().intern();
         } else {
-            request.contentType = "text/html";
+            request.contentType = "text/html".intern();
         }
 
         request.body = httpServletRequest.getInputStream();

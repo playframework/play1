@@ -101,14 +101,14 @@ public class HttpHandler implements IoHandler {
         IoBuffer buffer = (IoBuffer) minaRequest.getContent();
 
         request.remoteAddress = ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
-        request.method = minaRequest.getMethod().toString();
+        request.method = minaRequest.getMethod().toString().intern();
         request.path = URLDecoder.decode(uri.getRawPath(), "utf-8");
         request.querystring = uri.getQuery() == null ? "" : uri.getRawQuery();
 
         if (minaRequest.getHeader("Content-Type") != null) {
-            request.contentType = minaRequest.getHeader("Content-Type").split(";")[0].trim().toLowerCase();
+            request.contentType = minaRequest.getHeader("Content-Type").split(";")[0].trim().toLowerCase().intern();
         } else {
-            request.contentType = "text/html";
+            request.contentType = "text/html".intern();
         }
 
         if (minaRequest.getFileContent() == null) {

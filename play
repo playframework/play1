@@ -229,7 +229,8 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~~ Build java path
 	def do_java():	
-		global java_cmd	
+		global java_cmd
+		global java_path
 		global pid_path
 		global application_mode 
 		global jpda_port

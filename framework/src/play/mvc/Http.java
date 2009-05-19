@@ -155,7 +155,7 @@ public class Http {
          * 
          */
         Method invokedMethod;
-
+        
         /**
          * Automatically resolve request format from the Accept header
          * (in this order : html > xml > json > text)
@@ -167,34 +167,34 @@ public class Http {
             }          
             
             if (headers.get("accept") == null) {
-                format = "html";
+                format = "html".intern();
                 return;
             }
 
             String accept = headers.get("accept").value();
 
             if (accept.indexOf("application/xhtml") != -1 || accept.indexOf("text/html") != -1 || accept.startsWith("*/*")) {
-                format = "html";
+                format = "html".intern();
                 return;
             }
 
             if (accept.indexOf("application/xml") != -1 || accept.indexOf("text/xml") != -1) {
-                format = "xml";
+                format = "xml".intern();
                 return;
             }
 
             if (accept.indexOf("text/plain") != -1) {
-                format = "txt";
+                format = "txt".intern();
                 return;
             }
 
             if (accept.indexOf("application/json") != -1 || accept.indexOf("text/javascript") != -1) {
-                format = "json";
+                format = "json".intern();
                 return;
             }
             
             if (accept.endsWith("*/*")) {
-            	 format = "html";
+            	 format = "html".intern();
                  return;
             }
         }
@@ -213,9 +213,9 @@ public class Http {
          */
         public String getBase() {
             if (port == 80 || port == 443) {
-                return String.format("%s://%s", secure ? "https" : "http", domain);
+                return String.format("%s://%s", secure ? "https" : "http", domain).intern();
             }
-            return String.format("%s://%s:%s", secure ? "https" : "http", domain, port);
+            return String.format("%s://%s:%s", secure ? "https" : "http", domain, port).intern();
         }
 
         @Override
