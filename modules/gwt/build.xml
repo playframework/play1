@@ -7,9 +7,6 @@
         <fileset dir="../../framework/lib">
             <include name="*.jar"/>
         </fileset>
-        <fileset dir="../../framework/provided">
-            <include name="*.jar"/>
-        </fileset>
         <fileset dir="lib">
             <include name="*.jar"/>
         </fileset>

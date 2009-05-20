@@ -162,7 +162,7 @@ public class Http {
          */
         public void resolveFormat() {
 
-        	if(format != null) {
+            if(format != null) {
                 return;
             }          
             
