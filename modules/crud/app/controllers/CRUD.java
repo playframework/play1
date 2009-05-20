@@ -290,7 +290,7 @@ public abstract class CRUD extends Controller {
                         type = "password";
                     }
                 }
-                if (Number.class.isAssignableFrom(field.getType())) {
+                if (Number.class.isAssignableFrom(field.getType()) || field.getType().equals(double.class) || field.getType().equals(int.class) || field.getType().equals(long.class)) {
                     type = "number";
                 }
                 if (Boolean.class.isAssignableFrom(field.getType())) {

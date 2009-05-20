@@ -1,7 +1,5 @@
 package play.modules.gwt;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.exceptions.JavaExecutionException;
@@ -11,7 +9,6 @@ import play.mvc.Router;
 import play.mvc.Router.Route;
 import play.mvc.results.RedirectToStatic;
 import play.mvc.results.RenderText;
-import play.mvc.results.Result;
 
 public class GWTPlugin extends PlayPlugin {
 
@@ -19,7 +16,7 @@ public class GWTPlugin extends PlayPlugin {
     public void onRoutesLoaded() {
         boolean useDefault = true;
         for (Route route : Router.routes) {
-            if (route.path.contains("gwt-public")) {
+            if (route.action.contains("gwt-public")) {
                 useDefault = false;
                 break;
             }
@@ -27,6 +24,7 @@ public class GWTPlugin extends PlayPlugin {
         if (useDefault) {
             Router.addRoute("GET", "/app", "staticDir:gwt-public");
         }
+        Router.addRoute("GET", "/@gwt", "dummy.dummy"); // protect it
     }
 
     @Override

@@ -1,0 +1,68 @@
+body, html {
+	margin: 0;
+	padding: 0;
+	background: #444444;
+	font-family: 'Lucida Grande','Trebuchet MS',Arial,Helvetica,sans-serif;
+	font-size: 90%;
+}
+
+#app {
+    background: #fff;
+    margin: 20px;
+    padding: 20px;
+}
+
+#footer {
+    margin-top: 1em;
+    border-top: 1px dotted #ccc;
+    padding-top: 5px;
+}
+
+
+/* stock list header row */
+.watchListHeader {
+    background-color: #111;
+    color: gold;
+}
+
+/* stock list flex table */
+.watchList {
+    border: 1px solid silver;
+    padding: 2px;
+    margin-bottom:6px;
+    width: 700px;
+}
+
+/* stock list Price and Change fields */
+.watchListNumericColumn {
+    text-align: right;
+    width:8em;
+}
+
+/* stock list Remove column */
+.watchListRemoveColumn {
+    text-align: center;
+}
+
+/* Add Stock panel */
+.addPanel {
+    margin: 10px 0px 15px 0px;
+}
+
+/* stock list, the Remove button */
+.gwt-Button-remove {
+    width: 50px;
+}
+
+/* Dynamic color changes for the Change field */
+.noChange {
+  color: black;
+}
+
+.positiveChange {
+  color: green;
+}
+
+.negativeChange {
+  color: red;
+}

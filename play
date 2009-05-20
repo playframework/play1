@@ -207,11 +207,6 @@ try:
 			if jar.endswith('.jar'):
 				classpath.append(os.path.normpath(os.path.join(play_base, 'framework/lib/%s' % jar)))
 
-		for jar in os.listdir(os.path.join(play_base, 'framework/provided')):
-			if jar.endswith('.jar'):
-				classpath.append(os.path.normpath(os.path.join(play_base, 'framework/provided/%s' % jar)))
-
-
 
 		cp_args = ':'.join(classpath)
 		if os.name == 'nt':
@@ -433,7 +428,7 @@ try:
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/lib')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/lib'))
 		os.mkdir(os.path.join(war_path, 'WEB-INF/lib'))
 		for jar in classpath:
-			if jar.endswith('.jar'):
+			if jar.endswith('.jar') and not jar.startswith('provided-'):
 				shutil.copyfile(jar, os.path.join(war_path, 'WEB-INF/lib/%s' % os.path.split(jar)[1]))
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/framework')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/framework'))
 		os.mkdir(os.path.join(war_path, 'WEB-INF/framework'))

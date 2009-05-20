@@ -41,14 +41,12 @@ if play_command == 'gwt:init':
         shutil.copyfile(os.path.join(play_base, 'modules/gwt/resources/index.html'), os.path.join(application_path, 'gwt-public/index.html'))
         
     # Create packages
-    if not os.path.exists(os.path.join(application_path, 'app/gwt')):
-        os.mkdir(os.path.join(application_path, 'app/gwt'))
-    if not os.path.exists(os.path.join(application_path, 'app/gwt/client')):
-        os.mkdir(os.path.join(application_path, 'app/gwt/client'))
-    if not os.path.exists(os.path.join(application_path, 'app/gwt/Main.gwt.xml')):
-        shutil.copyfile(os.path.join(play_base, 'modules/gwt/resources/Main.gwt.xml'), os.path.join(application_path, 'app/gwt/Main.gwt.xml'))
-    if not os.path.exists(os.path.join(application_path, 'app/gwt/client/Main.java')):
-        shutil.copyfile(os.path.join(play_base, 'modules/gwt/resources/Main.java'), os.path.join(application_path, 'app/gwt/client/Main.java'))
+    if not os.path.exists(os.path.join(application_path, 'app/client')):
+        os.mkdir(os.path.join(application_path, 'app/client'))
+    if not os.path.exists(os.path.join(application_path, 'app/Main.gwt.xml')):
+        shutil.copyfile(os.path.join(play_base, 'modules/gwt/resources/Main.gwt.xml'), os.path.join(application_path, 'app/Main.gwt.xml'))
+    if not os.path.exists(os.path.join(application_path, 'app/client/Main.java')):
+        shutil.copyfile(os.path.join(play_base, 'modules/gwt/resources/Main.java'), os.path.join(application_path, 'app/client/Main.java'))
     
     print "~ Ok. A Main GWT module has been created in app/gwt and GWT static resources come to gwt-public"
     print "~ Run play gwt:browser to run the hosted mode browser"
@@ -59,14 +57,28 @@ if play_command == 'gwt:init':
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~ [gwt:browser] Run the hosted mode browser
-if play_command == 'gwt:hosted':
+if play_command == 'gwt:browser':
     
     # Run
     print "~ Running com.google.gwt.dev.HostedMode ..."
     print "~"
     do_classpath()
     do_java()
-    gwt_cmd = [java_path, '-Xmx256M', '-classpath', 'C:/Documents and Settings/bort_g/Bureau/test-gg/app;C:/Documents and Settings/bort_g/Bureau/gwt-windows-1.6.4/gwt-user.jar;C:/Documents and Settings/bort_g/Bureau/gwt-windows-1.6.4/gwt-dev-windows.jar', 'com.google.gwt.dev.HostedMode', '-noserver', '-startupUrl', 'http://localhost:9000/@gwt', '-war', 'C:/Documents and Settings/bort_g/Bureau/test-gg/gwt-public', 'gwt.Main']
+    cp = []
+    cp.append(os.path.normpath(os.path.join(application_path, 'app')))
+    cp.append(os.path.normpath(os.path.join(play_base, 'modules/gwt/lib/gwt-user.jar')))
+    cp.append(os.path.normpath(os.path.join(gwt_path, 'gwt-dev-windows.jar')))
+    cp.append(os.path.normpath(os.path.join(gwt_path, 'gwt-dev-mac.jar')))
+    cp.append(os.path.normpath(os.path.join(gwt_path, 'gwt-dev-linux.jar')))
+    cps = ':'.join(cp)
+    if os.name == 'nt':
+        cps = ';'.join(cp)
+    # '-logLevel', 'DEBUG',
+    gwt_cmd = [java_path, '-Xmx256M', '-classpath', cps, 'com.google.gwt.dev.HostedMode', '-noserver', '-startupUrl', 'http://localhost:9000/@gwt', '-war', os.path.normpath(os.path.join(application_path, 'gwt-public')), 'Main']
+    if os.path.exists(os.path.normpath(os.path.join(gwt_path, 'gwt-dev-mac.jar'))):
+        gwt_cmd.insert(2, '-XstartOnFirstThread')
+    gwt_cmd.insert(2, '-Xdebug')
+    gwt_cmd.insert(2, '-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % '3408')
     subprocess.call(gwt_cmd, env=os.environ)
     print "~"
     sys.exit(0)

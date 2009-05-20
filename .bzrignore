@@ -33,3 +33,9 @@ modules/gwt/lib/play-gwt.jar
 tmp
 test-result
 logs
+logs
+tmp
+db
+./db
+test-result
+./nbproject

@@ -1,4 +1,4 @@
-package gwt.client;
+package client;
 
 import com.google.gwt.core.client.*;
 import com.google.gwt.event.dom.client.*;
