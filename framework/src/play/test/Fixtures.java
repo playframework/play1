@@ -126,10 +126,12 @@ public class Fixtures {
                         Object model = JPASupport.create(cType, "object", params);
                         JPA.getEntityManager().persist(model);
                         idCache.put(type + "-" + id, JPASupport.findKey(model));
+                        // Not very good for performance but will avoid outOfMemory
+                        JPA.getEntityManager().flush();
+                        JPA.getEntityManager().clear();
                     }
                 }
-            }
-            JPA.getEntityManager().clear();
+            }            
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Class " + e.getMessage() + " was not found", e);
         } catch (RuntimeException e) {

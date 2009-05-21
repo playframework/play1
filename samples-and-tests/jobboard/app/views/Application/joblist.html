@@ -1,0 +1,20 @@
+
+#{if jobs.size() == 0}
+	<p>
+		No jobs ...
+	</p>
+#{/if}
+#{else}
+	<ul>
+		#{list items:jobs, as:'job'}
+			<li class="${job_parity}">
+				<a href="@{Application.jobdetails(job.id)}">${job.title}</a> at <span class="company">${job.company}</span> 
+				#{if job.place}
+					- <span class="place">${job.place}</span>
+				#{/if}
+			</li>
+		#{/list}
+	</ul>	
+#{/else}
+
+

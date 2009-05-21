@@ -36,6 +36,9 @@ logs
 logs
 tmp
 db
-./db
 test-result
-./nbproject
+samples-and-tests/with-gwt/nbproject
+samples-and-tests/jobboard/db
+samples-and-tests/jobboard/tmp
+samples-and-tests/jobboard/test-result
+samples-and-tests/jobboard/attachments

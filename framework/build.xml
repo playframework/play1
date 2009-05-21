@@ -174,7 +174,7 @@
     <!-- Launch all *Test.java -->
     
     <target name="test" depends="jar" description="run tests suite">
-        <echo message="Forum application" />
+        <echo message="Forum application ... (wait)" />
         <exec executable="${basedir}/../play.bat" osfamily="windows">
             <arg value="auto-test"/>
             <arg value="${basedir}/../samples-and-tests/forum"/>
@@ -182,6 +182,26 @@
         <exec executable="${basedir}/../play" osfamily="unix">
             <arg value="auto-test"/>
             <arg value="${basedir}/../samples-and-tests/forum"/>
+        </exec>
+        
+        <echo message="GWT application ... (wait)" />
+        <exec executable="${basedir}/../play.bat" osfamily="windows">
+            <arg value="auto-test"/>
+            <arg value="${basedir}/../samples-and-tests/with-gwt"/>
+        </exec>
+        <exec executable="${basedir}/../play" osfamily="unix">
+            <arg value="auto-test"/>
+            <arg value="${basedir}/../samples-and-tests/with-gwt"/>
+        </exec>
+        
+        <echo message="Jobs application ... (wait)" />
+        <exec executable="${basedir}/../play.bat" osfamily="windows">
+            <arg value="auto-test"/>
+            <arg value="${basedir}/../samples-and-tests/jobboard"/>
+        </exec>
+        <exec executable="${basedir}/../play" osfamily="unix">
+            <arg value="auto-test"/>
+            <arg value="${basedir}/../samples-and-tests/jobboard"/>
         </exec>
     </target>
     

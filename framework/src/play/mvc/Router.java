@@ -255,7 +255,11 @@ public class Router {
                     // les parametres codes en dur dans la route matchent-ils ?
                     for (String staticKey : route.staticArgs.keySet()) {
                         if(staticKey.equals("format")) {
-                            continue; // format is a sepcial key
+                            if(!Http.Request.current().format.equals(route.staticArgs.get("format"))) {
+                                allRequiredArgsAreHere = false;
+                                break;
+                            }
+                            continue; // format is a special key
                         }
                         if (!args.containsKey(staticKey) || args.get(staticKey) == null || !args.get(staticKey).equals(route.staticArgs.get(staticKey))) {
                             allRequiredArgsAreHere = false;
