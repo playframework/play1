@@ -21,15 +21,15 @@
                 margin-top: 0;
             }
             #header.success {
-				background: #81CF5A !important;
-			}
+                background: #81CF5A !important;
+            }
             .passed span {
                 background: #81CF5A !important;
                 padding: 3px 5px;
             }
-			#header.failed {
-				background: #EF6868 !important;
-			}
+            #header.failed {
+                background: #EF6868 !important;
+            }
             .failed span {
                 background: #EF6868 !important;
                 padding: 3px 5px;
@@ -51,15 +51,15 @@
                 margin-bottom: 10px;
             }
             .error {
-				color: #c00;
-			}
+                color: #c00;
+            }
             table td {
-				padding: 5px 0;
-			}
+                padding: 5px 0;
+            }
         </style>
     </head>
     <body>
-
+        
         <div id="header" class="block ${results.passed ? 'success' : 'failed'}">
             <h1>
                 ${test}
@@ -68,40 +68,44 @@
                 ${results.passed ? 'SUCCESS' : 'FAILED'}
             </p>
         </div>
-
+        
         <div id="results">
             <table>
-            #{list items:results.results, as:'result'}
+                #{list items:results.results, as:'result'}
                 <tr>
                     <td width="20%" class="${result.passed ? 'passed' : 'failed'}" valign="top">
                         <span>${result.name}</span>
                     </td>
                     <td class="${result.error ? 'error' : ''}" valign="top">
                         #{if result.error}
-                            <strong>${result.error.escape()}</strong>
-                            #{if result.sourceInfos}
-                                <div class="source">
-                                    <span>${result.sourceInfos} :</span>
-                                </div>
-                                <div class="sourceLine">
-                                    <span>${result.sourceCode.escape()}</span>
-                                </div>
-                            #{/if}
-                            #{if result.trace}
-                                <pre>${result.trace}</pre>
-                            #{/if}
+                        <strong>${result.error.escape()}</strong>
+                        #{if result.sourceInfos}
+                        <div class="source">
+                            <span>${result.sourceInfos} :</span>
+                        </div>
+                        <div class="sourceLine">
+                            <span>
+                                ${play.libs.Utils.open(result.sourceFile, result.sourceLine) ? '<a href="' + play.libs.Utils.open(result.sourceFile, result.sourceLine) + '">' : ''}
+                                    ${result.sourceCode.escape()}
+                                ${play.libs.Utils.open(result.sourceFile, result.sourceLine) ? '</a>' : ''}
+                            </span>
+                        </div>
+                        #{/if}
+                        #{if result.trace}
+                        <pre>${result.trace}</pre>
+                        #{/if}
                         #{/if}
                         #{else}
-                            Ok
+                        Ok
                         #{/else}
                     </td>
                     <td width="5%" align="right" class="time" valign="top">
                         ${result.time} ms
                     </td>
                 </tr>
-            #{/list}
+                #{/list}
             </table>
         </div>
-
+        
     </body>
 </html>

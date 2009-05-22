@@ -6,6 +6,7 @@ import java.util.Properties;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
+import org.apache.log4j.Level;
 import org.hibernate.ejb.Ejb3Configuration;
 import play.Logger;
 import play.Play;
@@ -36,10 +37,14 @@ public class JPAPlugin extends PlayPlugin {
             cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty("jpa.ddl", "update"));
             cfg.setProperty("hibernate.dialect", getDefaultDialect(Play.configuration.getProperty("db.driver")));
             cfg.setProperty("javax.persistence.transaction", "RESOURCE_LOCAL");
-            cfg.setProperty("hibernate.show_sql", Play.configuration.getProperty("jpa.debugSQL", "false"));
-			// inject additional  hibernate.* settings declared in Play! configuration
-			cfg.addProperties( (Properties) Utils.Maps.filterMap( Play.configuration, "^hibernate\\..*"));
-			
+            if(Play.configuration.getProperty("jpa.debugSQL", "false").equals("true")) {
+                org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
+            } else {
+                org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.OFF);
+            }
+            // inject additional  hibernate.* settings declared in Play! configuration
+            cfg.addProperties((Properties) Utils.Maps.filterMap(Play.configuration, "^hibernate\\..*"));
+
             try {
                 Field field = cfg.getClass().getDeclaredField("overridenClassLoader");
                 field.setAccessible(true);
@@ -59,7 +64,7 @@ public class JPAPlugin extends PlayPlugin {
             } catch (PersistenceException e) {
                 throw new JPAException(e.getMessage(), e.getCause() != null ? e.getCause() : e);
             }
-            JPQLDialect.instance = new JPQLDialect ();
+            JPQLDialect.instance = new JPQLDialect();
         }
     }
 

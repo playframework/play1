@@ -25,16 +25,6 @@ import play.mvc.Scope.Params;
  * A super class for JPA entities
  */
 public class JPASupport implements Serializable {
-
-    public Object getId() {
-        try {
-            Field idField = this.getClass().getField("id");
-            idField.setAccessible(true);
-            return idField.get(this);
-        } catch(Exception e) {
-            throw new JPAException("The class " + this.getClass() + " does not define any id field.");
-        }
-    }
     
     public static <T> T create(Class type, String name, Map<String, String[]> params) {
         try {
@@ -285,23 +275,23 @@ public class JPASupport implements Serializable {
         if (!(this.getClass().equals(other.getClass()))) {
             return false;
         }
-        if (this.getId() == null) {
+        if (this.getEntityId() == null) {
             return false;
         }
-        return this.getId().equals(((JPASupport) other).getId());
+        return this.getEntityId().equals(((JPASupport) other).getEntityId());
     }
 
     @Override
     public int hashCode() {
-        if (this.getId() == null) {
+        if (this.getEntityId() == null) {
             return 0;
         }
-        return this.getId().hashCode();
+        return this.getEntityId().hashCode();
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "[" + getId() + "]";
+        return getClass().getSimpleName() + "[" + getEntityId() + "]";
     }
     
     /**
@@ -416,5 +406,14 @@ public class JPASupport implements Serializable {
             throw new UnexpectedException("Error while determining the object @Id for an object of type " + entity.getClass());
         }
         return null;
+    }
+    
+    private Object key;
+    
+    public Object getEntityId() {
+        if(key == null) {
+            key = findKey(this);
+        }
+        return key;
     }
 }

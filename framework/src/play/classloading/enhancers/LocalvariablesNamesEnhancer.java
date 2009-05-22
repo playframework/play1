@@ -75,9 +75,10 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             CtField signature = CtField.make("public static String[] $" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes()) + " = " + iv.toString(), ctClass);
             ctClass.addField(signature);
             sigChecksum.append(iv);
+            
 
             // Bon.
-            // Alors là il s'agit aprés chaque instruction de creation d'une variable locale
+            // Alors là il s'agit après chaque instruction de creation d'une variable locale
             // d'insérer un appel à play.utils.LocalVariables.addVariable('var', var)
             // et sans tout péter ...
             for (int i = 0; i < localVariableAttribute.tableLength(); i++) {

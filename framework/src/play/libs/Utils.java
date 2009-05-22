@@ -4,11 +4,19 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import play.Play;
 
 /**
  * Generic utils
  */
 public class Utils {
+
+    public static String open(String file, Integer line) {
+        if (Play.configuration.containsKey("play.editor")) {
+            return String.format(Play.configuration.getProperty("play.editor"), Play.getFile(file).getAbsolutePath(), line);
+        }
+        return null;
+    }
 
     /**
      * for java.util.Map

@@ -1,0 +1,12 @@
+
+User(a):
+    name: A
+    j: 45
+    birth: 2009-12-12
+
+User(b):
+    name: B
+    b: false
+    c: true
+    l: 10000
+    i: 34   

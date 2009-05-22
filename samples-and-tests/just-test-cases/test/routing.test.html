@@ -1,0 +1,87 @@
+#{selenium 'Just test the simple scenario'}
+
+	open('/')
+	
+	// Missing name
+	clickAndWait('sayHello')
+	assertTextPresent('Hello !')
+
+	// A name
+	clickAndWait('back')
+	type('name', 'Guillaume')
+	clickAndWait('sayHello')
+	assertTextPresent('Hello Guillaume !')
+	
+	// test utf-8
+	clickAndWait('back')
+	type('name', '日本語')
+	clickAndWait('sayHello')
+	assertTextPresent('Hello 日本語 !')
+	
+	// Check URL
+	assertAttribute('back@href', '/')
+	clickAndWait('back')
+	assertAttribute('form@action', '/sayHello?x-http-method-override=PUT')
+	assertAttribute('form@method', 'post')
+	
+	// The yop form
+	assertElementPresent('css=form[action=/application/yop]')
+	assertAttribute('css=form[action=/application/yop]@method', 'post')
+	clickAndWait('yop')
+	assertTextPresent('Yop')
+	clickAndWait('back')
+	assertTextPresent('It works !')
+	
+	// A GET form
+	assertElementPresent('css=form[action=/aGetForm]')
+	assertAttribute('css=form[action=/aGetForm]@method', 'get')
+	clickAndWait('yopGet')
+	assertTextPresent('Hello !')
+	clickAndWait('back')
+	
+	// ... with a name
+	type('getName', 'Toto')
+	clickAndWait('yopGet')
+	assertTextPresent('Hello Toto !')
+	assertEval('window.document.location', '*/aGetForm?name=Toto')
+	
+	// Direct URL with a trailing slash
+	open('/aGetForm/')
+	assertTextPresent('Hello 2null !')
+	open('/aGetForm')
+	assertTextPresent('Hello !')
+	
+	// Optional slash
+	open('/optionalSlash/')
+	assertTextPresent('OK')
+	open('/optionalSlash')
+	assertTextPresent('OK')
+	open('/optionalSlash//')
+	assertTextPresent('Not found')
+	
+	// Catch all route
+	open('/application/optional')
+	assertTextPresent('OK')
+	open('/Application/optional')
+	assertTextPresent('OK')
+	open('/Application/Optional')
+	assertTextPresent('OK')
+	
+	// Alternative URL
+	open('/index')
+	assertTextPresent('It works !')
+	
+	// Reverse
+	open('@{Application.reverse()}')
+	assertText('a', '/')
+	assertText('b', '/sayHello')
+	assertText('c', '/sayHello?name=Guillaume')
+	assertText('d', '/application/yop')
+	assertText('e', '/aGetForm')
+	assertText('f', '/aGetForm/')
+	assertText('g', '/aGetForm?name=Yop')
+	assertText('h', '/aGetForm/?name=Yop')
+	assertText('i', '/optionalSlash')
+	
+	
+#{/selenium}	

@@ -18,10 +18,10 @@ public class JPQLDialect {
         if (query.trim().toLowerCase().startsWith("from ")) {
             return query;
         }
-        if (query.trim().indexOf(" ") == -1 && params != null && params.length == 1) {
+        if (query.trim().indexOf(" ") == -1 && query.trim().indexOf("=") == -1 && params != null && params.length == 1) {
             query += " = ?1";
         }
-        if (query.trim().indexOf(" ") == -1 && params == null) {
+        if (query.trim().indexOf(" ") == -1 && query.trim().indexOf("=") == -1 && params == null) {
             query += " = null";
         }
         return "from " + entityName + " where " + query;
@@ -38,10 +38,10 @@ public class JPQLDialect {
         if (query.trim().toLowerCase().startsWith("from ")) {
             return "delete " + query;
         }
-        if (query.trim().indexOf(" ") == -1 && params != null && params.length == 1) {
+        if (query.trim().indexOf(" ") == -1 && query.trim().indexOf("=") == -1 && params != null && params.length == 1) {
             query += " = ?1";
         }
-        if (query.trim().indexOf(" ") == -1 && params == null) {
+        if (query.trim().indexOf(" ") == -1 && query.trim().indexOf("=") == -1 && params == null) {
             query += " = null";
         }
         return "delete from " + entityName + " where " + query;
@@ -58,10 +58,10 @@ public class JPQLDialect {
         if (query.trim().toLowerCase().startsWith("from ")) {
             return "select count(*) " + query;
         }
-        if (query.trim().indexOf(" ") == -1 && params != null && params.length == 1) {
+        if (query.trim().indexOf(" ") == -1 && query.trim().indexOf("=") == -1 && params != null && params.length == 1) {
             query += " = ?1";
         }
-        if (query.trim().indexOf(" ") == -1 && params == null) {
+        if (query.trim().indexOf(" ") == -1 && query.trim().indexOf("=") == -1 && params == null) {
             query += " = null";
         }
         return "select count(e) from " + entityName + " e where " + query;

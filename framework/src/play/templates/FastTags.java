@@ -68,7 +68,7 @@ public class FastTags {
         if (!("GET".equals(actionDef.method))) {
             out.print("Not implemented yet");
         }
-        out.print("<a href=\"" + actionDef.url + "\">");
+        out.print("<a " + (args.get("id") == null ? "" : "id=\"" + args.get("id") + "\" ") + " href=\"" + actionDef.url + "\">");
         out.print(JavaExtensions.toString(body));
         out.print("</a>");
     }

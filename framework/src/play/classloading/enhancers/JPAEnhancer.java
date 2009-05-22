@@ -6,6 +6,7 @@ import javassist.CtMethod;
 import javassist.CtNewConstructor;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.exceptions.UnexpectedException;
 
 /**
  * Enhance JPASupport entities classes
@@ -40,6 +41,7 @@ public class JPAEnhancer extends Enhancer {
             }
         } catch (Exception e) {
             Logger.error(e, "Error in JPAEnhancer");
+            throw new UnexpectedException("Error in JPAEnhancer", e);
         }
 
         // count

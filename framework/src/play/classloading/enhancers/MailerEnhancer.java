@@ -5,6 +5,7 @@ import javassist.CtMethod;
 import javassist.Modifier;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.exceptions.UnexpectedException;
 import play.mvc.Mailer;
 
 /**
@@ -27,7 +28,8 @@ public class MailerEnhancer extends Enhancer {
                     ctMethod.insertBefore("if(infos.get() != null) {play.Logger.warn(\"You call " + ctMethod.getLongName() + " from \" + ((java.util.Map)infos.get()).get(\"method\") + \". It's forbidden in a Mailer. It will propably fail...\", new Object[0]);}; infos.set(new java.util.HashMap());((java.util.Map)infos.get()).put(\"method\", \"" + ctMethod.getLongName() + "\");");
                     ctMethod.insertAfter("infos.set(null);", true);
                 } catch (Exception e) {
-                    Logger.error(e, "Error in ControllersEnhancer");
+                    Logger.error(e, "Error in MailerEnhancer");
+                    throw new UnexpectedException("Error in MailerEnhancer", e);
                 }
             }
 

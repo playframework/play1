@@ -74,11 +74,11 @@ public abstract class CRUD extends Controller {
                 render("CRUD/show.html", type, object);
             }
         }
-        flash.success(Messages.get("crud.saved", type.modelName, object.getId()));
+        flash.success(Messages.get("crud.saved", type.modelName, object.getEntityId()));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
         }
-        redirect(request.controller + ".show", object.getId());
+        redirect(request.controller + ".show", object.getEntityId());
     }
 
     public static void blank() {
@@ -105,14 +105,14 @@ public abstract class CRUD extends Controller {
             }
         }
         object.save();
-        flash.success(Messages.get("crud.created", type.name, object.getId()));
+        flash.success(Messages.get("crud.created", type.name, object.getEntityId()));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
         }
         if (params.get("_saveAndAddAnother") != null) {
             redirect(request.controller + ".blank");
         }
-        redirect(request.controller + ".show", object.getId());
+        redirect(request.controller + ".show", object.getEntityId());
     }
 
     public static void delete(String id) {
@@ -120,7 +120,7 @@ public abstract class CRUD extends Controller {
         notFoundIfNull(type);
         JPASupport object = type.findById(id);
         object.delete();
-        flash.success(Messages.get("crud.deleted", type.name, object.getId()));
+        flash.success(Messages.get("crud.deleted", type.name, object.getEntityId()));
         redirect(request.controller + ".list");
     }
 

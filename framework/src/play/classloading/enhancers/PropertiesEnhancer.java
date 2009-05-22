@@ -20,6 +20,7 @@ import javassist.expr.FieldAccess;
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.exceptions.UnexpectedException;
 
 /**
  * Generate valid JavaBeans.
@@ -71,6 +72,7 @@ public class PropertiesEnhancer extends Enhancer {
 
             } catch (Exception e) {
                 Logger.error(e, "Error in PropertiesEnhancer");
+                throw new UnexpectedException("Error in PropertiesEnhancer", e);
             }
 
         }
@@ -90,6 +92,7 @@ public class PropertiesEnhancer extends Enhancer {
             }
         } catch (Exception e) {
             Logger.error(e, "Error in PropertiesEnhancer");
+            throw new UnexpectedException("Error in PropertiesEnhancer", e);
         }
 
         // Intercepte les FieldAccess
@@ -133,7 +136,7 @@ public class PropertiesEnhancer extends Enhancer {
                         }
 
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw new UnexpectedException("Error in PropertiesEnhancer", e);
                     }
                 }
             });

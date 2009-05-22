@@ -13,6 +13,10 @@ public class JPAModel extends JPASupport {
     @Id
     @GeneratedValue
     public Long id;
+    
+    public Long getId() {
+        return id;
+    }
 
     @PostLoad
     @Override

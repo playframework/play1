@@ -46,9 +46,6 @@ public class Router {
         route.method = method;
         route.path = path;
         route.path = route.path.replace("//", "/");
-        if (route.path.endsWith("/") && !route.path.equals("/")) {
-            route.path = route.path.substring(0, route.path.length() - 1);
-        }
         route.action = action;
         route.compute();
         if(routes.size() == 0) {
@@ -95,11 +92,12 @@ public class Router {
                 } else {
                     Route route = new Route();
                     route.method = matcher.group("method");
-                    route.path = prefix + matcher.group("path");
-                    route.path = route.path.replace("//", "/");
-                    if (route.path.endsWith("/") && !route.path.equals("/")) {
-                        route.path = route.path.substring(0, route.path.length() - 1);
+                    if(matcher.group("path").equals("/") && !prefix.equals("")) {
+                        route.path = prefix;
+                    } else {
+                        route.path = prefix + matcher.group("path");
                     }
+                    route.path = route.path.replace("//", "/");
                     route.action = action;
                     route.addParams(matcher.group("params"));
                     route.compute();
@@ -269,6 +267,9 @@ public class Router {
                     if (allRequiredArgsAreHere) {
                         StringBuilder queryString = new StringBuilder();
                         String path = route.path;
+                        if(path.endsWith("/?")) {
+                            path = path.substring(0, path.length()-2);
+                        }
                         for (String key : args.keySet()) {
                             if (inPathArgs.contains(key) && args.get(key) != null) {
                                 if (List.class.isAssignableFrom(args.get(key).getClass())) {
@@ -367,7 +368,8 @@ public class Router {
                     return;
                 }
                 if (!this.path.endsWith("/") && !this.path.equals("/")) {
-                    this.path += "/";
+                    Logger.warn("The path for a staticDir route must end with / (%s)", this);
+                    this.path += "/";                    
                 }
                 this.pattern = new Pattern("^" + path + "({resource}.*)$");
                 this.staticDir = action.substring("staticDir:".length());

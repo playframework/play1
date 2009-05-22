@@ -1,0 +1,18 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+<h1>It works !</h1>
+
+#{form action:@hello(), id:'form'}
+	<input id="name" type="text" name="name" />
+	<input id="sayHello" value="Say hello" type="submit" />
+#{/form}
+
+#{form action:@yop()}
+	<input id="yop" value="Yop" type="submit" />
+#{/form}
+
+#{form action:@aGetForm()}
+	<input type="text" name="name" id="getName" />
+	<input id="yopGet" value="GET Yop" type="submit" />
+#{/form}

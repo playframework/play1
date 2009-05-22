@@ -126,6 +126,8 @@ public class TestEngine {
                 if(stackTraceElement.getClassName().equals(className)) {
                     current.sourceInfos = "In " + Play.classes.getApplicationClass(className).javaFile.relativePath() + ", line " + stackTraceElement.getLineNumber();
                     current.sourceCode = Play.classes.getApplicationClass(className).javaSource.split("\n")[stackTraceElement.getLineNumber()-1];
+                    current.sourceFile = Play.classes.getApplicationClass(className).javaFile.relativePath();
+                    current.sourceLine = stackTraceElement.getLineNumber();
                 }
             }
             current.passed = false;
@@ -154,6 +156,8 @@ public class TestEngine {
         public String trace;
         public String sourceInfos;
         public String sourceCode;
+        public String sourceFile;
+        public int sourceLine;
     }
     
     

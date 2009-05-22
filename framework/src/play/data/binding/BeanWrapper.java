@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import play.Logger;
 import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
+import play.exceptions.UnexpectedException;
 
 /**
  * Parameters map to POJO binder
@@ -142,6 +143,7 @@ public class BeanWrapper {
 
             } catch (Exception ex) {
                 Logger.warn(ex, "ERROR in BeanWrapper when setting property %s value is %s", name, value);
+                throw new UnexpectedException(ex);
             }
         }
 

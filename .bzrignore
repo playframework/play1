@@ -42,3 +42,5 @@ samples-and-tests/jobboard/db
 samples-and-tests/jobboard/tmp
 samples-and-tests/jobboard/test-result
 samples-and-tests/jobboard/attachments
+samples-and-tests/just-test-cases/tmp
+samples-and-tests/just-test-cases/test-result
