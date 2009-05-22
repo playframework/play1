@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import play.Logger;
 import play.Play;
-import play.cache.Cache.CacheImpl;
+import play.cache.CacheImpl;
 import play.exceptions.CacheException;
 
 public class GAECache implements CacheImpl {
