@@ -28,6 +28,7 @@ public class Binder {
 
     static Map<Class, SupportedType> supportedTypes = new HashMap<Class, SupportedType>();
     
+
     static {
         supportedTypes.put(Date.class, new DateBinder());
         supportedTypes.put(File.class, new FileBinder());
@@ -35,7 +36,6 @@ public class Binder {
         supportedTypes.put(Locale.class, new LocaleBinder());
 
     }
-
     static Map<Class, BeanWrapper> beanwrappers = new HashMap<Class, BeanWrapper>();
 
     static BeanWrapper getBeanWrapper(Class clazz) {
@@ -56,22 +56,30 @@ public class Binder {
             // Arrays types 
             if (clazz.isArray()) {
                 if (value == null) {
-                    return null;
+                    value = params.get(name + prefix + "[]");
+                }
+                if (value == null) {
+                    return Array.newInstance(clazz.getComponentType(), 0);
                 }
                 Object r = Array.newInstance(clazz.getComponentType(), value.length);
                 for (int i = 0; i < value.length; i++) {
-                    Array.set(r, i, directBind(value[i], clazz.getComponentType()));
+                    try {
+                        Array.set(r, i, directBind(value[i], clazz.getComponentType()));
+                    } catch (Exception e) {
+                        // ?? One item was bad
+                    }
                 }
                 return r;
             }
             // Enums
-            if(Enum.class.isAssignableFrom(clazz)) {
-            	if(value == null || value.length == 0)
-            		return null;
-            	return Enum.valueOf(clazz, value[0]);
+            if (Enum.class.isAssignableFrom(clazz)) {
+                if (value == null || value.length == 0) {
+                    return null;
+                }
+                return Enum.valueOf(clazz, value[0]);
             }
             // Map 
-            if(Map.class.isAssignableFrom(clazz)) {
+            if (Map.class.isAssignableFrom(clazz)) {
                 Class keyClass = String.class;
                 Class valueClass = String.class;
                 if (type instanceof ParameterizedType) {
@@ -80,21 +88,21 @@ public class Binder {
                 }
                 // Search for all params
                 Map r = new HashMap();
-                for(String param : params.keySet()) {
-                    Pattern p = Pattern.compile("^"+name + prefix+"\\[([^\\]]+)\\](.*)$");
+                for (String param : params.keySet()) {
+                    Pattern p = Pattern.compile("^" + name + prefix + "\\[([^\\]]+)\\](.*)$");
                     Matcher m = p.matcher(param);
-                    if(m.matches()) {
+                    if (m.matches()) {
                         String key = m.group(1);
-                        Map<String,String[]> tP = new HashMap();
-                        tP.put("key", new String[] {key});
+                        Map<String, String[]> tP = new HashMap();
+                        tP.put("key", new String[]{key});
                         Object oKey = bindInternal("key", keyClass, keyClass, tP, "");
-                        if (isComposite(name + prefix  +"[" + key + "]", params.keySet())) {
+                        if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
                             BeanWrapper beanWrapper = getBeanWrapper(valueClass);
-                            Object oValue = beanWrapper.bind("", type, params, name + prefix  +"[" + key + "]");
+                            Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]");
                             r.put(oKey, oValue);
                         } else {
                             tP = new HashMap();
-                            tP.put("value", params.get(name + prefix  +"[" + key + "]"));
+                            tP.put("value", params.get(name + prefix + "[" + key + "]"));
                             Object oValue = bindInternal("value", valueClass, valueClass, tP, "");
                             r.put(oKey, oValue);
                         }
@@ -104,9 +112,6 @@ public class Binder {
             }
             // Collections types
             if (Collection.class.isAssignableFrom(clazz)) {
-                if (value == null) {
-                    return null;
-                }
                 if (clazz.isInterface()) {
                     if (clazz.equals(List.class)) {
                         clazz = ArrayList.class;
@@ -123,15 +128,48 @@ public class Binder {
                 if (type instanceof ParameterizedType) {
                     componentClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
                 }
+                if (value == null) {
+                    value = params.get(name + prefix + "[]");
+                    if (value == null && r instanceof List) {
+                        for (String param : params.keySet()) {
+                            Pattern p = Pattern.compile("^" + name + prefix + "\\[([0-9]+)\\](.*)$");
+                            Matcher m = p.matcher(param);
+                            if (m.matches()) {
+                                int key = Integer.parseInt(m.group(1));
+                                while (((List) r).size() <= key) {
+                                    ((List) r).add(null);
+                                }
+                                if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
+                                    BeanWrapper beanWrapper = getBeanWrapper(componentClass);
+                                    Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]");
+                                    ((List) r).set(key, oValue);
+                                } else {
+                                    Map tP = new HashMap();
+                                    tP.put("value", params.get(name + prefix + "[" + key + "]"));
+                                    Object oValue = bindInternal("value", componentClass, componentClass, tP, "");
+                                    ((List) r).set(key, oValue);
+                                }
+                            }
+                        }
+                        return r;
+                    }
+                }
+                if (value == null) {
+                    return r;
+                }
                 for (String v : value) {
-                    r.add(directBind(v, componentClass));
+                    try {
+                        r.add(directBind(v, componentClass));
+                    } catch (Exception e) {
+                        // ?? One item was bad
+                    }
                 }
                 return r;
             }
+            // Simple types
             if (value == null) {
                 value = new String[0];
             }
-            // Simple types
             if (value.length > 0) {
                 return directBind(value[0], clazz);
             } else {
@@ -159,28 +197,28 @@ public class Binder {
             }
             return null;
         } catch (Exception e) {
-            Validation.addError(name+prefix, "validation.invalid");
-                if (clazz.equals(boolean.class)) {
-                    return false;
-                }
-                if (clazz.equals(int.class)) {
-                    return 0;
-                }
-                if (clazz.equals(long.class)) {
-                    return 0;
-                }
-                if (clazz.equals(double.class)) {
-                    return 0;
-                }
-                if (clazz.equals(short.class)) {
-                    return 0;
-                }
-                if (clazz.equals(byte.class)) {
-                    return 0;
-                }
-                if (clazz.equals(char.class)) {
-                    return ' ';
-                }
+            Validation.addError(name + prefix, "validation.invalid");
+            if (clazz.equals(boolean.class)) {
+                return false;
+            }
+            if (clazz.equals(int.class)) {
+                return 0;
+            }
+            if (clazz.equals(long.class)) {
+                return 0;
+            }
+            if (clazz.equals(double.class)) {
+                return 0;
+            }
+            if (clazz.equals(short.class)) {
+                return 0;
+            }
+            if (clazz.equals(byte.class)) {
+                return 0;
+            }
+            if (clazz.equals(char.class)) {
+                return ' ';
+            }
             return null;
         }
     }
@@ -212,7 +250,7 @@ public class Binder {
             if (value == null || value.trim().length() == 0) {
                 return null;
             }
-            if(value.contains(".")) {
+            if (value.contains(".")) {
                 value = value.substring(0, value.indexOf("."));
             }
             return Integer.parseInt(value);
@@ -227,7 +265,7 @@ public class Binder {
             if (value == null || value.trim().length() == 0) {
                 return null;
             }
-            if(value.contains(".")) {
+            if (value.contains(".")) {
                 value = value.substring(0, value.indexOf("."));
             }
             return Short.parseShort(value);
@@ -236,7 +274,7 @@ public class Binder {
             if (value == null || value.trim().length() == 0) {
                 return null;
             }
-            if(value.contains(".")) {
+            if (value.contains(".")) {
                 value = value.substring(0, value.indexOf("."));
             }
             return Long.parseLong(value);
@@ -247,7 +285,7 @@ public class Binder {
             }
             return Float.parseFloat(value);
         }
-        if ( clazz.equals(BigDecimal.class)) {
+        if (clazz.equals(BigDecimal.class)) {
             if (value == null || value.trim().length() == 0) {
                 return null;
             }

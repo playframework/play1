@@ -18,16 +18,17 @@ import play.Play.Mode;
  * Play! server
  */
 public class Server {
-    
+
     private SocketAcceptor acceptor;
     public static int port;
 
     public Server() {
         Properties p = Play.configuration;
         int httpPort = Integer.parseInt(p.getProperty("http.port", "9000"));
-        if (System.getProperties().containsKey("http.port"))
-        	httpPort = Integer.parseInt(System.getProperty("http.port"));
-        if(Play.mode == Mode.DEV) {
+        if (System.getProperties().containsKey("http.port")) {
+            httpPort = Integer.parseInt(System.getProperty("http.port"));
+        }
+        if (Play.mode == Mode.DEV) {
             acceptor = new NioSocketAcceptor(1);
         } else {
             acceptor = new NioSocketAcceptor();

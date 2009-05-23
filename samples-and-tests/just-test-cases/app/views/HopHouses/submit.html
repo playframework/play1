@@ -1,0 +1,58 @@
+#{extends 'main.html' /}
+
+<div id="id">${h.id}</div>
+<div id="numbers">
+	#{list items:h.numbers, as:'n'}
+		${n},
+	#{/list}
+</div>
+<div id="moreNumbers">
+	#{list items:h.moreNumbers, as:'n'}
+		${n},
+	#{/list}
+</div>
+<div id="moreMoreNumbers">
+	#{list items:h.moreMoreNumbers, as:'n'}
+		${n},
+	#{/list}
+</div>
+<div id="tags">
+	#{list items:h.tags, as:'n'}
+		${n},
+	#{/list}
+</div>
+<div id="moreTags">
+	#{list items:h.moreTags, as:'n'}
+		${n},
+	#{/list}
+</div>
+
+<div id="noSet">${h.notSet.length}</div>
+<div id="noSetList">${h.notSetList?.size()}</div>
+
+#{if h.address}
+	<h1>Address</h1>
+	<div id="a.id">${h.address.id}</div>
+	<div id="a.street">${h.address.street}</div>
+	<div id="a.city">${h.address.city?.name}</div>
+	<div id="a.number">${h.address.number}</div>
+	<div id="a.bikes">${h.address.bikes?.length} bikes</div>
+	<div id="a.dogs">
+		${h.address.dogs?.size()} dogs
+		#{list items:h.address.dogs, as:'dog'}
+			${dog},
+		#{/list}
+	</div>
+#{/if}
+
+#{list items:h.texts, as:'t'}
+	<div id="${t.key}">${t}</div>
+#{/list}
+
+#{list items:h.justMap, as:'t'}
+	<div id="${t.key}">${t}</div>
+#{/list}
+
+#{list items:h.dogs, as:'dog'}
+	${dog},
+#{/list}

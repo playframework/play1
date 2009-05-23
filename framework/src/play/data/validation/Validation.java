@@ -3,6 +3,7 @@ package play.data.validation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,6 +93,12 @@ public class Validation {
                     if(annotation.annotationType().equals(Equals.class)) {
                         validator.params.put("equalsTo", name + "." + ((Equals)annotation).value());
                     }
+                    if(annotation.annotationType().equals(Future.class)) {
+                        validator.params.put("reference", ((Future)annotation).value());
+                    }
+                    if(annotation.annotationType().equals(Past.class)) {
+                        validator.params.put("reference", ((Past)annotation).value());
+                    }
                 }
             }
             return validators;
@@ -113,6 +120,13 @@ public class Validation {
                     if(annotation.annotationType().equals(Equals.class)) {
                         validator.params.put("equalsTo", name + "." + ((Equals)annotation).value());
                     }
+                    if(annotation.annotationType().equals(Future.class)) {
+                        validator.params.put("reference", ((Future)annotation).value());
+                    }
+                    if(annotation.annotationType().equals(Past.class)) {
+                        validator.params.put("reference", ((Past)annotation).value());
+                    }
+                    
                 }
                 if(annotation.annotationType().equals(Valid.class)) {
                     containsAtValid = true;
@@ -191,6 +205,50 @@ public class Validation {
     public ValidationResult max(Object o, double max) {
         String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
         return Validation.max(key, o, max);
+    }
+    
+    public static ValidationResult future(String key, Object o, Date reference) {
+        FutureCheck check = new FutureCheck();
+        check.reference = reference;
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult future(Object o, Date reference) {
+        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        return Validation.future(key, o, reference);
+    }
+    
+    public static ValidationResult future(String key, Object o) {
+        FutureCheck check = new FutureCheck();
+        check.reference = new Date();
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult future(Object o) {
+        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        return Validation.future(key, o, new Date());
+    }
+    
+    public static ValidationResult past(String key, Object o, Date reference) {
+        PastCheck check = new PastCheck();
+        check.reference = reference;
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult past(Object o, Date reference) {
+        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        return Validation.past(key, o, reference);
+    }
+    
+    public static ValidationResult past(String key, Object o) {
+        PastCheck check = new PastCheck();
+        check.reference = new Date();
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult past(Object o) {
+        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        return Validation.past(key, o, new Date());
     }
 
     public static ValidationResult match(String key, Object o, String pattern) {

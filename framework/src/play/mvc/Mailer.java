@@ -31,7 +31,7 @@ public class Mailer {
         infos.set(map);
     }
 
-    public static void addRecipient(String... recipients) {
+    public static void addRecipient(Object... recipients) {
         HashMap map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
@@ -68,7 +68,7 @@ public class Mailer {
         infos.set(map);
     }
 
-    public static void setFrom(String from) {
+    public static void setFrom(Object from) {
         HashMap map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
@@ -77,7 +77,7 @@ public class Mailer {
         infos.set(map);
     }
     
-    public static void setReplyTo(String replyTo) {
+    public static void setReplyTo(Object replyTo) {
         HashMap map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
@@ -131,17 +131,17 @@ public class Mailer {
         String body = template.render(templateBinding);
 
         // Recipients
-        List<String> recipientList = (List<String>) infos.get().get("recipients");
-        String[] recipients = new String[recipientList.size()];
+        List<Object> recipientList = (List<Object>) infos.get().get("recipients");
+        Object[] recipients = new Object[recipientList.size()];
         int i = 0;
-        for (String recipient : recipientList) {
+        for (Object recipient : recipientList) {
             recipients[i] = recipient;
             i++;
         }
 
         // From
-        String from = (String) infos.get().get("from");
-        String replyTo = (String) infos.get().get("replyTo");
+        Object from = infos.get().get("from");
+        Object replyTo = infos.get().get("replyTo");
 
         // Attachment
         Object[] attachements = new Object[0];

@@ -51,7 +51,10 @@ public class AlternativeDateFormat {
     	                "yyyyMMddhhmmss",
     	                "dd'/'MM'/'yyyy",
     	                "dd-MM-yyyy",
-    	                "ddMMyyyy"));
+    	                "ddMMyyyy",
+                        "MMddyy",
+                        "MM-dd-yy",
+                        "MM'/'dd'/'yy"));
     	}
     	return dateformat.get();
     }

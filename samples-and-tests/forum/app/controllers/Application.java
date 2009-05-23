@@ -46,10 +46,14 @@ public class Application extends Controller {
 			signup();
 		}
 		User user = new User(email, password, name);
-		if(Notifier.welcome(user)) {
-			flash.success("Your account is created. Please check your emails ...");
-			login();
-		} 
+		try {
+    		if(Notifier.welcome(user)) {
+    			flash.success("Your account is created. Please check your emails ...");
+    			login();
+    		} 
+	    } catch(Exception e) {
+	        Logger.error(e, "Mail error");
+	    }
 		flash.error("Oops ... (the email cannot be sent)");
 		login();
 	}
@@ -94,11 +98,15 @@ public class Application extends Controller {
 	public static void resendConfirmation(String uuid) {
 		User user = User.findByRegistrationUUID(uuid);
 		notFoundIfNull(user);
-		if(Notifier.welcome(user)) {
-			flash.success("Please check your emails ...");
-			flash.put("email", user.email);
-			login();
-		} 
+		try {
+    		if(Notifier.welcome(user)) {
+    			flash.success("Please check your emails ...");
+    			flash.put("email", user.email);
+    			login();
+    		} 
+		} catch(Exception e) {
+	        Logger.error(e, "Mail error");
+	    }
 		flash.error("Oops (the email cannot be sent)...");
 		flash.put("email", user.email);
 		login();

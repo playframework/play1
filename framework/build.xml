@@ -16,13 +16,22 @@
         <delete dir="tests-tmp" />
         <delete file="play.jar" /> 
         <delete file="src/play/version" /> 
+        <delete includeemptydirs="true">
+            <fileset dir="../samples-and-tests">
+                <include name="**/test-result/**"/> 
+                <include name="**/tmp/**"/> 
+                <include name="**/db/**"/> 
+                <include name="**/attachments/**"/> 
+                <include name="**/nbproject/**"/>
+            </fileset> 
+        </delete>
     </target>
     
     <target name="version" unless="version">
         <exec executable="bzr" outputproperty="bzrversion" errorproperty="bzrerror" failonerror="false" failifexecutionfails="false">
             <arg value="revno" />
         </exec>
-        <condition property="version" value="1.0-stable5-r${bzrversion}" else="1.0-stable5-localbuild">
+        <condition property="version" value="1.0-stable6-r${bzrversion}" else="1.0-stable6-localbuild">
             <equals arg1="" arg2="${bzrerror}" trim="true" />
         </condition> 
         <echo message="Version ${version}"></echo>
@@ -174,35 +183,55 @@
     <!-- Launch all *Test.java -->
     
     <target name="test" depends="jar" description="run tests suite">
-        <echo message="Forum application ... (wait)" />
-        <exec executable="${basedir}/../play.bat" osfamily="windows">
-            <arg value="auto-test"/>
-            <arg value="${basedir}/../samples-and-tests/forum"/>
-        </exec>
-        <exec executable="${basedir}/../play" osfamily="unix">
-            <arg value="auto-test"/>
-            <arg value="${basedir}/../samples-and-tests/forum"/>
-        </exec>
+        <condition property="playExtension" value=".bat">
+            <and><os family="windows"/></and>
+        </condition>
+        <condition property="playExtension" value="">
+            <and><os family="unix"/></and>
+        </condition>
         
-        <echo message="GWT application ... (wait)" />
-        <exec executable="${basedir}/../play.bat" osfamily="windows">
-            <arg value="auto-test"/>
-            <arg value="${basedir}/../samples-and-tests/with-gwt"/>
-        </exec>
-        <exec executable="${basedir}/../play" osfamily="unix">
-            <arg value="auto-test"/>
-            <arg value="${basedir}/../samples-and-tests/with-gwt"/>
-        </exec>
+        <echo message="Using ${basedir}/../play${playExtension}" />
         
-        <echo message="Jobs application ... (wait)" />
-        <exec executable="${basedir}/../play.bat" osfamily="windows">
+        <antcall target="play-test">
+            <param name="testAppPath" value="${basedir}/../samples-and-tests/just-test-cases"/>
+        </antcall>
+        
+        <antcall target="play-test">
+            <param name="testAppPath" value="${basedir}/../samples-and-tests/forum"/>
+        </antcall>
+        
+        <antcall target="play-test">
+            <param name="testAppPath" value="${basedir}/../samples-and-tests/with-gwt"/>
+        </antcall>
+        
+        <antcall target="play-test">
+            <param name="testAppPath" value="${basedir}/../samples-and-tests/jobboard"/>
+        </antcall>
+        
+        <antcall target="test-success" />
+        
+    </target>
+    
+    <target name="test-success">
+        <echo message="*****************" />
+        <echo message="All test passed !" />
+        <echo message="*****************" />
+    </target>
+    
+    <target name="play-test">
+        <echo message="play auto-test ${testAppPath} (wait)" />
+        <exec executable="${basedir}/../play${playExtension}" failonerror="true">
             <arg value="auto-test"/>
-            <arg value="${basedir}/../samples-and-tests/jobboard"/>
+            <arg value="${testAppPath}"/>
         </exec>
-        <exec executable="${basedir}/../play" osfamily="unix">
-            <arg value="auto-test"/>
-            <arg value="${basedir}/../samples-and-tests/jobboard"/>
-        </exec>
+        <available file="${testAppPath}/test-result/result.passed" property="${testAppPath}testPassed" />
+        <fail message="Last test has failed ! (Check results in file://${testAppPath}/test-result)">
+            <condition>
+                <not>
+                    <isset property="${testAppPath}testPassed"/>
+                </not>
+            </condition>
+        </fail>
     </target>
     
     <target name="debug-test-single" depends="compile-tests" description="debug a single test">
@@ -246,7 +275,7 @@
     <target name="package" depends="clean,version,jar,javadoc">
         <mkdir dir="dist" /> 
         <zip destfile="dist/play-${version}.zip" comment="Play! ${version}" update="false">
-            <zipfileset prefix="play-${version}" dir=".." includes="**/*" excludes=".*,.*/*,framework/dist/**,id,play,nbproject/**,**/.bzr/**,*.bzrignore,framework/classes/**,framework/tests-results/**" />   
+            <zipfileset prefix="play-${version}" dir=".." includes="**/*" excludes=".*,.*/*,framework/dist/**,id,play,nbproject/**,**/.bzr/**,*.bzrignore,framework/classes/**,framework/tests-results/**,samples-and-tests/**/test-result,samples-and-tests/**/tmp,samples-and-tests/**/db,samples-and-tests/**/attachments" />   
             <zipfileset prefix="play-${version}" dir=".." includes="play" filemode="777" />
         </zip>
     </target>

@@ -18,3 +18,7 @@ validation.match=Must match %2$d
 validation.isTrue=Must be checked
 validation.equals=Must be equals to &{%2$s}
 validation.invalid=Incorrect value
+validation.future=Must be in the future
+validation.after=Must be after %2$s
+validation.past=Must be in the past
+validation.before=Must be before %2$s

@@ -54,9 +54,10 @@ import play.PlayPlugin;
  * 
  * Search what Yahoo! thinks of google (starting from the 30th result).
  * <pre>
- *    response = WS.GET("http://search.yahoo.com/search?p=<em>%s</em>&pstart=1&b=<em>%l</em>", "Google killed me", 30 );
- *    if( response.getStatus() == 200 )
+ *    response = WS.GET("http://search.yahoo.com/search?p=<em>%s</em>&pstart=1&b=<em>%d</em>", "Google killed me", 30 );
+ *    if( response.getStatus() == 200 ) {
  *       html = response.getString();
+ *    }
  * </pre>
  */
 public class WS extends PlayPlugin {
@@ -160,11 +161,29 @@ public class WS extends PlayPlugin {
      * Make a GET request using an url template.
      * If you provide no parameters, the url is left unchanged (no replacements)
      * @param url an URL template with placeholders for parameters
-     * @param params a variable list of parameters to be replaced in the template
+     * @param params a variable list of parameters to be replaced in the template using the String.format(...) syntax
      * @return server response {@link HttpResponse}
      */
     public static HttpResponse GET(String url, Object... params) {
         return GET(null, url, params);
+    }
+    
+    /**
+     * Make a GET request using an url template.
+     * If you provide no parameters, the url is left unchanged (no replacements)
+     * @param url an URL template with placeholders for parameters
+     * @param params a variable Map
+     * @return server response {@link HttpResponse}
+     */
+    public static HttpResponse GET(String url, Map<String,String> params) {
+        StringBuffer sb = new StringBuffer(10);
+        for(String key : params.keySet()) {
+            if(sb.length() > 0) {
+                sb.append("&");
+            }
+            sb.append(key + "=" + encode(params.get(key)));
+        }
+        return GET(sb.toString());
     }
 
     /**
@@ -172,7 +191,7 @@ public class WS extends PlayPlugin {
      * If you provide no parameters, the url is left unchanged (no replacements)
      * @param headers a map of headers to be appended to the request.
      * @param url an template with <tt>%s,%d</tt> placeholders for parameters.
-     * @param params parameters to be replaced in the url template
+     * @param params parameters to be replaced in the url template using the String.format(...) syntax
      * @return HTTP response {@link HttpResponse}
      */
     public static HttpResponse GET(Map<String, Object> headers, String url, Object... params) {

@@ -315,7 +315,7 @@
                         });
                     }
                     if(/.test.html/.test(testId)) {
-                        window.open('/public/test-runner/selenium/TestRunner.html?baseUrl=http://localhost:9000&test=/@tests/'+testId+'.suite&auto=true&close=true&resultsUrl=/@tests/'+testId);
+                        window.open('/public/test-runner/selenium/TestRunner.html?baseUrl=http://localhost:${play.configuration['http.port'] ?: '9000'}&test=/@tests/'+testId+'.suite&auto=true&close=true&resultsUrl=/@tests/'+testId);
                         var checkResult = setInterval(function() {
                              var req = $.ajax({url: '@{TestRunner.run("XXX.result")}'.replace('XXX', testId), async: false});
                              if(req.status == 200) {
@@ -514,7 +514,7 @@
                 #{list items:seleniumTests, as:'test'}
                 <li>
                     <div class="test" id="${test}">
-                        <span class="touch">+</span><a href="/public/test-runner/selenium/TestRunner.html?baseUrl=http://localhost:9000&test=/@tests/${test}.suite">${test}</a>
+                        <span class="touch">+</span><a href="/public/test-runner/selenium/TestRunner.html?baseUrl=http://localhost:${play.configuration['http.port'] ?: '9000'}&test=/@tests/${test}.suite">${test}</a>
                         <div class="testResult"></div>
                     </div>
                 </li>

@@ -1,6 +1,8 @@
 package play.mvc;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
@@ -11,7 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.logging.Level;
 import play.Logger;
+import play.exceptions.UnexpectedException;
 import play.libs.Time;
 import play.libs.Utils;
 
@@ -64,9 +68,7 @@ public class Http {
          * Cookie value
          */
         public String value;
-        
         public boolean sendOnError = false;
-        
         public Integer maxAge;
     }
 
@@ -155,17 +157,17 @@ public class Http {
          * 
          */
         Method invokedMethod;
-        
+
         /**
          * Automatically resolve request format from the Accept header
          * (in this order : html > xml > json > text)
          */
         public void resolveFormat() {
 
-            if(format != null) {
+            if (format != null) {
                 return;
-            }          
-            
+            }
+
             if (headers.get("accept") == null) {
                 format = "html".intern();
                 return;
@@ -192,10 +194,10 @@ public class Http {
                 format = "json".intern();
                 return;
             }
-            
+
             if (accept.endsWith("*/*")) {
-            	 format = "html".intern();
-                 return;
+                format = "html".intern();
+                return;
             }
         }
 
@@ -220,10 +222,10 @@ public class Http {
 
         @Override
         public String toString() {
-            return method + " " + path + (querystring != null && querystring.length()>0 ? "?" + querystring : "");
+            return method + " " + path + (querystring != null && querystring.length() > 0 ? "?" + querystring : "");
         }
-        
-        public boolean isModified (String etag, long last) {
+
+        public boolean isModified(String etag, long last) {
             if (!(headers.containsKey("if-none-match") && headers.containsKey("if-modified-since"))) {
                 return true;
             } else {
@@ -269,7 +271,7 @@ public class Http {
         /**
          * Response body stream
          */
-        public OutputStream out;
+        public ByteArrayOutputStream out;
         /**
          * Send this file directly
          */
@@ -305,36 +307,38 @@ public class Http {
          * @param name Cookie name
          * @param value Cookie value
          */
-        public void setCookie (String name, String value) {
-        	setCookie(name, value, (Integer) null);
+        public void setCookie(String name, String value) {
+            setCookie(name, value, (Integer) null);
         }
-        
+
         /**
          * Set a new cookie that will expire in (current) + duration
          * @param name
          * @param value
          * @param duration Ex: 3d
          */
-        public void setCookie (String name, String value, String duration) {
-        	int expire = Time.parseDuration(duration);
-        	setCookie(name, value, Integer.valueOf(expire));
+        public void setCookie(String name, String value, String duration) {
+            int expire = Time.parseDuration(duration);
+            setCookie(name, value, Integer.valueOf(expire));
         }
-        
+
         public void setCookie(String name, String value, Integer maxAge) {
             if (cookies.containsKey(name)) {
                 cookies.get(name).value = value;
-                if (maxAge!=null)
-                	 cookies.get(name).maxAge = maxAge; 
+                if (maxAge != null) {
+                    cookies.get(name).maxAge = maxAge;
+                }
             } else {
                 Cookie cookie = new Cookie();
                 cookie.name = name;
                 cookie.value = value;
-                if (maxAge!=null)
-                	cookie.maxAge=maxAge;
+                if (maxAge != null) {
+                    cookie.maxAge = maxAge;
+                }
                 cookies.put(name, cookie);
             }
         }
-        
+
         /**
          * Add a cache-control header 
          * @param duration Ex: 3h
@@ -343,7 +347,7 @@ public class Http {
             int maxAge = Time.parseDuration(duration);
             setHeader("Cache-Control", "max-age=" + maxAge);
         }
-        
+
         /**
          * Add cache-control headers
          * @param duration Ex: 3h
@@ -353,6 +357,18 @@ public class Http {
             setHeader("Cache-Control", "max-age=" + maxAge);
             setHeader("Last-Modified", Utils.getHttpDateFormatter().format(new Date(lastModified)));
             setHeader("Etag", etag);
+        }
+        
+        public void print(Object o) {
+            try {
+                out.write(o.toString().getBytes("utf-8"));
+            } catch (IOException ex) {
+                throw new UnexpectedException("UTF-8 problem ?", ex);
+            }
+        }
+        
+        public void reset() {
+            out.reset();
         }
     }
 }

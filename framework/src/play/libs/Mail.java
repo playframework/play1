@@ -136,20 +136,26 @@ public class Mail {
     public static Future<Boolean> send(String from, String[] recipients, String subject, String body, String contentType, Object... attachments) {
         return send(from, from, recipients, subject, body, contentType, attachments);
     }
-    
-        /**
+
+    /**
      * Send an email
      * @param from From address
-       @param replyTo ReplyTo address
+    @param replyTo ReplyTo address
      * @param recipients To addresses
      * @param subject Subject
      * @param body Body
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static Future<Boolean> send(String from, String replyTo, String[] recipients, String subject, String body, String contentType, Object... attachments) {
+    public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String contentType, Object... attachments) {
         try {
-            if(Play.configuration.getProperty("mail.smtp", "").equals("mock")) {
+            if (from == null) {
+                from = Play.configuration.getProperty("mail.smtp.from", "user@localhost");
+            }
+            if (replyTo == null) {
+                replyTo = from;
+            }
+            if (Play.configuration.getProperty("mail.smtp", "").equals("mock")) {
                 Mock.send(from, replyTo, recipients, subject, body, contentType, attachments);
                 return new Future<Boolean>() {
 
@@ -189,7 +195,7 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static MimeMessage buildMessage(String from, String replyTo, String[] recipients, String subject, String body, String contentType, Object... attachments) throws MessagingException {       
+    public static MimeMessage buildMessage(Object from, Object replyTo, Object[] recipients, String subject, String body, String contentType, Object... attachments) throws MessagingException {
         MimeMessage msg = new MimeMessage(getSession());
 
         if (from == null) {
@@ -209,12 +215,18 @@ public class Mail {
             contentType = "text/plain";
         }
 
-        msg.setFrom( new InternetAddress(from));
-        msg.setReplyTo(new InternetAddress[]{new InternetAddress(replyTo == null ? from : replyTo)});
+        msg.setFrom(from instanceof InternetAddress ? (InternetAddress) from : new InternetAddress(from.toString()));
+        InternetAddress reply;
+        if (replyTo == null) {
+            reply = from instanceof InternetAddress ? (InternetAddress) from : new InternetAddress(from.toString());
+        } else {
+            reply = replyTo instanceof InternetAddress ? (InternetAddress) replyTo : new InternetAddress(replyTo.toString());
+        }
+        msg.setReplyTo(new InternetAddress[]{reply});
 
         InternetAddress[] addressTo = new InternetAddress[recipients.length];
         for (int i = 0; i < recipients.length; i++) {
-            addressTo[i] = new InternetAddress(recipients[i]);
+            addressTo[i] = recipients[i] instanceof InternetAddress ? (InternetAddress) recipients[i] : new InternetAddress(recipients[i].toString());
         }
         msg.setRecipients(javax.mail.Message.RecipientType.TO, addressTo);
 
@@ -258,8 +270,8 @@ public class Mail {
                 // port 25 + enable starttls + ssl socket factory
                 props.put("mail.smtp.port", "25");
                 props.put("mail.smtp.starttls.enable", "true");
-                // can't install our socket factory. will work only with server that has a signed certificate
-                // story to be continued in javamail 1.4.2 : https://glassfish.dev.java.net/issues/show_bug.cgi?id=5189
+            // can't install our socket factory. will work only with server that has a signed certificate
+            // story to be continued in javamail 1.4.2 : https://glassfish.dev.java.net/issues/show_bug.cgi?id=5189
             }
 
             if (Play.configuration.containsKey("mail.smtp.localhost")) {
@@ -331,7 +343,7 @@ public class Mail {
      * @param msg A JavaMail message
      */
     public static Future<Boolean> sendMessage(final Message msg) {
-        if(asynchronousSend) {
+        if (asynchronousSend) {
             return executor.submit(new Callable<Boolean>() {
 
                 public Boolean call() {
@@ -350,7 +362,7 @@ public class Mail {
             final StringBuffer result = new StringBuffer();
             try {
                 msg.setSentDate(new Date());
-                Transport.send(msg);                
+                Transport.send(msg);
             } catch (Throwable e) {
                 MailException me = new MailException("Error while sending email", e);
                 Logger.error(me, "The email has not been sent");
@@ -358,26 +370,26 @@ public class Mail {
             }
             return new Future<Boolean>() {
 
-                    public boolean cancel(boolean mayInterruptIfRunning) {
-                        return false;
-                    }
+                public boolean cancel(boolean mayInterruptIfRunning) {
+                    return false;
+                }
 
-                    public boolean isCancelled() {
-                        return false;
-                    }
+                public boolean isCancelled() {
+                    return false;
+                }
 
-                    public boolean isDone() {
-                        return true;
-                    }
+                public boolean isDone() {
+                    return true;
+                }
 
-                    public Boolean get() throws InterruptedException, ExecutionException {
-                        return result.length() == 0;
-                    }
+                public Boolean get() throws InterruptedException, ExecutionException {
+                    return result.length() == 0;
+                }
 
-                    public Boolean get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-                        return result.length() == 0;
-                    }
-                };
+                public Boolean get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                    return result.length() == 0;
+                }
+            };
         }
     }
     static ExecutorService executor = Executors.newCachedThreadPool();
@@ -397,31 +409,31 @@ public class Mail {
             return new PasswordAuthentication(user, password);
         }
     }
-    
+
     public static class Mock {
-        
-        static Map<String,String> emails = new HashMap();
-        
-        static void send(String from, String replyTo, String[] recipients, String subject, String body, String contentType, Object... attachments) {
+
+        static Map<String, String> emails = new HashMap();
+
+        static void send(Object from, Object replyTo, Object[] recipients, String subject, String body, String contentType, Object... attachments) {
             StringBuffer email = new StringBuffer();
             email.append("From Mock Mailer\n\tNew email received by");
-            for(String to : recipients) {
-                email.append(", " + to);
+            for (Object add : recipients) {
+                email.append(", " + (add instanceof InternetAddress ? ((InternetAddress) add).toString() : add.toString()));
             }
-            email.append("\n\tFrom: "+from);
-            email.append("\n\tSubject: "+subject);
-            email.append("\n\tAttachments: "+attachments.length);
-            email.append("\n\tBody("+contentType+"): "+body);
+            email.append("\n\tFrom: " + (from instanceof InternetAddress ? ((InternetAddress) from).toString() : from.toString()));
+            email.append("\n\tReplyTo: " + (replyTo instanceof InternetAddress ? ((InternetAddress) replyTo).toString() : replyTo.toString()));
+            email.append("\n\tSubject: " + subject);
+            email.append("\n\tAttachments: " + attachments.length);
+            email.append("\n\tBody(" + contentType + "): " + body);
             email.append("\n");
             Logger.info(email.toString());
-            for(String to : recipients) {
-                emails.put(to, email.toString());
+            for (Object add : recipients) {
+                emails.put((add instanceof InternetAddress ? ((InternetAddress) add).getAddress() : add.toString()), email.toString());
             }
         }
-        
+
         public static String getLastMessageReceivedBy(String email) {
             return emails.get(email);
         }
-        
-    } 
+    }
 }

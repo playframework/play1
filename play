@@ -148,11 +148,15 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Check if it's a valid application
 	def check_application():
+		global http_port
 		if application_path and not os.path.exists(os.path.join(application_path, 'conf/routes')):
 			print "~ Oops. %s does not seem to host a valid application" % os.path.normpath(application_path)
 			print "~"
 			sys.exit(-1)
-			
+		http_port = readConf('http.port')
+		if not http_port:
+			http_port = '9000'
+		
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Modules list
 	def load_modules():
@@ -509,6 +513,8 @@ try:
 			shutil.rmtree(log_path)
 		if os.path.exists(test_result):
 			shutil.rmtree(test_result)
+		if os.path.exists(os.path.join(application_path, 'tmp')):
+			shutil.rmtree(os.path.join(application_path, 'tmp'))	
 		play_process = subprocess.Popen(java_cmd, env=os.environ, stdout=subprocess.PIPE)
 		while True:
 			line = play_process.stdout.readline().strip()
@@ -527,15 +533,15 @@ try:
 		try:
 			proxy_handler = urllib2.ProxyHandler({})
 			opener = urllib2.build_opener(proxy_handler)
-			opener.open('http://localhost:9000/@tests', );
+			opener.open('http://localhost:%s/@tests' % http_port);
 		except urllib2.HTTPError, e:
 			print "~"
 			print "~ There are compilation errors..."
 			print "~"
 			kill(play_process.pid)
 			sys.exit(-1)
-		print "~ Launching a web browser at http://localhost:9000/@tests?select=all&auto=yes ..."
-		webbrowser.open('http://localhost:9000/@tests?select=all&auto=yes')
+		print "~ Launching a web browser at http://localhost:%s/@tests?select=all&auto=yes ..." % http_port
+		webbrowser.open('http://localhost:%s/@tests?select=all&auto=yes' % http_port)
 		while True:
 			time.sleep(1)
 			if os.path.exists(os.path.join(application_path, 'test-result/result.passed')):

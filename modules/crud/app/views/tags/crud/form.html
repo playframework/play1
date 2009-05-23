@@ -73,7 +73,7 @@
 							break;
 						case "MinSize":
 							out.println(messages.get('crud.help.minlength', it.annotation.value()))
-							break;
+							break;    
 						case "Range":
 							out.println(messages.get('crud.help.range', it.annotation.min(), it.annotation.max()))
 							break;
@@ -86,6 +86,20 @@
 						case "Equals":
 							out.println(messages.get('crud.help.equals', it.params.equalsTo))
 							break;
+						case "Future":
+							if(it.params.reference) {
+								out.println(messages.get('crud.help.after', it.params.reference))		
+							} else {
+								out.println(messages.get('crud.help.future'))								
+							}
+							break;						
+						case "Past":
+							if(it.params.reference) {
+								out.println(messages.get('crud.help.before', it.params.reference))		
+							} else {
+								out.println(messages.get('crud.help.past'))								
+							}
+							break;		
 					}
 				}%
 			%{ } }%

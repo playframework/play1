@@ -188,6 +188,41 @@ public class ActionInvoker {
             for (PlayPlugin plugin : Play.plugins) {
                 plugin.afterActionInvocation();
             }
+            
+            // @Finally
+            if(Controller.getControllerClass() != null) {
+                try {
+                    List<Method> allFinally = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Finally.class);
+                    ControllerInstrumentation.stopActionCall();
+                    for (Method aFinally : allFinally) {
+                        String[] unless = aFinally.getAnnotation(Finally.class).unless();
+                        boolean skip = false;
+                        for (String un : unless) {
+                            if (!un.contains(".")) {
+                                un = aFinally.getDeclaringClass().getName().substring(12) + "." + un;
+                            }
+                            if (un.equals(request.action)) {
+                                skip = true;
+                                break;
+                            }
+                        }
+                        if (!skip) {
+                            if (Modifier.isStatic(aFinally.getModifiers())) {
+                                aFinally.setAccessible(true);
+                                Java.invokeStatic(aFinally, new Object[aFinally.getParameterTypes().length]);
+                            }
+                        }
+                    }
+                } catch(InvocationTargetException ex) {
+                    StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex.getTargetException());
+                    if (element != null) {
+                        throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(), ex.getTargetException());
+                    }
+                    throw new JavaExecutionException(Http.Request.current().action, ex);
+                } catch(Exception e) {
+                    throw new UnexpectedException("Excption while doing @Finally", e);
+                }
+            }
 
         } catch (PlayException e) {
             throw e;
