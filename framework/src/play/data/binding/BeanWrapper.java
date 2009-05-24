@@ -46,7 +46,10 @@ public class BeanWrapper {
             if(name.equals("") && prefix.equals("") && newPrefix.startsWith(".")) {
                 newPrefix = newPrefix.substring(1);
             }
-            prop.setValue(instance, Binder.bindInternal(name, prop.getType(), prop.getGenericType(), params, newPrefix));
+            Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), params, newPrefix);
+            if(value != Binder.MISSING) {
+                prop.setValue(instance, value);
+            }
         }
         return instance;
     }
@@ -104,7 +107,7 @@ public class BeanWrapper {
 
         private Field field;
 
-        private Class dataClass;
+        private Class type;
 
         private Type genericType;
 
@@ -113,7 +116,7 @@ public class BeanWrapper {
         Property(String propertyName, Method setterMethod) {
             name = propertyName;
             setter = setterMethod;
-            dataClass = setter.getParameterTypes()[0];
+            type = setter.getParameterTypes()[0];
             genericType = setter.getGenericParameterTypes()[0];
         }
 
@@ -121,16 +124,11 @@ public class BeanWrapper {
             this.field = field;
             this.field.setAccessible(true);
             name = field.getName();
-            dataClass = field.getType();
+            type = field.getType();
             genericType = field.getGenericType();
         }
 
         public void setValue(Object instance, Object value) {
-            // due to the way the Databinder works, all properties are setted, even if not present in the request
-            // here we avoid to reset all object fields
-            if (value == null) {
-                return;
-            }
             try {
                 if (setter != null) {
                     Logger.trace("invoke setter %s on %s with value %s", setter, instance, value);
@@ -152,7 +150,7 @@ public class BeanWrapper {
         }
 
         Class getType() {
-            return dataClass;
+            return type;
         }
 
         Type getGenericType() {

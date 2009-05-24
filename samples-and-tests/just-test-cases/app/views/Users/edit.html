@@ -1,0 +1,13 @@
+#{extends 'main.html' /}
+	
+#{form @save()}
+	<input type="text" name="u.name" id="name" value="${u.name}" />
+	<input type="text" name="u.b" id="b" value="${u.b}" />
+	<input type="text" name="u.c" id="c" value="${u.c}" />
+	<input type="text" name="u.i" id="i" value="${u.i}" />
+	<input type="text" name="u.j" id="j" value="${u.j}" />
+	<input type="text" name="u.l" id="l" value="${u.l}" />
+	<input type="text" name="u.k" id="k" value="${u.k}" />
+	<input type="text" name="u.birth" id="birth" value="${u.birth?.format('dd/MM/yyyy')}" />
+	<input type="submit" id="go" />
+#{/form}

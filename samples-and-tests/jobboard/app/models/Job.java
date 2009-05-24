@@ -74,7 +74,7 @@ public class Job extends JPAModel {
 	@PreUpdate
     @PrePersist
     void index() {
-		this.index = JavaExtensions.noAccents(this.company.name).toLowerCase() + " ";
+		this.index = JavaExtensions.noAccents(this.company == null ? "" : this.company.name).toLowerCase() + " ";
 		this.index += JavaExtensions.noAccents(this.title).toLowerCase() + " ";
 		this.index += JavaExtensions.noAccents(this.detail).toLowerCase() + " ";
 		this.index += JavaExtensions.noAccents(this.place).toLowerCase();

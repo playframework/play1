@@ -45,6 +45,7 @@ public class Binder {
         }
         return beanwrappers.get(clazz);
     }
+    public static Object MISSING = new Object();
 
     static Object bindInternal(String name, Class clazz, Type type, Map<String, String[]> params, String prefix) {
         try {
@@ -59,7 +60,7 @@ public class Binder {
                     value = params.get(name + prefix + "[]");
                 }
                 if (value == null) {
-                    return Array.newInstance(clazz.getComponentType(), 0);
+                    return MISSING;
                 }
                 Object r = Array.newInstance(clazz.getComponentType(), value.length);
                 for (int i = 0; i < value.length; i++) {
@@ -74,7 +75,7 @@ public class Binder {
             // Enums
             if (Enum.class.isAssignableFrom(clazz)) {
                 if (value == null || value.length == 0) {
-                    return null;
+                    return MISSING;
                 }
                 return Enum.valueOf(clazz, value[0]);
             }
@@ -96,15 +97,21 @@ public class Binder {
                         Map<String, String[]> tP = new HashMap();
                         tP.put("key", new String[]{key});
                         Object oKey = bindInternal("key", keyClass, keyClass, tP, "");
-                        if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
-                            BeanWrapper beanWrapper = getBeanWrapper(valueClass);
-                            Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]");
-                            r.put(oKey, oValue);
-                        } else {
-                            tP = new HashMap();
-                            tP.put("value", params.get(name + prefix + "[" + key + "]"));
-                            Object oValue = bindInternal("value", valueClass, valueClass, tP, "");
-                            r.put(oKey, oValue);
+                        if (oKey != MISSING) {
+                            if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
+                                BeanWrapper beanWrapper = getBeanWrapper(valueClass);
+                                Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]");
+                                r.put(oKey, oValue);
+                            } else {
+                                tP = new HashMap();
+                                tP.put("value", params.get(name + prefix + "[" + key + "]"));
+                                Object oValue = bindInternal("value", valueClass, valueClass, tP, "");
+                                if (oValue != MISSING) {
+                                    r.put(oKey, oValue);
+                                } else {
+                                    r.put(oKey, null);
+                                }
+                            }
                         }
                     }
                 }
@@ -147,15 +154,17 @@ public class Binder {
                                     Map tP = new HashMap();
                                     tP.put("value", params.get(name + prefix + "[" + key + "]"));
                                     Object oValue = bindInternal("value", componentClass, componentClass, tP, "");
-                                    ((List) r).set(key, oValue);
+                                    if (oValue != MISSING) {
+                                        ((List) r).set(key, oValue);
+                                    }
                                 }
                             }
                         }
-                        return r;
+                        return r.size() == 0 ? MISSING : r;
                     }
                 }
                 if (value == null) {
-                    return r;
+                    return MISSING;
                 }
                 for (String v : value) {
                     try {
@@ -167,37 +176,19 @@ public class Binder {
                 return r;
             }
             // Simple types
-            if (value == null) {
-                value = new String[0];
+            if (value == null || value.length == 0) {
+                return MISSING;
             }
-            if (value.length > 0) {
-                return directBind(value[0], clazz);
-            } else {
-                if (clazz.equals(boolean.class)) {
-                    return false;
-                }
-                if (clazz.equals(int.class)) {
-                    return 0;
-                }
-                if (clazz.equals(long.class)) {
-                    return 0;
-                }
-                if (clazz.equals(double.class)) {
-                    return 0;
-                }
-                if (clazz.equals(short.class)) {
-                    return 0;
-                }
-                if (clazz.equals(byte.class)) {
-                    return 0;
-                }
-                if (clazz.equals(char.class)) {
-                    return ' ';
-                }
-            }
-            return null;
+            return directBind(value[0], clazz);
         } catch (Exception e) {
             Validation.addError(name + prefix, "validation.invalid");
+            return MISSING;
+        }
+    }
+
+    public static Object bind(String name, Class clazz, Type type, Map<String, String[]> params) {
+        Object result = bindInternal(name, clazz, type, params, "");
+        if (result == MISSING) {
             if (clazz.equals(boolean.class)) {
                 return false;
             }
@@ -221,13 +212,10 @@ public class Binder {
             }
             return null;
         }
+        return result;
     }
 
-    public static Object bind(String name, Class clazz, Type type, Map<String, String[]> params) {
-        return bindInternal(name, clazz, type, params, "");
-    }
-
-    public static boolean isComposite(String name, Set<String> pNames) {
+    static boolean isComposite(String name, Set<String> pNames) {
         for (String pName : pNames) {
             if (pName.startsWith(name + ".")) {
                 return true;
@@ -246,7 +234,16 @@ public class Binder {
             }
             return supportedTypes.get(clazz).bind(value);
         }
-        if (clazz.getName().equals("int") || clazz.equals(Integer.class)) {
+        if (clazz.getName().equals("int")) {
+            if (value == null || value.trim().length() == 0) {
+                return 0;
+            }
+            if (value.contains(".")) {
+                value = value.substring(0, value.indexOf("."));
+            }
+            return Integer.parseInt(value);
+        }
+        if (clazz.equals(Integer.class)) {
             if (value == null || value.trim().length() == 0) {
                 return null;
             }
@@ -255,13 +252,28 @@ public class Binder {
             }
             return Integer.parseInt(value);
         }
-        if (clazz.getName().equals("double") || clazz.equals(Double.class)) {
+        if (clazz.getName().equals("double")) {
+            if (value == null || value.trim().length() == 0) {
+                return 0D;
+            }
+            return Double.parseDouble(value);
+        }
+        if (clazz.equals(Double.class)) {
             if (value == null || value.trim().length() == 0) {
                 return null;
             }
             return Double.parseDouble(value);
         }
-        if (clazz.getName().equals("short") || clazz.equals(Short.class)) {
+        if (clazz.getName().equals("short")) {
+            if (value == null || value.trim().length() == 0) {
+                return 0;
+            }
+            if (value.contains(".")) {
+                value = value.substring(0, value.indexOf("."));
+            }
+            return Short.parseShort(value);
+        }
+        if (clazz.equals(Short.class)) {
             if (value == null || value.trim().length() == 0) {
                 return null;
             }
@@ -270,7 +282,16 @@ public class Binder {
             }
             return Short.parseShort(value);
         }
-        if (clazz.getName().equals("long") || clazz.equals(Long.class)) {
+        if (clazz.getName().equals("long")) {
+            if (value == null || value.trim().length() == 0) {
+                return 0L;
+            }
+            if (value.contains(".")) {
+                value = value.substring(0, value.indexOf("."));
+            }
+            return Long.parseLong(value);
+        }
+        if (clazz.equals(Long.class)) {
             if (value == null || value.trim().length() == 0) {
                 return null;
             }
@@ -279,7 +300,13 @@ public class Binder {
             }
             return Long.parseLong(value);
         }
-        if (clazz.getName().equals("float") || clazz.equals(Float.class)) {
+        if (clazz.getName().equals("float")) {
+            if (value == null || value.trim().length() == 0) {
+                return 0;
+            }
+            return Float.parseFloat(value);
+        }
+        if (clazz.equals(Float.class)) {
             if (value == null || value.trim().length() == 0) {
                 return null;
             }
@@ -291,7 +318,13 @@ public class Binder {
             }
             return new BigDecimal(value);
         }
-        if (clazz.getName().equals("boolean") || clazz.equals(Boolean.class)) {
+        if (clazz.getName().equals("boolean")) {
+            if (value == null || value.trim().length() == 0) {
+                return false;
+            }
+            return Boolean.parseBoolean(value);
+        }
+        if (clazz.equals(Boolean.class)) {
             if (value == null || value.trim().length() == 0) {
                 return null;
             }

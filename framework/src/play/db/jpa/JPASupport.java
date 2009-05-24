@@ -19,7 +19,6 @@ import javax.persistence.Query;
 import play.Play;
 import play.data.binding.BeanWrapper;
 import play.data.binding.Binder;
-import play.exceptions.JPAException;
 import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
 

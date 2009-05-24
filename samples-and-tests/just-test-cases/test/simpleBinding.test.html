@@ -46,6 +46,40 @@
 	//
 	open('@{Users.index()}')
 	type('name','日本語')
+	type('j','xxx')
+	type('l','yy')
+	clickAndWait('go')
+	assertText('name', '日本語')
+	assertText('b', '')
+	assertText('c', 'false')
+	assertText('i', '')
+	assertText('j', '0')
+	assertText('l', '0')
+	assertText('k', '')
+	assertText('birth', '')
+	assertTextPresent('u.j: Incorrect value')
+	assertTextPresent('u.l: Incorrect value')
+	
+	//
+	open('@{Users.index()}')
+	type('name','日本語')
+	type('i','xxx')
+	type('k','yy')
+	clickAndWait('go')
+	assertText('name', '日本語')
+	assertText('b', '')
+	assertText('c', 'false')
+	assertText('i', '')
+	assertText('j', '0')
+	assertText('l', '0')
+	assertText('k', '')
+	assertText('birth', '')
+	assertTextPresent('u.i: Incorrect value')
+	assertTextPresent('u.k: Incorrect value')	
+	
+	//
+	open('@{Users.index()}')
+	type('name','日本語')
 	type('b','false')
 	clickAndWait('go')
 	assertText('name', '日本語')
@@ -114,6 +148,7 @@
 	assertText('l', '0')
 	assertText('k', '')
 	assertText('birth', '')	
+	assertTextPresent('u.birth: Incorrect value')
 	
 	//
 	open('@{Users.index()}')
