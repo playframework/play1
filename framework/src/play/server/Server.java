@@ -49,6 +49,7 @@ public class Server {
         } catch (IOException e) {
             Logger.error("Could not bind on port " + httpPort, e);
             acceptor.dispose();
+            System.exit(-1);
         }
     }
 

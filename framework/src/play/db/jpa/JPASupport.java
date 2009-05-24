@@ -16,7 +16,9 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Query;
+import play.Play;
 import play.data.binding.BeanWrapper;
+import play.data.binding.Binder;
 import play.exceptions.JPAException;
 import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
@@ -51,12 +53,12 @@ public class JPASupport implements Serializable {
                 //
                 if (field.isAnnotationPresent(OneToOne.class) || field.isAnnotationPresent(ManyToOne.class)) {
                     isEntity = true;
-                    relation = field.getType().getSimpleName();
+                    relation = field.getType().getName();
                 }
                 if (field.isAnnotationPresent(OneToMany.class) || field.isAnnotationPresent(ManyToMany.class)) {
                     Class fieldType = (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                     isEntity = true;
-                    relation = fieldType.getSimpleName();
+                    relation = fieldType.getName();
                     multiple = true;
                 }
 
@@ -66,14 +68,18 @@ public class JPASupport implements Serializable {
                         String[] ids = params.get(name + "." + field.getName());
                         if (ids != null) {
                             for (String _id : ids) {
-                                l.add(JPA.getEntityManager().createQuery("from " + relation + " where id = " + _id).getSingleResult());
+                                Query q = JPA.getEntityManager().createQuery("from " + relation + " where id = ?");
+                                q.setParameter(1, Binder.directBind(_id, findKeyType(Play.classloader.loadClass(relation))));
+                                l.add(q.getSingleResult());
                             }
                         }
                         field.set(o, l);
                     } else {
                         String[] ids = params.get(name + "." + field.getName());
                         if (ids != null && ids.length > 0 && !ids[0].equals("")) {
-                            Object to = (Object) JPA.getEntityManager().createQuery("from " + relation + " where id = " + ids[0]).getSingleResult();
+                            Query q = JPA.getEntityManager().createQuery("from " + relation + " where id = ?");
+                            q.setParameter(1, Binder.directBind(ids[0], findKeyType(Play.classloader.loadClass(relation))));
+                                Object to = q.getSingleResult();
                             field.set(o, to);
                         } else {
                             field.set(o, null);
@@ -404,6 +410,23 @@ public class JPASupport implements Serializable {
             }
         } catch (Exception e) {
             throw new UnexpectedException("Error while determining the object @Id for an object of type " + entity.getClass());
+        }
+        return null;
+    }
+    
+    public static Class findKeyType(Class c) {
+        try {
+            while (c.isAnnotationPresent(Entity.class) || c.isAnnotationPresent(MappedSuperclass.class)) {
+                for (Field field : c.getDeclaredFields()) {
+                    if (field.isAnnotationPresent(Id.class)) {
+                        field.setAccessible(true);
+                        return field.getType();
+                    }
+                }
+                c = c.getSuperclass();
+            }
+        } catch (Exception e) {
+            throw new UnexpectedException("Error while determining the object @Id for an object of type " + c);
         }
         return null;
     }

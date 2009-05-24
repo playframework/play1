@@ -3,12 +3,12 @@
 
 GET			/												CRUD.index
 #{crud.types}
-GET			/${type.controllerName}							${type.controllerName}.list
-GET			/${type.controllerName}/new						${type.controllerName}.blank
-GET			/${type.controllerName}/{<\d+>id}				${type.controllerName}.show
-GET			/${type.controllerName}/{<\d+>id}/{field}		${type.controllerName}.attachment
-GET			/${type.controllerName}/{<\d+>id}/edit			${type.controllerName}.edit
-POST		/${type.controllerName}							${type.controllerName}.create
-PUT			/${type.controllerName}/{<\d+>id}				${type.controllerName}.save
-DELETE		/${type.controllerName}/{<\d+>id}				${type.controllerName}.delete
+GET			/${type.controllerName}							${type.controllerClass.name.substring(12)}.list
+GET			/${type.controllerName}/new						${type.controllerClass.name.substring(12)}.blank
+GET			/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12)}.show
+GET			/${type.controllerName}/{<\d+>id}/{field}		${type.controllerClass.name.substring(12)}.attachment
+GET			/${type.controllerName}/{<\d+>id}/edit			${type.controllerClass.name.substring(12)}.edit
+POST		/${type.controllerName}							${type.controllerClass.name.substring(12)}.create
+PUT			/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12)}.save
+DELETE		/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12)}.delete 
 #{/crud.types}

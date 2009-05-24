@@ -509,24 +509,25 @@ try:
 		print "~ Ctrl+C to stop"
 		print "~ "
 		test_result = os.path.join(application_path, 'test-result')
-		if os.path.exists(log_path):
-			shutil.rmtree(log_path)
 		if os.path.exists(test_result):
 			shutil.rmtree(test_result)
 		if os.path.exists(os.path.join(application_path, 'tmp')):
 			shutil.rmtree(os.path.join(application_path, 'tmp'))	
-		play_process = subprocess.Popen(java_cmd, env=os.environ, stdout=subprocess.PIPE)
+		sout = open(os.path.join(log_path, 'system.out'), 'w')	
+		play_process = subprocess.Popen(java_cmd, env=os.environ, stdout=sout)
+		soutint = open(os.path.join(log_path, 'system.out'), 'r')	
 		while True:
-			line = play_process.stdout.readline().strip()
-			print line
-			if not line:
+			if play_process.poll():
+ 				print "~"
+				print "~ Oops, application has not started ?"
 				print "~"
-				print "~ Oops..."
-				print "~"
-				kill(play_process.pid)
 				sys.exit(-1)
-			if line.find('Listening for HTTP') > -1:
-				break
+			line = soutint.readline().strip()
+			if line:			    
+ 				print line
+				if line.find('Listening for HTTP') > -1:
+					soutint.close()
+					break
 		# Launch the browser
 		print "~"
 		print "~ Loading the test runner ..."
@@ -645,8 +646,8 @@ try:
 		load_modules()
 		do_classpath()
 		do_java()
-		if not os.path.exists(pid_path):
-			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
+		if not os.path.exists(os.path.join(log_path, 'system.out')):
+			print "~ Oops! %s not found" % os.path.normpath(os.path.join(log_path, 'system.out'))
 			print "~"
 			sys.exit(-1)
 		sout = open(os.path.join(log_path, 'system.out'), 'r')

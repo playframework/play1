@@ -22,3 +22,10 @@ Selenium.prototype.assertNotEquals = function(var1, var2) {
         Assert.fail('Expected differents values, but both variables equals to '+a);
     }
 };
+
+Selenium.prototype.assertPath = function(expectedPath) {
+    var path = window.document.location.path;
+    if(path == expectedPath) {
+        Assert.fail('Expected path '+expectedPath+' but was '+path);
+    }
+};

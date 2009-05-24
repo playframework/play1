@@ -1,0 +1,39 @@
+#{fixture delete:'all' /}
+
+#{selenium 'Test the CRUD module'}
+	
+	open('@{CRUD.index()}')
+	assertPath('/admin')
+	
+	// Create a company
+	clickAndWait('link=AdminCompany')
+	assertTextPresent('0 AdminCompany')
+	assertPath('/admin/admincompany')
+	clickAndWait('link=Add Company')
+	assertPath('/admin/admincompany/new')
+	type('object_name', 'Zenexity')
+	clickAndWait('css=input[name=_save]')
+	assertTextPresent('has been created')
+	assertTextPresent('Zenexity')
+	assertPath('/admin/admincompany')
+	clickAndWait('link=Zenexity')
+	assertTextPresent('Edit Company')
+	
+	// Create a project
+	clickAndWait('link=Home')
+	assertPath('/admin')
+	clickAndWait('link=Projects')
+	assertPath('/admin/projects')
+	assertTextPresent('0 Projects')
+	clickAndWait('link=Add Project')
+	assertPath('/admin/projects/new')
+	type('object_name', 'Play')
+	select('object_company', 'Zenexity')
+	clickAndWait('css=input[name=_save]')
+	assertTextPresent('has been created')
+	assertTextPresent('Play belongs to Zenexity')
+	clickAndWait('link=Play belongs to Zenexity')
+	assertTextPresent('Edit Project')
+	
+		
+#{/selenium}

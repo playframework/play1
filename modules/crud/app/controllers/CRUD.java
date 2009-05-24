@@ -245,7 +245,13 @@ public abstract class CRUD extends Controller {
         }
 
         public JPASupport findById(Object id) {
-            return (JPASupport) JPA.getEntityManager().createQuery("from " + entityClass.getName() + " where id = " + id).getSingleResult();
+            Query query = JPA.getEntityManager().createQuery("from " + entityClass.getName() + " where id = ?");
+            try {
+				query.setParameter(1, play.data.binding.Binder.directBind(id+"", play.db.jpa.JPASupport.findKeyType(entityClass)));
+			} catch(Exception e) {
+				throw new RuntimeException("Something bad with id type ?", e);
+			}
+			return (JPASupport) query.getSingleResult();
         }
 
         public List<ObjectField> getFields() {
