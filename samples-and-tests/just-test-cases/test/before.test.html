@@ -1,0 +1,11 @@
+#{selenium 'Test the @Before'}
+
+	open('@{UsingBefore.a('Guillaume')}')
+	assertTextPresent('Youhou Guillaume')
+	
+	// Now the @Finally
+	open('@{UsingBefore.b('Guillaume')}')
+	assertTextNotPresent('Youhou')
+	assertTextPresent('Yop')
+
+#{/selenium}

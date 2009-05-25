@@ -1,0 +1,23 @@
+#{selenium 'Test the errors pages'}
+
+    // 404
+	open('@{HasErrors.willBeNotFound()}')
+	assertTextPresent('Not found')
+	assertTextPresent('Hop')
+	
+	// 500
+	open('@{HasErrors.willThrowError()}')
+	assertTextPresent('Java exception')
+	assertTextPresent('In /app/controllers/HasErrors.java (around line 15)')
+	
+	// 404
+	open('/nimp')
+	assertTextPresent('Not found')
+    assertTextPresent('GET /nimp')
+    
+    // 404
+	open('/application/nimp')
+	assertTextPresent('Not found')
+    assertTextPresent('application.nimp action not found')
+
+#{/selenium}

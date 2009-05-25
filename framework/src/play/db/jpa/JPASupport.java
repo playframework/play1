@@ -312,6 +312,11 @@ public class JPASupport implements Serializable {
             this.sq = sq;
         }
 
+        public JPAQuery(Query query) {
+            this.query = query;
+            this.sq = query.toString();
+        }
+
         /**
          * Retrieve the first result of the query or null
          * @return An entity or null
