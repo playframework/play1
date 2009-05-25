@@ -80,7 +80,7 @@ public class PropertiesEnhancer extends Enhancer {
         // Ajoute le constructeur par défaut
         try {
             boolean hasDefaultConstructor = false;
-            for (CtConstructor constructor : ctClass.getConstructors()) {
+            for (CtConstructor constructor : ctClass.getDeclaredConstructors()) {
                 if (constructor.getParameterTypes().length == 0) {
                     hasDefaultConstructor = true;
                     break;
