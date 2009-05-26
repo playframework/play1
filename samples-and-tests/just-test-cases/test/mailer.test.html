@@ -1,0 +1,15 @@
+#{selenium 'Test the Mailer support'}
+
+	open('@{Application.mail()}')
+	assertTextPresent('OK')
+	storeLastReceivedEmailBy('toto@localhost', 'email')
+	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email"])[1]}', 'subject')
+	assertEquals('Yop', '$[subject]')
+	
+	open('@{Application.mail2()}')
+	assertTextPresent('OK2')
+	storeLastReceivedEmailBy('toto@localhost', 'email2')
+	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email2"])[1]}', 'subject2')
+	assertEquals('Yop2', '$[subject2]')
+
+#{/selenium}

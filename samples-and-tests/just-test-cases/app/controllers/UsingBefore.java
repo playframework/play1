@@ -12,6 +12,11 @@ public class UsingBefore extends Controller {
         renderText("Yop " + name);
     }
     
+    @Before
+    public static void kiki() {
+        System.out.println("X");
+    }
+    
     public static void a(String name) {
         renderText("Youhou " + name);
     }

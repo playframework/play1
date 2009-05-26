@@ -39,5 +39,15 @@ public class Application extends Controller {
     public static void reverse() {
         render();
     }
+    
+    public static void mail() {
+        notifiers.Welcome.welcome();
+        renderText("OK");
+    }
+    
+    public static void mail2() {
+        Welcome.welcome();
+        renderText("OK2");
+    }
 
 }

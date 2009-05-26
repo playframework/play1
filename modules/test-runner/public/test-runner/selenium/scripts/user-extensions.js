@@ -15,11 +15,15 @@ Selenium.prototype.getLastReceivedEmailBy = function(by) {
     return null;
 }
 
-Selenium.prototype.assertNotEquals = function(var1, var2) {
-    var a = storedVars[var1];
-    var b = storedVars[var2];
+Selenium.prototype.assertEquals = function(a, b) {
+    if(a != b) {
+        Assert.fail(a+' != '+b);
+    }
+};
+
+Selenium.prototype.assertNotEquals = function(a, b) {
     if(a == b) {
-        Assert.fail('Expected differents values, but both variables equals to '+a);
+        Assert.fail(a+' == '+b);
     }
 };
 

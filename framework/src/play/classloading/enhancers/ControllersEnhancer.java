@@ -44,9 +44,17 @@ public class ControllersEnhancer extends Enhancer {
                     }
                 }
             });
-            
+
+           
             // Auto-redirect
-            if (Modifier.isPublic(ctMethod.getModifiers()) && Modifier.isStatic(ctMethod.getModifiers())) {
+            boolean isHandler = false;
+            for(Object o : ctMethod.getAnnotations()) {
+                if(o.toString().startsWith("@play.mvc.")) {
+                    isHandler = true;
+                    break;
+                }
+            }
+            if (Modifier.isPublic(ctMethod.getModifiers()) && Modifier.isStatic(ctMethod.getModifiers()) && !isHandler) {
                 try {
                     ctMethod.insertBefore(
                                "if(!play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.isActionCallAllowed()) {"+

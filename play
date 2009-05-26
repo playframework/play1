@@ -432,7 +432,7 @@ try:
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/lib')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/lib'))
 		os.mkdir(os.path.join(war_path, 'WEB-INF/lib'))
 		for jar in classpath:
-			if jar.endswith('.jar') and not jar.find('/provided-') > 0:
+			if jar.endswith('.jar') and not jar.find('provided-') > 0:
 				shutil.copyfile(jar, os.path.join(war_path, 'WEB-INF/lib/%s' % os.path.split(jar)[1]))
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/framework')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/framework'))
 		os.mkdir(os.path.join(war_path, 'WEB-INF/framework'))
