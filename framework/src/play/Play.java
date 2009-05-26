@@ -315,9 +315,6 @@ public class Play {
                 langs = new ArrayList<String>();
             }
             
-            // Cache
-            Cache.init();
-            
             // Clean templates
             TemplateLoader.cleanCompiledCache();
             
@@ -337,6 +334,9 @@ public class Play {
             for (PlayPlugin plugin : plugins) {
                 plugin.onApplicationStart();
             }
+
+            // Cache
+            Cache.init();
 
             // We made it
             started = true;

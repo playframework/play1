@@ -14,7 +14,8 @@ import play.libs.Time;
  */
 public abstract class Cache {
 
-    public static CacheImpl cacheImpl = EhCacheImpl.getInstance();
+    public static CacheImpl cacheImpl;
+    public static CacheImpl forcedCacheImpl;
 
     /**
      * Add an element only if it doesn't exist.
@@ -213,6 +214,10 @@ public abstract class Cache {
      * Init the cache system.
      */
     public static void init() {
+        if(forcedCacheImpl != null) {
+            cacheImpl = forcedCacheImpl;
+            return;
+        }
         if (Play.configuration.getProperty("memcached", "disabled").equals("enabled")) {
             try {
                 cacheImpl = MemcachedImpl.getInstance();
