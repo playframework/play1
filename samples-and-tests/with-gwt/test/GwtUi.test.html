@@ -36,5 +36,5 @@
 	// Wait 10 seconds. The price should change !
 	pause(10000)
 	storeText('css=.price-LCL', 'newPrice')
-	assertNotEquals('oldPrice', 'newPrice')
+	assertNotEquals('$[oldPrice]', '$[newPrice]')
 #{/selenium}
