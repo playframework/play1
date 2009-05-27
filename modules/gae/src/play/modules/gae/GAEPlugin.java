@@ -154,8 +154,6 @@ public class GAEPlugin extends PlayPlugin {
 
     @Override
     public void onConfigurationRead() {
-        // Disable tmp directory
-        Play.configuration.setProperty("play.tmp", "none");
         if(devEnvironment == null) {
             Play.configuration.setProperty("application.log", "DEBUG");
         }

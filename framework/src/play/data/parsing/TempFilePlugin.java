@@ -16,7 +16,8 @@ import play.PlayPlugin;
 public class TempFilePlugin extends PlayPlugin {
 
     private static DecimalFormat format = new DecimalFormat("##########");
-   
+
+
     static {
         format.setMinimumIntegerDigits(10);
         format.setGroupingUsed(false);
@@ -29,6 +30,9 @@ public class TempFilePlugin extends PlayPlugin {
     public static ThreadLocal<File> tempFolder = new ThreadLocal<File>();
 
     public static File createTempFolder() {
+        if(Play.tmpDir == null || Play.readOnlyTmp) {
+            return null;
+        }
         if (tempFolder.get() == null) {
             File file = new File(Play.tmpDir +
                     File.separator + "uploads" + File.separator +

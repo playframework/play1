@@ -59,6 +59,10 @@ public class Play {
      */
     public static File tmpDir = null;
     /**
+     * tmp dir
+     */
+    public static boolean readOnlyTmp = false;
+    /**
      * The framework root
      */
     public static File frameworkPath = null;
@@ -166,11 +170,16 @@ public class Play {
                 tmpDir = new File(applicationPath, tmpDir.getPath());
             }
             Logger.trace("Using %s as tmp dir", Play.tmpDir);
-            try {
-                tmpDir.mkdirs();
-            } catch (Throwable e) {
-                tmpDir = null;
-                Logger.warn("No tmp folder will be used (cannot create the tmp dir)");
+            if(!tmpDir.exists()) {
+                try {
+                    if(readOnlyTmp) {
+                        throw new Exception("ReadOnly tmp");
+                    }
+                    tmpDir.mkdirs();
+                } catch (Throwable e) {
+                    tmpDir = null;
+                    Logger.warn("No tmp folder will be used (cannot create the tmp dir)");
+                }
             }
         }
 
