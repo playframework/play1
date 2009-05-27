@@ -15,6 +15,7 @@ import webbrowser
 import urllib2
 import socket
 import getopt
+import zipfile
 
 # ~~~~~~~~~
 # Utilities
@@ -397,11 +398,15 @@ try:
 		do_java()
 		
 		war_path = None
+		war_zip_path = None
 		try:
-			optlist, args = getopt.getopt(remaining_args, 'o:', ['output='])
+			optlist, args = getopt.getopt(remaining_args, 'o:', ['output=', 'zip'])
 			for o, a in optlist:
 				if o in ('-o', '--output'):
 					war_path = os.path.normpath(os.path.abspath(a))
+			for o, a in optlist:
+				if o in ('--zip'):
+					war_zip_path = war_path + '.war'
 		except getopt.GetoptError, err:
 			print "~ %s" % str(err)
 			print "~ Please specify a path where to generate the WAR, using the -o or --output option"
@@ -441,6 +446,15 @@ try:
 		shutil.copytree(os.path.join(play_base, 'modules'), os.path.join(war_path, 'WEB-INF/modules'))
 		if not os.path.exists(os.path.join(war_path, 'WEB-INF/resources')): os.mkdir(os.path.join(war_path, 'WEB-INF/resources'))
 		shutil.copyfile(os.path.join(play_base, 'resources/messages'), os.path.join(war_path, 'WEB-INF/resources/messages'))
+		if war_zip_path:
+			print "~ Creating zipped archive to %s ..." % (os.path.normpath(war_zip_path))
+			if os.path.exists(war_zip_path):
+				os.remove(war_zip_path)
+			zip = zipfile.ZipFile(war_zip_path, 'w', zipfile.ZIP_STORED)
+			for (dirpath, dirnames, filenames) in os.walk(war_path):
+				for file in filenames:
+					zip.write(os.path.join(dirpath, file), os.path.join(dirpath[len(war_path):], file))
+			zip.close()
 		print "~ Done !"
 		print "~"
 		print "~ You can now load %s as a standard WAR into your servlet container" % (os.path.normpath(war_path))
