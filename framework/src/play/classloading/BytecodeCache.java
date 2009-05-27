@@ -24,7 +24,7 @@ public class BytecodeCache {
             if (Play.tmpDir == null || Play.readOnlyTmp || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
                 return;
             }
-            File f = cacheFile(name.replace("/", "_"));
+            File f = cacheFile(name.replace("/", "_").replace("{", "_").replace("}", "_").replace(":", "_"));
             if (f.exists()) {
                 f.delete();
             }
@@ -44,7 +44,7 @@ public class BytecodeCache {
             if (Play.tmpDir == null || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
                 return null;
             }
-            File f = cacheFile(name.replace("/", "_"));
+            File f = cacheFile(name.replace("/", "_").replace("{", "_").replace("}", "_").replace(":", "_"));
             if (f.exists()) {
                 FileInputStream fis = new FileInputStream(f);
                 // Read hash
@@ -83,7 +83,7 @@ public class BytecodeCache {
             if (Play.tmpDir == null || Play.readOnlyTmp || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
                 return;
             }
-            File f = cacheFile(name.replace("/", "_"));
+            File f = cacheFile(name.replace("/", "_").replace("{", "_").replace("}", "_").replace(":", "_"));
             FileOutputStream fos = new FileOutputStream(f);
             fos.write(hash(source).getBytes("utf-8"));
             fos.write(0);
@@ -117,7 +117,7 @@ public class BytecodeCache {
 
     static File cacheFile(String id) {
         File dir = new File(Play.tmpDir, "bytecode/" + Play.mode.name());
-        if (!dir.exists()) {
+        if (!dir.exists() && Play.tmpDir != null && !Play.readOnlyTmp) {
             dir.mkdirs();
         }
         return new File(dir, id);

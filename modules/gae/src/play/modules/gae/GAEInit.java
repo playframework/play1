@@ -14,6 +14,7 @@ public class GAEInit {
             Logger.setUp("DEBUG");
             Logger.info("Play! is running in Google App Engine");
             Play.readOnlyTmp = true;
+            Play.lazyLoadTemplates = true;
         } else {
             Logger.redirectJuli = true;
         }

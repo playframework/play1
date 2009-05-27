@@ -59,9 +59,13 @@ public class Play {
      */
     public static File tmpDir = null;
     /**
-     * tmp dir
+     * tmp dir is readOnly
      */
     public static boolean readOnlyTmp = false;
+    /**
+     * Lazy load the templates on demand
+     */
+    public static boolean lazyLoadTemplates = false;
     /**
      * The framework root
      */
@@ -384,9 +388,11 @@ public class Play {
             long start = System.currentTimeMillis();
             classloader.getAllClasses();
             Logger.trace("%sms to precompile the Java stuff", System.currentTimeMillis() - start);
-            start = System.currentTimeMillis();
-            TemplateLoader.getAllTemplate();
-            Logger.trace("%sms to precompile the templates", System.currentTimeMillis() - start);
+            if(!lazyLoadTemplates) {
+                start = System.currentTimeMillis();
+                TemplateLoader.getAllTemplate();
+                Logger.trace("%sms to precompile the templates", System.currentTimeMillis() - start);
+            }
             return true;
         } catch (Throwable e) {
             Logger.error(e, "Cannot start in PROD mode with errors");
