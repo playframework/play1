@@ -107,13 +107,13 @@ public class Logger {
     public static void trace(String message, Object... args) {
         if(forceJuli || log4j == null) {
             try {
-                juli.finest(String.format(message, args));
+                juli.finest(format(message, args));
             } catch (Throwable ex) {
                 juli.log(Level.SEVERE, "Oops. Error in Logger !", ex);
             }
         } else {
             try {
-                log4j.trace(String.format(message, args));
+                log4j.trace(format(message, args));
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
             }
@@ -128,13 +128,13 @@ public class Logger {
     public static void debug(String message, Object... args) {
         if(forceJuli || log4j == null) {
             try {
-                juli.fine(String.format(message, args));
+                juli.fine(format(message, args));
             } catch (Throwable ex) {
                 juli.log(Level.SEVERE, "Oops. Error in Logger !", ex);
             }
         } else {
             try {
-                log4j.debug(String.format(message, args));
+                log4j.debug(format(message, args));
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
             }
@@ -151,7 +151,7 @@ public class Logger {
         if(forceJuli || log4j == null) {
            try {
                 if (!niceThrowable(Priority.DEBUG, e, message, args)) {
-                    juli.log(Level.CONFIG, String.format(message, args), e);
+                    juli.log(Level.CONFIG, format(message, args), e);
                 }
             } catch (Throwable ex) {
                 juli.log(Level.SEVERE, "Oops. Error in Logger !", ex);
@@ -159,7 +159,7 @@ public class Logger {
         } else {
             try {
                 if (!niceThrowable(Priority.DEBUG, e, message, args)) {
-                    log4j.debug(String.format(message, args), e);
+                    log4j.debug(format(message, args), e);
                 }
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
@@ -175,13 +175,13 @@ public class Logger {
     public static void info(String message, Object... args) {
         if(forceJuli || log4j == null) {
             try {
-                juli.info(String.format(message, args));
+                juli.info(format(message, args));
             } catch (Throwable ex) {
                 juli.log(Level.SEVERE, "Oops. Error in Logger !", ex);
             } 
         } else {
             try {
-                log4j.info(String.format(message, args));
+                log4j.info(format(message, args));
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
             }
@@ -198,7 +198,7 @@ public class Logger {
         if(forceJuli || log4j == null) {
             try {
                 if (!niceThrowable(Priority.INFO, e, message, args)) {
-                    juli.log(Level.INFO, String.format(message, args), e);
+                    juli.log(Level.INFO, format(message, args), e);
                 }
             } catch (Throwable ex) {
                 juli.log(Level.SEVERE, "Oops. Error in Logger !", ex);
@@ -206,7 +206,7 @@ public class Logger {
         } else {
             try {
                 if (!niceThrowable(Priority.INFO, e, message, args)) {
-                    log4j.info(String.format(message, args), e);
+                    log4j.info(format(message, args), e);
                 }
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
@@ -222,13 +222,13 @@ public class Logger {
     public static void warn(String message, Object... args) {
         if(forceJuli || log4j == null) {
             try {
-                juli.warning(String.format(message, args));
+                juli.warning(format(message, args));
             } catch (Throwable ex) {
                 juli.log(Level.SEVERE, "Oops. Error in Logger !", ex);
             }
         } else {
             try {
-                log4j.warn(String.format(message, args));
+                log4j.warn(format(message, args));
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
             }
@@ -245,7 +245,7 @@ public class Logger {
         if(forceJuli || log4j == null) {
             try {
                 if (!niceThrowable(Priority.WARN, e, message, args)) {
-                    juli.log(Level.WARNING, String.format(message, args), e);
+                    juli.log(Level.WARNING, format(message, args), e);
                 }
             } catch (Throwable ex) {
                 juli.log(Level.SEVERE, "Oops. Error in Logger !", ex);
@@ -253,7 +253,7 @@ public class Logger {
         } else {
             try {
                 if (!niceThrowable(Priority.WARN, e, message, args)) {
-                    log4j.warn(String.format(message, args), e);
+                    log4j.warn(format(message, args), e);
                 }
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
@@ -269,13 +269,13 @@ public class Logger {
     public static void error(String message, Object... args) {
         if(forceJuli || log4j == null) {
             try {
-                juli.severe(String.format(message, args));
+                juli.severe(format(message, args));
             } catch (Throwable ex) {
                 juli.log(Level.SEVERE, "Oops. Error in Logger !", ex);
             }            
         } else {
             try {
-                log4j.error(String.format(message, args));
+                log4j.error(format(message, args));
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
             }
@@ -292,7 +292,7 @@ public class Logger {
         if(forceJuli || log4j == null) {
             try {
                 if (!niceThrowable(Priority.ERROR, e, message, args)) {
-                    juli.log(Level.SEVERE, String.format(message, args), e);
+                    juli.log(Level.SEVERE, format(message, args), e);
                 }
             } catch (Throwable ex) {
                 juli.log(Level.SEVERE, "Oops. Error in Logger !", ex);
@@ -300,7 +300,7 @@ public class Logger {
         } else {
             try {
                 if (!niceThrowable(Priority.ERROR, e, message, args)) {
-                    log4j.error(String.format(message, args), e);
+                    log4j.error(format(message, args), e);
                 }
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
@@ -316,13 +316,13 @@ public class Logger {
     public static void fatal(String message, Object... args) {
         if(forceJuli || log4j == null) {
             try {
-                juli.severe(String.format(message, args));
+                juli.severe(format(message, args));
             } catch (Throwable ex) {
                 juli.log(Level.SEVERE, "Oops. Error in Logger !", ex);
             }            
         } else {
             try {
-                log4j.fatal(String.format(message, args));
+                log4j.fatal(format(message, args));
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
             }
@@ -339,7 +339,7 @@ public class Logger {
         if(forceJuli || log4j == null) {
             try {
                 if (!niceThrowable(Priority.FATAL, e, message, args)) {
-                    juli.log(Level.SEVERE, String.format(message, args), e);
+                    juli.log(Level.SEVERE, format(message, args), e);
                 }
             } catch (Throwable ex) {
                 juli.log(Level.SEVERE, "Oops. Error in Logger !", ex);
@@ -347,7 +347,7 @@ public class Logger {
         } else {
             try {
                 if (!niceThrowable(Priority.FATAL, e, message, args)) {
-                    log4j.fatal(String.format(message, args), e);
+                    log4j.fatal(format(message, args), e);
                 }
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
@@ -385,7 +385,7 @@ public class Logger {
             errorOut.println("");
             errorOut.println("@" + playException.getId());
             errorOut.println("For request " + Request.current());
-            errorOut.println(String.format(message, args));
+            errorOut.println(format(message, args));
             errorOut.println("");
             if (playException.isSourceAvailable()) {
                 errorOut.println(playException.getErrorTitle() + " (In " + playException.getSourceFile() + " around line " + playException.getLineNumber() + ")");
@@ -402,6 +402,13 @@ public class Logger {
             return true;
         }
         return false;
+    }
+
+    static String format(String msg, Object... args) {
+        if(args != null && args.length > 0) {
+            return String.format(msg, args);
+        }
+        return msg;
     }
 
     /**
