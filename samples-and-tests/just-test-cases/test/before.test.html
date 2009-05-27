@@ -7,5 +7,13 @@
 	open('@{UsingBefore.b('Guillaume')}')
 	assertTextNotPresent('Youhou')
 	assertTextPresent('Yop')
+	
+	// Try to call directly UsingBefore.kiki
+	open('/usingbefore/kiki')
+	assertTextPresent('Not found')
+	
+	// Try to call a private method
+	open('/usingbefore/isPrivate')
+	assertTextPresent('Not found')
 
 #{/selenium}

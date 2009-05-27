@@ -25,5 +25,9 @@ public class UsingBefore extends Controller {
         renderText("Youhou " + name);
     }
     
+    static void isPrivate() {
+        renderText("Oops");
+    }
+    
 }
 

@@ -16,7 +16,9 @@ import java.util.Set;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
-import play.mvc.Scope;
+import play.mvc.After;
+import play.mvc.Before;
+import play.mvc.Finally;
 
 /**
  * Java utils
@@ -30,10 +32,13 @@ public class Java {
      * @return The method or null
      */
     public static Method findActionMethod(String name, Class clazz) {
-        while(!clazz.getName().equals("play.mvc.Controller") && !clazz.getName().equals("java.lang.Object")) {
+        while (!clazz.getName().equals("play.mvc.Controller") && !clazz.getName().equals("java.lang.Object")) {
             for (Method m : clazz.getDeclaredMethods()) {
                 if (m.getName().equalsIgnoreCase(name) && Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers())) {
-                    return m;
+                    // Check that it is not an intercepter
+                    if (!m.isAnnotationPresent(Before.class) && !m.isAnnotationPresent(After.class) && !m.isAnnotationPresent(Finally.class)) {
+                        return m;
+                    }
                 }
             }
             clazz = clazz.getSuperclass();
@@ -72,13 +77,13 @@ public class Java {
     public static Object invokeStatic(Method method, Map<String, String[]> args) throws Exception {
         return method.invoke(null, prepareArgs(method, args));
     }
-    
+
     public static Object invokeStatic(Method method, Object[] args) throws Exception {
         return method.invoke(null, args);
     }
-    
+
     static Object[] prepareArgs(Method method, Map<String, String[]> args) throws Exception {
-        String[] paramsNames = parameterNames(method);       
+        String[] paramsNames = parameterNames(method);
         if (paramsNames == null && method.getParameterTypes().length > 0) {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }
@@ -88,7 +93,7 @@ public class Java {
         }
         return rArgs;
     }
-    
+
     public static String[] parameterNames(Method method) throws Exception {
         return (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes())).get(null);
     }
@@ -170,7 +175,6 @@ public class Java {
             findAllFields(sClazz, found);
         }
     }
-    
     /** cache */
     private static Map<Field, FieldWrapper> wrappers = new HashMap<Field, FieldWrapper>();
 
@@ -182,7 +186,7 @@ public class Java {
         }
         return wrappers.get(field);
     }
-    
+
     public static byte[] serialize(Object o) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oo = new ObjectOutputStream(baos);
@@ -191,7 +195,7 @@ public class Java {
         oo.close();
         return baos.toByteArray();
     }
-    
+
     public static Object deserialize(byte[] b) throws Exception {
         ByteArrayInputStream bais = new ByteArrayInputStream(b);
         ObjectInputStream oi = new ObjectInputStream(bais);
