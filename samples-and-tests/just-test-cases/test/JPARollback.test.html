@@ -1,0 +1,26 @@
+#{fixture delete:'all' /}
+
+#{selenium 'Test that JPA.abort() works'}
+
+	// Will save
+	open('@{JPAController.index()}')
+	getEval('window.document.getElementById("form").action="@{JPAController.willSave()}"')
+	type('name', 'Toto1')
+	clickAndWait('save')
+	assertTextPresent('Toto1')
+	
+	// Will not save
+	open('@{JPAController.index()}')
+	getEval('window.document.getElementById("form").action="@{JPAController.willNotSave()}"')
+	type('name', 'Toto2')
+	clickAndWait('save')
+	assertTextNotPresent('Toto2')
+	
+	// Will save
+	open('@{JPAController.index()}')
+	getEval('window.document.getElementById("form").action="@{JPAController.willSave()}"')
+	type('name', 'Toto2')
+	clickAndWait('save')
+	assertTextPresent('Toto2')	
+
+#{/selenium}

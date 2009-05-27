@@ -15,6 +15,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Query;
 import play.Play;
 import play.data.binding.BeanWrapper;
@@ -112,10 +114,12 @@ public class JPASupport implements Serializable {
     }
 
     /**
-     * store (ie insert or update) the entity.
+     * store (ie insert) the entity.
      */
     public <T> T save() {
-        em().persist(this);
+        if(!em().contains(this)) {
+            em().persist(this);
+        }
         return (T) this;
     }
 
@@ -128,7 +132,7 @@ public class JPASupport implements Serializable {
     }
 
     /**
-     * Merge this object to obtain a manager entity.
+     * Merge this object to obtain a managed entity (usefull when the object comes from the Cache).
      */
     public <T> T merge() {
         return (T) em().merge(this);
@@ -443,4 +447,5 @@ public class JPASupport implements Serializable {
         }
         return key;
     }
+    
 }

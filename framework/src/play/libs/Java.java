@@ -1,5 +1,9 @@
 package play.libs;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -177,6 +181,21 @@ public class Java {
             wrappers.put(field, fw);
         }
         return wrappers.get(field);
+    }
+    
+    public static byte[] serialize(Object o) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oo = new ObjectOutputStream(baos);
+        oo.writeObject(o);
+        oo.flush();
+        oo.close();
+        return baos.toByteArray();
+    }
+    
+    public static Object deserialize(byte[] b) throws Exception {
+        ByteArrayInputStream bais = new ByteArrayInputStream(b);
+        ObjectInputStream oi = new ObjectInputStream(bais);
+        return oi.readObject();
     }
 
     /**

@@ -136,7 +136,6 @@ public class EhCacheImpl implements CacheImpl {
     }
 
     public void stop() {
-        System.out.println("CLOSE");
         cache.removeAll();
     }
 }

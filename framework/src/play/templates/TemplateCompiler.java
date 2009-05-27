@@ -96,7 +96,7 @@ public class TemplateCompiler {
 
             // Class header
             print("class ");
-            String className = "Template_" + template.name.replaceAll("/", "_s_").replaceAll("\\.", "_p_").replaceAll("-", "_t_");
+            String className = "Template_" + ((template.name.hashCode()+"").replace("-", "M"));
             print(className);
             println(" extends play.templates.Template.ExecutableTemplate {");
             println("public Object run() { use(play.templates.JavaExtensions) {");

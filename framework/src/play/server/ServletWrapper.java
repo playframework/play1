@@ -143,7 +143,7 @@ public class ServletWrapper extends HttpServlet {
         Request request = new Http.Request();
         URI uri = new URI(httpServletRequest.getRequestURI());
         request.method = httpServletRequest.getMethod().intern();
-        request.path = StringUtils.substringAfter(uri.getPath(), httpServletRequest.getContextPath());
+        request.path = uri.getPath();
         request.querystring = httpServletRequest.getQueryString() == null ? "" : httpServletRequest.getQueryString();
         Logger.trace("httpServletRequest.getContextPath(): " + httpServletRequest.getContextPath());
         Logger.trace("request.path: " + request.path + ", request.querystring: " + request.querystring);

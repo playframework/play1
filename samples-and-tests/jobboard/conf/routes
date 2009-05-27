@@ -9,7 +9,7 @@ GET			/admin						Administration.index
 # Login
 GET			/login						Administration.login
 POST		/login						Administration.authenticate
-GET			/logout						Administration.logout
+GET			/logout						Administration.logout 
 
 # RSS
 GET			/all.xml					Application.index(category:'all',format:'xml')

@@ -7,6 +7,7 @@ import play.Logger;
 public class GAEInit {
 
     static {
+        Logger.redirectJuli = true;
         if(ApiProxy.getCurrentEnvironment() != null) {
             LogLog.setQuietMode(true);
             Logger.forceJuli = true;

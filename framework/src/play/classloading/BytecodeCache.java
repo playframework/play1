@@ -13,7 +13,7 @@ import play.Play;
 public class BytecodeCache {
 
     // Please update the cache version at each release
-    static String version = "g";
+    static String version = "k";
     
     /**
      * Delete the bytecode
@@ -63,6 +63,8 @@ public class BytecodeCache {
                 fis.read(byteCode);
                 fis.close();
                 return byteCode;
+            } else {
+                Logger.trace("Cache MISS for %s", name);
             }
             return null;
         } catch (Exception e) {

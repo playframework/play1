@@ -42,6 +42,13 @@ public class JPA {
     public static EntityManager getEntityManager() {
         return get().entityManager;
     }
+    
+    /*
+     * Tell to JPA do not commit the current transaction
+     */ 
+    public static void abort() {
+        getEntityManager().getTransaction().setRollbackOnly();
+    }
 
     /**
      * @return true if an entityManagerFactory has started

@@ -5,6 +5,7 @@ import javassist.CtClass;
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.Modifier;
+import javassist.bytecode.annotation.Annotation;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
 import javassist.expr.Handler;
@@ -48,8 +49,8 @@ public class ControllersEnhancer extends Enhancer {
            
             // Auto-redirect
             boolean isHandler = false;
-            for(Object o : ctMethod.getAnnotations()) {
-                if(o.toString().startsWith("@play.mvc.")) {
+            for(Annotation a : getAnnotations(ctMethod).getAnnotations()) {
+                if(a.getTypeName().startsWith("play.mvc.")) {
                     isHandler = true;
                     break;
                 }

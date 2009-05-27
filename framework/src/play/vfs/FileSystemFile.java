@@ -43,16 +43,43 @@ public class FileSystemFile extends VirtualFile {
     public String relativePath() {
         List<String> path = new ArrayList<String>();
         File f = realFile;
-        while (f != null && !f.equals(Play.applicationPath) && !f.equals(Play.frameworkPath)) {
+        String prefix = "{?}";
+        while (true) {
             path.add(f.getName());
             f = f.getParentFile();
+            if(f == null) {
+                break; // ??
+            }
+            if(f.equals(Play.frameworkPath)) {
+                prefix = "{play}";
+                break;
+            }
+            if(f.equals(Play.applicationPath)) {
+                prefix = "";
+                break;
+            }
+            String module = isRoot(f);
+            if(module != null) {
+                prefix = module;
+                break;
+            }
+            
         }
         Collections.reverse(path);
         StringBuilder builder = new StringBuilder();
         for (String p : path) {
             builder.append("/" + p);
         }
-        return builder.toString();
+        return prefix + builder.toString();
+    }
+    
+    String isRoot(File f) {
+        for(VirtualFile vf : Play.roots) {
+            if(((FileSystemFile)vf).realFile.getAbsolutePath().equals(f.getAbsolutePath())) {
+                return "{module:"+ vf.getName()+"}";
+            }
+        }
+        return null;
     }
 
     public List<VirtualFile> list() {

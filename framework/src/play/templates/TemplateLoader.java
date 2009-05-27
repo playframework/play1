@@ -19,17 +19,24 @@ public class TemplateLoader {
     protected static Map<String, Template> templates = new HashMap<String, Template>();
 
     public static Template load(VirtualFile file) {
-        if (!templates.containsKey(file.relativePath())) {
-            templates.put(file.relativePath(), TemplateCompiler.compile(file));
+        String key = (file.relativePath().hashCode()+"").replace("-", "M");
+        if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {
+            Template template = new Template(file.relativePath(), file.contentAsString());
+            if(template.loadFromCache()) {
+                templates.put(key, template);
+            } else {
+                templates.put(key, TemplateCompiler.compile(file));
+            }
+        } else {
+            Template template = templates.get(key);
+            if (Play.mode == Play.Mode.DEV && template.timestamp < file.lastModified()) {
+                templates.put(key, TemplateCompiler.compile(file));
+            }
         }
-        Template template = templates.get(file.relativePath());
-        if (Play.mode == Play.Mode.DEV && template.timestamp < file.lastModified()) {
-            templates.put(file.relativePath(), TemplateCompiler.compile(file));
-        }
-        if (templates.get(file.relativePath()) == null) {
+        if (templates.get(key) == null) {
             throw new TemplateNotFoundException(file.relativePath());
         }
-        return templates.get(file.relativePath());
+        return templates.get(key);
     }
 
     public static void cleanCompiledCache() {

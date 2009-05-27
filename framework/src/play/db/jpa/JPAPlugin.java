@@ -58,7 +58,7 @@ public class JPAPlugin extends PlayPlugin {
                     Logger.trace("JPA Model : %s", clazz);
                 }
             }
-            Logger.debug("Initializing JPA ...");
+            Logger.trace("Initializing JPA ...");
             try {
                 JPA.entityManagerFactory = cfg.buildEntityManagerFactory();
             } catch (PersistenceException e) {

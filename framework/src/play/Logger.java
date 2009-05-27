@@ -25,6 +25,7 @@ import play.mvc.Http.Request;
 public class Logger {
     
     public static boolean forceJuli = false;
+    public static boolean redirectJuli = false;
     
     /**
      * The application logger (play).
@@ -61,15 +62,17 @@ public class Logger {
             Logger.juli.setLevel(toJuliLevel(level));
         } else {        
             Logger.log4j.setLevel(org.apache.log4j.Level.toLevel(level));
-            java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
-            for (Handler handler : rootLogger.getHandlers()) {
-                rootLogger.removeHandler(handler);
+            if(redirectJuli) {
+                java.util.logging.Logger rootLogger = java.util.logging.Logger.getLogger("");
+                for (Handler handler : rootLogger.getHandlers()) {
+                    rootLogger.removeHandler(handler);
+                }
+                Handler activeHandler = new JuliToLog4jHandler();
+                java.util.logging.Level juliLevel = toJuliLevel(level);
+                activeHandler.setLevel(juliLevel);
+                rootLogger.addHandler(activeHandler);
+                rootLogger.setLevel(juliLevel);
             }
-            Handler activeHandler = new JuliToLog4jHandler();
-            java.util.logging.Level juliLevel = toJuliLevel(level);
-            activeHandler.setLevel(juliLevel);
-            rootLogger.addHandler(activeHandler);
-            rootLogger.setLevel(juliLevel);
         }
     }
     

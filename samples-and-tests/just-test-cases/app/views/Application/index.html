@@ -10,9 +10,14 @@
 
 #{form action:@yop()}
 	<input id="yop" value="Yop" type="submit" />
+	#{if params.yop}
+		${9/0}
+	#{/if}
 #{/form}
 
-#{form action:@aGetForm()}
+${'Coucou'.up()}
+
+#{form action:@aGetForm()} 
 	<input type="text" name="name" id="getName" />
 	<input id="yopGet" value="GET Yop" type="submit" />
 #{/form}

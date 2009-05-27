@@ -195,6 +195,8 @@ public class Router {
         if(file == null || !file.exists()) {
             throw new NoRouteFoundException("File not found (" + file + ")");
         }
+        String path = file.relativePath();
+        path = path.substring(path.indexOf("}")+1);
         for (Route route : routes) {
             String staticDir = route.staticDir;
             if(staticDir != null) {
@@ -204,8 +206,8 @@ public class Router {
                 if(!staticDir.equals("/") && !staticDir.endsWith("/")) {
                     staticDir = staticDir + "/";
                 }
-                if(file.relativePath().startsWith(staticDir)) {
-                    String to = route.path + file.relativePath().substring(staticDir.length());
+                if(path.startsWith(staticDir)) {
+                    String to = route.path + path.substring(staticDir.length());
                     if(to.endsWith("/index.html")) {
                         to = to.substring(0, to.length() - "/index.html".length() + 1);
                     }

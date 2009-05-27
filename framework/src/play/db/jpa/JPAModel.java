@@ -19,15 +19,13 @@ public class JPAModel extends JPASupport {
     }
 
     @PostLoad
-    @Override
-    public void setupAttachment() {
+    public void onLoad() {
         super.setupAttachment();
     }
 
     @PostPersist
     @PostUpdate
-    @Override
-    public void saveAttachment() {
+    public void onSave() {
         super.saveAttachment();
     }
 }

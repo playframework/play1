@@ -511,8 +511,6 @@ try:
 		test_result = os.path.join(application_path, 'test-result')
 		if os.path.exists(test_result):
 			shutil.rmtree(test_result)
-		if os.path.exists(os.path.join(application_path, 'tmp')):
-			shutil.rmtree(os.path.join(application_path, 'tmp'))	
 		sout = open(os.path.join(log_path, 'system.out'), 'w')	
 		play_process = subprocess.Popen(java_cmd, env=os.environ, stdout=sout)
 		soutint = open(os.path.join(log_path, 'system.out'), 'r')	
@@ -530,14 +528,14 @@ try:
 					break
 		# Launch the browser
 		print "~"
-		print "~ Loading the test runner ..."
+		print "~ Loading the test runner at %s ..." % ('http://localhost:%s/@tests' % http_port)
 		try:
 			proxy_handler = urllib2.ProxyHandler({})
 			opener = urllib2.build_opener(proxy_handler)
 			opener.open('http://localhost:%s/@tests' % http_port);
 		except urllib2.HTTPError, e:
 			print "~"
-			print "~ There are compilation errors..."
+			print "~ There are compilation errors... (%s)" % (e.code)
 			print "~"
 			kill(play_process.pid)
 			sys.exit(-1)

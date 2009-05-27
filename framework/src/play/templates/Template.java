@@ -44,6 +44,7 @@ import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.Codec;
+import play.libs.Java;
 import play.mvc.ActionInvoker;
 import play.mvc.Http.Request;
 import play.mvc.Router;
@@ -76,70 +77,82 @@ public class Template {
         public Class defineTemplate(String name, byte[] byteCode) {
             return defineClass(name, byteCode, 0, byteCode.length, Play.classloader.protectionDomain);
         }
+    }
 
-        
+    public boolean loadFromCache() {
+        try {
+            long start = System.currentTimeMillis();
+            TClassLoader tClassLoader = new TClassLoader();
+            byte[] bc = BytecodeCache.getBytecode(name, source);
+            if (bc != null) {
+
+                String[] lines = new String(bc, "utf-8").split("\n");
+                this.linesMatrix = (HashMap<Integer, Integer>) Java.deserialize(Codec.decodeBASE64(lines[1]));
+                this.doBodyLines = (HashSet<Integer>) Java.deserialize(Codec.decodeBASE64(lines[3]));
+                for (int i = 4; i < lines.length; i = i + 2) {
+                    String className = lines[i];
+                    byte[] byteCode = Codec.decodeBASE64(lines[i + 1]);
+                    Class c = tClassLoader.defineTemplate(className, byteCode);
+                    if (compiledTemplate == null) {
+                        compiledTemplate = c;
+                    }
+                }
+                Logger.trace("%sms to load template %s from cache", System.currentTimeMillis() - start, name);
+                return true;
+            }
+        } catch(Exception e) {
+            Logger.warn(e, "Cannot load %s from cache", name);
+        }
+        return false;
     }
 
     public void compile() {
         if (compiledTemplate == null) {
             try {
-                long start = System.currentTimeMillis();                
-                
+                long start = System.currentTimeMillis();
+
                 TClassLoader tClassLoader = new TClassLoader();
 
-                // Try the cache
-                byte[] bc = BytecodeCache.getBytecode(name, groovySource);
-                if (bc != null) {
+                // Let's compile the groovy source
+                final List<GroovyClass> groovyClassesForThisTemplate = new ArrayList<GroovyClass>();
+                // ~~~ Please !
+                CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
+                compilerConfiguration.setSourceEncoding("utf-8"); // ouf                        
+                CompilationUnit compilationUnit = new CompilationUnit(compilerConfiguration);
+                compilationUnit.addSource(new SourceUnit(name, groovySource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()));
+                Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
+                phasesF.setAccessible(true);
+                LinkedList[] phases = (LinkedList[]) phasesF.get(compilationUnit);
+                LinkedList output = new LinkedList();
+                phases[Phases.OUTPUT] = output;
+                output.add(new GroovyClassOperation() {
 
-                    String[] lines = new String(bc, "utf-8").split("\n");
-                    for (int i = 0; i < lines.length; i = i + 2) {
-                        String className = lines[i];
-                        byte[] byteCode = Codec.decodeBASE64(lines[i + 1]);
-                        Class c = tClassLoader.defineTemplate(className, byteCode);
-                        if (compiledTemplate == null) {
-                            compiledTemplate = c;
-                        }
+                    public void call(GroovyClass gclass) {
+                        groovyClassesForThisTemplate.add(gclass);
                     }
-                    Logger.trace("%sms to load template %s from cache", System.currentTimeMillis() - start, name);
+                });
+                compilationUnit.compile();
+                // ouf 
 
-                } else {
-                    
-                    // Let's compile the groovy source
-                    final List<GroovyClass> groovyClassesForThisTemplate = new ArrayList<GroovyClass>();
-                    // ~~~ Please !
-                    CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
-                    compilerConfiguration.setSourceEncoding("utf-8"); // ouf                        
-                    CompilationUnit compilationUnit = new CompilationUnit(compilerConfiguration);
-                    compilationUnit.addSource(new SourceUnit(name, groovySource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()));
-                    Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
-                    phasesF.setAccessible(true);
-                    LinkedList[] phases = (LinkedList[]) phasesF.get(compilationUnit);
-                    LinkedList output = new LinkedList();
-                    phases[Phases.OUTPUT] = output;
-                    output.add(new GroovyClassOperation() {
-
-                        public void call(GroovyClass gclass) {
-                            groovyClassesForThisTemplate.add(gclass);
-                        }
-                    });
-                    compilationUnit.compile();
-                    // ouf 
-
-                    // Define script classes
-                    StringBuilder sb = new StringBuilder();
-                    for (GroovyClass gclass : groovyClassesForThisTemplate) {
-                        tClassLoader.defineTemplate(gclass.getName(), gclass.getBytes());
-                        sb.append(gclass.getName() + "\n");
-                        sb.append(Codec.encodeBASE64(gclass.getBytes()).replaceAll("\\s", ""));
-                        sb.append("\n");
-                    }
-                    // Cache
-                    BytecodeCache.cacheBytecode(sb.toString().getBytes("utf-8"), name, groovySource);
-                    compiledTemplate = tClassLoader.loadClass(groovyClassesForThisTemplate.get(0).getName());
-
-                    Logger.trace("%sms to compile template %s", System.currentTimeMillis() - start, name);
-
+                // Define script classes
+                StringBuilder sb = new StringBuilder();
+                sb.append("LINESMATRIX" + "\n");
+                sb.append(Codec.encodeBASE64(Java.serialize(linesMatrix)).replaceAll("\\s", ""));
+                sb.append("\n");
+                sb.append("DOBODYLINES" + "\n");
+                sb.append(Codec.encodeBASE64(Java.serialize(doBodyLines)).replaceAll("\\s", ""));
+                sb.append("\n");
+                for (GroovyClass gclass : groovyClassesForThisTemplate) {
+                    tClassLoader.defineTemplate(gclass.getName(), gclass.getBytes());
+                    sb.append(gclass.getName() + "\n");
+                    sb.append(Codec.encodeBASE64(gclass.getBytes()).replaceAll("\\s", ""));
+                    sb.append("\n");
                 }
+                // Cache
+                BytecodeCache.cacheBytecode(sb.toString().getBytes("utf-8"), name, source);
+                compiledTemplate = tClassLoader.loadClass(groovyClassesForThisTemplate.get(0).getName());
+
+                Logger.trace("%sms to compile template %s", System.currentTimeMillis() - start, name);
 
             } catch (MultipleCompilationErrorsException e) {
                 if (e.getErrorCollector().getLastError() != null) {
@@ -229,7 +242,7 @@ public class Template {
                     throw (TagInternalException) cleanStackTrace(e);
                 } else if (e instanceof NoRouteFoundException) {
                     NoRouteFoundException ex = (NoRouteFoundException) cleanStackTrace(e);
-                    if(ex.getFile() != null) {
+                    if (ex.getFile() != null) {
                         throw new NoRouteFoundException(ex.getFile(), this, this.linesMatrix.get(stackTraceElement.getLineNumber()));
                     }
                     throw new NoRouteFoundException(ex.getAction(), ex.getArgs(), this, this.linesMatrix.get(stackTraceElement.getLineNumber()));
@@ -247,7 +260,7 @@ public class Template {
         List<StackTraceElement> cleanTrace = new ArrayList<StackTraceElement>();
         for (StackTraceElement se : e.getStackTrace()) {
             if (se.getClassName().startsWith("Template_")) {
-                String tn = se.getClassName().substring(9).replace("_s_", "/").replace("_p_", ".").replace("_t_", "-");
+                String tn = se.getClassName().substring(9);
                 if (tn.indexOf("$") > -1) {
                     tn = tn.substring(0, tn.indexOf("$"));
                 }
@@ -258,7 +271,7 @@ public class Template {
                         ext = tn.substring(tn.indexOf(".") + 1);
                         tn = tn.substring(0, tn.indexOf("."));
                     }
-                    StackTraceElement nse = new StackTraceElement(tn, ext, "line", line);
+                    StackTraceElement nse = new StackTraceElement(TemplateLoader.templates.get(tn).name, ext, "line", line);
                     cleanTrace.add(nse);
                 }
             }
@@ -305,7 +318,7 @@ public class Template {
                 try {
                     tagTemplate = TemplateLoader.load("tags/" + templateName + ".tag");
                 } catch (TemplateNotFoundException ex) {
-                    if(callerExtension.equals("tag")) {
+                    if (callerExtension.equals("tag")) {
                         throw new TemplateNotFoundException("tags/" + templateName + ".tag", template, fromLine);
                     }
                     throw new TemplateNotFoundException("tags/" + templateName + "." + callerExtension + " or tags/" + templateName + ".tag", template, fromLine);
@@ -363,12 +376,12 @@ public class Template {
             @SuppressWarnings("unchecked")
             public Object invokeMethod(String name, Object param) {
                 try {
-                    if(controller == null) {
+                    if (controller == null) {
                         controller = Request.current().controller;
                     }
                     String action = controller + "." + name;
-                    if(action.endsWith(".call")) {
-                        action = action.substring(0, action.length()-5);
+                    if (action.endsWith(".call")) {
+                        action = action.substring(0, action.length() - 5);
                     }
                     try {
                         Map<String, Object> r = new HashMap<String, Object>();
