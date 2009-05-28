@@ -311,6 +311,7 @@ public class Play {
                     if (plugin.getClass().getClassLoader().getClass().equals(ApplicationClassloader.class)) {
                         PlayPlugin newPlugin = (PlayPlugin) classloader.loadClass(plugin.getClass().getName()).getConstructors()[0].newInstance();
                         newPlugin.onLoad();
+                        newPlugin.onConfigurationRead();
                         newPlugins.add(newPlugin);
                     } else {
                         newPlugins.add(plugin);
