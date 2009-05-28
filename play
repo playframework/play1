@@ -469,6 +469,7 @@ try:
 	# ~~~~~~~~~~~~~~~~~~~~~~ [cp] Display the application classpath
 	if play_command == 'cp' or play_command == 'classpath':
 		check_application()
+		load_modules()
 		do_classpath()
 		print "~ Computed classpath is :"
 		print "~ "
