@@ -299,9 +299,6 @@ public class Play {
                 stop();
             }
 
-            // Reload configuration
-            readConfiguration();
-
             if (mode == Mode.DEV) {
                 // Need a new classloader
                 classloader = new ApplicationClassloader();
@@ -311,7 +308,6 @@ public class Play {
                     if (plugin.getClass().getClassLoader().getClass().equals(ApplicationClassloader.class)) {
                         PlayPlugin newPlugin = (PlayPlugin) classloader.loadClass(plugin.getClass().getName()).getConstructors()[0].newInstance();
                         newPlugin.onLoad();
-                        newPlugin.onConfigurationRead();
                         newPlugins.add(newPlugin);
                     } else {
                         newPlugins.add(plugin);
@@ -319,6 +315,9 @@ public class Play {
                 }
                 plugins = newPlugins;
             }
+            
+            // Reload configuration
+            readConfiguration();
 
             // Configure logs
             String logLevel = configuration.getProperty("application.log", "INFO");
