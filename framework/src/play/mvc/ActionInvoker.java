@@ -12,6 +12,7 @@ import java.util.Map;
 import play.Play;
 import play.PlayPlugin;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
+import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.data.binding.Binder;
 import play.data.parsing.UrlEncodedParser;
 import play.data.validation.Validation;
@@ -242,6 +243,10 @@ public class ActionInvoker {
             String controller = fullAction.substring(0, fullAction.lastIndexOf("."));
             String action = fullAction.substring(fullAction.lastIndexOf(".") + 1);
             controllerClass = Play.classloader.getClassIgnoreCase(controller);
+            if(!ControllerSupport.class.isAssignableFrom(controllerClass)) {
+                throw new ActionNotFoundException(fullAction, new Exception("class " + controller + " does not extend play.mvc.Controller"));
+                
+            }
             actionMethod = Java.findActionMethod(action, controllerClass);
             if (actionMethod == null) {
                 throw new ActionNotFoundException(fullAction, new Exception("No method public static void " + action + "() was found in class " + controller));

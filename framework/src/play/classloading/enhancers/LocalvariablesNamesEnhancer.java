@@ -1,5 +1,6 @@
 package play.classloading.enhancers;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,13 +13,12 @@ import javassist.CtMethod;
 import javassist.Modifier;
 import javassist.bytecode.Bytecode;
 import javassist.bytecode.CodeAttribute;
-import javassist.bytecode.CodeIterator;
+import javassist.bytecode.CodeIterator; 
 import javassist.bytecode.LocalVariableAttribute;
+import javassist.bytecode.Opcode;
 import javassist.compiler.Javac;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.mvc.Controller;
-import play.mvc.Mailer;
 
 /**
  * Track names of local variables ...
@@ -29,18 +29,14 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
 
         CtClass ctClass = makeClass(applicationClass);
-        if (!ctClass.subtypeOf(classPool.get(Controller.class.getName())) && !ctClass.subtypeOf(classPool.get(Mailer.class.getName()))) {
+        if (!ctClass.subtypeOf(classPool.get(LocalVariablesSupport.class.getName()))) {
             return;
         }
         
         StringBuilder sigChecksum = new StringBuilder();
 
         for (CtMethod method : ctClass.getDeclaredMethods()) {
-
-            if (!Modifier.isStatic(method.getModifiers())) {
-                continue;
-            }
-
+            
             // Signatures names
             CodeAttribute codeAttribute = (CodeAttribute) method.getMethodInfo().getAttribute("Code");
             if (codeAttribute == null || javassist.Modifier.isAbstract(method.getModifiers())) {
@@ -48,10 +44,15 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             }
             LocalVariableAttribute localVariableAttribute = (LocalVariableAttribute) codeAttribute.getAttribute("LocalVariableTable");
             if (localVariableAttribute == null || localVariableAttribute.tableLength() < method.getParameterTypes().length) {
-                continue;
+                if(method.getParameterTypes().length > 0) {
+                    continue;
+                }
             }
             List<String> names = new ArrayList<String>();
-            for (int i = 0; i < method.getParameterTypes().length; i++) {
+            for (int i = 0; i < method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1); i++) {
+                if(localVariableAttribute == null) {
+                    continue;
+                }
                 String name = localVariableAttribute.getConstPool().getUtf8Info(localVariableAttribute.nameIndex(i));
                 if (!name.equals("this")) {
                     names.add(name);
@@ -72,11 +73,17 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 }
                 iv.append("};");
             }
+            
             CtField signature = CtField.make("public static String[] $" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes()) + " = " + iv.toString(), ctClass);
             ctClass.addField(signature);
             sigChecksum.append(iv);
             
-
+            // No variables name, skip ...
+            if(localVariableAttribute == null) {
+                continue;
+            }
+            
+            
             // Bon.
             // Alors là il s'agit après chaque instruction de creation d'une variable locale
             // d'insérer un appel à play.utils.LocalVariables.addVariable('var', var)
@@ -88,6 +95,12 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 if (name.equals("this")) {
                     continue;
                 }
+                
+                /* DEBUG
+                IO.write(ctClass.toBytecode(), new File("/tmp/lv_"+applicationClass.name+".class"));
+                ctClass.defrost();
+                */
+                
                 // l'instruction a laquelle cette variable locale est créée
                 Integer pc = localVariableAttribute.startPc(i);
 
@@ -95,9 +108,13 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 CodeIterator iterator = codeAttribute.iterator();
                 iterator.move(pc);
                 Integer insertionPc = iterator.next();
+                
+                Javac jv = new Javac(ctClass);
+                
+                // Is parameter variable ?
+                boolean isParameter = i < method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1);
 
                 // compile le bout de code
-                Javac jv = new Javac(ctClass);
                 jv.recordLocalVariables(codeAttribute, insertionPc);
                 jv.recordParams(method.getParameterTypes(), Modifier.isStatic(method.getModifiers()));
                 jv.setMaxLocals(codeAttribute.getMaxLocals());
@@ -113,13 +130,19 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 }
                 iterator.insert(insertionPc, b.get());
                 iterator.insert(b.getExceptionTable(), insertionPc);
+                
 
                 // Ensuite il faut tracer également chaque reaffectation de la variable.
                 CodeIterator codeIterator = codeAttribute.iterator();
+                
                 // Bon chaque instruction de cette méthode
                 while (codeIterator.hasNext()) {
                     int index = codeIterator.next();
                     int op = codeIterator.byteAt(index);
+                    
+                    // DEBUG
+                    // printOp(op);
+                    
                     int varNumber = -1;
                     // La variable change
                     if (storeByCode.containsKey(op)) {
@@ -163,6 +186,9 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         ctClass.defrost();
         applicationClass.sigChecksum = sigChecksum.toString().hashCode();
     }
+    
+    public static interface LocalVariablesSupport {
+    }
 
     public static class LocalVariablesNamesTracer {
 
@@ -192,7 +218,6 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 buffer.append(param);
             }
             Integer hash = buffer.toString().hashCode();
-            ;
             if (hash < 0) {
                 return -hash;
             }
@@ -325,5 +350,16 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         storeByCode.put(CodeIterator.DSTORE_2, 2);
         storeByCode.put(CodeIterator.DSTORE_3, 3);
         storeByCode.put(CodeIterator.DSTORE, -2);
+    }
+    
+    static void printOp(int op) {
+        try {
+            for(Field f : Opcode.class.getDeclaredFields()) {
+                if(java.lang.reflect.Modifier.isStatic(f.getModifiers()) && java.lang.reflect.Modifier.isPublic(f.getModifiers()) && f.getInt(null) == op) {
+                    System.out.println(op + " " + f.getName());
+                }
+            }
+        } catch(Exception e) {
+        }
     }
 }

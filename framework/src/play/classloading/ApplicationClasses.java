@@ -15,8 +15,8 @@ import play.classloading.enhancers.MailerEnhancer;
 import play.classloading.enhancers.PropertiesEnhancer;
 import play.classloading.enhancers.ZDBEnhancer;
 import play.exceptions.UnexpectedException;
-import play.vfs.VirtualFile;
-
+import play.vfs.VirtualFile; 
+ 
 /**
  * Application classes container.
  */
@@ -91,6 +91,10 @@ public class ApplicationClasses {
     public List<ApplicationClass> all() {
         return new ArrayList<ApplicationClass>(classes.values());
     }
+    
+    public void add(ApplicationClass applicationClass) {
+        classes.put(applicationClass.name, applicationClass);
+    }
 
     /**
      * Does this class is already loaded ?
@@ -102,7 +106,7 @@ public class ApplicationClasses {
     }    
     
     // Enhancers
-    Class[] enhancers = new Class[]{
+    static Class[] enhancers = new Class[]{
         ControllersEnhancer.class,
         MailerEnhancer.class,
         PropertiesEnhancer.class,
@@ -114,7 +118,7 @@ public class ApplicationClasses {
     /**
      * Represent a application class
      */
-    public class ApplicationClass {
+    public static class ApplicationClass {
 
         /**
          * The fully qualified class name
@@ -152,6 +156,9 @@ public class ApplicationClasses {
          * Signatures checksum
          */
         public int sigChecksum;
+        
+        public ApplicationClass() {
+        }
 
         public ApplicationClass(String name) {
             this.name = name;
@@ -211,7 +218,7 @@ public class ApplicationClasses {
          */
         public byte[] compile() {
             long start = System.currentTimeMillis();
-            compiler.compile(new String[] {this.name});             
+            Play.classes.compiler.compile(new String[] {this.name});             
             Logger.trace("%sms to compile class %s", System.currentTimeMillis()-start, name);
             return this.javaByteCode;
         }
@@ -233,6 +240,13 @@ public class ApplicationClasses {
             compiled = true;
             this.timestamp = this.javaFile.lastModified();  
         }
+
+        @Override
+        public String toString() {
+            return name + " (compiled:" + compiled + ")";
+        }
+        
+        
     }
 
     // ~~ Utils
@@ -243,7 +257,7 @@ public class ApplicationClasses {
      * @param name The fully qualified class name 
      * @return The virtualFile if found
      */
-    public VirtualFile getJava(String name) {
+    public static VirtualFile getJava(String name) {
         String fileName = name;
         if (fileName.contains("$")) {
             fileName = fileName.substring(0, fileName.indexOf("$"));

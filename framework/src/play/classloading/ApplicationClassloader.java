@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import play.Logger;
 import play.Play;
+import play.PlayPlugin;
 import play.vfs.VirtualFile;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
@@ -280,14 +281,22 @@ public class ApplicationClassloader extends ClassLoader {
         if (allClasses == null) {
             allClasses = new ArrayList<Class>();
             List<ApplicationClass> all = new ArrayList<ApplicationClass>();
+            
+            // Let's plugins play
+            for(PlayPlugin plugin : Play.plugins) {
+                plugin.compileAll(all);
+            }
+            
             for (VirtualFile virtualFile : Play.javaPath) {
                 all.addAll(getAllClasses(virtualFile));
             }
-            String[] classNames = new String[all.size()];
+            List<String> classNames = new ArrayList();
             for (int i = 0; i < all.size(); i++) {
-                classNames[i] = all.get(i).name;
+                if(!all.get(i).compiled) {
+                    classNames.add(all.get(i).name);
+                }
             }
-            Play.classes.compiler.compile(classNames);
+            Play.classes.compiler.compile(classNames.toArray(new String[classNames.size()]));
             for (ApplicationClass applicationClass : Play.classes.all()) {
                 Class clazz = loadApplicationClass(applicationClass.name);
                 if (clazz != null) {

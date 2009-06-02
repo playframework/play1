@@ -32,7 +32,7 @@ public class Java {
      * @return The method or null
      */
     public static Method findActionMethod(String name, Class clazz) {
-        while (!clazz.getName().equals("play.mvc.Controller") && !clazz.getName().equals("java.lang.Object")) {
+        while (!clazz.getName().equals("java.lang.Object")) {
             for (Method m : clazz.getDeclaredMethods()) {
                 if (m.getName().equalsIgnoreCase(name) && Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers())) {
                     // Check that it is not an intercepter
@@ -95,7 +95,11 @@ public class Java {
     }
 
     public static String[] parameterNames(Method method) throws Exception {
-        return (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes())).get(null);
+        try {
+            return (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes())).get(null);
+        } catch(Exception e) {
+            throw new UnexpectedException("Cannot read parameter names for " + method);
+        }
     }
 
     public static String rawMethodSignature(Method method) {
