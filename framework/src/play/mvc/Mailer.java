@@ -10,6 +10,7 @@ import java.util.concurrent.Future;
 
 import play.Logger;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
+import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSupport;
 import play.exceptions.UnexpectedException;
 import play.libs.Mail;
 import play.templates.Template;
@@ -18,7 +19,7 @@ import play.templates.TemplateLoader;
 /**
  * Application mailer support
  */
-public class Mailer {
+public class Mailer implements LocalVariablesSupport {
 
     protected static ThreadLocal<HashMap<String, Object>> infos = new ThreadLocal<HashMap<String, Object>>();
 

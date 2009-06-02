@@ -12,7 +12,9 @@ import java.util.Map;
 import org.w3c.dom.Document;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
+import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
+import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSupport;
 import play.data.binding.Unbinder;
 import play.data.validation.Validation;
 import play.exceptions.NoRouteFoundException;
@@ -41,7 +43,7 @@ import play.vfs.VirtualFile;
 /**
  * Application controller support
  */
-public abstract class Controller {
+public abstract class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * The current HTTP request
@@ -390,7 +392,7 @@ public abstract class Controller {
      * @param clazz The annotation class
      * @return Annotation object or null if not found
      */
-    public static <T extends Annotation> T getActionAnnotation(Class<T> clazz) {
+    protected static <T extends Annotation> T getActionAnnotation(Class<T> clazz) {
         Method m = (Method) ActionInvoker.getActionMethod(Http.Request.current().action)[1];
         if (m.isAnnotationPresent(clazz)) {
             return m.getAnnotation(clazz);
@@ -403,14 +405,14 @@ public abstract class Controller {
      * @param clazz The annotation class
      * @return Annotation object or null if not found
      */
-    public static Class getControllerClass() {
+    protected static Class getControllerClass() {
         return Play.classloader.getClassIgnoreCase("controllers." + Http.Request.current().controller);
     }
 
     /**
      *
      */
-    public static void parent(Object... args) {
+    protected static void parent(Object... args) {
         Map<String, Object> map = new HashMap();
         for (Object o : args) {
             List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
@@ -421,11 +423,11 @@ public abstract class Controller {
         parent(map);
     }
 
-    public static void parent() {
+    protected static void parent() {
         parent(new HashMap());
     }
 
-    public static void parent(Map<String, Object> map) {
+    protected static void parent(Map<String, Object> map) {
         try {
             Method method = Http.Request.current().invokedMethod;
             String name = method.getName();

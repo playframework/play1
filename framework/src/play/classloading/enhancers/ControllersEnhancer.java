@@ -15,7 +15,7 @@ import play.exceptions.UnexpectedException;
 import play.mvc.Controller;
 
 /**
- * Enhance controllers classes.
+ * Enhance controllers classes. 
  */
 public class ControllersEnhancer extends Enhancer {
 
@@ -90,6 +90,10 @@ public class ControllersEnhancer extends Enhancer {
         ctClass.defrost();
 
     }
+    
+    public static interface ControllerSupport {
+    }
+
     
     static boolean isThreadedFieldAccess(CtField field) {
         if(field.getDeclaringClass().getName().equals("play.mvc.Controller")) {
