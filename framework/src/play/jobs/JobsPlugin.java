@@ -84,15 +84,19 @@ public class JobsPlugin extends PlayPlugin {
             if (clazz.isAnnotationPresent(On.class)) {
                 String cron = ((On) (clazz.getAnnotation(On.class))).value();
                 if (cron.startsWith("cron.")) {
-                    cron = Play.configuration.getProperty(cron);
+                    cron = Play.configuration.getProperty(cron);   
                 }
-                try {
-                    CronTrigger trigger = new CronTrigger(clazz.getName(), "play", cron);
-                    JobDetail jobDetail = new JobDetail(clazz.getName(), null, clazz);
-                    scheduler.scheduleJob(jobDetail, trigger);
-                    crons.add(clazz);
-                } catch (Exception ex) {
-                    throw new UnexpectedException(ex);
+                if (cron != null && !cron.equals("")) {
+                    try {
+                        CronTrigger trigger = new CronTrigger(clazz.getName(), "play", cron);
+                        JobDetail jobDetail = new JobDetail(clazz.getName(), null, clazz);
+                        scheduler.scheduleJob(jobDetail, trigger);
+                        crons.add(clazz);
+                    } catch (Exception ex) {
+                        throw new UnexpectedException(ex);
+                    }
+                } else {
+                    Logger.info("Skipping job %s, cron expression is not defined", clazz.getName());
                 }
             }
         }

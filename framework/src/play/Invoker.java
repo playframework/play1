@@ -1,12 +1,11 @@
 package play;
 
-import java.security.AccessControlException;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
 import play.Play.Mode;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.PlayException;
@@ -17,16 +16,13 @@ import play.exceptions.UnexpectedException;
  */
 public class Invoker {
 
-    static Executor executor = null;
-
+    public static ThreadPoolExecutor executor = null;
+    public static BlockingQueue<Runnable> queue = null;
     /**
      * Run the code in a new thread took from a thread pool.
      * @param invocation The code to run
      */
     public static void invoke(final Invocation invocation) {
-        if (executor == null) {
-            executor = Invoker.startExecutor();
-        }
         executor.execute(new Thread() {
             @Override
             public void run() {
@@ -117,13 +113,13 @@ public class Invoker {
         }
     }
 
-    private static Executor startExecutor() {
+    static {
         Properties p = Play.configuration;
         int queueSize = Integer.parseInt(p.getProperty("play.pool.queue", "200"));
         int core = Integer.parseInt(p.getProperty("play.pool.core", "2"));
         int max = Integer.parseInt(p.getProperty("play.pool.max", "10"));
         int keepalive = Integer.parseInt(p.getProperty("play.pool.keepalive", "5"));
-        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<Runnable>(queueSize);
-        return new ThreadPoolExecutor(core, max, keepalive * 60, TimeUnit.SECONDS, queue, new ThreadPoolExecutor.AbortPolicy());
+        queue = new LinkedBlockingQueue<Runnable>(queueSize);
+        executor = new ThreadPoolExecutor(core, max, keepalive * 60, TimeUnit.SECONDS, queue, new ThreadPoolExecutor.AbortPolicy());
     }
 }

@@ -32,7 +32,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * @param response The Play response
      * @return true if this plugin has managed this request
      */
-    public boolean rawInvocation(Request request, Response response) {
+    public boolean rawInvocation(Request request, Response response) throws Exception{
         return false;
     }
     

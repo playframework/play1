@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class Http {
     /**
      * An HTTP Header
      */
-    public static class Header {
+    public static class Header implements Serializable {
 
         /**
          * Header name
@@ -50,7 +51,7 @@ public class Http {
     /**
      * An HTTP Cookie
      */
-    public static class Cookie {
+    public static class Cookie implements Serializable {
 
         /**
          * Cookie name
@@ -75,7 +76,7 @@ public class Http {
     /**
      * An HTTP Request
      */
-    public static class Request {
+    public static class Request implements Serializable {
 
         /**
          * Server host
@@ -136,7 +137,7 @@ public class Http {
         /**
          * Body stream
          */
-        public InputStream body;
+        public transient InputStream body;
         /**
          * Additinal HTTP params extracted from route
          */
@@ -156,7 +157,7 @@ public class Http {
         /**
          * 
          */
-        Method invokedMethod;
+        public transient Method invokedMethod;
 
         /**
          * Automatically resolve request format from the Accept header
