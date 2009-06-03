@@ -55,7 +55,7 @@ public class HttpHandler implements IoHandler {
 
     private static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
 
-    public void messageReceived(IoSession session, Object message) throws Exception {
+    public void messageReceived(IoSession session, Object message) throws Exception {      
         MutableHttpRequest minaRequest = (MutableHttpRequest) message;
         MutableHttpResponse minaResponse = new DefaultHttpResponse();
         Request request = null;
@@ -76,11 +76,7 @@ public class HttpHandler implements IoHandler {
                 copyResponse(session, request, response, minaRequest, minaResponse);
             } else {
                 Router.routeOnlyStatic(request);
-                if (Play.mode == Play.Mode.DEV) {
-                    Invoker.invokeInThread(new MinaInvocation(session, minaRequest, minaResponse, request, response));
-                } else {
-                    Invoker.invoke(new MinaInvocation(session, minaRequest, minaResponse, request, response));
-                }
+                Invoker.invoke(new MinaInvocation(session, minaRequest, minaResponse, request, response));                
             }
         } catch (NotFound e) {
             serve404(session, minaResponse, minaRequest, e);
@@ -160,6 +156,7 @@ public class HttpHandler implements IoHandler {
             playCookie.value = cookie.getValue();
             request.cookies.put(playCookie.name, playCookie);
         }
+        
         return request;
     }
 
@@ -382,6 +379,7 @@ public class HttpHandler implements IoHandler {
             this.session = session;
         }
 
+        @Override
         public void doIt() {
             try {
                 super.doIt();
@@ -399,6 +397,12 @@ public class HttpHandler implements IoHandler {
             ActionInvoker.invoke(request, response);
             copyResponse(session, request, response, minaRequest, minaResponse);
         }
+
+        @Override
+        public String toString() {
+            return "Request " + request;
+        }
+        
     }
 
     static void copyResponse(IoSession session, Request request, Response response, MutableHttpRequest minaRequest, MutableHttpResponse minaResponse) throws IOException {

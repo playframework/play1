@@ -221,7 +221,7 @@ public class ActionInvoker {
                     }
                     throw new JavaExecutionException(Http.Request.current().action, ex);
                 } catch(Exception e) {
-                    throw new UnexpectedException("Excption while doing @Finally", e);
+                    throw new UnexpectedException("Exception while doing @Finally", e);
                 }
             }
 
