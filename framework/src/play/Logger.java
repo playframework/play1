@@ -26,7 +26,7 @@ public class Logger {
     
     public static boolean forceJuli = false;
     public static boolean redirectJuli = false;
-    
+    public static boolean recordCaller = false;
     /**
      * The application logger (play).
      */
@@ -56,7 +56,7 @@ public class Logger {
             }
         }
     }
-    
+
     public static void setUp(String level) {  
         if(forceJuli || log4j == null) {
             Logger.juli.setLevel(toJuliLevel(level));
@@ -74,6 +74,7 @@ public class Logger {
                 rootLogger.setLevel(juliLevel);
             }
         }
+        recordCaller=Boolean.parseBoolean(Play.configuration.getProperty("application.log.recordCaller", "false"));
     }
     
     static java.util.logging.Level toJuliLevel(String level) {
@@ -113,7 +114,11 @@ public class Logger {
             }
         } else {
             try {
-                log4j.trace(format(message, args));
+                if (recordCaller) {
+                    CallInfo ci = getCallerInformations(3);
+                    log4j.getLogger(ci.className).trace(format(message, args));
+                }  else
+                    log4j.trace(format(message, args));
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
             }
@@ -134,7 +139,11 @@ public class Logger {
             }
         } else {
             try {
-                log4j.debug(format(message, args));
+                if (recordCaller) {
+                    CallInfo ci = getCallerInformations(3);
+                    log4j.getLogger(ci.className).debug(format(message, args));
+                }  else
+                    log4j.debug(format(message, args));
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
             }
@@ -159,7 +168,11 @@ public class Logger {
         } else {
             try {
                 if (!niceThrowable(Priority.DEBUG, e, message, args)) {
-                    log4j.debug(format(message, args), e);
+                    if (recordCaller) {
+                        CallInfo ci = getCallerInformations(3);
+                        log4j.getLogger(ci.className).debug(format(message, args),e);
+                    }  else
+                        log4j.debug(format(message, args), e);
                 }
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
@@ -181,7 +194,11 @@ public class Logger {
             } 
         } else {
             try {
-                log4j.info(format(message, args));
+                if (recordCaller) {
+                    CallInfo ci = getCallerInformations(3);
+                    log4j.getLogger(ci.className).info(format(message, args));
+                }  else
+                    log4j.info(format(message, args));
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
             }
@@ -206,7 +223,11 @@ public class Logger {
         } else {
             try {
                 if (!niceThrowable(Priority.INFO, e, message, args)) {
-                    log4j.info(format(message, args), e);
+                    if (recordCaller) {
+                        CallInfo ci = getCallerInformations(3);
+                        log4j.getLogger(ci.className).info(format(message, args),e);
+                    }  else
+                        log4j.info(format(message, args), e);
                 }
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
@@ -228,7 +249,11 @@ public class Logger {
             }
         } else {
             try {
-                log4j.warn(format(message, args));
+                if (recordCaller) {
+                    CallInfo ci = getCallerInformations(3);
+                    log4j.getLogger(ci.className).warn(format(message, args));
+                } else
+                    log4j.warn(format(message, args));
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
             }
@@ -253,7 +278,11 @@ public class Logger {
         } else {
             try {
                 if (!niceThrowable(Priority.WARN, e, message, args)) {
-                    log4j.warn(format(message, args), e);
+                    if (recordCaller) {
+                        CallInfo ci = getCallerInformations(3);
+                        log4j.getLogger(ci.className).warn(format(message, args),e);
+                    }  else
+                        log4j.warn(format(message, args), e);
                 }
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
@@ -275,7 +304,11 @@ public class Logger {
             }            
         } else {
             try {
-                log4j.error(format(message, args));
+                if (recordCaller) {
+                    CallInfo ci = getCallerInformations(3);
+                    log4j.getLogger(ci.className).error(format(message, args));
+                }  else
+                    log4j.error(format(message, args));
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
             }
@@ -300,7 +333,11 @@ public class Logger {
         } else {
             try {
                 if (!niceThrowable(Priority.ERROR, e, message, args)) {
-                    log4j.error(format(message, args), e);
+                    if (recordCaller) {
+                        CallInfo ci = getCallerInformations(3);
+                        log4j.getLogger(ci.className).error(format(message, args),e);
+                    }  else
+                        log4j.error(format(message, args), e);
                 }
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
@@ -322,7 +359,11 @@ public class Logger {
             }            
         } else {
             try {
-                log4j.fatal(format(message, args));
+                if (recordCaller) {
+                    CallInfo ci = getCallerInformations(3);
+                    log4j.getLogger(ci.className).fatal(format(message, args));
+                }  else
+                    log4j.fatal(format(message, args));
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
             }
@@ -347,7 +388,11 @@ public class Logger {
         } else {
             try {
                 if (!niceThrowable(Priority.FATAL, e, message, args)) {
-                    log4j.fatal(format(message, args), e);
+                    if (recordCaller) {
+                        CallInfo ci = getCallerInformations(3);
+                        log4j.getLogger(ci.className).fatal(format(message, args),e);
+                    }  else
+                        log4j.fatal(format(message, args), e);
                 }
             } catch (Throwable ex) {
                 log4j.error("Oops. Error in Logger !", ex);
@@ -411,6 +456,28 @@ public class Logger {
         return msg;
     }
 
+    static class CallInfo {
+        public String className;
+        public String methodName;
+        
+        public CallInfo(){};
+        public CallInfo(String className,String methodName){
+            this.className=className;
+            this.methodName=methodName;
+        };
+    }
+    /**
+     * Examine stack trace to get caller
+     * @param level method stack depth
+     * @return who called the logger
+     */
+    public static CallInfo getCallerInformations(int level) {
+        StackTraceElement[] callStack=Thread.currentThread().getStackTrace();
+        StackTraceElement caller = callStack[level];
+        return new CallInfo (caller.getClassName(),caller.getMethodName());
+    }
+    
+    
     /**
      * Redirect java.util.logging to log4j
      */
