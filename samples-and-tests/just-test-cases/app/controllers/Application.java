@@ -7,6 +7,7 @@ import play.mvc.*;
 import play.libs.*;
 
 import models.*;
+import utils.*;
 
 public class Application extends Controller {
 
@@ -66,6 +67,11 @@ public class Application extends Controller {
     
     public static void a() {
         render();
+    }
+    
+    public static void useSpringBean() {
+        Test test = (Test)Spring.getBean("test");
+        renderText(test.yop());
     }
 
 }
