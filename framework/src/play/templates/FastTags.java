@@ -73,15 +73,6 @@ public class FastTags {
         out.print("</a>");
     }
 
-    public static void _if(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        if (_evaluateCondition(args.get("arg"))) {
-            body.call();
-            TagContext.parent().data.put("_executeNextElse", false);
-        } else {
-            TagContext.parent().data.put("_executeNextElse", true);
-        }
-    }
-
     public static void _ifErrors(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         if (Validation.hasErrors()) {
             body.call();
@@ -127,38 +118,7 @@ public class FastTags {
         }
     }
 
-    public static void _else(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        if (TagContext.parent().data.containsKey("_executeNextElse")) {
-            if ((Boolean) TagContext.parent().data.get("_executeNextElse")) {
-                body.call();
-            }
-            TagContext.parent().data.remove("_executeNextElse");
-        } else {
-            throw new TemplateExecutionException(template.template, fromLine, "else tag without a preceding if tag", new TagInternalException("else tag without a preceding if tag"));
-        }
-    }
-
-    public static void _elseif(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        if (TagContext.parent().data.containsKey("_executeNextElse")) {
-            if ((Boolean) TagContext.parent().data.get("_executeNextElse") && _evaluateCondition(args.get("arg"))) {
-                body.call();
-                TagContext.parent().data.put("_executeNextElse", false);
-            }
-        } else {
-            throw new TemplateExecutionException(template.template, fromLine, "elseif tag without a preceding if tag", new TagInternalException("elseif tag without a preceding if tag"));
-        }
-    }
-
-    public static void _ifnot(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        if (!_evaluateCondition(args.get("arg"))) {
-            body.call();
-            TagContext.parent().data.put("_executeNextElse", false);
-        } else {
-            TagContext.parent().data.put("_executeNextElse", true);
-        }
-    }
-
-    public static boolean _evaluateCondition(Object test) {
+    static boolean _evaluateCondition(Object test) {
         if (test != null) {
             if (test instanceof Boolean) {
                 return ((Boolean) test).booleanValue();

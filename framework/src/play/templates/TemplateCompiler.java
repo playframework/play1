@@ -2,6 +2,7 @@ package play.templates;
 
 import groovy.lang.Closure;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,6 +17,7 @@ import play.vfs.VirtualFile;
 import play.exceptions.TemplateCompilationException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
+import play.templates.InlineTags.CALL;
 
 /**
  * The template compiler
@@ -66,6 +68,7 @@ public class TemplateCompiler {
 
             String name;
             int startLine;
+            boolean hasBody;
         }
 
         void hop(Template template) {
@@ -186,14 +189,14 @@ public class TemplateCompiler {
                         print("\tout.println(\"");
                     }
                     print(line);
-                    print("\")");
+                    print("\");");
                     markLine(parser.getLine() + i);
                     println();
                 }
             } else {
                 print("\tout.print(\"");
                 print(text);
-                print("\")");
+                print("\");");
                 markLine(parser.getLine());
                 println();
             }
@@ -259,6 +262,7 @@ public class TemplateCompiler {
             String tagText = parser.getToken().trim().replaceAll("\n", " ");
             String tagName = "";
             String tagArgs = "";
+            boolean hasBody = !parser.checkNext().endsWith("/");
             if (tagText.indexOf(" ") > 0) {
                 tagName = tagText.substring(0, tagText.indexOf(" "));
                 tagArgs = tagText.substring(tagText.indexOf(" ") + 1).trim();
@@ -273,13 +277,28 @@ public class TemplateCompiler {
             Tag tag = new Tag();
             tag.name = tagName;
             tag.startLine = parser.getLine();
+            tag.hasBody = hasBody;
             tagsStack.push(tag);
             print("attrs" + tagIndex + " = [" + tagArgs + "];");
-            if (!tag.name.equals("doBody")) {
+            // Use inlineTag if exists
+            try {
+                Method m = InlineTags.class.getDeclaredMethod("_" + tag.name, int.class, CALL.class);
+                println("play.templates.TagContext.enterTag();");
+                print((String)m.invoke(null, new Object[] {tagIndex, CALL.START}));
+                tag.hasBody = false;
+                return;
+            } catch (Exception e) {
+                // do nothing here
+            }
+            if (!tag.name.equals("doBody") && hasBody) {
                 print("body" + tagIndex + " = {");
                 markLine(parser.getLine());
                 println();
-            }
+            } else {
+                print("body" + tagIndex + " = null;");
+                markLine(parser.getLine());
+                println();
+            }            
             skipLineBreak = true;
 
         }
@@ -308,18 +327,26 @@ public class TemplateCompiler {
                 template.doBodyLines.add(currentLine);
                 println();
             } else {
-                print("};");
-                markLine(currentLine);
-                println();
-                // Use fastTag if exists
-                try {
-                    FastTags.class.getDeclaredMethod("_" + tag.name, Map.class, Closure.class, PrintWriter.class, Template.ExecutableTemplate.class, int.class);
-                    print("play.templates.TagContext.enterTag();");
-                    print("play.templates.FastTags._" + tag.name + "(attrs" + tagIndex + ",body" + tagIndex + ", out, this, " + tag.startLine + ");");
-                    print("play.templates.TagContext.exitTag();");
-                } catch (NoSuchMethodException e) {
-                    print("invokeTag(" + tag.startLine + ",'" + tagName + "',attrs" + tagIndex + ",body" + tagIndex + ");");
+                if(tag.hasBody) {
+                    print("};"); // close body closure
                 }
+                println();
+                // Use inlineTag if exists
+                try {
+                    Method m = InlineTags.class.getDeclaredMethod("_" + tag.name, int.class, CALL.class);
+                    println((String)m.invoke(null, new Object[] {tagIndex, CALL.END}));
+                    print("play.templates.TagContext.exitTag();");
+                } catch (Exception e) {
+                    // Use fastTag if exists
+                    try {
+                        FastTags.class.getDeclaredMethod("_" + tag.name, Map.class, Closure.class, PrintWriter.class, Template.ExecutableTemplate.class, int.class);
+                        print("play.templates.TagContext.enterTag();");
+                        print("play.templates.FastTags._" + tag.name + "(attrs" + tagIndex + ",body" + tagIndex + ", out, this, " + tag.startLine + ");");
+                        print("play.templates.TagContext.exitTag();");
+                    } catch (NoSuchMethodException ex) {
+                        print("invokeTag(" + tag.startLine + ",'" + tagName + "',attrs" + tagIndex + ",body" + tagIndex + ");");
+                    }
+                }                
                 markLine(tag.startLine);
                 println();
             }
@@ -329,7 +356,7 @@ public class TemplateCompiler {
         int currentLine = 1;
 
         void markLine(int line) {
-            groovySource.append("// ligne " + line);
+            groovySource.append("// line " + line);
             template.linesMatrix.put(currentLine, line);
         }
 
@@ -398,6 +425,13 @@ public class TemplateCompiler {
 
         public String getToken() {
             return pageSource.substring(begin2, end2);
+        }
+        
+        public String checkNext() {
+            if(end2 < pageSource.length()) {
+                return pageSource.charAt(end2) + "";
+            }
+            return "";
         }
 
         public Token nextToken() {
