@@ -65,6 +65,15 @@ public class Application extends Controller {
         render(a,b,c,d,e,f,g,h,i,j);
     }
     
+    public static void listTag() {
+        List<String> a = new ArrayList<String>();
+        a.add("aa");
+        a.add("ab");
+        a.add("ac");
+        int[] b = new int[] {0, 1, 2 , 3};
+        render(a, b);
+    }
+    
     public static void a() {
         render();
     }
