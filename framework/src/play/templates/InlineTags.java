@@ -73,8 +73,8 @@ public class InlineTags {
                 s.append("if(!attrs"+index+"['as']) {throw new play.exceptions.TagInternalException('as attribute cannot be empty')};");
                 s.append("if(attrs"+index+"['items'] == null) attrs"+index+"['items'] = [];");
                 s.append("_i = 0;");
-                s.append("for(_item in attrs"+index+"['items']) {");
-                s.append("setProperty(attrs"+index+"['as'], _item);");
+                s.append("for(_item"+index+" in attrs"+index+"['items']) {");
+                s.append("setProperty(attrs"+index+"['as'], _item"+index+");");
                 s.append("setProperty(attrs"+index+"['as']+'_index', _i+1);");
                 s.append("setProperty(attrs"+index+"['as']+'_isLast', (_i+1) == attrs"+index+"['items'].size());");
                 s.append("setProperty(attrs"+index+"['as']+'_isFirst', _i == 0);");
