@@ -2,18 +2,19 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET			/							Application.index
-PUT         /sayHello                   Application.hello
-GET         /aGetForm                   Application.aGetForm
-GET         /aGetForm/                  Application.aGetForm2 
-GET         /optionalSlash/?            Application.optional 
-GET         /index                      Application.index
+GET			/							    Application.index
+PUT         /sayHello                       Application.hello
+GET         /aGetForm                       Application.aGetForm
+GET         /aGetForm/                      Application.aGetForm2 
+GET         /optionalSlash/?                Application.optional 
+GET         /index                          Application.index
 
 # Import the default CRUD routes
-*			/admin						module:crud
+*			/admin						     module:crud
 
 # Map static resources from the /app/public folder to the /public path
-GET			/public/					staticDir:public
+GET			/public/					     staticDir:public
 
 # Catch all
-*			/{controller}/{action}		{controller}.{action}
+*           /sample/{controller}/{action}    sample.{controller}.{action}
+*			/{controller}/{action}		     {controller}.{action}

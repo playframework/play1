@@ -380,9 +380,9 @@ public class HttpHandler implements IoHandler {
         }
 
         @Override
-        public void doIt() {
+        public void run() {
             try {
-                super.doIt();
+                super.run();
             } catch (Exception e) {
                 serve500(e, session, minaRequest, minaResponse);
                 return;

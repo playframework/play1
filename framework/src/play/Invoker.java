@@ -1,6 +1,6 @@
 package play;
 
-import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -20,16 +20,20 @@ public class Invoker {
     /**
      * Run the code in a new thread took from a thread pool.
      * @param invocation The code to run
+     * @return The future object, to know when the task is completed
      */
-    public static void invoke(final Invocation invocation) {
-        // TODO: check the queue size ?
-        executor.execute(new Thread() {
+    public static Future invoke(final Invocation invocation) {
+        return executor.submit(invocation);
+    }
 
-            @Override
-            public void run() {
-                invocation.doIt();
-            }
-        });
+    /**
+     * Run the code in a new thread after a delay
+     * @param invocation The code to run
+     * @param seconds The time to wait before
+     * @return The future object, to know when the task is completed
+     */
+    public static Future invoke(final Invocation invocation, int seconds) {
+        return executor.schedule(invocation, seconds, TimeUnit.SECONDS);
     }
 
     /**
@@ -37,13 +41,27 @@ public class Invoker {
      * @param invocation The code to run
      */
     public static void invokeInThread(Invocation invocation) {
-        invocation.doIt();
+        DirectInvocation directInvocation = new DirectInvocation(invocation);
+        boolean retry = true;
+        while(retry) {
+            directInvocation.run();
+            if(directInvocation.retry == -1) {
+                retry = false;
+            } else {
+                try {
+                    Thread.sleep(directInvocation.retry * 1000);
+                } catch(InterruptedException e) {
+                    throw new UnexpectedException(e);
+                }
+                retry = true;
+            }
+        }
     }
 
     /**
      * An Invocation in something to run in a Play! context
      */
-    public static abstract class Invocation {
+    public static abstract class Invocation implements Runnable {
 
         /**
          * Override this method
@@ -96,14 +114,7 @@ public class Invoker {
          * @param timeout
          */
         public void suspend(int timeout) {
-            final Invocation invocation = this;
-            executor.schedule(new Thread() {
-
-                @Override
-                public void run() {
-                    invocation.doIt();
-                }
-            }, timeout, TimeUnit.SECONDS);
+            Invoker.invoke(this, timeout);
         }
 
         /**
@@ -115,7 +126,7 @@ public class Invoker {
             }
         }
 
-        public void doIt() {
+        public void run() {
             try {
                 before();
                 execute();
@@ -129,10 +140,56 @@ public class Invoker {
             }
         }
     }
-    
+
+    static class DirectInvocation extends Invocation {
+
+        int retry = -1;
+        Invocation originalInvocation;
+
+        public DirectInvocation(Invocation originalInvocation) {
+            this.originalInvocation = originalInvocation;
+        }
+
+        @Override
+        public void execute() throws Exception {
+            originalInvocation.execute();
+        }
+
+        @Override
+        public void before() {
+            retry = -1;
+            originalInvocation.before();
+        }
+
+        @Override
+        public void after() {
+            originalInvocation.after();
+        }
+
+        @Override
+        public void onException(Throwable e) {
+            originalInvocation.onException(e);
+        }
+
+        @Override
+        public void suspend(int timeout) {
+            retry = timeout;
+        }
+
+        @Override
+        public void _finally() {
+            originalInvocation._finally();
+        }
+
+        @Override
+        public void run() {
+            originalInvocation.run();
+        }
+
+    }
 
     static {
-        int core = Integer.parseInt(Play.configuration.getProperty("play.pool", "1"));
+        int core = Integer.parseInt(Play.configuration.getProperty("play.pool", Play.mode == Mode.DEV ? "1" : "3"));
         executor = new ScheduledThreadPoolExecutor(core, new ThreadPoolExecutor.AbortPolicy());
     }
 

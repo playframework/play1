@@ -2,6 +2,10 @@
 
 	open('/')
 	
+	// Packages
+	assertAttribute('wp1@href', '/sample/photo/index')
+	assertAttribute('wp2@href', '/admin.admincompany/index')
+	
 	// Missing name
 	clickAndWait('sayHello')
 	assertTextPresent('Hello !')

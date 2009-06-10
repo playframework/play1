@@ -323,10 +323,11 @@ public class ServletWrapper extends HttpServlet {
             this.request = request;
             this.response = response;
         }
-        
-        public void doIt() {
+
+        @Override
+        public void run() {
             try {
-                super.doIt();
+                super.run();
             } catch (Exception e) {
                 serve500(e, httpServletRequest, httpServletResponse);
                 return;
