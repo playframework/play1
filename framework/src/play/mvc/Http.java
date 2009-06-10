@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import java.util.logging.Level;
+import play.Invoker.SuspendRequest;
 import play.Logger;
 import play.exceptions.UnexpectedException;
 import play.libs.Time;
@@ -200,6 +201,19 @@ public class Http {
                 format = "html".intern();
                 return;
             }
+        }
+        
+        // Retry
+        
+        boolean isNew = true;
+        
+        public void suspend(String timeout) {
+            isNew = false;
+            throw new SuspendRequest(Time.parseDuration(timeout));
+        }
+        
+        public boolean isNew() {
+            return isNew;
         }
 
         /**

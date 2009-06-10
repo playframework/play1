@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 import org.junit.After;
 import org.junit.Before;
 import play.Invoker.Invocation;
-import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.mvc.ActionInvoker;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
@@ -20,13 +19,13 @@ public abstract class FunctionalTest extends BaseTest {
 
     @Before
     public void before() {
-        Invocation.before();
+        new FakeInvocation().before();
     }
 
     @After
     public void after() {
-        Invocation.after();
-        Invocation._finally();
+        new FakeInvocation().after();
+        new FakeInvocation()._finally();
     }
 
     // Requests
@@ -286,14 +285,12 @@ public abstract class FunctionalTest extends BaseTest {
         }
     }
 
-    // Some classes
-    public abstract static class ControllerInvocation {
+    public static class FakeInvocation extends Invocation {
 
-        public abstract void execute();
-
-        public void run() {
-            ControllerInstrumentation.initActionCall();
-            execute();
+        @Override
+        public void execute() throws Exception {
         }
+        
     }
+    
 }
