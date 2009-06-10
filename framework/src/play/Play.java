@@ -147,7 +147,7 @@ public class Play {
         // Guess the framework path
         try {
             URL versionUrl = Play.class.getResource("/play/version");
-            URI uri = versionUrl.toURI();
+            URI uri = new URI(versionUrl.toString().replace(" ", "%20"));
             if (uri.getScheme().equals("jar")) {
                 String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
                 frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
