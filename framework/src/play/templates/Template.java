@@ -152,7 +152,7 @@ public class Template {
                 BytecodeCache.cacheBytecode(sb.toString().getBytes("utf-8"), name, source);
                 compiledTemplate = tClassLoader.loadClass(groovyClassesForThisTemplate.get(0).getName());
 
-                Logger.trace("%sms to compile template %s", System.currentTimeMillis() - start, name);
+                Logger.trace("%sms to compile template %s to %d classes", System.currentTimeMillis() - start, name, groovyClassesForThisTemplate.size());
 
             } catch (MultipleCompilationErrorsException e) {
                 if (e.getErrorCollector().getLastError() != null) {

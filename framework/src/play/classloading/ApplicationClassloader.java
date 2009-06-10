@@ -292,7 +292,7 @@ public class ApplicationClassloader extends ClassLoader {
             }
             List<String> classNames = new ArrayList();
             for (int i = 0; i < all.size(); i++) {
-                if(!all.get(i).compiled) {
+                if(all.get(i) != null && !all.get(i).compiled) {
                     classNames.add(all.get(i).name);
                 }
             }

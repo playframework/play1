@@ -261,18 +261,6 @@ public class Scope {
                     DataParser dataParser = DataParser.parsers.get(contentType);
                     if (dataParser != null) {
                         _mergeWith(dataParser.parse(request.body));
-                    } else if (contentType.startsWith("text/")) {
-                        try {
-                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                            byte[] buffer = new byte[1024];
-                            int read = 0;
-                            while ((read = request.body.read(buffer)) > 0) {
-                                baos.write(buffer, 0, read);
-                            }
-                            data.put("body", new String[]{new String(baos.toByteArray(), "utf-8")});
-                        } catch (Exception e) {
-                            throw new UnexpectedException("Bad utf-8", e);
-                        }
                     }
                 }
                 requestIsParsed = true;

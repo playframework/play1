@@ -234,6 +234,29 @@
                 font-weight: normal !important;
                 padding: 0 !important;
             }
+            #selenium-mask {
+                background: #000;
+                opacity: .8;
+                position: fixed;
+                top: 180px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                display: none;
+            }
+            #selenium {
+                position: fixed;
+                top: 200px;
+                bottom: 20px;
+                right: 20px;
+                left: 20px;
+                display: none;
+                z-index: 100000;
+                background: #fff;
+            }
+            #selenium iframe {
+                border: 1px solid #666;
+            }
         </style>
         <script type="text/javascript">
             $(function() {
@@ -279,6 +302,9 @@
                 }
                                 
                 var result = function() {
+                    $('#selenium-mask, #selenium').hide();
+                    $('#selenium-runner').attr('src', 'about:blank');
+                    clearInterval(window.checkResult);
                     $(document.body).removeClass('running');
                     $('.passing').removeClass('passing');
                     if($('.test.failed').size()) {
@@ -315,17 +341,20 @@
                         });
                     }
                     if(/.test.html/.test(testId)) {
-                        window.open('/public/test-runner/selenium/TestRunner.html?baseUrl=http://localhost:${play.configuration['http.port'] ?: '9000'}&test=/@tests/'+testId+'.suite&auto=true&close=true&resultsUrl=/@tests/'+testId);
-                        var checkResult = setInterval(function() {
+                        $('#selenium-runner').attr('src', '/public/test-runner/selenium/TestRunner.html?baseUrl=http://localhost:${play.configuration['http.port'] ?: '9000'}&test=/@tests/'+testId+'.suite&auto=true&close=true&resultsUrl=/@tests/'+testId);
+                        $('#selenium-mask, #selenium').show();
+                        window.checkResult = setInterval(function() {
                              var req = $.ajax({url: '@{TestRunner.run("XXX.result")}'.replace('XXX', testId), async: false});
                              if(req.status == 200) {
                                  var results = jQuery("<div/>").append(req.responseText).find('table');
-                                 clearInterval(checkResult);
+                                 clearInterval(window.checkResult);
+                                 $('#selenium-mask, #selenium').hide();
                                  testSuccess(test, results);
                              }
                              if(req.status == 500) {
                                  var results = jQuery("<div/>").append(req.responseText).find('table');
-                                 clearInterval(checkResult);
+                                 clearInterval(window.checkResult);
+                                 $('#selenium-mask, #selenium').hide();
                                  testFail(test, results);
                              }
                         }, 2000);
@@ -343,7 +372,7 @@
                     test.removeClass('passing').addClass('failed');
                     $('.touch', test).html('+');
                     $('.testResult', test).html(result);					
-                    runNextTest();
+                    stop();
                 };
                         
                 var stop = function() {
@@ -526,6 +555,10 @@
             <h2><span>There is no test to run</span></h2>
             #{/if}
             
+        </div>
+        <div id="selenium-mask"></div>
+        <div id="selenium">
+            <iframe id="selenium-runner" width="100%" height="100%" src="about:blank"></iframe>
         </div>
     </body>
 </html>

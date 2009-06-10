@@ -561,6 +561,10 @@ public class WS extends PlayPlugin {
             return this.methodBase.getStatusCode();
         }
 
+        public String getContentType () {
+            return methodBase.getResponseHeader("content-type").getValue();
+        }
+        
         /**
          * Parse and get the response body as a {@link Document DOM document}
          * @return a DOM document

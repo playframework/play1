@@ -1,0 +1,19 @@
+#{extends 'main.html' /}
+
+<h1>a</h1>
+
+<div id="a">
+#{list items:a, as:'i'}
+    ${i_parity == 'even' ? '=' : '-'} ${i_index}. ${i} ${i_isLast ? '.' : ','} <br/>
+#{/list}
+</div>
+
+<h1>b</h1>
+
+<div id="b">
+#{list items:b, as:'i'}
+    ${i_parity == 'even' ? '=' : '-'} ${i_index}. ${i} ${i_isLast ? '.' : ','} <br/>
+#{/list}
+</div>
+
+xxx

@@ -7,6 +7,7 @@ import play.mvc.*;
 import play.libs.*;
 
 import models.*;
+import utils.*;
 
 public class Application extends Controller {
 
@@ -48,6 +49,38 @@ public class Application extends Controller {
     public static void mail2() {
         Welcome.welcome();
         renderText("OK2");
+    }
+    
+    public static void ifthenelse() {
+        boolean a = true;
+        boolean b = false;
+        String c = "";
+        String d = "Yop";
+        int e = 0;
+        int f = 5;
+        Boolean g = null;
+        Boolean h = true;
+        Object i = null;
+        Object j = new Object();
+        render(a,b,c,d,e,f,g,h,i,j);
+    }
+    
+    public static void listTag() {
+        List<String> a = new ArrayList<String>();
+        a.add("aa");
+        a.add("ab");
+        a.add("ac");
+        int[] b = new int[] {0, 1, 2 , 3};
+        render(a, b);
+    }
+    
+    public static void a() {
+        render();
+    }
+    
+    public static void useSpringBean() {
+        Test test = (Test)Spring.getBean("test");
+        renderText(test.yop());
     }
 
 }
