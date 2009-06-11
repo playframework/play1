@@ -13,8 +13,8 @@ public class Jobs extends Administration {
 		if (session.contains("superadmin")) {
 			parent();
 		}
-		String where = "company.email = '" + session.get("company") + "'";
-		parent(where);
+		request.args.put("where", "company.email = '" + session.get("company") + "'");
+		parent();
 	}
 	
 	public static void show(Long id) {

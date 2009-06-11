@@ -28,9 +28,9 @@ public abstract class CRUD extends Controller {
         }
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        List<JPASupport> objects = type.findPage(page, search, searchFields, orderBy, order, params.get("where"));
-        Long count = type.count(search, searchFields, params.get("where"));
-        Long totalCount = type.count(null, null, params.get("where"));
+        List<JPASupport> objects = type.findPage(page, search, searchFields, orderBy, order, (String)request.args.get("where"));
+        Long count = type.count(search, searchFields, (String)request.args.get("where"));
+        Long totalCount = type.count(null, null, (String)request.args.get("where"));
         try {
             render(type, objects, count, totalCount, page, orderBy, order);
         } catch (TemplateNotFoundException e) {

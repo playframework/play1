@@ -274,6 +274,10 @@ public class Scope {
         public void put(String key, String[] values) {
             data.put(key, values);
         }
+        
+        public void remove(String key) {
+            data.remove("where");
+        }
 
         public String get(String key) {
             if (!_contains(key)) {
