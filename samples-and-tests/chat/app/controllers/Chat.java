@@ -7,7 +7,9 @@ import play.mvc.*;
 import play.libs.*;
 import play.data.validation.*;
 
-public class Application extends Controller {
+import models.*;
+
+public class Chat extends Controller {
     
     @Before(unless={"signin", "register"})
     static void checkLogged() {
@@ -22,8 +24,16 @@ public class Application extends Controller {
 		render();
 	}
 	
-	public static void post(String message) {
+	public static void postMessage(String message) {
 	    new Message(session.get("nick"), message).save();
+	}
+	
+	public static void newMessages() {
+	    List<Message> messages = Message.findBy("date > ?", request.date);
+	    if(messages.isEmpty()) {
+	        suspend("1s");
+	    }
+	    renderJSON(messages);
 	}
 	
 	// ~~ login
@@ -38,11 +48,13 @@ public class Application extends Controller {
 	        signin();
 	    }
 	    session.put("nick", nick);
+	    new Message("notice", nick + " has joined the room").save();
 	    index();
 	}
 	
 	public static void disconnect() {
-	    session.clear();
+	    new Message("notice", session.get("nick") + " has left the room").save();
+        session.clear();
 	    signin();
 	}
 

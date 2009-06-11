@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.w3c.dom.Document;
+import play.Invoker.SuspendRequest;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
@@ -22,6 +23,7 @@ import play.exceptions.PlayException;
 import play.exceptions.TemplateNotFoundException;
 import play.exceptions.UnexpectedException;
 import play.libs.Java;
+import play.libs.Time;
 import play.mvc.Http.Response;
 import play.mvc.results.Error;
 import play.mvc.results.Forbidden;
@@ -261,7 +263,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
     protected static void redirectToStatic(String file) {
         try {
             VirtualFile vf = Play.getVirtualFile(file);
-            if(vf == null || !vf.exists()) {
+            if (vf == null || !vf.exists()) {
                 throw new NoRouteFoundException(file);
             }
             throw new RedirectToStatic(Router.reverse(Play.getVirtualFile(file)));
@@ -467,5 +469,9 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected static void suspend(String timeout) {
+        throw new SuspendRequest(Time.parseDuration(timeout));
     }
 }

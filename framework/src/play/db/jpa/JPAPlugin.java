@@ -109,6 +109,12 @@ public class JPAPlugin extends PlayPlugin {
         closeTx(true);
     }
 
+    @Override
+    public void invocationFinally() {
+        closeTx(true);
+    }
+    
+
     /**
      * initialize the JPA context and starts a JPA transaction
      * 

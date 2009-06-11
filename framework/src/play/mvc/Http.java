@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.text.ParseException;
@@ -14,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import java.util.logging.Level;
 import play.Invoker.SuspendRequest;
 import play.Logger;
 import play.exceptions.UnexpectedException;
@@ -159,6 +157,14 @@ public class Http {
          * 
          */
         public transient Method invokedMethod;
+        /**
+         * Free space to store your request specific data
+         */
+        public Map<String, Object> args = new HashMap();
+        /**
+         * When the request has been received
+         */
+        public Date date = new Date();
 
         /**
          * Automatically resolve request format from the Accept header
@@ -203,19 +209,6 @@ public class Http {
             }
         }
         
-        // Retry
-        
-        boolean isNew = true;
-        
-        public void suspend(String timeout) {
-            isNew = false;
-            throw new SuspendRequest(Time.parseDuration(timeout));
-        }
-        
-        public boolean isNew() {
-            return isNew;
-        }
-
         /**
          * Retrieve the current request
          * @return

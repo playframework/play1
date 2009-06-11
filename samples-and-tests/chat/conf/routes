@@ -2,13 +2,13 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET			/				Application.index
+GET			/				        Chat.index
+GET         /messages               Chat.newMessages
+POST        /messages               Chat.postMessage
 
-# Import the default CRUD routes
-*			/admin				module:crud
+GET         /signin                 Chat.signin
+POST        /signin                 Chat.register
+GET         /logout                 Chat.disconnect
 
-# Map static resources from the /app/public folder to the /public path
-GET			/public/        		staticDir:public
+GET			/        		        staticDir:public
 
-# Catch all
-*			/{controller}/{action}		{controller}.{action}

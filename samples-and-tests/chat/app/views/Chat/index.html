@@ -1,0 +1,48 @@
+#{extends 'main.html' /}
+#{set title:'Chat room' /}
+
+<h1>You are now chatting as ${session.nick} <a href="@{disconnect()}">Leave the chat room</a></h1> 
+
+<div id="thread">
+	<script type="text/html" id="message_tmpl">
+		<div class="message <%= message.user == '${session.nick}' ? 'you' : '' %> <%= message.user == 'notice' ? 'notice' : '' %>">
+			<h2><%= message.user %></h2>
+			<p>
+				<%= message.text %>
+			</p>
+		</div>
+	</script>
+</div>
+
+<div id="newMessage">
+	<textarea id="message" name="message"></textarea>
+</div>
+
+<script type="text/javascript">
+
+	// Send message when user press ENTER
+	$('#message').keypress(function(e) {
+		if(e.keyCode == 13) {
+			$.post('@{postMessage()}', {message: $('#message').val()}, function() {
+				$('#message').val('');
+			}); 
+		}
+    });
+
+	// Retrieve new messages
+	var getMessages = function() {
+		$.getJSON('@{newMessages()}', function(messages) {
+			$(messages).each(function() {
+				display(this);
+			});
+			getMessages();
+		});
+	}	
+	getMessages();
+	
+	// Display a message
+	var display = function(message) {
+		$('#thread').append(tmpl('message_tmpl', {message: message}));
+	}
+	
+</script>

@@ -1,0 +1,16 @@
+#{extends 'main.html' /}
+#{set title:'Sign in' /}
+
+<div id="signin">
+	#{form @register()}
+		#{if flash.error}
+		    <p class="error">
+		        ${flash.error}
+		    </p>
+		#{/if}
+		<label for="nick">Choose a nick name</label>
+	    <input type="text" name="nick" id="nick" />
+	    <input type="submit" id="enter" value="Enter chat room" />
+	#{/form}
+</div>
+
