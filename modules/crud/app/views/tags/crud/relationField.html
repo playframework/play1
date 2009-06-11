@@ -4,13 +4,13 @@
 	</label>
 	
 	#{if _field.multiple}
-		<select id="${field.id}" name="${field.name}" multiple="yes">
+		<select id="${field.id}" name="${field.name}@id" multiple="yes">
 			%{ play.db.jpa.JPA.getEntityManager().createQuery("from " + _field.relation).getResultList().sort{ it.toString() }.each() { }%
 			%{
 				selected = false;
 				if(field.error?.message != 'validation.required') {
-					if(params[field.name]) {
-						selected = params.getAll(field.name).contains(it.id.toString())
+					if(params[field.name+'@id']) {
+						selected = params.getAll(field.name+'@id').contains(it.id.toString())
 					} else {
 						selected = _value?.contains(it)
 					}
@@ -21,14 +21,14 @@
 		</select>
 	#{/if}
 	#{else}
-		<select id="${field.id}" name="${field.name}">
+		<select id="${field.id}" name="${field.name}@id">
 			<option value="">&{'crud.none'}</option>
 			%{ play.db.jpa.JPA.getEntityManager().createQuery("from " + _field.relation).getResultList().sort{ it.toString() }.each() { }%
 			%{
 				selected = false
 				if(field.error?.message != 'validation.required') {
-					if(params[field.name]) {
-						selected = (it.id.toString() == params[field.name])
+					if(params[field.name+'@id']) {
+						selected = (it.id.toString() == params[field.name+'@id'])
 					} else {
 						selected = it.id == _value?.id
 					}

@@ -187,6 +187,8 @@ public class Fixtures {
                         ids[i] = idCache.get(id).toString();
                     }
                 }
+                serialized.remove("object." + field.getName());
+                serialized.put("object." + field.getName() + "@id", ids);
             }
         }
     }

@@ -94,13 +94,13 @@
 	assertTextPresent('Edit Job')
 	
 	// Make a mistake
-	select('css=select[name=object.category]', '(None)')
+	select('object_category', '(None)')
 	clickAndWait('css=input[name=_save]')
 	assertText('css=span.error', 'Required')
 	
 	// Edit the job title and change tags
-	select('css=select[name=object.category]', 'Development')
-	removeSelection('css=select[name=object.tags]', 'Cool job')
+	select('object_category', 'Development')
+	removeSelection('object_tags', 'Cool job')
 	type('object_title', 'Search a Play developper')
 	clickAndWait('css=input[name=_save]')
 	
@@ -119,9 +119,9 @@
 	type('object_detail', 'Check our website')
 	clickAndWait('css=input[name=_save]')
 	assertText('css=span.error', 'Required')
-	select('css=select[name=object.category]', 'Development')
-	addSelection('css=select[name=object.tags]', 'Cool job')
-	addSelection('css=select[name=object.tags]', 'PHP')
+	select('object_category', 'Development')
+	addSelection('object_tags', 'Cool job')
+	addSelection('object_tags', 'PHP')
 	clickAndWait('css=input[name=_saveAndContinue]')
 	assertElementNotPresent('css=span.error')
 	assertTextPresent('has been created')

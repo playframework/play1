@@ -29,7 +29,7 @@ public class Jobs extends Administration {
 			parent();
 		}
 		Company company = Company.find("byEmail", session.get("company")).one();
-		params.put("object.company", company.id + "");
+		params.put("object.company@id", company.id + "");
 		parent();
 	}
 	
@@ -38,7 +38,7 @@ public class Jobs extends Administration {
 			parent();
 		}
 		Company company = Company.find("byEmail", session.get("company")).one();
-		params.put("object.company", company.id + "");
+		params.put("object.company@id", company.id + "");
 		parent();
 	}
     

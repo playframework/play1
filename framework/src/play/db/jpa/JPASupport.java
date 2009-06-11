@@ -66,7 +66,7 @@ public class JPASupport implements Serializable {
                 if (isEntity) {
                     if (multiple) {
                         List l = new ArrayList();
-                        String[] ids = params.get(name + "." + field.getName());
+                        String[] ids = params.get(name + "." + field.getName() + "@id");
                         if (ids != null) {
                             for (String _id : ids) {
                                 Query q = JPA.getEntityManager().createQuery("from " + relation + " where id = ?");
@@ -76,7 +76,7 @@ public class JPASupport implements Serializable {
                         }
                         field.set(o, l);
                     } else {
-                        String[] ids = params.get(name + "." + field.getName());
+                        String[] ids = params.get(name + "." + field.getName() + "@id");
                         if (ids != null && ids.length > 0 && !ids[0].equals("")) {
                             Query q = JPA.getEntityManager().createQuery("from " + relation + " where id = ?");
                             q.setParameter(1, Binder.directBind(ids[0], findKeyType(Play.classloader.loadClass(relation))));
