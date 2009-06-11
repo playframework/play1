@@ -23,9 +23,9 @@
 	// Send message when user press ENTER
 	$('#message').keypress(function(e) {
 		if(e.keyCode == 13) {
-			$.post('@{postMessage()}', {message: $('#message').val()}, function() {
-				$('#message').val('');
-			}); 
+			var message = $('#message').val();
+			$('#message').val('');
+			$.post('@{postMessage()}', {message: message}); 
 		}
     });
 

@@ -3,7 +3,7 @@
     <head>
         <title>Play! - Tests runner</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        <script src="/public/test-runner/jquery-1.3.2.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="@{'/public/test-runner/jquery-1.3.2.min.js'}" type="text/javascript" charset="utf-8"></script>
         <style type="text/css">
             html, body {
                 margin: 0;
@@ -136,7 +136,7 @@
                 background: #EF6868 !important;
             }
             .passing .touch {
-                background: url(/public/test-runner/running.gif) no-repeat;
+                background: url(@{'/public/test-runner/running.gif'}) no-repeat;
             }
             .passing a {
                 background: #95D7EF;
@@ -341,7 +341,7 @@
                         });
                     }
                     if(/.test.html/.test(testId)) {
-                        $('#selenium-runner').attr('src', '/public/test-runner/selenium/TestRunner.html?baseUrl=http://localhost:${play.configuration['http.port'] ?: '9000'}&test=/@tests/'+testId+'.suite&auto=true&close=true&resultsUrl=/@tests/'+testId);
+                        $('#selenium-runner').attr('src', '@{'/public/test-runner/selenium/TestRunner.html'}?baseUrl=http://localhost:${play.configuration['http.port'] ?: '9000'}&test=/@tests/'+testId+'.suite&auto=true&close=true&resultsUrl=/@tests/'+testId);
                         $('#selenium-mask, #selenium').show();
                         window.checkResult = setInterval(function() {
                              var req = $.ajax({url: '@{TestRunner.run("XXX.result")}'.replace('XXX', testId), async: false});
@@ -543,7 +543,7 @@
                 #{list items:seleniumTests, as:'test'}
                 <li>
                     <div class="test" id="${test}">
-                        <span class="touch">+</span><a href="/public/test-runner/selenium/TestRunner.html?baseUrl=http://localhost:${play.configuration['http.port'] ?: '9000'}&test=/@tests/${test}.suite">${test}</a>
+                        <span class="touch">+</span><a href="@{'/public/test-runner/selenium/TestRunner.html'}?baseUrl=http://localhost:${play.configuration['http.port'] ?: '9000'}&test=/@tests/${test}.suite">${test}</a>
                         <div class="testResult"></div>
                     </div>
                 </li>
