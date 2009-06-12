@@ -18,7 +18,9 @@ import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
 import play.mvc.After;
 import play.mvc.Before;
+import play.mvc.Controller;
 import play.mvc.Finally;
+import play.mvc.With;
 
 /**
  * Java utils
@@ -158,10 +160,15 @@ public class Java {
      */
     public static List<Method> findAllAnnotatedMethods(Class clazz, Class annotationType) {
         List<Method> methods = new ArrayList<Method>();
-        while (!clazz.equals(Object.class)) {
+        while (!clazz.equals(Object.class) && Controller.class.isAssignableFrom(clazz)) {
             for (Method method : clazz.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(annotationType)) {
                     methods.add(method);
+                }
+            }
+            if(clazz.isAnnotationPresent(With.class)) {
+                for(Class withClass : ((With)clazz.getAnnotation(With.class)).value()) {
+                    methods.addAll(findAllAnnotatedMethods(withClass, annotationType));
                 }
             }
             clazz = clazz.getSuperclass();

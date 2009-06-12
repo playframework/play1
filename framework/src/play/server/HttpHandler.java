@@ -179,7 +179,9 @@ public class HttpHandler implements IoHandler {
                         FileChannel channel = (FileChannel) future.getSession().getAttribute("file");
                         future.getSession().removeAttribute("file");
                         try {
-                            channel.close();
+                            if(channel != null) {
+                                channel.close();
+                            }
                         } catch (IOException e) {
                             Logger.error(e, "Unexpected error");
                         }

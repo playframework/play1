@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import play.Invoker.SuspendRequest;
 import play.Logger;
 import play.exceptions.UnexpectedException;
 import play.libs.Time;
