@@ -62,7 +62,6 @@
 	type('email', 'toto@sampleforum.com')
 	type('password', 'hello')
 	clickAndWait('loginButton')
-	assertTextPresent('This account is not confirmed')
 	
 	// Go to confirmation page
 	storeLastReceivedEmailBy('toto@sampleforum.com', 'email')

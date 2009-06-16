@@ -1,5 +1,6 @@
 <module rename-to="main">
 	<inherits name='com.google.gwt.user.theme.standard.Standard'/>
 	<inherits name="com.google.gwt.user.User"/>
+	<inherits name="com.google.gwt.maps.GoogleMaps" />
 	<entry-point class="client.StockWatcher"/>
 </module>

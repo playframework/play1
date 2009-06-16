@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.Entity;
@@ -25,21 +26,21 @@ import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
 
 /**
- * A super class for JPA entities
+ * A super class for JPA entities 
  */
 public class JPASupport implements Serializable {
-    
+
     public static <T> T create(Class type, String name, Map<String, String[]> params) {
         try {
             Object model = type.newInstance();
-            return (T)edit(model, name, params);
+            return (T) edit(model, name, params);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-    
+
     public <T> T edit(String name, Params params) {
-        return (T)edit(this, name, params.all());
+        return (T) edit(this, name, params.all());
     }
 
     public static <T> T edit(Object o, String name, Map<String, String[]> params) {
@@ -80,27 +81,27 @@ public class JPASupport implements Serializable {
                         if (ids != null && ids.length > 0 && !ids[0].equals("")) {
                             Query q = JPA.getEntityManager().createQuery("from " + relation + " where id = ?");
                             q.setParameter(1, Binder.directBind(ids[0], findKeyType(Play.classloader.loadClass(relation))));
-                                Object to = q.getSingleResult();
+                            Object to = q.getSingleResult();
                             field.set(o, to);
                         } else {
                             field.set(o, null);
                         }
                     }
                 }
-                if(field.getType().equals(FileAttachment.class)) {
-                    FileAttachment fileAttachment = ((FileAttachment)field.get(o));
-                    if(fileAttachment == null) {
+                if (field.getType().equals(FileAttachment.class)) {
+                    FileAttachment fileAttachment = ((FileAttachment) field.get(o));
+                    if (fileAttachment == null) {
                         fileAttachment = new FileAttachment(o, field.getName());
                         field.setAccessible(true);
                         field.set(o, fileAttachment);
                     }
-                    File file = Params.current().get(name + "." +field.getName(), File.class);
-                    if(file != null && file.exists() && file.length() > 0) {
-                        fileAttachment.set(Params.current().get(name + "." +field.getName(), File.class));
+                    File file = Params.current().get(name + "." + field.getName(), File.class);
+                    if (file != null && file.exists() && file.length() > 0) {
+                        fileAttachment.set(Params.current().get(name + "." + field.getName(), File.class));
                         fileAttachment.filename = file.getName();
                     } else {
-                        String df = Params.current().get(name + "." +field.getName()+"_delete_", String.class);
-                        if(df != null && df.equals("true")) {
+                        String df = Params.current().get(name + "." + field.getName() + "_delete_", String.class);
+                        if (df != null && df.equals("true")) {
                             fileAttachment.delete();
                             field.set(o, null);
                         }
@@ -117,7 +118,7 @@ public class JPASupport implements Serializable {
      * store (ie insert) the entity.
      */
     public <T> T save() {
-        if(!em().contains(this)) {
+        if (!em().contains(this)) {
             em().persist(this);
         }
         return (T) this;
@@ -302,7 +303,7 @@ public class JPASupport implements Serializable {
     public String toString() {
         return getClass().getSimpleName() + "[" + getEntityId() + "]";
     }
-    
+
     /**
      * A JPAQuery
      */
@@ -332,9 +333,23 @@ public class JPASupport implements Serializable {
                     return null;
                 }
                 return (T) results.get(0);
-            } catch(Exception e) {
-                throw new IllegalArgumentException("Error while executing query <strong>"+sq+"</strong>", e);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Error while executing query <strong>" + sq + "</strong>", e);
             }
+        }
+
+        /**
+         * Bind a JPQL named parameter to the current query.
+         */
+        public JPAQuery bind(String name, Object param) {
+            if (param.getClass().isArray()) {
+                param = Arrays.asList((Object[]) param);
+            }
+            if(param instanceof Integer) {
+                param = ((Integer)param).longValue(); 
+            }
+            query.setParameter(name, param); 
+            return this;
         }
 
         /**
@@ -344,8 +359,8 @@ public class JPASupport implements Serializable {
         public <T extends JPASupport> List<T> all() {
             try {
                 return query.getResultList();
-            } catch(Exception e) {
-                throw new IllegalArgumentException("Error while executing query <strong>"+sq+"</strong>", e);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Error while executing query <strong>" + sq + "</strong>", e);
             }
         }
 
@@ -363,20 +378,19 @@ public class JPASupport implements Serializable {
             query.setMaxResults(length);
             try {
                 return query.getResultList();
-            } catch(Exception e) {
-                throw new IllegalArgumentException("Error while executing query <strong>"+sq+"</strong>", e);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Error while executing query <strong>" + sq + "</strong>", e);
             }
         }
     }
 
     // File attachments
-
     public void setupAttachment() {
         for (Field field : getClass().getFields()) {
             if (field.getType().equals(FileAttachment.class)) {
                 try {
-                    FileAttachment attachment = (FileAttachment)field.get(this);
-                    if(attachment != null) {
+                    FileAttachment attachment = (FileAttachment) field.get(this);
+                    if (attachment != null) {
                         attachment.model = this;
                         attachment.name = field.getName();
                     }
@@ -391,8 +405,8 @@ public class JPASupport implements Serializable {
         for (Field field : getClass().getFields()) {
             if (field.getType().equals(FileAttachment.class)) {
                 try {
-                    FileAttachment attachment = (FileAttachment)field.get(this);
-                    if(attachment != null) {
+                    FileAttachment attachment = (FileAttachment) field.get(this);
+                    if (attachment != null) {
                         attachment.save();
                     }
                 } catch (Exception ex) {
@@ -403,7 +417,6 @@ public class JPASupport implements Serializable {
     }
 
     // More utils
-
     public static Object findKey(Object entity) {
         try {
             Class c = entity.getClass();
@@ -421,7 +434,7 @@ public class JPASupport implements Serializable {
         }
         return null;
     }
-    
+
     public static Class findKeyType(Class c) {
         try {
             while (c.isAnnotationPresent(Entity.class) || c.isAnnotationPresent(MappedSuperclass.class)) {
@@ -438,14 +451,12 @@ public class JPASupport implements Serializable {
         }
         return null;
     }
-    
     private Object key;
-    
+
     public Object getEntityId() {
-        if(key == null) {
+        if (key == null) {
             key = findKey(this);
         }
         return key;
     }
-    
 }

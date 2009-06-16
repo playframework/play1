@@ -70,6 +70,9 @@ if play_command == 'gwt:browser':
     cp.append(os.path.normpath(os.path.join(gwt_path, 'gwt-dev-windows.jar')))
     cp.append(os.path.normpath(os.path.join(gwt_path, 'gwt-dev-mac.jar')))
     cp.append(os.path.normpath(os.path.join(gwt_path, 'gwt-dev-linux.jar')))
+    for jar in os.listdir(os.path.join(application_path, 'lib')):
+        if jar.endswith('.jar'):
+            cp.append(os.path.normpath(os.path.join(application_path, 'lib/%s' % jar)))
     cps = ':'.join(cp)
     if os.name == 'nt':
         cps = ';'.join(cp)

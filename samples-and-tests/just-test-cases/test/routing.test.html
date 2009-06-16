@@ -26,11 +26,11 @@
 	assertAttribute('back@href', '/')
 	clickAndWait('back')
 	assertAttribute('form@action', '/sayHello?x-http-method-override=PUT')
-	assertAttribute('form@method', 'post')
+	assertAttribute('form@method', 'regexpi:post')
 	
 	// The yop form
 	assertElementPresent('css=form[action=/application/yop]')
-	assertAttribute('css=form[action=/application/yop]@method', 'post')
+	assertAttribute('css=form[action=/application/yop]@method', 'regexpi:post')
 	clickAndWait('yop')
 	assertTextPresent('Yop')
 	clickAndWait('back')
@@ -38,7 +38,7 @@
 	
 	// A GET form
 	assertElementPresent('css=form[action=/aGetForm]')
-	assertAttribute('css=form[action=/aGetForm]@method', 'get')
+	assertAttribute('css=form[action=/aGetForm]@method', 'regexpi:get')
 	clickAndWait('yopGet')
 	assertTextPresent('Hello !')
 	clickAndWait('back')
