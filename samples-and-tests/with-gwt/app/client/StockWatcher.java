@@ -10,14 +10,6 @@ import com.google.gwt.user.client.Random;
 import com.google.gwt.i18n.client.*;
 import com.google.gwt.user.client.rpc.*;
 
-import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.maps.client.InfoWindowContent;
-import com.google.gwt.maps.client.MapWidget;
-import com.google.gwt.maps.client.control.LargeMapControl;
-import com.google.gwt.maps.client.geom.LatLng;
-import com.google.gwt.maps.client.overlay.Marker;
-import com.google.gwt.user.client.ui.RootPanel;
-
 import java.util.*;
 
 /**
@@ -34,8 +26,6 @@ public class StockWatcher implements EntryPoint {
     TextBox newSymbolTextBox = new TextBox();
     Button addStockButton = new Button("Add");
     Label lastUpdatedLabel = new Label();
-    
-    MapWidget map;
 
     public void onModuleLoad() {
         // Create table for stock data.
@@ -99,16 +89,6 @@ public class StockWatcher implements EntryPoint {
                 }
             }
         });
-        
-        // Add a google map, just for fun
-        LatLng paris = LatLng.newInstance(47.15984,2.988281);
-        map = new MapWidget(paris, 2);
-        map.setSize("500px", "300px");
-        map.addControl(new LargeMapControl());
-        map.addOverlay(new Marker(paris));
-        map.getInfoWindow().open(map.getCenter(), new InfoWindowContent("play was made here"));
-        
-        RootPanel.get("mapsTutorial").add(map);
    
     }
     
