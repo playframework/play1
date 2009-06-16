@@ -26,7 +26,7 @@ public class MessagesPlugin extends PlayPlugin {
         } catch(Exception e) {
             Logger.warn("Defaults messsages file missing");
         }
-        for(VirtualFile module : Play.modules) {
+        for(VirtualFile module : Play.modules.values()) {
             VirtualFile messages = module.child("conf/messages");
             if(messages != null && messages.exists()) {
                 Messages.defaults.putAll(read(messages)); 
@@ -38,7 +38,7 @@ public class MessagesPlugin extends PlayPlugin {
         }
         for (String locale : Play.langs) {
             Properties properties = new Properties();
-            for(VirtualFile module : Play.modules) {
+            for(VirtualFile module : Play.modules.values()) {
                 VirtualFile messages = module.child("conf/messages." + locale);
                 if(messages != null && messages.exists()) {
                     properties.putAll(read(messages)); 
@@ -82,11 +82,24 @@ public class MessagesPlugin extends PlayPlugin {
             onApplicationStart();
             return;
         }
+        for(VirtualFile module : Play.modules.values()) {
+            if(module.child("conf/messages") != null && module.child("conf/messages").exists() && module.child("conf/messages").lastModified() > lastLoading) {
+                onApplicationStart();
+                return;
+            }
+        }
         for (String locale : Play.langs) {
             if (Play.getVirtualFile("conf/messages." + locale)!=null && Play.getVirtualFile("conf/messages." + locale).lastModified() > lastLoading) {
                 onApplicationStart();
                 return;
             }
+            for(VirtualFile module : Play.modules.values()) {
+                if(module.child("conf/messages."+locale) != null && module.child("conf/messages."+locale).exists() && module.child("conf/messages."+locale).lastModified() > lastLoading) {
+                    onApplicationStart();
+                    return;
+                }
+            }
         }
+
     }
 }

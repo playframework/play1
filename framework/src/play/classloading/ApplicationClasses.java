@@ -23,7 +23,7 @@ import play.vfs.VirtualFile;
 public class ApplicationClasses {
 
     ApplicationCompiler compiler = new ApplicationCompiler(this);
-    Map<String, ApplicationClass> classes = new HashMap<String, ApplicationClass>();
+    Map<String, ApplicationClass> classes = new HashMap<String, ApplicationClass>(); 
 
     /**
      * Cleat the classes cache

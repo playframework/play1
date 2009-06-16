@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
  */
 public class Time {
 
+    static Pattern days = Pattern.compile("^([0-9]+)d$");
     static Pattern hours = Pattern.compile("^([0-9]+)h$");
     static Pattern minutes = Pattern.compile("^([0-9]+)mn$");
     static Pattern seconds = Pattern.compile("^([0-9]+)s$");
@@ -22,7 +23,11 @@ public class Time {
             return 60 * 60 * 24 * 365;
         }
         int toAdd = -1;
-        if (hours.matcher(duration).matches()) {
+        if (days.matcher(duration).matches()) {
+            Matcher matcher = days.matcher(duration);
+            matcher.matches();
+            toAdd = Integer.parseInt(matcher.group(1)) * (60 * 60) * 24;
+        } else if (hours.matcher(duration).matches()) {
             Matcher matcher = hours.matcher(duration);
             matcher.matches();
             toAdd = Integer.parseInt(matcher.group(1)) * (60 * 60);

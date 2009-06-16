@@ -1,8 +1,8 @@
 # Routes for the CRUD module
 # ~~~~~~~~~~~
 
-GET			/												CRUD.index
 #{crud.types}
+GET			/												${type.controllerClass.name.substring(12)}.index
 GET			/${type.controllerName}							${type.controllerClass.name.substring(12)}.list
 GET			/${type.controllerName}/new						${type.controllerClass.name.substring(12)}.blank
 GET			/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12)}.show
@@ -12,3 +12,4 @@ POST		/${type.controllerName}							${type.controllerClass.name.substring(12)}.c
 PUT			/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12)}.save
 DELETE		/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12)}.delete 
 #{/crud.types}
+GET			/												CRUD.index

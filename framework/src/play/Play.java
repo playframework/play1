@@ -125,7 +125,7 @@ public class Play {
     /**
      * Modules
      */
-    public static List<VirtualFile> modules = new ArrayList<VirtualFile>();
+    public static Map<String, VirtualFile> modules = new HashMap<String, VirtualFile>();
     /**
      * Framework version
      */
@@ -530,7 +530,7 @@ public class Play {
      */
     public static void addModule(String name, File path) {
         VirtualFile root = VirtualFile.open(path);
-        modules.add(root);
+        modules.put(name, root);
         if (root.child("app").exists()) {
             javaPath.add(root.child("app"));
         }

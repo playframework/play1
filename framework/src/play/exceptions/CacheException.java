@@ -28,7 +28,7 @@ public class CacheException extends PlayException {
     @Override
     public String getErrorTitle() {
         return "Cache error";
-    }
+    } 
 
     @Override
     public String getErrorDescription() {
