@@ -7,6 +7,8 @@
  *    ${stylesheet src:'default.css' media:'screen,print' /}
 }*
 %{
+    ( _arg ) &&  ( _src = _arg);
+
     if(! _src) {
         throw new play.exceptions.TagInternalException("src attribute cannot be empty for stylesheet tag");
     }
