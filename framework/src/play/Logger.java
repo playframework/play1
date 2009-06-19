@@ -465,10 +465,14 @@ public class Logger {
     }
 
     static String format(String msg, Object... args) {
-        if (args != null && args.length > 0) {
-            return String.format(msg, args);
+        try {
+            if (args != null && args.length > 0) {
+                return String.format(msg, args);
+            }
+            return msg;
+        } catch(Exception e) {
+            return msg;
         }
-        return msg;
     }
 
     static class CallInfo {
@@ -478,13 +482,12 @@ public class Logger {
 
         public CallInfo() {
         }
-        ;
 
         public CallInfo(String className, String methodName) {
             this.className = className;
             this.methodName = methodName;
         }
-        ;
+
     }
 
     /**
