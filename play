@@ -434,6 +434,7 @@ try:
 		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%APPLICATION_NAME%', application_name)
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/application')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/application'))
 		shutil.copytree(application_path, os.path.join(war_path, 'WEB-INF/application'))
+		shutil.copytree(os.path.join(application_path, 'conf'), os.path.join(war_path, 'WEB-INF/classes'))
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/lib')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/lib'))
 		os.mkdir(os.path.join(war_path, 'WEB-INF/lib'))
 		for jar in classpath:

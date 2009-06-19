@@ -73,6 +73,7 @@ public class Invoker {
          * Things to do before an Invocation
          */
         public void before() {
+            Thread.currentThread().setContextClassLoader(Play.classloader);
             Play.detectChanges();
             if (!Play.started) {
                 if (Play.mode == Mode.PROD) {
@@ -80,6 +81,7 @@ public class Invoker {
                 }
                 Play.start();
             }
+            Thread.currentThread().setContextClassLoader(Play.classloader);
             for (PlayPlugin plugin : Play.plugins) {
                 plugin.beforeInvocation();
             }

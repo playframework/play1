@@ -36,6 +36,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         StringBuilder sigChecksum = new StringBuilder();
 
         for (CtMethod method : ctClass.getDeclaredMethods()) {
+            Logger.trace("Method signature for %s", method);
             
             // Signatures names
             CodeAttribute codeAttribute = (CodeAttribute) method.getMethodInfo().getAttribute("Code");

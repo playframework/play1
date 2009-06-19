@@ -18,6 +18,9 @@ public class JPQLDialect {
         if (query.trim().toLowerCase().startsWith("from ")) {
             return query;
         }
+        if (query.trim().toLowerCase().startsWith("order by ")) {
+            return "from " + entityName +" " + query;
+        }
         if (query.trim().indexOf(" ") == -1 && query.trim().indexOf("=") == -1 && params != null && params.length == 1) {
             query += " = ?1";
         }

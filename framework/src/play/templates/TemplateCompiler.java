@@ -283,9 +283,11 @@ public class TemplateCompiler {
             // Use inlineTag if exists
             try {
                 Method m = InlineTags.class.getDeclaredMethod("_" + tag.name, int.class, CALL.class);
-                println("play.templates.TagContext.enterTag();");
+                print("play.templates.TagContext.enterTag();");
                 print((String)m.invoke(null, new Object[] {tagIndex, CALL.START}));
                 tag.hasBody = false;
+                markLine(parser.getLine());
+                println();
                 return;
             } catch (Exception e) {
                 // do nothing here
