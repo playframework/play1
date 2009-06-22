@@ -70,11 +70,33 @@ public class Java {
     public static Object invokeStatic(Class clazz, String method, Object... args) throws Exception {
         Class[] types = new Class[args.length];
         for (int i = 0; i < args.length; i++) {
-            types[0] = args[0].getClass();
+            types[i] = args[i].getClass();
         }
         Method m = clazz.getDeclaredMethod(method, types);
+        m.setAccessible(true);
         return m.invoke(null, args);
     }
+
+    public static Object invokeStaticOrParent(Class clazz, String method, Object... args) throws Exception {
+        Class[] types = new Class[args.length];
+        for (int i = 0; i < args.length; i++) {
+            types[i] = args[i].getClass();
+        }
+        Method m = null;
+        while(!clazz.equals(Object.class) && m == null) {
+            try {
+                m = clazz.getDeclaredMethod(method, types);
+            } catch(Exception e) {
+                clazz = clazz.getSuperclass();
+            }
+        }
+        if(m != null) {
+            m.setAccessible(true);
+            return m.invoke(null, args);
+        }
+        throw new NoSuchMethodException(method);
+    }
+
 
     public static Object invokeStatic(Method method, Map<String, String[]> args) throws Exception {
         return method.invoke(null, prepareArgs(method, args));

@@ -403,6 +403,19 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
     }
 
     /**
+     * Retrieve annotation for the controller class
+     * @param clazz The annotation class
+     * @return Annotation object or null if not found
+     */
+    protected static <T extends Annotation> T getControllerAnnotation(Class<T> clazz) {
+        Method m = (Method) ActionInvoker.getActionMethod(Http.Request.current().action)[1];
+        if (m.getDeclaringClass().isAnnotationPresent(clazz)) {
+            return m.getDeclaringClass().getAnnotation(clazz);
+        }
+        return null;
+    }
+
+    /**
      * Retrieve annotation for the action method
      * @param clazz The annotation class
      * @return Annotation object or null if not found

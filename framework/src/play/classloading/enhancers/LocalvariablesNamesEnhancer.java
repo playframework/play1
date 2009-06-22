@@ -32,11 +32,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         if (!ctClass.subtypeOf(classPool.get(LocalVariablesSupport.class.getName()))) {
             return;
         }
-        
-        StringBuilder sigChecksum = new StringBuilder();
-
         for (CtMethod method : ctClass.getDeclaredMethods()) {
-            Logger.trace("Method signature for %s", method);
             
             // Signatures names
             CodeAttribute codeAttribute = (CodeAttribute) method.getMethodInfo().getAttribute("Code");
@@ -77,7 +73,6 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             
             CtField signature = CtField.make("public static String[] $" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes()) + " = " + iv.toString(), ctClass);
             ctClass.addField(signature);
-            sigChecksum.append(iv);
             
             // No variables name, skip ...
             if(localVariableAttribute == null) {
@@ -185,7 +180,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         applicationClass.enhancedByteCode = ctClass.toBytecode();
 
         ctClass.defrost();
-        applicationClass.sigChecksum = sigChecksum.toString().hashCode();
+        
     }
     
     public static interface LocalVariablesSupport {

@@ -169,10 +169,8 @@ public class ApplicationClassloader extends ClassLoader {
             }
         }
         List<ClassDefinition> newDefinitions = new ArrayList<ClassDefinition>();
-        Map<Class, Integer> annotationsHashes = new HashMap<Class, Integer>();
         boolean dirtySig = false;
         for (ApplicationClass applicationClass : modifieds) {
-            annotationsHashes.put(applicationClass.javaClass, computeAnnotationsHash(applicationClass.javaClass));
             if (applicationClass.compile() == null) {
                 Play.classes.classes.remove(applicationClass.name);
             } else {
@@ -198,13 +196,7 @@ public class ApplicationClassloader extends ClassLoader {
                 throw new RuntimeException("Need reload");
             }
         }
-        // Check new annotations
-        for (Class clazz : annotationsHashes.keySet()) {
-            if (annotationsHashes.get(clazz) != computeAnnotationsHash(clazz)) {
-                throw new RuntimeException("Annotations change !");
-            }
-        }
-        // Check signature (variable name aware !)
+        // Check signature (variable name & annotations aware !)
         if (dirtySig) {
             throw new RuntimeException("Signature change !");
         }
@@ -218,6 +210,13 @@ public class ApplicationClassloader extends ClassLoader {
                 }
                 if (applicationClass.name.contains("$")) {
                     Play.classes.classes.remove(applicationClass.name);
+                    // Ok we have to remove all classes from the same file ...
+                    VirtualFile vf = applicationClass.javaFile;
+                    for(ApplicationClass ac : Play.classes.all()) {
+                        if(ac.javaFile.equals(vf)) {
+                            Play.classes.classes.remove(ac.name);
+                        }
+                    }
                 }
             }
             throw new RuntimeException("Path has changed");
@@ -390,7 +389,7 @@ public class ApplicationClassloader extends ClassLoader {
 
     @Override
     public String toString() {
-        return "(play)" + (allClasses == null ? "" : allClasses.toString());
+        return "(play) " + (allClasses == null ? "" : allClasses.toString());
     }
     
     

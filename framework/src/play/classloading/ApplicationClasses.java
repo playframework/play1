@@ -13,6 +13,7 @@ import play.classloading.enhancers.JPAEnhancer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer;
 import play.classloading.enhancers.MailerEnhancer;
 import play.classloading.enhancers.PropertiesEnhancer;
+import play.classloading.enhancers.SigEnhancer;
 import play.classloading.enhancers.ZDBEnhancer;
 import play.exceptions.UnexpectedException;
 import play.vfs.VirtualFile; 
@@ -106,7 +107,8 @@ public class ApplicationClasses {
     }    
     
     // Enhancers
-    static Class[] enhancers = new Class[]{
+    static Class[] enhancers = new Class[] {
+        SigEnhancer.class,
         ControllersEnhancer.class,
         MailerEnhancer.class,
         PropertiesEnhancer.class,
