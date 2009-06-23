@@ -38,6 +38,7 @@ public class Stock extends JPAModel {
         Random rnd = new Random();        
         this.price = rnd.nextDouble() * MAX_PRICE;
         this.change = price * MAX_PRICE_CHANGE * (rnd.nextDouble() * 2.0 - 1.0);
+        this.save();
     }
     
     public String toString() {

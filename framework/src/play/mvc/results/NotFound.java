@@ -36,7 +36,6 @@ public class NotFound extends Result {
 
     public void apply(Request request, Response response) {
         response.status = 404;
-        Logger.warn("404 -> %s %s (%s)", request.method, request.url, why);
         response.contentType = "text/html";
         Map<String, Object> binding = Scope.RenderArgs.current().data;
         binding.put("result", this);

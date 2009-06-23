@@ -66,7 +66,6 @@ public abstract class CRUD extends Controller {
         JPASupport object = type.findById(id);
         validation.valid(object.edit("object", params));
         if (validation.hasErrors()) {
-            object.refresh();
             renderArgs.put("error", Messages.get("crud.hasErrors"));
             try {
                 render(request.controller.replace(".", "/") + "/show.html", type, object);
@@ -74,6 +73,7 @@ public abstract class CRUD extends Controller {
                 render("CRUD/show.html", type, object);
             }
         }
+        object.save();
         flash.success(Messages.get("crud.saved", type.modelName, object.getEntityId()));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");

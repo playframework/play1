@@ -357,7 +357,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
         templateBinding.put("flash", Scope.Flash.current());
         templateBinding.put("params", Scope.Params.current());
         try {
-            templateBinding.put("errors", ((Validation) (Java.invokeStatic(Validation.class, "current"))).errorsMap());
+            templateBinding.put("errors", ((Validation) (Java.invokeStatic(Validation.class, "current"))).errors());
         } catch (Exception ex) {
             throw new UnexpectedException(ex);
         }

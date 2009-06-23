@@ -39,15 +39,31 @@ public class JPA {
     /*
      * Retrieve the current entityManager
      */ 
+    @Deprecated
     public static EntityManager getEntityManager() {
+        return get().entityManager;
+    }
+    
+    /*
+     * Retrieve the current entityManager
+     */ 
+    public static EntityManager em() {
         return get().entityManager;
     }
     
     /*
      * Tell to JPA do not commit the current transaction
      */ 
+    @Deprecated
     public static void abort() {
-        getEntityManager().getTransaction().setRollbackOnly();
+        em().getTransaction().setRollbackOnly();
+    }
+    
+    /*
+     * Tell to JPA do not commit the current transaction
+     */ 
+    public static void setRollbackOnly() {
+        em().getTransaction().setRollbackOnly();
     }
 
     /**
@@ -58,12 +74,12 @@ public class JPA {
     }
     
     public static int execute(String query) {
-        return getEntityManager().createQuery(query).executeUpdate();
+        return em().createQuery(query).executeUpdate();
     }
 
     /*
      * Build a new entityManager.
-     * (In most case you want to use the local entityManager with getEntityManager)
+     * (In most case you want to use the local entityManager with em)
      */ 
     public static EntityManager newEntityManager() {
         return entityManagerFactory.createEntityManager();

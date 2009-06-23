@@ -1,13 +1,18 @@
 package play.db.jpa;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Properties;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
+import net.sf.oval.ConstraintViolation;
+import net.sf.oval.Validator;
 import org.apache.log4j.Level;
+import org.hibernate.EmptyInterceptor;
 import org.hibernate.ejb.Ejb3Configuration;
+import org.hibernate.type.Type;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -37,6 +42,21 @@ public class JPAPlugin extends PlayPlugin {
             cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty("jpa.ddl", "update"));
             cfg.setProperty("hibernate.dialect", getDefaultDialect(Play.configuration.getProperty("db.driver")));
             cfg.setProperty("javax.persistence.transaction", "RESOURCE_LOCAL");
+            cfg.setInterceptor(new EmptyInterceptor() {
+
+                /**
+                 * Discard change when an entity is not valid
+                 */
+                @Override
+                public int[] findDirty(Object o, Serializable id, Object[] arg2, Object[] arg3, String[] arg4, Type[] arg5) {
+                    if(o instanceof JPASupport && !((JPASupport)o).willBeSaved) {
+                        return new int[0];
+                    }
+                    return null;
+                }
+                
+                
+            });
             if(Play.configuration.getProperty("jpa.debugSQL", "false").equals("true")) {
                 org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
             } else {

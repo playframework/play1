@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -26,11 +27,21 @@ public class Validation {
     }
 
     public static List<Error> errors() {
-        return current.get().errors;
+        return new ArrayList<Error>(current.get().errors) {
+            
+            public Error forKey(String key) {
+                return Validation.error(key);
+            }
+            
+            public List<Error> allForKey(String key) {
+                return Validation.errors(key);
+            }
+            
+        };
     }
 
     public Map<String, List<Error>> errorsMap() {
-        Map<String, List<Error>> result = new HashMap<String, List<Error>>();
+        Map<String, List<Error>> result = new LinkedHashMap<String, List<Error>>();
         for (Error error : errors()) {
             result.put(error.key, errors(error.key));
         }
@@ -181,7 +192,7 @@ public class Validation {
     }
 
     public ValidationResult required(Object o) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        String key = getLocalName(o);
         return Validation.required(key, o);
     }
     
@@ -192,7 +203,7 @@ public class Validation {
     }
 
     public ValidationResult min(Object o, double min) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        String key = getLocalName(o);
         return Validation.min(key, o, min);
     }
 
@@ -203,7 +214,7 @@ public class Validation {
     }
 
     public ValidationResult max(Object o, double max) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        String key = getLocalName(o);
         return Validation.max(key, o, max);
     }
     
@@ -214,7 +225,7 @@ public class Validation {
     }
 
     public ValidationResult future(Object o, Date reference) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        String key = getLocalName(o);
         return Validation.future(key, o, reference);
     }
     
@@ -225,7 +236,7 @@ public class Validation {
     }
 
     public ValidationResult future(Object o) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        String key = getLocalName(o);
         return Validation.future(key, o, new Date());
     }
     
@@ -236,7 +247,7 @@ public class Validation {
     }
 
     public ValidationResult past(Object o, Date reference) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        String key = getLocalName(o);
         return Validation.past(key, o, reference);
     }
     
@@ -247,7 +258,7 @@ public class Validation {
     }
 
     public ValidationResult past(Object o) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        String key = getLocalName(o);
         return Validation.past(key, o, new Date());
     }
 
@@ -258,7 +269,7 @@ public class Validation {
     }
 
     public ValidationResult match(Object o, String pattern) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        String key = getLocalName(o);
         return Validation.match(key, o, pattern);
     }
     
@@ -268,7 +279,7 @@ public class Validation {
     }
 
     public ValidationResult email(Object o) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        String key = getLocalName(o);
         return Validation.email(key, o);
     }
     
@@ -278,7 +289,7 @@ public class Validation {
     }
 
     public ValidationResult isTrue(Object o) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        String key = getLocalName(o);
         return Validation.isTrue(key, o);
     }
     
@@ -291,8 +302,8 @@ public class Validation {
     }
 
     public ValidationResult equals(Object o, Object to) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
-        String otherKey = LocalVariablesNamesTracer.getAllLocalVariableNames(to).get(0);
+        String key = getLocalName(o);
+        String otherKey = getLocalName(to);
         return Validation.equals(key, o, otherKey, to);
     }
     
@@ -304,7 +315,7 @@ public class Validation {
     }
 
     public ValidationResult range(Object o, double min, double max) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        String key = getLocalName(o);
         return Validation.range(key, o, min, max);
     }
     
@@ -315,7 +326,7 @@ public class Validation {
     }
 
     public ValidationResult minSize(Object o, int minSize) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        String key = getLocalName(o);
         return Validation.minSize(key, o, minSize);
     }
     
@@ -326,7 +337,7 @@ public class Validation {
     }
 
     public ValidationResult maxSize(Object o, int maxSize) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        String key = getLocalName(o);
         return Validation.maxSize(key, o, maxSize);
     }
 
@@ -337,7 +348,7 @@ public class Validation {
     }
 
     public ValidationResult valid(Object o) {
-        String key = LocalVariablesNamesTracer.getAllLocalVariableNames(o).get(0);
+        String key = getLocalName(o);
         return Validation.valid(key, o);
     }
 
@@ -356,5 +367,13 @@ public class Validation {
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
+    }
+    
+    static String getLocalName(Object o) {
+        List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
+        if(names.size() > 0) {
+            return names.get(0);
+        }
+        return "";
     }
 }

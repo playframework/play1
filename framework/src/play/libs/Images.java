@@ -1,16 +1,38 @@
 package play.libs;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.IndexColorModel;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
+import nl.captcha.backgrounds.BackgroundProducer;
+import nl.captcha.backgrounds.FlatColorBackgroundProducer;
+import nl.captcha.backgrounds.GradiatedBackgroundProducer;
+import nl.captcha.backgrounds.SquigglesBackgroundProducer;
+import nl.captcha.backgrounds.TransparentBackgroundProducer;
+import nl.captcha.gimpy.GimpyRenderer;
+import nl.captcha.gimpy.RippleGimpyRenderer;
+import nl.captcha.noise.CurvedLineNoiseProducer;
+import nl.captcha.text.producer.DefaultTextProducer;
+import nl.captcha.text.renderer.DefaultWordRenderer;
+import play.exceptions.UnexpectedException;
+import play.mvc.Http.Response;
 
 /**
  * Images utils
@@ -119,5 +141,133 @@ public class Images {
      */
     public static String toBase64(File image) throws IOException {
         return "data:" + MimeTypes.getMimeType(image.getName()) + ";base64," + Codec.encodeBASE64(IO.readContent(image));
+    }
+
+    public static Captcha captcha(int width, int height) {
+        return new Captcha(width, height);
+    }
+
+    public static Captcha captcha() {
+        return captcha(150, 50);
+    }
+
+    public static class Captcha extends InputStream {
+
+        public String text = null;
+        public BackgroundProducer background = new TransparentBackgroundProducer();
+        public GimpyRenderer gimpy = new RippleGimpyRenderer();
+        public Color textColor = Color.BLACK;
+        public List<Font> fonts = new ArrayList<Font>();
+        public int w, h;
+        public Color noise = null;
+
+        public Captcha(int w, int h) {
+            this.w = w;
+            this.h = h;
+            this.fonts.add(new Font("Arial", Font.BOLD, 40));
+            this.fonts.add(new Font("Courier", Font.BOLD, 40));	
+        }
+
+        public String getText() {
+            return getText(5);
+        }
+        
+        public String getText(String color) {
+            this.textColor = Color.decode(color);
+            return getText();
+        }
+
+        public String getText(int length) {
+            return getText(length, "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789");
+        }
+        
+        public String getText(String color, int length) {
+            this.textColor = Color.decode(color);
+            return getText(length);
+        }
+
+        public String getText(int length, String chars) {
+            char[] charsArray = chars.toCharArray();
+            Random random = new Random(System.currentTimeMillis());
+            StringBuffer sb = new StringBuffer();
+            for(int i=0; i<length; i++) {
+                sb.append(charsArray[random.nextInt(charsArray.length)]);
+            }
+            text = sb.toString();
+            return text;
+        }
+        
+        public String getText(String color, int length, String chars) {
+            this.textColor = Color.decode(color);
+            return getText(length, chars);
+        }
+        
+        public Captcha addNoise() {
+            noise = Color.BLACK;
+            return this;
+        }
+        
+        public Captcha addNoise(String color) {
+            noise = Color.decode(color);
+            return this;
+        }
+
+        public Captcha setBackground(String from, String to) {
+            GradiatedBackgroundProducer bg = new GradiatedBackgroundProducer();
+            bg.setFromColor(Color.decode(from));
+            bg.setToColor(Color.decode(to));
+            background = bg;
+            return this;
+        }
+       
+        public Captcha setBackground(String color) {
+            background = new FlatColorBackgroundProducer(Color.decode(color));
+            return this;
+        }
+
+        public Captcha setSquigglesBackground() {
+            background = new SquigglesBackgroundProducer();
+            return this;
+        }
+        
+        // ~~ rendering
+        ByteArrayInputStream bais = null;
+
+        @Override
+        public int read() throws IOException {
+            check();
+            return bais.read();
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            check();
+            return bais.read(b);
+        }
+
+        void check() {
+            try {
+                if (bais == null) {
+                    if (text == null) {
+                        text = getText();
+                    }
+                    BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                    DefaultWordRenderer renderer = new DefaultWordRenderer(textColor, fonts);
+                    bi = background.addBackground(bi);
+                    renderer.render(text, bi);
+                    if(noise != null) {
+                        new CurvedLineNoiseProducer(noise, 3.0f).makeNoise(bi);
+                    }
+                    gimpy.gimp(bi); 
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    ImageIO.write(bi, "png", baos);
+                    bais = new ByteArrayInputStream(baos.toByteArray());
+                    //
+                    Response.current().contentType = "image/png";
+                }
+            } catch (Exception e) {
+                throw new UnexpectedException(e);
+            }
+        }
     }
 }

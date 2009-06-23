@@ -262,7 +262,6 @@ public class HttpHandler implements IoHandler {
     }
 
     public static void serve404(IoSession session, MutableHttpResponse minaResponse, HttpRequest minaRequest, NotFound e) {
-        Logger.warn("404 -> %s %s (%s)", minaRequest.getMethod(), minaRequest.getRequestUri(), e.getMessage());
         minaResponse.setStatus(HttpResponseStatus.NOT_FOUND);
         minaResponse.setContentType("text/html");
         Map<String, Object> binding = new HashMap<String, Object>();

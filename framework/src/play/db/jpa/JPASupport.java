@@ -6,8 +6,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
@@ -16,9 +20,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Query;
+import org.hibernate.collection.PersistentCollection;
+import org.hibernate.ejb.EntityManagerImpl;
+import org.hibernate.proxy.HibernateProxy;
 import play.Play;
 import play.data.binding.BeanWrapper;
 import play.data.binding.Binder;
@@ -29,6 +34,8 @@ import play.mvc.Scope.Params;
  * A super class for JPA entities 
  */
 public class JPASupport implements Serializable {
+
+    protected boolean willBeSaved = false;
 
     public static <T> T create(Class type, String name, Map<String, String[]> params) {
         try {
@@ -121,7 +128,78 @@ public class JPASupport implements Serializable {
         if (!em().contains(this)) {
             em().persist(this);
         }
+        avoidCascadeSaveLoops.set(new ArrayList<JPASupport>());
+        try {
+            saveAndCascade();
+        } finally {
+            avoidCascadeSaveLoops.get().clear();
+        }
         return (T) this;
+    }
+    static ThreadLocal<List<JPASupport>> avoidCascadeSaveLoops = new ThreadLocal<List<JPASupport>>();
+
+    private void saveAndCascade() {
+        willBeSaved = true;
+        if (avoidCascadeSaveLoops.get().contains(this)) {
+            return;
+        } else {
+            avoidCascadeSaveLoops.get().add(this);
+        }
+        // Cascade save
+        try {
+            for (Field field : this.getClass().getDeclaredFields()) {
+                boolean doCascade = false;
+                if (field.isAnnotationPresent(OneToOne.class)) {
+                    doCascade = cascadeAll(field.getAnnotation(OneToOne.class).cascade());
+                }
+                if (field.isAnnotationPresent(OneToMany.class)) {
+                    doCascade = cascadeAll(field.getAnnotation(OneToMany.class).cascade());
+                }
+                if (field.isAnnotationPresent(ManyToOne.class)) {
+                    doCascade = cascadeAll(field.getAnnotation(ManyToOne.class).cascade());
+                }
+                if (field.isAnnotationPresent(ManyToMany.class)) {
+                    doCascade = cascadeAll(field.getAnnotation(ManyToMany.class).cascade());
+                }
+                if (doCascade) {
+                    Object value = field.get(this);
+                    if (value == null) {
+                        continue;
+                    }
+                    if (value instanceof PersistentCollection) {
+                        if (((PersistentCollection) value).wasInitialized()) {
+                            for (Object o : (Collection) value) {
+                                if (o instanceof JPASupport) {
+                                    ((JPASupport) o).saveAndCascade();
+                                }
+                            }
+                        }
+                        continue;
+                    }
+                    if (value instanceof HibernateProxy && value instanceof JPASupport) {
+                        if (!((HibernateProxy) value).getHibernateLazyInitializer().isUninitialized()) {
+                            ((JPASupport)((HibernateProxy) value).getHibernateLazyInitializer().getImplementation()).saveAndCascade();
+                        }
+                        continue;
+                    }
+                    if (value instanceof JPASupport) {
+                        ((JPASupport) value).saveAndCascade();
+                        continue;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new UnexpectedException("During cascading save()", e);
+        }
+    }
+
+    static boolean cascadeAll(CascadeType[] types) {
+        for (CascadeType cascadeType : types) {
+            if (cascadeType == CascadeType.ALL) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -345,10 +423,10 @@ public class JPASupport implements Serializable {
             if (param.getClass().isArray()) {
                 param = Arrays.asList((Object[]) param);
             }
-            if(param instanceof Integer) {
-                param = ((Integer)param).longValue(); 
+            if (param instanceof Integer) {
+                param = ((Integer) param).longValue();
             }
-            query.setParameter(name, param); 
+            query.setParameter(name, param);
             return this;
         }
 
