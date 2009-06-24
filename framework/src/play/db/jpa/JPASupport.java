@@ -3,14 +3,13 @@ package play.db.jpa;
 import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -20,9 +19,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
+import javax.persistence.PostUpdate;
 import javax.persistence.Query;
 import org.hibernate.collection.PersistentCollection;
-import org.hibernate.ejb.EntityManagerImpl;
 import org.hibernate.proxy.HibernateProxy;
 import play.Play;
 import play.data.binding.BeanWrapper;
@@ -33,9 +34,10 @@ import play.mvc.Scope.Params;
 /**
  * A super class for JPA entities 
  */
+@MappedSuperclass
 public class JPASupport implements Serializable {
 
-    protected boolean willBeSaved = false;
+    public transient boolean willBeSaved = false;
 
     public static <T> T create(Class type, String name, Map<String, String[]> params) {
         try {
@@ -136,7 +138,7 @@ public class JPASupport implements Serializable {
         }
         return (T) this;
     }
-    static ThreadLocal<List<JPASupport>> avoidCascadeSaveLoops = new ThreadLocal<List<JPASupport>>();
+    static transient ThreadLocal<List<JPASupport>> avoidCascadeSaveLoops = new ThreadLocal<List<JPASupport>>();
 
     private void saveAndCascade() {
         willBeSaved = true;
@@ -148,6 +150,10 @@ public class JPASupport implements Serializable {
         // Cascade save
         try {
             for (Field field : this.getClass().getDeclaredFields()) {
+                field.setAccessible(true);
+                if(Modifier.isTransient(field.getModifiers())) {
+                    continue;
+                }
                 boolean doCascade = false;
                 if (field.isAnnotationPresent(OneToOne.class)) {
                     doCascade = cascadeAll(field.getAnnotation(OneToOne.class).cascade());
@@ -178,7 +184,7 @@ public class JPASupport implements Serializable {
                     }
                     if (value instanceof HibernateProxy && value instanceof JPASupport) {
                         if (!((HibernateProxy) value).getHibernateLazyInitializer().isUninitialized()) {
-                            ((JPASupport)((HibernateProxy) value).getHibernateLazyInitializer().getImplementation()).saveAndCascade();
+                            ((JPASupport) ((HibernateProxy) value).getHibernateLazyInitializer().getImplementation()).saveAndCascade();
                         }
                         continue;
                     }
@@ -450,7 +456,7 @@ public class JPASupport implements Serializable {
          */
         public <T extends JPASupport> List<T> page(int from, int length) {
             if (from < 1) {
-                throw new IllegalArgumentException("Page start at 1");
+                from = 1;
             }
             query.setFirstResult((from - 1) * length);
             query.setMaxResults(length);
@@ -529,12 +535,23 @@ public class JPASupport implements Serializable {
         }
         return null;
     }
-    private Object key;
+    private transient Object key;
 
     public Object getEntityId() {
         if (key == null) {
             key = findKey(this);
         }
         return key;
+    }
+    // Events
+    @PostLoad
+    public void onLoad() {
+        setupAttachment();
+    }
+
+    @PostPersist
+    @PostUpdate
+    public void onSave() {
+        saveAttachment();
     }
 }

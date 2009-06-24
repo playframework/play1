@@ -16,9 +16,7 @@ import java.security.Permissions;
 import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import play.Logger;
@@ -56,11 +54,12 @@ public class ApplicationClassloader extends ClassLoader {
 
     @Override
     protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
+
         Class c = findLoadedClass(name);
         if (c != null) {
             return c;
         }
-
+        
         // First check if it's an application Class
         Class applicationClass = loadApplicationClass(name);
         if (applicationClass != null) {

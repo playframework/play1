@@ -41,7 +41,7 @@
     <target name="compile-java6" depends="checkVersion" if="java6">
         <echo>Disabling annotation processing</echo>
         <mkdir dir="tmp/classes" />
-        <javac srcdir="src" destdir="tmp/classes" target="1.5">
+        <javac srcdir="src" destdir="tmp/classes" target="1.5" debug="true">
             <classpath refid="project.classpath" />
             <compilerarg value="-proc:none" />
         </javac>
@@ -49,7 +49,7 @@
     
     <target name="compile-java5" depends="checkVersion" unless="java6">
         <mkdir dir="tmp/classes" />
-        <javac srcdir="src" destdir="tmp/classes" target="1.5">
+        <javac srcdir="src" destdir="tmp/classes" target="1.5" debug="true">
             <classpath refid="project.classpath" />
         </javac>
     </target>

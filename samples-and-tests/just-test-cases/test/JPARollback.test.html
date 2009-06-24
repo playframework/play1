@@ -22,5 +22,25 @@
 	type('name', 'Toto2')
 	clickAndWait('save')
 	assertTextPresent('Toto2')	
+	
+	// Edit
+	open('@{JPAController.edit('Toto2', 'New toto2')}')
+	assertTextPresent('Toto2')	
+	assertTextNotPresent('New toto2')	
+	
+	// Edit and save
+	open('@{JPAController.editAndSave('Toto2', 'New toto2')}')
+	assertTextNotPresent('Toto2')	
+	assertTextPresent('New toto2')
+	
+	// Create and edit
+	open('@{JPAController.createAndEdit('Toto3', 'New toto3')}')
+	assertTextNotPresent('Toto3')	
+	assertTextPresent('New toto3')
+	
+	// Create and edit and save
+	open('@{JPAController.createAndEditAndSave('Toto4', 'New toto4')}')
+	assertTextNotPresent('Toto4')	
+	assertTextPresent('New toto4')
 
 #{/selenium}

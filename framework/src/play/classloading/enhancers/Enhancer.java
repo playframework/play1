@@ -25,12 +25,18 @@ import play.classloading.ApplicationClasses.ApplicationClass;
  */
 public abstract class Enhancer {
 
-    protected ClassPool classPool = new ClassPool();
+    protected ClassPool classPool;
 
     public Enhancer() {
+        this.classPool = newClassPool();
+    }
+    
+    public static ClassPool newClassPool() {
+        ClassPool classPool = new ClassPool();
         classPool.appendSystemPath();
         classPool.appendClassPath(new LoaderClassPath(Enhancer.class.getClassLoader()));
         classPool.appendClassPath(new ApplicationClassesClasspath());
+        return classPool;
     }
 
     public CtClass makeClass(ApplicationClass applicationClass) throws IOException {

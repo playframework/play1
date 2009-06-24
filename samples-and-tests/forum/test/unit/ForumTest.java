@@ -34,11 +34,7 @@ public class ForumTest extends UnitTest {
         assertEquals(3, help.getTopics(1, 20).size());
         assertEquals(1, help.getTopics(2, 2).size());
         assertEquals(0, help.getTopics(3, 2).size());
-        try {
-            help.getTopics(0, 2);
-            fail("IllegalArgumentException should be thrown");
-        } catch(IllegalArgumentException e) {            
-        }
+        assertEquals(2, help.getTopics(0, 2).size());
         assertEquals("Please help !", help.getTopics(1, 2).get(0).subject);
         assertEquals("It does not work ...", help.getTopics(2, 2).get(0).subject);        
     }

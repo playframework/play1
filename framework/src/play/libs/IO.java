@@ -1,6 +1,7 @@
 package play.libs;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -81,6 +82,16 @@ public class IO {
         is.read(result);
         is.close();
         return result;
+    }
+    
+    public static byte[] readContent(InputStream is) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int read = 0;
+        byte[] buffer = new byte[8096];
+        while((read = is.read(buffer)) > 0) {
+            baos.write(buffer, 0, read);
+        }
+        return baos.toByteArray();
     }
 
     /**
