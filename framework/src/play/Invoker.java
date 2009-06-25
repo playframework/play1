@@ -43,14 +43,14 @@ public class Invoker {
     public static void invokeInThread(Invocation invocation) {
         DirectInvocation directInvocation = new DirectInvocation(invocation);
         boolean retry = true;
-        while(retry) {
+        while (retry) {
             directInvocation.run();
-            if(directInvocation.retry == -1) {
+            if (directInvocation.retry == -1) {
                 retry = false;
             } else {
                 try {
                     Thread.sleep(directInvocation.retry * 1000);
-                } catch(InterruptedException e) {
+                } catch (InterruptedException e) {
                     throw new UnexpectedException(e);
                 }
                 retry = true;
@@ -70,9 +70,9 @@ public class Invoker {
         public abstract void execute() throws Exception;
 
         /**
-         * Things to do before an Invocation
+         * Init the call (especially usefull in DEV mode to detect changes)
          */
-        public void before() {
+        public boolean init() {
             Thread.currentThread().setContextClassLoader(Play.classloader);
             Play.detectChanges();
             if (!Play.started) {
@@ -81,6 +81,13 @@ public class Invoker {
                 }
                 Play.start();
             }
+            return true;
+        }
+
+        /**
+         * Things to do before an Invocation
+         */
+        public void before() {
             Thread.currentThread().setContextClassLoader(Play.classloader);
             for (PlayPlugin plugin : Play.plugins) {
                 plugin.beforeInvocation();
@@ -130,9 +137,11 @@ public class Invoker {
 
         public void run() {
             try {
-                before();
-                execute();
-                after();
+                if (init()) {
+                    before();
+                    execute();
+                    after();
+                }
             } catch (SuspendRequest e) {
                 suspend(((SuspendRequest) e).timeout);
             } catch (Throwable e) {
@@ -187,8 +196,8 @@ public class Invoker {
         public void run() {
             originalInvocation.run();
         }
-
     }
+    
 
     static {
         int core = Integer.parseInt(Play.configuration.getProperty("play.pool", Play.mode == Mode.DEV ? "1" : "3"));

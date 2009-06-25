@@ -55,7 +55,7 @@ public class HttpHandler implements IoHandler {
 
     private static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
 
-    public void messageReceived(IoSession session, Object message) throws Exception {      
+    public void messageReceived(IoSession session, Object message) throws Exception {
         MutableHttpRequest minaRequest = (MutableHttpRequest) message;
         MutableHttpResponse minaResponse = new DefaultHttpResponse();
         Request request = null;
@@ -75,15 +75,8 @@ public class HttpHandler implements IoHandler {
             if (raw) {
                 copyResponse(session, request, response, minaRequest, minaResponse);
             } else {
-                Router.routeOnlyStatic(request);
-                Invoker.invoke(new MinaInvocation(session, minaRequest, minaResponse, request, response));                
+                Invoker.invoke(new MinaInvocation(session, minaRequest, minaResponse, request, response));
             }
-        } catch (NotFound e) {
-            serve404(session, minaResponse, minaRequest, e);
-            return;
-        } catch (RenderStatic e) {
-            serveStatic(session, minaResponse, minaRequest, e);
-            return;
         } catch (Exception e) {
             serve500(e, session, minaRequest, minaResponse);
             return;
@@ -156,7 +149,7 @@ public class HttpHandler implements IoHandler {
             playCookie.value = cookie.getValue();
             request.cookies.put(playCookie.name, playCookie);
         }
-        
+
         return request;
     }
 
@@ -179,7 +172,7 @@ public class HttpHandler implements IoHandler {
                         FileChannel channel = (FileChannel) future.getSession().getAttribute("file");
                         future.getSession().removeAttribute("file");
                         try {
-                            if(channel != null) {
+                            if (channel != null) {
                                 channel.close();
                             }
                         } catch (IOException e) {
@@ -219,31 +212,38 @@ public class HttpHandler implements IoHandler {
         }
     }
 
-    public void serveStatic(IoSession session, MutableHttpResponse minaResponse, MutableHttpRequest minaRequest, RenderStatic renderStatic) throws IOException {
-        VirtualFile file = Play.getVirtualFile(renderStatic.file);
-        if(file != null && file.exists() && file.isDirectory()) {
-            file = file.child("index.html");
-            if(file != null) {
-                renderStatic.file = file.relativePath();
-            }
-        }
-        if ( (file == null || !file.exists() )) {
-            serve404(session, minaResponse, minaRequest, new NotFound("The file " + renderStatic.file + " does not exist"));
-        } else {
-            boolean raw = false;
-            for (PlayPlugin plugin : Play.plugins) {
-                if (plugin.serveStatic(file, Request.current(), Response.current())) {
-                    raw = true;
-                    break;
+    public static void serveStatic(IoSession session, MutableHttpResponse minaResponse, MutableHttpRequest minaRequest, RenderStatic renderStatic) {
+        try {
+            VirtualFile file = Play.getVirtualFile(renderStatic.file);
+            if (file != null && file.exists() && file.isDirectory()) {
+                file = file.child("index.html");
+                if (file != null) {
+                    renderStatic.file = file.relativePath();
                 }
             }
-            if (raw) {
-                copyResponse(session, Request.current(), Response.current(), minaRequest, minaResponse);
+            if ((file == null || !file.exists())) {
+                serve404(session, minaResponse, minaRequest, new NotFound("The file " + renderStatic.file + " does not exist"));
             } else {
-                if (Play.mode == Play.Mode.DEV) {
-                    minaResponse.setHeader("Cache-Control", "no-cache");
-                    attachFile(session, minaResponse, file);
+                boolean raw = false;
+                for (PlayPlugin plugin : Play.plugins) {
+                    if (plugin.serveStatic(file, Request.current(), Response.current())) {
+                        raw = true;
+                        break;
+                    }
+                }
+                if (raw) {
+                    copyResponse(session, Request.current(), Response.current(), minaRequest, minaResponse);
                 } else {
+                    if(Play.mode == Play.Mode.DEV) {
+                        minaResponse.setHeader("Cache-Control", "no-cache");
+                    } else {
+                        String maxAge = Play.configuration.getProperty("http.cacheControl", "3600");
+                        if(maxAge.equals("0")) {
+                            minaResponse.setHeader("Cache-Control", "no-cache");
+                        } else {
+                            minaResponse.setHeader("Cache-Control", "max-age=" + maxAge);           
+                        }
+                    }
                     long last = file.lastModified();
                     String etag = last + "-" + file.hashCode();
                     if (!isModified(etag, last, minaRequest)) {
@@ -251,13 +251,22 @@ public class HttpHandler implements IoHandler {
                         minaResponse.setStatus(HttpResponseStatus.NOT_MODIFIED);
                     } else {
                         minaResponse.setHeader("Last-Modified", Utils.getHttpDateFormatter().format(new Date(last)));
-                        minaResponse.setHeader("Cache-Control", "max-age=" + Play.configuration.getProperty("http.cacheControl", "3600"));
                         minaResponse.setHeader("Etag", etag);
                         attachFile(session, minaResponse, file);
+                        System.out.println("serving "+file);
+                
                     }
+                    writeResponse(session, minaRequest, minaResponse);
                 }
-                writeResponse(session, minaRequest, minaResponse);
             }
+        } catch (Exception e) {
+            Logger.error(e, "HttpHandler.serveStatic");
+            try {
+                minaResponse.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
+            } catch (UnsupportedEncodingException ex) {
+                //
+            }
+            writeResponse(session, minaRequest, minaResponse);
         }
     }
 
@@ -273,27 +282,6 @@ public class HttpHandler implements IoHandler {
             Logger.error(fex, "(utf-8 ?)");
         }
         writeResponse(session, minaRequest, minaResponse);
-    }
-
-    public static boolean isModified(String etag, long last, HttpRequest request) {
-        if (!(request.getHeaders().containsKey("If-None-Match") && request.getHeaders().containsKey("If-Modified-Since"))) {
-            return true;
-        } else {
-            String browserEtag = request.getHeader("If-None-Match");
-            if (!browserEtag.equals(etag)) {
-                return true;
-            } else {
-                try {
-                    Date browserDate = Utils.getHttpDateFormatter().parse(request.getHeader("If-Modified-Since"));
-                    if (browserDate.getTime() >= last) {
-                        return false;
-                    }
-                } catch (ParseException ex) {
-                    Logger.error("Can't parse date", ex);
-                }
-                return true;
-            }
-        }
     }
 
     public static void serve500(Exception e, IoSession session, HttpRequest request, MutableHttpResponse response) {
@@ -354,6 +342,27 @@ public class HttpHandler implements IoHandler {
         }
     }
 
+    public static boolean isModified(String etag, long last, HttpRequest request) {
+        if (!(request.getHeaders().containsKey("If-None-Match") && request.getHeaders().containsKey("If-Modified-Since"))) {
+            return true;
+        } else {
+            String browserEtag = request.getHeader("If-None-Match");
+            if (!browserEtag.equals(etag)) {
+                return true;
+            } else {
+                try {
+                    Date browserDate = Utils.getHttpDateFormatter().parse(request.getHeader("If-Modified-Since"));
+                    if (browserDate.getTime() >= last) {
+                        return false;
+                    }
+                } catch (ParseException ex) {
+                    Logger.error("Can't parse date", ex);
+                }
+                return true;
+            }
+        }
+    }
+
     public static void writeResponse(IoSession session, HttpRequest req, MutableHttpResponse res) {
         res.setHeader("Server", signature);
         res.normalize(req);
@@ -381,6 +390,21 @@ public class HttpHandler implements IoHandler {
         }
 
         @Override
+        public boolean init() {
+            super.init();
+            try {
+                Router.routeOnlyStatic(request);
+            } catch (NotFound e) {
+                serve404(session, minaResponse, minaRequest, e);
+                return false;
+            } catch (RenderStatic e) {
+                serveStatic(session, minaResponse, minaRequest, e);
+                return false;
+            }
+            return true;
+        }
+
+        @Override
         public void run() {
             try {
                 super.run();
@@ -403,7 +427,6 @@ public class HttpHandler implements IoHandler {
         public String toString() {
             return "Request " + request;
         }
-        
     }
 
     static void copyResponse(IoSession session, Request request, Response response, MutableHttpRequest minaRequest, MutableHttpResponse minaResponse) throws IOException {
