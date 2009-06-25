@@ -444,7 +444,6 @@ public class Logger {
             errorOut.println("");
             errorOut.println("");
             errorOut.println("@" + playException.getId());
-            errorOut.println("For request " + Request.current());
             errorOut.println(format(message, args));
             errorOut.println("");
             if (playException.isSourceAvailable()) {

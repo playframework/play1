@@ -310,7 +310,7 @@ public class ServletWrapper extends HttpServlet {
         is.close();
     }
 
-    public class ServletInvocation extends Invoker.Invocation {
+    public class ServletInvocation extends Invoker.DirectInvocation {
 
         private Request request;
         private Response response;

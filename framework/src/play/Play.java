@@ -174,9 +174,9 @@ public class Play {
                 tmpDir = new File(applicationPath, tmpDir.getPath());
             }
             Logger.trace("Using %s as tmp dir", Play.tmpDir);
-            if(!tmpDir.exists()) {
+            if (!tmpDir.exists()) {
                 try {
-                    if(readOnlyTmp) {
+                    if (readOnlyTmp) {
                         throw new Exception("ReadOnly tmp");
                     }
                     tmpDir.mkdirs();
@@ -232,8 +232,6 @@ public class Play {
         } else {
             Logger.warn("You're running Play! in DEV mode");
         }
-        // Yop
-        Logger.info("Application '%s' is ready !", configuration.getProperty("application.name", ""));
     }
 
     static void readConfiguration() {
@@ -315,7 +313,7 @@ public class Play {
                 }
                 plugins = newPlugins;
             }
-            
+
             // Reload configuration
             readConfiguration();
 
@@ -351,6 +349,10 @@ public class Play {
 
             // Cache
             Cache.init();
+
+            if (!started) {
+                Logger.info("Application '%s' is started !", configuration.getProperty("application.name", ""));
+            }
 
             // We made it
             started = true;
@@ -388,7 +390,7 @@ public class Play {
             long start = System.currentTimeMillis();
             classloader.getAllClasses();
             Logger.trace("%sms to precompile the Java stuff", System.currentTimeMillis() - start);
-            if(!lazyLoadTemplates) {
+            if (!lazyLoadTemplates) {
                 start = System.currentTimeMillis();
                 TemplateLoader.getAllTemplate();
                 Logger.trace("%sms to precompile the templates", System.currentTimeMillis() - start);

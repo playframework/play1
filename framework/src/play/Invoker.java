@@ -1,5 +1,8 @@
 package play;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -40,17 +43,20 @@ public class Invoker {
      * Run the code in the same thread than caller.
      * @param invocation The code to run
      */
-    public static void invokeInThread(Invocation invocation) {
-        DirectInvocation directInvocation = new DirectInvocation(invocation);
+    public static void invokeInThread(DirectInvocation invocation) {
         boolean retry = true;
         while (retry) {
-            directInvocation.run();
-            if (directInvocation.retry == -1) {
+            invocation.run();
+            if (invocation.retry == null) {
                 retry = false;
             } else {
                 try {
-                    Thread.sleep(directInvocation.retry * 1000);
-                } catch (InterruptedException e) {
+                    if (invocation.retry.task != null) {
+                        invocation.retry.task.get();
+                    } else {
+                        Thread.sleep(invocation.retry.timeout * 1000);
+                    }
+                } catch (Exception e) {
                     throw new UnexpectedException(e);
                 }
                 retry = true;
@@ -122,8 +128,12 @@ public class Invoker {
          * The request is suspended
          * @param timeout
          */
-        public void suspend(int timeout) {
-            Invoker.invoke(this, timeout);
+        public void suspend(Suspend suspendRequest) {
+            if (suspendRequest.task != null) {
+                WaitForTasksCompletion.waitFor(suspendRequest.task, this);
+            } else {
+                Invoker.invoke(this, suspendRequest.timeout);
+            }
         }
 
         /**
@@ -142,8 +152,8 @@ public class Invoker {
                     execute();
                     after();
                 }
-            } catch (SuspendRequest e) {
-                suspend(((SuspendRequest) e).timeout);
+            } catch (Suspend e) {
+                suspend(((Suspend) e));
             } catch (Throwable e) {
                 onException(e);
             } finally {
@@ -152,50 +162,21 @@ public class Invoker {
         }
     }
 
-    static class DirectInvocation extends Invocation {
+    public static abstract class DirectInvocation extends Invocation {
 
-        int retry = -1;
-        Invocation originalInvocation;
+        Suspend retry = null;
 
-        public DirectInvocation(Invocation originalInvocation) {
-            this.originalInvocation = originalInvocation;
+        @Override
+        public boolean init() {
+            retry = null;
+            return super.init();
         }
 
         @Override
-        public void execute() throws Exception {
-            originalInvocation.execute();
+        public void suspend(Suspend suspendRequest) {
+            retry = suspendRequest;
         }
 
-        @Override
-        public void before() {
-            retry = -1;
-            originalInvocation.before();
-        }
-
-        @Override
-        public void after() {
-            originalInvocation.after();
-        }
-
-        @Override
-        public void onException(Throwable e) {
-            originalInvocation.onException(e);
-        }
-
-        @Override
-        public void suspend(int timeout) {
-            retry = timeout;
-        }
-
-        @Override
-        public void _finally() {
-            originalInvocation._finally();
-        }
-
-        @Override
-        public void run() {
-            originalInvocation.run();
-        }
     }
     
 
@@ -204,12 +185,17 @@ public class Invoker {
         executor = new ScheduledThreadPoolExecutor(core, new ThreadPoolExecutor.AbortPolicy());
     }
 
-    public static class SuspendRequest extends PlayException {
+    public static class Suspend extends PlayException {
 
         int timeout;
+        Future task;
 
-        public SuspendRequest(int timeout) {
+        public Suspend(int timeout) {
             this.timeout = timeout;
+        }
+
+        public Suspend(Future task) {
+            this.task = task;
         }
 
         @Override
@@ -219,7 +205,49 @@ public class Invoker {
 
         @Override
         public String getErrorDescription() {
+            if (task != null) {
+                return "Wait for " + task;
+            }
             return "Retry in " + timeout + " s.";
+        }
+    }
+
+    static class WaitForTasksCompletion extends Thread {
+
+        Map<Future, Invocation> queue;
+        static WaitForTasksCompletion instance;
+
+        public WaitForTasksCompletion() {
+            queue = new HashMap();
+            setName("WaitForTasksCompletion");
+            setDaemon(true);
+            start();
+        }
+
+        public static void waitFor(Future task, Invocation invocation) {
+            if (instance == null) {
+                instance = new WaitForTasksCompletion();
+            }
+            instance.queue.put(task, invocation);
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    if (!queue.isEmpty()) {
+                        for (Future task : new HashSet<Future>(queue.keySet())) {
+                            if (task.isDone()) {
+                                executor.submit(queue.get(task));
+                                queue.remove(task);
+                            }
+                        }
+                    }
+                    Thread.sleep(10);
+                } catch (InterruptedException ex) {
+                    Logger.warn(ex, "");
+                }
+            }
         }
     }
 }

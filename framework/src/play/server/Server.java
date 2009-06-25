@@ -45,7 +45,12 @@ public class Server {
         acceptor.setHandler(new HttpHandler());
         try {
             acceptor.bind(new InetSocketAddress(httpPort));
-            Logger.info("Listening for HTTP on port %s ...", httpPort);
+
+            if (Play.mode == Mode.DEV) {
+                Logger.info("Listening for HTTP on port %s (Waiting a first request to start) ...", httpPort);
+            } else {
+                Logger.info("Listening for HTTP on port %s ...", httpPort);
+            }
         } catch (IOException e) {
             Logger.error("Could not bind on port " + httpPort, e);
             acceptor.dispose();

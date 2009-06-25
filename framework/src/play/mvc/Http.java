@@ -164,6 +164,10 @@ public class Http {
          * When the request has been received
          */
         public Date date = new Date();
+        /**
+         * New request or already submitted
+         */
+        public boolean isNew = true;
 
         /**
          * Automatically resolve request format from the Accept header

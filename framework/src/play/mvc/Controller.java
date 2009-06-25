@@ -9,8 +9,9 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 import org.w3c.dom.Document;
-import play.Invoker.SuspendRequest;
+import play.Invoker.Suspend;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
@@ -24,7 +25,7 @@ import play.exceptions.TemplateNotFoundException;
 import play.exceptions.UnexpectedException;
 import play.libs.Java;
 import play.libs.Time;
-import play.mvc.Http.Response;
+import play.mvc.Http.Request;
 import play.mvc.results.Error;
 import play.mvc.results.Forbidden;
 import play.mvc.results.NotFound;
@@ -54,7 +55,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
     /**
      * The current HTTP response
      */
-    protected static Response response = null;
+    protected static Http.Response response = null;
     /**
      * The current HTTP session
      */
@@ -357,7 +358,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
         templateBinding.put("flash", Scope.Flash.current());
         templateBinding.put("params", Scope.Params.current());
         try {
-            templateBinding.put("errors", ((Validation) (Java.invokeStatic(Validation.class, "current"))).errors());
+            templateBinding.put("errors", Validation.errors());
         } catch (Exception ex) {
             throw new UnexpectedException(ex);
         }
@@ -485,6 +486,12 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
     }
 
     protected static void suspend(String timeout) {
-        throw new SuspendRequest(Time.parseDuration(timeout));
+        Request.current().isNew = false;
+        throw new Suspend(Time.parseDuration(timeout));
+    }
+
+    protected static void waitFor(Future task) {
+        Request.current().isNew = false;
+        throw new Suspend(task);
     }
 }

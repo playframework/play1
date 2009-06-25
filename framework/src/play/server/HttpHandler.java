@@ -252,9 +252,7 @@ public class HttpHandler implements IoHandler {
                     } else {
                         minaResponse.setHeader("Last-Modified", Utils.getHttpDateFormatter().format(new Date(last)));
                         minaResponse.setHeader("Etag", etag);
-                        attachFile(session, minaResponse, file);
-                        System.out.println("serving "+file);
-                
+                        attachFile(session, minaResponse, file);                
                     }
                     writeResponse(session, minaRequest, minaResponse);
                 }
@@ -317,9 +315,9 @@ public class HttpHandler implements IoHandler {
                 String errorHtml = TemplateLoader.load("errors/500." + (ajax ? "txt" : "html")).render(binding);
                 response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
                 writeResponse(session, request, response);
-                Logger.error(e, "Internal Server Error (500)");
+                Logger.error(e, "Internal Server Error (500) for request %s", request.getMethod()+" "+request.getRequestUri());
             } catch (Throwable ex) {
-                Logger.error(e, "Internal Server Error (500)");
+                Logger.error(e, "Internal Server Error (500) for request %s", request.getMethod()+" "+request.getRequestUri());
                 Logger.error(ex, "Error during the 500 response generation");
                 try {
                     response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
