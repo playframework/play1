@@ -1,5 +1,6 @@
 package controllers;
 
+import com.sun.org.apache.xerces.internal.impl.xs.identity.ValueStore;
 import java.util.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -28,9 +29,9 @@ public abstract class CRUD extends Controller {
         }
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        List<JPASupport> objects = type.findPage(page, search, searchFields, orderBy, order, (String)request.args.get("where"));
-        Long count = type.count(search, searchFields, (String)request.args.get("where"));
-        Long totalCount = type.count(null, null, (String)request.args.get("where"));
+        List<JPASupport> objects = type.findPage(page, search, searchFields, orderBy, order, (String) request.args.get("where"));
+        Long count = type.count(search, searchFields, (String) request.args.get("where"));
+        Long totalCount = type.count(null, null, (String) request.args.get("where"));
         try {
             render(type, objects, count, totalCount, page, orderBy, order);
         } catch (TemplateNotFoundException e) {
@@ -247,11 +248,11 @@ public abstract class CRUD extends Controller {
         public JPASupport findById(Object id) {
             Query query = JPA.getEntityManager().createQuery("from " + entityClass.getName() + " where id = ?");
             try {
-				query.setParameter(1, play.data.binding.Binder.directBind(id+"", play.db.jpa.JPASupport.findKeyType(entityClass)));
-			} catch(Exception e) {
-				throw new RuntimeException("Something bad with id type ?", e);
-			}
-			return (JPASupport) query.getSingleResult();
+                query.setParameter(1, play.data.binding.Binder.directBind(id + "", play.db.jpa.JPASupport.findKeyType(entityClass)));
+            } catch (Exception e) {
+                throw new RuntimeException("Something bad with id type ?", e);
+            }
+            return (JPASupport) query.getSingleResult();
         }
 
         public List<ObjectField> getFields() {
@@ -273,7 +274,7 @@ public abstract class CRUD extends Controller {
             }
             return null;
         }
-
+        
         public static class ObjectField {
 
             public String type;
@@ -281,7 +282,8 @@ public abstract class CRUD extends Controller {
             public String relation;
             public boolean multiple;
             public boolean searchable;
-
+            public Object[] choices;
+            
             public ObjectField(Field field) {
                 if (CharSequence.class.isAssignableFrom(field.getType())) {
                     type = "text";
@@ -337,11 +339,22 @@ public abstract class CRUD extends Controller {
                         }
                     }
                 }
+                if (field.getType().isEnum()) {
+                    type = "enum";
+                    relation = field.getType().getSimpleName();
+                    choices = field.getType().getEnumConstants();
+                }
                 if (field.isAnnotationPresent(Id.class)) {
                     type = null;
                 }
                 name = field.getName();
             }
+
+            public Object[] getChoices() {
+                return choices;
+            }
+
+            
         }
     }
 }

@@ -13,34 +13,34 @@
 		am = ''
 	}%
 
-	<div class="crudField">
+<div class="crudField">
 
 	%{ def field = _caller.type.getField(fieldName) }%
-	
+
 	%{ if(fieldsHandler[fieldName]) { }%
 		%{
 			def handler = fieldsHandler[fieldName];
 			handler.setProperty('fieldName', 'object.' + field.name);
-            def oldObject = handler.getProperty('object');
+    def oldObject = handler.getProperty('object');
 			handler.setProperty('object', _caller.object);
 			out.println(handler.toString());
 			handler.setProperty('object', oldObject);
 			handler.setProperty('fieldName', null);
 		}%
 	%{ } else { }%
-		
+
 		#{if field.type == 'text'}
 			#{crud.textField name:field.name, value:(_caller.object ? _caller.object[field.name] : null) /}
 		#{/if}
-                
-        #{if field.type == 'password'}
+
+                #{if field.type == 'password'}
 			#{crud.passwordField name:field.name, value:(_caller.object ? _caller.object[field.name] : null) /}
 		#{/if}
-		
+
 		#{if field.type == 'file'}
 			#{crud.fileField name:field.name, value:(_caller.object ? _caller.object[field.name] : null), id:_caller.object?.id /}
 		#{/if}
-		
+
 		#{if field.type == 'longtext'}
 			#{crud.longtextField name:field.name, value:(_caller.object ? _caller.object[field.name] : null) /}
 		#{/if}
@@ -49,7 +49,7 @@
 			#{crud.numberField name:field.name, value:(_caller.object ? _caller.object[field.name] : null) /}
 			%{ am = 'crud.help.numeric' }%
 		#{/if}
-		
+
 		#{if field.type == 'date'}
 			#{crud.dateField name:field.name, value:(_caller.object ? _caller.object[field.name] : null) /}
 			%{ am = 'crud.help.dateformat' }%
@@ -58,13 +58,17 @@
 		#{if field.type == 'relation'}
 			#{crud.relationField name:field.name, value:(_caller.object ? _caller.object[field.name] : null), field:field /}
 		#{/if}
-		
+
 		#{if field.type == 'boolean'}
 			#{crud.checkField name:field.name, value:(_caller.object ? _caller.object[field.name] : null) /}
 		#{/if}
-		
-		<span class="crudHelp">
-			&{am}
+
+		#{if field.type == 'enum'}
+			#{crud.enumField name:field.name, value:(_caller.object ? _caller.object[field.name] : null), property:field /}
+		#{/if}
+
+    <span class="crudHelp">
+        &{am}
 			%{ play.data.validation.Validation.getValidators(_caller.type.entityClass, fieldName, 'object').each() { }%
 				%{
 					switch (it.annotation.annotationType().name.substring(21)) {
@@ -103,10 +107,10 @@
 					}
 				}%
 			%{ } }%
-		</span>
-		
+    </span>
+
 	%{ } }%
-	
-	</div>
-	
+
+</div>
+
 #{/list}
