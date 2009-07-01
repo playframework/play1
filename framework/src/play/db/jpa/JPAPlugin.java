@@ -7,8 +7,6 @@ import java.util.Properties;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
-import net.sf.oval.ConstraintViolation;
-import net.sf.oval.Validator;
 import org.apache.log4j.Level;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.ejb.Ejb3Configuration;

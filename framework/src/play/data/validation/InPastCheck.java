@@ -11,14 +11,14 @@ import net.sf.oval.context.OValContext;
 import play.data.binding.AlternativeDateFormat;
 import play.exceptions.UnexpectedException;
 
-public class PastCheck extends AbstractAnnotationCheck<Past> {
+public class InPastCheck extends AbstractAnnotationCheck<InPast> {
 
     final static String mes = "validation.past";
 
     Date reference;
 
     @Override
-    public void configure(Past past) {
+    public void configure(InPast past) {
         try {
             this.reference = past.value().equals("") ? new Date() : AlternativeDateFormat.getDefaultFormatter().parse(past.value());
         } catch (ParseException ex) {

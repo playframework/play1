@@ -8,10 +8,10 @@ import net.sf.oval.configuration.annotation.Constraint;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
-@Constraint(checkWith = FutureCheck.class)
-public @interface Future {
+@Constraint(checkWith = InFutureCheck.class)
+public @interface InFuture {
 
-    String message() default FutureCheck.mes;
+    String message() default InFutureCheck.mes;
     String value() default "";
 }
 

@@ -104,11 +104,11 @@ public class Validation {
                     if(annotation.annotationType().equals(Equals.class)) {
                         validator.params.put("equalsTo", name + "." + ((Equals)annotation).value());
                     }
-                    if(annotation.annotationType().equals(Future.class)) {
-                        validator.params.put("reference", ((Future)annotation).value());
+                    if(annotation.annotationType().equals(InFuture.class)) {
+                        validator.params.put("reference", ((InFuture)annotation).value());
                     }
-                    if(annotation.annotationType().equals(Past.class)) {
-                        validator.params.put("reference", ((Past)annotation).value());
+                    if(annotation.annotationType().equals(InPast.class)) {
+                        validator.params.put("reference", ((InPast)annotation).value());
                     }
                 }
             }
@@ -131,11 +131,11 @@ public class Validation {
                     if(annotation.annotationType().equals(Equals.class)) {
                         validator.params.put("equalsTo", name + "." + ((Equals)annotation).value());
                     }
-                    if(annotation.annotationType().equals(Future.class)) {
-                        validator.params.put("reference", ((Future)annotation).value());
+                    if(annotation.annotationType().equals(InFuture.class)) {
+                        validator.params.put("reference", ((InFuture)annotation).value());
                     }
-                    if(annotation.annotationType().equals(Past.class)) {
-                        validator.params.put("reference", ((Past)annotation).value());
+                    if(annotation.annotationType().equals(InPast.class)) {
+                        validator.params.put("reference", ((InPast)annotation).value());
                     }
                     
                 }
@@ -219,7 +219,7 @@ public class Validation {
     }
     
     public static ValidationResult future(String key, Object o, Date reference) {
-        FutureCheck check = new FutureCheck();
+        InFutureCheck check = new InFutureCheck();
         check.reference = reference;
         return applyCheck(check, key, o);
     }
@@ -230,7 +230,7 @@ public class Validation {
     }
     
     public static ValidationResult future(String key, Object o) {
-        FutureCheck check = new FutureCheck();
+        InFutureCheck check = new InFutureCheck();
         check.reference = new Date();
         return applyCheck(check, key, o);
     }
@@ -241,7 +241,7 @@ public class Validation {
     }
     
     public static ValidationResult past(String key, Object o, Date reference) {
-        PastCheck check = new PastCheck();
+        InPastCheck check = new InPastCheck();
         check.reference = reference;
         return applyCheck(check, key, o);
     }
@@ -252,7 +252,7 @@ public class Validation {
     }
     
     public static ValidationResult past(String key, Object o) {
-        PastCheck check = new PastCheck();
+        InPastCheck check = new InPastCheck();
         check.reference = new Date();
         return applyCheck(check, key, o);
     }

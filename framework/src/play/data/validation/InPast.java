@@ -8,10 +8,10 @@ import net.sf.oval.configuration.annotation.Constraint;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
-@Constraint(checkWith = PastCheck.class)
-public @interface Past {
+@Constraint(checkWith = InPastCheck.class)
+public @interface InPast {
 
-    String message() default PastCheck.mes;
+    String message() default InPastCheck.mes;
     String value() default "";
 }
 

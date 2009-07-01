@@ -12,6 +12,6 @@ import net.sf.oval.configuration.annotation.Constraint;
 public @interface Match {
 
     String message() default MatchCheck.mes;
-    String pattern();
+    String value();
 }
 

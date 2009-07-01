@@ -15,7 +15,7 @@ public class MatchCheck extends AbstractAnnotationCheck<Match> {
     @Override
     public void configure(Match match) {
         setMessage(match.message());
-        pattern = Pattern.compile(match.pattern());
+        pattern = Pattern.compile(match.value());
     }
 
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {

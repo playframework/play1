@@ -64,6 +64,9 @@
     #source .error .lineNumber {
         background: #c00;
     }
+    #source a {
+        text-decoration: none;
+    }
     #source a:hover * {
         cursor: pointer !important;
     }
@@ -96,7 +99,7 @@
             to = exception.lineNumber + 5  < exception.source.size() ? exception.lineNumber + 5 : exception.source.size()-1          
         }%
         #{list items:exception.source[from..to], as:'line'}
-            ${play.libs.Utils.open(exception.sourceFile, line_index+from) ? '<a href="' + play.libs.Utils.open(exception.sourceFile, line_index) + '">' : ''}
+            ${play.libs.Utils.open(exception.sourceFile, line_index+from) ? '<a href="' + play.libs.Utils.open(exception.sourceFile, line_index+from) + '">' : ''}
                 <div class="line ${exception.lineNumber == line_index+from ? 'error':''}">                
                     <span class="lineNumber">${line_index+from}:</span>
                     <pre>&nbsp;${line.escapeHtml()}</pre>                

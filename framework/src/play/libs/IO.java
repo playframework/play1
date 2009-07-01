@@ -83,12 +83,12 @@ public class IO {
         is.close();
         return result;
     }
-    
+
     public static byte[] readContent(InputStream is) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int read = 0;
         byte[] buffer = new byte[8096];
-        while((read = is.read(buffer)) > 0) {
+        while ((read = is.read(buffer)) > 0) {
             baos.write(buffer, 0, read);
         }
         return baos.toByteArray();
@@ -122,7 +122,7 @@ public class IO {
         os.flush();
         os.close();
     }
-    
+
     /**
      * Write binay data to a file
      * @param data The binary data to write
@@ -134,5 +134,14 @@ public class IO {
         os.write(data);
         os.flush();
         os.close();
+    }
+
+    public static void write(InputStream is, OutputStream os) throws IOException {
+        int read = 0;
+        byte[] buffer = new byte[8096];
+        while ((read = is.read(buffer)) > 0) {
+            os.write(buffer, 0, read);
+        }
+        is.close();
     }
 }

@@ -11,14 +11,14 @@ import net.sf.oval.context.OValContext;
 import play.data.binding.AlternativeDateFormat;
 import play.exceptions.UnexpectedException;
 
-public class FutureCheck extends AbstractAnnotationCheck<Future> {
+public class InFutureCheck extends AbstractAnnotationCheck<InFuture> {
 
     final static String mes = "validation.future";
 
     Date reference;
 
     @Override
-    public void configure(Future future) {
+    public void configure(InFuture future) {
         try {
             this.reference = future.value().equals("") ? new Date() : AlternativeDateFormat.getDefaultFormatter().parse(future.value());
         } catch (ParseException ex) {

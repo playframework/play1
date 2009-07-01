@@ -29,20 +29,19 @@ public class Secure extends Controller {
 
     private static void check(Check check) throws Throwable {
         for(String profile : check.value()) {
-            boolean hasProfile = (Boolean)Security.invoke("check", check.value());
+            boolean hasProfile = (Boolean)Security.invoke("check", profile);
             if(!hasProfile && check.type() == Check.Type.AND) {
-                Security.invoke("checkFailed", check.value());
+                Security.invoke("onCheckFailed", profile);
             }
             if(hasProfile && check.type() == Check.Type.OR) {
                 return;
             }
         }
-        Security.invoke("checkFailed", check.value());
     }
     
     // ~~~ Login
 
-    public static void login() {
+    public static void login() throws Throwable {
         Http.Cookie remember = request.cookies.get("rememberme");
         if(remember != null) {
             String sign = remember.value.substring(0, remember.value.indexOf("-"));
@@ -74,16 +73,18 @@ public class Secure extends Controller {
         redirectToOriginalURL();
     }
 
-    public static void logout() {
+    public static void logout() throws Throwable {
         session.clear();
         response.setCookie("rememberme", "", 0);
+        Security.invoke("onDisconnected");
         flash.success("secure.logout");
         login();
     }
     
     // ~~~ Utils
     
-    static void redirectToOriginalURL() {
+    static void redirectToOriginalURL() throws Throwable {
+        Security.invoke("onAuthenticated");
         String url = flash.get("url");
         if(url == null) {
             url = "/";
@@ -101,12 +102,22 @@ public class Secure extends Controller {
             return true;
         }
 
-        static void checkFailed(String profile) {
-            forbidden();
-        }
-
         static String connected() {
             return session.get("username");
+        }
+        
+        static boolean isConnected() {
+            return session.contains("username");
+        }
+        
+        static void onAuthenticated() {
+        }
+        
+        static void onDisconnected() {
+        }
+        
+        static void onCheckFailed(String profile) {
+            forbidden();
         }
 
         private static Object invoke(String m, Object... args) throws Throwable {

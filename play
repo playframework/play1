@@ -195,17 +195,19 @@ try:
 		classpath.append(os.path.normpath(os.path.join(play_base, 'framework/play.jar')))
 
 		# The application
-		for jar in os.listdir(os.path.join(application_path, 'lib')):
-			if jar.endswith('.jar'):
-				classpath.append(os.path.normpath(os.path.join(application_path, 'lib/%s' % jar)))
+		if os.path.exists(os.path.join(application_path, 'lib')):
+		    for jar in os.listdir(os.path.join(application_path, 'lib')):
+			    if jar.endswith('.jar'):
+				    classpath.append(os.path.normpath(os.path.join(application_path, 'lib/%s' % jar)))
 
 		# The modules
 		for module in modules:
-			libs = os.path.join(module, 'lib')
-			if os.path.exists(libs):
-				for jar in os.listdir(libs):
-					if jar.endswith('.jar'):
-						classpath.append(os.path.normpath(os.path.join(libs, '%s' % jar)))
+		    if os.path.exists(os.path.join(module, 'lib')):
+			    libs = os.path.join(module, 'lib')
+			    if os.path.exists(libs):
+				    for jar in os.listdir(libs):
+					    if jar.endswith('.jar'):
+						    classpath.append(os.path.normpath(os.path.join(libs, '%s' % jar)))
 
 		# The framework
 		for jar in os.listdir(os.path.join(play_base, 'framework/lib')):
