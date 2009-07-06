@@ -211,7 +211,7 @@ public class Http {
                 return;
             }
         }
-        
+
         /**
          * Retrieve the current request
          * @return
@@ -301,16 +301,25 @@ public class Http {
         }
 
         /**
-         * Set a response Header
+         * Get a response header
+         * @param name Header name
+         * @return the header value as a String
+         */
+        public String getHeader(String name) {
+            return headers.get(name).value();
+        }
+
+        /**
+         * Set a response header
          * @param name Header name
          * @param value Header value
          */
         public void setHeader(String name, String value) {
             Header h = new Header();
-            h.name = name.toLowerCase();
+            h.name = name;
             h.values = new ArrayList<String>();
             h.values.add(value);
-            headers.put(h.name, h);
+            headers.put(name, h);
         }
 
         /**
@@ -369,7 +378,7 @@ public class Http {
             setHeader("Last-Modified", Utils.getHttpDateFormatter().format(new Date(lastModified)));
             setHeader("Etag", etag);
         }
-        
+
         public void print(Object o) {
             try {
                 out.write(o.toString().getBytes("utf-8"));
@@ -377,7 +386,7 @@ public class Http {
                 throw new UnexpectedException("UTF-8 problem ?", ex);
             }
         }
-        
+
         public void reset() {
             out.reset();
         }
