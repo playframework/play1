@@ -491,6 +491,8 @@ public class JPASupport implements Serializable {
                 try {
                     FileAttachment attachment = (FileAttachment) field.get(this);
                     if (attachment != null) {
+                        attachment.model = this;
+                        attachment.name = field.getName();
                         attachment.save();
                     }
                 } catch (Exception ex) {

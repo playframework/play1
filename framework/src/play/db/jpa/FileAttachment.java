@@ -20,7 +20,7 @@ public class FileAttachment {
     
     public String filename;
 
-    FileAttachment() {
+    public FileAttachment() {
     }
 
     FileAttachment(Object model, String name) {
@@ -29,11 +29,14 @@ public class FileAttachment {
     }
     
     public File get() {
+        if(f != null) {
+            return f;
+        }
         File file = new File(getStore(), model.getClass().getName()+"."+name+"_"+JPASupport.findKey(model));
         if(file.exists()) {
-            return file;
+            f = file;
         }
-        return null;
+        return f;
     }
     
     public void set(File file) {
