@@ -13,12 +13,12 @@ public class Project extends JPAModel {
     @Required
     public String name;
     
-    @Future
-    @Past("2020-01-01")
+    @InFuture
+    @InPast("2020-01-01")
     public Date endDate;
     
-    @Past
-    @Future("1980-21-12")
+    @InPast
+    @InFuture("1980-21-12")
     public Date startDate;
     
     @Required

@@ -71,7 +71,8 @@ public class Application extends Controller {
         a.add("ab");
         a.add("ac");
         int[] b = new int[] {0, 1, 2 , 3};
-        render(a, b);
+        Iterator d = a.iterator();
+        render(a,b,d);
     }
     
     public static void a() {
