@@ -33,6 +33,7 @@ import org.apache.mina.common.WriteFuture;
 import play.Invoker;
 import play.Logger;
 import play.Play;
+import play.Play.Mode;
 import play.PlayPlugin;
 import play.exceptions.PlayException;
 import play.libs.MimeTypes;
@@ -389,7 +390,10 @@ public class HttpHandler implements IoHandler {
 
         @Override
         public boolean init() {
-            super.init();
+            // Patch favicon.ico
+            if(!request.path.equals("/favicon.ico")) {
+                super.init();
+            }
             try {
                 Router.routeOnlyStatic(request);
             } catch (NotFound e) {

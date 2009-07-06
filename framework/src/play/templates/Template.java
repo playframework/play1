@@ -33,6 +33,7 @@ import play.Play.Mode;
 import play.classloading.BytecodeCache;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.ActionNotFoundException;
+import play.exceptions.JavaExecutionException;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.TagInternalException;
@@ -100,7 +101,7 @@ public class Template {
                 Logger.trace("%sms to load template %s from cache", System.currentTimeMillis() - start, name);
                 return true;
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             Logger.warn(e, "Cannot load %s from cache", name);
         }
         return false;
@@ -251,6 +252,9 @@ public class Template {
                 } else {
                     throw new TemplateExecutionException(this, this.linesMatrix.get(stackTraceElement.getLineNumber()), e.getMessage(), cleanStackTrace(e));
                 }
+            }
+            if (stackTraceElement.getLineNumber() > 0 && Play.classes.hasClass(stackTraceElement.getClassName())) {
+                throw new JavaExecutionException(Play.classes.getApplicationClass(stackTraceElement.getClassName()), stackTraceElement.getLineNumber(), cleanStackTrace(e));
             }
         }
         throw new RuntimeException(e);

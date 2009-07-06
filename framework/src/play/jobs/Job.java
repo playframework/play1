@@ -74,8 +74,11 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     // Customize Invocation
     @Override
     public void onException(Throwable e) {
-        super.onException(e);
-        Logger.error(e, "Error during job execution (%s)", this);
+        try {
+            super.onException(e);
+        } catch(Throwable ex) {
+            Logger.error(ex, "Error during job execution (%s)", this);
+        }
     }
 
     @Override

@@ -423,9 +423,16 @@ public class Logger {
                 // Clean stack trace
                 List<StackTraceElement> cleanTrace = new ArrayList<StackTraceElement>();
                 for (StackTraceElement se : toClean.getStackTrace()) {
-                    if (se.getClassName().startsWith("org.apache.mina.")) {
-                        cleanTrace.add(new StackTraceElement("Play!", "HTTP Server", "Mina", -1));
+                    if (se.getClassName().startsWith("play.server.HttpHandler$MinaInvocation")) {
+                        cleanTrace.add(new StackTraceElement("Invocation", "HTTP Request", "Play!", -1));
                         break;
+                    }
+                    if (se.getClassName().startsWith("play.jobs.Job") && se.getMethodName().equals("run")) {
+                        cleanTrace.add(new StackTraceElement("Invocation", "Job", "Play!", -1));
+                        break;
+                    }
+                    if (se.getClassName().startsWith("sun.reflect.")) {
+                        continue; // not very interesting
                     }
                     cleanTrace.add(se);
                 }
