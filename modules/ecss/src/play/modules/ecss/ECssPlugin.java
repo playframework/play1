@@ -17,6 +17,15 @@ import play.vfs.VirtualFile;
 public class ECssPlugin extends PlayPlugin {
 
     static Pattern pattern = Pattern.compile("[$]([-A-Za-z1-9_]+)\\s*:\\s*(.*?);", Pattern.MULTILINE);
+    static Map<String, String[]> css3 = new HashMap();
+    static {
+        css3.put("border-radius", new String[] {"-moz-border-radius", "-webkit-border-radius"});
+        css3.put("border-top-right-radius", new String[] {"-moz-border-radius-topright", "-webkit-border-top-right-radius"});
+        css3.put("border-top-left-radius", new String[] {"-moz-border-radius-topleft", "-webkit-border-top-left-radius"});
+        css3.put("border-bottom-right-radius", new String[] {"-moz-border-radius-bottomright", "-webkit-border-bottom-right-radius"});
+        css3.put("border-bottom-left-radius", new String[] {"-moz-border-radius-bottomleft", "-webkit-border-bottom-left-radius"});
+        css3.put("box-shadow", new String[] {"-moz-box-shadow", "-webkit-box-shadow"});
+    }
 
     @Override
     public boolean serveStatic(VirtualFile file, Request request, Response response) {
@@ -46,6 +55,7 @@ public class ECssPlugin extends PlayPlugin {
     void doIt(VirtualFile file, Request request, Response response) {
         try {
             String css = file.contentAsString();
+            // Variables
             Matcher matcher = pattern.matcher(css);
             Map<String, String> vars = new HashMap<String, String>();
             while (matcher.find()) {
@@ -56,6 +66,20 @@ public class ECssPlugin extends PlayPlugin {
             css = css.replaceAll("[$]([-A-Za-z1-9_]+)\\s*:\\s*(.*?);", "");
             for (String var : vars.keySet()) {
                 css = css.replace("$" + var, vars.get(var));
+            }
+            // CSS3
+            for(String cssKey : css3.keySet()) {
+                StringBuffer newCss = new StringBuffer();
+                matcher = Pattern.compile("(\\s)" + Pattern.quote(cssKey) + "\\s*:([^;]*);").matcher(css);
+                while(matcher.find()) {
+                    String replacement = "$1";
+                    for(String nkey : css3.get(cssKey)) {
+                        replacement += "" + nkey + ":$2;";
+                    }
+                    matcher.appendReplacement(newCss, replacement);
+                }
+                matcher.appendTail(newCss);
+                css = newCss.toString();
             }
             response.contentType = "text/css";
             response.out.write(css.getBytes("utf-8"));

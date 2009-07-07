@@ -208,8 +208,6 @@ public class HttpHandler implements IoHandler {
         if (file instanceof FileSystemFile) {
             session.setAttribute("file", file.channel());
             response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + file.length());
-        } else {
-            response.setContent(IoBuffer.wrap(file.content()));
         }
     }
 
@@ -387,12 +385,20 @@ public class HttpHandler implements IoHandler {
             this.response = response;
             this.session = session;
         }
+        
+        private Map<String, RenderStatic> staticPathsCache = new HashMap();
 
         @Override
         public boolean init() {
+            Request.current.set(request);
+            Response.current.set(response);
             // Patch favicon.ico
             if(!request.path.equals("/favicon.ico")) {
                 super.init();
+            }
+            if(Play.mode == Mode.PROD && staticPathsCache.containsKey(request.path)) {
+                serveStatic(session, minaResponse, minaRequest, staticPathsCache.get(request.path));
+                return false;
             }
             try {
                 Router.routeOnlyStatic(request);
@@ -400,6 +406,9 @@ public class HttpHandler implements IoHandler {
                 serve404(session, minaResponse, minaRequest, e);
                 return false;
             } catch (RenderStatic e) {
+                if(Play.mode == Mode.PROD) {
+                    staticPathsCache.put(request.path, e);
+                }
                 serveStatic(session, minaResponse, minaRequest, e);
                 return false;
             }

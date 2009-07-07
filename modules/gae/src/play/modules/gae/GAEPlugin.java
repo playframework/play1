@@ -2,15 +2,13 @@ package play.modules.gae;
 
 import com.google.appengine.tools.development.ApiProxyLocalImpl;
 import com.google.apphosting.api.ApiProxy;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Properties;
-import javassist.CtClass;
-import javassist.CtMethod;
 import javax.mail.Session;
 import javax.persistence.Entity;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.Persistence;
 import org.datanucleus.enhancer.DataNucleusEnhancer;
 import play.Logger;
@@ -18,7 +16,6 @@ import play.Play;
 import play.PlayPlugin;
 import play.cache.Cache;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.classloading.enhancers.Enhancer;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
 import play.db.jpa.JPQLDialect;
@@ -133,7 +130,7 @@ public class GAEPlugin extends PlayPlugin {
             }
         };
         try {
-            if (!tempCl.loadClass(applicationClass.name).isAnnotationPresent(Entity.class)) {
+            if (!tempCl.loadClass(applicationClass.name).isAnnotationPresent(Entity.class) && !tempCl.loadClass(applicationClass.name).isAnnotationPresent(MappedSuperclass.class)) {
                 return;
             }
         } catch (Exception e) {
