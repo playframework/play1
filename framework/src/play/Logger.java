@@ -75,7 +75,7 @@ public class Logger {
                 rootLogger.addHandler(activeHandler);
                 rootLogger.setLevel(juliLevel);
             }
-            if(Play.configuration != null) {
+            if (Play.configuration != null) {
                 recordCaller = Boolean.parseBoolean(Play.configuration.getProperty("application.log.recordCaller", "false"));
             }
         }
@@ -434,6 +434,9 @@ public class Logger {
                     if (se.getClassName().startsWith("sun.reflect.")) {
                         continue; // not very interesting
                     }
+                    if (se.getClassName().startsWith("java.lang.reflect.")) {
+                        continue; // not very interesting
+                    }
                     cleanTrace.add(se);
                 }
                 toClean.setStackTrace(cleanTrace.toArray(new StackTraceElement[cleanTrace.size()]));
@@ -476,7 +479,7 @@ public class Logger {
                 return String.format(msg, args);
             }
             return msg;
-        } catch(Exception e) {
+        } catch (Exception e) {
             return msg;
         }
     }
@@ -493,7 +496,6 @@ public class Logger {
             this.className = className;
             this.methodName = methodName;
         }
-
     }
 
     /**

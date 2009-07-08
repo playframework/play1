@@ -13,15 +13,16 @@ import play.templates.Template;
 public class RenderTemplate extends Result {
     
     private Template template;
+    private String content;
     Map<String,Object> args;
     
     public RenderTemplate(Template template, Map<String,Object> args) {
         this.template = template;
         this.args = args;
+        this.content = template.render(args);
     }
 
     public void apply(Request request, Response response) {
-        String content = template.render(args);
         try {
             setContentTypeIfNotSet(response, MimeTypes.getMimeType(template.name, "text/plain"));
             response.out.write(content.getBytes("utf-8"));

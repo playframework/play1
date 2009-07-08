@@ -243,7 +243,7 @@ public class Invoker {
                             }
                         }
                     }
-                    Thread.sleep(10);
+                    Thread.sleep(100);
                 } catch (InterruptedException ex) {
                     Logger.warn(ex, "");
                 }
