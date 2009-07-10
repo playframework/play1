@@ -5,22 +5,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.ConnectTimeoutException;
+import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
@@ -69,6 +76,7 @@ public class WS extends PlayPlugin {
     private static ThreadLocal<OptionsMethod> optionsMethod = new ThreadLocal<OptionsMethod>();
     private static ThreadLocal<TraceMethod> traceMethod = new ThreadLocal<TraceMethod>();
     private static ThreadLocal<HeadMethod> headMethod = new ThreadLocal<HeadMethod>();
+    private static ThreadLocal<HttpState> states = new ThreadLocal<HttpState>();
 
     @Override
     public void invocationFinally() {
@@ -91,8 +99,10 @@ public class WS extends PlayPlugin {
         if (headMethod.get() != null) {
             headMethod.get().releaseConnection();
         }
+        if( states.get() != null ) {
+            states.get().clear();
+        }
     }
-
 
     static {
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
@@ -158,6 +168,34 @@ public class WS extends PlayPlugin {
     }
 
     /**
+     * define client authentication for a server host 
+     * provided credentials will be used during the request
+     * @param username
+     * @param password
+     * @param url hostname url or null to authenticate on any hosts
+     */
+    public static void setAuthentication(String username, String password, String url) {
+        Credentials credentials = new UsernamePasswordCredentials(username, password);
+        AuthScope scope = AuthScope.ANY;
+        if (url != null) {
+            try {
+                URL oUrl = new URL(url);
+                scope = new AuthScope(oUrl.getHost(), oUrl.getPort(), AuthScope.ANY_REALM);
+            } catch (MalformedURLException muex) {
+                throw new RuntimeException(muex);
+            }
+        }
+        setAuthentication(credentials, scope);
+    }
+
+    public static void setAuthentication(Credentials credentials, AuthScope authScope) {
+        if (states.get() == null) {
+            states.set(new HttpState());
+        }
+        states.get().setCredentials(authScope, credentials);
+    }
+
+    /**
      * Make a GET request using an url template.
      * If you provide no parameters, the url is left unchanged (no replacements)
      * @param url an URL template with placeholders for parameters
@@ -167,7 +205,7 @@ public class WS extends PlayPlugin {
     public static HttpResponse GET(String url, Object... params) {
         return GET(null, url, params);
     }
-    
+
     /**
      * Make a GET request using an url template.
      * If you provide no parameters, the url is left unchanged (no replacements)
@@ -175,10 +213,10 @@ public class WS extends PlayPlugin {
      * @param params a variable Map
      * @return server response {@link HttpResponse}
      */
-    public static HttpResponse GET(String url, Map<String,String> params) {
+    public static HttpResponse GET(String url, Map<String, String> params) {
         StringBuffer sb = new StringBuffer(10);
-        for(String key : params.keySet()) {
-            if(sb.length() > 0) {
+        for (String key : params.keySet()) {
+            if (sb.length() > 0) {
                 sb.append("&");
             }
             sb.append(key + "=" + encode(params.get(key)));
@@ -208,7 +246,7 @@ public class WS extends PlayPlugin {
                     getMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
-            httpClient.executeMethod(getMethod.get());
+            httpClient.executeMethod(null, getMethod.get(), states.get());
             return new HttpResponse(getMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -270,7 +308,7 @@ public class WS extends PlayPlugin {
 
             postMethod.get().setRequestEntity(new MultipartRequestEntity(parts, postMethod.get().getParams()));
 
-            httpClient.executeMethod(postMethod.get());
+            httpClient.executeMethod(null, postMethod.get(), states.get());
             return new HttpResponse(postMethod.get());
         } catch (Exception e) {
             postMethod.get().releaseConnection();
@@ -332,7 +370,7 @@ public class WS extends PlayPlugin {
 
             postMethod.get().setRequestBody((NameValuePair[]) nvps.toArray());
 
-            httpClient.executeMethod(postMethod.get());
+            httpClient.executeMethod(null, postMethod.get(), states.get());
             return new HttpResponse(postMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -372,7 +410,7 @@ public class WS extends PlayPlugin {
 
             postMethod.get().setRequestEntity(new StringRequestEntity(body));
 
-            httpClient.executeMethod(postMethod.get());
+            httpClient.executeMethod(null, postMethod.get(), states.get());
             return new HttpResponse(postMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -407,7 +445,7 @@ public class WS extends PlayPlugin {
                 }
             }
 
-            httpClient.executeMethod(deleteMethod.get());
+            httpClient.executeMethod(null, deleteMethod.get(), states.get());
             return new HttpResponse(deleteMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -444,7 +482,7 @@ public class WS extends PlayPlugin {
                     headMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
-            httpClient.executeMethod(headMethod.get());
+            httpClient.executeMethod(null, headMethod.get(), states.get());
             return new HttpResponse(headMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -481,7 +519,7 @@ public class WS extends PlayPlugin {
                     traceMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
-            httpClient.executeMethod(traceMethod.get());
+            httpClient.executeMethod(null, traceMethod.get(), states.get());
             return new HttpResponse(traceMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -518,7 +556,7 @@ public class WS extends PlayPlugin {
                     optionsMethod.get().addRequestHeader(key, headers.get(key) + "");
                 }
             }
-            httpClient.executeMethod(optionsMethod.get());
+            httpClient.executeMethod(null, optionsMethod.get(), states.get());
             return new HttpResponse(optionsMethod.get());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -561,10 +599,10 @@ public class WS extends PlayPlugin {
             return this.methodBase.getStatusCode();
         }
 
-        public String getContentType () {
+        public String getContentType() {
             return methodBase.getResponseHeader("content-type").getValue();
         }
-        
+
         /**
          * Parse and get the response body as a {@link Document DOM document}
          * @return a DOM document
