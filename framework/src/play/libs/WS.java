@@ -13,7 +13,6 @@ import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -174,7 +173,7 @@ public class WS extends PlayPlugin {
      * @param password
      * @param url hostname url or null to authenticate on any hosts
      */
-    public static void setAuthentication(String username, String password, String url) {
+    public static void authenticate(String username, String password, String url) {
         Credentials credentials = new UsernamePasswordCredentials(username, password);
         AuthScope scope = AuthScope.ANY;
         if (url != null) {
@@ -185,10 +184,14 @@ public class WS extends PlayPlugin {
                 throw new RuntimeException(muex);
             }
         }
-        setAuthentication(credentials, scope);
+        authenticate(credentials, scope);
+    }
+    
+    public static void authenticate(String username, String password) {
+        authenticate(username, password, null);
     }
 
-    public static void setAuthentication(Credentials credentials, AuthScope authScope) {
+    public static void authenticate(Credentials credentials, AuthScope authScope) {
         if (states.get() == null) {
             states.set(new HttpState());
         }
@@ -240,6 +243,7 @@ public class WS extends PlayPlugin {
             getMethod.get().releaseConnection();
         }
         getMethod.set(new GetMethod(url));
+        getMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
@@ -291,7 +295,7 @@ public class WS extends PlayPlugin {
             postMethod.get().releaseConnection();
         }
         postMethod.set(new PostMethod(url));
-
+        postMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
@@ -342,6 +346,7 @@ public class WS extends PlayPlugin {
             postMethod.get().releaseConnection();
         }
         postMethod.set(new PostMethod(url));
+        postMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
@@ -369,7 +374,6 @@ public class WS extends PlayPlugin {
             }
 
             postMethod.get().setRequestBody((NameValuePair[]) nvps.toArray());
-
             httpClient.executeMethod(null, postMethod.get(), states.get());
             return new HttpResponse(postMethod.get());
         } catch (Exception e) {
@@ -400,7 +404,7 @@ public class WS extends PlayPlugin {
             postMethod.get().releaseConnection();
         }
         postMethod.set(new PostMethod(url));
-
+        postMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
@@ -438,6 +442,7 @@ public class WS extends PlayPlugin {
             deleteMethod.get().releaseConnection();
         }
         deleteMethod.set(new DeleteMethod(url));
+        deleteMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
@@ -475,7 +480,7 @@ public class WS extends PlayPlugin {
             headMethod.get().releaseConnection();
         }
         headMethod.set(new HeadMethod(url));
-
+        headMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
@@ -512,7 +517,7 @@ public class WS extends PlayPlugin {
             traceMethod.get().releaseConnection();
         }
         traceMethod.set(new TraceMethod(url));
-
+        traceMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
@@ -549,7 +554,7 @@ public class WS extends PlayPlugin {
             optionsMethod.get().releaseConnection();
         }
         optionsMethod.set(new OptionsMethod(url));
-
+        optionsMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
                 for (String key : headers.keySet()) {
