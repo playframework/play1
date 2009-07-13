@@ -366,6 +366,9 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
             Template template = TemplateLoader.load(templateName);
             throw new RenderTemplate(template, templateBinding.data);
         } catch (TemplateNotFoundException ex) {
+            if(ex.isSourceAvailable()) {
+                throw ex;
+            }
             StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex);
             if (element != null) {
                 throw new TemplateNotFoundException(templateName, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
