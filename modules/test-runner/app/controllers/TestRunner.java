@@ -41,7 +41,7 @@ public class TestRunner extends Controller {
             renderText("done");
         }
         if (test.endsWith(".class")) {
-        	Play.getFile("test-result").mkdir();
+            Play.getFile("test-result").mkdir();
             Thread.sleep(250);
             TestEngine.TestResults results = TestEngine.run(test.substring(0, test.length() - 6));
             response.status = results.passed ? 200 : 500;

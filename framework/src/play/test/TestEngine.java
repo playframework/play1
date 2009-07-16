@@ -28,7 +28,13 @@ public class TestEngine {
     static ExecutorService executor = Executors.newCachedThreadPool();
 
     public static List<Class> allUnitTests() {
-        return Play.classloader.getAssignableClasses(UnitTest.class);
+        List<Class> result = new ArrayList<Class>();
+        for(Class clazz : Play.classloader.getAllClasses()) {
+            if(!FunctionalTest.class.isAssignableFrom(clazz) && clazz.getName().endsWith("Test")) {
+                result.add(clazz);
+            }
+        }
+        return result;
     }
 
     public static List<Class> allFunctionalTests() {
@@ -66,13 +72,6 @@ public class TestEngine {
             // Load test class
             final Class testClass = Play.classloader.loadClass(name);
 
-            // Simple test
-            if(UnitTest.class.isAssignableFrom(testClass)) {
-                JUnitCore junit = new JUnitCore();
-                junit.addListener(new Listener(testClass.getName(), testResults));
-                junit.run(testClass);
-            }
-
             // VirtualClient test
             if(FunctionalTest.class.isAssignableFrom(testClass)) {
                 Future<Result> futureResult = executor.submit(new Callable<Result>() {
@@ -88,6 +87,13 @@ public class TestEngine {
                     Logger.error("VirtualClient test has failed", e);
                 }
             }
+            
+            
+            // Simple test            
+            JUnitCore junit = new JUnitCore();
+            junit.addListener(new Listener(testClass.getName(), testResults));
+            junit.run(testClass);
+
         } catch(ClassNotFoundException e) {
             Logger.error(e, "Test not found %s", name);
         }
