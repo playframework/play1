@@ -23,29 +23,29 @@ public class GAECache implements CacheImpl {
     static MemcacheService memcacheService = MemcacheServiceFactory.getMemcacheService();
 
     public void add(String key, Object value, int expiration) {
-        memcacheService.put(key, wrap(value), Expiration.byDeltaMillis(expiration), MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
+        memcacheService.put(key, wrap(value), Expiration.byDeltaSeconds(expiration), MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
     }
 
     public boolean safeAdd(String key, Object value, int expiration) {
-        memcacheService.put(key, wrap(value), Expiration.byDeltaMillis(expiration), MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
+        memcacheService.put(key, wrap(value), Expiration.byDeltaSeconds(expiration), MemcacheService.SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
         return true;
     }
 
     public void set(String key, Object value, int expiration) {
-        memcacheService.put(key, wrap(value), Expiration.byDeltaMillis(expiration), MemcacheService.SetPolicy.SET_ALWAYS);
+        memcacheService.put(key, wrap(value), Expiration.byDeltaSeconds(expiration), MemcacheService.SetPolicy.SET_ALWAYS);
     }
 
     public boolean safeSet(String key, Object value, int expiration) {
-        memcacheService.put(key, wrap(value), Expiration.byDeltaMillis(expiration), MemcacheService.SetPolicy.SET_ALWAYS);
+        memcacheService.put(key, wrap(value), Expiration.byDeltaSeconds(expiration), MemcacheService.SetPolicy.SET_ALWAYS);
         return true;
     }
 
     public void replace(String key, Object value, int expiration) {
-        memcacheService.put(key, wrap(value), Expiration.byDeltaMillis(expiration), MemcacheService.SetPolicy.REPLACE_ONLY_IF_PRESENT);
+        memcacheService.put(key, wrap(value), Expiration.byDeltaSeconds(expiration), MemcacheService.SetPolicy.REPLACE_ONLY_IF_PRESENT);
     }
 
     public boolean safeReplace(String key, Object value, int expiration) {
-        memcacheService.put(key, wrap(value), Expiration.byDeltaMillis(expiration), MemcacheService.SetPolicy.REPLACE_ONLY_IF_PRESENT);
+        memcacheService.put(key, wrap(value), Expiration.byDeltaSeconds(expiration), MemcacheService.SetPolicy.REPLACE_ONLY_IF_PRESENT);
         return true;
     }
 
