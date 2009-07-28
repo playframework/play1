@@ -82,7 +82,7 @@ public class ServletWrapper extends HttpServlet {
 
     public void serveStatic(HttpServletResponse servletResponse, HttpServletRequest servletRequest, RenderStatic renderStatic) throws IOException {  
         VirtualFile file = Play.getVirtualFile(renderStatic.file);
-        servletResponse.setContentType(MimeTypes.getMimeType(file.getName()));
+        servletResponse.setContentType(MimeTypes.getContentType(file.getName()));
         if (file == null || file.isDirectory() || !file.exists()) {
             //serve404(session, minaResponse, minaRequest, new NotFound("The file " + renderStatic.file + " does not exist"));
         } else {

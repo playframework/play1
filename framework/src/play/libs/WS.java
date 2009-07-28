@@ -1,6 +1,7 @@
 package play.libs;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -13,14 +14,21 @@ import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javassist.bytecode.EnclosingMethodAttribute;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+
+import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -28,15 +36,18 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.DeleteMethod;
+import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.OptionsMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.methods.TraceMethod;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
+import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.ControllerThreadSocketFactory;
 import org.apache.commons.httpclient.protocol.Protocol;
@@ -69,6 +80,7 @@ import play.PlayPlugin;
 public class WS extends PlayPlugin {
 
     private static HttpClient httpClient;
+    private static ThreadLocal<HttpMethod> httpMethod = new ThreadLocal<HttpMethod>();
     private static ThreadLocal<GetMethod> getMethod = new ThreadLocal<GetMethod>();
     private static ThreadLocal<PostMethod> postMethod = new ThreadLocal<PostMethod>();
     private static ThreadLocal<DeleteMethod> deleteMethod = new ThreadLocal<DeleteMethod>();
@@ -380,7 +392,7 @@ public class WS extends PlayPlugin {
             throw new RuntimeException(e);
         }
     }
-
+    
     /**
      * POST some text data
      * @param url resource URL
@@ -420,7 +432,12 @@ public class WS extends PlayPlugin {
             throw new RuntimeException(e);
         }
     }
-
+    public static WSRequest url(String url){
+    	return new WSRequest(url);
+    }
+    public static WSRequest url(String url, Object... params){
+    	return new WSRequest(String.format(url, params));
+    }
     /**
      * Make a DELETE request
      * @param url resource URL
@@ -580,19 +597,121 @@ public class WS extends PlayPlugin {
             throw new RuntimeException(e);
         }
     }
-
+    public static class WSRequest{
+    	public String url;
+    	public String body;
+    	public File[] files;
+    	public Map<String, String> headers;
+    	public Map<String, Object> parameters;
+    	public String mimeType;
+    	
+    	public WSRequest(String url){
+    		this.url = url;
+    	}
+    	
+    	private void checkRelease(){
+    		if (httpMethod.get() != null) {
+    			httpMethod.get().releaseConnection();
+            }
+    	}
+    	private void checkFileBody(HttpMethod method) throws FileNotFoundException{
+			String guessedMimeType = null;
+			EntityEnclosingMethod putOrPost = (EntityEnclosingMethod) method;
+			if (files != null && method instanceof EntityEnclosingMethod) {
+				
+				//could be optimized, we know the size of this array.
+				List<Part> parts = new ArrayList<Part>();
+				for (int i = 0; i<this.files.length;i++){
+					parts.add(new FilePart(files[i].getName(), this.files[i], MimeTypes.getMimeType(this.files[i].getName()), null));
+				}
+				if (this.parameters != null){
+					for (String key : this.parameters.keySet()) {
+						if (!this.parameters.get(key).getClass().isAssignableFrom(String.class)){
+							throw new RuntimeException("Cannot send multiple valued parameters when sending file and params using multipart/form-data. Values must be String.");
+						}
+						parts.add(new StringPart(key, (String) this.parameters.get(key), "utf-8"));
+					}
+				}
+				putOrPost.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[parts.size()]), putOrPost.getParams()));
+				method.addRequestHeader("content-type", "application/form-data");
+				return;
+				
+			} 
+			if (this.parameters != null) {
+				method.addRequestHeader("content-type", "application/x-www-form-urlencoded");
+				ArrayList<NameValuePair> nvps = new ArrayList<NameValuePair>();
+				StringBuilder sb = new StringBuilder();
+				for (String key : this.parameters.keySet()) {
+						if (sb.length() > 0){
+							sb.append("&");
+						}
+						 Object value = this.parameters.get(key);
+			              
+						if (value != null) {
+		                	if (value instanceof Collection){
+		                		boolean first = true;
+		                		for (Object v : (Collection) value) {
+		                			if (!first) {
+		                				sb.append("&");
+		                				first = false;
+		                			}
+		                			sb.append(encode(key)).append("=").append(encode(v.toString()));
+		                		}
+		                	} else {
+		                		sb.append(encode(key)).append("=").append(this.parameters.get(key));
+		                	}
+		                }	
+				}
+				putOrPost.setRequestEntity(new StringRequestEntity(sb.toString()));
+			}
+            
+    	}
+    	public WSRequest mimeType(String mimeType){
+    		this.mimeType = mimeType;
+    		return this;
+    	}
+    	public HttpResponse post(){
+    		this.checkRelease();
+    		httpMethod.set(new PostMethod(this.url));
+    		httpMethod.get().setDoAuthentication(true);
+            try {
+                if (this.headers != null) {
+                    for (String key : headers.keySet()) {
+                    	httpMethod.get().addRequestHeader(key, headers.get(key) + "");
+                    }
+                }
+                this.checkFileBody(httpMethod.get());
+                if (mimeType != null) {
+                	httpMethod.get().addRequestHeader("content-type", mimeType);
+                }
+                httpClient.executeMethod(null, httpMethod.get(), states.get());
+                return new HttpResponse(httpMethod.get());
+            } catch (Exception e) {
+                postMethod.get().releaseConnection();
+                throw new RuntimeException(e);
+            }
+    	}
+    	public WSRequest body(File... files){
+    		this.files = files;
+    		return this;
+    	}
+    	public WSRequest body(String body){
+    		this.body = body;
+    		return this;
+    	}
+    }
     /**
      * An HTTP response wrapper
      */
     public static class HttpResponse {
 
-        private HttpMethodBase methodBase;
+        private HttpMethod methodBase;
 
         /**
          * you shouldnt have to create an HttpResponse yourself
          * @param method
          */
-        public HttpResponse(HttpMethodBase method) {
+        public HttpResponse(HttpMethod method) {
             this.methodBase = method;
         }
 
@@ -701,9 +820,9 @@ public class WS extends PlayPlugin {
         class ConnectionReleaserStream extends InputStream {
 
             private InputStream wrapped;
-            private HttpMethodBase method;
+            private HttpMethod method;
 
-            public ConnectionReleaserStream(InputStream wrapped, HttpMethodBase method) {
+            public ConnectionReleaserStream(InputStream wrapped, HttpMethod method) {
                 this.wrapped = wrapped;
                 this.method = method;
             }

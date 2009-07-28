@@ -77,7 +77,7 @@ public class RenderBinary extends Result {
     public void apply(Request request, Response response) {
         try {
             if (name!=null)
-                setContentTypeIfNotSet(response, MimeTypes.getMimeType(name, "application/octet-stream"));
+                setContentTypeIfNotSet(response, MimeTypes.getContentType(name));
             if (!response.headers.containsKey("Content-Disposition")) {
                 if (inline) {
                     if(name == null) {
