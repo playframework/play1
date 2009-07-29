@@ -1,18 +1,33 @@
 package play.modules.testrunner;
 
+import java.io.File;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.mvc.Router;
+import play.vfs.FileSystemFile;
+import play.vfs.VirtualFile;
 
 public class TestRunnerPlugin extends PlayPlugin {
 
     @Override
     public void onLoad() {
+        VirtualFile appRoot = VirtualFile.open(Play.applicationPath);
+        Play.javaPath.add(appRoot.child("test"));
+        for (VirtualFile module : Play.modules.values()) {
+            if (module instanceof FileSystemFile) {
+                File modulePath = ((FileSystemFile) module).realFile;
+                if (modulePath.getAbsolutePath().startsWith(Play.frameworkPath.getParentFile().getAbsolutePath())
+                        && !Play.javaPath.contains(module.child("test"))) {
+                    Play.javaPath.add(module.child("test"));
+                }
+            }
+        }
         Logger.info("");
         Logger.info("Go to http://localhost:" + Play.configuration.getProperty("http.port", "9000") + "/@tests to run the tests");
         Logger.info("");
-    }    
+    }
 
     @Override
     public void onRoutesLoaded() {

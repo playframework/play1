@@ -22,6 +22,7 @@ import play.classloading.ApplicationClassloader;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
+import play.vfs.FileSystemFile;
 import play.vfs.VirtualFile;
 import play.mvc.Router;
 import play.templates.TemplateLoader;
@@ -199,9 +200,7 @@ public class Play {
         roots.add(appRoot);
         javaPath = new ArrayList<VirtualFile>();
         javaPath.add(appRoot.child("app"));
-        if (id.equals("test")) {
-            javaPath.add(appRoot.child("test"));
-        }
+        
 
         // Build basic templates path
         templatesPath = new ArrayList<VirtualFile>();
@@ -216,7 +215,7 @@ public class Play {
 
         // Load modules
         loadModules();
-
+        
         // Enable a first classloader
         classloader = new ApplicationClassloader();
 
