@@ -192,6 +192,7 @@ public class ServletWrapper extends HttpServlet {
                 playCookie.path = cookie.getPath();
                 playCookie.secure = cookie.getSecure();
                 playCookie.value = cookie.getValue();
+                playCookie.maxAge = cookie.getMaxAge();
                 request.cookies.put(playCookie.name, playCookie);
             }
         }
@@ -281,6 +282,7 @@ public class ServletWrapper extends HttpServlet {
             Cookie c = new Cookie(cookie.name, cookie.value);
             c.setSecure(cookie.secure);
             c.setPath(cookie.path);
+            c.setMaxAge(cookie.maxAge);
             servletResponse.addCookie(c);
         }
         if (!response.headers.containsKey("cache-control")) {
