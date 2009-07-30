@@ -30,7 +30,8 @@ public class TestEngine {
     public static List<Class> allUnitTests() {
         List<Class> result = new ArrayList<Class>();
         for(Class clazz : Play.classloader.getAllClasses()) {
-            if(!FunctionalTest.class.isAssignableFrom(clazz) && clazz.getName().endsWith("Test")) {
+            System.out.println(clazz.getSimpleName());
+            if(!FunctionalTest.class.isAssignableFrom(clazz) && clazz.getName().endsWith("Test") && !clazz.getSimpleName().equals("Test")) {
                 result.add(clazz);
             }
         }
