@@ -9,6 +9,18 @@ GET         /aGetForm/                      Application.aGetForm2
 GET         /optionalSlash/?                Application.optional 
 GET         /index                          Application.index
 
+POST		/ressource/file/{id}			Rest.postOrPutFile
+PUT			/ressource/file/{id}			Rest.postOrPutFile
+POST		/ressource/fileAndParams/{id}	Rest.postOrPutFileAndParams
+PUT			/ressource/fileAndParams/{id}	Rest.postOrPutFileAndParams
+
+GET			/ressource/{id}					Rest.get
+POST		/ressource/{id}					Rest.postOrPut
+PUT			/ressource/{id}					Rest.postOrPut
+DELETE		/ressource/{id}					Rest.delete
+OPTIONS		/ressource/{id}					Rest.options
+HEAD		/ressource/{id}					Rest.head	
+
 # Import the default CRUD routes
 *			/admin						     module:crud
 
