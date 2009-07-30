@@ -219,6 +219,7 @@ public class WS extends PlayPlugin {
      * @param url an URL template with placeholders for parameters
      * @param params a variable list of parameters to be replaced in the template using the String.format(...) syntax
      * @return server response {@link HttpResponse}
+     * @deprecated Use WS.url(url, params...).get() instead.
      */
     public static HttpResponse GET(String url, Object... params) {
         return GET(null, url, params);
@@ -230,6 +231,7 @@ public class WS extends PlayPlugin {
      * @param url an URL template with placeholders for parameters
      * @param params a variable Map
      * @return server response {@link HttpResponse}
+     * @deprecated Use WS.url(url).params(params).get() instead.
      */
     public static HttpResponse GET(String url, Map<String, String> params) {
         StringBuffer sb = new StringBuffer(10);
@@ -249,6 +251,7 @@ public class WS extends PlayPlugin {
      * @param url an template with <tt>%s,%d</tt> placeholders for parameters.
      * @param params parameters to be replaced in the url template using the String.format(...) syntax
      * @return HTTP response {@link HttpResponse}
+     * @deprecated Use WS.url(url).params().header().get() instead.
      */
     public static HttpResponse GET(Map<String, Object> headers, String url, Object... params) {
         if (params.length > 0) {
@@ -277,6 +280,7 @@ public class WS extends PlayPlugin {
      * @param url resource URL
      * @param body content to be posted. content-type is guessed from the filename extension.
      * @return server response {@link HttpResponse}
+     * @deprecated Use WS.url(url).file().post() instead.
      */
     public static HttpResponse POST(String url, File body) {
         String mimeType = MimeTypes.getMimeType(body.getName());
@@ -289,6 +293,7 @@ public class WS extends PlayPlugin {
      * @param body content to be posted
      * @param mimeType the content type as a mimetype
      * @return server response {@link HttpResponse}
+     * @deprecated Use WS.url(url).file().mimetype().post() instead.
      */
     public static HttpResponse POST(String url, File body, String mimeType) {
         return POST(null, url, body, mimeType);
@@ -300,6 +305,7 @@ public class WS extends PlayPlugin {
      * @param url resource URL
      * @param body content to be posted. content-type is guessed from the filename extension.
      * @return server response {@link HttpResponse}
+     * @deprecated Use WS.url(url).header().file().post() instead.
      */
     public static HttpResponse POST(Map<String, String> headers, String url, File body) {
         return POST(headers, url, body, null);
@@ -342,6 +348,7 @@ public class WS extends PlayPlugin {
      * @param url the request URL
      * @param parameters the parameters to be posted
      * @return server response {@link HttpResponse}
+     * @deprecated Use WS.url(url).params().post() instead.
      */
     public static HttpResponse POST(String url, Map<String, Object> parameters) {
         return POST(null, url, parameters);
@@ -355,6 +362,7 @@ public class WS extends PlayPlugin {
      * @param url the request URL
      * @param parameters the parameters to be posted
      * @return server response {@link HttpResponse}
+     * @deprecated Use WS.url(url).params().header().post() instead.
      */
     public static HttpResponse POST(Map<String, Object> headers, String url, Map<String, Object> parameters) {
         if (postMethod.get() != null) {
@@ -402,6 +410,7 @@ public class WS extends PlayPlugin {
      * @param body text content to be posted "as is", with not encoding
      * @param mimeType the request content-type
      * @return server response {@link HttpResponse}
+     * @deprecated Use WS.url(url).params().body().mimetype().post() instead.
      */
     public static HttpResponse POST(String url, String body, String mimeType) {
         return POST((Map<String, Object>) null, url, body);
@@ -413,6 +422,7 @@ public class WS extends PlayPlugin {
      * @param url resource URL
      * @param body text content to be posted "as is"
      * @return server response {@link HttpResponse}
+     * @deprecated Use WS.url().headers().body().post() instead
      */
     public static HttpResponse POST(Map<String, Object> headers, String url, String body) {
         if (postMethod.get() != null) {
@@ -439,6 +449,7 @@ public class WS extends PlayPlugin {
      * Make a DELETE request
      * @param url resource URL
      * @return server response {@link HttpResponse}
+     * @deprecated Use WS.url().delete() instead.
      */
     public static HttpResponse DELETE(String url) {
         return DELETE(null, url);
@@ -450,6 +461,7 @@ public class WS extends PlayPlugin {
      * @param url resource URL
      * @param params query parameters
      * @return server response {@link HttpResponse}
+     * @deprecated Use WS.url().headers().delete() instead.
      */
     public static HttpResponse DELETE(Map<String, String> headers, String url) {
         if (deleteMethod.get() != null) {
@@ -476,6 +488,7 @@ public class WS extends PlayPlugin {
      * @param url resource URL
      * @param params query parameters
      * @return server response {@link HttpResponse}
+     * @deprecated Use WS.url().head() instead.
      */
     public static HttpResponse HEAD(String url, Object... params) {
         return HEAD(null, url, params);
@@ -487,6 +500,7 @@ public class WS extends PlayPlugin {
      * @param url resource URL
      * @param params query parameters
      * @return server response {@link HttpResponse}
+     * @deprecated Use WS.url().headers().params().head() instead.
      */
     public static HttpResponse HEAD(Map<String, String> headers, String url, Object... params) {
         url = String.format(url, params);
@@ -513,6 +527,7 @@ public class WS extends PlayPlugin {
      * @param url resource URL
      * @param params query parameters
      * @return server response {@link HttpResponse}
+     * @deprecated Use WS.url().trace() instead.
      */
     public static HttpResponse TRACE(String url, Object... params) {
         return TRACE(null, url, params);
@@ -524,6 +539,7 @@ public class WS extends PlayPlugin {
      * @param url resource URL
      * @param params query parameters
      * @return the response
+     * @deprecated Use WS.url().headers().params().delete() instead.
      */
     public static HttpResponse TRACE(Map<String, String> headers, String url, Object... params) {
         url = String.format(url, params);
@@ -550,6 +566,7 @@ public class WS extends PlayPlugin {
      * @param url resource URL
      * @param params query parameters
      * @return the OPTIONS response
+     * @deprecated Use WS.url().options() instead.
      */
     public static HttpResponse OPTIONS(String url, Object... params) {
         return OPTIONS(null, url, params);
@@ -561,6 +578,7 @@ public class WS extends PlayPlugin {
      * @param url resource URL
      * @param params query parameters
      * @return the OPTIONS response
+     * @deprecated Use WS.url().headers().params().options() instead.
      */
     public static HttpResponse OPTIONS(Map<String, String> headers, String url, Object... params) {
         url = String.format(url, params);
@@ -595,9 +613,23 @@ public class WS extends PlayPlugin {
         }
     }
 
+    /**
+     * Build a WebService Request with the given URL.
+     * This object support chaining style programming for adding params, file, headers to requests.
+     * @param url of the request
+     * @return a WSRequest on which you can add params, file headers using a chaining style programming.
+     */
     public static WSRequest url(String url){
     	return new WSRequest(url);
     }
+    /**
+     * Build a WebService Request with the given URL.
+     * This constructor will format url using params passed in arguments.
+     * This object support chaining style programming for adding params, file, headers to requests.
+     * @param url to format using the given params.
+     * @param params the params passed to format the URL.
+     * @return a WSRequest on which you can add params, file headers using a chaining style programming.
+     */
     public static WSRequest url(String url, String... params){
     	Object[] encodedParams = new String[params.length];
     	for (int i = 0; i < params.length; i++) {
@@ -605,6 +637,7 @@ public class WS extends PlayPlugin {
 		}
     	return new WSRequest(String.format(url, encodedParams));
     }
+    
     public static class WSRequest{
     	public String url;
     	public String body;
@@ -613,7 +646,7 @@ public class WS extends PlayPlugin {
     	public Map<String, Object> parameters;
     	public String mimeType;
     	
-    	public WSRequest(String url){
+    	private WSRequest(String url){
     		this.url = url;
     	}
     	
@@ -659,18 +692,39 @@ public class WS extends PlayPlugin {
 			}
             
     	}
+    	
+    	/**
+    	 * Add a MimeType to the web service request.
+    	 * @param mimeType
+    	 * @return the WSRequest for chaining.
+    	 */
     	public WSRequest mimeType(String mimeType){
     		this.mimeType = mimeType;
     		return this;
     	}
+    	/**
+    	 * Add files to request. This will only work with POST or PUT.
+    	 * @param files
+    	 * @return the WSRequest for chaining.
+    	 */
     	public WSRequest files(File... files){
     		this.fileParams = FileParam.getFileParams(files);
     		return this;
     	}
+    	/**
+    	 * Add fileParams aka File and Name parameter to the request. This will only work with POST or PUT.
+    	 * @param fileParams
+    	 * @return the WSRequest for chaining.
+    	 */
     	public WSRequest files(FileParam... fileParams){
     		this.fileParams = fileParams;
     		return this;
     	}
+    	/**
+    	 * Add the given body to the request.
+    	 * @param body
+    	 * @return the WSRequest for chaining.
+    	 */
     	public WSRequest body(String body){
     		this.body = body;
     		return this;
@@ -679,45 +733,43 @@ public class WS extends PlayPlugin {
     	 * Add parameters to request.
     	 * If POST or PUT, parameters are passed in body using x-www-form-urlencoded if alone, or form-data if there is files too.
     	 * For any other method, those params are appended to the queryString. 
+    	 * @return the WSRequest for chaining.
     	 */
     	public WSRequest params(Map<String, Object> parameters){
     		this.parameters = parameters;
     		return this;
     	}
     	/** Execute a GET request.*/
-    	public HttpResponse get(){
-    		httpMethod.set(new GetMethod(this.url));
-    		return this.executeRequest();
+    	public HttpResponse get(){	
+    		return this.executeRequest(new GetMethod(this.url));
     	}
     	/** Execute a POST request.*/
     	public HttpResponse post(){
-    		httpMethod.set(new PostMethod(this.url));
-    		return this.executeRequest();
+    		return this.executeRequest(new PostMethod(this.url));
     	}
     	/** Execute a PUT request.*/
     	public HttpResponse put(){
-    		httpMethod.set(new PutMethod(this.url));
-    		return this.executeRequest();
+    		return this.executeRequest(new PutMethod(this.url));
     	}
     	/** Execute a DELETE request.*/
-    	public HttpResponse delete(){
-    		httpMethod.set(new DeleteMethod(this.url));
-    		return this.executeRequest();
+    	public HttpResponse delete(){;
+    		return this.executeRequest(new DeleteMethod(this.url));
     	}
+    	/** Execute a OPTIONS request.*/
     	public HttpResponse options(){
-    		httpMethod.set(new OptionsMethod(this.url));
-    		return this.executeRequest();
+    		return this.executeRequest(new OptionsMethod(this.url));
     	}
+    	/** Execute a HEAD request.*/
     	public HttpResponse head(){
-    		httpMethod.set(new HeadMethod(this.url));
-    		return this.executeRequest();
+    		return this.executeRequest(new HeadMethod(this.url));
     	}
+    	/** Execute a TRACE request.*/
     	public HttpResponse trace(){
-    		httpMethod.set(new TraceMethod(this.url));
-    		return this.executeRequest();
+    		return this.executeRequest(new TraceMethod(this.url));
     	}
-    	private HttpResponse executeRequest(){
+    	private HttpResponse executeRequest(HttpMethod method){
     		this.checkRelease();
+    		httpMethod.set(method);
     		httpMethod.get().setDoAuthentication(true);
             try {
                 if (this.headers != null) {
