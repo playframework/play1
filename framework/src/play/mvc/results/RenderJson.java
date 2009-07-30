@@ -22,7 +22,7 @@ public class RenderJson extends Result {
 
     public void apply(Request request, Response response) {
         try {
-            setContentTypeIfNotSet(response, "application/json");
+            setContentTypeIfNotSet(response, "application/json; charset=utf-8");
             response.out.write(json.getBytes("utf-8"));
         } catch (Exception e) {
             throw new UnexpectedException(e);
