@@ -28,7 +28,6 @@ public class MimeTypes {
 
     /**
      * return the mimetype from a file name
-     * For a text-based mimetype, also return the encoding suffix eg. <em>"text/plain; charset=utf-8"</em>
      * @param filename the file name
      * @return the mimetype or the empty string if not found
      */
@@ -38,7 +37,6 @@ public class MimeTypes {
 
     /**
      * return the mimetype from a file name.<br/>
-     * For a text-based mimetype, also return the encoding suffix eg. <em>"text/plain; charset=utf-8"</em>
      * @param filename the file name
      * @param defaultMimeType the default mime type to return when no matching mimetype is found
      * @return the mimetype
@@ -54,15 +52,36 @@ public class MimeTypes {
             if (mimeType == null) {
                 return defaultMimeType;
             }
-            if (mimeType.startsWith("text/")) {
-                mimeType = mimeType + "; charset=utf-8";
-            }
-
             return mimeType;
         }
         return defaultMimeType;
     }
-
+    /**
+     * return the content-type from a file name. If none is found returning application/octet-stream<br/>
+     * For a text-based content-type, also return the encoding suffix eg. <em>"text/plain; charset=utf-8"</em>
+     * @param filename the file name
+     * @return the content-type deduced from the file extension.
+     */
+    public static String getContentType(String filename){
+    	return getContentType(filename, "application/octet-stream");
+    }
+    /**
+     * return the content-type from a file name.<br/>
+     * For a text-based content-type, also return the encoding suffix eg. <em>"text/plain; charset=utf-8"</em>
+     * @param filename the file name
+     * @param defaultContentType the default content-type to return when no matching content-type is found
+     * @return the content-type deduced from the file extension.
+     */
+    public static String getContentType(String filename, String defaultContentType){
+    	String contentType = getMimeType(filename, null);
+    	if (contentType == null){
+    		contentType =  defaultContentType;
+    	}
+    	if (contentType != null && contentType.startsWith("text/")){
+    		return contentType + "; charset=utf-8";
+    	}
+    	return contentType;
+    }
     /**
      * check the mimetype is referenced in the mimetypes database
      * @param mimeType the mimeType to verify

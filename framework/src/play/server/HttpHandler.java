@@ -204,7 +204,7 @@ public class HttpHandler implements IoHandler {
 
     public static void attachFile(IoSession session, MutableHttpResponse response, VirtualFile file) throws IOException {
         response.setStatus(HttpResponseStatus.OK);
-        response.setHeader("Content-Type", MimeTypes.getMimeType(file.getName()));
+        response.setHeader("Content-Type", MimeTypes.getContentType(file.getName()));
         if (file instanceof FileSystemFile) {
             session.setAttribute("file", file.channel());
             response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + file.length());
