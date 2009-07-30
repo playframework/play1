@@ -37,7 +37,9 @@ public class JPAPlugin extends PlayPlugin {
             }
             Ejb3Configuration cfg = new Ejb3Configuration();
             cfg.setDataSource(DB.datasource);
-            cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty("jpa.ddl", "update"));
+            if(Play.configuration.containsKey("jpa.ddl")) {
+                cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty("jpa.ddl", "update"));
+            }
             cfg.setProperty("hibernate.dialect", getDefaultDialect(Play.configuration.getProperty("db.driver")));
             cfg.setProperty("javax.persistence.transaction", "RESOURCE_LOCAL");
             cfg.setInterceptor(new EmptyInterceptor() {
