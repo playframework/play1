@@ -222,8 +222,9 @@ public class Play {
         // Plugins
         loadPlugins();
 
-        if (mode == Mode.PROD) {
-            if (preCompile()) {
+        if (mode == Mode.PROD || System.getProperty("precompile") != null) {
+            mode = Mode.PROD;
+            if (preCompile() && System.getProperty("precompile") == null) {
                 start();
             } else {
                 return;

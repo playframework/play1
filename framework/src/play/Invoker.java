@@ -116,7 +116,10 @@ public class Invoker {
          */
         public void onException(Throwable e) {
             for (PlayPlugin plugin : Play.plugins) {
-                plugin.onInvocationException(e);
+                try {
+                    plugin.onInvocationException(e);
+                } catch(Throwable ex) {
+                }
             }
             if (e instanceof PlayException) {
                 throw (PlayException) e;

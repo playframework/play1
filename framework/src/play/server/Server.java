@@ -61,6 +61,10 @@ public class Server {
     public static void main(String[] args) {
         File root = new File(System.getProperty("application.path"));
         Play.init(root, System.getProperty("play.id", ""));
-        new Server();
+        if(System.getProperty("precompile") == null) {
+            new Server();
+        } else {
+            Logger.info("Done.");
+        }
     }
 }
