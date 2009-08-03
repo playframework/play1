@@ -314,12 +314,12 @@ public abstract class CRUD extends Controller {
                     if (field.isAnnotationPresent(OneToOne.class)) {
                         if (field.getAnnotation(OneToOne.class).mappedBy().equals("")) {
                             type = "relation";
-                            relation = field.getType().getSimpleName();
+                            relation = field.getType().getName();
                         }
                     }
                     if (field.isAnnotationPresent(ManyToOne.class)) {
                         type = "relation";
-                        relation = field.getType().getSimpleName();
+                        relation = field.getType().getName();
                     }
                 }
                 if (Collection.class.isAssignableFrom(field.getType())) {
@@ -327,14 +327,14 @@ public abstract class CRUD extends Controller {
                     if (field.isAnnotationPresent(OneToMany.class)) {
                         if (field.getAnnotation(OneToMany.class).mappedBy().equals("")) {
                             type = "relation";
-                            relation = fieldType.getSimpleName();
+                            relation = fieldType.getName();
                             multiple = true;
                         }
                     }
                     if (field.isAnnotationPresent(ManyToMany.class)) {
                         if (field.getAnnotation(ManyToMany.class).mappedBy().equals("")) {
                             type = "relation";
-                            relation = fieldType.getSimpleName();
+                            relation = fieldType.getName();
                             multiple = true;
                         }
                     }

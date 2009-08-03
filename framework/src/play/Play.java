@@ -16,16 +16,16 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import play.cache.Cache;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
-import play.vfs.FileSystemFile;
-import play.vfs.VirtualFile;
 import play.mvc.Router;
 import play.templates.TemplateLoader;
+import play.vfs.VirtualFile;
 
 /**
  * Main framework class
