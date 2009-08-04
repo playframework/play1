@@ -94,7 +94,6 @@ public class GAEPlugin extends PlayPlugin {
         if (!classes.isEmpty()) {
             // Hack the JPA plugin
             JPAPlugin.autoTxs = false;
-            System.out.println(Thread.currentThread().getContextClassLoader());
             JPA.entityManagerFactory = Persistence.createEntityManagerFactory("default");
             JPQLDialect.instance = new DataNucleusDialect();
         }
