@@ -83,6 +83,16 @@ public abstract class Enhancer {
         }
         return false;
     }
+    
+    protected boolean hasAnnotation(CtField ctField, String annotation) throws ClassNotFoundException {
+        for (Object object : ctField.getAnnotations()) {
+            Annotation ann = (Annotation) object;
+            if (ann.annotationType().getName().equals(annotation)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     protected static void createAnnotation(AnnotationsAttribute attribute, Class annotationType, Map<String, MemberValue> members) {
         javassist.bytecode.annotation.Annotation annotation = new javassist.bytecode.annotation.Annotation(annotationType.getName(), attribute.getConstPool());

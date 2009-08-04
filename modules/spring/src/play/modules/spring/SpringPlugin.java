@@ -1,30 +1,22 @@
-package play.libs;
+package play.modules.spring;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 import org.xml.sax.InputSource;
-
 import play.Logger;
 import play.Play;
-import play.PlayPlugin;
 import play.Play.Mode;
+import play.PlayPlugin;
+import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.PlayException;
 import play.vfs.VirtualFile;
 
-/**
- * SpringApplication context support
- * 
- * To enable it, edit or create a new play.plugins file, and add 
- * something like 5:play.libs.Spring
- *
- */
-public class Spring extends PlayPlugin {
+public class SpringPlugin extends PlayPlugin {
 
     public static GenericApplicationContext applicationContext;
     private long startDate = 0;
@@ -49,8 +41,16 @@ public class Spring extends PlayPlugin {
     }
 
     @Override
+    public void enhance(ApplicationClass applicationClass) throws Exception {
+        new SpringEnhancer().enhanceThisClass(applicationClass);
+    }
+
+    @Override
     public void onApplicationStart() {
-        URL url = this.getClass().getClassLoader().getResource("application-context.xml");
+        URL url = this.getClass().getClassLoader().getResource(Play.id+".application-context.xml");
+        if(url == null) {
+            url = this.getClass().getClassLoader().getResource("application-context.xml");
+        }
         if (url != null) {
             InputStream is = null;
             try {
@@ -91,26 +91,6 @@ public class Spring extends PlayPlugin {
                     }
                 }
             }
-        }
-    }
-
-    public static Object getBean(String name) {
-        if (applicationContext == null) {
-            throw new SpringError();
-        }
-        return applicationContext.getBean(name);
-    }
-
-    public static class SpringError extends PlayException {
-
-        private static final long serialVersionUID = 1L;
-
-        public String getErrorDescription() {
-            return "The Spring application context is not started.";
-        }
-
-        public String getErrorTitle() {
-            return "Spring context is not started !";
         }
     }
 }

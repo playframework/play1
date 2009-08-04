@@ -93,6 +93,7 @@
         <ant antfile="build.xml" target="build" dir="../modules/ecss" />
         <ant antfile="build.xml" target="build" dir="../modules/gae" />
         <ant antfile="build.xml" target="build" dir="../modules/gwt" />
+        <ant antfile="build.xml" target="build" dir="../modules/spring" />
     </target>
     
     <!-- Netbeans support -->

@@ -48,3 +48,4 @@ samples-and-tests/chat/tmp
 samples-and-tests/chat/logs
 .git
 .gitignore
+modules/spring/lib/play-spring.jar

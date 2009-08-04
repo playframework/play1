@@ -6,6 +6,8 @@ import play.*;
 import play.mvc.*;
 import play.libs.*;
 
+import play.modules.spring.*;
+
 import models.*;
 import utils.*;
 

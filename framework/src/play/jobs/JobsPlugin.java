@@ -8,7 +8,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
