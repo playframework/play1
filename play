@@ -436,6 +436,8 @@ try:
 		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%APPLICATION_NAME%', application_name)
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/application')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/application'))
 		shutil.copytree(application_path, os.path.join(war_path, 'WEB-INF/application'))
+		shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/war'))
+		shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/logs'))
 		shutil.copytree(os.path.join(application_path, 'conf'), os.path.join(war_path, 'WEB-INF/classes'))
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/lib')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/lib'))
 		os.mkdir(os.path.join(war_path, 'WEB-INF/lib'))
@@ -445,8 +447,13 @@ try:
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/framework')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/framework'))
 		os.mkdir(os.path.join(war_path, 'WEB-INF/framework'))
 		shutil.copytree(os.path.join(play_base, 'framework/templates'), os.path.join(war_path, 'WEB-INF/framework/templates'))
-		if os.path.exists(os.path.join(war_path, 'WEB-INF/modules')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/modules'))
-		shutil.copytree(os.path.join(play_base, 'modules'), os.path.join(war_path, 'WEB-INF/modules'))
+		
+		# modules
+		for module in modules:
+			to = os.path.join(war_path, 'WEB-INF/modules/%s' % os.path.basename(module))
+			shutil.copytree(module, to)
+			shutil.rmtree(os.path.join(to, 'src'))
+			os.remove(os.path.join(to, 'build.xml'))
 		if not os.path.exists(os.path.join(war_path, 'WEB-INF/resources')): os.mkdir(os.path.join(war_path, 'WEB-INF/resources'))
 		shutil.copyfile(os.path.join(play_base, 'resources/messages'), os.path.join(war_path, 'WEB-INF/resources/messages'))
 		if war_zip_path:
@@ -582,6 +589,8 @@ try:
 		load_modules()
 		do_classpath()
 		do_java()
+		if os.path.exists(os.path.join(application_path, 'tmp')):
+			shutil.rmtree(os.path.join(application_path, 'tmp'))
 		java_cmd.insert(2, '-Dprecompile=yes')
 		subprocess.call(java_cmd, env=os.environ)
 		print
