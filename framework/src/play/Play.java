@@ -390,7 +390,7 @@ public class Play {
             long start = System.currentTimeMillis();
             classloader.getAllClasses();
             Logger.trace("%sms to precompile the Java stuff", System.currentTimeMillis() - start);
-            if (!lazyLoadTemplates) {
+            if (!lazyLoadTemplates || System.getProperty("precompile") != null) {
                 start = System.currentTimeMillis();
                 TemplateLoader.getAllTemplate();
                 Logger.trace("%sms to precompile the templates", System.currentTimeMillis() - start);

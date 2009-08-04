@@ -1,8 +1,8 @@
 package play.classloading;
 
-import de.schlichtherle.io.File;
-import de.schlichtherle.io.FileInputStream;
-import de.schlichtherle.io.FileOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.security.MessageDigest;
 import play.Logger;
 import play.Play;
@@ -14,7 +14,7 @@ public class BytecodeCache {
 
     // Please update the cache version at each release
     static String version = "r";
-    
+
     /**
      * Delete the bytecode
      * @param name Cache name
@@ -116,7 +116,7 @@ public class BytecodeCache {
     }
 
     static File cacheFile(String id) {
-        File dir = new File(Play.tmpDir, "bytecode/" + Play.mode.name() + ".zip");
+        File dir = new File(Play.tmpDir, "bytecode/" + Play.mode.name());
         if (!dir.exists() && Play.tmpDir != null && !Play.readOnlyTmp) {
             dir.mkdirs();
         }

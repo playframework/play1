@@ -14,6 +14,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
@@ -42,14 +44,17 @@ import play.vfs.VirtualFile;
  * Servlet implementation.
  * Thanks to Lee Breisacher.
  */
-public class ServletWrapper extends HttpServlet {
+public class ServletWrapper extends HttpServlet implements ServletContextListener {
 
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        String appDir = appDir = config.getServletContext().getRealPath("/WEB-INF/application");
+    public void contextInitialized(ServletContextEvent e) {
+        String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
-        Play.init(root, System.getProperty("play.id", ""));       
+        Play.init(root, System.getProperty("play.id", ""));   
     }
+
+    public void contextDestroyed(ServletContextEvent e) {
+        Play.stop();
+    }   
 
     @Override
     public void destroy() {

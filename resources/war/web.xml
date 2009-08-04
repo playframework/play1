@@ -7,6 +7,10 @@
 
   <display-name>Play! (%APPLICATION_NAME%)</display-name>
   
+  <listener>
+      <listener-class>play.server.ServletWrapper</listener-class>
+  </listener>
+  
   <servlet>
     <servlet-name>play</servlet-name>
     <servlet-class>play.server.ServletWrapper</servlet-class>	
