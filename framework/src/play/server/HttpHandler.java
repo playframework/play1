@@ -233,25 +233,30 @@ public class HttpHandler implements IoHandler {
                 if (raw) {
                     copyResponse(session, Request.current(), Response.current(), minaRequest, minaResponse);
                 } else {
-                    if(Play.mode == Play.Mode.DEV) {
+                    if (Play.mode == Play.Mode.DEV) {
                         minaResponse.setHeader("Cache-Control", "no-cache");
                     } else {
                         String maxAge = Play.configuration.getProperty("http.cacheControl", "3600");
-                        if(maxAge.equals("0")) {
+                        if (maxAge.equals("0")) {
                             minaResponse.setHeader("Cache-Control", "no-cache");
                         } else {
-                            minaResponse.setHeader("Cache-Control", "max-age=" + maxAge);           
+                            minaResponse.setHeader("Cache-Control", "max-age=" + maxAge);
                         }
                     }
+                    boolean useEtag = Play.configuration.getProperty("http.useETag", "true").equals("true");
                     long last = file.lastModified();
                     String etag = last + "-" + file.hashCode();
                     if (!isModified(etag, last, minaRequest)) {
-                        minaResponse.setHeader("Etag", etag);
+                        if (useEtag) {
+                            minaResponse.setHeader("Etag", etag);
+                        }
                         minaResponse.setStatus(HttpResponseStatus.NOT_MODIFIED);
                     } else {
                         minaResponse.setHeader("Last-Modified", Utils.getHttpDateFormatter().format(new Date(last)));
-                        minaResponse.setHeader("Etag", etag);
-                        attachFile(session, minaResponse, file);                
+                        if (useEtag) {
+                            minaResponse.setHeader("Etag", etag);
+                        }
+                        attachFile(session, minaResponse, file);
                     }
                     writeResponse(session, minaRequest, minaResponse);
                 }
@@ -314,9 +319,9 @@ public class HttpHandler implements IoHandler {
                 String errorHtml = TemplateLoader.load("errors/500." + (ajax ? "txt" : "html")).render(binding);
                 response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
                 writeResponse(session, request, response);
-                Logger.error(e, "Internal Server Error (500) for request %s", request.getMethod()+" "+request.getRequestUri());
+                Logger.error(e, "Internal Server Error (500) for request %s", request.getMethod() + " " + request.getRequestUri());
             } catch (Throwable ex) {
-                Logger.error(e, "Internal Server Error (500) for request %s", request.getMethod()+" "+request.getRequestUri());
+                Logger.error(e, "Internal Server Error (500) for request %s", request.getMethod() + " " + request.getRequestUri());
                 Logger.error(ex, "Error during the 500 response generation");
                 try {
                     response.setContent(IoBuffer.wrap("Internal Error (check logs)".getBytes("utf-8")));
@@ -340,24 +345,25 @@ public class HttpHandler implements IoHandler {
     }
 
     public static boolean isModified(String etag, long last, HttpRequest request) {
-        if (!(request.getHeaders().containsKey("If-None-Match") && request.getHeaders().containsKey("If-Modified-Since"))) {
-            return true;
-        } else {
+        if (request.getHeaders().containsKey("If-None-Match")) {
             String browserEtag = request.getHeader("If-None-Match");
-            if (!browserEtag.equals(etag)) {
-                return true;
-            } else {
-                try {
-                    Date browserDate = Utils.getHttpDateFormatter().parse(request.getHeader("If-Modified-Since"));
-                    if (browserDate.getTime() >= last) {
-                        return false;
-                    }
-                } catch (ParseException ex) {
-                    Logger.error("Can't parse date", ex);
-                }
-                return true;
-            }
+            if (browserEtag.equals(etag)) {
+                return false;
+            } 
+            return true;
         }
+        if (request.getHeaders().containsKey("If-Modified-Since")) {
+            try {
+                Date browserDate = Utils.getHttpDateFormatter().parse(request.getHeader("If-Modified-Since"));
+                if (browserDate.getTime() >= last) {
+                    return false;
+                }
+            } catch (ParseException ex) {
+                Logger.warn("Can't parse HTTP date", ex);
+            }
+            return true;
+        }
+        return true;
     }
 
     public static void writeResponse(IoSession session, HttpRequest req, MutableHttpResponse res) {
@@ -385,7 +391,6 @@ public class HttpHandler implements IoHandler {
             this.response = response;
             this.session = session;
         }
-        
         private Map<String, RenderStatic> staticPathsCache = new HashMap();
 
         @Override
@@ -393,10 +398,10 @@ public class HttpHandler implements IoHandler {
             Request.current.set(request);
             Response.current.set(response);
             // Patch favicon.ico
-            if(!request.path.equals("/favicon.ico")) {
+            if (!request.path.equals("/favicon.ico")) {
                 super.init();
             }
-            if(Play.mode == Mode.PROD && staticPathsCache.containsKey(request.path)) {
+            if (Play.mode == Mode.PROD && staticPathsCache.containsKey(request.path)) {
                 serveStatic(session, minaResponse, minaRequest, staticPathsCache.get(request.path));
                 return false;
             }
@@ -406,7 +411,7 @@ public class HttpHandler implements IoHandler {
                 serve404(session, minaResponse, minaRequest, e);
                 return false;
             } catch (RenderStatic e) {
-                if(Play.mode == Mode.PROD) {
+                if (Play.mode == Mode.PROD) {
                     staticPathsCache.put(request.path, e);
                 }
                 serveStatic(session, minaResponse, minaRequest, e);
