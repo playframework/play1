@@ -184,6 +184,7 @@ public class ApplicationClasses {
          * @return the enhanced byteCode
          */
         public byte[] enhance() {
+            this.enhancedByteCode = this.javaByteCode;
             for (Class enhancer : enhancers) {
                 try {
                     long start = System.currentTimeMillis();

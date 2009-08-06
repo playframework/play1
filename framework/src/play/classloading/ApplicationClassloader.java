@@ -89,7 +89,7 @@ public class ApplicationClassloader extends ClassLoader {
                     Logger.trace("%sms to load class %s from cache", System.currentTimeMillis() - start, name);
                     return applicationClass.javaClass;
                 }
-                if (applicationClass.enhancedByteCode != null || applicationClass.compile() != null) {
+                if (applicationClass.javaByteCode != null || applicationClass.compile() != null) {
                     applicationClass.enhance();
                     applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
                     BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, name, applicationClass.javaSource);
