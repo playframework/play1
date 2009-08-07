@@ -16,6 +16,8 @@ import java.security.Permissions;
 import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -153,6 +155,36 @@ public class ApplicationClassloader extends ClassLoader {
             }
         }
         return super.getResource(name);
+    }
+    
+    @Override
+    public Enumeration<URL> getResources(String name) throws IOException {
+        List<URL> urls = new ArrayList<URL>();
+        for(VirtualFile vf : Play.javaPath) {
+            VirtualFile res = vf.child(name);
+            if(res != null && res.exists() && res instanceof FileSystemFile) {
+                try {
+                    urls.add(((FileSystemFile) res).realFile.toURI().toURL());
+                } catch (MalformedURLException ex) {
+                    throw new UnexpectedException(ex);
+                }
+            }
+        }
+        Enumeration<URL> parent = super.getResources(name);
+        while(parent.hasMoreElements()) {
+            urls.add(parent.nextElement());
+        }
+        final Iterator<URL> it = urls.iterator();
+        return new Enumeration<URL>() {
+
+            public boolean hasMoreElements() {
+                return it.hasNext();
+            }
+
+            public URL nextElement() {
+                return it.next();
+            }
+        };
     }
 
     /**

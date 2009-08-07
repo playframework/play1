@@ -1,0 +1,247 @@
+h1. Google App Engine support
+
+The GAE module enable Google App Engine support for your application. It wraps commons GAE services in play basic services when possible (Logging, JPA, Mail, Cache, ...) and expose directly other Google specifics services (User services, Datastore, ...).
+
+Moreover, this module set up a GAE development environment directly in the play development server, so you don't need to develop directly in the Google App Engine SDK (but it's supported too ...).
+
+h2. <a>What is supported ?</a>
+
+* The application layout is totally standard.
+* Auto reload works as expected.
+* Logging is correctly dispatched to java.util.logging when the module is enabled.
+* tmp folder is disabled because you can't write to the filesystem in GAE.
+* Direct datastore access is fully supported.
+* JPA support is enabled but you still depends on GAE JPA limitations.
+* Cache is correctly wrapped to the GAE memcached instance.
+* Mail is correctly wrapped to the GAE mail service.
+* Users services is available with a 'sign in' page simulation in the development server.
+* You can still explode your application into several modules.
+* PROD mode is forced when the application is running on the GAE production environment.
+
+h2. <a>Setting up the GAE module</a>
+
+Start to create a new application in the classical way.
+
+bc. # play new test-gae
+
+Then edit the **conf/application.conf** file to enable the GAE module :
+
+bc. # Additional modules
+# ~~~~~
+# A module is another play! application. Add a line for each module you want
+# to add to your application. Modules path are either absolutes or relative to
+# the application root.
+#
+module.gae=${play.path}/modules/gae
+
+Now you can start your application and play should start a GAE developement environment :
+
+bc. # play run test-gae
+ 
+~        _            _ 
+~  _ __ | | __ _ _  _| |
+~ | '_ \| |/ _' | || |_|
+~ |  __/|_|\____|\__ (_)
+~ |_|            |__/   
+~
+~ play! 1.0-stable5-localbuild, http://www.playframework.org
+~
+~ Ctrl+C to stop
+~ 
+11:37:02,228 INFO  ~ Starting /Volumes/Data/Desktop/test-gae
+11:37:02,240 INFO  ~ Module gae is available (/Volumes/Data/Desktop/play/modules/gae)
+11:37:02,350 WARN  ~ 
+11:37:02,351 WARN  ~ Google App Engine module
+11:37:02,351 WARN  ~ ~~~~~~~~~~~~~~~~~~~~~~~
+11:37:02,351 WARN  ~ No Google App Engine environment found. Setting up a development environement
+11:37:02,379 WARN  ~ Don't forget to define your GAE application id in the 'war/WEB-INF/appengine-web.xml' file
+11:37:02,379 WARN  ~ 
+11:37:02,380 WARN  ~ You're running play in DEV mode
+11:37:02,381 INFO  ~ Application 'Test of GAE' is ready !
+11:37:02,529 INFO  ~ Listening for HTTP on port 9000 ...
+11:37:02,529 INFO  ~ 
+
+A blank **appengine-web.xml** file has been created in the **war/WEB-INF** directory. Don't forget to set up a correct GAE application id before running it into the GAE SDK.
+
+p(note). **Note**
+ 
+Content of the **war** directory will be merged during the war export command. It's not something specific to the GAE module.
+
+h2. <a>Writing a simple TODO application</a>
+
+Let's see how to write a simple application. At this stage it should not been different from writing a classical play application.
+
+h3. Let's define a Task model object ====
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.*;
+import play.db.jpa.*;
+ 
+@Entity
+public class Task extends JPASupport {
+ 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)	
+	public Long id;
+	public String label;
+	public Boolean done;
+	public Date createdAt;
+	
+	public Task(String label) {
+		this.label = label;
+		this.done = false;
+		this.createdAt = new Date();
+		this.save();
+	}
+	
+	public void done() {
+		this.done = true;
+	}
+	
+	public static void flushDones() {
+		for(JPASupport task : findBy("done", true)) {
+			task.delete();
+		}
+	}
+    
+}
+
+Very easy. 
+
+Just note the we can't extends directly the JPAModel support class. It is because the JPAModel class define an automatic id using the default JPA generation mechanism, that is not supported on GAE. Instead we need to extends the JPASupport class and define our own id field.
+
+h3. Now, the controller
+
+bc. package controllers;
+ 
+import java.util.*;
+ 
+import play.*;
+import play.mvc.*;
+import play.libs.*;
+import play.data.validation.*;
+ 
+import models.*;
+ 
+public class Application extends Controller {
+ 
+	public static void index() {
+		List tasks = Task.findAll();
+		render(tasks);
+	}
+	
+	public static void addTask(@Required String label) {
+		if(Validation.hasErrors()) {
+			flash.error("Please provide a task label");
+			index();
+		}
+		new Task(label);
+		index();
+	}
+	
+	public static void done(Long id) {
+		Task task = Task.findById(id);
+		task.done();
+		index();
+	}
+	
+	public static void flush() {
+		Task.flushDones();
+		index();
+	}
+ 
+}
+
+Nothing specific here.
+
+h3. And finally, the Application/index.html template
+
+bc. #{extends 'main.html' /}
+#{set title:'TODO' /}
+ 
+<h1>${tasks.size()} task${tasks.size().pluralize()}</h1>
+ 
+<ul>
+#{list items:tasks, as:'task'}
+	<li style="${task.done ? 'text-decoration: line-through;' : ''}">
+		${task.label} 
+                (created at ${task.createdAt?.format('MM/dd/yyyy hh:mm')})
+		#{ifnot task.done}
+			- #{a @done(task.id)}(done)#{/a}
+		#{/ifnot}	
+	</li>
+#{/list}
+</ul>
+ 
+#{if flash.error}
+	<p class="error">
+		${flash.error}
+	</p>
+#{/if}
+ 
+#{form @addTask()}
+	<input type="text" name="label" size="60" />
+	<input type="submit" value="Add this task" />
+#{/form}
+ 
+<p>
+	#{a @flush()}Flush done tasks#{/a}
+</p>
+
+h3. Testing the application
+
+Well, nothing specific here. It should just work using the local datastore as database.\\ Auto refresh should work as expected.
+
+h3. Exporting the application as a WAR file
+
+To be abble to run your application is the GAE SDK you need to export it as a war file.
+
+From the application directory, run :
+
+bc. # play war -o ../test-gae-war
+
+It will generated a WAR file containing the application, all the modules, and a snapshot of the play framework to the **test-gae-war** directory.
+
+h3. Testing the application in the Google App Engine SDK
+
+First you need to install the Google App Engine SDK.
+
+Then simply run the generated WAR using the GAE **devappserver** :
+
+bc. # appengine-java-sdk-1.2.0/bin/dev_appserver.sh test-gae-war/
+
+The application will start at the first request.
+
+bc. The server is running at http://localhost:8080/
+25 avr. 2009 12:03:39 play.Logger info
+INFO: play is running in Google App Engine
+25 avr. 2009 12:03:39 play.Logger info
+INFO: Starting /Volumes/Data/Desktop/test-war/WEB-INF/application
+25 avr. 2009 12:03:39 play.Logger info
+INFO: Module crud is available (/Volumes/Data/Desktop/test-war/WEB-INF/modules/crud)
+25 avr. 2009 12:03:39 play.Logger info
+INFO: Module gae is available (/Volumes/Data/Desktop/test-war/WEB-INF/modules/gae)
+25 avr. 2009 12:03:39 play.Logger warn
+WARNING: You're running play in DEV mode
+25 avr. 2009 12:03:39 play.Logger info
+INFO: Application 'Test of GAE' is ready !
+
+The application should run as in the play development server. However be aware that the GAE SDK ensures more security restrictions than the play server. If you follow GAE guidelines, you should not have any problem thus.
+
+h2. <a>Deploying the application in GAE</a>
+
+Simply use the **appcfg** command of the GAE SDK to upload your application. Note that you don't need to set up your application in PROD mode, the GAE module will take care of that.
+
+bc. # appengine-java-sdk-1.2.0/bin/appcfg.sh update test-gae-war/
+
+In production, the application will start at the first request. You can access the application logs in the GAE Dashboard.
+
+!images/gae-logs!
+
+p(important). All this stuff is just a preview. A more complete sample application using the full broad of GAE services should be added soon.
+ 
+Have fun !

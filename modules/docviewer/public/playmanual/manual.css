@@ -1,0 +1,363 @@
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: inherit;
+	vertical-align: baseline;
+}
+/* remember to define focus styles! */
+:focus {
+	outline: 0;
+}
+body {
+	line-height: 1;
+	color: black;
+	background: white;
+}
+ol, ul {
+	list-style: none;
+}
+/* tables still need 'cellspacing="0"' in the markup */
+table {
+	border-collapse: separate;
+	border-spacing: 0;
+}
+caption, th, td {
+	text-align: left;
+	font-weight: normal;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: "";
+}
+blockquote, q {
+	quotes: "" "";
+}
+
+html, body {
+	background: #444444;
+	font-family: "Helvetica Neue", Helvetica, Arial, Sans-Serif;
+	line-height: 1.2em;
+	text-align: center;
+}
+
+.noteclassic, .noteimportant, .notewarning, .notetip {
+	-webkit-border-radius: 0 !important;
+}
+
+a {
+	color: #444;	
+}
+
+p {
+	margin-bottom: 15px;
+}
+
+#main {
+	width: 735px;
+	text-align: left;
+	margin: 20px auto;
+	font-weight: lighter;
+	position: relative;
+}
+
+#main #header #menu {
+	position: absolute;
+	right: 0;
+	top: 22px;
+}
+
+#main #header #menu li {
+	display: inline;
+}
+
+#main #header #menu li a {
+	text-decoration: none;
+	color: #fff;
+	font-size: 18px;
+	margin-left: 30px;
+}
+
+#main #header #menu li a.selected {
+	color: #b3e862;
+}
+
+#main #footer {
+	font-size: 11px;
+	color: #eee;
+}
+
+#main #footer a {
+	color: #b3e862;
+}
+
+#main #body {
+	margin: 10px 0;
+	background: #fff;
+	padding: 20px;
+	padding-top: 30px;
+}
+
+#home h1 {
+	color: #8dac26;
+	font-size: 30px;
+	margin-bottom: 15px;
+	line-height: 1em;
+}
+
+#main .download strong {
+}
+
+#home h2 {
+	margin-bottom: 30px;
+}
+
+#home h3 {
+	font-size: 20px;
+	color: black;
+	margin-bottom: 20px;
+	margin-top: 40px;
+}
+
+#home ul {
+	list-style: square;
+	margin-left: 15px;
+}
+
+#home ul li {
+	margin-bottom: 5px;
+}
+
+#home .screen {
+	margin: 15px 0 0 0;
+}
+
+#home strong {
+	color: #444;
+	background: #b3e862;
+	padding: 1px 5px;
+	margin-right: 1px;	
+}
+
+/** For manual **/
+
+#page #bc {
+    font-size: 75%;
+    margin-bottom: 15px;
+}
+
+#page h1 {
+    color: rgb(141, 172, 38);
+    display: block;
+    font-size: 30px;
+    line-height: 30px;
+    font-weight: 200;
+    margin-bottom: 20px;
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 0px;
+    text-decoration: none;
+}
+
+#page h2 {
+    margin: 30px 0 10px 0;
+}
+
+#page h3 {
+    font-size: 18px;
+    font-weight: 400;
+    margin: 30px 0 10px 0;
+}
+
+#page h4 {
+    font-size: 16px;
+    font-weight: 400;
+    margin: 20px 0 10px 0;
+    color: #444;
+}
+
+
+#page h2 a {
+    background-color: rgb(179, 232, 98);
+    color: rgb(68, 68, 68);
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 200;
+    padding: 1px 5px;
+}
+
+#page ol {
+    color: rgb(141, 172, 38);
+    list-style-position: outside;
+    list-style-type: decimal;
+    line-height: 24px;
+    margin-bottom: 10px;
+    margin-left: 30px;
+    margin-top: -10px;
+}
+
+#page ol ol {
+    margin-left: 22px;
+    list-style-type: lower-roman;
+    list-style-position: outside;
+    margin-top: 0px;
+    margin-bottom: 5px;
+}
+
+#page ul {
+    list-style: square;
+    list-style-position: outside;
+    margin-left: 18px;
+}
+
+#page pre {
+    overflow: hidden;
+}
+
+#page p {   
+    margin: 20px 0;
+}
+
+#page p strong {
+    font-weight: bolder;
+}
+
+#page p.note {
+    border-top : 1px solid #FFB320;
+    border-bottom : 1px solid #FFB320;
+    background: #FFFEB2;
+    padding: 10px;
+}
+
+#page p.important {
+    border-top : 1px solid rgb(204, 0, 0);
+    border-bottom : 1px solid rgb(204, 0, 0);
+    background: rgb(255, 192, 203);
+    padding: 10px;
+}
+
+#page code {
+    display: block;
+    background-color: rgb(224, 255, 184);
+    border-bottom: 1px solid rgb(148, 218, 58);
+    border-top: 1px solid rgb(148, 218, 58);
+    padding: 5px 10px;
+    margin: 5px 0;
+    font-family: monospace, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+}
+
+#page blockquote {
+    color: #666;
+    padding-left: 20px;
+}
+
+/** Community **/
+
+.community .icon {
+    float: left;
+    margin-right: 10px;
+}
+
+.community div.i {
+    margin-top: 30px;
+    margin-bottom: 50px;
+}
+
+.community div.i div {
+    margin-left: 110px;
+}
+
+/** Tickets **/
+
+#filter .selected {
+    background: #BCE569;
+    color: #666;
+    padding: 1px 5px;
+    text-decoration: none;
+}
+
+.ticket {
+    background: #F0F9DD;
+    border-top: 1px solid #A1D644;
+    border-bottom: 1px solid #A1D644;
+    padding: 5px 10px;
+    margin-bottom: 20px;
+    font-size: 16px;
+    padding-left: 60px;
+    padding-right: 60px;
+    position: relative;
+}
+
+.ticket .id {
+    color: #80AB37;
+    font-size: 18px;
+    position: absolute;
+    top: 4px;
+    left: 5px;
+    font-weight: bold;
+}
+
+.ticket .by {
+    margin: 0 !important;
+    font-size: 11px;
+}
+
+.ticket .state {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: #80AB37;
+    color: #fff;
+    font-size: 11px;
+    padding: 0 5px;
+}
+
+#search {
+    padding: 0 0 10px 0;
+    margin-bottom: 20px !important;
+}
+
+#search input {
+    font-size: 16px;
+    padding: 4px;
+    width: 70%;
+}
+
+#page pre {
+    white-space: pre-wrap; /* css-3 */
+    white-space: -moz-pre-wrap !important; /* Mozilla, since 1999 */
+    white-space: -pre-wrap; /* Opera 4-6 */
+    white-space: -o-pre-wrap; /* Opera 7 */
+    word-wrap: break-word; /* Internet Explorer 5.5+ */
+}
+
+pre.description {
+    background: #E5FDBB;
+    padding: 5px 10px;
+    border-top: 1px solid #A1D644;
+    border-bottom: 1px solid #A1D644;
+}
+
+.message {
+    background: #FEFDB6;
+    padding: 5px 10px;
+    margin-bottom: 15px;
+    border-top: 1px solid #F3B438;
+    border-bottom: 1px solid #F3B438;
+}

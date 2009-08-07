@@ -1,0 +1,159 @@
+h1. Test your application
+
+Creating automatic test suites for your application is a good way to make it robust. It allows you to work in a very agile way.
+
+play tests are built using "Junit 4":http://www.junit.org/|JUnit 4 or "Selenium":http://seleniumhq.org/|Selenium depending what you want to test. 
+
+h2. <a>Writing tests</a>
+
+The tests must be created in the **test/** directory. This folder will be added to sources path only when the application is run in **test** mode.
+
+You can write 3 differents kind of test.
+
+h3. Unit test
+
+A unit test is written using JUnit. In this kind of test you can test the model of your application (including some utils). 
+
+Here a example of a Unit test :
+
+bc. import play.test.*;
+import org.junit.*;
+ 
+public class MyTest extends UnitTest {
+     
+    @Test
+    public void aTest() {
+        assertEquals(2, 1+1); // A really important thing to test
+    }
+ 
+    @Test
+    public void testUsers() {
+        assertEquals(3, Users.count()); 
+    }
+ 
+}
+
+h3. Functional test
+
+A functional test is written using JUnit. In this kind of test you can test your application by accessing directly the controller objects. 
+
+Here a example of a Functional test :
+
+bc. import play.test.*;
+import play.mvc.*;
+import play.mvc.Http.*;
+import org.junit.*;
+ 
+public class ApplicationTest extends FunctionalTest {
+     
+    @Test
+    public void testTheHomePage() {
+        Response response = GET("/");
+        assertStatus(200, response);
+    }
+     
+}
+
+h3. Selenium test
+
+Acceptance tests are written using selenium. In this kind of test you can test your application by running your application in an automated browser. 
+
+Selenium tests are written using HTML table. You can either use this native syntax or use the **#{selenium /}** tag.
+
+Here a example of a selenium test :
+
+bc. #{selenium 'Test security'}
+ 
+    // Try to log in the administration area
+    clearSession()
+    open('/admin')
+    assertTextPresent('Login')
+    type('login', 'admin')
+    type('password', 'secret')
+    clickAndWait('signin')
+ 
+    // Verify that the user in correctly logged in
+    assertText('success', 'Welcom admin !')
+ 
+#{/selenium}
+
+h2. <a>Fixtures</a>
+
+When you run tests, you need to have stable data for your application. The simplest way is to resest your database before each test.
+
+The **play.test.Fixtures** class help you to manipulate your databse and to inject test data. You typically use it in a @Before method of a JUnit test.
+
+bc. @Before
+public void setUp() {
+    Fixtures.deleteAll();
+}
+
+To import data, it is simpler to define them in a YAML file, that the Fixtures helper can automatically import.
+
+bc. # Test data
+ 
+Company(google):
+   name:    Google
+ 
+Company(zen):
+   name:    Zenexity
+ 
+User(guillaume):
+   name:    guillaume
+   company: zen
+
+And then : 
+
+bc. @Before
+public void setUp() {
+    Fixtures.deleteAll();
+    Fixtures.load("data.yml");
+}
+
+For selenium tests, you can use the **#{fixture /}** tag :
+
+bc. #{fixture delete:'all', load:'data.yml' /}
+ 
+#{selenium}
+    
+    // Write your test here
+ 
+#{/selenium}
+
+h2. <a>Running the tests</a>
+
+To run the tests, you must run your application in **test** mode using the '**play test**' command.
+
+bc. # play test myApp
+
+In this mode, Play will automatically load the **test-runner** module. This module provides a Web based test runner, available at the http://localhost:9000/@tests URL.
+
+!images/test-runner!
+
+When you run a test, the result is saved into the **/test-result** directory of your application.
+
+On the test runner page, each test is a link. You can 'right click' and 'Open in a new tab', to run the test directly outside of the test-runner. 
+
+When you run tests this way, play will start with a special **test** framework ID. So you can define special configurations in the **application.conf** file.
+
+For example :
+
+bc. %test.db=mem
+%test.jpa.ddl=create-drop
+
+h2. <a>Continuous integration, and running the tests automatically</a>
+
+The '**auto-test**' command do the same than the '**test**' command, but it automatically launch a browser, run all the tests, and stop.
+
+This is a usefull command if you want to set up a continuous integration system; 
+
+After the run, all results are saved to the **/test-result** directory. Moreover, this directory contains a marker file (either **result.failed** or **result.passed**) for the final result of the test suite. And finally, this directory contains all the logs, in a **application.log** file.
+
+So setting up a continous integration system to test your application, could be :
+
+* Checkout the latest version of your application
+* Run '**play auto-test**'
+* Wait the end of the process
+* Check for marker file **result.passed** or **result.failed** in the **/test-result** directory
+
+Run these step in a CRON tab, and you're done !

@@ -1,0 +1,218 @@
+h1. The template engine
+
+Play has an efficient templating system which allows play to dynamically generate HTML, XML, JSON or any text based format. The template engine uses "Groovy":http://groovy.codehaus.org/ as an expression language. A tag system allows you to create reusable functions.
+
+Templates are stored in the **app/views** directory. This directory is further organized into many sub-directories :
+
+h4. tags:
+
+Template fragments used as tag.
+
+h4. A directory for each application Controller:
+
+By default all views from a Controller are stored in the same directory.
+
+h2. <a name="syntax">Template syntax</a>
+
+A template file is a text file, some parts of which have placeholders for dynamically generated content. Dynamic elements of the template are written using the "Groovy":http://groovy.codehaus.org/ language. Groovy syntax is very close to Java one. 
+
+Dynamics elements are resolved during template execution. The rendered result is then sent as part of the HTTP response.
+
+h3. Expressions : ${…}
+
+The simplest way to make a dynamic element is to declare an expression. The syntax used here is **${…}**. The result of evaluating the expressions is inserted in place of the expression.
+
+For example :
+
+bc. <h1>Client ${client.name}</h1>
+
+h3. Tags : #{tagName
+
+A tag is a template fragment that can be called with parameters. If the tag has only one parameter, by convention it is called "arg" and its name can be omitted.
+
+For example, this tag inserts a SCRIPT tag to load a Javascript file :
+
+bc. #{script 'jquery.js' /}
+
+A tag has to be closed, either directly or by an end tag :
+
+bc. #{script 'jquery.js' /}
+
+or
+
+bc. #{script 'jquery.js'}
+#{/script}
+
+For example the **list** tag allows iteration over any collection. It takes two mandatory parameters :
+
+bc. <h1>Client ${client.name}</h1>
+<ul>
+    #{list items:client.accounts, as:'account' }
+        <li>${account}</li>
+    #{/list}
+</ul>
+
+h3. Actions : @{…} or @@{…}
+
+You can use the Router to (reverse) generate a URL corresponding to a specified route. From a template you can use the special **@{…}** syntax to do that.
+
+For example :
+
+bc. <h1>Client ${client.name}</h1>
+<p>
+   <a href="@{Clients.showAccounts(client.id)}">All accounts</a>
+</p>
+
+The **@@{…}** syntax does the same but generates an absolute URL (useful for email, ...).
+
+h3. Messages : &{…}
+
+If your application needs internationalization you can use the **&{…}** syntax to display an internationalized message :
+
+For example in the files **conf/messages** we specify : 
+
+bc. clientName=The client name is %s
+
+To display this message in a template, simply use:
+
+bc. <h1>&{'clientName', client.name}</h1>
+
+h3. Comment : *{…}*
+
+Comments aren't evaluated by the template engine. They are just comments ...
+
+bc. *{**** Display the user name ****}*
+<div class="name">
+    ${user.name}
+</div>
+
+h3. Scripts : %{…}%
+
+A script is a more complicated set of expressions. A script can declare some variables and define some statements. Use the **%{…}%** syntax to insert a script.
+
+bc. %{
+   fullName = client.name.toUpperCase()+' '+client.forname;
+}%
+ 
+<h1>Client ${fullName}</h1>
+
+A script can write dynamic content directly using the **out** object :
+
+bc. %{
+   fullName = client.name.toUpperCase()+' '+client.forname;
+   out.print('<h1>'+fullName+'</h1>');
+}%
+
+You can use a script to create a structure such as an iteration in your template :
+
+bc. <h1>Client ${client.name}</h1>
+<ul>
+%{
+     for(account in client.accounts) { 
+}%
+     <li>${account}</li>
+%{
+     }
+}%
+</ul>
+
+Bear in mind that a template is not a place to do complex things. So, use a tag when you can, or move the computations into the controller or the model object.
+
+h2. <a>Template inheritance</a>
+
+A template can inherit another template, i.e. it can be included as a part of an other template.
+
+To inherit another template, use the **extends** tag :
+
+bc. #{extends 'main.html' /}
+ 
+<h1>Some code</h1>
+
+The **main.html** template is a standard template, but it uses the **doLayout** tag to include the content :
+
+bc. <h1>Main template</h1>
+ 
+<div id="content">
+    #{doLayout /}
+</div>
+
+h2. <a>Create tags</a>
+
+You can easily create specifics tags for your application. A tag is a simple template file, stored in the **app/views/tags** directory. The name of the template file is used as the tag name.
+
+To create a **hello** tag, just create the **app/views/tags/hello.html** file.
+
+bc. Hello from tag !
+
+No need to configure anything. You can use the tag directly :
+
+bc. #{hello /}
+
+h3. Retrieve tags parameters
+
+Tag parameters are exposed as template variables. The variable names are constructed with the '_' character prepended to the parameter name. 
+
+From example : 
+
+bc. Hello ${_name} !
+
+And you can pass the name parameter to the tag :
+
+bc. #{hello name:'Bob' /}
+
+h3. Invoke tag body
+
+If your tag supports a **body**, you can include it at any point in the tag code, using the **doBody** tag.
+
+For example : 
+
+bc. Hello #{doBody /} !
+
+And you can then pass the name as tag body :
+
+bc. #{hello}
+   Bob
+#{/hello}
+
+
+h2. <a>Java object extensions in templates</a>
+
+When you use your Java object within the template engine, some new methods are added to it. These methods do not exist in the original Java class and are defined dynamically added by the template engine.
+
+For example, to allow easy number formatting in a template, a **format** method is added to **java.lang.Number**.
+
+It's then very easy to format a number : 
+
+bc. <ul>
+#{list items:products, as:'product'}
+    <li>${product.name}. Price : ${product.price.format('## ###,00')} €</li>
+#{/list}
+</ul>
+
+You can also provide new extension methods for your project, see Extending the templates language.
+
+
+h2. <a>Implicit objects available from a template</a>
+
+All objects added to the **renderArgs** scope are directly injected as template variables. 
+
+For instance, to inject a ''user'' bean into the template from a controller:
+
+bc. renderArgs.put("user", user );
+
+When you render a template from an action, the framework also adds some implicit objects :
+
+* **session**, the Session object
+* **flash**, the Flash scope
+* **request**, the current Request
+* **params**, HTTP params 
+* **play**, a reference to play.Play
+* **lang**, the current language
+* **messages**, the messages map
+* **out**, the Writer
+
+p(note). **Continuing the discussion**
+ 
+The last layer of a play application is the "domain object model":model.
+
+ 

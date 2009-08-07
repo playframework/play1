@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <title>Play manual - ${title}</title>
+        <link rel="stylesheet" href="@{'/public/playmanual/manual.css'}" type="text/css" media="screen" charset="utf-8">
+    </head>
+    <body>
+        <div id="main">
+            <div id="body">
+                <div id="page">
+                    
+                    #{if id != 'home'}
+                    <div id="bc">
+                        <a href="@{index()}">Table of contents</a> » ${title}
+                    </div>
+                    #{/if}
+                    
+                    ${html}
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

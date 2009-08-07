@@ -1,0 +1,78 @@
+h1. Setting up i18n
+
+Internationalization is a means of adapting your application to different languages and allow for regional differences. Follow theses steps to enable internationalization in your application.
+
+h2. <a>Only use UTF-8!</a>
+
+play supports only one encoding : UTF-8. Since encoding problems can be weird and difficult to deal with, we made the choice to support only one encoding. UTF-8 allows you to display all characters for all languages.
+
+So be sure to be consistent with UTF-8 usage throughout your application:
+
+* Edit all your source files as UTF-8
+* Define proper encoding headers in HTTP
+* Set your HTML meta tags to UTF-8
+* If you use a database, configure it to use UTF-8, and always connect to it using UTF-8
+
+p(note). **Note**
+ 
+The UTF-8 encoding issue is the reason why most of the play configuration files, even though they are Java properties files, are not named *.properties. Java imposes the requirement that properties files must be encoded with **iso-8859-1**. play configuration files must be UTF-8 encoded. Need we way more?
+
+h2. <a>Externalize your messages</a>
+
+To support i18n you have to externalize all messages in the application. 
+
+Create a file named **messages** in the **conf/** directory of the application. This file is really just a Java properties file.
+
+bc. hello=Hello !
+back=Back
+
+Then you can define a specific **message** file for each language used in your application. Just add the ISO language code as file extension. 
+
+For example, the message file containing the corresponding French translations in **conf/messages.fr** :
+
+bc. hello=Bonjour !
+back=Retour
+
+h2. <a>Define languages supported by the application</a>
+
+In the **conf/application.conf** file define a list of supported languages.
+
+bc. application.langs=fr,en,ja
+
+On the first request from a new user, play will guess the default language to use. It does so by parsing the HTTP **Accept-language** header. It will then save the chosen language in a **PLAY_LANG** cookie. So the next request will use the same language.
+
+From your application code your can retrieve the current language for the user by accessing the **play.i18n.Lang** object :
+
+bc. String lang = Lang.get();
+
+If you want to permanently change the user language, use the change method :
+
+bc. Lang.change("ja");
+
+The new value will be saved back in the user's language Cookie.
+
+h2. Retrieve localized messages
+
+From application code, you can retrieve messages defined in message files. From Java, use the **play.i18n.Messages** object.
+
+bc. public static void hello() {
+    renderText(Messages.get("hello"));
+}
+
+We support message formatting through the standard Java formatting syntax. You can also define dynamic content in your messages :
+
+bc. hello=Hello %s !
+
+and
+
+bc. public static void hello(String user) {
+    renderText(Messages.get("hello", user));
+}
+
+From a template you can use the special **&{...}** syntax to display localized messages :
+
+bc. <h1>&{'hello'}</h1>
+
+or using dynamic content
+
+bc. <h1>&{'hello', params.user}</h1>

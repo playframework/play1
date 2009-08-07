@@ -1,0 +1,113 @@
+h1. The main concepts
+
+h2. <a name="mvc">The MVC application model</a>
+
+A play application follows the MVC architectural pattern as applied to the architecture of the Web.
+
+This pattern splits the application into separate layers: the Presentation layer and the Model layer. The Presentation layer is further split into a View and a Controller layer. 
+
+* The **Model** is the domain-specific representation of the information on which the application operates. Domain logic adds 'meaning' to raw data (e.g., calculating if today is the user's birthday, or the totals, taxes, and shipping charges for a shopping cart). Most applications use a persistent storage mechanism such as a database to store data. MVC does not specifically mention the data access layer because it is understood to be underneath or encapsulated by the Model.
+
+* The **View** renders the model into a form suitable for interactions, typically a user interface. Multiple views can exist for a single model, for different purposes. In a Web application the view is usually rendered in a 'Web format' like HTML, XML or JSON. However there are some cases where the view can be in a binary form, eg. dynamically rendered chart diagrams.
+
+* The **Controller** processes and responds to events, typically user actions and may also invoke changes on the model. In a Web application, events are typically HTTP request : a Controller listens for HTTP requests, extracts interesting data from the 'event', such as query string parameters, request headers... and applies changes on the underlying model objects.
+
+!images/diagrams_mvc!
+
+In a play applications these three layers are defined in the **app** directory, each in a separate Java package :
+
+h3. app/controllers
+
+A Controller is a Java class where each public, static, method is an **action**. An action is a Java entry point invoked when a HTTP Request is received. The Java code from the Controller class isn't really Object Oriented : it's mainly some procedural code. The action method code extracts interesting data from the HTTP Request, reads or updates the model objects, and sends back a result which is wrapped into an HTTP Response. 
+
+h3. app/models
+
+The domain model object layer is a set a Java classes using all the Object Oriented features available from the Java language. It contains data structures and operations on which the application operates. Whenever model objects need to be saved into a persistent storage, they may contain some glue artifacts like JPA annotations or SQL statements.
+
+h3. app/views
+
+Most of the application views are generated using an efficient templating system provided by play. The Controller gets some interesting data from the model layer, and then apply a template to decorate these objects. This packages contains some HTML, XML, JSON,... template files with special directives used to dynamically generate the model representation.
+
+
+h2. <a name="request">The request life cycle</a>
+
+The play framework is fully stateless and only Request/Response oriented. All HTTP Requests follow the same path :
+
+* An HTTP Request is received by the framework.
+* The Router component tries to find the most specific route able to accept this request. The corresponding action method is then invoked.
+* The application code is executed.
+* If a complex view needs to be generated, a template file is rendered.
+* The result of the action method (HTTP Response code, Content) is then written as an HTTP Response.
+
+This diagram summarizes the HTTP Request path :
+
+!images/diagrams_path!
+
+
+h2. <a name="application">play application layout</a>
+
+The layout of a play application is standardized to keep things as simple as possible.
+
+h3. The app directory
+
+This directory contains all executable artefacts : Java source code and views templates.
+
+p(note). **Where are my .class files ??**
+ 
+Don't look for compiled Java classes. The play framework compiles the Java source code at runtime and doesn't keep any compiled classes on the filesystem.
+
+There are three standard packages in the app directory, one for each layer of the MVC architectural pattern. 
+
+In addition, the views package is further organized into sub-packages : 
+
+* **tags**, hosts application tags.
+* **One views folder for each Controller**, by convention templates related to each Controller are stored in their own package
+
+h3. The public directory
+
+Resources stored in the **public** directory are static assets and are served directly by the Web server.
+
+This directory is split into three standard sub-directories : for images, CSS stylesheets and javascripts. You should try to organize your static assets like this to keep all play applications consistent.
+
+h3. The conf directory
+
+The **conf** directory contains all configuration files for the application.
+
+There are at least two configurations files needed : 
+
+* **application.conf**, the main configuration file for the application. It contains standard configuration options.
+* **routes**, the routes definition file.
+
+p(note). **Tip**
+ 
+If you need to add some configuration options specific to your application, it's a good idea to add more options to the application.conf file. If any library need a specific configuration file, try to put it i the conf directory : **this directory is included in the Java ClassPath**.
+
+h3. The lib directory
+
+This directory contains all standard Java libraries needed by your application. There are automatically added to the Java Classpath.
+
+
+h2. <a name="lifecycle">Development life cycle</a>
+
+There are no compilation, packaging or deployment phases while working with play.
+
+Java source code is compiled and loaded at runtime. If a Java source file is modified while the application is running, the source code is recompiled and hot-swapped into the JVM.
+
+If a compilation error occurs, the exact problem is displayed in the browser.
+
+!images/error!
+
+Template files are hot-compiled and hot-reloaded too.
+
+h3. Connect a Java debugger
+
+If you run your application with the **debug** command you can then connect a Java debugger on port 8000.
+
+For example, using the netbeans debugger : 
+
+!images/screenshot_attach-debugger!
+
+p(note). **Continuing the discussion**
+ 
+Now that you've seen what a play application is, let's see how "the Router":routes works. The Router is in charge of translating incoming HTTP Requests into action calls.
+

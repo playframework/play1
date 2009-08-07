@@ -1,0 +1,191 @@
+h1. CRUD: Administration generator
+
+The CRUD module generates a fully usable web interface for your JPAModel objects.
+
+Let's see a simple example.
+
+h2. <a>Enable the CRUD module for the application</a>
+
+In the **/conf/application.conf** file, enable the CRUD module by adding this line : 
+
+bc. # The crud module
+module.crud=${play.path}/modules/crud
+
+h2. <a>Import default CRUD routes</a>
+
+In the **conf/routes** file, import the default module routes by adding this line :
+
+bc. # Import CRUD routes
+*      /admin              module:crud
+
+h2. <a>Create a User class</a>
+
+We will create a User class to start :
+
+bc. package models;
+ 
+import play.*;
+import play.db.jpa.*;
+import javax.persistence.*;
+import java.util.*;
+ 
+@Entity
+public class User extends JPAModel {
+ 	
+	public String name;
+	public String email;
+	public String address;
+ 	
+}
+
+h2. <a>Create the Users controller</a>
+
+Create a simple controller that just inherits the CRUD controller.
+
+bc. package controllers;
+ 
+public class Users extends CRUD {
+    
+}
+
+Now open "http://localhost:9000/admin":http://localhost:9000/admin and you should show the User admin area.
+
+!images/crud1!
+
+If you want to name the controller differently, with a name that ends with the model class with a final 's' (Whew!) then create the controller this way, using an annotation. (The example is clearer than its description). 
+
+bc. package controllers;
+ 
+@CRUD.For(User.class)
+public class AdminUsers extends CRUD {
+   
+}
+
+h2. <a>The User form</a>
+
+Click the **Add** button, and you should see the User form.
+
+!images/crud2!
+
+Now we can add some validation rules to the User class :
+
+bc. package models;
+ 
+import play.*;
+import play.db.jpa.*;
+import javax.persistence.*;
+import java.util.*;
+ 
+import play.data.validation.*;
+ 
+@Entity
+public class User extends JPAModel {
+ 	
+	@Required
+	@MinSize(8)
+	public String name;
+	
+	@Required
+	@Email
+	public String email;
+	
+	@Required
+	@MaxSize(1000)
+	public String address;
+ 
+    public String toString() {
+        return email;
+    }
+	
+}
+
+
+Refresh the User form and you will see that the validation is automatically applied.
+
+!images/crud3!
+
+h2. <a>Change the form label</a>
+
+Add these lines to the **conf/messages** file in your application :
+
+bc. name=Name
+email=Email address
+address=Postal address
+
+And refresh the User form.
+
+!images/crud4!
+
+h2. <a>Create a User and customize the list view</a>
+
+The default list view uses only one column containing the object toString() result.
+
+!images/crud5!
+
+To customize this view, we need to create the **/app/views/Users/list.html** template in the application.
+
+Open a shell, go the application directory and type :
+
+bc. play crud:ov Users/list
+
+This will copy the default CRUD **list.html** template to the **Users/list.html** template in your application, overwriting it if present.
+
+Edit this template like this :
+
+bc. #{extends 'CRUD/layout.html' /}
+ 
+<div id="crudList" class="${type.name}">
+	
+	<h2 id="crudListTitle">&{'crud.list.title', type.name}</h2>
+ 
+	<div id="crudListSearch">
+		#{crud.search /}
+	</div>
+ 
+	<div id="crudListTable">
+		#{crud.table fields:['email', 'name'] /}
+	</div>
+	
+	<div id="crudListPagination">
+		#{crud.pagination /}
+	</div>
+	
+	<p id="crudListAdd">
+		<a href="@{blank()}">&{'crud.add', type.modelName}</a>
+	</p>
+ 
+</div>
+
+and refresh the list.
+
+!images/crud6!
+
+
+h2. <a>Custom fields rendering : the crud.custom tag</a>
+
+You can go a bit further by customizing the way each field of your ''User'' entity is displayed in the list and form views.
+
+To customize a field, use the ''#{crud.custom}'' tag like this :
+
+bc. #{crud.table fields:['name', 'company']}
+ 
+   #{crud.custom 'company'}
+       <a href="@{Companies.show(object.company.id)}">${object.company.name}</a>
+   #{/crud.custom}
+ 
+#{/crud.table}
+
+You may also display additional columns or form inputs  by defining custom handlers :
+
+bc. #{crud.table fields:['name', 'company', 'edit']}
+ 
+   #{crud.custom 'company'}
+       <a href="@{Companies.show(object.company.id)}">${object.company.name}</a>
+   #{/crud.custom}
+ 
+   #{crud.custom 'edit'}
+       <a href="@{Persons.edit(object.id)}">Edit</a>
+   #{/crud.custom}
+ 
+#{/crud.table}
+

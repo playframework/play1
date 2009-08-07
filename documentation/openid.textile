@@ -1,0 +1,63 @@
+h1. Integrate with OpenID
+
+"OpenID":http://openid.net/|OpenID is an open and decentralized identity system. You can easily accept new users in your application without the need to keep specific user information. You just have to keep track of authorized users through their **OpenID**.
+
+h2. <a>A simple OpenID authentication example</a>
+
+This example provides a high-level view of how OpenID authentication can be used within a Play! application :
+
+* For each request check if the user is connected
+* If not, display a page where the user can submit his OpenID
+* Redirect the user to the OpenID provider
+* When the user comes back, get the verified OpenID and save it in the HTTP session.
+
+The OpenID functionality is provided by the **play.libs.OpenID** class and is build using [[http://code.google.com/p/openid4java/|OpenID4Java]].
+
+bc. @Before(unless={"login", "authenticate"})
+static void checkAuthenticated() {
+    if(!session.contains("user")) {
+        login();
+    }
+}
+ 
+public static void index() {
+    render("Hello %s !", session.get("user"));
+}
+     
+public static void login() {
+    render();
+}
+    
+public static void authenticate(String user) {
+    if(user != null) {
+        OpenID.verify(user); // will redirect the user
+    } else {
+        String verifiedUser = OpenID.getVerifiedID();
+        if(verifiedUser == null) {
+            flash.put("error", "Oops. Authentication has failed");
+            login();
+        } 
+        session.put("user", verifiedUser);
+        index();
+    }
+}
+
+And the **login.html** template :
+
+bc. #{if flash.error}
+<h1>${flash.error}</h1>
+#{/if}
+ 
+<form action="@{Application.authenticate}" method="POST">
+    <label for="user">What's your OpenID ?</label>
+    <input type="text" name="user" id="user" />
+    <input type="submit" value="login ..." />
+</form>
+</code>
+
+And finally the routes definitions : 
+
+bc. GET   /               Application.index
+GET   /login          Application.login
+*     /authenticate   Application.authenticate
+

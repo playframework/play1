@@ -1,0 +1,110 @@
+h1. Five cool things you can do with play
+
+Five examples to show the philosophy behind the play framework.
+
+h2. <a>1. Bind an HTTP parameter to a Java method parameter</a>
+
+Retrieving HTTP parameters from Java code is really simple with play. Just declare method parameters with the same name as the HTTP parameters.
+
+For example, with this request :
+
+bc. /articles/archive?date=08/01/08&page=2
+
+You can retrieve the **date** and **page** parameters by declaring them as Java method parameters :
+
+bc. public static void archive(Date date, Integer page) {
+    List<Article> articles = Articles.fromArchive(date, page);
+    render(articles);
+}
+
+Smart binding also functions **with any classes.**
+
+bc. public class Person {
+    String name;
+    Integer age;
+}
+
+A simplistic controller action to add a person may looks like this :
+
+bc. public static void add(Person p) {
+    p.save();
+}
+
+The HTML form defines fields with composite names :  
+
+bc. <form action="/Directory/add" >
+    Name: <input type="text" name="p.name" />
+    Age: <input type="text" name="p.age" />
+</form>
+
+
+h2. <a>2. Redirect to an action by simply calling the corresponding Java method</a>
+
+There is no equivalent to the Java Servlet **forward** command with play. But redirecting to another action is really simple. Just call the corresponding Java method and play will generate the correct HTTP Redirect response.
+
+bc. public static void show(Long id) {
+    Article article = Article.findById(id);
+    render(article);
+}
+ 
+public static void edit(Long id, String title) {
+    Article article = Article.findById(id);
+    article.title = title;
+    article.save();
+    show(id);
+}
+
+
+Note how at the end of the edit action, we redirect to the show action.
+
+In any template you can use the equivalent syntax to generate the link :
+
+bc. <a href="@{Article.show(article.id)}">${article.title}</a>
+
+That will generate HTML like :
+
+bc. <a href="/articles/15">My new article</a>
+
+
+h2. <a>Don't Repeat Yourself when passing Java objects to templates</a>
+
+In most Java frameworks, to pass some Java objects to the template system you need to write something like :
+
+bc. Article article = Article.findById(id);
+User user = User.getConnected();
+Map<String, Object> model = new HashMap<String,Object>();
+model.put("article", article);
+model.put("user", user);
+render(model);
+
+When, with Play you can just write :
+
+bc. Article article = Article.findById(id);
+User user = User.getConnected();
+render(article, user);
+
+And retrieve objects from their Java local name in the template. That saves a lot of useless lines of code ...
+
+h2. <a>4. Straightforward file upload management</a>
+
+File upload management is so simple with play.
+
+The HTML form :
+
+bc. <form action="@{Article.uploadPhoto()}" method="POST" enctype="multipart/form-data">
+    <input type="text" name="title" />
+    <input type="file" id="photo" name="photo" />
+    <input type="submit" value="Send it ..." />
+</form>
+
+And the Java code : 
+
+bc. public static void uploadPhoto(String title, File photo) {
+   ...
+}
+
+How could it be easier ?
+
+h2. <a>5. Distribute an application to several JVMs without configuring anything</a>
+
+Since the server is totally stateless, you can just start the same application on several servers and load balance between applications at the HTTP level. No need to set up a complex application server cluster or something similar.

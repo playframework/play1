@@ -1,0 +1,116 @@
+h1. Put your application in production
+
+Here some simple tips to optimize your application for production.
+
+h2. Configure your application.conf for production
+
+First off, the best way to specify production mode is to give a specific ID to your production framework. Let's pick **production** as an example. Refer "manage application.conf in several environments":ids to see how.
+
+h3. Set the framework in prod mode:
+
+bc. %production.application.mode=prod
+
+In this mode, the framework will pre-compile all Java sources and templates. If an error is found at this step, the application will not start. The sources modifications will not be hot reloaded.
+
+h3. Define a real database:
+
+If you have used a development database (either **db=mem** or **db=fs**), you should configure a more robust database engine :
+
+bc. %production.db.url=jdbc:mysql://localhost/prod
+%production.db.driver=com.mysql.jdbc.Driver
+%production.db.user=root
+%production.db.pass=1515312
+
+h3. Disable JPA automatic schema update:
+
+If you have used the automatic schema update feature provided by Hibernate, you should disable this feature for production. 
+
+For your production server, it's usually a bad idea to let Hibernate automatically ALTER your productions schema and data ... 
+
+The initial deployment is potentially a different issue. In this case only specify:
+
+bc. %production.jpa.ddl=create
+
+h3. Define a secure secret key:
+
+The play secret key is used to secure cryptographic functions, like the session signature. Your application must keep this key very secret.
+
+bc.%production.application.secret=c12d1c59af499d20f4955d07255ed8ea333
+
+You can use the **play secret** command to generate a new secure and random key (At least on 'a real' OS). If you plan to distribute your application to several servers, remember to use the **same key** for all application instances !
+
+h3. Enable memcached
+
+If your application use Cache, you could enable a real memcached daemon. 
+
+bc. %production.memcached=enabled
+%production.memcached.host=127.0.0.1:11211
+
+
+h2. <a>Configure logging</a>
+
+For production it's a good idea to use rolling log files. Do not send log to the Console, since they will be written in the **logs/system.out** file and it will grow without bound!
+
+Create a custom **log4j.properties** in the **conf/**, directory :
+
+bc. log4j.rootLogger=ERROR, Rolling
+ 
+log4j.logger.play=INFO
+ 
+# Rolling files
+log4j.appender.Rolling=org.apache.log4j.RollingFileAppender
+log4j.appender.Rolling.File=application.log
+log4j.appender.Rolling.MaxFileSize=1MB
+log4j.appender.Rolling.MaxBackupIndex=100
+log4j.appender.Rolling.layout=org.apache.log4j.PatternLayout
+log4j.appender.Rolling.layout.ConversionPattern=%d{ABSOLUTE} %-5p ~ %m%n
+
+h2. Setup a front-end HTTP server
+
+You can easily deploy your application as a stand-alone server by setting the application HTTP port to **80** :
+
+bc. %production.http.port=80
+
+But if you plan to host several applications in the same server or load balance several instances of your application for scalability or fault tolerance, you can use a front-end HTTP server.
+
+**Note that using a front-end HTTP server will never give you better performance than using play server directly !**
+
+This example shows you how to configure [[http://www.lighttpd.net/|lighttpd]] as a front-end web server. Note that you can do the same with apache, but if you only need virtual hosting or load balancing, lighttpd is a very good choice and much easier to configure !
+
+The **/etc/lighttpd/lighttpd.conf** file should define things like this :
+
+bc. server.modules = (
+      "mod_access",
+      "mod_proxy",
+      "mod_accesslog" 
+)
+...
+$HTTP["host"] =~ "www.myapp.com" {
+    proxy.balance = "round-robin" proxy.server = ( "/" =>
+        ( ( "host" => "127.0.0.1", "port" => 9000 ) ) )
+}
+ 
+$HTTP["host"] =~ "www.loadbalancedapp.com" {
+    proxy.balance = "round-robin" proxy.server = ( "/" => ( 
+          ( "host" => "127.0.0.1", "port" => 9000 ), 
+          ( "host" => "127.0.0.1", "port" => 9001 ) ) 
+    )
+}
+
+
+h3. Advanced proxy settings
+
+When using a HTTP frontal server, requests adresses are seen as coming from the http server. In a usual setup, where you both have the play app and the proxy running on the same machine, the play app will see the requests coming from 127.0.0.1.
+
+Proxy servers can add a specific header to request to tell the proxied application where the request came from. Most webservers will add a X-Forwarded-For header with the remot client ip address as first argument. If you enable the forward support in your play app configuration:
+
+bc. XForwardedSupport=127.0.0.1,10.0.0.25
+
+Play will change the request.remoteAddress from the ip of the proxy with the ip of the client. You have to list the ip addresses of your proxy servers for this to work.
+
+However, the host header is untouched, it'll remain issued by the proxy. If you use apache 2.x, you can add a directive like: 
+
+bc. ProxyPreserveHost on
+
+The host: header will be the original host request header issued by the client. By combining theses two techniques, your app is like directly exposed.
+

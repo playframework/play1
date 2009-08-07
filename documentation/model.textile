@@ -1,0 +1,197 @@
+h1. The domain object model
+
+The model has a central position in a play application. It is the domain-specific representation of the information on which the application operates. 
+
+Martin fowler defines it as :
+
+bq. Responsible for representing concepts of the business, information about the business situation, and business rules. State that reflects the business situation is controlled and used here, even though the technical details of storing it are delegated to the infrastructure. This layer is the heart of business software.
+
+A common Java anti-pattern is to keep the model as a set of simple JavaBeans and put the application logic back into a "service" layer which operates on the model objects.
+
+Martin fowler again has named this anti-pattern "Anemic object model":http://www.martinfowler.com/bliki/AnemicDomainModel.html: 
+
+bq. The basic symptom of an Anemic Domain Model is that at first blush it looks like the real thing. There are objects, many named after the nouns in the domain space, and these objects are connected with the rich relationships and structure that true domain models have. The catch comes when you look at the behavior, and you realize that there is hardly any behavior on these objects, making them little more than bags of getters and setters. Indeed often these models come with design rules that say that you are not to put any domain logic in the the domain objects. Instead there are a set of service objects which capture all the domain logic. These services live on top of the domain model and use the domain model for data.
+ 
+The fundamental horror of this anti-pattern is that it's so contrary to the basic idea of object-oriented design; which is to combine data and process together. The anemic domain model is really just a procedural style design, exactly the kind of thing that object bigots like me (and Eric) have been fighting since our early days in Smalltalk. What's worse, many people think that anemic objects are real objects, and thus completely miss the point of what object-oriented design is all about.
+
+h2. <a>Properties simulation</a>
+
+If you take a look at Play samples, you will often see that classes declare public variables. Now if you’re a Java developer with any experience at all, warning sirens are probably clanging like mad at the sight of a public variable. In Java (as in other object-oriented languages), best practice says to make all fields private and provide accessors and mutators.  This is to promote encapsulation, a concept critical to object oriented design.
+
+Java has no truly built-in property definition system. It use a convention named JavaBeans : a property on a Java object is defined by a couple of getXxx/setXxx methods. If the property is read-only there is only a getter.
+
+Although the system works well, it's very tedious to write. For each property you have to declare a private variable and write two methods. Thus, most of time the getter and setter implementation is always the same :
+
+bc. private String name;
+ 
+public String getName() {
+    return name;
+}
+ 
+public void setName(String value) {
+    name = value;
+}
+
+The Model portion of the play framework automatically generates this pattern while keeping your code clean. Effectively, all public variables become instance properties. The convention is that any **public**, **non static**, **non final** field of a class is seen as a property.
+
+For example, when you define a class like this :
+
+bc. public class Product {
+ 
+    public String name;
+    public Integer price;
+ 
+}
+
+The loaded class will be : 
+
+bc. public class Product {
+ 
+    public String name;
+    public Integer price;
+ 
+    public String getName() {
+        return name;
+    }
+ 
+    public void setName(String name) {
+        this.name = name;
+    }
+ 
+    public Integer getPrice() {
+        return price;
+    }
+ 
+    public void setPrice(Integer name) {
+        this.price = price;
+    }
+ 
+}
+
+Then when you want to access a property you can just write :
+
+bc. product.name = "My product";
+product.price = 58;
+
+Which is translated at load time to : 
+
+bc. product.setName("My product");
+product.setPrice(58);
+
+p(note). **Warning !**
+ 
+You can't directly use getter and setter methods to access properties if you rely on automatic generation. These methods are generated at runtime. So, if you reference them in code you write, the compiler won't find the methods and will generate an error.
+
+Of course you can define the getter and setter methods yourself. If a method exists play will use the existing accessors.
+
+So to protect the value of the price property of the Product class, you can write : 
+
+bc. public class Product {
+ 
+    public String name;
+    public Integer price;
+ 
+    public void setPrice(Integer price) {
+        if(price<0) {
+            throw new IllegalArgumentException("Price can't be negative !");
+        }
+        this.price = price;
+    }
+ 
+}
+
+Then if you try to set a property to a negative value an exception will be thrown :
+
+bc. product.price = -10: // Oops ! IllegalArgumentException
+
+Because the enhanced class follow JavaBeans convention, when you use your object with a library which expects a JavaBean it will work perfectly !
+
+h2. <a>Setup a database to persist your model objects</a>
+
+Most of the time you will need to save model object data permanently. The most natural way is to save this data into a database. 
+
+During development, you can quickly set up an embedded database either in memory or save it in a sub-directory within your application.
+
+To start an in-memory HSQLDB database instance, just add this line to your **conf/application.conf** file : 
+
+bc. db=mem
+
+If your prefer to save the database in the file system use :
+
+bc. db=fs
+
+You can also connect to any JDBC compliant database. Just add the driver library to your **lib/** directory and define JDBC properties in the application.conf : 
+
+bc. db.url=jdbc:mysql://localhost/test
+db.driver=com.mysql.jdbc.Driver
+db.user=root
+db.pass=
+
+From your code your can then obtain a **java.sql.Connection** from the **play.db.DB** and use it in the standard way.
+
+bc. Connection conn = DB.getConnection();
+conn.createStatement().execute("select * from products");
+
+h2. <a>Persist you object model with Hibernate</a>
+
+You can use Hibernate (through JPA) to persist your Java objects in the Database automatically.
+
+When you define JPA entities by adding **@Entity** annotations to any Java object, play will automatically start a JPA entity manager.
+
+bc. @Entity
+public class Product {
+ 
+    public String name;
+    public Integer price;
+ 
+}
+
+You can then obtain the EntityManager from the **play.db.jpa.JPA** object :
+
+bc. EntityManager em = JPA.getEntityManager();
+em.persist(product);
+em.createQuery("from Product where price > 50").getResultList();
+
+play provides a nice Superclass to help you to deal with JPA. Just extend **play.db.jpa.JPAModel**.
+
+bc. @Entity
+public class Product extends JPAModel {
+ 
+    public String name;
+    public Integer price;
+ 
+}
+
+And then manipulate the Product object using simple methods on the Product instances :
+
+bc. Product.findBy("price > ?1", 50).all();
+Product product = Product.findById(2L);
+product.save();
+product.delete();
+
+h2. <a>Keep the model stateless</a>
+
+play is designed to operate in a 'share nothing' architecture. The idea is to keep the application completely stateless. By doing this you will allow your application to run on as many server nodes as needed at the same time.
+
+What are the common traps you should avoid to keep the model stateless ? **Do not store any object on the Java heap for multiple requests**
+
+h4. When you want to keep data across multiple requests you have several choices :
+
+1. If data is small and simple enough, store it into the flash or the session scope. 
+
+However thes scopes are limited to about 4Ko each, and allow only String data.
+
+2. Save the data permanently into a durable storage (like a database). For example if you need to create an object with a "wizard" that spans multiple requests : 
+
+* Initialize and persist the object into the database at the first request.
+* Save the the id of the newly created object into the flash scope.
+* During successive requests, retrieve the object from the database using the object id, update it, and save it again. 
+
+3. Save the data temporarily into a transient storage (such as the Cache). For example if you need to create an object with a "wizard" that spans multiple requests :
+
+* Initialize the object and save it into the Cache at the first request.
+* Save the key of the newly created object into the flash scope
+* During successive requests, retrieve the object from the cache (with the correct key), update it, and save it into the cache again. 
+* At the end of the last request in the chain, save the object permanently (into the database for example)
+
+Cache is not reliable storage but if you put an object in the cache you should retrieve it. Depending on your requirements, the Cache can be a very good choice and a good replacement for the Java Servlet session.

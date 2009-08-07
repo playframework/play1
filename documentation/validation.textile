@@ -1,0 +1,234 @@
+h1. Validating with play
+
+Validations ensure that the data has certain values or meet specific requirements. You can use validation to verify that your models are correct before saving them to the database, or use them directly on HTTP parameters to validate a simple form.
+
+h2. <a>How does it work ?</a>
+
+Each request has it own **Validation** object which collects errors. From a controller, you access it directly using the **validation** variable. You can still access a subset of the API using static methods of the **play.data.validation.Validation** class.
+
+The validation object maintains a collection of **play.data.validation.Error** objects. Each error has two properties :
+
+* The **key**. This helps you to determine which data element caused the error. The key value can be set arbitrarily but when play generates errors, it uses default conventions that follow the Java variables names.
+
+* The **message**. This contains the textual description of the error. The message can be a plain message or refer to a key from a message bundle (typically for internationalization support).
+
+Let's see how to validate a simple HTTP parameter :
+
+bc. public static void hello(String name) {
+     validation.required(name);
+     ...
+}
+
+This code checks that the name variable is correctly set. If not the corresponding error is added to the current errors collection.
+
+You can repeat this operation for each validation you need :
+
+bc. public static void hello(String name, Integer age) {
+     validation.required(name);
+     validation.required(age);
+     validation.min(age, 0);
+     ...
+}
+
+h2. <a>Retrieving error messages</a>
+
+At the end of the validation you can check if any errors have been created and display them :
+
+bc. public static void hello(String name, Integer age) {
+     validation.required(name);
+     validation.required(age);
+     validation.min(age, 0);
+     
+     if(validation.hasErrors()) {
+         for(Error error : validation.errors) {
+             System.out.println(error.message());
+         }
+     }
+}
+
+This should display something like (assuming that name and age are null):
+
+bc. name is required
+age is required
+
+Default messages are keys that refer to the message bundle. So in the **conf/messages** file you will have :
+
+bc. validation.required=%s is required
+
+You can change this default message and override it for each language of the application. The **%s** placeholder will be replaced by the error key. You can override using the **error.message(String field)** method.
+
+For example : 
+
+bc. Error error = validation.required(name).error;
+if(error != null) {
+    System.out.println(error.message("The name"));
+}
+
+You can also specify a different message for each check :
+
+bc. Error error = validation.required(name).message("Fill the name !").error;
+if(error != null) {
+    System.out.println(error.message());
+}
+
+h2. <a>Displaying errors in the template</a>
+
+In most cases you want to display the error messages in the view template. You can access them in the template using the **errors** object. Some tags help you to display the errors :
+
+Let's see a sample :
+
+bc. public static void hello(String name, Integer age) {
+     validation.required(name);
+     validation.required(age);
+     validation.min(age, 0);
+     render(name, age);
+}
+
+and now the template :
+
+bc. #{ifErrors}
+ 
+   <h1>Oops ...</h1>
+ 
+   #{errors}
+       <li>${error}</li>
+   #{/errors}
+ 
+#{/ifErrors}
+#{else}
+ 
+   Hello ${name}, you are ${age}.
+ 
+#{/else}
+
+But in a real application you want to redisplay the original form. So you will have two actions: one to display the form and another one to handle the POST. 
+
+Of course the validation will occur in the second action and if some error occurs you will have to redirect to the first action. In this case you need a special trick to keep your errors during the redirect. Use the **validation.keep()** method. This will save the errors collection for the next action.
+
+Let's see a real sample :
+
+bc. public class Application extends Controller {
+ 
+   public static void index() {
+      render();
+   }
+ 
+   public static void hello(String name, Integer age) {
+      validation.required(name);
+      validation.required(age);
+      validation.min(age, 0);
+      if(validation.hasErrors()) {
+          params.flash(); // add http parameters to the flash scope
+          validation.keep(); // keep the errors for the next request
+          index();
+      }
+      render(name, age);
+   }
+ 
+}
+
+And the **view/Application/index.html** template :
+
+bc. #{ifErrors}
+   <h1>Oops ...</h1>
+ 
+   #{errors}
+       <li>${error}</li>
+   #{/errors}
+#{/ifErrors}
+ 
+#{form @Application.hello}
+   <div>
+      Name : <input type="text" name="name" value="${flash.name}" />
+   </div>
+   <div>
+      Age : <input type="text" name="age" value="${flash.age}" /> 
+   </div>
+   <div>
+      <input type="submit" value="Say hello" /> 
+   </div>
+#{/form}
+
+You can create a better user experience by displaying each error message next to the field that generated the error :
+
+bc. #{ifErrors}
+   <h1>Oops ...</h1>
+#{/ifErrors}
+ 
+#{form @Application.hello}
+   <div>
+      Name : <input type="text" name="name" value="${flash.name}" />
+      <span class="error">#{error 'name' /}</span>
+   </div>
+   <div>
+      Age : <input type="text" name="age" value="${flash.age}" /> 
+      <span class="error">#{error 'age' /}</span>
+   </div>
+   <div>
+      <input type="submit" value="Say hello" /> 
+   </div>
+#{/form}
+
+
+h2. <a>Using annotations</a>
+
+You can use annotations to do the same thing :
+
+bc. public static void hello(@Required String name, @Required @Min(0) Integer age) {
+   if(validation.hasErrors()) {
+       params.flash(); // add http parameters to the flash scope
+       validation.keep(); // keep the errors for the next request
+       index();
+   }
+   render(name, age);
+}
+
+h2. <a>Validating objects</a>
+
+Using annotations you can easily add constraints to your model objects. Let's rewrite the previous example using a User class.
+
+First the **User** class : 
+
+bc. package models;
+ 
+public class User {
+    
+    @Required
+    public String name;
+ 
+    @Required
+    @Min(0)
+    public Integer age;
+ 
+}
+
+Then the modified **hello** action : 
+
+bc. public static void hello(@Valid User user) {
+   if(validation.hasErrors()) {
+       params.flash(); // add http parameters to the flash scope
+       validation.keep(); // keep the errors for the next request
+       index();
+   }
+   render(name, age);
+}
+
+And finally the modified form :
+
+bc. #{ifErrors}
+   <h1>Oops ...</h1>
+#{/ifErrors}
+ 
+#{form @Application.hello}
+   <div>
+      Name : <input type="text" name="user.name" value="${flash['user.name']}" />
+      <span class="error">#{error 'user.name' /}</span>
+   </div>
+   <div>
+      Age : <input type="text" name="user.age" value="${flash['user.age']}" /> 
+      <span class="error">#{error 'user.age' /}</span>
+   </div>
+   <div>
+      <input type="submit" value="Say hello" /> 
+   </div>
+#{/form}

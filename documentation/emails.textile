@@ -1,0 +1,98 @@
+h1. Sending emails with play
+
+Use the play.libs.Mail utility to send emails very easily: 
+
+bc. Mail.send("sender@zenexity.fr","recipient@zenexity.fr","Subject","Message");
+
+h2. <a>Mail and MVC integration</a>
+
+You may send complex, variable mail messages using the standard templates mecanism and syntax.
+
+First,  define a **Mailer notifier** in your application. Your mailer notifier must subclass **play.mvc.Mailer** and be part of the **notifiers** package. 
+
+ach public static method will be a email sender, in a similar manner as actions for a MVC controller.
+
+For example :
+
+bc. package notifiers;
+ 
+import play.*;
+import play.mvc.*;
+import java.util.*;
+ 
+public class Mails extends Mailer {
+ 
+   public static void welcome(User user) {
+      setSubject("Welcome %s", user.name);
+      addRecipient(user.email);
+      addAttachment(Play.getFile("rules.pdf"));
+      send(user);
+   }
+ 
+   public static void lostPassword(User user) {
+      String newpassword = user.password;
+      setSubject("Your password has been reset");
+      addRecipient(user.email);
+      send(user, newpassword);
+   }
+ 
+}
+
+The send call will render the app/views/Mails/welcome.txt template as the body of the email message.
+
+bc. Welcome ${user.name},
+...
+
+Template for the lostPassword method could look like this one:
+
+app/views/Mails/lostPassword.txt
+
+bc. Hello ${user.name},
+ 
+Your new password is ${newpassword}.
+ 
+
+h2. <a>SMTP configuration</a>
+
+First, you need to define the smtp server to use
+
+bc. mail.smtp.host=smtp.taldius.net
+
+If your SMTP server requires authentication, use the following properties: 
+
+bc. mail.smtp.user=jfp
+mail.smtp.pass=topsecret
+
+h3. Channel & ports
+
+If you need to send the mail over an encrypted channel, you have two ways to do so. You can use a clear connection on port 25 that will switch to SSL/TLS, if your server supports the **starttls** command (see: rfc 2487). In that case, you tell play to use this mechanism by adding this configuration option:
+
+bc. mail.smtp.channel=starttls
+
+Your server may also provide a smtp-over-ssl (smtps) connector, that is a SSL socket listening on port 465. In that case, you tell play to use this setup using the configuration option :
+
+bc. mail.smtp.channel=ssl
+
+h2. <a>More</a>
+
+Under the hood, play uses JavaMail to perform the actual smtp transactions. If you need to see what's going on, try:
+
+bc. mail.debug=true
+
+When using ssl connections with JavaMail, the default ssl behaviour is to drop connection if the remote server certificate is not signed by a root certificate (like a self signed certificate). Play's default behaviour is to skip such a check. You can control this using the following property:
+
+bc. mail.smtp.socketFactory.class
+
+If you need to connect to servers using non-standard ports, the following property will override the defaults:
+
+bc. mail.smtp.port=2500
+
+h2. <a>Using Gmail</a>
+
+To use gmail's servers, use the following kind of configuration: 
+
+bc. mail.smtp.host=smtp.gmail.com
+mail.smtp.user=yourGmailLogin
+mail.smtp.pass=yourGmailPassword
+mail.smtp.channel=ssl
+

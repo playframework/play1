@@ -1,0 +1,124 @@
+h1. Play framework documentation
+
+Welcome to the play framework documentation. These docs are for the *1.0 release* and may be significantly different from previous versions. 
+
+p(note). This is a work in progress, feel free to ask any question not covered into these documents or report any error. You can contribute to the documentation the "same way you can contribute code":/code.
+
+
+h2. <a name="started">Getting started</a>
+
+Your first steps with Play and your first 5 minutes fun.
+
+# "Play framework overview":overview
+# "Watch the video presentation":video
+# "Installation guide":install
+# "Setting up your preferred IDE":ide
+# "Five cool things you can do with Play":5things
+# "The Hello World app: create your first application":helloworld
+
+
+h2. <a name="guide">Play guide; a real world app step by step</a>
+
+Each chapter is meant to last about one hour, and will be the occasion to learn play by coding yet another blog engine, from start to finish.
+
+# "Starting up the project":guide1
+# "A first iteration for the data model":guide2
+# "Building the first screen":guide3
+# "The comments page":guide4
+# "Setting up a Captcha":guide5
+# "Adding tags support":guide6
+# "A basic admin area using CRUD":guide7
+# "Adding security":guide8
+# "Better content using Textile":guide9
+# "Creating a custom editor area":guide10
+# "The media library":guide11
+# "More fun with the Flickr API":guide12
+# "Sending emails notifications":guide13
+# "A search engine with asynchronous indexing":guide14
+# "Preparing for production":guide15
+
+h2. <a name="manual">The essential documentation</a>
+
+Everything you need to know about Play (and then some).
+
+# "Main concepts":main
+## "The MVC application model":main#mvc
+## "A request life cycle":main#request
+## "Application layout & organization":main#application
+## "Development lifecycle":main#lifecycle
+# "HTTP routing":routes
+## "The routes file syntax":routes#syntax
+## "Routes priority":routes#priority
+## "Serving static resources":routes#static
+## "Reverse routing : generate some URL":routing#reverse
+# "Controllers":controllers
+## "A Controller overview":controllers#overview
+## "Retrieve HTTP parameters":controllers#params
+## "Return a result":controllers#result
+## "Actions chaining":controllers#chaining
+## "Interceptions":controllers#interceptions
+## "Session and Flash scopes":controllers#session
+# "The template engine":templates
+## "Template syntax":templates#syntax
+## "Template inheritance":templates#inheritance
+## "Create tags":templates#tags
+## "Extending the templates language":template#extensions
+## "Implicit objects":template#implicits
+# "The domain object model":model
+## "Properties simulation":model#properties
+## "Setup a database to persist your model objects":model#database
+## "Persist you object model with Hibernate":model#hibernate
+## "The stateless model":model#stateless
+# "Jobs":jobs
+## "Concepts":jobs#concepts
+## "Scheduling":jobs#scheduling
+# "Testing the application":test
+## "Writing tests":test#writing
+## "Running the tests":test#running
+## "Fixtures":test#fixtures
+## "Continuous integration":test#continus
+
+
+h2. <a name="cook">Cookbook</a>
+
+Tips about everything and anything.
+
+# "Data validation":validation
+# "Application modularization":modules
+# "Configure logs":logs
+# "Manage application.conf in several environments":ids
+# "Setting up i18n":i18n
+# "Use cache and configure Memcached":cache
+# "Put your application in production":production
+# "Sending emails":emails
+
+
+h2. <a name="modules">Built-in modules</a>
+
+Other batteries included.
+
+# "CRUD generator":crud
+# "Security":secure
+# "OpenID integration":openid
+# "Spring support":spring
+# "Extended CSS":ecss
+# "Google App Engine module":gae
+# "Google Web Toolkit module":gwt
+# "The zookeeper":zookeeper
+# "Bespin editor":bespin
+
+
+h2. <a name="references">References</a>
+
+Extended references for day to day hacking.
+
+# "Download the precious cheat sheet (PDF)":w
+# "Browse API documentation":w
+# "Template tags and extensions reference":w
+
+
+
+
+
+
+

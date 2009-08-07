@@ -439,6 +439,7 @@ public class Play {
      * Enable found plugins
      */
     public static void loadPlugins() {
+        Logger.trace("Loading plugins");
         // Play! plugings
         Enumeration<URL> urls = null;
         try {
@@ -447,12 +448,14 @@ public class Play {
         }
         while (urls != null && urls.hasMoreElements()) {
             URL url = urls.nextElement();
+            Logger.trace("Found one plugins descriptor, %s", url);
             try {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
                 String line = null;
                 while ((line = reader.readLine()) != null) {
                     String[] infos = line.split(":");
                     PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(infos[1]).newInstance();
+                    Logger.trace("Loaded plugin %s", plugin);
                     plugin.index = Integer.parseInt(infos[0]);
                     plugins.add(plugin);
                 }
@@ -524,6 +527,9 @@ public class Play {
         if (Play.id.equals("test")) {
             addModule("test-runner", new File(Play.frameworkPath, "modules/test-runner"));
         }
+        if(Play.mode == Mode.DEV) {
+            addModule("_docviewer", new File(Play.frameworkPath, "modules/docviewer"));
+        }
     }
 
     /**
@@ -543,7 +549,9 @@ public class Play {
             modulesRoutes.put(name, root.child("conf/routes"));
         }
         roots.add(root);
-        Logger.info("Module %s is available (%s)", name, path.getAbsolutePath());
+        if(!name.startsWith("_")) {
+            Logger.info("Module %s is available (%s)", name, path.getAbsolutePath());
+        }
     }
 
     /**

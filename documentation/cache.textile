@@ -1,0 +1,106 @@
+h1. Use cache
+
+To create highly performant systems, you sometimes need to cache data. play has a cache library intended to be used with "Memached":http://www.danga.com/memcached/.
+
+If you don't configure memcached, play will use a simple implementation which caches data in the JVM heap.  Caching data in the JVM application breaks the "share nothing" assumption made by play : you can't start your application using several servers, and expect the application to behave consistently. Each application instance will have a different copy of the data.
+
+It is important to understand that the cache contract is clear : even if you have put some data in a cache, you can't expect the data to remain there forever. In fact you shouldn't. A cache is a fast, but values expire, and the cache generally exists only in memory (without persistent backup). 
+
+So the best way to use the cache is to repopulate the cache if it doesn't have what you expect :
+
+bc. public static void allProducts() {
+    List<Product> products = Cache.get("products", List.class);
+    if(products == null) {
+        products = Product.findAll();
+        Cache.set("products", products, "30mn");
+    }
+    render(products);
+}
+
+h2. <a>The Cache API</a>
+
+The cache API is provided by the **play.cache.Cache** class. This class contains the set of methods to set, replace, and get data from the cache. Refer to the memcached documentation to understand the exact significance of each method.
+
+Some examples : 
+
+bc. public static void showProduct(String id) {
+    Product product = Cache.get(id, Product.class);
+    if(product == null) {
+        product = Product.findById(id);
+        Cache.set("product_"+id, product, "30mn");
+    }
+    render(product);
+}
+ 
+public static void addProduct(String name, int price) {
+    Product product = new Product(name, price);
+    product.save();
+    showProduct(id);
+}
+ 
+public static void editProduct(String id, String name, int price) {
+    Product product = Product.findById(id);
+    product.name = name;
+    product.price = price;
+    Cache.set("product_"+id, product, "30mn");
+    showProduct(id);
+}
+ 
+public static void deleteProduct(String id) {
+    Product product = Product.findById(id);
+    product.delete();
+    Cache.delete("product_"+id);
+    allProducts();
+}
+
+Some methods start with the **safe** prefix - e.g. **safeDelete**, **safeSet**. The standard methods are non-blocking. That means that when you issue the call :
+
+bc. Cache.delete("product_"+id);
+
+The **delete** method will return immediately and will not wait until the cached object is actually deleted. So if an error occurs - e.g. an IO error - it is possible than the object will not have been deleted.
+
+If it's important to ensure that the object is truly deleted before continuing, then you can use the **safeDelete** method : 
+
+bc. Cache.safeDelete("product_"+id);
+
+This method is blocking and returns a boolean value which indicates whether he object has really been deleted. So the full pattern that ensures an item is deleted from cache is : 
+
+bc. if(!Cache.safeDelete("product_"+id)) {
+    throw new Exception("Oops, the product has not been removed from cache");
+}
+...
+
+Note that being since these are blocking call, **safe*** methods will slow your applications. So use them only if needed.
+
+h2. <a>Don't use the Session as a cache!</a>
+
+If you come from a framework which uses an in memory Session implementation, you can be frustrated to see that play allow only a small set of String data to be saved in the HTTP Session. But this is much better because a Session is not the place to cache your application data ! 
+
+So if you have been accustomed to doing things similar to :
+
+bc. httpServletRequest.getSession().put("userProducts", products);
+...
+// and then in subsequent requests
+products = (List<Product>)httpServletRequest.getSession().get("userProducts");
+
+In play you achieve the same effect a little differently. We think it's a better approach :
+
+bc. Cache.put(session.getId(), products);
+...
+// and then in subsequent requests
+List<Product> products = Cache.get(session.getId(), List.class)
+
+Here we have used an unique uuid to keep unique information in the Cache for each user. Remember that, unlike a session object, the cache in not bound to any particular User !
+
+h2. <a>Configure memcached</a>
+
+When you want to enable a real memcached implementation, enable memcached and define the daemon address in your **application.conf** :
+
+bc. memcached=enabled
+memcached.host=127.0.0.1:11211
+
+You can connect to a distributed cache by specifying multiple daemon addresses : 
+
+bc. memcached=enabled
+memcached.1.host=127.0.0.1:11211
+memcached.2.host=127.0.0.1:11212

@@ -1,0 +1,89 @@
+h1. Installation guide
+
+
+h2. <a>Prerequisites</a>
+
+To run the play framework, you will need "Java 5 or later":http:java.sun.com. If you wish to build play from source, you will need the "Bazaar source control client":http:bazaar-vcs.org/ to fetch the source code and "Ant":http:ant.apache.org/ to build it.
+
+
+h2. <a>Download Binary package</a>
+
+Download the latest "play binary package":http:www.playframework.org/download and extract the archive. Add the framework installation directory to your system PATH. If you're on UNIX, make sure that the _play_ script is runnable (otherwise simply do a **chmod +x play**). That's all.
+
+p(note). *Tip*
+ 
+If you need to rebuild the framework for whatever reason, cd into the *$PLAY_HOME/framework* directory and run *ant*.
+
+
+h2. <a>Build from latest sources</a>
+
+To benefit from the latest improvements and bug fixes, you may want to compile play from sources. You'll need a "Bazaar client":http:bazaar-vcs.org/Download to fetch the sources and "Ant":http:ant.apache.org/ to build the framework.
+
+From the command line :
+
+bc. # bzr checkout lp:play
+# cd play/framework
+# ant
+
+Play! is ready to use.
+
+p(note). lp:play aliases to http:bazaar.launchpad.net/%7Eplay-developers/play/stable3-hacks/
+
+
+h2. <a>Use the play command</a>
+
+When the framework is correctly installed, open a shell and execute *play*. 
+
+bc. # play
+
+You should see the play help :
+
+!images/help!
+
+
+h3. Arguments
+
+The play command line tool takes two arguments :
+
+bc. # play command path
+
+where command is one of the following :
+
+* **new** : Create a new application in the path directory.
+* **run** : Start an existing application in the path directory.
+* **start** : Start an existing application in the path directory. (start in background)
+* **stop** : Stop an existing application in the path directory. (if it was started in background)
+* **restart** : Restart an existing application in the path directory. (start in background)
+* **pid** : Display the PID of the currently running application in path. (if it was started in background)
+* **out** : Display the system.out file of the application in the path directory
+* **war** : Export the application in a standalone WAR package
+* **test** : Run the application in test mode
+* **auto-test**: Run the application in test mode and automatically launch all tests
+* **eclipsify** : Generation configuration files for eclipse IDE
+* **netbeansify** : Generation configuration files for netbeans IDE
+* **secret** : Generate a new secret key for the application.
+
+p(note). **Note**
+ 
+If the path argument is omitted, the current directory is used as default path.
+
+
+h2. <a>Create a new application</a>
+
+Use the **new** command to create a new application. You must give a non existant path where the application will be created.
+
+bc. # play new myApp
+
+!images/empty!
+
+Will create a new application. Start it with : 
+
+bc. # play run myApp
+
+You can then open a browser at "http:localhost:9000":http:localhost:9000 and see the default page for the application.
+
+!images/newapp!
+
+p(note). **Your Play! environnement is ready**
+ 
+See how to "set up your preferred IDE":ide.
