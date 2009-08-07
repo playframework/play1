@@ -135,6 +135,14 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      */
     public void onRoutesLoaded() {
     }
+
+    /** 
+     * Event may be sent by plugins or other components
+     * @param message convention: pluginClassShortName.message
+     * @param context depends on the plugin
+     */
+    public void onEvent (String message, Object context) {
+    }
     
     public void compileAll(List<ApplicationClass> classes) {
     }
@@ -148,5 +156,12 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     public int compareTo(PlayPlugin o) {
         return (index < o.index ? -1 : (index == o.index ? 0 : 1));
+    }
+    
+    public static void postEvent (String message, Object context) {
+        List<PlayPlugin> plugins = Play.plugins;
+        for (PlayPlugin playPlugin : plugins) {
+            playPlugin.onEvent(message, context);
+        }
     }
 }

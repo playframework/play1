@@ -26,6 +26,7 @@ import javax.persistence.Query;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.proxy.HibernateProxy;
 import play.Play;
+import play.PlayPlugin;
 import play.data.binding.BeanWrapper;
 import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
@@ -129,6 +130,7 @@ public class JPASupport implements Serializable {
     public <T> T save() {
         if (!em().contains(this)) {
             em().persist(this);
+            PlayPlugin.postEvent("JPASupport.objectPersisted", this);
         }
         avoidCascadeSaveLoops.set(new ArrayList<JPASupport>());
         try {
@@ -146,6 +148,7 @@ public class JPASupport implements Serializable {
             return;
         } else {
             avoidCascadeSaveLoops.get().add(this);
+            PlayPlugin.postEvent("JPASupport.objectUpdated", this);
         }
         // Cascade save
         try {
@@ -230,6 +233,7 @@ public class JPASupport implements Serializable {
     public <T> T delete() {
         try {
             em().remove(this);
+            PlayPlugin.postEvent("JPASupport.objectDeleted", this);
             return (T) this;
         } catch (Throwable e) {
             throw new RuntimeException(e);
