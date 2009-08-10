@@ -94,6 +94,7 @@
         <ant antfile="build.xml" target="build" dir="../modules/gae" />
         <ant antfile="build.xml" target="build" dir="../modules/gwt" />
         <ant antfile="build.xml" target="build" dir="../modules/spring" />
+        <ant antfile="build.xml" target="build" dir="../modules/search" />
     </target>
     
     <!-- Netbeans support -->

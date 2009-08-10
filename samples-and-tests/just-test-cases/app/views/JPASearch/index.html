@@ -1,0 +1,24 @@
+
+
+<form action="@{JPASearch.index()}" method="POST">
+	<label for="field-selector">Filter Field:</label>
+	<select name="field" id="field-selector">
+		<option #{if field=="title"}selected#{/if}>title</option>
+		<option #{if field=="author"}selected#{/if}>author</option>
+		<option #{if field=="content"}selected#{/if}>content</option>
+		<option #{if field=="shelfNumber"}selected#{/if}>shelfNumber</option>
+	</select>
+	
+	<label for="query">Query:</label>
+	<input type="text" name="query" id="query" value="${query?query:""}">
+	
+	<input type="submit" value="filter">
+	
+</form>
+
+
+<ul>
+#{list items:books, as:'book'}
+	<li>${book.title} - ${book.author} (${book.id})</li>
+#{/list}
+</ul>

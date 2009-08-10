@@ -49,3 +49,6 @@ samples-and-tests/chat/logs
 .git
 .gitignore
 modules/spring/lib/play-spring.jar
+modules/search/bin
+modules/search/lib/search.jar
+samples-and-tests/just-test-cases/data
