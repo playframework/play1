@@ -89,7 +89,7 @@ public class CorePlugin extends PlayPlugin {
         }
         out.println();
         out.println("Configuration:");
-        out.println("~~~~~~~~~~~~");
+        out.println("~~~~~~~~~~~~~~");
         for(Object key : Play.configuration.keySet()) {
             out.println(key+"="+Play.configuration.getProperty(key.toString()));
         }
