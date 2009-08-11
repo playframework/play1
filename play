@@ -222,7 +222,9 @@ try:
 	def check_jpda():
 		global jpda_port
 		try:
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)			
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+			
 			s.bind(('127.0.0.1', int(jpda_port)))
 			s.close()
 		except socket.error, e:
