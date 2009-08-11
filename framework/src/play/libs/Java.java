@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.FutureTask;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
@@ -26,6 +27,28 @@ import play.mvc.With;
  * Java utils
  */
 public class Java {
+    
+    /**
+     * Ohoh ..
+     */
+    public static Object extractUnderlyingCallable(FutureTask futureTask) {
+        try {
+            Field syncField = FutureTask.class.getDeclaredField("sync");
+            syncField.setAccessible(true);
+            Object sync = syncField.get(futureTask);
+            Field callableField = sync.getClass().getDeclaredField("callable");
+            callableField.setAccessible(true);
+            Object callable = callableField.get(sync);
+            if(callable.getClass().getSimpleName().equals("RunnableAdapter")) {
+                Field taskField = callable.getClass().getDeclaredField("task");
+                taskField.setAccessible(true);
+                return taskField.get(callable);
+            }
+            return callable;
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Find the first public static method

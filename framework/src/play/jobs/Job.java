@@ -14,6 +14,8 @@ import play.libs.Time;
 public class Job<V> extends Invoker.Invocation implements Callable<V> {
 
     protected ExecutorService executor;
+    protected long lastRun = 0;
+    protected boolean wasError = false;
 
     /**
      * Here you do the job
@@ -92,8 +94,11 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
                 before();
                 V result = null;
                 try {
+                    lastRun = System.currentTimeMillis();
                     result = doJobWithResult();
+                    wasError = false;
                 } catch (Exception e) {
+                    wasError = true;
                     StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
                     if (element != null) {
                         throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(), e);

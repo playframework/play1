@@ -24,6 +24,18 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public void onLoad() {
     }
     
+    /**
+     * Retun the plugin status
+     */
+    public String getStatus() {
+        return null;
+    }
+    
+    /**
+     * Enhance this class
+     * @param applicationClass
+     * @throws java.lang.Exception
+     */
     public void enhance(ApplicationClass applicationClass) throws Exception {
     }
     

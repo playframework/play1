@@ -2,6 +2,8 @@ package play.db;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -84,6 +86,30 @@ public class DBPlugin extends PlayPlugin {
                 throw new DatabaseException("Cannot connected to the database, " + e.getMessage(), e);
             }
         }
+    }
+
+    @Override
+    public String getStatus() {
+        StringWriter sw = new StringWriter();
+        PrintWriter out = new PrintWriter(sw);
+        if(DB.datasource == null || !(DB.datasource instanceof ComboPooledDataSource)) {
+            out.println("Datasource:");
+            out.println("~~~~~~~~~~~");
+            out.println("(not yet connected)");
+            return sw.toString();
+        }
+        ComboPooledDataSource datasource = (ComboPooledDataSource)DB.datasource;
+        out.println("Datasource:");
+        out.println("~~~~~~~~~~~");
+        out.println("Jdbc url: " + datasource.getJdbcUrl());
+        out.println("Jdbc driver: " + datasource.getDriverClass());
+        out.println("Jdbc user: " + datasource.getUser());
+        out.println("Jdbc password: " + datasource.getPassword());
+        out.println("Min pool size: " + datasource.getMinPoolSize());
+        out.println("Max pool size: " + datasource.getMaxPoolSize());
+        out.println("Initial pool size: " + datasource.getInitialPoolSize());
+        out.println("Checkout timeout: " + datasource.getCheckoutTimeout());
+        return sw.toString();
     }
 
     @Override

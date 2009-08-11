@@ -142,7 +142,7 @@ public class Scope {
             try {
                 Session session = new Session();
                 Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_SESSION");
-                if (cookie != null) {
+                if (cookie != null && Play.started) {
                     String value = cookie.value;
                     String sign = value.substring(0, value.indexOf("-"));
                     String data = value.substring(value.indexOf("-") + 1);

@@ -32,6 +32,10 @@ public class ActionInvoker {
 
     public static void invoke(Http.Request request, Http.Response response) {
         try {
+            if(!Play.started) {
+                return;
+            }
+            
             Http.Request.current.set(request);
             Http.Response.current.set(response);
             

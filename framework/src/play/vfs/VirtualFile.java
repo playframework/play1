@@ -53,6 +53,13 @@ public abstract class VirtualFile {
             throw new UnexpectedException(e);
         }
     }
+    
+    public File getRealFile() {
+        if(this instanceof FileSystemFile) {
+            return ((FileSystemFile)this).realFile;
+        }
+        return null;
+    }
 
     public void write(CharSequence string) {
         try {

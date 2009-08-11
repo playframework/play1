@@ -26,6 +26,8 @@ import play.libs.IO;
 import play.mvc.Router;
 import play.templates.TemplateLoader;
 import play.vfs.VirtualFile;
+import sun.misc.Signal;
+import sun.misc.SignalHandler;
 
 /**
  * Main framework class
@@ -201,7 +203,6 @@ public class Play {
         javaPath = new ArrayList<VirtualFile>();
         javaPath.add(appRoot.child("app"));
         
-
         // Build basic templates path
         templatesPath = new ArrayList<VirtualFile>();
         templatesPath.add(appRoot.child("app/views"));
@@ -222,6 +223,7 @@ public class Play {
         // Plugins
         loadPlugins();
 
+        // Done !
         if (mode == Mode.PROD || System.getProperty("precompile") != null) {
             mode = Mode.PROD;
             if (preCompile() && System.getProperty("precompile") == null) {
