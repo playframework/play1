@@ -88,6 +88,12 @@ public class CorePlugin extends PlayPlugin {
             out.println(plugin.index + ":" + plugin.getClass().getName());
         }
         out.println();
+        out.println("Configuration:");
+        out.println("~~~~~~~~~~~~");
+        for(Object key : Play.configuration.keySet()) {
+            out.println(key+"="+Play.configuration.getProperty(key.toString()));
+        }
+        out.println();
         out.println("Threads:");
         out.println("~~~~~~~~");
         visit(out, getRootThread(), 0);
