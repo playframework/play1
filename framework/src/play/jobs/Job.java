@@ -1,5 +1,7 @@
 package play.jobs;
 
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -89,13 +91,17 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     }
 
     public V call() {
+        Monitor monitor = null;
         try {
             if (init()) {
                 before();
                 V result = null;
                 try {
                     lastRun = System.currentTimeMillis();
+                    monitor = MonitorFactory.start(getClass().getName()+".doJob()");
                     result = doJobWithResult();
+                    monitor.stop();
+                    monitor = null;
                     wasError = false;
                 } catch (Exception e) {
                     wasError = true;
@@ -111,6 +117,9 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
         } catch (Throwable e) {
             onException(e);
         } finally {
+            if(monitor != null) {
+                monitor.stop();
+            }
             _finally();
         }
         return null;

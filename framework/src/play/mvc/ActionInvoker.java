@@ -1,5 +1,7 @@
 package play.mvc;
 
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
 import java.io.ByteArrayInputStream;
 import play.mvc.results.Result;
 import java.lang.reflect.InvocationTargetException;
@@ -31,6 +33,7 @@ import play.mvc.results.Ok;
 public class ActionInvoker {
 
     public static void invoke(Http.Request request, Http.Response response) {
+        Monitor monitor = null;
         try {
             if(!Play.started) {
                 return;
@@ -82,11 +85,14 @@ public class ActionInvoker {
                 Controller.class.getDeclaredField("renderArgs").set(null, Scope.RenderArgs.current());
                 Controller.class.getDeclaredField("validation").set(null, Java.invokeStatic(Validation.class, "current"));
             }
-
+            
             for (PlayPlugin plugin : Play.plugins) {
                 plugin.beforeActionInvocation(actionMethod);
             }
 
+            // Monitoring
+            monitor = MonitorFactory.start(request.action+"()");
+            
             // 5. Invoke the action
             try {
                 // @Before
@@ -147,6 +153,9 @@ public class ActionInvoker {
                         }
                     }
                 }
+                
+                monitor.stop();
+                monitor = null;
                 
                 // Ok, rethrow the original action result
                 if(actionResult != null) {
@@ -233,6 +242,10 @@ public class ActionInvoker {
             throw e;
         } catch (Exception e) {
             throw new UnexpectedException(e);
+        } finally {
+            if(monitor != null) {
+                monitor.stop();
+            }
         }
 
     }

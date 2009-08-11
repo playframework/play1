@@ -1,5 +1,8 @@
 package play;
 
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
+import com.jamonapi.utils.Misc;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -95,6 +98,19 @@ public class CorePlugin extends PlayPlugin {
         out.println("Active count: " + Invoker.executor.getActiveCount());
         out.println("Scheduled task count: " + Invoker.executor.getTaskCount());
         out.println("Queue size: " + Invoker.executor.getQueue().size());
+        out.println();
+        out.println("Monitors:");
+        out.println("~~~~~~~~");
+        Object[][] data = Misc.sort(MonitorFactory.getRootMonitor().getBasicData(), 3, "desc");
+        int lm = 10;
+        for(Object[] row : data) {
+            if(row[0].toString().length() > lm) {
+                lm = row[0].toString().length();
+            }
+        }
+        for(Object[] row : data) {
+            out.println(String.format("%-"+(lm)+"s -> %8.0f hits; %8.1f avg; %8.1f min; %8.1f max;", row[0], row[1], row[2], row[6], row[7]));
+        }
         return sw.toString();
     }
 

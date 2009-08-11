@@ -1,5 +1,7 @@
 package play.templates;
 
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
 import groovy.lang.Binding;
 import groovy.lang.Closure;
 import groovy.lang.GroovyClassLoader;
@@ -198,9 +200,13 @@ public class Template {
         }
         ExecutableTemplate t = (ExecutableTemplate) InvokerHelper.createScript(compiledTemplate, binding);
         t.template = this;
+        Monitor monitor = null;
         try {
+            monitor = MonitorFactory.start(name);
             long start = System.currentTimeMillis();
             t.run();
+            monitor.stop();
+            monitor = null;
             Logger.trace("%sms to render template %s", System.currentTimeMillis() - start, name);
         } catch (NoRouteFoundException e) {
             throwException(e);
@@ -220,6 +226,9 @@ public class Template {
             }
             throwException(e);
         } finally {
+            if(monitor != null) {
+                monitor.stop();
+            }
         }
         if (applyLayouts && layout.get() != null) {
             Map<String, Object> layoutArgs = new HashMap<String, Object>(args);

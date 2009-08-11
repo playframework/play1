@@ -1,5 +1,7 @@
 package play;
 
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -26,6 +28,9 @@ public class Invoker {
      * @return The future object, to know when the task is completed
      */
     public static Future invoke(final Invocation invocation) {
+        Monitor monitor = MonitorFactory.getMonitor("Invoker queue size", "elmts.");
+        monitor.add(executor.getQueue().size());
+        invocation.waitInQueue = MonitorFactory.start("Waiting for execution");
         return executor.submit(invocation);
     }
 
@@ -36,6 +41,8 @@ public class Invoker {
      * @return The future object, to know when the task is completed
      */
     public static Future invoke(final Invocation invocation, int seconds) {
+        Monitor monitor = MonitorFactory.getMonitor("Invocation queue", "elmts.");
+        monitor.add(executor.getQueue().size());
         return executor.schedule(invocation, seconds, TimeUnit.SECONDS);
     }
 
@@ -68,6 +75,8 @@ public class Invoker {
      * An Invocation in something to run in a Play! context
      */
     public static abstract class Invocation implements Runnable {
+        
+        Monitor waitInQueue;
 
         /**
          * Override this method
@@ -118,7 +127,7 @@ public class Invoker {
             for (PlayPlugin plugin : Play.plugins) {
                 try {
                     plugin.onInvocationException(e);
-                } catch(Throwable ex) {
+                } catch (Throwable ex) {
                 }
             }
             if (e instanceof PlayException) {
@@ -149,6 +158,9 @@ public class Invoker {
         }
 
         public void run() {
+            if(waitInQueue != null) {
+                waitInQueue.stop();
+            }
             try {
                 if (init()) {
                     before();
@@ -179,7 +191,6 @@ public class Invoker {
         public void suspend(Suspend suspendRequest) {
             retry = suspendRequest;
         }
-
     }
     
 
