@@ -11,7 +11,7 @@ import play.mvc.*;
 import play.templates.Template;
 import play.templates.TemplateLoader;
 import play.test.*;
-import play.vfs.FileSystemFile;
+import play.vfs.*;
 
 public class TestRunner extends Controller {
 
@@ -62,7 +62,7 @@ public class TestRunner extends Controller {
         if (test.endsWith(".test.html")) {
             File testFile = Play.getFile("test/" + test);
             if (testFile.exists()) {
-                Template testTemplate = TemplateLoader.load(new FileSystemFile((testFile)));
+                Template testTemplate = TemplateLoader.load(VirtualFile.open(testFile));
                 Map<String, Object> options = new HashMap<String, Object>();
                 response.contentType = "text/html";
                 renderText(testTemplate.render(options));

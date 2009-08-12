@@ -1,49 +1,173 @@
 package play.vfs;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channel;
+import java.nio.channels.FileChannel;
+import java.security.AccessControlException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import play.Play;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
 
 /**
  * The VFS used by Play!
  */
-public abstract class VirtualFile {
+public class VirtualFile {
 
-    public abstract String getName();
-    public abstract boolean isDirectory();
-    public abstract String relativePath();
-    public abstract List<VirtualFile> list();
-    public abstract boolean exists();
-    public abstract InputStream inputstream();
-    public abstract OutputStream outputstream();
-    public abstract VirtualFile child(String name);
-    public abstract Long lastModified();
-    public abstract long length();
-    public abstract Channel channel();
-    
+    File realFile;
+
+    VirtualFile(File file) {
+        this.realFile = file;
+    }
+
+    public String getName() {
+        return realFile.getName();
+    }
+
+    public boolean isDirectory() {
+        return realFile.isDirectory();
+    }
+
+    public String relativePath() {
+        List<String> path = new ArrayList<String>();
+        File f = realFile;
+        String prefix = "{?}";
+        while (true) {
+            path.add(f.getName());
+            f = f.getParentFile();
+            if (f == null) {
+                break; // ??
+            }
+            if (f.equals(Play.frameworkPath)) {
+                prefix = "{play}";
+                break;
+            }
+            if (f.equals(Play.applicationPath)) {
+                prefix = "";
+                break;
+            }
+            String module = isRoot(f);
+            if (module != null) {
+                prefix = module;
+                break;
+            }
+
+        }
+        Collections.reverse(path);
+        StringBuilder builder = new StringBuilder();
+        for (String p : path) {
+            builder.append("/" + p);
+        }
+        return prefix + builder.toString();
+    }
+
+    String isRoot(File f) {
+        for (VirtualFile vf : Play.roots) {
+            if (vf.realFile.getAbsolutePath().equals(f.getAbsolutePath())) {
+                return "{module:" + vf.getName() + "}";
+            }
+        }
+        return null;
+    }
+
+    public List<VirtualFile> list() {
+        List<VirtualFile> res = new ArrayList<VirtualFile>();
+        if (exists()) {
+            File[] children = realFile.listFiles();
+            for (int i = 0; i < children.length; i++) {
+                res.add(new VirtualFile(children[i]));
+            }
+        }
+        return res;
+    }
+
+    public boolean exists() {
+        try {
+            if (realFile != null) {
+                boolean exists = realFile.exists();
+                return exists;
+            }
+            return false;
+        } catch (AccessControlException e) {
+            return false;
+        }
+    }
+
+    public InputStream inputstream() {
+        try {
+            return new FileInputStream(realFile);
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
+    }
+
+    public OutputStream outputstream() {
+        try {
+            return new FileOutputStream(realFile);
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
+    }
+
+    public Long lastModified() {
+        if (realFile != null) {
+            return realFile.lastModified();
+        }
+        return 0L;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof VirtualFile) {
+            VirtualFile vf = (VirtualFile) other;
+            if (realFile != null && vf.realFile != null) {
+                return realFile.equals(vf.realFile);
+            }
+        }
+        return super.equals(other);
+    }
+
+    @Override
+    public int hashCode() {
+        if (realFile != null) {
+            return realFile.hashCode();
+        }
+        return super.hashCode();
+    }
+
+    public long length() {
+        return realFile.length();
+    }
+
+    public VirtualFile child(String name) {
+        return new VirtualFile(new File(realFile, name));
+    }
+
+    public Channel channel() {
+        try {
+            FileInputStream fis = new FileInputStream(realFile);
+            FileChannel ch = fis.getChannel();
+            return ch;
+        } catch (FileNotFoundException e) {
+            return null;
+        }
+
+    }
+
     public static VirtualFile open(String file) {
         return open(new File(file));
     }
 
     public static VirtualFile open(File file) {
-        if (file.isFile() && (file.toString().endsWith(".zip") || file.toString().endsWith(".jar"))) {
-            try {
-                return new ZFile(file);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        if (file.isDirectory()) {
-            return new FileSystemFile(file);
-        } else {
-            return null;
-        }
+        return new VirtualFile(file);
     }
 
     public String contentAsString() {
@@ -53,12 +177,9 @@ public abstract class VirtualFile {
             throw new UnexpectedException(e);
         }
     }
-    
+
     public File getRealFile() {
-        if(this instanceof FileSystemFile) {
-            return ((FileSystemFile)this).realFile;
-        }
-        return null;
+        return realFile;
     }
 
     public void write(CharSequence string) {

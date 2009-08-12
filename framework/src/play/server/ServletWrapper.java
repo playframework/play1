@@ -37,7 +37,6 @@ import play.mvc.Http.Response;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 import play.templates.TemplateLoader;
-import play.vfs.FileSystemFile;
 import play.vfs.VirtualFile;
 
 /**
@@ -298,7 +297,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         
         response.out.flush();
         if(response.direct != null) {
-            attachFile(servletResponse, new FileSystemFile(response.direct));
+            attachFile(servletResponse, VirtualFile.open(response.direct));
         } else {
             servletResponse.getOutputStream().write(((ByteArrayOutputStream) response.out).toByteArray());
         }

@@ -46,7 +46,6 @@ import play.mvc.Http.Response;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 import play.templates.TemplateLoader;
-import play.vfs.FileSystemFile;
 import play.vfs.VirtualFile;
 
 /**
@@ -205,10 +204,8 @@ public class HttpHandler implements IoHandler {
     public static void attachFile(IoSession session, MutableHttpResponse response, VirtualFile file) throws IOException {
         response.setStatus(HttpResponseStatus.OK);
         response.setHeader("Content-Type", MimeTypes.getContentType(file.getName()));
-        if (file instanceof FileSystemFile) {
-            session.setAttribute("file", file.channel());
-            response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + file.length());
-        }
+        session.setAttribute("file", file.channel());
+        response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + file.length());
     }
 
     public static void serveStatic(IoSession session, MutableHttpResponse minaResponse, MutableHttpRequest minaRequest, RenderStatic renderStatic) {

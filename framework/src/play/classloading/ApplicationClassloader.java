@@ -24,7 +24,6 @@ import play.PlayPlugin;
 import play.vfs.VirtualFile;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
-import play.vfs.FileSystemFile;
 
 /**
  * The application classLoader. 
@@ -159,9 +158,9 @@ public class ApplicationClassloader extends ClassLoader {
     public URL getResource(String name) {
         for(VirtualFile vf : Play.javaPath) {
             VirtualFile res = vf.child(name);
-            if(res != null && res.exists() && res instanceof FileSystemFile) {
+            if(res != null && res.exists()) {
                 try {
-                    return ((FileSystemFile) res).realFile.toURI().toURL();
+                    return res.getRealFile().toURI().toURL();
                 } catch (MalformedURLException ex) {
                     throw new UnexpectedException(ex);
                 }
@@ -178,9 +177,9 @@ public class ApplicationClassloader extends ClassLoader {
         List<URL> urls = new ArrayList<URL>();
         for(VirtualFile vf : Play.javaPath) {
             VirtualFile res = vf.child(name);
-            if(res != null && res.exists() && res instanceof FileSystemFile) {
+            if(res != null && res.exists()) {
                 try {
-                    urls.add(((FileSystemFile) res).realFile.toURI().toURL());
+                    urls.add(res.getRealFile().toURI().toURL());
                 } catch (MalformedURLException ex) {
                     throw new UnexpectedException(ex);
                 }
