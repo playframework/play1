@@ -110,13 +110,14 @@ public class WS extends PlayPlugin {
         if (headMethod.get() != null) {
             headMethod.get().releaseConnection();
         }
-        if( states.get() != null ) {
+        if (states.get() != null) {
             states.get().clear();
         }
-        if (httpMethod.get() != null){
-        	httpMethod.get().releaseConnection();
+        if (httpMethod.get() != null) {
+            httpMethod.get().releaseConnection();
         }
     }
+    
 
     static {
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
@@ -201,7 +202,7 @@ public class WS extends PlayPlugin {
         }
         authenticate(credentials, scope);
     }
-    
+
     public static void authenticate(String username, String password) {
         authenticate(username, password, null);
     }
@@ -445,6 +446,7 @@ public class WS extends PlayPlugin {
             throw new RuntimeException(e);
         }
     }
+
     /**
      * Make a DELETE request
      * @param url resource URL
@@ -619,9 +621,10 @@ public class WS extends PlayPlugin {
      * @param url of the request
      * @return a WSRequest on which you can add params, file headers using a chaining style programming.
      */
-    public static WSRequest url(String url){
-    	return new WSRequest(url);
+    public static WSRequest url(String url) {
+        return new WSRequest(url);
     }
+
     /**
      * Build a WebService Request with the given URL.
      * This constructor will format url using params passed in arguments.
@@ -630,215 +633,236 @@ public class WS extends PlayPlugin {
      * @param params the params passed to format the URL.
      * @return a WSRequest on which you can add params, file headers using a chaining style programming.
      */
-    public static WSRequest url(String url, String... params){
-    	Object[] encodedParams = new String[params.length];
-    	for (int i = 0; i < params.length; i++) {
-			encodedParams[i] = encode(params[i]);
-		}
-    	return new WSRequest(String.format(url, encodedParams));
+    public static WSRequest url(String url, String... params) {
+        Object[] encodedParams = new String[params.length];
+        for (int i = 0; i < params.length; i++) {
+            encodedParams[i] = encode(params[i]);
+        }
+        return new WSRequest(String.format(url, encodedParams));
     }
-    
-    public static class WSRequest{
-    	public String url;
-    	public String body;
-    	public FileParam[] fileParams;
-    	public Map<String, String> headers;
-    	public Map<String, Object> parameters;
-    	public String mimeType;
-    	
-    	private WSRequest(String url){
-    		this.url = url;
-    	}
-    	
-    	private void checkRelease(){
-    		if (httpMethod.get() != null) {
-    			httpMethod.get().releaseConnection();
+
+    public static class WSRequest {
+
+        public String url;
+        public String body;
+        public FileParam[] fileParams;
+        public Map<String, String> headers;
+        public Map<String, Object> parameters;
+        public String mimeType;
+
+        private WSRequest(String url) {
+            this.url = url;
+        }
+
+        private void checkRelease() {
+            if (httpMethod.get() != null) {
+                httpMethod.get().releaseConnection();
             }
-    	}
-    	private void checkFileBody(EntityEnclosingMethod method) throws FileNotFoundException{
-			EntityEnclosingMethod putOrPost = (EntityEnclosingMethod) method;
-			if (this.fileParams != null) {
-				//could be optimized, we know the size of this array.
-				List<Part> parts = new ArrayList<Part>();
-				for (int i = 0; i<this.fileParams.length;i++){
-					parts.add(new FilePart(this.fileParams[i].paramName, this.fileParams[i].file, MimeTypes.getMimeType(this.fileParams[i].file.getName()), null));
-				}
-				if (this.parameters != null){
-					for (String key : this.parameters.keySet()) {
-						Object value = this.parameters.get(key) ;
-						if (value instanceof Collection || value.getClass().isArray()){
-							Collection values  = value.getClass().isArray() ? Arrays.asList((Object[])value) :(Collection) value;
-	                		for (Object v : (Collection) values) {
-	                			parts.add(new StringPart(key, v.toString(), "utf-8"));
-	                		}
-						} else {
-							parts.add(new StringPart(key, value.toString(), "utf-8"));
-						}
-					}
-				}
-				if (this.body != null) throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
-				
-				putOrPost.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[parts.size()]), putOrPost.getParams()));
-				return;
-				
-			} 
-			if (this.parameters != null) {
-				method.addRequestHeader("content-type", "application/x-www-form-urlencoded");
-				putOrPost.setRequestEntity(new StringRequestEntity(createQueryString()));
-			}
-			if (this.body != null){
-				if (this.parameters != null) throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
-				putOrPost.setRequestEntity(new StringRequestEntity(this.body));
-			}
-            
-    	}
-    	
-    	/**
-    	 * Add a MimeType to the web service request.
-    	 * @param mimeType
-    	 * @return the WSRequest for chaining.
-    	 */
-    	public WSRequest mimeType(String mimeType){
-    		this.mimeType = mimeType;
-    		return this;
-    	}
-    	/**
-    	 * Add files to request. This will only work with POST or PUT.
-    	 * @param files
-    	 * @return the WSRequest for chaining.
-    	 */
-    	public WSRequest files(File... files){
-    		this.fileParams = FileParam.getFileParams(files);
-    		return this;
-    	}
-    	/**
-    	 * Add fileParams aka File and Name parameter to the request. This will only work with POST or PUT.
-    	 * @param fileParams
-    	 * @return the WSRequest for chaining.
-    	 */
-    	public WSRequest files(FileParam... fileParams){
-    		this.fileParams = fileParams;
-    		return this;
-    	}
-    	/**
-    	 * Add the given body to the request.
-    	 * @param body
-    	 * @return the WSRequest for chaining.
-    	 */
-    	public WSRequest body(String body){
-    		this.body = body;
-    		return this;
-    	}
-    	/**
-    	 * Add parameters to request.
-    	 * If POST or PUT, parameters are passed in body using x-www-form-urlencoded if alone, or form-data if there is files too.
-    	 * For any other method, those params are appended to the queryString. 
-    	 * @return the WSRequest for chaining.
-    	 */
-    	public WSRequest params(Map<String, Object> parameters){
-    		this.parameters = parameters;
-    		return this;
-    	}
-    	/** Execute a GET request.*/
-    	public HttpResponse get(){	
-    		return this.executeRequest(new GetMethod(this.url));
-    	}
-    	/** Execute a POST request.*/
-    	public HttpResponse post(){
-    		return this.executeRequest(new PostMethod(this.url));
-    	}
-    	/** Execute a PUT request.*/
-    	public HttpResponse put(){
-    		return this.executeRequest(new PutMethod(this.url));
-    	}
-    	/** Execute a DELETE request.*/
-    	public HttpResponse delete(){;
-    		return this.executeRequest(new DeleteMethod(this.url));
-    	}
-    	/** Execute a OPTIONS request.*/
-    	public HttpResponse options(){
-    		return this.executeRequest(new OptionsMethod(this.url));
-    	}
-    	/** Execute a HEAD request.*/
-    	public HttpResponse head(){
-    		return this.executeRequest(new HeadMethod(this.url));
-    	}
-    	/** Execute a TRACE request.*/
-    	public HttpResponse trace(){
-    		return this.executeRequest(new TraceMethod(this.url));
-    	}
-    	private HttpResponse executeRequest(HttpMethod method){
-    		this.checkRelease();
-    		httpMethod.set(method);
-    		httpMethod.get().setDoAuthentication(true);
+        }
+
+        private void checkFileBody(EntityEnclosingMethod method) throws FileNotFoundException {
+            EntityEnclosingMethod putOrPost = (EntityEnclosingMethod) method;
+            if (this.fileParams != null) {
+                //could be optimized, we know the size of this array.
+                List<Part> parts = new ArrayList<Part>();
+                for (int i = 0; i < this.fileParams.length; i++) {
+                    parts.add(new FilePart(this.fileParams[i].paramName, this.fileParams[i].file, MimeTypes.getMimeType(this.fileParams[i].file.getName()), null));
+                }
+                if (this.parameters != null) {
+                    for (String key : this.parameters.keySet()) {
+                        Object value = this.parameters.get(key);
+                        if (value instanceof Collection || value.getClass().isArray()) {
+                            Collection values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection) value;
+                            for (Object v : (Collection) values) {
+                                parts.add(new StringPart(key, v.toString(), "utf-8"));
+                            }
+                        } else {
+                            parts.add(new StringPart(key, value.toString(), "utf-8"));
+                        }
+                    }
+                }
+                if (this.body != null) {
+                    throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
+                }
+                putOrPost.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[parts.size()]), putOrPost.getParams()));
+                return;
+
+            }
+            if (this.parameters != null) {
+                method.addRequestHeader("content-type", "application/x-www-form-urlencoded");
+                putOrPost.setRequestEntity(new StringRequestEntity(createQueryString()));
+            }
+            if (this.body != null) {
+                if (this.parameters != null) {
+                    throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
+                }
+                putOrPost.setRequestEntity(new StringRequestEntity(this.body));
+            }
+
+        }
+
+        /**
+         * Add a MimeType to the web service request.
+         * @param mimeType
+         * @return the WSRequest for chaining.
+         */
+        public WSRequest mimeType(String mimeType) {
+            this.mimeType = mimeType;
+            return this;
+        }
+
+        /**
+         * Add files to request. This will only work with POST or PUT.
+         * @param files
+         * @return the WSRequest for chaining.
+         */
+        public WSRequest files(File... files) {
+            this.fileParams = FileParam.getFileParams(files);
+            return this;
+        }
+
+        /**
+         * Add fileParams aka File and Name parameter to the request. This will only work with POST or PUT.
+         * @param fileParams
+         * @return the WSRequest for chaining.
+         */
+        public WSRequest files(FileParam... fileParams) {
+            this.fileParams = fileParams;
+            return this;
+        }
+
+        /**
+         * Add the given body to the request.
+         * @param body
+         * @return the WSRequest for chaining.
+         */
+        public WSRequest body(String body) {
+            this.body = body;
+            return this;
+        }
+
+        /**
+         * Add parameters to request.
+         * If POST or PUT, parameters are passed in body using x-www-form-urlencoded if alone, or form-data if there is files too.
+         * For any other method, those params are appended to the queryString. 
+         * @return the WSRequest for chaining.
+         */
+        public WSRequest params(Map<String, Object> parameters) {
+            this.parameters = parameters;
+            return this;
+        }
+
+        /** Execute a GET request.*/
+        public HttpResponse get() {
+            return this.executeRequest(new GetMethod(this.url));
+        }
+
+        /** Execute a POST request.*/
+        public HttpResponse post() {
+            return this.executeRequest(new PostMethod(this.url));
+        }
+
+        /** Execute a PUT request.*/
+        public HttpResponse put() {
+            return this.executeRequest(new PutMethod(this.url));
+        }
+
+        /** Execute a DELETE request.*/
+        public HttpResponse delete() {
+            ;
+            return this.executeRequest(new DeleteMethod(this.url));
+        }
+
+        /** Execute a OPTIONS request.*/
+        public HttpResponse options() {
+            return this.executeRequest(new OptionsMethod(this.url));
+        }
+
+        /** Execute a HEAD request.*/
+        public HttpResponse head() {
+            return this.executeRequest(new HeadMethod(this.url));
+        }
+
+        /** Execute a TRACE request.*/
+        public HttpResponse trace() {
+            return this.executeRequest(new TraceMethod(this.url));
+        }
+
+        private HttpResponse executeRequest(HttpMethod method) {
+            this.checkRelease();
+            httpMethod.set(method);
+            httpMethod.get().setDoAuthentication(true);
             try {
                 if (this.headers != null) {
                     for (String key : headers.keySet()) {
-                    	httpMethod.get().addRequestHeader(key, headers.get(key) + "");
+                        httpMethod.get().addRequestHeader(key, headers.get(key) + "");
                     }
                 }
-                if (httpMethod.get() instanceof EntityEnclosingMethod){
-                	this.checkFileBody((EntityEnclosingMethod)httpMethod.get());
-                } else if (this.fileParams != null){
-                	throw new RuntimeException("Method "+httpMethod.get().getName()+" with file is not an option.");
-                } else if (this.parameters != null){
-                	httpMethod.get().setQueryString(createQueryString());
+                if (httpMethod.get() instanceof EntityEnclosingMethod) {
+                    this.checkFileBody((EntityEnclosingMethod) httpMethod.get());
+                } else if (this.fileParams != null) {
+                    throw new RuntimeException("Method " + httpMethod.get().getName() + " with file is not an option.");
+                } else if (this.parameters != null) {
+                    httpMethod.get().setQueryString(createQueryString());
                 }
                 if (mimeType != null) {
-                	httpMethod.get().addRequestHeader("content-type", mimeType);
+                    httpMethod.get().addRequestHeader("content-type", mimeType);
                 }
-                
+
                 httpClient.executeMethod(null, httpMethod.get(), states.get());
                 return new HttpResponse(httpMethod.get());
             } catch (Exception e) {
                 httpMethod.get().releaseConnection();
                 throw new RuntimeException(e);
             }
-    	}
-    	private String createQueryString(){
-    		StringBuilder sb = new StringBuilder();
-			for (String key : this.parameters.keySet()) {
-					if (sb.length() > 0){
-						sb.append("&");
-					}
-					 Object value = this.parameters.get(key);
-		              
-					if (value != null) {
-	                	if (value instanceof Collection || value.getClass().isArray()){
-	                		Collection values  = value.getClass().isArray() ? Arrays.asList((Object[])value) :(Collection) value;
-	                		boolean first = true;
-	                		for (Object v : (Collection) values) {
-	                			if (!first) {
-	                				sb.append("&");
-	                			}
-	                			first = false;
-	                			sb.append(encode(key)).append("=").append(encode(v.toString()));
-	                		}
-	                	} else {
-	                		sb.append(encode(key)).append("=").append(encode(this.parameters.get(key).toString()));
-	                	}
-	                }	
-			}
-			return sb.toString();
-    	}
-    	
-    	
+        }
+
+        private String createQueryString() {
+            StringBuilder sb = new StringBuilder();
+            for (String key : this.parameters.keySet()) {
+                if (sb.length() > 0) {
+                    sb.append("&");
+                }
+                Object value = this.parameters.get(key);
+
+                if (value != null) {
+                    if (value instanceof Collection || value.getClass().isArray()) {
+                        Collection values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection) value;
+                        boolean first = true;
+                        for (Object v : (Collection) values) {
+                            if (!first) {
+                                sb.append("&");
+                            }
+                            first = false;
+                            sb.append(encode(key)).append("=").append(encode(v.toString()));
+                        }
+                    } else {
+                        sb.append(encode(key)).append("=").append(encode(this.parameters.get(key).toString()));
+                    }
+                }
+            }
+            return sb.toString();
+        }
     }
-    public static  class FileParam{
-		File file;
-		String paramName;
-		public FileParam(File file, String name) {
-			this.file = file;
-			this.paramName = name;
-		}
-		public static FileParam[] getFileParams(File[] files) {
-			FileParam[] filesp = new FileParam[files.length];
-			for (int i = 0; i < files.length; i++) {
-				filesp[i] = new FileParam(files[i], files[i].getName());
-			}
-			return filesp;
-		}
-	}
+
+    public static class FileParam {
+
+        File file;
+        String paramName;
+
+        public FileParam(File file, String name) {
+            this.file = file;
+            this.paramName = name;
+        }
+
+        public static FileParam[] getFileParams(File[] files) {
+            FileParam[] filesp = new FileParam[files.length];
+            for (int i = 0; i < files.length; i++) {
+                filesp[i] = new FileParam(files[i], files[i].getName());
+            }
+            return filesp;
+        }
+    }
 
     /**
      * An HTTP response wrapper
@@ -846,6 +870,7 @@ public class WS extends PlayPlugin {
     public static class HttpResponse {
 
         private HttpMethod method;
+
         /**
          * you shouldnt have to create an HttpResponse yourself
          * @param method
@@ -862,8 +887,15 @@ public class WS extends PlayPlugin {
             return this.method.getStatusCode();
         }
 
+        /**
+         * The http response content type
+         */
         public String getContentType() {
             return method.getResponseHeader("content-type").getValue();
+        }
+        
+        public String getHeader(String key) {
+            return method.getResponseHeader(key).getValue();
         }
 
         /**

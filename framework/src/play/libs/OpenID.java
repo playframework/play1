@@ -1,143 +1,222 @@
 package play.libs;
 
-import java.text.ParseException;
-import java.util.Date;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import java.util.Set;
-import java.util.Map.Entry;
-
-import org.openid4java.association.Association;
-import org.openid4java.association.AssociationException;
-import org.openid4java.consumer.ConsumerAssociationStore;
-import org.openid4java.consumer.ConsumerException;
-import org.openid4java.consumer.ConsumerManager;
-import org.openid4java.consumer.NonceVerifier;
-import org.openid4java.consumer.VerificationResult;
-import org.openid4java.discovery.DiscoveryException;
-import org.openid4java.discovery.DiscoveryInformation;
-import org.openid4java.discovery.Identifier;
-import org.openid4java.message.AuthRequest;
-import org.openid4java.message.AuthSuccess;
-import org.openid4java.message.MessageException;
-import org.openid4java.message.ParameterList;
-import org.openid4java.message.ax.AxMessage;
-import org.openid4java.message.ax.FetchRequest;
-import org.openid4java.message.ax.FetchResponse;
-import org.openid4java.message.sreg.SRegMessage;
-import org.openid4java.message.sreg.SRegRequest;
-import org.openid4java.message.sreg.SRegResponse;
-import org.openid4java.server.RealmVerifier;
-
-import org.openid4java.util.HttpClientFactory;
-import org.openid4java.util.InternetDateFormat;
-import org.openid4java.util.ProxyProperties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.w3c.dom.Document;
 import play.Logger;
-import play.Play;
-import play.cache.Cache;
 import play.exceptions.PlayException;
+import play.libs.WS.HttpResponse;
 import play.mvc.Router;
 import play.mvc.Http.Request;
-import play.mvc.Scope.Flash;
 import play.mvc.Scope.Params;
 import play.mvc.results.Redirect;
 
 public class OpenID {
 
-	static class OpenIDAttribute {
-		public String alias;
-		public String schema;
-		public boolean mandatory;
-	}
-	
-	static HashMap<String, OpenIDAttribute> attributes = new HashMap<String, OpenIDAttribute>();
-	static String dataRetrievalMethod = (String) Play.configuration.get("openid.dataRetrievalMethod");
-
-    static {
-    	/*
-    	 * sample config :
-    	 * openid.attribute.<attr>
-    	 * openid.attribute.<attr>=schema
-    	 * openid.mandatoryAttribute.<attr>=schema
-    	 * 
-    	 */
-    	
-    	if(!"ax".equals(dataRetrievalMethod) && !"sreg".equals(dataRetrievalMethod)) {
-    		dataRetrievalMethod = "ax";
-    	}
-    	
-    	for(Entry<Object, Object> entry : Play.configuration.entrySet()) {
-    		String key = (String) entry.getKey();
-    		if(key.startsWith("openid.attribute.")) {
-    			putAttribute(key.substring("openid.attribute.".length()), entry.getValue() != null ? (String) entry.getValue() : null, false);
-    		}
-    		if(key.startsWith("openid.mandatoryAttribute.")) {
-    			putAttribute(key.substring("openid.mandatoryAttribute.".length()), entry.getValue() != null ? (String) entry.getValue() : null, true);
-    		}
-    	}
-    	
-    	// default 3 optional attributes (ax)
-    	if(attributes.size() == 0) {
-    		putAttribute("FirstName", "http://schema.openid.net/namePerson/first", false);
-    		putAttribute("LastName", "http://schema.openid.net/namePerson/last", false);
-    		putAttribute("Email", "http://schema.openid.net/namePerson/email", false);
-    	}
+    private OpenID(String id) {
+        this.id = id;
+        this.returnAction = this.realmAction = Request.current().action;
     }
-    
-    static ConsumerManager consumerManager;
 
-    /**
-     * Verify the openID and redirect to the OpenID server
-     * @param openID The OpenID url
-     * @param returnAction The action to return
-     * @return
-     */
-    public static boolean verify(String openID, String returnAction) {
+    // ~~~ API
+    
+    String id;
+    String returnAction;
+    String realmAction;
+    List<String> sregRequired = new ArrayList<String>();
+    List<String> sregOptional = new ArrayList<String>();
+    Map<String, String> axRequired = new HashMap<String, String>();
+    Map<String, String> axOptional = new HashMap<String, String>();
+    
+    public OpenID returnTo(String action) {
+        this.returnAction = action;
+        return this;
+    }
+
+    public OpenID forRealm(String action) {
+        this.realmAction = action;
+        return this;
+    }
+
+    public OpenID required(String alias) {
+        this.sregRequired.add(alias);
+        return this;
+    }
+
+    public OpenID required(String alias, String schema) {
+        this.axRequired.put(alias, schema);
+        return this;
+    }
+
+    public OpenID optional(String alias) {
+        this.sregOptional.add(alias);
+        return this;
+    }
+
+    public OpenID optional(String alias, String schema) {
+        this.axOptional.put(alias, schema);
+        return this;
+    }
+
+    public boolean verify() {
         try {
-            openID = openID.trim();
-            Flash.current().put("openid.discover", openID);
-            List discoveries = getConsumerManager().discover(openID);
-            DiscoveryInformation discovered = getConsumerManager().associate(discoveries);
-            String returnTo = Request.current().getBase() + Router.reverse(returnAction);
-            AuthRequest authRequest = getConsumerManager().authenticate(discovered, returnTo);
-            
-            if(dataRetrievalMethod.equals("ax")) {
-	            FetchRequest fetch = FetchRequest.createFetchRequest();
-	            for(OpenIDAttribute attr : attributes.values()) {
-	            	fetch.addAttribute(attr.alias, attr.schema, attr.mandatory);
-	            }
-	            authRequest.addExtension(fetch);
-            } else if(dataRetrievalMethod.equals("sreg")) {
-            	SRegRequest fetch = SRegRequest.createFetchRequest();
-            	for(OpenIDAttribute attr : attributes.values()) {
-            		fetch.addAttribute(attr.alias, attr.mandatory);
-            	}
-            	authRequest.addExtension(fetch);
+            // Normalize
+            String claimedId = normalize(id);
+            String server = null;
+            String delegate = null;
+
+            // Discover
+            HttpResponse response = WS.url(claimedId).get();
+
+            // Try HTML (I know it's bad)
+            String html = response.getString();
+            server = discoverServer(html);
+
+            if (server == null) {
+
+                // Try YADIS
+                Document xrds = null;
+
+                if (response.getContentType().contains("application/xrds+xml")) {
+                    xrds = response.getXml();
+                } else if (response.getHeader("X-XRDS-Location") != null) {
+                    xrds = WS.url(response.getHeader("X-XRDS-Location")).get().getXml();
+                } else {
+                    return false;
+                }
+
+                // Ok we have the XRDS file
+                server = XPath.selectText("//Type[text()='http://specs.openid.net/auth/2.0/server']/following-sibling::URI/text()", xrds);
+                claimedId = XPath.selectText("//Type[text()='http://specs.openid.net/auth/2.0/signon']/following-sibling::LocalID/text()", xrds);
+                if (claimedId == null) {
+                    claimedId = "http://specs.openid.net/auth/2.0/identifier_select";
+                } else {
+                    server = XPath.selectText("//Type[text()='http://specs.openid.net/auth/2.0/signon']/following-sibling::URI/text()", xrds);
+                }
+
+                if (server == null) {
+                    return false;
+                }
+
+            } else {
+
+                // Delegate
+                Matcher openid2Localid = Pattern.compile("<link[^>]+openid2[.]local_id[^>]+>", Pattern.CASE_INSENSITIVE).matcher(html);
+                Matcher openidDelegate = Pattern.compile("<link[^>]+openid[.]delegate[^>]+>", Pattern.CASE_INSENSITIVE).matcher(html);
+                if (openid2Localid.find()) {
+                    delegate = extractHref(openid2Localid.group());
+                } else if (openidDelegate.find()) {
+                    delegate = extractHref(openidDelegate.group());
+                }
+
             }
-            String url = authRequest.getDestinationUrl(true);
+
+            // Redirect
+            String url = server;
+            if (!server.contains("?")) {
+                url += "?";
+            }
+            if (!url.endsWith("?") && !url.endsWith("&")) {
+                url += "&";
+            }
+
+            url += "openid.ns=http://specs.openid.net/auth/2.0";
+            url += "&openid.mode=checkid_setup";
+            url += "&openid.claimed_id=" + URLEncoder.encode(claimedId, "utf8");
+            url += "&openid.identity=" + URLEncoder.encode(delegate == null ? claimedId : delegate, "utf8");
+            url += "&openid.return_to=" + URLEncoder.encode(Request.current().getBase() + Router.reverse(returnAction), "utf8");
+            url += "&openid.realm=" + URLEncoder.encode(Request.current().getBase() + Router.reverse(realmAction), "utf8");
+
+            for (String a : sregOptional) {
+                url += "&openid.sreg.optional=" + a;
+            }
+            for (String a : sregRequired) {
+                url += "&openid.sreg.required=" + a;
+            }
+
+            if (!axRequired.isEmpty() || !axOptional.isEmpty()) {
+                url += "&openid.ns.ax=http%3A%2F%2Fopenid.net%2Fsrv%2Fax%2F1.0";
+                url += "&openid.ax.mode=fetch_request";
+                for (String a : axOptional.keySet()) {
+                    url += "&openid.ax.type." + a + "=" + axOptional.get(a);
+                }
+                for (String a : axRequired.keySet()) {
+                    url += "&openid.ax.type." + a + "=" + axRequired.get(a);
+                }
+                if(!axRequired.isEmpty()) {
+                    String r = "";
+                    for (String a : axRequired.keySet()) {
+                        r += "," + a;
+                    }
+                    r = r.substring(1);
+                    url += "&openid.ax.required="+r;
+                }
+                if(!axOptional.isEmpty()) {
+                    String r = "";
+                    for (String a : axOptional.keySet()) {
+                        r += "," + a;
+                    }
+                    r = r.substring(1);
+                    url += "&openid.ax.optional="+r;
+                }
+            }
+
+            
+            // Debug
+            Logger.trace("Send request %s", url);
+
             throw new Redirect(url);
+        } catch (Redirect e) {
+            throw e;
         } catch (PlayException e) {
             throw e;
-        } catch (ConsumerException e) {
-            Logger.error(e, "OpenID cannot verify %s", openID);
-        } catch (MessageException e) {
-            Logger.error(e, "OpenID cannot verify %s", openID);
-        } catch (DiscoveryException e) {
-            Logger.error(e, "OpenID cannot verify %s", openID);
+        } catch (Exception e) {
+            return false;
         }
-        return false;
+    }
+    
+    // ~~~~ Main API
+    
+    public static OpenID id(String id) {
+        return new OpenID(id);
+    }
+    
+    /**
+     * Normalize the given openid as a standard openid
+     */
+    public static String normalize(String openID) {
+        openID = openID.trim();
+        if (!openID.startsWith("http://") && !openID.startsWith("https://")) {
+            openID = "http://" + openID;
+        }
+        try {
+            URI url = new URI(openID);
+            String frag = url.getRawFragment();
+            if (frag != null && frag.length() > 0) {
+                openID = openID.replace("#" + frag, "");
+            }
+            if (url.getPath().equals("")) {
+                openID += "/";
+            }
+            openID = new URI(openID).toString();
+        } catch (Exception e) {
+            throw new RuntimeException(openID + " is not a valid URL");
+        }
+        return openID;
     }
 
     /**
-     * Verify the openID and redirect to the OpenID server and return to the current action
-     * @param openID The OpenID url
-     * @return
+     * Is the current request an authentication response from the OP ?
      */
-    public static boolean verify(String openID) {
-        return verify(openID, Request.current().action);
+    public static boolean isAuthenticationResponse() {
+        return Params.current().get("openid.mode") != null;
     }
 
     /**
@@ -146,45 +225,84 @@ public class OpenID {
      */
     public static UserInfo getVerifiedID() {
         try {
-            String openID = Flash.current().get("openid.discover");
-            List discoveries = getConsumerManager().discover(openID);
-            DiscoveryInformation discovered = getConsumerManager().associate(discoveries);
-            ParameterList openidResp = new ParameterList(Params.current().allSimple());
-            VerificationResult verification = getConsumerManager().verify(Request.current().getBase() + Request.current().url, openidResp, discovered);
-            Identifier verified = verification.getVerifiedId();
-            if (verified != null && !verified.getIdentifier().equals("null")) {
-                UserInfo userInfo = new UserInfo();
-                userInfo.id = verified.toString();
-                AuthSuccess authSuccess = (AuthSuccess) verification.getAuthResponse();
-                if(authSuccess.hasExtension(SRegMessage.OPENID_NS_SREG)) {
-                	SRegResponse fetchResp = (SRegResponse) authSuccess.getExtension(SRegMessage.OPENID_NS_SREG);
-                	Map<String, String> attributes = (Map<String, String>) fetchResp.getAttributes();
-                    for (String key : attributes.keySet()) {
-                        userInfo.extensions.put(key, attributes.get(key));
-                    }
+            String mode = Params.current().get("openid.mode");
+
+            // Check authentication
+            if (mode != null && mode.equals("id_res")) {
+
+                // id
+                String id = Params.current().get("openid.claimed_id");
+                if (id == null) {
+                    id = Params.current().get("openid.identity");
                 }
-                if (authSuccess.hasExtension(AxMessage.OPENID_NS_AX)) {
-                    FetchResponse fetchResp = (FetchResponse) authSuccess.getExtension(AxMessage.OPENID_NS_AX);
-                    Map<String, List<String>> attributes = (Map<String, List<String>>) fetchResp.getAttributes();
-                    for (String key : attributes.keySet()) {
-                        userInfo.extensions.put(key, attributes.get(key).get(0));
-                    }
+
+                id = normalize(id);
+
+                // server
+                String server = Params.current().get("openid.op_endpoint");
+                if (server == null) {
+                    server = discoverServer(id);
                 }
-                return userInfo;
+
+                String fields = Request.current().querystring.replace("openid.mode=id_res", "openid.mode=check_authentication");
+                WS.HttpResponse response = WS.url(server).mimeType("application/x-www-form-urlencoded").body(fields).post();
+                if (response.getStatus() == 200 && response.getString().contains("is_valid:true")) {
+                    UserInfo userInfo = new UserInfo();
+                    userInfo.id = id;
+                    Pattern patternAX = Pattern.compile("^openid[.].+[.]value[.]([^.]+)([.]\\d+)?$");
+                    Pattern patternSREG = Pattern.compile("^openid[.]sreg[.]([^.]+)$");
+                    for (String p : Params.current().allSimple().keySet()) {
+                        Matcher m = patternAX.matcher(p);
+                        if (m.matches()) {
+                            String alias = m.group(1);
+                            userInfo.extensions.put(alias, Params.current().get(p));
+                        }
+                        m = patternSREG.matcher(p);
+                        if (m.matches()) {
+                            String alias = m.group(1);
+                            userInfo.extensions.put(alias, Params.current().get(p));
+                        }
+                    }
+                    return userInfo;
+                } else {
+                    return null;
+                }
+
             }
+
         } catch (PlayException e) {
             throw e;
-        } catch (ConsumerException e) {
-            Logger.error(e, "OpenID error");
-        } catch (MessageException e) {
-            Logger.error(e, "OpenID error");
-        } catch (DiscoveryException e) {
-            Logger.error(e, "OpenID error");
-        } catch (AssociationException e) {
-            Logger.error(e, "OpenID error");
+        }
+
+        return null;
+    }
+    
+    // ~~~~ Utils
+    
+    static String extractHref(String link) {
+        Matcher m = Pattern.compile("href=\"([^\"]*)\"").matcher(link);
+        if (m.find()) {
+            return m.group(1).trim();
         }
         return null;
     }
+
+    static String discoverServer(String tok) {
+        if (tok.startsWith("http")) {
+            tok = WS.url(tok).get().getString();
+        }
+        Matcher openid2Provider = Pattern.compile("<link[^>]+openid2[.]provider[^>]+>", Pattern.CASE_INSENSITIVE).matcher(tok);
+        Matcher openidServer = Pattern.compile("<link[^>]+openid[.]server[^>]+>", Pattern.CASE_INSENSITIVE).matcher(tok);
+        String server = null;
+        if (openid2Provider.find()) {
+            server = extractHref(openid2Provider.group());
+        } else if (openidServer.find()) {
+            server = extractHref(openidServer.group());
+        }
+        return server;
+    }
+    
+    // ~~~~ Result class
 
     public static class UserInfo {
 
@@ -197,160 +315,10 @@ public class OpenID {
          * Extensions values
          */
         public Map<String, String> extensions = new HashMap<String, String>();
-    }
 
-    static ConsumerManager getConsumerManager() throws ConsumerException {
-        if (consumerManager == null) {
-            // HTTP proxy
-            if(Play.configuration.getProperty("http.proxy.hostname") != null && "true".equals(Play.configuration.getProperty("openid.proxy.enable"))) {
-                ProxyProperties proxyProperties = new ProxyProperties();
-                proxyProperties.setProxyHostName(Play.configuration.getProperty("http.proxy.hostname"));
-                proxyProperties.setProxyPort(Integer.parseInt(Play.configuration.getProperty("http.proxy.port", "80")));
-                proxyProperties.setUserName(Play.configuration.getProperty("http.proxy.user", ""));
-                proxyProperties.setPassword(Play.configuration.getProperty("http.proxy.password", ""));
-                HttpClientFactory.setProxyProperties(proxyProperties);
-            }
-            // OpenID4J
-            consumerManager = new ConsumerManager();
-            RealmVerifier realmVerifier = new RealmVerifier();
-            realmVerifier.setEnforceRpId(false);
-            consumerManager.setNonceVerifier(new CacheNonceVerifier(1800)); // 1/2h
-            consumerManager.setAssociations(new CacheAssociationStore());
+        @Override
+        public String toString() {
+            return id + " " + extensions;
         }
-        return consumerManager;
-    }
-
-    public static class CacheAssociationStore implements ConsumerAssociationStore {
-
-        @SuppressWarnings("unchecked")
-        public void save(String opUrl, Association association) {
-            int maxAge = (int) ((association.getExpiry().getTime() - new Date().getTime()) / 1000);
-            if (maxAge <= 0) {
-                maxAge = 10;
-            }
-            Cache.add(opUrl + "#" + association.getHandle(), association, maxAge + "s");
-            Set<String> handles = (Set<String>) Cache.get(opUrl + "#_handles");
-            if (handles == null) {
-                handles = new HashSet<String>();
-                Cache.add(opUrl + "#_handles", handles);
-            }
-            handles.add(association.getHandle());
-            Cache.replace(opUrl + "#_handles", handles);
-        }
-
-        @SuppressWarnings("unchecked")
-        public Association load(String opUrl, String handle) {
-            Association assoc = (Association) Cache.get(opUrl + "#" + handle);
-            if (assoc == null) {
-                Set<String> handles = (Set<String>) Cache.get(opUrl + "#_handles");
-                if (handles != null) {
-                    handles.remove(handle);
-                    Cache.replace(opUrl + "#_handles", handles);
-                }
-            }
-            return assoc;
-        }
-
-        @SuppressWarnings("unchecked")
-        public Association load(String opUrl) {
-            Association latest = null;
-            Set<String> handles = (Set<String>) Cache.get(opUrl + "#_handles");
-            Set<String> toRemove = new HashSet<String>();
-            if (handles != null) {
-                for (String handle : handles) {
-                    Association association = (Association) Cache.get(opUrl + "#" + handle);
-                    if (association != null) {
-                        if (latest == null || latest.getExpiry().before(association.getExpiry())) {
-                            latest = association;
-                        }
-                    } else {
-                        toRemove.add(handle);
-                    }
-                }
-                if (!toRemove.isEmpty()) {
-                    handles.removeAll(toRemove);
-                    Cache.replace(opUrl + "#_handles", handles);
-                }
-            }
-            return (latest);
-        }
-
-        @SuppressWarnings("unchecked")
-        public void remove(String opUrl, String handle) {
-            Cache.delete(opUrl + "#" + handle);
-            Set<String> handles = (Set<String>) Cache.get(opUrl + "#_handles");
-            if (handles != null) {
-                if (handles.contains(handle)) {
-                    handles.remove(handle);
-                    Cache.replace(opUrl + "#_handles", handles);
-
-                }
-            }
-        }
-    }
-
-    public static class CacheNonceVerifier implements NonceVerifier {
-
-        protected static InternetDateFormat _dateFormat = new InternetDateFormat();
-        protected int _maxAge;
-
-        /**
-         * @param maxAge
-         *          maximum token age in seconds
-         */
-        protected CacheNonceVerifier(int maxAge) {
-            _maxAge = maxAge;
-        }
-
-        public int getMaxAge() {
-            return _maxAge;
-        }
-
-        /**
-         * Checks if nonce date is valid and if it is in the max age boudary. Other
-         * checks are delegated to {@link #seen(java.util.Date, String, String)}
-         */
-        public int seen(String opUrl, String nonce) {
-            Date now = new Date();
-            try {
-                Date nonceDate = _dateFormat.parse(nonce);
-                if (isTooOld(now, nonceDate)) {
-                    return (TOO_OLD);
-                }
-                return (seen(now, opUrl, nonce));
-            } catch (ParseException e) {
-                return (INVALID_TIMESTAMP);
-            }
-        }
-
-        /**
-         * Subclasses should implement this method and check if the nonce was seen
-         * before. The nonce timestamp was verified at this point, it is valid and
-         * it is in the max age boudary.
-         *
-         * @param now
-         *          The timestamp used to check the max age boudary.
-         */
-        protected int seen(Date now, String opUrl, String nonce) {
-            String key = opUrl + '#' + nonce;
-            if (Cache.get(key) != null) {
-                return (SEEN);
-            }
-            Cache.add(key, "true", _maxAge + "s");
-            return (OK);
-        }
-
-        protected boolean isTooOld(Date now, Date nonce) {
-            long age = now.getTime() - nonce.getTime();
-            return (age > _maxAge * 1000);
-        }
-    }
-    
-    private static void putAttribute(String alias, String schema, boolean mandatory) {
-    	OpenIDAttribute attr = new OpenIDAttribute();
-    	attr.alias = alias;
-    	attr.schema = schema;
-    	attr.mandatory = mandatory;
-    	attributes.put(alias, attr);
     }
 }
