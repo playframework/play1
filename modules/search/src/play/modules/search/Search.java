@@ -199,6 +199,8 @@ public class Search {
         try {
             if (! (object instanceof JPAModel))
                 return;
+            if (object.getClass().getAnnotation(Indexed.class)==null)
+                return;
             JPAModel jpaModel = (JPAModel) object;
             String index = object.getClass().getName();
             indexWriters.get(index).deleteDocuments(new Term("_docID", jpaModel.id+""));
