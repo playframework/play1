@@ -66,6 +66,7 @@ public class Search {
         }
     }
     
+    
     private static Analyzer getAnalyser() {
         try {
             Class clazz = Class.forName(ANALYSER_CLASS);
@@ -298,7 +299,7 @@ public class Search {
         fl.mkdirs();
         List<ApplicationClass> classes = Play.classes.getAnnotatedClasses(Indexed.class);
         for (ApplicationClass applicationClass : classes) {
-            List<JPAModel> objects = (List<JPAModel>) JPA.em().createQuery("select e from "+applicationClass.getClass().getName()).getResultList();
+            List<JPAModel> objects = (List<JPAModel>) JPA.em().createQuery("select e from "+applicationClass.javaClass.getCanonicalName()+" as e").getResultList();
             for (JPAModel model : objects) {
                 index(model);
             }
