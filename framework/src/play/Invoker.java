@@ -20,6 +20,9 @@ import play.exceptions.UnexpectedException;
  */
 public class Invoker {
 
+    /**
+     * Main executor for requests invocations.
+     */
     public static ScheduledThreadPoolExecutor executor = null;
 
     /**
@@ -76,6 +79,9 @@ public class Invoker {
      */
     public static abstract class Invocation implements Runnable {
         
+        /**
+         * If set, monitor the time the invocation waited in the queue
+         */
         Monitor waitInQueue;
 
         /**
@@ -157,6 +163,9 @@ public class Invoker {
             }
         }
 
+        /**
+         * It's time to execute.
+         */
         public void run() {
             if(waitInQueue != null) {
                 waitInQueue.stop();
@@ -177,6 +186,9 @@ public class Invoker {
         }
     }
 
+    /**
+     * A direct invocation (in the same thread than caller)
+     */
     public static abstract class DirectInvocation extends Invocation {
 
         Suspend retry = null;
@@ -193,15 +205,27 @@ public class Invoker {
         }
     }
     
-
+    /**
+     * Init executor at load time.
+     */
     static {
         int core = Integer.parseInt(Play.configuration.getProperty("play.pool", Play.mode == Mode.DEV ? "1" : "3"));
         executor = new ScheduledThreadPoolExecutor(core, new ThreadPoolExecutor.AbortPolicy());
     }
 
+    /**
+     * Throwable to indicate that the request must be suspended
+     */
     public static class Suspend extends PlayException {
 
+        /**
+         * Suspend for a timeout (in seconds).
+         */
         int timeout;
+        
+        /**
+         * Wait for task execution.
+         */
         Future task;
 
         public Suspend(int timeout) {
@@ -226,6 +250,9 @@ public class Invoker {
         }
     }
 
+    /**
+     * Utility that track tasks completion in order to resume suspended requests.
+     */
     static class WaitForTasksCompletion extends Thread {
 
         Map<Future, Invocation> queue;

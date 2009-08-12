@@ -20,13 +20,14 @@ public class JPAEnhancer extends Enhancer {
             return;
         }
         
-        // les classes non entity ne doivent pas etre instrumentees
+        // Enhance only JPA entities
         if (!hasAnnotation(ctClass, "javax.persistence.Entity")) {
             return;
         }
         
         String entityName = ctClass.getName();
-        // Ajoute le constructeur par défaut (obligatoire pour la peristence)
+        
+        // Add a default constructor if needed
         try {
             boolean hasDefaultConstructor = false;
             for (CtConstructor constructor : ctClass.getConstructors()) {
@@ -88,6 +89,7 @@ public class JPAEnhancer extends Enhancer {
         CtMethod create = CtMethod.make("public static play.db.jpa.JPASupport create(String name, play.mvc.Scope.Params params) { return (play.db.jpa.JPASupport)((play.db.jpa.JPASupport)" + entityName + ".class.newInstance()).edit(name, params); }", ctClass);
         ctClass.addMethod(create);
 
+        // Done.
         applicationClass.enhancedByteCode = ctClass.toBytecode();
         ctClass.defrost();
     }

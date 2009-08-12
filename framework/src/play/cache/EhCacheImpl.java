@@ -29,7 +29,7 @@ public class EhCacheImpl implements CacheImpl {
     net.sf.ehcache.Cache cache;
 
     public void add(String key, Object value, int expiration) {
-        if(cache.get(key) != null) {
+        if (cache.get(key) != null) {
             return;
         }
         Element element = new Element(key, value);
@@ -82,7 +82,7 @@ public class EhCacheImpl implements CacheImpl {
     }
 
     public void replace(String key, Object value, int expiration) {
-        if(cache.get(key) == null) {
+        if (cache.get(key) == null) {
             return;
         }
         Element element = new Element(key, value);

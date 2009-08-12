@@ -77,8 +77,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             // No variables name, skip ...
             if(localVariableAttribute == null) {
                 continue;
-            }
-            
+            }            
             
             // Bon.
             // Alors là il s'agit après chaque instruction de creation d'une variable locale
@@ -177,15 +176,21 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
         }
 
+        // Done.
         applicationClass.enhancedByteCode = ctClass.toBytecode();
-
         ctClass.defrost();
         
     }
     
+    /**
+     * Mark class that need local variables tracking
+     */
     public static interface LocalVariablesSupport {
     }
 
+    /**
+     * Runtime part.
+     */
     public static class LocalVariablesNamesTracer {
 
         public static Integer computeMethodHash(CtClass[] parameters) {
@@ -313,9 +318,10 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
     }
     private static Map<Integer, Integer> storeByCode = new HashMap<Integer, Integer>();
     
-
+    /**
+     * Useful instructions
+     */
     static {
-
         storeByCode.put(CodeIterator.ASTORE_0, 0);
         storeByCode.put(CodeIterator.ASTORE_1, 1);
         storeByCode.put(CodeIterator.ASTORE_2, 2);
@@ -348,6 +354,9 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         storeByCode.put(CodeIterator.DSTORE, -2);
     }
     
+    /**
+     * Debug utility. Display a byte code op as plain text.
+     */
     static void printOp(int op) {
         try {
             for(Field f : Opcode.class.getDeclaredFields()) {

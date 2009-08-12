@@ -3,11 +3,8 @@ package play.classloading;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.UnmodifiableClassException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AllPermission;
@@ -30,11 +27,14 @@ import play.exceptions.UnexpectedException;
 import play.vfs.FileSystemFile;
 
 /**
- * The application classLoader. Load the classes from
- * the application Java sources files.
+ * The application classLoader. 
+ * Load the classes from the application Java sources files.
  */
 public class ApplicationClassloader extends ClassLoader {
 
+    /**
+     * This protection domain will be affecter to all loaded classes.
+     */
     public ProtectionDomain protectionDomain;
 
     public ApplicationClassloader() {
@@ -54,6 +54,9 @@ public class ApplicationClassloader extends ClassLoader {
         }
     }
 
+    /**
+     * You know ...
+     */
     @Override
     protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
 
@@ -76,6 +79,7 @@ public class ApplicationClassloader extends ClassLoader {
     }
     
     // ~~~~~~~~~~~~~~~~~~~~~~~
+    
     protected Class loadApplicationClass(String name) {
         long start = System.currentTimeMillis();
         ApplicationClass applicationClass = Play.classes.getApplicationClass(name);
@@ -106,6 +110,9 @@ public class ApplicationClassloader extends ClassLoader {
         return null;
     }
 
+    /**
+     * Search for the byte code of the given class.
+     */
     protected byte[] getClassDefinition(String name) {
         name = name.replace(".", "/") + ".class";
         InputStream is = getResourceAsStream(name);
@@ -131,6 +138,9 @@ public class ApplicationClassloader extends ClassLoader {
         }
     }
 
+    /**
+     * You know ...
+     */
     @Override
     public InputStream getResourceAsStream(String name) {
         for(VirtualFile vf : Play.javaPath) {
@@ -142,6 +152,9 @@ public class ApplicationClassloader extends ClassLoader {
         return super.getResourceAsStream(name);
     }
 
+    /**
+     * You know ...
+     */
     @Override
     public URL getResource(String name) {
         for(VirtualFile vf : Play.javaPath) {
@@ -156,7 +169,10 @@ public class ApplicationClassloader extends ClassLoader {
         }
         return super.getResource(name);
     }
-    
+
+    /**
+     * You know ...
+     */
     @Override
     public Enumeration<URL> getResources(String name) throws IOException {
         List<URL> urls = new ArrayList<URL>();
@@ -254,26 +270,9 @@ public class ApplicationClassloader extends ClassLoader {
         }
     }
 
-    int computeAnnotationsHash(Class clazz) {
-        if (clazz == null) {
-            return 0;
-        }
-        StringBuffer buffer = new StringBuffer();
-        for (Annotation annotation : clazz.getAnnotations()) {
-            buffer.append(annotation.toString());
-        }
-        for (Field field : clazz.getDeclaredFields()) {
-            for (Annotation annotation : field.getAnnotations()) {
-                buffer.append(annotation.toString());
-            }
-        }
-        for (Method method : clazz.getDeclaredMethods()) {
-            for (Annotation annotation : method.getAnnotations()) {
-                buffer.append(annotation.toString());
-            }
-        }
-        return buffer.toString().hashCode();
-    }
+    /**
+     * Used to track change of the application sources path
+     */
     int pathHash = 0;
 
     int computePathHash() {
@@ -382,6 +381,7 @@ public class ApplicationClassloader extends ClassLoader {
     }
     
     // ~~~ Intern
+    
     List<ApplicationClass> getAllClasses(String basePackage) {
         List<ApplicationClass> res = new ArrayList<ApplicationClass>();
         for (VirtualFile virtualFile : Play.javaPath) {
@@ -405,7 +405,7 @@ public class ApplicationClassloader extends ClassLoader {
         return res;
     }
 
-    private void scan(List<ApplicationClass> classes, String packageName, VirtualFile current) {
+    void scan(List<ApplicationClass> classes, String packageName, VirtualFile current) {
         if (!current.isDirectory()) {
             if (current.getName().endsWith(".java") && !current.getName().startsWith(".")) {
                 String classname = packageName + current.getName().substring(0, current.getName().length() - 5);

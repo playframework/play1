@@ -95,6 +95,10 @@ public class BytecodeCache {
         }
     }
 
+    /**
+     * Build a hash of the source code.
+     * To efficiently track source code modifications.
+     */
     static String hash(String text) {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
@@ -115,6 +119,9 @@ public class BytecodeCache {
         }
     }
 
+    /**
+     * Retrieve the real file that will be used as cache.
+     */
     static File cacheFile(String id) {
         File dir = new File(Play.tmpDir, "bytecode/" + Play.mode.name());
         if (!dir.exists() && Play.tmpDir != null && !Play.readOnlyTmp) {

@@ -9,7 +9,7 @@ import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
 import play.exceptions.UnexpectedException;
 
 /**
- * Parameters map to POJO binder
+ * Parameters map to POJO binder.
  */
 public class BeanWrapper {
 

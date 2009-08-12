@@ -8,13 +8,12 @@ import java.util.Map;
 import net.sf.oval.Validator;
 import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import net.sf.oval.context.OValContext;
-import play.data.binding.AlternativeDateFormat;
+import play.data.binding.DateBinder.AlternativeDateFormat;
 import play.exceptions.UnexpectedException;
 
 public class InPastCheck extends AbstractAnnotationCheck<InPast> {
 
     final static String mes = "validation.past";
-
     Date reference;
 
     @Override
@@ -22,9 +21,9 @@ public class InPastCheck extends AbstractAnnotationCheck<InPast> {
         try {
             this.reference = past.value().equals("") ? new Date() : AlternativeDateFormat.getDefaultFormatter().parse(past.value());
         } catch (ParseException ex) {
-            throw new UnexpectedException("Cannot parse date " +past.value(), ex);
+            throw new UnexpectedException("Cannot parse date " + past.value(), ex);
         }
-        if(!past.value().equals("") && past.message().equals(mes)) {
+        if (!past.value().equals("") && past.message().equals(mes)) {
             setMessage("validation.before");
         } else {
             setMessage(past.message());
@@ -38,7 +37,7 @@ public class InPastCheck extends AbstractAnnotationCheck<InPast> {
         }
         if (value instanceof Date) {
             try {
-                return reference.after((Date)value);
+                return reference.after((Date) value);
             } catch (Exception e) {
                 return false;
             }
@@ -52,5 +51,4 @@ public class InPastCheck extends AbstractAnnotationCheck<InPast> {
         messageVariables.put("reference", new SimpleDateFormat("yyyy-MM-dd").format(reference));
         return messageVariables;
     }
-   
 }

@@ -26,8 +26,6 @@ import play.libs.IO;
 import play.mvc.Router;
 import play.templates.TemplateLoader;
 import play.vfs.VirtualFile;
-import sun.misc.Signal;
-import sun.misc.SignalHandler;
 
 /**
  * Main framework class
@@ -145,6 +143,7 @@ public class Play {
         Play.started = false;
         Play.applicationPath = root;
 
+        // load all play.static of exists
         initStaticStuff();
 
         // Guess the framework path
@@ -236,6 +235,9 @@ public class Play {
         }
     }
 
+    /**
+     * Read application.conf and resolve overriden key using the play id mechanism.
+     */
     static void readConfiguration() {
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         conf = appRoot.child("conf/application.conf");
@@ -294,6 +296,8 @@ public class Play {
      */
     public static synchronized void start() {
         try {
+            
+            // Log reloading (for fun)
             if (started) {
                 Logger.info("Reloading ...");
                 stop();
@@ -386,6 +390,10 @@ public class Play {
         Router.lastLoading = 0L;
     }
 
+    /**
+     * Force all java source and template compilation.
+     * @return success ?
+     */
     static boolean preCompile() {
         try {
             Logger.info("Precompiling ...");
@@ -403,7 +411,7 @@ public class Play {
             try {
                 System.exit(-1);
             } catch (Exception ex) {
-                // Will not work in some application server
+                // Will not work in some application servers
             }
             return false;
         }
@@ -499,6 +507,10 @@ public class Play {
         }
     }
 
+    /**
+     * Load all modules. 
+     * You can even specify the list using the MODULES environement variable.
+     */
     public static void loadModules() {
         if (System.getenv("MODULES") != null) {
             // Modules path is prepended with a env property

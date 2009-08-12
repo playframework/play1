@@ -9,7 +9,7 @@ import javassist.bytecode.annotation.Annotation;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 /**
- * Track names of local variables ...
+ * Compute a unique hash for the class signature.
  */
 public class SigEnhancer extends Enhancer {
 
@@ -50,6 +50,7 @@ public class SigEnhancer extends Enhancer {
             }
         }
 
+        // Done.
         applicationClass.sigChecksum = sigChecksum.toString().hashCode();
     }
 }

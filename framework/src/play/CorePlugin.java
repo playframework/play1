@@ -1,6 +1,5 @@
 package play;
 
-import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 import com.jamonapi.utils.Misc;
 import java.io.PrintWriter;
@@ -12,8 +11,15 @@ import play.mvc.Http.Header;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
+/**
+ * Plugin used for core tasks
+ */
 public class CorePlugin extends PlayPlugin {
 
+    /**
+     * Intercept /@status and check that the Authorization header is valid. 
+     * Then ask each plugin for a status dump and send it over the HTTP response.
+     */
     @Override
     public boolean rawInvocation(Request request, Response response) throws Exception {
         if (request.path.equals("/@status")) {
@@ -49,6 +55,9 @@ public class CorePlugin extends PlayPlugin {
         return super.rawInvocation(request, response);
     }
 
+    /**
+     * Retrieve status about play core.
+     */
     @Override
     public String getStatus() {
         StringWriter sw = new StringWriter();
@@ -120,6 +129,9 @@ public class CorePlugin extends PlayPlugin {
         return sw.toString();
     }
 
+    /**
+     * Recursively visit all JVM threads
+     */
     static void visit(PrintWriter out, ThreadGroup group, int level) {
         // Get threads in `group'
         int numThreads = group.activeCount();
@@ -144,6 +156,9 @@ public class CorePlugin extends PlayPlugin {
         }
     }
 
+    /**
+     * Retrieve the JVM root thread group.
+     */
     static ThreadGroup getRootThread() {
         ThreadGroup root = Thread.currentThread().getThreadGroup().getParent();
         while (root.getParent() != null) {

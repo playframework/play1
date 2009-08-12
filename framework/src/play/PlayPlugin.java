@@ -14,7 +14,7 @@ import play.vfs.VirtualFile;
 public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
-     * Priority
+     * Plugin priority (0 for highest priority)
      */
     public int index;
 
@@ -23,14 +23,14 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      */
     public void onLoad() {
     }
-    
+
     /**
      * Retun the plugin status
      */
     public String getStatus() {
         return null;
     }
-    
+
     /**
      * Enhance this class
      * @param applicationClass
@@ -38,17 +38,17 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      */
     public void enhance(ApplicationClass applicationClass) throws Exception {
     }
-    
+
     /**
      * Let a chance to this plugin to fully manage this request
      * @param request The Play request
      * @param response The Play response
      * @return true if this plugin has managed this request
      */
-    public boolean rawInvocation(Request request, Response response) throws Exception{
+    public boolean rawInvocation(Request request, Response response) throws Exception {
         return false;
     }
-    
+
     /**
      * Let a chance to this plugin to manage a static ressource
      * @param request The Play request
@@ -129,7 +129,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      */
     public void onActionInvocationResult(Result result) {
     }
-    
+
     /**
      * Called at the end of the action invocation.
      */
@@ -153,9 +153,13 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * @param message convention: pluginClassShortName.message
      * @param context depends on the plugin
      */
-    public void onEvent (String message, Object context) {
+    public void onEvent(String message, Object context) {
     }
-    
+
+    /**
+     * Let a chance to the plugin to compile it owns classes.
+     * Must be added to the mutable list.
+     */
     public void compileAll(List<ApplicationClass> classes) {
     }
 
@@ -166,14 +170,19 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public void routeRequest(Request request) {
     }
 
-    public int compareTo(PlayPlugin o) {
-        return (index < o.index ? -1 : (index == o.index ? 0 : 1));
-    }
-    
-    public static void postEvent (String message, Object context) {
+    /**
+     * Inter-plugin communication.
+     */
+    public static void postEvent(String message, Object context) {
         List<PlayPlugin> plugins = Play.plugins;
         for (PlayPlugin playPlugin : plugins) {
             playPlugin.onEvent(message, context);
         }
     }
+    
+    // ~~~~~
+    
+    public int compareTo(PlayPlugin o) {
+        return (index < o.index ? -1 : (index == o.index ? 0 : 1));
+    }        
 }

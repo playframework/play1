@@ -4,6 +4,7 @@ import java.util.Map;
 
 /**
  * A cache implementation
+ * @see play.cache.Cache
  */
 public interface CacheImpl {
 

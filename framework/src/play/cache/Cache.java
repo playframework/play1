@@ -14,7 +14,14 @@ import play.libs.Time;
  */
 public abstract class Cache {
 
+    /**
+     * The underlying cache implementation
+     */
     public static CacheImpl cacheImpl;
+    
+    /**
+     * Sometime we REALLY need to change the implementation :)
+     */
     public static CacheImpl forcedCacheImpl;
 
     /**
@@ -239,6 +246,9 @@ public abstract class Cache {
         cacheImpl.stop();
     }
     
+    /**
+     * Utility that check that an object is serializable.
+     */
     static void checkSerializable(Object value) {
         if(!(value instanceof Serializable)) {
             throw new CacheException("Cannot cache a non-serializable value of type " + value.getClass().getName(), new NotSerializableException(value.getClass().getName()));

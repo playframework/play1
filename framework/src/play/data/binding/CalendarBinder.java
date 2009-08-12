@@ -3,10 +3,11 @@ package play.data.binding;
 import java.util.Calendar;
 import java.util.Locale;
 
+import play.data.binding.DateBinder.AlternativeDateFormat;
 import play.i18n.Lang;
 
 /**
- * Binder that support Calendar class
+ * Binder that support Calendar class.
  */
 public class CalendarBinder implements SupportedType<Calendar> {
 

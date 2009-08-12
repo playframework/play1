@@ -45,7 +45,6 @@ public class ControllersEnhancer extends Enhancer {
                     }
                 }
             });
-
            
             // Auto-redirect
             boolean isHandler = false;
@@ -86,15 +85,21 @@ public class ControllersEnhancer extends Enhancer {
 
         }
         
+        // Done.
         applicationClass.enhancedByteCode = ctClass.toBytecode();
         ctClass.defrost();
 
     }
     
+    /**
+     * Mark class that need controller enhancement
+     */
     public static interface ControllerSupport {
     }
 
-    
+    /**
+     * Check if a field must be translated to a 'thread safe field'
+     */
     static boolean isThreadedFieldAccess(CtField field) {
         if(field.getDeclaringClass().getName().equals("play.mvc.Controller")) {
             return field.getName().equals("params") 
@@ -109,6 +114,9 @@ public class ControllersEnhancer extends Enhancer {
 	return false;
     }	
     
+    /**
+     * Runtime part needed by the instrumentation
+     */
     public static class ControllerInstrumentation {
         
         public static boolean isActionCallAllowed() {

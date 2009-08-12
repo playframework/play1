@@ -23,11 +23,18 @@ import play.vfs.VirtualFile;
  */
 public class ApplicationClasses {
 
+    /**
+     * Reference to the eclipse compiler.
+     */
     ApplicationCompiler compiler = new ApplicationCompiler(this);
+    
+    /**
+     * Cache of all compiled classes
+     */
     Map<String, ApplicationClass> classes = new HashMap<String, ApplicationClass>(); 
 
     /**
-     * Cleat the classes cache
+     * Clear the classes cache
      */
     public void clear() {
         classes = new HashMap<String, ApplicationClass>();
@@ -93,6 +100,9 @@ public class ApplicationClasses {
         return new ArrayList<ApplicationClass>(classes.values());
     }
     
+    /**
+     * Put a new class to the cache.
+     */
     public void add(ApplicationClass applicationClass) {
         classes.put(applicationClass.name, applicationClass);
     }
@@ -100,7 +110,6 @@ public class ApplicationClasses {
     /**
      * Does this class is already loaded ?
      * @param name The fully qualified class name
-     * @return
      */
     public boolean hasClass(String name) {
         return classes.containsKey(name);
@@ -126,34 +135,42 @@ public class ApplicationClasses {
          * The fully qualified class name
          */
         public String name;
+        
         /**
          * A reference to the java source file
          */
         public VirtualFile javaFile;
+        
         /**
          * The Java source
          */
         public String javaSource;
+        
         /**
          * The compiled byteCode
          */
         public byte[] javaByteCode;
+        
         /**
          * The enhanced byteCode
          */
         public byte[] enhancedByteCode;
+        
         /**
          * The in JVM loaded class
          */
         public Class javaClass;
+        
         /**
          * Last time than this class was compiled
          */
         public Long timestamp = 0L;
+        
         /**
          * Is this class compiled
          */
         boolean compiled;
+        
         /**
          * Signatures checksum
          */
@@ -247,8 +264,7 @@ public class ApplicationClasses {
         @Override
         public String toString() {
             return name + " (compiled:" + compiled + ")";
-        }
-        
+        }        
         
     }
 

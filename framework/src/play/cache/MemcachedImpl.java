@@ -19,18 +19,19 @@ import play.Play;
 import play.exceptions.ConfigurationException;
 
 /**
- * Memcached implementation
+ * Memcached implementation (using http://code.google.com/p/spymemcached/)
  */
-public class MemcachedImpl  implements CacheImpl {
-	
-	private static MemcachedImpl uniqueInstance;
-	
-	public static MemcachedImpl getInstance() throws IOException {
-		if(uniqueInstance == null)
-			uniqueInstance = new MemcachedImpl();
-		return uniqueInstance;
-	}
+public class MemcachedImpl implements CacheImpl {
 
+    private static MemcachedImpl uniqueInstance;
+
+    public static MemcachedImpl getInstance() throws IOException {
+        if (uniqueInstance == null) {
+            uniqueInstance = new MemcachedImpl();
+        }
+        return uniqueInstance;
+    }
+    
     MemcachedClient client;
 
     private MemcachedImpl() throws IOException {

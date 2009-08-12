@@ -8,7 +8,7 @@ import java.util.Map;
 import net.sf.oval.Validator;
 import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import net.sf.oval.context.OValContext;
-import play.data.binding.AlternativeDateFormat;
+import play.data.binding.DateBinder.AlternativeDateFormat;
 import play.exceptions.UnexpectedException;
 
 public class InFutureCheck extends AbstractAnnotationCheck<InFuture> {

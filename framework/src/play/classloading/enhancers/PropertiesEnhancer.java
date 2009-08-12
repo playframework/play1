@@ -77,7 +77,7 @@ public class PropertiesEnhancer extends Enhancer {
 
         }
 
-        // Ajoute le constructeur par défaut
+        // Add a default constructor if needed
         try {
             boolean hasDefaultConstructor = false;
             for (CtConstructor constructor : ctClass.getDeclaredConstructors()) {
@@ -95,7 +95,7 @@ public class PropertiesEnhancer extends Enhancer {
             throw new UnexpectedException("Error in PropertiesEnhancer", e);
         }
 
-        // Intercepte les FieldAccess
+        // Intercept all fields access
         for (final CtBehavior ctMethod : ctClass.getDeclaredBehaviors()) {
             ctMethod.instrument(new ExprEditor() {
 
@@ -142,10 +142,14 @@ public class PropertiesEnhancer extends Enhancer {
             });
         }
 
+        // Done.
         applicationClass.enhancedByteCode = ctClass.toBytecode();
         ctClass.defrost();
     }
 
+    /**
+     * Is this field a valid javabean property ?
+     */
     boolean isProperty(CtField ctField) {
         if (ctField.getName().equals(ctField.getName().toUpperCase()) || ctField.getName().substring(0, 1).equals(ctField.getName().substring(0, 1).toUpperCase())) {
             return false;
@@ -155,6 +159,9 @@ public class PropertiesEnhancer extends Enhancer {
                 !Modifier.isStatic(ctField.getModifiers());
     }
 
+    /**
+     * Runtime part.
+     */
     public static class FieldAccessor {
 
         public static Object invokeReadProperty(Object o, String property, String targetType, String invocationPoint) throws Throwable {

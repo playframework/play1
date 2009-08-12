@@ -35,6 +35,7 @@ public class MailerEnhancer extends Enhancer {
 
         }
 
+        // Done.
         applicationClass.enhancedByteCode = ctClass.toBytecode();
         ctClass.defrost();
 
