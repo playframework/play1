@@ -8,7 +8,7 @@ import play.db.jpa.*;
 import play.data.validation.*;
 
 @Entity
-public class Forum extends JPAModel {
+public class Forum extends Model {
 	
 	@Required
 	public String name;

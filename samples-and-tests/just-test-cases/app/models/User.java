@@ -7,7 +7,7 @@ import javax.persistence.*;
 import java.util.*;
 
 @Entity
-public class User extends JPAModel {
+public class User extends Model {
 	
 	public User(String name) {
 		this.name = name;

@@ -12,7 +12,7 @@ import play.mvc.Scope.*;
 import javax.persistence.*;
 
 @Entity
-public class Job extends JPAModel {
+public class Job extends Model {
 	
 	@Required 
 	public String title;

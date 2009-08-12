@@ -8,7 +8,7 @@ import play.db.jpa.*;
 import play.data.validation.*;
 
 @Entity
-public class Post extends JPAModel {
+public class Post extends Model {
 	
 	public String content;	
 	public Date postedAt;

@@ -510,7 +510,7 @@ public class JPASupport implements Serializable {
     public static Object findKey(Object entity) {
         try {
             Class c = entity.getClass();
-            while (c.isAnnotationPresent(Entity.class) || c.isAnnotationPresent(MappedSuperclass.class)) {
+            while (!c.equals(Object.class)) {
                 for (Field field : c.getDeclaredFields()) {
                     if (field.isAnnotationPresent(Id.class)) {
                         field.setAccessible(true);
@@ -527,7 +527,7 @@ public class JPASupport implements Serializable {
 
     public static Class findKeyType(Class c) {
         try {
-            while (c.isAnnotationPresent(Entity.class) || c.isAnnotationPresent(MappedSuperclass.class)) {
+            while (!c.equals(Object.class)) {
                 for (Field field : c.getDeclaredFields()) {
                     if (field.isAnnotationPresent(Id.class)) {
                         field.setAccessible(true);

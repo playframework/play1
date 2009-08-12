@@ -6,7 +6,7 @@ import javax.persistence.*;
 import play.db.jpa.*;
 
 @Entity
-public class Message extends JPAModel {
+public class Message extends Model {
     
     public String user;
     public Date date;

@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.*;
 
 @Entity
-public class City extends JPAModel {
+public class City extends Model {
     
     public String name;
     

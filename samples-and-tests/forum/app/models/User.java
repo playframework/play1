@@ -9,7 +9,7 @@ import play.libs.*;
 import play.data.validation.*;
 
 @Entity
-public class User extends JPAModel {
+public class User extends Model {
 	
 	@Email
 	@Required

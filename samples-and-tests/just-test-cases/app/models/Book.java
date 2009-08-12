@@ -9,7 +9,7 @@ import play.modules.search.Indexed;
 
 @Entity
 @Indexed
-public class Book extends JPAModel{
+public class Book extends JPAModel {
     
     public Book(String title, String author, String content, int shelfNumber) {
         this.title = title;

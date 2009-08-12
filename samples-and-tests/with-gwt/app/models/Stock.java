@@ -8,7 +8,7 @@ import java.util.*;
 import client.*;
 
 @Entity
-public class Stock extends JPAModel {
+public class Stock extends Model {
     
     final double MAX_PRICE = 100.0; // $100.00
     final double MAX_PRICE_CHANGE = 0.02; // +/- 2%

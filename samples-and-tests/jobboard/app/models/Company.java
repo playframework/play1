@@ -8,7 +8,7 @@ import javax.persistence.*;
 import java.util.*;
 
 @Entity
-public class Company extends JPAModel {
+public class Company extends Model {
 	
 	@Required 
 	public String name;	

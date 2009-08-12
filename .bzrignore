@@ -52,3 +52,4 @@ modules/spring/lib/play-spring.jar
 modules/search/bin
 modules/search/lib/search.jar
 samples-and-tests/just-test-cases/data
+modules/siena/lib/play-siena.jar

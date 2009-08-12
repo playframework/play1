@@ -8,7 +8,7 @@ import javax.persistence.*;
 import java.util.*;
 
 @Entity
-public class Category extends JPAModel {
+public class Category extends Model {
 	
 	@Required 
 	public String label;

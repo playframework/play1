@@ -95,6 +95,7 @@
         <ant antfile="build.xml" target="build" dir="../modules/gwt" />
         <ant antfile="build.xml" target="build" dir="../modules/spring" />
         <ant antfile="build.xml" target="build" dir="../modules/search" />
+        <ant antfile="build.xml" target="build" dir="../modules/siena" />
     </target>
     
     <!-- Netbeans support -->
