@@ -1,5 +1,7 @@
 package play.libs;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -13,6 +15,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -20,14 +23,10 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NameValuePair;
@@ -55,7 +54,6 @@ import org.xml.sax.InputSource;
 
 import play.Logger;
 import play.PlayPlugin;
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -769,7 +767,6 @@ public class WS extends PlayPlugin {
 
         /** Execute a DELETE request.*/
         public HttpResponse delete() {
-            ;
             return this.executeRequest(new DeleteMethod(this.url));
         }
 
@@ -962,25 +959,10 @@ public class WS extends PlayPlugin {
          * get the reponse body as a {@link JSONObject}
          * @return the json response
          */
-        public JSONObject getJSONObject() {
+        public JsonElement getJson() {
             try {
                 String json = method.getResponseBodyAsString();
-                return JSONObject.fromObject(json);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } finally {
-                method.releaseConnection();
-            }
-        }
-
-        /**
-         * get the reponse body as a {@link JSONArray}
-         * @return the json response as an array
-         */
-        public JSONArray getJSONArray() {
-            try {
-                String json = method.getResponseBodyAsString();
-                return JSONArray.fromObject(json);
+                return new JsonParser().parse(json);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {

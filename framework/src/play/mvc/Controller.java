@@ -157,8 +157,8 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
      * @param o The Java object to serialize
      * @param includes Object properties to include
      */
-    protected static void renderJSON(Object o, String... includes) {
-        throw new RenderJson(o, includes);
+    protected static void renderJSON(Object o) {
+        throw new RenderJson(o);
     }
 
     /**

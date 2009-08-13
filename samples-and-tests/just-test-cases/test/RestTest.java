@@ -4,14 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.json.JSONObject;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import play.libs.WS;
 import play.libs.WS.FileParam;
 import play.test.UnitTest;
+
+import com.google.gson.*;
 
 
 public class RestTest extends UnitTest{
@@ -30,9 +30,9 @@ public class RestTest extends UnitTest{
 	}
 	@Test
 	public void testPost(){
-		JSONObject jsonResponse = new JSONObject();
-		jsonResponse.put("id", 101);
-		assertEquals(jsonResponse, WS.url("http://localhost:9003/ressource/%s", "名字").params(params).post().getJSONObject());
+		JsonObject jsonResponse = new JsonObject();
+		jsonResponse.addProperty("id", 101);
+		assertEquals(jsonResponse.toString(), WS.url("http://localhost:9003/ressource/%s", "名字").params(params).post().getJson().toString());
 		File fileToSend = new File(getClass().getResource("/kiki.txt").getFile());
 		assertTrue(fileToSend.exists());
 		assertEquals("POSTED!", WS.url("http://localhost:9003/ressource/file/%s", "名字").files(new FileParam(fileToSend, "file")).post().getString());
@@ -41,9 +41,9 @@ public class RestTest extends UnitTest{
 	}
 	@Test
 	public void testPut(){
-		JSONObject jsonResponse = new JSONObject();
-		jsonResponse.put("id", 101);
-		assertEquals(jsonResponse, WS.url("http://localhost:9003/ressource/%s", "名字").params(params).put().getJSONObject());
+		JsonObject jsonResponse = new JsonObject();
+		jsonResponse.addProperty("id", 101);
+		assertEquals(jsonResponse.toString(), WS.url("http://localhost:9003/ressource/%s", "名字").params(params).put().getJson().toString());
 		File fileToSend = new File(getClass().getResource("/kiki.txt").getFile());
 		assertTrue(fileToSend.exists());
 		assertEquals("POSTED!", WS.url("http://localhost:9003/ressource/file/%s", "名字").files(new FileParam(fileToSend, "file")).put().getString());

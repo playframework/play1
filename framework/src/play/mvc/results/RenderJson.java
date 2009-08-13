@@ -1,8 +1,8 @@
 package play.mvc.results;
 
+import com.google.gson.Gson;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
-import fr.zenexity.json.JSON;
 import play.exceptions.UnexpectedException;
 
 /**
@@ -12,8 +12,8 @@ public class RenderJson extends Result {
 
     String json;
 
-    public RenderJson(Object o, String... includes) {
-        json = JSON.toJSON(o);
+    public RenderJson(Object o) {
+        json = new Gson().toJson(o);
     }
     
     public RenderJson(String jsonString) {
