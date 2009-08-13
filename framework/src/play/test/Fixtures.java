@@ -29,21 +29,17 @@ public class Fixtures {
 
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
 
-    public static int jpql(String query) {
-        return JPA.execute(query);
-    }
-
     public static void delete(Class... types) {
         if (getForeignKeyToggleStmt(false) != null) {
             DB.execute(getForeignKeyToggleStmt(false));
         }
         for (Class type : types) {
-            JPA.getEntityManager().createQuery("delete from " + type.getName()).executeUpdate();
+            JPA.em().createQuery("delete from " + type.getName()).executeUpdate();
         }
         if (getForeignKeyToggleStmt(true) != null) {
             DB.execute(getForeignKeyToggleStmt(true));
         }
-        JPA.getEntityManager().clear();
+        JPA.em().clear();
     }
 
     public static void delete(List<Class> classes) {
@@ -90,7 +86,7 @@ public class Fixtures {
                 DB.execute(getForeignKeyToggleStmt(true));
             }
             if(JPA.isEnabled()) {
-                JPA.getEntityManager().clear();
+                JPA.em().clear();
             }
         } catch (Exception e) {
             throw new RuntimeException("Cannot delete all table data : " + e.getMessage(), e);
@@ -124,11 +120,11 @@ public class Fixtures {
                         Class cType = Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
                         Object model = JPASupport.create(cType, "object", params);
-                        JPA.getEntityManager().persist(model);
+                        JPA.em().persist(model);
                         idCache.put(type + "-" + id, JPASupport.findKey(model));
                         // Not very good for performance but will avoid outOfMemory
-                        JPA.getEntityManager().flush();
-                        JPA.getEntityManager().clear();
+                        JPA.em().flush();
+                        JPA.em().clear();
                     }
                 }
             }            

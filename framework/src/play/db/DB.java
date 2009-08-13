@@ -40,7 +40,7 @@ public class DB {
     public static Connection getConnection() {
         try {
             if (JPA.isEnabled()) {
-                return ((org.hibernate.ejb.EntityManagerImpl) JPA.getEntityManager()).getSession().connection();
+                return ((org.hibernate.ejb.EntityManagerImpl) JPA.em()).getSession().connection();
             }
             if (localConnection.get() != null) {
                 return localConnection.get();
@@ -71,7 +71,7 @@ public class DB {
         }
     }
 
-     /**
+    /**
      * Execute an SQL query
      * @param SQL
      * @return The query resultSet
@@ -83,6 +83,4 @@ public class DB {
             throw new DatabaseException(ex.getMessage(), ex);
         }
     }
-
-    
 }

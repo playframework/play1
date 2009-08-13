@@ -4,9 +4,7 @@ import com.google.gwt.core.client.*;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.*;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Random;
 import com.google.gwt.i18n.client.*;
 import com.google.gwt.user.client.rpc.*;
 

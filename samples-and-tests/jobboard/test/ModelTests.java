@@ -1,7 +1,6 @@
 
 import org.junit.*;
 import play.test.*;
-import java.util.*;
 
 import models.*;
 

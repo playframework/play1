@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.CascadeType;
-import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
@@ -80,7 +79,7 @@ public class JPASupport implements Serializable {
                         String[] ids = params.get(name + "." + field.getName() + "@id");
                         if (ids != null) {
                             for (String _id : ids) {
-                                Query q = JPA.getEntityManager().createQuery("from " + relation + " where id = ?");
+                                Query q = JPA.em().createQuery("from " + relation + " where id = ?");
                                 q.setParameter(1, Binder.directBind(_id, findKeyType(Play.classloader.loadClass(relation))));
                                 l.add(q.getSingleResult());
                             }
@@ -89,7 +88,7 @@ public class JPASupport implements Serializable {
                     } else {
                         String[] ids = params.get(name + "." + field.getName() + "@id");
                         if (ids != null && ids.length > 0 && !ids[0].equals("")) {
-                            Query q = JPA.getEntityManager().createQuery("from " + relation + " where id = ?");
+                            Query q = JPA.em().createQuery("from " + relation + " where id = ?");
                             q.setParameter(1, Binder.directBind(ids[0], findKeyType(Play.classloader.loadClass(relation))));
                             Object to = q.getSingleResult();
                             field.set(o, to);
@@ -264,8 +263,7 @@ public class JPASupport implements Serializable {
     }
 
     /**
-     * Find all entities for this class
-     * @return A list of entity
+     * Find all entities of this type
      */
     public static <T extends JPASupport> List<T> findAll() {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
@@ -291,12 +289,20 @@ public class JPASupport implements Serializable {
     }
 
     /**
+     * Try all()
+     */
+    @Deprecated
+    public static JPAQuery find() {
+        throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
+    }
+
+    /**
      * Prepare a query to find *all* entities.
      * @param query HQL query or shortcut
      * @param params Params to bind to the query
      * @return A JPAQuery
      */
-    public static JPAQuery find() {
+    public static JPAQuery all() {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 
@@ -325,6 +331,7 @@ public class JPASupport implements Serializable {
      * @param params parameters of the query
      * @return <T> the first item matching the query or null
      */
+    @Deprecated
     public static <T extends JPASupport> T findOneBy(String query, Object... params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
@@ -336,6 +343,7 @@ public class JPASupport implements Serializable {
      * @param params parameters of the query
      * @return a list<T> of items matching the query
      */
+    @Deprecated
     public static <T extends JPASupport> List<T> findBy(String query, Object... params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
@@ -345,16 +353,15 @@ public class JPASupport implements Serializable {
      * @return the current entityManager
      */
     public static EntityManager em() {
-        return JPA.getEntityManager();
+        return JPA.em();
     }
 
     /**
-     * Retrieve the current entityManager
-     * @return the current entityManager
-     * @deprecated 
+     * Try em();
      */
+    @Deprecated
     public static EntityManager getEntityManager() {
-        return JPA.getEntityManager();
+        return JPA.em();
     }
 
     /**
@@ -411,9 +418,9 @@ public class JPASupport implements Serializable {
         }
 
         /**
-         * Retrieve the first result of the query or null
-         * @return An entity or null
+         * Try first();
          */
+        @Deprecated
         public <T extends JPASupport> T one() {
             try {
                 List<T> results = query.setMaxResults(1).getResultList();
@@ -424,6 +431,10 @@ public class JPASupport implements Serializable {
             } catch (Exception e) {
                 throw new IllegalArgumentException("Error while executing query <strong>" + sq + "</strong>", e);
             }
+        }
+        
+        public <T extends JPASupport> T first() {
+            return (T)one();
         }
 
         /**
@@ -441,9 +452,9 @@ public class JPASupport implements Serializable {
         }
 
         /**
-         * Retrieve all results of the query
-         * @return A list of entities
+         * Try fetch();
          */
+        @Deprecated
         public <T extends JPASupport> List<T> all() {
             try {
                 return query.getResultList();
@@ -453,11 +464,31 @@ public class JPASupport implements Serializable {
         }
 
         /**
-         * Retrieve a page of result
-         * @param from Page number (start at 1)
-         * @param length (page length)
+         * Retrieve all results of the query
          * @return A list of entities
          */
+        public <T extends JPASupport> List<T> fetch() {
+            return all();
+        }
+
+        /**
+         * Retrieve results of the query
+         * @param max Max results to fetch
+         * @return A list of entities
+         */
+        public <T extends JPASupport> List<T> fetch(int max) {
+            try {
+                query.setMaxResults(max);
+                return query.getResultList();
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Error while executing query <strong>" + sq + "</strong>", e);
+            }
+        }
+
+        /**
+         * Try fetch(from, length);
+         */
+        @Deprecated
         public <T extends JPASupport> List<T> page(int from, int length) {
             if (from < 1) {
                 from = 1;
@@ -469,6 +500,16 @@ public class JPASupport implements Serializable {
             } catch (Exception e) {
                 throw new IllegalArgumentException("Error while executing query <strong>" + sq + "</strong>", e);
             }
+        }
+        
+        /**
+         * Retrieve a page of result
+         * @param from Page number (start at 1)
+         * @param length (page length)
+         * @return A list of entities
+         */
+        public <T extends JPASupport> List<T> fetch(int from, int length) {
+            return page(from, length);
         }
     }
 

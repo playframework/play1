@@ -6,7 +6,7 @@ import play.*;
 
 import models.*;
 
-@On("0/5 * * * * ?")
+@Every("5s")
 public class UpdateStocksPrice extends Job {
 
     public void doJob() {

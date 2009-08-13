@@ -14,8 +14,8 @@ public class BaseTest extends org.junit.Assert {
     }
     
     public void clearJPASession() {
-        JPA.getEntityManager().flush();
-        JPA.getEntityManager().clear();
+        JPA.em().flush();
+        JPA.em().clear();
     }
     
 }
