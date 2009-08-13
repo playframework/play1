@@ -28,13 +28,7 @@ public class TestEngine {
     static ExecutorService executor = Executors.newCachedThreadPool();
 
     public static List<Class> allUnitTests() {
-        List<Class> result = new ArrayList<Class>();
-        for(Class clazz : Play.classloader.getAllClasses()) {
-            if(!FunctionalTest.class.isAssignableFrom(clazz) && clazz.getName().endsWith("Test") && !clazz.getSimpleName().equals("Test")) {
-                result.add(clazz);
-            }
-        }
-        return result;
+        return Play.classloader.getAssignableClasses(UnitTest.class);
     }
 
     public static List<Class> allFunctionalTests() {

@@ -16,7 +16,7 @@ public class TestRunnerPlugin extends PlayPlugin {
         Play.javaPath.add(appRoot.child("test"));
         for (VirtualFile module : Play.modules.values()) {
             File modulePath = module.getRealFile();
-            if (modulePath.getAbsolutePath().startsWith(Play.frameworkPath.getParentFile().getAbsolutePath()) && !Play.javaPath.contains(module.child("test"))) {
+            if (!modulePath.getAbsolutePath().startsWith(Play.frameworkPath.getAbsolutePath()) && !Play.javaPath.contains(module.child("test"))) {
                 Play.javaPath.add(module.child("test"));
             }
         }
