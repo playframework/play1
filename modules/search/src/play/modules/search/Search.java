@@ -243,6 +243,9 @@ public class Search {
             
             String name = field.getName();
             String value = valueOf(object, field);
+            
+            if (value==null) continue;
+            
             document.add(new Field(name, value, index.stored()?Field.Store.YES:Field.Store.NO, index.tokenize() ? Field.Index.TOKENIZED:Field.Index.UN_TOKENIZED));
         }
         return document;
