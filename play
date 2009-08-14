@@ -223,8 +223,6 @@ try:
 		global jpda_port
 		try:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-			
 			s.bind(('127.0.0.1', int(jpda_port)))
 			s.close()
 		except socket.error, e:
@@ -496,11 +494,15 @@ try:
 		check_application()
 		load_modules()
 		do_classpath()
+		disable_check_jpda = False
+		if remaining_args.count('-f') == 1:
+			disable_check_jpda = True
+			remaining_args.remove('-f')
 		do_java()
 		print "~ Ctrl+C to stop"
 		print "~ "
 		if application_mode == 'dev':
-			check_jpda()
+			if not disable_check_jpda: check_jpda()
 			java_cmd.insert(2, '-Xdebug')
 			java_cmd.insert(2, '-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % jpda_port)
 			java_cmd.insert(2, '-Dplay.debug=yes')
