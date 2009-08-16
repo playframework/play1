@@ -6,11 +6,13 @@ import java.io.StringWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.exceptions.TagInternalException;
 import play.exceptions.TemplateExecutionException;
 import play.exceptions.TemplateNotFoundException;
+import play.libs.Codec;
 import play.mvc.Router.ActionDefinition;
 import play.templates.Template.ExecutableTemplate;
 
@@ -66,11 +68,21 @@ public class FastTags {
             actionDef = (ActionDefinition) args.get("action");
         }
         if (!("GET".equals(actionDef.method))) {
-            out.print("Not implemented yet");
+            if (!("POST".equals(actionDef.method))) {
+                String separator = actionDef.url.indexOf('?') != -1 ? "&" : "?";
+                actionDef.url += separator + "x-http-method-override=" + actionDef.method;
+                actionDef.method = "POST";
+            }
+            String id = Codec.UUID();
+            out.print("<form method=\"POST\" id=\""+id+"\" style=\"display:none\" action=\"" + actionDef.url + "\"></form>");
+            out.print("<a" + (args.get("id") == null ? "" : "id=\"" + args.get("id") + "\" ") + " href=\"javascript:document.getElementById('"+id+"').submit();\">");
+            out.print(JavaExtensions.toString(body));
+            out.print("</a>");
+        } else {
+            out.print("<a" + (args.get("id") == null ? "" : "id=\"" + args.get("id") + "\" ") + " href=\"" + actionDef.url + "\">");
+            out.print(JavaExtensions.toString(body));
+            out.print("</a>");
         }
-        out.print("<a " + (args.get("id") == null ? "" : "id=\"" + args.get("id") + "\" ") + " href=\"" + actionDef.url + "\">");
-        out.print(JavaExtensions.toString(body));
-        out.print("</a>");
     }
 
     public static void _ifErrors(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {

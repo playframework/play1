@@ -1,6 +1,8 @@
 package play.modules.gae;
 
 import com.google.apphosting.api.ApiProxy.Environment;
+import java.util.HashMap;
+import java.util.Map;
 import play.Play;
 import play.mvc.Scope.Session;
 
@@ -39,6 +41,10 @@ public class PlayDevEnvironment implements Environment {
     }
 
     public void setDefaultNamespace(String ns) {
+    }
+
+    public Map<String, Object> getAttributes() {
+        return new HashMap<String, Object>();
     }
 
 }

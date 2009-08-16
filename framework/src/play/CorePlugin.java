@@ -105,7 +105,11 @@ public class CorePlugin extends PlayPlugin {
         out.println();
         out.println("Threads:");
         out.println("~~~~~~~~");
-        visit(out, getRootThread(), 0);
+        try {
+            visit(out, getRootThread(), 0);
+        } catch(Throwable e) {
+            out.println("Oops; "+e.getMessage());
+        } 
         out.println();
         out.println("Requests execution pool:");
         out.println("~~~~~~~~~~~~~~~~~~~~~~~~");

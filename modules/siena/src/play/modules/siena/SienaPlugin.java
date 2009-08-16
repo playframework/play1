@@ -2,7 +2,6 @@ package play.modules.siena;
 
 import play.Play;
 import play.PlayPlugin;
-import play.classloading.ApplicationClasses.ApplicationClass;
 import siena.Model;
 import siena.PersistenceManager;
 import siena.PersistenceManagerFactory;
@@ -37,10 +36,5 @@ public class SienaPlugin extends PlayPlugin {
             PersistenceManagerFactory.install(persistenceManager, c);
         }
     }
-
-    @Override
-    public void enhance(ApplicationClass applicationClass) throws Exception {
-        new SienaEnhancer().enhanceThisClass(applicationClass);
-    }  
     
 }

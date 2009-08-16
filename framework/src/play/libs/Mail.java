@@ -155,7 +155,7 @@ public class Mail {
             if (replyTo == null) {
                 replyTo = from;
             }
-            if (Play.configuration.getProperty("mail.smtp", "").equals("mock")) {
+            if (Play.configuration.getProperty("mail.smtp", "").equals("mock") && Play.mode == Play.Mode.DEV) {
                 Mock.send(from, replyTo, recipients, subject, body, contentType, attachments);
                 return new Future<Boolean>() {
 

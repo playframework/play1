@@ -443,7 +443,7 @@ try:
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/lib')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/lib'))
 		os.mkdir(os.path.join(war_path, 'WEB-INF/lib'))
 		for jar in classpath:
-			if jar.endswith('.jar') and not jar.find('provided-') > 0:
+			if jar.endswith('.jar') and jar.find('provided-') == -1:
 				shutil.copyfile(jar, os.path.join(war_path, 'WEB-INF/lib/%s' % os.path.split(jar)[1]))
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/framework')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/framework'))
 		os.mkdir(os.path.join(war_path, 'WEB-INF/framework'))
@@ -457,6 +457,7 @@ try:
 			os.remove(os.path.join(to, 'build.xml'))
 		if not os.path.exists(os.path.join(war_path, 'WEB-INF/resources')): os.mkdir(os.path.join(war_path, 'WEB-INF/resources'))
 		shutil.copyfile(os.path.join(play_base, 'resources/messages'), os.path.join(war_path, 'WEB-INF/resources/messages'))
+		
 		if war_zip_path:
 			print "~ Creating zipped archive to %s ..." % (os.path.normpath(war_zip_path))
 			if os.path.exists(war_zip_path):

@@ -18,7 +18,7 @@ import play.Play;
 import play.cache.CacheImpl;
 import play.exceptions.CacheException;
 
-public class GAECache implements CacheImpl {
+public class GAECache implements CacheImpl { 
 
     static MemcacheService memcacheService = MemcacheServiceFactory.getMemcacheService();
 

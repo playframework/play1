@@ -82,4 +82,8 @@ public class ClassResolver implements ClassLoaderResolver {
         //
     }
 
+    public void setRuntimeClassLoader(ClassLoader arg0) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 }

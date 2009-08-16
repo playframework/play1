@@ -13,7 +13,6 @@ import java.util.Enumeration;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
@@ -68,6 +67,21 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         try {
             request = parseRequest(httpServletRequest);
             Logger.trace("ServletWrapper>service, request: " + request);
+            Response response = new Response();
+            Response.current.set(response);
+            response.out = new ByteArrayOutputStream();
+            boolean raw = false;
+            for (PlayPlugin plugin : Play.plugins) {
+                if (plugin.rawInvocation(request, response)) {
+                    raw = true;
+                    break;
+                }
+            }
+            if (raw) {
+                copyResponse(Request.current(), Response.current(), httpServletRequest, httpServletResponse);
+            } else {
+                Invoker.invokeInThread(new ServletInvocation(request, response, httpServletRequest, httpServletResponse));
+            }
         } catch (NotFound e) {
             Logger.trace("ServletWrapper>service, NotFound: " + e);
             serve404(httpServletRequest, httpServletResponse, e);
@@ -76,12 +90,9 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             Logger.trace("ServletWrapper>service, RenderStatic: " + e);
             serveStatic(httpServletResponse, httpServletRequest, e);
             return;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new ServletException(e);
-        }
-        Response response = new Response();
-        response.out = new ByteArrayOutputStream();
-        Invoker.invokeInThread(new ServletInvocation(request, response, httpServletRequest, httpServletResponse));
+        }        
     }
 
     public void serveStatic(HttpServletResponse servletResponse, HttpServletRequest servletRequest, RenderStatic renderStatic) throws IOException {  
@@ -183,7 +194,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                 String value = (String) enumValues.nextElement();
                 hd.values.add(value);
             }
-            request.headers.put(hd.name, hd);
+            request.headers.put(hd.name.toLowerCase(), hd);
         }
 
         request.resolveFormat();

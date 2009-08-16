@@ -3,6 +3,7 @@ package play.modules.gae;
 import play.db.jpa.JPQLDialect;
 
 public class DataNucleusDialect extends JPQLDialect {
+    
     @SuppressWarnings("unused")
     public String createFindByQuery(String entityName, String entityClass, String query, Object... params) {
         if (query == null) {
@@ -22,4 +23,5 @@ public class DataNucleusDialect extends JPQLDialect {
         }
         return "select from " + entityName + " where " + query;
     }
+    
 }

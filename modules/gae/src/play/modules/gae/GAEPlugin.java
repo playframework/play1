@@ -23,7 +23,7 @@ import play.exceptions.UnexpectedException;
 import play.jobs.JobsPlugin;
 import play.libs.IO;
 import play.libs.Mail;
-import play.mvc.Router;
+import play.mvc.Router; 
 
 public class GAEPlugin extends PlayPlugin {
 
@@ -95,12 +95,12 @@ public class GAEPlugin extends PlayPlugin {
             // Hack the JPA plugin
             JPAPlugin.autoTxs = false;
             JPA.entityManagerFactory = Persistence.createEntityManagerFactory("default");
-            JPQLDialect.instance = new DataNucleusDialect();
+            JPQLDialect.instance = new DataNucleusDialect(); 
         }
 
         // Wrap the GAE cache
         if (devEnvironment == null) {
-            Cache.forcedCacheImpl = new GAECache();
+            Cache.forcedCacheImpl = new GAECache(); 
         }
 
         // Provide the correct JavaMail session
@@ -163,6 +163,7 @@ public class GAEPlugin extends PlayPlugin {
     @Override
     public void onConfigurationRead() {
         if (devEnvironment == null) {
+            Play.configuration.remove("smtp.mock");
             Play.configuration.setProperty("application.log", "DEBUG");
         }
     }
