@@ -1,0 +1,17 @@
+~ Name:
+~ ~~~~~
+~ id -- Define the framework ID
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play id
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Display a prompt to define the framework installation id. Each framework installation can have its own id.
+~
+~ Ids can be used in applications configuration files to specify different settings for different environements
+~ or different developers.
+~ 
+~ Setting a framework id is totally optional.
+~

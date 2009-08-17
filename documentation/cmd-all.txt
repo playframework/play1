@@ -1,0 +1,28 @@
+~ For all commands, if the application is not specified, the current directory is used
+~ Use 'play help cmd' to get more help on a specific command
+~
+~ Available commands are: 
+~ ~~~~~~~~~~~~~~~~~~~~~~~
+~ auto-test      Automatically run all application tests
+~ classpath      Display the computed classpath
+~ clean          Delete temporary files (including the bytecode cache)
+~ eclipsify      Create all eclipse configuration files
+~ help           Display help on a specific command
+~ id             Define the framework ID
+~ modules        Display the computed modules list
+~ netbeansify    Create all netbeans configuration files
+~ new            Create a new application
+~ out            Follow logs/system.out file
+~ pid            Show the pid of a running application
+~ precompile     Precompile all Java sources and templates to speed up application start
+~ run            Run the application in the current shell
+~ restart        Restart the running application
+~ secret         Generate a new secret key
+~ status         Display the status of the running application
+~ start          Start the application in background
+~ stop           Stop the running application
+~ test           Run the application in test mode in the current shell
+~ war            Export the application as a standalone WAR archive
+~ 
+~ Also refer to documentation at http://www.playframework.org/documentation
+~ 

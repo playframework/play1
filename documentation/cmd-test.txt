@@ -1,0 +1,30 @@
+~ Name:
+~ ~~~~~
+~ test -- Run the application in test mode in the current shell
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play test [app_path] [-f] [--java_options]
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Run the application hosted at the app_path directory. If app_path is omitted, the current directory is used.
+~ The application is run in foreground in the current shell. You can then stop it using Ctrl+C.
+~
+~ The application is run is test mode: the framework id is forced to 'test' and a web test runner is automatically
+~ started at the /@tests URL.
+~
+~ The script first try to locate the java program using the $JAVA_HOME environment variable (from $JAVA_HOME/bin).
+~ If the $JAVA_HOME variable is not defined, the default java command available from the PATH is used.
+~
+~ All options specified after the application path are passed to the JVM (example. -Xms=64m -Xmx=256m).
+~ All the shell environment variables are passed to the JVM.
+~
+~ A JPDA session is automatically opened on the port specified by the jpda.port property of the conf/application.conf 
+~ file (default to 8000). If the JPDA port is already used, another available port is automatically chosen.
+~
+~ Options:
+~ ~~~~~~~~~
+~ -f: 
+~ Disable the JPDA port checking and force the jpda.port value.
+~

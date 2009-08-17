@@ -1,0 +1,32 @@
+~ Name:
+~ ~~~~~
+~ status -- Display the status of the running application
+~
+~ Alias:
+~ ~~~~~
+~ st
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play status [app_path] [--url=http://...] [--secret=...]
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ This script try to connect to the /@status URL of the running application to request the application status.
+~ The application status contains usefull informations about the running application.
+~
+~ The status command is aimed to monitor application running on production servers.
+~
+~ Options:
+~ ~~~~~~~~
+~ --url: 
+~ The script try to connect to the application at the localhost domain. If you want to monitor an application running on
+~ a remote server, specify the application URL using this option (eg. play status --url=http://myapp.com)
+~
+~ --secret: 
+~ The script uses the secret key to generate an authorization token. It assumes that the secret key available from the
+~ app_path/conf/application.conf is valid. If not you can provide your own secret key using this option 
+~ (eg. play status --secret=bghjT7ZG7ZGCO8)  
+~ 
+~ If you provide both options, you can run this command without a local application directory (app_path is not required).
+~

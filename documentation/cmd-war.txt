@@ -1,0 +1,25 @@
+~ Name:
+~ ~~~~~
+~ war -- Export the application as a standalone WAR archive
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play war [app_path] --output=war_path [--zip]
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Package a snapshot of the play framework and the application hosted at the app_path directory as a WAR package. 
+~ If app_path is omitted, the current directory is used.
+~
+~ All required modules are included as well.
+~
+~ You can then deploy the created WAR to a servlet container like Tomcat or Jetty.
+~
+~ Options:
+~ ~~~~~~~~~
+~ --output, or -o: 
+~ The path where the WAR directory will be created. The content of this directory will first be deleted.
+~
+~ --zip:
+~ By default, the script create an exploded WAR. If you want a zipped archive, specify the --zip option.
+~

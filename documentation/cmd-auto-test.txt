@@ -1,0 +1,33 @@
+~ Name:
+~ ~~~~~
+~ auto-test -- Automatically run all application tests
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play auto-test [app_path]
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Run the application hosted at the app_path directory, run a web browser and run all application tests.
+~ If app_path is omitted, the current directory is used. The application is run in foreground in the current shell. 
+~ You can then stop it using Ctrl+C.
+~
+~ The System.out stream is redirected to the logs/system.out file. All application and framework logs are written to
+~ the test-results/application.log file.
+~
+~ The script first try to locate the java program using the $JAVA_HOME environment variable (from $JAVA_HOME/bin).
+~ If the $JAVA_HOME variable is not defined, the default java command available from the PATH is used.
+~
+~ All options specified after the application path are passed to the JVM (example. -Xms=64m -Xmx=256m).
+~ All the shell environment variables are passed to the JVM.
+~
+~ The script try to run a browser using the OS default registred web browser. If the application has compilation
+~ errors, the script fail without trying to launch the browser.
+~
+~ All tests results are written to the test-results/ directory. If all tests pass, a test-results/result.passed file is
+~ created. If one or more tests fail, a test-results/result.failed file is created.
+~
+~ All the test-results/* content is deleted before running the tests.
+~
+~ This script is aimed to be used in continuous integration environments.
+~

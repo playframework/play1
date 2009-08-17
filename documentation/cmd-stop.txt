@@ -1,0 +1,14 @@
+~ Name:
+~ ~~~~~
+~ stop -- Stop the running application
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play stop [app_path]
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Stop the application hosted at the app_path directory. If app_path is omitted, the current directory is used.
+~
+~ The script locate the running Java process using the server.pid file indication.
+~

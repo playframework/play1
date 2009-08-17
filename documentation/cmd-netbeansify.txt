@@ -1,0 +1,26 @@
+~ Name:
+~ ~~~~~
+~ netbeansify -- Create all netbeans configuration files
+~
+~ Alias:
+~ ~~~~~
+~ nb
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play netbeansify [app_path]
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Create all needed configuration file to make the application hosted at the app_path directory an netbeans project.
+~ If app_path is omitted, the current directory is used. 
+~
+~ All needed configuration files are created in the nbproject directory.
+~
+~ Just open the application as a netbeans project.
+~
+~ Use netbeansify again when you want to update netbeans configuration files. It's needed after any classpath change.
+~
+~ The created configuration file contains absolute references to your application, the play framework and all enabled modules.
+~ These are specific to your own installation. When you work in a team, each developer must keep his IDE configuration files private.
+~

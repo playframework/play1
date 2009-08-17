@@ -1,0 +1,16 @@
+~ Name:
+~ ~~~~~
+~ pid -- Show the pid of a running application
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play pid [app_path]
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Display the content of the app_path.logs/server.pid file.
+~ If app_path is omitted, the current directory is used.
+~
+~ The server.pid file contains the pid of the running Java process when the application is run
+~ in background mode using the 'start' command.
+~

@@ -1,0 +1,24 @@
+~ Name:
+~ ~~~~~
+~ restart -- Restart the running application
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play restart [app_path] [--java_options]
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Restart the application hosted at the app_path directory. If app_path is omitted, the current directory is used.
+~ The application is run in background in the current shell. You can then stop it using the 'stop' command.
+~
+~ The script first try to stop the running application using the server.pid file to locate the running Java process.
+~
+~ The script first try to locate the java program using the $JAVA_HOME environment variable (from $JAVA_HOME/bin).
+~ If the $JAVA_HOME variable is not defined, the default java command available from the PATH is used.
+~
+~ All options specified after the application path are passed to the JVM (example. -Xms=64m -Xmx=256m).
+~ All the shell environment variables are passed to the JVM.
+~
+~ The PID of the created Java process is written to the server.pid file.
+~ The System.out stream is redirected to the logs/system.out file.
+~

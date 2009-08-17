@@ -1,0 +1,20 @@
+~ Name:
+~ ~~~~~
+~ classpath -- Display the computed classpath
+~
+~ Alias:
+~ ~~~~~
+~ cp
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play classpath [app_path]
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Compute and display the Java classpath used to run the application hosted at the app_path directory.
+~ If app_path is omitted, the current directory is used. 
+~
+~ The displayed classpath is the same than the one passed to the JVM using the -cp argument.
+~ The classpath depends of enabled modules in the conf/application.conf file.
+~

@@ -1,0 +1,16 @@
+~ Name:
+~ ~~~~~
+~ new -- Create a new application
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play new app_path
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Create a new application in the app_path directory.
+~ The app_path directory will be automatically created and must not already exist.
+~
+~ The created application is then ready to be run using the 'run' command. It contains a default welcome page
+~ with a guide to first steps.
+~

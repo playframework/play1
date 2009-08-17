@@ -292,30 +292,18 @@ try:
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [help] Display help
 	if play_command == 'help':
-		print "~ Play commands : "
-		print "~ "
-		print "~        new          Create a new application"
-		print "~        run          Run the application in the current window"
-		print "~        start        Start the application in background"
-		print "~        stop         Stop the application"
-		print "~        restart      Restart the application in background"
-		print "~        out          Output latest log messages"
-		print "~        eclipsify    Create eclipse project (use ec as shortcut command)"
-		print "~        netbeansify  Create netbeans project (use nb as shortcut command)"
-		print "~        pid          Show the pid of an application"
-		print "~        cp           Display the computed classpath"
-		print "~        modules      Display the computed modules list"
-		print "~        test         Run the application in test mode"
-		print "~        auto-test    Automactically run all tests"
-		print "~        clean        Delete temporary files"
-		print "~        id           Define the framework ID"
-		print "~        secret       Generate a new secret key"
-		print "~        override     Override a module file in the application"
-		print "~        help         Show more commands"
-		print "~ "
-		print "~ Also refer to documentation at http://www.playframework.org/manual"
-		print "~ "
-		sys.exit(0)	
+		if len(sys.argv) == 3:
+			cmd = sys.argv[2]	
+		else:
+			cmd = 'all'
+		help_file = os.path.join(play_base, 'documentation/cmd-%s.txt' % cmd)
+		if os.path.exists(help_file):
+			print open(help_file, 'r').read()
+			sys.exit(0)	
+		else:
+			print '~ Oops, command not found \'%s\'. Try just \'play help\' to list all commands.' % cmd
+			print '~'
+			sys.exit(-1)			
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [id] Define the framework ID
@@ -577,6 +565,10 @@ try:
 		check_application()
 		load_modules()
 		do_classpath()
+		disable_check_jpda = False
+		if remaining_args.count('-f') == 1:
+			disable_check_jpda = True
+			remaining_args.remove('-f')
 		do_java()
 		print "~ Running in test mode"
 		print "~ Ctrl+C to stop"
@@ -754,6 +746,10 @@ try:
 			print "~"
 			sys.exit(-1)
 		sout = open(os.path.join(log_path, 'system.out'), 'r')
+		try:
+			sout.seek(-5000, os.SEEK_END)
+		except IOError:
+			sout.seek(0)
 		while True:
 			where = sout.tell()
 			line = sout.readline().strip()
@@ -889,12 +885,12 @@ try:
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Invalid command
-	print "~ Usage: play command [application path] [-options]"
+	print "~ Usage: play cmd [app_path] [--options]"
   	print "~ "
   	print "~ with,  new      Create a new application"
-  	print "~        run      Run the application in the current window"
-  	print "~        test     Run the application in test mode"
-  	print "~        help     Show more commands"
+  	print "~        run      Run the application in the current shell"
+  	print "~        test     Run the application in test mode in the current shell"
+  	print "~        help     Show play help"
   	print "~"
 	if len(sys.argv) > 1:
 		print "~ Invalid command : %s" % sys.argv[1]
