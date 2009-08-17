@@ -1,0 +1,23 @@
+#{extends 'main.html' /}
+#{set title:'Edit this list' /}
+
+
+<h1>Edit this list <span class="more">#{a @Lists.delete(list.id)}Or delete it#{/a}</span></h1>
+
+#{form @Lists.save(list.id)}
+
+    <p>
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name" size="60" value="${list.name}" />
+    </p>
+    
+    <p>
+        <label for="notes">Notes (optional)</label>
+        <textarea id="notes" name="notes" cols="60" rows="5">${flash.notes ?: list.notes}</textarea>
+    </p>
+    
+    <p>
+        <input type="submit" value="Save changes"> or <a href="@{Lists.show(list.id)}">Cancel</a>
+    </p>
+
+#{/form}

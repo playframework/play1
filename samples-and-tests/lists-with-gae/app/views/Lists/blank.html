@@ -1,0 +1,15 @@
+#{extends 'main.html' /}
+#{set title:'Create a new list' /}
+
+#{form @Lists.create()}
+
+    <p>
+        <label for="name">What's your new list name ?</label>
+        <input type="text" name="name" id="name" size="60" />
+    </p>
+    
+    <p>
+        <input type="submit" value="Create this list"> or <a href="@{Lists.index()}">Cancel</a>
+    </p>
+
+#{/form}

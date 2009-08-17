@@ -1,0 +1,144 @@
+html, body {
+    font-family: Helvetica, Arial, Sans-Serif;
+    margin: 0;
+    padding: 0;
+}
+
+#notice {
+    background: #FBE551;
+    text-align: center;
+    font-size: 80%;
+    padding: 10px;
+}
+
+#notice a {
+    color: #8A1616;
+    font-weight: bold;
+}
+
+#welcome a {
+    background: #715EB9;
+    color: #fff;
+    display: block;
+    margin: 100px auto;
+    width: 400px;
+    text-decoration: none;
+    padding: 10px 20px;
+    -webkit-border-radius: 9px;
+    text-shadow: 1px 1px rgba(0,0,0,.5);
+    text-align: center;
+    font-size: 100%;
+}
+
+#user {
+    background: #2D5BA6;
+    color: #fff;
+    font-size: 80%;
+    padding: 3px 20px;
+}
+
+a {
+    color: red;
+    font-size: 12px;
+}
+
+p {
+    font-size: 80%;
+}
+
+p.info {
+    background: #FEF8DA;
+    padding: 10px;
+    margin: 10px -10px;
+}
+
+p.error {
+    background: pink;
+    color: #c00;
+    margin: 20px;
+    padding: 5px;
+    text-align: center;
+}
+
+p.success {
+    background: #9AFF7F;
+    color: #1D5701;
+    margin: 20px;
+    padding: 5px;
+    text-align: center;
+}
+
+#user a {
+    color: #fff;
+}
+
+#main {
+    margin: 20px 20px;
+}
+
+#main h1 {
+    background: #EFEFEF;
+    padding: 5px 10px;
+    -webkit-border-radius: 8px;
+    font-size: 150%;
+    padding-right: 50px;
+    margin: 0 -10px;
+}
+
+#main h1 a {
+    font-weight: normal;
+}
+
+#main h1 a#back {
+    color: blue;
+    font-size: inherit;
+}
+
+#main h1 .more {
+    font-size: 13px;
+    margin-left: 10px;
+}
+
+form label {
+    display: block;
+    font-weight: bold;
+    color: #000;
+    font-size: 140%;
+}
+
+form input[type=text] {
+    font-size: 140%;
+}
+
+#lists a {
+    color: blue;
+    font-size: 110%;
+}
+
+#items ul {
+    list-style: none;
+    padding: 0;
+}
+
+#items ul li {
+    font-size: 95%;
+    margin-bottom: 5px;
+}
+
+#done li {
+    color: #888;
+}
+
+#items.sortable li {
+    padding-left: 30px;
+    background: url(../images/drag.gif) center left no-repeat;
+    cursor: move;
+}
+
+#todo .do {
+    display: none;
+}
+
+a.strong {
+    background: #FFFD32;
+}

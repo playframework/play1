@@ -1,0 +1,10 @@
+Hey there-
+
+Here's a copy of the list you just requested via email.
+Items that have been checked off are not included.
+
+#{list items:list.items(), as:'item'}
+* ${item}    
+#{/list}
+
+You can view, modify, and add to the list at: @@{Lists.show(list.id)}

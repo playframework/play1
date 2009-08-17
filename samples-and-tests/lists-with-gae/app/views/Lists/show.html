@@ -1,0 +1,81 @@
+#{extends 'main.html' /}
+#{set title:list /}
+
+<h1><a id="back" href="@{Lists.index()}">My lists:</a> ${list} <span class="more"><a href="@{Lists.edit(list.id)}">Edit</a>#{if items.size() > 1} | <a id="sort" href="#">Reorder</a>#{/if} | #{a @Lists.email(list.id)}Email yourself a copy#{/a}</span></h1>
+
+<div id="items">
+    
+    #{if list.notes}
+        <p>
+            ${list.notes}
+        </p>
+    #{/if}
+
+    <ul id="todo">
+       #{list items:items, as:'item'}
+            <li rel="${item.id}"><input type="checkbox" class="checker" />${item} <span class="do">- <a class="deleter" href="#">delete</a></span></li>
+       #{/list} 
+    </ul>
+
+    #{form @Lists.addItem(list.id)}    
+        <input type="text" name="label" size="30" />
+        <p>
+            <input type="submit" value="+ Add this item">
+        </p>    
+    #{/form}
+
+    <ul id="done">
+       #{list items:oldItems, as:'item'}
+            <li rel="${item.id}" ><input type="checkbox" checked="true" class="checker" />${item} <span class="do">- <a class="deleter" href="#">delete</a></span></li> 
+       #{/list} 
+    </ul>
+
+</div>
+
+<script type="text/javascript" charset="utf-8">
+    // Events
+    $(function() {
+       $('.checker').change(function() {
+           var done = $(this).parents('ul').is("#todo");
+           var li = $(this).parent();
+           $.post('@{Lists.changeItemState(list.id, "000000")}'.replace('000000', li.attr('rel')), {done: done}, function() {
+               if(done) {
+                   $('#done').prepend(li);
+                   $(li).effect('highlight')
+               } else {
+                   $('#todo').append(li);
+                   $(li).effect('highlight')
+               }
+           });
+       });
+       $('.deleter').live('click', function(e) {
+           var l = $(this);
+           e.preventDefault();
+           $.post('@{Lists.deleteItem(list.id, "000000")}'.replace('000000', $(this).parent().parent().attr('rel')), function() {
+              l.parent().parent('li').effect('drop');
+           });
+       });
+       $('#sort').click(function(e) {
+           e.preventDefault();  
+           if($('#items').is('.sortable')) {
+               $(this).html("Redorder").removeClass('strong');
+               $('#items').toggleClass('sortable');
+               $('#items form, #done, #todo input').show();
+               $('#todo').sortable('destroy');
+               // Post result
+               var order = '';
+               $('li[rel]').each(function() {                  
+                   order += ','+$(this).attr('rel');
+               });
+               order = order.substring(1);
+               $.post('@{Lists.reorderItems(list.id)}', {newOrder: order});
+           } else {
+               $(this).html("I'm done reordering").addClass('strong');
+               $('#items').toggleClass('sortable');
+               $('#items form, #done, #todo input').hide();
+               $('#todo').sortable({axis: 'y'});
+           }
+       });
+    });
+    
+</script>

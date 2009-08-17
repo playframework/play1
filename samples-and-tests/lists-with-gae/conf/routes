@@ -1,0 +1,26 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                                       Application.index
+GET     /lists                                  Lists.index
+GET     /lists/new                              Lists.blank
+POST    /lists                                  Lists.create
+GET     /lists/{<\d+>id}                        Lists.show
+DELETE  /lists/{<\d+>id}                        Lists.delete
+GET     /lists/{<\d+>id}/details                Lists.edit
+POST    /lists/{<\d+>id}                        Lists.save    
+POST    /lists/{<\d+>id}/items                  Lists.addItems
+POST    /lists/{<\d+>id}/items/{<\d+>itemId}    Lists.changeItemState 
+POST    /lists/{<\d+>id}/items/reorder          Lists.reorderItems
+POST    /lists/{<\d+>id}/email                  Lists.email
+
+GET     /login                                  Application.login
+GET     /logout                                 Application.logout                   
+
+# Map static resources from the /app/public folder to the /public path
+GET     /assets/                                staticDir:public
+
+# Catch all
+*       /{controller}/{action}                  {controller}.{action}

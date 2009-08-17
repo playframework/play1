@@ -1,0 +1,16 @@
+#{extends 'main.html' /}
+#{set title:'Your lists' /}
+
+<h1>My lists <span class="more"><a href="@{Lists.blank()}">create a new list</a></span></h1>
+    
+#{ifnot lists}
+    <p class="info">
+        You don't have any list yet. <a href="@{Lists.blank()}">Create your first list</a>
+    </p>
+#{/ifnot}
+
+<ol id="lists">
+#{list items:lists, as:'list'}
+    <li><a href="@{Lists.show(list.id)}">${list}</a></li>
+#{/list}
+</ol>

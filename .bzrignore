@@ -53,3 +53,6 @@ modules/search/bin
 modules/search/lib/search.jar
 samples-and-tests/just-test-cases/data
 modules/siena/lib/play-siena.jar
+samples-and-tests/lists-with-gae/logs
+samples-and-tests/lists-with-gae/tmp
+samples-and-tests/lists-with-gae/war/WEB-INF/appengine-generated
