@@ -889,7 +889,6 @@ try:
   	print "~ "
   	print "~ with,  new      Create a new application"
   	print "~        run      Run the application in the current shell"
-  	print "~        test     Run the application in test mode in the current shell"
   	print "~        help     Show play help"
   	print "~"
 	if len(sys.argv) > 1:

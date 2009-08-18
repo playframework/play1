@@ -93,7 +93,7 @@ Tips about everything and anything.
 # "Sending emails":emails
 
 
-h2. <a name="modules">Built-in modules</a>
+h2. <a name="modules">Other batteries included</a>
 
 Other batteries included.
 

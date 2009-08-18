@@ -10,6 +10,8 @@ import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.regex.Pattern;
+import jregex.Matcher;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -32,7 +34,7 @@ public class DBPlugin extends PlayPlugin {
                 // Try the driver
                 String driver = p.getProperty("db.driver");
                 try {
-                    Driver d = (Driver)Class.forName(driver, true, Play.classloader).newInstance();
+                    Driver d = (Driver) Class.forName(driver, true, Play.classloader).newInstance();
                     DriverManager.registerDriver(new ProxyDriver(d));
                 } catch (Exception e) {
                     throw new Exception("Driver not found (" + driver + ")");
@@ -92,13 +94,13 @@ public class DBPlugin extends PlayPlugin {
     public String getStatus() {
         StringWriter sw = new StringWriter();
         PrintWriter out = new PrintWriter(sw);
-        if(DB.datasource == null || !(DB.datasource instanceof ComboPooledDataSource)) {
+        if (DB.datasource == null || !(DB.datasource instanceof ComboPooledDataSource)) {
             out.println("Datasource:");
             out.println("~~~~~~~~~~~");
             out.println("(not yet connected)");
             return sw.toString();
         }
-        ComboPooledDataSource datasource = (ComboPooledDataSource)DB.datasource;
+        ComboPooledDataSource datasource = (ComboPooledDataSource) DB.datasource;
         out.println("Datasource:");
         out.println("~~~~~~~~~~~");
         out.println("Jdbc url: " + datasource.getJdbcUrl());
@@ -132,6 +134,17 @@ public class DBPlugin extends PlayPlugin {
             p.put("db.url", "jdbc:hsqldb:file:" + (new File(Play.applicationPath, "db/db").getAbsolutePath()));
             p.put("db.user", "sa");
             p.put("db.pass", "");
+        }
+
+        Matcher m = new jregex.Pattern("^mysql:(({user}[\\w]+)(:({pwd}[\\w]+))?@)?({name}[\\w]+)$").matcher(p.getProperty("db", ""));
+        if (m.matches()) {
+            String user = m.group("user");
+            String password = m.group("pwd");
+            String name = m.group("name");
+            p.put("db.driver", "com.mysql.jdbc.Driver");
+            p.put("db.url", "jdbc:mysql://localhost/"+name+"?useUnicode=yes&characterEncoding=UTF-8&connectionCollation=utf8_general_ci");
+            if(user != null) p.put("db.user", user);
+            if(password != null) p.put("db.pass", password);
         }
 
         if ((p.getProperty("db.driver") == null) || (p.getProperty("db.url") == null)) {

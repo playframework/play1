@@ -91,6 +91,8 @@ public class JPAPlugin extends PlayPlugin {
     static String getDefaultDialect(String driver) {
         if (driver.equals("org.hsqldb.jdbcDriver")) {
             return "org.hibernate.dialect.HSQLDialect";
+        } else if(driver.equals("com.mysql.jdbc.Driver")) {
+            return "play.db.jpa.MySQLDialect";
         } else {
             String dialect = Play.configuration.getProperty("jpa.dialect");
             if (dialect != null) {
