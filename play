@@ -299,7 +299,7 @@ try:
 			cmd = sys.argv[2]	
 		else:
 			cmd = 'all'
-		help_file = os.path.join(play_base, 'documentation/cmd-%s.txt' % cmd)
+		help_file = os.path.join(play_base, 'documentation/commands/cmd-%s.txt' % cmd)
 		if os.path.exists(help_file):
 			print open(help_file, 'r').read()
 			sys.exit(0)	

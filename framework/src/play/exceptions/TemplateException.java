@@ -5,7 +5,7 @@ import java.util.List;
 import play.templates.Template;
 
 /**
- * An exceptoin during template execution
+ * An exception during template execution
  */
 public abstract class TemplateException extends PlayException implements SourceAttachment {
 

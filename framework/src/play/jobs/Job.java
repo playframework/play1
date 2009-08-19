@@ -13,6 +13,10 @@ import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.libs.Time;
 
+/**
+ * A job is an asynchronously executed unit of work
+ * @param <V> The job result type (if any)
+ */
 public class Job<V> extends Invoker.Invocation implements Callable<V> {
 
     protected ExecutorService executor;

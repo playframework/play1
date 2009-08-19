@@ -14,7 +14,7 @@ import net.sf.oval.context.MethodParameterContext;
 import net.sf.oval.guard.Guard;
 import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
-import play.libs.Java;
+import play.utils.Java;
 import play.mvc.ActionInvoker;
 import play.mvc.Http;
 import play.mvc.Http.Cookie;

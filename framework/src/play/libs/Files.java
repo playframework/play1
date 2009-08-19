@@ -40,17 +40,20 @@ public class Files {
     }
 
     /**
-     * Just delete a file
+     * Just delete a file. If the file is a directory, it's work.
      * @param file The file to delete
      */
     public static boolean delete(File file) {
-        if(file.isDirectory()) {
+        if (file.isDirectory()) {
             return deleteDirectory(file);
         } else {
             return file.delete();
         }
     }
 
+    /**
+     * Recursively delete a directory.
+     */
     public static boolean deleteDirectory(File path) {
         if (path.exists()) {
             File[] files = path.listFiles();

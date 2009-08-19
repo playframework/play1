@@ -16,7 +16,7 @@ import java.util.Map;
 import play.Logger;
 import play.exceptions.UnexpectedException;
 import play.libs.Time;
-import play.libs.Utils;
+import play.utils.Utils;
 
 /**
  * HTTP interface
@@ -153,7 +153,7 @@ public class Http {
          */
         public static ThreadLocal<Request> current = new ThreadLocal<Request>();
         /**
-         * 
+         * The really invoker Java methid
          */
         public transient Method invokedMethod;
         /**

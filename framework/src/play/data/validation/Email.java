@@ -6,6 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import net.sf.oval.configuration.annotation.Constraint;
 
+/**
+ * This field must be a valid email.
+ * Message key: validation.email
+ * $1: field name
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Constraint(checkWith = EmailCheck.class)

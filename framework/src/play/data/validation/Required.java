@@ -6,6 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import net.sf.oval.configuration.annotation.Constraint;
 
+/**
+ * This field is required.
+ * Message key: validation.required
+ * $1: field name
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Constraint(checkWith = RequiredCheck.class)

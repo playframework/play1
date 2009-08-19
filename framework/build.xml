@@ -52,11 +52,11 @@
     </target>
     
     <target name="javadoc" description="Generate the Javadoc">
-        <delete dir="docs" />
+        <delete dir="../documentation/api" />
         <javadoc packagenames="play.*"
                sourcepath="src"           
                defaultexcludes="yes"
-               destdir="docs"
+               destdir="../documentation/api"
                author="false"
                version="true"
                use="true"
@@ -71,7 +71,7 @@
         </javadoc>
     </target>
     
-    <target name="jar" depends="compile,version,modules" description="create play.jar">        
+    <target name="jar" depends="compile,version,modules,javadoc" description="create play.jar">        
         <echo message="${version}" file="src/play/version" />
         <echo message="${version}" file="classes/play/version" />
         <jar destfile="play.jar" basedir="classes">

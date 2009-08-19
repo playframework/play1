@@ -6,7 +6,7 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 import play.Play;
 
 /**
- * JPA exception
+ * Cache related exception
  */
 public class CacheException extends PlayException {
     

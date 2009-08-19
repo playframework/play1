@@ -18,7 +18,7 @@ import play.Play;
 import play.PlayPlugin;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
-import play.libs.Java;
+import play.utils.Java;
 import play.libs.Time;
 
 public class JobsPlugin extends PlayPlugin {

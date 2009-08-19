@@ -4,9 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.Cipher;
@@ -26,6 +23,9 @@ public class Crypto {
 
     static final char[] HEX_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
+    /**
+     * Sign a message using the application secret key (HMAC-SHA1)
+     */
     public static String sign(String message){
         return sign(message, Play.secretKey.getBytes());
     }
@@ -69,7 +69,7 @@ public class Crypto {
     }
 
     /**
-     * Create a password hash
+     * Create an MD5 password hash
      * @param input The password
      * @return The password hash
      */

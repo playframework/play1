@@ -84,6 +84,6 @@ public class StringList extends ArrayList<String> implements UserType {
     }
     
     public char getSeparator() {
-        return ',';
+        return '|';
     }
 }

@@ -8,7 +8,7 @@ import net.sf.oval.context.FieldContext;
 import net.sf.oval.context.MethodParameterContext;
 import net.sf.oval.context.OValContext;
 import play.exceptions.UnexpectedException;
-import play.libs.Java;
+import play.utils.Java;
 
 public class ValidCheck extends AbstractAnnotationCheck<Required> {
 

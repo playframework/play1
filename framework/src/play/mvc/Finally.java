@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Mark this method as @Before interceptor
+ * Mark this method as @Finally interceptor
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

@@ -23,7 +23,7 @@ import play.exceptions.ActionNotFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
-import play.libs.Java;
+import play.utils.Java;
 import play.mvc.results.NotFound;
 import play.mvc.results.Ok;
 

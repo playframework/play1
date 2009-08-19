@@ -23,7 +23,7 @@ import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.TemplateNotFoundException;
 import play.exceptions.UnexpectedException;
-import play.libs.Java;
+import play.utils.Java;
 import play.libs.Time;
 import play.mvc.Http.Request;
 import play.mvc.results.Error;
@@ -429,7 +429,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
     }
 
     /**
-     *
+     * Call the parent action adding this objects to the params scope
      */
     protected static void parent(Object... args) {
         Map<String, Object> map = new HashMap();
@@ -442,10 +442,16 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
         parent(map);
     }
 
+    /**
+     * Call the parent method
+     */
     protected static void parent() {
         parent(new HashMap());
     }
 
+    /**
+     * Call the parent action adding this objects to the params scope
+     */
     protected static void parent(Map<String, Object> map) {
         try {
             Method method = Http.Request.current().invokedMethod;
@@ -488,11 +494,17 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
         }
     }
 
+    /**
+     * Suspend the current request for a specified amount of time
+     */
     protected static void suspend(String timeout) {
         Request.current().isNew = false;
         throw new Suspend(Time.parseDuration(timeout));
     }
 
+    /**
+     * Suspend this request and wait for the task completion
+     */
     protected static void waitFor(Future task) {
         Request.current().isNew = false;
         throw new Suspend(task);

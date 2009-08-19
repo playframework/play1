@@ -18,5 +18,6 @@ public class LocaleBinder implements SupportedType<Locale> {
         }
         return Locale.getDefault();
     }
+    
 }
 

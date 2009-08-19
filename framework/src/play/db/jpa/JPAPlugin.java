@@ -16,7 +16,7 @@ import play.Play;
 import play.PlayPlugin;
 import play.db.DB;
 import play.exceptions.JPAException;
-import play.libs.Utils;
+import play.utils.Utils;
 
 /**
  * JPA Plugin

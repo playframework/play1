@@ -26,16 +26,15 @@ import play.data.validation.Validation;
  */
 public class Binder {
 
-    static Map<Class, SupportedType> supportedTypes = new HashMap<Class, SupportedType>();
-    
+    static Map<Class, SupportedType> supportedTypes = new HashMap<Class, SupportedType>();    
 
     static {
         supportedTypes.put(Date.class, new DateBinder());
         supportedTypes.put(File.class, new FileBinder());
         supportedTypes.put(Calendar.class, new CalendarBinder());
         supportedTypes.put(Locale.class, new LocaleBinder());
-
     }
+    
     static Map<Class, BeanWrapper> beanwrappers = new HashMap<Class, BeanWrapper>();
 
     static BeanWrapper getBeanWrapper(Class clazz) {

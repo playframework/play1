@@ -133,7 +133,7 @@ public class Images {
     }
 
     /**
-     * Encode an image to base64
+     * Encode an image to base64 using a data: URI
      * @param image The image file
      * @return The base64 encoded value
      * @throws java.io.IOException
@@ -142,14 +142,23 @@ public class Images {
         return "data:" + MimeTypes.getMimeType(image.getName()) + ";base64," + Codec.encodeBASE64(IO.readContent(image));
     }
 
+    /**
+     * Create a captche image
+     */
     public static Captcha captcha(int width, int height) {
         return new Captcha(width, height);
     }
 
+    /**
+     * Create a 150x150 captcha image
+     */
     public static Captcha captcha() {
         return captcha(150, 50);
     }
 
+    /**
+     * A captcha image.
+     */
     public static class Captcha extends InputStream {
 
         public String text = null;
@@ -167,19 +176,31 @@ public class Images {
             this.fonts.add(new Font("Courier", Font.BOLD, 40));
         }
 
+        /**
+         * Tell the captche to draw a text and retrieve it
+         */
         public String getText() {
             return getText(5);
         }
 
+        /**
+         * Tell the captche to draw a text using the specified color (ex. #000000) and retrieve it
+         */
         public String getText(String color) {
             this.textColor = Color.decode(color);
             return getText();
         }
 
+        /**
+         * Tell the captche to draw a text of the specified size and retrieve it
+         */
         public String getText(int length) {
             return getText(length, "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789");
         }
 
+        /**
+         * Tell the captche to draw a text of the specified size using the specified color (ex. #000000) and retrieve it
+         */
         public String getText(String color, int length) {
             this.textColor = Color.decode(color);
             return getText(length);
@@ -201,16 +222,25 @@ public class Images {
             return getText(length, chars);
         }
 
+        /**
+         * Add noise to the captcha.
+         */
         public Captcha addNoise() {
             noise = Color.BLACK;
             return this;
         }
 
+        /**
+         * Add noise to the captcha.
+         */
         public Captcha addNoise(String color) {
             noise = Color.decode(color);
             return this;
         }
 
+        /**
+         * Set a gradient background.
+         */
         public Captcha setBackground(String from, String to) {
             GradiatedBackgroundProducer bg = new GradiatedBackgroundProducer();
             bg.setFromColor(Color.decode(from));
@@ -219,11 +249,17 @@ public class Images {
             return this;
         }
 
+        /**
+         * Set a solid background.
+         */
         public Captcha setBackground(String color) {
             background = new FlatColorBackgroundProducer(Color.decode(color));
             return this;
         }
 
+        /**
+         * Set a squiggles background
+         */
         public Captcha setSquigglesBackground() {
             background = new SquigglesBackgroundProducer();
             return this;

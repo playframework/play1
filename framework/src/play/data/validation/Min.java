@@ -6,6 +6,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import net.sf.oval.configuration.annotation.Constraint;
 
+/**
+ * This field must be greater than.
+ * Message key: validation.min
+ * $1: field name
+ * $2: reference value
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Constraint(checkWith = MinCheck.class)

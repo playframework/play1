@@ -15,9 +15,7 @@ import play.exceptions.UnexpectedException;
 public class BeanWrapper {
 
     final static int notwritableField = Modifier.FINAL | Modifier.NATIVE | Modifier.STATIC;
-
     final static int notaccessibleMethod = Modifier.NATIVE | Modifier.STATIC;
-
     private Class beanClass;
 
     /** 

@@ -5,6 +5,9 @@ import play.exceptions.UnexpectedException;
 
 public class BaseTest extends org.junit.Assert {
 
+    /**
+     * Pause the current thread
+     */
     public void pause(long millis) {
         try {
             Thread.sleep(millis);
@@ -13,6 +16,9 @@ public class BaseTest extends org.junit.Assert {
         }
     }
     
+    /**
+     * Flush and clear the JPA session
+     */
     public void clearJPASession() {
         JPA.em().flush();
         JPA.em().clear();

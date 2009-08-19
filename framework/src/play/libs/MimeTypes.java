@@ -12,8 +12,7 @@ import java.util.regex.Pattern;
 public class MimeTypes {
 
     private static Properties mimetypes;
-    private static Pattern extPattern;
-    
+    private static Pattern extPattern;    
 
     static {
         try {
@@ -56,6 +55,7 @@ public class MimeTypes {
         }
         return defaultMimeType;
     }
+    
     /**
      * return the content-type from a file name. If none is found returning application/octet-stream<br/>
      * For a text-based content-type, also return the encoding suffix eg. <em>"text/plain; charset=utf-8"</em>
@@ -65,6 +65,7 @@ public class MimeTypes {
     public static String getContentType(String filename){
     	return getContentType(filename, "application/octet-stream");
     }
+    
     /**
      * return the content-type from a file name.<br/>
      * For a text-based content-type, also return the encoding suffix eg. <em>"text/plain; charset=utf-8"</em>
@@ -82,10 +83,10 @@ public class MimeTypes {
     	}
     	return contentType;
     }
+    
     /**
      * check the mimetype is referenced in the mimetypes database
      * @param mimeType the mimeType to verify
-     * @return
      */
     public static boolean isValidMimeType(String mimeType) {
         if (mimeType == null) {
@@ -96,4 +97,5 @@ public class MimeTypes {
             return mimetypes.contains(mimeType);
         }
     }
+    
 }

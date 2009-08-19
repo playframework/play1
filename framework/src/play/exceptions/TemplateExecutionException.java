@@ -3,7 +3,7 @@ package play.exceptions;
 import play.templates.Template;
 
 /**
- * An exceptoin during template execution
+ * An exception during template execution
  */
 public class TemplateExecutionException extends TemplateException {
 

@@ -28,7 +28,7 @@ import play.PlayPlugin;
 import play.data.validation.Validation;
 import play.exceptions.PlayException;
 import play.libs.MimeTypes;
-import play.libs.Utils;
+import play.utils.Utils;
 import play.mvc.ActionInvoker;
 import play.mvc.Http;
 import play.mvc.Router;

@@ -30,8 +30,7 @@ public abstract class DataParser {
 
     // ~~~~~~~~ Repository 
     public abstract Map<String, String[]> parse(InputStream is);    
-    public static Map<String, DataParser> parsers = new HashMap<String, DataParser>();
-    
+    public static Map<String, DataParser> parsers = new HashMap<String, DataParser>();    
 
     static {
         parsers.put("application/x-www-form-urlencoded", new UrlEncodedParser());

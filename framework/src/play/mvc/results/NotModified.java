@@ -3,6 +3,9 @@ package play.mvc.results;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
+/**
+ * 304 Not Modified
+ */
 public class NotModified extends Result {
 
     String etag;

@@ -74,6 +74,9 @@ public class JPA {
         return entityManagerFactory != null;
     }
     
+    /**
+     * Execute a JPQL query
+     */
     public static int execute(String query) {
         return em().createQuery(query).executeUpdate();
     }

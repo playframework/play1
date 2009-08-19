@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
-import play.libs.Utils;
+import play.utils.Utils;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.vfs.VirtualFile;

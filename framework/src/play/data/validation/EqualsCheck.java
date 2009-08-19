@@ -11,8 +11,7 @@ import net.sf.oval.context.MethodParameterContext;
 import net.sf.oval.context.OValContext;
 import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
-import play.i18n.Messages;
-import play.libs.Java;
+import play.utils.Java;
 import play.mvc.Scope;
 
 public class EqualsCheck extends AbstractAnnotationCheck<Equals> {

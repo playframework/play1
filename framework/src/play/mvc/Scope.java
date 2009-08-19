@@ -15,7 +15,7 @@ import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
 import play.libs.Codec;
 import play.libs.Crypto;
-import play.libs.Utils;
+import play.utils.Utils;
 
 /**
  * All application Scopes

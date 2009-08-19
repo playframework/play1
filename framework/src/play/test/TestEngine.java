@@ -17,13 +17,8 @@ import play.Logger;
 
 /**
  * Run application tests
- * ??
  */
 public class TestEngine {
-
-    public static void main(String[] args) {
-        // TODO
-    }
 
     static ExecutorService executor = Executors.newCachedThreadPool();
 

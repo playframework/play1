@@ -47,7 +47,7 @@ import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.Codec;
-import play.libs.Java;
+import play.utils.Java;
 import play.mvc.ActionInvoker;
 import play.mvc.Http.Request;
 import play.mvc.Router;

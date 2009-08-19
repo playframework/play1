@@ -22,10 +22,16 @@ public class Validation {
     protected Validation() {
     }
 
+    /**
+     * @return The current validation helper
+     */
     public static Validation current() {
         return current.get();
     }
 
+    /**
+     * @return The list of all errors
+     */
     public static List<Error> errors() {
         return new ArrayList<Error>(current.get().errors) {
             
@@ -40,6 +46,9 @@ public class Validation {
         };
     }
 
+    /**
+     * @return All errors keyed by field name
+     */
     public Map<String, List<Error>> errorsMap() {
         Map<String, List<Error>> result = new LinkedHashMap<String, List<Error>>();
         for (Error error : errors()) {
@@ -48,52 +57,76 @@ public class Validation {
         return result;
     }
 
-    public static void addError(String key, String message, String... variables) {
-        if(error(key) == null || !error(key).message.equals(message)) {
-            Validation.current().errors.add(new Error(key, message, variables));
+    /**
+     * Add an error
+     * @param field Field name
+     * @param message Message key
+     * @param variables Message variables
+     */
+    public static void addError(String field, String message, String... variables) {
+        if(error(field) == null || !error(field).message.equals(message)) {
+            Validation.current().errors.add(new Error(field, message, variables));
         }
     }
 
+    /**
+     * @return True if the current request has errors
+     */
     public static boolean hasErrors() {
         return current.get().errors.size() > 0;
     }
 
-    public static Error error(String key) {
+    /**
+     * @param field The field name
+     * @return First error related to this field
+     */
+    public static Error error(String field) {
         for (Error error : current.get().errors) {
-            if (error.key.equals(key)) {
+            if (error.key.equals(field)) {
                 return error;
             }
         }
         return null;
     }
 
-    public static List<Error> errors(String key) {
+    /**
+     * @param field The field name
+     * @return All errors related to this field
+     */
+    public static List<Error> errors(String field) {
         List<Error> errors = new ArrayList<Error>();
         for (Error error : current.get().errors) {
-            if (error.key.equals(key)) {
+            if (error.key.equals(field)) {
                 errors.add(error);
             }
         }
         return errors;
     }
 
+    /**
+     * Keep errors for the next request (will be stored in a cookie)
+     */
     public static void keep() {
         current.get().keep = true;
     }
 
-    public static boolean hasError(String key) {
-        return error(key) != null;
+    /**
+     * @param field The field name
+     * @return True is there are errors related to this field
+     */
+    public static boolean hasError(String field) {
+        return error(field) != null;
     }
     
     // ~~~~ Integration helper
     
-    public static Map<String,List<Validator>> getValidators(Class clazz, String name) {
+    static Map<String,List<Validator>> getValidators(Class clazz, String name) {
         Map<String,List<Validator>> result = new HashMap<String,List<Validator>>();
         searchValidator(clazz, name, result);
         return result;
     }
     
-    public static List<Validator> getValidators(Class clazz, String property, String name) {
+    static List<Validator> getValidators(Class clazz, String property, String name) {
         try {
             Field field = clazz.getDeclaredField(property);
             List<Validator> validators = new ArrayList<Validator>();

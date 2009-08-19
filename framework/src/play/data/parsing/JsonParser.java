@@ -33,7 +33,7 @@ public class JsonParser extends DataParser {
         internalParse("", result, jt.nextToken());
         return result;
     }
-    //// 
+
     private void internalParse(String name, Map<String, String[]> result, Token tok) {
         String nextname = null;
         

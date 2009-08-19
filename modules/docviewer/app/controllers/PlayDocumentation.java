@@ -13,7 +13,7 @@ public class PlayDocumentation extends Controller {
     }
     
     public static void page(String id) throws Exception {
-        File page = new File(Play.frameworkPath, "documentation/"+id+".textile");
+        File page = new File(Play.frameworkPath, "documentation/manual/"+id+".textile");
         if(!page.exists()) {
             notFound("Manual page for "+id+" not found");
         }

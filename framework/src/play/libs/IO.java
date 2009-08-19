@@ -84,6 +84,12 @@ public class IO {
         return result;
     }
 
+    /**
+     * Read binary content of a stream (warning does not use on large file !)
+     * @param is The stream to read
+     * @return The binary data
+     * @throws java.io.IOException
+     */
     public static byte[] readContent(InputStream is) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int read = 0;
@@ -136,6 +142,9 @@ public class IO {
         os.close();
     }
 
+    /**
+     * Copy an stream to another one.
+     */
     public static void write(InputStream is, OutputStream os) throws IOException {
         int read = 0;
         byte[] buffer = new byte[8096];

@@ -88,6 +88,9 @@ public class Codec {
         }
     }
 
+    /**
+     * Write a byte array as hexedecimal String.
+     */
     public static String byteToHexString(byte[] bytes) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < bytes.length; ++i) {
@@ -104,6 +107,9 @@ public class Codec {
         return builder.toString();
     }
 
+    /**
+     * Transform an hexadecimal String to a byte array.
+     */
     public static byte[] hexStringToByte(String hexString) {
         byte[] raw = new byte[16];
         for(int i=0;i<16;i++) {

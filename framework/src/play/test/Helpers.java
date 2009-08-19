@@ -9,20 +9,19 @@ public class Helpers {
 
     public static String[] seleniumCommand(String command) {
         Matcher matcher = pattern.matcher(command.trim());
-		if(matcher.matches()) {
+        if (matcher.matches()) {
             String[] result = new String[3];
             result[0] = matcher.group(1);
             result[1] = matcher.group(2);
             result[2] = matcher.group(3);
-            for(int i=0; i<result.length; i++) {
-                if(result[i].matches("^'.*'$")) {
-                    result[i] = result[i].substring(1, result[i].length()-1);
+            for (int i = 0; i < result.length; i++) {
+                if (result[i].matches("^'.*'$")) {
+                    result[i] = result[i].substring(1, result[i].length() - 1);
                 }
             }
-			return result;
-		} else {
-			return null;
-		}
+            return result;
+        } else {
+            return null;
+        }
     }
-
 }
