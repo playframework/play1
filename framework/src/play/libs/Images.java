@@ -3,11 +3,8 @@ package play.libs;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.IndexColorModel;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -29,7 +26,6 @@ import nl.captcha.backgrounds.TransparentBackgroundProducer;
 import nl.captcha.gimpy.GimpyRenderer;
 import nl.captcha.gimpy.RippleGimpyRenderer;
 import nl.captcha.noise.CurvedLineNoiseProducer;
-import nl.captcha.text.producer.DefaultTextProducer;
 import nl.captcha.text.renderer.DefaultWordRenderer;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http.Response;
@@ -81,9 +77,12 @@ public class Images {
             graphics.drawImage(srcSized, 0, 0, null);
             ImageWriter writer = ImageIO.getImageWritersByMIMEType(mimeType).next();
             ImageWriteParam params = writer.getDefaultWriteParam();
-            writer.setOutput(new FileImageOutputStream(to));
+            FileImageOutputStream toFs = new FileImageOutputStream(to);
+            writer.setOutput(toFs);
             IIOImage image = new IIOImage(dest, null, null);
             writer.write(null, image, params);
+            toFs.flush();
+            toFs.close();
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -158,20 +157,20 @@ public class Images {
         public GimpyRenderer gimpy = new RippleGimpyRenderer();
         public Color textColor = Color.BLACK;
         public List<Font> fonts = new ArrayList<Font>();
-        public int w, h;
+        public  int w,   h;
         public Color noise = null;
 
         public Captcha(int w, int h) {
             this.w = w;
             this.h = h;
             this.fonts.add(new Font("Arial", Font.BOLD, 40));
-            this.fonts.add(new Font("Courier", Font.BOLD, 40));	
+            this.fonts.add(new Font("Courier", Font.BOLD, 40));
         }
 
         public String getText() {
             return getText(5);
         }
-        
+
         public String getText(String color) {
             this.textColor = Color.decode(color);
             return getText();
@@ -180,7 +179,7 @@ public class Images {
         public String getText(int length) {
             return getText(length, "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789");
         }
-        
+
         public String getText(String color, int length) {
             this.textColor = Color.decode(color);
             return getText(length);
@@ -190,23 +189,23 @@ public class Images {
             char[] charsArray = chars.toCharArray();
             Random random = new Random(System.currentTimeMillis());
             StringBuffer sb = new StringBuffer();
-            for(int i=0; i<length; i++) {
+            for (int i = 0; i < length; i++) {
                 sb.append(charsArray[random.nextInt(charsArray.length)]);
             }
             text = sb.toString();
             return text;
         }
-        
+
         public String getText(String color, int length, String chars) {
             this.textColor = Color.decode(color);
             return getText(length, chars);
         }
-        
+
         public Captcha addNoise() {
             noise = Color.BLACK;
             return this;
         }
-        
+
         public Captcha addNoise(String color) {
             noise = Color.decode(color);
             return this;
@@ -219,7 +218,7 @@ public class Images {
             background = bg;
             return this;
         }
-       
+
         public Captcha setBackground(String color) {
             background = new FlatColorBackgroundProducer(Color.decode(color));
             return this;
@@ -228,9 +227,7 @@ public class Images {
         public Captcha setSquigglesBackground() {
             background = new SquigglesBackgroundProducer();
             return this;
-        }
-        
-        // ~~ rendering
+        }        // ~~ rendering
         ByteArrayInputStream bais = null;
 
         @Override
@@ -255,10 +252,10 @@ public class Images {
                     DefaultWordRenderer renderer = new DefaultWordRenderer(textColor, fonts);
                     bi = background.addBackground(bi);
                     renderer.render(text, bi);
-                    if(noise != null) {
+                    if (noise != null) {
                         new CurvedLineNoiseProducer(noise, 3.0f).makeNoise(bi);
                     }
-                    gimpy.gimp(bi); 
+                    gimpy.gimp(bi);
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     ImageIO.write(bi, "png", baos);
                     bais = new ByteArrayInputStream(baos.toByteArray());
