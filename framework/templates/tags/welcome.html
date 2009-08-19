@@ -1,42 +1,85 @@
-<style type="text/css">
-    html, body {
-        margin: 0;
-        padding: 0;
-        font-family: Helvetica, Arial, Sans;
-        background: #EEEEEE;
-    }            
-    .block {
-        padding: 20px;
-        border-bottom: 1px solid #aaa;
-    }
-    #header h1 {
-        font-weight: normal;
-        font-size: 28px;
-        margin: 0;
-    }
-    #header {
-        background: #DCFCD2;
-    }
-    #header p, #header li {
-        color: #333;
-    }        
-    #why {
-        font-size: 80%;
-    }
-</style>
-<div id="header" class="block">
-    <h1>
-        Your application is ready !
-    </h1>
-    <p>
-        But is empty ... What to do now ?                
-    </p>
-    <ol>
-        <li><a href="/@documentation">Check the documentation</a></li>
-        <li>Edit the <strong>/app/controllers/Application.java</strong> controller</li>
-        <li><a href="/">And reload !</a></li>
-    </ol>
-</div> 
-<div id="why" class="block">
-    ${play.configuration.getProperty("application.name", "")} (${play.applicationPath}) with play-${play.version}
+<link rel="stylesheet" href="/public/playmanual/manual.css" type="text/css" media="screen" charset="utf-8">
+<div id="main">
+    <div id="body">
+        <div id="page">
+            <div id="bc">
+                Play framework, ${play.version}
+            </div>
+            <h1>Your application is ready !</h1>
+            <p>
+                Congratulation, you've just created a new play application. This page will help you in the few next steps.
+                <a href="#" onclick="var env = document.getElementById('env'); env.style.display=(env.style.display == 'none' ? 'block' : 'none')">
+                    Click here to get more informations about your application environment
+                </a>.
+            </p>
+            <code id="env" style="display:none; background: rgb(255, 254, 178); border-bottom: 1px solid rgb(255, 179, 32); border-top: 1px solid rgb(255, 179, 32)"><pre>${play.CorePlugin.computeApplicationStatus()}</pre></code>
+            <h2><a name="why">Why do you see this page ?</a></h2>
+            <p>
+                The <strong>conf/routes</strong> file defines a route that tell play to invoke the <strong>Application.index</strong> action
+                when a browser requests the <strong>/</strong> URI using the <strong>GET</strong> method:
+            </p>
+            <code><pre># Home page
+GET     /         Application.index</pre></code>
+            <p>
+                So play has invoked the <strong>controllers&#46;Application&#46;index()</strong> method:
+            </p>
+            <code><pre>public static void index() {
+    render();
+}</pre></code>
+            <p>
+                Using the <strong>render()</strong> call, this action asks play to display a template. By convention play has
+                displayed the <strong>app/views/Application/index.html</strong> template:
+            </p>
+            <code><pre>&#35;{extends 'main.html' /}
+&#35;{set title:'Home' /}
+
+&#35;{welcome /}</pre></code>
+            <p>
+                This template extends the <strong>app/views/main.html</strong>, and uses the <strong>&#35;{welcome /}</strong> tag to display this
+                welcome page.
+            </p>
+            <h2><a name="ide">Need to set up a Java IDE ?</a></h2>
+            <p>
+                You can start right now to hack your application using any text editor. Any changes will be automatically realoaded at the
+                next page refresh, including modifications made to Java sources files.
+            </p>
+            <p>
+                If you want to set up your application in <strong>Eclipse</strong>, <strong>Netbeans</strong> or any other Java IDE, check
+                the <a href="/@documentation/ide">Setting up your preferred IDE</a> page.
+            </p>
+            <h2><a name="db">Need to connect to a database ?</a></h2>
+            <p>
+                You can quickly set up a developement database (either in memory or written to the filesystem), by adding one of these
+                lines to the <strong>conf/application.conf</strong> file:
+            </p>
+<code><pre># For a transient in memory database (HSQL in memory)
+db=mem
+
+# for a simple file written database (HSQL file stored)
+db=fs</pre></code>
+            <p>
+                If you want to connect to an existing <strong>MySQL5 server</strong>, use:
+            </p>
+<code><pre>db=mysql:user:pwd@database_name</pre></code>             
+            </p>
+            <p>
+                If you need to connect to another JDBC compliant database, first add the corresponding driver library to the
+                <strong>lib/</strong> directory of your application, and add these lines to the <strong>conf/application.conf</strong> file:
+            </p>
+            <code><pre>db.url=jdbc:postgresql:database_name
+db.driver=org.postgresql.Driver
+db.user=root
+db.pass=secret</pre></code>      
+            <h2><a name="doc">Need more help ?</a></h2>
+            <p>
+                When your application run in <strong>DEV</strong> mode, you can access directly the current documentation at the
+                <a href="/@documentation">/@documentation</a> URL or go to <a href="http://www.playframework.org">http://www.playframework.org</a>.
+            </p>
+            <p>
+                The <a href="#">Play Google Group</a> is where Play users come to seek help, announce projects, and discuss. 
+                If you don't have any google account, you can still join the mailing list sending an email to
+                <br/><strong>play-framework+subscribe@googlegroups.com</strong>.
+            </p>
+        </div>
+    </div>
 </div>

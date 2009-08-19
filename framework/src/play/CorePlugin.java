@@ -17,40 +17,47 @@ import play.mvc.Http.Response;
 public class CorePlugin extends PlayPlugin {
 
     /**
+     * Get the appication status
+     */
+    public static String computeApplicationStatus() {
+        StringBuffer dump = new StringBuffer();
+        for (PlayPlugin plugin : Play.plugins) {
+            try {
+                String status = plugin.getStatus();
+                if (status != null) {
+                    dump.append(status);
+                    dump.append("\n");
+                }
+            } catch (Throwable e) {
+                dump.append(plugin.getClass().getName() + ".getStatus() has failed (" + e.getMessage() + ")");
+            }
+        }
+        return dump.toString();
+    }
+
+    /**
      * Intercept /@status and check that the Authorization header is valid. 
      * Then ask each plugin for a status dump and send it over the HTTP response.
      */
     @Override
     public boolean rawInvocation(Request request, Response response) throws Exception {
         if (request.path.equals("/@status")) {
-            if(!Play.started) {
+            if (!Play.started) {
                 response.status = 503;
                 response.print("Not started");
                 return true;
             }
             response.contentType = "text/plain";
             Header authorization = request.headers.get("authorization");
-            if(authorization != null && Crypto.sign("@status").equals(authorization.value())) {
-                StringBuffer dump = new StringBuffer();
-                for (PlayPlugin plugin : Play.plugins) {
-                    try {
-                        String status = plugin.getStatus();
-                        if (status != null) {
-                            dump.append(status);
-                            dump.append("\n");
-                        }
-                    } catch (Throwable e) {
-                        dump.append(plugin.getClass().getName() + ".getStatus() has failed (" + e.getMessage() + ")");
-                    }
-                }                
-                response.status = 200;
-                response.print(dump);
+            if (authorization != null && Crypto.sign("@status").equals(authorization.value())) {
+                response.print(computeApplicationStatus());
+                response.status = 200;                
                 return true;
             } else {
                 response.status = 401;
                 response.print("Not authorized");
                 return true;
-            }            
+            }
         }
         return super.rawInvocation(request, response);
     }
@@ -99,17 +106,17 @@ public class CorePlugin extends PlayPlugin {
         out.println();
         out.println("Configuration:");
         out.println("~~~~~~~~~~~~~~");
-        for(Object key : Play.configuration.keySet()) {
-            out.println(key+"="+Play.configuration.getProperty(key.toString()));
+        for (Object key : Play.configuration.keySet()) {
+            out.println(key + "=" + Play.configuration.getProperty(key.toString()));
         }
         out.println();
         out.println("Threads:");
         out.println("~~~~~~~~");
         try {
             visit(out, getRootThread(), 0);
-        } catch(Throwable e) {
-            out.println("Oops; "+e.getMessage());
-        } 
+        } catch (Throwable e) {
+            out.println("Oops; " + e.getMessage());
+        }
         out.println();
         out.println("Requests execution pool:");
         out.println("~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -122,13 +129,15 @@ public class CorePlugin extends PlayPlugin {
         out.println("~~~~~~~~");
         Object[][] data = Misc.sort(MonitorFactory.getRootMonitor().getBasicData(), 3, "desc");
         int lm = 10;
-        for(Object[] row : data) {
-            if(row[0].toString().length() > lm) {
+        for (Object[] row : data) {
+            if (row[0].toString().length() > lm) {
                 lm = row[0].toString().length();
             }
         }
-        for(Object[] row : data) {
-            out.println(String.format("%-"+(lm)+"s -> %8.0f hits; %8.1f avg; %8.1f min; %8.1f max;", row[0], row[1], row[2], row[6], row[7]));
+        for (Object[] row : data) {
+            if(((Double)row[1])>0) {
+                out.println(String.format("%-" + (lm) + "s -> %8.0f hits; %8.1f avg; %8.1f min; %8.1f max;", row[0], row[1], row[2], row[6], row[7]));
+            }
         }
         return sw.toString();
     }
