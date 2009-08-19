@@ -2,6 +2,7 @@ package play.db.jpa;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import play.exceptions.JPAException;
 
 /**
  * JPA Support
@@ -15,7 +16,7 @@ public class JPA {
 
     static JPA get() {
         if (local.get() == null) {
-            throw new IllegalStateException("The JPA context is not initialized.");
+            throw new JPAException("The JPA context is not initialized. JPA Entity Manager automatically start when one or more classes annotated with the @javax.persistence.Entity annotation are found in the application.");
         }
         return local.get();
     }

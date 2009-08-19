@@ -486,7 +486,7 @@ public class Logger {
             } else {
                 errorOut.println(playException.getErrorTitle());
             }
-            errorOut.println(playException.getErrorDescription().replace("<strong>", "").replace("</strong>", "").replace("\n", " "));
+            errorOut.println(playException.getErrorDescription().replaceAll("</?\\w+/?>", "").replace("\n", " "));
             if (forceJuli || log4j == null) {
                 juli.log(toJuliLevel(priority.toString()), sw.toString(), e);
             } else {

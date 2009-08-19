@@ -379,6 +379,14 @@ public class ApplicationClassloader extends ClassLoader {
         return results;
     }
     
+    public List<Class> getAnnotatedClasses(Class[] clazz) {
+        List<Class> results = new ArrayList<Class>();
+        for(Class cl : clazz) {
+            results.addAll(getAnnotatedClasses(cl));
+        }
+        return results;
+    }
+    
     // ~~~ Intern
     
     List<ApplicationClass> getAllClasses(String basePackage) {
