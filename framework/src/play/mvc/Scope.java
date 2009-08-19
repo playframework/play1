@@ -1,6 +1,5 @@
 package play.mvc;
 
-import java.io.ByteArrayOutputStream;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -129,6 +128,10 @@ public class Scope {
         public boolean contains(String key) {
             return data.containsKey(key);
         }
+        
+        public String toString() {
+            return data.toString();
+        }
     }
 
     /**
@@ -187,10 +190,10 @@ public class Scope {
                 }
                 String sessionData = URLEncoder.encode(session.toString(), "utf-8");
                 String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
-                if(Play.configuration.getProperty("application.sessionMaxAge") == null) {
+                if(Play.configuration.getProperty("application.session.maxAge") == null) {
                     Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData);
                 } else {
-                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, Play.configuration.getProperty("application.sessionMaxAge"));
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, Play.configuration.getProperty("application.session.maxAge"));
                 }                
             } catch (Exception e) {
                 throw new UnexpectedException("Session serializationProblem", e);
@@ -398,6 +401,12 @@ public class Scope {
                 }
             }
         }
+
+        @Override
+        public String toString() {
+            return data.toString();
+        }        
+        
     }
 
     /**

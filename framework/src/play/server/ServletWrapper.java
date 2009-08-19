@@ -25,6 +25,7 @@ import play.Invoker;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
+import play.data.validation.Validation;
 import play.exceptions.PlayException;
 import play.libs.MimeTypes;
 import play.libs.Utils;
@@ -33,6 +34,7 @@ import play.mvc.Http;
 import play.mvc.Router;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import play.mvc.Scope;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 import play.templates.TemplateLoader;
@@ -47,12 +49,12 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     public void contextInitialized(ServletContextEvent e) {
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
-        Play.init(root, System.getProperty("play.id", ""));   
+        Play.init(root, System.getProperty("play.id", ""));
     }
 
     public void contextDestroyed(ServletContextEvent e) {
         Play.stop();
-    }   
+    }
 
     @Override
     public void destroy() {
@@ -92,10 +94,10 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             return;
         } catch (Throwable e) {
             throw new ServletException(e);
-        }        
+        }
     }
 
-    public void serveStatic(HttpServletResponse servletResponse, HttpServletRequest servletRequest, RenderStatic renderStatic) throws IOException {  
+    public void serveStatic(HttpServletResponse servletResponse, HttpServletRequest servletRequest, RenderStatic renderStatic) throws IOException {
         VirtualFile file = Play.getVirtualFile(renderStatic.file);
         servletResponse.setContentType(MimeTypes.getContentType(file.getName()));
         if (file == null || file.isDirectory() || !file.exists()) {
@@ -214,21 +216,37 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
         return request;
     }
-    
+
     public void serve404(HttpServletRequest servletRequest, HttpServletResponse servletResponse, NotFound e) {
         Logger.warn("404 -> %s %s (%s)", servletRequest.getMethod(), servletRequest.getRequestURI(), e.getMessage());
         servletResponse.setStatus(404);
         servletResponse.setContentType("text/html");
         Map<String, Object> binding = new HashMap<String, Object>();
         binding.put("result", e);
-        String errorHtml = TemplateLoader.load("errors/404.html").render(binding);
+        binding.put("session", Scope.Session.current());
+        binding.put("request", Http.Request.current());
+        binding.put("flash", Scope.Flash.current());
+        binding.put("params", Scope.Params.current());
+        binding.put("play", new Play());
+        try {
+            binding.put("errors", Validation.errors());
+        } catch (Exception ex) {
+            //
+        }
+        String format = Request.current().format;
+        servletResponse.setStatus(404);
+        if ("XMLHttpRequest".equals(servletRequest.getHeader("X-Requested-With")) && (format == null || format.equals("html"))) {
+            format = "txt";
+        }
+        servletResponse.setContentType(MimeTypes.getContentType("xxx." + format, "text/plain"));
+        String errorHtml = TemplateLoader.load("errors/404."+format).render(binding);
         try {
             servletResponse.getOutputStream().write(errorHtml.getBytes("utf-8"));
         } catch (Exception fex) {
             Logger.error(fex, "(utf-8 ?)");
         }
     }
-    
+
     public void serve500(Exception e, HttpServletRequest request, HttpServletResponse response) {
         try {
             Map<String, Object> binding = new HashMap<String, Object>();
@@ -251,15 +269,24 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                 // humm ?
             }
             binding.put("exception", e);
-            boolean ajax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
-            response.setStatus(500);
-            if (ajax) {
-                response.setContentType("text/plain");
-            } else {
-                response.setContentType("text/html");
-            }
+            binding.put("session", Scope.Session.current());
+            binding.put("request", Http.Request.current());
+            binding.put("flash", Scope.Flash.current());
+            binding.put("params", Scope.Params.current());
+            binding.put("play", new Play());
             try {
-                String errorHtml = TemplateLoader.load("errors/500." + (ajax ? "txt" : "html")).render(binding);
+                binding.put("errors", Validation.errors());
+            } catch (Exception ex) {
+                //
+            }
+            response.setStatus(500);
+            String format = Request.current().format;
+            if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With")) && (format == null || format.equals("html"))) {
+                format = "txt";
+            }
+            response.setContentType(MimeTypes.getContentType("xxx." + format, "text/plain"));
+            try {
+                String errorHtml = TemplateLoader.load("errors/500." + format).render(binding);
                 response.getOutputStream().write(errorHtml.getBytes("utf-8"));
                 Logger.error(e, "Internal Server Error (500)");
             } catch (Throwable ex) {
@@ -281,7 +308,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         } else {
             servletResponse.setHeader("Content-Type", "text/plain;charset=utf-8");
         }
-        
+
         servletResponse.setStatus(response.status);
         Map<String, Http.Header> headers = response.headers;
         for (String key : headers.keySet()) {
@@ -297,22 +324,24 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             Cookie c = new Cookie(cookie.name, cookie.value);
             c.setSecure(cookie.secure);
             c.setPath(cookie.path);
-            if (cookie.maxAge != null) c.setMaxAge(cookie.maxAge);
+            if (cookie.maxAge != null) {
+                c.setMaxAge(cookie.maxAge);
+            }
             servletResponse.addCookie(c);
         }
         if (!response.headers.containsKey("cache-control")) {
             servletResponse.setHeader("Cache-Control", "no-cache");
         }
-        
+
         // Content
-        
+
         response.out.flush();
-        if(response.direct != null) {
+        if (response.direct != null) {
             attachFile(servletResponse, VirtualFile.open(response.direct));
         } else {
             servletResponse.getOutputStream().write(((ByteArrayOutputStream) response.out).toByteArray());
         }
-        
+
     }
 
     private void attachFile(HttpServletResponse servletResponse, VirtualFile file) throws IOException {
@@ -320,9 +349,9 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         OutputStream os = servletResponse.getOutputStream();
         byte[] buffer = new byte[8096];
         int read = 0;
-        while((read = is.read(buffer))>0) {
+        while ((read = is.read(buffer)) > 0) {
             os.write(buffer, 0, read);
-        }      
+        }
         os.flush();
         is.close();
     }
@@ -350,7 +379,6 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                 return;
             }
         }
-
 
         @Override
         public void execute() throws Exception {

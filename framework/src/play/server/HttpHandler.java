@@ -35,6 +35,7 @@ import play.Logger;
 import play.Play;
 import play.Play.Mode;
 import play.PlayPlugin;
+import play.data.validation.Validation;
 import play.exceptions.PlayException;
 import play.libs.MimeTypes;
 import play.libs.Utils;
@@ -43,6 +44,7 @@ import play.mvc.Http;
 import play.mvc.Router;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import play.mvc.Scope;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 import play.templates.TemplateLoader;
@@ -274,7 +276,23 @@ public class HttpHandler implements IoHandler {
         minaResponse.setContentType("text/html");
         Map<String, Object> binding = new HashMap<String, Object>();
         binding.put("result", e);
-        String errorHtml = TemplateLoader.load("errors/404.html").render(binding);
+        binding.put("session", Scope.Session.current());
+        binding.put("request", Http.Request.current());
+        binding.put("flash", Scope.Flash.current());
+        binding.put("params", Scope.Params.current());
+        binding.put("play", new Play());
+        try {
+            binding.put("errors", Validation.errors());
+        } catch (Exception ex) {
+            //
+        }
+        String format = Request.current().format;
+        minaResponse.setStatus(HttpResponseStatus.forId(500));
+        if ("XMLHttpRequest".equals(minaRequest.getHeader("X-Requested-With")) && (format == null || format.equals("html"))) {
+            format = "txt";
+        }
+        minaResponse.setContentType(MimeTypes.getContentType("xxx." + format, "text/plain"));
+        String errorHtml = TemplateLoader.load("errors/404."+format).render(binding);
         try {
             minaResponse.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
         } catch (UnsupportedEncodingException fex) {
@@ -305,15 +323,24 @@ public class HttpHandler implements IoHandler {
                 // humm ?
             }
             binding.put("exception", e);
-            boolean ajax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
-            response.setStatus(HttpResponseStatus.forId(500));
-            if (ajax) {
-                response.setContentType("text/plain");
-            } else {
-                response.setContentType("text/html");
-            }
+            binding.put("session", Scope.Session.current());
+            binding.put("request", Http.Request.current());
+            binding.put("flash", Scope.Flash.current());
+            binding.put("params", Scope.Params.current());
+            binding.put("play", new Play());
             try {
-                String errorHtml = TemplateLoader.load("errors/500." + (ajax ? "txt" : "html")).render(binding);
+                binding.put("errors", Validation.errors());
+            } catch (Exception ex) {
+                //
+            }
+            String format = Request.current().format;
+            response.setStatus(HttpResponseStatus.forId(500));
+            if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With")) && (format == null || format.equals("html"))) {
+                format = "txt";
+            }
+            response.setContentType(MimeTypes.getContentType("xxx." + format, "text/plain"));
+            try {
+                String errorHtml = TemplateLoader.load("errors/500." + format).render(binding);
                 response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
                 writeResponse(session, request, response);
                 Logger.error(e, "Internal Server Error (500) for request %s", request.getMethod() + " " + request.getRequestUri());
@@ -346,7 +373,7 @@ public class HttpHandler implements IoHandler {
             String browserEtag = request.getHeader("If-None-Match");
             if (browserEtag.equals(etag)) {
                 return false;
-            } 
+            }
             return true;
         }
         if (request.getHeaders().containsKey("If-Modified-Since")) {

@@ -1,6 +1,5 @@
 package play.mvc;
 
-import com.jamonapi.Monitor;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -219,6 +218,17 @@ public class Http {
          */
         public static Request current() {
             return current.get();
+        }
+        
+        /**
+         * This request was sent by an Ajax framework.
+         * (rely on the X-Requested-With header).
+         */
+        public boolean isAjax() {
+            if(!headers.containsKey("x-requested-with")) {
+                return false;
+            }
+            return "XMLHttpRequest".equals(headers.get("x-requested-with").value());
         }
 
         /**

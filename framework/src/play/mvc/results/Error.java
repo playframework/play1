@@ -4,6 +4,7 @@ import java.util.Map;
 
 import play.Play;
 import play.exceptions.UnexpectedException;
+import play.libs.MimeTypes;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
@@ -29,7 +30,11 @@ public class Error extends Result {
 
     public void apply(Request request, Response response) {
         response.status = status;
-        response.contentType = "text/html";
+        String format = request.format;
+        if(request.isAjax() && "html".equals(format)) {
+            format = "txt";
+        }
+        response.contentType = MimeTypes.getContentType("xx."+format);
         Map<String, Object> binding = Scope.RenderArgs.current().data;
         binding.put("exception", this);
         binding.put("result", this);
@@ -38,7 +43,7 @@ public class Error extends Result {
         binding.put("flash", Scope.Flash.current());
         binding.put("params", Scope.Params.current());
         binding.put("play", new Play());
-        String errorHtml = TemplateLoader.load("errors/" + this.status + ".html").render(binding);
+        String errorHtml = TemplateLoader.load("errors/" + this.status + "."+format).render(binding);
         try {
             response.out.write(errorHtml.getBytes("utf-8"));
         } catch (Exception e) {
