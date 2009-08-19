@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>echo -n "render(\""
+echo -n "$TM_DROPPED_FILE" | sed -e 's#^.*/views/##g' | tr -d '\n'
+echo -n "\");\$0"</string>
+	<key>draggedFileExtensions</key>
+	<array>
+		<string>html</string>
+	</array>
+	<key>input</key>
+	<string>selection</string>
+	<key>name</key>
+	<string>render(template)</string>
+	<key>output</key>
+	<string>insertAsSnippet</string>
+	<key>scope</key>
+	<string>source.java</string>
+	<key>uuid</key>
+	<string>66461743-2A2B-402B-B599-4421F5FF0E45</string>
+</dict>
+</plist>

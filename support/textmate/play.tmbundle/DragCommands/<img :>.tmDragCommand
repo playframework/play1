@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>echo -n "&lt;img src=\""
+echo -n "$TM_DROPPED_FILE" | sed -e 's#^.*\(/public/.*\)$#\1#g' | tr -d '\n'
+echo -n "\" /&gt;\$0"</string>
+	<key>draggedFileExtensions</key>
+	<array>
+		<string>png</string>
+		<string>jpeg</string>
+		<string>jpg</string>
+		<string>gif</string>
+	</array>
+	<key>input</key>
+	<string>selection</string>
+	<key>name</key>
+	<string>&lt;img /&gt;</string>
+	<key>output</key>
+	<string>insertAsSnippet</string>
+	<key>scope</key>
+	<string>text.html.play</string>
+	<key>uuid</key>
+	<string>20B1398C-F1E6-40A7-B228-C93CE6D6A267</string>
+</dict>
+</plist>

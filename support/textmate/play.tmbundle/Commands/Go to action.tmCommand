@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>saveModifiedFiles</string>
+	<key>command</key>
+	<string>"${TM_BUNDLE_SUPPORT}/bin/go_to_action.py"</string>
+	<key>input</key>
+	<string>document</string>
+	<key>keyEquivalent</key>
+	<string>@A</string>
+	<key>name</key>
+	<string>Go to action</string>
+	<key>output</key>
+	<string>showAsTooltip</string>
+	<key>scope</key>
+	<string>text.html.play</string>
+	<key>uuid</key>
+	<string>F331CE72-BE7D-48E4-ABC9-9CDDCB6DC410</string>
+</dict>
+</plist>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>@Before
+static void ${1:intercept}($2) {
+	$0
+}</string>
+	<key>name</key>
+	<string>before</string>
+	<key>scope</key>
+	<string>source.java</string>
+	<key>tabTrigger</key>
+	<string>before</string>
+	<key>uuid</key>
+	<string>5A3F099C-0871-42C9-8169-DA222F28FBF1</string>
+</dict>
+</plist>

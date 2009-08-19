@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>PUT		$1								$2$0</string>
+	<key>name</key>
+	<string>PUT ...</string>
+	<key>scope</key>
+	<string>source.routes.play</string>
+	<key>tabTrigger</key>
+	<string>put</string>
+	<key>uuid</key>
+	<string>1BD25744-7F2B-4490-8412-801757A305CA</string>
+</dict>
+</plist>
