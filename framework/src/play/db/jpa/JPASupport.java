@@ -84,16 +84,16 @@ public class JPASupport implements Serializable {
                                 l.add(q.getSingleResult());
                             }
                         }
-                        field.set(o, l);
+                        bw.set(field.getName(), o, l);
                     } else {
                         String[] ids = params.get(name + "." + field.getName() + "@id");
                         if (ids != null && ids.length > 0 && !ids[0].equals("")) {
                             Query q = JPA.em().createQuery("from " + relation + " where id = ?");
                             q.setParameter(1, Binder.directBind(ids[0], findKeyType(Play.classloader.loadClass(relation))));
                             Object to = q.getSingleResult();
-                            field.set(o, to);
+                            bw.set(field.getName(), o, to);
                         } else {
-                            field.set(o, null);
+                            bw.set(field.getName(), o, null);
                         }
                     }
                 }
@@ -101,8 +101,7 @@ public class JPASupport implements Serializable {
                     FileAttachment fileAttachment = ((FileAttachment) field.get(o));
                     if (fileAttachment == null) {
                         fileAttachment = new FileAttachment(o, field.getName());
-                        field.setAccessible(true);
-                        field.set(o, fileAttachment);
+                        bw.set(field.getName(), o, fileAttachment);              
                     }
                     File file = Params.current().get(name + "." + field.getName(), File.class);
                     if (file != null && file.exists() && file.length() > 0) {
@@ -112,7 +111,7 @@ public class JPASupport implements Serializable {
                         String df = Params.current().get(name + "." + field.getName() + "_delete_", String.class);
                         if (df != null && df.equals("true")) {
                             fileAttachment.delete();
-                            field.set(o, null);
+                            bw.set(field.getName(), o, null);
                         }
                     }
                 }

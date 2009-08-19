@@ -56,3 +56,7 @@ modules/siena/lib/play-siena.jar
 samples-and-tests/lists-with-gae/logs
 samples-and-tests/lists-with-gae/tmp
 samples-and-tests/lists-with-gae/war/WEB-INF/appengine-generated
+./.settings
+samples-and-tests/just-test-cases/.settings
+samples-and-tests/just-test-cases/eclipse
+framework/ecClasses

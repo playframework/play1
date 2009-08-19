@@ -4,6 +4,7 @@ import java.lang.reflect.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import play.Logger;
 import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
 import play.exceptions.UnexpectedException;
@@ -53,7 +54,18 @@ public class BeanWrapper {
         }
         return instance;
     }
+    public void set(String name, Object instance, Object value){
+    	for (Property prop : wrappers.values()) {
+			if(name.equals(prop.name)) {
+				prop.setValue(instance, value);
+				return;
+			}
+		}
+    	String message = String.format("Can't find property with name '%s' on class %s", name, instance.getClass().getName());
+    	Logger.warn(message);
+    	throw new UnexpectedException(message);
 
+    }
     private boolean isSetter(Method method) {
         return (!method.isAnnotationPresent(PlayPropertyAccessor.class) && method.getName().startsWith("set") && method.getName().length() > 3 && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
     }
