@@ -2,6 +2,7 @@ package play.server;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Properties;
 
@@ -25,8 +26,20 @@ public class Server {
     public Server() {
         Properties p = Play.configuration;
         int httpPort = Integer.parseInt(p.getProperty("http.port", "9000"));
+        InetAddress address = null;
         if (System.getProperties().containsKey("http.port")) {
             httpPort = Integer.parseInt(System.getProperty("http.port"));
+        }
+        try {
+            if(p.getProperty("http.address") != null) {
+                address = InetAddress.getByName(p.getProperty("http.address"));
+            }
+            if (System.getProperties().containsKey("http.address")) {
+                address = InetAddress.getByName(System.getProperty("http.address"));
+            }
+        } catch(Exception e) {
+            Logger.error(e, "Could not understand http.address");
+            System.exit(-1);
         }
         if (Play.mode == Mode.DEV) {
             acceptor = new NioSocketAcceptor(1);
@@ -44,12 +57,19 @@ public class Server {
         acceptor.setBacklog(50000);
         acceptor.setHandler(new HttpHandler());
         try {
-            acceptor.bind(new InetSocketAddress(httpPort));
-
+            acceptor.bind(new InetSocketAddress(address, httpPort));
             if (Play.mode == Mode.DEV) {
-                Logger.info("Listening for HTTP on port %s (Waiting a first request to start) ...", httpPort);
+                if(address == null) {
+                    Logger.info("Listening for HTTP on port %s (Waiting a first request to start) ...", httpPort);
+                } else {
+                    Logger.info("Listening for HTTP at %2$s:%1$s (Waiting a first request to start) ...", httpPort, address);
+                }
             } else {
-                Logger.info("Listening for HTTP on port %s ...", httpPort);
+                if(address == null) {
+                    Logger.info("Listening for HTTP on port %s ...", httpPort);
+                } else {
+                    Logger.info("Listening for HTTP at %2$s:%1$s  ...", httpPort, address);
+                }
             }
         } catch (IOException e) {
             Logger.error("Could not bind on port " + httpPort, e);
