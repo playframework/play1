@@ -131,6 +131,9 @@ public class Play {
      * Framework version
      */
     public static String version = null;
+    
+    // pv
+    static boolean firstStart = true;
 
     /**
      * Init the framework
@@ -297,9 +300,7 @@ public class Play {
     public static synchronized void start() {
         try {
             
-            // Log reloading (for fun)
             if (started) {
-                Logger.info("Reloading ...");
                 stop();
             }
 
@@ -356,8 +357,9 @@ public class Play {
             // Cache
             Cache.init();
 
-            if (!started) {
+            if (firstStart) {
                 Logger.info("Application '%s' is started !", configuration.getProperty("application.name", ""));
+                firstStart = false;
             }
 
             // We made it
