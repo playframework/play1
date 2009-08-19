@@ -60,3 +60,4 @@ samples-and-tests/lists-with-gae/war/WEB-INF/appengine-generated
 samples-and-tests/just-test-cases/.settings
 samples-and-tests/just-test-cases/eclipse
 framework/ecClasses
+documentation/api
