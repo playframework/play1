@@ -288,6 +288,7 @@ public class TemplateCompiler {
                 tag.hasBody = false;
                 markLine(parser.getLine());
                 println();
+                skipLineBreak = true;
                 return;
             } catch (Exception e) {
                 // do nothing here
