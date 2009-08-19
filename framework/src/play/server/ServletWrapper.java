@@ -45,14 +45,11 @@ import play.vfs.VirtualFile;
  * Thanks to Lee Breisacher.
  */
 public class ServletWrapper extends HttpServlet implements ServletContextListener {
-    
-    private String contextPath;
 
     public void contextInitialized(ServletContextEvent e) {
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
         Play.init(root, System.getProperty("play.id", ""));
-        contextPath = e.getServletContext().getContextPath();
     }
 
     public void contextDestroyed(ServletContextEvent e) {
@@ -68,7 +65,6 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     @Override
     protected void service(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
         Logger.trace("ServletWrapper>service " + httpServletRequest.getRequestURI());
-        Play.configuration.setProperty("war.context", contextPath);
         Request request = null;
         try {
             request = parseRequest(httpServletRequest);

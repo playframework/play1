@@ -123,7 +123,7 @@ bc. public static void show(List<Long> id) {
 
 p(note). **Exceptions**
  
-If the HTTP parameter corresponding to the action method argument is not found, the corresponding method argument is set to null. If a value is found but it can't be properly cast to the required Java type, an exception is thrown.
+If the HTTP parameter corresponding to the action method argument is not found, the corresponding method argument is set to null. If a value is found but it can't be properly cast to the required Java type, an error is added to the validation error collection and the default value is used.
 
 h2. <a name="binding">Advanced HTTP to Java binding</a>
 

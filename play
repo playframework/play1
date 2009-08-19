@@ -22,6 +22,9 @@ import zipfile
 
 def replaceAll(file, searchExp, replaceExp):
 	replaceExp = replaceExp.replace('\\', '\\\\')
+	searchExp = searchExp.replace('$', '\\$')
+	searchExp = searchExp.replace('{', '\\{')
+	searchExp = searchExp.replace('}', '\\}')
 	for line in fileinput.input(file, inplace=1):
 		line = re.sub(searchExp, replaceExp, line)
 		sys.stdout.write(line)
@@ -425,8 +428,10 @@ try:
 		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%APPLICATION_NAME%', application_name)
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/application')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/application'))
 		shutil.copytree(application_path, os.path.join(war_path, 'WEB-INF/application'))
-		shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/war'))
-		shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/logs'))
+		if os.path.exists(os.path.join(war_path, 'WEB-INF/application/war')):
+			shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/war'))
+		if os.path.exists(os.path.join(war_path, 'WEB-INF/application/logs')):
+			shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/logs'))
 		shutil.copytree(os.path.join(application_path, 'conf'), os.path.join(war_path, 'WEB-INF/classes'))
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/lib')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/lib'))
 		os.mkdir(os.path.join(war_path, 'WEB-INF/lib'))
@@ -441,8 +446,15 @@ try:
 		for module in modules:
 			to = os.path.join(war_path, 'WEB-INF/modules/%s' % os.path.basename(module))
 			shutil.copytree(module, to)
-			shutil.rmtree(os.path.join(to, 'src'))
-			os.remove(os.path.join(to, 'build.xml'))
+			if os.path.exists(os.path.join(to, 'src')):
+				shutil.rmtree(os.path.join(to, 'src'))
+			if os.path.exists(os.path.join(to, 'build.xml')):
+				os.remove(os.path.join(to, 'build.xml'))
+		pm = readConfs('module.')
+  		for m in pm:
+			nm = os.path.basename(m)
+  			replaceAll(os.path.join(war_path, 'WEB-INF/application/conf/application.conf'), m, '../modules/%s' % nm)
+		
 		if not os.path.exists(os.path.join(war_path, 'WEB-INF/resources')): os.mkdir(os.path.join(war_path, 'WEB-INF/resources'))
 		shutil.copyfile(os.path.join(play_base, 'resources/messages'), os.path.join(war_path, 'WEB-INF/resources/messages'))
 		
