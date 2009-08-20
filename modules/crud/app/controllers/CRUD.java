@@ -14,6 +14,13 @@ import play.exceptions.*;
 import play.i18n.*;
 
 public abstract class CRUD extends Controller {
+    
+    @Before
+    static void addType() {
+        ObjectType type = ObjectType.get(getControllerClass());
+        notFoundIfNull(type);
+        renderArgs.put("type", type);
+    }
 
     public static void index() {
         try {
@@ -24,11 +31,10 @@ public abstract class CRUD extends Controller {
     }
 
     public static void list(int page, String search, String searchFields, String orderBy, String order) {
+        ObjectType type = ObjectType.get(getControllerClass());
         if (page < 1) {
             page = 1;
         }
-        ObjectType type = ObjectType.get(getControllerClass());
-        notFoundIfNull(type);
         List<JPASupport> objects = type.findPage(page, search, searchFields, orderBy, order, (String) request.args.get("where"));
         Long count = type.count(search, searchFields, (String) request.args.get("where"));
         Long totalCount = type.count(null, null, (String) request.args.get("where"));
@@ -41,7 +47,6 @@ public abstract class CRUD extends Controller {
 
     public static void show(String id) {
         ObjectType type = ObjectType.get(getControllerClass());
-        notFoundIfNull(type);
         JPASupport object = type.findById(id);
         try {
             render(type, object);
@@ -52,7 +57,6 @@ public abstract class CRUD extends Controller {
 
     public static void attachment(String id, String field) throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
-        notFoundIfNull(type);
         JPASupport object = type.findById(id);
         FileAttachment attachment = (FileAttachment) object.getClass().getField(field).get(object);
         if (attachment == null) {
@@ -63,7 +67,6 @@ public abstract class CRUD extends Controller {
 
     public static void save(String id) throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
-        notFoundIfNull(type);
         JPASupport object = type.findById(id);
         validation.valid(object.edit("object", params));
         if (validation.hasErrors()) {
@@ -84,7 +87,6 @@ public abstract class CRUD extends Controller {
 
     public static void blank() {
         ObjectType type = ObjectType.get(getControllerClass());
-        notFoundIfNull(type);
         try {
             render(type);
         } catch (TemplateNotFoundException e) {
@@ -94,7 +96,6 @@ public abstract class CRUD extends Controller {
 
     public static void create() throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
-        notFoundIfNull(type);
         JPASupport object = type.entityClass.newInstance();
         validation.valid(object.edit("object", params));
         if (validation.hasErrors()) {
@@ -118,7 +119,6 @@ public abstract class CRUD extends Controller {
 
     public static void delete(String id) {
         ObjectType type = ObjectType.get(getControllerClass());
-        notFoundIfNull(type);
         JPASupport object = type.findById(id);
         object.delete();
         flash.success(Messages.get("crud.deleted", type.name, object.getEntityId()));

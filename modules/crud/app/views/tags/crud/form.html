@@ -21,7 +21,7 @@
 		%{
 			def handler = fieldsHandler[fieldName];
 			handler.setProperty('fieldName', 'object.' + field.name);
-    def oldObject = handler.getProperty('object');
+            def oldObject = handler.getProperty('object');
 			handler.setProperty('object', _caller.object);
 			out.println(handler.toString());
 			handler.setProperty('object', oldObject);
