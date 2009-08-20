@@ -3,7 +3,6 @@
 2:play.db.jpa.JPAPlugin
 3:play.jobs.JobsPlugin
 4:play.i18n.MessagesPlugin
-5:play.db.zdb.ZDBPlugin
 6:play.libs.WS
 7:play.data.parsing.TempFilePlugin
 8:play.data.validation.ValidationPlugin

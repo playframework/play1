@@ -154,6 +154,18 @@ public class Search {
             }
         }
         
+        public long count () throws SearchException {
+            try {
+                org.apache.lucene.search.Query luceneQuery = new QueryParser("_docID", getAnalyser()).parse(query);
+                Hits hits = getIndexReader(clazz.getName()).search(luceneQuery,getSort());
+                return hits.length();
+            } catch (ParseException e) {
+                throw new SearchException (e);
+            } catch (Exception e) {
+                throw new UnexpectedException (e);
+            }
+        }
+        
         /**
          * Executes the lucene query against the index. You get QueryResults.
          * @param fetch load the corresponding JPAModel objects in the QueryResult Object
@@ -254,7 +266,11 @@ public class Search {
     private static String valueOf (Object object, java.lang.reflect.Field field) throws Exception {
         if (field.getType().equals(String.class))
             return (String)field.get(object);
-        return ""+field.get(object);
+        //else if (field.getType().isPrimitive()) 
+            return ""+field.get(object);
+        /*else if (field.getType().isAssignableFrom(Collection.class)) {
+            
+        }*/
     }
     
     public static IndexSearcher getIndexReader(String name) {
@@ -269,7 +285,8 @@ public class Search {
                     if (root.exists()) {
                         IndexSearcher reader = new IndexSearcher(FSDirectory.getDirectory(root));
                         indexReaders.put(name, reader);
-                    }
+                    } else 
+                        throw new UnexpectedException ("Could not find "+name+" index. Please restart your ");
                 }
             }
             return indexReaders.get(name);

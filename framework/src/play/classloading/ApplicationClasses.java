@@ -14,7 +14,6 @@ import play.classloading.enhancers.LocalvariablesNamesEnhancer;
 import play.classloading.enhancers.MailerEnhancer;
 import play.classloading.enhancers.PropertiesEnhancer;
 import play.classloading.enhancers.SigEnhancer;
-import play.classloading.enhancers.ZDBEnhancer;
 import play.exceptions.UnexpectedException;
 import play.vfs.VirtualFile; 
  
@@ -122,10 +121,10 @@ public class ApplicationClasses {
         MailerEnhancer.class,
         PropertiesEnhancer.class,
         JPAEnhancer.class,
-        ZDBEnhancer.class,
         LocalvariablesNamesEnhancer.class
     };
 
+    
     /**
      * Represent a application class
      */
