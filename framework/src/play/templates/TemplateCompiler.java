@@ -91,8 +91,8 @@ public class TemplateCompiler {
             });
             for (String cName : names) {
                 source = source.replaceAll("([a-zA-Z0-9.-_$]+)\\s+instanceof\\s+" + Pattern.quote(cName), "_('" + originalNames.get(cName).replace("$", "\\$") + "').isAssignableFrom($1.class)");
-                source = source.replaceAll(Pattern.quote(cName) + ".class", "_('" + originalNames.get(cName) + "')");
-                source = source.replaceAll("([^'\"])" + Pattern.quote(cName) + "([^'\"])", "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')$2");
+                source = source.replaceAll("([^.])" + Pattern.quote(cName) + ".class", "$1_('" + originalNames.get(cName) + "')");
+                source = source.replaceAll("([^'\".])" + Pattern.quote(cName) + "([^'\"])", "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')$2");
             }
 
             this.parser = new Parser(source);
