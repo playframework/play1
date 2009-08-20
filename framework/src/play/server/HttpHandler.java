@@ -291,8 +291,11 @@ public class HttpHandler implements IoHandler {
         if ("XMLHttpRequest".equals(minaRequest.getHeader("X-Requested-With")) && (format == null || format.equals("html"))) {
             format = "txt";
         }
+        if (format == null) {
+            format = "txt";
+        }
         minaResponse.setContentType(MimeTypes.getContentType("xxx." + format, "text/plain"));
-        String errorHtml = TemplateLoader.load("errors/404."+format).render(binding);
+        String errorHtml = TemplateLoader.load("errors/404." + format).render(binding);
         try {
             minaResponse.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
         } catch (UnsupportedEncodingException fex) {
@@ -336,6 +339,9 @@ public class HttpHandler implements IoHandler {
             String format = Request.current().format;
             response.setStatus(HttpResponseStatus.forId(500));
             if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With")) && (format == null || format.equals("html"))) {
+                format = "txt";
+            }
+            if (format == null) {
                 format = "txt";
             }
             response.setContentType(MimeTypes.getContentType("xxx." + format, "text/plain"));

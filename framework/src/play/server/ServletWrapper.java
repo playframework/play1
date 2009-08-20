@@ -238,8 +238,11 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         if ("XMLHttpRequest".equals(servletRequest.getHeader("X-Requested-With")) && (format == null || format.equals("html"))) {
             format = "txt";
         }
+        if (format == null) {
+            format = "txt";
+        }
         servletResponse.setContentType(MimeTypes.getContentType("xxx." + format, "text/plain"));
-        String errorHtml = TemplateLoader.load("errors/404."+format).render(binding);
+        String errorHtml = TemplateLoader.load("errors/404." + format).render(binding);
         try {
             servletResponse.getOutputStream().write(errorHtml.getBytes("utf-8"));
         } catch (Exception fex) {
@@ -282,6 +285,9 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             response.setStatus(500);
             String format = Request.current().format;
             if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With")) && (format == null || format.equals("html"))) {
+                format = "txt";
+            }
+            if (format == null) {
                 format = "txt";
             }
             response.setContentType(MimeTypes.getContentType("xxx." + format, "text/plain"));
