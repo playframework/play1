@@ -26,7 +26,7 @@ Each chapter is meant to last about one hour, and will be the occasion to learn 
 # "Building the first screen":guide3
 # "The comments page":guide4
 # "Setting up a Captcha":guide5
-# "Adding tags support":guide6
+# "Tagging support":guide6
 # "A basic admin area using CRUD":guide7
 # "Adding security":guide8
 # "Better content using Textile":guide9
@@ -34,7 +34,7 @@ Each chapter is meant to last about one hour, and will be the occasion to learn 
 # "The media library":guide11
 # "More fun with the Flickr API":guide12
 # "Sending emails notifications":guide13
-# "A search engine with asynchronous indexing":guide14
+# "A search engine":guide14
 # "Preparing for production":guide15
 
 h2. <a name="manual">The essential documentation</a>
@@ -91,20 +91,21 @@ Tips about everything and anything.
 # "Use cache and configure Memcached":cache
 # "Put your application in production":production
 # "Sending emails":emails
+# "OpenID integration":openid
 
 
 h2. <a name="modules">Other batteries included</a>
 
-Other batteries included.
+These modules are availables.
 
-# "CRUD generator":crud
+# "CRUD":crud
 # "Security":secure
-# "OpenID integration":openid
+# "Search":search
 # "Spring support":spring
+# "Siena":siena
 # "Extended CSS":ecss
-# "Google App Engine module":gae
-# "Google Web Toolkit module":gwt
-# "The zookeeper":zookeeper
+# "Google App Engine":gae
+# "Google Web Toolkit":gwt
 # "Bespin editor":bespin
 
 
@@ -112,7 +113,6 @@ h2. <a name="references">References</a>
 
 Extended references for day to day hacking.
 
-# "Download the precious cheat sheet (PDF)":w
 # "Browse API documentation":/@api/index.html
 # "Template tags and extensions reference":w
 

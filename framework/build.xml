@@ -71,7 +71,7 @@
         </javadoc>
     </target>
     
-    <target name="jar" depends="compile,version,modules,javadoc" description="create play.jar">        
+    <target name="jar" depends="compile,version,modules,javadoc,support" description="create play.jar">        
         <echo message="${version}" file="src/play/version" />
         <echo message="${version}" file="classes/play/version" />
         <jar destfile="play.jar" basedir="classes">
@@ -85,6 +85,12 @@
                 </section>
             </manifest>
         </jar>
+    </target>
+    
+    <target name="support">
+        <zip destfile="../support/textmate.zip" comment="Textmate bundle for Play! - ${version}" update="false">
+            <zipfileset dir="../support/textmate" includes="**/**" />
+        </zip>
     </target>
     
     <target name="modules">

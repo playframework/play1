@@ -3,7 +3,7 @@
     <div id="body">
         <div id="page">
             <div id="bc">
-                Play framework, ${play.version}
+                Play framework, ${play.version} - <a href="/@documentation">Documentation</a> - <a href="/@api/index.html">Browse API</a>  
             </div>
             <h1>Your application is ready !</h1>
             <p>
@@ -12,28 +12,28 @@
                     Click here to get more informations about your application environment
                 </a>.
             </p>
-            <code id="env" style="display:none; background: rgb(255, 254, 178); border-bottom: 1px solid rgb(255, 179, 32); border-top: 1px solid rgb(255, 179, 32)"><pre>${play.CorePlugin.computeApplicationStatus()}</pre></code>
+            <pre><code id="env" style="display:none; background: rgb(255, 254, 178); border-bottom: 1px solid rgb(255, 179, 32); border-top: 1px solid rgb(255, 179, 32)">${play.CorePlugin.computeApplicationStatus()}</code></pre>
             <h2><a name="why">Why do you see this page ?</a></h2>
             <p>
                 The <strong>conf/routes</strong> file defines a route that tell play to invoke the <strong>Application.index</strong> action
                 when a browser requests the <strong>/</strong> URI using the <strong>GET</strong> method:
             </p>
-            <code><pre># Home page
-GET     /         Application.index</pre></code>
+            <pre><code># Home page
+GET     /         Application.index</code></pre>
             <p>
                 So play has invoked the <strong>controllers&#46;Application&#46;index()</strong> method:
             </p>
-            <code><pre>public static void index() {
+            <pre><code>public static void index() {
     render();
-}</pre></code>
+}</code></pre>
             <p>
                 Using the <strong>render()</strong> call, this action asks play to display a template. By convention play has
                 displayed the <strong>app/views/Application/index.html</strong> template:
             </p>
-            <code><pre>&#35;{extends 'main.html' /}
+            <pre><code>&#35;{extends 'main.html' /}
 &#35;{set title:'Home' /}
 
-&#35;{welcome /}</pre></code>
+&#35;{welcome /}</code></pre>
             <p>
                 This template extends the <strong>app/views/main.html</strong>, and uses the <strong>&#35;{welcome /}</strong> tag to display this
                 welcome page.
@@ -52,24 +52,24 @@ GET     /         Application.index</pre></code>
                 You can quickly set up a developement database (either in memory or written to the filesystem), by adding one of these
                 lines to the <strong>conf/application.conf</strong> file:
             </p>
-<code><pre># For a transient in memory database (HSQL in memory)
+<pre><code># For a transient in memory database (HSQL in memory)
 db=mem
 
 # for a simple file written database (HSQL file stored)
-db=fs</pre></code>
+db=fs</code></pre>
             <p>
                 If you want to connect to an existing <strong>MySQL5 server</strong>, use:
             </p>
-<code><pre>db=mysql:user:pwd@database_name</pre></code>             
+<pre><code>db=mysql:user:pwd@database_name</code></pre>            
             </p>
             <p>
                 If you need to connect to another JDBC compliant database, first add the corresponding driver library to the
                 <strong>lib/</strong> directory of your application, and add these lines to the <strong>conf/application.conf</strong> file:
             </p>
-            <code><pre>db.url=jdbc:postgresql:database_name
+            <pre><code>db.url=jdbc:postgresql:database_name
 db.driver=org.postgresql.Driver
 db.user=root
-db.pass=secret</pre></code>      
+db.pass=secret</code></pre>      
             <h2><a name="doc">Need more help ?</a></h2>
             <p>
                 When your application run in <strong>DEV</strong> mode, you can access directly the current documentation at the
