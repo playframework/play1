@@ -516,12 +516,14 @@ public class Play {
     public static void loadModules() {
         if (System.getenv("MODULES") != null) {
             // Modules path is prepended with a env property
-            for (String m : System.getenv("MODULES").split(System.getProperty("os.name").startsWith("Windows") ? ";" : ":")) {
-                File modulePath = new File(m);
-                if (!modulePath.exists() || !modulePath.isDirectory()) {
-                    Logger.error("Module %s will not be loaded because %s does not exist", modulePath.getName(), modulePath.getAbsolutePath());
-                } else {
-                    addModule(modulePath.getName(), modulePath);
+            if(System.getenv("MODULES") != null && System.getenv("MODULES").trim().length()>0) {
+                for (String m : System.getenv("MODULES").split(System.getProperty("os.name").startsWith("Windows") ? ";" : ":")) {
+                    File modulePath = new File(m);
+                    if (!modulePath.exists() || !modulePath.isDirectory()) {
+                        Logger.error("Module %s will not be loaded because %s does not exist", modulePath.getName(), modulePath.getAbsolutePath());
+                    } else {
+                        addModule(modulePath.getName(), modulePath);
+                    }
                 }
             }
         }
