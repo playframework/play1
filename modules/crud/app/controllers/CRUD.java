@@ -145,17 +145,20 @@ public abstract class CRUD extends Controller {
         public String name;
         public String modelName;
         public String controllerName;
+        
+        public ObjectType(Class modelClass) {
+            this.modelName = modelClass.getSimpleName();
+            this.entityClass = modelClass;
+        }
 
         public static ObjectType get(Class controllerClass) {
             Class entityClass = getEntityClassForController(controllerClass);
             if (entityClass == null || !JPASupport.class.isAssignableFrom(entityClass)) {
                 return null;
             }
-            ObjectType type = new ObjectType();
+            ObjectType type = new ObjectType(entityClass);
             type.name = controllerClass.getSimpleName();
-            type.modelName = entityClass.getSimpleName();
             type.controllerName = controllerClass.getSimpleName().toLowerCase();
-            type.entityClass = entityClass;
             type.controllerClass = controllerClass;
             return type;
         }

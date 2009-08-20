@@ -33,7 +33,7 @@
 			#{crud.textField name:field.name, value:(_caller.object ? _caller.object[field.name] : null) /}
 		#{/if}
 
-                #{if field.type == 'password'}
+        #{if field.type == 'password'}
 			#{crud.passwordField name:field.name, value:(_caller.object ? _caller.object[field.name] : null) /}
 		#{/if}
 
