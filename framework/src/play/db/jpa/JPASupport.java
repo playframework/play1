@@ -483,16 +483,26 @@ public class JPASupport implements Serializable {
                 throw new IllegalArgumentException("Error while executing query <strong>" + sq + "</strong>", e);
             }
         }
-
+        
         /**
-         * Try fetch(from, length);
+         * Set the position to start
+         * @param position Position of the first element
+         * @return A new query
+         */
+        public <T extends JPASupport> JPAQuery from(int position) {
+            query.setFirstResult(position);
+            return this;
+        }
+        
+        /**
+         * Try fetch(page, length);
          */
         @Deprecated
-        public <T extends JPASupport> List<T> page(int from, int length) {
-            if (from < 1) {
-                from = 1;
+        public <T extends JPASupport> List<T> page(int page, int length) {
+            if (page < 1) {
+                page = 1;
             }
-            query.setFirstResult((from - 1) * length);
+            query.setFirstResult((page - 1) * length);
             query.setMaxResults(length);
             try {
                 return query.getResultList();
@@ -507,8 +517,8 @@ public class JPASupport implements Serializable {
          * @param length (page length)
          * @return A list of entities
          */
-        public <T extends JPASupport> List<T> fetch(int from, int length) {
-            return page(from, length);
+        public <T extends JPASupport> List<T> fetch(int page, int length) {
+            return page(page, length);
         }
     }
 
