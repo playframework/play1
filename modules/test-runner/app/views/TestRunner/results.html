@@ -85,9 +85,9 @@
                         </div>
                         <div class="sourceLine">
                             <span>
-                                ${play.libs.Utils.open(result.sourceFile, result.sourceLine) ? '<a href="' + play.libs.Utils.open(result.sourceFile, result.sourceLine) + '">' : ''}
+                                ${play.utils.Utils.open(result.sourceFile, result.sourceLine) ? '<a href="' + play.utils.Utils.open(result.sourceFile, result.sourceLine) + '">' : ''}
                                     ${result.sourceCode.escape()}
-                                ${play.libs.Utils.open(result.sourceFile, result.sourceLine) ? '</a>' : ''}
+                                ${play.utils.Utils.open(result.sourceFile, result.sourceLine) ? '</a>' : ''}
                             </span>
                         </div>
                         #{/if}
