@@ -3,7 +3,7 @@
  js_messages=fr.zenexity.json.JSON.toJSON( play.i18n.Messages.all(play.i18n.Lang.get()));
  
 }%
-<script type="text/javascript" language="javascript" charset="utf-8">
+<script type="text/javascript" charset="utf-8">
     
 var i18nMessages = ${js_messages};
 
