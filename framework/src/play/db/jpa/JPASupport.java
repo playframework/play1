@@ -297,8 +297,6 @@ public class JPASupport implements Serializable {
 
     /**
      * Prepare a query to find *all* entities.
-     * @param query HQL query or shortcut
-     * @param params Params to bind to the query
      * @return A JPAQuery
      */
     public static JPAQuery all() {

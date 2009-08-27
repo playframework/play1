@@ -24,8 +24,8 @@ import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.jpa.JPA;
-import play.db.jpa.JPAModel;
 import play.db.jpa.JPASupport;
+import play.db.jpa.Model;
 import play.exceptions.UnexpectedException;
 /**
  * Very basic tool to basic search on your JPA objects.
@@ -91,7 +91,7 @@ public class Search {
     public static class QueryResult {
         public String id;
         public float score;
-        public JPAModel object;
+        public Model object;
     }
     
     public static class Query {
@@ -101,6 +101,7 @@ public class Search {
         private int offset=0;
         private int pageSize=10;
         private boolean reverse = false;
+        private Hits hits = null;
         
         protected Query (String query, Class clazz) {
             this.query=query;
@@ -112,6 +113,10 @@ public class Search {
             return this;
         }
         
+        public Query all () {
+            pageSize=-1;
+            return this;
+        }
         public Query reverse () {
             this.reverse=true;
             return this;
@@ -121,6 +126,7 @@ public class Search {
             this.order=order;
             return this;
         }
+        
         
         private Sort getSort () {
             Sort sort = new Sort ();
@@ -144,7 +150,7 @@ public class Search {
         public <T extends JPASupport> List<T> fetch () throws SearchException{
             try {
                 List<QueryResult> results = executeQuery(true);
-                List<JPAModel> objects = new ArrayList<JPAModel>();
+                List<Model> objects = new ArrayList<Model>();
                 for (QueryResult queryResult : results) {
                     objects.add(queryResult.object);
                 }
@@ -154,10 +160,23 @@ public class Search {
             }
         }
         
+        public List<Long> fetchIds () throws SearchException{
+            try {
+                List<QueryResult> results = executeQuery(false);
+                List<Long> objects = new ArrayList<Long>();
+                for (QueryResult queryResult : results) {
+                    objects.add(Long.parseLong(queryResult.id));
+                }
+                return objects;
+            } catch (Exception e) {
+                throw new UnexpectedException (e);
+            }
+        }
+        
         public long count () throws SearchException {
             try {
                 org.apache.lucene.search.Query luceneQuery = new QueryParser("_docID", getAnalyser()).parse(query);
-                Hits hits = getIndexReader(clazz.getName()).search(luceneQuery,getSort());
+                hits = getIndexReader(clazz.getName()).search(luceneQuery,getSort());
                 return hits.length();
             } catch (ParseException e) {
                 throw new SearchException (e);
@@ -173,8 +192,10 @@ public class Search {
          */
         public List<QueryResult> executeQuery (boolean fetch) throws SearchException {
             try {
-                org.apache.lucene.search.Query luceneQuery = new QueryParser("_docID", getAnalyser()).parse(query);
-                Hits hits = getIndexReader(clazz.getName()).search(luceneQuery,getSort());
+                if (hits==null) {
+                    org.apache.lucene.search.Query luceneQuery = new QueryParser("_docID", getAnalyser()).parse(query);
+                    hits = getIndexReader(clazz.getName()).search(luceneQuery,getSort());
+                }
                 List<QueryResult> results = new ArrayList<QueryResult>();
                 if( hits == null )
                     return results;
@@ -183,16 +204,29 @@ public class Search {
                 if (offset > l) {
                     return results;
                 }
-                
-                for (int i = offset; i < (offset + pageSize > l ? l : offset + pageSize); i++) {
-                    QueryResult qresult = new QueryResult();
-                    qresult.score = hits.score(i);
-                    qresult.id = hits.doc(i).get("_docID");
-                    if (fetch) {
-                        qresult.object=(JPAModel) JPA.em().find(clazz,Long.parseLong(qresult.id));
-                        if (qresult.object==null) throw new SearchException ("Please re-index");
+                List<Long> ids = new ArrayList<Long>();
+                if (pageSize>0) {
+                    for (int i = offset; i < (offset + pageSize > l ? l : offset + pageSize); i++) {
+                        QueryResult qresult = new QueryResult();
+                        qresult.score = hits.score(i);
+                        qresult.id = hits.doc(i).get("_docID");
+                        if (fetch) {
+                            qresult.object=(Model) JPA.em().find(clazz,Long.parseLong(qresult.id));
+                            if (qresult.object==null) throw new SearchException ("Please re-index");
+                        }
+                        results.add(qresult);
                     }
-                    results.add(qresult);
+                } else {
+                    for (int i = 0; i < l ; i++) {
+                        QueryResult qresult = new QueryResult();
+                        qresult.score = hits.score(i);
+                        qresult.id = hits.doc(i).get("_docID");
+                        if (fetch) {
+                            qresult.object=(Model) JPA.em().find(clazz,Long.parseLong(qresult.id));
+                            if (qresult.object==null) throw new SearchException ("Please re-index");
+                        }
+                        results.add(qresult);
+                    }
                 }
                 return results;
             } catch (ParseException e) {
@@ -209,11 +243,11 @@ public class Search {
     
     public static void unIndex (Object object) {
         try {
-            if (! (object instanceof JPAModel))
+            if (! (object instanceof Model))
                 return;
             if (object.getClass().getAnnotation(Indexed.class)==null)
                 return;
-            JPAModel jpaModel = (JPAModel) object;
+            Model jpaModel = (Model) object;
             String index = object.getClass().getName();
             indexWriters.get(index).deleteDocuments(new Term("_docID", jpaModel.id+""));
         } catch (Exception e) {
@@ -223,9 +257,9 @@ public class Search {
     
     public static void index (Object object) {
         try {
-            if (! (object instanceof JPAModel))
+            if (! (object instanceof Model))
                 return;
-            JPAModel jpaModel = (JPAModel) object;
+            Model jpaModel = (Model) object;
             String index = object.getClass().getName();
             Document document = toDocument(object);
             if (document==null)
@@ -244,7 +278,7 @@ public class Search {
             return null;
         if (! (object instanceof JPASupport))
             return null;
-        JPAModel jpaModel = (JPAModel) object;
+        Model jpaModel = (Model) object;
         Document document = new Document ();
         document.add(new Field("_docID", jpaModel.id+"", Field.Store.YES, Field.Index.UN_TOKENIZED));
         for (java.lang.reflect.Field field : object.getClass().getFields()) {
@@ -321,8 +355,8 @@ public class Search {
         fl.mkdirs();
         List<ApplicationClass> classes = Play.classes.getAnnotatedClasses(Indexed.class);
         for (ApplicationClass applicationClass : classes) {
-            List<JPAModel> objects = (List<JPAModel>) JPA.em().createQuery("select e from "+applicationClass.javaClass.getCanonicalName()+" as e").getResultList();
-            for (JPAModel model : objects) {
+            List<Model> objects = (List<Model>) JPA.em().createQuery("select e from "+applicationClass.javaClass.getCanonicalName()+" as e").getResultList();
+            for (Model model : objects) {
                 index(model);
             }
         }
