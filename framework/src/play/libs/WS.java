@@ -17,6 +17,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -258,8 +259,8 @@ public class WS extends PlayPlugin {
         public String url;
         public String body;
         public FileParam[] fileParams;
-        public Map<String, String> headers;
-        public Map<String, Object> parameters;
+        public Map<String, String> headers = new HashMap<String, String> ();
+        public Map<String, Object> parameters = new HashMap<String, Object> ();
         public String mimeType;
 
         private WSRequest(String url) {
@@ -350,6 +351,28 @@ public class WS extends PlayPlugin {
          */
         public WSRequest body(String body) {
             this.body = body;
+            return this;
+        }
+        
+        /**
+         * Add a header to the request
+         * @param name header name
+         * @param value header value
+         * @return
+         */
+        public WSRequest setHeader (String name, String value) {
+            this.headers.put(name,value);
+            return this;
+        }
+        
+        /**
+         * Add a parameter to the request
+         * @param name parameter name
+         * @param value parameter value
+         * @return
+         */
+        public WSRequest setParameter (String name, String value) {
+            this.parameters.put(name,value);
             return this;
         }
         
