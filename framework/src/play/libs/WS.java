@@ -306,7 +306,7 @@ public class WS extends PlayPlugin {
                 putOrPost.setRequestEntity(new StringRequestEntity(createQueryString()));
             }
             if (this.body != null) {
-                if (this.parameters != null) {
+                if (this.parameters != null && this.parameters.keySet().size()>0) {
                     throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
                 }
                 putOrPost.setRequestEntity(new StringRequestEntity(this.body));
