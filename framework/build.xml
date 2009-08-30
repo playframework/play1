@@ -288,7 +288,7 @@
     <target name="package" depends="clean,version,jar,javadoc">
         <mkdir dir="dist" /> 
         <zip destfile="dist/play-${version}.zip" comment="Play! ${version}" update="false">
-            <zipfileset prefix="play-${version}" dir=".." includes="**/*" excludes=".*,.*/*,framework/dist/**,id,play,nbproject/**,**/.bzr/**,*.bzrignore,framework/classes/**,framework/tests-results/**,samples-and-tests/**/test-result,samples-and-tests/**/tmp,samples-and-tests/**/db,samples-and-tests/**/attachments" />   
+            <zipfileset prefix="play-${version}" dir=".." includes="**/*" excludes=".*,.*/*,framework/dist/**,id,play,nbproject/**,**/.bzr/**,*.bzrignore,support/textmate/**,framework/classes/**,framework/tests-results/**,samples-and-tests/**/test-result,samples-and-tests/**/tmp,samples-and-tests/**/db,samples-and-tests/**/attachments" />   
             <zipfileset prefix="play-${version}" dir=".." includes="play" filemode="777" />
         </zip>
     </target>

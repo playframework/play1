@@ -1,22 +1,14 @@
 h1. The template engine
 
-Play has an efficient templating system which allows play to dynamically generate HTML, XML, JSON or any text based format. The template engine uses "Groovy":http://groovy.codehaus.org/ as an expression language. A tag system allows you to create reusable functions.
+Play has an efficient templating system which allows to dynamically generate HTML, XML, JSON or any text based format document. The template engine uses "Groovy":http://groovy.codehaus.org/ as an expression language. A tag system allows you to create reusable functions.
 
-Templates are stored in the **app/views** directory. This directory is further organized into many sub-directories :
-
-h4. tags:
-
-Template fragments used as tag.
-
-h4. A directory for each application Controller:
-
-By default all views from a Controller are stored in the same directory.
+Templates are stored in the **app/views** directory. 
 
 h2. <a name="syntax">Template syntax</a>
 
 A template file is a text file, some parts of which have placeholders for dynamically generated content. Dynamic elements of the template are written using the "Groovy":http://groovy.codehaus.org/ language. Groovy syntax is very close to Java one. 
 
-Dynamics elements are resolved during template execution. The rendered result is then sent as part of the HTTP response.
+Dynamic elements are resolved during template execution. The rendered result is then sent as part of the HTTP response.
 
 h3. Expressions : ${…}
 
@@ -26,7 +18,7 @@ For example :
 
 bc. <h1>Client ${client.name}</h1>
 
-h3. Tags : #{tagName
+h3. Tags : #{tagName /}
 
 A tag is a template fragment that can be called with parameters. If the tag has only one parameter, by convention it is called "arg" and its name can be omitted.
 
@@ -40,8 +32,7 @@ bc. #{script 'jquery.js' /}
 
 or
 
-bc. #{script 'jquery.js'}
-#{/script}
+bc. #{script 'jquery.js'}#{/script}
 
 For example the **list** tag allows iteration over any collection. It takes two mandatory parameters :
 
@@ -62,8 +53,10 @@ bc. <h1>Client ${client.name}</h1>
 <p>
    <a href="@{Clients.showAccounts(client.id)}">All accounts</a>
 </p>
+<hr />
+<a href="@{Clients.index()}">Back</a>
 
-The **@@{…}** syntax does the same but generates an absolute URL (useful for email, ...).
+The **@@{…}** syntax does the same but generates an absolute URL (notably useful for email, ...).
 
 h3. Messages : &{…}
 
@@ -77,7 +70,7 @@ To display this message in a template, simply use:
 
 bc. <h1>&{'clientName', client.name}</h1>
 
-h3. Comment : *{…}*
+h3. Comment : ==*{…}*==
 
 Comments aren't evaluated by the template engine. They are just comments ...
 
@@ -86,7 +79,7 @@ bc. *{**** Display the user name ****}*
     ${user.name}
 </div>
 
-h3. Scripts : %{…}%
+h3. Scripts : ==%{…}%==
 
 A script is a more complicated set of expressions. A script can declare some variables and define some statements. Use the **%{…}%** syntax to insert a script.
 
@@ -152,13 +145,23 @@ h3. Retrieve tags parameters
 
 Tag parameters are exposed as template variables. The variable names are constructed with the '_' character prepended to the parameter name. 
 
-From example : 
+For example: 
 
 bc. Hello ${_name} !
 
 And you can pass the name parameter to the tag :
 
 bc. #{hello name:'Bob' /}
+
+If your tag has only one parameter, you can use the fact than the default parameter name is **arg** and that its name is implicit.
+
+Example:
+
+bc. Hello ${_arg} !
+
+And you can call it easily using:
+
+bc. #{hello 'Bob' /}
 
 h3. Invoke tag body
 
@@ -177,7 +180,7 @@ bc. #{hello}
 
 h2. <a>Java object extensions in templates</a>
 
-When you use your Java object within the template engine, some new methods are added to it. These methods do not exist in the original Java class and are defined dynamically added by the template engine.
+When you use your Java object within the template engine, some new methods are added to it. These methods do not exist in the original Java class and are dynamically added by the template engine.
 
 For example, to allow easy number formatting in a template, a **format** method is added to **java.lang.Number**.
 
@@ -189,8 +192,34 @@ bc. <ul>
 #{/list}
 </ul>
 
-You can also provide new extension methods for your project, see Extending the templates language.
+h3. Create custom extensions
 
+Your project may have specifics formatting needs, in which case you can provide your own extensions.
+
+You only need to create a Java class extending **play.templates.JavaExtensions**.
+
+For instance, to provide a custom currency formatter for a number :
+
+bc. package ext;
+ 
+import play.templates.JavaExtensions;
+ 
+public class CurrencyExtensions extends JavaExtensions {
+ 
+  public static String ccyAmount(Number number, String currencySymbol) {
+     String format = "'"+currencySymbol + "'#####.##";
+     return new DecimalFormat(format).format(number);
+  }
+ 
+}
+
+Each extension method is a static method and should return a **java.lang.String** to be written back in the page. The first parameter will hold the enhanced object.
+
+Use your formatter as this :
+
+bc. <em>Price: ${123456.324234.ccyAmount()}</em>
+
+Template extensions classes are automatically detected by play at startup. You just have to restart your application to make them available.
 
 h2. <a>Implicit objects available from a template</a>
 

@@ -2,9 +2,9 @@ h1. Controllers
 
 Business logic is managed in the domain model layer. As a client (typically a Web browser) cannot directly invoke this code, the functionality of domain object is exposed as resources represented by an URI. 
 
-A client uses the uniform API provided by the HTTP protocol to manipulate these resources, and, by implication, the underlying business logic. However, this mapping of resource to domain object is not a bijection : the granularity can be expressed at different levels, some resources may be virtual, some resource aliases may be defined, etc...
+A client uses the uniform API provided by the HTTP protocol to manipulate these resources, and, by implication, the underlying business logic. However, this mapping of resource to domain object is not a bijection : the granularity can be expressed at different levels, some resources may be virtuals, some resources aliases may be defined, etc...
 
-That is precisely the role played by the Controller layer : providing a **glue** between the domain model objects and transport layer events. As the Model layer, controllers are written in pure Java, making it easy to access or modify Model objects. And like the HTTP interface, controllers are procedural and Request/Response oriented.
+That is precisely the role played by the Controller layer : providing a **glue** between the domain model objects and transport layer events. As the Model layer, controllers are written in pure Java, making it easy to access or modify Model objects. And like the HTTP interface, Controllers are procedural and Request/Response oriented.
 
 The Controller layer reduces the **impedance mismatch** between HTTP and the Domain Model.
 
@@ -46,19 +46,19 @@ Each public, static method in a Controller is called an action.
 
 The signature for an action method is always :
 
-bc. public static void action(params...);
+bc. public static void action_name(params...);
 
 You can define parameters in the action method signature. These parameters will be automatically resolved by the framework from the corresponding HTTP parameters.
 
 Generally, an action method does not contain any return statement. The method exit is done by the invocation of a **result** method. In this exemple **render(...)** is a result method which executes and displays a template.
 
-h2. <a name="params">Retrieve HTTP parameters</a>
+h2. <a name="params">Retrieving HTTP parameters</a>
 
 An HTTP request contains some data. This data can be extracted from :
 
 * The URI path: in **/clients/1541**, 1541 is dynamic part of the URI Pattern.
 * The Query String: **/clients?id=1541.**
-* The request body: if the request was sent from an HTML form, the request body contains the form data encoded as **x-www-urlform-encoded**. The request body can also be a JSON or XML document.
+* The request body: if the request was sent from an HTML form, the request body contains the form data encoded as **x-www-urlform-encoded**.
 
 In all cases, play extracts this data and builds a Map<String, String[]> which contains all the HTTP parameters. The key is the parameter name. The parameter name is derived from :
 
@@ -123,7 +123,7 @@ bc. public static void show(List<Long> id) {
 
 p(note). **Exceptions**
  
-If the HTTP parameter corresponding to the action method argument is not found, the corresponding method argument is set to null. If a value is found but it can't be properly cast to the required Java type, an error is added to the validation error collection and the default value is used.
+If the HTTP parameter corresponding to the action method argument is not found, the corresponding method argument is set to it default value (typically null for objects and 0 for primitive numeric types). If a value is found but it can't be properly cast to the required Java type, an error is added to the validation error collection and the default value is used.
 
 h2. <a name="binding">Advanced HTTP to Java binding</a>
 
@@ -133,15 +133,23 @@ All the native and common Java type are automatically bound :
 
 **int**, **long**, **boolean**, **char**, **byte**, **float**, **double**, **Integer**, **Long**, **Boolean**, **Char**, **String**, **Float**, **Double**.
 
-Note that if the parameter is missing in the HTTP Request, Object type will be set to null and native types will be set to their default value.
+Note that if the parameter is missing in the HTTP Request, or that automatic conversion fails, Object type will be set to null and native types will be set to their default value.
 
 h3. Date
 
 A date object can be automatically bound if the string representation of the date matches one of the following patterns :
 
-* **dd/MM/yyyy**
-* **dd-MM-yyyy**
-* **ddMMyyyy**
+* yyyy-MM-dd'T'hh:mm:ss'Z' // ISO8601 + timezone
+* yyyy-MM-dd'T'hh:mm:ss" // ISO8601
+* yyyy-MM-dd
+* yyyyMMdd'T'hhmmss
+* yyyyMMddhhmmss
+* dd'/'MM'/'yyyy
+* dd-MM-yyyy
+* ddMMyyyy
+* MMddyy
+* MM-dd-yy
+* MM'/'dd'/'yy
 
 For example :
 
@@ -163,7 +171,7 @@ bc. public static void create(String comment, File attachment) {
     show(doc.id);
 }
 
-The created file has the same name as the original file. It's stored in a temporary directory and deleted at the end of the request. So you have to copy it in a safe directory.
+The created file has the same name as the original file. It's stored in a temporary directory and deleted at the end of the request. So you have to copy it in a safe directory or it will be automatically deleted by the framework after the request end.
 
 h3. Arrays or collections of supported types
 
@@ -188,7 +196,7 @@ bc. public static void show(Set<Long> id) {
 
 h3. POJO objects binding
 
-play also automatically binds any of your model classes using the same simple naming convention rules.
+Play also automatically binds any of your model classes using the same simple naming convention rules.
 
 bc. public static void create(Client client ) {
     client.save();
@@ -207,11 +215,6 @@ bc. ?client.name=Zenexity
 &client.address.street=64+rue+taitbout
 &client.address.zip=75009
 &client.address.country=France
-
-The binder also applies for JSON posted data. Our previous example could also be sent from an AJAX call.
-
-bc. var cli = { name: "Zenexity", email: "contact@zenexity.fr" };
-jQuery.post( "/client/create", { 'client': cli }, callback );
 
 
 h2. <a name="result">Result types</a>
@@ -243,12 +246,12 @@ You can format the text message using the Java standard formatting syntax :
 
 bc. public static void countUnreadMessages() {
     Integer unreadMessages = MessagesBox.countUnreadMessages();
-    renderText("The are %s unread messages", unreadMessages);
+    renderText("There are %s unread messages", unreadMessages);
 }
 
 h3. Execute a template
 
-If the generated content is too complicated, you can use a template to generate the response content.
+If the generated content is complicated, you will use a template to generate the response content.
 
 bc. public class Clients extends Controller {
 
@@ -258,7 +261,7 @@ bc. public class Clients extends Controller {
 
 }
 
-A default template is used here. The path of the default template is resolved using the Controller and action names. 
+A template name is automatically deduced from the Play conventions. The path of the default template is resolved using the Controller and action names. 
 
 In this example the invoked template is :
 
@@ -359,7 +362,7 @@ POST   /clients                 Clients.create
 * The Router invokes the **create** action of the **Clients** controller.
 * The action method call the **show** action method directly.
 * The Java call is intercepted and the Router reverse route generation creates the URL needed to invoke Clients.show with an id parameter.
-* The HTTP Response is **REDIRECT /clients/3132**.
+* The HTTP Response is **302 Location:/clients/3132**.
 * The browser then issues **GET /clients/3132**.
 * ...
 
@@ -368,7 +371,7 @@ h2. <a name="interceptions">Interceptions</a>
 
 A controller can define interception methods. Interceptors are invoked for all actions of the controller class and its descendants. It is a useful way to define treatments that are common to all actions :  verifying that a user is authenticated, loading request-scope information ...
 
-These methods have to be **static** but not **public**. You have to annotate these method with a correction interception marker.
+These methods have to be **static** but not **public**. You have to annotate these method with a correct interception marker.
 
 h3. @Before
 
@@ -454,13 +457,52 @@ h3. Controller hierarchy
 
 If a Controller class is a subclass of another Controller class, interceptions are applied to the full Controller hierarchy.
 
+h3. Adding more interceptors using the @With annotation
+
+Because Java does not allow multiple inheritance, it's sometimes very limiting to rely on Controller hierarchy to apply interceptors. You can then define some interceptors in a totally different class, and link them with any controller using the @With annotation.
+
+Example:
+
+bc. public class Secure extends Controller {
+    
+    @Before
+    static void checkAuthenticated() {
+        if(!session.containsKey("user")) {
+            unAuthorized();
+        }
+    }
+}    
+
+And on another Controller:
+
+bc. @With(Secure.class)
+public class Admin extends Application {
+    
+    ...
+     
+}
+
 h2. <a name="session">Session and Flash scope</a>
 
-If you have to keep some data across multiple HTTP Requests, you can save it in the Session or the Flash scope. Data stored in the Session is available during the whole of the user session, and data stored in the flash scope is available to the next request only.
+If you have to keep some data across multiple HTTP Requests, you can save them in the Session or the Flash scope. Data stored in the Session are available during the whole of the user session, and data stored in the flash scope are available to the next request only.
 
 It's important to understand that Session and Flash data are not stored in the server but are added to each subsequent HTTP Request, using the Cookie mechanism. So the data size is very limited (up to 4Ko); and you can only store String values.
 
-Of course, cookies are signed with a secret key so the client can't modify the cookie data (or the cookie will be invalidated).
+Of course, cookies are signed with a secret key so the client can't modify the cookie data (or the cookie will be invalidated). The play session is not aimed to be used as a cache. If you need to cache some data related to a specific session, you can use the play built-in cache mechansim and use the *session.id* key to keep them related to a specific user session. 
+
+Example:
+
+bc. public static void index() {
+    List messages = Cache.get(session.id + "-messages", List.class);
+    if(messages == null) {
+        // Cache miss
+        messages = Message.findByUser(session.get("user"));
+        Cache.set(session.id + "-messages", messages, "30mn");
+    }
+    render(messages);
+}
+
+The cache has a different semantic than the classic servlet HTTP session object. You can't rely on the fact that these objects will be always found in the cache. So it force you to handle the cache miss cases, and finally keep your application fully stateless.
 
 p(note). **Continuing the discussion**
  

@@ -10,11 +10,11 @@ This pattern splits the application into separate layers: the Presentation layer
 
 * The **View** renders the model into a form suitable for interactions, typically a user interface. Multiple views can exist for a single model, for different purposes. In a Web application the view is usually rendered in a 'Web format' like HTML, XML or JSON. However there are some cases where the view can be in a binary form, eg. dynamically rendered chart diagrams.
 
-* The **Controller** processes and responds to events, typically user actions and may also invoke changes on the model. In a Web application, events are typically HTTP request : a Controller listens for HTTP requests, extracts interesting data from the 'event', such as query string parameters, request headers... and applies changes on the underlying model objects.
+* The **Controller** processes and responds to events, typically user actions and may also invoke changes on the model. In a Web application, events are typically HTTP requests: a Controller listens for HTTP requests, extracts interesting data from the 'event', such as query string parameters, request headers... and applies changes on the underlying model objects.
 
 !images/diagrams_mvc!
 
-In a play applications these three layers are defined in the **app** directory, each in a separate Java package :
+In a play application these three layers are defined in the **app** directory, each one in a separate Java package :
 
 h3. app/controllers
 
@@ -44,9 +44,10 @@ This diagram summarizes the HTTP Request path :
 !images/diagrams_path!
 
 
-h2. <a name="application">play application layout</a>
+h2. <a name="application">The standard application layout</a>
 
 The layout of a play application is standardized to keep things as simple as possible.
+
 
 h3. The app directory
 
@@ -54,20 +55,26 @@ This directory contains all executable artefacts : Java source code and views te
 
 p(note). **Where are my .class files ??**
  
-Don't look for compiled Java classes. The play framework compiles the Java source code at runtime and doesn't keep any compiled classes on the filesystem.
+Don't look for compiled Java classes. The play framework compiles the Java source code at runtime and only keep compiled classes to a bytecode cache in the tmp directory. The main executables artefacts in a play application are the *.java* source files, not the compiled classes.
 
-There are three standard packages in the app directory, one for each layer of the MVC architectural pattern. 
+There are three standard packages in the app directory, one for each layer of the MVC architectural pattern. You can of course add your own packages as for example an *utils* packages.
 
 In addition, the views package is further organized into sub-packages : 
 
 * **tags**, hosts application tags.
-* **One views folder for each Controller**, by convention templates related to each Controller are stored in their own package
+* **One views folder for each Controller**, by convention templates related to each Controller are stored in their own package.
+
 
 h3. The public directory
 
 Resources stored in the **public** directory are static assets and are served directly by the Web server.
 
 This directory is split into three standard sub-directories : for images, CSS stylesheets and javascripts. You should try to organize your static assets like this to keep all play applications consistent.
+
+p(note). **Tip*
+ 
+By default the /public directory is mapped to the /public URL path, but you can easily change that, or even use several directories for your static assets.
+
 
 h3. The conf directory
 
@@ -99,9 +106,14 @@ If a compilation error occurs, the exact problem is displayed in the browser.
 
 Template files are hot-compiled and hot-reloaded too.
 
+p(note). **About DEV/PROD modes**
+ 
+You can run an application either in a DEV or PROD mode. You toggle this mode using the *application.mode* configuration property. When you run in
+DEV mode, play will check for files modifications and handle hot reloading. The PROD mode is fully optimized for production mode.
+
 h3. Connect a Java debugger
 
-If you run your application with the **debug** command you can then connect a Java debugger on port 8000.
+When you run the application in DEV mode, you can then connect a Java debugger on port 8000.
 
 For example, using the netbeans debugger : 
 

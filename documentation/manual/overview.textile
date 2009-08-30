@@ -11,7 +11,7 @@ h2. <a name="java">Pure Java framework</a>
 
 Play is a pure Java framework and allows you to keep your preferred development tools and libraries. If you already use Java as a development platform you don't need to switch to another language, another IDE and other libraries. *Just switch to a more productive Java environment !*
 
-A Play application looks really coherent to any Java developer : 
+A play application looks really coherent to any Java developer : 
 
 !images/structure!
 
@@ -20,13 +20,13 @@ h2. <a name="http">Built over HTTP</a>
 
 If you are already using another Java Web framework like Servlet API or Struts framework, you allready have used an abstract view of the HTTP protocol with strange Java APIs and concepts. We think differently. A Web applications framework should give you full, straightforward access to HTTP and its concepts. This is a fundamental difference between Play and other Java web application frameworks.
 
-HTTP, the Request/Response pattern, REST, content-type negotiation and URI are all major concepts for the Play! framework. 
+HTTP, the Request/Response pattern, the REST architectural style, content-type negotiation, URI are all major concepts for the play framework. 
 
 For instance, binding an URI pattern to a Java call is a matter of one line:
 
 bc. GET    /clients/{id}        Clients.show
 
-If AJAX, REST and managing back/forward movement between web pages are some of the issues you face in your day-to-day web development, just give Play! a try.
+If AJAX, REST and managing back/forward movement between web pages are some of the issues you face in your day-to-day web development, just give play a try.
 
 
 h2. <a name="templates">Efficient templating engine</a>
@@ -66,20 +66,22 @@ Whenever an error occurs, the framework makes its best effort to show you the pr
 
 !images/error!
 
+If you like work in *Test Driven develoment* mode, the integrated tests runner will allow you to quickly write tests, run them and fix them in an unified environment.
+
 
 h2. <a name="full-stack">Full-stack application framework</a>
 
 The play framework was initially inspired by our own Java applications. It has all the tools needed to create a modern web application :
 
 * Relational Database support through JDBC.
-* Object-Relational Mapping using Hibernate.
-* Memcache support.
-* Web services consumption either in JSON or XML.
+* Object-Relational Mapping using Hibernate (with the JPA API).
+* Integrated Cache support, with easy use of the distributed memcached system if needed.
+* Straightforward Web services consumption either in JSON or XML (we talk about *real* web services here; not the SOAP stuff).
 * OpenID support for distributed authentication.
 * Image manipulation API.
 * ...
 
-A plugin architecture lets you combine a Web application with many other Web applications, and reuse Java code, templates or resources like Javascript and CSS.
+A modular architecture lets you combine a Web application with many other Web applications. With play application modules, you can of course reuse some Java code, but templates or static resources (like Javascript and CSS) as well.
 
 p(note). **Give it a try**
  

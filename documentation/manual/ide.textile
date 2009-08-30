@@ -1,6 +1,8 @@
 h1. Setting up your preferred IDE
 
-Working with play is easy. You don't even need an IDE because play compiles and refreshes the modifications you make to Java sources automatically. However using a modern Java IDE provides cool productivity features like auto-completion, on the fly compilation, assisted refactoring and debugging. play provides support for "Netbeans":http://www.netbeans.org and "Eclipse":http://www.eclipse.org.
+Working with play is easy. You don't even need an IDE because play compiles and refreshes the modifications you make to Java sources automatically. 
+
+However using a modern Java IDE provides cool productivity features like auto-completion, on the fly compilation, assisted refactoring and debugging. play provides automatic support for "Netbeans":http://www.netbeans.org and "Eclipse":http://www.eclipse.org.
 
 Because play applications are standard Java applications you don't need any specific plugin to work with your preferred IDE. Just a little bit of tuning for your Java project :
 
@@ -13,9 +15,14 @@ A play application classpath is built as follows (in this order):
 * All the jars found in the **/lib** directory for the application
 * All the jars found in the **$PLAY_PATH/framework/lib** directory
 
+p(note). *Tip*
+ 
+If you have some modules enabled, you will need to add all modules libraires (from the $module/lib directory) to the classpath as well.
+
+
 h3. Main class to run
 
-To start a play application just run the **play.server.Server** class. play uses the **"application.path"** system property to locate the application to run. Typically you pass this value with :
+To start a play application just run the **play.server.Server** class. Play uses the **"application.path"** system property to locate the application to run. Typically you pass this value with :
 
 bc. java -Dapplication.path="/app/path" ...
 
@@ -25,6 +32,8 @@ h3. Java agent
 To enable HotSwap reloading you have to load a Java agent packaged in the **play.jar** library. Typically like this :
 
 bc. java -javaagent:"$PLAY_PATH/framework/play.jar" ...
+
+It's not required, but will speed up class reloading when it is possible.
 
 
 h2. <a>Generate configuration files for Netbeans</a>
@@ -48,7 +57,7 @@ The generated configuration files contains absolute references to your framework
 
 h2. <a>Generate configuration files for eclipse</a>
 
-play provides a command to simplify Eclipse configuration. To transform a play application to a working Eclipse project use the **eclipsify** command :
+Play provides a command to simplify Eclipse configuration. To transform a play application to a working Eclipse project use the **eclipsify** command :
 
 bc. # play eclipsify myApp
 
@@ -56,7 +65,7 @@ You then need to import the application into your Workspace with the **File/Impo
 
 !images/eclipse!
 
-The **eclipsify** command generates several launchers for the application. The main launcher in usable either with the **Run** et **Debug** eclipse command. The JPDA launcher is only usable with the **Run** command since it already starts a JPDA agent. You can then use the Connect JPDA launcher to start a debugging session at any time. Stopping the debugging session will not stop the server.
+The **eclipsify** command generates several launchers for the application. The main launcher in usable either with the **Run** or **Debug** eclipse command. The JPDA launcher is only usable with the **Run** command because it already starts a JPDA agent. You can then use "the Connect JPDA launcher" to start a debugging session at any time. Stopping the debugging session will not stop the server.
 
 If you make changes to your application classpath or any important changes to your application, use **eclipsify** again to regenerate the configuration files.
 
@@ -67,7 +76,7 @@ The generated configuration files contains absolute references to your framework
 
 h2. <a>Debugging problems</a>
 
-play automatically reloads Java classes when the Java sources are modified. But because Java does not really support class reloading, the JDPA debugger can easily get lost or be confused : breakpoint submission can fail or the debugger can show you wrong lines when you execute code step by step.
+Play automatically reloads Java classes when the Java sources are modified. But because Java does not really support class reloading, the JDPA debugger can easily get lost or be confused : breakpoint submission can fail or the debugger can show you wrong lines when you execute code step by step.
 
 To correct this, the better way is to start a fresh debugging session after a code modification. Luckily, JPDA supports the ability to connect and disconnect the debugger at any time without restarting the JVM.
 

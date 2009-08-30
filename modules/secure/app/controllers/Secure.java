@@ -6,6 +6,7 @@ import play.Play;
 import play.mvc.*;
 import play.data.validation.*;
 import play.libs.*;
+import play.utils.*;
 
 public class Secure extends Controller {
 

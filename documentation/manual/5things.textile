@@ -10,12 +10,14 @@ For example, with this request :
 
 bc. /articles/archive?date=08/01/08&page=2
 
-You can retrieve the **date** and **page** parameters by declaring them as Java method parameters :
+You can retrieve the **date** and **page** parameters by declaring them as Java method parameters:
 
 bc. public static void archive(Date date, Integer page) {
     List<Article> articles = Articles.fromArchive(date, page);
     render(articles);
 }
+
+Play will use the static type of the method parameter, to translate the HTTP value as a Java object.
 
 Smart binding also functions **with any classes.**
 
@@ -40,7 +42,7 @@ bc. <form action="/Directory/add" >
 
 h2. <a>2. Redirect to an action by simply calling the corresponding Java method</a>
 
-There is no equivalent to the Java Servlet **forward** command with play. But redirecting to another action is really simple. Just call the corresponding Java method and play will generate the correct HTTP Redirect response.
+There is no equivalent to the Java Servlet **forward** command with play. But redirecting to another action is really simple. Just call the corresponding Java method and play will generate the correct HTTP "Redirect" response.
 
 bc. public static void show(Long id) {
     Article article = Article.findById(id);
@@ -77,7 +79,7 @@ model.put("article", article);
 model.put("user", user);
 render(model);
 
-When, with Play you can just write :
+When, with play you can just write :
 
 bc. Article article = Article.findById(id);
 User user = User.getConnected();
@@ -107,4 +109,4 @@ How could it be easier ?
 
 h2. <a>5. Distribute an application to several JVMs without configuring anything</a>
 
-Since the server is totally stateless, you can just start the same application on several servers and load balance between applications at the HTTP level. No need to set up a complex application server cluster or something similar.
+Because play is totally stateless, you can just start the same application on several servers and load balance between applications at the HTTP level. No need to set up a complex application server cluster or something similar.

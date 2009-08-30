@@ -8,7 +8,7 @@
             <h1>Your application is ready !</h1>
             <p>
                 Congratulation, you've just created a new play application. This page will help you in the few next steps.
-                <a href="#" onclick="var env = document.getElementById('env'); env.style.display=(env.style.display == 'none' ? 'block' : 'none')">
+                <a href="#" onclick="var env = document.getElementById('env'); env.style.display=(env.style.display == 'none' ? 'block' : 'none'); if(event && event.preventDefault) event.preventDefault()">
                     Click here to get more informations about your application environment
                 </a>.
             </p>
@@ -61,7 +61,6 @@ db=fs</code></pre>
                 If you want to connect to an existing <strong>MySQL5 server</strong>, use:
             </p>
 <pre><code>db=mysql:user:pwd@database_name</code></pre>            
-            </p>
             <p>
                 If you need to connect to another JDBC compliant database, first add the corresponding driver library to the
                 <strong>lib/</strong> directory of your application, and add these lines to the <strong>conf/application.conf</strong> file:

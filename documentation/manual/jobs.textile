@@ -1,1 +1,102 @@
 h1. Jobs
+
+Because play is a web application framework, most of the application logic is done by controllers responding to HTTP requests. 
+
+But sometimes you will need to execute some application logic outside of any HTTP request. It can be usefull for initilization tasks, maintenance tasks or to run long task without blocking the HTTP request execution pool. 
+
+Jobs are fully managed by the framework. That means that play will manage for you all the database connection stuff, JPA entity manager synchronization and transactions management for you. To create a job you just need to extends the **play.jobs.Job** super class.
+
+bc. package jobs;
+ 
+import play.jobs.*;
+ 
+public class MyJob extends Job {
+    
+    public void doJob() {
+        // execute some application logic here ...
+    }
+    
+}
+
+Sometimes you need to create jobs that return a result. You then overrides the **doJobWithResult()** method.
+
+bc. package jobs;
+ 
+import play.jobs.*;
+  
+public class MyJob extends Job<String> {
+    
+    public String doJobWithResult() {
+        // execute some application logic here ...
+        return result;
+    }
+    
+}
+
+Here the use of **String** is just for example, of course a job can return any object type.
+
+h2. <a>Bootstrap job</a>
+
+Boostrap jobs are executed by play at application start time. To mark your job as a bootstrap job you just need to add the **@OnApplicationStart** annotation.
+
+bc. import play.jobs.*;
+ 
+@OnApplicationStart
+public class Bootstrap extends Job {
+    
+    public void doJob() {
+        if(Page.count() == 0) {
+            new Page("root").save();
+            Logger.info("The page tree was empty. A root page has been created.");
+        }
+    }
+    
+}
+
+You don't need to return a result. Even if you do it, the result will be lost.
+
+p(note). **Warning**
+ 
+When you run the application in DEV mode, the application waits the first HTTP request to start. Moreover when you are in DEV mode, the application will sometime automatically restart when needed. 
+ 
+When you run in PROD mode, the application will start synchronously with the server start.
+
+h2. <a>Scheduled job</a>
+
+Scheduled jobs are run periodically by the framework. You can tell play to run a job at a specified interval using the **@Every** annotation.
+
+bc. import play.jobs.*;
+ 
+@Every("1h")
+public class Bootstrap extends Job {
+    
+    public void doJob() {
+        List<User> newUsers = User.find("newAccount = true").fetch();
+        for(User user : newUsers) {
+            Notifier.sayWelcome(user);
+        }
+    }
+    
+}
+
+If the @Every annotation is not enough you can use the **@On** annotation to run your jobs using a CRON expression.
+
+bc. import play.jobs.*;
+ 
+/** Fire at 12pm (noon) every day **/ 
+@On("0 0 12 * * ?")
+public class Bootstrap extends Job {
+    
+    public void doJob() {
+        Logger.info("Maintenance job ...");
+        ...
+    }
+    
+}
+
+p(note). **Tip**
+ 
+We use the Cron expression parser from the "Quartz library":http://www.opensymphony.com/quartz/wikidocs/CronTriggers%20Tutorial.html.
+
+You don't need to return a result. Even if you do it, the result will be lost.
+

@@ -1,10 +1,10 @@
 h1. HTTP routing
 
-The router is the component in charge of translating incoming HTTP Requests into action calls (static, public method of a Controller).
+The router is the component in charge of translating incoming HTTP Requests into action calls (a static, public method of a Controller).
 
 An HTTP request is seen as an event by the MVC framework. The event contains two major pieces of information :
 
-* The Request path (such as /clients/1542, /photos/list)
+* The Request path (such as /clients/1542, /photos/list), including the query string.
 * The HTTP method (GET, POST, DELETE, ...)
 
 h2. <a>About REST ...</a>
@@ -15,9 +15,9 @@ REST states a few key design principles:
 
 * Application functionality is divided into resources
 * Every resource is uniquely addressable using an URI
-* All resources share a uniform interface for the transfer of state between client and resource. If you're using HTTP, these interface are 
+* All resources share a uniform interface for the transfer of state between client and resource. 
 
-defined by the set of availables HTTP methods. The protocol used to access the resource state is:
+If you're using HTTP, these interfaces are defined by the set of availables HTTP methods. The protocol used to access the resource state is:
 
 * Client-server
 * Stateless
@@ -45,7 +45,7 @@ You can add a comment to the route file, with the **"#"** character.
 bc. # Display a client
 GET    /clients/{id}             Clients.show           
 
-h2. <a name="http">The HTTP method</a>
+h3. The HTTP method
 
 The HTTP method can be any one of the any valid methods supported by HTTP :
 
@@ -65,7 +65,7 @@ bc. GET /clients/1541
 PUT /clients/1212
 
 
-h2. The URI Pattern
+h3. The URI Pattern
 
 The URI pattern defines the request path needed by the route Some parts of the route can be dynamic. Any dynamic part must be specified within braces {...}.
 
@@ -88,7 +88,7 @@ A URI pattern may have more than one dynamic part :
 
 bc. /clients/{id}/accounts/{accountId}
 
-The default matching strategy for a dynamic part is defined by the regular expression **[^/]+**. You can define your own regular expression for a dynamic part.
+The default matching strategy for a dynamic part is defined by the regular expression **/[^/]+/**. You can define your own regular expression for a dynamic part.
 
 This regex will only accept numerical values as id :
 
@@ -104,6 +104,13 @@ p(note). **Note**
  
 Dynamic parts are named. The Controller can later retrieve the dynamic parts from the HTTP params map.
 
+By default play considers the trailing URL slash as important. For example, this route:
+
+bc. GET     /clients         Clients.index
+
+will match the */clients* URL but not the */clients/* one. You can tell play that you want to match both URL adding a question mark after the trailing slash. For example:
+
+bc. GET     /clients/?       Clients.index
 
 h3. Java call definition
 
@@ -158,7 +165,7 @@ Use the special action **staticDir**, to point to each folder you wish to publis
 
 For example :
 
-bc. GET    /public/               staticDir:/public
+bc. GET    /public/               staticDir:public
 
 When supplied with a request for a /public/* path, play will serve your files from the application /public folder.
 
@@ -186,7 +193,7 @@ bc. map.put("id", 1541);
 map.put("display", "full");
 String url = Router.reverse("Clients.show", map).url; GET /clients/1541?display=full
 
-The priority order ia again used to find the most specific Route able to generate the URL.
+The priority order is again used to find the most specific Route able to generate the URL.
 
 p(note). **Continuing the discussion**
  
