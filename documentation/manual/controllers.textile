@@ -488,16 +488,16 @@ If you have to keep some data across multiple HTTP Requests, you can save them i
 
 It's important to understand that Session and Flash data are not stored in the server but are added to each subsequent HTTP Request, using the Cookie mechanism. So the data size is very limited (up to 4Ko); and you can only store String values.
 
-Of course, cookies are signed with a secret key so the client can't modify the cookie data (or the cookie will be invalidated). The play session is not aimed to be used as a cache. If you need to cache some data related to a specific session, you can use the play built-in cache mechansim and use the *session.id* key to keep them related to a specific user session. 
+Of course, cookies are signed with a secret key so the client can't modify the cookie data (or the cookie will be invalidated). The play session is not aimed to be used as a cache. If you need to cache some data related to a specific session, you can use the play built-in cache mechansim and use the *session.getId()* key to keep them related to a specific user session. 
 
 Example:
 
 bc. public static void index() {
-    List messages = Cache.get(session.id + "-messages", List.class);
+    List messages = Cache.get(session.getId() + "-messages", List.class);
     if(messages == null) {
         // Cache miss
         messages = Message.findByUser(session.get("user"));
-        Cache.set(session.id + "-messages", messages, "30mn");
+        Cache.set(session.getId() + "-messages", messages, "30mn");
     }
     render(messages);
 }

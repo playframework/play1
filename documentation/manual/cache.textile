@@ -1,8 +1,8 @@
 h1. Use cache
 
-To create highly performant systems, you sometimes need to cache data. play has a cache library intended to be used with "Memached":http://www.danga.com/memcached/.
+To create highly performant systems, you sometimes need to cache data. play has a cache library and will use "Memcahed":http://www.danga.com/memcached/ when used in a distributed environment.
 
-If you don't configure memcached, play will use a simple implementation which caches data in the JVM heap.  Caching data in the JVM application breaks the "share nothing" assumption made by play : you can't start your application using several servers, and expect the application to behave consistently. Each application instance will have a different copy of the data.
+If you don't configure memcached, play will use a standalone cache that stor data in the JVM heap. Caching data in the JVM application breaks the "share nothing" assumption made by play : you can't start your application using several servers, and expect the application to behave consistently. Each application instance will have a different copy of the data.
 
 It is important to understand that the cache contract is clear : even if you have put some data in a cache, you can't expect the data to remain there forever. In fact you shouldn't. A cache is a fast, but values expire, and the cache generally exists only in memory (without persistent backup). 
 

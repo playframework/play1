@@ -1,4 +1,4 @@
-h1. Validating with play
+h1. Validating HTTP data with play
 
 Validations ensure that the data has certain values or meet specific requirements. You can use validation to verify that your models are correct before saving them to the database, or use them directly on HTTP parameters to validate a simple form.
 
@@ -137,7 +137,7 @@ bc. #{ifErrors}
    #{/errors}
 #{/ifErrors}
  
-#{form @Application.hello}
+#{form @Application.hello()}
    <div>
       Name : <input type="text" name="name" value="${flash.name}" />
    </div>
@@ -155,7 +155,7 @@ bc. #{ifErrors}
    <h1>Oops ...</h1>
 #{/ifErrors}
  
-#{form @Application.hello}
+#{form @Application.hello()}
    <div>
       Name : <input type="text" name="name" value="${flash.name}" />
       <span class="error">#{error 'name' /}</span>
@@ -219,7 +219,7 @@ bc. #{ifErrors}
    <h1>Oops ...</h1>
 #{/ifErrors}
  
-#{form @Application.hello}
+#{form @Application.hello()}
    <div>
       Name : <input type="text" name="user.name" value="${flash['user.name']}" />
       <span class="error">#{error 'user.name' /}</span>

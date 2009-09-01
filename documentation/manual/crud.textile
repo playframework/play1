@@ -1,6 +1,6 @@
 h1. CRUD: Administration generator
 
-The CRUD module generates a fully usable web interface for your JPAModel objects.
+The CRUD module generates a fully usable web interface for your JPA Model objects.
 
 Let's see a simple example.
 
@@ -26,11 +26,12 @@ bc. package models;
  
 import play.*;
 import play.db.jpa.*;
+ 
 import javax.persistence.*;
 import java.util.*;
  
 @Entity
-public class User extends JPAModel {
+public class User extends Model {
  	
 	public String name;
 	public String email;
@@ -73,25 +74,26 @@ bc. package models;
  
 import play.*;
 import play.db.jpa.*;
+ 
 import javax.persistence.*;
 import java.util.*;
  
 import play.data.validation.*;
  
 @Entity
-public class User extends JPAModel {
+public class User extends Model {
  	
-	@Required
-	@MinSize(8)
-	public String name;
+    @Required
+    @MinSize(8)
+    public String name;
 	
-	@Required
-	@Email
-	public String email;
+    @Required
+    @Email
+    public String email;
 	
-	@Required
-	@MaxSize(1000)
-	public String address;
+    @Required
+    @MaxSize(1000)
+    public String address;
  
     public String toString() {
         return email;

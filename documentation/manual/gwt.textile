@@ -1,4 +1,4 @@
-h1(red). **Google Web Toolkit** support
+h1. Google Web Toolkit support
 
 
 This module provides helper to simplify the integration of a GWT UI with Play as application server.
@@ -22,8 +22,6 @@ bc. # Additional modules
 # the application root.
 #
 module.gwt=${play.path}/modules/gwt
-
-!http://ddd!
 
 Now use the **gwt:init** command to bootstrap your GWT project in the existing Play application :
 
@@ -85,15 +83,6 @@ public class HelloServiceImpl extends GWTService implements HelloService {
  
 }
 
-"coucou":http://www.commmo
-
-* jkjkjklkjlkl
-** HelloServiceImpl
-
-bq. jkjkjkklj
-* jkjkjkjkl
-** kjkjlkjl
-
 This is the only difference from the GWT documentation.
 
 h2. <a>Debugging the GWT UI</a>
@@ -105,7 +94,7 @@ When you run the GWT UI in hosted mode, a Java VM simulate the execution of the 
 
 So if you want to debug all the application you have to attach 2 debugging sessions using JPDA. This is not a problem ...
 
-For example, using netbeans. Start to create a netbeans project with the **play netbeansify** command :
+For example, using netbeans, create a netbeans project with the **play netbeansify** command :
 
 bc. # play netbeansify test-gwt
 

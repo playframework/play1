@@ -1,13 +1,11 @@
 h1. Overview
 
-The play framework makes it easier to build Web applications with Java. It's a clean alternative to bloated Enterprise Java stacks. It focuses on developers productivity and targets RESTfull architectures. 
-
-Play is a perfect companion for *agile sofware development*.
+The play framework makes it easier to build Web applications with Java. It's a clean alternative to bloated Enterprise Java stacks. It focuses on developers productivity and targets RESTful architectures. Play is a perfect companion for *agile sofiware development*.
 
 p(note). Wanna see some code ? Check "Five cool things you can do with play":5things, or try the "hello world tutorial":helloworld.
 
 
-h2. <a name="java">Pure Java framework</a>
+h2. <a name="java">Java framework, without pain</a>
 
 Play is a pure Java framework and allows you to keep your preferred development tools and libraries. If you already use Java as a development platform you don't need to switch to another language, another IDE and other libraries. *Just switch to a more productive Java environment !*
 
@@ -18,7 +16,7 @@ A play application looks really coherent to any Java developer :
 
 h2. <a name="http">Built over HTTP</a>
 
-If you are already using another Java Web framework like Servlet API or Struts framework, you allready have used an abstract view of the HTTP protocol with strange Java APIs and concepts. We think differently. A Web applications framework should give you full, straightforward access to HTTP and its concepts. This is a fundamental difference between Play and other Java web application frameworks.
+If you are already using another Java Web framework like Servlet API or Struts framework, you already have used an abstract view of the HTTP protocol with strange Java APIs and concepts. We think differently. A Web applications framework should give you full, straightforward access to HTTP and its concepts. This is a fundamental difference between Play and other Java web application frameworks.
 
 HTTP, the Request/Response pattern, the REST architectural style, content-type negotiation, URI are all major concepts for the play framework. 
 

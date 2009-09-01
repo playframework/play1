@@ -14,7 +14,7 @@ Your first steps with play and your first 5 minutes fun.
 # "Installation guide":install
 # "Setting up your preferred IDE":ide
 # "Five cool things you can do with Play":5things
-# "The Hello World app: create your first application":helloworld
+# "Your first application":helloworld
 
 
 h2. <a name="guide">Play guide -- a real world app step by step</a>
@@ -26,9 +26,9 @@ Each chapter is meant to last about one hour, and will be the occasion to learn 
 # "Building the first screen":guide3
 # "The comments page":guide4
 # "Setting up a Captcha":guide5
-# "Tagging support":guide6
+# "Add tagging support":guide6
 # "A basic admin area using CRUD":guide7
-# "Adding security":guide8
+# "Add basic security":guide8
 # "Better content using Textile":guide9
 # "Creating a custom editor area":guide10
 # "The media library":guide11
@@ -84,6 +84,7 @@ h2. <a name="cook">Cookbook</a>
 
 Tips about everything and anything.
 
+# "JPA support":jpa
 # "Data validation":validation
 # "Application modularization":modules
 # "Configure logs":logs
@@ -97,7 +98,7 @@ Tips about everything and anything.
 
 h2. <a name="modules">Other batteries included</a>
 
-These modules are availables.
+Add instant power to your application by enabling one of these modules.
 
 # "CRUD":crud
 # "Security":secure

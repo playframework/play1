@@ -191,7 +191,7 @@
     
     <!-- Launch all *Test.java -->
     
-    <target name="test" depends="jar" description="run tests suite">
+    <target name="test" depends="clean,jar" description="run tests suite">
         <condition property="playExtension" value=".bat">
             <and><os family="windows"/></and>
         </condition>
@@ -233,6 +233,10 @@
     
     <target name="play-test">
         <echo message="play auto-test ${testAppPath} (wait)" />
+        <exec executable="${basedir}/../play${playExtension}" failonerror="true">
+            <arg value="clean"/>
+            <arg value="${testAppPath}"/>
+        </exec>
         <exec executable="${basedir}/../play${playExtension}" failonerror="true">
             <arg value="auto-test"/>
             <arg value="${testAppPath}"/>

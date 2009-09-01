@@ -20,8 +20,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.httpclient.ConnectTimeoutException;
@@ -130,7 +130,8 @@ public class WS extends PlayPlugin {
                     int port,
                     InetAddress localAddress,
                     int localPort) throws IOException, UnknownHostException {
-                // get inetAddersses
+                
+                // get inetAddresses
                 InetAddress[] inetAddresses = InetAddress.getAllByName(host);
 
 

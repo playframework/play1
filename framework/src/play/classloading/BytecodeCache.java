@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.security.MessageDigest;
 import play.Logger;
 import play.Play;
+import play.PlayPlugin;
 
 /**
  * Used to speed up compilation time
@@ -101,9 +102,13 @@ public class BytecodeCache {
      */
     static String hash(String text) {
         try {
+            StringBuffer plugins = new StringBuffer();
+            for(PlayPlugin plugin : Play.plugins) {
+                plugins.append(plugin.getClass().getName());
+            }
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             messageDigest.reset();
-            messageDigest.update((BytecodeCache.version + "-" + Play.version + text).getBytes("utf-8"));
+            messageDigest.update((BytecodeCache.version + "-" + Play.version + plugins.toString() + text).getBytes("utf-8"));
             byte[] digest = messageDigest.digest();
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < digest.length; ++i) {

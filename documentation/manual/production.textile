@@ -35,16 +35,9 @@ h3. Define a secure secret key:
 
 The play secret key is used to secure cryptographic functions, like the session signature. Your application must keep this key very secret.
 
-bc.%production.application.secret=c12d1c59af499d20f4955d07255ed8ea333
+bc. %production.application.secret=c12d1c59af499d20f4955d07255ed8ea333
 
 You can use the **play secret** command to generate a new secure and random key (At least on 'a real' OS). If you plan to distribute your application to several servers, remember to use the **same key** for all application instances !
-
-h3. Enable memcached
-
-If your application use Cache, you could enable a real memcached daemon. 
-
-bc. %production.memcached=enabled
-%production.memcached.host=127.0.0.1:11211
 
 
 h2. <a>Configure logging</a>
@@ -65,7 +58,7 @@ log4j.appender.Rolling.MaxBackupIndex=100
 log4j.appender.Rolling.layout=org.apache.log4j.PatternLayout
 log4j.appender.Rolling.layout.ConversionPattern=%d{ABSOLUTE} %-5p ~ %m%n
 
-h2. Setup a front-end HTTP server
+h2. <a>Setup a front-end HTTP server</a>
 
 You can easily deploy your application as a stand-alone server by setting the application HTTP port to **80** :
 
