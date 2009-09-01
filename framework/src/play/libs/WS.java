@@ -741,7 +741,6 @@ public class WS extends PlayPlugin {
         }
         
         /**
-         * Set the headers of the request.
          * Add a header to the request
          * @param name header name
          * @param value header value
