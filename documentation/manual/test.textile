@@ -6,9 +6,7 @@ play tests are built using "Junit 4":http://www.junit.org/|JUnit 4 or "Selenium"
 
 h2. <a>Writing tests</a>
 
-The tests must be created in the **test/** directory. This folder will be added to sources path only when the application is run in **test** mode.
-
-You can write 3 differents kind of test.
+The tests must be created in the **test/** directory. This folder will be added to sources path only when the application is run in **test** mode. You can write 3 differents kind of test.
 
 h3. Unit test
 

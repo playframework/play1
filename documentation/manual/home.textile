@@ -84,10 +84,10 @@ h2. <a name="cook">Cookbook</a>
 
 Tips about everything and anything.
 
-# "JPA support":jpa
-# "Data validation":validation
+# "More about the JPA support":jpa
+# "Using data validation":validation
 # "Application modularization":modules
-# "Configure logs":logs
+# "How to configure logs":logs
 # "Manage application.conf in several environments":ids
 # "Setting up i18n":i18n
 # "Use cache and configure Memcached":cache
