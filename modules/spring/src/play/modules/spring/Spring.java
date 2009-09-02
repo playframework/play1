@@ -13,7 +13,7 @@ public class Spring {
         return SpringPlugin.applicationContext.getBean(name);
     }
     
-    public static Object getBeanOfType(Class type) {
+    public static <T> T getBeanOfType(Class<T> type) {
         Map<String, Object> beans = getBeansOfType(type);
         if(beans.isEmpty()) {
             return null;
@@ -29,7 +29,7 @@ public class Spring {
         }
     }
     
-    public static Map<String, Object> getBeansOfType(Class type) {
+    public static <T> Map<String, T> getBeansOfType(Class type) {
         if (SpringPlugin.applicationContext == null) {
             throw new SpringException();
         }

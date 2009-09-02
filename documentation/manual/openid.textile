@@ -29,16 +29,16 @@ public static void login() {
 }
     
 public static void authenticate(String user) {
-    if(user != null) {
-        OpenID.verify(user); // will redirect the user
-    } else {
-        String verifiedUser = OpenID.getVerifiedID();
+    if(OpenID.isAuthenticationResponse()) {
+        UserInfo verifiedUser = OpenID.getVerifiedID();
         if(verifiedUser == null) {
             flash.put("error", "Oops. Authentication has failed");
             login();
         } 
-        session.put("user", verifiedUser);
+        session.put("user", verifiedUser.id);
         index();
+    } else {
+        OpenID.id(user).verify(); // will redirect the user
     }
 }
 
@@ -48,7 +48,7 @@ bc. #{if flash.error}
 <h1>${flash.error}</h1>
 #{/if}
  
-<form action="@{Application.authenticate}" method="POST">
+<form action="@{Application.authenticate()}" method="POST">
     <label for="user">What's your OpenID ?</label>
     <input type="text" name="user" id="user" />
     <input type="submit" value="login ..." />
@@ -57,7 +57,7 @@ bc. #{if flash.error}
 
 And finally the routes definitions : 
 
-bc. GET   /               Application.index
-GET   /login          Application.login
-*     /authenticate   Application.authenticate
+bc. GET   /                     Application.index
+GET   /login                Application.login
+*     /authenticate         Application.authenticate
 

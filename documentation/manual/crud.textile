@@ -18,6 +18,8 @@ In the **conf/routes** file, import the default module routes by adding this lin
 bc. # Import CRUD routes
 *      /admin              module:crud
 
+p(note). **Note** that it's not required to use the default routes file. You can also define your own routes, or mix both.
+
 h2. <a>Create a User class</a>
 
 We will create a User class to start :

@@ -73,7 +73,7 @@ Your server may also provide a smtp-over-ssl (smtps) connector, that is a SSL so
 
 bc. mail.smtp.channel=ssl
 
-h2. <a>More</a>
+h2. <a>More about configuration</a>
 
 Under the hood, play uses JavaMail to perform the actual smtp transactions. If you need to see what's going on, try:
 

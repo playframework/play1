@@ -2,7 +2,7 @@ h1. Put your application in production
 
 Here some simple tips to optimize your application for production.
 
-h2. Configure your application.conf for production
+h2. <a>Configure your application.conf for production</a>
 
 First off, the best way to specify production mode is to give a specific ID to your production framework. Let's pick **production** as an example. Refer "manage application.conf in several environments":ids to see how.
 

@@ -358,7 +358,7 @@ public class Play {
             Cache.init();
 
             if (firstStart) {
-                Logger.info("Application '%s' is started !", configuration.getProperty("application.name", ""));
+                Logger.info("Application '%s' is now started !", configuration.getProperty("application.name", ""));
                 firstStart = false;
             }
 

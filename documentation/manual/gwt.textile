@@ -5,7 +5,7 @@ This module provides helper to simplify the integration of a GWT UI with Play as
 
 h2. <a>First, download the GWT SDK</a>
 
-p. This module is designed to __work with___ the latest version of GWT. A the moment, it is the 1.6.4 version. Before working with the Play GWT module, you have to download the GWT SDK and set the GWT_PATH environment variable.
+p. This module is designed to work with the latest version of GWT. A the moment, it is the 1.6.4 version. Before working with the Play GWT module, you have to download the GWT SDK and set the GWT_PATH environment variable.
 
 h2. <a>Setting up a GWT project</a>
 
