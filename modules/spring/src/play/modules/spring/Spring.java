@@ -8,7 +8,7 @@ public class Spring {
 
     public static Object getBean(String name) {
         if (SpringPlugin.applicationContext == null) {
-            throw new SpringException();
+            throw new SpringException(); 
         }
         return SpringPlugin.applicationContext.getBean(name);
     }
@@ -18,7 +18,7 @@ public class Spring {
         if(beans.isEmpty()) {
             return null;
         }
-        return beans.values().iterator().next();
+        return (T)beans.values().iterator().next();
     }
     
     public static Object getBeanOfType(String type) {

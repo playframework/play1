@@ -208,6 +208,14 @@ public class FastTags {
                 throw new TemplateExecutionException(template.template, fromLine, "Specify a template name", new TagInternalException("Specify a template name"));
             }
             String name = args.get("arg").toString();
+            if (name.startsWith("./")) {
+                String ct = Template.currentTemplate.get().name;
+                if (ct.matches("^/lib/[^/]+/app/views/.*")) {
+                    ct = ct.substring(ct.indexOf("/", 5));
+                }
+                ct = ct.substring(0, ct.lastIndexOf("/"));
+                name = ct + name.substring(1);
+            }
             Template t = TemplateLoader.load(name);
             Map newArgs = new HashMap();
             newArgs.putAll(template.getBinding().getVariables());
