@@ -75,13 +75,12 @@ public class TestEngine {
                 } catch(Exception e) {
                     Logger.error("VirtualClient test has failed", e);
                 }
+            } else {       
+                // Simple test            
+                JUnitCore junit = new JUnitCore();
+                junit.addListener(new Listener(testClass.getName(), testResults));
+                junit.run(testClass);
             }
-            
-            
-            // Simple test            
-            JUnitCore junit = new JUnitCore();
-            junit.addListener(new Listener(testClass.getName(), testResults));
-            junit.run(testClass);
 
         } catch(ClassNotFoundException e) {
             Logger.error(e, "Test not found %s", name);
