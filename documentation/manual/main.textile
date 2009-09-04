@@ -102,7 +102,7 @@ Java source code is compiled and loaded at runtime. If a Java source file is mod
 
 If a compilation error occurs, the exact problem is displayed in the browser.
 
-!images/error!
+!images/guide1-3!
 
 Template files are hot-compiled and hot-reloaded too.
 

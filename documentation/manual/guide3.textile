@@ -2,7 +2,9 @@ h1. Building the first screen
 
 Now that we have build a first data model, it's time to start to create the first page of the application. This page will just show to most recent post, as well as a list of older post.
 
-Here a mock of what we will try to achieve :
+Here is a mock of what we want to achieve :
+
+!images/guide-mock1!
 
 h2. <a>Bootstraping with default data</a>
 
@@ -10,7 +12,7 @@ In fact before coding the first screen we need one more thing. Working on a web 
 
 One way to inject default data into the blog is to load a fixture file at application load time. To do that we will create a Bootstrap Job. A play job is something that executes itself outside of any HTTP request, like at the application start or at specific interval using a CRON system.
 
-Let's create the /yabe/app/Bootstrap.java job that will load a set of default data using fixture :
+Let's create the **/yabe/app/Bootstrap.java** job that will load a set of default data using fixture :
 
 bc. import play.*;
 import play.jobs.*;
@@ -30,31 +32,36 @@ public class Bootstrap extends Job {
  
 }
 
-You have to create a initial-data.yml in the /yabe/conf directory. You can of course reuse the data.yml content that we just used for tests previously.
+You have to create a initial-data.yml in the **/yabe/conf** directory. You can of course reuse the **data.yml** content that we just used for tests previously.
 
-Now run the application (with either 'play run', or 'play test') and display the "http://localhost:9000":http://localhost:9000 page in the browser.
+Now run the application using **play run** and display the "http://localhost:9000":http://localhost:9000 page in the browser.
 
 h2. <a>The blog home page</a>
 
 This time, we can really start to code the home page.
 
-Do you remember how the first page is displayed ? First the routes file define that the / URL will invoke the controllers.Application.index() action method. Then this method call render() and execute the views/Application/index.html template.
+Do you remember how the first page is displayed ? First the routes file define that the **/** URL will invoke the **controllers.Application.index()** action method. Then this method call **render()** and execute the **/yabe/app/views/Application/index.html** template.
 
 We will keep these components but add code to them to load the posts list and display them.
 
-Open the /yabe/app/controllers/Application.java controller and modify the index() action to load the posts list, as is:
+Open the **/yabe/app/controllers/Application.java** controller and modify the **index()** action to load the posts list, as is:
 
 bc. package controllers;
  
 import java.util.*;
+ 
+import play.*;
 import play.mvc.*;
+ 
 import models.*;
  
 public class Application extends Controller {
  
     public static void index() {
         Post frontPost = Post.find("order by postedAt desc").first();
-        List<Post> olderPosts = Post.find("order by postedAt desc").from(1).fetch(10);
+        List<Post> olderPosts = Post.find(
+            "order by postedAt desc"
+        ).from(1).fetch(10);
         render(frontPost, olderPosts);
     }
  
@@ -62,7 +69,7 @@ public class Application extends Controller {
 
 You see how we pass objects to the render method ? It will allow us to access them from the template using the same name.
 
-Open the /yabe/app/views/Application/index.html and modify it to display these objects :
+Open the **/yabe/app/views/Application/index.html** and modify it to display these objects :
 
 bc. #{extends 'main.html' /}
 #{set title:'Home' /}
@@ -74,13 +81,15 @@ bc. #{extends 'main.html' /}
         </h2>
         <div class="post-metadata">
             <span class="post-author">by ${frontPost.author.fullname}</span>
-            <span class="post-date">${frontPost.postedAt.format('dd MMM yy')}</span>
-            <div class="post-comments">
-                <a href="#">${frontPost.comments.size() ?: 'no'} comment${frontPost.comments.size().pluralize()}</a>
+            <span class="post-date">${frontPost.postedAt.format('MMM dd')}</span>
+            <span class="post-comments">
+                &nbsp;|&nbsp; 
+                ${frontPost.comments.size() ?: 'no'} 
+                comment${frontPost.comments.size().pluralize()}</a>
                 #{if frontPost.comments}
-                    - latest by ${frontPost.comments[0].author}
+                    , latest by ${frontPost.comments[0].author}
                 #{/if}
-            </div>
+            </span>
         </div>
         <div class="post-content">
             ${frontPost.content.nl2br()}
@@ -88,25 +97,32 @@ bc. #{extends 'main.html' /}
     </div>
     
     #{if olderPosts.size() > 1}
-        <h3>Older posts</h3>
+        <div class="older-posts">    
+            <h3>Older posts <span class="from">from this blog</span></h3>
         
-        #{list items:olderPosts[1..-1], as:'oldPost'}
-            <div class="post">
-                <h2 class="post-title">
-                    <a href="#">${oldPost.title}</a>
-                </h2>
-                <div class="post-metadata">
-                    <span class="post-author">by ${oldPost.author.fullname}</span>
-                    <span class="post-date">${oldPost.postedAt.format('dd MMM yy')}</span>
-                    <div class="post-comments">
-                        <a href="#">${oldPost.comments.size() ?: 'no'} comment${oldPost.comments.size().pluralize()}</a>
-                        #{if oldPost.comments}
-                            - latest by ${oldPost.comments[0].author}
-                        #{/if}
+            #{list items:olderPosts, as:'oldPost'}
+                <div class="post">
+                    <h2 class="post-title">
+                        <a href="#">${oldPost.title}</a>
+                    </h2>
+                    <div class="post-metadata">
+                        <span class="post-author">
+                            by ${oldPost.author.fullname}
+                        </span>
+                        <span class="post-date">
+                            ${oldPost.postedAt.format('dd MMM yy')}
+                        </span>
+                        <div class="post-comments">
+                            ${oldPost.comments.size() ?: 'no'} 
+                            comment${oldPost.comments.size().pluralize()}
+                            #{if oldPost.comments}
+                                - latest by ${oldPost.comments[0].author}
+                            #{/if}
+                        </div>
                     </div>
                 </div>
-            </div>
-        #{/list}
+            #{/list}
+        </div>
         
     #{/if}
     
@@ -122,11 +138,13 @@ You can read more about the "template language here":templates. Basically it jus
 
 Ok, now refresh the blog home page. 
 
+!images/guide3-0!
+
 Not really pretty but it's work !
 
 However you see you have already started to duplicate some code. Because we will display posts in several fashion (full, full with comment, teaser) we should create something like a function that we could call from several template. That exactly what a play tag does !
 
-To create a tag just create the new /yabe/app/views/tags/display.html file. A tag is just another template. A tag has parameters (like a function). The #{display /} tag will have 2 parameters : the Post object to display and the display mode which will be one of 'home', 'teaser' or 'full'.
+To create a tag just create the new **/yabe/app/views/tags/display.html** file. A tag is just another template. A tag has parameters (like a function). The **#{display /}** tag will have 2 parameters : the Post object to display and the display mode which will be one of 'home', 'teaser' or 'full'.
 
 bc. *{ Display a post in one of these modes: 'full', 'home' or 'teaser' }*
  
@@ -135,17 +153,21 @@ bc. *{ Display a post in one of these modes: 'full', 'home' or 'teaser' }*
         <a href="#">${_post.title}</a>
     </h2>
     <div class="post-metadata">
-        <span class="post-author">by ${_post.author.fullname}</span>
-        <span class="post-date">${_post.postedAt.format('MMM dd')}</span>
-        <div class="post-comments">
-            <a href="#">${_post.comments.size() ?: 'no'} comment${_post.comments.size().pluralize()}</a>
-            #{if _post.comments}
-                - latest by ${_post.comments[0].author}
-            #{/if}
-        </div>
+        <span class="post-author">by ${_post.author.fullname}</span>,
+        <span class="post-date">${_post.postedAt.format('dd MMM yy')}</span>
+        #{if _as != 'full'}
+            <span class="post-comments">
+                &nbsp;|&nbsp; ${_post.comments.size() ?: 'no'} 
+                comment${_post.comments.size().pluralize()}
+                #{if _post.comments}
+                    , latest by ${_post.comments[0].author}
+                #{/if}
+            </span>
+        #{/if}
     </div>
     #{if _as != 'teaser'}
         <div class="post-content">
+            <div class="about">Detail: </div>
             ${_post.content.nl2br()}
         </div>
     #{/if}
@@ -153,15 +175,21 @@ bc. *{ Display a post in one of these modes: 'full', 'home' or 'teaser' }*
  
 #{if _as == 'full'}
     <div class="comments">
-        <h3>${_post.comments.size() ?: 'no'} comment so far</h3>
+        <h3>
+            ${_post.comments.size() ?: 'no'} 
+            comment${_post.comments.size().pluralize()}
+        </h3>
         
         #{list items:_post.comments, as:'comment'}
             <div class="comment">
                 <div class="comment-metadata">
-                    <span class="comment-author">by ${comment.author}</span>
-                    <span class="comment-date">${comment.postedAt.format('MMM dd yy')}</span>
+                    <span class="comment-author">by ${comment.author},</span>
+                    <span class="comment-date">
+                        ${comment.postedAt.format('dd MMM yy')}
+                    </span>
                 </div>
                 <div class="comment-content">
+                    <div class="about">Detail: </div>
                     ${comment.content.escape().nl2br()}
                 </div>
             </div>
@@ -179,13 +207,15 @@ bc. #{extends 'main.html' /}
     
     #{display post:frontPost, as:'home' /}
     
-    #{if olderPosts.size() > 1}
+    #{if olderPosts.size()}
     
-        <h3>Older posts</h3>
+        <div class="older-posts">    
+            <h3>Older posts <span class="from">from this blog</span></h3>
         
-        #{list items:olderPosts[1..-1], as:'oldPost'}
-            #{display post:oldPost, as:'teaser' /}
-        #{/list}
+            #{list items:olderPosts, as:'oldPost'}
+                #{display post:oldPost, as:'teaser' /}
+            #{/list}            
+        </div>
         
     #{/if}
     
@@ -201,9 +231,9 @@ Reload the page and check that all is going fine.
 
 h2. <a>Improving the layout</a>
 
-As you seen, the index.html template extends the main.html. Because we want to provide a common layout to all blog page with the blog title and authentication links, this this file we need to modify.
+As you seen, the index.html template extends the main.html. Because we want to provide a common layout to all blog page with the blog title and authentication links, we need to modify this file.
 
-Edit the /yabe/app/views/main.html file :
+Edit the **/yabe/app/views/main.html** file :
 
 bc. <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
  
@@ -211,22 +241,25 @@ bc. <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w
     <head>
         <title>#{get 'title' /}</title>		
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/main.css'}" />
-        <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}" />
+        <link rel="stylesheet" type="text/css" media="screen" 
+            href="@{'/public/stylesheets/main.css'}" />
+        <link rel="shortcut icon" type="image/png" 
+            href="@{'/public/images/favicon.png'}" />
     </head>
     <body>
         
         <div id="header">
             <div id="logo">
-                <a href="@{Application.index()}">Yabe</a>
+                yabe.
             </div>
             <ul id="tools">
                 <li>
-                    <a href="#">Login</a>
+                    <a href="#">Log in to write something</a>
                 </li>
             </ul>
             <div id="title">
-                <h1>${blogTitle}</h1>
+                <span class="about">About this blog</span>
+                <h1><a href="#">${blogTitle}</a></h1>
                 <h2>${blogBaseline}</h2>
             </div>
         </div>
@@ -236,16 +269,17 @@ bc. <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w
         </div>
         
         <p id="footer">
-            Yabe is a (not so) powserfull blog engine built with the <a href="http://www.playframework.org">play framework</a>
+            Yabe is a (not so) powserfull blog engine built with the 
+            <a href="http://www.playframework.org">play framework</a>
             as a tutorial application.
         </p>
         
     </body>
 </html>
 
-Refresh and check the result. It seems to work, apart that the blogTitle and the blogBaseLine variables are not displayed. We could add them to render() call at the index() action. But because the main.html file will be used as template for all application actions, we don't want to add them each time.
+Refresh and check the result. It seems to work, apart that the **blogTitle** and the **blogBaseLine** variables are not displayed. This is because we have not passed them during the **render(...)** call. Of course we could add them to **render()** call in the index action. But because the **main.html** file will be used as main template for all application actions, we don't want to add them each time.
 
-One way to execute the same code for each action of a controller (or a hierarchy of controllers) is to define a @Before interceptor. Let's add the addDefaults method to the Application controller :
+One way to execute the same code for each action of a controller (or a hierarchy of controllers) is to define a **@Before** interceptor. Let's add the **addDefaults()** method to the Application controller :
 
 bc. @Before
 static void addDefaults() {
@@ -253,8 +287,7 @@ static void addDefaults() {
     renderArgs.put("blogBaseline", Play.configuration.getProperty("blog.baseline"));
 }
 
-All variables that you add to the renderArgs scope will be available from the templates. And you see that the method read the variable
-value from the Play.configuration object. This object contains all configurations keys from the /yabe/conf/application.conf file.
+All variables that you add to the **renderArgs** scope will be available from the templates. And you see that the method read the variable value from the **Play.configuration** object. This object contains all configurations keys from the **/yabe/conf/application.conf** file.
 
 Add this 2 keys to configuration file :
 
@@ -265,11 +298,17 @@ blog.baseline=We will write about nothing
 
 Reload the home page and check that it works !
 
+!images/guide3-1!
+
 h2. <a>Adding some style</a>
 
-Now the blog home page is almost done. But not really pretty. We'll add some style to make it shinier. As you seen the main template file main.html includes the /public/stylesheets/main.css stylesheet. We'll keep it but add more style rules to it. This tutorial is not a CSS tutorial and we assume that you already have basic CSS knowledges, so I will not explain how this CSS works. You can download it here, and copy it to the /public/stylsheets/main.css file.
+Now the blog home page is almost done. But not really pretty. We'll add some style to make it shinier. As you have seen, the main template file main.html includes the **/public/stylesheets/main.css** stylesheet. We'll keep it but add more style rules to it. This tutorial is not a CSS tutorial and we assume that you already have basic CSS knowledges, so I will not explain how this CSS works. 
+
+You can "download it here":files/main.css, and copy it to the **/public/stylsheets/main.css** file.
 
 Refresh the home page and you should see a styled page now.
+
+!images/guide3-2!
 
 h2. <a>Commit your work</a>
 
@@ -279,5 +318,5 @@ bc. $ bzr st
 $ bzr add
 $ bzr commit -m 'Home page'
 
-
+p(note). Go to the "next part":guide4. 
 

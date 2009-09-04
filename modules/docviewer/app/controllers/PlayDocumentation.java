@@ -31,6 +31,14 @@ public class PlayDocumentation extends Controller {
         renderBinary(image);
     }
     
+    public static void file(String name) {
+        File file = new File(Play.frameworkPath, "documentation/files/"+name);
+        if(!file.exists()) {
+            notFound();
+        }
+        renderBinary(file);
+    }    
+    
     //
     
     static String toHTML(String textile) {

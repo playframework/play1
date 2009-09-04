@@ -62,3 +62,6 @@ samples-and-tests/just-test-cases/eclipse
 framework/ecClasses
 documentation/api
 support/textmate
+samples-and-tests/yabe/logs
+samples-and-tests/yabe/test-result
+samples-and-tests/yabe/tmp

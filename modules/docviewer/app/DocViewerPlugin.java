@@ -25,6 +25,7 @@ public class DocViewerPlugin extends PlayPlugin {
         Router.addRoute("GET", "/@documentation/?", "PlayDocumentation.index");
         Router.addRoute("GET", "/@documentation/{id}", "PlayDocumentation.page");
         Router.addRoute("GET", "/@documentation/images/{name}", "PlayDocumentation.image");
+        Router.addRoute("GET", "/@documentation/files/{name}", "PlayDocumentation.file");
     }
 
 }

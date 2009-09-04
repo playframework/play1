@@ -68,7 +68,7 @@ That will generate HTML like :
 bc. <a href="/articles/15">My new article</a>
 
 
-h2. <a>Don't Repeat Yourself when passing Java objects to templates</a>
+h2. <a>3. Don't Repeat Yourself when passing Java objects to templates</a>
 
 In most Java frameworks, to pass some Java objects to the template system you need to write something like :
 
@@ -87,7 +87,22 @@ render(article, user);
 
 And retrieve objects from their Java local name in the template. That saves a lot of useless lines of code ...
 
-h2. <a>4. Straightforward file upload management</a>
+h2. <a>4. JPA on steroids</a>
+
+JPA is surrely the best ORM API available for Java. If you know it you will be amazed how simpler it become with play. Nothing to configure, play will automatically startthe JPA Entity Manager using Hibernate and magically synchonize it while code reloading. 
+
+Moreover if you use the provided **play.db.jpa.Model** superclass it will help to make your code prettier. Take a look:
+
+bc. public void messages(int page) {
+    User connectedUser = User.find("byEmail", connected());
+    List<Message> messages = Message.find(
+        "user = ? and read = false order by date desc",
+        connectedUser
+    ).from(page * 10).fetch(10);
+    render(connectedUser, messages);
+}
+
+h2. <a>5. Straightforward file upload management</a>
 
 File upload management is so simple with play.
 
@@ -106,7 +121,3 @@ bc. public static void uploadPhoto(String title, File photo) {
 }
 
 How could it be easier ?
-
-h2. <a>5. Distribute an application to several JVMs without configuring anything</a>
-
-Because play is totally stateless, you can just start the same application on several servers and load balance between applications at the HTTP level. No need to set up a complex application server cluster or something similar.

@@ -1,5 +1,7 @@
 h1. A first iteration for the data model
 
+Here we will start to write the model part of our blog engine.
+
 h2. <a>Introduction to JPA</a>
 
 The model layer has a central position in a play application (and in fact in all well designed application). It is the domain-specific representation of the information on which the application operates. As we want to create a blog engine the model layer will certainly contains classes like User, Post and Comment.
@@ -14,7 +16,7 @@ If you don't know JPA, you can read some of these simple presentation before to 
 
 h2. <a>Starting by the User class</a>
 
-We will start to code the blog engine by creating the User class. Create a new file /yabe/app/models/User.java, and declare a first implementation of the User class :
+We will start to code the blog engine by creating the User class. Create a new file **/yabe/app/models/User.java**, and declare a first implementation of the User class :
 
 bc. package models;
  
@@ -38,7 +40,7 @@ public class User extends Model {
  
 }
 
-The @Entity annotation mark this class as a managed JPA entity and the Model superclass automatically provides a set of usefull JPA helper that we will discover later. All fields of this class will be automatically persisted to the database. 
+The **@Entity** annotation mark this class as a managed JPA entity and the Model superclass automatically provides a set of usefull JPA helper that we will discover later. All fields of this class will be automatically persisted to the database. 
 
 If you have already used JPA before, you know that every JPA entity must provide an @Id property but the Model superclass provides an automatically generated numeric id, that is a pretty good default in most cases. 
 
@@ -54,11 +56,15 @@ To run a test case, you need to start the application in a special 'test' mode. 
 
 bc. ~$ play test
 
+!images/guide2-0!
+
 The 'play test' command is almost the same than 'play run', except that it load a test runner module that allow to run test suite directly from a browser. 
 
 Open a browser to the "http://localhost:9000/@tests":http://localhost:9000/@tests URL to see the test runner. You can try to select all the default tests and run them; all should be green... but these default tests does not test really anything.
 
-To test the model part of the application we will use a JUnit test. As you see a default BasicTests.java already exists, so let's open it (/yabe/test/BasicTest.java):
+!images/guide2-1!
+
+To test the model part of the application we will use a JUnit test. As you see a default BasicTests.java already exists, so let's open it (**/yabe/test/BasicTest.java**):
 
 bc. import org.junit.*;
 import play.test.*;
@@ -88,11 +94,11 @@ public void createAndRetrieveUser() {
     assertEquals("Bob", bob.fullname);
 }
 
-As you see, the Model superclass give us two first very usefull methods : save() and find(). Select the BasicTests.java in the test runner, click start and check that all is green. 
+As you see, the Model superclass give us two first very usefull methods : **save()** and **find()**. Select the **BasicTests.java** in the test runner, click start and check that all is green. 
 
 We will need a method on the User class that check if a user with specified username and password exists. Let's write it and test it.
 
-In the User.java add the connect() method : 
+In the **User.java** source add the **connect()** method : 
 
 bc. public static User connect(String email, String password) {
     return find("byEmailAndPassword", email, password).first();
@@ -145,11 +151,11 @@ public class Post extends Model {
  
 }
 
-Here we use the @Lob annotation to tell JPA that we wat that it use a large text database type to store the post content. We have declared the relation to the User class using @ManyToOne. That means that each Post is authored by a single User and that each User can author several Posts.
+Here we use the **@Lob** annotation to tell JPA that we wat that it use a large text database type to store the post content. We have declared the relation to the User class using **@ManyToOne**. That means that each Post is authored by a single User and that each User can author several Posts.
 
 We will write a new test case to check that to Post class works as expected. By before to write more tests we need to do something in the JUnit class. In the current test, the database content is never deleted, and each new run create more an more objects. It will become problematic soon because more advanced test will start to count objects to check that all is going file.
 
-So let's write a JUnit setup() method to delete the database before each test :
+So let's write a JUnit **setup()** method to delete the database before each test :
 
 bc. public class BasicTest extends UnitTest {
  
@@ -187,6 +193,8 @@ public void createPost() {
     assertEquals("Hello world", firstPost.content);
     assertNotNull(firstPost.postedAt);
 }
+
+p(note). **Don't forget** to import the **java.util.List** or will get a compilation error.
 
 h2. <a>Finish with Comment</a>
 
@@ -312,11 +320,13 @@ public void useTheCommentsRelation() {
 
 Is it green ?
 
+!images/guide2-2!
+
 h2. <a>Using fixture to write more complicated test</a>
 
 When you start to write more complicated test, you often need to have an existing set of data to test on. Fixtures allows to describe your model in a YAML file and load it at any time before a test.
 
-Edit the /yabe/test/data.yml file and start to describe a User :
+Edit the **/yabe/test/data.yml** file and start to describe a User :
 
 bc. 
 User(bob):
@@ -327,7 +337,7 @@ User(bob):
 ...
  
 
-Well, because the data.yml file is a litle big, you can download it here.
+Well, because the data.yml file is a litle big, you can "download it here":files/data.yml.
 
 Now we create create a test case, that load these data and run some assertions over it:
 
@@ -338,7 +348,7 @@ public void fullTest() {
     // Count things
     assertEquals(2, User.count());
     assertEquals(3, Post.count());
-    assertEquals(4, Comment.count());
+    assertEquals(3, Comment.count());
  
     // Try to connect as users
     assertNotNull(User.connect("bob@gmail.com", "secret"));
@@ -365,25 +375,27 @@ public void fullTest() {
     // Post a new comment
     frontPost.addComment("Jim", "Hello guys");
     assertEquals(3, frontPost.comments.size());
-    assertEquals(5, Comment.count());
+    assertEquals(4, Comment.count());
 }
 
-h2. <a>Save our work</a>
+h2. <a>Save your work</a>
 
 Well, we have now finished an hudge part on the blog engine. With all this things created and tested, we can now start to develop the web application.
 
-But before continuing, it's time to save our work using bazaar. Open a command line an type 'bzr st' to see the modifications made since the latest commit:
+But before continuing, it's time to save our work using bazaar. Open a command line an type **bzr st** to see the modifications made since the latest commit:
 
 bc. $ bzr st
 
-As you see there are some new files not under version control. The test-result folder don't need to be versioned. So let's ignore it.
+As you see there are some new files not under version control. The **test-result** folder don't need to be versioned. So let's ignore it.
 
 bc. $ bzr ignore test-result
 
-And add other files to version control using 'bzr add'
+And add other files to version control using **bzr add**.
 
 bc. $ bzr add
 
 You can now commit your project.
 
 bc. $ bzr commit -m "The model layer is ready"
+
+p(note). Go to the "next part":guide3. 

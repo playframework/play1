@@ -16,9 +16,11 @@ To complicate things a little we will manage several differents users with diffe
 
 We will call this blog engine project **yabe**.
 
+!images/guide1-0!
+
 h2. <a>Prerequisites</a>
 
-First of all, check that you already have a working Java installation. Play requires Java 5 or later.
+First of all, check that you already have a working Java installation. Play requires **Java 5 or later**.
 
 As we will use the command line a lot, it's better to use a Unix-like OS, but if you run a Windows system, it will also work fine, you'll just have to type a few commands in the cmd prompt.
 
@@ -32,10 +34,10 @@ h2. <a>Installation of the play framework</a>
 
 Installation is pretty simple. Just download the latest binary package from the download page and unzip it.
 
-p(note). If you're using windows it is generally a good idee to avoid space characters in the path, so c:\play will be a better choice that c:\Documents And Settings\user\play ...
+p(note). If you're using windows it is generally a good idee to avoid space characters in the path, so **c:\play** will be a better choice that **c:\Documents And Settings\user\play** ...
 
 
-To work effectively, you will need to add the play directory to your working path. It will allow to just type 'play' on the command line to use the play utility. To check that the installation worked, just open a new command line and type 'play'; it should show you the play basic usage help.
+To work effectively, you will need to add the play directory to your working path. It will allow to just type **'play'** on the command line to use the play utility. To check that the installation worked, just open a new command line and type **'play'**; it should show you the play basic usage help.
 
 h2. <a>Project creation</a>
 
@@ -47,11 +49,13 @@ bc. ~$ play new yabe
 
 It will prompt you for the application full name, where you can just type 'Yet Another Blog Engine'.
 
+!images/guide1-1!
+
 The 'play new' command creates a new directory **yabe/** and populates it with a series of files and directories, the most important of which are as follows :
 
 **app/** contains the core of the application, split between models, controllers and views directories. It can contains other Java package as well. This is the directory where *.java source files live. 
 
-**conf/** contains all the configuration files of the application, especially the main 'application.conf' file, the 'routes' definition files and the 'messages' files used for internationalisation.
+**conf/** contains all the configuration files of the application, especially the main **application.conf** file, the **routes** definition files and the **messages** files used for internationalisation.
 
 **lib/** contains all optional Java libraries packaged as standard .jar files.
 
@@ -59,27 +63,29 @@ The 'play new' command creates a new directory **yabe/** and populates it with a
 
 **test/** contains all the application tests. Tests are either written as Java JUnit tests, or Selenium tests.
 
-p(note). Because play uses UTF-8 as single enconding, it is very important that all text files hosted in these directories are encoded using this charset; be aware of that when you configure your text editor.
+p(note). Because **play uses UTF-8** as single enconding, it is very important that all text files hosted in these directories are encoded using this charset; be aware of that when you configure your text editor.
 
 Now if you are a trained Java developer, you can ask yourself where go all the .class files. In fact, the answer is nowhere;  play don't use any class files but read directly the java source files. Under the hood we use the Eclipse compiler to compile Java sources on the fly. 
 
 That allows two very important things in the developement process. The first one is that play will detect changes you make to any Java source file and automatically reload them at runtime. The second one is that, when a Java exception occurs, play will create better error report showing you the exact source code.
 
-p(note). In fact play can keep a bytecode cache in the application /tmp directory, but only to speed up things between restart on large application. You can discard this cache using the 'play clean' command if needed.
+p(note). In fact play can keep a bytecode cache in the application **/tmp** directory, but only to speed up things between restart on large application. You can discard this cache using the **'play clean'** command if needed.
 
 h2. <a>Running the application</a>
 
-We can now directly test the newly created application. Just return to the command line, go to the newly created **yabe/** directory and type 'play run'. Play will now load the application and start a Web server on port 9000.
+We can now directly test the newly created application. Just return to the command line, go to the newly created **yabe/** directory and type **'play run'**. Play will now load the application and start a Web server on port 9000.
 
 You can check that you have access to the new application by opening a browser to "http://localhost:9000":http://localhost:9000. A new application has a standard welcome page that just tell you that all is going fine.
 
+!images/guide1-2!
+
 Let's see how the new application can display this page. 
 
-The main entry point of your application is the conf/routes file. This file defines all accessible URL of the application. If you open the generated routes file you will see this first 'route' :
+The main entry point of your application is the **conf/routes** file. This file defines all accessible URL of the application. If you open the generated routes file you will see this first 'route' :
 
 bc. GET		/			Application.index
 
-That simply tell to play that when the web server receive a GET request for the / path, it must call the Application.index Java method. In this case Application.index is a shortcut for controller.Application.index, because the controllers package is implicit. 
+That simply tell to play that when the web server receive a **GET** request for the **/** path, it must call the **Application.index** Java method. In this case **Application.index** is a shortcut for **controller.Application.index**, because the controllers package is implicit. 
 
 When you create standalone Java application you generally use a single entry point defined by a method like :
 
@@ -89,7 +95,7 @@ bc. public static void main(String[] args) {
 
 A play application has several entry points, one for each URL. We call these methods 'action' methods. Action methods are defined in special classes that we call 'controllers'.
 
-Let's see what the controllers.Application controller look like. Open the yabe/app/controllers/Application.java source file :
+Let's see what the **controllers.Application** controller look like. Open the **yabe/app/controllers/Application.java** source file :
 
 bc. package controllers;
  
@@ -103,26 +109,26 @@ public class Application extends Controller {
  
 }
 
-You see that controllers classes extends from the play.mvc.Controller class. This class provides all useful methods for controllers, like the render() method we use in the index method. 
+You see that controllers classes extends from the **play.mvc.Controller** class. This class provides all useful methods for controllers, like the **render()** method we use in the index action. 
 
-The index action, is defined as a 'public static void' method. This is the way to define action methods. You see that action methods are static, because the controller classes are never instanciated. They are marked public to tell play that you authorize the framework to call them in response of an URL. And finally they always return void.  
+The index action, is defined as a **'public static void'** method. This is the way to define action methods. You see that action methods are static, because the controller classes are never instanciated. They are marked public to tell play that you authorize the framework to call them in response of an URL. And finally they always return void.  
 
-The default index action is pretty simple. It just call the render() method which tell play to render a template. Using a template is the most common way (but not the only one) to fill the HTTP response with some text content. 
+The default index action is pretty simple. It just call the **render()** method which tell play to render a template. Using a template is the most common way (but not the only one) to fill the HTTP response with some text content. 
 
-Templates are simple text files that live in the /app/views directory. Because we don't tell explicitely to play which template render it will use the default for this action: Application/index.html
+Templates are simple text files that live in the **/app/views** directory. Because we don't tell explicitely to play which template render it will use the default for this action: **Application/index.html**
 
-To see what the template look like, open the /yabe/app/views/Application/index.html file :
+To see what the template look like, open the **/yabe/app/views/Application/index.html** file :
 
 bc. #{extends 'main.html' /}
 #{set title:'Home' /}
  
 #{welcome /}
 
-The template content seems pretty light. In fact, all you see are play tags. Play tags are very closes to JSP taglib if you know them. This is the #{welcome /} tag that generate the welcome message you've seen in the browser. 
+The template content seems pretty light. In fact, all you see are play tags. Play tags are very closes to JSP taglib if you know them. This is the **#{welcome /}** tag that generate the welcome message you've seen in the browser. 
 
-The #{extends /} tags tell play that this template inherits another template called 'main.html'. Template inheritance is a powerfull concept that allow to create complex web pages by reusing some common parts.
+The **#{extends /}** tags tell play that this template inherits another template called **main.html**. Template inheritance is a powerfull concept that allow to create complex web pages by reusing some common parts.
 
-Open the /yabe/app/views/main.html template :
+Open the **/yabe/app/views/main.html** template :
 
 bc. <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
  
@@ -130,15 +136,17 @@ bc. <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w
     <head>
         <title>#{get 'title' /}</title>		
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/main.css'}" />
-        <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}" />
+        <link rel="stylesheet" type="text/css" media="screen" 
+            href="@{'/public/stylesheets/main.css'}" />
+        <link rel="shortcut icon" type="image/png" 
+            href="@{'/public/images/favicon.png'}" />
     </head>
     <body>
         #{doLayout /} 
     </body>
 </html>
 
-Do you see the #{doLayout /} tag ? This is at this place that the Application/index.html content will be inserted.
+Do you see the **#{doLayout /}** tag ? This is at this place that the **Application/index.html** content will be inserted.
  
 We can try to edit the controller file to see how play automatically relaod it. Open the app/controllers/Application.java file in a simple text editor, and make a mistake, by removing the trailing semicolon after the render() call :
 
@@ -148,6 +156,8 @@ bc. public static void index() {
 
 Go to the browser and refresh the page. You will see that play detect the change and try to reload the Application controller. But because you made a mistake you get a compilation error. 
 
+!images/guide1-3!
+
 Ok, let's correct the error, and make a real modification :
 
 bc. public static void index() {
@@ -155,7 +165,7 @@ bc. public static void index() {
     render();
 }
 
-This time, play has correctly reloaded the controller and replaced the old code in the JVM. Each request to the / URL will write the 'Yop' message to the console.
+This time, play has correctly reloaded the controller and replaced the old code in the JVM. Each request to the **/** URL will write the 'Yop' message to the console.
 
 Well, you can remove this useless line, and now edit the Application/index.html template to replace the welcome message :
 
@@ -174,7 +184,7 @@ One more thing before starting to code. For the blog engine, we will need a data
 
 Because at the project beginning we will often test and change the application model it is often better to use an in memory database to always have a fresh data set to work.
 
-To set up the database, open the conf/application.conf file and uncomment this line: 
+To set up the database, open the **conf/application.conf** file and uncomment this line: 
 
 bc. db=mem
 
@@ -190,13 +200,11 @@ Bazaar is a very simple distributed source version control system. As it is tota
 
 As it is just a tutorial application you can think that using bazaar at this time is useless. But in the process of developing a real web application it is a very good practice to use a VCS. It allows to revert to a previous version if a change breaks something, work with several peoples and give access to all the successive versions of the application.
 
-The source code of this tutorial comes with the full bazaar history and allow you to track succesive changes. Installing bazaar is out of the scope of this tutorial but it is very easy even on windows system. 
-
-Once you have a working installation of bazaar, go to the blog directory and init the application versioning by typing :
+Installing bazaar is out of the scope of this tutorial but it is very easy even on windows system. Once you have a working installation of bazaar, go to the blog directory and init the application versioning by typing :
 
 bc. $ bzr init
 
-Now let's tell to bazaar which directories to ignore. This is useful because a play application has a number of directories we don't want to track especially the tmp/ and logs/ directories.
+Now let's tell to bazaar which directories to ignore. This is useful because a play application has a number of directories we don't want to track especially the **tmp/** and **logs/** directories.
 
 bc. $ bzr ignore tmp
 $ bzr ignore logs
@@ -208,5 +216,5 @@ $ bzr commit -m "YABE inital version"
 
 Version 1 is committed and we have now solid fundations for the project. 
 
-p(note). In the "next part":guide2 we will start to write the object model of the blog engine before developing the web application part. 
+p(note). Go to the "next part":guide2. 
 

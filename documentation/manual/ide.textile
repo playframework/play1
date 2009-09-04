@@ -2,6 +2,10 @@ h1. Setting up your preferred IDE
 
 Working with play is easy. You don't even need an IDE because play compiles and refreshes the modifications you make to Java sources automatically. 
 
+So you can easily work using a simple text editor. For example, using "Textmate":http://macromates.com/ and the provided bundle:
+
+!images/editor!
+
 However using a modern Java IDE provides cool productivity features like auto-completion, on the fly compilation, assisted refactoring and debugging. play provides automatic support for "Netbeans":http://www.netbeans.org and "Eclipse":http://www.eclipse.org.
 
 Because play applications are standard Java applications you don't need any specific plugin to work with your preferred IDE. Just a little bit of tuning for your Java project :

@@ -36,9 +36,9 @@ h2. <a>Use the play command</a>
 
 When the framework is correctly installed, open a shell and execute *play*. 
 
-bc. # play
+bc. $ play
 
-You should see the play help :
+You should see the play default message:
 
 !images/help!
 
@@ -53,15 +53,15 @@ Use the **new** command to create a new application. You must give a non existan
 
 bc. # play new myApp
 
-!images/empty!
+!images/guide1-1!
 
 Will create a new application. Start it with : 
 
 bc. # play run myApp
 
-You can then open a browser at "http:localhost:9000":http:localhost:9000 and see the default page for the application.
+You can then open a browser at "http://localhost:9000":http://localhost:9000 and see the default page for the application.
 
-!images/newapp!
+!images/guide1-2!
 
 p(note). **Your play environnement is ready**
  
