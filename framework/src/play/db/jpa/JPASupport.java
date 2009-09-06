@@ -8,8 +8,10 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
@@ -75,7 +77,10 @@ public class JPASupport implements Serializable {
 
                 if (isEntity) {
                     if (multiple) {
-                        List l = new ArrayList();
+                        Collection l = new ArrayList();
+                        if(field.getType().isAssignableFrom(Set.class)) {
+                            l = new HashSet();
+                        }
                         String[] ids = params.get(name + "." + field.getName() + "@id");
                         if (ids != null) {
                             for (String _id : ids) {
@@ -264,7 +269,7 @@ public class JPASupport implements Serializable {
     /**
      * Find all entities of this type
      */
-    public static <T extends JPASupport> List<T> findAll() {
+    public static <T> List<T> findAll() {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 
@@ -273,7 +278,7 @@ public class JPASupport implements Serializable {
      * @param id The entity id
      * @return The entity
      */
-    public static <T extends JPASupport> T findById(Object id) {
+    public static <T> T findById(Object id) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 
@@ -329,7 +334,7 @@ public class JPASupport implements Serializable {
      * @return <T> the first item matching the query or null
      */
     @Deprecated
-    public static <T extends JPASupport> T findOneBy(String query, Object... params) {
+    public static <T> T findOneBy(String query, Object... params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 
@@ -341,7 +346,7 @@ public class JPASupport implements Serializable {
      * @return a list<T> of items matching the query
      */
     @Deprecated
-    public static <T extends JPASupport> List<T> findBy(String query, Object... params) {
+    public static <T> List<T> findBy(String query, Object... params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 
@@ -418,7 +423,7 @@ public class JPASupport implements Serializable {
          * Try first();
          */
         @Deprecated
-        public <T extends JPASupport> T one() {
+        public <T> T one() {
             try {
                 List<T> results = query.setMaxResults(1).getResultList();
                 if (results.size() == 0) {
@@ -430,7 +435,7 @@ public class JPASupport implements Serializable {
             }
         }
         
-        public <T extends JPASupport> T first() {
+        public <T> T first() {
             return (T)one();
         }
 
@@ -452,7 +457,7 @@ public class JPASupport implements Serializable {
          * Try fetch();
          */
         @Deprecated
-        public <T extends JPASupport> List<T> all() {
+        public <T> List<T> all() {
             try {
                 return query.getResultList();
             } catch (Exception e) {
@@ -464,7 +469,7 @@ public class JPASupport implements Serializable {
          * Retrieve all results of the query
          * @return A list of entities
          */
-        public <T extends JPASupport> List<T> fetch() {
+        public <T> List<T> fetch() {
             return all();
         }
 
@@ -473,7 +478,7 @@ public class JPASupport implements Serializable {
          * @param max Max results to fetch
          * @return A list of entities
          */
-        public <T extends JPASupport> List<T> fetch(int max) {
+        public <T> List<T> fetch(int max) {
             try {
                 query.setMaxResults(max);
                 return query.getResultList();
@@ -487,7 +492,7 @@ public class JPASupport implements Serializable {
          * @param position Position of the first element
          * @return A new query
          */
-        public <T extends JPASupport> JPAQuery from(int position) {
+        public <T> JPAQuery from(int position) {
             query.setFirstResult(position);
             return this;
         }
@@ -496,7 +501,7 @@ public class JPASupport implements Serializable {
          * Try fetch(page, length);
          */
         @Deprecated
-        public <T extends JPASupport> List<T> page(int page, int length) {
+        public <T> List<T> page(int page, int length) {
             if (page < 1) {
                 page = 1;
             }
@@ -515,7 +520,7 @@ public class JPASupport implements Serializable {
          * @param length (page length)
          * @return A list of entities
          */
-        public <T extends JPASupport> List<T> fetch(int page, int length) {
+        public <T> List<T> fetch(int page, int length) {
             return page(page, length);
         }
     }

@@ -1,0 +1,272 @@
+h1. Adding tagging support
+
+As our blog will contain more posts it will be more and more difficult to retrieve them. To help to classify posts by subjects we will add tagging support. 
+
+h2. <a>The Tag model object</a>
+
+So, we will add one more object to the blog model definition. The Tag class itself is indeed very simple:
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.db.jpa.*;
+ 
+@Entity
+public class Tag extends Model {
+ 
+    public String name;
+    
+    public String toString() {
+        return name;
+    }
+ 
+}
+
+Because we want something like lazy tags creation we will always get them using the **findOrCreateByName(String name)** factory method. Let's add it to the Tag class:
+
+bc. public static Tag findOrCreateByName(String name) {
+    Tag tag = Tag.find("byName", name).one();
+    if(tag == null) {
+        tag = new Tag().save();
+        tag.name = name;
+    }
+    return tag;
+}
+
+h2. <a>Tagging posts</a>
+
+Now it's time to link the new Tag model with the Post one. Let's add the correct relation to the Post class:
+
+bc. ...
+@ManyToMany(cascade=CascadeType.ALL)
+public Set<Tag> tags = new HashSet();
+...
+
+We will keep this relation unidirectional.
+
+Also we will add a bunch of helper methods to make tag management simpler. First one, the ability to tag a Post:
+
+bc. ...
+public Post tagItWith(String name) {
+    tags.add(Tag.findOrCreateByName(name));
+    return this;
+}
+...
+
+Then the ability to retrieve all posts tagged with a specific tag:
+
+bc. ...
+public static List<Post> findTaggedWith(String tag) {
+    return Post.find(
+        "select distinct p from Post p join p.tags as t where t.name = ?", tag
+    ).fetch();
+}
+...
+
+It is time to write a new test case to test this stuff. Restart the server in **test** mode by typing:
+
+bc. $ play test
+
+And add a new **@Test** to the **BasicTest** class:
+
+bc. @Test
+public void testTags() {
+    // Create a new user and save it
+    User bob = new User("bob@gmail.com", "secret", "Bob").save();
+ 
+    // Create a new post
+    Post bobPost = new Post(bob, "My first post", "Hello world").save();
+    Post anotherBobPost = new Post(bob, "Hop", "Hello world").save();
+    
+    // Well
+    assertEquals(0, Post.findTaggedWith("Red").size());
+    
+    // Tag it now
+    bobPost.tagItWith("Red").tagItWith("Blue");
+    anotherBobPost.tagItWith("Red").tagItWith("Green");
+    
+    // Check
+    assertEquals(2, Post.findTaggedWith("Red").size());        
+    assertEquals(1, Post.findTaggedWith("Blue").size());
+    assertEquals(1, Post.findTaggedWith("Green").size());
+    
+}
+
+Check that works.
+
+h2. <a>A little more difficult now</a>
+
+Well, we will not use it in our blog right now, but what if we wanted to retrieve posts tagged with several tags ? It is more difficult than it looks like.
+
+I give you the needed JPQL query because you will likely use it in several web projects:
+
+bc. ...
+public static List<Post> findTaggedWith(String... tags) {
+    return Post.find(
+        "select distinct p.id from Post p join p.tags as t where t.name in (:tags) group by p.id having count(t.id) = :size"
+    ).bind("tags", tags).bind("size", tags.length).fetch();
+}
+...
+
+The tricky part is that we have to use an **having count** statement to filter only posts that have exaclty **all tags** from the join view.
+
+p(note). **Note** that we can't use the **Post.find("...", tags, tags.count)** signature here. It's just because **tags** is already a **vararg**.
+
+You can test it by adding more check to the previous test:
+
+bc. ...
+assertEquals(1, Post.findTaggedWith("Red", "Blue").size());   
+assertEquals(1, Post.findTaggedWith("Red", "Green").size());   
+assertEquals(0, Post.findTaggedWith("Red", "Green", "Blue").size());  
+assertEquals(0, Post.findTaggedWith("Green", "Blue").size());
+...
+
+h2. <a>The tag cloud</a>
+
+Where we put tags we need a tag cloud. Let's add a method to the **Tag** class to generate the tag cloud:
+
+bc. public static List<Map> getCloud() {
+    List<Map> result = Tag.find(
+        "select new map(t.name as tag, count(p.id) as pound) from Post p join p.tags as t group by t.name"
+    ).fetch();
+    return result;
+}
+
+Here we use an handy feature of hibernate that allows to return a custom object from a JPA query. It will result a **List** containing for each tag a **Map** with two attributes: **name** for the tag name and **pound** for the tage pound.
+
+Let's test it by adding one more check to our tags test:
+
+bc. ...
+List<Map> cloud = Tag.getCloud();
+assertEquals(
+    "[{tag=Red, pound=2}, {tag=Blue, pound=1}, {tag=Green, pound=1}]", 
+    cloud.toString()
+);
+
+h2. <a>Adding tags to the Blog UI</a>
+
+Now we can use the new tagging stuff to add one more way to browse the blog. As always to work effectively we need to add a bunch of test tags to our initial data set.
+
+Modify the **/yabe/conf/initial-data.yml** file to add some tags to the tests posts. For example:
+
+bc. ... 
+Tag(play):
+    name:           Play
+ 
+Tag(architecture):
+    name:           Architecture
+ 
+Tag(test):
+    name:           Test
+ 
+Tag(mvc):
+    name:           MVC    
+...
+
+And then add them to posts declaration as is:
+
+bc. ...
+Post(jeffPost):
+    title:          The MVC application
+    postedAt:       2009-06-06
+    author:         jeff
+    tags:           
+                    - play
+                    - architecture
+                    - mvc
+    content:        >
+                    A Play
+...
+
+You need to restart your application to force the new inital data set to be loaded. You can note how play tell you problems even in YAML files:
+
+!images/guide6-1!
+
+Then modify to **#{display /}** tag to show tag set on the **full** post view. Edit the **/yabe/app/views/tags/display/html** file:
+
+bc. ...
+#{if _as != 'full'}
+    <span class="post-comments">
+        &nbsp;|&nbsp; ${_post.comments.size() ?: 'no'} 
+        comment${_post.comments.size().pluralize()}
+        #{if _post.comments}
+            , latest by ${_post.comments[0].author}
+        #{/if}
+    </span>
+#{/if}
+#{elseif _post.tags}
+    <span class="post-tags">
+        - Tagged 
+        #{list items:_post.tags, as:'tag'}
+            <a href="#">${tag}</a>${tag_isLast ? '' : ', '}
+        #{/list}
+    </span>
+#{/elseif}
+...
+
+!images/guide6-2!
+
+h2. <a>The new 'tagged with' page</a>
+
+Now we can add a new way to list blog posts by tags. Just before we have let the link blank, we will replace it by a link to the new **listTagged** action:
+
+bc. ...
+- Tagged 
+#{list items:_post.tags, as:'tag'}
+    <a href="@{Application.listTagged(tag.name)}">${tag}</a>${tag_isLast ? '' : ', '}
+#{/list}
+...
+
+And create the action method on the **Application** controller:
+
+bc. ...
+public static void listTagged(String tag) {
+    List<Post> posts = Post.findTaggedWith(tag);
+    render(tag, posts);
+}
+...
+
+As always we create a specific route to keep cleaner URI:
+
+bc. GET     /posts/{tag}                    Application.listTagged
+
+Well, we have a problem here because we have already defined another route that conflict with this new one. These two routes will match the same URI:
+
+bc. GET     /posts/{id}                     Application.show
+GET     /posts/{tag}                    Application.tagged
+
+But because we'll assume that **id** are numeric data and **tag** not, we can easily solve the situation using a regular expression to restrict the first route:
+
+bc. GET     /posts/{<[0-9]+>id}             Application.show
+GET     /posts/{tag}                    Application.tagged 
+
+Finally we just have to create the **/yabe/app/views/Application/listTagged.html** template that will be used by the new **listTagged** action:
+
+bc. #{extends 'main.html' /}
+#{set title:'Posts tagged with ' + tag /}
+ 
+*{********* Title ********* }*
+ 
+#{if posts.size() > 1}
+   <h3>There are ${posts.size()} posts tagged '${tag}'</h3>  
+#{/if} 
+#{elseif posts}
+    <h3>There is 1 post tagged '${tag}'</h3>  
+#{/elseif}
+#{else}
+    <h3>No post tagged '${tag}'</h3>
+#{/else}
+ 
+*{********* Posts list *********}*
+ 
+<div class="older-posts">    
+    #{list items:posts, as:'post'}
+        #{display post:post, as:'teaser' /}
+    #{/list}
+</div> 
+
+!images/guide6-3!
+
+p(note). Go to the "next part":guide7. 

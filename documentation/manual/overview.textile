@@ -19,7 +19,7 @@ The main goal of the play framework is to reach maximum productivity within the 
 
 The framework compiles your Java sources directly and hot-reloads them into the JVM without the need to restart the server. You can then edit, reload and see your modifications immediately, just as in any LAMP environment. 
 
-It is so fun that you can even work with a simple text editor and skip a full featured Java IDE if want (however it integrate nicely with any Java IDE).
+It is so fun that you can even work with a simple text editor and skip a full featured Java IDE if you want (however it integrate nicely with any Java IDE).
 
 !images/editor!
 
@@ -42,7 +42,7 @@ The "Share Nothing" architecture is promoted by many Web application framework f
 We don't need anymore to hack the HTTP model to rebuild a fake state over the Web. Another aspect of “share nothing” is to make it easier to render portions of the page in parallel, and to do partial page updates (or progressive enhancement).
 
 
-h2. <a name="http">Built over HTTP</a>
+h2. <a name="http">HTTP-to-code mapping</a>
 
 If you are already using another Java Web framework like Servlet API or Struts framework, you already have used an abstract view of the HTTP protocol with strange Java APIs and concepts. We think differently. A Web applications framework should give you full, straightforward access to HTTP and its concepts. This is a fundamental difference between Play and other Java web application frameworks.
 
@@ -82,7 +82,7 @@ The expression language used by play template engine is "Groovy":http://groovy.c
 
 h2. <a>JPA on steroids</a>
 
-JPA is surrely the best ORM API available for Java. If you know it you will be amazed how simpler it become with play. Nothing to configure, play will automatically startthe JPA Entity Manager using Hibernate and magically synchonize it while code reloading. 
+JPA is surrely the best ORM API available for Java. If you know it you will be amazed how simpler it become with play. Nothing to configure, play will automatically start the JPA Entity Manager using Hibernate and magically synchonize it while code reloading. 
 
 Moreover if you use the provided **play.db.jpa.Model** superclass it will help to make your code prettier. Take a look:
 

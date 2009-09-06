@@ -11,6 +11,7 @@ import play.Invoker;
 import play.Logger;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
+import play.exceptions.UnexpectedException;
 import play.libs.Time;
 
 /**
@@ -22,6 +23,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     protected ExecutorService executor;
     protected long lastRun = 0;
     protected boolean wasError = false;
+    protected Throwable lastException = null;
 
     /**
      * Here you do the job
@@ -82,6 +84,8 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     // Customize Invocation
     @Override
     public void onException(Throwable e) {
+        wasError = true;
+        lastException = e;
         try {
             super.onException(e);
         } catch(Throwable ex) {
@@ -101,14 +105,16 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
                 before();
                 V result = null;
                 try {
+                    lastException = null;
                     lastRun = System.currentTimeMillis();
                     monitor = MonitorFactory.start(getClass().getName()+".doJob()");
                     result = doJobWithResult();
                     monitor.stop();
                     monitor = null;
                     wasError = false;
+                } catch (PlayException e) {
+                    throw e;
                 } catch (Exception e) {
-                    wasError = true;
                     StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
                     if (element != null) {
                         throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(), e);

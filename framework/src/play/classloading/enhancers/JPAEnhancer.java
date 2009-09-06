@@ -58,7 +58,7 @@ public class JPAEnhancer extends Enhancer {
         ctClass.addMethod(findAll);
 
         // findById
-        CtMethod findById = CtMethod.make("public static play.db.jpa.JPASupport findById(Object id) { return (" + entityName + ") em().find(" + entityName + ".class, id); }", ctClass);
+        CtMethod findById = CtMethod.make("public static Object findById(Object id) { return (" + entityName + ") em().find(" + entityName + ".class, id); }", ctClass);
         ctClass.addMethod(findById);
 
         // findBy        
@@ -86,11 +86,11 @@ public class JPAEnhancer extends Enhancer {
         ctClass.addMethod(deleteAll);
 
         // findOneBy
-        CtMethod findOneBy = CtMethod.make("public static play.db.jpa.JPASupport findOneBy(String query, Object[] params) { javax.persistence.Query q = em().createQuery(play.db.jpa.JPQLDialect.instance.createFindByQuery(\"" + entityName + "\", \"" + entityName + "\", query, params)); java.util.List results = play.db.jpa.JPQLDialect.instance.bindParameters(q,params).getResultList(); if(results.size() == 0) return null; return (play.db.jpa.JPASupport)results.get(0); }", ctClass);
+        CtMethod findOneBy = CtMethod.make("public static Object findOneBy(String query, Object[] params) { javax.persistence.Query q = em().createQuery(play.db.jpa.JPQLDialect.instance.createFindByQuery(\"" + entityName + "\", \"" + entityName + "\", query, params)); java.util.List results = play.db.jpa.JPQLDialect.instance.bindParameters(q,params).getResultList(); if(results.size() == 0) return null; return (play.db.jpa.JPASupport)results.get(0); }", ctClass);
         ctClass.addMethod(findOneBy);
         
         // create     
-        CtMethod create = CtMethod.make("public static play.db.jpa.JPASupport create(String name, play.mvc.Scope.Params params) { return (play.db.jpa.JPASupport)((play.db.jpa.JPASupport)" + entityName + ".class.newInstance()).edit(name, params); }", ctClass);
+        CtMethod create = CtMethod.make("public static Object create(String name, play.mvc.Scope.Params params) { return (play.db.jpa.JPASupport)((play.db.jpa.JPASupport)" + entityName + ".class.newInstance()).edit(name, params); }", ctClass);
         ctClass.addMethod(create);
 
         // Done.

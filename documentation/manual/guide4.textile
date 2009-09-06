@@ -83,12 +83,16 @@ Because we will call these methods several times during a request, it could be o
 bc. <ul id="pagination">
     #{if post.previous()}
         <li id="previous">
-            <a href="@{Application.show(post.previous().id)}">${post.previous().title}</a>
+            <a href="@{Application.show(post.previous().id)}">
+                ${post.previous().title}
+            </a>
         </li>
     #{/if}
     #{if post.next()}
         <li id="next">
-            <a href="@{Application.show(post.next().id)}">${post.next().title}</a>
+            <a href="@{Application.show(post.next().id)}">
+                ${post.next().title}
+            </a>
         </li>
     #{/if}
 </ul>
@@ -229,13 +233,7 @@ The last thing we will adjust in this form is the URL used for the **postComment
 
 bc. POST    /posts/{postId}/comments                Application.postComment
 
-h2. <a>Commit your work</a>
-
-As always, we commit this version to bazaar :
-
-bc. $ bzr st
-$ bzr add
-$ bzr commit -m 'Comments'
+That's done. As always, commit the version to bazaar.
 
 p(note). Go to the "next part":guide5. 
 

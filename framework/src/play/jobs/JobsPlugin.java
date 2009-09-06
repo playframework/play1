@@ -99,12 +99,18 @@ public class JobsPlugin extends PlayPlugin {
                 try {
                     Job job = ((Job) clazz.newInstance());
                     scheduledJobs.add(job);
-                    job.run();               
+                    job.run();     
+                    if(job.wasError) {
+                        if(job.lastException != null) {
+                            throw job.lastException;
+                        }
+                        throw new RuntimeException("@OnApplicationStart Job has failed");
+                    }
                 } catch (InstantiationException e) {
                     throw new UnexpectedException("Job could not be instantiated", e);
                 } catch (IllegalAccessException e) {
                     throw new UnexpectedException("Job could not be instantiated", e);
-                } catch (Exception ex) {
+                } catch (Throwable ex) {
                     if (ex instanceof PlayException) {
                         throw (PlayException) ex;
                     }

@@ -312,7 +312,7 @@ Refresh the home page and you should see a styled page now.
 
 h2. <a>Commit your work</a>
 
-This time the blog home page is finished. We can commit this blog version to bazaar :
+This time the blog home page is finished. As always we can commit this blog version to bazaar :
 
 bc. $ bzr st
 $ bzr add

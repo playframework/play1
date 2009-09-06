@@ -18,12 +18,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.scanner.ScannerException;
 import play.Logger;
 import play.Play;
 import play.db.DB;
 import play.db.DBPlugin;
 import play.db.jpa.JPA;
 import play.db.jpa.JPASupport;
+import play.exceptions.YAMLException;
+import play.vfs.VirtualFile;
 
 public class Fixtures {
 
@@ -85,7 +88,7 @@ public class Fixtures {
             if (getForeignKeyToggleStmt(true) != null) {
                 DB.execute(getForeignKeyToggleStmt(true));
             }
-            if(JPA.isEnabled()) {
+            if (JPA.isEnabled()) {
                 JPA.em().clear();
             }
         } catch (Exception e) {
@@ -94,9 +97,16 @@ public class Fixtures {
     }
 
     public static void load(String name) {
+        VirtualFile yamlFile = null;
         try {
+            for (VirtualFile vf : Play.javaPath) {
+                yamlFile = vf.child(name);
+                if (yamlFile != null && yamlFile.exists()) {
+                    break;
+                }
+            }
             InputStream is = Play.classloader.getResourceAsStream(name);
-            if(is == null) {
+            if (is == null) {
                 throw new RuntimeException("Cannot load fixture " + name + ", the file was not found");
             }
             Yaml yaml = new Yaml();
@@ -127,13 +137,13 @@ public class Fixtures {
                         JPA.em().clear();
                     }
                 }
-            }            
+            }
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Class " + e.getMessage() + " was not found", e);
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot load fixture " + name, e);
+        } catch (ScannerException e) {
+            throw new YAMLException(e, yamlFile);
+        } catch (Throwable e) {
+            throw new RuntimeException("Cannot load fixture " + name + ": " + e.getMessage(), e);
         }
     }
 
@@ -157,7 +167,7 @@ public class Fixtures {
             }
         }
     }
-    
+
     static void resolveDependencies(Class type, Map<String, String[]> serialized, Map<String, Object> idCache) {
         for (Field field : type.getDeclaredFields()) {
             boolean isEntity = false;

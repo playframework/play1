@@ -204,6 +204,7 @@ public class Play {
         roots.add(appRoot);
         javaPath = new ArrayList<VirtualFile>();
         javaPath.add(appRoot.child("app"));
+        javaPath.add(appRoot.child("conf"));
         
         // Build basic templates path
         templatesPath = new ArrayList<VirtualFile>();

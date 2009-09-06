@@ -92,8 +92,7 @@ public class VirtualFile {
     public boolean exists() {
         try {
             if (realFile != null) {
-                boolean exists = realFile.exists();
-                return exists;
+                return realFile.exists();
             }
             return false;
         } catch (AccessControlException e) {

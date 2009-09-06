@@ -17,7 +17,6 @@ public class BeanWrapper {
     final static int notwritableField = Modifier.FINAL | Modifier.NATIVE | Modifier.STATIC;
     final static int notaccessibleMethod = Modifier.NATIVE | Modifier.STATIC;
     private Class beanClass;
-
     /** 
      * a cache for our properties and setters
      */
@@ -38,32 +37,34 @@ public class BeanWrapper {
         Object instance = newBeanInstance();
         return bind(name, type, params, prefix, instance);
     }
-    
+
     public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Object instance) throws Exception {
         for (Property prop : wrappers.values()) {
             String newPrefix = prefix + "." + prop.getName();
-            if(name.equals("") && prefix.equals("") && newPrefix.startsWith(".")) {
+            if (name.equals("") && prefix.equals("") && newPrefix.startsWith(".")) {
                 newPrefix = newPrefix.substring(1);
             }
             Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), params, newPrefix);
-            if(value != Binder.MISSING) {
+            if (value != Binder.MISSING) {
                 prop.setValue(instance, value);
             }
         }
         return instance;
     }
-    public void set(String name, Object instance, Object value){
-    	for (Property prop : wrappers.values()) {
-			if(name.equals(prop.name)) {
-				prop.setValue(instance, value);
-				return;
-			}
-		}
-    	String message = String.format("Can't find property with name '%s' on class %s", name, instance.getClass().getName());
-    	Logger.warn(message);
-    	throw new UnexpectedException(message);
+
+    public void set(String name, Object instance, Object value) {
+        for (Property prop : wrappers.values()) {
+            if (name.equals(prop.name)) {
+                prop.setValue(instance, value);
+                return;
+            }
+        }
+        String message = String.format("Can't find property with name '%s' on class %s", name, instance.getClass().getName());
+        Logger.warn(message);
+        throw new UnexpectedException(message);
 
     }
+
     private boolean isSetter(Method method) {
         return (!method.isAnnotationPresent(PlayPropertyAccessor.class) && method.getName().startsWith("set") && method.getName().length() > 3 && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
     }
@@ -114,13 +115,9 @@ public class BeanWrapper {
     public static class Property {
 
         private Method setter;
-
         private Field field;
-
         private Class type;
-
         private Type genericType;
-
         private String name;
 
         Property(String propertyName, Method setterMethod) {
@@ -150,7 +147,7 @@ public class BeanWrapper {
                 }
 
             } catch (Exception ex) {
-                Logger.warn(ex, "ERROR in BeanWrapper when setting property %s value is %s", name, value);
+                Logger.warn(ex, "ERROR in BeanWrapper when setting property %s value is %s (%s)", name, value, value == null ? null : value.getClass());
                 throw new UnexpectedException(ex);
             }
         }

@@ -12,7 +12,7 @@ JPA is a Java specification that define a standard API for object relational map
 
 If you have ever used Hibernate or JPA before you will be surprised by the simplicity added by play at this level. No need to configure anything; JPA just work out of the box with play.
 
-If you don't know JPA, you can read some of these simple presentation before to continue.
+If you don't know JPA, you can "read some of these simple presentation":http://java.sun.com/javaee/5/docs/tutorial/doc/bnbpz.html before to continue.
 
 h2. <a>Starting by the User class</a>
 
