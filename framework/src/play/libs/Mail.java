@@ -264,7 +264,7 @@ public class Mail {
                 // port 465 + setup yes ssl socket factory (won't verify that the server certificate is signed with a root ca.)
                 props.put("mail.smtp.port", "465");
                 props.put("mail.smtp.socketFactory.port", "465");
-                props.put("mail.smtp.socketFactory.class", "play.libs.YesSSLSocketFactory");
+                props.put("mail.smtp.socketFactory.class", "play.utils.YesSSLSocketFactory");
                 props.put("mail.smtp.socketFactory.fallback", "false");
             } else if (channelEncryption.equals("starttls")) {
                 // port 25 + enable starttls + ssl socket factory
