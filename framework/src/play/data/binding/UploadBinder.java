@@ -1,6 +1,5 @@
 package play.data.binding;
 
-import java.io.File;
 import java.util.List;
 import play.data.Upload;
 import play.mvc.Http.Request;
@@ -8,17 +7,13 @@ import play.mvc.Http.Request;
 /**
  * Bind file form multipart/form-data request.
  */
-public class FileBinder implements SupportedType<File> {
+public class UploadBinder implements SupportedType<Upload> {
 
-    public File bind(String value) {
+    public Upload bind(String value) {
         List<Upload> uploads = (List<Upload>)Request.current().args.get("__UPLOADS");
         for(Upload upload : uploads) {
             if(upload.getFieldName().equals(value)) {
-                File file = upload.asFile();
-                if(file.length() > 0) {
-                    return file;
-                } 
-                return null;
+                return upload;
             }
         }
         return null;

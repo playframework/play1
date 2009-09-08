@@ -19,6 +19,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import play.data.Upload;
 import play.data.validation.Validation;
 
 /**
@@ -31,6 +32,7 @@ public class Binder {
     static {
         supportedTypes.put(Date.class, new DateBinder());
         supportedTypes.put(File.class, new FileBinder());
+        supportedTypes.put(Upload.class, new UploadBinder());
         supportedTypes.put(Calendar.class, new CalendarBinder());
         supportedTypes.put(Locale.class, new LocaleBinder());
     }

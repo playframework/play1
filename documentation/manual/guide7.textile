@@ -1,0 +1,70 @@
+h1. Setting up a basic administration area using CRUD
+
+For now we have now way to create new blog posts are monitorate comments using the blog UI. Play provides an out of the box **CRUD** module that help
+you to quickly generate a basic administration area.
+
+h2. <a>Enabling the CRUD module</a>
+
+A play application can be assembled from several application modules. This allows you to reuse application components across several application or split a large application into several smaller applications.
+
+The CRUD module is a generic application that introspect your model classes to create simple list and form.
+
+To enable the CRUD module, you have to add this line to the **/yabe/conf/application.conf** file:
+
+bc. # Import he crud module
+module.crud=${play.path}/modules/crud
+
+Then this module comes with a generic set of **routes** that we can reuse for now. To imports these routes just add this line to the **/yabe/conf/routes** file:
+
+bc. # Import CRUD routes
+*      /admin              module:crud
+
+This will import all the CRUD routes using the **/admin** prefix for the URL paths.
+
+You have to restart the application to take the new modul in account.
+
+h2. <a>Declaring the CRUD controllers</a>
+
+For each model object that we want to integrate to the administration area, we have to declare a controller that just extends the **controllers.CRUD** super controller. This is very easy.
+
+Create one controller for each model object. For example, for the **Post** object create the **Posts** controller in the **/yabe/app/controllers/Posts.java** file. 
+
+bc. package controllers;
+ 
+import play.*;
+import play.mvc.*;
+ 
+public class Posts extends CRUD {    
+}
+
+p(note). The convention is to pluralize the model object name to create the corresponding controller. This way, play will automatically find the associate model object for each controller. If you need to use a different name, you can still use the **@CRUD.For** annotation. Check the "manual page":crud.
+
+Create the same for all model objects:
+
+bc. package controllers;
+ 
+import play.*;
+import play.mvc.*;
+ 
+public class Users extends CRUD {    
+}
+
+bc. package controllers;
+ 
+import play.*;
+import play.mvc.*;
+ 
+public class Comments extends CRUD {    
+}
+
+bc. package controllers;
+ 
+import play.*;
+import play.mvc.*;
+ 
+public class Tags extends CRUD {    
+}
+
+Now just open the "http://localhost:9000/admin":http://localhost:9000/admin URL, and you should the administration area.
+
+!images/guide7-1!

@@ -5,22 +5,24 @@ import org.apache.commons.fileupload.util.Closeable;
 import org.apache.commons.fileupload.util.LimitedInputStream;
 import org.apache.commons.fileupload.util.Streams;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
+import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.ParameterParser;
 import org.apache.commons.fileupload.ProgressListener;
+import play.Play;
+import play.data.Upload;
 import play.exceptions.UnexpectedException;
-import play.mvc.Http.Header;
 import play.mvc.Http.Request;
 
 /**
@@ -29,7 +31,7 @@ import play.mvc.Http.Request;
  */
 public class ApacheMultipartParser extends DataParser {
 
-    private static FileItemFactory fileItemFactory = new DiskFileItemFactory();
+    private static DiskFileItemFactory fileItemFactory = new DiskFileItemFactory();
 
     public Map<String, String[]> parse(InputStream body) {
         Map<String, String[]> result = new HashMap<String, String[]>();
@@ -47,18 +49,17 @@ public class ApacheMultipartParser extends DataParser {
          *             if there are problems reading/parsing the request or
          *             storing files.
          */
-        Map<String, Header> headers = Request.current().headers;
         try {
             FileItemIteratorImpl iter = new FileItemIteratorImpl(body, Request.current().headers.get("content-type").value(), "UTF-8");
 
-            FileItemFactory fac = fileItemFactory;
-            if (fac == null) {
+            if (fileItemFactory == null) {
                 throw new NullPointerException("No FileItemFactory has been set.");
             }
+            fileItemFactory.setSizeThreshold(Integer.parseInt(Play.configuration.getProperty("upload.threshold", "10240")));
 
             while (iter.hasNext()) {
                 FileItemStream item = iter.next();
-                FileItem fileItem = fac.createItem(item.getFieldName(), item.getContentType(), item.isFormField(), item.getName());
+                FileItem fileItem = fileItemFactory.createItem(item.getFieldName(), item.getContentType(), item.isFormField(), item.getName());
                 try {
                     Streams.copy(item.openStream(), fileItem.getOutputStream(), true);
                 } catch (FileUploadIOException e) {
@@ -69,19 +70,13 @@ public class ApacheMultipartParser extends DataParser {
                 if (fileItem.isFormField()) {
                     putMapEntry(result, fileItem.getFieldName(), fileItem.getString("UTF-8"));
                 } else {
-                    // create temp file with current millis _ count static / fieldName / original file name.
-                    if(item.getName() == null || item.getName().equals("")) {
-                         // File item not filled
-                    } else {
-                        File file =  new File ( TempFilePlugin.createTempFolder(), item.getFieldName() + File.separator + item.getName());
-                        file.getParentFile().mkdirs();
-                        try {
-                            fileItem.write(file);
-                        } catch (Exception e) {
-                            throw new IllegalStateException("Error when trying to write to file " + file.getAbsolutePath(), e);
-                        }
-                        putMapEntry(result, fileItem.getFieldName(), file.getAbsolutePath());
+                    List<Upload> uploads = (List<Upload>)Request.current().args.get("__UPLOADS");
+                    if(uploads == null) {
+                        uploads = new ArrayList<Upload>();
+                        Request.current().args.put("__UPLOADS", uploads);
                     }
+                    uploads.add(new Upload(fileItem));
+                    putMapEntry(result, fileItem.getFieldName(), fileItem.getFieldName());
                 }
             }
         } catch (FileUploadIOException e) {
