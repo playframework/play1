@@ -1,0 +1,11 @@
+--- src/net/sourceforge/cobertura/instrument/ClassInstrumenter.java.orig	2009-08-04 14:32:45.000000000 +0200
++++ src/net/sourceforge/cobertura/instrument/ClassInstrumenter.java	2009-08-04 14:33:00.000000000 +0200
+@@ -33,7 +33,7 @@
+ import org.objectweb.asm.MethodVisitor;
+ import org.objectweb.asm.Opcodes;
+ 
+-class ClassInstrumenter extends ClassAdapter
++public class ClassInstrumenter extends ClassAdapter
+ {
+ 
+ 	private static final Logger logger = Logger
