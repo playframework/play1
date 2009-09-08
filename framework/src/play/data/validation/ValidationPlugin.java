@@ -1,5 +1,6 @@
 package play.data.validation;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -28,6 +29,16 @@ public class ValidationPlugin extends PlayPlugin {
     @Override
     public void beforeActionInvocation(Method actionMethod) {
         try {
+            boolean verify = false;
+            for(Annotation[] annotations : actionMethod.getParameterAnnotations()) {
+                if(annotations.length > 0) {
+                    verify = true;
+                    break;
+                }
+            }
+            if(!verify) {
+                return;
+            }
             keys.set(new HashMap<Object, String>());
             Validation.current.set(restore());
             List<ConstraintViolation> violations = new Validator().validateAction(actionMethod);
