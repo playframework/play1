@@ -29,6 +29,8 @@ public class ValidationPlugin extends PlayPlugin {
     @Override
     public void beforeActionInvocation(Method actionMethod) {
         try {
+            keys.set(new HashMap<Object, String>());
+            Validation.current.set(restore());
             boolean verify = false;
             for(Annotation[] annotations : actionMethod.getParameterAnnotations()) {
                 if(annotations.length > 0) {
@@ -39,8 +41,6 @@ public class ValidationPlugin extends PlayPlugin {
             if(!verify) {
                 return;
             }
-            keys.set(new HashMap<Object, String>());
-            Validation.current.set(restore());
             List<ConstraintViolation> violations = new Validator().validateAction(actionMethod);
             ArrayList errors = new ArrayList();
             String[] paramNames = Java.parameterNames(actionMethod);

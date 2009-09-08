@@ -320,7 +320,7 @@ public class Search {
                         IndexSearcher reader = new IndexSearcher(FSDirectory.getDirectory(root));
                         indexReaders.put(name, reader);
                     } else 
-                        throw new UnexpectedException ("Could not find "+name+" index. Please restart your ");
+                        throw new UnexpectedException ("Could not find "+name+" index. Please re-index");
                 }
             }
             return indexReaders.get(name);
