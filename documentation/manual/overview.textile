@@ -1,33 +1,35 @@
 h1. Play framework overview
 
-The play framework makes it easier to build Web applications with Java. It's a clean alternative to bloated Enterprise Java stacks. It focuses on developers productivity and targets RESTful architectures. Play is a perfect companion for *agile software development*.
+The play framework is a clean alternative to bloated Enterprise Java stacks. It focuses on developers productivity and targets RESTful architectures. Play is a perfect companion for *agile software development*.
+
+Play framework aim is to ease web applications development while sticking with Java. Let's see how this is possible.
 
 p(note). **Wanna see some code ?** 
  
-Check "Five cool things you can do with play":5things, or start directly with the "play guide":guide1.
+Check "Five cool things you can do with play":5things, or start directly with "play guide":guide1.
 
 
-h2. <a name="java">Java framework, without pain</a>
+h2. <a name="java">Java framework without the pain</a>
 
 Play is a pure Java framework and allows you to keep your preferred development tools and libraries. If you already use Java as a development platform you don't need to switch to another language, another IDE and other libraries. *Just switch to a more productive Java environment !*
 
 h2. <a name="reload">Fix the bug and hit Reload</a>
 
-The Java platform is indeed infamous for its low productivity, mainly because of its repeated and tedious compile-package-deploy cycles.
+The Java platform is infamous for its low productivity, mainly due to repeated and tedious compile-package-deploy cycles.
 
-The main goal of the play framework is to reach maximum productivity within the Java platform. That's why we rethought the development cycle to make developing with play an efficient process.
+That's why we rethought the development cycle to make developing with play an efficient process.
 
-The framework compiles your Java sources directly and hot-reloads them into the JVM without the need to restart the server. You can then edit, reload and see your modifications immediately, just as in any LAMP environment. 
+The framework compiles your Java sources directly and hot-reloads them into the JVM without the need to restart the server. You can then edit, reload and see your modifications immediately, just as in a LAMP or Rails environment. 
 
-It is so fun that you can even work with a simple text editor and skip a full featured Java IDE if you want (however it integrate nicely with any Java IDE).
+It is so fun that you can even work with a simple text editor and skip a full-featured Java IDE if you want.
 
 !images/editor!
 
-Whenever an error occurs, the framework makes its best effort to show you the problem code. 
+Whenever an error occurs, the framework makes its best effort to identify and show you the problem.
 
 !images/guide1-3!
 
-Even the stacktraces are stripped down and optimized to make it easier to resolve problems. Look how templates execution are nicely integrated to the Java stacktrace. 
+Even the stacktraces are stripped down and optimized to make it easier to resolve problems. Look how templates execution is nicely integrated to the Java stacktrace. 
 
 !images/stacktrace!
 
@@ -37,9 +39,9 @@ You’ve got a database on one side and a web browser on the other. Why should y
 
 Stateful and component based Java Web framework make it easy to automatically save page state, but brings into a lot of other problems: what happens if the user opens a second window? What if the user hits the browser back button?
 
-The "Share Nothing" architecture is promoted by many Web application framework from PHP to RubyOnRails or Django. As browser starts to become more and more powerful, it is now easy to use Ajax or offline storage to locally solve the state problems. 
+The "Share Nothing":http://zef.me/883/the-share-nothing-architecture architecture is promoted by many Web application framework from PHP to RubyOnRails or Django. As the browser is becoming more and more powerful, it is now easy to use Ajax or offline storage to locally solve the state problems. 
 
-We don't need anymore to hack the HTTP model to rebuild a fake state over the Web. Another aspect of “share nothing” is to make it easier to render portions of the page in parallel, and to do partial page updates (or progressive enhancement).
+We don't need to hack the HTTP model anymore to rebuild a fake state over the Web. Another aspect of the “share nothing” is to make it easier to render portions of the page in parallel, and to do partial page updates (or progressive enhancement).
 
 
 h2. <a name="http">HTTP-to-code mapping</a>
@@ -82,9 +84,9 @@ The expression language used by play template engine is "Groovy":http://groovy.c
 
 h2. <a>JPA on steroids</a>
 
-JPA is surrely the best ORM API available for Java. If you know it you will be amazed how simpler it become with play. Nothing to configure, play will automatically start the JPA Entity Manager using Hibernate and magically synchonize it while code reloading. 
+JPA is the cleanest ORM API available for Java. If you allready know it you will be amazed how simpler it becomes with play. Nothing to configure, play will automatically start the JPA Entity Manager and magically synchronize it while the code is reloaded. 
 
-Moreover if you use the provided **play.db.jpa.Model** superclass it will help to make your code prettier. Take a look:
+Moreover if you use the provided **play.db.jpa.Model** superclass it will help to make your code prettier. Have a look:
 
 bc. public void messages(int page) {
     User connectedUser = User.find("byEmail", connected());
@@ -97,7 +99,7 @@ bc. public void messages(int page) {
 
 h2. <a>Test driven development if you like it</a>
 
-The integrated test runner make it easy to work in test driven development mode. You can write all test types from the simple unit tests to complete acceptance tests running directly in the browser using "Selenium":http://seleniumhq.org/. Code coverage is examinated as well.
+The integrated test runner makes it easy to work in a TDD mode. You can write all kind of tests, from simple unit tests to full acceptance tests, and run them directly in the browser using "Selenium":http://seleniumhq.org/. Code coverage is also measured.
 
 !images/guide2-2!
 
@@ -113,7 +115,7 @@ The play framework was initially inspired by our own Java applications. It has a
 * Image manipulation API.
 * ...
 
-A modular architecture lets you combine a Web application with many other Web applications. With play application modules, you can of course reuse some Java code, but templates or static resources (like Javascript and CSS) as well.
+A modular architecture lets you combine a Web application with many other Web applications. Thanks to "application modules":modules, you can reuse your java code, templates and static resources (such as Javascript and CSS files) in a simple way.
 
 p(note). **Give it a try**
  

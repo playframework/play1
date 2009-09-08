@@ -1,18 +1,18 @@
 h1. Play framework documentation
 
-Welcome to the play framework documentation. These docs are for the *1.0 release* and may be significantly different from previous versions. 
+Welcome to the play framework documentation. This documentation is intended for the *1.0 release* and may significantly differs from previous versions of the framework. 
 
-p(note). This is a work in progress, feel free to ask any question not covered into these documents or report any error. You can contribute to the documentation the "same way you can contribute code":/code.
+p(note). This is a work in progress, feel free to ask any question not covered into these documents or report any error. You can contribute to the documentation the "same way you can contribute code":code.
 
 
 h2. <a name="started">Getting started</a>
 
-Your first steps with play and your first 5 minutes fun.
+Your first steps with play and your first 5 minutes of fun.
 
 # "Play framework overview":overview
-# "Watch the video presentation":video
+# "Watch the screencast":video
 # "Installation guide":install
-# "Setting up your preferred IDE":ide
+# "Set up your preferred IDE":ide
 # "Five cool things you can do with Play":5things
 
 
@@ -21,7 +21,7 @@ h2. <a name="guide">Tutorial -- Play guide, a real world app step by step</a>
 Learn play by coding 'Yet Another Blog Engine', from start to finish. Each chapter will be occasion to learn one more cool play feature.
 
 # "Starting up the project":guide1
-# "A first iteration for the data model":guide2
+# "A first iteration of the data model":guide2
 # "Building the first screen":guide3
 # "The comments page":guide4
 # "Setting up a Captcha":guide5
