@@ -41,7 +41,7 @@ public class JPASupport implements Serializable {
 
     public transient boolean willBeSaved = false;
 
-    public static <T> T create(Class type, String name, Map<String, String[]> params) {
+    public static <T extends JPASupport> T create(Class type, String name, Map<String, String[]> params) {
         try {
             Object model = type.newInstance();
             return (T) edit(model, name, params);
@@ -50,11 +50,11 @@ public class JPASupport implements Serializable {
         }
     }
 
-    public <T> T edit(String name, Params params) {
+    public <T extends JPASupport> T edit(String name, Params params) {
         return (T) edit(this, name, params.all());
     }
 
-    public static <T> T edit(Object o, String name, Map<String, String[]> params) {
+    public static <T extends JPASupport> T edit(Object o, String name, Map<String, String[]> params) {
         try {
             BeanWrapper bw = new BeanWrapper(o.getClass());
             bw.bind(name, o.getClass(), params, "", o);
@@ -130,7 +130,7 @@ public class JPASupport implements Serializable {
     /**
      * store (ie insert) the entity.
      */
-    public <T> T save() {
+    public <T extends JPASupport> T save() {
         if (!em().contains(this)) {
             em().persist(this);
             PlayPlugin.postEvent("JPASupport.objectPersisted", this);
@@ -217,7 +217,7 @@ public class JPASupport implements Serializable {
     /**
      * Refresh the entity state.
      */
-    public <T> T refresh() {
+    public <T extends JPASupport> T refresh() {
         em().refresh(this);
         return (T) this;
     }
@@ -225,7 +225,7 @@ public class JPASupport implements Serializable {
     /**
      * Merge this object to obtain a managed entity (usefull when the object comes from the Cache).
      */
-    public <T> T merge() {
+    public <T extends JPASupport> T merge() {
         return (T) em().merge(this);
     }
 
@@ -233,7 +233,7 @@ public class JPASupport implements Serializable {
      * Delete the entity.
      * @return The deleted entity.
      */
-    public <T> T delete() {
+    public <T extends JPASupport> T delete() {
         try {
             em().remove(this);
             PlayPlugin.postEvent("JPASupport.objectDeleted", this);
@@ -243,7 +243,7 @@ public class JPASupport implements Serializable {
         }
     }
 
-    public static <T> T create(String name, Params params) {
+    public static <T extends JPASupport> T create(String name, Params params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 
@@ -269,7 +269,7 @@ public class JPASupport implements Serializable {
     /**
      * Find all entities of this type
      */
-    public static <T> List<T> findAll() {
+    public static <T extends JPASupport> List<T> findAll() {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 
@@ -278,7 +278,7 @@ public class JPASupport implements Serializable {
      * @param id The entity id
      * @return The entity
      */
-    public static <T> T findById(Object id) {
+    public static <T extends JPASupport> T findById(Object id) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 
@@ -334,7 +334,7 @@ public class JPASupport implements Serializable {
      * @return <T> the first item matching the query or null
      */
     @Deprecated
-    public static <T> T findOneBy(String query, Object... params) {
+    public static <T extends JPASupport> T findOneBy(String query, Object... params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 
@@ -346,7 +346,7 @@ public class JPASupport implements Serializable {
      * @return a list<T> of items matching the query
      */
     @Deprecated
-    public static <T> List<T> findBy(String query, Object... params) {
+    public static <T extends JPASupport> List<T> findBy(String query, Object... params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 
