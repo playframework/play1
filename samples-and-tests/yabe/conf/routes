@@ -9,6 +9,9 @@ GET     /posts/{tag}                            Application.listTagged
 POST    /posts/{<[0-9]+>postId}/comments        Application.postComment
 GET     /captcha                                Application.captcha
 
+# Import CRUD routes
+*       /admin                                  module:crud
+
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public
 
