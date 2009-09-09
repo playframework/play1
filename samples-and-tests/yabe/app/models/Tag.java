@@ -4,10 +4,12 @@ import java.util.*;
 import javax.persistence.*;
  
 import play.db.jpa.*;
+import play.data.validation.*;
  
 @Entity
 public class Tag extends Model {
  
+    @Required
     public String name;
     
     public static Tag findOrCreateByName(String name) {

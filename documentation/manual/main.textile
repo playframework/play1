@@ -100,8 +100,8 @@ There are no compilation, packaging or deployment phases while working with play
 
 p(note). **About DEV/PROD modes**
  
-You can run an application either in a DEV or PROD mode. You toggle this mode using the *application.mode* configuration property. 
-When run in DEV mode, play will check for file changes and will handle hot reloading if necessary. 
+You can run an application either in a DEV or PROD mode. You toggle this mode using the *application.mode* configuration property. When run in DEV mode, play will check for file changes and will handle hot reloading if necessary. 
+ 
 The PROD mode is fully optimized for production : java sources and templates are compiled once and cached for multiple uses.
 
 Java source code is compiled and loaded at runtime. If a Java source file is modified while the application is running, the source code is recompiled and hot-swapped into the JVM.

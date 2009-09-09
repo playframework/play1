@@ -10,6 +10,50 @@ import models.*;
 
 
 public class JPAController extends Controller {
+    
+    public static void init() {
+        Post post = new Post();
+        post.name = "Post1";
+        Tag tag1 = new Tag();
+        tag1.name = "Blue";
+        Tag tag2 = new Tag();
+        tag2.name = "Red";
+        post.tags.add(tag1);
+        post.tags.add(tag2);
+        post.save();
+        show();
+    }
+    
+    public static void show() {
+        Post post = Post.all().first();
+        render(post);
+    }
+    
+    public static void dontEditName() {
+        Post post = Post.all().first();
+        post.name = "Kiki";
+        show();
+    }
+    
+    public static void editName() {
+        Post post = Post.all().first();
+        post.name = "Kiki";
+        post.save();
+        show();
+    }
+    
+    public static void dontEditTags() {
+        Post post = Post.all().first();
+        post.tags.remove(0);
+        show();
+    }
+    
+    public static void editTags() {
+        Post post = Post.all().first();
+        post.tags.remove(0);
+        post.save();
+        show();
+    }
 	
 	public static void index() {
 		render();

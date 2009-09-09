@@ -31,7 +31,7 @@
 	%{ if(fieldsHandler[fieldName]) { }%
 		%{
 			def handler = fieldsHandler[fieldName];
-			handler.setProperty('fieldName', 'object.' + field.name);
+			handler.setProperty('fieldName', 'object.' + field.name + (field.type == 'relation' ? '@id' : ''));
             def oldObject = handler.getProperty('object');
 			handler.setProperty('object', currentObject);
 			out.println(handler.toString());

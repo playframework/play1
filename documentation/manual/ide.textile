@@ -4,6 +4,7 @@ h1. Setting up your preferred IDE
 "Eclipse":#eclipse | "Netbeans":#netbeans | "Textmate":#textmate | "Other IDEs":#custom
 
 Working with play is easy. You don't even need a sophisticated IDE as play compiles and refreshes the modifications you make to your source files automatically. So you can easily work using a simple text editor.
+
 However using a modern Java IDE provides cool productivity features like auto-completion, on the fly compilation, assisted refactoring and debugging. Play supports "Netbeans":http://www.netbeans.org and "Eclipse":http://www.eclipse.org platforms.
 
 
@@ -46,13 +47,20 @@ p(note). **Do not commit the nbproject directory when you work in a team !**
 The generated configuration files contains absolute references to your framework installation. These are specific to your own installation. When you work in a team on the same application, each developer must keep his netbeans configuration files private.
 
 
+h2(#textmate). <a>Textmate</a>
+
+Download and install the bundle provided for "Textmate":http://macromates.com/ to enable syntax coloration and auto-completion. Bundle also eases navigation between controllers and views.
+
+!images/editor!
+
+
 
 h2(#custom). <a>Manually configure your preferred editor</a>
 
 As play applications are standard Java applications you won't need any specific plugin to work with your preferred editor. 
 This however requires a little bit of knowledge on how Play works :
 
-h2. <a>Classpath settings</a>
+h3. Classpath settings
 
 A play application classpath is built as follows (in this order): 
 
@@ -80,14 +88,6 @@ To enable HotSwap reloading you have to load a Java agent packaged in the **play
 bc. java -javaagent:"$PLAY_PATH/framework/play.jar" ...
 
 It's not required, but will speed up class reloading when it is possible.
-
-
-
-h2(#textmate). <a>Textmate</a>
-
-Download and install the bundle provided for "Textmate":http://macromates.com/ to enable syntax coloration and auto-completion. Bundle also eases navigation between controllers and views.
-
-!images/editor!
 
 
 h2. <a>Debugging issues</a>

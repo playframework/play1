@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import java.util.Map;
+import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
@@ -68,6 +69,8 @@ public class ActionInvoker {
             } catch (ActionNotFoundException e) {
                 throw new NotFound(String.format("%s action not found", e.getAction()));
             }
+            
+            Logger.trace("------- %s", actionMethod);
 
             // 3. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);

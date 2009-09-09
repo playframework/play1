@@ -8,7 +8,9 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import org.apache.log4j.Level;
+import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
+import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.hibernate.type.Type;
 import play.Logger;
@@ -42,17 +44,38 @@ public class JPAPlugin extends PlayPlugin {
             }
             cfg.setProperty("hibernate.dialect", getDefaultDialect(Play.configuration.getProperty("db.driver")));
             cfg.setProperty("javax.persistence.transaction", "RESOURCE_LOCAL");
+            
+            // Explicit SAVE for JPASupport is implemented here
+            // ~~~~~~
+            // We've hacked the org.hibernate.event.def.AbstractFlushingEventListener line 271, to flush collection update
+            // only if the owner will be saved.
+            // As is:
+            // if (session.getInterceptor().onCollectionUpdate(coll, ce.getLoadedKey())) {
+            //      actionQueue.addAction(...);
+            // }
+            //
+            // This is really hacky. We should move to something better than Hibernate like EBEAN
             cfg.setInterceptor(new EmptyInterceptor() {
 
-                /**
-                 * Discard change when an entity is not valid
-                 */
                 @Override
                 public int[] findDirty(Object o, Serializable id, Object[] arg2, Object[] arg3, String[] arg4, Type[] arg5) {
                     if(o instanceof JPASupport && !((JPASupport)o).willBeSaved) {
                         return new int[0];
                     }
                     return null;
+                }
+
+                @Override
+                public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
+                    if(collection instanceof PersistentCollection) {
+                        Object o = ((PersistentCollection)collection).getOwner();
+                        if(o instanceof JPASupport) {
+                            return ((JPASupport)o).willBeSaved;
+                        }
+                    } else {
+                        System.out.println("HOO: Case not handled !!!");                        
+                    }
+                    return super.onCollectionUpdate(collection, key);
                 }
                 
                 

@@ -24,7 +24,9 @@ import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostUpdate;
 import javax.persistence.Query;
+import org.hibernate.Session;
 import org.hibernate.collection.PersistentCollection;
+import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.proxy.HibernateProxy;
 import play.Play;
 import play.PlayPlugin;
@@ -84,6 +86,7 @@ public class JPASupport implements Serializable {
                         String[] ids = params.get(name + "." + field.getName() + "@id");
                         if (ids != null) {
                             for (String _id : ids) {
+                                if(_id.equals("")) continue;
                                 Query q = JPA.em().createQuery("from " + relation + " where id = ?");
                                 q.setParameter(1, Binder.directBind(_id, findKeyType(Play.classloader.loadClass(relation))));
                                 l.add(q.getSingleResult());
@@ -612,5 +615,9 @@ public class JPASupport implements Serializable {
     @PostUpdate
     public void onSave() {
         saveAttachment();
+    }    
+        
+    private Session rawSession() {
+        return ((HibernateEntityManager)em()).getSession();
     }
 }

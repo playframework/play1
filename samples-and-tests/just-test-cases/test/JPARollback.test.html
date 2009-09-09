@@ -2,6 +2,36 @@
 
 #{selenium 'Test that JPA.abort() works'}
 
+    // Init
+    open('@{JPAController.init()}')
+    assertTextPresent('Post1')
+    assertTextPresent('Blue')
+    assertTextPresent('Red')
+    
+    // Don't edit name
+    open('@{JPAController.dontEditName()}')
+    assertTextPresent('Post1')
+    assertTextPresent('Blue')
+    assertTextPresent('Red')    
+
+    // Edit name
+    open('@{JPAController.editName()}')
+    assertTextPresent('Kiki')
+    assertTextPresent('Blue')
+    assertTextPresent('Red')
+    
+    // Don't edit tags
+    open('@{JPAController.dontEditTags()}')
+    assertTextPresent('Kiki')
+    assertTextPresent('Blue')
+    assertTextPresent('Red')
+    
+    // Edit tags
+    open('@{JPAController.editTags()}')
+    assertTextPresent('Kiki')
+    assertTextNotPresent('Blue')
+    assertTextPresent('Red')
+
 	// Will save
 	open('@{JPAController.index()}')
 	getEval('window.document.getElementById("form").action="@{JPAController.willSave()}"')

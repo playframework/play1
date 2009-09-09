@@ -65,6 +65,215 @@ import play.mvc.*;
 public class Tags extends CRUD {    
 }
 
-Now just open the "http://localhost:9000/admin":http://localhost:9000/admin URL, and you should the administration area.
+Now just open the "http://localhost:9000/admin":http://localhost:9000/admin URL, and you should get the administration area.
 
 !images/guide7-1!
+
+If you browse it a little, you that the objects names in the lists are a little rough. This is because the default is to use a simple **toString()** to get a readable representation of the model objects.
+
+We can easily fix that, by providing correct implementations of the **toString()** method for all models. For example, for the User class:
+
+bc. ...
+public String toString() {
+    return email;
+}
+...
+
+h2. <a>Adding validation</a>
+
+The main problem of the generated administration area, is that forms do not contains any validation rules. But in fact the CRUD module is able to extract the validation rules from the validation annotation if the model class is correctly annotated.
+
+Let's add some annotation to the **User** class:
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.db.jpa.*;
+import play.data.validation.*;
+ 
+@Entity
+public class User extends Model {
+ 
+    @Email
+    @Required
+    public String email;
+    
+    @Required
+    public String password;
+    
+    public String fullname;
+    
+...
+
+Now if you go to the edition or creation form for the **User** model object, you will see that validation rules are auto-magically added to the form:
+
+!images/guide7-2!
+
+Let's do the same for the **Post** class:
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.db.jpa.*;
+import play.data.validation.*;
+ 
+@Entity
+public class Post extends Model {
+ 
+    @Required
+    public String title;
+    
+    @Required
+    public Date postedAt;
+    
+    @Lob
+    @Required
+    @MaxSize(10000)
+    public String content;
+    
+    @Required
+    @ManyToOne
+    public User author;
+    
+    @OneToMany(mappedBy="post", cascade=CascadeType.ALL)
+    public List<Comment> comments = new ArrayList();
+    
+    @ManyToMany(cascade=CascadeType.ALL)
+    public Set<Tag> tags = new HashSet();
+        
+...
+
+And check the result:
+
+!images/guide7-3!
+
+Here you see an intersting side effect: the **@MaxSize** validation rule, has changed the way that play display the Post form. It now uses a large text area for the content field.
+
+Finally we can add validation rules to the **Comment** and **Tag** classes as well:
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.db.jpa.*;
+import play.data.validation.*;
+ 
+@Entity
+public class Tag extends Model {
+ 
+    @Required
+    public String name;
+ 
+...
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.db.jpa.*;
+import play.data.validation.*;
+ 
+@Entity
+public class Comment extends Model {
+ 
+    @Required
+    public String author;
+    
+    @Required
+    public Date postedAt;
+     
+    @Lob
+    @Required
+    @MaxSize(10000)
+    public String content;
+    
+    @ManyToOne
+    @Required
+    public Post post;
+ 
+...
+
+h2. <a>Better form labels</a>
+
+As you see the form labels are a little rough. Play has used the Java field name as form label. To customize it, we just have to provide better label in the **/yabe/conf/messages** file.
+
+p(note). In fact you can have a separate **messages** file for each language supported by your application. For example you could put french messages in the **/yabe/conf/messages.fr** file.
+
+So, add these label to the **messages** file:
+
+bc. title=Title
+content=Content
+postedAt=Posted at
+author=Author
+post=Related post
+tags=Tags set
+name=Common name
+email=Email
+password=Password
+fullname=Full name
+
+Then refresh any form, and you will see the new form labels:
+
+!images/guide7-4!
+
+h2. <a>Customizing the 'Comments' data list</a>
+
+The CRUD module is made to be fully customizable. For example if you look at the comments list page tha way that data are listed is not very good. We would like add more columns, especially the 'related post' column to help us to easily filter the list.
+
+In fact as your application keep the master, you can freeky override any **action** or **template** provided by the CRUD module. For example if we want to customize the 'comments list' view, we just have to provide another **/yabe/app/views/Comments/list.html** template.
+
+The **CRUD** module provide more play commands when it is enabled. The **crud:ov** command help you to override any template. From a command line, type:
+
+bc. $ play crud:ov --template Comments/list
+
+Now you have a new template at **/yabe/app/views/Comments/list.html**:
+
+bc. #{extends 'CRUD/layout.html' /}
+ 
+<div id="crudList" class="${type.name}">
+	
+	<h2 id="crudListTitle">&{'crud.list.title', type.name}</h2>
+ 
+	<div id="crudListSearch">
+		#{crud.search /}
+	</div>
+ 
+	<div id="crudListTable">
+		#{crud.table fields:['content', 'post', 'author'] /}
+	</div>
+ 	
+	<div id="crudListPagination">
+		#{crud.pagination /}
+	</div>
+	
+	<p id="crudListAdd">
+		<a href="@{blank()}">&{'crud.add', type.modelName}</a>
+	</p>
+ 
+</div>
+
+The **#{crud.table /}** actually generates the table. We can customize it using the **fields** parameter to add more columns. Try:
+
+bc. #{crud.table fields:['content', 'post', 'author'] /}
+
+And now we have 3 columns in the table:
+
+!images/guide7-5!
+
+The problem is that the **content** field could be very long for some comments. We will specialize the way that the **#{crud.table /}** handles it to be able to troncate it if needed.
+
+We can specify a custom way to display each field using the **#{crud.custom /}** tag as is:
+
+bc. #{crud.table fields:['content', 'post', 'author']}
+ #{crud.custom 'content'}
+  <a href="@{Comments.show(object.id)}">
+   ${object.content.length() > 50 ? object.content[0..50] + '…' : object.content}
+  </a>
+ #{/crud.custom}
+#{/crud.table}
