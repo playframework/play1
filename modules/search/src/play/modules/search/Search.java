@@ -249,7 +249,7 @@ public class Search {
                 return;
             Model jpaModel = (Model) object;
             String index = object.getClass().getName();
-            indexWriters.get(index).deleteDocuments(new Term("_docID", jpaModel.id+""));
+            getIndexWriter(index).deleteDocuments(new Term("_docID", jpaModel.id+""));
         } catch (Exception e) {
             throw new UnexpectedException (e);
         }
