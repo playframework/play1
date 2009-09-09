@@ -48,6 +48,39 @@ public class JPAController extends Controller {
         show();
     }
     
+    public static void dontReplaceTags() {
+        Post post = Post.all().first();
+        post.tags = new ArrayList();
+        Tag tag = new Tag();
+        tag.name = "Green";
+        post.tags.add(tag);
+        show();
+    }
+    
+    public static void replaceTags() {
+        Post post = Post.all().first();
+        post.tags = new ArrayList();
+        Tag tag = new Tag();
+        tag.name = "Green";
+        post.tags.add(tag);
+        post.save();
+        show();
+    }
+    
+    public static void dontDeleteTags() {
+        Post post = Post.all().first();
+        post.tags = null;
+        show();
+    }
+    
+    public static void deleteTags() {
+        Post post = Post.all().first();
+        post.tags = null;
+        post.save();
+        show();
+    }
+    
+    
     public static void editTags() {
         Post post = Post.all().first();
         post.tags.remove(0);

@@ -31,6 +31,34 @@
     assertTextPresent('Kiki')
     assertTextNotPresent('Blue')
     assertTextPresent('Red')
+    
+    // Don't replace tags
+    open('@{JPAController.dontReplaceTags()}')
+    assertTextPresent('Kiki')
+    assertTextNotPresent('Blue')
+    assertTextPresent('Red')
+    assertTextNotPresent('Green')
+    
+    // Replace tags
+    open('@{JPAController.replaceTags()}')
+    assertTextPresent('Kiki')
+    assertTextNotPresent('Blue')
+    assertTextNotPresent('Red')
+    assertTextPresent('Green')
+    
+    // Don't delete tags
+    open('@{JPAController.dontDeleteTags()}')
+    assertTextPresent('Kiki')
+    assertTextNotPresent('Blue')
+    assertTextNotPresent('Red')
+    assertTextPresent('Green')
+    
+    // Delete tags
+    open('@{JPAController.deleteTags()}')
+    assertTextPresent('Kiki')
+    assertTextNotPresent('Blue')
+    assertTextNotPresent('Red')
+    assertTextNotPresent('Green')
 
 	// Will save
 	open('@{JPAController.index()}')

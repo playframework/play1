@@ -129,7 +129,8 @@ public class Fixtures {
                         serialize((Map) objects.get(key), "object", params);
                         Class cType = Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
-                        Object model = JPASupport.create(cType, "object", params);
+                        JPASupport model = JPASupport.create(cType, "object", params);
+                        model.save();
                         JPA.em().persist(model);
                         idCache.put(type + "-" + id, JPASupport.findKey(model));
                         // Not very good for performance but will avoid outOfMemory

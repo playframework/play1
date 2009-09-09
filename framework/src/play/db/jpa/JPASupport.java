@@ -238,6 +238,7 @@ public class JPASupport implements Serializable {
      */
     public <T extends JPASupport> T delete() {
         try {
+            save();
             em().remove(this);
             PlayPlugin.postEvent("JPASupport.objectDeleted", this);
             return (T) this;

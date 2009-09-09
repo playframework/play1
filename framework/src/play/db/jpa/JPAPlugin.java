@@ -39,15 +39,15 @@ public class JPAPlugin extends PlayPlugin {
             }
             Ejb3Configuration cfg = new Ejb3Configuration();
             cfg.setDataSource(DB.datasource);
-            if(!Play.configuration.getProperty("jpa.ddl", "update").equals("none")) {
+            if (!Play.configuration.getProperty("jpa.ddl", "update").equals("none")) {
                 cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty("jpa.ddl", "update"));
             }
             cfg.setProperty("hibernate.dialect", getDefaultDialect(Play.configuration.getProperty("db.driver")));
             cfg.setProperty("javax.persistence.transaction", "RESOURCE_LOCAL");
-            
+
             // Explicit SAVE for JPASupport is implemented here
             // ~~~~~~
-            // We've hacked the org.hibernate.event.def.AbstractFlushingEventListener line 271, to flush collection update
+            // We've hacked the org.hibernate.event.def.AbstractFlushingEventListener line 271, to flush collection update,remove,recreation
             // only if the owner will be saved.
             // As is:
             // if (session.getInterceptor().onCollectionUpdate(coll, ce.getLoadedKey())) {
@@ -59,7 +59,7 @@ public class JPAPlugin extends PlayPlugin {
 
                 @Override
                 public int[] findDirty(Object o, Serializable id, Object[] arg2, Object[] arg3, String[] arg4, Type[] arg5) {
-                    if(o instanceof JPASupport && !((JPASupport)o).willBeSaved) {
+                    if (o instanceof JPASupport && !((JPASupport) o).willBeSaved) {
                         return new int[0];
                     }
                     return null;
@@ -67,20 +67,44 @@ public class JPAPlugin extends PlayPlugin {
 
                 @Override
                 public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
-                    if(collection instanceof PersistentCollection) {
-                        Object o = ((PersistentCollection)collection).getOwner();
-                        if(o instanceof JPASupport) {
-                            return ((JPASupport)o).willBeSaved;
+                    if (collection instanceof PersistentCollection) {
+                        Object o = ((PersistentCollection) collection).getOwner();
+                        if (o instanceof JPASupport) {
+                            return ((JPASupport) o).willBeSaved;
                         }
                     } else {
-                        System.out.println("HOO: Case not handled !!!");                        
+                        System.out.println("HOO: Case not handled !!!");
                     }
                     return super.onCollectionUpdate(collection, key);
                 }
-                
-                
+
+                @Override
+                public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
+                    if (collection instanceof PersistentCollection) {
+                        Object o = ((PersistentCollection) collection).getOwner();
+                        if (o instanceof JPASupport) {
+                            return ((JPASupport) o).willBeSaved;
+                        }
+                    } else {
+                        System.out.println("HOO: Case not handled !!!");
+                    }
+                    return super.onCollectionRecreate(collection, key);
+                }
+
+                @Override
+                public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException {
+                    if (collection instanceof PersistentCollection) {
+                        Object o = ((PersistentCollection) collection).getOwner();
+                        if (o instanceof JPASupport) {
+                            return ((JPASupport) o).willBeSaved;
+                        }
+                    } else {
+                        System.out.println("HOO: Case not handled !!!");
+                    }
+                    return super.onCollectionRemove(collection, key);
+                }
             });
-            if(Play.configuration.getProperty("jpa.debugSQL", "false").equals("true")) {
+            if (Play.configuration.getProperty("jpa.debugSQL", "false").equals("true")) {
                 org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
             } else {
                 org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.OFF);
@@ -114,7 +138,7 @@ public class JPAPlugin extends PlayPlugin {
     static String getDefaultDialect(String driver) {
         if (driver.equals("org.hsqldb.jdbcDriver")) {
             return "org.hibernate.dialect.HSQLDialect";
-        } else if(driver.equals("com.mysql.jdbc.Driver")) {
+        } else if (driver.equals("com.mysql.jdbc.Driver")) {
             return "play.db.jpa.MySQLDialect";
         } else {
             String dialect = Play.configuration.getProperty("jpa.dialect");
@@ -157,7 +181,7 @@ public class JPAPlugin extends PlayPlugin {
     @Override
     public void invocationFinally() {
         closeTx(true);
-    }    
+    }
 
     /**
      * initialize the JPA context and starts a JPA transaction
@@ -205,6 +229,7 @@ public class JPAPlugin extends PlayPlugin {
                                     break;
                                 }
                             }
+                            e.printStackTrace();
                             throw new JPAException("Cannot commit", e);
                         }
                     }
