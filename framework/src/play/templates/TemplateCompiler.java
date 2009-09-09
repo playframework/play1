@@ -270,6 +270,7 @@ public class TemplateCompiler {
                     tagArgs = "arg:" + tagArgs;
                 }
                 tagArgs = tagArgs.replaceAll("[:]\\s*[@]", ":actionBridge.");
+                tagArgs = tagArgs.replaceAll("(\\s)[@]", "$1actionBridge.");
             } else {
                 tagName = tagText;
                 tagArgs = ":";

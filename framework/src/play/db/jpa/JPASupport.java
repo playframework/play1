@@ -80,13 +80,15 @@ public class JPASupport implements Serializable {
                 if (isEntity) {
                     if (multiple) {
                         Collection l = new ArrayList();
-                        if(field.getType().isAssignableFrom(Set.class)) {
+                        if (field.getType().isAssignableFrom(Set.class)) {
                             l = new HashSet();
                         }
                         String[] ids = params.get(name + "." + field.getName() + "@id");
                         if (ids != null) {
                             for (String _id : ids) {
-                                if(_id.equals("")) continue;
+                                if (_id.equals("")) {
+                                    continue;
+                                }
                                 Query q = JPA.em().createQuery("from " + relation + " where id = ?");
                                 q.setParameter(1, Binder.directBind(_id, findKeyType(Play.classloader.loadClass(relation))));
                                 l.add(q.getSingleResult());
@@ -109,7 +111,7 @@ public class JPASupport implements Serializable {
                     FileAttachment fileAttachment = ((FileAttachment) field.get(o));
                     if (fileAttachment == null) {
                         fileAttachment = new FileAttachment(o, field.getName());
-                        bw.set(field.getName(), o, fileAttachment);              
+                        bw.set(field.getName(), o, fileAttachment);
                     }
                     File file = Params.current().get(name + "." + field.getName(), File.class);
                     if (file != null && file.exists() && file.length() > 0) {
@@ -140,7 +142,14 @@ public class JPASupport implements Serializable {
         }
         avoidCascadeSaveLoops.set(new ArrayList<JPASupport>());
         try {
-            saveAndCascade();
+            saveAndCascade(true);
+        } finally {
+            avoidCascadeSaveLoops.get().clear();
+        }
+        em().flush();
+        avoidCascadeSaveLoops.set(new ArrayList<JPASupport>());
+        try {
+            saveAndCascade(false);
         } finally {
             avoidCascadeSaveLoops.get().clear();
         }
@@ -148,8 +157,8 @@ public class JPASupport implements Serializable {
     }
     static transient ThreadLocal<List<JPASupport>> avoidCascadeSaveLoops = new ThreadLocal<List<JPASupport>>();
 
-    private void saveAndCascade() {
-        willBeSaved = true;
+    private void saveAndCascade(boolean willBeSaved) {
+        this.willBeSaved = willBeSaved;
         if (avoidCascadeSaveLoops.get().contains(this)) {
             return;
         } else {
@@ -160,7 +169,7 @@ public class JPASupport implements Serializable {
         try {
             for (Field field : this.getClass().getDeclaredFields()) {
                 field.setAccessible(true);
-                if(Modifier.isTransient(field.getModifiers())) {
+                if (Modifier.isTransient(field.getModifiers())) {
                     continue;
                 }
                 boolean doCascade = false;
@@ -185,7 +194,7 @@ public class JPASupport implements Serializable {
                         if (((PersistentCollection) value).wasInitialized()) {
                             for (Object o : (Collection) value) {
                                 if (o instanceof JPASupport) {
-                                    ((JPASupport) o).saveAndCascade();
+                                    ((JPASupport) o).saveAndCascade(willBeSaved);
                                 }
                             }
                         }
@@ -193,12 +202,12 @@ public class JPASupport implements Serializable {
                     }
                     if (value instanceof HibernateProxy && value instanceof JPASupport) {
                         if (!((HibernateProxy) value).getHibernateLazyInitializer().isUninitialized()) {
-                            ((JPASupport) ((HibernateProxy) value).getHibernateLazyInitializer().getImplementation()).saveAndCascade();
+                            ((JPASupport) ((HibernateProxy) value).getHibernateLazyInitializer().getImplementation()).saveAndCascade(willBeSaved);
                         }
                         continue;
                     }
                     if (value instanceof JPASupport) {
-                        ((JPASupport) value).saveAndCascade();
+                        ((JPASupport) value).saveAndCascade(willBeSaved);
                         continue;
                     }
                 }
@@ -238,8 +247,20 @@ public class JPASupport implements Serializable {
      */
     public <T extends JPASupport> T delete() {
         try {
-            save();
+            avoidCascadeSaveLoops.set(new ArrayList<JPASupport>());
+            try {
+                saveAndCascade(true);
+            } finally {
+                avoidCascadeSaveLoops.get().clear();
+            }
             em().remove(this);
+            em().flush();
+            avoidCascadeSaveLoops.set(new ArrayList<JPASupport>());
+            try {
+                saveAndCascade(false);
+            } finally {
+                avoidCascadeSaveLoops.get().clear();
+            }
             PlayPlugin.postEvent("JPASupport.objectDeleted", this);
             return (T) this;
         } catch (Throwable e) {
@@ -438,9 +459,9 @@ public class JPASupport implements Serializable {
                 throw new IllegalArgumentException("Error while executing query <strong>" + sq + "</strong>", e);
             }
         }
-        
+
         public <T> T first() {
-            return (T)one();
+            return (T) one();
         }
 
         /**
@@ -490,7 +511,7 @@ public class JPASupport implements Serializable {
                 throw new IllegalArgumentException("Error while executing query <strong>" + sq + "</strong>", e);
             }
         }
-        
+
         /**
          * Set the position to start
          * @param position Position of the first element
@@ -500,7 +521,7 @@ public class JPASupport implements Serializable {
             query.setFirstResult(position);
             return this;
         }
-        
+
         /**
          * Try fetch(page, length);
          */
@@ -517,7 +538,7 @@ public class JPASupport implements Serializable {
                 throw new IllegalArgumentException("Error while executing query <strong>" + sq + "</strong>", e);
             }
         }
-        
+
         /**
          * Retrieve a page of result
          * @param from Page number (start at 1)
@@ -616,9 +637,9 @@ public class JPASupport implements Serializable {
     @PostUpdate
     public void onSave() {
         saveAttachment();
-    }    
-        
+    }
+
     private Session rawSession() {
-        return ((HibernateEntityManager)em()).getSession();
+        return ((HibernateEntityManager) em()).getSession();
     }
 }

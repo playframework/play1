@@ -12,6 +12,7 @@ import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
+import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.type.Type;
 import play.Logger;
 import play.Play;
@@ -229,8 +230,7 @@ public class JPAPlugin extends PlayPlugin {
                                     break;
                                 }
                             }
-                            e.printStackTrace();
-                            throw new JPAException("Cannot commit", e);
+                           throw new JPAException("Cannot commit", e);
                         }
                     }
                 }

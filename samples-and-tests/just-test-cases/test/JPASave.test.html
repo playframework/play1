@@ -93,8 +93,8 @@
 	
 	// Create and edit
 	open('@{JPAController.createAndEdit('Toto3', 'New toto3')}')
-	assertTextNotPresent('Toto3')	
-	assertTextPresent('New toto3')
+	assertTextPresent('Toto3')	
+	assertTextNotPresent('New toto3')
 	
 	// Create and edit and save
 	open('@{JPAController.createAndEditAndSave('Toto4', 'New toto4')}')

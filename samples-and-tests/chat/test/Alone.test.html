@@ -26,8 +26,10 @@
 	// Hop two more messages
 	type('message', 'Im bob !')
 	keyPress('message', '\13')
+	pause(3000)
 	type('message', 'Anyone here ?')
 	keyPress('message', '\13')
+	pause(3000)
 	
 	// Wait the message
 	waitForTextPresent('Im bob !')

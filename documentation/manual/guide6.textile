@@ -40,7 +40,7 @@ h2. <a>Tagging posts</a>
 Now it's time to link the new Tag model with the Post one. Let's add the correct relation to the Post class:
 
 bc. ...
-@ManyToMany(cascade=CascadeType.ALL)
+@ManyToMany(cascade=CascadeType.PERSIST)
 public Set<Tag> tags = new HashSet();
 ...
 
@@ -84,8 +84,8 @@ public void testTags() {
     assertEquals(0, Post.findTaggedWith("Red").size());
     
     // Tag it now
-    bobPost.tagItWith("Red").tagItWith("Blue");
-    anotherBobPost.tagItWith("Red").tagItWith("Green");
+    bobPost.tagItWith("Red").tagItWith("Blue").save();
+    anotherBobPost.tagItWith("Red").tagItWith("Green").save();
     
     // Check
     assertEquals(2, Post.findTaggedWith("Red").size());        
