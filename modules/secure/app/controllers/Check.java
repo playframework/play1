@@ -9,8 +9,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface Check {
 
-    public enum Type {AND, OR};
-
     String[] value();
-    Type type() default Type.OR;
 }

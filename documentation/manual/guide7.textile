@@ -1,13 +1,12 @@
 h1. Setting up a basic administration area using CRUD
 
-For now we have now way to create new blog posts are monitorate comments using the blog UI. Play provides an out of the box **CRUD** module that help
-you to quickly generate a basic administration area.
+For now we have now way to create new blog posts are monitorate comments using the blog UI. Play provides an out of the box **CRUD** module that will help  to quickly generate a basic administration area.
 
 h2. <a>Enabling the CRUD module</a>
 
 A play application can be assembled from several application modules. This allows you to reuse application components across several application or split a large application into several smaller applications.
 
-The CRUD module is a generic application that introspect your model classes to create simple list and form.
+The CRUD module is a generic application that introspects the model classes to create simple list and form.
 
 To enable the CRUD module, you have to add this line to the **/yabe/conf/application.conf** file:
 
@@ -104,6 +103,7 @@ public class User extends Model {
     public String password;
     
     public String fullname;
+    public boolean isAdmin;
     
 ...
 
@@ -277,3 +277,83 @@ bc. #{crud.table fields:['content', 'post', 'author']}
   </a>
  #{/crud.custom}
 #{/crud.table}
+
+h2. <a>Customizing the 'Post' form</a>
+
+We can customize the generated forms as well. For example, the way we enter tags in the Post form is not really easy. We could build something better. Let's override the **Posts/show** template:
+
+bc. $ play crud:ov --template Posts/edit
+
+Now you have a new template at **/yabe/app/views/Posts/show.html**:
+
+bc. #{extends 'CRUD/layout.html' /}
+ 
+<div id="crudShow" class="${type.name}">
+	
+<h2 id="crudShowTitle">&{'crud.show.title', type.modelName}</h2>
+ 
+<div class="objectForm">
+#{form action:@save(object.id), enctype:'multipart/form-data'}
+    #{crud.form /}
+    <p class="crudButtons">
+        <input type="submit" name="_save" value="&{'crud.save', type.modelName}" />
+        <input type="submit" name="_saveAndContinue" value="&{'crud.saveAndContinue', type.modelName}" />
+    </p>
+#{/form}
+</div>
+ 
+#{form @delete(object.id)}
+    <p class="crudDelete">
+        <input type="submit" value="&{'crud.delete', type.modelName}" />
+    </p>
+#{/form}
+ 
+</div>
+
+You can hack the **#{crud.form /}** tag the make the **tags** field custom:
+
+bc. #{crud.form}
+    #{crud.custom 'tags'}
+        <label for="tags">
+            &{'tags'}
+        </label>
+        <style type="text/css">
+	        .tags-list .tag {
+	            cursor: pointer;
+	            padding: 1px 4px;
+	        }
+	        .tags-list .selected {
+	            background: #222;
+	            color: #fff;
+	        }
+	    </style>
+	    <script type="text/javascript">
+	        var toggle = function(tagEl) {
+	            var input = document.getElementById('h'+tagEl.id);
+	            if(tagEl.className.indexOf('selected') > -1) {
+	                tagEl.className = 'tag';
+	                input.value = '';
+	            } else {
+	                tagEl.className = 'tag selected';
+	                input.value = tagEl.id;
+	            }
+	        }
+	    </script>
+	    <div class="tags-list">
+	        #{list items:models.Tag.findAll(), as:'tag'}
+	           <span id="${tag.id}" onclick="toggle(this)" 
+	                class="tag ${object.tags.contains(tag) ? 'selected' : ''}">
+	               ${tag}
+	           </span> 
+	           <input id="h${tag.id}" type="hidden" name="${fieldName}" 
+	                    value="${object.tags.contains(tag) ? tag.id : ''}" />
+	        #{/list}
+	    </div>
+    #{/crud.custom}
+#{/crud.form}
+
+Well this is a little hacky and we could do better here, but we have now a simpler tags selector using a little bit of javascript:
+
+!images/guide7-6!
+
+p(note). Go to the "next part":guide8. 

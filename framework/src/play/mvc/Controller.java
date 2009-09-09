@@ -412,9 +412,24 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
      * @return Annotation object or null if not found
      */
     protected static <T extends Annotation> T getControllerAnnotation(Class<T> clazz) {
-        Method m = (Method) ActionInvoker.getActionMethod(Http.Request.current().action)[1];
-        if (m.getDeclaringClass().isAnnotationPresent(clazz)) {
-            return m.getDeclaringClass().getAnnotation(clazz);
+        if (getControllerClass().isAnnotationPresent(clazz)) {
+            return (T)getControllerClass().getAnnotation(clazz);
+        }
+        return null;
+    }
+    
+    /**
+     * Retrieve annotation for the controller class
+     * @param clazz The annotation class
+     * @return Annotation object or null if not found
+     */
+    protected static <T extends Annotation> T getControllerInheritedAnnotation(Class<T> clazz) {
+        Class c = getControllerClass();
+        while(!c.equals(Object.class)) {
+            if (c.isAnnotationPresent(clazz)) {
+                return (T)c.getAnnotation(clazz);
+            }
+            c = c.getSuperclass();
         }
         return null;
     }

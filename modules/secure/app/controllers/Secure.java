@@ -22,7 +22,7 @@ public class Secure extends Controller {
         if(check != null) {
             check(check);
         }
-        check = getControllerAnnotation(Check.class);
+        check = getControllerInheritedAnnotation(Check.class);
         if(check != null) {
             check(check);
         }
@@ -31,11 +31,8 @@ public class Secure extends Controller {
     private static void check(Check check) throws Throwable {
         for(String profile : check.value()) {
             boolean hasProfile = (Boolean)Security.invoke("check", profile);
-            if(!hasProfile && check.type() == Check.Type.AND) {
+            if(!hasProfile) {
                 Security.invoke("onCheckFailed", profile);
-            }
-            if(hasProfile && check.type() == Check.Type.OR) {
-                return;
             }
         }
     }

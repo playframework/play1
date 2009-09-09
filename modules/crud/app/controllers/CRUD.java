@@ -275,6 +275,9 @@ public abstract class CRUD extends Controller {
         public List<ObjectField> getFields() {
             List fields = new ArrayList();
             for (Field f : entityClass.getFields()) {
+                if(Modifier.isTransient(f.getModifiers())) {
+                    continue;
+                }
                 ObjectField of = new ObjectField(f);
                 if (of.type != null) {
                     fields.add(of);
@@ -318,7 +321,7 @@ public abstract class CRUD extends Controller {
                 if (Number.class.isAssignableFrom(field.getType()) || field.getType().equals(double.class) || field.getType().equals(int.class) || field.getType().equals(long.class)) {
                     type = "number";
                 }
-                if (Boolean.class.isAssignableFrom(field.getType())) {
+                if (Boolean.class.isAssignableFrom(field.getType()) || field.getType().equals(boolean.class)) {
                     type = "boolean";
                 }
                 if (Date.class.isAssignableFrom(field.getType())) {

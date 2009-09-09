@@ -64,7 +64,7 @@ public class JPASupport implements Serializable {
             for (Field field : o.getClass().getDeclaredFields()) {
                 boolean isEntity = false;
                 String relation = null;
-                boolean multiple = false;
+                boolean multiple = false;                
                 //
                 if (field.isAnnotationPresent(OneToOne.class) || field.isAnnotationPresent(ManyToOne.class)) {
                     isEntity = true;

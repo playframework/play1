@@ -1,0 +1,66 @@
+h1. Add authentication
+
+Now that we have an administration area we need to plug in some authentication. Fortunaly play has a module for that. It's called the **Secure** module.
+
+h2. <a>Enabling the secure module</a>
+
+As for the **CRUD* module we have to enable it in the **yabe/conf/application.conf** file and restart the application.
+
+bc. # Import the secure module
+module.secure=${play.path}/modules/secure
+
+After the restart, play should tell that the module is loaded.
+
+The **Secure** module comes with a set of default routes that you can easily enable in the **yabe/conf/routes** file (or we could define our own routes as well):
+
+bc. # Import Secure routes
+*       /                                       module:secure
+
+h2. <a>Protecting the admins controllers</a>
+
+In fact this module provides a **controllers.Secure** controller that declare all needed interceptor. Of course we could just inherit this controller but because Java is limited to simple inheritance it would be problematic.
+
+Instead of directly inherit the **Secure** controller, we can annotate the admin controllers using the **@With** annotation to tell play to invoke the corresponding interceptors as well:
+
+bc. package controllers;
+ 
+import play.*;
+import play.mvc.*;
+ 
+@With(Secure.class)
+public class Posts extends CRUD {    
+}
+
+Do the same for the **Comments**, **Users** and **Tags** controller.
+
+Now if you try to access any admin action, you should get a login page:
+
+!images/guide8-1!
+
+In fact for now you can try any login/password pair, it will just work.
+
+h2. <a>Customizing the authentication process</a>
+
+The application has to provide an instance of **controllers.Secure.Security** to customize the authentication process. By creating our own version of this class we will be able to specify exactly how users should be authenticated.
+
+Create a **yabe/controllers/Security.java** file and override the **authentify()** method:
+
+bc. package controllers;
+ 
+import models.*;
+ 
+public class Security extends Secure.Security {
+ 
+    static boolean authentify(String username, String password) {
+        return true;
+    }
+    
+}
+
+As we already have the User objects part of the blog model, it is easy to implement a working version of this method;
+
+bc. static boolean authentify(String username, String password) {
+    return User.connect(username, password) != null;
+}
+
+Now you can try on of the user imported in **initial-data.yml** file, like **bob@gmail.com/secret**.

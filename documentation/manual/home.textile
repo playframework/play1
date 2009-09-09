@@ -27,9 +27,9 @@ Learn play by coding 'Yet Another Blog Engine', from start to finish. Each chapt
 # "Setting up a Captcha":guide5
 # "Add tagging support":guide6
 # "A basic admin area using CRUD":guide7
-# "Add basic security":guide8
-# "Better content using Textile":guide9
+# "Adding authentication and preparing the admin area":guide8
 # "Creating a custom editor area":guide10
+# "Better content using Textile":guide9
 # "The media library":guide11
 # "More fun with the Flickr API":guide12
 # "Sending emails notifications":guide13
