@@ -27,7 +27,7 @@ public class Post extends Model {
     @OneToMany(mappedBy="post", cascade=CascadeType.ALL)
     public List<Comment> comments = new ArrayList();
     
-    @ManyToMany(cascade=CascadeType.ALL)
+    @ManyToMany(cascade=CascadeType.PERSIST)
     public Set<Tag> tags = new HashSet();
     
     public Post(User author, String title, String content) {

@@ -210,7 +210,7 @@ public class JPASupport implements Serializable {
 
     static boolean cascadeAll(CascadeType[] types) {
         for (CascadeType cascadeType : types) {
-            if (cascadeType == CascadeType.ALL) {
+            if (cascadeType == CascadeType.ALL || cascadeType == CascadeType.PERSIST) {
                 return true;
             }
         }
