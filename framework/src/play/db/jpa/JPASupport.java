@@ -20,6 +20,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PersistenceException;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostUpdate;
@@ -27,6 +28,7 @@ import javax.persistence.Query;
 import org.hibernate.Session;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.HibernateEntityManager;
+import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.proxy.HibernateProxy;
 import play.Play;
 import play.PlayPlugin;
@@ -64,7 +66,7 @@ public class JPASupport implements Serializable {
             for (Field field : o.getClass().getDeclaredFields()) {
                 boolean isEntity = false;
                 String relation = null;
-                boolean multiple = false;                
+                boolean multiple = false;
                 //
                 if (field.isAnnotationPresent(OneToOne.class) || field.isAnnotationPresent(ManyToOne.class)) {
                     isEntity = true;
@@ -146,7 +148,13 @@ public class JPASupport implements Serializable {
         } finally {
             avoidCascadeSaveLoops.get().clear();
         }
-        em().flush();
+        try {
+            em().flush();
+        } catch (PersistenceException e) {
+            if (e.getCause() instanceof GenericJDBCException) {
+                throw new PersistenceException(((GenericJDBCException) e.getCause()).getSQL());
+            }
+        }
         avoidCascadeSaveLoops.set(new ArrayList<JPASupport>());
         try {
             saveAndCascade(false);
@@ -254,7 +262,13 @@ public class JPASupport implements Serializable {
                 avoidCascadeSaveLoops.get().clear();
             }
             em().remove(this);
-            em().flush();
+            try {
+                em().flush();
+            } catch (PersistenceException e) {
+                if (e.getCause() instanceof GenericJDBCException) {
+                    throw new PersistenceException(((GenericJDBCException) e.getCause()).getSQL());
+                }
+            }
             avoidCascadeSaveLoops.set(new ArrayList<JPASupport>());
             try {
                 saveAndCascade(false);
@@ -263,6 +277,8 @@ public class JPASupport implements Serializable {
             }
             PlayPlugin.postEvent("JPASupport.objectDeleted", this);
             return (T) this;
+        } catch (PersistenceException e) {
+            throw e;
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
