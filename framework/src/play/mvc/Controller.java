@@ -390,6 +390,13 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
         } else {
             templateName = Http.Request.current().action.replace(".", "/") + "." + (Http.Request.current().format == null ? "html" : Http.Request.current().format);
         }
+        if(templateName.startsWith("@")) {
+            templateName = templateName.substring(1);
+            if(!templateName.contains(".")) {
+                templateName = Http.Request.current().controller + "." + templateName;
+            }
+            templateName = templateName.replace(".", "/") + "." + (Http.Request.current().format == null ? "html" : Http.Request.current().format);
+        }
         renderTemplate(templateName, args);
     }
 
