@@ -3,7 +3,7 @@ package controllers;
 import play.*;
 import play.mvc.*;
 
-@Check("isAdmin")
+@Check("admin")
 @With(Secure.class)
 public class Users extends CRUD {    
 }

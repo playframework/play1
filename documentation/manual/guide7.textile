@@ -217,6 +217,7 @@ name=Common name
 email=Email
 password=Password
 fullname=Full name
+isAdmin=User is admin
 
 Then refresh any form, and you will see the new form labels:
 

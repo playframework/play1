@@ -9,7 +9,8 @@ GET     /posts/{tag}                            Application.listTagged
 POST    /posts/{<[0-9]+>postId}/comments        Application.postComment
 GET     /captcha                                Application.captcha
 
-# Import CRUD routes
+# Adminstration
+GET     /admin                                  Admin.index
 *       /admin                                  module:crud
 
 # Import Secure routes

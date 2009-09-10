@@ -9,7 +9,7 @@ GET			/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring
 GET			/${type.controllerName}/{<\d+>id}/{field}		${type.controllerClass.name.substring(12)}.attachment
 GET			/${type.controllerName}/{<\d+>id}/edit			${type.controllerClass.name.substring(12)}.edit
 POST		/${type.controllerName}							${type.controllerClass.name.substring(12)}.create
-PUT			/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12)}.save
+POST		/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12)}.save
 DELETE		/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12)}.delete 
 #{/crud.types}
 GET			/												CRUD.index

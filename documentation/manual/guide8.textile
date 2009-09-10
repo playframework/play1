@@ -1,4 +1,4 @@
-h1. Add authentication
+h1. Adding authentication and preparing the admin area
 
 Now that we have an administration area we need to plug in some authentication. Fortunaly play has a module for that. It's called the **Secure** module.
 
@@ -64,3 +64,249 @@ bc. static boolean authentify(String username, String password) {
 }
 
 Now you can try on of the user imported in **initial-data.yml** file, like **bob@gmail.com/secret**.
+
+h2. <a>Refactoring the administration area</a>
+
+We've started the administration area using the CRUD module, but it is not yet well integrated with the blog UI. We will start to work for a new administration area. This one will give each author the access to his own posts. The full-featured administration using CRUD will still be available for super administrator users.
+
+Let's create a new **Admin** controller for the administration part:
+
+bc.  package controllers;
+ 
+import play.*;
+import play.mvc.*;
+ 
+import java.util.*;
+ 
+import models.*;
+ 
+@With(Secure.class)
+public class Admin extends Controller {
+    
+    @Before
+    static void setConnectedUser() {
+        if(Security.isConnected()) {
+            User user = User.find("byEmail", Security.connected()).first();
+            renderArgs.put("user", user.fullname);
+        }
+    }
+ 
+    public static void index() {
+        render();
+    }
+    
+}
+
+And refactor the routes definition in **yabe/conf/routes**:
+
+bc. # Administration
+GET     /admin                                  Admin.index
+*       /admin                                  module:crud
+
+Now link the 'Log in to write something' text from the **yabe/app/views/main.html** template to this controller:
+
+bc. ...
+<ul id="tools">
+    <li>
+        <a href="@{Admin.index()}">Log in to write something</a>
+    </li>
+</ul>
+...
+
+The last thing to make all this new stuff work is to create the **yabe/app/views/Admin/index.html** template. Let's start with something simple:
+
+bc. Welcome ${user} !
+
+Now, go to the blog home page, click the 'Log in to write something' link and you should get the new administration area:
+
+!images/guide8-2!
+
+Good start! But as we will have several pages in this administration area we need a super template. Let's create it in the **yabe/app/views/main.html** file:
+
+bc. <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+ 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <title>Administration</title>		
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        #{get 'moreStyles' /}	
+        <link rel="stylesheet" type="text/css" media="screen" 
+                href="@{'/public/stylesheets/main.css'}" />
+        <link rel="shortcut icon" type="image/png" 
+                href="@{'/public/images/favicon.png'}" />
+        <script src="@{'/public/javascripts/jquery-1.3.2.min.js'}"></script>
+        <script src="@{'/public/javascripts/jquery.tools.min.js'}"></script>
+    </head>
+    <body>
+        
+        <div id="header">
+            <div id="logo">
+                yabe. <span>administration</span>
+            </div>
+            <ul id="tools">
+                <li>
+                    <a href="@{Secure.logout()}">Log out</a>
+                </li>
+            </ul>
+        </div>
+        
+        <div id="main">
+            #{doLayout /} 
+        </div>
+        
+        <p id="footer">
+            Yabe is a (not so) powserfull blog engine built with the 
+            <a href="http://www.playframework.org">play framework</a>
+            as a tutorial application.
+        </p>
+        
+    </body>
+</html>
+
+As you see, it is very close to the template used for the front part of the blog engine. You have replaced to **Log in** link by a **Log out** link that call the **logout** action of the **Secure** controller provided by the secure module.
+
+Now let's use it in the **yabe/app/views/Admin/index.html** template:
+
+bc. #{extends 'admin.html' /}
+ 
+Welcome ${user} !
+
+And refresh!
+
+!images/guide8-3!
+
+Ok. If you try the **log out** link it will send you back to the login form:
+
+!images/guide8-4!
+
+That's the default way for the secure module to handle log out events. But it is easily customizable by just overriding the **onDisconnected()** method in the **controllers.Security** class:
+
+bc. static void onDisconnected() {
+    Application.index();
+}
+
+Yet, you can do the same for the **onAuthenticated()** event:
+
+bc. static void onAuthenticated() {
+    Admin.index();
+}
+
+h2. <a>Adding roles</a>
+
+Well in fact we need two administration area, one for simple editors and another one for super administrator. As you seen the **User** model object has a **isAdmin** field that tell if the user has super administrator rights.
+
+The secure module does not only provide **authentication** but **authorization** management too. It's called **profiles**. To create an **admin** profile, you just need to override the **check()** method in the **controllers.Security** class:
+
+bc. static boolean check(String profile) {
+    if("admin".equals(profile)) {
+        return User.find("byEmail", connected()).<User>first().isAdmin;
+    }
+    return false;
+}
+
+Now we can build an administration menu that depend of the user role. Update the **yabe/views/main.html** to integrate a top level menu:
+
+bc. ...
+<div id="main">
+    
+    <ul id="adminMenu">
+        <li class="${request.controller == 'Admin' ? 'selected' : ''}">
+            <a href="@{Admin.index()}">My posts</a>
+        </li>
+        #{secure.check 'admin'}
+            <li class="${request.controller == 'Posts' ? 'selected' : ''}">
+                <a href="@{Posts.list()}">Posts</a>
+            </li>
+            <li class="${request.controller == 'Tags' ? 'selected' : ''}">
+                <a href="@{Tags.list()}">Tags</a>
+            </li>
+            <li class="${request.controller == 'Comments' ? 'selected' : ''}">
+                <a href="@{Comments.list()}">Comments</a>
+            </li>
+            <li class="${request.controller == 'Users' ? 'selected' : ''}">
+                <a href="@{Users.list()}">Users</a>
+            </li>
+        #{/secure.check}
+    </ul>
+    
+    #{doLayout /} 
+</div>
+...
+
+Look have we have used the **#{secure.check /}** tag to show part of the menu only to **admin** users.
+
+!images/guide8-5!
+
+But it's not enough to correctly protect the CRUD part! If a user know the URL he can still access it. We have to protect controllers as well. We can do it easily using the **@Check** annotation. For example, for the **Posts** controller:
+
+bc. package controllers;
+ 
+import play.*;
+import play.mvc.*;
+ 
+@Check("admin")
+@With(Secure.class)
+public class Posts extends CRUD {    
+}
+
+Do the same for the **Tags**, **Comments** and **Users** controllers. Now try to log out and log in again with a standard user (like **jeff@gmail.com/secret**). You should not see the CRUD admin links. And if you try to acces directly the **http://localhost:9000/admin/users** URL you will get a 403 response.
+
+!images/guide8-6!
+
+h2. <a>Customizing the CRUD layout</a>
+
+That's fun but when we go to CRUD part of the administration area, we lost the administration layout. That is because the CRUD module provides it own layout. But we can of course override it. Use this play command:
+
+bc. play crud:ov --layout
+
+And you get a new **/yabe/app/views/CRUD/layout.html** template. Let's replace it content to integrate it nicely with our **admin.html** layout:
+
+bc. #{extends 'admin.html' /}
+#{set 'moreStyles'}
+    <link rel="stylesheet" type="text/css" media="screen" 
+        href="@{'/public/stylesheets/crud.css'}" />
+#{/set}
+ 
+<div id="crud">
+ 
+    #{if flash.success}
+    	<div class="crudFlash flashSuccess">
+    		${flash.success}
+    	</div>
+    #{/if}
+    #{if flash.error || error}
+    	<div class="crudFlash flashError">
+    		${error ?: flash.error}
+    	</div>
+    #{/if}
+ 
+    <div id="crudContent">
+    	#{doLayout /}
+    </div>
+ 
+</div>
+
+As you see you reuse the **crud.css** and include it in the **admin.html** using the **get/set** template variables mechanism. Now if you try the CRUD part of the administration area, it is correctly integrated with the administration layout:
+
+!images/guide8-7!
+
+h2. <a>Styling the login page</a>
+
+The administration area is almost graphicaly coherent now. The last thing to style is the login page. As always it is easily customizable by overriding the default css:
+
+bc. play secure:ov --css
+
+We will just keep the CSS as is, but import our **main.css** at the top. Just add this first line to the **yabe/public/stylesheets/secure.css**:
+
+bc. @import url(main.css);
+...
+
+And customize the login screen messages, by adding these lines to your own **yabe/conf/messages** file:
+
+bc. secure.username=Your email:
+secure.password=Your password:
+secure.signin=Log in now
+
+!images/guide8-8!
+
+p(note). Go to the "next part":guide9. 
