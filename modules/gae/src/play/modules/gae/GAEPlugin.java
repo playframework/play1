@@ -166,6 +166,6 @@ public class GAEPlugin extends PlayPlugin {
             Play.configuration.remove("smtp.mock");
             Play.configuration.setProperty("application.log", "DEBUG");
         }
-        Play.configuration.setProperty("upload.threshold", "11000000");
+        Play.configuration.setProperty("upload.threshold", Integer.MAX_VALUE + "");
     }
 }

@@ -58,6 +58,10 @@ public class Upload {
             throw new UnexpectedException(ex);
         }
     }
+    
+    public String getContentType() {
+        return fileItem.getContentType();
+    }
 
     public String getFileName() {
         return fileItem.getName();
