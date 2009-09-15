@@ -11,6 +11,10 @@ GET     /captcha                                Application.captcha
 
 # Adminstration
 GET     /admin                                  Admin.index
+GET     /admin/myPosts/{id}                     Admin.form
+POST    /admin/myPosts/{id}                     Admin.save
+GET     /admin/new                              Admin.form
+POST    /admin/new                              Admin.save
 *       /admin                                  module:crud
 
 # Import Secure routes

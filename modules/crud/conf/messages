@@ -25,6 +25,7 @@ crud.delete=Delete &{%s}
 crud.created=The &{%s} has been created
 crud.saved=The &{%s} has been saved
 crud.deleted=The &{%s} has been deleted
+crud.delete.error=Cannot delete this object
 crud.search=Search
 crud.none=(None)
 

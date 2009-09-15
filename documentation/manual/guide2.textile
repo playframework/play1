@@ -268,7 +268,15 @@ You see that the navigation between Post and Comments is not very easy because w
 
 bc. ...
 @OneToMany(mappedBy="post", cascade=CascadeType.ALL)
-public List<Comment> comments = new ArrayList();;
+public List<Comment> comments;
+ 
+public Post(User author, String title, String content) { 
+    this.comments = new ArrayList<Comment>();
+    this.author = author;
+    this.title = title;
+    this.content = content;
+    this.postedAt = new Date();
+}
 ...
 
 Note how we have used the mappedBy attribute to tell JPA that the Post class maintains the relation. When you define bi-directional relation with JPA it is very important to tell wich side will maintain the relation. In this case, because the Comments belong to the Post it is better that the Comment class maintains the relation. 

@@ -18,7 +18,7 @@ Your first steps with play and your first 5 minutes of fun.
 
 h2. <a name="guide">Tutorial -- Play guide, a real world app step by step</a>
 
-Learn play by coding 'Yet Another Blog Engine', from start to finish. Each chapter will be occasion to learn one more cool play feature.
+Learn play by coding **'Yet Another Blog Engine'**, from start to finish. Each chapter will be occasion to learn one more cool play feature.
 
 # "Starting up the project":guide1
 # "A first iteration of the data model":guide2
@@ -27,12 +27,12 @@ Learn play by coding 'Yet Another Blog Engine', from start to finish. Each chapt
 # "Setting up a Captcha":guide5
 # "Add tagging support":guide6
 # "A basic admin area using CRUD":guide7
-# "Adding authentication and preparing the admin area":guide8
+# "Adding authentication":guide8
 # "Creating a custom editor area":guide9
-# "The media library":guide10
+# "Building a media library":guide10
 # "More fun with the Flickr API":guide11
 # "Sending emails notifications":guide12
-# "A search engine":guide13
+# "Now with a search engine":guide13
 # "Writing the UI tests":guide14
 # "Preparing for production":guide15
 

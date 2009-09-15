@@ -658,4 +658,5 @@ public class JPASupport implements Serializable {
     private Session rawSession() {
         return ((HibernateEntityManager) em()).getSession();
     }
+
 }

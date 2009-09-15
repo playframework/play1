@@ -87,7 +87,7 @@ public class PropertiesEnhancer extends Enhancer {
                 }
             }
             if (!hasDefaultConstructor) {
-                CtConstructor defaultConstructor = CtNewConstructor.make("public " + ctClass.getSimpleName() + "() {}", ctClass);
+                CtConstructor defaultConstructor = CtNewConstructor.defaultConstructor(ctClass);
                 ctClass.addConstructor(defaultConstructor);
             }
         } catch (Exception e) {

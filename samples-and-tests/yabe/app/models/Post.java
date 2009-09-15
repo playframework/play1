@@ -25,12 +25,14 @@ public class Post extends Model {
     public User author;
     
     @OneToMany(mappedBy="post", cascade=CascadeType.ALL)
-    public List<Comment> comments = new ArrayList();
+    public List<Comment> comments;
     
     @ManyToMany(cascade=CascadeType.PERSIST)
-    public Set<Tag> tags = new HashSet();
+    public Set<Tag> tags;
     
-    public Post(User author, String title, String content) {
+    public Post(User author, String title, String content) { 
+        this.comments = new ArrayList<Comment>();
+        this.tags = new TreeSet();  
         this.author = author;
         this.title = title;
         this.content = content;

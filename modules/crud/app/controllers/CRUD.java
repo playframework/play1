@@ -126,7 +126,12 @@ public abstract class CRUD extends Controller {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         JPASupport object = type.findById(id);
-        object.delete();
+        try {
+            object.delete();            
+        } catch(Exception e) {
+            flash.error(Messages.get("crud.delete.error", type.name, object.getEntityId()));
+            redirect(request.controller + ".show", object.getEntityId());
+        }
         flash.success(Messages.get("crud.deleted", type.name, object.getEntityId()));
         redirect(request.controller + ".list");
     }

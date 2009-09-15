@@ -14,12 +14,20 @@ import javax.persistence.*;
 import play.db.jpa.*;
  
 @Entity
-public class Tag extends Model {
+public class Tag extends Model implements Comparable<Tag> {
  
     public String name;
     
+    private Tag(String name) {
+        this.name = name;
+    }
+    
     public String toString() {
         return name;
+    }
+    
+    public int compareTo(Tag otherTag) {
+        return name.compareTo(otherTag.name);
     }
  
 }
@@ -29,8 +37,7 @@ Because we want something like lazy tags creation we will always get them using 
 bc. public static Tag findOrCreateByName(String name) {
     Tag tag = Tag.find("byName", name).one();
     if(tag == null) {
-        tag = new Tag().save();
-        tag.name = name;
+        tag = new Tag(name);
     }
     return tag;
 }
@@ -41,7 +48,16 @@ Now it's time to link the new Tag model with the Post one. Let's add the correct
 
 bc. ...
 @ManyToMany(cascade=CascadeType.PERSIST)
-public Set<Tag> tags = new HashSet();
+public Set<Tag> tags;
+    
+public Post(User author, String title, String content) { 
+    this.comments = new ArrayList<Comment>();
+    this.tags = new TreeSet<Tag>();
+    this.author = author;
+    this.title = title;
+    this.content = content;
+    this.postedAt = new Date();
+}
 ...
 
 We will keep this relation unidirectional.

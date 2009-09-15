@@ -1,0 +1,129 @@
+h1. Creating a custom editor area
+
+In the previous part we have a created an adminstration area for yabe and prepared the 'My posts' section. This page will give each author a list of his own posts, and the ability to edit them or create a new one as well.
+
+We could easily reuse the CRUD module as start for this page but here we will create something from scratch. We need a lot of personalization on these screens.
+
+h2. <a>Start with the user posts list</a>
+
+We just need to retrieve and display the posts written by the connected user. Very easy. Start to enhance the **Admin.index** action:
+
+bc. public static void index() {
+    List<Post> posts = Post.find("author.email", Security.connected()).fetch();
+    render(posts);
+}
+
+And complete the **yabe/app/views/Admin/index.html**:
+
+bc. #{extends 'admin.html' /}
+ 
+<h3>Welcome ${user}, <span>you have written ${posts.size() ?: 'no'} ${posts.pluralize('post', 'posts')} so far</span></h3>
+ 
+#{list items:posts, as:'post'}
+    <p class="post ${post_parity}">
+        <a href="#">${post.title}</a>
+    </p>
+#{/list}
+ 
+<p id="newPost" >
+    <a href="#"><span>+</span> write a new post</a>
+</p>
+
+The first screen is ready:
+
+!images/guide9-1!
+
+h2. <a>The 'write a new post page'</a>
+
+We will create a form to create a new post. Basically when you have a form you have 2 actions: one to display the form and one to handle to form submission. 
+Let's create the new **Admin.form** and **Admin.save** actions that will display and handle submission of the form:
+
+Add the routes in the **yabe/conf/routes** file:
+
+bc. GET     /admin/new                          Admin.form
+POST    /admin/new                          Admin.save
+
+And add the **form()** and **save()** actions to the **Admin.java** controller:
+
+bc. public static void form() {
+    render();
+}
+ 
+public static void save() {
+    // Not implemented yet
+}
+
+Now you have to create the **yabe/app/views/Admin/form.html** template:
+
+bc. #{extends 'admin.html' /}
+ 
+<h3>Write, <span>a new post</span></h3>
+ 
+#{form @save()}
+ 
+    #{ifErrors}
+        <p class="error">
+            Please correct these errors.
+        </p>
+    #{/ifErrors}
+     
+    <p>
+        #{field 'post.title'}
+        <label for="postTitle">Post title:</label>
+        <input type="text" id="postTitle" name="${field.name}" value="${post?.title}" class="${field.errorClass}" />
+        #{/field}
+    </p>
+ 
+    <p>
+        #{field 'post.content'}
+        <label for="postContent">Write here:</label>
+        <textarea id="postContent" name="${field.name}" class="${field.errorClass}">${post?.content}</textarea>
+        #{/field}
+    </p>
+ 
+    <p>
+        #{field 'tags'}
+        <label for="postTags">Enter some tags:</label>
+        <input type="text" id="postTags" size="50" name="${field.name}" value="${post?.tags?.join(' ')}" />
+        #{/field}
+    </p>
+    
+    <p>
+        <input type="submit" value="Publish this post to the blog" />
+    </p>
+    
+#{/form}
+
+Finally, edit the **yabe/app/views/Admin/index.html** template to link the **Write a new post** button to this form:
+
+bc. <p id="newPost" >
+    <a href="@{form()}"><span>+</span> write a new post</a>
+</p>
+
+You can check the result:
+
+!images/guide9-2!
+
+xxx
+
+bc. public static void save(Post post, String tags) {
+    // Set new tags list
+    Set<Tag> newTags = new TreeSet<Tag>();
+    for(String tag : tags.split("\\s+")) {
+        if(tag.trim().length() > 0) {
+            newTags.add(Tag.findOrCreateByName(tag));
+        }
+    }
+    post.tags = newTags;
+    // And other stuff
+    post.author = User.find("byEmail", Security.connected()).first();
+    post.postedAt = new Date();
+    // Validate
+    validation.valid(post);
+    if(validation.hasErrors()) {
+        render("@form", post);
+    }
+    // Save
+    post.save();
+    index();
+}

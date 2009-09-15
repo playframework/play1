@@ -7,16 +7,19 @@ import play.db.jpa.*;
 import play.data.validation.*;
  
 @Entity
-public class Tag extends Model {
+public class Tag extends Model implements Comparable<Tag> {
  
     @Required
     public String name;
     
+    private Tag(String name) {
+        this.name = name;
+    }
+    
     public static Tag findOrCreateByName(String name) {
         Tag tag = Tag.find("byName", name).one();
         if(tag == null) {
-            tag = new Tag().save();
-            tag.name = name;
+            tag = new Tag(name);
         }
         return tag;
     }
@@ -30,6 +33,10 @@ public class Tag extends Model {
     
     public String toString() {
         return name;
+    }
+    
+    public int compareTo(Tag otherTag) {
+        return name.compareTo(otherTag.name);
     }
  
 }

@@ -11,6 +11,11 @@ User(jeff):
     password:       secret
     fullname:       Jeff    
     
+User(paul):
+    email:          paul@gmail.com
+    password:       secret
+    fullname:       Paul    
+    
 Tag(play):
     name:           Play
     

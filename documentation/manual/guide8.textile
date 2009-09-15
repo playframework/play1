@@ -1,4 +1,4 @@
-h1. Adding authentication and preparing the admin area
+h1. Adding authentication
 
 Now that we have an administration area we need to plug in some authentication. Fortunaly play has a module for that. It's called the **Secure** module.
 
@@ -137,7 +137,7 @@ bc. <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w
         <script src="@{'/public/javascripts/jquery-1.3.2.min.js'}"></script>
         <script src="@{'/public/javascripts/jquery.tools.min.js'}"></script>
     </head>
-    <body>
+    <body id="admin">
         
         <div id="header">
             <div id="logo">
@@ -289,6 +289,8 @@ bc. #{extends 'admin.html' /}
 As you see you reuse the **crud.css** and include it in the **admin.html** using the **get/set** template variables mechanism. Now if you try the CRUD part of the administration area, it is correctly integrated with the administration layout:
 
 !images/guide8-7!
+
+!images/guide8-9!
 
 h2. <a>Styling the login page</a>
 

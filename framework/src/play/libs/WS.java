@@ -833,7 +833,7 @@ public class WS extends PlayPlugin {
                     this.checkFileBody((EntityEnclosingMethod) httpMethod.get());
                 } else if (this.fileParams != null) {
                     throw new RuntimeException("Method " + httpMethod.get().getName() + " with file is not an option.");
-                } else if (this.parameters != null) {
+                } else if (this.parameters != null && !this.parameters.isEmpty()) {
                     httpMethod.get().setQueryString(createQueryString());
                 }
                 if (mimeType != null) {

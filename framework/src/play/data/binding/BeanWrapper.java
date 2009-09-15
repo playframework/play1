@@ -69,8 +69,7 @@ public class BeanWrapper {
         return (!method.isAnnotationPresent(PlayPropertyAccessor.class) && method.getName().startsWith("set") && method.getName().length() > 3 && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
     }
 
-    protected Object newBeanInstance() throws InstantiationException,
-            IllegalAccessException {
+    protected Object newBeanInstance() throws InstantiationException, IllegalAccessException {
         return beanClass.newInstance();
     }
 

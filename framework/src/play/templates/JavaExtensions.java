@@ -193,26 +193,38 @@ public class JavaExtensions {
 
     public static String pluralize(Number n) {
         long l = n.longValue();
-        if (l > 1) {
+        if (l != 1) {
             return "s";
         }
         return "";
     }
+    
+    public static String pluralize(Collection n) {
+        return pluralize(n.size());
+    }
 
     public static String pluralize(Number n, String plural) {
         long l = n.longValue();
-        if (l > 1) {
+        if (l != 1) {
             return plural;
         }
         return "";
     }
+    
+    public static String pluralize(Collection n, String plural) {
+        return pluralize(n.size(), plural);
+    }
 
     public static String pluralize(Number n, String[] forms) {
         long l = n.longValue();
-        if (l > 1) {
+        if (l != 1) {
             return forms[1];
         }
         return forms[0];
+    }
+    
+    public static String pluralize(Collection n, String[] forms) {
+        return pluralize(n.size(), forms);
     }
 
     public static String noAccents(String string) {

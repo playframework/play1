@@ -201,6 +201,11 @@ h3 {
     margin-bottom: 15px;
 }
 
+h3 span {
+    font-size: 80%;
+    font-weight: normal;
+}
+
 .comment {
     width: 70%;
     clear: both;
@@ -408,7 +413,7 @@ form label {
 }
 
 tr.odd {
-    background: pink !important;
+    background: #BECCE7 !important;
 }
 
 #crud #crudContent, #crudContent form, #crudListSearch, #crudListPagination, .crudButtons {
@@ -484,4 +489,54 @@ tr.odd {
 
 #remember-field {
     display: none;
+}
+
+/** My posts **/
+
+#admin .post {
+    background: #fff;
+    padding: 4px;
+    margin: 0;
+    font-size: 90%;
+}
+
+#admin .post.odd {
+    background: #C0CBE5;
+}
+
+#admin .post a {
+    color: #444;
+}
+
+#newPost {
+    border-top: 1px dotted #C0CBE5;
+    padding-top: 15px;
+}
+
+#newPost a {
+    background: #C88116;
+    -webkit-border-radius: 12px;
+    padding: 5px 10px;
+    font-size: 80%;
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+    -webkit-box-shadow: 1px 1px 2px rgba(0,0,0,.3);
+}
+
+#newPost a span {
+    background: #7D510E;
+    -webkit-border-radius: 8px;
+    padding: 0 5px 2px 5px;
+    position: relative;
+    top: -1px;
+}
+
+#postContent {
+    width: 100%;
+    height: 300px;
+}
+
+.hasError {
+    background: pink;
 }
