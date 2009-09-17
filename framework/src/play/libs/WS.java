@@ -822,6 +822,7 @@ public class WS extends PlayPlugin {
         private HttpResponse executeRequest(HttpMethod method) {
             this.checkRelease();
             httpMethod.set(method);
+            httpMethod.get().getParams().setSoTimeout(5000);
             httpMethod.get().setDoAuthentication(true);
             try {
                 if (this.headers != null) {
@@ -837,7 +838,7 @@ public class WS extends PlayPlugin {
                     httpMethod.get().setQueryString(createQueryString());
                 }
                 if (mimeType != null) {
-                    httpMethod.get().addRequestHeader("content-type", mimeType);
+                    httpMethod.get().setRequestHeader("Content-Type", mimeType);
                 }
 
                 httpClient.executeMethod(null, httpMethod.get(), states.get());
