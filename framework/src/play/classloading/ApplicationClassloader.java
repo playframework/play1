@@ -22,6 +22,7 @@ import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.vfs.VirtualFile;
+import play.cache.Cache;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
 
@@ -230,6 +231,7 @@ public class ApplicationClassloader extends ClassLoader {
             }
         }
         if(newDefinitions.size() > 0) {
+            Cache.clear();
             if(HotswapAgent.enabled) {
                 try {
                     HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
