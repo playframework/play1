@@ -688,12 +688,12 @@ public class WS extends PlayPlugin {
                 return;
 
             }
-            if (this.parameters != null) {
-                method.addRequestHeader("content-type", "application/x-www-form-urlencoded");
+            if (this.parameters != null && !this.parameters.isEmpty()) {
+                method.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 putOrPost.setRequestEntity(new StringRequestEntity(createQueryString()));
-            }
+            } 
             if (this.body != null) {
-                if (this.parameters != null && this.parameters.keySet().size()>0) {
+                if (this.parameters != null && !this.parameters.isEmpty()) {
                     throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
                 }
                 putOrPost.setRequestEntity(new StringRequestEntity(this.body));

@@ -36,7 +36,7 @@
 	// Check
 	assertTextPresent('Héhé')
 	assertTextPresent('A new forum')
-	assertTextPresent('0 post in 0 topic')
+	assertTextPresent('0 posts in 0 topics')
 	
 	// Delete a forum
 	clickAndWait('link=Play help')
@@ -56,12 +56,12 @@
 	// Check admin has no more posts
 	clickAndWait('link=Admin')
 	assertTextPresent('Admin')
-	assertTextPresent('0 post in 0 topic')
+	assertTextPresent('0 posts in 0 topics')
 	assertTextPresent('No post by this user')
 	
 	// Logout
 	clickAndWait('link=Logout')
 	assertTextPresent('been logged out')
-	assertTextPresent('0 post in 0 topic')
+	assertTextPresent('0 posts in 0 topics')
 	
 #{/selenium}
