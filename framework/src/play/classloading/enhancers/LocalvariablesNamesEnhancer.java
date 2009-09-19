@@ -357,7 +357,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
     /**
      * Debug utility. Display a byte code op as plain text.
      */
-    static void printOp(int op) {
+    public static void printOp(int op) {
         try {
             for(Field f : Opcode.class.getDeclaredFields()) {
                 if(java.lang.reflect.Modifier.isStatic(f.getModifiers()) && java.lang.reflect.Modifier.isPublic(f.getModifiers()) && f.getInt(null) == op) {

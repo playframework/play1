@@ -1,10 +1,13 @@
 package play.classloading.enhancers;
 
 import javassist.CtClass;
+import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.bytecode.CodeAttribute;
+import javassist.bytecode.CodeIterator;
 import javassist.bytecode.LocalVariableAttribute;
+import javassist.bytecode.Opcode;
 import javassist.bytecode.annotation.Annotation;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
@@ -47,6 +50,19 @@ public class SigEnhancer extends Enhancer {
                 for (int i = 0; i < localVariableAttribute.tableLength(); i++) {
                     sigChecksum.append(localVariableAttribute.variableName(i) + ",");
                 }
+            }
+        }
+        
+        if(ctClass.getClassInitializer() != null) {
+            sigChecksum.append("Static Code->");
+            for(CodeIterator i = ctClass.getClassInitializer().getMethodInfo().getCodeAttribute().iterator(); i.hasNext(); ) {
+                int index = i.next();
+                int op = i.byteAt(index);
+                sigChecksum.append(op);
+                if(op == Opcode.LDC) {
+                    sigChecksum.append("["+i.get().getConstPool().getLdcValue(i.byteAt(index+1))+"]");;
+                }
+                sigChecksum.append(".");                
             }
         }
 
