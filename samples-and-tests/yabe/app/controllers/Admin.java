@@ -32,23 +32,25 @@ public class Admin extends Controller {
         render();
     }
     
-    public static void save(Long id, Post post, String tags) {
-        // Edition ?
-        if(id != null) {
+    public static void save(Long id, String title, String content, String tags) {
+        Post post;
+        if(id == null) {
+            // Create post
+            User author = User.find("byEmail", Security.connected()).first();
+            post = new Post(author, title, content);
+        } else {
+            // Retrieve post
             post = Post.findById(id);
-            post.edit("post", params);
+            post.title = title;
+            post.content = content;
+            post.tags.clear();
         }
-        // Set new tags list
-        Set<Tag> newTags = new TreeSet<Tag>();
+        // Set tags list
         for(String tag : tags.split("\\s+")) {
             if(tag.trim().length() > 0) {
-                newTags.add(Tag.findOrCreateByName(tag));
+                post.tags.add(Tag.findOrCreateByName(tag));
             }
         }
-        post.tags = newTags;
-        // And other stuff
-        post.author = User.find("byEmail", Security.connected()).first();
-        post.postedAt = new Date();
         // Validate
         validation.valid(post);
         if(validation.hasErrors()) {

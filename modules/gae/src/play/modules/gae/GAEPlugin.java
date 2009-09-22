@@ -3,14 +3,27 @@ package play.modules.gae;
 import com.google.appengine.tools.development.ApiProxyLocalImpl;
 import com.google.apphosting.api.ApiProxy;
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Properties;
+import java.util.logging.Level;
 import javax.mail.Session;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Persistence;
+import javax.persistence.metamodel.ManagedType;
+import javax.persistence.spi.ClassTransformer;
+import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.PersistenceUnitTransactionType;
+import javax.sql.DataSource;
 import org.datanucleus.enhancer.DataNucleusEnhancer;
+import org.datanucleus.store.appengine.jpa.DatastoreEntityManagerFactory;
+import org.datanucleus.store.appengine.jpa.DatastorePersistenceProvider;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -90,11 +103,81 @@ public class GAEPlugin extends PlayPlugin {
     @Override
     public void onApplicationStart() {
         // It's time to set up JPA
-        List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
+        final List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
         if (!classes.isEmpty()) {
             // Hack the JPA plugin
             JPAPlugin.autoTxs = false;
-            JPA.entityManagerFactory = Persistence.createEntityManagerFactory("default");
+            JPA.entityManagerFactory = new DatastorePersistenceProvider().createContainerEntityManagerFactory(new PersistenceUnitInfo() {
+
+                public String getPersistenceUnitName() {
+                    return "default";
+                }
+
+                public String getPersistenceProviderClassName() {
+                    return DatastorePersistenceProvider.class.getName();
+                }
+
+                public PersistenceUnitTransactionType getTransactionType() {
+                    return PersistenceUnitTransactionType.RESOURCE_LOCAL;
+                }
+
+                public DataSource getJtaDataSource() {
+                    return null;
+                }
+
+                public DataSource getNonJtaDataSource() {
+                    return null;
+                }
+
+                public List<String> getMappingFileNames() {
+                    return new ArrayList();
+                }
+
+                public List<URL> getJarFileUrls() {
+                    return new ArrayList();
+                }
+
+                public URL getPersistenceUnitRootUrl() {
+                    try {
+                        return Play.applicationPath.toURL();
+                    } catch (MalformedURLException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+
+                public List<String> getManagedClassNames() {
+                    List<String> classNames = new ArrayList<String>();
+                    for(Class c : classes) {
+                        classNames.add(c.getName());
+                    }
+                    return classNames;
+                }
+
+                public boolean excludeUnlistedClasses() {
+                    return false;
+                }
+
+                public Properties getProperties() {
+                    Properties properties = new Properties();
+                    properties.setProperty("datanucleus.NontransactionalRead", "true");
+                    properties.setProperty("datanucleus.NontransactionalWrite", "true");
+                    properties.setProperty("datanucleus.ConnectionURL", "appengine");
+                    properties.setProperty("datanucleus.classLoaderResolverName", "playApplicationLoader");
+                    return properties;
+                }
+
+                public ClassLoader getClassLoader() {
+                    return Play.classloader;
+                }
+
+                public void addTransformer(ClassTransformer c) {
+                    //
+                }
+
+                public ClassLoader getNewTempClassLoader() {
+                    return Play.classloader;
+                }
+            }, new HashMap());
             JPQLDialect.instance = new DataNucleusDialect(); 
         }
 
@@ -147,6 +230,11 @@ public class GAEPlugin extends PlayPlugin {
             dataNucleusEnhancer.addClass(applicationClass.name, applicationClass.enhancedByteCode);
             dataNucleusEnhancer.enhance();
             applicationClass.enhancedByteCode = dataNucleusEnhancer.getEnhancedBytes(applicationClass.name);
+            /*try {
+               IO.write(applicationClass.enhancedByteCode, new File("/Users/guillaume/Desktop/"+applicationClass.name+".class"));
+            } catch(IOException e) {
+                //
+            }*/
         } finally {
             Thread.currentThread().setContextClassLoader(pc);
         }
