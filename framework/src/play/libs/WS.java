@@ -54,7 +54,9 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 import play.Logger;
+import play.Play;
 import play.PlayPlugin;
+import play.utils.Utils;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -142,7 +144,7 @@ public class WS extends PlayPlugin {
 
                         return socket;
                     } catch (SocketException se) {
-                        System.out.println("Socket exception on " + inetAddresses[i]);
+                        Logger.error("Socket exception on " + inetAddresses[i] + "; will try another dns record if exists.");
                     }
                 }
                 // tried all
@@ -179,6 +181,25 @@ public class WS extends PlayPlugin {
         Protocol protocol = new Protocol("http", factory, 80);
         Protocol.registerProtocol("http", protocol);
         httpClient = new HttpClient(connectionManager);
+        String proxyHost = Play.configuration.getProperty("http.proxyHost", System.getProperty("http.proxyHost"));
+        String proxyPort = Play.configuration.getProperty("http.proxyPort", System.getProperty("http.proxyPort"));
+        String proxyUser = Play.configuration.getProperty("http.proxyUser", System.getProperty("http.proxyUser"));
+        String proxyPassword = Play.configuration.getProperty("http.proxyPassword", System.getProperty("http.proxyPassword"));
+        
+        if (proxyHost != null) {
+        	int proxyPortInt = 0;
+        	try{
+        		proxyPortInt = Integer.parseInt(proxyPort);
+        	} catch (NumberFormatException e){
+        		Logger.error("Cannot parse the proxy port property '%s'. Check property http.proxyPort either in System configuration or in Play config file.", proxyPort);
+        		throw new IllegalStateException("WS proxy is misconfigured -- check the logs for details");
+        	}
+        	httpClient.getHostConfiguration().setProxy(proxyHost, proxyPortInt);
+        	if (proxyUser != null){
+        		AuthScope scope = new AuthScope(proxyHost, proxyPortInt);
+        		httpClient.getState().setProxyCredentials(scope, new UsernamePasswordCredentials(proxyUser, proxyPassword));
+        	}
+        }
 
     }
 
