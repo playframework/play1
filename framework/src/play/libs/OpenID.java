@@ -164,7 +164,7 @@ public class OpenID {
                         r += "," + a;
                     }
                     r = r.substring(1);
-                    url += "&openid.ax.optional="+r;
+                    url += "&openid.ax.if_available="+r;
                 }
             }
 
