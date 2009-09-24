@@ -153,7 +153,8 @@ public class JPASupport implements Serializable {
         } catch (PersistenceException e) {
             if (e.getCause() instanceof GenericJDBCException) {
                 throw new PersistenceException(((GenericJDBCException) e.getCause()).getSQL());
-            }
+            } else
+                throw e;
         }
         avoidCascadeSaveLoops.set(new ArrayList<JPASupport>());
         try {
