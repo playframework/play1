@@ -31,9 +31,9 @@ public class Router {
     static Pattern methodOverride = new Pattern("^.*x-http-method-override=({method}GET|PUT|POST|DELETE).*$");
     public static long lastLoading = -1;
 
-    public static void load() {
+    public static void load(String prefix) {
         routes.clear();
-        parse(Play.routes, "");
+        parse(Play.routes, prefix);
         lastLoading = System.currentTimeMillis();
         // Plugins
         for (PlayPlugin plugin : Play.plugins) {
@@ -41,18 +41,20 @@ public class Router {
         }
     }
 
-    public static void addRoute(String method, String path, String action) {
+     public static void addRoute(String method, String path, String action) {
+        addRoute(method, path, action, null);
+    }
+
+
+    public static void addRoute(String method, String path, String action, String params) {
         Route route = new Route();
         route.method = method;
         route.path = path;
         route.path = route.path.replace("//", "/");
         route.action = action;
+        route.addParams(params);
         route.compute();
-        if(routes.size() == 0) {
-            routes.add(route);
-        }else {
-            routes.add(0, route);
-        }
+        routes.add(0, route);
     }
 
     /**
@@ -90,35 +92,27 @@ public class Router {
                         Logger.error("Cannot include routes for module %s (not found)", moduleName);
                     }
                 } else {
-                    Route route = new Route();
-                    route.method = matcher.group("method");
-                    if(matcher.group("path").equals("/") && !prefix.equals("")) {
-                        route.path = prefix;
-                    } else {
-                        route.path = prefix + matcher.group("path");
-                    }
-                    route.path = route.path.replace("//", "/");
-                    route.action = action;
-                    route.addParams(matcher.group("params"));
-                    route.compute();
-                    routes.add(route);
-                }
+                    String method = matcher.group("method");
+                    String path = prefix + matcher.group("path");
+                    String params = matcher.group("params");
+                    addRoute(method, path, action, params);
+                }                
             } else {
                 Logger.error("Invalid route definition : %s", line);
             }
         }
     }
 
-    public static void detectChanges() {
+    public static void detectChanges(String prefix) {
         if (Play.mode == Mode.PROD && lastLoading > 0) {
             return;
         }
         if (Play.routes.lastModified() > lastLoading) {
-            load();
+            load(prefix);
         } else {
             for (VirtualFile file : Play.modulesRoutes.values()) {
                 if (file.lastModified() > lastLoading) {
-                    load();
+                    load(prefix);
                     return;
                 }
             }
