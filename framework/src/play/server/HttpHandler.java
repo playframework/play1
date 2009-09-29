@@ -119,7 +119,7 @@ public class HttpHandler implements IoHandler {
             request.domain = request.host;
         }
 
-        if (minaRequest.containsHeader("X-Forwarded-For")) {
+        if (Play.configuration.containsKey("XForwardedSupport") && minaRequest.containsHeader("X-Forwarded-For")) {
             if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(",")).contains(request.remoteAddress)) {
                 throw new RuntimeException("This proxy request is not authorized");
             } else {
