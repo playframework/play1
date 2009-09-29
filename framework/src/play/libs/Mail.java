@@ -231,17 +231,25 @@ public class Mail {
         msg.setRecipients(javax.mail.Message.RecipientType.TO, addressTo);
 
         msg.setSubject(subject, "utf-8");
+        if ("text/plain".equals(contentType)) {
+            msg.setText(body);
+            if (attachments != null && attachments.length > 0) {
+                Multipart mp = new MimeMultipart();
+                handleAttachments(mp, attachments);
+                msg.setContent(mp);
+            }
+        } else {
 
-        Multipart mp = new MimeMultipart();
-        MimeBodyPart bodyPart = new MimeBodyPart();
+            Multipart mp = new MimeMultipart();
+            MimeBodyPart bodyPart = new MimeBodyPart();
 
-        bodyPart.setContent(body, contentType + "; charset=utf-8");
-        mp.addBodyPart(bodyPart);
+            bodyPart.setContent(body, contentType + "; charset=utf-8");
+            mp.addBodyPart(bodyPart);
 
-        handleAttachments(mp, attachments);
+            handleAttachments(mp, attachments);
 
-        msg.setContent(mp);
-
+            msg.setContent(mp);
+        }
         return msg;
     }
 
@@ -332,7 +340,7 @@ public class Mail {
                 MimeBodyPart part = new MimeBodyPart();
                 part.setDataHandler(new DataHandler(datasource));
                 part.setFileName(datasource.getName());
-                part.setContentID(datasource.getName());
+                part.setContentID(Codec.UUID() + datasource.getName());
                 mp.addBodyPart(part);
             }
         }
