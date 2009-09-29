@@ -50,6 +50,8 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
         Play.init(root, System.getProperty("play.id", ""));
+        // Reload the rules, but this time with the context. Not really efficient through...
+        Router.load(e.getServletContext().getContextPath());
     }
 
     public void contextDestroyed(ServletContextEvent e) {
@@ -98,11 +100,12 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     }
 
     public void serveStatic(HttpServletResponse servletResponse, HttpServletRequest servletRequest, RenderStatic renderStatic) throws IOException {
+
         VirtualFile file = Play.getVirtualFile(renderStatic.file);
-        servletResponse.setContentType(MimeTypes.getContentType(file.getName()));
         if (file == null || file.isDirectory() || !file.exists()) {
             //serve404(session, minaResponse, minaRequest, new NotFound("The file " + renderStatic.file + " does not exist"));
         } else {
+            servletResponse.setContentType(MimeTypes.getContentType(file.getName()));
             boolean raw = false;
             for (PlayPlugin plugin : Play.plugins) {
                 if (plugin.serveStatic(file, Request.current(), Response.current())) {

@@ -135,6 +135,8 @@ public class Play {
     // pv
     static boolean firstStart = true;
 
+    private final static String NO_PREFIX = "";
+
     /**
      * Init the framework
      * @param root The application path
@@ -165,11 +167,12 @@ public class Play {
         }
         System.setProperty("play.path", Play.frameworkPath.getAbsolutePath());
         System.setProperty("application.path", Play.applicationPath.getAbsolutePath());
-        Logger.info("");
+
         Logger.info("Starting %s", root.getAbsolutePath());
 
         // Read the configuration file
         readConfiguration();
+
         if (configuration.getProperty("play.tmp", "tmp").equals("none")) {
             tmpDir = null;
             Logger.debug("No tmp folder will be used (play.tmp is set to none)");
@@ -348,7 +351,7 @@ public class Play {
             Play.classloader.getAllClasses();
 
             // Routes
-            Router.detectChanges();
+            Router.detectChanges(NO_PREFIX);
 
             // Plugins
             for (PlayPlugin plugin : plugins) {
@@ -429,7 +432,7 @@ public class Play {
         }
         try {
             classloader.detectChanges();
-            Router.detectChanges();
+            Router.detectChanges(NO_PREFIX);
             if (conf.lastModified() > startedAt) {
                 start();
                 return;
