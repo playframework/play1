@@ -56,7 +56,6 @@ import org.xml.sax.InputSource;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
-import play.utils.Utils;
 
 /**
  * Simple HTTP client to make webservices requests.
