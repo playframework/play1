@@ -41,10 +41,9 @@ public class Router {
         }
     }
 
-     public static void addRoute(String method, String path, String action) {
+    public static void addRoute(String method, String path, String action) {
         addRoute(method, path, action, null);
     }
-
 
     public static void addRoute(String method, String path, String action, String params) {
         Route route = new Route();
@@ -95,8 +94,15 @@ public class Router {
                     String method = matcher.group("method");
                     String path = prefix + matcher.group("path");
                     String params = matcher.group("params");
-                    addRoute(method, path, action, params);
-                }                
+                    Route route = new Route();
+                    route.method = method;
+                    route.path = path;
+                    route.path = route.path.replace("//", "/");
+                    route.action = action;
+                    route.addParams(params);
+                    route.compute();
+                    routes.add(route);
+                }
             } else {
                 Logger.error("Invalid route definition : %s", line);
             }
@@ -119,16 +125,16 @@ public class Router {
         }
     }
     public static List<Route> routes = new ArrayList<Route>();
-    
+
     public static void routeOnlyStatic(Http.Request request) {
         for (Route route : routes) {
             try {
-                if(route.matches(request.method, request.path) != null) {
+                if (route.matches(request.method, request.path) != null) {
                     break;
                 }
-            } catch(Throwable t) {
-                if(t instanceof RenderStatic) {
-                    throw (RenderStatic)t;
+            } catch (Throwable t) {
+                if (t instanceof RenderStatic) {
+                    throw (RenderStatic) t;
                 }
             }
         }
@@ -186,23 +192,23 @@ public class Router {
     }
 
     public static String reverse(VirtualFile file) {
-        if(file == null || !file.exists()) {
+        if (file == null || !file.exists()) {
             throw new NoRouteFoundException("File not found (" + file + ")");
         }
         String path = file.relativePath();
-        path = path.substring(path.indexOf("}")+1);
+        path = path.substring(path.indexOf("}") + 1);
         for (Route route : routes) {
             String staticDir = route.staticDir;
-            if(staticDir != null) {
-                if(!staticDir.startsWith("/")) {
+            if (staticDir != null) {
+                if (!staticDir.startsWith("/")) {
                     staticDir = "/" + staticDir;
                 }
-                if(!staticDir.equals("/") && !staticDir.endsWith("/")) {
+                if (!staticDir.equals("/") && !staticDir.endsWith("/")) {
                     staticDir = staticDir + "/";
                 }
-                if(path.startsWith(staticDir)) {
+                if (path.startsWith(staticDir)) {
                     String to = route.path + path.substring(staticDir.length());
-                    if(to.endsWith("/index.html")) {
+                    if (to.endsWith("/index.html")) {
                         to = to.substring(0, to.length() - "/index.html".length() + 1);
                     }
                     return to;
@@ -248,8 +254,8 @@ public class Router {
                     }
                     // les parametres codes en dur dans la route matchent-ils ?
                     for (String staticKey : route.staticArgs.keySet()) {
-                        if(staticKey.equals("format")) {
-                            if(!Http.Request.current().format.equals(route.staticArgs.get("format"))) {
+                        if (staticKey.equals("format")) {
+                            if (!Http.Request.current().format.equals(route.staticArgs.get("format"))) {
                                 allRequiredArgsAreHere = false;
                                 break;
                             }
@@ -263,8 +269,8 @@ public class Router {
                     if (allRequiredArgsAreHere) {
                         StringBuilder queryString = new StringBuilder();
                         String path = route.path;
-                        if(path.endsWith("/?")) {
-                            path = path.substring(0, path.length()-2);
+                        if (path.endsWith("/?")) {
+                            path = path.substring(0, path.length() - 2);
                         }
                         for (String key : args.keySet()) {
                             if (inPathArgs.contains(key) && args.get(key) != null) {
@@ -365,7 +371,7 @@ public class Router {
                 }
                 if (!this.path.endsWith("/") && !this.path.equals("/")) {
                     Logger.warn("The path for a staticDir route must end with / (%s)", this);
-                    this.path += "/";                    
+                    this.path += "/";
                 }
                 this.pattern = new Pattern("^" + path + "({resource}.*)$");
                 this.staticDir = action.substring("staticDir:".length());
