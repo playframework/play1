@@ -41,12 +41,23 @@ public class Router {
         }
     }
 
-     public static void addRoute(String method, String path, String action) {
-        addRoute(method, path, action, null);
+    /**
+     * This one can be called to add new route. Last added is first in the route list. 
+     */
+    public static void addRoute(String method, String path, String action) {
+        prependRoute(method, path, action, null);
     }
 
+ 
+    /**
+     * This is used internally when reading the route file. The order the routes are added matters and
+     * we want the to append the routes to the list.
+     */
+    protected static void appendRoute(String method, String path, String action, String params) {
+        routes.add(getRoute(method, path, action, params));
+    }
 
-    public static void addRoute(String method, String path, String action, String params) {
+    public static Route getRoute(String method, String path, String action, String params) {
         Route route = new Route();
         route.method = method;
         route.path = path;
@@ -54,7 +65,14 @@ public class Router {
         route.action = action;
         route.addParams(params);
         route.compute();
-        routes.add(0, route);
+	return route;
+    }
+
+    /**
+     * Add a new route at the beginning of the route list
+     */ 
+    private static void prependRoute(String method, String path, String action, String params) {
+        routes.add(0, getRoute(method, path, action, params));
     }
 
     /**
@@ -95,7 +113,7 @@ public class Router {
                     String method = matcher.group("method");
                     String path = prefix + matcher.group("path");
                     String params = matcher.group("params");
-                    addRoute(method, path, action, params);
+                    appendRoute(method, path, action, params);
                 }                
             } else {
                 Logger.error("Invalid route definition : %s", line);
