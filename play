@@ -329,7 +329,7 @@ try:
 		
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [new] Create a new application
-	if play_command == 'new':
+	if play_command == 'new' or play_command == 'new,run':
 		if os.path.exists(application_path):
 			print "~ Oops. %s already exists" % application_path
 			print "~"
@@ -345,7 +345,7 @@ try:
 		print "~ Start it with : play run %s" % sys.argv[2]
 		print "~ Have fun !"
 		print "~"
-		sys.exit(0)
+		if play_command == 'new': sys.exit(0)
 		
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [secret] Generate a new secret key
@@ -491,7 +491,7 @@ try:
 		
 		
 	# ~~~~~~~~~~~~~~~~~~~~~~ [run] Run the application
-	if play_command == 'run':
+	if play_command == 'run' or play_command == 'new,run':
 		check_application()
 		load_modules()
 		do_classpath()

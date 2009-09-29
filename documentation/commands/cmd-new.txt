@@ -14,3 +14,7 @@
 ~ The created application is then ready to be run using the 'run' command. It contains a default welcome page
 ~ with a guide to first steps.
 ~
+~ Tip:
+~ ~~~~
+~ As alternative, you can use the new,run command that do the same but automatically run the created application.
+~
