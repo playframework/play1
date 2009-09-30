@@ -28,6 +28,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.exceptions.MailException;
@@ -137,6 +138,13 @@ public class Mail {
         return send(from, from, recipients, subject, body, contentType, attachments);
     }
 
+    public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String contentType, Object... attachments) {
+        if ("text/plain".equals(contentType)) {
+            return send(from, replyTo, recipients, subject, null, body, contentType, attachments);
+        }
+        return send(from, replyTo, recipients, subject, body, null, contentType, attachments);
+    }
+
     /**
      * Send an email
      * @param from From address
@@ -147,7 +155,7 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String contentType, Object... attachments) {
+    public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String bodyHtml, String bodyText, String contentType, Object... attachments) {
         try {
             if (from == null) {
                 from = Play.configuration.getProperty("mail.smtp.from", "user@localhost");
@@ -156,7 +164,7 @@ public class Mail {
                 replyTo = from;
             }
             if (Play.configuration.getProperty("mail.smtp", "").equals("mock") && Play.mode == Play.Mode.DEV) {
-                Mock.send(from, replyTo, recipients, subject, body, contentType, attachments);
+                Mock.send(from, replyTo, recipients, subject, bodyHtml, bodyText, contentType, attachments);
                 return new Future<Boolean>() {
 
                     public boolean cancel(boolean mayInterruptIfRunning) {
@@ -180,7 +188,7 @@ public class Mail {
                     }
                 };
             }
-            return sendMessage(buildMessage(from, replyTo, recipients, subject, body, contentType, attachments));
+            return sendMessage(buildMessage(from, replyTo, recipients, subject, bodyHtml, bodyText, contentType, attachments));
         } catch (MessagingException ex) {
             throw new MailException("Cannot send email", ex);
         }
@@ -195,7 +203,7 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static MimeMessage buildMessage(Object from, Object replyTo, Object[] recipients, String subject, String body, String contentType, Object... attachments) throws MessagingException {
+    public static MimeMessage buildMessage(Object from, Object replyTo, Object[] recipients, String subject, String bodyHtml, String bodyText, String contentType, Object... attachments) throws MessagingException {
         MimeMessage msg = new MimeMessage(getSession());
 
         if (from == null) {
@@ -232,7 +240,7 @@ public class Mail {
 
         msg.setSubject(subject, "utf-8");
         if ("text/plain".equals(contentType)) {
-            msg.setText(body);
+            msg.setText(bodyText);
             if (attachments != null && attachments.length > 0) {
                 Multipart mp = new MimeMultipart();
                 handleAttachments(mp, attachments);
@@ -240,17 +248,45 @@ public class Mail {
             }
         } else {
 
-            Multipart mp = new MimeMultipart();
-            MimeBodyPart bodyPart = new MimeBodyPart();
+            if (attachments != null && attachments.length > 0) {
 
-            bodyPart.setContent(body, contentType + "; charset=utf-8");
-            mp.addBodyPart(bodyPart);
+                Multipart mixed = new MimeMultipart("mixed");
 
-            handleAttachments(mp, attachments);
+                Multipart mp = getMultipart(bodyHtml, bodyText, contentType);
 
-            msg.setContent(mp);
+                // Add an attachment
+                handleAttachments(mixed, attachments);
+
+                // Create a body part to house the multipart/alternative Part
+                MimeBodyPart contentPartRoot = new MimeBodyPart();
+                contentPartRoot.setContent(mp);
+
+                mixed.addBodyPart(contentPartRoot);
+
+                msg.setContent(mixed);
+            } else {
+                
+                msg.setContent(getMultipart(bodyHtml, bodyText, contentType));
+            }
+          
         }
         return msg;
+    }
+
+    private static Multipart getMultipart(String bodyHtml, String bodyText, String contentType) throws MessagingException {
+        Multipart mp = new MimeMultipart("alternative");
+
+        MimeBodyPart bodyHtmlPart = new MimeBodyPart();
+
+        bodyHtmlPart.setContent(bodyHtml, contentType + "; charset=utf-8");
+        mp.addBodyPart(bodyHtmlPart);
+        if (!StringUtils.isEmpty(bodyText)) {
+            MimeBodyPart bodyTextPart = new MimeBodyPart();
+            bodyTextPart.setContent(bodyText, "text/plain; charset=utf-8");
+            mp.addBodyPart(bodyTextPart);
+        }
+
+        return mp;
     }
 
     private static Session getSession() {
@@ -422,7 +458,7 @@ public class Mail {
 
         static Map<String, String> emails = new HashMap();
 
-        static void send(Object from, Object replyTo, Object[] recipients, String subject, String body, String contentType, Object... attachments) {
+        static void send(Object from, Object replyTo, Object[] recipients, String subject, String bodyHtml, String bodyText, String contentType, Object... attachments) {
             StringBuffer email = new StringBuffer();
             email.append("From Mock Mailer\n\tNew email received by");
             for (Object add : recipients) {
@@ -432,7 +468,14 @@ public class Mail {
             email.append("\n\tReplyTo: " + (replyTo instanceof InternetAddress ? ((InternetAddress) replyTo).toString() : replyTo.toString()));
             email.append("\n\tSubject: " + subject);
             email.append("\n\tAttachments: " + attachments.length);
-            email.append("\n\tBody(" + contentType + "): " + body);
+            if (contentType.equals("textPlain")) {
+                email.append("\n\tBody(" + contentType + "): " + bodyText);
+            } else {
+                email.append("\n\tBody(" + contentType + "): " + bodyHtml);
+                if (!StringUtils.isEmpty(bodyText)) {
+                    email.append("\n\tAlternate Body(text/plain): " + bodyText);
+                }
+            }
             email.append("\n");
             Logger.info(email.toString());
             for (Object add : recipients) {
