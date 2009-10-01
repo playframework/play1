@@ -167,7 +167,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
      * @param o The Java object to serialize
      * @param adapters A set of GSON serializers/deserializers/instance creator to use
      */
-    protected static void renderJSON(Object o, Object... adapters) {
+    protected static void renderJSON(Object o, JsonSerializer... adapters) {
         throw new RenderJson(o, adapters);
     }
 

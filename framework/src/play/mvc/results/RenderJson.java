@@ -22,22 +22,11 @@ public class RenderJson extends Result {
         json = new Gson().toJson(o);
     }
     
-    public RenderJson(Object o, Object... adapters) {
+    public RenderJson(Object o, JsonSerializer... adapters) {
         GsonBuilder gson = new GsonBuilder();
         for(Object adapter : adapters) {
-            Type t = null;
-            if(adapter instanceof JsonSerializer) {
-                t = getMethod(adapter.getClass(), "serialize").getParameterTypes()[0];
-            }
-            if(adapter instanceof JsonDeserializer) {
-                t = getMethod(adapter.getClass(), "deserialize").getReturnType();
-            }
-            if(adapter instanceof InstanceCreator) {
-                t = getMethod(adapter.getClass(), "createInstance").getReturnType();
-            }
-            if(t != null) {
-                gson.registerTypeAdapter(t, adapter);
-            }
+            Type t = getMethod(adapter.getClass(), "serialize").getParameterTypes()[0];;
+            gson.registerTypeAdapter(t, adapter);
         }
         json = gson.create().toJson(o);
     }
