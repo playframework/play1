@@ -1,5 +1,7 @@
 package play.mvc;
 
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonSerializer;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -155,10 +157,18 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
     /**
      * Render a 200 OK application/json response
      * @param o The Java object to serialize
-     * @param includes Object properties to include
      */
     protected static void renderJSON(Object o) {
         throw new RenderJson(o);
+    }
+    
+        /**
+     * Render a 200 OK application/json response
+     * @param o The Java object to serialize
+     * @param adapters A set of GSON serializers/deserializers/instance creator to use
+     */
+    protected static void renderJSON(Object o, Object... adapters) {
+        throw new RenderJson(o, adapters);
     }
 
     /**
