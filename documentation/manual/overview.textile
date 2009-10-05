@@ -68,16 +68,16 @@ bc. <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
  
 <c:choose>
     <c:when test="${emails.unread != null && fn:size(emails.unread)}">
-        You've ${fn:size(emails.unread)} unread emails!
+        You have ${fn:size(emails.unread)} unread emails!
     </c:when>
     <c:otherwise>
-        You've no unread email!
+        You have no unread email!
     </c:otherwise>
 </c:choose>
 
-We think you would certainly prefer to write the following:
+We think you would certainly prefer to write:
 
-bc. You've ${email.unread?.size() ?: 'no'} unread ${email.unread?.size() > 1 ? 'emails' : 'email'}!
+bc. You have ${email.unread?.size() ?: 'no'} unread ${email.unread?.size() > 1 ? 'emails' : 'email'}!
 
 The expression language used by the play template engine is "Groovy":http://groovy.codehaus.org/, which provides a syntax consistent with Java. While play mainly uses the templating system to render HTML responses, you are free to use it to generate any other documents such as email messages, json responses, etc.
 
