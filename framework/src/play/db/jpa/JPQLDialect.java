@@ -6,7 +6,7 @@ public class JPQLDialect {
 
     @SuppressWarnings("unused")
     public String createFindByQuery(String entityName, String entityClass, String query, Object... params) {
-        if (query == null) {
+        if (query == null || query.trim().length() == 0) {
             return "from " + entityName;
         }
         if (query.matches("^by[A-Z].*$")) {
@@ -61,11 +61,17 @@ public class JPQLDialect {
         if (query.trim().toLowerCase().startsWith("from ")) {
             return "select count(*) " + query;
         }
+        if (query.trim().toLowerCase().startsWith("order by ")) {
+            return "select count(*) from " + entityName;
+        }
         if (query.trim().indexOf(" ") == -1 && query.trim().indexOf("=") == -1 && params != null && params.length == 1) {
             query += " = ?1";
         }
         if (query.trim().indexOf(" ") == -1 && query.trim().indexOf("=") == -1 && params == null) {
             query += " = null";
+        }
+        if(query.trim().length() == 0) {
+            return "select count(*) from " + entityName;
         }
         return "select count(e) from " + entityName + " e where " + query;
     }
