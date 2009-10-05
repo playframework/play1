@@ -38,7 +38,7 @@ Learn play by coding **'Yet Another Blog Engine'**, from start to finish. Each c
 
 h2. <a name="manual">The essential documentation</a>
 
-Everything you need to know about Play (and then some).
+Everything you need to know about Play.
 
 # "Main concepts":main
 ## "The MVC application model":main#mvc

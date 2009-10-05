@@ -5,32 +5,31 @@ h1. Setting up your preferred IDE
 
 Working with play is easy. You don't even need a sophisticated IDE as play compiles and refreshes the modifications you make to your source files automatically. So you can easily work using a simple text editor.
 
-However using a modern Java IDE provides cool productivity features like auto-completion, on the fly compilation, assisted refactoring and debugging. Play supports "Netbeans":http://www.netbeans.org and "Eclipse":http://www.eclipse.org platforms.
+However, using a modern Java IDE provides cool productivity features like auto-completion, on-the-fly compilation, assisted refactoring and debugging. Play supports the "Netbeans":http://www.netbeans.org and "Eclipse":http://www.eclipse.org platforms.
 
 
 h2(#eclipse). <a>Generate configuration files for eclipse</a>
 
-Play provides a command to simplify Eclipse configuration. To transform a play application to a working Eclipse project use the **eclipsify** command :
+Play provides a command to simplify Eclipse configuration. To transform a play application into a working Eclipse project, use the **eclipsify** command:
 
 bc. # play eclipsify myApp
 
-You then need to import the application into your Workspace with the **File/Import/General/Existing project ...** menu.
+You then need to import the application into your Workspace with the **File/Import/General/Existing project...** menu.
 
 !images/eclipse!
 
 The **eclipsify** command generates several launchers for the application. The main launcher in usable either with the **Run** or **Debug** eclipse command. The JPDA launcher is only usable with the **Run** command because it already starts a JPDA agent. You can then use "the Connect JPDA launcher" to start a debugging session at any time. Stopping the debugging session will not stop the server.
 
-If you make changes to your application classpath or any important changes to your application, use **eclipsify** again to regenerate the configuration files.
+If you make any important change to your application such as changing the classpath, use **eclipsify** again to regenerate the configuration files.
 
-p(note). **Do not commit eclipse configuration files when you work in a team !**
- 
+p(note). **Do not commit eclipse configuration files when you work in a team!**
+
 The generated configuration files contains absolute references to your framework installation. These are specific to your own installation. When you work in a team, each developer must keep his eclipse configuration files private. 
-
 
 
 h2(#netbeans). <a>Generate configuration files for Netbeans</a>
 
-play provides a command to simplify Netbeans configuration. To transform an existing application to a valid Netbeans project use the **netbeansify** command :
+play provides a command to simplify Netbeans configuration. To transform an existing application to a valid Netbeans project, use the **netbeansify** command:
 
 bc. # play netbeansify myApp
 
@@ -40,9 +39,9 @@ Then you can just open the application as a Netbeans project.
 
 Use the standard "Run" button to start the application. When the application is started you can attach a debugging session at any time using the "Debug" button. Stopping the debugging session doesn't stop the server.
 
-If you make changes to your application classpath or any important changes to your application, use **netbeansify** again to regenerate the configuration files. 
+If you make any important change to your application such as changing the classpath, use **netbeansify** again to regenerate the configuration files. 
 
-p(note). **Do not commit the nbproject directory when you work in a team !**
+p(note). **Do not commit the nbproject directory when you work in a team!**
  
 The generated configuration files contains absolute references to your framework installation. These are specific to your own installation. When you work in a team on the same application, each developer must keep his netbeans configuration files private.
 
@@ -57,8 +56,8 @@ Download and install the bundle provided for "Textmate":http://macromates.com/ t
 
 h2(#custom). <a>Manually configure your preferred editor</a>
 
-As play applications are standard Java applications you won't need any specific plugin to work with your preferred editor. 
-This however requires a little bit of knowledge on how Play works :
+As play applications are standard Java applications, you don't need any specific plugin to work with your preferred editor. 
+This however requires a little bit of knowledge on how Play works:
 
 h3. Classpath settings
 
@@ -71,19 +70,19 @@ A play application classpath is built as follows (in this order):
 
 p(note). *Tip*
  
-If you have some modules enabled, you will need to add all modules librairies (from the $module/lib directory) to the classpath as well.
+If you have any module enabled, you will need to add all modules' libraries (from the $module/lib directory) to the classpath as well.
 
 
 h3. Main class to run
 
-To start a play application just run the **play.server.Server** class. Play uses the **"application.path"** system property to locate the application to run. Typically you pass this value with :
+To start a play application, just run the **play.server.Server** class. Play uses the **"application.path"** system property to locate the application to run. Typically you pass this value with:
 
-bc. java -Dapplication.path="/app/path" ...
+bc. java -Dapplication.path="/app/path"...
 
 
 h3. Java agent
 
-To enable HotSwap reloading you have to load a Java agent packaged in the **play.jar** library. Typically like this :
+To enable HotSwap reloading you have to load a Java agent packaged in the **play.jar** library. Typically like this:
 
 bc. java -javaagent:"$PLAY_PATH/framework/play.jar" ...
 
@@ -92,11 +91,11 @@ It's not required, but will speed up class reloading when it is possible.
 
 h2. <a>Debugging issues</a>
 
-Play automatically reloads Java classes when the Java sources are modified. However as Java does not fully support class reloading, the JDPA debugger can easily get confused : breakpoints submission may fail or the debugger may stop on the wrong line when you step into the code.
+Play automatically reloads Java classes when the Java sources are modified. However as Java does not fully support class reloading, the JDPA debugger can easily get confused: breakpoints submission may fail or the debugger may stop on the wrong line when you step into the code.
 
 To avoid this behavior, the better way is to start a fresh debugging session after a code modification. Luckily, JPDA supports the ability to connect and disconnect the debugger at any time without restarting the JVM.
 
-So the correct work flow for debugging is :
+So the correct workflow for debugging is:
 
 * Make changes to your source code.
 * Refresh the browser to see the results. (At this time play will reload your code modifications and redefine classes in the JVM).
@@ -104,5 +103,5 @@ So the correct work flow for debugging is :
 * Debug and correct your code.
 * Disconnect the debugger.
 
-By using this work flow you will always have a debugger synchronized with the code loaded in the JVM.
+By using this workflow you will always have a debugger synchronized with the code loaded in the JVM.
 
