@@ -1,22 +1,22 @@
 h1. A first iteration for the data model
 
-Here we will start to write the model part of our blog engine.
+Here we will start to write the model for our blog engine.
 
 h2. <a>Introduction to JPA</a>
 
-The model layer has a central position in a play application (and in fact in all well designed application). It is the domain-specific representation of the information on which the application operates. As we want to create a blog engine the model layer will certainly contains classes like User, Post and Comment.
+The model layer has a central position in a play application (and in fact in all well designed application). It is the domain-specific representation of the information on which the application operates. As we want to create a blog engine, the model layer will certainly contains classes like User, Post and Comment.
 
-Because we want that most of data manipulated by the model objects survive between application restart we have to save them in a persistent datastore. A common choice to store data is to use a relational database. But because Java is an object oriented language we will use an 'Object Relational Mapper' to help to reduce the impedance mismatch.
+Because most model objects need to survive between application restarts, we have to save them in a persistent datastore. A common choice is to use a relational database. But because Java is an object oriented language, we will use an 'Object Relational Mapper' to help reduce the impedance mismatch.
 
-JPA is a Java specification that define a standard API for object relational mapping. As implementation of JPA, play uses the famous Hibernate framework. One advantage of using JPA over the standard Hibernate API is that all the 'mapping' in directly declared in the Java objects.
+JPA is a Java specification that defines a standard API for object relational mapping. As implementation of JPA, play uses the well-known Hibernate framework. One advantage of using JPA over the standard Hibernate API is that all the 'mapping' is declared directly in the Java objects.
 
-If you have ever used Hibernate or JPA before you will be surprised by the simplicity added by play at this level. No need to configure anything; JPA just work out of the box with play.
+If you have ever used Hibernate or JPA before you will be surprised by the simplicity added by play. No need to configure anything; JPA just works out of the box with play.
 
-If you don't know JPA, you can "read some of these simple presentation":http://java.sun.com/javaee/5/docs/tutorial/doc/bnbpz.html before to continue.
+If you don't know JPA, you can read "some of these simple presentations":http://java.sun.com/javaee/5/docs/tutorial/doc/bnbpz.html before continuing.
 
 h2. <a>Starting by the User class</a>
 
-We will start to code the blog engine by creating the User class. Create a new file **/yabe/app/models/User.java**, and declare a first implementation of the User class :
+We will start to code the blog engine by creating the User class. Create a new file **/yabe/app/models/User.java**, and declare a first implementation of the User class:
 
 bc. package models;
  
@@ -41,31 +41,31 @@ public class User extends Model {
  
 }
 
-The **@Entity** annotation mark this class as a managed JPA entity and the Model superclass automatically provides a set of usefull JPA helper that we will discover later. All fields of this class will be automatically persisted to the database. 
+The **@Entity** annotation marks this class as a managed JPA entity, and the Model superclass automatically provides a set of useful JPA helpers that we will discover later. All fields of this class will be automatically persisted to the database. 
 
-If you have already used JPA before, you know that every JPA entity must provide an @Id property but the Model superclass provides an automatically generated numeric id, that is a pretty good default in most cases. 
+If you have already used JPA before, you know that every JPA entity must provide an @Id property. Here the Model superclass provides an automatically generated numeric id, in most cases this is good enough.
 
-Now if you’re a Java developer with any experience at all, warning sirens are probably clanging like mad at the sight of a public variable. In Java (as in other object-oriented languages), best practice says to make all fields private and provide accessors and mutators. This is to promote encapsulation, a concept critical to object oriented design. But in fact, play take care of that for you and will automatically generate getter and setter for you while preserving encapsulation; we will see how that work later in this tutorial.
+Now if you’re a Java developer with any experience at all, warning sirens are probably clanging like mad at the sight of a public variable. In Java (as in other object-oriented languages), best practice says to make all fields private and provide accessors and mutators. This is to promote encapsulation, a concept critical to object oriented design. In fact, play takes care of that for you and automatically generates getters and setters while preserving encapsulation; we will see how it works later in this tutorial.
 
-You can now refresh the application homepage, to see the result. In fact, unless you made a mistake, you should see nothing specific: play has automatically compiled and loaded the User class, but this does not provide any feature to the application.
+You can now refresh the application homepage, to see the result. In fact, unless you made a mistake, you should not see any change: play has automatically compiled and loaded the User class, but this does not provide any feature to the application.
 
 h2. <a>Writing the first test</a>
 
-A good way to test the newly created User class, is to write a JUnit test case. It will allow to incrementally complete the application model and test that all is going fine.
+A good way to test the newly created User class is to write a JUnit test case. It will allow to incrementally complete the application model and ensure that all is fine.
 
-To run a test case, you need to start the application in a special 'test' mode. Stop the currently running application, open a command line and type :
+To run a test case, you need to start the application in a special 'test' mode. Stop the currently running application, open a command line and type:
 
 bc. ~$ play test
 
 !images/guide2-0!
 
-The 'play test' command is almost the same than 'play run', except that it load a test runner module that allow to run test suite directly from a browser. 
+The 'play test' command is almost the same than 'play run', except that it loads a test runner module that allows to run test suite directly from a browser. 
 
-Open a browser to the "http://localhost:9000/@tests":http://localhost:9000/@tests URL to see the test runner. You can try to select all the default tests and run them; all should be green... but these default tests does not test really anything.
+Open a browser to the "http://localhost:9000/@tests":http://localhost:9000/@tests URL to see the test runner. Try to select all the default tests and run them; all should be green... But these default tests don't really test anything.
 
 !images/guide2-1!
 
-To test the model part of the application we will use a JUnit test. As you see a default BasicTests.java already exists, so let's open it (**/yabe/test/BasicTest.java**):
+To test the model part of the application we will use a JUnit test. As you see a default BasicTests.java already exists, so let's open it: (**/yabe/test/BasicTest.java**):
 
 bc. import org.junit.*;
 import play.test.*;
@@ -80,7 +80,7 @@ public class BasicTest extends UnitTest {
  
 }
 
-Remove the useless default test (aVeryImportantThingToTest) and create a test that try to create a new user and retrieve it:
+Remove the useless default test (aVeryImportantThingToTest) and create a test that tries to create a new user and retrieve it:
 
 bc. @Test
 public void createAndRetrieveUser() {
@@ -95,17 +95,17 @@ public void createAndRetrieveUser() {
     assertEquals("Bob", bob.fullname);
 }
 
-As you see, the Model superclass give us two first very usefull methods : **save()** and **find()**. Select the **BasicTests.java** in the test runner, click start and check that all is green. 
+As you can see, the Model superclass gives us two first very useful methods : **save()** and **find()**. Select the **BasicTests.java** in the test runner, click start and check that all is green. 
 
-We will need a method on the User class that check if a user with specified username and password exists. Let's write it and test it.
+We will need a method on the User class that checks if a user with a specified username and password exists. Let's write it and test it.
 
-In the **User.java** source add the **connect()** method : 
+In the **User.java** source, add the **connect()** method:
 
 bc. public static User connect(String email, String password) {
     return find("byEmailAndPassword", email, password).first();
 }
 
-And now the test case :
+And now the test case:
 
 bc. @Test
 public void tryConnectAsUser() {
@@ -118,11 +118,11 @@ public void tryConnectAsUser() {
     assertNull(User.connect("tom@gmail.com", "secret"));
 }
 
-Each time you make a modification you can run all the tests from the play test runner to check you don't have broken anything. 
+Each time you make a modification you can run all the tests from the play test runner to make sure you didn't break anything. 
 
 h2. <a>The Post class</a>
 
-The Post class will represent blog posts. Let's write a first implementation :
+The Post class will represent blog posts. Let's write a first implementation:
 
 bc. package models;
  
@@ -152,11 +152,11 @@ public class Post extends Model {
  
 }
 
-Here we use the **@Lob** annotation to tell JPA that we wat that it use a large text database type to store the post content. We have declared the relation to the User class using **@ManyToOne**. That means that each Post is authored by a single User and that each User can author several Posts.
+Here we use the **@Lob** annotation to tell JPA to use a large text database type to store the post content. We have declared the relation to the User class using **@ManyToOne**. That means that each Post is authored by a single User, and that each User can author several Posts.
 
-We will write a new test case to check that to Post class works as expected. By before to write more tests we need to do something in the JUnit class. In the current test, the database content is never deleted, and each new run create more an more objects. It will become problematic soon because more advanced test will start to count objects to check that all is going file.
+We will write a new test case to check that to Post class works as expected. But before to write more tests, we need to do something in the JUnit class. In the current test, the database content is never deleted, each new run creating more and more objects. It will become problematic soon when more advanced test will start to count objects to check that all is fine.
 
-So let's write a JUnit **setup()** method to delete the database before each test :
+So let's write a JUnit **setup()** method to delete the database before each test:
 
 bc. public class BasicTest extends UnitTest {
  
@@ -169,7 +169,7 @@ bc. public class BasicTest extends UnitTest {
  
 }
 
-As you see, the Fixtures class is an helper that help you to deal with your database data during tests. Run the test again to check that you don't have broken anything, and start to write the next test :
+As you can see, the Fixtures class is a helper to deal with your database during tests. Run the test again to check that you don't have broken anything, and start to write the next test :
 
 bc. @Test
 public void createPost() {
