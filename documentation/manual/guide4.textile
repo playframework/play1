@@ -1,17 +1,17 @@
 h1. Viewing and posting comments
 
-The blog home page is now set, and we will continue by writing the post detail page. This page will show all the comments about the current post, and will include a form to post new comments.
+The blog home page is now set, and we will continue by writing the post details page. This page will show all the comments about the current post, and will include a form to post new comments.
 
 h2. <a>Creating the 'show' action</a>
 
-To display the post detail page, we will need a new action method to the Application controller. Let's call it show() :
+To display the post details page, we will need a new action method to the Application controller. Let's call it show():
 
 bc. public static void show(Long id) {
     Post post = Post.findById(id);
     render(post);
 }
 
-As you see this action is pretty simple. We declare the **id** method parameter to say play that we want automatically retrieve the HTTP 'id' parameter as a Long Java object. This parameter will be extracted either of the queryString, the URL path or the request body.
+As you can see this action is pretty simple. We declare the **id** method parameter to retrieve automatically the HTTP 'id' parameter as a Long Java object. This parameter will be extracted either from the queryString, from the URL path or from the request body.
 
 This action will display the **/yabe/app/views/Application/show.html** template :
 
@@ -20,11 +20,11 @@ bc. #{extends 'main.html' /}
  
 #{display post:post, as:'full' /}
 
-Because we already written the display tag, this page is really simple to write.
+Because we've already written the display tag, this page is really simple to write.
 
-h2. <a>Adding links to the detail page</a>
+h2. <a>Adding links to the details page</a>
 
-In the display tag we've left all links empty (using #). It is now time to make these links pointing to the **Application.show** action. With play you can easily build link in a template using the **@{...} notation**. This syntax uses the router to 'reverse' the URL needed to call the specified action. 
+In the display tag we've left all links empty (using #). It's now time to make these links pointing to the **Application.show** action. With play you can easily build links in a template using the **@{...} notation**. This syntax uses the router to 'reverse' the URL needed to call the specified action. 
 
 Let's edit the **/yabe/app/views/tags/display.html** tag :
 
@@ -34,11 +34,11 @@ bc. ...
 </h2>
 ...
 
-You can new refresh the home page, and click to a post title to display it. 
+You can new refresh the home page, and click on a post title to display it. 
 
 !images/guide4-0!
 
-Great but it miss a link to go back to the home page. Edit the **/yabe/app/views/main.html** template to complete the title link:
+It's great, but it lacks a link to go back to the home page. Edit the **/yabe/app/views/main.html** template to complete the title link:
 
 bc. ...
 <div id="title">
@@ -52,7 +52,7 @@ We can now navigate between the home page and the post detail pages.
 
 h2. <a>Specifying a better URL</a>
 
-As you see the post detail page URL looks like
+As you cqn see the post detail page URL looks like
 
 bc. /application/show?id=1
 
@@ -60,7 +60,7 @@ This is because play has used the default 'catch all' route.
 
 bc. *       /{controller}/{action}                  {controller}.{action}
 
-We can have a better URL by specifying a custom path for the **Application.show** action. Edit the **/yabe/conf/routes** file and add this route after the first route :
+We can have a better URL by specifying a custom path for the **Application.show** action. Edit the **/yabe/conf/routes** file and add this route after the first one:
 
 bc. GET     /posts/{id}                             Application.show
 
@@ -68,7 +68,7 @@ Refresh the browser and check that it now uses the correct URL.
 
 h2. <a>Adding some pagination</a>
 
-To allow users to navigate easily throught posts we will add a pagination mechanism. We'll extends the Post class to be able to fetch previous and next post as required:
+To allow users to navigate easily through posts, we will add a pagination mechanism. We'll extends the Post class to be able to fetch previous and next post as required:
 
 bc. public Post previous() {
     return Post.find("postedAt < ? order by postedAt desc", postedAt).first();
@@ -78,7 +78,7 @@ public Post next() {
     return Post.find("postedAt > ? order by postedAt asc", postedAt).first();
 }
 
-Because we will call these methods several times during a request, it could be optimized, but it will be sufficient right now. Also, add the pagination links in top of the show.html template (before the **#{display /}** tag in fact):
+Because we will call these methods several times during a request, it could be optimized, but it will be sufficient for now. Also, add the pagination links in top of the show.html template (before the **#{display /}** tag in fact):
 
 bc. <ul id="pagination">
     #{if post.previous()}
