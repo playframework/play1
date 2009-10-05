@@ -169,7 +169,7 @@ bc. public class BasicTest extends UnitTest {
  
 }
 
-As you can see, the Fixtures class is a helper to deal with your database during tests. Run the test again to check that you don't have broken anything, and start to write the next test :
+As you can see, the Fixtures class is a helper to deal with your database during tests. Run the test again to check that you don't have broken anything, and start to write the next test:
 
 bc. @Test
 public void createPost() {
@@ -199,7 +199,7 @@ p(note). **Don't forget** to import the **java.util.List** or will get a compila
 
 h2. <a>Finish with Comment</a>
 
-The last thing that we want to add at this first model draft is the ability to attach Comment to Posts. 
+The last thing that we need to add at this first model draft is the ability to attach comments to posts.
 
 The creation of the Comment class is pretty straightforward.
 
@@ -231,7 +231,7 @@ public class Comment extends Model {
  
 }
 
-Let's write a first test case :
+Let's write a first test case:
 
 bc. @Test
 public void postComments() {
@@ -264,7 +264,7 @@ public void postComments() {
     assertNotNull(secondComment.postedAt);
 }
 
-You see that the navigation between Post and Comments is not very easy because we need to use a query to retrieve all comments attached to Post. We can do better here by setting up the other side of the relation to the Post class. Add the comments field to the Post class :
+You see that the navigation between Post and Comments is not very easy: we need to use a query to retrieve all comments attached to Post. We can do better by setting up the other side of the relationship to the Post class. Add the comments field to the Post class:
 
 bc. ...
 @OneToMany(mappedBy="post", cascade=CascadeType.ALL)
@@ -279,11 +279,11 @@ public Post(User author, String title, String content) {
 }
 ...
 
-Note how we have used the mappedBy attribute to tell JPA that the Post class maintains the relation. When you define bi-directional relation with JPA it is very important to tell wich side will maintain the relation. In this case, because the Comments belong to the Post it is better that the Comment class maintains the relation. 
+Note how we have used the mappedBy attribute to tell JPA that the Post class maintains the relationship. When you define bi-directional relation with JPA it is very important to tell which side will maintain the relationship. In this case, since the Comments belong to the Post it's better that the Comment class maintains the relationship.
 
-We have setted the casacade property to tell JPA that we want that the Post deletion be cascaded to comments. This way, if you delete a post, all related comments will be deleted too.
+We have setted the casacade property to tell JPA that we want that the Post deletion be cascaded to comments. This way, if you delete a post, all related comments will be deleted as well.
 
-With this new relation, we will add an helper method to the Post class to simplify adding comments:
+With this new relationship, we will add a helper method to the Post class to simplify adding comments:
 
 bc. public Post addComment(String author, String content) {
     Comment newComment = new Comment(this, author, content).save();
@@ -291,7 +291,7 @@ bc. public Post addComment(String author, String content) {
     return this;
 }
 
-Let's write another test case to check that stuff :
+Let's write another test case to check that:
 
 bc. @Test
 public void useTheCommentsRelation() {
@@ -327,15 +327,15 @@ public void useTheCommentsRelation() {
     assertEquals(0, Comment.count());
 }
 
-Is it green ?
+Is it green?
 
 !images/guide2-2!
 
-h2. <a>Using fixture to write more complicated test</a>
+h2. <a>Using Fixtures to write more complicated test</a>
 
-When you start to write more complicated test, you often need to have an existing set of data to test on. Fixtures allows to describe your model in a YAML file and load it at any time before a test.
+When you start to write more complex tests, you often need a set of data to test on. Fixtures lets you describe your model in a YAML file and load it at any time before a test.
 
-Edit the **/yabe/test/data.yml** file and start to describe a User :
+Edit the **/yabe/test/data.yml** file and start to describe a User:
 
 bc. 
 User(bob):
@@ -348,7 +348,7 @@ User(bob):
 
 Well, because the data.yml file is a litle big, you can "download it here":files/data.yml.
 
-Now we create create a test case, that load these data and run some assertions over it:
+Now we create create a test case that loads this data and run some assertions over it:
 
 bc. @Test
 public void fullTest() {
@@ -389,17 +389,17 @@ public void fullTest() {
 
 h2. <a>Save your work</a>
 
-Well, we have now finished an hudge part on the blog engine. With all this things created and tested, we can now start to develop the web application.
+We have now finished an huge part on the blog engine. With all this things created and tested, we can now start to develop the web application itself.
 
-But before continuing, it's time to save our work using bazaar. Open a command line an type **bzr st** to see the modifications made since the latest commit:
+But before continuing, it's time to save our work in bazaar. Open a command line an type **bzr st** to see the modifications made since the latest commit:
 
 bc. $ bzr st
 
-As you see there are some new files not under version control. The **test-result** folder don't need to be versioned. So let's ignore it.
+As you can see, some new files are not under version control. The **test-result** folder doesn't need to be versioned, so let's ignore it.
 
 bc. $ bzr ignore test-result
 
-And add other files to version control using **bzr add**.
+Add other files to version control using **bzr add**.
 
 bc. $ bzr add
 
