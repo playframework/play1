@@ -142,7 +142,7 @@ OK, now refresh the blog home page.
 
 Not pretty but it works!
 
-However you see you have already started to duplicate code. Because we will display posts in several fashion (full, full with comment, teaser) we should create something like a function that we could call from several templates. This is exactly what a play tag does!
+However you see you have already started to duplicate code. Because we will display posts in several fashions (full, full with comment, teaser) we should create something like a function that we could call from several templates. This is exactly what a play tag does!
 
 To create a tag, just create the new **/yabe/app/views/tags/display.html** file. A tag is just another template. It has parameters (like a function). The **#{display /}** tag will have 2 parameters: the Post object to display and the display mode which will be one of 'home', 'teaser' or 'full'.
 
@@ -209,12 +209,12 @@ bc. #{extends 'main.html' /}
     
     #{if olderPosts.size()}
     
-        <div class="older-posts">    
+        <div class="older-posts">
             <h3>Older posts <span class="from">from this blog</span></h3>
         
             #{list items:olderPosts, as:'oldPost'}
                 #{display post:oldPost, as:'teaser' /}
-            #{/list}            
+            #{/list}
         </div>
         
     #{/if}

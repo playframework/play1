@@ -31,7 +31,7 @@ public class User extends Model {
     public String email;
     public String password;
     public String fullname;
-    public boolean isAdmin
+    public boolean isAdmin;
     
     public User(String email, String password, String fullname) {
         this.email = email;
@@ -310,7 +310,7 @@ public void useTheCommentsRelation() {
     assertEquals(1, Post.count());
     assertEquals(2, Comment.count());
  
-    // Retrieve the bob post
+    // Retrieve Bob's post
     bobPost = Post.find("byAuthor", bob).first();
     assertNotNull(bobPost);
  
