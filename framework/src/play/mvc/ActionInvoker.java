@@ -130,6 +130,21 @@ public class ActionInvoker {
                     if (ex.getTargetException() instanceof Result) {
                         actionResult = (Result) ex.getTargetException();
                     } else {
+                        // @Catch
+                        Object[] args = new Object[] { ex.getTargetException() };
+                        List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
+                        ControllerInstrumentation.stopActionCall();
+                        for (Method mCatch : catches) if (Modifier.isStatic(mCatch.getModifiers())) {
+                            Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
+                            for (Class exception : exceptions) {
+                                if (exception.isInstance(args[0])) {
+                                    mCatch.setAccessible(true);
+                                    Java.invokeStatic(mCatch, args);
+                                    break;
+                                }
+                            }
+                        }
+
                         throw ex;
                     }
                 }
