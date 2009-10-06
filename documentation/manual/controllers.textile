@@ -1,10 +1,10 @@
 h1. Controllers
 
-Business logic is managed in the domain model layer. As a client (typically a Web browser) cannot directly invoke this code, the functionality of domain object is exposed as resources represented by an URI. 
+Business logic is managed in the domain model layer. As a client (typically a Web browser) cannot directly invoke this code, the functionality of domain object is exposed as resources represented by a URI. 
 
-A client uses the uniform API provided by the HTTP protocol to manipulate these resources, and, by implication, the underlying business logic. However, this mapping of resource to domain object is not a bijection : the granularity can be expressed at different levels, some resources may be virtuals, some resources aliases may be defined, etc...
+A client uses the uniform API provided by the HTTP protocol to manipulate these resources, and by implication the underlying business logic. However, this mapping of resources to domain objects is not a bijection: the granularity can be expressed at different levels, some resources may be virtuals, some resources aliases may be defined...
 
-That is precisely the role played by the Controller layer : providing a **glue** between the domain model objects and transport layer events. As the Model layer, controllers are written in pure Java, making it easy to access or modify Model objects. And like the HTTP interface, Controllers are procedural and Request/Response oriented.
+This is precisely the role played by the Controller layer: providing a **glue** between the domain model objects and transport layer events. As the Model layer, controllers are written in pure Java, making it easy to access or modify Model objects. Like the HTTP interface, Controllers are procedural and Request/Response oriented.
 
 The Controller layer reduces the **impedance mismatch** between HTTP and the Domain Model.
 
@@ -13,7 +13,7 @@ p(note). **Note**
 There are different architectural models with different strategies. Some protocols give you direct access to the domain model objects. This is typically what EJB or Corba protocols do. In these cases, the architectural style used is RPC (Remote Procedure Call). These communication styles are hardly compatible with the Web architecture.
  
 Some technologies like SOAP try to give access to the model object domain through the Web. However, SOAP is just another RPC-style protocol, in this case using HTTP as a transport protocol. It is not an application protocol.
- 
+
 The principles of the Web are not fundamentally object oriented. So a layer is needed to adapt HTTP to your favorite language. 
 
 
@@ -21,7 +21,7 @@ h2. <a name="overview">A controller overview</a>
 
 A Controller is a Java class, hosted by the **controllers** package, and subclassing **play.mvc.Controller**.
 
-This is a Controller.
+This is a Controller:
 
 bc. package controllers;
  
@@ -42,19 +42,17 @@ public class Clients extends Controller {
  
 }
 
-Each public, static method in a Controller is called an action.
-
-The signature for an action method is always :
+Each public, static method in a Controller is called an action. The signature for an action method is always :
 
 bc. public static void action_name(params...);
 
 You can define parameters in the action method signature. These parameters will be automatically resolved by the framework from the corresponding HTTP parameters.
 
-Generally, an action method does not contain any return statement. The method exit is done by the invocation of a **result** method. In this exemple **render(...)** is a result method which executes and displays a template.
+Usually, an action method doesn't include any return statement. The method exit is done by the invocation of a **result** method. In this example, **render(...)** is a result method that executes and displays a template.
 
 h2. <a name="params">Retrieving HTTP parameters</a>
 
-An HTTP request contains some data. This data can be extracted from :
+An HTTP request contains data. This data can be extracted from:
 
 * The URI path: in **/clients/1541**, 1541 is dynamic part of the URI Pattern.
 * The Query String: **/clients?id=1541.**
@@ -68,32 +66,32 @@ In all cases, play extracts this data and builds a Map<String, String[]> which c
 
 h3. Using the params map
 
-The **params** object is available to any Controller class (it's defined in the **play.mvc.Controller** super class). This object contains all the HTTP parameters found for the current request.
+The **params** object is available to any Controller class (it is defined in the **play.mvc.Controller** super class). This object contains all the HTTP parameters found for the current request.
 
-For example :
+For example:
 
 bc. public static void show() {
     String id = params.get("id");
     String[] names = params.getAll("names");
 }
 
-You can also ask play to do the type conversion for you :
+You can also ask play to do the type conversion for you:
 
 bc. public static void show() {
     Long id = params.get("id", Long.class);
 }
 
-But wait, there are better ways to do this below :)
+But wait, there are better ways to do this :)
 
 h3. From the action method signature
 
-You can retrieve some HTTP parameters directly from the action method signature. The name of the Java parameter must be the same as the HTTP parameter.
+You can retrieve HTTP parameters directly from the action method signature. The name of the Java parameter must be the same as the HTTP parameter.
 
-For example, in this request :
+For example, in this request:
 
 bc. /clients?id=1451
 
-An action method can retrieve the **id** parameter value by declaring an **id** parameter in its signature : 
+An action method can retrieve the **id** parameter value by declaring an **id** parameter in its signature:
 
 bc. public static void show(String id) {
     System.out.println(id); 
@@ -113,7 +111,7 @@ bc. public static void show(Long[] id) {
     }
 }
 
-or even a collection type :
+or even a collection type:
 
 bc. public static void show(List<Long> id) {
     for(String anId : id) {
@@ -123,13 +121,13 @@ bc. public static void show(List<Long> id) {
 
 p(note). **Exceptions**
  
-If the HTTP parameter corresponding to the action method argument is not found, the corresponding method argument is set to it default value (typically null for objects and 0 for primitive numeric types). If a value is found but it can't be properly cast to the required Java type, an error is added to the validation error collection and the default value is used.
+If the HTTP parameter corresponding to the action method argument is not found, the corresponding method argument is set to it default value (typically null for objects and 0 for primitive numeric types). If a value is found but can't be properly cast to the required Java type, an error is added to the validation error collection and the default value is used.
 
 h2. <a name="binding">Advanced HTTP to Java binding</a>
 
 h3. Simple types
 
-All the native and common Java type are automatically bound :
+All the native and common Java type are automatically bound:
 
 **int**, **long**, **boolean**, **char**, **byte**, **float**, **double**, **Integer**, **Long**, **Boolean**, **Char**, **String**, **Float**, **Double**.
 
@@ -137,7 +135,7 @@ Note that if the parameter is missing in the HTTP Request, or that automatic con
 
 h3. Date
 
-A date object can be automatically bound if the string representation of the date matches one of the following patterns :
+A date object can be automatically bound if the string representation of the date matches one of the following patterns:
 
 * yyyy-MM-dd'T'hh:mm:ss'Z' // ISO8601 + timezone
 * yyyy-MM-dd'T'hh:mm:ss" // ISO8601
@@ -151,7 +149,7 @@ A date object can be automatically bound if the string representation of the dat
 * MM-dd-yy
 * MM'/'dd'/'yy
 
-For example :
+For example:
 
 bc. archives?from=21/12/1980
 
@@ -162,7 +160,7 @@ bc. public static void articlesSince(Date from) {
 
 h3. Files
 
-File upload is easy with play. Use a **multipart/form-data** encoded request to post files to the server, and then use the **java.io.File** type to retrieve the file object :
+File upload is easy with play. Use a **multipart/form-data** encoded request to post files to the server, and then use the **java.io.File** type to retrieve the file object:
 
 bc. public static void create(String comment, File attachment) {
     String s3Key = S3.post(attachment);
@@ -171,11 +169,11 @@ bc. public static void create(String comment, File attachment) {
     show(doc.id);
 }
 
-The created file has the same name as the original file. It's stored in a temporary directory and deleted at the end of the request. So you have to copy it in a safe directory or it will be automatically deleted by the framework after the request end.
+The created file has the same name as the original file. It's stored in a temporary directory and deleted at the end of the request. So you have to copy it in a safe directory or it will be lost.
 
 h3. Arrays or collections of supported types
 
-All supported types can be retrieved as an Array or a collection of objects :
+All supported types can be retrieved as an Array or a collection of objects:
 
 bc. public static void show(Long[] id) {
     ...
@@ -209,7 +207,7 @@ bc. ?client.name=Zenexity&client.email=contact@zenexity.fr
 
 play creates a Client instance and resolves HTTP parameters name to properties on the Client object. Unresolved parameters are safely ignored. Types mismatches are also safely ignored.
 
-Parameter binding is done recursively which means you can address complete object graphs:
+Parameter binding is done recursively, which means you can address complete object graphs:
 
 bc. ?client.name=Zenexity
 &client.address.street=64+rue+taitbout
@@ -221,7 +219,7 @@ h2. <a name="result">Result types</a>
 
 An action method has to generate an HTTP response. The easiest way to do this is to emit a Result object. When a Result object is emitted, the normal execution flow is interrupted and the method returns.
 
-For example :
+For example:
 
 bc. public static void show(Long id) {
     Client client = Client.findById(id);
@@ -235,14 +233,14 @@ h3. Return some textual content
 
 The **renderText(...)** method emits a simple Result event which writes some text directly to the underlying HTTP Response.
 
-Example : 
+Example:
 
 bc. public static void countUnreadMessages() {
     Integer unreadMessages = MessagesBox.countUnreadMessages();
     renderText(unreadMessages);
 }
 
-You can format the text message using the Java standard formatting syntax :
+You can format the text message using the Java standard formatting syntax:
 
 bc. public static void countUnreadMessages() {
     Integer unreadMessages = MessagesBox.countUnreadMessages();
@@ -251,7 +249,7 @@ bc. public static void countUnreadMessages() {
 
 h3. Execute a template
 
-If the generated content is complicated, you will use a template to generate the response content.
+If the generated content is complex, you should use a template to generate the response content.
 
 bc. public class Clients extends Controller {
 
@@ -263,13 +261,13 @@ bc. public class Clients extends Controller {
 
 A template name is automatically deduced from the Play conventions. The path of the default template is resolved using the Controller and action names. 
 
-In this example the invoked template is :
+In this example the invoked template is:
 
 bc. app/views/Clients/index.html
 
-h4. Add some data to the template scope
+h4. Add data to the template scope
 
-Often the template needs some data. You can add these data to the template scope using the **renderArgs** object :
+Often the template needs data. You can add these data to the template scope using the **renderArgs** object:
 
 bc.. public class Clients extends Controller {
  
@@ -283,13 +281,13 @@ bc.. public class Clients extends Controller {
 
 During template execution, the **client** variable will be defined.
 
-For example :
+For example:
 
 bc. <h1>Client ${client.name}</h1>
 
-h4. A simpler way to add data into the template scope
+h4. A simpler way to add data to the template scope
 
-You can pass data directly into the template using **render(...)** method arguments :
+You can pass data directly to the template using **render(...)** method arguments :
 
 bc. public static void show(Long id) {
     Client client = Client.findById(id);
@@ -298,23 +296,23 @@ bc. public static void show(Long id) {
 
 In this case, the variables accessible by the template have the same name as the local Java variables.
 
-You can pass more than one variable :
+You can pass more than one variable:
 
 bc. public static void show(Long id) {
     Client client = Client.findById(id);
     render(id, client);    
 }
 
-p(note). **Important !**
+p(note). **Important!**
  
 You can only pass **local variables** in this way.
 
 
 h4. Specify another template
 
-If you don't want use the default template, you can specify your own template file during the **render(...)** call. Just pass it as the first parameter of the render method :
+If you don't want to use the default template, you can specify your own template file during the **render(...)** call. Just pass it as the first parameter of the render method:
 
-Example : 
+Example:
 
 bc. public static void show(Long id) {
     Client client = Client.findById(id);
@@ -332,11 +330,11 @@ bc. public static void index() {
 
 h3. Action chaining
 
-There is no equivalent to the Servlet API **forward**. An HTTP request can only invoke one action. If you need to invoke another action you have to redirect the browser to the URL able to invoke that action. In this way the browser URL is always consistent with the executed action, and the **Back/Forward/Refresh** management is much easier !
+There is no equivalent to the Servlet API **forward**. An HTTP request can only invoke one action. If you need to invoke another action, you have to redirect the browser to the URL able to invoke that action. In this way, the browser URL is always consistent with the executed action, and the **Back/Forward/Refresh** management is much easier.
 
 You can send a Redirect response to any action, simply by invoking the action method in a Java way. The Java call is intercepted by the framework and the correct HTTP Redirect is generated.
 
-For example :
+For example:
 
 bc. public class Clients extends Controller {
 
@@ -353,7 +351,7 @@ bc. public class Clients extends Controller {
 
 }
 
-With these routes :
+With these routes:
 
 bc. GET    /clients/{id}            Clients.show
 POST   /clients                 Clients.create 
@@ -369,15 +367,15 @@ POST   /clients                 Clients.create
 
 h2. <a name="interceptions">Interceptions</a>
 
-A controller can define interception methods. Interceptors are invoked for all actions of the controller class and its descendants. It is a useful way to define treatments that are common to all actions :  verifying that a user is authenticated, loading request-scope information ...
+A controller can define interception methods. Interceptors are invoked for all actions of the controller class and its descendants. It's a useful way to define treatments that are common to all actions: verifying that a user is authenticated, loading request-scope information...
 
-These methods have to be **static** but not **public**. You have to annotate these method with a correct interception marker.
+These methods have to be **static** but not **public**. You have to annotate these method with a valid interception marker.
 
 h3. @Before
 
 Methods annotated with the **@Before** annotation are executed before each action call for this Controller.
 
-So, to create a security check :
+So, to create a security check:
 
 bc. public class Admin extends Application {
  
@@ -395,7 +393,7 @@ bc. public class Admin extends Application {
  
 }
 
-If the @Before method should not intercept all action calls, you can specify a list of specific actions not to be intercepted
+If you don't want the @Before method to intercept all action calls, you can specify a list of actions to exclude:
 
 bc. public class Admin extends Application {
  
@@ -435,7 +433,7 @@ bc. public class Admin extends Application {
 
 h3. @Finally
 
-Methods annotated with the **@Finally ** annotation are executed after each action result applied from for this Controller.
+Methods annotated with the **@Finally** annotation are executed after each action result is applied from for this Controller.
 
 bc. public class Admin extends Application {
  
@@ -459,7 +457,7 @@ If a Controller class is a subclass of another Controller class, interceptions a
 
 h3. Adding more interceptors using the @With annotation
 
-Because Java does not allow multiple inheritance, it's sometimes very limiting to rely on Controller hierarchy to apply interceptors. You can then define some interceptors in a totally different class, and link them with any controller using the @With annotation.
+Because Java does not allow multiple inheritance, it can be very limiting to rely on the Controller hierarchy to apply interceptors. But you can define some interceptors in a totally different class, and link them with any controller using the **@With** annotation.
 
 Example:
 
@@ -484,11 +482,11 @@ public class Admin extends Application {
 
 h2. <a name="session">Session and Flash scope</a>
 
-If you have to keep some data across multiple HTTP Requests, you can save them in the Session or the Flash scope. Data stored in the Session are available during the whole of the user session, and data stored in the flash scope are available to the next request only.
+If you have to keep data across multiple HTTP Requests, you can save them in the Session or the Flash scope. Data stored in the Session are available during the whole user session, and data stored in the flash scope are available to the next request only.
 
-It's important to understand that Session and Flash data are not stored in the server but are added to each subsequent HTTP Request, using the Cookie mechanism. So the data size is very limited (up to 4Ko); and you can only store String values.
+It's important to understand that Session and Flash data are not stored in the server but are added to each subsequent HTTP Request, using the Cookie mechanism. So the data size is very limited (up to 4Ko) and you can only store String values.
 
-Of course, cookies are signed with a secret key so the client can't modify the cookie data (or the cookie will be invalidated). The play session is not aimed to be used as a cache. If you need to cache some data related to a specific session, you can use the play built-in cache mechansim and use the *session.getId()* key to keep them related to a specific user session. 
+Of course, cookies are signed with a secret key so the client can't modify the cookie data (or it will be invalidated). The play session is not aimed to be used as a cache. If you need to cache some data related to a specific session, you can use the play built-in cache mechanism and use the *session.getId()* key to keep them related to a specific user session. 
 
 Example:
 
@@ -502,7 +500,7 @@ bc. public static void index() {
     render(messages);
 }
 
-The cache has a different semantic than the classic servlet HTTP session object. You can't rely on the fact that these objects will be always found in the cache. So it force you to handle the cache miss cases, and finally keep your application fully stateless.
+The cache has a different semantic than the classic servlet HTTP session object. You can't assume that these objects will be always in the cache. So it forces you to handle the cache miss cases, and keeps your application fully stateless.
 
 p(note). **Continuing the discussion**
  

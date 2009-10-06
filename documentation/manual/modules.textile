@@ -4,7 +4,7 @@ A play application can be assembled from several application modules. This allow
 
 h2. <a>What is a module ?</a>
 
-A module is just another play application; howewer some differences exiss in the way resources are loaded for an application module :
+A module is just another play application; however some differences exist in the way resources are loaded for an application module :
 
 * A module does not have a **conf/application.conf** file.
 * A module can have a **conf/routes** file, but these routes will not be  loaded automatically.
@@ -27,7 +27,7 @@ bc. # Additional modules
 #
 module.crud=${play.path}/modules/crud
 
-Let's say you have a large application with a CMS component, a forum component, a directory component and so on :
+Let's say you have a large application with a CMS component, a forum component, a directory component and so on:
 
 bc. module.cms=../cms
 module.forum=../forum
@@ -37,12 +37,12 @@ If module paths are relative they are resolved from the main application root.
 
 h2. <a>Load default routes from modules</a>
 
-A module can provide a default routes file. You can load it in the main application routes file, using a special route declaration :
+A module can provide a default routes file. You can load it in the main application routes file, using a special route declaration:
 
 bc. # Import the default CRUD routes
 GET     /admin	     module:crud
 
-You can even load routes from all available modules : 
+You can even load routes from all available modules:
 
 bc. GET     /	     module:*
 

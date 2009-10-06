@@ -4,7 +4,7 @@ The spring support module help you to integrate Spring managed beans with a play
 
 h2. <a>Enable the Spring module for the application</a>
 
-In the **/conf/application.conf** file, enable the Spring module by adding this line : 
+In the **/conf/application.conf** file, enable the Spring module by adding this line:
 
 bc. # The spring module
 module.spring=${play.path}/modules/spring

@@ -2,12 +2,12 @@ h1. HTTP routing
 
 The router is the component in charge of translating incoming HTTP Requests into action calls (a static, public method of a Controller).
 
-An HTTP request is seen as an event by the MVC framework. The event contains two major pieces of information :
+An HTTP request is seen as an event by the MVC framework. The event contains two major pieces of information:
 
 * The Request path (such as /clients/1542, /photos/list), including the query string.
-* The HTTP method (GET, POST, DELETE, ...)
+* The HTTP method (GET, POST, PUT, DELETE)
 
-h2. <a>About REST ...</a>
+h2. <a>About REST</a>
 
 Representational state transfer (REST) is a style of software architecture for distributed hypermedia systems such as the World Wide Web.
 
@@ -17,14 +17,14 @@ REST states a few key design principles:
 * Every resource is uniquely addressable using an URI
 * All resources share a uniform interface for the transfer of state between client and resource. 
 
-If you're using HTTP, these interfaces are defined by the set of availables HTTP methods. The protocol used to access the resource state is:
+If you're using HTTP, these interfaces are defined by the set of available HTTP methods. The protocol used to access the resource state is:
 
 * Client-server
 * Stateless
 * Cacheable
 * Layered
 
-If an application follows the main REST design principles, the application is RESTFul. The play framework makes it easy to build RESTFul applications :
+If an application follows the main REST design principles, the application is RESTFul. The play framework makes it easy to build RESTFul applications:
 
 * The play router interprets both URI and HTTP methods to route a request to a Java call. Regular expressions-based URI patterns provides you even more flexibility. 
 * The protocol is stateless. This means you can't save any state on the server between two successive requests.
@@ -34,7 +34,7 @@ h2. <a name="syntax">The routes file syntax</a>
 
 The **conf/routes** file is the configuration file used by the Router. This file list all the routes needed by the application. Each route consists of an HTTP method + URI pattern associated to a Java call.
 
-Let's see what a route definition looks like :
+Let's see what a route definition looks like:
 
 bc. GET    /clients/{id}             Clients.show           
 
@@ -47,7 +47,7 @@ GET    /clients/{id}             Clients.show
 
 h3. The HTTP method
 
-The HTTP method can be any one of the any valid methods supported by HTTP :
+The HTTP method can be any one of the any valid methods supported by HTTP:
 
 * **GET**
 * **POST**
@@ -59,7 +59,7 @@ If you specify * as method, this route will match the HTTP Request for any metho
 
 bc. *   /clients/{id}             Clients.show           
 
-This route will accept independently :
+This route will accept independently:
 
 bc. GET /clients/1541
 PUT /clients/1212
@@ -71,7 +71,7 @@ The URI pattern defines the request path needed by the route Some parts of the r
 
 bc. /clients/all
 
-exactly matches :
+exactly matches:
 
 bc. /clients/all
 
@@ -79,7 +79,7 @@ but ...
 
 bc. /clients/{id}
 
-independently matches :
+independently matches:
 
 bc. /clients/12121
 /clients/toto
@@ -90,11 +90,11 @@ bc. /clients/{id}/accounts/{accountId}
 
 The default matching strategy for a dynamic part is defined by the regular expression **/[^/]+/**. You can define your own regular expression for a dynamic part.
 
-This regex will only accept numerical values as id :
+This regex will only accept numerical values as id:
 
 bc. /clients/{<[0-9]+>id}
 
-This one will ensure id is a word containing between 4 and 10 lower case characters only :
+This one will ensure id is a word containing between 4 and 10 lower case characters only:
 
 bc. /clients/{<[a-z]{4,10}>id}
 
@@ -116,7 +116,7 @@ h3. Java call definition
 
 The last part a route definition is the Java call. This part is defined by the fully qualified name of an action method. The action method must be a static, public method of a Controller class. A Controller class must be defined in the **controllers** package and must be a subclass of **play.mvc.Controller**.
 
-You can add a Java package before the Controller class name if it isn't defined directly under the controllers package. The **controllers** pakage itself is implicit, so you don't need to specify it. 
+You can add a Java package before the Controller class name if it isn't defined directly under the controllers package. The **controllers** package itself is implicit, so you don't need to specify it. 
 
 bc. GET    /admin             admin.Dashboard.index           
 
@@ -124,18 +124,18 @@ h3. Assign static args
 
 In some cases, you want to reuse an existing action but define a more specific route based on the values of some of the arguments.
 
-Let's see how in this example : 
+Let's see how in this example:
 
 bc. public static void page(String id) {
     Page page = Page.findById(id);
     render(page);
 }
 
-With the corresponding route : 
+With the corresponding route:
 
 bc. GET    /pages/{id}         Application.page
 
-Now, I want to define an URL alias for the page with id 'home'. I can define another route with a static argument :
+Now, I want to define a URL alias for the page with id 'home'. I can define another route with a static argument:
 
 bc. GET    /home               Application.page(id:'home')
 GET    /pages/{id}         Application.page
@@ -147,12 +147,12 @@ h2. <a name="priority">Routes priority</a>
 
 Many routes can match the same request. If there is any conflict, the first route (following the declaration order)is used.
 
-For example :
+For example:
 
 bc. GET    /clients/all          Clients.listAll
 GET    /clients/{id}         Clients.show
 
-With these definitions, the URI :
+With these definitions, the URI:
 
 bc. /client/all
 
@@ -163,7 +163,7 @@ h2. <a name="static">Serving static resources</a>
 
 Use the special action **staticDir**, to point to each folder you wish to publish as a static resources container.
 
-For example :
+For example:
 
 bc. GET    /public/               staticDir:public
 
@@ -172,22 +172,22 @@ When supplied with a request for a /public/* path, play will serve your files fr
 Priorities are applied as for a standard route.
 
 
-h2. <a name="reverse">Reverse routing : generate some URL</a>
+h2. <a name="reverse">Reverse routing: generate some URL</a>
 
 The Router can be used to generate a URL from within a Java call. So you're able to centralize in one only configuration file all your URI patterns, and then be more confident when refactoring your application.
 
-For example, with this route definition :
+For example, with this route definition:
 
 bc. GET    /clients/{id}             Clients.show
 
-From within your code, you can generate the URL able to invoke Clients.show :
+From your code, you can generate the URL able to invoke Clients.show:
 
 bc. map.put("id", 1541);
 String url = Router.reverse("Clients.show", map).url;  GET /clients/1541
 
 p(note). The URL generation is integrated into many components of the framework. You never should use the Router.reverse operation directly.
 
-If you add parameters that are not included in the URI pattern, these parameters will be added to the query string :
+If you add parameters that are not included in the URI pattern, these parameters will be added to the query string:
 
 bc. map.put("id", 1541);
 map.put("display", "full");
