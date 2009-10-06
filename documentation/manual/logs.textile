@@ -4,19 +4,19 @@ The play logger is built on "Log4j":http://logging.apache.org/log4j/1.2/index.ht
 
 h2. <a>Logging from your application</a>
 
-play provides a default logger with the class **play.Logger**. This class uses Log4j to write messages and exceptions to a logger named "play".
+Play provides a default logger with the class **play.Logger**. This class uses Log4j to write messages and exceptions to a logger named "play".
 
-Logging from your application is easy : 
+Logging from your application is easy:
 
 bc. Logger.info("A log message");
 Logger.error(ex, "Oops");
 
-Methods of the **play.Logger** class support easy formatting through the standard Java formatter syntax : 
+Methods of the **play.Logger** class support easy formatting through the standard Java formatter syntax:
 
 bc. Logger.debug("The param was %s", param);
 Logger.info("I want to log %s and %s and %s", a, b, c);
 
-You can still use Log4j directly to create alternative loggers for specific needs :
+You can still use Log4j directly to create alternative loggers for specific needs:
 
 bc. org.apache.log4j.Logger.getLogger("another.logger");
 
@@ -30,7 +30,7 @@ You can change this value without restarting the server. Note that this level on
 
 If you need to fully configure Log4j, create a **log4j.properties** file in the **conf/** directory. Since this directory is the first element of the classpath, this file will be the default used by all libraries.
 
-The default log4j configuration is the following :
+The default log4j configuration is the following:
 
 bc. log4j.rootLogger=ERROR, Console
 
@@ -41,4 +41,4 @@ log4j.appender.Console=org.apache.log4j.ConsoleAppender
 log4j.appender.Console.layout=org.apache.log4j.PatternLayout
 log4j.appender.Console.layout.ConversionPattern=%d{ABSOLUTE} %-5p ~ %m%n
 
-Copy this file and update it for your specifics needs !
+Copy this file and update it for your specifics needs!
