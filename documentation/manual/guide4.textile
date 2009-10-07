@@ -135,11 +135,11 @@ You can try to post a new comment. It should just work.
 
 h2. <a>Adding validation</a>
 
-Currently we don't validate the form content before creating the comment. We would like to set both field as required. We can easily use the play validation mechanism to ensure that HTTP parameters are correctly filled. Modify the **postComment** action to add validation annotations and check that no error occurs:
+Currently we don't validate the form content before creating the comment. We would like to set both fields as required. We can easily use the play validation mechanism to ensure that HTTP parameters are correctly filled. Modify the **postComment** action to add validation annotations and check that no error occurs:
 
 bc. public static void postComment(Long postId, @Required String author, @Required String content) {
     Post post = Post.findById(postId);
-    if(validation.hasErrors()) {
+    if (Validation.hasErrors()) {
         render("Application/show.html", post);
     }
     post.addComment(author, content);
