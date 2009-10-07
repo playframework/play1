@@ -1,10 +1,10 @@
 h1. Integrate with OpenID
 
-"OpenID":http://openid.net/|OpenID is an open and decentralized identity system. You can easily accept new users in your application without the need to keep specific user information. You just have to keep track of authorized users through their **OpenID**.
+"OpenID":http://openid.net/|OpenID is an open and decentralized identity system. You can easily accept new users in your application without having to keep specific user information. You just have to keep track of authorized users through their **OpenID**.
 
 h2. <a>A simple OpenID authentication example</a>
 
-This example provides a high-level view of how OpenID authentication can be used within a Play! application :
+This example provides a high-level view of how OpenID authentication can be used within a Play! application:
 
 * For each request check if the user is connected
 * If not, display a page where the user can submit his OpenID
@@ -21,7 +21,7 @@ static void checkAuthenticated() {
 }
  
 public static void index() {
-    render("Hello %s !", session.get("user"));
+    render("Hello %s!", session.get("user"));
 }
      
 public static void login() {
@@ -49,13 +49,13 @@ bc. #{if flash.error}
 #{/if}
  
 <form action="@{Application.authenticate()}" method="POST">
-    <label for="user">What's your OpenID ?</label>
+    <label for="user">What's your OpenID?</label>
     <input type="text" name="user" id="user" />
-    <input type="submit" value="login ..." />
+    <input type="submit" value="login..." />
 </form>
 </code>
 
-And finally the routes definitions : 
+And finally the routes definitions:
 
 bc. GET   /                     Application.index
 GET   /login                Application.login

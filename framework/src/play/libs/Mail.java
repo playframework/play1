@@ -488,13 +488,9 @@ public class Mail {
             email.append("\n\tReplyTo: " + (replyTo instanceof InternetAddress ? ((InternetAddress) replyTo).toString() : replyTo.toString()));
             email.append("\n\tSubject: " + subject);
             email.append("\n\tAttachments: " + attachments.length);
-            if (contentType.equals("textPlain")) {
-                email.append("\n\tBody(" + contentType + "): " + alternate);
-            } else {
-                email.append("\n\tBody(" + contentType + "): " + body);
-                if (!StringUtils.isEmpty(alternate)) {
-                    email.append("\n\tAlternate Body(text/plain): " + alternate);
-                }
+            email.append("\n\tBody(" + contentType + "): " + body);
+            if (!StringUtils.isEmpty(alternate)) {
+                email.append("\n\tAlternate Body(text/plain): " + alternate);
             }
             email.append("\n");
             Logger.info(email.toString());

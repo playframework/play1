@@ -4,9 +4,9 @@ Internationalization is a means of adapting your application to different langua
 
 h2. <a>Only use UTF-8!</a>
 
-play supports only one encoding : UTF-8. Since encoding problems can be weird and difficult to deal with, we made the choice to support only one encoding. UTF-8 allows you to display all characters for all languages.
+play supports only one encoding: UTF-8. Since encoding problems can be weird and difficult to deal with, we made the choice to support only one encoding. UTF-8 allows you to display all characters for all languages.
 
-So be sure to be consistent with UTF-8 usage throughout your application:
+Be sure to be consistent with UTF-8 usage throughout your application:
 
 * Edit all your source files as UTF-8
 * Define proper encoding headers in HTTP
@@ -15,27 +15,27 @@ So be sure to be consistent with UTF-8 usage throughout your application:
 
 p(note). **Note**
  
-The UTF-8 encoding issue is the reason why most of the play configuration files, even though they are Java properties files, are not named *.properties. Java imposes the requirement that properties files must be encoded with **iso-8859-1**. play configuration files must be UTF-8 encoded. Need we way more?
+The UTF-8 encoding issue is the reason why most of the play configuration files, even though they are Java properties files, are not named *.properties. Java imposes the requirement that properties files must be encoded with **iso-8859-1**. Play configuration files must be UTF-8 encoded. Need we say more?
 
 h2. <a>Externalize your messages</a>
 
-To support i18n you have to externalize all messages in the application. 
+To support i18n you have to externalize all messages in your application. 
 
 Create a file named **messages** in the **conf/** directory of the application. This file is really just a Java properties file.
 
 bc. hello=Hello !
 back=Back
 
-Then you can define a specific **message** file for each language used in your application. Just add the ISO language code as file extension. 
+Then you can define a specific **message** file for each language used in your application. Just add the ISO language code as a file extension. 
 
-For example, the message file containing the corresponding French translations in **conf/messages.fr** :
+For example, the message file containing the corresponding French translations in **conf/messages.fr**:
 
-bc. hello=Bonjour !
+bc. hello=Bonjour!
 back=Retour
 
 h2. <a>Define languages supported by the application</a>
 
-In the **conf/application.conf** file define a list of supported languages.
+In the **conf/application.conf** file, define a list of supported languages:
 
 bc. application.langs=fr,en,ja
 
@@ -45,23 +45,23 @@ From your application code your can retrieve the current language for the user b
 
 bc. String lang = Lang.get();
 
-If you want to permanently change the user language, use the change method :
+If you want to permanently change the user language, use the change() method:
 
 bc. Lang.change("ja");
 
-The new value will be saved back in the user's language Cookie.
+The new value will be saved back in the user's language cookie.
 
 h2. Retrieve localized messages
 
-From application code, you can retrieve messages defined in message files. From Java, use the **play.i18n.Messages** object.
+From the application code, you can retrieve messages defined in message files. From Java, use the **play.i18n.Messages** object.
 
 bc. public static void hello() {
     renderText(Messages.get("hello"));
 }
 
-We support message formatting through the standard Java formatting syntax. You can also define dynamic content in your messages :
+We support message formatting through the standard Java formatting syntax. You can also define dynamic content in your messages:
 
-bc. hello=Hello %s !
+bc. hello=Hello %s!
 
 and
 
@@ -73,6 +73,6 @@ From a template you can use the special **&{...}** syntax to display localized m
 
 bc. <h1>&{'hello'}</h1>
 
-or using dynamic content
+or using dynamic content:
 
 bc. <h1>&{'hello', params.user}</h1>

@@ -18,7 +18,7 @@ Your first steps with play and your first 5 minutes of fun.
 
 h2. <a name="guide">Tutorial -- Play guide, a real world app step by step</a>
 
-Learn play by coding **'Yet Another Blog Engine'**, from start to finish. Each chapter will be occasion to learn one more cool play feature.
+Learn play by coding **'Yet Another Blog Engine'**, from start to finish. Each chapter will be an occasion to learn one more cool Play feature.
 
 # "Starting up the project":guide1
 # "A first iteration of the data model":guide2
@@ -38,7 +38,7 @@ Learn play by coding **'Yet Another Blog Engine'**, from start to finish. Each c
 
 h2. <a name="manual">The essential documentation</a>
 
-Everything you need to know about Play (and then some).
+Everything you need to know about Play.
 
 # "Main concepts":main
 ## "The MVC application model":main#mvc

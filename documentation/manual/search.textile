@@ -1,10 +1,10 @@
 h1. Search module
 
-The **Search** module allows you to have basic full text search functionnalities to your JPA Model. It is based on Lucene, and requires a real file system to store it's indexes.
+The **Search** module allows you to have basic full text search functionalities to your JPA Model. It is based on Lucene, and requires a real file system to store its indexes.
 
 h2. <a> Enable the module</a>
 
-In the **/conf/application.conf** file, enable the Search module by adding this line : 
+In the **/conf/application.conf** file, enable the Search module by adding this line: 
 
 bc. # The search module
 module.search=${play.path}/modules/search
@@ -29,7 +29,7 @@ Use the **Search** helper to build your queries:
 
 bc. Search.search("object:dogs", Folder.class)
 
-First parameter is a lucene query, second parameter is your Model class. You may want to refer to the Lucene query documentation at this point, knowing that the **Search** maintains a separated index per class and adds the properties marked with **@Field** as a Lucene Field.
+The first parameter is a lucene query and the second is your Model class. You may want to refer to the Lucene query documentation at this point, knowing that the **Search** maintains a separated index per class and adds the properties marked with **@Field** as a Lucene Field.
 
 The Search.search returns a query object that you can tweak:
 
@@ -49,20 +49,20 @@ or to get only ids (to use in a JPA query by example...):
 bc. List<Long> folderIds = q.fetchIds();
     
 
-To get full informations (like relevance), you'll use:
+To get full informations (like relevance), you would use:
 
-bc. List<QueryResult> results = q.executeQuery ();
+bc. List<QueryResult> results = q.executeQuery();
     
 
 h2. <a> Maintaining the indexes </a>
 
-Each time you create, update or delete your **Model** objects, the corresponding index is automaticly updated. 
+Each time you create, update or delete your **Model** objects, the corresponding index is automatically updated. 
 
-Should you require to re-index your objects (like if you have manually modified your database),  you'll reboot your application with 
+Should you need to re-index your objects (like if you have manually modified your database), you will reboot your application with:
 
 bc. play.search.reindex=enabled
 
-In your conf/application.conf. Don't forget to remove it after !
+In your conf/application.conf. Don't forget to remove it after!
 
 h2. <a> Misc configuration </a>
 
@@ -72,7 +72,7 @@ bc. play.search.path=/tmp/myDevApplication
 play.search.analyser=org.apache.lucene.analysis.standard.StandardAnalyzer
 
 **play.search.path** is where the module stores it's indexes
-**play.search.analyser** is the lucene analyser class used for indexation.
+**play.search.analyser** is the lucene analyzer class used for indexation.
 
 
 

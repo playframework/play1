@@ -386,6 +386,7 @@ form label {
     background: #591C64;
     padding: 2px 10px;
     -webkit-border-radius: 9px;
+    -moz-border-radius: 9px;
 }
 
 #adminMenu li.selected a {
@@ -463,6 +464,7 @@ tr.odd {
 
 .crudField .tag.selected {
     -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
 }
 
 .crudField .error {
@@ -479,6 +481,7 @@ tr.odd {
     background: #8B98AD !important;
     border: 0 !important;
     -webkit-border-radius: 16px;
+    -moz-border-radius: 16px;
 }
 
 #login label, #password-field label, #username-field label {
@@ -516,6 +519,7 @@ tr.odd {
 #newPost a {
     background: #C88116;
     -webkit-border-radius: 12px;
+    -moz-border-radius: 12px;
     padding: 5px 10px;
     font-size: 80%;
     text-decoration: none;
@@ -527,6 +531,7 @@ tr.odd {
 #newPost a span {
     background: #7D510E;
     -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
     padding: 0 5px 2px 5px;
     position: relative;
     top: -1px;

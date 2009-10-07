@@ -12,4 +12,18 @@
 	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email2"])[1]}', 'subject2')
 	assertEquals('Yop2', '$[subject2]')
 
+	open('@{Application.mail3()}')
+	assertTextPresent('OK3')
+	storeLastReceivedEmailBy('toto@localhost', 'email3')
+	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email3"])[1]}', 'subject3')
+	assertEquals('Yop3', '$[subject3]')
+
+
+	open('@{Application.mail4()}')
+	assertTextPresent('OK4')
+	storeLastReceivedEmailBy('toto@localhost', 'email4')
+	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email4"])[1]}', 'subject4')
+	assertEquals('Yop4', '$[subject4]')
+
+
 #{/selenium}

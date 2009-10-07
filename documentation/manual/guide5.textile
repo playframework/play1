@@ -1,14 +1,14 @@
 h1. Setting up a captcha
 
-Because anyone can post a comment to our blog engine, we should protect it a little to avoid automated spam. A simple way to protect a form from bit is to add a captcha image.
+Because anyone can post a comment to our blog engine, we should protect it a little to avoid automated spam. A simple way to protect a form from this is to add a captcha image.
 
 h2. <a>Generating the captcha image</a>
 
-We'll start to see how we can easily generate a captcha image using play. Basically we will just use another action, except that it will return a binary stream instead of HTML responses that we have returned so far. 
+We'll start to see how we can easily generate a captcha image using play. Basically we will just use another action, except that it will return a binary stream instead of HTML responses like what we've returned so far.
 
-As play is a **full-stack** web framework, we try to add built-in constructs for all web applications typical needs. And generating a captcha is one. We can use the **play.libs.Images** utility to simply generate a captcha image, and then write it to the HTTP response. 
+Play being a **full-stack** web framework, we try to include built-in constructs for web applications' most typical needs; generating a captcha is one of them. We can use the **play.libs.Images** utility to simply generate a captcha image, and then write it to the HTTP response. 
 
-As always, we will start with a simple implementation. Add the **captcha** action to the **Application** controller:
+As usual, we will start with a simple implementation. Add the **captcha** action to the **Application** controller:
 
 bc. public static void captcha() {
     Images.Captcha captcha = Images.captcha();
@@ -27,17 +27,17 @@ And try the **captcha** action by opening "http://localhost:9000/captcha":http:/
 
 It should generate a random text for each refresh.
 
-h2. <a>How to manage the state ?</a>
+h2. <a>How to manage the state?</a>
 
-Well, it was easy. But the most complicated part comes now. To validate the captcha we need to save somewhere the random text written to the captcha image and then check it at the form submission time. 
+Until now it was easy, but the most complicated part is coming. To validate the captcha we need to save somewhere the random text written to the captcha image and then check it at the form submission time. 
 
 Of course we could just put the text to the user session at the image generation time and then retrieve it later. But this solution has two drawbacks:
 
-**First** the play session is stored as a cookie. It solve a lot of problems in terms of architecture but has a lot of implications. Data written to the session cookie are signed (so the user can't modify them) but not crypted. If we write the captcha code to the session any bot could easily resolve it by reading the session cookie.
+**First** the play session is stored as a cookie. It solves a lot of problems in terms of architecture but has a lot of implications. Data written to the session cookie are signed (so the user can't modify them) but not crypted. If we write the captcha code to the session any bot could easily resolve it by reading the session cookie.
 
-**Then** remember than play is a **stateless** framework. We want to manage things in a pure stateless way. Typically, what happen if a user open simultaneously two differents blog page with two differents captcha images ? We have to track the captcha code for each form.
+**Then** remember than play is a **stateless** framework. We want to manage things in a pure stateless way. Typically, what happens if a user opens simultaneously two different blog pages with two different captcha images? We have to track the captcha code for each form.
 
-So to resolve the problem we need two things. We will store the captcha secreet key on the server side. Because it is a transient data we can easily use the play **Cache**. Moreover because cached data have a limited life time it will add one more security mechanism (let's say that a captcha code will be available for only 10mn). Then to resolve the code later we need to generate a **unique ID**. This unique ID will be added to each form as an hidden field and implicitely references a generated captcha code.
+So to resolve the problem we need two things. We will store the captcha secret key on the server side. Because it is a transient data we can easily use the play **Cache**. Moreover because cached data have a limited life time it will add one more security mechanism (let's say that a captcha code will be available for only 10mn). Then to resolve the code later we need to generate a **unique ID**. This unique ID will be added to each form as an hidden field and implicitely references a generated captcha code.
 
 This way we solve elegantly our state problem.
 
@@ -54,7 +54,7 @@ p(note). **Don't forget** to import the play.cache.*.
 
 h2. <a>Adding the captcha image to the comment form</a>
 
-Now, before to display a comment form we will generate a unique ID. Then we will modify the HTML form to integrate a captcha image using this ID, and add the ID to another hidden field.
+Now, before displaying a comment form we will generate a unique ID. Then we will modify the HTML form to integrate a captcha image using this ID, and add the ID to another hidden field.
 
 Let's rewrite the **Application.show** action:
 
@@ -83,7 +83,7 @@ bc. ...
 </p>
 ...
 
-Good start. The comment form has now a captcha image.
+Good start. The comment form now has a captcha image.
 
 !images/guide5-2!
 
@@ -91,7 +91,7 @@ h2. <a>Validating the captcha</a>
 
 Now we just have to validate the captcha. We have added the **randomID** as an hidden field right ? So we can retrieve it in the **postComment** action, then retrieve the actual code from Cache and finally compare it to the submitted code.
 
-Not so difficult. Let's modify the **postComment** action.
+Not that difficult. Let's modify the **postComment** action.
 
 bc. public static void postComment(
         Long postId, 
@@ -112,7 +112,7 @@ bc. public static void postComment(
     show(postId);
 }
 
-Well because we have now more error messages, modify the way we display error in the **show.html** template:
+Because we have now more error messages, modify the way we display errors in the **show.html** template:
 
 bc. .. 
 #{ifErrors}
@@ -122,7 +122,7 @@ bc. ..
 #{/ifErrors}
 ...
 
-p(note). Typically for more complex form, error messages are not managed this way but externalized in the **messages** file. We'll see that later.
+p(note). Typically for more complex forms, error messages are not managed this way but externalized in the **messages** file. We'll see that later.
 
 Check that the captcha is now fully functional.
 

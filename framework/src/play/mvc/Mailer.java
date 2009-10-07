@@ -112,11 +112,13 @@ public class Mailer implements LocalVariablesSupport {
             templateName = args[0].toString();
         }
 
-        Map<String, Object> templateBinding = new HashMap();
+        Map<String, Object> templateHtmlBinding = new HashMap();
+        Map<String, Object> templateTextBinding = new HashMap();
         for (Object o : args) {
             List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
             for (String name : names) {
-                templateBinding.put(name, o);
+                templateHtmlBinding.put(name, o);
+                templateTextBinding.put(name, o);
             }
         }
 
@@ -131,7 +133,7 @@ public class Mailer implements LocalVariablesSupport {
         String bodyText = null;
         try {
             Template templateHtml = TemplateLoader.load(templateName + ".html");
-            bodyHtml = templateHtml.render(templateBinding);
+            bodyHtml = templateHtml.render(templateHtmlBinding);
         } catch (TemplateNotFoundException e) {
             if (contentType != null && !"text/plain".equals(contentType)) {
                 throw e;
@@ -140,7 +142,7 @@ public class Mailer implements LocalVariablesSupport {
 
         try {
             Template templateText = TemplateLoader.load(templateName + ".txt");
-            bodyText = templateText.render(templateBinding);
+            bodyText = templateText.render(templateTextBinding);
         } catch (TemplateNotFoundException e) {
             if ("text/plain".equals(contentType)) {
                 throw e;
@@ -150,7 +152,7 @@ public class Mailer implements LocalVariablesSupport {
          // Content type
         
         if (contentType == null) {
-            if (bodyHtml == null) {
+            if (bodyHtml != null) {
                 contentType = "text/html";
             } else {
                 contentType = "text/plain";
@@ -183,11 +185,9 @@ public class Mailer implements LocalVariablesSupport {
 
         }
 
+        System.out.println("body text [" + bodyText + "]");
         // Send
-        if ("text/html".equals(contentType)) {
-            return Mail.send(from, replyTo, recipients, subject, bodyHtml, bodyText, contentType, attachements);
-        }
-        return Mail.send(from, replyTo, recipients, subject, bodyText, contentType, attachements);
+        return Mail.send(from, replyTo, recipients, subject, bodyHtml, bodyText, contentType, attachements);
     }
 
     public static boolean sendAndWait(Object... args) {
