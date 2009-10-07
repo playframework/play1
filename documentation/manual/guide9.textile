@@ -98,9 +98,11 @@ bc. #{extends 'admin.html' /}
 
 Finally, edit the **yabe/app/views/Admin/index.html** template to link the **Write a new post** button to this form:
 
-bc. <p id="newPost" >
+bc. ...
+<p id="newPost" >
     <a href="@{form()}"><span>+</span> write a new post</a>
 </p>
+...
 
 You can check the result:
 
@@ -127,6 +129,10 @@ bc. public static void save(String title, String content, String tags) {
     post.save();
     index();
 }
+
+p(note). Here we use render("@form") as a shortcut of render("Admin/form.html"). It just says play to use the default template of the form action.
+
+Test it!
 
 h2. <a>Reusing this stuff for Post 'edition'</a>
 
@@ -259,4 +265,6 @@ And for better URL we will use the same trick as before, by adding a new preferr
 bc. POST    /admin/myPosts/{id}                  Admin.save
 POST    /admin/new                          Admin.save
 
-That's done! Now we're using the same action for both creating new blog posts and editing old ones.
+That's done! Now we're using the same action for both creating new blog posts and editing old ones, and the administration area is finished!
+
+p(note). Go to the "next part":guide10. 

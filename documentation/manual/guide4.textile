@@ -4,14 +4,16 @@ The blog home page is now set, and we will continue by writing the post details 
 
 h2. <a>Creating the 'show' action</a>
 
-To display the post details page, we will need a new action method to the Application controller. Let's call it show():
+To display the post details page, we will need a new action method to the Application controller. Let's call it **show()**:
 
 bc. public static void show(Long id) {
     Post post = Post.findById(id);
     render(post);
 }
 
-As you can see this action is pretty simple. We declare the **id** method parameter to retrieve automatically the HTTP 'id' parameter as a Long Java object. This parameter will be extracted either from the queryString, from the URL path or from the request body.
+As you can see this action is pretty simple. We declare the **id** method parameter to retrieve automatically the HTTP **'id'** parameter as a Long Java object. This parameter will be extracted either from the queryString, from the URL path or from the request body.
+
+p(note). If we try to send an **id** HTTP parameter that is not a valid number, the id variable value will be null and play will automatically add a validation error to the **errors** container.
 
 This action will display the **/yabe/app/views/Application/show.html** template :
 
@@ -64,6 +66,8 @@ We can have a better URL by specifying a custom path for the **Application.show*
 
 bc. GET     /posts/{id}                             Application.show
 
+p(note). This way the id parameter will be extracted from the URL path.
+
 Refresh the browser and check that it now uses the correct URL.
 
 h2. <a>Adding some pagination</a>
@@ -78,7 +82,7 @@ public Post next() {
     return Post.find("postedAt > ? order by postedAt asc", postedAt).first();
 }
 
-Since we will call these methods several times during a request it could be optimized, but it's good enough for now. Also, add the pagination links in top of the show.html template (before the **#{display /}** tag):
+Since we will call these methods several times during a request it could be optimized, but it's good enough for now. Also, add the pagination links in top of the show.html template (before the **#{display/}** tag):
 
 bc. <ul id="pagination">
     #{if post.previous()}

@@ -22,8 +22,8 @@ Play will use the static type of the method parameter, to translate the HTTP val
 Smart binding also works **with any classes.**
 
 bc. public class Person {
-    String name;
-    Integer age;
+    public String name;
+    public Integer age;
 }
 
 A simplistic controller action to add a person may look like this:
@@ -34,7 +34,7 @@ bc. public static void add(Person p) {
 
 The HTML form defines fields with composite names:
 
-bc. <form action="/Directory/add" >
+bc. <form action="/Directory/add" method="POST">
     Name: <input type="text" name="p.name" />
     Age: <input type="text" name="p.age" />
 </form>
