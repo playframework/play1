@@ -6,7 +6,7 @@ h2. <a>Generating the captcha image</a>
 
 We'll start to see how we can easily generate a captcha image using play. Basically we will just use another action, except that it will return a binary stream instead of HTML responses like what we've returned so far.
 
-Play being a **full-stack** web framework, we try to include built-in constructs for web applications' most typical needs; generating a captcha is one of them. We can use the **play.libs.Images** utility to simply generate a captcha image, and then write it to the HTTP response. 
+Play being a **full-stack** web framework, we try to include built-in constructs for web application's most typical needs; generating a captcha is one of them. We can use the **play.libs.Images** utility to simply generate a captcha image, and then write it to the HTTP response. 
 
 As usual, we will start with a simple implementation. Add the **captcha** action to the **Application** controller:
 
@@ -14,6 +14,8 @@ bc. public static void captcha() {
     Images.Captcha captcha = Images.captcha();
     renderBinary(captcha);
 }
+
+Note that we can pass the captcha object directly to the renderBinary() method because the Images.Captcha class implements java.io.InputStream. 
 
 p(note). **Don't forget** to import the play.libs.*.
 
@@ -49,6 +51,8 @@ bc. public static void captcha(String id) {
     Cache.set(id, code, "10mn");
     renderBinary(captcha);
 }
+
+Note that the **getText()** method takes any color as parameter. It will use this color to draw the text.
 
 p(note). **Don't forget** to import the play.cache.*.
 
@@ -112,7 +116,7 @@ bc. public static void postComment(
     show(postId);
 }
 
-Because we have now more error messages, modify the way we display errors in the **show.html** template:
+Because we have now more error messages, modify the way we display errors in the **show.html** template (yes we will just display the first error, it's good enough):
 
 bc. .. 
 #{ifErrors}
@@ -122,10 +126,12 @@ bc. ..
 #{/ifErrors}
 ...
 
-p(note). Typically for more complex forms, error messages are not managed this way but externalized in the **messages** file. We'll see that later.
+p(note). Typically for more complex forms, error messages are not managed this way but externalized in the **messages** file and each error is printed in side of the corresponding field.
 
 Check that the captcha is now fully functional.
 
 !images/guide5-3!
+
+Great!
 
 p(note). Go to the "next part":guide6. 

@@ -64,7 +64,7 @@ import play.mvc.*;
 public class Tags extends CRUD {    
 }
 
-Now just open the "http://localhost:9000/admin":http://localhost:9000/admin URL, and you should get to the administration area.
+Now just open the "http://localhost:9000/admin/":http://localhost:9000/admin/ URL, and you should get to the administration area.
 
 !images/guide7-1!
 
@@ -246,7 +246,7 @@ bc. #{extends 'CRUD/layout.html' /}
 	</div>
  
 	<div id="crudListTable">
-		#{crud.table fields:['content', 'post', 'author'] /}
+		#{crud.table /}
 	</div>
  	
 	<div id="crudListPagination">
@@ -278,6 +278,8 @@ bc. #{crud.table fields:['content', 'post', 'author']}
   </a>
  #{/crud.custom}
 #{/crud.table}
+
+p(note). Yes there is some groovy syntaxic sugar at work here.
 
 h2. <a>Customizing the 'Post' form</a>
 
@@ -356,5 +358,7 @@ bc. #{crud.form}
 This is a little hacky and we could do better here, but we have now a simpler tags selector using a little bit of javascript:
 
 !images/guide7-6!
+
+This is a good start for the administration area!
 
 p(note). Go to the "next part":guide8. 

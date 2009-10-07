@@ -1,6 +1,6 @@
 h1. Building the first screen
 
-Now that we have built a first data model, it's time to start to create the first page of the application. This page will just show to most recent posts, as well as a list of older posts.
+Now that we have built a first data model, it's time to start to create the first page of the application. This page will just show the most recent posts, as well as a list of older posts.
 
 Here is a mock of what we want to achieve:
 
@@ -31,6 +31,10 @@ public class Bootstrap extends Job {
     }
  
 }
+
+We have annotated this Job with the **@OnApplicationStart** annotation to tell play that we want to run this jobs synchronously at the application start.
+
+p(note). In fact this job will be run differently in DEV or PROD modes. In DEV mode, play waits for a first request to start. So this job will be executed synchronously at the first request. This way, if the job fail, you will get the error message in your browser. In PROD mode however, the job will be executed at application start (synchrously with the **'play run'** command) and will prevent the application to start in case of error.
 
 You have to create a initial-data.yml in the **/yabe/conf** directory. You can of course reuse the **data.yml** content that we just used for tests previously.
 
@@ -231,7 +235,7 @@ Reload the page and check that all is fine.
 
 h2. <a>Improving the layout</a>
 
-As you can see, the index.html template extends main.html. Because we want to provide a common layout to all blog pages with the blog title and authentication links, we need to modify this file.
+As you can see, the **index.html** template extends **main.html**. Because we want to provide a common layout to all blog pages with the blog title and authentication links, we need to modify this file.
 
 Edit the **/yabe/app/views/main.html** file :
 
@@ -279,7 +283,9 @@ bc. <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w
 
 Refresh and check the result. It seems to work, except that the **blogTitle** and the **blogBaseLine** variables are not displayed. This is because we didn't pass them during the **render(...)** call. Of course we could add them to the **render()** call in the index action. But because the **main.html** file will be used as main template for all application actions, we don't want to add them every time.
 
-One way to execute the same code for each action of a controller (or a hierarchy of controllers) is to define a **@Before** interceptor. Let's add the **addDefaults()** method to the Application controller :
+One way to execute the same code for each action of a controller (or a hierarchy of controllers) is to define a **@Before** interceptor. 
+
+Let's add the **addDefaults()** method to the Application controller :
 
 bc. @Before
 static void addDefaults() {
@@ -287,7 +293,7 @@ static void addDefaults() {
     renderArgs.put("blogBaseline", Play.configuration.getProperty("blog.baseline"));
 }
 
-All variables added to the **renderArgs** scope will be available from the templates. And you cqn see that the method reads the variables' values from the **Play.configuration** object. This object contains all configuration keys from the **/yabe/conf/application.conf** file.
+All variables added to the **renderArgs** scope will be available from the templates. And you can see that the method reads the variable's values from the **Play.configuration** object. This object contains all configuration keys from the **/yabe/conf/application.conf** file.
 
 Add this 2 keys to the configuration file:
 

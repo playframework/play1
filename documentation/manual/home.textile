@@ -29,12 +29,8 @@ Learn play by coding **'Yet Another Blog Engine'**, from start to finish. Each c
 # "A basic admin area using CRUD":guide7
 # "Adding authentication":guide8
 # "Creating a custom editor area":guide9
-# "Building a media library":guide10
-# "More fun with the Flickr API":guide11
-# "Sending emails notifications":guide12
-# "Now with a search engine":guide13
-# "Writing the UI tests":guide14
-# "Preparing for production":guide15
+# "Completing the application tests":guide10
+# "Preparing for production":guide11
 
 h2. <a name="manual">The essential documentation</a>
 

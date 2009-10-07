@@ -6,9 +6,9 @@ h2. <a>Introduction to JPA</a>
 
 The model layer has a central position in a play application (and in fact in all well designed application). It is the domain-specific representation of the information on which the application operates. As we want to create a blog engine, the model layer will certainly contains classes like User, Post and Comment.
 
-Because most model objects need to survive between application restarts, we have to save them in a persistent datastore. A common choice is to use a relational database. But because Java is an object oriented language, we will use an 'Object Relational Mapper' to help reduce the impedance mismatch.
+Because most model objects need to survive between application restarts, we have to save them in a persistent datastore. A common choice is to use a relational database. But because Java is an object oriented language, we will use an **'Object Relational Mapper'** to help reduce the impedance mismatch.
 
-JPA is a Java specification that defines a standard API for object relational mapping. As implementation of JPA, play uses the well-known Hibernate framework. One advantage of using JPA over the standard Hibernate API is that all the 'mapping' is declared directly in the Java objects.
+JPA is a Java specification that defines a standard API for object relational mapping. As implementation of JPA, play uses the well-known "Hibernate":http://www.hibernate.org framework. One advantage of using JPA over the standard Hibernate API is that all the 'mapping' is declared directly in the Java objects.
 
 If you have ever used Hibernate or JPA before you will be surprised by the simplicity added by play. No need to configure anything; JPA just works out of the box with play.
 
@@ -43,7 +43,11 @@ public class User extends Model {
 
 The **@Entity** annotation marks this class as a managed JPA entity, and the Model superclass automatically provides a set of useful JPA helpers that we will discover later. All fields of this class will be automatically persisted to the database. 
 
-If you have already used JPA before, you know that every JPA entity must provide an @Id property. Here the Model superclass provides an automatically generated numeric id, in most cases this is good enough.
+p(note). It's not required that your model objects extend the **play.db.jpa.Model** class. You can work as plain JPA as well. But extending this class is a good choice in most cases as it will ease a lot the JPA stuff.
+
+If you have already used JPA before, you know that every JPA entity must provide an **@Id** property. Here the Model superclass provides an automatically generated numeric id, in most cases this is good enough.
+
+p(note). Don't think about this provided **id** field as a **functional identifier** but as a **technical identifier**. It is generally a good idea to keep both concepts separated and to keep an automatically generated numeric id as technical identifier.
 
 Now if you’re a Java developer with any experience at all, warning sirens are probably clanging like mad at the sight of a public variable. In Java (as in other object-oriented languages), best practice says to make all fields private and provide accessors and mutators. This is to promote encapsulation, a concept critical to object oriented design. In fact, play takes care of that for you and automatically generates getters and setters while preserving encapsulation; we will see how it works later in this tutorial.
 
@@ -59,13 +63,15 @@ bc. ~$ play test
 
 !images/guide2-0!
 
-The 'play test' command is almost the same than 'play run', except that it loads a test runner module that allows to run test suite directly from a browser. 
+The **'play test'** command is almost the same than **'play run'**, except that it loads a test runner module that allows to run test suite directly from a browser. 
+
+p(note). When you run a play application in **test mode**, play will automatically switch to the **test** framework id and load the **application.conf** file accordingly. Check "this page":ids for more informations.
 
 Open a browser to the "http://localhost:9000/@tests":http://localhost:9000/@tests URL to see the test runner. Try to select all the default tests and run them; all should be green... But these default tests don't really test anything.
 
 !images/guide2-1!
 
-To test the model part of the application we will use a JUnit test. As you see a default BasicTests.java already exists, so let's open it: (**/yabe/test/BasicTest.java**):
+To test the model part of the application we will use a JUnit test. As you see a default BasicTests.java already exists, so let's open it (**/yabe/test/BasicTest.java**):
 
 bc. import org.junit.*;
 import play.test.*;
@@ -154,7 +160,7 @@ public class Post extends Model {
 
 Here we use the **@Lob** annotation to tell JPA to use a large text database type to store the post content. We have declared the relation to the User class using **@ManyToOne**. That means that each Post is authored by a single User, and that each User can author several Posts.
 
-We will write a new test case to check that to Post class works as expected. But before to write more tests, we need to do something in the JUnit class. In the current test, the database content is never deleted, each new run creating more and more objects. It will become problematic soon when more advanced test will start to count objects to check that all is fine.
+We will write a new test case to check that the Post class works as expected. But before to write more tests, we need to do something in the JUnit class. In the current test, the database content is never deleted, each new run creating more and more objects. It will become problematic soon when more advanced test will start to count objects to check that all is fine.
 
 So let's write a JUnit **setup()** method to delete the database before each test:
 
@@ -168,6 +174,8 @@ bc. public class BasicTest extends UnitTest {
     ...
  
 }
+
+p(note). The **@Before** concept is a core concept of the JUnit testing tool.
 
 As you can see, the Fixtures class is a helper to deal with your database during tests. Run the test again to check that you don't have broken anything, and start to write the next test:
 
@@ -264,7 +272,9 @@ public void postComments() {
     assertNotNull(secondComment.postedAt);
 }
 
-You see that the navigation between Post and Comments is not very easy: we need to use a query to retrieve all comments attached to Post. We can do better by setting up the other side of the relationship to the Post class. Add the comments field to the Post class:
+You see that the navigation between Post and Comments is not very easy: we need to use a query to retrieve all comments attached to Post. We can do better by setting up the other side of the relationship to the Post class. 
+
+Add the comments field to the Post class:
 
 bc. ...
 @OneToMany(mappedBy="post", cascade=CascadeType.ALL)
@@ -279,9 +289,9 @@ public Post(User author, String title, String content) {
 }
 ...
 
-Note how we have used the mappedBy attribute to tell JPA that the Post class maintains the relationship. When you define bi-directional relation with JPA it is very important to tell which side will maintain the relationship. In this case, since the Comments belong to the Post it's better that the Comment class maintains the relationship.
+Note how we have used the **mappedBy** attribute to tell JPA that the Post class maintains the relationship. When you define bi-directional relation with JPA it is very important to tell which side will maintain the relationship. In this case, since the Comments belong to the Post it's better that the Comment class maintains the relationship.
 
-We have setted the casacade property to tell JPA that we want that the Post deletion be cascaded to comments. This way, if you delete a post, all related comments will be deleted as well.
+We have setted the **casacade** property to tell JPA that we want that the Post deletion be cascaded to comments. This way, if you delete a post, all related comments will be deleted as well.
 
 With this new relationship, we will add a helper method to the Post class to simplify adding comments:
 
@@ -391,7 +401,7 @@ h2. <a>Save your work</a>
 
 We have now finished an huge part on the blog engine. With all this things created and tested, we can now start to develop the web application itself.
 
-But before continuing, it's time to save our work in bazaar. Open a command line an type **bzr st** to see the modifications made since the latest commit:
+But before continuing, it's time to save your work in bazaar. Open a command line an type **bzr st** to see the modifications made since the latest commit:
 
 bc. $ bzr st
 

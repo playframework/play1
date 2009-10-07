@@ -100,7 +100,7 @@ public class Admin extends Controller {
 And refactor the routes definition in **yabe/conf/routes**:
 
 bc. # Administration
-GET     /admin                                  Admin.index
+GET     /admin/?                                Admin.index
 *       /admin                                  module:crud
 
 Now link the 'Log in to write something' text from the **yabe/app/views/main.html** template to this controller:

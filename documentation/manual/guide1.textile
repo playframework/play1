@@ -2,7 +2,7 @@ h1. Starting up the project
 
 h2. <a>Introduction</a>
 
-In this tutorial you will learn the play framework by coding a real web application, from start to finish. In this application, we will try to use everything you would need in a real project, while introducing good practices for play development.
+In this tutorial you will learn the play framework by coding a real web application, from start to finish. In this application, we will try to use everything you would need in a real project, while introducing good practices for play application development.
 
 We have split the tutorial into several independent parts. Each part will introduce more complex features, and provide everything that a real project needs: validation, error handling, a complete security, an automated test suite, a shiny web interface, an administration area, etc.
 
@@ -12,17 +12,19 @@ h2. <a>The project</a>
 
 We chose to create yet another blog engine. It's not a very imaginative choice but it will allow to explore most of the functionalities needed by a modern web application. 
 
-To complicate things a bit we will manage several users with different roles (writer, editor, admin) and build a complete set of Web services that could be reused in other applications.
+To complicate things a bit we will manage several users with different roles (editor, admin).
 
 We will call this blog engine project **yabe**.
 
 !images/guide1-0!
 
+p(note). This application is distributed as an sample application as well. You can retrieve the final code in the **samples-and-tests/yabe** directory of your play installation.
+
 h2. <a>Prerequisites</a>
 
 First of all, make sure that you have a working Java installation. Play requires **Java 5 or later**.
 
-As we will use the command line a lot, it's better to use a Unix-like OS. If you run a Windows system, it will also work fine; you'll just have to type a few commands in the cmd prompt.
+As we will use the command line a lot, it's better to use a Unix-like OS. If you run a Windows system, it will also work fine; you'll just have to type a few commands in the command prompt.
 
 We will assume that you already have a knowledge of Java and Web development (especially HTML, CSS and Javascript). However you don't need to have a deep knowledge of all the JEE components. Play is a 'full stack' Java framework and it provides or encapsulates all the Java API you will need. No need to know how to configure a JPA entity manager or deploy a JEE component.
 
@@ -32,9 +34,9 @@ Later in this tutorial we will use Lighttpd and MySql to show how to deploy a pl
 
 h2. <a>Installation of the play framework</a>
 
-Installation is very simple. Just download the latest binary package from the download page and unzip it.
+Installation is very simple. Just download the latest binary package from the download page and unzip it to any path.
 
-p(note). If you're using windows, it is generally a good idae to avoid space characters in the path, so for example **c:\play** would be a better choice than **c:\Documents And Settings\user\play**.
+p(note). If you're using windows, it is generally a good idea to avoid space characters in the path, so for example **c:\play** would be a better choice than **c:\Documents And Settings\user\play**.
 
 To work efficiently, you need to add the play directory to your working path. It allows to type just **'play'** at the command prompt to use the play utility. To check that the installation worked, just open a new command line and type **'play'**; it should show you the play basic usage help.
 
@@ -46,11 +48,11 @@ Open a new command line and type:
 
 bc. ~$ play new yabe
 
-It will prompt you for the application full name. Type 'Yet Another Blog Engine'.
+It will prompt you for the application full name. Type **'Yet Another Blog Engine'**.
 
 !images/guide1-1!
 
-The 'play new' command creates a new directory **yabe/** and populates it with a series of files and directories, the most important being:
+The **'play new'** command creates a new directory **yabe/** and populates it with a series of files and directories, the most important being:
 
 **app/** contains the core of the application, split between models, controllers and views directories. It can contains other Java package as well. This is the directory where *.java source files live.
 
@@ -84,7 +86,7 @@ The main entry point of your application is the **conf/routes** file. This file 
 
 bc. GET		/			Application.index
 
-That simply tells play that when the web server receives a **GET** request for the **/** path, it must call the **Application.index** Java method. In this case, **Application.index** is a shortcut for **controller.Application.index**, because the controllers package is implicit. 
+That simply tells play that when the web server receives a **GET** request for the **/** path, it must call the **Application.index** Java method. In this case, **Application.index** is a shortcut for **controllers.Application.index**, because the controllers package is implicit. 
 
 When you create standalone Java applications you generally use a single entry point defined by a method such as:
 
@@ -92,7 +94,7 @@ bc. public static void main(String[] args) {
   ... 
 }
 
-A play application has several entry points, one for each URL. We call these methods 'action' methods. Action methods are defined in special classes that we call 'controllers'.
+A play application has several entry points, one for each URL. We call these methods **'action'** methods. Action methods are defined in special classes that we call **'controllers'**.
 
 Let's see how the **controllers.Application** controller looks like. Open the **yabe/app/controllers/Application.java** source file:
 
@@ -147,7 +149,7 @@ bc. <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w
 
 Do you see the **#{doLayout /}** tag? This is where the content of **Application/index.html** will be inserted.
  
-We can try to edit the controller file to see how play automatically reloads it. Open the app/controllers/Application.java file in a text editor, and add a mistake by removing the trailing semicolon after the render() call:
+We can try to edit the controller file to see how play automatically reloads it. Open the **yabe/app/controllers/Application.java** file in a text editor, and add a mistake by removing the trailing semicolon after the render() call:
 
 bc. public static void index() {
     render()
@@ -164,9 +166,9 @@ bc. public static void index() {
     render();
 }
 
-This time, play has correctly reloaded the controller and replaced the old code in the JVM. Each request to the **/** URL will output the 'Yop' message to the console.
+This time, play has correctly reloaded the controller and replaced the old code in the JVM. Each request to the **'/'** URL will output the 'Yop' message to the console.
 
-You can remove this useless line, and now edit the Application/index.html template to replace the welcome message:
+You can remove this useless line, and now edit the **yabe/app/views/Application/index.html** template to replace the welcome message:
 
 bc. #{extends 'main.html' /}
 #{set title:'Home' /}
@@ -183,7 +185,7 @@ One more thing before starting to code. For the blog engine, we will need a data
 
 At the beginning, we will do a lot of testing and changes in the application model. For that reason, it's better to use an-memory database so we always start with a fresh data set.
 
-To set up the database, open the **conf/application.conf** file and uncomment this line:
+To set up the database, open the **yabe/conf/application.conf** file and uncomment this line:
 
 bc. db=mem
 
@@ -197,7 +199,7 @@ h2. <a>Using a version control system (VCS) to track changes</a>
 
 When you work on a project, it's highly recommended to store your source code in a VCS. It allows to revert to a previous version if a change breaks something, work with several peoples and give access to all the successive versions of the application. Of course you can use any VCS to store your project, but here we will use Bazaar as an example. Bazaar is a distributed source version control system.
 
-Installing bazaar is out of the scope of this tutorial but it is very easy any system. Once you have a working installation of bazaar, go to the blog directory and init the application versioning by typing :
+Installing bazaar is out of the scope of this tutorial but it is very easy for any system. Once you have a working installation of bazaar, go to the blog directory and init the application versioning by typing :
 
 bc. $ bzr init
 

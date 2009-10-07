@@ -35,7 +35,7 @@ public class Tag extends Model implements Comparable<Tag> {
 Because we want something like lazy tags creation we will always get them using the **findOrCreateByName(String name)** factory method. Let's add it to the Tag class:
 
 bc. public static Tag findOrCreateByName(String name) {
-    Tag tag = Tag.find("byName", name).one();
+    Tag tag = Tag.find("byName", name).first();
     if(tag == null) {
         tag = new Tag(name);
     }
@@ -59,6 +59,8 @@ public Post(User author, String title, String content) {
     this.postedAt = new Date();
 }
 ...
+
+p(note). Note that we use a **TreeSet** here in order to keep the tag list in a predictible order (alphabetical order in fact, because of our previous compareTo implementation).
 
 We will keep this relationship unidirectional.
 
@@ -126,7 +128,7 @@ public static List<Post> findTaggedWith(String... tags) {
 }
 ...
 
-The tricky part is that we have to use a **having count** statement to filter only posts that have exactly **all tags** from the join view.
+The tricky part is that we have to use a **having count** statement to filter only posts that have exactly **all tags** from the joined view.
 
 p(note). **Note** that we can't use the **Post.find("...", tags, tags.count)** signature here. It's just because **tags** is already a **vararg**.
 
