@@ -3,36 +3,36 @@ h1. Installation guide
 
 h2. <a>Prerequisites</a>
 
-To run the play framework, you will need "Java 5 or later":http:java.sun.com. If you wish to build play from source, you will need the "Bazaar source control client":http:bazaar-vcs.org/ to fetch the source code and "Ant":http:ant.apache.org/ to build it. 
+To run the play framework, you need "Java 5 or later":http:java.sun.com. If you wish to build play from source, you will need the "Bazaar source control client":http:bazaar-vcs.org/ to fetch the source code and "Ant":http:ant.apache.org/ to build it.
 
-The play command line utility use python. So it should work out of the box on any UNIX system. If you'are running Windows, don't worry, a python runtime is bundled with the framework.
+The play command line utility uses python. So it should work out of the box on any UNIX system. If you're running Windows, don't worry, a python runtime is bundled with the framework.
 
 
-h2. <a>Download Binary package</a>
+h2. <a>Download the binary package</a>
 
 Download the latest "play binary package":http:www.playframework.org/download and extract the archive. For convenience, you should add the framework installation directory to your system PATH. If you're on UNIX, make sure that the _play_ script is runnable (otherwise simply do a **chmod +x play**). That's all.
 
 p(note). *Tip*
  
-If you need to rebuild the framework for whatever reason, cd into the *$PLAY_HOME/framework* directory and run *ant*.
+If you need to rebuild the framework for whatever reason, run *ant* from the *$PLAY_HOME/framework* directory.
 
 
-h2. <a>Build from latest sources</a>
+h2. <a>Build from the latest sources</a>
 
 To benefit from the latest improvements and bug fixes, you may want to compile play from sources. You'll need a "Bazaar client":http:bazaar-vcs.org/Download to fetch the sources and "Ant":http:ant.apache.org/ to build the framework.
 
-From the command line :
+From the command line:
 
 bc. # bzr checkout lp:play
 # cd play/framework
 # ant
 
-Play framework is ready to use.
+The Play framework is ready to use.
 
 p(note). lp:play currently aliases to http:bazaar.launchpad.net/%7Eplay-developers/play/1.0/
 
 
-h2. <a>Use the play command</a>
+h2. <a>Using the play command</a>
 
 When the framework is correctly installed, open a shell and execute *play*. 
 
@@ -47,15 +47,15 @@ You can get more help on any specific command using *play help any-command-name-
 bc. # play help run
 
 
-h2. <a>Create a new application</a>
+h2. <a>Creating a new application</a>
 
-Use the **new** command to create a new application. You must give a non existant path where the application will be created.
+Use the **new** command to create a new application. You must give a non-existent path where the application will be created.
 
 bc. # play new myApp
 
 !images/guide1-1!
 
-Will create a new application. Start it with : 
+Will create a new application. Start it with:
 
 bc. # play run myApp
 

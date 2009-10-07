@@ -10,5 +10,18 @@ public class Welcome extends Mailer {
         addRecipient("toto@localhost");
         send(msg);
     }    
+  
+   public static void welcome2() {
+        String msg = "Welcome";
+        setSubject("Yop3");
+        addRecipient("toto@localhost");
+        send(msg);
+    }    
     
+    public static void welcome3() {
+        String msg = "Welcome";
+        setSubject("Yop4");
+        addRecipient("toto@localhost");
+        send(msg);
+    }  
 }

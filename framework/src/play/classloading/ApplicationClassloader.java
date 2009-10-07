@@ -13,6 +13,8 @@ import java.security.Permissions;
 import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -333,6 +335,11 @@ public class ApplicationClassloader extends ClassLoader {
                     allClasses.add(clazz);
                 }
             }
+            Collections.sort(allClasses, new Comparator<Class>() {
+                public int compare(Class o1, Class o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
         }
         return allClasses;
     }

@@ -1,14 +1,14 @@
 h1. Setting up a basic administration area using CRUD
 
-For now we have now way to create new blog posts are monitorate comments using the blog UI. Play provides an out of the box **CRUD** module that will help  to quickly generate a basic administration area.
+Currently, we have no way to create new blog posts and moderate comments using the blog UI. Play provides an out of the box **CRUD** module that will help quickly generate a basic administration area.
 
 h2. <a>Enabling the CRUD module</a>
 
-A play application can be assembled from several application modules. This allows you to reuse application components across several application or split a large application into several smaller applications.
+A play application can be assembled from several application modules. This lets you reuse components across several applications or split a large application into several smaller ones.
 
-The CRUD module is a generic application that introspects the model classes to create simple list and form.
+The CRUD module is a generic application that introspects the model classes to create simple lists and forms.
 
-To enable the CRUD module, you have to add this line to the **/yabe/conf/application.conf** file:
+To enable the CRUD module, add this line to the **/yabe/conf/application.conf** file:
 
 bc. # Import he crud module
 module.crud=${play.path}/modules/crud
@@ -20,11 +20,11 @@ bc. # Import CRUD routes
 
 This will import all the CRUD routes using the **/admin** prefix for the URL paths.
 
-You have to restart the application to take the new modul in account.
+You have to restart the application to take the new module into account.
 
 h2. <a>Declaring the CRUD controllers</a>
 
-For each model object that we want to integrate to the administration area, we have to declare a controller that just extends the **controllers.CRUD** super controller. This is very easy.
+For each model object that we want to integrate to the administration area, we have to declare a controller that extends the **controllers.CRUD** super controller. This is very easy.
 
 Create one controller for each model object. For example, for the **Post** object create the **Posts** controller in the **/yabe/app/controllers/Posts.java** file. 
 
@@ -36,7 +36,7 @@ import play.mvc.*;
 public class Posts extends CRUD {    
 }
 
-p(note). The convention is to pluralize the model object name to create the corresponding controller. This way, play will automatically find the associate model object for each controller. If you need to use a different name, you can still use the **@CRUD.For** annotation. Check the "manual page":crud.
+p(note). The convention is to pluralize the model object name to create the corresponding controller. This way, play will automatically find the associated model object for each controller. If you need to use a different name, you can still use the **@CRUD.For** annotation. Check the "manual page":crud.
 
 Create the same for all model objects:
 
@@ -64,11 +64,11 @@ import play.mvc.*;
 public class Tags extends CRUD {    
 }
 
-Now just open the "http://localhost:9000/admin":http://localhost:9000/admin URL, and you should get the administration area.
+Now just open the "http://localhost:9000/admin/":http://localhost:9000/admin/ URL, and you should get to the administration area.
 
 !images/guide7-1!
 
-If you browse it a little, you that the objects names in the lists are a little rough. This is because the default is to use a simple **toString()** to get a readable representation of the model objects.
+If you browse it a little, you will notice that the object names in the lists are a little rough. This is because the default is to use a simple **toString()** to get a readable representation of the model objects.
 
 We can easily fix that, by providing correct implementations of the **toString()** method for all models. For example, for the User class:
 
@@ -80,9 +80,9 @@ public String toString() {
 
 h2. <a>Adding validation</a>
 
-The main problem of the generated administration area, is that forms do not contains any validation rules. But in fact the CRUD module is able to extract the validation rules from the validation annotation if the model class is correctly annotated.
+The main problem of the generated administration area is that forms don't contain any validation rules. But actually the CRUD module is able to extract the validation rules from the validation annotations if the model class is correctly annotated.
 
-Let's add some annotation to the **User** class:
+Let's add some annotations to the **User** class:
 
 bc. package models;
  
@@ -151,7 +151,7 @@ And check the result:
 
 !images/guide7-3!
 
-Here you see an intersting side effect: the **@MaxSize** validation rule, has changed the way that play display the Post form. It now uses a large text area for the content field.
+Here you see an interesting side effect: the **@MaxSize** validation rule has changed the way play displays the Post form. It now uses a large text area for the content field.
 
 Finally we can add validation rules to the **Comment** and **Tag** classes as well:
 
@@ -201,11 +201,11 @@ public class Comment extends Model {
 
 h2. <a>Better form labels</a>
 
-As you see the form labels are a little rough. Play has used the Java field name as form label. To customize it, we just have to provide better label in the **/yabe/conf/messages** file.
+As you can see the form labels are a little rough. Play uses the Java field name as form label. To customize it, we just have to provide better labels in the **/yabe/conf/messages** file.
 
-p(note). In fact you can have a separate **messages** file for each language supported by your application. For example you could put french messages in the **/yabe/conf/messages.fr** file.
+p(note). In fact, you can have a separate **messages** file for each language supported by your application. For example, you could put French messages in the **/yabe/conf/messages.fr** file.
 
-So, add these label to the **messages** file:
+Add these label to the **messages** file:
 
 bc. title=Title
 content=Content
@@ -225,11 +225,11 @@ Then refresh any form, and you will see the new form labels:
 
 h2. <a>Customizing the 'Comments' data list</a>
 
-The CRUD module is made to be fully customizable. For example if you look at the comments list page tha way that data are listed is not very good. We would like add more columns, especially the 'related post' column to help us to easily filter the list.
+The CRUD module is made to be fully customizable. For example if you look at the comments list page, the way that data is listed is not great. We would like to add more columns, especially the 'related post' column to help us filter the list easily.
 
-In fact as your application keep the master, you can freeky override any **action** or **template** provided by the CRUD module. For example if we want to customize the 'comments list' view, we just have to provide another **/yabe/app/views/Comments/list.html** template.
+In fact as your applications keep the master, you can really override any **action** or **template** provided by the CRUD module. For example if we want to customize the 'comments list' view, we just have to provide another **/yabe/app/views/Comments/list.html** template.
 
-The **CRUD** module provide more play commands when it is enabled. The **crud:ov** command help you to override any template. From a command line, type:
+The **CRUD** module provides more play commands when it's enabled. The **crud:ov** command helps you override any template. From a command line, type:
 
 bc. $ play crud:ov --template Comments/list
 
@@ -246,7 +246,7 @@ bc. #{extends 'CRUD/layout.html' /}
 	</div>
  
 	<div id="crudListTable">
-		#{crud.table fields:['content', 'post', 'author'] /}
+		#{crud.table /}
 	</div>
  	
 	<div id="crudListPagination">
@@ -259,7 +259,7 @@ bc. #{extends 'CRUD/layout.html' /}
  
 </div>
 
-The **#{crud.table /}** actually generates the table. We can customize it using the **fields** parameter to add more columns. Try:
+The **#{crud.table /}** actually generates the table. We can customize it using the **fields** parameter to add more columns. Try this:
 
 bc. #{crud.table fields:['content', 'post', 'author'] /}
 
@@ -267,7 +267,7 @@ And now we have 3 columns in the table:
 
 !images/guide7-5!
 
-The problem is that the **content** field could be very long for some comments. We will specialize the way that the **#{crud.table /}** handles it to be able to troncate it if needed.
+The problem is that the **content** field could be very long for some comments. We will specialize the way that the **#{crud.table /}** handles it to be able to truncate it if needed.
 
 We can specify a custom way to display each field using the **#{crud.custom /}** tag as is:
 
@@ -278,6 +278,8 @@ bc. #{crud.table fields:['content', 'post', 'author']}
   </a>
  #{/crud.custom}
 #{/crud.table}
+
+p(note). Yes there is some groovy syntaxic sugar at work here.
 
 h2. <a>Customizing the 'Post' form</a>
 
@@ -353,8 +355,10 @@ bc. #{crud.form}
     #{/crud.custom}
 #{/crud.form}
 
-Well this is a little hacky and we could do better here, but we have now a simpler tags selector using a little bit of javascript:
+This is a little hacky and we could do better here, but we have now a simpler tags selector using a little bit of javascript:
 
 !images/guide7-6!
+
+This is a good start for the administration area!
 
 p(note). Go to the "next part":guide8. 

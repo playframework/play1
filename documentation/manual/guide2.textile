@@ -1,22 +1,22 @@
 h1. A first iteration for the data model
 
-Here we will start to write the model part of our blog engine.
+Here we will start to write the model for our blog engine.
 
 h2. <a>Introduction to JPA</a>
 
-The model layer has a central position in a play application (and in fact in all well designed application). It is the domain-specific representation of the information on which the application operates. As we want to create a blog engine the model layer will certainly contains classes like User, Post and Comment.
+The model layer has a central position in a play application (and in fact in all well designed application). It is the domain-specific representation of the information on which the application operates. As we want to create a blog engine, the model layer will certainly contains classes like User, Post and Comment.
 
-Because we want that most of data manipulated by the model objects survive between application restart we have to save them in a persistent datastore. A common choice to store data is to use a relational database. But because Java is an object oriented language we will use an 'Object Relational Mapper' to help to reduce the impedance mismatch.
+Because most model objects need to survive between application restarts, we have to save them in a persistent datastore. A common choice is to use a relational database. But because Java is an object oriented language, we will use an **'Object Relational Mapper'** to help reduce the impedance mismatch.
 
-JPA is a Java specification that define a standard API for object relational mapping. As implementation of JPA, play uses the famous Hibernate framework. One advantage of using JPA over the standard Hibernate API is that all the 'mapping' in directly declared in the Java objects.
+JPA is a Java specification that defines a standard API for object relational mapping. As implementation of JPA, play uses the well-known "Hibernate":http://www.hibernate.org framework. One advantage of using JPA over the standard Hibernate API is that all the 'mapping' is declared directly in the Java objects.
 
-If you have ever used Hibernate or JPA before you will be surprised by the simplicity added by play at this level. No need to configure anything; JPA just work out of the box with play.
+If you have ever used Hibernate or JPA before you will be surprised by the simplicity added by play. No need to configure anything; JPA just works out of the box with play.
 
-If you don't know JPA, you can "read some of these simple presentation":http://java.sun.com/javaee/5/docs/tutorial/doc/bnbpz.html before to continue.
+If you don't know JPA, you can read "some of these simple presentations":http://java.sun.com/javaee/5/docs/tutorial/doc/bnbpz.html before continuing.
 
 h2. <a>Starting by the User class</a>
 
-We will start to code the blog engine by creating the User class. Create a new file **/yabe/app/models/User.java**, and declare a first implementation of the User class :
+We will start to code the blog engine by creating the User class. Create a new file **/yabe/app/models/User.java**, and declare a first implementation of the User class:
 
 bc. package models;
  
@@ -31,7 +31,7 @@ public class User extends Model {
     public String email;
     public String password;
     public String fullname;
-    public boolean isAdmin
+    public boolean isAdmin;
     
     public User(String email, String password, String fullname) {
         this.email = email;
@@ -41,27 +41,33 @@ public class User extends Model {
  
 }
 
-The **@Entity** annotation mark this class as a managed JPA entity and the Model superclass automatically provides a set of usefull JPA helper that we will discover later. All fields of this class will be automatically persisted to the database. 
+The **@Entity** annotation marks this class as a managed JPA entity, and the Model superclass automatically provides a set of useful JPA helpers that we will discover later. All fields of this class will be automatically persisted to the database. 
 
-If you have already used JPA before, you know that every JPA entity must provide an @Id property but the Model superclass provides an automatically generated numeric id, that is a pretty good default in most cases. 
+p(note). It's not required that your model objects extend the **play.db.jpa.Model** class. You can work as plain JPA as well. But extending this class is a good choice in most cases as it will ease a lot the JPA stuff.
 
-Now if you’re a Java developer with any experience at all, warning sirens are probably clanging like mad at the sight of a public variable. In Java (as in other object-oriented languages), best practice says to make all fields private and provide accessors and mutators. This is to promote encapsulation, a concept critical to object oriented design. But in fact, play take care of that for you and will automatically generate getter and setter for you while preserving encapsulation; we will see how that work later in this tutorial.
+If you have already used JPA before, you know that every JPA entity must provide an **@Id** property. Here the Model superclass provides an automatically generated numeric id, in most cases this is good enough.
 
-You can now refresh the application homepage, to see the result. In fact, unless you made a mistake, you should see nothing specific: play has automatically compiled and loaded the User class, but this does not provide any feature to the application.
+p(note). Don't think about this provided **id** field as a **functional identifier** but as a **technical identifier**. It is generally a good idea to keep both concepts separated and to keep an automatically generated numeric id as technical identifier.
+
+Now if you’re a Java developer with any experience at all, warning sirens are probably clanging like mad at the sight of a public variable. In Java (as in other object-oriented languages), best practice says to make all fields private and provide accessors and mutators. This is to promote encapsulation, a concept critical to object oriented design. In fact, play takes care of that for you and automatically generates getters and setters while preserving encapsulation; we will see how it works later in this tutorial.
+
+You can now refresh the application homepage, to see the result. In fact, unless you made a mistake, you should not see any change: play has automatically compiled and loaded the User class, but this does not provide any feature to the application.
 
 h2. <a>Writing the first test</a>
 
-A good way to test the newly created User class, is to write a JUnit test case. It will allow to incrementally complete the application model and test that all is going fine.
+A good way to test the newly created User class is to write a JUnit test case. It will allow to incrementally complete the application model and ensure that all is fine.
 
-To run a test case, you need to start the application in a special 'test' mode. Stop the currently running application, open a command line and type :
+To run a test case, you need to start the application in a special 'test' mode. Stop the currently running application, open a command line and type:
 
 bc. ~$ play test
 
 !images/guide2-0!
 
-The 'play test' command is almost the same than 'play run', except that it load a test runner module that allow to run test suite directly from a browser. 
+The **'play test'** command is almost the same than **'play run'**, except that it loads a test runner module that allows to run test suite directly from a browser. 
 
-Open a browser to the "http://localhost:9000/@tests":http://localhost:9000/@tests URL to see the test runner. You can try to select all the default tests and run them; all should be green... but these default tests does not test really anything.
+p(note). When you run a play application in **test mode**, play will automatically switch to the **test** framework id and load the **application.conf** file accordingly. Check "this page":ids for more informations.
+
+Open a browser to the "http://localhost:9000/@tests":http://localhost:9000/@tests URL to see the test runner. Try to select all the default tests and run them; all should be green... But these default tests don't really test anything.
 
 !images/guide2-1!
 
@@ -80,7 +86,7 @@ public class BasicTest extends UnitTest {
  
 }
 
-Remove the useless default test (aVeryImportantThingToTest) and create a test that try to create a new user and retrieve it:
+Remove the useless default test (aVeryImportantThingToTest) and create a test that tries to create a new user and retrieve it:
 
 bc. @Test
 public void createAndRetrieveUser() {
@@ -95,17 +101,17 @@ public void createAndRetrieveUser() {
     assertEquals("Bob", bob.fullname);
 }
 
-As you see, the Model superclass give us two first very usefull methods : **save()** and **find()**. Select the **BasicTests.java** in the test runner, click start and check that all is green. 
+As you can see, the Model superclass gives us two first very useful methods : **save()** and **find()**. Select the **BasicTests.java** in the test runner, click start and check that all is green. 
 
-We will need a method on the User class that check if a user with specified username and password exists. Let's write it and test it.
+We will need a method on the User class that checks if a user with a specified username and password exists. Let's write it and test it.
 
-In the **User.java** source add the **connect()** method : 
+In the **User.java** source, add the **connect()** method:
 
 bc. public static User connect(String email, String password) {
     return find("byEmailAndPassword", email, password).first();
 }
 
-And now the test case :
+And now the test case:
 
 bc. @Test
 public void tryConnectAsUser() {
@@ -118,11 +124,11 @@ public void tryConnectAsUser() {
     assertNull(User.connect("tom@gmail.com", "secret"));
 }
 
-Each time you make a modification you can run all the tests from the play test runner to check you don't have broken anything. 
+Each time you make a modification you can run all the tests from the play test runner to make sure you didn't break anything. 
 
 h2. <a>The Post class</a>
 
-The Post class will represent blog posts. Let's write a first implementation :
+The Post class will represent blog posts. Let's write a first implementation:
 
 bc. package models;
  
@@ -152,11 +158,11 @@ public class Post extends Model {
  
 }
 
-Here we use the **@Lob** annotation to tell JPA that we wat that it use a large text database type to store the post content. We have declared the relation to the User class using **@ManyToOne**. That means that each Post is authored by a single User and that each User can author several Posts.
+Here we use the **@Lob** annotation to tell JPA to use a large text database type to store the post content. We have declared the relation to the User class using **@ManyToOne**. That means that each Post is authored by a single User, and that each User can author several Posts.
 
-We will write a new test case to check that to Post class works as expected. By before to write more tests we need to do something in the JUnit class. In the current test, the database content is never deleted, and each new run create more an more objects. It will become problematic soon because more advanced test will start to count objects to check that all is going file.
+We will write a new test case to check that the Post class works as expected. But before to write more tests, we need to do something in the JUnit class. In the current test, the database content is never deleted, each new run creating more and more objects. It will become problematic soon when more advanced test will start to count objects to check that all is fine.
 
-So let's write a JUnit **setup()** method to delete the database before each test :
+So let's write a JUnit **setup()** method to delete the database before each test:
 
 bc. public class BasicTest extends UnitTest {
  
@@ -169,7 +175,9 @@ bc. public class BasicTest extends UnitTest {
  
 }
 
-As you see, the Fixtures class is an helper that help you to deal with your database data during tests. Run the test again to check that you don't have broken anything, and start to write the next test :
+p(note). The **@Before** concept is a core concept of the JUnit testing tool.
+
+As you can see, the Fixtures class is a helper to deal with your database during tests. Run the test again to check that you don't have broken anything, and start to write the next test:
 
 bc. @Test
 public void createPost() {
@@ -199,7 +207,7 @@ p(note). **Don't forget** to import the **java.util.List** or will get a compila
 
 h2. <a>Finish with Comment</a>
 
-The last thing that we want to add at this first model draft is the ability to attach Comment to Posts. 
+The last thing that we need to add at this first model draft is the ability to attach comments to posts.
 
 The creation of the Comment class is pretty straightforward.
 
@@ -231,7 +239,7 @@ public class Comment extends Model {
  
 }
 
-Let's write a first test case :
+Let's write a first test case:
 
 bc. @Test
 public void postComments() {
@@ -264,7 +272,9 @@ public void postComments() {
     assertNotNull(secondComment.postedAt);
 }
 
-You see that the navigation between Post and Comments is not very easy because we need to use a query to retrieve all comments attached to Post. We can do better here by setting up the other side of the relation to the Post class. Add the comments field to the Post class :
+You see that the navigation between Post and Comments is not very easy: we need to use a query to retrieve all comments attached to Post. We can do better by setting up the other side of the relationship to the Post class. 
+
+Add the comments field to the Post class:
 
 bc. ...
 @OneToMany(mappedBy="post", cascade=CascadeType.ALL)
@@ -279,11 +289,11 @@ public Post(User author, String title, String content) {
 }
 ...
 
-Note how we have used the mappedBy attribute to tell JPA that the Post class maintains the relation. When you define bi-directional relation with JPA it is very important to tell wich side will maintain the relation. In this case, because the Comments belong to the Post it is better that the Comment class maintains the relation. 
+Note how we have used the **mappedBy** attribute to tell JPA that the Post class maintains the relationship. When you define bi-directional relation with JPA it is very important to tell which side will maintain the relationship. In this case, since the Comments belong to the Post it's better that the Comment class maintains the relationship.
 
-We have setted the casacade property to tell JPA that we want that the Post deletion be cascaded to comments. This way, if you delete a post, all related comments will be deleted too.
+We have setted the **casacade** property to tell JPA that we want that the Post deletion be cascaded to comments. This way, if you delete a post, all related comments will be deleted as well.
 
-With this new relation, we will add an helper method to the Post class to simplify adding comments:
+With this new relationship, we will add a helper method to the Post class to simplify adding comments:
 
 bc. public Post addComment(String author, String content) {
     Comment newComment = new Comment(this, author, content).save();
@@ -291,7 +301,7 @@ bc. public Post addComment(String author, String content) {
     return this;
 }
 
-Let's write another test case to check that stuff :
+Let's write another test case to check that:
 
 bc. @Test
 public void useTheCommentsRelation() {
@@ -310,7 +320,7 @@ public void useTheCommentsRelation() {
     assertEquals(1, Post.count());
     assertEquals(2, Comment.count());
  
-    // Retrieve the bob post
+    // Retrieve Bob's post
     bobPost = Post.find("byAuthor", bob).first();
     assertNotNull(bobPost);
  
@@ -327,15 +337,15 @@ public void useTheCommentsRelation() {
     assertEquals(0, Comment.count());
 }
 
-Is it green ?
+Is it green?
 
 !images/guide2-2!
 
-h2. <a>Using fixture to write more complicated test</a>
+h2. <a>Using Fixtures to write more complicated test</a>
 
-When you start to write more complicated test, you often need to have an existing set of data to test on. Fixtures allows to describe your model in a YAML file and load it at any time before a test.
+When you start to write more complex tests, you often need a set of data to test on. Fixtures lets you describe your model in a YAML file and load it at any time before a test.
 
-Edit the **/yabe/test/data.yml** file and start to describe a User :
+Edit the **/yabe/test/data.yml** file and start to describe a User:
 
 bc. 
 User(bob):
@@ -348,7 +358,7 @@ User(bob):
 
 Well, because the data.yml file is a litle big, you can "download it here":files/data.yml.
 
-Now we create create a test case, that load these data and run some assertions over it:
+Now we create create a test case that loads this data and run some assertions over it:
 
 bc. @Test
 public void fullTest() {
@@ -389,17 +399,17 @@ public void fullTest() {
 
 h2. <a>Save your work</a>
 
-Well, we have now finished an hudge part on the blog engine. With all this things created and tested, we can now start to develop the web application.
+We have now finished an huge part on the blog engine. With all this things created and tested, we can now start to develop the web application itself.
 
-But before continuing, it's time to save our work using bazaar. Open a command line an type **bzr st** to see the modifications made since the latest commit:
+But before continuing, it's time to save your work in bazaar. Open a command line an type **bzr st** to see the modifications made since the latest commit:
 
 bc. $ bzr st
 
-As you see there are some new files not under version control. The **test-result** folder don't need to be versioned. So let's ignore it.
+As you can see, some new files are not under version control. The **test-result** folder doesn't need to be versioned, so let's ignore it.
 
 bc. $ bzr ignore test-result
 
-And add other files to version control using **bzr add**.
+Add other files to version control using **bzr add**.
 
 bc. $ bzr add
 

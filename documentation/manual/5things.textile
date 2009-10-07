@@ -6,7 +6,7 @@ h2. <a>1. Bind an HTTP parameter to a Java method parameter</a>
 
 Retrieving HTTP parameters from Java code is really simple with play. Just declare method parameters with the same name as the HTTP parameters.
 
-For example, with this request :
+For example, with this request:
 
 bc. /articles/archive?date=08/01/08&page=2
 
@@ -19,28 +19,28 @@ bc. public static void archive(Date date, Integer page) {
 
 Play will use the static type of the method parameter, to translate the HTTP value as a Java object.
 
-Smart binding also functions **with any classes.**
+Smart binding also works **with any classes.**
 
 bc. public class Person {
-    String name;
-    Integer age;
+    public String name;
+    public Integer age;
 }
 
-A simplistic controller action to add a person may looks like this :
+A simplistic controller action to add a person may look like this:
 
 bc. public static void add(Person p) {
     p.save();
 }
 
-The HTML form defines fields with composite names :  
+The HTML form defines fields with composite names:
 
-bc. <form action="/Directory/add" >
+bc. <form action="/Directory/add" method="POST">
     Name: <input type="text" name="p.name" />
     Age: <input type="text" name="p.age" />
 </form>
 
 
-h2. <a>2. Redirect to an action by simply calling the corresponding Java method</a>
+h2. <a>2. Redirect to an action by calling the corresponding Java method</a>
 
 There is no equivalent to the Java Servlet **forward** command with play. But redirecting to another action is really simple. Just call the corresponding Java method and play will generate the correct HTTP "Redirect" response.
 
@@ -59,18 +59,18 @@ public static void edit(Long id, String title) {
 
 Note how at the end of the edit action, we redirect to the show action.
 
-In any template you can use the equivalent syntax to generate the link :
+In any template you can use the equivalent syntax to generate the link:
 
 bc. <a href="@{Article.show(article.id)}">${article.title}</a>
 
-That will generate HTML like :
+That will generate the following HTML:
 
 bc. <a href="/articles/15">My new article</a>
 
 
 h2. <a>3. Don't Repeat Yourself when passing Java objects to templates</a>
 
-In most Java frameworks, to pass some Java objects to the template system you need to write something like :
+In most Java frameworks, in order to pass Java objects to the template system you need to write something like:
 
 bc. Article article = Article.findById(id);
 User user = User.getConnected();
@@ -79,19 +79,19 @@ model.put("article", article);
 model.put("user", user);
 render(model);
 
-When, with play you can just write :
+With play, you can just write:
 
 bc. Article article = Article.findById(id);
 User user = User.getConnected();
 render(article, user);
 
-And retrieve objects from their Java local name in the template. That saves a lot of useless lines of code ...
+And retrieve objects from their Java local name in the template. That saves a lot of useless lines of code...
 
 h2. <a>4. JPA on steroids</a>
 
-JPA is surrely the best ORM API available for Java. If you know it you will be amazed how simpler it become with play. Nothing to configure, play will automatically startthe JPA Entity Manager using Hibernate and magically synchonize it while code reloading. 
+JPA is surely the best ORM API available for Java. If you know it you will be amazed how simpler it become with play. Nothing to configure, play will automatically start the JPA Entity Manager using Hibernate and magically synchronize it when code is reloaded.
 
-Moreover if you use the provided **play.db.jpa.Model** superclass it will help to make your code prettier. Take a look:
+Moreover, if you use the provided **play.db.jpa.Model** superclass it will help to make your code prettier. Take a look:
 
 bc. public void messages(int page) {
     User connectedUser = User.find("byEmail", connected());
@@ -104,20 +104,20 @@ bc. public void messages(int page) {
 
 h2. <a>5. Straightforward file upload management</a>
 
-File upload management is so simple with play.
+File upload management is very simple with play.
 
-The HTML form :
+The HTML form:
 
 bc. <form action="@{Article.uploadPhoto()}" method="POST" enctype="multipart/form-data">
     <input type="text" name="title" />
     <input type="file" id="photo" name="photo" />
-    <input type="submit" value="Send it ..." />
+    <input type="submit" value="Send it..." />
 </form>
 
-And the Java code : 
+And the Java code:
 
 bc. public static void uploadPhoto(String title, File photo) {
    ...
 }
 
-How could it be easier ?
+How could it be easier?

@@ -1,28 +1,28 @@
 h1. CRUD: Administration generator
 
-The CRUD module generates a fully usable web interface for your JPA Model objects.
+The CRUD (Create, Read, Update, Delete) module generates a fully usable web interface for your JPA Model objects.
 
 Let's see a simple example.
 
 h2. <a>Enable the CRUD module for the application</a>
 
-In the **/conf/application.conf** file, enable the CRUD module by adding this line : 
+In the **/conf/application.conf** file, enable the CRUD module by adding this line:
 
 bc. # The crud module
 module.crud=${play.path}/modules/crud
 
 h2. <a>Import default CRUD routes</a>
 
-In the **conf/routes** file, import the default module routes by adding this line :
+In the **conf/routes** file, import the default module routes by adding this line:
 
 bc. # Import CRUD routes
 *      /admin              module:crud
 
-p(note). **Note** that it's not required to use the default routes file. You can also define your own routes, or mix both.
+p(note). **Note** that using the default routes file is not required. You can also define your own routes, or mix the two.
 
 h2. <a>Create a User class</a>
 
-We will create a User class to start :
+We will start by creating a User class:
 
 bc. package models;
  
@@ -43,7 +43,7 @@ public class User extends Model {
 
 h2. <a>Create the Users controller</a>
 
-Create a simple controller that just inherits the CRUD controller.
+Then, we create a simple controller that just inherits the CRUD controller.
 
 bc. package controllers;
  
@@ -51,11 +51,11 @@ public class Users extends CRUD {
     
 }
 
-Now open "http://localhost:9000/admin":http://localhost:9000/admin and you should show the User admin area.
+Now open "http://localhost:9000/admin":http://localhost:9000/admin and you should see the User admin area.
 
 !images/crud1!
 
-If you want to name the controller differently, with a name that ends with the model class with a final 's' (Whew!) then create the controller this way, using an annotation. (The example is clearer than its description). 
+The controller's class name has to be the model class name with a final 's'. If you want to name it differently, you can do it using an annotation.
 
 bc. package controllers;
  
@@ -70,7 +70,7 @@ Click the **Add** button, and you should see the User form.
 
 !images/crud2!
 
-Now we can add some validation rules to the User class :
+Now we can add some validation rules to the User class:
 
 bc. package models;
  
@@ -110,7 +110,7 @@ Refresh the User form and you will see that the validation is automatically appl
 
 h2. <a>Change the form label</a>
 
-Add these lines to the **conf/messages** file in your application :
+Add these lines to the **conf/messages** file in your application:
 
 bc. name=Name
 email=Email address
@@ -122,19 +122,19 @@ And refresh the User form.
 
 h2. <a>Create a User and customize the list view</a>
 
-The default list view uses only one column containing the object toString() result.
+The default list view uses only one column containing the result of the object's toString() method.
 
 !images/crud5!
 
 To customize this view, we need to create the **/app/views/Users/list.html** template in the application.
 
-Open a shell, go the application directory and type :
+Open a shell, go the application directory and type:
 
 bc. play crud:ov Users/list
 
 This will copy the default CRUD **list.html** template to the **Users/list.html** template in your application, overwriting it if present.
 
-Edit this template like this :
+Edit the template like this:
 
 bc. #{extends 'CRUD/layout.html' /}
  
@@ -165,11 +165,11 @@ and refresh the list.
 !images/crud6!
 
 
-h2. <a>Custom fields rendering : the crud.custom tag</a>
+h2. <a>Custom fields rendering: the crud.custom tag</a>
 
 You can go a bit further by customizing the way each field of your ''User'' entity is displayed in the list and form views.
 
-To customize a field, use the ''#{crud.custom}'' tag like this :
+To customize a field, use the ''#{crud.custom}'' tag:
 
 bc. #{crud.table fields:['name', 'company']}
  
@@ -179,7 +179,7 @@ bc. #{crud.table fields:['name', 'company']}
  
 #{/crud.table}
 
-You may also display additional columns or form inputs  by defining custom handlers :
+You can also display additional columns or form inputs by defining custom handlers:
 
 bc. #{crud.table fields:['name', 'company', 'edit']}
  

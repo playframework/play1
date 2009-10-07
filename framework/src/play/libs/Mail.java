@@ -28,6 +28,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.exceptions.MailException;
@@ -49,7 +50,7 @@ public class Mail {
      * @param body Body
      */
     public static Future<Boolean> send(String from, String recipient, String subject, String body) {
-        return send(from, new String[]{recipient}, subject, body, "text/plain", new Object[0]);
+        return send(from, new String[]{recipient}, subject, body, null, "text/plain", new Object[0]);
     }
 
     /**
@@ -60,8 +61,32 @@ public class Mail {
      * @param body Body
      * @param contentType The content type (text/plain or text/html)
      */
-    public static Future<Boolean> send(String from, String recipient, String subject, String body, String contentType) {
-        return send(from, new String[]{recipient}, subject, body, contentType, new Object[0]);
+    public static Future<Boolean> send(String from, String recipient, String subject, String body, String alternate) {
+        return send(from, new String[]{recipient}, subject, body, alternate, "text/html", new Object[0]);
+    }
+
+    /**
+     * Send an email
+     * @param from From address
+     * @param recipient To address
+     * @param subject Subject
+     * @param body Body
+     * @param contentType The content type (text/plain or text/html)
+     */
+    public static Future<Boolean> send(String from, String recipient, String subject, String body, String alternate, Object... obj) {
+        return send(from, new String[]{recipient}, subject, body, alternate, "text/html", obj);
+    }
+
+    /**
+     * Send an email
+     * @param from From address
+     * @param recipient To address
+     * @param subject Subject
+     * @param body Body
+     * @param contentType The content type (text/plain or text/html)
+     */
+    public static Future<Boolean> send(String from, String recipient, String subject, String body, String alternate, String contentType) {
+        return send(from, new String[]{recipient}, subject, body, alternate, contentType, new Object[0]);
     }
 
     /**
@@ -72,7 +97,7 @@ public class Mail {
      * @param body Body
      */
     public static Future<Boolean> send(String from, String[] recipients, String subject, String body) {
-        return send(from, recipients, subject, body, "text/plain", new Object[0]);
+        return send(from, recipients, subject, body, null, "text/plain", new Object[0]);
     }
 
     /**
@@ -83,8 +108,8 @@ public class Mail {
      * @param body Body
      * @param contentType The content type (text/plain or text/html)
      */
-    public static Future<Boolean> send(String from, String[] recipients, String subject, String body, String contentType) {
-        return send(from, recipients, subject, body, contentType, new Object[0]);
+    public static Future<Boolean> send(String from, String[] recipients, String subject, String body, String alternate, String contentType) {
+        return send(from, recipients, subject, body, alternate, contentType, new Object[0]);
     }
 
     /**
@@ -96,7 +121,7 @@ public class Mail {
      * @param attachments File attachments
      */
     public static Future<Boolean> send(String from, String recipient, String subject, String body, Object... attachments) {
-        return send(from, new String[]{recipient}, subject, body, "text/plain", attachments);
+        return send(from, new String[]{recipient}, subject, body, null, "text/plain", attachments);
     }
 
     /**
@@ -108,10 +133,9 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static Future<Boolean> send(String from, String recipient, String subject, String body, String contentType, Object... attachments) {
-        return send(from, new String[]{recipient}, subject, body, contentType, attachments);
-    }
-
+//    public static Future<Boolean> send(String from, String recipient, String subject, String body, String contentType, Object... attachments) {
+//        return send(from, new String[]{recipient}, subject, body, contentType, attachments);
+//    }
     /**
      * Send an email
      * @param from From address
@@ -121,7 +145,7 @@ public class Mail {
      * @param attachments File attachments
      */
     public static Future<Boolean> send(String from, String[] recipients, String subject, String body, Object... attachments) {
-        return send(from, recipients, subject, body, "text/plain", attachments);
+        return send(from, recipients, subject, body, null, "text/plain", attachments);
     }
 
     /**
@@ -133,8 +157,12 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static Future<Boolean> send(String from, String[] recipients, String subject, String body, String contentType, Object... attachments) {
-        return send(from, from, recipients, subject, body, contentType, attachments);
+    public static Future<Boolean> send(String from, String[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) {
+        return send(from, from, recipients, subject, body, alternate, contentType, attachments);
+    }
+
+    public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String contentType, Object... attachments) {
+        return send(from, replyTo, recipients, subject, body, null, contentType, attachments);
     }
 
     /**
@@ -147,7 +175,7 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String contentType, Object... attachments) {
+    public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) {
         try {
             if (from == null) {
                 from = Play.configuration.getProperty("mail.smtp.from", "user@localhost");
@@ -156,7 +184,7 @@ public class Mail {
                 replyTo = from;
             }
             if (Play.configuration.getProperty("mail.smtp", "").equals("mock") && Play.mode == Play.Mode.DEV) {
-                Mock.send(from, replyTo, recipients, subject, body, contentType, attachments);
+                Mock.send(from, replyTo, recipients, subject, body, alternate, contentType, attachments);
                 return new Future<Boolean>() {
 
                     public boolean cancel(boolean mayInterruptIfRunning) {
@@ -180,7 +208,7 @@ public class Mail {
                     }
                 };
             }
-            return sendMessage(buildMessage(from, replyTo, recipients, subject, body, contentType, attachments));
+            return sendMessage(buildMessage(from, replyTo, recipients, subject, body, alternate, contentType, attachments));
         } catch (MessagingException ex) {
             throw new MailException("Cannot send email", ex);
         }
@@ -195,7 +223,7 @@ public class Mail {
      * @param contentType The content type (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static MimeMessage buildMessage(Object from, Object replyTo, Object[] recipients, String subject, String body, String contentType, Object... attachments) throws MessagingException {
+    public static MimeMessage buildMessage(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) throws MessagingException {
         MimeMessage msg = new MimeMessage(getSession());
 
         if (from == null) {
@@ -240,17 +268,45 @@ public class Mail {
             }
         } else {
 
-            Multipart mp = new MimeMultipart();
-            MimeBodyPart bodyPart = new MimeBodyPart();
+            if (attachments != null && attachments.length > 0) {
 
-            bodyPart.setContent(body, contentType + "; charset=utf-8");
-            mp.addBodyPart(bodyPart);
+                Multipart mixed = new MimeMultipart("mixed");
 
-            handleAttachments(mp, attachments);
+                Multipart mp = getMultipart(body, alternate, contentType);
 
-            msg.setContent(mp);
+                // Create a body part to house the multipart/alternative Part
+                MimeBodyPart contentPartRoot = new MimeBodyPart();
+                contentPartRoot.setContent(mp);
+
+                mixed.addBodyPart(contentPartRoot);
+
+                // Add an attachment
+                handleAttachments(mixed, attachments);
+
+                msg.setContent(mixed);
+            } else {
+
+                msg.setContent(getMultipart(body, alternate, contentType));
+            }
+
         }
         return msg;
+    }
+
+    private static Multipart getMultipart(String body, String alternate, String contentType) throws MessagingException {
+        Multipart mp = new MimeMultipart("alternative");
+
+        if (!StringUtils.isEmpty(alternate)) {
+            MimeBodyPart alternatePart = new MimeBodyPart();
+            alternatePart.setContent(alternate, "text/plain; charset=utf-8");
+            mp.addBodyPart(alternatePart);
+        }
+
+        MimeBodyPart bodyPart = new MimeBodyPart();
+        bodyPart.setContent(body, contentType + "; charset=utf-8");
+        mp.addBodyPart(bodyPart);
+
+        return mp;
     }
 
     private static Session getSession() {
@@ -278,8 +334,8 @@ public class Mail {
                 // port 25 + enable starttls + ssl socket factory
                 props.put("mail.smtp.port", "25");
                 props.put("mail.smtp.starttls.enable", "true");
-            // can't install our socket factory. will work only with server that has a signed certificate
-            // story to be continued in javamail 1.4.2 : https://glassfish.dev.java.net/issues/show_bug.cgi?id=5189
+                // can't install our socket factory. will work only with server that has a signed certificate
+                // story to be continued in javamail 1.4.2 : https://glassfish.dev.java.net/issues/show_bug.cgi?id=5189
             }
 
             if (Play.configuration.containsKey("mail.smtp.localhost")) {
@@ -422,7 +478,7 @@ public class Mail {
 
         static Map<String, String> emails = new HashMap();
 
-        static void send(Object from, Object replyTo, Object[] recipients, String subject, String body, String contentType, Object... attachments) {
+        static void send(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) {
             StringBuffer email = new StringBuffer();
             email.append("From Mock Mailer\n\tNew email received by");
             for (Object add : recipients) {
@@ -433,6 +489,9 @@ public class Mail {
             email.append("\n\tSubject: " + subject);
             email.append("\n\tAttachments: " + attachments.length);
             email.append("\n\tBody(" + contentType + "): " + body);
+            if (!StringUtils.isEmpty(alternate)) {
+                email.append("\n\tAlternate Body(text/plain): " + alternate);
+            }
             email.append("\n");
             Logger.info(email.toString());
             for (Object add : recipients) {

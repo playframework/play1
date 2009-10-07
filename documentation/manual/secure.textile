@@ -1,22 +1,22 @@
 h1. Secure module
 
-The simple **Secure** module help you to set up basic authentication and authorization management to your application. It provides a simple **controllers.Secure** controller that defines a set of inteceptors that you can easily add to your own controllers using the **@With** annotation.
+The simple **Secure** module help you to set up basic authentication and authorization management to your application. It provides a simple **controllers.Secure** controller that defines a set of interceptors that you can easily add to your own controllers using the **@With** annotation.
 
 h2. <a>Enable the Secure module for the application</a>
 
-In the **/conf/application.conf** file, enable the Secure module by adding this line : 
+In the **/conf/application.conf** file, enable the Secure module by adding this line:
 
 bc. # The secure module
 module.secure=${play.path}/modules/secure
 
 h2. <a>Import default Secure routes</a>
 
-In the **conf/routes** file, import the default module routes by adding this line :
+In the **conf/routes** file, import the default module routes by adding this line:
 
 bc. # Import Secure routes
 *      /                module:secure
 
-p(note). **Note** that it's not required to use the default routes file. You can also define your own routes, or mix both.
+p(note). **Note** that it's not required to use the default routes file. You can also define your own routes, or mix the two.
 
 h2. <a>Protecting a controller</a>
 

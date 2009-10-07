@@ -78,7 +78,7 @@ def override(f, t):
 		sys.exit(-1)
 	toFile = os.path.join(application_path, t)
 	if os.path.exists(toFile):
-		response = raw_input("~ Warning ! %s already exists and will be overriden (y/n) ? " % toFile)
+		response = raw_input("~ Warning! %s already exists and will be overriden (y/n)? " % toFile)
 		if not response == 'y':	
 			return
 	if not os.path.exists(os.path.dirname(toFile)):
@@ -92,11 +92,11 @@ def override(f, t):
 
 try:
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the framework ?
+	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the framework?
 	play_base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
 
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ What is the framework id ?
+	# ~~~~~~~~~~~~~~~~~~~~~~ What is the framework id?
 	id_file = os.path.join(play_base, 'id')
 	if os.path.exists(id_file):
 		play_id = open(id_file).readline().strip()
@@ -114,13 +114,13 @@ try:
 	play_version_file = os.path.join(play_base, 'framework/src/play/version')
 	if not os.path.exists(play_version_file):
 		print "~ Oops. %s file not found" % os.path.normpath(os.path.join(play_base, 'framework/src/play/version'))
-		print "~ Is the framework compiled ? "
+		print "~ Is the framework compiled? "
 		print "~"
 		sys.exit(-1)
 
 	print "~ play! %s, http://www.playframework.org" % (open(play_version_file).readline().strip())
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command ?
+	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command?
 	if len(sys.argv) > 1:
 		play_command = sys.argv[1]
 	else:
@@ -135,7 +135,7 @@ try:
 	print "~"
 
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the application ?
+	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the application?
 	application_path = None
 	remaining_args = []
 	if len(sys.argv) == 2:
@@ -304,7 +304,7 @@ try:
 			print open(help_file, 'r').read()
 			sys.exit(0)	
 		else:
-			print '~ Oops, command not found \'%s\'. Try just \'play help\' to list all commands.' % cmd
+			print '~ Oops, command \'%s\' not found. Try just \'play help\' to list all commands.' % cmd
 			print '~'
 			sys.exit(-1)			
 
@@ -313,15 +313,15 @@ try:
 	if play_command == 'id':
 		if not play_id:
 			print "~ framework ID is not set"
-		new_id = raw_input("~ What is the new framework ID (or blank to unset) ? ")
+		new_id = raw_input("~ What is the new framework ID (or blank to unset)? ")
 		if new_id:
 			print "~"
-			print "~ Ok, the framework ID is now %s" % new_id
+			print "~ OK, the framework ID is now %s" % new_id
 			print "~"
 			open(id_file, 'w').write(new_id)
 		else:
 			print "~"
-			print "~ Ok, the framework ID is unset"
+			print "~ OK, the framework ID is unset"
 			print "~"
 			if os.path.exists(id_file):
 				os.remove(id_file)
@@ -335,15 +335,15 @@ try:
 			print "~"
 			sys.exit(-1)
 		print "~ The new application will be created in %s" % os.path.normpath(application_path)
-		application_name = raw_input("~ What is the application name ? ")
+		application_name = raw_input("~ What is the application name? ")
 		shutil.copytree(os.path.join(play_base, 'resources/application-skel'), application_path)
 		check_application()
 		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%APPLICATION_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%SECRET_KEY%', secretKey())
 		print "~"
-		print "~ Ok, the application is created."
+		print "~ OK, the application is created."
 		print "~ Start it with : play run %s" % sys.argv[2]
-		print "~ Have fun !"
+		print "~ Have fun!"
 		print "~"
 		if play_command == 'new': sys.exit(0)
 		
@@ -351,7 +351,7 @@ try:
 	# ~~~~~~~~~~~~~~~~~~~~~~ [secret] Generate a new secret key
 	if play_command == 'secret':
 		check_application()
-		print "~ Generating secret key..."
+		print "~ Generating the secret key..."
 		sk = secretKey()
 		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'application.secret=.*', 'application.secret=%s' % sk)
 		print "~ Keep the secret : %s" % sk
@@ -374,7 +374,7 @@ try:
 		check_application()
 		load_modules()
 		if len(modules):
-			print "~ Application modules are :"
+			print "~ Application modules are:"
 			print "~ "
 			for module in modules:
 				print "~ %s" % module
@@ -470,10 +470,10 @@ try:
 		print "~ Done !"
 		print "~"
 		print "~ You can now load %s as a standard WAR into your servlet container" % (os.path.normpath(war_path))
-		print "~ You can't use play standard commands to run/stop/debug the WAR application ..."
+		print "~ You can't use play standard commands to run/stop/debug the WAR application..."
 		print "~ ... just use your servlet container commands instead"
 		print "~"
-		print "~ Have fun !"
+		print "~ Have fun!"
 		print "~"
 		sys.exit(0)
 		
@@ -483,7 +483,7 @@ try:
 		check_application()
 		load_modules()
 		do_classpath()
-		print "~ Computed classpath is :"
+		print "~ Computed classpath is:"
 		print "~ "
 		print cp_args
 		print "~ "
@@ -542,7 +542,7 @@ try:
 					http_port = int(http_port)
 				url = 'http://localhost:%s/@status' % http_port
 			if not secret_key:
-				secret_key = readConf('application.secret')			
+				secret_key = readConf('application.secret')
 		
 		import hmac
 		import sha
@@ -612,7 +612,7 @@ try:
 		while True:
 			if play_process.poll():
  				print "~"
-				print "~ Oops, application has not started ?"
+				print "~ Oops, application has not started?"
 				print "~"
 				sys.exit(-1)
 			line = soutint.readline().strip()
@@ -674,12 +674,12 @@ try:
 		do_classpath()
 		do_java()
 		if os.path.exists(pid_path):
-			print "~ Oops. %s is already started ! (or delete %s)" % (os.path.normpath(application_path), os.path.normpath(pid_path))
+			print "~ Oops. %s is already started! (or delete %s)" % (os.path.normpath(application_path), os.path.normpath(pid_path))
 			print "~"
 			sys.exit(1)
 		sout = open(os.path.join(log_path, 'system.out'), 'w')
 		pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
-		print "~ Ok, %s is started" % os.path.normpath(application_path)
+		print "~ OK, %s is started" % os.path.normpath(application_path)
 		print "~ output is redirected to %s" % os.path.normpath(os.path.join(log_path, 'system.out'))
 		pid_file = open(pid_path, 'w')
 		pid_file.write(str(pid))
@@ -701,7 +701,7 @@ try:
 		pid = open(pid_path).readline().strip()
 		os.remove(pid_path)
 		kill(pid)		
-		print "~ Ok, %s is stopped" % application_path
+		print "~ OK, %s is stopped" % application_path
 		print "~"
 		sys.exit(0)
 
@@ -722,7 +722,7 @@ try:
 		
 		sout = open(os.path.join(log_path, 'system.out'), 'w')
 		pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
-		print "~ Ok, %s is restarted" % os.path.normpath(application_path)
+		print "~ OK, %s is restarted" % os.path.normpath(application_path)
 		print "~ output is redirected to %s" % os.path.normpath(os.path.join(log_path, 'system.out'))
 		pid_file = open(pid_path, 'w')
 		pid_file.write(str(pid))
@@ -802,7 +802,7 @@ try:
 			if os.path.isdir(os.path.join(application_path, dir)) and dir not in ['app', 'conf', 'test', 'public', 'tmp', 'logs', 'nbproject', 'lib']:
 				mr = '<source-folder style="tree"><label>%s</label><location>%s</location></source-folder>' % (dir, dir)
 		replaceAll(os.path.join(nbproject, 'project.xml'), r'%MORE%', mr)
-		print "~ Ok, the application is ready for netbeans"
+		print "~ OK, the application is ready for netbeans"
 		print "~ Just open %s as a netbeans project" % os.path.normpath(application_path)
 		print "~"
 		print "~ Use netbeansify again when you want to update netbeans configuration files, then close and open you project again."
@@ -872,11 +872,11 @@ try:
 		replaceAll(os.path.join(application_path, 'eclipse/connect.launch'), r'%JPDA_PORT%', jpda_port)
 		os.rename(os.path.join(application_path, 'eclipse/connect.launch'), os.path.join(application_path, 'eclipse/Connect JPDA to %s.launch' % application_name))
 		
-		print "~ Ok, the application is ready for eclipse"
+		print "~ OK, the application is ready for eclipse"
 		print "~ Use File/Import/General/Existing project to import %s into eclipse" % os.path.normpath(application_path)
 		print "~"
 		print "~ Use eclipsify again when you want to update eclipse configuration files."
-		print "~ However, it's often better to delete and re-import the project into your workspace since eclipse keeps dirty caches ..."
+		print "~ However, it's often better to delete and re-import the project into your workspace since eclipse keeps dirty caches..."
 		print "~"
 				
 		sys.exit(0)
@@ -900,7 +900,7 @@ try:
   	print "~        help     Show play help"
   	print "~"
 	if len(sys.argv) > 1:
-		print "~ Invalid command : %s" % sys.argv[1]
+		print "~ Invalid command: %s" % sys.argv[1]
 		print "~"
 	sys.exit(-1)
 

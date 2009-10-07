@@ -3,7 +3,7 @@
 # ~~~~
 
 # Import the default CRUD routes
-GET			/admin						Administration.index
+GET			/admin/?					Administration.index
 *			/admin						module:crud
 
 # Login
