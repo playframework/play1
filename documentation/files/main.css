@@ -1,8 +1,8 @@
 /** Main layout **/
 
 html, body {
-    background: #364B66;
-    font-family: Helvetica, Arial, Sans;
+    background: #364B66 !important;
+    font-family: Helvetica, Arial, Sans !important;
 }
 
 body {
@@ -20,7 +20,6 @@ body {
 
 #logo {
     display: block;
-    width: 210px;
     height: 49px;
     margin-left: 20px;
     color: #fff;
@@ -28,6 +27,11 @@ body {
     font-weight: bold;
     letter-spacing: -4px;
     text-shadow: 1px 2px 2px #000;
+}
+
+#logo span {
+    color: #f00;
+    font-size: 70%;
 }
 
 #tools {
@@ -197,6 +201,11 @@ h3 {
     margin-bottom: 15px;
 }
 
+h3 span {
+    font-size: 80%;
+    font-weight: normal;
+}
+
 .comment {
     width: 70%;
     clear: both;
@@ -351,4 +360,183 @@ form label {
 #footer a {
     color: #869AB1;
     font-weight: bold;
+}
+
+/** Admin **/
+
+.tags-list .tag {
+    cursor: pointer;
+    color: red;
+}
+
+#adminMenu {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+}
+
+#adminMenu li {
+    display: inline;
+}
+
+#adminMenu li a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 80%;
+    background: #591C64;
+    padding: 2px 10px;
+    -webkit-border-radius: 9px;
+}
+
+#adminMenu li.selected a {
+    background: #82A346;
+}
+
+#crudContent {
+    color: #8B98AD;
+}
+
+#crudContent h2 {
+    color: #EDC3CD !important;
+}
+
+#crudContent thead tr {
+    background: #512162 !important;
+}
+
+#crudContent table {
+    border: none !important;
+}
+
+#crudContent table td {
+    color: #444;
+}
+
+tr.odd {
+    background: #BECCE7 !important;
+}
+
+#crud #crudContent, #crudContent form, #crudListSearch, #crudListPagination, .crudButtons {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+#crudListTable {
+    margin: 10px 0;
+}
+
+.crudField, .objectForm {
+    border: none;
+    padding-left: 0;
+}
+
+.crudField label {
+    color: #B8FA5C;
+}
+
+.crudHelp {
+    color: #fff !important;
+}
+
+.crudField .tag {
+    color: #111;
+    font-size: 80%;
+}
+
+.crudButtons input {
+    font-size: 110%;
+}
+
+.crudButtons {
+    margin-top: 20px;
+    border-top: 1px dotted #8B98AD;
+    padding-top: 10px;
+}
+
+.crudFlash {
+    border: 0;
+    -webkit-border-radius: 8px;
+    font-size: 80%;
+    padding: 2px 10px;
+}
+
+.crudField .tag.selected {
+    -webkit-border-radius: 8px;
+}
+
+.crudField .error {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: pink;
+    -webkit-box-shadow: none;
+}
+
+/** Login **/
+
+#login form {
+    background: #8B98AD !important;
+    border: 0 !important;
+    -webkit-border-radius: 16px;
+}
+
+#login label, #password-field label, #username-field label {
+    color: #161D28 !important;
+    font-size: 110% !important;
+}
+
+
+#remember-field {
+    display: none;
+}
+
+/** My posts **/
+
+#admin .post {
+    background: #fff;
+    padding: 4px;
+    margin: 0;
+    font-size: 90%;
+}
+
+#admin .post.odd {
+    background: #C0CBE5;
+}
+
+#admin .post a {
+    color: #444;
+}
+
+#newPost {
+    border-top: 1px dotted #C0CBE5;
+    padding-top: 15px;
+}
+
+#newPost a {
+    background: #C88116;
+    -webkit-border-radius: 12px;
+    padding: 5px 10px;
+    font-size: 80%;
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+    -webkit-box-shadow: 1px 1px 2px rgba(0,0,0,.3);
+}
+
+#newPost a span {
+    background: #7D510E;
+    -webkit-border-radius: 8px;
+    padding: 0 5px 2px 5px;
+    position: relative;
+    top: -1px;
+}
+
+#postContent {
+    width: 100%;
+    height: 300px;
+}
+
+.hasError {
+    background: pink;
 }
