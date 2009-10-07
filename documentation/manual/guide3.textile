@@ -269,7 +269,7 @@ bc. <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w
         </div>
         
         <p id="footer">
-            Yabe is a (not so) powserfull blog engine built with the 
+            Yabe is a (not that) powerful blog engine built with the 
             <a href="http://www.playframework.org">play framework</a>
             as a tutorial application.
         </p>
