@@ -65,3 +65,5 @@ support/textmate
 samples-and-tests/yabe/logs
 samples-and-tests/yabe/test-result
 samples-and-tests/yabe/tmp
+*.ser
+modules/cobertura/lib

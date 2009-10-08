@@ -14,4 +14,11 @@ public class ApplicationTest extends FunctionalTest {
         assertCharset("utf-8", response);
     }
     
+    @Test
+    public void testAdminSecurity() {
+        Response response = GET("/admin");
+        assertStatus(302, response);
+        assertHeaderEquals("Location", "http://localhost/login", response);
+    }
+    
 }
