@@ -113,7 +113,7 @@ h2. <a name="references">References</a>
 Extended references for day to day hacking.
 
 # "Browse API documentation":/@api/index.html
-# "Template tags and extensions reference":w
+# "Template tags and extensions reference":tags
 
 
 

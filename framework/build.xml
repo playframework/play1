@@ -71,7 +71,7 @@
         </javadoc>
     </target>
     
-    <target name="jar" depends="compile,version,modules" description="create play.jar">        
+    <target name="jar" depends="compile,version,modules,javadoc" description="create play.jar">        
         <echo message="${version}" file="src/play/version" />
         <echo message="${version}" file="classes/play/version" />
         <jar destfile="play.jar" basedir="classes">
@@ -219,6 +219,10 @@
         
         <antcall target="play-test">
             <param name="testAppPath" value="${basedir}/../samples-and-tests/chat"/>
+        </antcall>
+        
+        <antcall target="play-test">
+            <param name="testAppPath" value="${basedir}/../samples-and-tests/yabe"/>
         </antcall>
         
         <antcall target="test-success" />

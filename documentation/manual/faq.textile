@@ -24,19 +24,19 @@ h2. <a>You guys don't even know how to program in Java ...</a>
 
 We are fully aware that we made choices that are not so common in the Java world and that play sometimes does not blindly follow the so called Java 'good pratices'. But all members of the play teams are very experienced Java developers and we are totally aware of the choices we made and the rules we have broken. 
 
-Java itself is a very generic programming language and not originally designed for web application development. It is a very different things to write a generic and reusable Java library than to create a web application. A web application itself doesn't need not be designed to be reusable. You need less abstraction, less configuration (even if in fact a Web application should be reusable, but through some Web service API). 
+Java itself is a very generic programming language and not originally designed for web application development. It is a very different things to write a generic and reusable Java library than to create a web application. A web application itself doesn't need to be designed to be reusable. You need less abstraction, less configuration (even if in fact a Web application should be reusable, but through some Web service API). 
 
 When the application development time tends to 0 you can concentrate on your application features and to quickly experiment, instead of trying to abstract things in order of make future developments less painful.
 
 h2. <a>Is play fast ?</a>
 
-Yes play itself is fast. But that does not mean that any particular application will be fast. The embedded HTTP server and the basic routing and controller invocation stack is very very fast. Used with a modern JVM and Just In Time compiling you can get thousand of requests per second easily. Unafortunely as your application will likely use a database it will become the bottleneck (as always).
+Yes play itself is fast. But that does not mean that any particular application will be fast. The embedded HTTP server and the basic routing and controller invocation stack is very very fast. Used with a modern JVM and Just In Time compiling you can get thousand of requests per second easily. Unfortunely as your application will likely use a database it will become the bottleneck (as always).
 
 The most CPU consumer in the play stack at this time is the template processing based on groovy. But as play applications are easily scalable by running the same application to several servers it is not really a problem if you need to serve a very high traffic. And we hope performance gain on this stuff with the new JDK7 and its better support of dynamic languages.
 
 h2. <a>Can I already use it for a production application ?</a>
 
-Sure, a lot of people already use play in production. And the 1.0 branch is now in maintenance mode, that means that we will just assure bug fixes without any API change (At least on the 1.0 branch).
+Sure, a lot of people already use play in production. And the 1.0 branch is now in maintenance mode, that means that we will just fix bugs without any API change (At least on the 1.0 branch).
 
 h2. <a>Is library X supported ?</a>
 
@@ -44,6 +44,6 @@ Play is standard Java, so any standard Java library can easily be used. However 
 
 h2. <a>How can I help/contribute ?</a>
 
-We use launchpad as main development tool. And laucnhpad itself is very open. You can just register a launchpad account and start to contribute. You can get any open bug for yourself, fork any play official branch to your own branch, and propose us to merge if you have fixed something.
+We use launchpad as main development tool. And launchpad itself is very open. You can just register a launchpad account and start to contribute. You can get any open bug for yourself, fork any play official branch to your own branch, and propose us to merge if you have fixed something.
 
 The documentation itself is kept as textile files in the framework source repository. So you can edit it the same way than code.
