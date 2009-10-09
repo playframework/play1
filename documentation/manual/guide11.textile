@@ -1,0 +1,72 @@
+h1. Preparing for production
+
+This time we've finished the blog engine. Let's see the few common step we need to set a play application in production.
+
+h2. <a>Defining a framework id</a>
+
+You will typically deploy your application on a different computer (well probably a server) than the one you used to make the development. So you will have a different play installation.
+
+Play allows to give each framework installation a different id and so manage different configurations in the same **application.conf** file. Let's say that the **server01** will host your production application.
+
+Once the play framework is installed on this server, let's define the framework id using the **'play id'** command. Type:
+
+bc. $ play id
+
+And give **server01** as id. Now we can define special keys in the yabe configuration file that will be used only when the application will be run on the server.
+
+h2. <a>Setting the application in PROD mode</a>
+
+The first configuration key we want specialize for the server deployement is the **application.mode** property. So far we have used the **DEV** mode that allow play to hot reload and recompile java files and display detailled messages when an error occurs. In **PROD** mode however, play will compile all java sources and template at startup time and will never check again for changes.
+
+In the **yabe/conf/application.conf** file, define:
+
+bc. %server01.application.mode=PROD
+
+Now when you run the yabe application on the server, it will automatically start in **PROD** mode.
+
+h2. <a>Configuring a MySQL server</a>
+
+For production use, we will use a MySQL server as database server instead of the in-memory HSQLDB we have used so far. Play comes with the JDBC driver for MySQL so we don't need to install anything more.
+
+Edit the database configuration in the **yabe/conf/application.conf** file:
+
+bc. %server01.db=mysql:root:secret@yabe
+
+Now we will tweak the way Hibernate manage the database schema for us. It's very usefull when hibernate automatically update the database schema when the Java model objects change. However we are never sure of what will happend exactly. And running magical things on a production database is never a good thing. So we will let Hibernate create the database schema if it doesn't exist, but never update it automatically.
+
+Change the **jpa.ddl** configuration key:
+
+bc. %server01.jpa.ddl=create
+
+h2. <a>Setting up a frontal HTTP server</a>
+
+Now we could just change the default port of the embedded HTTP server to 80 in order to have a real production server. However it will limit us to install only one play application on any server. As we typically want to install several applications in the same server (but using differents IP host names), we need to use a frontal HTTP server as reverse proxy.
+
+You can choose any HTTP server and configuring as reverse proxy, however it is generally a good choice to take something light and fast like "LIGHTTPD":http://www.lighttpd.net/. 
+
+The exact configuration of LIGHTTPD is out of the scope of this tutorial, but should be something like:
+
+bc. server.modules = (
+      "mod_access",
+      "mod_proxy",
+      "mod_accesslog" 
+)
+...
+$HTTP["host"] =~ "www.yabe.com" {
+    proxy.balance = "round-robin" proxy.server = ( "/" =>
+        ( ( "host" => "127.0.0.1", "port" => 9000 ) ) )
+}
+
+And then allow a local reverse proxy to connect to your play application adding these key to the **application.conf** file:
+
+bc. %server01.XForwardedSupport=127.0.0.1
+
+h2. <a>This is just the beginning</a>
+
+p(note). If you have read and followed this tutorial up, you're now a seasoned play developer. You know most of the concept that drive the play application developement. 
+ 
+There is still more feature we haven't explored yet, especially all the Web service stuff, like JSON or XML binding. Also play comes with more modules that provide more features. And play itself still evolve every day.
+ 
+If you are convinced that play will help you to save time for your next java web application, you can now start. And don't hesitate to ask us on the play google group.
+ 
+**Thank a lot!**

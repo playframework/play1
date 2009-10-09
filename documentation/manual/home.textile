@@ -2,7 +2,7 @@ h1. Play framework documentation
 
 Welcome to the play framework documentation. This documentation is intended for the *1.0 release* and may significantly differs from previous versions of the framework. 
 
-p(note). This is a work in progress, feel free to ask any question not covered into these documents or report any error. You can contribute to the documentation the "same way you can contribute code":code.
+p(note). This is a work in progress, feel free to ask any question not covered into these documents or report any error. You can contribute to the documentation the "same way you can contribute code":faq.
 
 
 h2. <a name="started">Getting started</a>
@@ -11,9 +11,11 @@ Your first steps with play and your first 5 minutes of fun.
 
 # "Play framework overview":overview
 # "Watch the screencast":video
-# "Installation guide":install
-# "Set up your preferred IDE":ide
 # "Five cool things you can do with Play":5things
+# "Frequently Asked Questions":faq
+# "Installation guide":install
+# "Your first application — the 'Hello World' tutorial":firstapp
+# "Set up your preferred IDE":ide
 
 
 h2. <a name="guide">Tutorial -- Play guide, a real world app step by step</a>
