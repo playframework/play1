@@ -1,0 +1,198 @@
+h1. Completing the application tests
+
+We've now finished the blog engine we wanted to create in this tutorial. However the project itself is not yet completely finished. To be totally confident with our code we need to add more tests to the project. 
+
+Of course we already written some unit test cases in order to test all the yabe model layer functionnalities. And it is very great as it will ensure that the core functionnalities of the blog engine are well tested. But a web application is not only about the 'model' part. We need to ensure that the web interface works as expected. That means testing the controller layer of the yabe blog engine. But we even need to test the UI itself, as for example, our javascript code.
+
+h2. <a>Testing the controller part</a>
+
+Play give you a way to test directly the controller part of the application using JUnit. We call these tests **'Functional test'**. This is because we want to test complete functionnalities of the web application.
+
+Basically a functional test call the play **ActionInvoker** directly, by simulating an HTTP request. So we give an HTTP method, an URI and somme HTTP parameters. Play then route the request, invoke the corresponding action and you get back the filled response. You can then analyse it to check that the response content is expected.
+
+Let's write a first functional test. Open the **yabe/test/ApplicationTest.java** unit test:
+
+bc. import org.junit.*;
+import play.test.*;
+import play.mvc.*;
+import play.mvc.Http.*;
+import models.*;
+ 
+public class ApplicationTest extends FunctionalTest {
+ 
+    @Test
+    public void testThatIndexPageWorks() {
+        Response response = GET("/");
+        assertIsOk(response);
+        assertContentType("text/html", response);
+        assertCharset("utf-8", response);
+    }
+    
+}
+
+It looks like a standard JUnit test for now. Note that we use the play **FunctionalTest** super class in order to get all useful utility helper. This test is correct and just check that the application home page (typically the '/' URL render an HTML response with **'200 OK'** as status code).
+
+Now we will check that the security of the administration area works as expected. Add this new test to the **ApplicationTest.java** file:
+
+bc. ...
+@Test
+public void testAdminSecurity() {
+    Response response = GET("/admin");
+    assertStatus(302, response);
+    assertHeaderEquals("Location", "http://localhost/login", response);
+}
+...
+
+Now run the yabe application in test mode using the **'play test'** command, open "http://localhost:9000/@tests":http://localhost:9000/@tests, select the **ApplicationTest.java** test case and run it.
+
+Is it green ?
+
+!images/guide10-1!
+
+Well, we could continue to test all the application functionallity this way, but it's not the better way to test an HTML based web application. As our blog engine is intended to be executed in a Web browser, it would be better to test it directly in a **real web browser**. And that exactly what play **'Selenium tests'** allow. 
+
+This kind of JUnit based **'Functional tests'** are however often useful, typically to test Web service stuff, when an HTTP request return some non HTML response like JSON or XML.
+
+h2. <a>Writing some Selenium tests</a>
+
+"Selenium":http://seleniumhq.org is a testing tool specifically for testing web applications. The cool things here is that Selenium allow to run the test suite directly in any existing browser. As it does not use any 'browser simulator' you're sure that you test the same things that your application users will use.
+
+A selenium test suite is typically written as an HTML file. The HTML syntax required by selenium is a little tedious (formatted using an HTML table element) to write. The good news is that play will help you to generate it using the play template engine and a set of tags that support a simplified syntax for selenium scenarios. An interesting side effect of using template is that your are not tied with 'static scenario' anymore and that you can use the power of play template (looping, conditional blocks) to write more complicated tests.
+
+p(note). However you can still write plain HTML selenium syntax in the template and forget the specific selenium tags if needed. It can become interesting if you use one of the several selenium tools that generate the test scenario for you, like "Selenium IDE":http://seleniumhq.org/projects/ide.
+
+The default test suite of a newly created play application already contains a selenium test. Open the **yabe/test/Application.test.html** file:
+
+bc. *{ You can use plain selenium command using the selenium tag }*
+ 
+#{selenium}
+    // Open the home page, and check that no error occured
+    open('/')
+    waitForPageToLoad(1000)
+    assertNotTitle('Application error')
+#{/selenium}
+
+This test should run without any problem with the yabe application for now. It just open the home page and check that the page content does not containt the 'Application error' text.
+
+However like any complicated test, you need to setup a set of well know data before navigating the application and test it. We will of course reuse the fixture concept and the **yabe/test/data.yml** file that we've used before. To import this data set before the test suite, just use the **#{fixtures /}** tag, as is:
+
+bc. #{fixture delete:'all', load:'data.yml' /}
+ 
+#{selenium}
+    // Open the home page, and check that no error occured
+    open('/')
+    waitForPageToLoad(1000)
+    assertNotTitle('Application error')
+#{/selenium}
+
+Another important things to make sure is that at the test beginning we have a fresh user session (as the session is stored in a browser transient cookie, you would keep the same session during two succesive test run).
+
+So let's start our test with a special command:
+
+bc. #{fixture delete:'all', load:'data.yml' /}
+ 
+#{selenium}
+    clearSession()
+ 
+    // Open the home page, and check that no error occured
+    open('/')
+    waitForPageToLoad(1000)
+    assertNotTitle('Application error')
+#{/selenium}
+
+Run it to be sure that there is no mistake. It should be green.
+
+So we can write a more specific test. Open the home page and check that the default posts are present:
+
+bc. #{fixture delete:'all', load:'data.yml' /}
+ 
+#{selenium 'Check home page'}
+    clearSession()
+ 
+    // Open the home page
+    open('/')
+ 
+    // Check that the front post is present
+    assertTextPresent('About the model layer')
+    assertTextPresent('by Bob, 14 Jun 09')
+    assertTextPresent('2 comments , latest by Guest')
+    assertTextPresent('It is the domain-specific representation')
+    
+    // Check older posts
+    assertTextPresent('The MVC application')
+    assertTextPresent('Just a test of YABE')    
+#{/selenium}
+
+We use the standard selenium syntax, called "selenese":http://seleniumhq.org/docs/04_selenese_commands.html.
+
+Run it (you can run in a different windows just by opening the test link in a new window).
+
+!images/guide10-2!
+
+Now we will test the comments form. Just add a new **#{selenium /}** tag to the template:
+
+bc. #{selenium 'Test comments'}
+ 
+    // Click on 'The MVC application post'
+    clickAndWait('link=The MVC application')
+    assertTextPresent('The MVC application')
+    assertTextPresent('no comments')
+    
+    // Post a new comment
+    type('content', 'Hello')
+    clickAndWait('css=input[type=submit]')
+    
+    // Should get an error
+    assertTextPresent('no comments')
+    assertTextPresent('Author is required')
+    type('author', 'Me')
+    clickAndWait('css=input[type=submit]')
+    
+    // Check
+    assertTextPresent('Thanks for posting Me')
+    assertTextPresent('1 comment')
+    assertTextPresent('Hello')
+#{/selenium}
+
+And run it. Well it fails; and we have a serious problem here.
+
+!images/guide10-3!
+
+We can't really test correctly the captcha mechanism. So we have to cheat. In test mode we will validate any code as a correct captcha. We know that we're in test mode when the framework id is **test**. So let's modify the **postComment** action in the **yabe/app/controllers/Application.java** file to skip this validation in test mode:
+
+bc. ...
+if(!Play.id.equals("test")) {
+    validation.equals(code, Cache.get(randomID)).message("Invalid code. Please type it again");
+}
+...
+
+Now just modify the test case to type any code in the text field, as is:
+
+bc. ...
+type('author', 'Me')
+type('code', 'XXXXX')
+clickAndWait('css=input[type=submit]')
+...
+
+And now run the test again, it should work.
+
+h2. <a>Measuring code coverage</a>
+
+Well of course we don't have written all required test cases for the application. But it is enough for this tutorial. But in general cases, how can we know if we have written enough test cases ? We need something called **'code coverage'**. 
+
+Play comes with a code coverage module based on the "Cobertura":http://cobertura.sourceforge.net/ tool. We need to enable this module only for test mode. So add this line to the **application.conf** file, and restart the application in test mode.
+
+bc. # Import the cobertura module in test mode
+%test.module.cobertura=${play.path}/modules/cobertura
+
+Now reopen the browser at the "http://localhost:9000/@tests":http://localhost:9000/@tests url, select all tests and run them. All should be green.
+
+!images/guide10-5!
+
+When all tests are passed, stop the application and cobertura will then generate the code coverage report. You can then open the **yabe/test-result/code-coverage/index.html** in your browser and check the report.
+
+!images/guide10-4!
+
+As you see we're far from testing all cases of the application. Good testing suite should approach 100% (even if it is of course near of impossible to check all the code, typically because we often need to hack in test mode like the captcha cheat).
+
+p(note). Go to the "next part":guide10. 

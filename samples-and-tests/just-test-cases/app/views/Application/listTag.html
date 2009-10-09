@@ -17,6 +17,7 @@
 </div>
 
 <h1>c</h1>
+
 <div id="c">
 #{list items:0..3, as:'i'}
     ${i_parity == 'even' ? '=' : '-'} ${i_index}. ${i} ${i_isLast ? '.' : ','} <br/>
@@ -31,5 +32,45 @@
 #{/list}
 </div>
 
+<h1>e</h1>
+
+<div id="e">
+#{list items:1..5}
+    ${loop_parity == 'even' ? '=' : '-'} ${loop_index}. ${loop} ${loop_isLast ? '.' : ','} <br/>
+#{/list}
+</div>
+
+<h1>f</h1>
+
+<div id="f">
+#{list}
+    COUCOU
+#{/list}
+</div>
+
+<h1>g</h1>
+
+<div id="g">
+#{list items:[], as:'k'}
+    OOPS
+#{/list}
+#{else}
+    Nothing to display
+#{/else}
+</div>
+
+<h1>h</h1>
+
+<div id="h">
+#{list items:[], as:'k'}
+    OOPS
+#{/list}
+#{elseif 1}
+    Yeah
+#{/elseif}
+#{else}
+    OOPS
+#{/else}
+</div>
 
 xxx
