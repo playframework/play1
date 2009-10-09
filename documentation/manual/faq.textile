@@ -30,9 +30,9 @@ When the application development time tends to 0 you can concentrate on your app
 
 h2. <a>Is play fast ?</a>
 
-Yes play itself is fast. But that does not means that any particular application will be fast. The embedded HTTP server and the basic routing and controller invocation stack is very very fast. Used with a modern JVM and Just In Time compiling you can get thousand of requests per second easily. Unafortunely as your application will likely use a database it will become the bottleneck (as always).
+Yes play itself is fast. But that does not mean that any particular application will be fast. The embedded HTTP server and the basic routing and controller invocation stack is very very fast. Used with a modern JVM and Just In Time compiling you can get thousand of requests per second easily. Unafortunely as your application will likely use a database it will become the bottleneck (as always).
 
-The most CPU consumer in the play stack at this time is the template processing based on groovy. But as play applications are easily scalable by running the same application to several servers it is not really a problem if you need to serve a very high traffic. And we hope performance gain on this stuff with the new JDK7 and it sbetter support of dynamic languages.
+The most CPU consumer in the play stack at this time is the template processing based on groovy. But as play applications are easily scalable by running the same application to several servers it is not really a problem if you need to serve a very high traffic. And we hope performance gain on this stuff with the new JDK7 and its better support of dynamic languages.
 
 h2. <a>Can I already use it for a production application ?</a>
 
