@@ -13,6 +13,7 @@ import java.util.Stack;
 import java.util.regex.Pattern;
 import play.Logger;
 import play.Play;
+import play.PlayPlugin;
 import play.vfs.VirtualFile;
 import play.exceptions.TemplateCompilationException;
 import play.exceptions.PlayException;
@@ -24,7 +25,7 @@ import play.templates.InlineTags.CALL;
  */
 public class TemplateCompiler {
 
-    static List<String> extensionsClassnames = new ArrayList();
+    public static List<String> extensionsClassnames = new ArrayList();
 
     public static Template compile(VirtualFile file) {
         try {
@@ -45,6 +46,9 @@ public class TemplateCompiler {
             long start = System.currentTimeMillis();
             new Compiler().hop(template);
             Logger.trace("%sms to parse template %s", System.currentTimeMillis() - start, file.relativePath());
+            for(PlayPlugin plugin : Play.plugins) {
+            	plugin.onTemplateCompilation(template);
+            }
             return template;
         } catch (PlayException e) {
             throw e;
@@ -97,6 +101,8 @@ public class TemplateCompiler {
 
             this.parser = new Parser(source);
 
+            //int line = 1;
+            
             // Class header
             print("class ");
             String className = "Template_" + ((template.name.hashCode()+"").replace("-", "M"));
@@ -106,11 +112,11 @@ public class TemplateCompiler {
             for (String n : extensionsClassnames) {
                 println("use(_('" + n + "')) {");
             }
-
+            
             // Parse
             loop:
             for (;;) {
-
+            	
                 if (doNextScan) {
                     state = parser.nextToken();
                 } else {
@@ -149,7 +155,7 @@ public class TemplateCompiler {
                         break;
                 }
             }
-
+            
             for (String n : extensionsClassnames) {
                 println(" } ");
             }
@@ -160,7 +166,8 @@ public class TemplateCompiler {
                 Tag tag = tagsStack.peek();
                 throw new TemplateCompilationException(template, tag.startLine, "#{" + tag.name + "} is not closed.");
             }
-
+            
+            
             // Done !            
             template.groovySource = groovySource.toString();
 
@@ -181,6 +188,7 @@ public class TemplateCompiler {
                     if (line.length() > 0 && (int) line.charAt(line.length() - 1) == 13) {
                         line = line.substring(0, line.length() - 1);
                     }
+                    
                     if (i == lines.length - 1 && !text.endsWith("\n")) {
                         print("\tout.print(\"");
                     } else if (i == lines.length - 1 && line.equals("")) {
@@ -190,6 +198,7 @@ public class TemplateCompiler {
                     }
                     print(line);
                     print("\");");
+                    
                     markLine(parser.getLine() + i);
                     println();
                 }

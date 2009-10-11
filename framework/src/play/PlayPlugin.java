@@ -5,7 +5,9 @@ import java.util.List;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import play.mvc.Router.Route;
 import play.mvc.results.Result;
+import play.templates.Template;
 import play.vfs.VirtualFile;
 
 /**
@@ -38,6 +40,14 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      */
     public void enhance(ApplicationClass applicationClass) throws Exception {
     }
+    
+    /**
+     * Let the plugin to modify the parsed template.
+     * @param template
+     */
+    public void onTemplateCompilation(Template template) {
+		
+	} 
 
     /**
      * Let a chance to this plugin to fully manage this request
@@ -129,6 +139,13 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      */
     public void onActionInvocationResult(Result result) {
     }
+    
+    /**
+     * Called when the request has been routed.
+     * @param route The route selected.
+     */
+    public void onRequestRouting(Route route) {
+    }
 
     /**
      * Called at the end of the action invocation.
@@ -184,5 +201,5 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     
     public int compareTo(PlayPlugin o) {
         return (index < o.index ? -1 : (index == o.index ? 0 : 1));
-    }        
+    }       
 }

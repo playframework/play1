@@ -3,6 +3,8 @@ package play.mvc;
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 import java.io.ByteArrayInputStream;
+
+import play.mvc.Router.Route;
 import play.mvc.results.Result;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -53,7 +55,10 @@ public class ActionInvoker {
                 for (PlayPlugin plugin : Play.plugins) {
                     plugin.routeRequest(request);
                 }
-                Router.route(request);
+                Route route = Router.route(request);
+                for (PlayPlugin plugin : Play.plugins) {
+                	plugin.onRequestRouting(route);
+                }
             }
             request.resolveFormat();
 

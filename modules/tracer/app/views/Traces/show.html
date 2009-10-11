@@ -1,0 +1,546 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <title>Play Tracer - Trace #${id}</title>		
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}" />
+        <link type="text/css" href="@{'/public/stylesheets/jquery/dark-hive/jquery-ui-1.7.2.custom.css'}" rel="stylesheet" />
+        <script type="text/javascript" src="@{'/public/javascripts/jquery-1.3.2.min.js'}"></script>
+        <script type="text/javascript" src="@{'/public/javascripts/jquery-ui-1.7.2.custom.min.js'}"></script>
+        <style type="text/css">
+        	html, body { margin: 0px; padding: 0; font-family: arial; background-color: #DDDDDD;}
+        	h1, h2, h3, h4, p { padding: 0; margin: 0; }
+        	body > div { }
+        	#header {
+        		padding: 0;
+        		-moz-box-shadow:0 0 6px rgba(0, 0, 0, 0.8);
+        	}
+        	#title {
+        		background-image: url(/public/images/sproutcore_standard_theme.png);
+        		background-position: 0 -634px;
+        		padding: 0 10px;
+        		height: 64px;
+        		color: #222222;
+        	}
+        	#title h1 { padding: 5px 0 0; }
+        	#navigator { padding: 20px 20%; background-color: #8A97AA; }
+        	
+        	#main { height: 100%; width: 100%; display: table; }
+        	
+        	#main > div {
+        		display: table;
+        		width: 100%;
+        	}
+        	
+        	#main > div > div {
+        		display: table-cell;
+        	}
+        	
+        	#traceInfos {
+        		background-color: #8A97AA;
+        	}
+        	
+        	#sourceBrowsing {
+        		display: table;
+        	}
+        	
+        	#sourceContainer {
+        		width: 50%;
+        		border-right: 1Px dashed #999999;
+        	}
+        	
+        	#source {
+        		padding: 0 10px;
+        	}
+        	
+        	.source {
+        		font-size: 10px;
+        		font-family: monospace;
+        	}
+        	.source .line {
+        		display: block;
+        	}
+        	.source .lineNumber, .source .tab {
+        		display: inline-block;
+        		width: 20px;
+        		cursor: default;
+        		-moz-user-select: none;
+        	}
+        	.source .line.selected {
+        		background-color: yellow;
+        	}
+        	
+        	/*
+        		Some syntax highlighting
+        	*/
+        	.template .attribute { color: green; }
+        	.template .markup { color: purple; }
+        	.java .keyword { color: purple; }
+        	
+        	#variablesStack .mutated { background-color: red; }
+        	#variablesStack .static { font-style: italic; }
+        </style>
+        <script type="text/javascript">
+        	(function() {
+            	var tracer = {
+            		traceString: '',
+            		trace: {},
+            		lineExecutions: [],
+            		methodExecutions: [],
+            		templateExecutions: [],
+            		sources: {},
+            		displayedLineExecution: null,
+            		displayedSource: null,
+            		displayedLine: 0,
+            		showLines: 16,
+
+            		make: function() {
+
+            		},
+
+            		fetch: function(type, source) {
+						var parseJava = function(data) {
+							return data = data.replace(/(public|protected|private|package|import|final|static|class|extends|implements|boolean|byte|short|int|long|double|float|synchronized|for|while|false|true|return|switch|case|try|catch|finally|break|continue|goto|null)\s+/g, "<span class=\"keyword\">$&</span>");
+						};
+
+						var parseHtml = function(data) {
+							data = data.replace(/&/g, "&amp").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+							data = data.replace(/(&lt;\/?\w+)(.*?)(&gt;)/g, "<span class=\"markup\">$1</span>$2<span class=\"markup\">$3</span>");
+							return data;
+						}
+
+                		var callbacks = [];
+                		for(var i = 2; i < arguments.length; i++)
+                    		callbacks.push(arguments[i]);
+						
+						var url = type === 'MethodExecution' ? '@{Traces.getClassSource("___")}' : '@{Traces.getTemplateSource("___")}';
+						url = url.replace('___', source);
+						
+						$.get(url, function(data) {
+							if(type === 'MethodExecution')
+								data = parseJava(data);
+							if(type === 'TemplateExecution') {
+								data = parseHtml(data);
+							}
+							data = tracer.parseSource(data);
+							tracer.sources[source] = data;
+							for(var i = 0; i < callbacks.length; i++)
+								try { callbacks[i](); } catch(e) { if(console != null) console.log(e); }
+						});
+            		},
+
+            		showSource: function(line) {
+                		var type = line.parent.type;
+						var source = line.parent.type === 'MethodExecution' ? line.parent.klass : line.parent.name;
+						var showLine = function() {
+							var $lines = $('#source [line]');
+							var range = tracer.showLines;
+							var n = line.line;
+							$('#source .line.selected').removeClass('selected')
+							if(range) {
+								$('#source .line:visible').hide()
+								var start = n - parseInt(range/2) - 1
+								var end = n + parseInt(range/2) - 1
+								if(start < 1) {
+									end = end - start;
+									start = 0;
+								}
+								if(end > $lines.length)
+									end = $lines.length - 1                         
+								for(var i = start; i <= end; i++)
+									$($lines[i]).show()
+							}
+							$('#source [line=' + n+']').addClass('selected')
+						};
+
+						var load = function() {
+							var $source = $('#source');
+							var syntax = type === 'MethodExecution' ? 'java' : 'template';
+							if(!$source.hasClass(syntax)) {
+								$source.removeClass('java template').addClass(syntax);
+							}
+							$source.html('<h2>'+source+'</h2>' + tracer.sources[source]);
+							tracer.displayedSource = source;
+						};
+
+						if(source !== tracer.displayedSource) {
+							if(!tracer.sources[source])
+								tracer.fetch(type, source, load, showLine);
+							else { load(); showLine() }
+						} else {
+							showLine()
+						}
+            		},
+
+            		showStack: function(line) {
+						var stack = '';
+						var e = {
+							exec: line.parent,
+							l: line.line
+						};
+						while(e.exec) {
+							var exec = e.exec;
+							var l = e.l;
+							if(exec.type === 'MethodExecution') {
+								var onclick = '';
+								var first = exec.children[0];
+								if(first)
+									onclick = "$('#bar').slider('value', " + (first.index-1) + ")";
+								stack += '<li onclick="'+onclick+'">' + exec.klass + '.' + exec.name + ':' + l + '</li>';
+							} else if(exec.type === 'TemplateExecution') {
+								stack += '<li>' + exec.name + ':' + l + '</li>';
+							} else if(exec.type === 'LineExecution') {
+								l = exec.line;
+							}
+							e = {
+								exec: exec.parent,
+								l: l
+							}
+						}
+						$('#stack').html('<ul>' + stack + '</ul>');
+            		},
+
+            		showVariableStack: function(line) {
+						var stack = '';
+						var parent = line.parent;
+						if(parent.type === 'MethodExecution' || parent.type === 'TemplateExecution') {
+							stack = '<ul>';
+							$(line.currentVarStack).each(function() {
+								if(this.index > -1) {
+									var _var = parent.varStack[this.index];
+									var _val = _var.values[this.valIndex];
+									var classes = _var.isLocal ? 'local' : 'field';
+									classes += " " + tracer.utils.modifiers.parse(_var.modifier);
+									classes += this.mutated ? ' mutated' : '';
+									stack += '<li class="' + classes + '">' + _var.name + ' -> ' + _val + '</li>';
+								}
+							});
+							stack += '</ul>';
+							$('#variablesStack').html(stack);
+						}
+            		},
+
+            		showAssignments: function(line) {
+                		var res;
+                		if(line.assignments.length !== 0) {
+                			res = '<ul>';
+    						for(var i = 0; i < line.assignments.length; i++) {
+        						res += '<li><span class="variable">' + line.assignments[i].name + '</span> -> ';
+        						res += '<span class="value">' + getRepresentation(line.assignments[i]) + '</span></li>';
+    						}
+    						res += '</ul>';
+                		}
+                		$('#assignments').html(res || 'No assignments');
+            		},
+
+            		show: function(line) {
+						tracer.showSource(line);
+						tracer.showStack(line);
+						tracer.showVariableStack(line);
+            		},
+
+            		parseSource: function(source, range, middle) {
+                		var start = (!isNaN(range) && !isNaN(middle)) ? middle - parseInt(range / 2) : 1;
+                		var end = (!isNaN(range) && !isNaN(middle)) ? middle + parseInt(range / 2) : Infinity;
+                		middle = isNaN(middle) ? -1 : middle;
+                		var lines = source.split("\n");
+                		var result = '';
+                		for(var i = start; i <= lines.length && i <= end; i++) {
+							result += '<span class="line'+(i===middle? ' selected' : '')+'" line="'+i+'"><span class="lineNumber">' + i + '</span>' + lines[i-1] + '</span>';
+                		}
+						return result.replace(/\t/g, '<span class="tab"></span>');
+            		},
+
+            		getLineExecutionIndex: function(lineNumber) {
+						var lines = tracer.lineExecutions;
+						for(var i = 0; i<lines.length; i++)
+							if(lines[i].line === lineNumber)
+								return i;
+            		},
+
+            		utils: {
+						modifiers: {
+							isStatic: function(modifier) {
+								return (modifier & 0x0008) != 0;
+            				},
+            				isPublic: function(modifier) {
+                				return (modifier & 0x0001) != 0;
+            				},
+            				isProtected: function(modifier) {
+                				return (modifier & 0x0004) != 0;
+            				},
+            				isPrivate: function(modifier) {
+                				return (modifier & 0x0002) != 0;
+            				},
+            				isFinal: function(modifier) {
+                				return (modifier & 0x0010) != 0;
+            				},
+            				isVolatile: function(modifier) {
+                				return (modifier & 0x0040) != 0;
+            				},
+            				isTransiant: function(modifier) {
+                				return (modifier & 0x0080) != 0;
+            				},
+            				parse: function(modifier) {
+                				var _ = tracer.utils.modifiers;
+                				var resultArray = [];
+								if(_.isPublic(modifier))
+									resultArray.push("public");
+								if(_.isProtected(modifier))
+									resultArray.push("protected");
+								if(_.isPrivate(modifier))
+									resultArray.push("private");
+								if(_.isStatic(modifier))
+									resultArray.push("static");
+								if(_.isFinal(modifier))
+									resultArray.push("final");
+								if(_.isVolatile(modifier))
+									resultArray.push("volatile");
+								if(_.isTransiant(modifier))
+									resultArray.push("transiant");
+								var result = "";
+								if(resultArray.length) {
+									result += resultArray[0];
+									for(var i = 1; i < resultArray.length; i++)
+										result += " " + resultArray[i];
+								}
+								return result;
+            				}	
+            			}
+            		}
+                };
+
+                $.ajax({
+                    method: 'get',
+                    async: false,
+                    url: '@{Traces.jsonTrace(id)}',
+                    success: function(data) {
+                    	tracer.traceString = data;
+                    	tracer.trace = eval('(' + data + ')');
+                	},
+                	error: function() {
+                    	if(console) console.log('ERROR');
+                	}
+            	});
+
+				var getRepresentation = function(assignment) {
+					var val = assignment.value;
+					if(typeof val === "object" && val.constructor === Array)
+						return "[" + (val ? val : " ") + "]";
+					return val.toString();
+				};
+
+				// run through all executionsin trace
+				var runThroughExecutions = function() {
+					var callbacks = arguments;
+					var doInspect = function(executions, parent) {
+						for(var i = 0; i < executions.length; i++) {
+							for(var j = 0; j < callbacks.length; j++) {
+								try {
+									callbacks[j].call(executions[i], parent);
+								} catch (e) {
+									if(console) console.log(e);
+								}
+							}
+							doInspect(executions[i].children, executions[i]);
+						}
+					};
+					doInspect(tracer.trace.executions);
+				};
+				
+				var getLineExecutions = function() {
+					if(this.type === 'LineExecution') {
+						this.index = tracer.lineExecutions.push(this);
+					}
+				};
+
+				var getMethodExecutions = function() {
+					if(this.type === 'MethodExecution')
+						this.index = tracer.methodExecutions.push(this);
+				};
+
+				var getTemplateExecutions = function() {
+					if(this.type === 'TemplateExecution')
+						this.index = tracer.templateExecutions.push(this);
+				};
+
+				var rebuildHierarchy = function(parent) {
+					this.parent = parent;
+				};
+
+				var computeDuration = function() {
+					this.duration = this.end - this.start;
+					this.durationMillis = this.duration / 1000000;
+				};
+
+				var buildVariableStack = function(parent) {
+					if(this.type !== 'LineExecution') {
+						if(this.type === 'MethodExecution' || this.type === 'TemplateExecution') {
+							var mexec = this;
+							this.varStack = [];
+							for(var i = 0; i < this.variables.length; i++) {
+								var lv = this.variables[i];
+								var values = [];
+								this.varStack.push({
+									name: lv.name,
+									values: [
+										lv.value
+									],
+									startLine: lv.startLine,
+									endLine: lv.endLine,
+									isLocal: lv.isLocal,
+									modifier: lv.modifier
+								});
+							}
+						}
+					} else {
+						var line = this;
+						line.currentVarStack = [];
+						$(parent.varStack).each(function(i) {
+							var v = this;
+							var mutated = false;
+							$(line.assignments).each(function() {
+								if(this.isLocal === v.isLocal && this.name === v.name) {
+									v.values.push(this.value);
+									mutated = true;
+								}
+							});
+							if(line.line >= (v.startLine) && line.line <= v.endLine)
+								line.currentVarStack.push({ index: i, valIndex: v.values.length - 1, mutated: mutated}); // indice de la valeur courante
+							else line.currentVarStack.push({ index: -1, valIndex: -1, mutated: mutated}); // pas d'indice -> la variable n'est pas valide pour cette ligne.
+						});
+					}
+				};
+
+				runThroughExecutions(getLineExecutions, rebuildHierarchy, computeDuration, getMethodExecutions, getTemplateExecutions, buildVariableStack);
+
+				// extends actionContext
+				tracer.trace.actionContext.request.getURL = function() {
+					var req = tracer.trace.actionContext.request;
+					return 'http' + (req.secure === 'true' ? 's' : '') + '://' + req.host + req.path + req.querystring;
+				};
+
+				$(function() {
+					tracer.show(tracer.lineExecutions[0])
+					var getMethodFirstLineExecutionIndex = function(methodFQN) {
+						for(var i = 0; i < tracer.methodExecutions.length; i++) {
+							var mexec = tracer.methodExecutions[i];
+							if((mexec.klass+'.'+mexec.name) === methodFQN) {
+								var le = mexec.children[0];
+								if(le)
+									return le.index;
+							}
+						}
+						return -1;
+					};
+					
+					$('#bar').slider({
+						min: 0,
+						max: tracer.lineExecutions.length - 1,
+						slide: function(e, ui) {
+							var line = tracer.lineExecutions[ui.value];
+							tracer.show(line);
+						},
+						change: function(e, ui) {
+							if(!e.originalEvent) { // programmatic change
+								var line = tracer.lineExecutions[ui.value];
+								tracer.show(line);
+							}
+						}
+					});
+
+					$('#source .line').live('click', function() {
+						var line = parseInt($(this).attr('line'));
+						$('#bar').slider('value', tracer.getLineExecutionIndex(line));
+					});
+
+					$('h1').text(tracer.trace.actionContext.request.method + ': ' + tracer.trace.actionContext.request.getURL());
+					$('#summary').html('routed to <a href="#" onclick="' + (function() {
+						var search = 'controllers.' + tracer.action;
+						for(var i = 0; i < tracer.lineExecutions.length; i++) {
+							var parent = tracer.lineExecutions[i].parent;
+							if(parent.type === 'MethodExecution' && (parent.klass+'.'+parent.name) === search) {
+								return "$('#bar').slider('value', " + i + ")";
+							}
+						}
+						return '';
+					})() + '">' + tracer.trace.actionContext.action + '</a>, completion time : ' + (tracer.trace.end - tracer.trace.realStart) + ' ms');
+
+					// longest executions ->
+					var longestExecutions = tracer.methodExecutions.concat(tracer.templateExecutions);
+					longestExecutions.sort(function(a, b) {
+						return a.duration < b.duration;
+					});
+					
+					$('#longestExecutions p').html((function(){
+						var res = '<ul>';
+						for(var i = 0; i<longestExecutions.length; i++) {
+							var onclick = '';
+							if(longestExecutions[i].type === 'MethodExecution') {
+								var first = longestExecutions[i].children[0];
+								if(first)
+									onclick = "$('#bar').slider('value', " + (first.index-1) + ")";
+							}
+							res+='<li onclick="'+onclick+'">' + longestExecutions[i].name + ' (' + (longestExecutions[i].duration / 1000000) + ' ms)</li>';
+						}
+						return res += '</ul>'
+					})());
+
+					// actions ->
+					var actions = '<ul>';
+					for(var i = 0; i < tracer.trace.executions.length; i++) {
+						var exec = tracer.trace.executions[i];
+						var onclick = '';
+						var first = exec.children[0];
+						if(first)
+							onclick = "$('#bar').slider('value', " + (first.index-1) + ")";
+						actions += '<li onclick="'+onclick+'">' + exec.klass + '.' + exec.name + ' [' + exec.durationMillis + ' ms]</li>';
+					}
+					actions += '</ul>';
+					$('#actions p').html(actions)
+
+					// routes ->
+					$.get('@{Traces.getFile("___")}'.replace('___', tracer.trace.actionContext.routeFile), function(data) {
+						var middle = tracer.trace.actionContext.routeLine;
+						var lines = data.split("\n");
+						$('#routes').html('<h2>' + tracer.trace.actionContext.routeFile + '</h2>' + '<div>' + tracer.parseSource(data, 8, middle) + '</div>');
+					});
+				});
+        	})();
+        </script>
+    </head>
+    <body>
+    	<div id="header">
+	    	<div id="title">
+		    	<h1></h1>
+		    	<p id="summary"></p>
+	    	</div>
+	    	<div id="navigator">
+	    		<div id="bar"></div>
+	    	</div>
+	    </div>
+    	
+	    <div id="main">
+	    	<div id="sourceBrowsing">
+		    	<div id="sourceContainer"><h2>Source</h2><div id="source" class="source"></div></div>
+		    	<div><h2>Stack</h2><div id="stack"></div></div>
+		    	<div><h2>Variable stack</h2><div id="variablesStack"></div></div>
+	    	</div>
+	    	<div id="traceInfos">
+		    	<div>
+		    		<h2>Routes</h2>
+		    		<div  id="routes" class="source"></div>
+		    	</div>
+		    	<div id="actions" >
+		    		<h2>Actions</h2>
+		    		<p></p>
+		    	</div>
+		    	<div id="longestExecutions" >
+		    		<h2>Longest Executions</h2>
+		    		<p></p>
+		    	</div>
+	    	</div>
+    	</div>
+    </body>
+</html>

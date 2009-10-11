@@ -102,6 +102,7 @@
         <ant antfile="build.xml" target="build" dir="../modules/spring" />
         <ant antfile="build.xml" target="build" dir="../modules/search" />
         <ant antfile="build.xml" target="build" dir="../modules/siena" />
+	<ant antfile="build.xml" target="build" dir="../modules/tracer" />
     </target>
     
     <!-- Netbeans support -->
