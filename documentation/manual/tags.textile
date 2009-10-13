@@ -1,0 +1,199 @@
+h1. Built-in template tags 
+
+These are the standard tags built in the template engine.
+
+p(note). If you search about available standard Java extensions, you should look at the "JavaDoc":/@api/play/templates/JavaExtensions.html
+
+h2. <a>a</a>
+
+The **a** tag inserts a HTML link to a controller action.
+
+bc. #{a @Application.logout()}Disconnect#{/a}
+
+Rendered as:
+
+bc. <a href="/application/logout">Disconnect</a>
+
+If the action you try call does not have any route able to invoke it using a GET method, play will automatically generate an hidden form that will be submitted on link click using javascript.
+
+h2. <a>doLayout</a>
+
+Used with template inheritance, this tag insert the content of the evaluated sub-template.
+
+bc. <!-- common header here -->
+<div id="content">
+    #{doLayout /}
+</div>
+<!-- common footer here -->
+
+h2. <a>extends</a>
+
+Make the template inherit another template.
+
+bc. #{extends 'main.html' /}
+
+h2. <a>form</a>
+
+Insert a **form** tag. HTTP method is guessed from the route, and defaults to POST. 
+
+Optional **id** attribute sets an id to the form element. 
+Optional **enctype** attribute sets the form's data encoding. it defaults to ''application/x-www-form-urlencoded''.
+
+Charset encoding is always ''utf-8''
+
+bc. #{form @Client.create() , id:'creationForm' enctype:'multipart/form-data' }
+   ...
+#{/form}
+
+
+Rendered as :
+
+bc. <form action="/client/create" id="frm" method="POST" accept-charset="utf-8" enctype="multipart/form-data">
+ ...
+</form>
+
+h2. <a>get</a>
+
+Retrieve a value defined with a **set** tag. You may use  the get/set mechanism to exchange values between templates, layouts and sub-templates.
+
+bc. <head>
+    <title>#{get 'title' /}
+</head>
+
+h2. <a>i18n</a>
+
+Export localized messages in Javascript. Localized messages are available from your javascript code using the **i18n()** function.
+
+Define your translations in the **conf/messages** file.
+
+bc. hello_world=Hello, World !
+hello_someone=Hello %s !
+
+Include the messages in your template (or layout) page:
+
+bc. #{i18n /}
+
+And retrieve keys from Javascript:
+
+bc. alert(i18n('hello_world'));
+alert(i18n('hello_someone', 'John'));
+
+h2. <a>include</a>
+
+Include another template. All variable of the current template are directly availables in the included template.
+
+bc. <div id="tree">
+    #{include 'tree.html' /}
+</div>
+
+h2. <a>if</a>
+
+Evaluate the given test, and if true, evaluate the tag body.
+
+bc. #{if user.countryCode == 'en"' }
+    Connected user is ${user}
+#{/if}
+
+Using composite conditions:
+
+bc. #{if ( request.actionMethod == 'administer'  && user.isAdmin() ) }
+    You are admin, allowed to administer.
+#{/if}
+
+h2. <a>ifnot</a>
+
+Cleaner alternative to #{if !condition}
+
+bc. #{ifnot tasks}
+    No tasks today
+#{/if}
+
+h2. <a>else</a>
+
+Of course used with the **if** tag.
+
+bc. #{if user}
+    Connected user is ${user}
+#{/if}
+#{else}
+    Please log in
+#{/else}
+
+However, you can use it also with the **list** tag and it will be executed if the list was empty.
+
+bc. #{list items:task, as:'task'}
+    <li>${task}</li>
+#{/li}
+ 
+#{else}
+    Nothing to do...
+#{/else}
+
+h2. <a>elseif</a>
+
+bc. #{if tasks.size() > 1}
+    Busy tasklist
+#{/if}
+ 
+#{elseif tasks}
+    One task on the list
+#{/elseif}
+ 
+#{else}
+    Nothing to do
+#{/else}
+
+As for **else**, you can use it with the **list** tag.
+
+h2. <a>list</a>
+
+Iterate over an object collection.
+
+bc. <ul>
+#{list items:products, as:'product'}
+    <li>${product}</li>
+#{/list}
+</ul>
+
+The tag define implicit variables in his body. The variable names are prefixed with the loop variable name.
+
+* **name_index**, the index of the item, starting at 1
+* **name_isLast**, true for the last element
+* **name_isFirst**, true for the first element
+* **name_parity**, alternate between **odd** and **even** value
+
+bc. <ul>
+#{list items:products, as:'product'}
+    <span class="${product_parity}">${product_index}. ${product}</span>
+    ${product_isLast ? '' : '-'}
+#{/list}
+</ul>
+
+**for** loops are easy to create using Groovy **range** object :
+
+bc. #{list items:0..10, as:'i'}
+    ${i}
+#{/list}
+
+bc. #{list items:'a'..'z', as:'letter'}
+    ${letter} ${letter_isLast ? '' : '|' }
+#{/list}
+
+
+h2. <a>set</a>
+
+Define a value which can be retrieve in the same template or any layout with the **get** tag.
+
+bc. #{set title:'Admin' /}
+#{set style:'2columns' /}
+
+You can also use variables:
+
+bc. #{set title:'Profile of ' + user.login /}
+
+You can define variables value in the body:
+
+bc. #{set 'title'}
+    Profile of ${user.login}
+#{/set}
+

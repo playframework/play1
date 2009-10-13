@@ -70,8 +70,8 @@ public class InlineTags {
         StringBuffer s = new StringBuffer();
         switch(f) {
             case START:
-                s.append("if(!attrs"+index+"['as']) {throw new play.exceptions.TagInternalException('as attribute cannot be empty')};");
-                s.append("if(attrs"+index+"['items'] == null) attrs"+index+"['items'] = [];");
+                s.append("if(!attrs"+index+"['as']) {attrs"+index+"['as'] = 'loop';};");
+                s.append("if(attrs"+index+"['items']) { play.templates.TagContext.parent().data.put('_executeNextElse', false);");
                 s.append("_iter"+index+" = attrs"+index+"['items'].iterator();");
                 s.append("for (_i = 1; _iter"+index+".hasNext(); _i++) {");
                 s.append("_item"+index+" = _iter"+index+".next();");
@@ -83,6 +83,7 @@ public class InlineTags {
                 break;
             case END:
                 s.append("};");
+                s.append("} else { play.templates.TagContext.parent().data.put('_executeNextElse', true); }");
                 break;
         }
         return s.toString();

@@ -245,8 +245,8 @@ public abstract class FunctionalTest extends BaseTest {
      * @param response server response
      */
     public static void assertHeaderEquals(String headerName, String value, Response response) {
-        assertNotNull("Response header " + headerName + " missing", response.headers.get(headerName.toLowerCase()));
-        assertEquals("Response header " + headerName + " mismatch", value, response.headers.get(headerName.toLowerCase()));
+        assertNotNull("Response header " + headerName + " missing", response.headers.get(headerName));
+        assertEquals("Response header " + headerName + " mismatch", value, response.headers.get(headerName).value());
     }
 
     /* TODO : check json syntax

@@ -38,7 +38,7 @@ public abstract class SqlQuery {
         }
 
         public Concat prefix(String prefix) {
-            if (this.prefix == null) this.prefix = prefix;
+            this.prefix = prefix;
             return this;
         }
 

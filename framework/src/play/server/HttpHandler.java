@@ -509,7 +509,7 @@ public class HttpHandler implements IoHandler {
             }
             minaResponse.addCookie(c);
         }
-        if (!response.headers.containsKey("cache-control")) {
+        if (!response.headers.containsKey("cache-control") && !response.headers.containsKey("Cache-Control")) {
             minaResponse.setHeader("Cache-Control", "no-cache");
         }
         HttpHandler.writeResponse(session, minaRequest, minaResponse);

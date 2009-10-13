@@ -38,6 +38,29 @@ public class Mails extends Mailer {
  
 }
 
+bc. text/html email
+
+The send call will render the app/views/Mails/welcome.html template as the body of the email message.
+
+bc. <html><body><p>Welcome <b>${user.name}</b>, </p>
+...
+</html>
+
+The template for the lostPassword method could look like this:
+
+app/views/Mails/lostPassword.html
+
+bc. <html><body><head>...</head><body><img src="mycompany.com/images"/><p>Hello ${user.name},
+
+Your new password is <b>${newpassword}</b>.
+</p>
+</body>
+</html>
+
+bc. plain/text email
+
+If no HTML template is defined, then a plain/text email is sent using the txt template. If a HTML template is defined and a text template exists, then the text template will be used as an alternative message.
+
 The send call will render the app/views/Mails/welcome.txt template as the body of the email message.
 
 bc. Welcome ${user.name},
@@ -50,7 +73,6 @@ app/views/Mails/lostPassword.txt
 bc. Hello ${user.name},
  
 Your new password is ${newpassword}.
- 
 
 h2. <a>SMTP configuration</a>
 

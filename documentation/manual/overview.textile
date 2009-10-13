@@ -6,7 +6,7 @@ The Play framework's goal is to ease web applications development while sticking
 
 p(note). **Wanna see some code?** 
  
-Check "Five cool things you can do with play":5things, or start directly with "play guide":guide1.
+Check "Five cool things you can do with play":5things, or start directly with "hello world tutorial":firstapp.
 
 
 h2. <a name="java">A Java framework without the pain</a>
@@ -68,16 +68,16 @@ bc. <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
  
 <c:choose>
     <c:when test="${emails.unread != null && fn:size(emails.unread)}">
-        You have ${fn:size(emails.unread)} unread emails!
+        You have ${fn:size(emails.unread)} unread email(s)!
     </c:when>
     <c:otherwise>
-        You have no unread email!
+        You have no unread emails!
     </c:otherwise>
 </c:choose>
 
 We think you would certainly prefer to write:
 
-bc. You have ${email.unread?.size() ?: 'no'} unread ${email.unread?.size() > 1 ? 'emails' : 'email'}!
+bc. You have ${emails.unread ?: 'no'} ${emails.unread?.pluralize('email')} !
 
 The expression language used by the play template engine is "Groovy":http://groovy.codehaus.org/, which provides a syntax consistent with Java. While play mainly uses the templating system to render HTML responses, you are free to use it to generate any other documents such as email messages, json responses, etc.
 

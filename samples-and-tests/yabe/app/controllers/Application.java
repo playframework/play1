@@ -37,7 +37,9 @@ public class Application extends Controller {
         String randomID) 
     {
         Post post = Post.findById(postId);
-        validation.equals(code, Cache.get(randomID)).message("Invalid code. Please type it again");
+        if(!Play.id.equals("test")) {
+            validation.equals(code, Cache.get(randomID)).message("Invalid code. Please type it again");
+        }
         if(validation.hasErrors()) {
             render("Application/show.html", post, randomID);
         }
