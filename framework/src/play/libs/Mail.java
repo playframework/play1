@@ -43,7 +43,7 @@ public class Mail {
     public static boolean asynchronousSend = true;
 
     /**
-     * Send an email
+     * Send an email in plain text
      * @param from From address
      * @param recipient To address
      * @param subject Subject
@@ -54,90 +54,56 @@ public class Mail {
     }
 
     /**
-     * Send an email
+     * Send an email in text/html with a text/plain alternative
      * @param from From address
      * @param recipient To address
      * @param subject Subject
-     * @param body Body
-     * @param contentType The content type (text/plain or text/html)
+     * @param body text/html body content
+     * @param alternate text/plain alternative content (optional)
      */
     public static Future<Boolean> send(String from, String recipient, String subject, String body, String alternate) {
         return send(from, new String[]{recipient}, subject, body, alternate, "text/html", new Object[0]);
     }
 
     /**
-     * Send an email
+     * Send an email in text/html with a text/plain alternative and attachments
      * @param from From address
      * @param recipient To address
      * @param subject Subject
-     * @param body Body
-     * @param contentType The content type (text/plain or text/html)
+     * @param body text/html body content
+     * @param alternate text/plain alternative content (optional)
+     * @param obj the attachments to the email
      */
     public static Future<Boolean> send(String from, String recipient, String subject, String body, String alternate, Object... obj) {
         return send(from, new String[]{recipient}, subject, body, alternate, "text/html", obj);
     }
 
     /**
-     * Send an email
-     * @param from From address
-     * @param recipient To address
-     * @param subject Subject
-     * @param body Body
-     * @param contentType The content type (text/plain or text/html)
-     */
-    public static Future<Boolean> send(String from, String recipient, String subject, String body, String alternate, String contentType) {
-        return send(from, new String[]{recipient}, subject, body, alternate, contentType, new Object[0]);
-    }
-
-    /**
-     * Send an email
+     * Send an email in text/plain format
      * @param from From address
      * @param recipients To addresses
      * @param subject Subject
-     * @param body Body
+     * @param body The text/plain body of the email
      */
     public static Future<Boolean> send(String from, String[] recipients, String subject, String body) {
         return send(from, recipients, subject, body, null, "text/plain", new Object[0]);
     }
 
     /**
-     * Send an email
-     * @param from From address
-     * @param recipients To addresses
-     * @param subject Subject
-     * @param body Body
-     * @param contentType The content type (text/plain or text/html)
-     */
-    public static Future<Boolean> send(String from, String[] recipients, String subject, String body, String alternate, String contentType) {
-        return send(from, recipients, subject, body, alternate, contentType, new Object[0]);
-    }
-
-    /**
-     * Send an email
+     * Send an email in text/plain
      * @param from From address
      * @param recipient To address
      * @param subject Subject
-     * @param body Body
+     * @param body plain/text body of the email
      * @param attachments File attachments
      */
     public static Future<Boolean> send(String from, String recipient, String subject, String body, Object... attachments) {
         return send(from, new String[]{recipient}, subject, body, null, "text/plain", attachments);
     }
 
+
     /**
-     * Send an email
-     * @param from From address
-     * @param recipient To address
-     * @param subject Subject
-     * @param body Body
-     * @param contentType The content type (text/plain or text/html)
-     * @param attachments File attachments
-     */
-//    public static Future<Boolean> send(String from, String recipient, String subject, String body, String contentType, Object... attachments) {
-//        return send(from, new String[]{recipient}, subject, body, contentType, attachments);
-//    }
-    /**
-     * Send an email
+     * Send an email in text/plain
      * @param from From address
      * @param recipients To addresses
      * @param subject Subject
@@ -148,31 +114,16 @@ public class Mail {
         return send(from, recipients, subject, body, null, "text/plain", attachments);
     }
 
+    
     /**
      * Send an email
      * @param from From address
+     * @param replyTo ReplyTo address
      * @param recipients To addresses
      * @param subject Subject
-     * @param body Body
-     * @param contentType The content type (text/plain or text/html)
-     * @param attachments File attachments
-     */
-    public static Future<Boolean> send(String from, String[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) {
-        return send(from, from, recipients, subject, body, alternate, contentType, attachments);
-    }
-
-    public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String contentType, Object... attachments) {
-        return send(from, replyTo, recipients, subject, body, null, contentType, attachments);
-    }
-
-    /**
-     * Send an email
-     * @param from From address
-    @param replyTo ReplyTo address
-     * @param recipients To addresses
-     * @param subject Subject
-     * @param body Body
-     * @param contentType The content type (text/plain or text/html)
+     * @param body body of the email
+     * @param alternate text/plain body (optional). This parameter is ignored if contentType is set to text/plain or is null.
+     * @param contentType The content type of the body (text/plain or text/html)
      * @param attachments File attachments
      */
     public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) {
@@ -219,8 +170,9 @@ public class Mail {
      * @param from From address
      * @param recipients To addresses
      * @param subject Subject
-     * @param body Body
-     * @param contentType The content type (text/plain or text/html)
+     * @param body body of the email
+     * @param alternate text/plain body (optional). This parameter is ignored if contentType is set to text/plain or is null.
+     * @param contentType The content type of the body (text/plain or text/html) (optional)
      * @param attachments File attachments
      */
     public static MimeMessage buildMessage(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) throws MessagingException {
