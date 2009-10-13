@@ -10,6 +10,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.modules.tracer.service.TraceService;
 import play.templates.TemplateLoader;
+import play.vfs.VirtualFile;
 
 public class Traces extends Controller {
 	@Before
@@ -42,7 +43,8 @@ public class Traces extends Controller {
 	}
 	
 	public static void getTemplateSource(String name) {
-		renderText(TemplateLoader.load(name).source);
+		VirtualFile vf = VirtualFile.fromRelativePath(name);
+		renderText(TemplateLoader.load(vf).source);
 	}
 	
 	public static void getFile(String path) throws IOException {

@@ -120,6 +120,7 @@ public class LineExecution extends Execution {
 		Logger.debug("LineExecution.end() --- line="+line);
 		if(parent instanceof MethodExecution) {
 			MethodExecution mexec = (MethodExecution) parent;
+			Logger.debug("ending line %s in mexec = %s", line, parent);
 			for(Variable variable : mexec.readAccessesByLine.get(line)) {
 				Logger.debug("LineExecution.end(): read '%s' at line "+line, variable.name);
 				assignIfModified(variable.name, variable.that, variable.klass, line, variable.isLocal);

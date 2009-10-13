@@ -44,7 +44,7 @@ public class SerializedObject {
 	public String toJSON(boolean includeStaticIfNull) {
 		if(serializedType.equals(SerializedType.NULL) && !includeStaticIfNull) return "\"null\"";
 		if(json != null) return json;
-		if(serializedType.equals(SerializedType.SIMPLE)) return toJSON(value);
+		if(serializedType.equals(SerializedType.SIMPLE)) return Utils.escapeJSON(value);
 		boolean array = serializedType.equals(SerializedType.COLLECTION) || serializedType.equals(SerializedType.ARRAY);
 		
 		StringBuffer sb = new StringBuffer(array ? "[" : "{");
@@ -55,7 +55,7 @@ public class SerializedObject {
 				if(!first)
 					sb.append(",");
 				else first = false;
-				sb.append(toJSON(entry.getKey())).append(":").append(entry.getValue().toJSON());
+				sb.append(Utils.escapeJSON(entry.getKey())).append(":").append(entry.getValue().toJSON());
 			}
 		}
 
@@ -66,7 +66,7 @@ public class SerializedObject {
 			if(array)
 				sb.append(entry.getValue().toJSON());
 			else {
-				sb.append(toJSON(entry.getKey())).append(":").append(entry.getValue().toJSON());
+				sb.append(Utils.escapeJSON(entry.getKey())).append(":").append(entry.getValue().toJSON());
 			}
 		}
 		
@@ -151,10 +151,6 @@ public class SerializedObject {
 		}
 		
 		return result;
-	}
-	
-	private static String toJSON(String s) {
-		return "\"" + (s == null ? "null" : s.replace("\\", "\\\\").replace("\"", "\\\"")).replace("\n", "\\n") + "\"";
 	}
 	
 	public static enum SerializedType {

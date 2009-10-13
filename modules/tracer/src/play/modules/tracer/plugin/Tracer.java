@@ -72,6 +72,7 @@ public class Tracer extends PlayPlugin {
 		Logger.debug("TRACER beforeActionInvocation (" + Request.current().action + " [" + Request.current().toString() + "]");
 		current.set(trace);
 		RenderArgs.current().put("__trace_id", trace.id);
+		Logger.info("Tracer starts tracking execution of %s.%s", actionMethod.getDeclaringClass().getCanonicalName(), actionMethod.getName());
 	}
 	
 	@Override

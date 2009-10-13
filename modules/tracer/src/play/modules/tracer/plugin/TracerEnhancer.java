@@ -23,6 +23,7 @@ import javassist.bytecode.Opcode;
 import javassist.compiler.Javac;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
+import javassist.expr.MethodCall;
 
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
@@ -346,6 +347,19 @@ public class TracerEnhancer extends Enhancer {
             			throw new RuntimeException(name + " was not found in\n" + sb, e);
             		}
             	}
+            	
+            	@Override
+            	public void edit(MethodCall m) throws CannotCompileException {
+            		try {
+	            		Logger.trace("method call %s", m.getClassName() + "."+m.getMethodName());
+	            		if(m.getMethod().getDeclaringClass().equals(ctClass.getClassPool().getCtClass("play.mvc.Controller")) && m.getMethodName().startsWith("render")) {
+	            			Logger.trace("method call %s.%s in %s is a controller render (at "+m.getLineNumber()+")", m.getClassName(), m.getMethodName(), method.getLongName());
+	            			m.replace("play.modules.tracer.plugin.Tracer.endLine(null, null);play.modules.tracer.plugin.Tracer.exitMethod();$proceed($$);");
+	            		}
+            		} catch (Exception e) {
+            			Logger.error("[TracerEnhancer] methodcall replacement error : ", e);
+            		}
+            	}
             });
             
             
@@ -453,6 +467,7 @@ public class TracerEnhancer extends Enhancer {
 
         
         applicationClass.enhancedByteCode = ctClass.toBytecode();
+        // debug purpose
         /*File f = new File("/tmp");
         for(String s : applicationClass.name.replaceAll("\\.(?!class)", "/").split("/")) {
         	if(!s.endsWith(".class")) {

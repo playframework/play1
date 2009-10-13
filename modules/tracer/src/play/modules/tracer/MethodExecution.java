@@ -78,4 +78,8 @@ public class MethodExecution extends BodyExecution {
 			fields.addAll(getFields(klass.getSuperclass(), false));
 		return fields;
 	}
+	
+	public String toString() {
+		return klass.getCanonicalName() + "." + name;
+	}
 }

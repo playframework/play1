@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import play.Logger;
+
 public abstract class BodyExecution extends Execution {
 	public List<Variable> variables = new ArrayList<Variable>();
 	
@@ -19,11 +21,13 @@ public abstract class BodyExecution extends Execution {
 			LineExecution last = null;
 			if(children.size() > 0) {
 				last = (LineExecution) children.get(children.size() - 1);
+				Logger.debug("accepted start line %s in %s", lexec.line, this);
 			}
 			if(last == null || last.line < lexec.line) {
 				lexec.afterLoop = loopDetected;
 				super.appendExecution(e);
 				loopDetected = false;
+				Logger.debug("accepted start line %s in %s", lexec.line, this);
 				return true;
 			} else {
 				loopDetected = true;
@@ -71,5 +75,12 @@ public abstract class BodyExecution extends Execution {
 			}
 		}
 		return sb.append("]").toString();
+	}
+	
+	@Override
+	public void end() {
+		for(Execution e : children)
+			e.end();
+		super.end();
 	}
 }

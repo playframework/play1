@@ -68,13 +68,13 @@ public class TemplateEnhancer {
 			if(currentLine != entry.getValue()) {
 				prependAt(entry.getKey() - 1, "play.modules.tracer.plugin.Tracer.startLine("+entry.getValue()+");");
 				if(currentLine > -1)
-					prependAt(entry.getKey() - 1, "play.modules.tracer.plugin.Tracer.endLine(binding); ");
+					prependAt(entry.getKey() - 1, "play.modules.tracer.plugin.Tracer.endLine(this.binding); ");
 				currentLine = entry.getValue();
 			}
 		}
-		
+
 		prependAt(startLine, "play.modules.tracer.plugin.Tracer.enterTemplate(\""+template.name+"\");");
-		appendAt(endLine, "play.modules.tracer.plugin.Tracer.endLine(binding);");
+		appendAt(endLine, "play.modules.tracer.plugin.Tracer.endLine(this.binding);");
 		appendAt(endLine, "play.modules.tracer.plugin.Tracer.exitTemplate();");
                 System.out.println(source);
 	}

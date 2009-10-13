@@ -11,4 +11,8 @@ public class Utils {
 		}
 		return null;
 	}
+
+	public static String escapeJSON(String s) {
+		return "\"" + (s == null ? "null" : s.replace("\\", "\\\\").replace("\"", "\\\"")).replace("\n", "\\n") + "\"";
+	}
 }

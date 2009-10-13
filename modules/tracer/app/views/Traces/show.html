@@ -115,7 +115,7 @@
                     		callbacks.push(arguments[i]);
 						
 						var url = type === 'MethodExecution' ? '@{Traces.getClassSource("___")}' : '@{Traces.getTemplateSource("___")}';
-						url = url.replace('___', source);
+						url = url.replace('___', encodeURIComponent(source));
 						
 						$.get(url, function(data) {
 							if(type === 'MethodExecution')
@@ -487,18 +487,21 @@
 						return res += '</ul>'
 					})());
 
-					// actions ->
-					var actions = '<ul>';
+					// Interceptors, action & templates ->
+					var significativeSteps = '<ul>';
 					for(var i = 0; i < tracer.trace.executions.length; i++) {
 						var exec = tracer.trace.executions[i];
 						var onclick = '';
 						var first = exec.children[0];
 						if(first)
 							onclick = "$('#bar').slider('value', " + (first.index-1) + ")";
-						actions += '<li onclick="'+onclick+'">' + exec.klass + '.' + exec.name + ' [' + exec.durationMillis + ' ms]</li>';
+						significativeSteps += '<li onclick="'+onclick+'">';
+						if(exec.type === 'MethodExecution')
+							significativeSteps += exec.klass + '.';
+						significativeSteps += exec.name + ' [' + exec.durationMillis + ' ms]</li>';
 					}
-					actions += '</ul>';
-					$('#actions p').html(actions)
+					significativeSteps += '</ul>';
+					$('#significativeSteps p').html(significativeSteps)
 
 					// routes ->
 					$.get('@{Traces.getFile("___")}'.replace('___', tracer.trace.actionContext.routeFile), function(data) {
@@ -524,7 +527,7 @@
 	    <div id="main">
 	    	<div id="sourceBrowsing">
 		    	<div id="sourceContainer"><h2>Source</h2><div id="source" class="source"></div></div>
-		    	<div><h2>Stack</h2><div id="stack"></div></div>
+		    	<div><h2>Call Stack</h2><div id="stack"></div></div>
 		    	<div><h2>Variable stack</h2><div id="variablesStack"></div></div>
 	    	</div>
 	    	<div id="traceInfos">
@@ -532,8 +535,8 @@
 		    		<h2>Routes</h2>
 		    		<div  id="routes" class="source"></div>
 		    	</div>
-		    	<div id="actions" >
-		    		<h2>Actions</h2>
+		    	<div id="significativeSteps" >
+		    		<h2>Interceptors, Action &amp; Templates</h2>
 		    		<p></p>
 		    	</div>
 		    	<div id="longestExecutions" >
