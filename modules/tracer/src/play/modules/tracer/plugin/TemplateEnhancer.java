@@ -76,6 +76,7 @@ public class TemplateEnhancer {
 		prependAt(startLine, "play.modules.tracer.plugin.Tracer.enterTemplate(\""+template.name+"\");");
 		appendAt(endLine, "play.modules.tracer.plugin.Tracer.endLine(binding);");
 		appendAt(endLine, "play.modules.tracer.plugin.Tracer.exitTemplate();");
+                System.out.println(source);
 	}
 	
 	private void appendAt(int line, String str) {

@@ -83,7 +83,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
      * Return a 200 OK text/plain response
      * @param text The response content
      */
-    protected static void renderText(Object text) {
+    public static void renderText(Object text) {
         throw new RenderText(text == null ? "" : text.toString());
     }
 
@@ -92,7 +92,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
      * @param text The response content to be formatted (with String.format)
      * @param args Args for String.format
      */
-    protected static void renderText(CharSequence pattern, Object... args) {
+    public static void renderText(CharSequence pattern, Object... args) {
         throw new RenderText(String.format(pattern.toString(), args));
     }
 
@@ -393,7 +393,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
      * @param templateName The template name
      * @param args The template data
      */
-    protected static void render(Object... args) {
+    public static void render(Object... args) {
         String templateName = null;
         if (args.length > 0 && args[0] instanceof String && LocalVariablesNamesTracer.getAllLocalVariableNames(args[0]).isEmpty()) {
             templateName = args[0].toString();
