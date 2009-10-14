@@ -1,49 +1,49 @@
 h1. Frequently Asked Questions
 
-h2. <a>How play compares to framework X ?</a>
+h2. <a>How play compares to framework X?</a>
 
-Well if you are looking to do web application programming, you have a very large number of choice these days. First, play is a Java web application framework, so let's compare it to other Java framework. Play is built for a 'share nothing' architecture (think about it as a Stateless framework). So it is very differents that all these Java stateful and components based frameworks like Seam, Tapestry or Wicket. It is closer to Spring MVC or Struts (or Struts 2); but is way more opinionated.
+Nowadays, you have a very large number of choices to develop Web applications. Play being a Java web application framework, let's compare it to other Java frameworks. Play is built for a 'share nothing' architecture (think about it as a Stateless framework). So it's very different from all these Java stateful and components based frameworks like Seam, Tapestry or Wicket. It's closer to Spring MVC or Struts (or Struts 2), but way more opinionated.
 
-However Play is a very unique Java framework. It does not really rely on the so called Java Entreprise standards. It uses Java but try to push all the good things from the scripting language based frameworks like Ruby On Rails, Django, Pylons, Symfony, Grails, Cake PHP (and so one ..) to the Java world. We really tried to get the best of the Java platform without getting the pain of traditional Java web development (slow development cycle, too much abstraction, too much configuration, ...)
+However Play is a very unique Java framework. It does not really rely on the so-called Java Enterprise standards. It uses Java but tries to push all the good things from the frameworks based on scripting languages like Ruby On Rails, Django, Pylons, Symfony, Grails, Cake PHP, etc. to the Java world. We really tried to get the best of the Java platform without getting the pain of traditional Java web development: slow development cycle, too much abstraction, too much configuration...
 
-h2. <a>Please rename the 'play' package as 'org.playframework' !</a>
+h2. <a>Please rename the 'play' package as 'org.playframework'!</a>
 
-You miss the point. Play is not another library that you will add to your servlet container. It is really a full stack Java framework that run your application in a standalone way. The Java package naming conventions exist to avoid name clashing when you use several different library from several vendor. But believe us, you will never put the play.jar library in your own project. This is not the way play works. Play **is the platform**. Don't worry about that. 
+You miss the point. Play is not another library that you add to your servlet container. It's really a full stack Java framework that runs your application in a standalone way. The Java package naming conventions exist to avoid name clashing when you use several different libraries from several vendors. But believe us, you will never put the play.jar library in your own project. This is not the way play works. Play **is the platform**. Don't worry about that.
 
-h2. <a>Why do I need python (I would prefer maven) ?</a>
+h2. <a>Why do I need python (I would prefer maven)?</a>
 
-We need a lot of scripts to manage the play applications. Like create a new application, run it, launch a browser, etc... Of course we could wrinting these stuff in Java directly. But running a Java VM for simple tasks like project creation is very slow. And Java itself is very limited when it comes to manage OS processes and other native things. 
+We need a lot of scripts to manage Play applications, like creating a new application, running it, launch a browser, etc... Of course we could write these in Java directly. But running a Java VM for simple tasks like project creation is very slow. And Java itself is very limited when it comes to OS interaction.
 
-Python allowed us to write these scripts in a total portable way. It is fast to run, easy to write and availabe out of the box on most systems. Of course not on Windows but it is not a problem since we have packaged a windows python version directly with the framework.
+Python allowed us to write these scripts in a completely portable way. It's fast to run, easy to write and available out of the box on most systems. It's not on Windows, that's why we bundle a Windows Python binary with the framework.
 
-h2. <a>Is play a Groovy framework ?</a>
+h2. <a>Is play a Groovy framework?</a>
 
-No. Even if we use Groovy as base technology for the play templating system, it is totally transparent. And you can't write directly other parts of the application (like controllers, models or other utils) in Groovy. If you search for a Groovy based framework you should look at Grails.
+No. Even if we use Groovy as the base technology for the Play templating system, it's totally transparent. Also, you can't write directly any other part of the application (such as controllers, models or other utilities) in Groovy. If you're looking for a Groovy based framework you should have a look at Grails.
 
-h2. <a>You guys don't even know how to program in Java ...</a>
+h2. <a>You guys don't even know how to program in Java...</a>
 
-We are fully aware that we made choices that are not so common in the Java world and that play sometimes does not blindly follow the so called Java 'good pratices'. But all members of the play teams are very experienced Java developers and we are totally aware of the choices we made and the rules we have broken. 
+We are fully aware that we made choices that are pretty uncommon in the Java world, and that Play does not blindly follow all the so-called Java 'good practices'. But all members of the Play teams are very experienced Java developers and we are totally aware of the choices we made and the rules we broke.
 
-Java itself is a very generic programming language and not originally designed for web application development. It is a very different things to write a generic and reusable Java library than to create a web application. A web application itself doesn't need to be designed to be reusable. You need less abstraction, less configuration (even if in fact a Web application should be reusable, but through some Web service API). 
+Java itself is a very generic programming language and not originally designed for web application development. It is a very different thing to write a generic and reusable Java library and to create a web application. A web application itself doesn't need to be designed to be reusable. You need less abstraction, less configuration. Reusability does exist for Web applications, but through Web service API rather than language-level integration.
 
-When the application development time tends to 0 you can concentrate on your application features and to quickly experiment, instead of trying to abstract things in order of make future developments less painful.
+When the development time tends to 0 you can concentrate on your application features and experiment quickly, rather than try to abstract things for future developments.
 
-h2. <a>Is play fast ?</a>
+h2. <a>Is Play fast?</a>
 
-Yes play itself is fast. But that does not mean that any particular application will be fast. The embedded HTTP server and the basic routing and controller invocation stack is very very fast. Used with a modern JVM and Just In Time compiling you can get thousand of requests per second easily. Unfortunely as your application will likely use a database it will become the bottleneck (as always).
+Yes, Play itself is fast. But that doesn't mean that any particular application will be fast. The embedded HTTP server, the basic routing and the controller invocation stack is very very fast. Used with a modern JVM and Just In Time compiling you can easily get thousand of requests per second. Unfortunately as your application will likely use a database, it as usual will become the bottleneck.
 
-The most CPU consumer in the play stack at this time is the template processing based on groovy. But as play applications are easily scalable by running the same application to several servers it is not really a problem if you need to serve a very high traffic. And we hope performance gain on this stuff with the new JDK7 and its better support of dynamic languages.
+The biggest CPU consumer in the Play stack at this time is the template engine based on Groovy. But as Play applications are easily scalable, it is not really a problem if you need to serve a very high traffic: you can balance the load between several servers. And we hope for a performance gain at this level with the new JDK7 and its better support of dynamic languages.
 
-h2. <a>Can I already use it for a production application ?</a>
+h2. <a>Can I already use it for a production application?</a>
 
-Sure, a lot of people already use play in production. And the 1.0 branch is now in maintenance mode, that means that we will just fix bugs without any API change (At least on the 1.0 branch).
+Sure, a lot of people already use play in production. The 1.0 branch is now in maintenance mode, that means that we will just fix bugs and keep API compatibility in that branch.
 
-h2. <a>Is library X supported ?</a>
+h2. <a>Is library X supported?</a>
 
-Play is standard Java, so any standard Java library can easily be used. However keep in mind that play does not use the Servlet API (even if you can get it work in a standard servlet container using the WAR export). So if the library you plan to use relies on the Servlet API it will be problematic.
+Play is standard Java, so any standard Java library can easily be used. However keep in mind that Play does not use the Servlet API (even if you can get it work in a standard servlet container using the WAR export). So unless the library you want to use relies on the Servlet API, there won't be any problem.
 
-h2. <a>How can I help/contribute ?</a>
+h2. <a>How can I help/contribute?</a>
 
-We use launchpad as main development tool. And launchpad itself is very open. You can just register a launchpad account and start to contribute. You can get any open bug for yourself, fork any play official branch to your own branch, and propose us to merge if you have fixed something.
+We use launchpad as our main development tool, and launchpad itself is very open. You can just register a launchpad account and start to contribute. You can assign any open bug to yourself, fork any play official branch to your own branch, and propose us to merge if you have fixed something.
 
-The documentation itself is kept as textile files in the framework source repository. So you can edit it the same way than code.
+The documentation itself is kept as textile files in the framework source repository, so you can edit it and contribute just like with code.
