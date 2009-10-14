@@ -15,6 +15,10 @@ public abstract class SqlQuery {
     public SqlQuery params(Object ... objs) { for (Object obj : objs) params.add(obj); return this; }
     public List<Object> getParams() { return params; }
 
+    public int paramCurrentIndex() { return params.size()+1; }
+    public String pmark() { return "?"+Integer.toString(paramCurrentIndex()); }
+    public String pmark(int offset) { return "?"+Integer.toString(paramCurrentIndex()+offset); }
+
     public static class Concat {
         private String prefix, separator, suffix;
         private String defaultValue;
@@ -30,6 +34,14 @@ public abstract class SqlQuery {
 
         public Concat(String prefix, String separator) {
             this(prefix, separator, "");
+        }
+
+        public Concat(Concat src) {
+            this.prefix = src.prefix;
+            this.separator = src.separator;
+            this.suffix = src.suffix;
+            this.defaultValue = src.defaultValue;
+            this.expr = src.expr;
         }
 
         public Concat defaultValue(String defaultValue) {
@@ -49,8 +61,11 @@ public abstract class SqlQuery {
 
         public Concat append(Object obj) {
             final String text;
-            if (obj != null && obj.toString().length() > 0) text = obj.toString();
-            else text = defaultValue;
+            if (obj != null) {
+                String objStr = obj.toString();
+                if (objStr.length() > 0) text = objStr;
+                else text = defaultValue;
+            } else text = defaultValue;
 
             if (text != null) {
                 if (expr.length() > 0) {
@@ -88,16 +103,14 @@ public abstract class SqlQuery {
 
         String str;
         if (param instanceof String) str = quote(param.toString());
-        else if (param instanceof List<?>) {
-            Concat list = new Concat("(", ",");
-            for (Object p : (List<?>)param) list.append(inlineParam(p));
+        else if (param instanceof Iterable<?>) {
+            Concat list = new Concat("(", ", ", ")");
+            for (Object p : (Iterable<?>)param) list.append(inlineParam(p));
             str = list.toString();
-            if (str.length()>0) str += ")";
         } else if (param instanceof Object[]) {
-            Concat list = new Concat("(", ",");
+            Concat list = new Concat("(", ", ", ")");
             for (Object p : (Object[])param) list.append(inlineParam(p));
             str = list.toString();
-            if (str.length()>0) str += ")";
         } else str = param.toString();
         return str;
     }
