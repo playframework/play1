@@ -21,7 +21,7 @@ To work efficiently, you need to add the play directory to your working path. It
 
 h2. <a>Project creation</a>
 
-Now that Play is correctly installed, it's time to create the blog application. Creating a Play application is pretty easy and fully managed by the Play command line utility. That allows for standard project layouts between all Play applications. 
+Now that Play is correctly installed, it's time to create the hello world application. Creating a Play application is pretty easy and fully managed by the Play command line utility. That allows for standard project layouts between all Play applications. 
 
 Open a new command line and type:
 
