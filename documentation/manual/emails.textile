@@ -38,6 +38,28 @@ public class Mails extends Mailer {
  
 }
 
+h3. text/html email 
+
+The send call will render the app/views/Mails/welcome.html template as the body of the email message.
+
+bc. <html><body><p>Welcome <b>${user.name}</b>, </p>
+...
+</html>
+
+The template for the lostPassword method could look like this:
+
+app/views/Mails/lostPassword.html
+
+bc. <html><body><head>...</head><body><img src="mycompany.com/images"/><p>Hello ${user.name},<br/>
+Your new password is <b>${newpassword}</b>.
+</p>
+</body>
+</html>
+
+h3. text/plain email
+
+If no HTML template is defined, then a text/plain email is sent using the text template.
+
 The send call will render the app/views/Mails/welcome.txt template as the body of the email message.
 
 bc. Welcome ${user.name},
@@ -50,7 +72,19 @@ app/views/Mails/lostPassword.txt
 bc. Hello ${user.name},
  
 Your new password is ${newpassword}.
- 
+
+h3. text/html email with text/plain alternative
+
+If an HTML template is defined and a text template exists, then the text template will be used as an alternative message. In our previous example, if both 
+
+app/views/Mails/lostPassword.html 
+
+and 
+
+app/views/Mails/lostPassword.txt
+
+are defined, then the email will be sent in text/html as defined in lostPassword.html with an alternative part as defined in lostPassword.txt.
+So you can send nice HMTL emails to your friends and still please those geeky friends that still use mutt ;)
 
 h2. <a>SMTP configuration</a>
 
