@@ -47,7 +47,7 @@ Everything you need to know about Play.
 ## "The routes file syntax":routes#syntax
 ## "Routes priority":routes#priority
 ## "Serving static resources":routes#static
-## "Reverse routing : generate some URL":routing#reverse
+## "Reverse routing : generate some URL":routes#reverse
 # "Controllers":controllers
 ## "A Controller overview":controllers#overview
 ## "Retrieve HTTP parameters":controllers#params
