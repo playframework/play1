@@ -36,7 +36,7 @@ The biggest CPU consumer in the Play stack at this time is the template engine b
 
 h2. <a>Can I already use it for a production application?</a>
 
-Sure, a lot of people already use play in production. The 1.0 branch is now in maintenance mode, that means that we will just fix bugs and keep API compatibility in that branch.
+Sure, "a lot of people":http://www.playframework.org/community/testimonials already use play in production. The 1.0 branch is now in maintenance mode, that means that we will just fix bugs and keep API compatibility in that branch.
 
 h2. <a>Is library X supported?</a>
 

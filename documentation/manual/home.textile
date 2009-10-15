@@ -10,7 +10,7 @@ h2. <a name="started">Getting started</a>
 Your first steps with play and your first 5 minutes of fun.
 
 # "Play framework overview":overview
-# "Watch the screencast":video
+# "Watch the screencast":http://vimeo.com/7087610
 # "Five cool things you can do with Play":5things
 # "Frequently Asked Questions":faq
 # "Installation guide":install
