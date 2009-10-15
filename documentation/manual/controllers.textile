@@ -252,11 +252,11 @@ h3. Execute a template
 If the generated content is complex, you should use a template to generate the response content.
 
 bc. public class Clients extends Controller {
-
+ 
     public static void index() {
         render();    
     }
-
+ 
 }
 
 A template name is automatically deduced from the Play conventions. The path of the default template is resolved using the Controller and action names. 

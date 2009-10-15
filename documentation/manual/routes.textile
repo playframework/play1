@@ -112,6 +112,8 @@ will match the */clients* URL but not the */clients/* one. You can tell play tha
 
 bc. GET     /clients/?       Clients.index
 
+p(note). The URI pattern cannot have any optional part excepted that trailing slash.
+
 h3. Java call definition
 
 The last part a route definition is the Java call. This part is defined by the fully qualified name of an action method. The action method must be a static, public method of a Controller class. A Controller class must be defined in the **controllers** package and must be a subclass of **play.mvc.Controller**.
