@@ -111,8 +111,26 @@ public abstract class SqlQuery {
             Concat list = new Concat("(", ", ", ")");
             for (Object p : (Object[])param) list.append(inlineParam(p));
             str = list.toString();
+        } else if (param instanceof Enum<?>) {
+            str = quote(param.toString());
         } else str = param.toString();
         return str;
+    }
+
+    public static String whereIn(String column, Object param) {
+        String value = inlineParam(param);
+        if (value.length() == 0) return value;
+
+        String operator;
+        if (param instanceof Object[]) {
+            operator = " in ";
+        } else if (param instanceof Iterable<?>) {
+            operator = " in ";
+        } else {
+            operator = "=";
+        }
+
+        return column + operator + value;
     }
 
 }
