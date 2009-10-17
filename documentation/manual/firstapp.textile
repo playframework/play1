@@ -159,7 +159,7 @@ public class Application extends Controller {
     }
     
     public static void sayHello(String myName) {
-        render(myName)
+        render(myName);
     }
  
 }
@@ -266,7 +266,7 @@ We will finish to write some test for the application. As there is no Java logic
 
 First, you need to run your application in **test mode**. Stop the application and restart it with the **test** command:
 
-bc. $ play test helloworld
+bc. $ play test
 
 The **'play test'** command is almost the same as **'play run'**, except that it loads a test runner module that allows to run test suite directly from a browser. 
 
