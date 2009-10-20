@@ -51,15 +51,23 @@ public class DateBinder implements SupportedType<Date> {
                 dateformat.set(new AlternativeDateFormat(Locale.US,
                         "yyyy-MM-dd'T'hh:mm:ss'Z'", // ISO8601 + timezone
                         "yyyy-MM-dd'T'hh:mm:ss", // ISO8601
+                        "yyyy-MM-dd hh:mm:ss",
+                        "yyyyMMdd hhmmss",
                         "yyyy-MM-dd",
                         "yyyyMMdd'T'hhmmss",
                         "yyyyMMddhhmmss",
                         "dd'/'MM'/'yyyy",
                         "dd-MM-yyyy",
+                        "dd'/'MM'/'yyyy hh:mm:ss",
+                        "dd-MM-yyyy hh:mm:ss",
+                        "ddMMyyyy hhmmss",
                         "ddMMyyyy",
                         "MMddyy",
                         "MM-dd-yy",
-                        "MM'/'dd'/'yy"));
+                        "MM'/'dd'/'yy",
+                        "MMddyy hhmmss",
+                        "MM-dd-yy hh:mm:ss",
+                        "MM'/'dd'/'yy hh:mm:ss"));
             }
             return dateformat.get();
         }
