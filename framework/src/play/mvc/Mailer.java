@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
 import play.Logger;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSupport;
+import play.exceptions.TemplateNotFoundException;
 import play.exceptions.UnexpectedException;
 import play.libs.Mail;
 import play.templates.Template;
@@ -77,7 +78,7 @@ public class Mailer implements LocalVariablesSupport {
         map.put("from", from);
         infos.set(map);
     }
-    
+
     public static void setReplyTo(Object replyTo) {
         HashMap map = infos.get();
         if (map == null) {
@@ -87,17 +88,10 @@ public class Mailer implements LocalVariablesSupport {
         infos.set(map);
     }
 
-
     public static Future<Boolean> send(Object... args) {
         HashMap map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
-        }
-
-        // Content type
-        String contentType = (String) infos.get().get("contentType");
-        if (contentType == null) {
-            contentType = "text/plain";
         }
 
         // Subject
@@ -112,28 +106,59 @@ public class Mailer implements LocalVariablesSupport {
         }
         templateName = templateName.substring(0, templateName.indexOf("("));
         templateName = templateName.replace(".", "/");
-        if (contentType.equals("text/html")) {
-            templateName += ".html";
-        } else {
-            templateName += ".txt";
-        }
+
         // overrides Template name
         if (args.length > 0 && args[0] instanceof String && LocalVariablesNamesTracer.getAllLocalVariableNames(args[0]).isEmpty()) {
             templateName = args[0].toString();
         }
 
-        HashMap<String, Object> params = new HashMap<String, Object>();
-        Template template = TemplateLoader.load(templateName);
-
-        Map<String, Object> templateBinding = new HashMap();
+        Map<String, Object> templateHtmlBinding = new HashMap();
+        Map<String, Object> templateTextBinding = new HashMap();
         for (Object o : args) {
             List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
             for (String name : names) {
-                templateBinding.put(name, o);
+                templateHtmlBinding.put(name, o);
+                templateTextBinding.put(name, o);
             }
         }
-        String body = template.render(templateBinding);
 
+        // The rule is as follow: If we ask for text/plain, we don't care about the HTML
+        // If we ask for HTML and there is a text/plain we add it as an alternative.
+        // If contentType is not specified look at the template available:
+        // - .txt only -> text/plain
+        // else
+        // -           -> text/html
+        String contentType = (String) infos.get().get("contentType");
+        String bodyHtml = null;
+        String bodyText = null;
+        try {
+            Template templateHtml = TemplateLoader.load(templateName + ".html");
+            bodyHtml = templateHtml.render(templateHtmlBinding);
+        } catch (TemplateNotFoundException e) {
+            if (contentType != null && !"text/plain".equals(contentType)) {
+                throw e;
+            }
+        }
+
+        try {
+            Template templateText = TemplateLoader.load(templateName + ".txt");
+            bodyText = templateText.render(templateTextBinding);
+        } catch (TemplateNotFoundException e) {
+            if ("text/plain".equals(contentType)) {
+                throw e;
+            }
+        }
+
+         // Content type
+        
+        if (contentType == null) {
+            if (bodyHtml != null) {
+                contentType = "text/html";
+            } else {
+                contentType = "text/plain";
+            }
+        }
+        
         // Recipients
         List<Object> recipientList = (List<Object>) infos.get().get("recipients");
         Object[] recipients = new Object[recipientList.size()];
@@ -154,14 +179,15 @@ public class Mailer implements LocalVariablesSupport {
             attachements = new Object[objectList.size()];
             i = 0;
             for (Object object : objectList) {
-            	attachements[i] = object;
+                attachements[i] = object;
                 i++;
             }
 
         }
 
+        System.out.println("body text [" + bodyText + "]");
         // Send
-        return Mail.send(from, replyTo, recipients, subject, body, contentType, attachements);
+        return Mail.send(from, replyTo, recipients, subject, bodyHtml, bodyText, contentType, attachements);
     }
 
     public static boolean sendAndWait(Object... args) {

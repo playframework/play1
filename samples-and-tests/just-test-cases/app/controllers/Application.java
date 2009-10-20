@@ -52,6 +52,16 @@ public class Application extends Controller {
         Welcome.welcome();
         renderText("OK2");
     }
+  
+    public static void mail3() {
+        notifiers.Welcome.welcome2();
+        renderText("OK3");
+    }
+    
+    public static void mail4() {
+	notifiers.Welcome.welcome3();
+        renderText("OK4");
+    }
     
     public static void ifthenelse() {
         boolean a = true;

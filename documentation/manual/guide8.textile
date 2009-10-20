@@ -63,7 +63,7 @@ bc. static boolean authentify(String username, String password) {
     return User.connect(username, password) != null;
 }
 
-Now you can try one of the users imported in **initial-data.yml** file, like **bob@gmail.com/secret**.
+Now go to "http://localhost:9000/logout":http://localhost:9000/logout to log out and you can try one of the users imported in **initial-data.yml** file, like **bob@gmail.com/secret**.
 
 h2. <a>Refactoring the administration area</a>
 

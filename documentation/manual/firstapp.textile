@@ -21,7 +21,7 @@ To work efficiently, you need to add the play directory to your working path. It
 
 h2. <a>Project creation</a>
 
-Now that Play is correctly installed, it's time to create the blog application. Creating a Play application is pretty easy and fully managed by the Play command line utility. That allows for standard project layouts between all Play applications. 
+Now that Play is correctly installed, it's time to create the hello world application. Creating a Play application is pretty easy and fully managed by the Play command line utility. That allows for standard project layouts between all Play applications. 
 
 Open a new command line and type:
 
@@ -159,7 +159,7 @@ public class Application extends Controller {
     }
     
     public static void sayHello(String myName) {
-        render(myName)
+        render(myName);
     }
  
 }
@@ -266,7 +266,7 @@ We will finish to write some test for the application. As there is no Java logic
 
 First, you need to run your application in **test mode**. Stop the application and restart it with the **test** command:
 
-bc. $ play test helloworld
+bc. $ play test
 
 The **'play test'** command is almost the same as **'play run'**, except that it loads a test runner module that allows to run test suite directly from a browser. 
 

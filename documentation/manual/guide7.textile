@@ -164,7 +164,7 @@ import play.db.jpa.*;
 import play.data.validation.*;
  
 @Entity
-public class Tag extends Model {
+public class Tag extends Model implements Comparable<Tag> {
  
     @Required
     public String name;
@@ -285,7 +285,7 @@ h2. <a>Customizing the 'Post' form</a>
 
 We can customize the generated forms as well. For example, the way we enter tags in the Post form is not really easy. We could build something better. Let's override the **Posts/show** template:
 
-bc. $ play crud:ov --template Posts/edit
+bc. $ play crud:ov --template Posts/show
 
 Now you have a new template at **/yabe/app/views/Posts/show.html**:
 

@@ -90,7 +90,7 @@ Another important thing to check is that we have a fresh user session at the tes
 So let's start our test with a special command:
 
 bc. #{fixture delete:'all', load:'data.yml' /}
-
+ 
 #{selenium}
     clearSession()
  
@@ -108,16 +108,16 @@ bc. #{fixture delete:'all', load:'data.yml' /}
  
 #{selenium 'Check home page'}
     clearSession()
-
+ 
     // Open the home page
     open('/')
-
+ 
     // Check that the front post is present
     assertTextPresent('About the model layer')
     assertTextPresent('by Bob, 14 Jun 09')
     assertTextPresent('2 comments , latest by Guest')
     assertTextPresent('It is the domain-specific representation')
-
+ 
     // Check older posts
     assertTextPresent('The MVC application')
     assertTextPresent('Just a test of YABE')

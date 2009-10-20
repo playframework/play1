@@ -39,7 +39,7 @@ public class JsonParser extends DataParser {
         
         // primitives type
         if (tok == STRING || tok == NULL || tok == NUMBER || tok == BOOLEAN) {
-            putMapEntry(result, name, tok.value);
+            putMapEntry(result, name, jt.value());
             
         // arrays
         } else if (tok == START_ARRAY) {
@@ -79,7 +79,7 @@ public class JsonParser extends DataParser {
                 if (tok != STRING) {
                     throw JSONException.grammarError(jt, STRING);
                 }
-                String key = tok.value;
+                String key = jt.value();
                 jt.expect(SEMICOLON);
                 nextname = name + key;
                 internalParse(nextname, result, jt.nextToken());
