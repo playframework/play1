@@ -190,7 +190,10 @@ public class ApplicationClassloader extends ClassLoader {
         }
         Enumeration<URL> parent = super.getResources(name);
         while(parent.hasMoreElements()) {
-            urls.add(parent.nextElement());
+            URL next = parent.nextElement();
+            if(!urls.contains(next)) {
+                urls.add(next);
+            }
         }
         final Iterator<URL> it = urls.iterator();
         return new Enumeration<URL>() {

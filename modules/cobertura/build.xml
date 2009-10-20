@@ -35,6 +35,7 @@
 				</section>
 			</manifest>
 		</jar>
+		<delete dir="tmp"/>
 	</target>
 
 	<!--	This target downloads Cobertura source, untars it, and applies a patch,
