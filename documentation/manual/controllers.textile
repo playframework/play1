@@ -337,18 +337,18 @@ You can send a Redirect response to any action, simply by invoking the action me
 For example:
 
 bc. public class Clients extends Controller {
-
+ 
     public static void show(Long id) {
         Client client = Client.findById(id);
         render(client);
     }
-
+ 
     public static void create(String name) {
         Client client = new Client(name);
         client.save();
         show(client.id);
     }
-
+ 
 }
 
 With these routes:
