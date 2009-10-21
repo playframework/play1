@@ -827,23 +827,24 @@ try:
 			shutil.rmtree(eclipse)
 			if os.name == 'nt':
 				time.sleep(1)
-				
+
 		if os.path.exists(dotSettings):
 			shutil.rmtree(dotSettings)
 			if os.name == 'nt':
 				time.sleep(1)
-				
+
 		shutil.copyfile(os.path.join(play_base, 'resources/eclipse/.project'), dotProject)
 		shutil.copyfile(os.path.join(play_base, 'resources/eclipse/.classpath'), dotClasspath)
 		shutil.copytree(os.path.join(play_base, 'resources/eclipse'), eclipse)
 		shutil.copytree(os.path.join(play_base, 'resources/eclipse/.settings'), dotSettings)
 		replaceAll(dotProject, r'%PROJECT_NAME%', application_name)
-		
+
 		cpXML = ""
 		for el in classpath:
-			cpXML += '<classpathentry kind="lib" path="%s" />' % os.path.normpath(el)
+			if not os.path.basename(el) == "conf":
+				cpXML += '<classpathentry kind="lib" path="%s" />' % os.path.normpath(el)
 		replaceAll(dotClasspath, r'%PROJECTCLASSPATH%', cpXML)
-		
+
 		if len(modules):
 			lXML = ""
 			cXML = ""
@@ -855,30 +856,30 @@ try:
 		else:
 			replaceAll(dotProject, r'%LINKS%', '')
 			replaceAll(dotClasspath, r'%MODULES%', '')
-		
+
 		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%PROJECT_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%PLAY_BASE%', play_base)
 		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%PLAY_ID%', play_id)
 		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%JPDA_PORT%', jpda_port)
 		os.rename(os.path.join(application_path, 'eclipse/debug.launch'), os.path.join(application_path, 'eclipse/%s.launch' % application_name))
-		
+
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%PROJECT_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%PLAY_BASE%', play_base)
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%PLAY_ID%', play_id)
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%JPDA_PORT%', jpda_port)
 		os.rename(os.path.join(application_path, 'eclipse/test.launch'), os.path.join(application_path, 'eclipse/Test %s.launch' % application_name))	
-				
+
 		replaceAll(os.path.join(application_path, 'eclipse/connect.launch'), r'%PROJECT_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'eclipse/connect.launch'), r'%JPDA_PORT%', jpda_port)
 		os.rename(os.path.join(application_path, 'eclipse/connect.launch'), os.path.join(application_path, 'eclipse/Connect JPDA to %s.launch' % application_name))
-		
+
 		print "~ OK, the application is ready for eclipse"
 		print "~ Use File/Import/General/Existing project to import %s into eclipse" % os.path.normpath(application_path)
 		print "~"
 		print "~ Use eclipsify again when you want to update eclipse configuration files."
 		print "~ However, it's often better to delete and re-import the project into your workspace since eclipse keeps dirty caches..."
 		print "~"
-				
+
 		sys.exit(0)
 
 	
