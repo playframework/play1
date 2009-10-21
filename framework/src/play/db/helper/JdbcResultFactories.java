@@ -23,7 +23,14 @@ public class JdbcResultFactories {
     }
 
     public static <T> JdbcResultFactory<T> build(Class<T> objectClass, List<String> fields) {
-        return objectClass.isPrimitive()
+        return objectClass == Boolean.class
+            || objectClass == Character.class
+            || objectClass == Byte.class
+            || objectClass == Short.class
+            || objectClass == Integer.class
+            || objectClass == Long.class
+            || objectClass == Float.class
+            || objectClass == Double.class
                 ? new PrimitiveFactory<T>(objectClass, fields)
                 : new ClassFactory<T>(objectClass, fields);
     }
@@ -31,7 +38,7 @@ public class JdbcResultFactories {
 
 
     public static <T> JdbcResultFactory<T> buildPrimitive(Class<T> objectClass) {
-        return buildPrimitive(objectClass, 0);
+        return buildPrimitive(objectClass, 1);
     }
 
     public static <T> JdbcResultFactory<T> buildPrimitive(Class<T> objectClass, int columnIndex) {
@@ -73,13 +80,13 @@ public class JdbcResultFactories {
         public PrimitiveFactory(Class<T> objectClass, String field) {
             this.objectClass = objectClass;
             this.field = field;
-            this.columnIndex = 0;
+            this.columnIndex = 1;
         }
 
         public PrimitiveFactory(Class<T> objectClass, List<String> fields) {
             this.objectClass = objectClass;
             this.field = fields == null || fields.isEmpty() ? null : fields.get(0);
-            this.columnIndex = 0;
+            this.columnIndex = 1;
         }
 
         public void init(ResultSet result) throws SQLException {
