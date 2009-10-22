@@ -198,6 +198,8 @@ Post(jeffPost):
                     A Play
 ...
 
+p(note). Add the Tags declaration at the top of the YAML file, because they need to be created before that any Post reference them.
+
 You need to restart your application to force loading the new initial data set. Note how play tells you problems even in YAML files:
 
 !images/guide6-1!
