@@ -5,6 +5,10 @@ h2. <a>Prerequisites</a>
 
 To run the play framework, you need "Java 5 or later":http://java.sun.com. If you wish to build play from source, you will need the "Bazaar source control client":http://bazaar-vcs.org/ to fetch the source code and "Ant":http://ant.apache.org/ to build it.
 
+p(note). If you are using MacOS, java is just built-in. If you are using linux, make sure to use either the Sun-JDK or OpenJDK (and not gcj which is the default java command on many linux distro). If you are using Windows, just download and install the latest JDK package.
+
+Be sure to have java in the current path (try to type **java -version** to check). Play will use the default java or the one available at the **$JAVA_HOME** path if defined.
+
 The play command line utility uses python. So it should work out of the box on any UNIX system. If you're running Windows, don't worry, a python runtime is bundled with the framework.
 
 
