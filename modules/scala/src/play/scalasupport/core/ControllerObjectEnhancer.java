@@ -52,7 +52,7 @@ public class ControllerObjectEnhancer extends Enhancer {
 
         }
         
-        // Auto-redirect
+        // Auto-redirect ??
         for (CtMethod method : controllerCtClass.getDeclaredMethods()) {
             boolean isHandler = false;
             for(Annotation a : getAnnotations(method).getAnnotations()) {
@@ -65,7 +65,7 @@ public class ControllerObjectEnhancer extends Enhancer {
                 try {
                     method.insertBefore(
                                "if(!play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.isActionCallAllowed()) {"+
-                                    "play.mvc.Controller.redirect(\""+controllerProxyName+"."+method.getName()+"\", $args);"+
+                                    "play.scalasupport.wrappers.ControllerWrapper.redirect(\""+controllerProxyName+"."+method.getName()+"\", $args);"+
                                "}"+
                                "play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.stopActionCall();"
                     );
@@ -77,7 +77,7 @@ public class ControllerObjectEnhancer extends Enhancer {
         }
         
         // Hop
-        controllerProxyApplicationClass.enhancedByteCode = controllerProxyCtClass.toBytecode();
+        controllerProxyApplicationClass.javaByteCode = controllerProxyApplicationClass.enhancedByteCode = controllerProxyCtClass.toBytecode();
         controllerProxyCtClass.defrost();
         
         // Et re hop

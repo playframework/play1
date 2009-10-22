@@ -4,6 +4,12 @@ Welcome to the play framework documentation. This documentation is intended for 
 
 p(note). The 1.1 branch is in active devlopment.
 
+h2. <a name="a">Hot stuff -- Scala support</a>
+
+We will describe here the scala support progress
+
+# "Using scala in new play application":scala
+
 
 h2. <a name="started">Getting started</a>
 

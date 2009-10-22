@@ -354,6 +354,15 @@ try:
 		for m in withModules:
 			replaceAll(os.path.join(application_path, 'conf/application.conf'), r'#module.%s' % m, 'module.%s' % m)
 		print "~"
+		
+		# modules
+		check_application()
+		load_modules()
+		for module in modules:
+			commands = os.path.join(module, 'commands.py')
+			if os.path.exists(commands):
+				execfile(commands)
+		
 		print "~ OK, the application is created."
 		print "~ Start it with : play run %s" % sys.argv[2]
 		print "~ Have fun!"
@@ -373,13 +382,13 @@ try:
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [clean] Clean temporary files
-	if play_command == 'clean':
+	if play_command == 'clean' or play_command == 'clean,run':
 		check_application()
 		print "~ Deleting %s" % os.path.normpath(os.path.join(application_path, 'tmp'))
 		if os.path.exists(os.path.join(application_path, 'tmp')):
 			shutil.rmtree(os.path.join(application_path, 'tmp'))
 		print "~"
-		sys.exit(0)
+		if play_command == 'clean': sys.exit(0)
 		
 		
 	# ~~~~~~~~~~~~~~~~~~~~~~ [modules] Display the application modules
@@ -504,7 +513,7 @@ try:
 		
 		
 	# ~~~~~~~~~~~~~~~~~~~~~~ [run] Run the application
-	if play_command == 'run' or play_command == 'new,run':
+	if play_command == 'run' or play_command == 'new,run' or play_command == 'clean,run':
 		check_application()
 		load_modules()
 		do_classpath()
