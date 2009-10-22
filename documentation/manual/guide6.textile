@@ -255,12 +255,12 @@ bc. GET     /posts/{tag}                    Application.listTagged
 Well, we have a problem because we have an existing route that conflicts with this new one. These two routes will match the same URI:
 
 bc. GET     /posts/{id}                     Application.show
-GET     /posts/{tag}                    Application.tagged
+GET     /posts/{tag}                    Application.listTagged
 
 But because we'll assume that **id** are numeric and **tag** are not, we can easily solve the situation using a regular expression to restrict the first route:
 
 bc. GET     /posts/{<[0-9]+>id}             Application.show
-GET     /posts/{tag}                    Application.tagged 
+GET     /posts/{tag}                    Application.listTagged 
 
 Finally we just have to create the **/yabe/app/views/Application/listTagged.html** template that will be used by the new **listTagged** action:
 
