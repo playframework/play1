@@ -30,7 +30,7 @@ public class SigEnhancer extends Enhancer {
         for (CtField field : ctClass.getDeclaredFields()) {
             sigChecksum.append(" Field->" + ctClass.getName() + " " + field.getSignature() + ":");
             sigChecksum.append(field.getSignature());
-            for (Annotation annotation : getAnnotations(ctClass).getAnnotations()) {
+            for (Annotation annotation : getAnnotations(field).getAnnotations()) {
                 sigChecksum.append(annotation + ",");
             }
         }
