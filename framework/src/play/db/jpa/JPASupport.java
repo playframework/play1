@@ -36,12 +36,25 @@ import play.data.binding.BeanWrapper;
 import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
+import ch.lambdaj.function.closure.Closure;
+import static ch.lambdaj.Lambda.closure;
 
 /**
  * A super class for JPA entities 
  */
 @MappedSuperclass
 public class JPASupport implements Serializable {
+    
+    // Trunk
+    
+    public static <T> void forEach(Iterable<T> objects) {
+        Closure closure = closure();
+        for(T o: objects) {
+            closure.apply(o);
+        }
+    }
+    
+    //
 
     public transient boolean willBeSaved = false;
 
