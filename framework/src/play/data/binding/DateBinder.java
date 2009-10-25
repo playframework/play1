@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.data.binding.annotations.As;
 import play.Logger;
+import play.libs.I18N;
 
 /**
  * Binder that support Date class.
@@ -30,9 +31,9 @@ public class DateBinder implements SupportedType<Date> {
                 }
             }
         }
-        // Attempt to magically recognize the format or use the default one??
-        return AlternativeDateFormat.getDefaultFormatter().parse(value);
-    }
+        // TODO: Check that the format matches otherwise throws an exception?
+         return new SimpleDateFormat(I18N.getDateFormat()).parse(value);
+     }
 
     public static class AlternativeDateFormat {
 

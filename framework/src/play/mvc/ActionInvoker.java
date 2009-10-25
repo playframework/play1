@@ -311,7 +311,6 @@ public class ActionInvoker {
             } else {
                 params.putAll(Scope.Params.current().all());
             }
-            Logger.info("Params %s", params);
             rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params);
         }
         return rArgs;
