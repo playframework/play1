@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.Play;
 import play.PlayConfiguration;
 
@@ -35,15 +36,14 @@ public class I18N {
     }
 
     public static String getDateFormat() {
-        final String localizedDateFormat = Play.configuration.getProperty(PlayConfiguration.DATE_FORMAT + "." + Locale.getISOLanguages());
+        final String localizedDateFormat = Play.configuration.getProperty(PlayConfiguration.DATE_FORMAT + "." + Locale.getDefault().getLanguage());
         if (!StringUtils.isEmpty(localizedDateFormat)) {
             return localizedDateFormat;
         }
         final String globalDateFormat = Play.configuration.getProperty(PlayConfiguration.DATE_FORMAT);
-        if (!StringUtils.isEmpty(localizedDateFormat)) {
+        if (!StringUtils.isEmpty(globalDateFormat)) {
             return globalDateFormat;
         }
         return new SimpleDateFormat().toPattern();
     }
-    
 }
