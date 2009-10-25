@@ -111,7 +111,7 @@ public class Mail {
      * @param attachments File attachments
      */
     public static Future<Boolean> send(String from, String[] recipients, String subject, String body, Object... attachments) {
-        return send(from, recipients, subject, body, null, "text/plain", attachments);
+        return send(from, null, recipients, subject, body, null, "text/plain", attachments);
     }
 
     

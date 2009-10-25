@@ -30,7 +30,7 @@ public class Properties extends HashMap<String, String> {
 
     public synchronized void load(InputStream is, String encoding) throws IOException {
         if (is == null) {
-            new NullPointerException("Can't read from null stream");
+            throw new NullPointerException("Can't read from null stream");
         }
         BufferedReader rd = new BufferedReader(new InputStreamReader(is, encoding));
         while (true) {
@@ -72,7 +72,7 @@ public class Properties extends HashMap<String, String> {
 
     public synchronized void store(OutputStream out, String encoding) throws IOException {
         if (out == null) {
-            new NullPointerException("Can't store to null stream");
+            throw new NullPointerException("Can't store to null stream");
         }
         BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out, encoding));
         for (String key : keySet()) {

@@ -324,7 +324,7 @@ public class Router {
                         ActionDefinition actionDefinition = new ActionDefinition();
                         actionDefinition.url = qs.length() == 0 ? path : path + "?" + qs;
                         actionDefinition.method = route.method == null || route.method.equals("*") ? "GET" : route.method.toUpperCase();
-                        actionDefinition.star = route.method.equals("*");
+                        actionDefinition.star = "*".equals(route.method);
                         actionDefinition.action = action;
                         actionDefinition.args = args;
                         return actionDefinition;
