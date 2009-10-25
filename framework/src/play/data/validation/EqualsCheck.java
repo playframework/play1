@@ -50,7 +50,7 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
                         return false;
                     }
                     otherKey = to;
-                    otherValue = Binder.bind(to, method.getParameterTypes()[index], method.getGenericParameterTypes()[index], Scope.Params.current().all());
+                    otherValue = Binder.bind(to, method.getParameterTypes()[index], method.getGenericParameterTypes()[index], method.getParameterAnnotations()[index], Scope.Params.current().all());
                 }
                 if (context instanceof FieldContext) {
                     FieldContext ctx = (FieldContext) context;

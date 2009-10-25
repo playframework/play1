@@ -1,5 +1,6 @@
 package play.data.binding;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.Collection;
 import java.util.HashMap;
@@ -44,7 +45,7 @@ public class BeanWrapper {
             if (name.equals("") && prefix.equals("") && newPrefix.startsWith(".")) {
                 newPrefix = newPrefix.substring(1);
             }
-            Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), params, newPrefix);
+            Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), prop.getAnnotations(), params, newPrefix);
             if (value != Binder.MISSING) {
                 prop.setValue(instance, value);
             }
@@ -95,7 +96,7 @@ public class BeanWrapper {
     private void registerSetters(Class clazz) {
         if (clazz == Object.class) {
             return;
-        // deep walk (superclass first)
+            // deep walk (superclass first)
         }
         registerSetters(clazz.getSuperclass());
 
@@ -113,6 +114,7 @@ public class BeanWrapper {
 
     public static class Property {
 
+        private Annotation[] annotations;
         private Method setter;
         private Field field;
         private Class type;
@@ -123,6 +125,7 @@ public class BeanWrapper {
             name = propertyName;
             setter = setterMethod;
             type = setter.getParameterTypes()[0];
+            annotations = setter.getAnnotations();
             genericType = setter.getGenericParameterTypes()[0];
         }
 
@@ -131,6 +134,7 @@ public class BeanWrapper {
             this.field.setAccessible(true);
             name = field.getName();
             type = field.getType();
+            annotations = field.getAnnotations();
             genericType = field.getGenericType();
         }
 
@@ -161,6 +165,10 @@ public class BeanWrapper {
 
         Type getGenericType() {
             return genericType;
+        }
+
+        Annotation[] getAnnotations() {
+            return annotations;
         }
     }
 }

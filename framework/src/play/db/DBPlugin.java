@@ -44,9 +44,9 @@ public class DBPlugin extends PlayPlugin {
                 Connection fake = null;
                 try {
                     if (p.getProperty("db.user") == null) {
-                        DriverManager.getConnection(p.getProperty("db.url"));
+                        fake = DriverManager.getConnection(p.getProperty("db.url"));
                     } else {
-                        DriverManager.getConnection(p.getProperty("db.url"), p.getProperty("db.user"), p.getProperty("db.pass"));
+                        fake = DriverManager.getConnection(p.getProperty("db.url"), p.getProperty("db.user"), p.getProperty("db.pass"));
                     }
                 } finally {
                     if (fake != null) {

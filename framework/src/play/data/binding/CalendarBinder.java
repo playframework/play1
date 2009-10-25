@@ -1,5 +1,6 @@
 package play.data.binding;
 
+import java.lang.annotation.Annotation;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -11,7 +12,7 @@ import play.i18n.Lang;
  */
 public class CalendarBinder implements SupportedType<Calendar> {
 
-    public Calendar bind(String value) throws Exception {
+    public Calendar bind(Annotation[] annotations, String value) throws Exception {
         Calendar cal;
         if (Lang.get() != null && !"".equals(Lang.get())) {
             cal = Calendar.getInstance(new Locale(Lang.get()));

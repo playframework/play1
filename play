@@ -330,6 +330,17 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [new] Create a new application
 	if play_command == 'new' or play_command == 'new,run':
+		withModules = []
+		try:
+			optlist, args = getopt.getopt(remaining_args, '', ['with='])
+			for o, a in optlist:
+				if o in ('--with'):
+					withModules = a.split(',')
+		except getopt.GetoptError, err:
+			print "~ %s" % str(err)
+			print "~ Sorry, unrecognized option"
+			print "~ "
+			sys.exit(-1)
 		if os.path.exists(application_path):
 			print "~ Oops. %s already exists" % application_path
 			print "~"
@@ -340,6 +351,8 @@ try:
 		check_application()
 		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%APPLICATION_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%SECRET_KEY%', secretKey())
+		for m in withModules:
+			replaceAll(os.path.join(application_path, 'conf/application.conf'), r'#module.%s' % m, 'module.%s' % m)
 		print "~"
 		print "~ OK, the application is created."
 		print "~ Start it with : play run %s" % sys.argv[2]
@@ -360,13 +373,13 @@ try:
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [clean] Clean temporary files
-	if play_command == 'clean':
+	if play_command == 'clean' or play_command == 'clean,run':
 		check_application()
 		print "~ Deleting %s" % os.path.normpath(os.path.join(application_path, 'tmp'))
 		if os.path.exists(os.path.join(application_path, 'tmp')):
 			shutil.rmtree(os.path.join(application_path, 'tmp'))
 		print "~"
-		sys.exit(0)
+		if play_command == 'clean': sys.exit(0)
 		
 		
 	# ~~~~~~~~~~~~~~~~~~~~~~ [modules] Display the application modules
@@ -491,7 +504,7 @@ try:
 		
 		
 	# ~~~~~~~~~~~~~~~~~~~~~~ [run] Run the application
-	if play_command == 'run' or play_command == 'new,run':
+	if play_command == 'run' or play_command == 'new,run' or play_command == 'clean,run':
 		check_application()
 		load_modules()
 		do_classpath()
@@ -499,6 +512,9 @@ try:
 		if remaining_args.count('-f') == 1:
 			disable_check_jpda = True
 			remaining_args.remove('-f')
+		for a in remaining_args:
+			if a.find('--with') == 0:
+				remaining_args.remove(a)
 		do_java()
 		print "~ Ctrl+C to stop"
 		print "~ "
@@ -822,28 +838,31 @@ try:
 		dotProject = os.path.join(application_path, '.project')
 		dotClasspath = os.path.join(application_path, '.classpath')
 		dotSettings = os.path.join(application_path, '.settings')
+		dotAmateras = os.path.join(application_path, '.amateras')
 		eclipse = os.path.join(application_path, 'eclipse')
 		if os.path.exists(eclipse):
 			shutil.rmtree(eclipse)
 			if os.name == 'nt':
 				time.sleep(1)
-				
+
 		if os.path.exists(dotSettings):
 			shutil.rmtree(dotSettings)
 			if os.name == 'nt':
 				time.sleep(1)
-				
+
 		shutil.copyfile(os.path.join(play_base, 'resources/eclipse/.project'), dotProject)
 		shutil.copyfile(os.path.join(play_base, 'resources/eclipse/.classpath'), dotClasspath)
+		shutil.copyfile(os.path.join(play_base, 'resources/eclipse/.amateras'), dotAmateras)
 		shutil.copytree(os.path.join(play_base, 'resources/eclipse'), eclipse)
 		shutil.copytree(os.path.join(play_base, 'resources/eclipse/.settings'), dotSettings)
 		replaceAll(dotProject, r'%PROJECT_NAME%', application_name)
-		
+
 		cpXML = ""
 		for el in classpath:
-			cpXML += '<classpathentry kind="lib" path="%s" />' % os.path.normpath(el)
+			if not os.path.basename(el) == "conf":
+				cpXML += '<classpathentry kind="lib" path="%s" />' % os.path.normpath(el)
 		replaceAll(dotClasspath, r'%PROJECTCLASSPATH%', cpXML)
-		
+
 		if len(modules):
 			lXML = ""
 			cXML = ""
@@ -855,30 +874,30 @@ try:
 		else:
 			replaceAll(dotProject, r'%LINKS%', '')
 			replaceAll(dotClasspath, r'%MODULES%', '')
-		
+
 		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%PROJECT_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%PLAY_BASE%', play_base)
 		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%PLAY_ID%', play_id)
 		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%JPDA_PORT%', jpda_port)
 		os.rename(os.path.join(application_path, 'eclipse/debug.launch'), os.path.join(application_path, 'eclipse/%s.launch' % application_name))
-		
+
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%PROJECT_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%PLAY_BASE%', play_base)
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%PLAY_ID%', play_id)
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%JPDA_PORT%', jpda_port)
 		os.rename(os.path.join(application_path, 'eclipse/test.launch'), os.path.join(application_path, 'eclipse/Test %s.launch' % application_name))	
-				
+
 		replaceAll(os.path.join(application_path, 'eclipse/connect.launch'), r'%PROJECT_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'eclipse/connect.launch'), r'%JPDA_PORT%', jpda_port)
 		os.rename(os.path.join(application_path, 'eclipse/connect.launch'), os.path.join(application_path, 'eclipse/Connect JPDA to %s.launch' % application_name))
-		
+
 		print "~ OK, the application is ready for eclipse"
 		print "~ Use File/Import/General/Existing project to import %s into eclipse" % os.path.normpath(application_path)
 		print "~"
 		print "~ Use eclipsify again when you want to update eclipse configuration files."
 		print "~ However, it's often better to delete and re-import the project into your workspace since eclipse keeps dirty caches..."
 		print "~"
-				
+
 		sys.exit(0)
 
 	

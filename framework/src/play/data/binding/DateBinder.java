@@ -1,18 +1,35 @@
 package play.data.binding;
 
+import java.lang.annotation.Annotation;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import org.apache.commons.lang.StringUtils;
+import play.Logger;
+import play.data.binding.annotations.As;
+import play.Logger;
 
 /**
  * Binder that support Date class.
  */
 public class DateBinder implements SupportedType<Date> {
 
-    public Date bind(String value) throws Exception {
+    public Date bind(Annotation[] annotations, String value) throws Exception {
+        // Look up for the As annotation
+        for (Annotation annotation : annotations) {
+            if (annotation.annotationType().equals(As.class)) {
+                final String format = ((As)annotation).value();
+                if (!StringUtils.isEmpty(format)) {
+                    // TODO: Check that the format matches otherwise throws an exception?
+                    return new SimpleDateFormat(format).parse(value);
+                }
+            }
+        }
+
+        // Attempt to magically recognize the format
         return AlternativeDateFormat.getDefaultFormatter().parse(value);
     }
 
@@ -61,13 +78,7 @@ public class DateBinder implements SupportedType<Date> {
                         "dd'/'MM'/'yyyy hh:mm:ss",
                         "dd-MM-yyyy hh:mm:ss",
                         "ddMMyyyy hhmmss",
-                        "ddMMyyyy",
-                        "MMddyy",
-                        "MM-dd-yy",
-                        "MM'/'dd'/'yy",
-                        "MMddyy hhmmss",
-                        "MM-dd-yy hh:mm:ss",
-                        "MM'/'dd'/'yy hh:mm:ss"));
+                        "ddMMyyyy"));
             }
             return dateformat.get();
         }

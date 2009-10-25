@@ -130,7 +130,7 @@ To customize this view, we need to create the **/app/views/Users/list.html** tem
 
 Open a shell, go the application directory and type:
 
-bc. play crud:ov Users/list
+bc. play crud:ov --template Users/list
 
 This will copy the default CRUD **list.html** template to the **Users/list.html** template in your application, overwriting it if present.
 

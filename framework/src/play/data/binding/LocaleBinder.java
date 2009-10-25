@@ -1,5 +1,6 @@
 package play.data.binding;
 
+import java.lang.annotation.Annotation;
 import java.util.Locale;
 
 /**
@@ -7,7 +8,7 @@ import java.util.Locale;
  */
 public class LocaleBinder implements SupportedType<Locale> {
 
-    public Locale bind(String value) {
+    public Locale bind(Annotation[] annotations, String value) {
         if( value == null )
             return null;
         if (value.length() == 2) {

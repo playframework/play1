@@ -3,14 +3,18 @@ h1. Installation guide
 
 h2. <a>Prerequisites</a>
 
-To run the play framework, you need "Java 5 or later":http:java.sun.com. If you wish to build play from source, you will need the "Bazaar source control client":http:bazaar-vcs.org/ to fetch the source code and "Ant":http:ant.apache.org/ to build it.
+To run the play framework, you need "Java 5 or later":http://java.sun.com. If you wish to build play from source, you will need the "Bazaar source control client":http://bazaar-vcs.org/ to fetch the source code and "Ant":http://ant.apache.org/ to build it.
+
+p(note). If you are using MacOS, java is just built-in. If you are using linux, make sure to use either the Sun-JDK or OpenJDK (and not gcj which is the default java command on many linux distro). If you are using Windows, just download and install the latest JDK package.
+
+Be sure to have java in the current path (try to type **java -version** to check). Play will use the default java or the one available at the **$JAVA_HOME** path if defined.
 
 The play command line utility uses python. So it should work out of the box on any UNIX system. If you're running Windows, don't worry, a python runtime is bundled with the framework.
 
 
 h2. <a>Download the binary package</a>
 
-Download the latest "play binary package":http:www.playframework.org/download and extract the archive. For convenience, you should add the framework installation directory to your system PATH. If you're on UNIX, make sure that the _play_ script is runnable (otherwise simply do a **chmod +x play**). That's all.
+Download the latest "play binary package":http://download.playframework.org/ and extract the archive. For convenience, you should add the framework installation directory to your system PATH. If you're on UNIX, make sure that the _play_ script is runnable (otherwise simply do a **chmod +x play**). That's all.
 
 p(note). *Tip*
  
@@ -19,7 +23,7 @@ If you need to rebuild the framework for whatever reason, run *ant* from the *$P
 
 h2. <a>Build from the latest sources</a>
 
-To benefit from the latest improvements and bug fixes, you may want to compile play from sources. You'll need a "Bazaar client":http:bazaar-vcs.org/Download to fetch the sources and "Ant":http:ant.apache.org/ to build the framework.
+To benefit from the latest improvements and bug fixes, you may want to compile play from sources. You'll need a "Bazaar client":http://bazaar-vcs.org/Download to fetch the sources and "Ant":http://ant.apache.org/ to build the framework.
 
 From the command line:
 
