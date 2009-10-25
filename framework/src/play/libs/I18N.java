@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.PlayConfiguration;
+import play.i18n.Lang;
 
 /**
  * I18N utils
@@ -36,7 +37,7 @@ public class I18N {
     }
 
     public static String getDateFormat() {
-        final String localizedDateFormat = Play.configuration.getProperty(PlayConfiguration.DATE_FORMAT + "." + Locale.getDefault().getLanguage());
+        final String localizedDateFormat = Play.configuration.getProperty(PlayConfiguration.DATE_FORMAT + "." + Lang.get());
         if (!StringUtils.isEmpty(localizedDateFormat)) {
             return localizedDateFormat;
         }
@@ -46,4 +47,5 @@ public class I18N {
         }
         return new SimpleDateFormat().toPattern();
     }
+    
 }
