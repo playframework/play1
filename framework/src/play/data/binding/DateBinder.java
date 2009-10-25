@@ -19,17 +19,18 @@ public class DateBinder implements SupportedType<Date> {
 
     public Date bind(Annotation[] annotations, String value) throws Exception {
         // Look up for the As annotation
-        for (Annotation annotation : annotations) {
-            if (annotation.annotationType().equals(As.class)) {
-                final String format = ((As)annotation).value();
-                if (!StringUtils.isEmpty(format)) {
-                    // TODO: Check that the format matches otherwise throws an exception?
-                    return new SimpleDateFormat(format).parse(value);
+        if (annotations != null) {
+            for (Annotation annotation : annotations) {
+                if (annotation.annotationType().equals(As.class)) {
+                    final String format = ((As) annotation).value();
+                    if (!StringUtils.isEmpty(format)) {
+                        // TODO: Check that the format matches otherwise throws an exception?
+                        return new SimpleDateFormat(format).parse(value);
+                    }
                 }
             }
         }
-
-        // Attempt to magically recognize the format
+        // Attempt to magically recognize the format or use the default one??
         return AlternativeDateFormat.getDefaultFormatter().parse(value);
     }
 

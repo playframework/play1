@@ -30,7 +30,7 @@ import play.data.binding.annotations.As;
  */
 public class Binder {
 
-    static Map<Class, SupportedType> supportedTypes = new HashMap<Class, SupportedType>();    
+    static Map<Class, SupportedType> supportedTypes = new HashMap<Class, SupportedType>();
 
     static {
         supportedTypes.put(Date.class, new DateBinder());
@@ -39,7 +39,6 @@ public class Binder {
         supportedTypes.put(Calendar.class, new CalendarBinder());
         supportedTypes.put(Locale.class, new LocaleBinder());
     }
-    
     static Map<Class, BeanWrapper> beanwrappers = new HashMap<Class, BeanWrapper>();
 
     static BeanWrapper getBeanWrapper(Class clazz) {
@@ -61,13 +60,14 @@ public class Binder {
 
             // Let see if we have a As annotation and a separator. If so, we need to split the values
             // Look up for the As annotation
-            for (Annotation annotation : annotations) {
-                if (value != null && value.length > 0 && annotation.annotationType().equals(As.class)) {
-                    final String separator = ((As) annotation).separator();
-                    value = value[0].split(separator);
+            if (annotations != null) {
+                for (Annotation annotation : annotations) {
+                    if (value != null && value.length > 0 && annotation.annotationType().equals(As.class)) {
+                        final String separator = ((As) annotation).separator();
+                        value = value[0].split(separator);
+                    }
                 }
             }
-            
             // Arrays types
             if (clazz.isArray()) {
                 if (value == null) {
@@ -328,12 +328,12 @@ public class Binder {
         }
         if (clazz.getName().equals("byte") || clazz.equals(Byte.class)) {
             if (value == null || value.trim().length() == 0) {
-                 return clazz.isPrimitive() ? 0 : null;
-             }
-             if (value.contains(".")) {
-                 value = value.substring(0, value.indexOf("."));
+                return clazz.isPrimitive() ? 0 : null;
             }
-             return Byte.parseByte(value);
+            if (value.contains(".")) {
+                value = value.substring(0, value.indexOf("."));
+            }
+            return Byte.parseByte(value);
         }
         if (clazz.equals(BigDecimal.class)) {
             if (value == null || value.trim().length() == 0) {
