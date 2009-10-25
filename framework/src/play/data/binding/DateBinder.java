@@ -1,18 +1,21 @@
 package play.data.binding;
 
+import java.lang.annotation.Annotation;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import play.Logger;
 
 /**
  * Binder that support Date class.
  */
 public class DateBinder implements SupportedType<Date> {
 
-    public Date bind(String value) throws Exception {
+    public Date bind(Annotation[] annotations, String value) throws Exception {
+        Logger.info("bind %s " , annotations[0]);
         return AlternativeDateFormat.getDefaultFormatter().parse(value);
     }
 

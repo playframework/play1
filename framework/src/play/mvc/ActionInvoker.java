@@ -3,6 +3,7 @@ package play.mvc;
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 import java.io.ByteArrayInputStream;
+import java.lang.annotation.Annotation;
 import play.mvc.results.Result;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import java.util.Map;
+import org.apache.commons.collections.MapUtils;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -301,6 +303,7 @@ public class ActionInvoker {
         }
         Object[] rArgs = new Object[method.getParameterTypes().length];
         for (int i = 0; i < method.getParameterTypes().length; i++) {
+
             Class type = method.getParameterTypes()[i];
             Map<String, String[]> params = new HashMap();
             if(type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {
@@ -308,7 +311,8 @@ public class ActionInvoker {
             } else {
                 params.putAll(Scope.Params.current().all());
             }
-            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], params);
+            Logger.info("Params %s", params);
+            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params);
         }
         return rArgs;
     }

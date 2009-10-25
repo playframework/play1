@@ -92,7 +92,8 @@ public class JPASupport implements Serializable {
                                     continue;
                                 }
                                 Query q = JPA.em().createQuery("from " + relation + " where id = ?");
-                                q.setParameter(1, Binder.directBind(_id, findKeyType(Play.classloader.loadClass(relation))));
+                                // TODO: I think we need to type of direct bind -> primitive and object binder
+                                q.setParameter(1, Binder.directBind(null, _id, findKeyType(Play.classloader.loadClass(relation))));
                                 l.add(q.getSingleResult());
                             }
                         }
@@ -101,7 +102,8 @@ public class JPASupport implements Serializable {
                         String[] ids = params.get(name + "." + field.getName() + "@id");
                         if (ids != null && ids.length > 0 && !ids[0].equals("")) {
                             Query q = JPA.em().createQuery("from " + relation + " where id = ?");
-                            q.setParameter(1, Binder.directBind(ids[0], findKeyType(Play.classloader.loadClass(relation))));
+                            // TODO: I think we need to type of direct bind -> primitive and object binder
+                            q.setParameter(1, Binder.directBind(null, ids[0], findKeyType(Play.classloader.loadClass(relation))));
                             Object to = q.getSingleResult();
                             bw.set(field.getName(), o, to);
                         } else {
@@ -115,12 +117,14 @@ public class JPASupport implements Serializable {
                         fileAttachment = new FileAttachment(o, field.getName());
                         bw.set(field.getName(), o, fileAttachment);
                     }
-                    File file = Params.current().get(name + "." + field.getName(), File.class);
+                    // TODO: I think we need to type of direct bind -> primitive and object binder
+                    File file = Params.current().get(null, name + "." + field.getName(), File.class);
                     if (file != null && file.exists() && file.length() > 0) {
-                        fileAttachment.set(Params.current().get(name + "." + field.getName(), File.class));
+                        fileAttachment.set(Params.current().get(null, name + "." + field.getName(), File.class));
                         fileAttachment.filename = file.getName();
                     } else {
-                        String df = Params.current().get(name + "." + field.getName() + "_delete_", String.class);
+                        // TODO: I think we need to type of direct bind -> primitive and object binder
+                        String df = Params.current().get(null, name + "." + field.getName() + "_delete_", String.class);
                         if (df != null && df.equals("true")) {
                             fileAttachment.delete();
                             bw.set(field.getName(), o, null);

@@ -1,6 +1,7 @@
 package play.data.binding;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -48,7 +49,7 @@ public class Binder {
     }
     public static Object MISSING = new Object();
 
-    static Object bindInternal(String name, Class clazz, Type type, Map<String, String[]> params, String prefix) {
+    static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String prefix) {
         try {
             if (isComposite(name + prefix, params.keySet())) {
                 BeanWrapper beanWrapper = getBeanWrapper(clazz);
@@ -66,7 +67,7 @@ public class Binder {
                 Object r = Array.newInstance(clazz.getComponentType(), value.length);
                 for (int i = 0; i < value.length; i++) {
                     try {
-                        Array.set(r, i, directBind(value[i], clazz.getComponentType()));
+                        Array.set(r, i, directBind(annotations, value[i], clazz.getComponentType()));
                     } catch (Exception e) {
                         // ?? One item was bad
                     }
@@ -97,7 +98,7 @@ public class Binder {
                         String key = m.group(1);
                         Map<String, String[]> tP = new HashMap();
                         tP.put("key", new String[]{key});
-                        Object oKey = bindInternal("key", keyClass, keyClass, tP, "");
+                        Object oKey = bindInternal("key", keyClass, keyClass, annotations, tP, "");
                         if (oKey != MISSING) {
                             if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
                                 BeanWrapper beanWrapper = getBeanWrapper(valueClass);
@@ -106,7 +107,7 @@ public class Binder {
                             } else {
                                 tP = new HashMap();
                                 tP.put("value", params.get(name + prefix + "[" + key + "]"));
-                                Object oValue = bindInternal("value", valueClass, valueClass, tP, "");
+                                Object oValue = bindInternal("value", valueClass, valueClass, annotations, tP, "");
                                 if (oValue != MISSING) {
                                     r.put(oKey, oValue);
                                 } else {
@@ -154,7 +155,7 @@ public class Binder {
                                 } else {
                                     Map tP = new HashMap();
                                     tP.put("value", params.get(name + prefix + "[" + key + "]"));
-                                    Object oValue = bindInternal("value", componentClass, componentClass, tP, "");
+                                    Object oValue = bindInternal("value", componentClass, componentClass, annotations, tP, "");
                                     if (oValue != MISSING) {
                                         ((List) r).set(key, oValue);
                                     }
@@ -169,7 +170,7 @@ public class Binder {
                 }
                 for (String v : value) {
                     try {
-                        r.add(directBind(v, componentClass));
+                        r.add(directBind(annotations, v, componentClass));
                     } catch (Exception e) {
                         // ?? One item was bad
                     }
@@ -180,15 +181,15 @@ public class Binder {
             if (value == null || value.length == 0) {
                 return MISSING;
             }
-            return directBind(value[0], clazz);
+            return directBind(annotations, value[0], clazz);
         } catch (Exception e) {
             Validation.addError(name + prefix, "validation.invalid");
             return MISSING;
         }
     }
 
-    public static Object bind(String name, Class clazz, Type type, Map<String, String[]> params) {
-        Object result = bindInternal(name, clazz, type, params, "");
+    public static Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params) {
+        Object result = bindInternal(name, clazz, type, annotations, params, "");
         if (result == MISSING) {
             if (clazz.equals(boolean.class)) {
                 return false;
@@ -225,7 +226,7 @@ public class Binder {
         return false;
     }
 
-    public static Object directBind(String value, Class clazz) throws Exception {
+    public static Object directBind(Annotation[] annotations, String value, Class clazz) throws Exception {
         if (clazz.equals(String.class)) {
             return value;
         }
@@ -233,7 +234,7 @@ public class Binder {
             if (value == null || value.trim().length() == 0) {
                 return null;
             }
-            return supportedTypes.get(clazz).bind(value);
+            return supportedTypes.get(clazz).bind(annotations, value);
         }
         if (clazz.getName().equals("int")) {
             if (value == null || value.trim().length() == 0) {
