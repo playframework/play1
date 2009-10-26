@@ -99,6 +99,9 @@ public class JPASupport implements Serializable {
                             l = new HashSet();
                         }
                         String[] ids = params.get(name + "." + field.getName() + "@id");
+                        if(ids == null) {
+                            ids = params.get(name + "." + field.getName() + ".id");
+                        }
                         if (ids != null) {
                             for (String _id : ids) {
                                 if (_id.equals("")) {
@@ -112,6 +115,9 @@ public class JPASupport implements Serializable {
                         bw.set(field.getName(), o, l);
                     } else {
                         String[] ids = params.get(name + "." + field.getName() + "@id");
+                        if(ids == null) {
+                            ids = params.get(name + "." + field.getName() + ".id");
+                        }
                         if (ids != null && ids.length > 0 && !ids[0].equals("")) {
                             Query q = JPA.em().createQuery("from " + relation + " where id = ?");
                             q.setParameter(1, Binder.directBind(ids[0], findKeyType(Play.classloader.loadClass(relation))));

@@ -1,0 +1,55 @@
+#{fixture delete:'all' /}
+
+#{selenium 'Test the transparent JPA Binding'}
+
+    open('@{JPABinding.index()}')
+    
+    type('name', 'Play 1.1')
+    clickAndWait('go')
+    
+    assertValue('name', 'Play 1.1')
+    storeValue('id', 'objectId')
+    echo('Project id is $[objectId]')
+    assertTextPresent('No company')
+    
+    type('name', 'Hop')
+    clickAndWait('go')
+    
+    assertValue('name', 'Hop')
+    echo('Project id is $[objectId]')
+    assertValue('id', '$[objectId]')
+    assertTextPresent('No company')
+    
+    type('id', '89776')
+    clickAndWait('go')
+    
+    assertTextPresent('detached entity passed to persist: models.Project')
+    
+    open('@{JPABinding.createCompany()}?company.name=zenexity')
+    assertValue('name', 'zenexity')
+    storeValue('id', 'companyId')
+    echo('Company id is $[companyId]')
+    
+    open('@{JPABinding.show()}?id=$[objectId]')
+    type('company', '$[companyId]')
+    clickAndWait('go')
+    
+    assertValue('name', 'Hop')
+    echo('Project id is $[objectId]')
+    assertValue('id', '$[objectId]')
+    assertTextNotPresent('No company')
+    assertTextPresent('zenexity')
+    
+    open('@{JPABinding.index()}')
+    
+    type('name', 'Zapps')
+    type('company', '$[companyId]')
+    clickAndWait('go')
+    
+    assertValue('name', 'Zapps')
+    assertNotValue('id', '$[objectId]')
+    assertTextNotPresent('No company')
+    assertTextPresent('zenexity')
+    
+
+#{/selenium}

@@ -19,6 +19,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import play.Play;
+import play.PlayPlugin;
 import play.data.Upload;
 import play.data.validation.Validation;
 
@@ -188,7 +190,15 @@ public class Binder {
     }
 
     public static Object bind(String name, Class clazz, Type type, Map<String, String[]> params) {
-        Object result = bindInternal(name, clazz, type, params, "");
+        Object result = null;
+        // Let a chance to plugins to bind this object
+        for(PlayPlugin plugin : Play.plugins) {
+            result = plugin.bind(name, clazz, type, params);
+            if(result != null) {
+                return result;
+            }
+        }
+        result = bindInternal(name, clazz, type, params, "");
         if (result == MISSING) {
             if (clazz.equals(boolean.class)) {
                 return false;

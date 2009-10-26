@@ -79,9 +79,8 @@ public class Codec {
         try {
             MessageDigest md;
             md = MessageDigest.getInstance("SHA-1");
-            byte[] digest = new byte[40];
             md.update(value.getBytes("utf-8"));
-            digest = md.digest();
+            byte[] digest = md.digest();
             return byteToHexString(digest);
         } catch (Exception ex) {
             throw new UnexpectedException(ex);
