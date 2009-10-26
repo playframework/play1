@@ -11,7 +11,7 @@
             <span class="post-comments">
                 &nbsp;|&nbsp; ${_post.comments.size() ?: 'no'} comment${_post.comments.size().pluralize()}
                 #{if _post.comments}
-                    , latest by ${_post.comments[0].author}
+                    , latest by ${_post.comments[-1].author}
                 #{/if}
             </span>
         #{/if}
