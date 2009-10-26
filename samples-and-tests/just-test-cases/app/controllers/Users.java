@@ -39,6 +39,10 @@ public class Users extends Controller {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	public static void wbyte(byte a, Byte b) {
+	    renderText(a+","+b);
+	}
     
 }
 

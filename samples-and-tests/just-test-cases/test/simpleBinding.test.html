@@ -1,4 +1,10 @@
 #{selenium 'Try simple binding'}
+
+    // byte
+    open('@{Users.wbyte(8, 90)}')
+	assertTextPresent('8,90')
+	open('@{Users.wbyte(8, 930)}')
+	assertTextPresent('8,null')
 	
 	//
 	open('@{Users.index()}')

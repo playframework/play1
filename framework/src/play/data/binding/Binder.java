@@ -263,6 +263,28 @@ public class Binder {
             }
             return Integer.parseInt(value);
         }
+        if (clazz.getName().equals("byte")) {
+            if (value == null || value.trim().length() == 0) {
+                return 0;
+            }
+            if (value.contains(".")) {
+                value = value.substring(0, value.indexOf("."));
+            }
+            Byte b = Byte.parseByte(value);
+            if(b == null) {
+                return 0;
+            }
+            return b;
+        }
+        if (clazz.equals(Byte.class)) {
+            if (value == null || value.trim().length() == 0) {
+                return null;
+            }
+            if (value.contains(".")) {
+                value = value.substring(0, value.indexOf("."));
+            }
+            return Byte.parseByte(value);
+        }
         if (clazz.getName().equals("double")) {
             if (value == null || value.trim().length() == 0) {
                 return 0D;
