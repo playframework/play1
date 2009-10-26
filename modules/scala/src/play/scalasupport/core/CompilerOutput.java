@@ -14,7 +14,7 @@ public class CompilerOutput extends AbstractFile {
     static Map<String, ByteArrayOutputStream> generatedBytecode = new HashMap<String, ByteArrayOutputStream>();
     
     String path = "";
-    String name = "";
+    String name = ""; 
     CompilerOutput parent = null;
     
     public CompilerOutput() {
@@ -22,7 +22,7 @@ public class CompilerOutput extends AbstractFile {
     
     public CompilerOutput(CompilerOutput parent, String name) {
         this.path = parent.path + ( parent.path.equals("") ? "" : "/") + name;
-        this.parent = parent;
+        this.parent = parent; 
     }
 
     @Override 

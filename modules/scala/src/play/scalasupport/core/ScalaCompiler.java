@@ -24,9 +24,10 @@ import scala.tools.nsc.util.Position;
 import scala.tools.nsc.util.BatchSourceFile;
 import scala.tools.nsc.util.SourceFile;
 
-public class ScalaCompiler {
+public class ScalaCompiler { 
     
     static Map<String, VirtualFile> symbolic2real = new HashMap<String, VirtualFile>();
+    static Global compiler;
 
     public static void compileAll(List<ApplicationClass> all) {
         
@@ -57,8 +58,10 @@ public class ScalaCompiler {
             
         };
         
-        Global compiler = new Global(settings, reporter);
-        compiler.genJVM().outputDir_$eq(dir);
+        if(compiler == null) {
+            compiler = new Global(settings, reporter);
+            compiler.genJVM().outputDir_$eq(dir);
+        }
 
         // Clean
         symbolic2real.clear();

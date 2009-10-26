@@ -6,13 +6,12 @@ import play.mvc._;
 object Application extends ControllerObject {
     
     def index() {
-        render()
+        val a = 25
+        render(a)
     }
     
-    def hello(name: String) {
-        render(name)
+    def yop() {
+        renderText("Cossucou")
     }
-    
-    def yop() = hello("Guillaume")
     
 }

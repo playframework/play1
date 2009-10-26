@@ -1,5 +1,6 @@
 package play.classloading.enhancers;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import javassist.bytecode.Opcode;
 import javassist.compiler.Javac;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.libs.IO;
 
 /**
  * Track names of local variables ...
@@ -27,7 +29,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
-
+        
         CtClass ctClass = makeClass(applicationClass);
         if (!ctClass.subtypeOf(classPool.get(LocalVariablesSupport.class.getName()))) {
             return;
@@ -77,7 +79,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             // No variables name, skip ...
             if(localVariableAttribute == null) {
                 continue;
-            }            
+            } 
             
             // Bon.
             // Alors là il s'agit après chaque instruction de creation d'une variable locale
@@ -174,11 +176,14 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             method.insertBefore("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.enter();");
             method.insertAfter("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.exit();", true);
 
-        }
-
+        }        
+        
         // Done.
         applicationClass.enhancedByteCode = ctClass.toBytecode();
         ctClass.defrost();
+        
+        IO.write(ctClass.toBytecode(), new File("/tmp/lv_"+applicationClass.name+".class"));
+
         
     }
     
