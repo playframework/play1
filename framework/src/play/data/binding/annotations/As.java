@@ -17,7 +17,7 @@ public @interface As {
 
     public static final class DEFAULT implements SupportedType {
         public Object bind(Annotation[] annotations, String value) throws Exception {
-            throw new UnsupportedOperationException("Not supported yet.");
+            throw new UnsupportedOperationException("Not supported.");
         }
     }
 }
