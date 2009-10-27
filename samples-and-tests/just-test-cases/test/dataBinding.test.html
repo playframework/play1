@@ -1,0 +1,33 @@
+#{selenium 'Just test the simple scenario'}
+
+	open('/databinding/showDefaultDateFormat/1902-01-24/')
+        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        open('/databinding/showDefaultDateFormat?date=1902-01-24')
+        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+
+        open('/databinding/changeLanguage/fr/')
+        open('/databinding/showLocaleDateFormat/1902-24-01/')
+        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        open('/databinding/showLocaleDateFormat?date=1902-24-01')
+        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+
+        open('/databinding/changeLanguage/ch/')
+        open('/databinding/showDefaultLocaleDateFormat/1902-01-24/')
+        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        open('/databinding/showDefaultLocaleDateFormat?date=1902-01-24')
+        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+
+        open('/databinding/showDateFormat/01-24-1902T12:01:01/')
+        assertTextPresent('Fri Jan 24 12:01:01 CET 1902')
+        open('/databinding/showDateFormat?date=01-24-1902T12:01:01')
+        assertTextPresent('Fri Jan 24 12:01:01 CET 1902')
+
+        open('/databinding/showList/01/02/04/')
+        assertTextPresent('[01, 02, 04]')
+
+        open('/databinding/showCalendar/24-Jan-1902/')
+        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        open('/databinding/showCalendar?cal=24-Jan-1902')
+        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+	
+#{/selenium}	

@@ -252,6 +252,18 @@ public class Binder {
         if (clazz.equals(String.class)) {
             return value;
         }
+      
+       for (Annotation annotation : annotations) {
+           if (annotation.getClass().equals(As.class)) {
+                Class<? extends SupportedType> toInstanciate = ((As)annotation).implementation();
+                if (!(toInstanciate.equals(As.DEFAULT.class))) {
+                    // Instanciate the binder
+                    SupportedType myInstance = toInstanciate.newInstance();
+                    return myInstance.bind(annotations, value);
+                }
+           }
+       }
+
        if (supportedTypes.containsKey(clazz)) {
             if (value == null || value.trim().length() == 0) {
                 return null;
