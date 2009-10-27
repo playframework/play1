@@ -135,28 +135,32 @@ Note that if the parameter is missing in the HTTP Request, or that automatic con
 
 h3. Date
 
-A date object can be automatically bound if the string representation of the date matches one of the following patterns:
-
-* yyyy-MM-dd'T'hh:mm:ss'Z' // ISO8601 + timezone
-* yyyy-MM-dd'T'hh:mm:ss" // ISO8601
-* yyyy-MM-dd
-* yyyyMMdd'T'hhmmss
-* yyyyMMddhhmmss
-* dd'/'MM'/'yyyy
-* dd-MM-yyyy
-* ddMMyyyy
-* MMddyy
-* MM-dd-yy
-* MM'/'dd'/'yy
+A date object can be automatically bound if the string representation. Using the @As annotation, you can specify the date format.
 
 For example:
 
 bc. archives?from=21/12/1980
 
-bc. public static void articlesSince(Date from) {
+bc. public static void articlesSince(@As("dd/MM/yyyy") Date from) {
     List<Article> articles = Article.findBy("date >= ?", from);
     render(articles);
 }
+
+If no **@As** annotation is specified, then Play! uses the default date format according to your locale.
+To set the default date format to use, edit your application.conf and set the following property:
+
+bc. date.format=yyy-MM-dd
+    date.format.fr=dd/MM/yyyy
+
+Please note that the language fr in the application.conf must be enabled as well:
+bc. application.langs=fr
+
+This property also affects how the dates are rendered in the templates using the ${date.format()}.
+
+
+h3. Calendar
+
+The calendar binding works exactly as with the date, except that Play! is choosing the Calendar object according to your locale. The @As annotation can also be used.
 
 h3. Files
 

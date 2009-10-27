@@ -51,6 +51,19 @@ bc. Lang.change("ja");
 
 The new value will be saved back in the user's language cookie.
 
+h2. <a>Define date format according to your locale</a>
+
+To set the default date format to use, edit your application.conf and set the following property:
+
+bc. date.format=yyy-MM-dd
+    date.format.fr=dd/MM/yyyy
+
+Please note that the language fr in the application.conf must be enabled as well (see above):
+bc. application.langs=fr,en
+
+This property affects how the dates are rendered in the templates using the ${date.format()}.
+It also set the default date format when binding a date parameter.
+
 h2. Retrieve localized messages
 
 From the application code, you can retrieve messages defined in message files. From Java, use the **play.i18n.Messages** object.
