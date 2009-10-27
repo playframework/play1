@@ -286,7 +286,10 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                 //
             }
             response.setStatus(500);
-            String format = Request.current().format;
+            String format = "html";
+            if(Request.current() != null) {
+                format = Request.current().format;
+            }
             if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With")) && (format == null || format.equals("html"))) {
                 format = "txt";
             }

@@ -1,0 +1,15 @@
+#{form @save()}
+    <input type="hidden" id="id" name="project.id" value="${project.id}">
+    <input type="text" id="name" name="project.name" value="${project.name}" />
+    <input type="text" id="company" name="project.company.id" value="${project.company?.id}">
+    <input type="submit" id="go" />
+#{/form}
+
+<p>
+    #{ifnot project.company}
+        No company
+    #{/ifnot}
+    #{else}
+        ${project.company}
+    #{/else}
+</p>

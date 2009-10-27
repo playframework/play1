@@ -1,8 +1,10 @@
 package play.test;
 
 import java.io.File;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,11 +25,23 @@ public class TestEngine {
     static ExecutorService executor = Executors.newCachedThreadPool();
 
     public static List<Class> allUnitTests() {
-        return Play.classloader.getAssignableClasses(UnitTest.class);
+        List<Class> classes = Play.classloader.getAssignableClasses(UnitTest.class);
+        for(ListIterator<Class> it = classes.listIterator(); it.hasNext(); ) {
+            if(Modifier.isAbstract(it.next().getModifiers())) {
+                it.remove();
+            }
+        }
+        return classes;
     }
 
     public static List<Class> allFunctionalTests() {
-        return Play.classloader.getAssignableClasses(FunctionalTest.class);
+        List<Class> classes =  Play.classloader.getAssignableClasses(FunctionalTest.class);
+        for(ListIterator<Class> it = classes.listIterator(); it.hasNext(); ) {
+            if(Modifier.isAbstract(it.next().getModifiers())) {
+                it.remove();
+            }
+        }
+        return classes;
     }
     
     public static List<String> allSeleniumTests() {

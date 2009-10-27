@@ -1,7 +1,10 @@
 package play;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
@@ -22,6 +25,13 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * Called at plugin loading
      */
     public void onLoad() {
+    }
+    
+    /**
+     * Called when play need to bind a Java object from HTTP params
+     */
+    public Object bind(String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations, Map<String, String[]> params) {
+        return null;
     }
 
     /**

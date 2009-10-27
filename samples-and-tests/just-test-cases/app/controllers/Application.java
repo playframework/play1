@@ -95,6 +95,13 @@ public class Application extends Controller {
         Test test = (Test)Spring.getBean("test");
         renderText(test.yop());
     }
+    
+    @javax.inject.Inject
+    static Test myTest;
+    
+    public static void useSpringBeanInject() {
+        renderText(myTest.yop());
+    }
 
     public static void googleSearch(String word) {
         WS.HttpResponse response = WS.GET("http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=%s", word);

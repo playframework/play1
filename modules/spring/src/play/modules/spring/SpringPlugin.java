@@ -3,6 +3,7 @@ package play.modules.spring;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Map;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -14,9 +15,11 @@ import play.Play.Mode;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.PlayException;
+import play.inject.BeanSource;
+import play.inject.Injector;
 import play.vfs.VirtualFile;
 
-public class SpringPlugin extends PlayPlugin {
+public class SpringPlugin extends PlayPlugin implements BeanSource {
 
     public static GenericApplicationContext applicationContext;
     private long startDate = 0;
@@ -92,5 +95,16 @@ public class SpringPlugin extends PlayPlugin {
                 }
             }
         }
+        Injector.inject(this);
     }
+
+    public <T> T getBeanOfType(Class<T> clazz) {
+        Map<String,T> beans = applicationContext.getBeansOfType(clazz);
+        if(beans.size() == 0) {
+            return null;
+        }
+        return beans.values().iterator().next();
+    }
+    
+    
 }

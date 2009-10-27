@@ -20,7 +20,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import play.Logger;
+import play.Play;
+import play.PlayPlugin;
 import play.data.Upload;
 import play.data.validation.Validation;
 import play.data.binding.annotations.As;
@@ -201,7 +202,16 @@ public class Binder {
     }
 
     public static Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params) {
-        Object result = bindInternal(name, clazz, type, annotations, params, "");
+        Object result = null;
+        // Let a chance to plugins to bind this object
+        for(PlayPlugin plugin : Play.plugins) {
+            result = plugin.bind(name, clazz, type, annotations, params);
+            if(result != null) {
+                return result;
+            }
+        }
+        result = bindInternal(name, clazz, type, annotations, params, "");
+
         if (result == MISSING) {
             if (clazz.equals(boolean.class)) {
                 return false;
@@ -242,7 +252,7 @@ public class Binder {
         if (clazz.equals(String.class)) {
             return value;
         }
-        if (supportedTypes.containsKey(clazz)) {
+       if (supportedTypes.containsKey(clazz)) {
             if (value == null || value.trim().length() == 0) {
                 return null;
             }
@@ -265,6 +275,28 @@ public class Binder {
                 value = value.substring(0, value.indexOf("."));
             }
             return Integer.parseInt(value);
+        }
+        if (clazz.getName().equals("byte")) {
+            if (value == null || value.trim().length() == 0) {
+                return 0;
+            }
+            if (value.contains(".")) {
+                value = value.substring(0, value.indexOf("."));
+            }
+            Byte b = Byte.parseByte(value);
+            if(b == null) {
+                return 0;
+            }
+            return b;
+        }
+        if (clazz.equals(Byte.class)) {
+            if (value == null || value.trim().length() == 0) {
+                return null;
+            }
+            if (value.contains(".")) {
+                value = value.substring(0, value.indexOf("."));
+            }
+            return Byte.parseByte(value);
         }
         if (clazz.getName().equals("double")) {
             if (value == null || value.trim().length() == 0) {

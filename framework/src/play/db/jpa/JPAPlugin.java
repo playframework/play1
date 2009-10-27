@@ -1,18 +1,21 @@
 package play.db.jpa;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 import org.apache.log4j.Level;
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
-import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.type.Type;
 import play.Logger;
 import play.Play;
@@ -27,6 +30,27 @@ import play.utils.Utils;
 public class JPAPlugin extends PlayPlugin {
 
     public static boolean autoTxs = true;
+
+    @Override
+    public Object bind(String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations, Map<String, String[]> params) {
+        // TODO need to be more generic in order to work with JPASupport
+        if(Model.class.isAssignableFrom(clazz)) {
+            String idKey = name + ".id"; 
+            if(params.containsKey(idKey) && params.get(idKey).length > 0 && params.get(idKey)[0] != null && params.get(idKey)[0].trim().length() > 0) {
+                String id = params.get(idKey)[0];
+                try {
+                    Query query = JPA.em().createQuery("from " + clazz.getName() + " o where o.id = ?");
+                    query.setParameter(1, play.data.binding.Binder.directBind(annotations, id + "", play.db.jpa.JPASupport.findKeyType(clazz)));
+                    Object o = query.getSingleResult();
+                    return JPASupport.edit(o, name, params);
+                } catch(Exception e) {
+                    return null;
+                }
+            }
+            return JPASupport.create(clazz, name, params);
+        }
+        return super.bind(name, clazz, type, annotations, params);
+    }
 
     @Override
     public void onApplicationStart() {
