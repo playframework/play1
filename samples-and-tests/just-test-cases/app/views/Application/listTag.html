@@ -73,4 +73,28 @@
 #{/else}
 </div>
 
+<h1>i</h1>
+
+<div id="i">
+#{list a, as:'i'}
+    ${i_parity == 'even' ? '=' : '-'} ${i_index}. ${i} ${i_isLast ? '.' : ','} <br/>
+#{/list}
+</div>
+
+<h1>j</h1>
+
+<div id="j">
+#{list a}
+    ${loop_parity == 'even' ? '=' : '-'} ${loop_index}. ${loop} ${loop_isLast ? '.' : ','} <br/>
+#{/list}
+</div>
+
+<h1>k</h1>
+
+<div id="k">
+#{list 1..5}
+    ${loop_parity == 'even' ? '=' : '-'} ${loop_index}. ${loop} ${loop_isLast ? '.' : ','} <br/>
+#{/list}
+</div>
+
 xxx

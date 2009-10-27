@@ -1,0 +1,4 @@
+<error>
+    <type>${exception?.class.name}</type>
+    <message>${exception?.message?.escape()}</message>
+</error>
