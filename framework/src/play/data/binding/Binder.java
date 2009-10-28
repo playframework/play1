@@ -248,6 +248,11 @@ public class Binder {
         return false;
     }
 
+
+    public static Object directBind(Annotation[] annotations, String value, Class clazz) throws Exception {
+        return directBind(null, value, clazz);
+    }
+
     public static Object directBind(Annotation[] annotations, String value, Class clazz) throws Exception {
         if (clazz.equals(String.class)) {
             return value;
