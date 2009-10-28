@@ -29,7 +29,7 @@ public class FastTags {
      * @param template encloding template
      * @param fromLine template line number where the tag is defined
      */
-    public static void _form(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    public static void _form(Map<?,?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         ActionDefinition actionDef = (ActionDefinition) args.get("arg");
         if (actionDef == null) {
             actionDef = (ActionDefinition) args.get("action");
@@ -62,7 +62,7 @@ public class FastTags {
      * @param template encloding template
      * @param fromLine template line number where the tag is defined
      */
-    public static void _a(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    public static void _a(Map<?,?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         ActionDefinition actionDef = (ActionDefinition) args.get("arg");
         if (actionDef == null) {
             actionDef = (ActionDefinition) args.get("action");
@@ -85,7 +85,7 @@ public class FastTags {
         }
     }
 
-    public static void _ifErrors(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    public static void _ifErrors(Map<?,?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         if (Validation.hasErrors()) {
             body.call();
             TagContext.parent().data.put("_executeNextElse", false);
@@ -94,7 +94,7 @@ public class FastTags {
         }
     }
 
-    public static void _ifError(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    public static void _ifError(Map<?,?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         if (args.get("arg") == null) {
             throw new TemplateExecutionException(template.template, fromLine, "Please specify the error key", new TagInternalException("Please specify the error key"));
         }
@@ -106,7 +106,7 @@ public class FastTags {
         }
     }
 
-    public static void _errorClass(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    public static void _errorClass(Map<?,?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         if (args.get("arg") == null) {
             throw new TemplateExecutionException(template.template, fromLine, "Please specify the error key", new TagInternalException("Please specify the error key"));
         }
@@ -115,7 +115,7 @@ public class FastTags {
         }
     }
 
-    public static void _error(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    public static void _error(Map<?,?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         if (args.get("arg") == null && args.get("key") == null) {
             throw new TemplateExecutionException(template.template, fromLine, "Please specify the error key", new TagInternalException("Please specify the error key"));
         }
@@ -147,11 +147,11 @@ public class FastTags {
         return false;
     }
 
-    public static void _doLayout(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    public static void _doLayout(Map<?,?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         out.print("____%LAYOUT%____");
     }
 
-    public static void _get(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    public static void _get(Map<?,?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         Object name = args.get("arg");
         if (name == null) {
             throw new TemplateExecutionException(template.template, fromLine, "Specify a variable name", new TagInternalException("Specify a variable name"));
@@ -162,11 +162,12 @@ public class FastTags {
         }
     }
 
-    public static void _set(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    public static void _set(Map<?,?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         // Simple case : #{set title:'Yop' /}
-        for (Object p : args.keySet()) {
-            if (!p.toString().equals("arg")) {
-                Template.layoutData.get().put(p.toString(), args.get(p));
+    	for (Map.Entry<?, ?> entry : args.entrySet()) {
+    		Object key = entry.getKey();
+            if (!key.toString().equals("arg")) {
+                Template.layoutData.get().put(key, entry.getValue());
                 return;
             }
         }
@@ -182,7 +183,7 @@ public class FastTags {
         }
     }
 
-    public static void _extends(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    public static void _extends(Map<?,?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         try {
             if (!args.containsKey("arg") || args.get("arg") == null) {
                 throw new TemplateExecutionException(template.template, fromLine, "Specify a template name", new TagInternalException("Specify a template name"));
@@ -202,7 +203,7 @@ public class FastTags {
         }
     }
 
-    public static void _include(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    public static void _include(Map<?,?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         try {
             if (!args.containsKey("arg") || args.get("arg") == null) {
                 throw new TemplateExecutionException(template.template, fromLine, "Specify a template name", new TagInternalException("Specify a template name"));

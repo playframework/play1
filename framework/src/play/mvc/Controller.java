@@ -506,8 +506,9 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
                 throw new RuntimeException("PAF");
             }
             Map<String, String> mapss = new HashMap();
-            for (String key : map.keySet()) {
-                mapss.put(key, map.get(key) == null ? null : map.get(key).toString());
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+            	Object value = entry.getValue();
+                mapss.put(entry.getKey(),value == null ? null : value.toString());
             }
             Scope.Params.current().__mergeWith(mapss);
             ControllerInstrumentation.initActionCall();

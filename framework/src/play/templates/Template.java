@@ -350,8 +350,8 @@ public class Template {
             // all other vars are template-specific
             args.put("_caller", getBinding().getVariables());
             if (attrs != null) {
-                for (String key : attrs.keySet()) {
-                    args.put("_" + key, attrs.get(key));
+            	for (Map.Entry<String, Object> entry : attrs.entrySet()) {
+                    args.put("_" + entry.getKey(), entry.getValue());
                 }
             }
             args.put("_body", body);
