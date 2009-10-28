@@ -43,7 +43,7 @@ public class Utils {
             }
         }
 
-        public static Map filterMap(Map map, String keypattern) {
+        public static Map filterMap(Map<?,?> map, String keypattern) {
             try {
                 Map filtered = (Map) map.getClass().newInstance();
                 for (Map.Entry<?, ?> entry : map.entrySet()) {
