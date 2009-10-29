@@ -67,7 +67,8 @@ public class ActionInvoker {
             try {
                 Object[] ca = getActionMethod(request.action);
                 actionMethod = (Method) ca[1];
-                request.controller = ((Class) ca[0]).getName().substring(12);
+                request.controller = ((Class) ca[0]).getName().substring(12).replace("$", "");
+                request.controllerClass = ((Class) ca[0]);
                 request.actionMethod = actionMethod.getName();
                 request.action = request.controller + "." + request.actionMethod;
                 request.invokedMethod = actionMethod;
@@ -119,17 +120,15 @@ public class ActionInvoker {
                         }
                     }
                     if (!skip) {
-                        if (Modifier.isStatic(before.getModifiers())) {
-                            before.setAccessible(true);
-                            Java.invokeStatic(before, getActionMethodArgs(before));
-                        }
+                        before.setAccessible(true);
+                        invokeControllerMethod(before, getActionMethodArgs(before));
                     }
                 }
                 // Action
                 Result actionResult = null;
                 ControllerInstrumentation.initActionCall();
                 try {
-                    Java.invokeStatic(actionMethod, getActionMethodArgs(actionMethod));
+                    invokeControllerMethod(actionMethod, getActionMethodArgs(actionMethod));
                 } catch (InvocationTargetException ex) {
                     // It's a Result ? (expected)
                     if (ex.getTargetException() instanceof Result) {
@@ -139,12 +138,12 @@ public class ActionInvoker {
                         Object[] args = new Object[] { ex.getTargetException() };
                         List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
                         ControllerInstrumentation.stopActionCall();
-                        for (Method mCatch : catches) if (Modifier.isStatic(mCatch.getModifiers())) {
+                        for (Method mCatch : catches) {
                             Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
                             for (Class exception : exceptions) {
                                 if (exception.isInstance(args[0])) {
                                     mCatch.setAccessible(true);
-                                    Java.invokeStatic(mCatch, args);
+                                    invokeControllerMethod(mCatch, args);
                                     break;
                                 }
                             }
@@ -170,10 +169,8 @@ public class ActionInvoker {
                         }
                     }
                     if (!skip) {
-                        if (Modifier.isStatic(after.getModifiers())) {
-                            after.setAccessible(true);
-                            Java.invokeStatic(after, getActionMethodArgs(after));
-                        }
+                        after.setAccessible(true);
+                        invokeControllerMethod(after, getActionMethodArgs(after));
                     }
                 }
                 
@@ -244,10 +241,8 @@ public class ActionInvoker {
                             }
                         }
                         if (!skip) {
-                            if (Modifier.isStatic(aFinally.getModifiers())) {
-                                aFinally.setAccessible(true);
-                                Java.invokeStatic(aFinally, new Object[aFinally.getParameterTypes().length]);
-                            }
+                            aFinally.setAccessible(true);
+                            invokeControllerMethod(aFinally, new Object[aFinally.getParameterTypes().length]);
                         }
                     }
                 } catch(InvocationTargetException ex) {
@@ -273,6 +268,21 @@ public class ActionInvoker {
 
     }
 
+    public static void invokeControllerMethod(Method method, Object[] args) throws Exception {
+        if(Modifier.isStatic(method.getModifiers())) {
+            method.invoke(null, args);
+        } else {
+            Object instance = null;
+            try {
+                instance = method.getDeclaringClass().getDeclaredField("MODULE$").get(null);
+            } catch(Exception e) {
+                throw new ActionNotFoundException(Http.Request.current().action, e);
+            }
+            method.invoke(instance, args);
+        }
+        
+    }
+
     public static Object[] getActionMethod(String fullAction) {
         Method actionMethod = null;
         Class controllerClass = null;
@@ -283,9 +293,12 @@ public class ActionInvoker {
             String controller = fullAction.substring(0, fullAction.lastIndexOf("."));
             String action = fullAction.substring(fullAction.lastIndexOf(".") + 1);
             controllerClass = Play.classloader.getClassIgnoreCase(controller);
-            if(!ControllerSupport.class.isAssignableFrom(controllerClass)) {
-                throw new ActionNotFoundException(fullAction, new Exception("class " + controller + " does not extend play.mvc.Controller"));
-                
+            if(!ControllerSupport.class.isAssignableFrom(controllerClass)) {                
+                // Try the scala way
+                controllerClass = Play.classloader.getClassIgnoreCase(controller+"$");
+                if(!ControllerSupport.class.isAssignableFrom(controllerClass)) {
+                    throw new ActionNotFoundException(fullAction, new Exception("class " + controller + " does not extend play.mvc.Controller"));
+                }
             }
             actionMethod = Java.findActionMethod(action, controllerClass);
             if (actionMethod == null) {
