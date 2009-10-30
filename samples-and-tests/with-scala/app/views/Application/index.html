@@ -5,4 +5,4 @@
     <li>${error.key} -> ${error.message}</li>
 #{/errors}
 
-<h1>Welcome ${name} - Age is ${age} - Yop is ${yop}</h1>
+<h1>Welcome ${name ?: 'Guest'} - Age is ${age} - Yop is ${yop}</h1>

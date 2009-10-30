@@ -14,11 +14,22 @@ object Application extends ControllerObject {
     }
     
     def index(@Required name: String) {
-        val age = 59
+        val age = 59 
         var yop = 8
         yop = yop + 3
+        println(name)
         render(name, age, yop)
     }
+    
+    def goJojo() {
+        index("Jojo") 
+    }
+    
+    def helloWorld = "Hello world !"
+    
+    def hello(name: String) = if(name != null) "Hello " + name else "Hello guest"
+    
+    def nbOfUsers = User.size
     
     @After
     private def log {

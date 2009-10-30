@@ -11,6 +11,14 @@ public class ControllerWrapper extends Controller {
     public static void renderText(Object text) {
         Controller.renderText(text);
     }
+
+    public static void renderXml(String xml) {
+        Controller.renderXml(xml);
+    }
+
+    public static void renderJSON(String json) {
+        Controller.renderJSON(json);
+    }
     
     public static void renderText(CharSequence pattern, Object... args) {
         Controller.renderText(pattern, args);
@@ -34,6 +42,22 @@ public class ControllerWrapper extends Controller {
 
     public static void redirect(String action, boolean permanent, Object... args) {
         Controller.redirect(action, permanent, args);
+    }
+
+    public static void unauthorized(String realm) {
+        Controller.unauthorized(realm);
+    }
+
+    public static void notFound(String what) {
+        Controller.notFound(what);
+    }
+
+    public static void notFoundIfNull(Object o) {
+        Controller.notFoundIfNull(o);
+    }
+
+    public static void ok() {
+        Controller.ok();
     }
 
 }

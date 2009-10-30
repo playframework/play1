@@ -29,6 +29,7 @@ import play.i18n.Lang;
 import play.utils.Java;
 import play.mvc.results.NotFound;
 import play.mvc.results.Ok;
+import play.mvc.results.RenderText;
 
 /**
  * Invoke an action after an HTTP request
@@ -128,7 +129,10 @@ public class ActionInvoker {
                 Result actionResult = null;
                 ControllerInstrumentation.initActionCall();
                 try {
-                    invokeControllerMethod(actionMethod, getActionMethodArgs(actionMethod));
+                    Object o = invokeControllerMethod(actionMethod, getActionMethodArgs(actionMethod));
+                    if(o != null) {
+                        throw new InvocationTargetException(new RenderText(o.toString()));
+                    }
                 } catch (InvocationTargetException ex) {
                     // It's a Result ? (expected)
                     if (ex.getTargetException() instanceof Result) {
@@ -268,9 +272,9 @@ public class ActionInvoker {
 
     }
 
-    public static void invokeControllerMethod(Method method, Object[] args) throws Exception {
+    public static Object invokeControllerMethod(Method method, Object[] args) throws Exception {
         if(Modifier.isStatic(method.getModifiers())) {
-            method.invoke(null, args);
+            return method.invoke(null, args);
         } else {
             Object instance = null;
             try {
@@ -278,7 +282,7 @@ public class ActionInvoker {
             } catch(Exception e) {
                 throw new ActionNotFoundException(Http.Request.current().action, e);
             }
-            method.invoke(instance, args);
+            return method.invoke(instance, args);
         }
         
     }
