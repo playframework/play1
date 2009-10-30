@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Properties;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import org.apache.log4j.Level;
@@ -32,6 +31,9 @@ public class JPAPlugin extends PlayPlugin {
 
     @Override
     public Object bind(String name, Class clazz, java.lang.reflect.Type type, Map<String, String[]> params) {
+        if(!Play.configuration.getProperty("future.bindJPAObjects", "false").equals("true")) {
+            return null;
+        }
         // TODO need to be more generic in order to work with JPASupport
         if(Model.class.isAssignableFrom(clazz)) {
             String idKey = name + ".id"; 

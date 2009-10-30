@@ -223,7 +223,7 @@ public class TemplateCompiler {
             String expr = parser.getToken().trim();
             print("\tval=");
             print(expr);
-            print(";out.print(val!=null?val:'')");
+            print(";out.print(val!=null?__safe(val):'')");
             markLine(parser.getLine());
             println();
         }
@@ -284,7 +284,7 @@ public class TemplateCompiler {
             // Use inlineTag if exists
             try {
                 Method m = InlineTags.class.getDeclaredMethod("_" + tag.name, int.class, CALL.class);
-                print("play.templates.TagContext.enterTag();");
+                print("play.templates.TagContext.enterTag('"+tag.name+"');");
                 print((String)m.invoke(null, new Object[] {tagIndex, CALL.START}));
                 tag.hasBody = false;
                 markLine(parser.getLine());
@@ -344,7 +344,7 @@ public class TemplateCompiler {
                     // Use fastTag if exists
                     try {
                         FastTags.class.getDeclaredMethod("_" + tag.name, Map.class, Closure.class, PrintWriter.class, Template.ExecutableTemplate.class, int.class);
-                        print("play.templates.TagContext.enterTag();");
+                        print("play.templates.TagContext.enterTag('"+tag.name+"');");
                         print("play.templates.FastTags._" + tag.name + "(attrs" + tagIndex + ",body" + tagIndex + ", out, this, " + tag.startLine + ");");
                         print("play.templates.TagContext.exitTag();");
                     } catch (NoSuchMethodException ex) {

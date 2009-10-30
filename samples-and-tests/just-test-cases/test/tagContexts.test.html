@@ -1,0 +1,7 @@
+#{selenium 'Check the tag contexts'}
+
+	open('@{Application.tagContexts()}')
+	assertTextNotPresent('Yop')
+	assertTextPresent('[ROOT{_executeNextElse=false}, list{_executeNextElse=true}, if{}, ifnot{}, verbatim{_executeNextElse=true}, else{}]')
+
+#{/selenium}

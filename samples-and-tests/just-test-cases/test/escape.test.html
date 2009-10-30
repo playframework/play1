@@ -1,0 +1,21 @@
+#{selenium 'Test the @Before'}
+
+	open('@{Application.escapeData()}')
+	
+	// Check default (escaped)
+	assertText('default', '${'&nbsp;<i>Yop <!-- Coucou --></i>&nbsp;'.escape()}')
+	
+	// Check raw
+	assertNotText('raw', '${'&nbsp;<i>Yop <!-- Coucou --></i>&nbsp;'.escape()}')
+	assertNotText('raw', '*Coucou*')
+	assertText('raw', 'Yop')
+	
+	// Check verbatim
+	assertNotText('verbatim', '${'&nbsp;<i>Yop <!-- Coucou --></i>&nbsp;'.escape()}')
+	assertNotText('verbatim', '*Coucou*')
+	assertText('verbatim', 'Yop')
+	
+	// Check default again (escaped)
+	assertText('defaultAgain', '${'&nbsp;<i>Yop <!-- Coucou --></i>&nbsp;'.escape()}')
+
+#{/selenium}
