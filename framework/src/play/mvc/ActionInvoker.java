@@ -4,6 +4,8 @@ import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 import java.io.ByteArrayInputStream;
 
+import java.io.File;
+import java.io.InputStream;
 import play.mvc.Router.Route;
 import play.mvc.results.Result;
 import java.lang.reflect.InvocationTargetException;
@@ -26,9 +28,11 @@ import play.exceptions.ActionNotFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
+import play.libs.MimeTypes;
 import play.utils.Java;
 import play.mvc.results.NotFound;
 import play.mvc.results.Ok;
+import play.mvc.results.RenderBinary;
 import play.mvc.results.RenderText;
 
 /**
@@ -74,6 +78,7 @@ public class ActionInvoker {
                 request.action = request.controller + "." + request.actionMethod;
                 request.invokedMethod = actionMethod;
             } catch (ActionNotFoundException e) {
+                Logger.error(e, "%s action not found", e.getAction());
                 throw new NotFound(String.format("%s action not found", e.getAction()));
             }
             
@@ -93,7 +98,7 @@ public class ActionInvoker {
                 Controller.class.getDeclaredField("session").set(null, Scope.Session.current());
                 Controller.class.getDeclaredField("flash").set(null, Scope.Flash.current());
                 Controller.class.getDeclaredField("renderArgs").set(null, Scope.RenderArgs.current());
-                Controller.class.getDeclaredField("validation").set(null, Java.invokeStatic(Validation.class, "current"));
+                Controller.class.getDeclaredField("validation").set(null, Validation.current());
             }
             
             for (PlayPlugin plugin : Play.plugins) {
@@ -131,6 +136,15 @@ public class ActionInvoker {
                 try {
                     Object o = invokeControllerMethod(actionMethod, getActionMethodArgs(actionMethod));
                     if(o != null) {
+                        if(o instanceof InputStream) {
+                            Result.setContentTypeIfNotSet(response, "application/octet-stream");
+                            throw new RenderBinary((InputStream)o, null ,true);
+                        }
+                        if(o instanceof File) {
+                            Result.setContentTypeIfNotSet(response, "application/octet-stream");
+                            throw new RenderBinary((File)o);
+                        }
+                        Result.setContentTypeIfNotSet(response, MimeTypes.getContentType("x."+request.format, "text/plain"));
                         throw new InvocationTargetException(new RenderText(o.toString()));
                     }
                 } catch (InvocationTargetException ex) {

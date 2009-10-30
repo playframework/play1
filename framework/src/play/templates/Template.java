@@ -371,9 +371,6 @@ public class Template {
         }
 
         public String __safe(Object val) {
-            if(!Play.configuration.getProperty("future.escapeInTemplates", "false").equals("true")) {
-                return val.toString();
-            }
             if(val instanceof RawData) {
                 return ((RawData)val).data;
             }

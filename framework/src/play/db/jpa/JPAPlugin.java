@@ -31,9 +31,6 @@ public class JPAPlugin extends PlayPlugin {
 
     @Override
     public Object bind(String name, Class clazz, java.lang.reflect.Type type, Map<String, String[]> params) {
-        if(!Play.configuration.getProperty("future.bindJPAObjects", "false").equals("true")) {
-            return null;
-        }
         // TODO need to be more generic in order to work with JPASupport
         if(Model.class.isAssignableFrom(clazz)) {
             String idKey = name + ".id"; 

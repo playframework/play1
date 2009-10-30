@@ -1,12 +1,15 @@
 package controllers;
 
+import scala.xml._
+
 import play._;
 import play.mvc._;
 import play.data.validation._
+import play.libs._
 
 import models._;
 
-object Application extends ControllerObject {
+object Application extends Actions {
     
     @Before
     private def check {
@@ -14,6 +17,7 @@ object Application extends ControllerObject {
     }
     
     def index(@Required name: String) {
+        println(request.path)
         val age = 59 
         var yop = 8
         yop = yop + 3
@@ -25,11 +29,17 @@ object Application extends ControllerObject {
         index("Jojo") 
     }
     
-    def helloWorld = "Hello world !"
+    def api = renderXml(<items><item id="3">Yop</item></items>) 
     
-    def hello(name: String) = if(name != null) "Hello " + name else "Hello guest"
+    def yop = render("@index") 
+    
+    def helloWorld = <h1>Hello world!</h1>
+    
+    def hello(name: String) = <h1>Hello { if(name != null) name else "Guest" }!</h1>
     
     def nbOfUsers = User.size
+    
+    def captcha = Images.captcha
     
     @After
     private def log {

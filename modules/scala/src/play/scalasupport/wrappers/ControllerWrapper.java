@@ -1,5 +1,6 @@
 package play.scalasupport.wrappers;
 
+import java.io.InputStream;
 import play.mvc.Controller;
 
 public class ControllerWrapper extends Controller {
@@ -58,6 +59,10 @@ public class ControllerWrapper extends Controller {
 
     public static void ok() {
         Controller.ok();
+    }
+
+    public static void renderBinary(InputStream stream) {
+        Controller.renderBinary(stream);
     }
 
 }
