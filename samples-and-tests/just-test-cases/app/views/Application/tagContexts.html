@@ -1,0 +1,22 @@
+#{list 0..1}
+    #{if loop}
+        
+        #{ifnot 0}
+            
+            #{verbatim}
+                
+                #{if 0}
+                    Yop
+                #{/if}
+                #{else}
+                    
+                    ${play.templates.TagContext.currentStack.get()}
+                    
+                #{/else}
+                
+            #{/verbatim}
+            
+        #{/ifnot}
+        
+    #{/if}
+#{/list}

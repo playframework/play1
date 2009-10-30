@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.codehaus.groovy.control.CompilationUnit;
 import org.codehaus.groovy.control.CompilationUnit.GroovyClassOperation;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -367,6 +368,37 @@ public class Template {
 
         public Class _(String className) throws Exception {
             return Play.classloader.loadClass(className);
+        }
+
+        public String __safe(Object val) {
+            if(!Play.configuration.getProperty("future.escapeInTemplates", "false").equals("true")) {
+                return val.toString();
+            }
+            if(val instanceof RawData) {
+                return ((RawData)val).data;
+            }
+            if(!template.name.endsWith(".html") || TagContext.hasParentTag("verbatim")) {
+                return val.toString();
+            }
+            return StringEscapeUtils.escapeHtml(val.toString());
+        }
+
+        static class RawData {
+
+            public String data;
+
+            public RawData(Object val) {
+                if(val == null) {
+                    data = "";
+                } else {
+                    data = val.toString();
+                }
+            }
+
+            public String toString() {
+                return data;
+            }
+
         }
 
         static class ActionBridge extends GroovyObjectSupport {

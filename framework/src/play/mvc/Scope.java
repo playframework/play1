@@ -167,6 +167,7 @@ public class Scope {
                 throw new UnexpectedException("Corrupted HTTP session from " + Http.Request.current().remoteAddress, e);
             }
         }
+        
         Map<String, String> data = new HashMap<String, String>();        // ThreadLocal access
         public static ThreadLocal<Session> current = new ThreadLocal<Session>();
 

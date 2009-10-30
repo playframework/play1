@@ -82,7 +82,7 @@
         </h1>
         #{if play.Play.mode.name() == 'DEV'}
         <p>
-            ${exception.errorDescription}
+            ${exception.errorDescription.raw()}
         </p>
         #{/if}
         #{if play.Play.mode.name() == 'PROD'}
@@ -99,12 +99,12 @@
             to = exception.lineNumber + 5  < exception.source.size() ? exception.lineNumber + 5 : exception.source.size()-1          
         }%
         #{list items:exception.source[from..to], as:'line'}
-            ${play.utils.Utils.open(exception.sourceFile, line_index+from) ? '<a href="' + play.utils.Utils.open(exception.sourceFile, line_index+from) + '">' : ''}
+            ${play.utils.Utils.open(exception.sourceFile, line_index+from) ? ('<a href="' + play.utils.Utils.open(exception.sourceFile, line_index+from) + '">').raw() : ''}
                 <div class="line ${exception.lineNumber == line_index+from ? 'error':''}">                
                     <span class="lineNumber">${line_index+from}:</span>
-                    <pre>&nbsp;${line.escapeHtml()}</pre>                
+                    <pre>&nbsp;${line}</pre>                
                 </div>
-            ${play.utils.Utils.open(exception.sourceFile, line_index+from) ? '</a>' : ''}
+            ${play.utils.Utils.open(exception.sourceFile, line_index+from) ? '</a>'.raw() : ''}
          #{/list}
     </div>
     #{/if}
@@ -114,7 +114,7 @@
 #{/if}
 #{else}
     <div id="header" class="block">
-        <h1>${exception.message}</h1>
+        <h1>${exception.message.raw()}</h1>
     </div>
 #{/else}
 
