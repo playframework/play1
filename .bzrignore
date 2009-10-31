@@ -67,3 +67,5 @@ samples-and-tests/yabe/test-result
 samples-and-tests/yabe/tmp
 *.ser
 modules/cobertura/lib
+modules/scala/lib/play-scala.jar
+samples-and-tests/with-scala/logs

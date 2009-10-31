@@ -1017,6 +1017,7 @@ public class WS extends PlayPlugin {
         public JsonElement getJson() {
             try {
                 String json = method.getResponseBodyAsString();
+                Logger.info(json);
                 return new JsonParser().parse(json);
             } catch (Exception e) {
                 throw new RuntimeException(e);

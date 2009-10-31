@@ -48,7 +48,7 @@ import play.vfs.VirtualFile;
 /**
  * Application controller support
  */
-public abstract class Controller implements ControllerSupport, LocalVariablesSupport {
+public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * The current HTTP request

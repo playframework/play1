@@ -34,18 +34,18 @@ public class BeanWrapper {
         return wrappers.values();
     }
 
-    public Object bind(String name, Type type, Map<String, String[]> params, String prefix) throws Exception {
+    public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Annotation[] annotations) throws Exception {
         Object instance = newBeanInstance();
-        return bind(name, type, params, prefix, instance);
+        return bind(name, type, params, prefix, instance, annotations);
     }
 
-    public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Object instance) throws Exception {
+    public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Object instance, Annotation[] annotations) throws Exception {
         for (Property prop : wrappers.values()) {
             String newPrefix = prefix + "." + prop.getName();
             if (name.equals("") && prefix.equals("") && newPrefix.startsWith(".")) {
                 newPrefix = newPrefix.substring(1);
             }
-            Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), prop.getAnnotations(), params, newPrefix);
+            Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), annotations, params, newPrefix);
             if (value != Binder.MISSING) {
                 prop.setValue(instance, value);
             }

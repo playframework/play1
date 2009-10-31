@@ -26,3 +26,6 @@
 ~ -f: 
 ~ Disable the JPDA port checking and force the jpda.port value.
 ~
+~ --with module_list:
+~ Automatically enable this set of module for the newly created application
+~ For example: play new myApp --with scala,crud

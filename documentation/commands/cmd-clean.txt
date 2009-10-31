@@ -15,3 +15,7 @@
 ~ speed up application start. If you feel that the Play compiler do weird things you can try
 ~ to clean it and restart your application.
 ~
+~ Tip:
+~ ~~~~
+~ As alternative, you can use the clean,run command that do the same but automatically run the cleaned application.
+~

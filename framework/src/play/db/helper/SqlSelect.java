@@ -80,7 +80,7 @@ public class SqlSelect extends SqlQuery {
 
         private Where(SqlSelect parent) {
             this.parent = parent;
-            where = new Concat("", null).defaultValue(null);
+            where = new Concat("(", null, ")").defaultValue(null);
         }
 
         public Where param(Object obj) { parent.param(obj); return this; }
@@ -97,7 +97,7 @@ public class SqlSelect extends SqlQuery {
 
         @Override
         public String toString() {
-            return where.isEmpty() ? "" : "(" + where.toString() + ")";
+            return where.toString();
         }
     }
 

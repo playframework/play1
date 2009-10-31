@@ -1,0 +1,51 @@
+h1. Scala support
+
+The 1.1 release of play will include support for the "Scala":http://www.scala-lang.org programming language. Thanks to the flexibility of the play framework architecture, the Scala support is provided with a simple module. You just need to enable the scala module in the **conf/application.conf** file.
+
+bc. module.scala=${play.path}/modules/scala
+
+Then you can write all or parts of your play application using scala. You can of course mix it with Java.
+
+p(note). We are in very very active development on this stuff. You can try it for now as an experimental feature. Don't expect to write a complete play application in Scala right now.
+
+h2. <a>Create a new application, with Scala support</a>
+
+You can automatically create a scala ready application, by using the **--with** option of the **play new** command. Just try:
+
+bc. play new myApp --with scala
+
+The play application will be created as usual, but if you look at the **controllers** package, the **Application.java** file is now replaced by a **Application.scala** file:
+
+bc. package controllers
+ 
+import play._
+import play.mvc._
+ 
+object Application extends ControllerObject {
+    
+    def index() {
+        render()
+    }
+    
+}
+
+It is very close to the Java version of the default Application controller.
+
+Now just run the application as usual using **play run** and it will display the standard welcome page. Now just edit the **Application.scala** file to replace the **render()** call:
+
+bc. ...
+def index() {
+    renderText("Hello scala !")
+}
+...
+
+Refresh the page, and see the magic. 
+
+As always, if you make a mistake, play will just show you the error in a perfect way; (it's just more difficult now to forget the trailing semicolon)
+
+!images/scala-error!
+
+
+
+
+

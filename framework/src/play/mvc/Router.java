@@ -47,25 +47,31 @@ public class Router {
     public static void addRoute(String method, String path, String action) {
         prependRoute(method, path, action, null);
     }
-
- 
+    
     /**
      * This is used internally when reading the route file. The order the routes are added matters and
      * we want the to append the routes to the list.
      */
-    protected static void appendRoute(String method, String path, String action, String params) {
-        routes.add(getRoute(method, path, action, params));
+    protected static void appendRoute(String method, String path, String action, String params, String sourceFile, int line) {
+        routes.add(getRoute(method, path, action, params, sourceFile, line));
     }
+    
 
     public static Route getRoute(String method, String path, String action, String params) {
+        return getRoute(method, path, action, params, null, 0);
+    }
+    
+    public static Route getRoute(String method, String path, String action, String params, String sourceFile, int line) {
         Route route = new Route();
         route.method = method;
         route.path = path;
         route.path = route.path.replace("//", "/");
         route.action = action;
+        route.routesFile = sourceFile;
+        route.routesFileLine = line;
         route.addParams(params);
         route.compute();
-	return route;
+        return route;
     }
 
     /**
@@ -85,7 +91,10 @@ public class Router {
      */
     static void parse(VirtualFile routeFile, String prefix) {
         String content = TemplateLoader.load(routeFile).render(new HashMap<String, Object>());
+        String fileAbsolutePath = routeFile.getRealFile().getAbsolutePath();
+        int lineNumber = 0;
         for (String line : content.split("\n")) {
+        	lineNumber++;
             line = line.trim().replaceAll("\\s+", " ");
             if (line.length() == 0 || line.startsWith("#")) {
                 continue;
@@ -113,7 +122,7 @@ public class Router {
                     String method = matcher.group("method");
                     String path = prefix + matcher.group("path");
                     String params = matcher.group("params");
-                    appendRoute(method, path, action, params);
+                    appendRoute(method, path, action, params, fileAbsolutePath, lineNumber);
                 }                
             } else {
                 Logger.error("Invalid route definition : %s", line);
@@ -152,7 +161,7 @@ public class Router {
         }
     }
 
-    public static void route(Http.Request request) {
+    public static Route route(Http.Request request) {
         // request method may be overriden if a x-http-method-override parameter is given
         if (request.querystring != null && methodOverride.matches(request.querystring)) {
             Matcher matcher = methodOverride.matcher(request.querystring);
@@ -174,7 +183,7 @@ public class Router {
                         request.action = request.action.replace("{" + arg + "}", request.routeArgs.get(arg));
                     }
                 }
-                return;
+                return route;
             }
         }
         throw new NotFound(request.method, request.path);
@@ -370,6 +379,10 @@ public class Router {
         Pattern pattern;
         List<Arg> args = new ArrayList<Arg>();
         Map<String, String> staticArgs = new HashMap<String, String>();
+        
+		public int routesFileLine;
+		public String routesFile;		
+		
         static Pattern customRegexPattern = new Pattern("\\{([a-zA-Z_0-9]+)\\}");
         static Pattern argsPattern = new Pattern("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}");
         static Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'");

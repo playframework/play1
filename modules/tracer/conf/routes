@@ -1,0 +1,13 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+#GET		/traces									Traces.list
+#GET     /traces/{id}                            Traces.show
+#GET		/source/core/{name}						Traces.getClassSource
+#GET		/source/template/{name}					Traces.getTemplateSource
+#GET		/files									Traces.getFile
+
+# Map static resources from the /app/public folder to the /public path
+#GET     /public/                                staticDir:public

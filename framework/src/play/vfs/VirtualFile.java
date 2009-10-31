@@ -13,6 +13,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import play.Play;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
@@ -213,5 +217,31 @@ public class VirtualFile {
             }
         }
         return null;
+    }
+
+    public static VirtualFile fromRelativePath(String relativePath) {
+    	Pattern pattern = Pattern.compile("^(\\{(.+?)\\})?(.*)$");
+    	Matcher matcher = pattern.matcher(relativePath);
+    	
+    	if(matcher.matches()) {
+    		String path = matcher.group(3);
+    		String module = matcher.group(2);
+    		if(module == null || module.equals("?") || module.equals("")) {
+    			return new VirtualFile(Play.applicationPath).child(path);
+    		} else {
+    			if(module.equals("play")) {
+    				return new VirtualFile(Play.frameworkPath).child(path);
+    			}
+    			if(module.startsWith("module:")){
+    				module = module.substring("module:".length());
+    				for(Entry<String, VirtualFile> entry : Play.modules.entrySet()) {
+    					if(entry.getKey().equals(module))
+    						return entry.getValue().child(path);
+    				}
+    			}
+    		}
+    	}
+    	
+    	return null;
     }
 }

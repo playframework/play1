@@ -4,6 +4,7 @@ import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 import java.io.ByteArrayInputStream;
 import java.lang.annotation.Annotation;
+import play.mvc.Router.Route;
 import play.mvc.results.Result;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import java.util.Map;
-import org.apache.commons.collections.MapUtils;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -55,7 +55,10 @@ public class ActionInvoker {
                 for (PlayPlugin plugin : Play.plugins) {
                     plugin.routeRequest(request);
                 }
-                Router.route(request);
+                Route route = Router.route(request);
+                for (PlayPlugin plugin : Play.plugins) {
+                	plugin.onRequestRouting(route);
+                }
             }
             request.resolveFormat();
 
@@ -99,6 +102,9 @@ public class ActionInvoker {
             monitor = MonitorFactory.start(request.action+"()");
             
             // 5. Invoke the action
+
+            // There is a difference between a get and a post when binding data. The get does not care about validation while
+            // the post do.
             try {
                 // @Before
                 List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);

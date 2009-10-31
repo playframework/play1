@@ -12,6 +12,14 @@ public class SqlUnion extends SqlQuery {
         limit = new Concat("LIMIT ", null);
     }
 
+    public SqlUnion(SqlUnion src) {
+        union = new Concat(src.union);
+        orderBy = new Concat(src.orderBy);
+        limit = new Concat(src.limit);
+
+        params.addAll(src.getParams());
+    }
+
     @Override public SqlUnion param(Object obj) { super.param(obj); return this; }
     @Override public SqlUnion params(Object ... objs) { super.params(objs); return this; }
 

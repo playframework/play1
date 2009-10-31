@@ -1,8 +1,15 @@
 h1. Play framework documentation
 
-Welcome to the play framework documentation. This documentation is intended for the *1.0 release* and may significantly differs from previous versions of the framework. 
+Welcome to the play framework documentation. This documentation is intended for the *1.1 release* and may significantly differs from previous versions of the framework. 
 
-p(note). This is a work in progress, feel free to ask any question not covered into these documents or report any error. You can contribute to the documentation the "same way you can contribute code":faq.
+p(note). The 1.1 branch is in active devlopment.
+
+h2. <a name="a">Hot stuff</a>
+
+We will describe here the new features progress
+
+# "Now the future -- supporting Scala":scala
+# "Some functional programming techniques, brought to Java":lambdaj
 
 
 h2. <a name="started">Getting started</a>

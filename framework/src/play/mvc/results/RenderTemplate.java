@@ -12,7 +12,7 @@ import play.templates.Template;
  */
 public class RenderTemplate extends Result {
     
-    private Template template;
+    public Template template;
     private String content;
     Map<String,Object> args;
     

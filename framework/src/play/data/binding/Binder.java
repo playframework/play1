@@ -55,7 +55,7 @@ public class Binder {
         try {
             if (isComposite(name + prefix, params.keySet())) {
                 BeanWrapper beanWrapper = getBeanWrapper(clazz);
-                return beanWrapper.bind(name, type, params, prefix);
+                return beanWrapper.bind(name, type, params, prefix, annotations);
             }
             String[] value = params.get(name + prefix);
 
@@ -115,7 +115,7 @@ public class Binder {
                         if (oKey != MISSING) {
                             if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
                                 BeanWrapper beanWrapper = getBeanWrapper(valueClass);
-                                Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]");
+                                Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]", annotations);
                                 r.put(oKey, oValue);
                             } else {
                                 tP = new HashMap();
@@ -163,7 +163,7 @@ public class Binder {
                                 }
                                 if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
                                     BeanWrapper beanWrapper = getBeanWrapper(componentClass);
-                                    Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]");
+                                    Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]", annotations);
                                     ((List) r).set(key, oValue);
                                 } else {
                                     Map tP = new HashMap();
@@ -249,7 +249,7 @@ public class Binder {
     }
 
 
-    public static Object directBind(Annotation[] annotations, String value, Class clazz) throws Exception {
+    public static Object directBind(String value, Class clazz) throws Exception {
         return directBind(null, value, clazz);
     }
 
@@ -257,18 +257,20 @@ public class Binder {
         if (clazz.equals(String.class)) {
             return value;
         }
-      
-       for (Annotation annotation : annotations) {
-           if (annotation.getClass().equals(As.class)) {
-                Class<? extends SupportedType> toInstanciate = ((As)annotation).implementation();
-                if (!(toInstanciate.equals(As.DEFAULT.class))) {
-                    // Instanciate the binder
-                    SupportedType myInstance = toInstanciate.newInstance();
-                    return myInstance.bind(annotations, value);
-                }
+
+       if (annotations != null) {
+           for (Annotation annotation : annotations) {
+               if (annotation.getClass().equals(As.class)) {
+                    Class<? extends SupportedType> toInstanciate = ((As)annotation).implementation();
+                    if (!(toInstanciate.equals(As.DEFAULT.class))) {
+                        // Instanciate the binder
+                        SupportedType myInstance = toInstanciate.newInstance();
+                        return myInstance.bind(annotations, value);
+                    }
+               }
            }
        }
-
+        
        if (supportedTypes.containsKey(clazz)) {
             if (value == null || value.trim().length() == 0) {
                 return null;
