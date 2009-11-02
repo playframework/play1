@@ -37,6 +37,7 @@ def readConf(key):
 		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
 			if line.startswith('%' + play_id + '.' + key + "="):
 				return line[line.find('=')+1:].strip()
+		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
 			if line.startswith(key + "="):
 				return line[line.find('=')+1:].strip()
 	return ''
@@ -45,9 +46,10 @@ def readConfs(key):
 	result = []
 	if application_path:
 		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
-			if line.startswith('%' + play_id + '.' + key):
-				result.append(line[line.find('=')+1:].strip())
 			if line.startswith(key):
+				result.append(line[line.find('=')+1:].strip())
+		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
+			if line.startswith('%' + play_id + '.' + key):
 				result.append(line[line.find('=')+1:].strip())
 	return result
 
