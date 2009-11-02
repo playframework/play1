@@ -313,8 +313,7 @@ public class HttpHandler implements IoHandler {
             // Flush some cookies
             try {
                 Map<String, Http.Cookie> cookies = Response.current().cookies;
-                for (String key : cookies.keySet()) {
-                    Http.Cookie cookie = cookies.get(key);
+                for (Http.Cookie cookie : cookies.values()) {
                     if (cookie.sendOnError) {
                         DefaultCookie c = new DefaultCookie(cookie.name, cookie.value);
                         c.setSecure(cookie.secure);
@@ -491,16 +490,15 @@ public class HttpHandler implements IoHandler {
         }
         minaResponse.setStatus(HttpResponseStatus.forId(response.status));
         Map<String, Http.Header> headers = response.headers;
-        for (String key : headers.keySet()) {
-            Http.Header hd = headers.get((key));
+        for (Map.Entry<String, Http.Header> entry : headers.entrySet()) {
+            Http.Header hd = entry.getValue();
             for (String value : hd.values) {
-                minaResponse.addHeader(key, value);
+                minaResponse.addHeader(entry.getKey(), value);
             }
         }
 
         Map<String, Http.Cookie> cookies = response.cookies;
-        for (String key : cookies.keySet()) {
-            Http.Cookie cookie = cookies.get(key);
+        for (Http.Cookie cookie : cookies.values()) {
             DefaultCookie c = new DefaultCookie(cookie.name, cookie.value);
             c.setSecure(cookie.secure);
             c.setPath(cookie.path);

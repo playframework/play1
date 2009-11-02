@@ -43,12 +43,13 @@ public class Utils {
             }
         }
 
-        public static Map filterMap(Map map, String keypattern) {
+        public static Map filterMap(Map<?,?> map, String keypattern) {
             try {
                 Map filtered = (Map) map.getClass().newInstance();
-                for (Object key : map.keySet()) {
+                for (Map.Entry<?, ?> entry : map.entrySet()) {
+                	Object key = entry.getKey();
                     if (key.toString().matches(keypattern)) {
-                        filtered.put(key, map.get(key));
+                        filtered.put(key, entry.getValue());
                     }
                 }
                 return filtered;

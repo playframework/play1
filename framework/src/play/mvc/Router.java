@@ -284,19 +284,21 @@ public class Router {
                         if (path.endsWith("/?")) {
                             path = path.substring(0, path.length() - 2);
                         }
-                        for (String key : args.keySet()) {
-                            if (inPathArgs.contains(key) && args.get(key) != null) {
-                                if (List.class.isAssignableFrom(args.get(key).getClass())) {
-                                    List<Object> vals = (List<Object>) args.get(key);
+                        for (Map.Entry<String, Object> entry : args.entrySet()) {
+                        	String key = entry.getKey();
+                        	Object value = entry.getValue();
+                            if (inPathArgs.contains(key) && value != null) {
+                                if (List.class.isAssignableFrom(value.getClass())) {
+                                    List<Object> vals = (List<Object>) value;
                                     path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", vals.get(0) + "");
                                 } else {
-                                    path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", args.get(key) + "");
+                                    path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value + "");
                                 }
                             } else if (route.staticArgs.containsKey(key)) {
                                 // Do nothing -> The key is static
-                            } else if (args.get(key) != null) {
-                                if (List.class.isAssignableFrom(args.get(key).getClass())) {
-                                    List<Object> vals = (List<Object>) args.get(key);
+                            } else if (value != null) {
+                                if (List.class.isAssignableFrom(value.getClass())) {
+                                    List<Object> vals = (List<Object>) value;
                                     for (Object object : vals) {
                                         try {
                                             queryString.append(URLEncoder.encode(key, "utf-8"));
@@ -310,7 +312,7 @@ public class Router {
                                     try {
                                         queryString.append(URLEncoder.encode(key, "utf-8"));
                                         queryString.append("=");
-                                        queryString.append(URLEncoder.encode(args.get(key) + "", "utf-8"));
+                                        queryString.append(URLEncoder.encode(value + "", "utf-8"));
                                         queryString.append("&");
                                     } catch (UnsupportedEncodingException ex) {
                                     }
