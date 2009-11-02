@@ -161,7 +161,11 @@ public class FastTags {
         }
         Object value = Template.layoutData.get().get(name);
         if (value != null) {
-            out.print(Template.layoutData.get().get(name));
+            out.print(value);
+        } else {
+            if(body != null) {
+                out.print(JavaExtensions.toString(body));
+            }
         }
     }
 
