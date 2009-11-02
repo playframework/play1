@@ -7,6 +7,11 @@
 
   <display-name>Play! (%APPLICATION_NAME%)</display-name>
   
+  <context-param>
+    <param-name>play.id</param-name>
+    <param-value>%PLAY_ID%</param-value>
+  </context-param>
+  
   <listener>
       <listener-class>play.server.ServletWrapper</listener-class>
   </listener>

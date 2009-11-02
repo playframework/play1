@@ -450,6 +450,7 @@ try:
 		shutil.copyfile(os.path.join(play_base, 'resources/war/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
 		application_name = readConf('application.name')
 		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%APPLICATION_NAME%', application_name)
+		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%PLAY_ID%', play_id)
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/application')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/application'))
 		shutil.copytree(application_path, os.path.join(war_path, 'WEB-INF/application'))
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/application/war')):

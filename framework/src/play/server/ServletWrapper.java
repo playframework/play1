@@ -49,7 +49,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     public void contextInitialized(ServletContextEvent e) {
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
-        Play.init(root, System.getProperty("play.id", ""));
+        Play.init(root, e.getServletContext().getInitParameter("play.id"));
         // Reload the rules, but this time with the context. Not really efficient through...
         Router.load(e.getServletContext().getContextPath());
     }
