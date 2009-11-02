@@ -101,7 +101,8 @@ try:
 	if os.path.exists(id_file):
 		play_id = open(id_file).readline().strip()
 	else:
-		play_id = ''
+		play_id = ''	
+	
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Display logo
 	print r"~        _            _ "
@@ -120,21 +121,6 @@ try:
 
 	print "~ play! %s, http://www.playframework.org" % (open(play_version_file).readline().strip())
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command?
-	if len(sys.argv) > 1:
-		play_command = sys.argv[1]
-	else:
-		play_command = 'none'
-
-	# Override ID
-	if play_command == 'test' or play_command == 'auto-test':
-		play_id = 'test'
-
-	if play_id:
-		print "~ framework ID is %s" % play_id
-	print "~"
-
-
 	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the application?
 	application_path = None
 	remaining_args = []
@@ -149,6 +135,26 @@ try:
 			application_path = os.path.normpath(os.path.abspath(sys.argv[2]))
 			remaining_args = sys.argv[3:]
 
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command?
+	if len(sys.argv) > 1:
+		play_command = sys.argv[1]
+	else:
+		play_command = 'none'
+
+			
+	# ~~~~~~~~~~~~~~~~~ Override id
+	for a in remaining_args:
+		if a.find('--id=') == 0:
+			play_id = a[5:]
+
+	if play_command == 'test' or play_command == 'auto-test':
+		play_id = 'test'
+
+
+	if play_id:
+		print "~ framework ID is %s" % play_id
+	print "~"
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Check if it's a valid application
 	def check_application():
@@ -247,6 +253,9 @@ try:
 		else:
 			java_path = os.path.normpath("%s/bin/java" % os.environ['JAVA_HOME'])
 
+		for a in remaining_args:
+			if a.find('--') == 0:
+				remaining_args.remove(a)
 
 		# ~~~~~~~~~~~~~~~~~~~~~~ Read some configuration from conf/application.conf
 		java_args = remaining_args[:]
@@ -512,9 +521,6 @@ try:
 		if remaining_args.count('-f') == 1:
 			disable_check_jpda = True
 			remaining_args.remove('-f')
-		for a in remaining_args:
-			if a.find('--with') == 0:
-				remaining_args.remove(a)
 		do_java()
 		print "~ Ctrl+C to stop"
 		print "~ "

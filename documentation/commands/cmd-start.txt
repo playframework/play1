@@ -23,3 +23,7 @@
 ~ This way to run an application is aimed to be used on production servers. In development mode, prefer the 'run'
 ~ command that run the application in foreground mode.
 ~
+~ Options:
+~ ~~~~~~~~~
+~ --id={fwk_id}:
+~ Use this id to run the application (override the default framework id)

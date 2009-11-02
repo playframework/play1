@@ -22,3 +22,7 @@
 ~ The PID of the created Java process is written to the server.pid file.
 ~ The System.out stream is redirected to the logs/system.out file.
 ~
+~ Options:
+~ ~~~~~~~~~
+~ --id={fwk_id}:
+~ Use this id to run the application (override the default framework id)
