@@ -11,6 +11,7 @@ public class YAMLException extends PlayException implements SourceAttachment {
     VirtualFile yaml;
 
     public YAMLException(ScannerException e, VirtualFile yaml) {
+        super(e.getMessage() + " (in file " + yaml.relativePath() + " line " + (e.getProblemMark().getLine() + 1) + ", column " + (e.getProblemMark().getColumn() + 1) + ")", e);
         this.e = e;
         this.yaml = yaml;
     }
@@ -29,7 +30,7 @@ public class YAMLException extends PlayException implements SourceAttachment {
     }
 
     public Integer getLineNumber() {
-        return e.getProblemMark().getLine();
+        return e.getProblemMark().getLine() + 1;
     }
 
     public List<String> getSource() {
