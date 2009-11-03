@@ -416,7 +416,7 @@ public class WS extends PlayPlugin {
                 }
             }
 
-            postMethod.get().setRequestBody((NameValuePair[]) nvps.toArray());
+            postMethod.get().setRequestBody((NameValuePair[]) nvps.toArray(new NameValuePair[nvps.size()]));
             httpClient.executeMethod(null, postMethod.get(), states.get());
             return new HttpResponse(postMethod.get());
         } catch (Exception e) {
