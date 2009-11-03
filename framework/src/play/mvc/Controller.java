@@ -89,7 +89,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
 
     /**
      * Return a 200 OK text/plain response
-     * @param text The response content to be formatted (with String.format)
+     * @param pattern The response content to be formatted (with String.format)
      * @param args Args for String.format
      */
     protected static void renderText(CharSequence pattern, Object... args) {
@@ -269,7 +269,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
 
     /**
      * Send a 302 redirect response.
-     * @param url The Location to redirect
+     * @param file The Location to redirect
      */
     protected static void redirectToStatic(String file) {
         try {
@@ -390,7 +390,6 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
 
     /**
      * Render the corresponding template
-     * @param templateName The template name
      * @param args The template data
      */
     protected static void render(Object... args) {
@@ -453,7 +452,6 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
 
     /**
      * Retrieve annotation for the action method
-     * @param clazz The annotation class
      * @return Annotation object or null if not found
      */
     protected static Class getControllerClass() {
