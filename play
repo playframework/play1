@@ -37,6 +37,7 @@ def readConf(key):
 		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
 			if line.startswith('%' + play_id + '.' + key + "="):
 				return line[line.find('=')+1:].strip()
+		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
 			if line.startswith(key + "="):
 				return line[line.find('=')+1:].strip()
 	return ''
@@ -45,9 +46,10 @@ def readConfs(key):
 	result = []
 	if application_path:
 		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
-			if line.startswith('%' + play_id + '.' + key):
-				result.append(line[line.find('=')+1:].strip())
 			if line.startswith(key):
+				result.append(line[line.find('=')+1:].strip())
+		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
+			if line.startswith('%' + play_id + '.' + key):
 				result.append(line[line.find('=')+1:].strip())
 	return result
 
@@ -101,7 +103,8 @@ try:
 	if os.path.exists(id_file):
 		play_id = open(id_file).readline().strip()
 	else:
-		play_id = ''
+		play_id = ''	
+	
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Display logo
 	print r"~        _            _ "
@@ -120,21 +123,6 @@ try:
 
 	print "~ play! %s, http://www.playframework.org" % (open(play_version_file).readline().strip())
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command?
-	if len(sys.argv) > 1:
-		play_command = sys.argv[1]
-	else:
-		play_command = 'none'
-
-	# Override ID
-	if play_command == 'test' or play_command == 'auto-test':
-		play_id = 'test'
-
-	if play_id:
-		print "~ framework ID is %s" % play_id
-	print "~"
-
-
 	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the application?
 	application_path = None
 	remaining_args = []
@@ -149,6 +137,26 @@ try:
 			application_path = os.path.normpath(os.path.abspath(sys.argv[2]))
 			remaining_args = sys.argv[3:]
 
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command?
+	if len(sys.argv) > 1:
+		play_command = sys.argv[1]
+	else:
+		play_command = 'none'
+
+			
+	# ~~~~~~~~~~~~~~~~~ Override id
+	for a in remaining_args:
+		if a.find('--id=') == 0:
+			play_id = a[5:]
+
+	if play_command == 'test' or play_command == 'auto-test':
+		play_id = 'test'
+
+
+	if play_id:
+		print "~ framework ID is %s" % play_id
+	print "~"
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Check if it's a valid application
 	def check_application():
@@ -247,6 +255,9 @@ try:
 		else:
 			java_path = os.path.normpath("%s/bin/java" % os.environ['JAVA_HOME'])
 
+		for a in remaining_args:
+			if a.find('--') == 0:
+				remaining_args.remove(a)
 
 		# ~~~~~~~~~~~~~~~~~~~~~~ Read some configuration from conf/application.conf
 		java_args = remaining_args[:]
@@ -448,6 +459,7 @@ try:
 		shutil.copyfile(os.path.join(play_base, 'resources/war/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
 		application_name = readConf('application.name')
 		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%APPLICATION_NAME%', application_name)
+		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%PLAY_ID%', play_id)
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/application')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/application'))
 		shutil.copytree(application_path, os.path.join(war_path, 'WEB-INF/application'))
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/application/war')):
@@ -521,9 +533,6 @@ try:
 		if remaining_args.count('-f') == 1:
 			disable_check_jpda = True
 			remaining_args.remove('-f')
-		for a in remaining_args:
-			if a.find('--with') == 0:
-				remaining_args.remove(a)
 		do_java()
 		print "~ Ctrl+C to stop"
 		print "~ "
@@ -570,7 +579,7 @@ try:
 				secret_key = readConf('application.secret')
 		
 		import hmac
-		import sha
+		from hashlib import sha1 as sha
 		
 		hm = hmac.new(secret_key, '@status', sha)
 		authorization = hm.hexdigest()
@@ -878,7 +887,7 @@ try:
 			for module in modules:
 				lXML += '<link><name>%s</name><type>2</type><location>%s</location></link>' % (os.path.basename(module), os.path.join(module, 'app').replace('\\', '/'))
 				cXML += '<classpathentry kind="src" path="%s"/>' % (os.path.basename(module))
-			replaceAll(dotProject, r'%LINKS%', '<linkedResources>%s</linkedResources>' % lXML)
+			replaceAll(dotProject, r'%LINKS%', '<xlinkedResources>%s</linkedResources>' % lXML)
 			replaceAll(dotClasspath, r'%MODULES%', cXML)
 		else:
 			replaceAll(dotProject, r'%LINKS%', '')

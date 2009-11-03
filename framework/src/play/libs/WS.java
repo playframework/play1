@@ -256,11 +256,11 @@ public class WS extends PlayPlugin {
      */
     public static HttpResponse GET(String url, Map<String, String> params) {
         StringBuffer sb = new StringBuffer(10);
-        for (String key : params.keySet()) {
+        for (Map.Entry<String, String> entry : params.entrySet()) {
             if (sb.length() > 0) {
                 sb.append("&");
             }
-            sb.append(key + "=" + encode(params.get(key)));
+            sb.append(entry.getKey() + "=" + encode(entry.getValue()));
         }
         return GET(sb.toString());
     }
@@ -285,8 +285,8 @@ public class WS extends PlayPlugin {
         getMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-                for (String key : headers.keySet()) {
-                    getMethod.get().addRequestHeader(key, headers.get(key) + "");
+            	for (Map.Entry<String, Object> entry : headers.entrySet()) {
+                    getMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
             httpClient.executeMethod(null, getMethod.get(), states.get());
@@ -340,8 +340,8 @@ public class WS extends PlayPlugin {
         postMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-                for (String key : headers.keySet()) {
-                    postMethod.get().addRequestHeader(key, headers.get(key) + "");
+            	for (Map.Entry<String, String> entry : headers.entrySet()) {
+                    postMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
             if (mimeType != null) {
@@ -393,31 +393,30 @@ public class WS extends PlayPlugin {
         postMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-                for (String key : headers.keySet()) {
-                    postMethod.get().addRequestHeader(key, headers.get(key) + "");
+            	for (Map.Entry<String, Object> entry : headers.entrySet()) {
+                    postMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
 
             postMethod.get().addRequestHeader("content-type", "application/x-www-form-urlencoded");
 
             ArrayList<NameValuePair> nvps = new ArrayList<NameValuePair>();
-            Set<String> keySet = parameters.keySet();
-            for (String key : keySet) {
-                Object value = parameters.get(key);
+            for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+                Object value = entry.getValue();
                 if (value instanceof Collection) {
                     for (Object v : (Collection) value) {
                         NameValuePair nvp = new NameValuePair();
-                        nvp.setName(key);
+                        nvp.setName(entry.getKey());
                         nvp.setValue(v.toString());
                     }
                 } else {
                     NameValuePair nvp = new NameValuePair();
-                    nvp.setName(key);
+                    nvp.setName(entry.getKey());
                     nvp.setValue(value.toString());
                 }
             }
 
-            postMethod.get().setRequestBody((NameValuePair[]) nvps.toArray());
+            postMethod.get().setRequestBody((NameValuePair[]) nvps.toArray(new NameValuePair[nvps.size()]));
             httpClient.executeMethod(null, postMethod.get(), states.get());
             return new HttpResponse(postMethod.get());
         } catch (Exception e) {
@@ -453,8 +452,8 @@ public class WS extends PlayPlugin {
         postMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-                for (String key : headers.keySet()) {
-                    postMethod.get().addRequestHeader(key, headers.get(key) + "");
+            	for (Map.Entry<String, Object> entry : headers.entrySet()) {
+                    postMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
 
@@ -481,7 +480,6 @@ public class WS extends PlayPlugin {
      * Make a DELETE request
      * @param headers extra request headers
      * @param url resource URL
-     * @param params query parameters
      * @return server response {@link HttpResponse}
      * @deprecated Use WS.url().headers().delete() instead.
      */
@@ -493,8 +491,8 @@ public class WS extends PlayPlugin {
         deleteMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-                for (String key : headers.keySet()) {
-                    deleteMethod.get().addRequestHeader(key, headers.get(key) + "");
+            	for (Map.Entry<String, String> entry : headers.entrySet()) {
+                    deleteMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
 
@@ -533,8 +531,8 @@ public class WS extends PlayPlugin {
         headMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-                for (String key : headers.keySet()) {
-                    headMethod.get().addRequestHeader(key, headers.get(key) + "");
+            	for (Map.Entry<String, String> entry : headers.entrySet()) {
+                    headMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
             httpClient.executeMethod(null, headMethod.get(), states.get());
@@ -572,8 +570,8 @@ public class WS extends PlayPlugin {
         traceMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-                for (String key : headers.keySet()) {
-                    traceMethod.get().addRequestHeader(key, headers.get(key) + "");
+            	for (Map.Entry<String, String> entry : headers.entrySet()) {
+                    traceMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
             httpClient.executeMethod(null, traceMethod.get(), states.get());
@@ -611,8 +609,8 @@ public class WS extends PlayPlugin {
         optionsMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-                for (String key : headers.keySet()) {
-                    optionsMethod.get().addRequestHeader(key, headers.get(key) + "");
+            	for (Map.Entry<String, String> entry : headers.entrySet()) {
+                    optionsMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
             httpClient.executeMethod(null, optionsMethod.get(), states.get());
@@ -765,7 +763,7 @@ public class WS extends PlayPlugin {
          * Add a header to the request
          * @param name header name
          * @param value header value
-         * @return
+         * @return the WSRequest for chaining.
          */
         public WSRequest setHeader (String name, String value) {
             this.headers.put(name,value);
@@ -776,7 +774,7 @@ public class WS extends PlayPlugin {
          * Add a parameter to the request
          * @param name parameter name
          * @param value parameter value
-         * @return
+         * @return the WSRequest for chaining.
          */
         public WSRequest setParameter (String name, String value) {
             this.parameters.put(name,value);
@@ -933,7 +931,7 @@ public class WS extends PlayPlugin {
 
         /**
          * the HTTP status code
-         * @return 
+         * @return the status code of the http response
          */
         public Integer getStatus() {
             return this.method.getStatusCode();
@@ -941,6 +939,7 @@ public class WS extends PlayPlugin {
 
         /**
          * The http response content type
+         * @return the content type of the http response
          */
         public String getContentType() {
             return method.getResponseHeader("content-type").getValue();
@@ -986,7 +985,7 @@ public class WS extends PlayPlugin {
 
         /**
          * get the response body as a string
-         * @return
+         * @return the body of the http response
          */
         public String getString() {
             try {
@@ -1011,7 +1010,7 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * get the reponse body as a {@link JSONObject}
+         * get the response body as a {@link com.google.gson.JSONObject}
          * @return the json response
          */
         public JsonElement getJson() {

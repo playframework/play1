@@ -18,3 +18,8 @@
 ~ ~~~~
 ~ As alternative, you can use the new,run command that do the same but automatically run the created application.
 ~
+~ Options:
+~ ~~~~~~~~
+~ --with module_list:
+~ Automatically enable this set of module for the newly created application
+~ For example: play new myApp --with scala,crud`

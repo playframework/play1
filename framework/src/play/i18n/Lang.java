@@ -41,7 +41,7 @@ public class Lang {
      */
     public static void change(String locale) {
         if (set(locale)) {
-            Response.current().setCookie("PLAY_LANG", locale);
+            Response.current().setCookie(Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG"), locale);
         }
     }
 
@@ -56,9 +56,10 @@ public class Lang {
      */
     public static void resolvefrom(Request request) {
         // Check a cookie
-        if (request.cookies.containsKey("PLAY_LANG")) {
-            if (!set(request.cookies.get("PLAY_LANG").value)) {
-                Response.current().setCookie("PLAY_LANG", "");
+        String cn = Play.configuration.getProperty("application.lang.cookie", "PLAY_LANG");
+        if (request.cookies.containsKey(cn)) {
+            if (!set(request.cookies.get(cn).value)) {
+                Response.current().setCookie(cn, "");
             }
             return;
         }

@@ -89,7 +89,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Return a 200 OK text/plain response
-     * @param text The response content to be formatted (with String.format)
+     * @param pattern The response content to be formatted (with String.format)
      * @param args Args for String.format
      */
     protected static void renderText(CharSequence pattern, Object... args) {
@@ -269,7 +269,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Send a 302 redirect response.
-     * @param url The Location to redirect
+     * @param file The Location to redirect
      */
     protected static void redirectToStatic(String file) {
         try {
@@ -390,7 +390,6 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Render the corresponding template
-     * @param templateName The template name
      * @param args The template data
      */
     protected static void render(Object... args) {
@@ -453,7 +452,6 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Retrieve annotation for the action method
-     * @param clazz The annotation class
      * @return Annotation object or null if not found
      */
     protected static Class getControllerClass() {
@@ -506,8 +504,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
                 throw new RuntimeException("PAF");
             }
             Map<String, String> mapss = new HashMap();
-            for (String key : map.keySet()) {
-                mapss.put(key, map.get(key) == null ? null : map.get(key).toString());
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+            	Object value = entry.getValue();
+                mapss.put(entry.getKey(),value == null ? null : value.toString());
             }
             Scope.Params.current().__mergeWith(mapss);
             ControllerInstrumentation.initActionCall();
