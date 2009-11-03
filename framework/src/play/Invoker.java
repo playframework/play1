@@ -144,7 +144,7 @@ public class Invoker {
 
         /**
          * The request is suspended
-         * @param timeout
+         * @param suspendRequest
          */
         public void suspend(Suspend suspendRequest) {
             if (suspendRequest.task != null) {

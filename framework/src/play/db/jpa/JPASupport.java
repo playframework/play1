@@ -418,7 +418,7 @@ public class JPASupport implements Serializable {
     }
 
     /**
-     * JPASupport instances a and b are equals if either <strong>a == b</strong> or a and b have same </strong>{@link #id id} and class</strong>
+     * JPASupport instances a and b are equals if either <strong>a == b</strong> or a and b have same </strong>{@link #key key} and class</strong>
      * @param other 
      * @return true if equality condition above is verified
      */
@@ -567,9 +567,9 @@ public class JPASupport implements Serializable {
 
         /**
          * Retrieve a page of result
-         * @param from Page number (start at 1)
+         * @param page Page number (start at 1)
          * @param length (page length)
-         * @return A list of entities
+         * @return a list of entities
          */
         public <T> List<T> fetch(int page, int length) {
             return page(page, length);

@@ -480,7 +480,6 @@ public class WS extends PlayPlugin {
      * Make a DELETE request
      * @param headers extra request headers
      * @param url resource URL
-     * @param params query parameters
      * @return server response {@link HttpResponse}
      * @deprecated Use WS.url().headers().delete() instead.
      */
@@ -764,7 +763,7 @@ public class WS extends PlayPlugin {
          * Add a header to the request
          * @param name header name
          * @param value header value
-         * @return
+         * @return the WSRequest for chaining.
          */
         public WSRequest setHeader (String name, String value) {
             this.headers.put(name,value);
@@ -775,7 +774,7 @@ public class WS extends PlayPlugin {
          * Add a parameter to the request
          * @param name parameter name
          * @param value parameter value
-         * @return
+         * @return the WSRequest for chaining.
          */
         public WSRequest setParameter (String name, String value) {
             this.parameters.put(name,value);
@@ -932,7 +931,7 @@ public class WS extends PlayPlugin {
 
         /**
          * the HTTP status code
-         * @return 
+         * @return the status code of the http response
          */
         public Integer getStatus() {
             return this.method.getStatusCode();
@@ -940,6 +939,7 @@ public class WS extends PlayPlugin {
 
         /**
          * The http response content type
+         * @return the content type of the http response
          */
         public String getContentType() {
             return method.getResponseHeader("content-type").getValue();
@@ -985,7 +985,7 @@ public class WS extends PlayPlugin {
 
         /**
          * get the response body as a string
-         * @return
+         * @return the body of the http response
          */
         public String getString() {
             try {
@@ -1010,7 +1010,7 @@ public class WS extends PlayPlugin {
         }
 
         /**
-         * get the reponse body as a {@link JSONObject}
+         * get the response body as a {@link com.google.gson.JSONObject}
          * @return the json response
          */
         public JsonElement getJson() {

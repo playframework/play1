@@ -232,10 +232,8 @@ public class MultipartStream {
     // ----------------------------------------------------------- Constructors
     /**
      * Creates a new instance.
-     * @deprecated Use {@link #MultipartStream(InputStream, byte[],
-     * org.apache.commons.fileupload.MultipartStream.ProgressNotifier)},
-     * or {@link #MultipartStream(InputStream, byte[], int,
-     * org.apache.commons.fileupload.MultipartStream.ProgressNotifier)}
+     * @deprecated Use {@link #MultipartStream(InputStream, byte[], ProgressNotifier)},
+     * or {@link #MultipartStream(InputStream, byte[], int, ProgressNotifier)}
      */
     public MultipartStream() {
         this(null, null, null);
@@ -256,8 +254,7 @@ public class MultipartStream {
      * @param bufSize  The size of the buffer to be used, in bytes.
      *
      * @see #MultipartStream(InputStream, byte[], ProgressNotifier)
-     * @deprecated Use {@link #MultipartStream(InputStream, byte[], int,
-     *  org.apache.commons.fileupload.MultipartStream.ProgressNotifier)}.
+     * @deprecated Use {@link #MultipartStream(InputStream, byte[], int, ProgressNotifier)}.
      */
     public MultipartStream(InputStream input, byte[] boundary, int bufSize) {
         this(input, boundary, bufSize, null);
