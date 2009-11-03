@@ -8,6 +8,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +64,13 @@ public class JPASupport implements Serializable {
             BeanWrapper bw = new BeanWrapper(o.getClass());
             bw.bind(name, o.getClass(), params, "", o);
             // relations
-            for (Field field : o.getClass().getDeclaredFields()) {
+            Set<Field> fields = new HashSet<Field>();
+            Class clazz = o.getClass();
+            while (!clazz.equals(JPASupport.class)) {
+                Collections.addAll(fields, clazz.getDeclaredFields());
+                clazz = clazz.getSuperclass();
+            }
+            for (Field field : fields) {
                 boolean isEntity = false;
                 String relation = null;
                 boolean multiple = false;
