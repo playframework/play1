@@ -46,7 +46,7 @@ public class RenderJson extends Result {
     
     //
     
-    static Method getMethod(Class clazz, String name) {
+    static Method getMethod(Class<?> clazz, String name) {
         for(Method m : clazz.getDeclaredMethods()) {
             if(m.getName().equals(name)) {
                 return m;

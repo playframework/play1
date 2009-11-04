@@ -29,7 +29,7 @@ import play.data.validation.Validation;
  */
 public class Binder {
 
-    static Map<Class, SupportedType> supportedTypes = new HashMap<Class, SupportedType>();    
+    static Map<Class<?>, SupportedType<?>> supportedTypes = new HashMap<Class<?>, SupportedType<?>>();    
 
     static {
         supportedTypes.put(Date.class, new DateBinder());
@@ -39,9 +39,9 @@ public class Binder {
         supportedTypes.put(Locale.class, new LocaleBinder());
     }
     
-    static Map<Class, BeanWrapper> beanwrappers = new HashMap<Class, BeanWrapper>();
+    static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<Class<?>, BeanWrapper>();
 
-    static BeanWrapper getBeanWrapper(Class clazz) {
+    static BeanWrapper getBeanWrapper(Class<?> clazz) {
         if (!beanwrappers.containsKey(clazz)) {
             BeanWrapper beanwrapper = new BeanWrapper(clazz);
             beanwrappers.put(clazz, beanwrapper);
@@ -84,20 +84,20 @@ public class Binder {
             }
             // Map 
             if (Map.class.isAssignableFrom(clazz)) {
-                Class keyClass = String.class;
-                Class valueClass = String.class;
+                Class<?> keyClass = String.class;
+                Class<?> valueClass = String.class;
                 if (type instanceof ParameterizedType) {
-                    keyClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
-                    valueClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[1];
+                    keyClass = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
+                    valueClass = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[1];
                 }
                 // Search for all params
-                Map r = new HashMap();
+                Map<Object, Object> r = new HashMap<Object, Object>();
                 for (String param : params.keySet()) {
                     Pattern p = Pattern.compile("^" + name + prefix + "\\[([^\\]]+)\\](.*)$");
                     Matcher m = p.matcher(param);
                     if (m.matches()) {
                         String key = m.group(1);
-                        Map<String, String[]> tP = new HashMap();
+                        Map<String, String[]> tP = new HashMap<String, String[]>();
                         tP.put("key", new String[]{key});
                         Object oKey = bindInternal("key", keyClass, keyClass, tP, "");
                         if (oKey != MISSING) {
@@ -106,7 +106,7 @@ public class Binder {
                                 Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]");
                                 r.put(oKey, oValue);
                             } else {
-                                tP = new HashMap();
+                                tP = new HashMap<String, String[]>();
                                 tP.put("value", params.get(name + prefix + "[" + key + "]"));
                                 Object oValue = bindInternal("value", valueClass, valueClass, tP, "");
                                 if (oValue != MISSING) {
@@ -133,32 +133,32 @@ public class Binder {
                         clazz = TreeSet.class;
                     }
                 }
-                Collection r = (Collection) clazz.newInstance();
-                Class componentClass = String.class;
+                Collection<Object> r = (Collection<Object>) clazz.newInstance();
+                Class<?> componentClass = String.class;
                 if (type instanceof ParameterizedType) {
-                    componentClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
+                    componentClass = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
                 }
                 if (value == null) {
                     value = params.get(name + prefix + "[]");
-                    if (value == null && r instanceof List) {
+                    if (value == null && r instanceof List<?>) {
                         for (String param : params.keySet()) {
                             Pattern p = Pattern.compile("^" + name + prefix + "\\[([0-9]+)\\](.*)$");
                             Matcher m = p.matcher(param);
                             if (m.matches()) {
                                 int key = Integer.parseInt(m.group(1));
-                                while (((List) r).size() <= key) {
-                                    ((List) r).add(null);
+                                while (((List<?>) r).size() <= key) {
+                                    ((List<?>) r).add(null);
                                 }
                                 if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
                                     BeanWrapper beanWrapper = getBeanWrapper(componentClass);
                                     Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]");
-                                    ((List) r).set(key, oValue);
+                                    ((List<Object>) r).set(key, oValue);
                                 } else {
-                                    Map tP = new HashMap();
+                                    Map<String, String[]> tP = new HashMap<String, String[]>();
                                     tP.put("value", params.get(name + prefix + "[" + key + "]"));
                                     Object oValue = bindInternal("value", componentClass, componentClass, tP, "");
                                     if (oValue != MISSING) {
-                                        ((List) r).set(key, oValue);
+                                        ((List<Object>) r).set(key, oValue);
                                     }
                                 }
                             }
@@ -235,7 +235,7 @@ public class Binder {
         return false;
     }
 
-    public static Object directBind(String value, Class clazz) throws Exception {
+    public static Object directBind(String value, Class<?> clazz) throws Exception {
         if (clazz.equals(String.class)) {
             return value;
         }

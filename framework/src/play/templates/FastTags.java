@@ -20,7 +20,7 @@ import play.templates.Template.ExecutableTemplate;
  */
 public class FastTags {
 
-    public static void _verbatim(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    public static void _verbatim(Map<String, Object> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         out.println(JavaExtensions.toString(body));
     }
 
@@ -141,8 +141,8 @@ public class FastTags {
                 return ((String) test).length() > 0;
             } else if (test instanceof Number) {
                 return ((Number) test).intValue() != 0;
-            } else if (test instanceof Collection) {
-                return ((Collection) test).size() != 0;
+            } else if (test instanceof Collection<?>) {
+                return ((Collection<?>) test).size() != 0;
             } else {
                 return true;
             }
@@ -225,7 +225,7 @@ public class FastTags {
                 name = ct + name.substring(1);
             }
             Template t = TemplateLoader.load(name);
-            Map newArgs = new HashMap();
+            Map<String, Object> newArgs = new HashMap<String, Object>();
             newArgs.putAll(template.getBinding().getVariables());
             newArgs.put("_isInclude", true);
             t.render(newArgs);

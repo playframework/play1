@@ -60,7 +60,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 iv.append("new String[0];");
             } else {
                 iv.append("new String[] {");
-                for (Iterator i = names.iterator(); i.hasNext();) {
+                for (Iterator<String> i = names.iterator(); i.hasNext();) {
                     iv.append("\"");
                     iv.append(i.next());
                     iv.append("\"");
@@ -201,7 +201,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             return computeMethodHash(names);
         }
 
-        public static Integer computeMethodHash(Class[] parameters) {
+        public static Integer computeMethodHash(Class<?>[] parameters) {
             String[] names = new String[parameters.length];
             for (int i = 0; i < parameters.length; i++) {
                 if (parameters[i].isArray()) {
@@ -224,7 +224,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             }
             return hash;
         }
-        static ThreadLocal<Stack<Map<String, Object>>> localVariables = new ThreadLocal();
+        static ThreadLocal<Stack<Map<String, Object>>> localVariables = new ThreadLocal<Stack<Map<String, Object>>>();
 
         public static void checkEmpty() {
             if(localVariables.get() != null && localVariables.get().size() != 0) {

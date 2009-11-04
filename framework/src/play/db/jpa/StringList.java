@@ -12,7 +12,9 @@ import org.hibernate.usertype.UserType;
 
 public class StringList extends ArrayList<String> implements UserType {
     
-    public StringList() {
+	private static final long serialVersionUID = -5145518193896935839L;
+
+	public StringList() {
         super();
     }
     
@@ -24,7 +26,7 @@ public class StringList extends ArrayList<String> implements UserType {
         return new int[]{Types.VARCHAR};
     }
 
-    public Class returnedClass() {
+    public Class<?> returnedClass() {
         return StringList.class;
     }
 

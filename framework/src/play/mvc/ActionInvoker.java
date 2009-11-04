@@ -62,7 +62,7 @@ public class ActionInvoker {
             try {
                 Object[] ca = getActionMethod(request.action);
                 actionMethod = (Method) ca[1];
-                request.controller = ((Class) ca[0]).getName().substring(12);
+                request.controller = ((Class<?>) ca[0]).getName().substring(12);
                 request.actionMethod = actionMethod.getName();
                 request.action = request.controller + "." + request.actionMethod;
                 request.invokedMethod = actionMethod;
@@ -135,8 +135,8 @@ public class ActionInvoker {
                         List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
                         ControllerInstrumentation.stopActionCall();
                         for (Method mCatch : catches) if (Modifier.isStatic(mCatch.getModifiers())) {
-                            Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
-                            for (Class exception : exceptions) {
+                            Class<?>[] exceptions = mCatch.getAnnotation(Catch.class).value();
+                            for (Class<?> exception : exceptions) {
                                 if (exception.isInstance(args[0])) {
                                     mCatch.setAccessible(true);
                                     Java.invokeStatic(mCatch, args);
@@ -270,7 +270,7 @@ public class ActionInvoker {
 
     public static Object[] getActionMethod(String fullAction) {
         Method actionMethod = null;
-        Class controllerClass = null;
+        Class<?> controllerClass = null;
         try {
             if (!fullAction.startsWith("controllers.")) {
                 fullAction = "controllers." + fullAction;
@@ -301,8 +301,8 @@ public class ActionInvoker {
         }
         Object[] rArgs = new Object[method.getParameterTypes().length];
         for (int i = 0; i < method.getParameterTypes().length; i++) {
-            Class type = method.getParameterTypes()[i];
-            Map<String, String[]> params = new HashMap();
+            Class<?> type = method.getParameterTypes()[i];
+            Map<String, String[]> params = new HashMap<String, String[]>();
             if(type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {
                 params.put(paramsNames[i], Scope.Params.current().getAll(paramsNames[i]));
             } else {

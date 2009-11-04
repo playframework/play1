@@ -30,7 +30,7 @@ public class Invoker {
      * @param invocation The code to run
      * @return The future object, to know when the task is completed
      */
-    public static Future invoke(final Invocation invocation) {
+    public static Future<?> invoke(final Invocation invocation) {
         Monitor monitor = MonitorFactory.getMonitor("Invoker queue size", "elmts.");
         monitor.add(executor.getQueue().size());
         invocation.waitInQueue = MonitorFactory.start("Waiting for execution");
@@ -43,7 +43,7 @@ public class Invoker {
      * @param seconds The time to wait before
      * @return The future object, to know when the task is completed
      */
-    public static Future invoke(final Invocation invocation, int seconds) {
+    public static Future<?> invoke(final Invocation invocation, int seconds) {
         Monitor monitor = MonitorFactory.getMonitor("Invocation queue", "elmts.");
         monitor.add(executor.getQueue().size());
         return executor.schedule(invocation, seconds, TimeUnit.SECONDS);
@@ -218,7 +218,9 @@ public class Invoker {
      */
     public static class Suspend extends PlayException {
 
-        /**
+		private static final long serialVersionUID = -6462637019844005053L;
+
+		/**
          * Suspend for a timeout (in seconds).
          */
         int timeout;
@@ -226,13 +228,13 @@ public class Invoker {
         /**
          * Wait for task execution.
          */
-        Future task;
+        Future<?> task;
 
         public Suspend(int timeout) {
             this.timeout = timeout;
         }
 
-        public Suspend(Future task) {
+        public Suspend(Future<?> task) {
             this.task = task;
         }
 
@@ -255,17 +257,17 @@ public class Invoker {
      */
     static class WaitForTasksCompletion extends Thread {
 
-        Map<Future, Invocation> queue;
+        Map<Future<?>, Invocation> queue;
         static WaitForTasksCompletion instance;
 
         public WaitForTasksCompletion() {
-            queue = new HashMap();
+            queue = new HashMap<Future<?>, Invocation>();
             setName("WaitForTasksCompletion");
             setDaemon(true);
             start();
         }
 
-        public static void waitFor(Future task, Invocation invocation) {
+        public static void waitFor(Future<?> task, Invocation invocation) {
             if (instance == null) {
                 instance = new WaitForTasksCompletion();
             }
@@ -277,7 +279,7 @@ public class Invoker {
             while (true) {
                 try {
                     if (!queue.isEmpty()) {
-                        for (Future task : new HashSet<Future>(queue.keySet())) {
+                        for (Future<?> task : new HashSet<Future<?>>(queue.keySet())) {
                             if (task.isDone()) {
                                 executor.submit(queue.get(task));
                                 queue.remove(task);

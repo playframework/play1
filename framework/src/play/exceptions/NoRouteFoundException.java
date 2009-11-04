@@ -11,7 +11,8 @@ import java.util.Arrays;
  */
 public class NoRouteFoundException extends PlayException implements SourceAttachment {
 
-    String file;
+	private static final long serialVersionUID = -50159578878254721L;
+	String file;
     String action;
     Map<String, Object> args;
     String sourceFile;

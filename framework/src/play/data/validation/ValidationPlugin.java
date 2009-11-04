@@ -24,7 +24,7 @@ import play.mvc.results.Result;
 
 public class ValidationPlugin extends PlayPlugin {
     
-    static ThreadLocal<Map<Object,String>> keys = new ThreadLocal();
+    static ThreadLocal<Map<Object,String>> keys = new ThreadLocal<Map<Object,String>>();
 
     @Override
     public void beforeActionInvocation(Method actionMethod) {
@@ -42,7 +42,7 @@ public class ValidationPlugin extends PlayPlugin {
                 return;
             }
             List<ConstraintViolation> violations = new Validator().validateAction(actionMethod);
-            ArrayList errors = new ArrayList();
+            List<Error> errors = new ArrayList<Error>();
             String[] paramNames = Java.parameterNames(actionMethod);
             for (ConstraintViolation violation : violations) {
                 errors.add(new Error(paramNames[((MethodParameterContext) violation.getContext()).getParameterIndex()], violation.getMessage(), violation.getMessageVariables() == null ? new String[0] : violation.getMessageVariables().values().toArray(new String[0])));

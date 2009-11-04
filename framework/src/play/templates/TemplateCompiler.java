@@ -24,15 +24,15 @@ import play.templates.InlineTags.CALL;
  */
 public class TemplateCompiler {
 
-    static List<String> extensionsClassnames = new ArrayList();
+    static List<String> extensionsClassnames = new ArrayList<String>();
 
     public static Template compile(VirtualFile file) {
         try {
 
             try {
                 extensionsClassnames.clear();
-                List<Class> extensionsClasses = Play.classloader.getAssignableClasses(JavaExtensions.class);
-                for (Class extensionsClass : extensionsClasses) {
+                List<Class<?>> extensionsClasses = Play.classloader.getAssignableClasses(JavaExtensions.class);
+                for (Class<?> extensionsClass : extensionsClasses) {
                     extensionsClassnames.add(extensionsClass.getName());
                 }
             } catch (Throwable e) {
@@ -77,9 +77,9 @@ public class TemplateCompiler {
             String source = template.source;
 
             // Static access
-            List<String> names = new ArrayList();
+            List<String> names = new ArrayList<String>();
             Map<String, String> originalNames = new HashMap<String, String>();
-            for (Class clazz : Play.classloader.getAllClasses()) {
+            for (Class<?> clazz : Play.classloader.getAllClasses()) {
                 names.add(clazz.getName().replace("$", "."));
                 originalNames.put(clazz.getName().replace("$", "."), clazz.getName());
             }

@@ -8,7 +8,9 @@ import net.sf.oval.context.OValContext;
 
 public class RangeCheck extends AbstractAnnotationCheck<Range> {
 
-    final static String mes = "validation.range";
+	private static final long serialVersionUID = -3563364644790407503L;
+
+	final static String mes = "validation.range";
 
     double min;
     double max;
@@ -45,7 +47,7 @@ public class RangeCheck extends AbstractAnnotationCheck<Range> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap();
+        Map<String, String> messageVariables = new HashMap<String, String>();
         messageVariables.put("min", Double.toString(min));
         messageVariables.put("max", Double.toString(max));
         return messageVariables;

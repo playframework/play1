@@ -46,7 +46,9 @@ import play.vfs.VirtualFile;
  */
 public class ServletWrapper extends HttpServlet implements ServletContextListener {
 
-    public void contextInitialized(ServletContextEvent e) {
+	private static final long serialVersionUID = -6895771299109682866L;
+
+	public void contextInitialized(ServletContextEvent e) {
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
         Play.init(root, e.getServletContext().getInitParameter("play.id"));
@@ -189,14 +191,14 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
         request.remoteAddress = httpServletRequest.getRemoteAddr();
 
-        Enumeration headersNames = httpServletRequest.getHeaderNames();
+        Enumeration<String> headersNames = httpServletRequest.getHeaderNames();
         while (headersNames.hasMoreElements()) {
             Http.Header hd = new Http.Header();
-            hd.name = (String) headersNames.nextElement();
+            hd.name = headersNames.nextElement();
             hd.values = new ArrayList<String>();
-            Enumeration enumValues = httpServletRequest.getHeaders(hd.name);
+            Enumeration<String> enumValues = httpServletRequest.getHeaders(hd.name);
             while (enumValues.hasMoreElements()) {
-                String value = (String) enumValues.nextElement();
+                String value = enumValues.nextElement();
                 hd.values.add(value);
             }
             request.headers.put(hd.name.toLowerCase(), hd);

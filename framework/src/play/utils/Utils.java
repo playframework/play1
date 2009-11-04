@@ -43,9 +43,9 @@ public class Utils {
             }
         }
 
-        public static Map filterMap(Map<?,?> map, String keypattern) {
+        public static Map<?,?> filterMap(Map<?,?> map, String keypattern) {
             try {
-                Map filtered = (Map) map.getClass().newInstance();
+                Map<Object, Object> filtered = (Map<Object, Object>) map.getClass().newInstance();
                 for (Map.Entry<?, ?> entry : map.entrySet()) {
                 	Object key = entry.getKey();
                     if (key.toString().matches(keypattern)) {

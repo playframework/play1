@@ -8,7 +8,9 @@ import net.sf.oval.context.OValContext;
 
 public class MaxSizeCheck extends AbstractAnnotationCheck<MaxSize> {
 
-    final static String mes = "validation.maxSize";
+	private static final long serialVersionUID = -3592548401203094193L;
+
+	final static String mes = "validation.maxSize";
 
     int maxSize;
 
@@ -28,7 +30,7 @@ public class MaxSizeCheck extends AbstractAnnotationCheck<MaxSize> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap();
+        Map<String, String> messageVariables = new HashMap<String, String>();
         messageVariables.put("maxSize", Integer.toString(maxSize));
         return messageVariables;
     }

@@ -420,7 +420,7 @@ public class HttpHandler implements IoHandler {
             this.response = response;
             this.session = session;
         }
-        private Map<String, RenderStatic> staticPathsCache = new HashMap();
+        private Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
 
         @Override
         public boolean init() {

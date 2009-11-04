@@ -1,9 +1,11 @@
 package play.classloading;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -15,7 +17,7 @@ import play.classloading.enhancers.MailerEnhancer;
 import play.classloading.enhancers.PropertiesEnhancer;
 import play.classloading.enhancers.SigEnhancer;
 import play.exceptions.UnexpectedException;
-import play.vfs.VirtualFile; 
+import play.vfs.VirtualFile;
  
 /**
  * Application classes container.
@@ -56,7 +58,7 @@ public class ApplicationClasses {
      * @param clazz The superclass, or the interface.
      * @return A list of application classes.
      */
-    public List<ApplicationClass> getAssignableClasses(Class clazz) {
+    public List<ApplicationClass> getAssignableClasses(Class<?> clazz) {
         List<ApplicationClass> results = new ArrayList<ApplicationClass>();
         for (ApplicationClass applicationClass : classes.values()) {
             try {
@@ -76,7 +78,7 @@ public class ApplicationClasses {
      * @param clazz The annotation class.
      * @return A list of application classes.
      */
-    public List<ApplicationClass> getAnnotatedClasses(Class clazz) {
+    public List<ApplicationClass> getAnnotatedClasses(Class<? extends Annotation> clazz) {
         List<ApplicationClass> results = new ArrayList<ApplicationClass>();
         for (ApplicationClass applicationClass : classes.values()) {
             try {
@@ -115,7 +117,7 @@ public class ApplicationClasses {
     }    
     
     // Enhancers
-    static Class[] enhancers = new Class[] {
+    static Class<?>[] enhancers = new Class[] {
         SigEnhancer.class,
         ControllersEnhancer.class,
         MailerEnhancer.class,
@@ -158,7 +160,7 @@ public class ApplicationClasses {
         /**
          * The in JVM loaded class
          */
-        public Class javaClass;
+        public Class<?> javaClass;
         
         /**
          * Last time than this class was compiled
@@ -201,7 +203,7 @@ public class ApplicationClasses {
          */
         public byte[] enhance() {
             this.enhancedByteCode = this.javaByteCode;
-            for (Class enhancer : enhancers) {
+            for (Class<?> enhancer : enhancers) {
                 try {
                     long start = System.currentTimeMillis();
                     ((Enhancer) enhancer.newInstance()).enhanceThisClass(this);

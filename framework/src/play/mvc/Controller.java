@@ -440,7 +440,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
      * @return Annotation object or null if not found
      */
     protected static <T extends Annotation> T getControllerInheritedAnnotation(Class<T> clazz) {
-        Class c = getControllerClass();
+        Class<?> c = getControllerClass();
         while(!c.equals(Object.class)) {
             if (c.isAnnotationPresent(clazz)) {
                 return (T)c.getAnnotation(clazz);
@@ -454,7 +454,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
      * Retrieve annotation for the action method
      * @return Annotation object or null if not found
      */
-    protected static Class getControllerClass() {
+    protected static Class<?> getControllerClass() {
         return Play.classloader.getClassIgnoreCase("controllers." + Http.Request.current().controller);
     }
 
@@ -462,7 +462,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
      * Call the parent action adding this objects to the params scope
      */
     protected static void parent(Object... args) {
-        Map<String, Object> map = new HashMap();
+        Map<String, Object> map = new HashMap<String, Object>();
         for (Object o : args) {
             List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
             for (String name : names) {
@@ -486,7 +486,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
         try {
             Method method = Http.Request.current().invokedMethod;
             String name = method.getName();
-            Class clazz = method.getDeclaringClass().getSuperclass();
+            Class<?> clazz = method.getDeclaringClass().getSuperclass();
             Method superMethod = null;
             while (!clazz.getName().equals("play.mvc.Controller") && !clazz.getName().equals("java.lang.Object")) {
                 for (Method m : clazz.getDeclaredMethods()) {
@@ -503,7 +503,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
             if (superMethod == null) {
                 throw new RuntimeException("PAF");
             }
-            Map<String, String> mapss = new HashMap();
+            Map<String, String> mapss = new HashMap<String, String>();
             for (Map.Entry<String, Object> entry : map.entrySet()) {
             	Object value = entry.getValue();
                 mapss.put(entry.getKey(),value == null ? null : value.toString());
@@ -536,7 +536,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
     /**
      * Suspend this request and wait for the task completion
      */
-    protected static void waitFor(Future task) {
+    protected static void waitFor(Future<?> task) {
         Request.current().isNew = false;
         throw new Suspend(task);
     }

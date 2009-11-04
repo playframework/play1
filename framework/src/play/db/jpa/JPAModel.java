@@ -11,7 +11,9 @@ import javax.persistence.MappedSuperclass;
 @Deprecated
 public class JPAModel extends JPASupport {
 
-    @Id
+	private static final long serialVersionUID = -7821293316182239628L;
+	
+	@Id
     @GeneratedValue
     public Long id;
     

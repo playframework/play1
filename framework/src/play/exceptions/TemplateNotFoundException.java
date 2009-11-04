@@ -10,7 +10,8 @@ import play.templates.Template;
  */
 public class TemplateNotFoundException extends PlayException implements SourceAttachment {
 
-    private String path;
+	private static final long serialVersionUID = -8282977422649500799L;
+	private String path;
     private String sourceFile;
     private List<String> source;
     private Integer line;

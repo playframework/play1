@@ -11,7 +11,8 @@ import play.classloading.ApplicationClasses.ApplicationClass;
  */
 public class MailException extends PlayException implements SourceAttachment {
     
-    String sourceFile;
+	private static final long serialVersionUID = 9072871691613380547L;
+	String sourceFile;
     List<String> source;
     Integer line;    
     

@@ -1,20 +1,24 @@
 package play.db.jpa;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
+
 import org.apache.log4j.Level;
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.hibernate.type.Type;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -30,7 +34,7 @@ public class JPAPlugin extends PlayPlugin {
     public static boolean autoTxs = true;
 
     @Override
-    public Object bind(String name, Class clazz, java.lang.reflect.Type type, Map<String, String[]> params) {
+    public Object bind(String name, Class<?> clazz, java.lang.reflect.Type type, Map<String, String[]> params) {
         if(!Play.configuration.getProperty("future.bindJPAObjects", "false").equals("true")) {
             return null;
         }
@@ -56,7 +60,7 @@ public class JPAPlugin extends PlayPlugin {
     @Override
     public void onApplicationStart() {
         if (JPA.entityManagerFactory == null) {
-            List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
+            List<Class<? extends Annotation>> classes = Play.classloader.getAnnotatedClasses(Entity.class);
             if (classes.isEmpty()) {
                 return;
             }
@@ -83,7 +87,9 @@ public class JPAPlugin extends PlayPlugin {
             // This is really hacky. We should move to something better than Hibernate like EBEAN
             cfg.setInterceptor(new EmptyInterceptor() {
 
-                @Override
+				private static final long serialVersionUID = 8597335170590887410L;
+
+				@Override
                 public int[] findDirty(Object o, Serializable id, Object[] arg2, Object[] arg3, String[] arg4, Type[] arg5) {
                     if (o instanceof JPASupport && !((JPASupport) o).willBeSaved) {
                         return new int[0];
@@ -145,7 +151,7 @@ public class JPAPlugin extends PlayPlugin {
             } catch (Exception e) {
                 Logger.error(e, "Error trying to override the hibernate classLoader (new hibernate version ???)");
             }
-            for (Class clazz : classes) {
+            for (Class<?> clazz : classes) {
                 if (clazz.isAnnotationPresent(Entity.class)) {
                     cfg.addAnnotatedClass(clazz);
                     Logger.trace("JPA Model : %s", clazz);

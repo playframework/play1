@@ -9,7 +9,9 @@ import org.hibernate.exception.GenericJDBCException;
  */
 public class JPAException extends PlayException implements SourceAttachment {
 
-    public JPAException(String message) {
+	private static final long serialVersionUID = 6294133721250723425L;
+
+	public JPAException(String message) {
         super(message, null);
     }
 

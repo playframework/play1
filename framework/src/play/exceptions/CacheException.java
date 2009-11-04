@@ -10,7 +10,8 @@ import play.Play;
  */
 public class CacheException extends PlayException {
     
-    String sourceFile;
+	private static final long serialVersionUID = 7462509729932776693L;
+	String sourceFile;
     List<String> source;
     Integer line;    
 

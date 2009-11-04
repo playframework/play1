@@ -8,7 +8,9 @@ import net.sf.oval.context.OValContext;
 
 public class MaxCheck extends AbstractAnnotationCheck<Max> {
 
-    final static String mes = "validation.max";
+	private static final long serialVersionUID = -505069960673969911L;
+
+	final static String mes = "validation.max";
 
     double max;
 
@@ -42,7 +44,7 @@ public class MaxCheck extends AbstractAnnotationCheck<Max> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap();
+        Map<String, String> messageVariables = new HashMap<String, String>();
         messageVariables.put("max", Double.toString(max));
         return messageVariables;
     }

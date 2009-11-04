@@ -4,8 +4,10 @@ package play.exceptions;
  * An unexpected exception
  */
 public class UnexpectedException extends PlayException {
-    
-    public UnexpectedException(String message) {
+
+	private static final long serialVersionUID = -2057018034873129233L;
+
+	public UnexpectedException(String message) {
         super(message);
     }
 

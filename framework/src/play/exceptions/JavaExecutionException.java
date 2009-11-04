@@ -7,7 +7,9 @@ import play.classloading.ApplicationClasses.ApplicationClass;
  */
 public class JavaExecutionException extends JavaException {
 
-    public JavaExecutionException(ApplicationClass applicationClass, Integer lineNumber, Throwable e) {
+	private static final long serialVersionUID = 5094926773157916567L;
+
+	public JavaExecutionException(ApplicationClass applicationClass, Integer lineNumber, Throwable e) {
         super(applicationClass, lineNumber, e.getMessage(), e);
     }
     

@@ -2,6 +2,7 @@ package play.modules.gae;
 
 import com.google.appengine.tools.development.ApiProxyLocalImpl;
 import com.google.apphosting.api.ApiProxy;
+import java.lang.annotation.Annotation;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -103,7 +104,7 @@ public class GAEPlugin extends PlayPlugin {
     @Override
     public void onApplicationStart() {
         // It's time to set up JPA
-        final List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
+        final List<Class<? extends Annotation>> classes = Play.classloader.getAnnotatedClasses(Entity.class);
         if (!classes.isEmpty()) {
             // Hack the JPA plugin
             JPAPlugin.autoTxs = false;

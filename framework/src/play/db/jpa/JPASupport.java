@@ -43,9 +43,10 @@ import play.mvc.Scope.Params;
 @MappedSuperclass
 public class JPASupport implements Serializable {
 
-    public transient boolean willBeSaved = false;
+	private static final long serialVersionUID = -7863942622935655536L;
+	public transient boolean willBeSaved = false;
 
-    public static <T extends JPASupport> T create(Class type, String name, Map<String, String[]> params) {
+    public static <T extends JPASupport> T create(Class<?> type, String name, Map<String, String[]> params) {
         try {
             Object model = type.newInstance();
             return (T) edit(model, name, params);
@@ -73,7 +74,7 @@ public class JPASupport implements Serializable {
                     relation = field.getType().getName();
                 }
                 if (field.isAnnotationPresent(OneToMany.class) || field.isAnnotationPresent(ManyToMany.class)) {
-                    Class fieldType = (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                    Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                     isEntity = true;
                     relation = fieldType.getName();
                     multiple = true;
@@ -81,9 +82,9 @@ public class JPASupport implements Serializable {
 
                 if (isEntity) {
                     if (multiple) {
-                        Collection l = new ArrayList();
+                        Collection<Object> l = new ArrayList<Object>();
                         if (field.getType().isAssignableFrom(Set.class)) {
-                            l = new HashSet();
+                            l = new HashSet<Object>();
                         }
                         String[] ids = params.get(name + "." + field.getName() + "@id");
                         if(ids == null) {
@@ -208,7 +209,7 @@ public class JPASupport implements Serializable {
                     }
                     if (value instanceof PersistentCollection) {
                         if (((PersistentCollection) value).wasInitialized()) {
-                            for (Object o : (Collection) value) {
+                            for (Object o : (Collection<?>) value) {
                                 if (o instanceof JPASupport) {
                                     ((JPASupport) o).saveAndCascade(willBeSaved);
                                 }
@@ -613,7 +614,7 @@ public class JPASupport implements Serializable {
     // More utils
     public static Object findKey(Object entity) {
         try {
-            Class c = entity.getClass();
+            Class<?> c = entity.getClass();
             while (!c.equals(Object.class)) {
                 for (Field field : c.getDeclaredFields()) {
                     if (field.isAnnotationPresent(Id.class)) {
@@ -629,7 +630,7 @@ public class JPASupport implements Serializable {
         return null;
     }
 
-    public static Class findKeyType(Class c) {
+    public static Class<?> findKeyType(Class<?> c) {
         try {
             while (!c.equals(Object.class)) {
                 for (Field field : c.getDeclaredFields()) {

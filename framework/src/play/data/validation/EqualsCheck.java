@@ -16,7 +16,9 @@ import play.mvc.Scope;
 
 public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
 
-    final static String mes = "validation.equals";
+	private static final long serialVersionUID = 5631021140372160508L;
+
+	final static String mes = "validation.equals";
 
     String to;
     String otherKey;
@@ -74,7 +76,7 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap();
+        Map<String, String> messageVariables = new HashMap<String, String>();
         messageVariables.put("to", otherKey);
         return messageVariables;
     }

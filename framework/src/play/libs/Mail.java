@@ -428,7 +428,7 @@ public class Mail {
 
     public static class Mock {
 
-        static Map<String, String> emails = new HashMap();
+        static Map<String, String> emails = new HashMap<String, String>();
 
         static void send(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) {
             StringBuffer email = new StringBuffer();

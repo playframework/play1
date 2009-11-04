@@ -66,7 +66,7 @@ public class Messages {
     
     static Object[] coolStuff(String pattern, Object[] args) {
         
-        Class[] conversions = new Class[args.length];
+        Class<?>[] conversions = new Class[args.length];
         
         Matcher matcher = formatterPattern.matcher(pattern);
         int incrementalPosition = 1;        

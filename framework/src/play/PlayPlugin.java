@@ -29,7 +29,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     /**
      * Called when play need to bind a Java object from HTTP params
      */
-    public Object bind(String name, Class clazz, Type type, Map<String, String[]> params) {
+    public Object bind(String name, Class<?> clazz, Type type, Map<String, String[]> params) {
         return null;
     }
 

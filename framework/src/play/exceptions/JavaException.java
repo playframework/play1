@@ -9,7 +9,8 @@ import play.classloading.ApplicationClasses.ApplicationClass;
  */
 public abstract class JavaException extends PlayException implements SourceAttachment {
 
-    private ApplicationClass applicationClass;
+	private static final long serialVersionUID = 7612525619114332804L;
+	private ApplicationClass applicationClass;
     private Integer lineNumber;
 
     public JavaException(ApplicationClass applicationClass, Integer lineNumber, String message) {

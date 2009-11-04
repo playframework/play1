@@ -5,7 +5,8 @@ package play.exceptions;
  */
 public class ActionNotFoundException extends PlayException {
 
-    private String action;
+	private static final long serialVersionUID = -734220698225443877L;
+	private String action;
    
     public ActionNotFoundException(String action, Throwable cause) {
         super(String.format("Action %s not found", action.startsWith("controllers.") ? action.substring(12) : action), cause);

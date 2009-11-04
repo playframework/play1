@@ -6,8 +6,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
@@ -243,8 +245,8 @@ public class Time {
         protected static final int NO_SPEC_INT = 98; // '?'
         protected static final Integer ALL_SPEC = new Integer(ALL_SPEC_INT);
         protected static final Integer NO_SPEC = new Integer(NO_SPEC_INT);
-        protected static Map monthMap = new HashMap(20);
-        protected static Map dayMap = new HashMap(60);
+        protected static Map<String, Integer> monthMap = new HashMap<String, Integer>(20);
+        protected static Map<String, Integer> dayMap = new HashMap<String, Integer>(60);
         
 
         static {
@@ -271,13 +273,13 @@ public class Time {
         }
         private String cronExpression = null;
         private TimeZone timeZone = null;
-        protected transient TreeSet seconds;
-        protected transient TreeSet minutes;
-        protected transient TreeSet hours;
-        protected transient TreeSet daysOfMonth;
-        protected transient TreeSet months;
-        protected transient TreeSet daysOfWeek;
-        protected transient TreeSet years;
+        protected transient SortedSet<Integer> seconds;
+        protected transient SortedSet<Integer> minutes;
+        protected transient SortedSet<Integer> hours;
+        protected transient SortedSet<Integer> daysOfMonth;
+        protected transient SortedSet<Integer> months;
+        protected transient SortedSet<Integer> daysOfWeek;
+        protected transient SortedSet<Integer> years;
         protected transient boolean lastdayOfWeek = false;
         protected transient int nthdayOfWeek = 0;
         protected transient boolean lastdayOfMonth = false;
@@ -434,25 +436,25 @@ public class Time {
             try {
 
                 if (seconds == null) {
-                    seconds = new TreeSet();
+                    seconds = new TreeSet<Integer>();
                 }
                 if (minutes == null) {
-                    minutes = new TreeSet();
+                    minutes = new TreeSet<Integer>();
                 }
                 if (hours == null) {
-                    hours = new TreeSet();
+                    hours = new TreeSet<Integer>();
                 }
                 if (daysOfMonth == null) {
-                    daysOfMonth = new TreeSet();
+                    daysOfMonth = new TreeSet<Integer>();
                 }
                 if (months == null) {
-                    months = new TreeSet();
+                    months = new TreeSet<Integer>();
                 }
                 if (daysOfWeek == null) {
-                    daysOfWeek = new TreeSet();
+                    daysOfWeek = new TreeSet<Integer>();
                 }
                 if (years == null) {
-                    years = new TreeSet();
+                    years = new TreeSet<Integer>();
                 }
 
                 int exprOn = SECOND;
@@ -684,7 +686,7 @@ public class Time {
                 } else {
                     throw new ParseException("'L' option is not valid here. (pos=" + i + ")", i);
                 }
-                TreeSet set = getSet(type);
+                SortedSet<Integer> set = getSet(type);
                 set.add(new Integer(val));
                 i++;
                 return i;
@@ -696,7 +698,7 @@ public class Time {
                 } else {
                     throw new ParseException("'W' option is not valid here. (pos=" + i + ")", i);
                 }
-                TreeSet set = getSet(type);
+                SortedSet<Integer> set = getSet(type);
                 set.add(new Integer(val));
                 i++;
                 return i;
@@ -718,7 +720,7 @@ public class Time {
                             i);
                 }
 
-                TreeSet set = getSet(type);
+                SortedSet<Integer> set = getSet(type);
                 set.add(new Integer(val));
                 i++;
                 return i;
@@ -837,7 +839,7 @@ public class Time {
             return buf.toString();
         }
 
-        protected String getExpressionSetSummary(java.util.Set set) {
+        protected String getExpressionSetSummary(Set<Integer> set) {
 
             if (set.contains(NO_SPEC)) {
                 return "?";
@@ -848,10 +850,10 @@ public class Time {
 
             StringBuffer buf = new StringBuffer();
 
-            Iterator itr = set.iterator();
+            Iterator<Integer> itr = set.iterator();
             boolean first = true;
             while (itr.hasNext()) {
-                Integer iVal = (Integer) itr.next();
+                Integer iVal = itr.next();
                 String val = iVal.toString();
                 if (!first) {
                     buf.append(",");
@@ -863,7 +865,7 @@ public class Time {
             return buf.toString();
         }
 
-        protected String getExpressionSetSummary(java.util.ArrayList list) {
+        protected String getExpressionSetSummary(List<Integer> list) {
 
             if (list.contains(NO_SPEC)) {
                 return "?";
@@ -874,7 +876,7 @@ public class Time {
 
             StringBuffer buf = new StringBuffer();
 
-            Iterator itr = list.iterator();
+            Iterator<Integer> itr = list.iterator();
             boolean first = true;
             while (itr.hasNext()) {
                 Integer iVal = (Integer) itr.next();
@@ -906,7 +908,7 @@ public class Time {
         protected void addToSet(int val, int end, int incr, int type)
                 throws ParseException {
 
-            TreeSet set = getSet(type);
+        	SortedSet<Integer> set = getSet(type);
 
             if (type == SECOND || type == MINUTE) {
                 if ((val < 0 || val > 59 || end > 59) && (val != ALL_SPEC_INT)) {
@@ -1003,7 +1005,7 @@ public class Time {
             }
         }
 
-        protected TreeSet getSet(int type) {
+        protected SortedSet<Integer> getSet(int type) {
             switch (type) {
                 case SECOND:
                     return seconds;
@@ -1090,7 +1092,7 @@ public class Time {
 
                 //if (endTime != null && cl.getTime().after(endTime)) return null;
 
-                SortedSet st = null;
+                SortedSet<Integer> st = null;
                 int t = 0;
 
                 int sec = cl.get(Calendar.SECOND);

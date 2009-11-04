@@ -8,7 +8,9 @@ import net.sf.oval.context.OValContext;
 
 public class MinSizeCheck extends AbstractAnnotationCheck<MinSize> {
 
-    final static String mes = "validation.minSize";
+	private static final long serialVersionUID = 5261101398123655757L;
+
+	final static String mes = "validation.minSize";
 
     int minSize;
 
@@ -28,7 +30,7 @@ public class MinSizeCheck extends AbstractAnnotationCheck<MinSize> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap();
+        Map<String, String> messageVariables = new HashMap<String, String>();
         messageVariables.put("minSize", Integer.toString(minSize));
         return messageVariables;
     }

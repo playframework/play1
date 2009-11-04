@@ -16,7 +16,7 @@ import play.exceptions.UnexpectedException;
 public class Validation {
 
     static ThreadLocal<Validation> current = new ThreadLocal<Validation>();
-    List<Error> errors = new ArrayList();
+    List<Error> errors = new ArrayList<Error>();
     boolean keep = false;
     
     protected Validation() {
@@ -35,7 +35,9 @@ public class Validation {
     public static List<Error> errors() {
         return new ArrayList<Error>(current.get().errors) {
             
-            public Error forKey(String key) {
+			private static final long serialVersionUID = -5435522665222196055L;
+
+			public Error forKey(String key) {
                 return Validation.error(key);
             }
             
@@ -120,13 +122,13 @@ public class Validation {
     
     // ~~~~ Integration helper
     
-    static Map<String,List<Validator>> getValidators(Class clazz, String name) {
+    static Map<String,List<Validator>> getValidators(Class<?> clazz, String name) {
         Map<String,List<Validator>> result = new HashMap<String,List<Validator>>();
         searchValidator(clazz, name, result);
         return result;
     }
     
-    static List<Validator> getValidators(Class clazz, String property, String name) {
+    static List<Validator> getValidators(Class<?> clazz, String property, String name) {
         try {
             Field field = clazz.getDeclaredField(property);
             List<Validator> validators = new ArrayList<Validator>();
@@ -151,7 +153,7 @@ public class Validation {
         }
     }
     
-    static void searchValidator(Class clazz, String name, Map<String,List<Validator>> result) {
+    static void searchValidator(Class<?> clazz, String name, Map<String,List<Validator>> result) {
         for(Field field : clazz.getDeclaredFields()) {
             
             List<Validator> validators = new ArrayList<Validator>();
@@ -188,7 +190,7 @@ public class Validation {
     public static class Validator {
         
         public Annotation annotation;
-        public Map<String,Object> params = new HashMap();
+        public Map<String,Object> params = new HashMap<String, Object>();
         
         public Validator(Annotation annotation) {
             this.annotation = annotation;
@@ -385,7 +387,7 @@ public class Validation {
         return Validation.valid(key, o);
     }
 
-    static ValidationResult applyCheck(AbstractAnnotationCheck check, String key, Object o) {
+    static ValidationResult applyCheck(AbstractAnnotationCheck<?> check, String key, Object o) {
         try {
             ValidationResult result = new ValidationResult();
             if (!check.isSatisfied(o, o, null, null)) {

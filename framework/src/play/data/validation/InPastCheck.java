@@ -13,7 +13,8 @@ import play.exceptions.UnexpectedException;
 
 public class InPastCheck extends AbstractAnnotationCheck<InPast> {
 
-    final static String mes = "validation.past";
+	private static final long serialVersionUID = -2666580673454411148L;
+	final static String mes = "validation.past";
     Date reference;
 
     @Override
@@ -47,7 +48,7 @@ public class InPastCheck extends AbstractAnnotationCheck<InPast> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap();
+        Map<String, String> messageVariables = new HashMap<String, String>();
         messageVariables.put("reference", new SimpleDateFormat("yyyy-MM-dd").format(reference));
         return messageVariables;
     }

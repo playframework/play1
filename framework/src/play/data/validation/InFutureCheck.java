@@ -13,7 +13,9 @@ import play.exceptions.UnexpectedException;
 
 public class InFutureCheck extends AbstractAnnotationCheck<InFuture> {
 
-    final static String mes = "validation.future";
+	private static final long serialVersionUID = 8333789542480831301L;
+
+	final static String mes = "validation.future";
 
     Date reference;
 
@@ -48,7 +50,7 @@ public class InFutureCheck extends AbstractAnnotationCheck<InFuture> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap();
+        Map<String, String> messageVariables = new HashMap<String, String>();
         messageVariables.put("reference", new SimpleDateFormat("yyyy-MM-dd").format(reference));
         return messageVariables;
     }

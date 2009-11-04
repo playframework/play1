@@ -9,7 +9,8 @@ import play.exceptions.UnexpectedException;
 
 public class RequiredCheck extends AbstractAnnotationCheck<Required> {
     
-    final static String mes = "validation.required";
+	private static final long serialVersionUID = -1205888357816715160L;
+	final static String mes = "validation.required";
 
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         if (value == null) {
@@ -18,8 +19,8 @@ public class RequiredCheck extends AbstractAnnotationCheck<Required> {
         if (value instanceof String) {
             return value.toString().trim().length() > 0;
         }
-        if (value instanceof Collection) {
-            return ((Collection)value).size() > 0;
+        if (value instanceof Collection<?>) {
+            return ((Collection<?>)value).size() > 0;
         }
         if (value instanceof FileAttachment) {
             return ((FileAttachment)value).isSet();

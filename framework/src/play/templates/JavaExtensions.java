@@ -43,7 +43,7 @@ public class JavaExtensions {
     }
 
     public static String[] remove(String[] array, String s) {
-        List temp = new ArrayList(Arrays.asList(array));
+        List<String> temp = new ArrayList<String>(Arrays.asList(array));
         temp.remove(s);
         return (String[]) temp.toArray(new String[temp.size()]);
     }
@@ -203,7 +203,7 @@ public class JavaExtensions {
         return "";
     }
 
-    public static String pluralize(Collection n) {
+    public static String pluralize(Collection<?> n) {
         return pluralize(n.size());
     }
 
@@ -215,7 +215,7 @@ public class JavaExtensions {
         return "";
     }
 
-    public static String pluralize(Collection n, String plural) {
+    public static String pluralize(Collection<?> n, String plural) {
         return pluralize(n.size(), plural);
     }
 
@@ -227,7 +227,7 @@ public class JavaExtensions {
         return forms[0];
     }
 
-    public static String pluralize(Collection n, String[] forms) {
+    public static String pluralize(Collection<?> n, String[] forms) {
         return pluralize(n.size(), forms);
     }
 
@@ -261,7 +261,7 @@ public class JavaExtensions {
     /**
      * return the last item of a list or null if the List is null
      */
-    public static Object last(List items) {
+    public static Object last(List<?> items) {
         return (items == null) ? null : items.get(items.size() - 1);
     }
 
@@ -269,12 +269,12 @@ public class JavaExtensions {
      * concatenate items of a collection as a string separated with <tt>separator</tt>
      *  items toString() method should be implemented to provide a string representation
      */
-    public static String join(Collection items, String separator) {
+    public static String join(Collection<?> items, String separator) {
         if (items == null) {
             return "";
         }
         StringBuffer sb = new StringBuffer();
-        Iterator ite = items.iterator();
+        Iterator<?> ite = items.iterator();
         int i = 0;
         while (ite.hasNext()) {
             if (i++ > 0) {

@@ -8,7 +8,8 @@ import play.classloading.ApplicationClasses.ApplicationClass;
  */
 public class JavaCompilationException extends JavaException {
 
-    private IProblem problem;
+	private static final long serialVersionUID = -2528317604578002631L;
+	private IProblem problem;
 
     public JavaCompilationException(ApplicationClass applicationClass, IProblem problem) {
         super(applicationClass, problem.getSourceLineNumber(), problem.getMessage());

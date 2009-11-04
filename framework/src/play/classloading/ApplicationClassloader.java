@@ -3,6 +3,7 @@ package play.classloading;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.UnmodifiableClassException;
 import java.net.MalformedURLException;
@@ -20,13 +21,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
-import play.vfs.VirtualFile;
 import play.cache.Cache;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
+import play.vfs.VirtualFile;
 
 /**
  * The application classLoader. 
@@ -60,15 +62,15 @@ public class ApplicationClassloader extends ClassLoader {
      * You know ...
      */
     @Override
-    protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
+    protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 
-        Class c = findLoadedClass(name);
+        Class<?> c = findLoadedClass(name);
         if (c != null) {
             return c;
         }
         
         // First check if it's an application Class
-        Class applicationClass = loadApplicationClass(name);
+        Class<?> applicationClass = loadApplicationClass(name);
         if (applicationClass != null) {
             if (resolve) {
                 resolveClass(applicationClass);
@@ -82,7 +84,7 @@ public class ApplicationClassloader extends ClassLoader {
     
     // ~~~~~~~~~~~~~~~~~~~~~~~
     
-    protected Class loadApplicationClass(String name) {
+    protected Class<?> loadApplicationClass(String name) {
         long start = System.currentTimeMillis();
         ApplicationClass applicationClass = Play.classes.getApplicationClass(name);
         if (applicationClass != null) {
@@ -312,9 +314,9 @@ public class ApplicationClassloader extends ClassLoader {
      * Try to load all .java files found.
      * @return The list of well defined Class
      */
-    public List<Class> getAllClasses() {
+    public List<Class<?>> getAllClasses() {
         if (allClasses == null) {
-            allClasses = new ArrayList<Class>();
+            allClasses = new ArrayList<Class<?>>();
             List<ApplicationClass> all = new ArrayList<ApplicationClass>();
             
             // Let's plugins play
@@ -325,7 +327,7 @@ public class ApplicationClassloader extends ClassLoader {
             for (VirtualFile virtualFile : Play.javaPath) {
                 all.addAll(getAllClasses(virtualFile));
             }
-            List<String> classNames = new ArrayList();
+            List<String> classNames = new ArrayList<String>();
             for (int i = 0; i < all.size(); i++) {
                 if(all.get(i) != null && !all.get(i).compiled) {
                     classNames.add(all.get(i).name);
@@ -333,29 +335,29 @@ public class ApplicationClassloader extends ClassLoader {
             }
             Play.classes.compiler.compile(classNames.toArray(new String[classNames.size()]));
             for (ApplicationClass applicationClass : Play.classes.all()) {
-                Class clazz = loadApplicationClass(applicationClass.name);
+                Class<?> clazz = loadApplicationClass(applicationClass.name);
                 if (clazz != null) {
                     allClasses.add(clazz);
                 }
             }
-            Collections.sort(allClasses, new Comparator<Class>() {
-                public int compare(Class o1, Class o2) {
+            Collections.sort(allClasses, new Comparator<Class<?>>() {
+                public int compare(Class<?> o1, Class<?> o2) {
                     return o1.getName().compareTo(o2.getName());
                 }
             });
         }
         return allClasses;
     }
-    List<Class> allClasses = null;
+    List<Class<?>> allClasses = null;
 
     /**
      * Retrieve all application classes assignable to this class.
      * @param clazz The superclass, or the interface.
      * @return A list of class
      */
-    public List<Class> getAssignableClasses(Class clazz) {
+    public List<Class<?>> getAssignableClasses(Class<?> clazz) {
         getAllClasses();
-        List<Class> results = new ArrayList<Class>();
+        List<Class<?>> results = new ArrayList<Class<?>>();
         for (ApplicationClass c : Play.classes.getAssignableClasses(clazz)) {
             results.add(c.javaClass);
         }
@@ -367,7 +369,7 @@ public class ApplicationClassloader extends ClassLoader {
      * @param name The class name.
      * @return a class
      */
-    public Class getClassIgnoreCase(String name) {
+    public Class<?> getClassIgnoreCase(String name) {
         getAllClasses();
         for (ApplicationClass c : Play.classes.all()) {
             if (c.name.equalsIgnoreCase(name)) {
@@ -382,18 +384,18 @@ public class ApplicationClassloader extends ClassLoader {
      * @param clazz The annotation class.
      * @return A list of class
      */
-    public List<Class> getAnnotatedClasses(Class clazz) {
+    public List<Class<? extends Annotation>> getAnnotatedClasses(Class<? extends Annotation> clazz) {
         getAllClasses();
-        List<Class> results = new ArrayList<Class>();
+        List<Class<? extends Annotation>> results = new ArrayList<Class<? extends Annotation>>();
         for (ApplicationClass c : Play.classes.getAnnotatedClasses(clazz)) {
-            results.add(c.javaClass);
+            results.add((Class<? extends Annotation>)c.javaClass);
         }
         return results;
     }
     
-    public List<Class> getAnnotatedClasses(Class[] clazz) {
-        List<Class> results = new ArrayList<Class>();
-        for(Class cl : clazz) {
+    public List<Class<? extends Annotation>> getAnnotatedClasses(Class<? extends Annotation>[] clazz) {
+        List<Class<? extends Annotation>> results = new ArrayList<Class<? extends Annotation>>();
+        for(Class<? extends Annotation> cl : clazz) {
             results.addAll(getAnnotatedClasses(cl));
         }
         return results;

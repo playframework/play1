@@ -9,7 +9,8 @@ import net.sf.oval.context.OValContext;
 
 public class MatchCheck extends AbstractAnnotationCheck<Match> {
 
-    final static String mes = "validation.match";
+	private static final long serialVersionUID = 3582799870785146808L;
+	final static String mes = "validation.match";
     Pattern pattern = null;
 
     @Override
@@ -27,7 +28,7 @@ public class MatchCheck extends AbstractAnnotationCheck<Match> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap();
+        Map<String, String> messageVariables = new HashMap<String, String>();
         messageVariables.put("pattern", pattern.toString());
         return messageVariables;
     }

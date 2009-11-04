@@ -11,7 +11,8 @@ import play.classloading.ApplicationClasses.ApplicationClass;
  */
 public class DatabaseException extends PlayException implements SourceAttachment {
     
-    String sourceFile;
+	private static final long serialVersionUID = 2670390873160399180L;
+	String sourceFile;
     List<String> source;
     Integer line;    
     

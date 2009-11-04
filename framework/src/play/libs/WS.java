@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.httpclient.ConnectTimeoutException;
@@ -403,8 +402,8 @@ public class WS extends PlayPlugin {
             ArrayList<NameValuePair> nvps = new ArrayList<NameValuePair>();
             for (Map.Entry<String, Object> entry : parameters.entrySet()) {
                 Object value = entry.getValue();
-                if (value instanceof Collection) {
-                    for (Object v : (Collection) value) {
+                if (value instanceof Collection<?>) {
+                    for (Object v : (Collection<?>) value) {
                         NameValuePair nvp = new NameValuePair();
                         nvp.setName(entry.getKey());
                         nvp.setValue(v.toString());
@@ -689,9 +688,9 @@ public class WS extends PlayPlugin {
                 if (this.parameters != null) {
                     for (String key : this.parameters.keySet()) {
                         Object value = this.parameters.get(key);
-                        if (value instanceof Collection || value.getClass().isArray()) {
-                            Collection values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection) value;
-                            for (Object v : (Collection) values) {
+                        if (value instanceof Collection<?> || value.getClass().isArray()) {
+                            Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
+                            for (Object v : (Collection<?>) values) {
                                 parts.add(new StringPart(key, v.toString(), "utf-8"));
                             }
                         } else {
@@ -876,10 +875,10 @@ public class WS extends PlayPlugin {
                 Object value = this.parameters.get(key);
 
                 if (value != null) {
-                    if (value instanceof Collection || value.getClass().isArray()) {
-                        Collection values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection) value;
+                    if (value instanceof Collection<?> || value.getClass().isArray()) {
+                        Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
                         boolean first = true;
-                        for (Object v : (Collection) values) {
+                        for (Object v : (Collection<?>) values) {
                             if (!first) {
                                 sb.append("&");
                             }

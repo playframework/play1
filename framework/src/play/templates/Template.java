@@ -63,7 +63,7 @@ public class Template {
     public String groovySource;
     public Map<Integer, Integer> linesMatrix = new HashMap<Integer, Integer>();
     public Set<Integer> doBodyLines = new HashSet<Integer>();
-    public Class compiledTemplate;
+    public Class<?> compiledTemplate;
     public String compiledTemplateName;
     public Long timestamp = System.currentTimeMillis();
 
@@ -78,7 +78,7 @@ public class Template {
             super(Play.classloader);
         }
 
-        public Class defineTemplate(String name, byte[] byteCode) {
+        public Class<?> defineTemplate(String name, byte[] byteCode) {
             return defineClass(name, byteCode, 0, byteCode.length, Play.classloader.protectionDomain);
         }
     }
@@ -96,7 +96,7 @@ public class Template {
                 for (int i = 4; i < lines.length; i = i + 2) {
                     String className = lines[i];
                     byte[] byteCode = Codec.decodeBASE64(lines[i + 1]);
-                    Class c = tClassLoader.defineTemplate(className, byteCode);
+                    Class<?> c = tClassLoader.defineTemplate(className, byteCode);
                     if (compiledTemplate == null) {
                         compiledTemplate = c;
                     }
@@ -366,7 +366,7 @@ public class Template {
             TagContext.exitTag();
         }
 
-        public Class _(String className) throws Exception {
+        public Class<?> _(String className) throws Exception {
             return Play.classloader.loadClass(className);
         }
 
@@ -418,7 +418,6 @@ public class Template {
             }
 
             @Override
-            @SuppressWarnings("unchecked")
             public Object invokeMethod(String name, Object param) {
                 try {
                     if (controller == null) {

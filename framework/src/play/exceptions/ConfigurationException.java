@@ -5,7 +5,9 @@ package play.exceptions;
  */
 public class ConfigurationException extends PlayException {
 
-    public ConfigurationException(String message) {
+	private static final long serialVersionUID = -841058683506879539L;
+
+	public ConfigurationException(String message) {
         super(message);
     }
 

@@ -24,9 +24,9 @@ public class TestEngine {
 
     static ExecutorService executor = Executors.newCachedThreadPool();
 
-    public static List<Class> allUnitTests() {
-        List<Class> classes = Play.classloader.getAssignableClasses(UnitTest.class);
-        for(ListIterator<Class> it = classes.listIterator(); it.hasNext(); ) {
+    public static List<Class<?>> allUnitTests() {
+        List<Class<?>> classes = Play.classloader.getAssignableClasses(UnitTest.class);
+        for(ListIterator<Class<?>> it = classes.listIterator(); it.hasNext(); ) {
             if(Modifier.isAbstract(it.next().getModifiers())) {
                 it.remove();
             }
@@ -34,9 +34,9 @@ public class TestEngine {
         return classes;
     }
 
-    public static List<Class> allFunctionalTests() {
-        List<Class> classes =  Play.classloader.getAssignableClasses(FunctionalTest.class);
-        for(ListIterator<Class> it = classes.listIterator(); it.hasNext(); ) {
+    public static List<Class<?>> allFunctionalTests() {
+        List<Class<?>> classes =  Play.classloader.getAssignableClasses(FunctionalTest.class);
+        for(ListIterator<Class<?>> it = classes.listIterator(); it.hasNext(); ) {
             if(Modifier.isAbstract(it.next().getModifiers())) {
                 it.remove();
             }
@@ -73,7 +73,7 @@ public class TestEngine {
 
         try {
             // Load test class
-            final Class testClass = Play.classloader.loadClass(name);
+            final Class<?> testClass = Play.classloader.loadClass(name);
 
             // VirtualClient test
             if(FunctionalTest.class.isAssignableFrom(testClass)) {
