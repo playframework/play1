@@ -13,6 +13,10 @@ public class TagContext {
     
     public String tagName;
     public Map<String,Object> data = new HashMap();
+
+    public TagContext(String tagName) {
+        this.tagName = tagName;
+    }
     
     public static void init() {
         currentStack.set(new Stack());
@@ -20,7 +24,7 @@ public class TagContext {
     }
     
     public static void enterTag(String name) {
-        currentStack.get().add(new TagContext());
+        currentStack.get().add(new TagContext(name));
     }
     
     public static void exitTag() {
@@ -55,5 +59,12 @@ public class TagContext {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return tagName+""+data;
+    }
+
+
 
 }

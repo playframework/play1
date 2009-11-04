@@ -1,4 +1,8 @@
 #{extends 'main.html' /}
 #{set title:'Home' /}
 
-<h1>Welcome x${a}x</h1>
+#{errors}
+    <li>${error.key} -> ${error.message}</li>
+#{/errors}
+
+<h1>Welcome ${name ?: 'Guest'} - Age is ${age} - Yop is ${yop}</h1>

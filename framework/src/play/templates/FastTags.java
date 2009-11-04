@@ -6,7 +6,6 @@ import java.io.StringWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.exceptions.TagInternalException;
@@ -20,6 +19,10 @@ import play.templates.Template.ExecutableTemplate;
  * Fast tags implementation
  */
 public class FastTags {
+
+    public static void _verbatim(Map args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        out.println(JavaExtensions.toString(body));
+    }
 
     /**
      * Generates a html form element linked to a controller action

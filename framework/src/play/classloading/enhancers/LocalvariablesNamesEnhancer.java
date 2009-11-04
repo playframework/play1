@@ -182,9 +182,6 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         applicationClass.enhancedByteCode = ctClass.toBytecode();
         ctClass.defrost();
         
-        IO.write(ctClass.toBytecode(), new File("/tmp/lv_"+applicationClass.name+".class"));
-
-        
     }
     
     /**

@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -15,13 +14,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.FutureTask;
-import org.apache.commons.lang.StringUtils;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.bytecode.SourceFileAttribute;
+import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
 import play.mvc.After;
 import play.mvc.Before;
-import play.mvc.Controller;
 import play.mvc.Finally;
 import play.mvc.With;
 
@@ -29,7 +30,17 @@ import play.mvc.With;
  * Java utils
  */
 public class Java {
-    
+
+    public static String[] extractInfosFromByteCode(byte[] code) {
+        try {
+            CtClass ctClass = ClassPool.getDefault().makeClass(new ByteArrayInputStream(code));
+            String sourceName = ((SourceFileAttribute) ctClass.getClassFile().getAttribute("SourceFile")).getFileName();
+            return new String[] {ctClass.getName(), sourceName};
+        } catch (Exception e) {
+            throw new UnexpectedException("Cannot read a scala generated class using javassist", e);
+        }
+    }
+
     /**
      * Try to discover what is hidden under a FutureTask (hack)
      */
@@ -41,13 +52,13 @@ public class Java {
             Field callableField = sync.getClass().getDeclaredField("callable");
             callableField.setAccessible(true);
             Object callable = callableField.get(sync);
-            if(callable.getClass().getSimpleName().equals("RunnableAdapter")) {
+            if (callable.getClass().getSimpleName().equals("RunnableAdapter")) {
                 Field taskField = callable.getClass().getDeclaredField("task");
                 taskField.setAccessible(true);
                 return taskField.get(callable);
             }
             return callable;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -61,7 +72,7 @@ public class Java {
     public static Method findActionMethod(String name, Class clazz) {
         while (!clazz.getName().equals("java.lang.Object")) {
             for (Method m : clazz.getDeclaredMethods()) {
-                if (m.getName().equalsIgnoreCase(name) && Modifier.isPublic(m.getModifiers()) && Modifier.isStatic(m.getModifiers())) {
+                if (m.getName().equalsIgnoreCase(name) && Modifier.isPublic(m.getModifiers())) {
                     // Check that it is not an intercepter
                     if (!m.isAnnotationPresent(Before.class) && !m.isAnnotationPresent(After.class) && !m.isAnnotationPresent(Finally.class)) {
                         return m;
@@ -108,20 +119,19 @@ public class Java {
             types[i] = args[i].getClass();
         }
         Method m = null;
-        while(!clazz.equals(Object.class) && m == null) {
+        while (!clazz.equals(Object.class) && m == null) {
             try {
                 m = clazz.getDeclaredMethod(method, types);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 clazz = clazz.getSuperclass();
             }
         }
-        if(m != null) {
+        if (m != null) {
             m.setAccessible(true);
             return m.invoke(null, args);
         }
         throw new NoSuchMethodException(method);
     }
-
 
     public static Object invokeStatic(Method method, Map<String, String[]> args) throws Exception {
         return method.invoke(null, prepareArgs(method, args));
@@ -149,7 +159,7 @@ public class Java {
     public static String[] parameterNames(Method method) throws Exception {
         try {
             return (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes())).get(null);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new UnexpectedException("Cannot read parameter names for " + method);
         }
     }
@@ -210,14 +220,14 @@ public class Java {
      */
     public static List<Method> findAllAnnotatedMethods(Class clazz, Class annotationType) {
         List<Method> methods = new ArrayList<Method>();
-        while (!clazz.equals(Object.class) && Controller.class.isAssignableFrom(clazz)) {
+        while (!clazz.equals(Object.class) && ControllerSupport.class.isAssignableFrom(clazz)) {
             for (Method method : clazz.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(annotationType)) {
                     methods.add(method);
                 }
             }
-            if(clazz.isAnnotationPresent(With.class)) {
-                for(Class withClass : ((With)clazz.getAnnotation(With.class)).value()) {
+            if (clazz.isAnnotationPresent(With.class)) {
+                for (Class withClass : ((With) clazz.getAnnotation(With.class)).value()) {
                     methods.addAll(findAllAnnotatedMethods(withClass, annotationType));
                 }
             }

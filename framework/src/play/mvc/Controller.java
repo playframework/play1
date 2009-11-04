@@ -305,7 +305,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * @param action The fully qualified action name (ex: Application.index)
      * @param args Method arguments
      */
-    protected static void redirect(String action, Object... args) {
+    public static void redirect(String action, Object... args) {
         redirect(action, false, args);
     }
 
@@ -315,7 +315,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * @param permanent true -> 301, false -> 302
      * @param args Method arguments
      */
-    protected static void redirect(String action, boolean permanent, Object... args) {
+    public static void redirect(String action, boolean permanent, Object... args) {
         try {
             Map<String, Object> r = new HashMap<String, Object>();
             Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
@@ -457,7 +457,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * @return Annotation object or null if not found
      */
     protected static Class getControllerClass() {
-        return Play.classloader.getClassIgnoreCase("controllers." + Http.Request.current().controller);
+        return Http.Request.current().controllerClass;
     }
 
     /**

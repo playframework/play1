@@ -57,7 +57,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      */
     public void onTemplateCompilation(Template template) {
 		
-	} 
+    }
 
     /**
      * Let a chance to this plugin to fully manage this request

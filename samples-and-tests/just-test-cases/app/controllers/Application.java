@@ -26,6 +26,15 @@ public class Application extends Controller {
         render();
     }
     
+    public static void tagContexts() {
+        render();
+    }
+    
+    public static void escapeData() {
+        String oops = "&nbsp;<i>Yop <!-- Coucou --></i>&nbsp;";
+        render(oops);
+    }
+    
     public static void aGetForm(String name) {
         render("Application/hello.html", name);
     }

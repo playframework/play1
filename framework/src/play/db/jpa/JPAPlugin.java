@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Properties;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import org.apache.log4j.Level;

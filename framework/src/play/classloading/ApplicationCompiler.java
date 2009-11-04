@@ -25,15 +25,15 @@ import org.eclipse.jdt.internal.compiler.Compiler;
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.exceptions.JavaCompilationException;
-import play.exceptions.UnexpectedException; 
+import play.exceptions.CompilationException;
+import play.exceptions.UnexpectedException;
 
 /**
  * Java compiler (uses eclipse JDT)
  */
 public class ApplicationCompiler {
 
-    Map<String,Boolean> packagesCache = new HashMap<String, Boolean>();
+    Map<String, Boolean> packagesCache = new HashMap<String, Boolean>();
     ApplicationClasses applicationClasses;
     Map<String, String> settings;
 
@@ -68,7 +68,7 @@ public class ApplicationCompiler {
 
         CompilationUnit(String pClazzName) {
             clazzName = pClazzName;
-            if(pClazzName.contains("$")) {
+            if (pClazzName.contains("$")) {
                 pClazzName = pClazzName.substring(0, pClazzName.indexOf("$"));
             }
             fileName = pClazzName.replace('.', '/') + ".java";
@@ -108,7 +108,7 @@ public class ApplicationCompiler {
     public void compile(String[] classNames) {
 
         ICompilationUnit[] compilationUnits = new CompilationUnit[classNames.length];
-        for(int i=0; i<classNames.length; i++) {
+        for (int i = 0; i < classNames.length; i++) {
             compilationUnits[i] = new CompilationUnit(classNames[i]);
         }
         IErrorHandlingPolicy policy = DefaultErrorHandlingPolicies.exitOnFirstError();
@@ -142,8 +142,8 @@ public class ApplicationCompiler {
 
             private NameEnvironmentAnswer findType(final String name) {
                 try {
-                    
-                    if(name.startsWith("play.") || name.startsWith("java.") || name.startsWith("javax.")) {
+
+                    if (name.startsWith("play.") || name.startsWith("java.") || name.startsWith("javax.")) {
                         byte[] bytes = Play.classloader.getClassDefinition(name);
                         if (bytes != null) {
                             ClassFileReader classFileReader = new ClassFileReader(bytes, name.toCharArray(), true);
@@ -152,7 +152,7 @@ public class ApplicationCompiler {
                             return null;
                         }
                     }
-                    
+
                     char[] fileName = name.toCharArray();
                     ApplicationClass applicationClass = applicationClasses.getApplicationClass(name);
 
@@ -183,7 +183,7 @@ public class ApplicationCompiler {
                     throw new UnexpectedException(e);
                 }
             }
-            
+
             public boolean isPackage(char[][] parentPackageName, char[] packageName) {
                 // Rebuild something usable
                 StringBuilder sb = new StringBuilder();
@@ -195,9 +195,9 @@ public class ApplicationCompiler {
                 }
                 sb.append(new String(packageName));
                 String name = sb.toString();
-                if(packagesCache.containsKey(name)) {
+                if (packagesCache.containsKey(name)) {
                     return packagesCache.get(name).booleanValue();
-                }        
+                }
                 // Check if thera a .java or .class for this ressource
                 if (Play.classloader.getClassDefinition(name) != null) {
                     packagesCache.put(name, false);
@@ -206,7 +206,7 @@ public class ApplicationCompiler {
                 if (applicationClasses.getApplicationClass(name) != null) {
                     packagesCache.put(name, false);
                     return false;
-                }        
+                }
                 packagesCache.put(name, true);
                 return true;
             }
@@ -227,8 +227,13 @@ public class ApplicationCompiler {
                     for (int i = 0; i < problems.length; i++) {
                         IProblem problem = problems[i];
                         String className = new String(problem.getOriginatingFileName()).replace("/", ".");
-                        className = className.substring(0, className.length()-5);
-                        throw new JavaCompilationException(Play.classes.getApplicationClass(className), problem);
+                        className = className.substring(0, className.length() - 5);
+                        String message = problem.getMessage();
+                        if (problem.getID() == IProblem.CannotImportPackage) {
+                            // Non sense !
+                            message = problem.getArguments()[0] + " cannot be resolved";
+                        }
+                        throw new CompilationException(Play.classes.getApplicationClass(className).javaFile, message, problem.getSourceLineNumber());
                     }
                 }
                 // Something has been compiled
@@ -253,6 +258,7 @@ public class ApplicationCompiler {
          * The JDT compiler
          */
         Compiler jdtCompiler = new Compiler(nameEnvironment, policy, settings, compilerRequestor, problemFactory) {
+
             @Override
             protected void handleInternalException(Throwable e, CompilationUnitDeclaration ud, CompilationResult result) {
             }

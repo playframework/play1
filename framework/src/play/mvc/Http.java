@@ -157,6 +157,10 @@ public class Http {
          */
         public transient Method invokedMethod;
         /**
+         * The invoked controller class
+         */
+        public transient Class controllerClass;
+        /**
          * Free space to store your request specific data
          */
         public Map<String, Object> args = new HashMap();

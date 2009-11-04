@@ -21,7 +21,7 @@ public class JavaExecutionException extends JavaException {
 
     @Override
     public String getErrorTitle() {
-        return String.format("Java exception");
+        return String.format("Execution exception");
     }
 
     @Override

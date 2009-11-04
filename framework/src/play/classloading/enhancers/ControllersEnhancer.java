@@ -23,7 +23,7 @@ public class ControllersEnhancer extends Enhancer {
     public void enhanceThisClass(final ApplicationClass applicationClass) throws Exception {
         CtClass ctClass = makeClass(applicationClass);
         
-        if(!ctClass.subtypeOf(classPool.get(Controller.class.getName()))) {
+        if(!ctClass.subtypeOf(classPool.get(ControllerSupport.class.getName()))) {
             return;
         }
         
@@ -54,11 +54,11 @@ public class ControllersEnhancer extends Enhancer {
                     break;
                 }
             }
-            if (Modifier.isPublic(ctMethod.getModifiers()) && Modifier.isStatic(ctMethod.getModifiers()) && ctMethod.getReturnType().equals(CtClass.voidType) && !isHandler) {
+            if (Modifier.isPublic(ctMethod.getModifiers()) && ((ctClass.getName().endsWith("$") && !ctMethod.getName().contains("$default$")) || (Modifier.isStatic(ctMethod.getModifiers()) && ctMethod.getReturnType().equals(CtClass.voidType))) && !isHandler) {
                 try {
                     ctMethod.insertBefore(
                                "if(!play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.isActionCallAllowed()) {"+
-                                    "play.mvc.Controller.redirect(\""+ctClass.getName()+"."+ctMethod.getName()+"\", $args);"+
+                                    "play.mvc.Controller.redirect(\""+ctClass.getName().replace("$", "")+"."+ctMethod.getName()+"\", $args);"+
                                "}"+
                                "play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.stopActionCall();"
                     );

@@ -74,7 +74,7 @@ public class JPASupport implements Serializable {
     public static <T extends JPASupport> T edit(Object o, String name, Map<String, String[]> params) {
         try {
             BeanWrapper bw = new BeanWrapper(o.getClass());
-            bw.bind(name, o.getClass(), params, "", o);
+            bw.bind(name, o.getClass(), params, "", o, null);
             // relations
             for (Field field : o.getClass().getDeclaredFields()) {
                 boolean isEntity = false;

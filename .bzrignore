@@ -69,3 +69,5 @@ samples-and-tests/yabe/tmp
 modules/cobertura/lib
 modules/scala/lib/play-scala.jar
 samples-and-tests/with-scala/logs
+samples-and-tests/yabe-with-scala/logs
+samples-and-tests/yabe-with-scala/tmp

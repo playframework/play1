@@ -22,6 +22,12 @@
 	clickAndWait('sayHello')
 	assertTextPresent('Hello 日本語 !')
 	
+	// test escape
+	clickAndWait('back')
+	type('name', '&lt;i>Italic &amp;nbsp; Yop&lt;/i>')
+	clickAndWait('sayHello')
+	assertTextPresent('&lt;i>Italic &amp;nbsp; Yop&lt;/i>')
+	
 	// Check URL
 	assertAttribute('back@href', '/')
 	clickAndWait('back')
