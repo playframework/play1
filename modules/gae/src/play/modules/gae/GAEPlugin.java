@@ -31,7 +31,7 @@ import play.cache.Cache;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.jpa.JPA;
 import play.db.jpa.JPAPlugin;
-import play.db.jpa.JPQLDialect;
+import play.db.jpa.JPQL;
 import play.exceptions.UnexpectedException;
 import play.jobs.JobsPlugin;
 import play.libs.IO;
@@ -178,7 +178,7 @@ public class GAEPlugin extends PlayPlugin {
                     return Play.classloader;
                 }
             }, new HashMap());
-            JPQLDialect.instance = new DataNucleusDialect(); 
+            JPQL.instance = new DataNucleusDialect();
         }
 
         // Wrap the GAE cache
