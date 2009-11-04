@@ -46,7 +46,8 @@ public class JPASupport implements Serializable {
 	private static final long serialVersionUID = -7863942622935655536L;
 	public transient boolean willBeSaved = false;
 
-    public static <T extends JPASupport> T create(Class<?> type, String name, Map<String, String[]> params) {
+	@SuppressWarnings("unchecked")
+	public static <T extends JPASupport> T create(Class<?> type, String name, Map<String, String[]> params) {
         try {
             Object model = type.newInstance();
             return (T) edit(model, name, params);
@@ -55,11 +56,13 @@ public class JPASupport implements Serializable {
         }
     }
 
-    public <T extends JPASupport> T edit(String name, Params params) {
+	@SuppressWarnings("unchecked")
+	public <T extends JPASupport> T edit(String name, Params params) {
         return (T) edit(this, name, params.all());
     }
 
-    public static <T extends JPASupport> T edit(Object o, String name, Map<String, String[]> params) {
+	@SuppressWarnings("unchecked")
+	public static <T extends JPASupport> T edit(Object o, String name, Map<String, String[]> params) {
         try {
             BeanWrapper bw = new BeanWrapper(o.getClass());
             bw.bind(name, o.getClass(), params, "", o);
@@ -144,6 +147,7 @@ public class JPASupport implements Serializable {
     /**
      * store (ie insert) the entity.
      */
+    @SuppressWarnings("unchecked")
     public <T extends JPASupport> T save() {
         if (!em().contains(this)) {
             em().persist(this);
@@ -246,6 +250,7 @@ public class JPASupport implements Serializable {
     /**
      * Refresh the entity state.
      */
+    @SuppressWarnings("unchecked")
     public <T extends JPASupport> T refresh() {
         em().refresh(this);
         return (T) this;
@@ -254,6 +259,7 @@ public class JPASupport implements Serializable {
     /**
      * Merge this object to obtain a managed entity (usefull when the object comes from the Cache).
      */
+    @SuppressWarnings("unchecked")
     public <T extends JPASupport> T merge() {
         return (T) em().merge(this);
     }
@@ -262,6 +268,7 @@ public class JPASupport implements Serializable {
      * Delete the entity.
      * @return The deleted entity.
      */
+    @SuppressWarnings("unchecked")
     public <T extends JPASupport> T delete() {
         try {
             avoidCascadeSaveLoops.set(new ArrayList<JPASupport>());
@@ -474,6 +481,7 @@ public class JPASupport implements Serializable {
         /**
          * Try first();
          */
+        @SuppressWarnings("unchecked")
         @Deprecated
         public <T> T one() {
             try {
@@ -487,6 +495,7 @@ public class JPASupport implements Serializable {
             }
         }
 
+        @SuppressWarnings("unchecked")
         public <T> T first() {
             return (T) one();
         }
@@ -508,6 +517,7 @@ public class JPASupport implements Serializable {
         /**
          * Try fetch();
          */
+        @SuppressWarnings("unchecked")
         @Deprecated
         public <T> List<T> all() {
             try {
@@ -530,6 +540,7 @@ public class JPASupport implements Serializable {
          * @param max Max results to fetch
          * @return A list of entities
          */
+        @SuppressWarnings("unchecked")
         public <T> List<T> fetch(int max) {
             try {
                 query.setMaxResults(max);
@@ -552,6 +563,7 @@ public class JPASupport implements Serializable {
         /**
          * Try fetch(page, length);
          */
+        @SuppressWarnings("unchecked")
         @Deprecated
         public <T> List<T> page(int page, int length) {
             if (page < 1) {

@@ -101,7 +101,6 @@ public class BeanWrapper {
 
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
-            String name = method.getName();
             if (!isSetter(method)) {
                 continue;
             }

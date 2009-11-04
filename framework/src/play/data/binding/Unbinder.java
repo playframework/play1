@@ -20,7 +20,8 @@ public class Unbinder {
         unBind(result, src, src.getClass(), name);
     }
 
-    private static void unBind(Map<String, Object> result, Object src, Class srcClazz, String name) {
+    @SuppressWarnings("unchecked")
+    private static void unBind(Map<String, Object> result, Object src, Class<?> srcClazz, String name) {
         if (isDirect(srcClazz) || src == null) {
             if (!result.containsKey(name)) {
                 result.put(name, src != null ? src.toString() : null);
@@ -31,7 +32,7 @@ public class Unbinder {
         } else if (src.getClass().isArray()) {
             List<Object> objects = new ArrayList<Object>();
             result.put(name, objects);
-            Class clazz = src.getClass().getComponentType();
+            Class<?> clazz = src.getClass().getComponentType();
             int size = Array.getLength(src);
             for (int i = 0; i < size; i++) {
                 unBind(result, Array.get(src, i), clazz, name);
@@ -40,7 +41,7 @@ public class Unbinder {
             if (Map.class.isAssignableFrom(src.getClass())) {
                 throw new UnsupportedOperationException("Unbind won't work with maps yet");
             } else {
-                Collection c = (Collection) src;
+                Collection<?> c = (Collection<?>) src;
                 List<Object> objects = new ArrayList<Object>();
                 result.put(name, objects);
                 for (Object object : c) {
@@ -65,7 +66,7 @@ public class Unbinder {
         }
     }
 
-    public static boolean isDirect(Class clazz) {
+    public static boolean isDirect(Class<?> clazz) {
         return clazz.equals(String.class) || clazz.equals(Integer.class) || Enum.class.isAssignableFrom(clazz) || clazz.equals(Boolean.class) || clazz.equals(Long.class) || clazz.equals(Double.class) || clazz.equals(Float.class) || clazz.equals(Short.class) || clazz.equals(BigDecimal.class) || clazz.isPrimitive();
     }
 }

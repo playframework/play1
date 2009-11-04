@@ -12,7 +12,8 @@ import play.utils.Java;
 
 public class ValidCheck extends AbstractAnnotationCheck<Required> {
 
-    final static String mes = "validation.object";
+	private static final long serialVersionUID = 4245428250487460293L;
+	final static String mes = "validation.object";
     String key;
 
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {

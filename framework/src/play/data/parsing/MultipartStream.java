@@ -672,7 +672,9 @@ public class MultipartStream {
     public static class MalformedStreamException
             extends IOException {
 
-        /**
+		private static final long serialVersionUID = -3185160865979928598L;
+
+		/**
          * Constructs a <code>MalformedStreamException</code> with no
          * detail message.
          */
@@ -697,7 +699,9 @@ public class MultipartStream {
     public static class IllegalBoundaryException
             extends IOException {
 
-        /**
+		private static final long serialVersionUID = 5293557195023784271L;
+
+		/**
          * Constructs an <code>IllegalBoundaryException</code> with no
          * detail message.
          */

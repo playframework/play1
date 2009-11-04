@@ -180,6 +180,7 @@ public class ApacheMultipartParser extends DataParser {
          * @return The content charset passed by the agent or <code>null</code> if
          *         not defined.
          */
+        @SuppressWarnings("unchecked")
         public String getCharSet() {
             ParameterParser parser = new ParameterParser();
             parser.setLowerCaseNames(true);
@@ -541,6 +542,7 @@ public class ApacheMultipartParser extends DataParser {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public Map<String, String[]> parse(InputStream body) {
         Map<String, String[]> result = new HashMap<String, String[]>();
         try {
@@ -690,6 +692,7 @@ public class ApacheMultipartParser extends DataParser {
      * 
      * @return The boundary, as a byte array.
      */
+    @SuppressWarnings("unchecked")
     private byte[] getBoundary(String contentType) {
 
         ParameterParser parser = new ParameterParser();
@@ -719,6 +722,7 @@ public class ApacheMultipartParser extends DataParser {
      * 
      * @return The file name for the current <code>encapsulation</code>.
      */
+    @SuppressWarnings("unchecked")
     private String getFileName(Map<String, String> headers) {
         String fileName = null;
         String cd = getHeader(headers, CONTENT_DISPOSITION);
@@ -759,6 +763,7 @@ public class ApacheMultipartParser extends DataParser {
      * 
      * @return The field name for the current <code>encapsulation</code>.
      */
+    @SuppressWarnings("unchecked")
     private String getFieldName(Map<String, String> headers) {
         String fieldName = null;
         String cd = getHeader(headers, CONTENT_DISPOSITION);

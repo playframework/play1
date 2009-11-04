@@ -50,7 +50,8 @@ public class Binder {
     }
     public static Object MISSING = new Object();
 
-    static Object bindInternal(String name, Class clazz, Type type, Map<String, String[]> params, String prefix) {
+    @SuppressWarnings("unchecked")
+    static Object bindInternal(String name, Class<?> clazz, Type type, Map<String, String[]> params, String prefix) {
         try {
             if (isComposite(name + prefix, params.keySet())) {
                 BeanWrapper beanWrapper = getBeanWrapper(clazz);
@@ -80,7 +81,7 @@ public class Binder {
                 if (value == null || value.length == 0) {
                     return MISSING;
                 }
-                return Enum.valueOf(clazz, value[0]);
+                return Enum.valueOf((Class<? extends Enum>)clazz, value[0]);
             }
             // Map 
             if (Map.class.isAssignableFrom(clazz)) {
@@ -189,7 +190,7 @@ public class Binder {
         }
     }
 
-    public static Object bind(String name, Class clazz, Type type, Map<String, String[]> params) {
+    public static Object bind(String name, Class<?> clazz, Type type, Map<String, String[]> params) {
         Object result = null;
         // Let a chance to plugins to bind this object
         for(PlayPlugin plugin : Play.plugins) {

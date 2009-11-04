@@ -22,10 +22,10 @@ import play.templates.TemplateLoader;
  */
 public class Mailer implements LocalVariablesSupport {
 
-    protected static ThreadLocal<HashMap<String, Object>> infos = new ThreadLocal<HashMap<String, Object>>();
+    protected static ThreadLocal<Map<String, Object>> infos = new ThreadLocal<Map<String, Object>>();
 
     public static void setSubject(String subject, Object... args) {
-        HashMap map = infos.get();
+        Map<String, Object> map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
         }
@@ -33,22 +33,22 @@ public class Mailer implements LocalVariablesSupport {
         infos.set(map);
     }
 
-    public static void addRecipient(Object... recipients) {
-        HashMap map = infos.get();
+    public static void addRecipient(String... recipients) {
+    	Map<String, Object> map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
         }
-        List recipientsList = (List<String>) map.get("recipients");
+        List<String> recipientsList = (List<String>) map.get("recipients");
         if (recipientsList == null) {
             recipientsList = new ArrayList<String>();
             map.put("recipients", recipientsList);
         }
-        recipientsList.addAll(Arrays.asList(recipients));
+        recipientsList.addAll(Arrays.<String>asList(recipients));
         infos.set(map);
     }
 
     public static void addAttachment(Object... attachments) {
-        HashMap map = infos.get();
+        Map<String, Object> map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
         }
@@ -62,7 +62,7 @@ public class Mailer implements LocalVariablesSupport {
     }
 
     public static void setContentType(String contentType) {
-        HashMap map = infos.get();
+    	Map<String, Object> map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
         }
@@ -71,7 +71,7 @@ public class Mailer implements LocalVariablesSupport {
     }
 
     public static void setFrom(Object from) {
-        HashMap map = infos.get();
+    	Map<String, Object> map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
         }
@@ -80,7 +80,7 @@ public class Mailer implements LocalVariablesSupport {
     }
 
     public static void setReplyTo(Object replyTo) {
-        HashMap map = infos.get();
+    	Map<String, Object> map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
         }
@@ -89,7 +89,7 @@ public class Mailer implements LocalVariablesSupport {
     }
 
     public static Future<Boolean> send(Object... args) {
-        HashMap map = infos.get();
+    	Map<String, Object> map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
         }
@@ -112,8 +112,8 @@ public class Mailer implements LocalVariablesSupport {
             templateName = args[0].toString();
         }
 
-        Map<String, Object> templateHtmlBinding = new HashMap();
-        Map<String, Object> templateTextBinding = new HashMap();
+        Map<String, Object> templateHtmlBinding = new HashMap<String, Object>();
+        Map<String, Object> templateTextBinding = new HashMap<String, Object>();
         for (Object o : args) {
             List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
             for (String name : names) {

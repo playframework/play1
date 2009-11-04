@@ -12,5 +12,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface With { 
     
-    Class[] value() default {};
+    Class<?>[] value() default {};
 }

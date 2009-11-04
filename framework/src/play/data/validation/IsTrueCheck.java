@@ -6,7 +6,8 @@ import net.sf.oval.context.OValContext;
 
 public class IsTrueCheck extends AbstractAnnotationCheck<IsTrue> {
 
-    final static String mes = "validation.isTrue";
+	private static final long serialVersionUID = -882369383494343381L;
+	final static String mes = "validation.isTrue";
 
     @Override
     public void configure(IsTrue isTrue) {

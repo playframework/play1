@@ -384,6 +384,7 @@ public class ApplicationClassloader extends ClassLoader {
      * @param clazz The annotation class.
      * @return A list of class
      */
+    @SuppressWarnings("unchecked")
     public List<Class<? extends Annotation>> getAnnotatedClasses(Class<? extends Annotation> clazz) {
         getAllClasses();
         List<Class<? extends Annotation>> results = new ArrayList<Class<? extends Annotation>>();

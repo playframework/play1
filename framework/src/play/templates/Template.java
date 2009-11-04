@@ -196,7 +196,7 @@ public class Template {
             currentTemplate.set(this);
         }
         if (!args.containsKey("_body") && !args.containsKey("_isLayout") && !args.containsKey("_isInclude")) {
-            layoutData.set(new HashMap());
+            layoutData.set(new HashMap<Object, Object>());
             TagContext.init();
         }
         ExecutableTemplate t = (ExecutableTemplate) InvokerHelper.createScript(compiledTemplate, binding);
@@ -297,7 +297,7 @@ public class Template {
         return e;
     }
     public static ThreadLocal<Template> layout = new ThreadLocal<Template>();
-    public static ThreadLocal<Map> layoutData = new ThreadLocal<Map>();
+    public static ThreadLocal<Map<?, ?>> layoutData = new ThreadLocal<Map<?, ?>>();
     public static ThreadLocal<Template> currentTemplate = new ThreadLocal<Template>();
 
     /**

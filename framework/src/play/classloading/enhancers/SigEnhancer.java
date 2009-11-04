@@ -1,7 +1,6 @@
 package play.classloading.enhancers;
 
 import javassist.CtClass;
-import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.bytecode.CodeAttribute;

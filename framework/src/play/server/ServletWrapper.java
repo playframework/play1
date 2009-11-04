@@ -159,6 +159,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static Request parseRequest(HttpServletRequest httpServletRequest) throws Exception {
         Request request = new Http.Request();
         URI uri = new URI(httpServletRequest.getRequestURI());

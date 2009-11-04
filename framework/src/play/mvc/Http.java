@@ -28,7 +28,10 @@ public class Http {
      */
     public static class Header implements Serializable {
 
-        /**
+
+		private static final long serialVersionUID = -1454530873680278410L;
+
+		/**
          * Header name
          */
         public String name;
@@ -51,7 +54,9 @@ public class Http {
      */
     public static class Cookie implements Serializable {
 
-        /**
+		private static final long serialVersionUID = -2652645210872345641L;
+		
+		/**
          * Cookie name
          */
         public String name;
@@ -76,7 +81,9 @@ public class Http {
      */
     public static class Request implements Serializable {
 
-        /**
+		private static final long serialVersionUID = -7021636999707450862L;
+		
+		/**
          * Server host
          */
         public String host;
@@ -159,7 +166,7 @@ public class Http {
         /**
          * Free space to store your request specific data
          */
-        public Map<String, Object> args = new HashMap();
+        public Map<String, Object> args = new HashMap<String, Object>();
         /**
          * When the request has been received
          */

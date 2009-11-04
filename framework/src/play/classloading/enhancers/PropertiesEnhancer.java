@@ -183,39 +183,39 @@ public class PropertiesEnhancer extends Enhancer {
             }
         }
 
-        public static void invokeWriteProperty(Object o, String property, Class valueType, boolean value, String targetType, String invocationPoint) throws Throwable {
+        public static void invokeWriteProperty(Object o, String property, Class<?> valueType, boolean value, String targetType, String invocationPoint) throws Throwable {
             invokeWriteProperty(o, property, valueType, Boolean.valueOf(value), targetType, invocationPoint);
         }
 
-        public static void invokeWriteProperty(Object o, String property, Class valueType, byte value, String targetType, String invocationPoint) throws Throwable {
+        public static void invokeWriteProperty(Object o, String property, Class<?> valueType, byte value, String targetType, String invocationPoint) throws Throwable {
             invokeWriteProperty(o, property, valueType, Byte.valueOf(value), targetType, invocationPoint);
         }
 
-        public static void invokeWriteProperty(Object o, String property, Class valueType, char value, String targetType, String invocationPoint) throws Throwable {
+        public static void invokeWriteProperty(Object o, String property, Class<?> valueType, char value, String targetType, String invocationPoint) throws Throwable {
             invokeWriteProperty(o, property, valueType, Character.valueOf(value), targetType, invocationPoint);
         }
 
-        public static void invokeWriteProperty(Object o, String property, Class valueType, double value, String targetType, String invocationPoint) throws Throwable {
+        public static void invokeWriteProperty(Object o, String property, Class<?> valueType, double value, String targetType, String invocationPoint) throws Throwable {
             invokeWriteProperty(o, property, valueType, Double.valueOf(value), targetType, invocationPoint);
         }
 
-        public static void invokeWriteProperty(Object o, String property, Class valueType, float value, String targetType, String invocationPoint) throws Throwable {
+        public static void invokeWriteProperty(Object o, String property, Class<?> valueType, float value, String targetType, String invocationPoint) throws Throwable {
             invokeWriteProperty(o, property, valueType, Float.valueOf(value), targetType, invocationPoint);
         }
 
-        public static void invokeWriteProperty(Object o, String property, Class valueType, int value, String targetType, String invocationPoint) throws Throwable {
+        public static void invokeWriteProperty(Object o, String property, Class<?> valueType, int value, String targetType, String invocationPoint) throws Throwable {
             invokeWriteProperty(o, property, valueType, Integer.valueOf(value), targetType, invocationPoint);
         }
 
-        public static void invokeWriteProperty(Object o, String property, Class valueType, long value, String targetType, String invocationPoint) throws Throwable {
+        public static void invokeWriteProperty(Object o, String property, Class<?> valueType, long value, String targetType, String invocationPoint) throws Throwable {
             invokeWriteProperty(o, property, valueType, Long.valueOf(value), targetType, invocationPoint);
         }
 
-        public static void invokeWriteProperty(Object o, String property, Class valueType, short value, String targetType, String invocationPoint) throws Throwable {
+        public static void invokeWriteProperty(Object o, String property, Class<?> valueType, short value, String targetType, String invocationPoint) throws Throwable {
             invokeWriteProperty(o, property, valueType, Short.valueOf(value), targetType, invocationPoint);
         }
 
-        public static void invokeWriteProperty(Object o, String property, Class valueType, Object value, String targetType, String invocationPoint) throws Throwable {
+        public static void invokeWriteProperty(Object o, String property, Class<?> valueType, Object value, String targetType, String invocationPoint) throws Throwable {
             if (o == null) {
                 throw new NullPointerException("Ecriture de la propriété " + property + " sur un objet null de type " + targetType + " (" + invocationPoint + ")");
             }

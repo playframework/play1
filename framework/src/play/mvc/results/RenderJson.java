@@ -2,8 +2,6 @@ package play.mvc.results;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.InstanceCreator;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -16,13 +14,14 @@ import play.exceptions.UnexpectedException;
  */
 public class RenderJson extends Result {
 
-    String json;
+	private static final long serialVersionUID = -4536719233708857087L;
+	String json;
 
     public RenderJson(Object o) {
         json = new Gson().toJson(o);
     }
     
-    public RenderJson(Object o, JsonSerializer... adapters) {
+    public RenderJson(Object o, JsonSerializer<?>... adapters) {
         GsonBuilder gson = new GsonBuilder();
         for(Object adapter : adapters) {
             Type t = getMethod(adapter.getClass(), "serialize").getParameterTypes()[0];;
