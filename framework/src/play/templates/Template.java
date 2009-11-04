@@ -297,7 +297,7 @@ public class Template {
         return e;
     }
     public static ThreadLocal<Template> layout = new ThreadLocal<Template>();
-    public static ThreadLocal<Map<?, ?>> layoutData = new ThreadLocal<Map<?, ?>>();
+    public static ThreadLocal<Map> layoutData = new ThreadLocal<Map>();
     public static ThreadLocal<Template> currentTemplate = new ThreadLocal<Template>();
 
     /**
