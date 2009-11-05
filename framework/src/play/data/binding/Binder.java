@@ -29,7 +29,7 @@ import play.data.validation.Validation;
  */
 public class Binder {
 
-    static Map<Class, SupportedType> supportedTypes = new HashMap<Class, SupportedType>();    
+    static Map<Class, SupportedType> supportedTypes = new HashMap<Class, SupportedType>();
 
     static {
         supportedTypes.put(Date.class, new DateBinder());
@@ -38,7 +38,7 @@ public class Binder {
         supportedTypes.put(Calendar.class, new CalendarBinder());
         supportedTypes.put(Locale.class, new LocaleBinder());
     }
-    
+
     static Map<Class, BeanWrapper> beanwrappers = new HashMap<Class, BeanWrapper>();
 
     static BeanWrapper getBeanWrapper(Class clazz) {
@@ -57,7 +57,7 @@ public class Binder {
                 return beanWrapper.bind(name, type, params, prefix);
             }
             String[] value = params.get(name + prefix);
-            // Arrays types 
+            // Arrays types
             if (clazz.isArray()) {
                 if (value == null) {
                     value = params.get(name + prefix + "[]");
@@ -82,7 +82,7 @@ public class Binder {
                 }
                 return Enum.valueOf(clazz, value[0]);
             }
-            // Map 
+            // Map
             if (Map.class.isAssignableFrom(clazz)) {
                 Class keyClass = String.class;
                 Class valueClass = String.class;
@@ -236,133 +236,93 @@ public class Binder {
     }
 
     public static Object directBind(String value, Class clazz) throws Exception {
+
         if (clazz.equals(String.class)) {
             return value;
         }
+
+        boolean nullOrEmpty = value == null || value.trim().length() == 0;
+
         if (supportedTypes.containsKey(clazz)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            return supportedTypes.get(clazz).bind(value);
+            return nullOrEmpty ? null : supportedTypes.get(clazz).bind(value);
         }
-        if (clazz.getName().equals("int")) {
-            if (value == null || value.trim().length() == 0) {
-                return 0;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            return Integer.parseInt(value);
+
+        // Not A Number test
+        boolean nullOrEmptyOrNan = nullOrEmpty;
+
+        try {
+            if (!nullOrEmpty) Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            nullOrEmptyOrNan = true;
         }
-        if (clazz.equals(Integer.class)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            return Integer.parseInt(value);
+
+        // int or Integer binding
+        if (clazz.getName().equals("int") || clazz.equals(Integer.class)) {
+            if (nullOrEmptyOrNan)
+                return clazz.isPrimitive() ? 0 : null;
+
+            return Integer.parseInt(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
-        if (clazz.getName().equals("byte")) {
-            if (value == null || value.trim().length() == 0) {
-                return 0;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            Byte b = Byte.parseByte(value);
-            if(b == null) {
-                return 0;
-            }
-            return b;
+
+        // long or Long binding
+        if (clazz.getName().equals("long") || clazz.equals(Long.class)) {
+            if (nullOrEmptyOrNan)
+                return clazz.isPrimitive() ? 0l : null;
+
+            return Long.parseLong(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
-        if (clazz.equals(Byte.class)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            return Byte.parseByte(value);
+
+        // byte or Byte binding
+        if (clazz.getName().equals("byte") || clazz.equals(Byte.class)) {
+            if (nullOrEmptyOrNan)
+                return clazz.isPrimitive() ? (byte)0 : null;
+
+            return Byte.parseByte(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
-        if (clazz.getName().equals("double")) {
-            if (value == null || value.trim().length() == 0) {
-                return 0D;
-            }
-            return Double.parseDouble(value);
+
+        // short or Short binding
+        if (clazz.getName().equals("short") || clazz.equals(Short.class)) {
+            if (nullOrEmptyOrNan)
+                return clazz.isPrimitive() ? (short)0 : null;
+
+            return Short.parseShort(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
-        if (clazz.equals(Double.class)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            return Double.parseDouble(value);
-        }
-        if (clazz.getName().equals("short")) {
-            if (value == null || value.trim().length() == 0) {
-                return 0;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            return Short.parseShort(value);
-        }
-        if (clazz.equals(Short.class)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            return Short.parseShort(value);
-        }
-        if (clazz.getName().equals("long")) {
-            if (value == null || value.trim().length() == 0) {
-                return 0L;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            return Long.parseLong(value);
-        }
-        if (clazz.equals(Long.class)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            return Long.parseLong(value);
-        }
-        if (clazz.getName().equals("float")) {
-            if (value == null || value.trim().length() == 0) {
-                return 0;
-            }
+
+        // float or Float binding
+        if (clazz.getName().equals("float") || clazz.equals(Float.class)) {
+            if (nullOrEmptyOrNan)
+                return clazz.isPrimitive() ? 0f : null;
+
             return Float.parseFloat(value);
         }
-        if (clazz.equals(Float.class)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            return Float.parseFloat(value);
+
+        // double or Double binding
+        if (clazz.getName().equals("double") || clazz.equals(Double.class)) {
+            if (nullOrEmptyOrNan)
+                return clazz.isPrimitive() ? 0d : null;
+
+            return Double.parseDouble(value);
         }
+
+        // BigDecimal binding
         if (clazz.equals(BigDecimal.class)) {
-            if (value == null || value.trim().length() == 0) {
+            if (nullOrEmptyOrNan)
                 return null;
-            }
+
             return new BigDecimal(value);
         }
-        if (clazz.getName().equals("boolean")) {
-            if (value == null || value.trim().length() == 0) {
-                return false;
-            }
+
+        // boolean or Boolean binding
+        if (clazz.getName().equals("boolean") || clazz.equals(Boolean.class)) {
+            if (nullOrEmpty)
+                return clazz.isPrimitive() ? false : null;
+
+            if (value.equals("1") || value.toLowerCase().equals("on") || value.toLowerCase().equals("yes"))
+                return true;
+
             return Boolean.parseBoolean(value);
         }
-        if (clazz.equals(Boolean.class)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            return Boolean.parseBoolean(value);
-        }
+
         return null;
     }
 }
