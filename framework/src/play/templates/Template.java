@@ -348,6 +348,7 @@ public class Template {
             args.put("lang", getBinding().getVariables().get("lang"));
             args.put("messages", getBinding().getVariables().get("messages"));
             args.put("out", getBinding().getVariable("out"));
+            args.put("_attrs", attrs);
             // all other vars are template-specific
             args.put("_caller", getBinding().getVariables());
             if (attrs != null) {

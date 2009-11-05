@@ -824,7 +824,7 @@ try:
 		replaceAll(os.path.join(nbproject, 'project.xml'), r'%MODULES%', mr)
 		mr = ""
 		for dir in os.listdir(application_path):
-			if os.path.isdir(os.path.join(application_path, dir)) and dir not in ['app', 'conf', 'test', 'public', 'tmp', 'logs', 'nbproject', 'lib']:
+			if os.path.isdir(os.path.join(application_path, dir)) and dir not in ['app', 'conf', 'test', 'test-result', 'public', 'tmp', 'logs', 'nbproject', 'lib']:
 				mr = '<source-folder style="tree"><label>%s</label><location>%s</location></source-folder>' % (dir, dir)
 		replaceAll(os.path.join(nbproject, 'project.xml'), r'%MORE%', mr)
 		print "~ OK, the application is ready for netbeans"
