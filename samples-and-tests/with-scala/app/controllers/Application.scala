@@ -43,7 +43,7 @@ object Application extends Actions {
     
     @After
     private def log {
-        println(new User)
+        println(new User("tom@gmail.com", "secret", "Tom"))
         println(new Company)
         //renderText("Oops")
     }
