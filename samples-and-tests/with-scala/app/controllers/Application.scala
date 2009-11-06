@@ -6,6 +6,7 @@ import play._;
 import play.mvc._;
 import play.data.validation._
 import play.libs._
+import play.db.jpa.QueryFunctions._
 
 import models._;
 
@@ -22,7 +23,16 @@ object Application extends Actions {
         var yop = 8
         yop = yop + 3
         println(name)
-        render(name, age, yop)
+        
+        val users = find[User]("byPassword", "88style").fetch
+        
+        render(name, age, yop, users)
+    }
+    
+    def addOne() {
+        val user = new User("guillaume@gmail.com", "88style", "Guillaume")
+        user.save()
+        index(null)
     }
     
     def goJojo() {
@@ -43,7 +53,7 @@ object Application extends Actions {
     
     @After
     private def log {
-        println(new User)
+        println(new User("tom@gmail.com", "secret", "Tom"))
         println(new Company)
         //renderText("Oops")
     }

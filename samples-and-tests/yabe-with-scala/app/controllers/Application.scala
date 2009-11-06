@@ -8,6 +8,7 @@ import play.libs._
 import play.cache._
 import play.db.jpa._
 import play.db.jpa.Helpers._
+import play.db.jpa.QueryFunctions._
  
 import models._
 
@@ -38,13 +39,13 @@ object Application extends Actions {
     // ~~
  
     def index() { 
-        val frontPost = jpql("from Post order by postedAt desc").first[Post]
-        val olderPosts = jpql("from Post order by postedAt desc").from(1).fetch[Post](10)
+        val frontPost = find[Post]("order by postedAt desc").first 
+        val olderPosts = find[Post]("from Post order by postedAt desc").from(1).fetch(10)
         render(frontPost, olderPosts);
     }
     
     def show(id: Long) { 
-        val post = jpql("from Post where id = ?", id).first[Post]
+        val post = findById[Post](id)
         val randomID = Codec.UUID
         render(post, randomID)
     }

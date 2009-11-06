@@ -6,3 +6,13 @@
 #{/errors}
 
 <h1>Welcome ${name ?: 'Guest'} - Age is ${age} - Yop is ${yop}</h1>
+
+<h2>${users.size()} users</h2>
+
+#{list users, as:'user'}
+    <li>${user}</li>
+#{/list}
+
+<p>
+    <a href="@{addOne()}">Add one user</a>
+</p>
