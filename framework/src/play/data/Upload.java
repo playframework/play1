@@ -1,36 +1,38 @@
 package play.data;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.util.Streams;
 import play.data.parsing.TempFilePlugin;
 import play.exceptions.UnexpectedException;
+import play.libs.Files;
+import play.libs.IO;
 
 public class Upload {
 
     FileItem fileItem;
+    File defaultFile;
 
     public Upload(FileItem fileItem) {
         this.fileItem = fileItem;
+        defaultFile = new File(TempFilePlugin.createTempFolder(), fileItem.getFieldName() + File.separator + fileItem.getName());
+        defaultFile.getParentFile().mkdirs();
+        try {
+            fileItem.write(defaultFile);
+        } catch (Exception e) {
+            throw new IllegalStateException("Error when trying to write to file " + defaultFile.getAbsolutePath(), e);
+        }
     }
 
     public File asFile() {
-        File file = new File(TempFilePlugin.createTempFolder(), fileItem.getFieldName() + File.separator + fileItem.getName());
-        file.getParentFile().mkdirs();
-        try {
-            fileItem.write(file);
-        } catch (Exception e) {
-            throw new IllegalStateException("Error when trying to write to file " + file.getAbsolutePath(), e);
-        }
-        return file;
+        return defaultFile;
     }
     
     public File asFile(File file) {
         try {
-            fileItem.write(file);
+            Files.copy(defaultFile, file);
             return file;
         } catch (Exception ex) {
             throw new UnexpectedException(ex);
@@ -43,9 +45,7 @@ public class Upload {
 
     public byte[] asBytes() {
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            Streams.copy(asStream(), baos, true);
-            return baos.toByteArray();
+            return IO.readContent(defaultFile);
         } catch (IOException e) {
             throw new UnexpectedException(e);
         }
@@ -53,7 +53,7 @@ public class Upload {
 
     public InputStream asStream() {
         try {
-            return this.fileItem.getInputStream();
+            return new FileInputStream(defaultFile);
         } catch (IOException ex) {
             throw new UnexpectedException(ex);
         }

@@ -11,7 +11,6 @@ import play.Invoker;
 import play.Logger;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
-import play.exceptions.UnexpectedException;
 import play.libs.Time;
 
 /**
