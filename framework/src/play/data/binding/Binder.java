@@ -247,18 +247,9 @@ public class Binder {
             return nullOrEmpty ? null : supportedTypes.get(clazz).bind(value);
         }
 
-        // Not A Number test
-        boolean nullOrEmptyOrNan = nullOrEmpty;
-
-        try {
-            if (!nullOrEmpty) Double.parseDouble(value);
-        } catch (NumberFormatException e) {
-            nullOrEmptyOrNan = true;
-        }
-
         // int or Integer binding
         if (clazz.getName().equals("int") || clazz.equals(Integer.class)) {
-            if (nullOrEmptyOrNan)
+            if (nullOrEmpty)
                 return clazz.isPrimitive() ? 0 : null;
 
             return Integer.parseInt(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
@@ -266,7 +257,7 @@ public class Binder {
 
         // long or Long binding
         if (clazz.getName().equals("long") || clazz.equals(Long.class)) {
-            if (nullOrEmptyOrNan)
+            if (nullOrEmpty)
                 return clazz.isPrimitive() ? 0l : null;
 
             return Long.parseLong(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
@@ -274,7 +265,7 @@ public class Binder {
 
         // byte or Byte binding
         if (clazz.getName().equals("byte") || clazz.equals(Byte.class)) {
-            if (nullOrEmptyOrNan)
+            if (nullOrEmpty)
                 return clazz.isPrimitive() ? (byte)0 : null;
 
             return Byte.parseByte(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
@@ -282,7 +273,7 @@ public class Binder {
 
         // short or Short binding
         if (clazz.getName().equals("short") || clazz.equals(Short.class)) {
-            if (nullOrEmptyOrNan)
+            if (nullOrEmpty)
                 return clazz.isPrimitive() ? (short)0 : null;
 
             return Short.parseShort(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
@@ -290,7 +281,7 @@ public class Binder {
 
         // float or Float binding
         if (clazz.getName().equals("float") || clazz.equals(Float.class)) {
-            if (nullOrEmptyOrNan)
+            if (nullOrEmpty)
                 return clazz.isPrimitive() ? 0f : null;
 
             return Float.parseFloat(value);
@@ -298,7 +289,7 @@ public class Binder {
 
         // double or Double binding
         if (clazz.getName().equals("double") || clazz.equals(Double.class)) {
-            if (nullOrEmptyOrNan)
+            if (nullOrEmpty)
                 return clazz.isPrimitive() ? 0d : null;
 
             return Double.parseDouble(value);
@@ -306,7 +297,7 @@ public class Binder {
 
         // BigDecimal binding
         if (clazz.equals(BigDecimal.class)) {
-            if (nullOrEmptyOrNan)
+            if (nullOrEmpty)
                 return null;
 
             return new BigDecimal(value);
