@@ -1,11 +1,10 @@
 #{selenium 'Try simple binding'}
-
-    // byte
-    open('@{Users.wbyte(8, 90)}')
+	// byte
+	open('@{Users.wbyte(8, 90)}')
 	assertTextPresent('8,90')
 	open('@{Users.wbyte(8, 930)}')
 	assertTextPresent('8,null')
-	
+
 	//
 	open('@{Users.index()}')
 	type('name','Guillaume')
@@ -18,7 +17,7 @@
 	assertText('l', '0')
 	assertText('k', '')
 	assertText('birth', '')
-	
+
 	//
 	open('@{Users.index()}')
 	type('name','日本語')
@@ -48,7 +47,7 @@
 	assertText('l', '1455555')
 	assertText('k', '')
 	assertText('birth', '')	
-	
+
 	//
 	open('@{Users.index()}')
 	type('name','日本語')
@@ -63,9 +62,9 @@
 	assertText('l', '0')
 	assertText('k', '')
 	assertText('birth', '')
-	assertTextPresent('u.j: Incorrect value')
-	assertTextPresent('u.l: Incorrect value')
-	
+	assertText('j', '0')
+	assertText('l', '0')
+
 	//
 	open('@{Users.index()}')
 	type('name','日本語')
@@ -80,9 +79,9 @@
 	assertText('l', '0')
 	assertText('k', '')
 	assertText('birth', '')
-	assertTextPresent('u.i: Incorrect value')
-	assertTextPresent('u.k: Incorrect value')	
-	
+	assertText('i', '')
+	assertText('k', '')
+
 	//
 	open('@{Users.index()}')
 	type('name','日本語')
@@ -96,7 +95,7 @@
 	assertText('l', '0')
 	assertText('k', '')
 	assertText('birth', '')	
-	
+
 	//
 	open('@{Users.index()}')
 	type('name','日本語')
@@ -111,7 +110,7 @@
 	assertText('l', '0')
 	assertText('k', '')
 	assertText('birth', '')	
-	
+
 	//
 	open('@{Users.index()}')
 	type('name','日本語')
@@ -126,7 +125,7 @@
 	assertText('l', '0')
 	assertText('k', '')
 	assertText('birth', '')	
-	
+
 	//
 	open('@{Users.index()}')
 	type('birth','21/12/1980')
@@ -140,7 +139,7 @@
 	assertText('l', '0')
 	assertText('k', '')
 	assertText('birth', '21/12/1980 00:00')	
-	
+
 	//
 	open('@{Users.index()}')
 	type('birth','nimp')
@@ -153,9 +152,9 @@
 	assertText('j', '0')
 	assertText('l', '0')
 	assertText('k', '')
-	assertText('birth', '')	
+	assertText('birth', '')
 	assertTextPresent('u.birth: Incorrect value')
-	
+
 	//
 	open('@{Users.index()}')
 	type('birth','12/21/80')
@@ -167,5 +166,29 @@
 	assertText('j', '0')
 	assertText('l', '0')
 	assertText('k', '')
-	assertText('birth', '21/12/1980 00:00')	
+	assertText('birth', '21/12/1980 00:00')
+
+	//
+	open('@{Users.index()}')
+	type('i','12.25')
+	type('j','12.25')
+	type('l','12.25')
+	type('k','12.25')
+	clickAndWait('go')
+	assertText('i', '12')
+	assertText('j', '12')
+	assertText('l', '12')
+	assertText('k', '12')
+  
+	//
+	open('@{Users.index()}')
+	type('i','12.25nan')
+	type('j','12.25nan')
+	type('l','12.25nan')
+	type('k','12.25nan')
+	clickAndWait('go')
+	assertText('i', '')
+	assertText('j', '0')
+	assertText('l', '0')
+	assertText('k', '')
 #{/selenium}

@@ -33,7 +33,7 @@
 	clickAndWait('go')
 	assertText('id', 'ABC')
 	assertText('numbers', '3, 0, -12,')	
-	assertText('moreNumbers', '35657, -34435355,')	
+	assertText('moreNumbers', '35657, , -34435355,')	
 	assertText('tags', ', , ,')
 	
 	//
@@ -47,7 +47,7 @@
 	clickAndWait('go')
 	assertText('id', 'ABC')
 	assertText('numbers', '3, 0, -12,')	
-	assertText('moreMoreNumbers', '35657, -34435355,')	
+	assertText('moreMoreNumbers', '35657, , -34435355,')
 	assertText('tags', ', , ,')
 	
 	//
@@ -97,7 +97,7 @@
 	clickAndWait('go')
 	assertText('id', 'ABC')
 	assertText('numbers', '3, 0, -12,')	
-	assertText('moreNumbers', '35657, -34435355,')	
+	assertText('moreNumbers', '35657, , -34435355,')	
 	assertText('tags', 'fff, , 日本語,')
 	
 	//
@@ -119,7 +119,7 @@
 	clickAndWait('go')
 	assertText('id', 'ABC')
 	assertText('numbers', '3, 0, -12,')	
-	assertText('moreNumbers', '35657, -34435355,')	
+	assertText('moreNumbers', '35657, , -34435355,')	
 	assertText('tags', 'fff, , 日本語,')
 	assertTextPresent('56')
 	assertTextPresent('Paris')
