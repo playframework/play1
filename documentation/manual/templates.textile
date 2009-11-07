@@ -1,6 +1,6 @@
 h1. The template engine
 
-Play has an efficient templating system which allows to dynamically generate HTML, XML, JSON or any text based format document. The template engine uses "Groovy":http://groovy.codehaus.org/ as an expression language. A tag system allows you to create reusable functions.
+Play has an efficient templating system which allows to dynamically generate HTML, XML, JSON or any other text based format documents. The template engine uses "Groovy":http://groovy.codehaus.org/ as its expression language. Reuse your code with custom tags. Centralize your pages design with templates decorators. 
 
 Templates are stored in the **app/views** directory. 
 
@@ -17,6 +17,33 @@ The simplest way to make a dynamic element is to declare an expression. The synt
 For example:
 
 bc. <h1>Client ${client.name}</h1>
+
+h3. Template decorators : #{extends  /} and  #{doLayout  /}
+
+Decorators provide a clean solution to share a page layout (or design) across several templates. 
+
+p(note). Use "#{get}":tags#ageta and "#{set}":tags#aseta tags to share variables between the template and the decorator. 
+
+Embedding a page in a decorator is the matter of a one liner:
+
+bc. #{extends 'simpledesign.html' /}
+ 
+#{set title:'A decorated page' /}
+This content will be decorated.
+
+The decorator : **simpledesign.html**
+
+bc. <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>#{get 'title' /}</title>
+  <link rel="stylesheet" type="text/css" href="@{'/public/stylesheets/main.css'}" />
+</head>
+<body>
+  <h1>#{get 'title' /}</h1>
+  #{doLayout /}
+  <div class="footer">Built with the play! framework</div>
+</body>
+</html>
 
 h3. Tags : #{tagName /}
 
