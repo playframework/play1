@@ -1,8 +1,8 @@
 package play.modules.gae;
 
-import play.db.jpa.JPQLDialect;
+import play.db.jpa.JPQL;
 
-public class DataNucleusDialect extends JPQLDialect {
+public class DataNucleusDialect extends JPQL {
     
     @SuppressWarnings("unused")
     public String createFindByQuery(String entityName, String entityClass, String query, Object... params) {

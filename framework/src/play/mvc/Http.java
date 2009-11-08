@@ -218,7 +218,7 @@ public class Http {
 
         /**
          * Retrieve the current request
-         * @return
+         * @return the current request
          */
         public static Request current() {
             return current.get();
@@ -237,7 +237,7 @@ public class Http {
 
         /**
          * Get the request base (ex: http://localhost:9000
-         * @return
+         * @return the request base of the url (protocol, host and port)
          */
         public String getBase() {
             if (port == 80 || port == 443) {
@@ -309,7 +309,7 @@ public class Http {
 
         /**
          * Retrieve the current response
-         * @return
+         * @return the current response
          */
         public static Response current() {
             return current.get();

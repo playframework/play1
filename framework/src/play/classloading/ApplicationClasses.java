@@ -233,7 +233,7 @@ public class ApplicationClasses {
 
         /**
          * Is this class already compiled but not defined ?
-         * @return
+         * @return if the class is compiled but not defined
          */
         public boolean isDefinable() {
             return compiled && javaClass != null;
@@ -241,7 +241,7 @@ public class ApplicationClasses {
 
         /**
          * Compile the class from Java source
-         * @return
+         * @return the bytes that comprise the class file
          */
         public byte[] compile() {
             long start = System.currentTimeMillis();

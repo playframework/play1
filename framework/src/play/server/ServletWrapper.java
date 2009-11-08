@@ -49,7 +49,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     public void contextInitialized(ServletContextEvent e) {
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
-        Play.init(root, System.getProperty("play.id", ""));
+        Play.init(root, e.getServletContext().getInitParameter("play.id"));
         // Reload the rules, but this time with the context. Not really efficient through...
         Router.load(e.getServletContext().getContextPath());
     }
@@ -262,8 +262,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             // Flush some cookies
             try {
                 Map<String, Http.Cookie> cookies = Response.current().cookies;
-                for (String key : cookies.keySet()) {
-                    Http.Cookie cookie = cookies.get(key);
+                for (Http.Cookie cookie : cookies.values()) {
                     if (cookie.sendOnError) {
                         Cookie c = new Cookie(cookie.name, cookie.value);
                         c.setSecure(cookie.secure);
@@ -323,16 +322,16 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
         servletResponse.setStatus(response.status);
         Map<String, Http.Header> headers = response.headers;
-        for (String key : headers.keySet()) {
-            Http.Header hd = headers.get((key));
+        for (Map.Entry<String, Http.Header> entry : headers.entrySet()) {
+            Http.Header hd = entry.getValue();
+            String key = entry.getKey();
             for (String value : hd.values) {
                 servletResponse.addHeader(key, value);
             }
         }
 
         Map<String, Http.Cookie> cookies = response.cookies;
-        for (String key : cookies.keySet()) {
-            Http.Cookie cookie = cookies.get(key);
+        for (Http.Cookie cookie : cookies.values()) {
             Cookie c = new Cookie(cookie.name, cookie.value);
             c.setSecure(cookie.secure);
             c.setPath(cookie.path);

@@ -365,8 +365,8 @@ public class ApplicationClassloader extends ClassLoader {
 
     /**
      * Find a class in a case insensitive way
-     * @param nale The class name.
-     * @return A class
+     * @param name The class name.
+     * @return a class
      */
     public Class getClassIgnoreCase(String name) {
         getAllClasses();

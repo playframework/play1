@@ -9,7 +9,7 @@ object Helpers {
 class SQuery(val jpql: String, val args: Any*) {
 
     val jpaQuery = new JPASupport.JPAQuery(JPA.em().createQuery(jpql))
-    JPQLDialect.instance.bindParameters(jpaQuery.query, args.map(_.asInstanceOf[AnyRef]):_*)
+    JPQL.instance.bindParameters(jpaQuery.query, args.map(_.asInstanceOf[AnyRef]):_*)
     
     // ~~
 

@@ -350,14 +350,14 @@ public class Scope {
         }
 
         void _mergeWith(Map<String, String[]> map) {
-            for (String key : map.keySet()) {
-                Utils.Maps.mergeValueInMap(data, key, map.get(key));
+        	for (Map.Entry<String, String[]> entry : map.entrySet()) {
+                Utils.Maps.mergeValueInMap(data, entry.getKey(), entry.getValue());
             }
         }
 
         void __mergeWith(Map<String, String> map) {
-            for (String key : map.keySet()) {
-                Utils.Maps.mergeValueInMap(data, key, map.get(key));
+        	for (Map.Entry<String, String> entry : map.entrySet()) {
+                Utils.Maps.mergeValueInMap(data, entry.getKey(), entry.getValue());
             }
         }
 

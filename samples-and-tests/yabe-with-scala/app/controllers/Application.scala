@@ -2,19 +2,37 @@ package controllers
 
 import play._
 import play.mvc._
+import play.mvc.Scope._
 import play.data.validation._
 import play.libs._
 import play.cache._
+import play.db.jpa._
 import play.db.jpa.Helpers._
  
 import models._
+
+class RichRenderArgs(val renderArgs: RenderArgs) {
+    
+    def +=(variable: Tuple2[String, Any]) {
+        renderArgs.put(variable._1, variable._2)
+    }
+    
+}
+
+object RichActions {
+    
+    implicit def richRenderArgs(x: RenderArgs) = new RichRenderArgs(x) 
+    
+}
+
+import RichActions._
 
 object Application extends Actions {
     
     @Before
     private def addDefaults {
-        renderArgs.put("blogTitle", Play.configuration.getProperty("blog.title"))
-        renderArgs.put("blogBaseline", Play.configuration.getProperty("blog.baseline"))
+        renderArgs += "blogTitle" -> Play.configuration.getProperty("blog.title")
+        renderArgs += "blogBaseline" -> Play.configuration.getProperty("blog.baseline")
     }
     
     // ~~
