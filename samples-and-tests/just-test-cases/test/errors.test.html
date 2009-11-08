@@ -10,6 +10,11 @@
 	assertTextPresent('Java exception')
 	assertTextPresent('In /app/controllers/HasErrors.java (around line 15)')
 	
+	// 500
+	open('@{HasErrors.willThrowErrorToo()}')
+	assertTextPresent('Java exception')
+	assertTextPresent('In /app/controllers/HasErrors.java (around line 15)')
+	
 	// 404
 	open('/nimp')
 	assertTextPresent('Not found')
