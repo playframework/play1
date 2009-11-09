@@ -48,7 +48,9 @@ public class RenderBinary extends Result {
      */
     public RenderBinary(File file, String name) {
         this(file, name, false);
-        if(file == null) throw new RuntimeException("file is null");
+        if (file == null) {
+            throw new RuntimeException("file is null");
+        }
     }
 
     /**
@@ -58,7 +60,9 @@ public class RenderBinary extends Result {
      */
     public RenderBinary(File file) {
         this(file, file.getName(), true);
-        if(file == null) throw new RuntimeException("file is null");
+        if (file == null) {
+            throw new RuntimeException("file is null");
+        }
     }
 
     /**
@@ -70,28 +74,28 @@ public class RenderBinary extends Result {
         this.file = file;
         this.name = name;
         this.inline = inline;
-        if(file == null) throw new RuntimeException("file is null");
+        if (file == null) {
+            throw new RuntimeException("file is null");
+        }
     }
 
     @Override
     public void apply(Request request, Response response) {
         try {
-            if (name!=null)
+            if (name != null) {
                 setContentTypeIfNotSet(response, MimeTypes.getContentType(name));
+            }
             if (!response.headers.containsKey("Content-Disposition")) {
                 if (inline) {
-                    if(name == null) {
+                    if (name == null) {
                         response.setHeader("Content-Disposition", "inline");
                     } else {
-                        response.setHeader("Content-Disposition", "inline; filename*=utf-8'en-us'" + name);
+                        response.setHeader("Content-Disposition", "inline; filename=\"" + name + "\"");
                     }
                 } else if (name == null) {
                     response.setHeader("Content-Disposition", "attachment");
                 } else {
-                    // filename must be quoted and encoded (space, etc)
-                    name = encoder.encode(name);
-                    // see RFC2231 we dont support locale for now
-                    response.setHeader("Content-Disposition", "attachment; filename*=utf-8'en-us'" + name);
+                    response.setHeader("Content-Disposition", "attachment; filename=\"" + name + "\"");
                 }
             }
             if (file != null) {
