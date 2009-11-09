@@ -56,6 +56,10 @@ public class Http {
          */
         public String name;
         /**
+         * Cookie domain
+         */
+        public String domain;
+        /**
          * Cookie path
          */
         public String path = "/";
@@ -67,8 +71,14 @@ public class Http {
          * Cookie value
          */
         public String value;
-        public boolean sendOnError = false;
+        /**
+         * Cookie max-age
+         */
         public Integer maxAge;
+        /**
+         * Don't use
+         */
+        public boolean sendOnError = false;
     }
 
     /**
@@ -336,6 +346,7 @@ public class Http {
             h.values.add(value);
             headers.put(name, h);
         }
+
 
         /**
          * Set a new cookie

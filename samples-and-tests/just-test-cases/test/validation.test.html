@@ -1,0 +1,21 @@
+#{selenium 'Test validation'}
+
+	open('@{Validation.index()}')
+	assertTextPresent('[Required, Required, Validation failed]')
+	
+	open('@{Validation.index()}?bottle.name1=Coucou')
+	assertTextPresent('[Required, Validation failed]')
+	
+	open('@{Validation.index()}?bottle.name2=Ho')
+	assertTextPresent('[Required, Minimal size is 3, Validation failed]')
+	
+	open('@{Validation.index()}?bottle.name2=Hop')
+	assertTextPresent('[Required, Validation failed]')
+	
+	open('@{Validation.index()}?bottle.name1=Ye&bottle.name2=Hop')
+	assertTextPresent('[wrong.bottle, Validation failed]')
+	
+	open('@{Validation.index()}?bottle.name1=Hop&bottle.name2=Hop')
+	assertTextPresent('[]')
+
+#{/selenium}

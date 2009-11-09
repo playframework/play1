@@ -264,7 +264,7 @@ try:
 
 		memory_in_args=False
 		for arg in java_args:
-			if arg.startswith('Xm'):
+			if arg.startswith('-Xm'):
 				memory_in_args=True
 		if not memory_in_args:
 			memory = readConf('jvm.memory')

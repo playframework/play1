@@ -15,6 +15,12 @@ public class HasErrors extends Controller {
         int a = 9/0;
         renderText(a);
     }
-    
+
+    /**
+     * This test fix for #478315
+     */
+    public static void willThrowErrorToo() {
+        render("/HasErrors/index.html");
+    }
 }
 
