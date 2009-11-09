@@ -22,7 +22,21 @@ trait Defaults extends Actions {
     
 }
 
-object Application extends Actions with Defaults {
+trait Log extends Actions {
+    
+    @Before
+    private def enter {
+        println("ENTER")
+    }
+    
+    @After
+    private def exit {
+        println("EXIT")
+    }
+    
+}
+
+object Application extends Actions with Defaults with Log {
  
     def index() { 
         val frontPost = find[Post]("order by postedAt desc").first 
