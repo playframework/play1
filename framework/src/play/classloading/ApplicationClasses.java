@@ -222,11 +222,6 @@ public class ApplicationClasses {
                     throw new UnexpectedException("While applying " + plugin + " on " + name, e);
                 }
             }
-            try {
-                IO.write(this.enhancedByteCode, new File(Play.tmpDir, name+".class"));
-            } catch(Throwable e) {
-                //
-            }
             return this.enhancedByteCode;
 
         }

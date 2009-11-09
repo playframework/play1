@@ -23,7 +23,8 @@ object QueryFunctions {
 class ScalaQuery[T](val query: JPASupport.JPAQuery) {
 
     def first = query.first().asInstanceOf[T]
-    def fetch = asList[T](query.fetch())
+    def fetch() = asList[T](query.fetch())
+    def all = fetch()
     def fetch(size: Int) = asList[T](query.fetch(size))
     def from(offset: Int) = {
         query.from(offset)

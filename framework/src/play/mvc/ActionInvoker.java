@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import play.mvc.Router.Route;
 import play.mvc.results.Result;
 import java.lang.reflect.InvocationTargetException;
@@ -287,7 +288,10 @@ public class ActionInvoker {
     }
 
     public static Object invokeControllerMethod(Method method, Object[] args) throws Exception {
-        if(Modifier.isStatic(method.getModifiers())) {
+        if(Modifier.isStatic(method.getModifiers()) && !method.getDeclaringClass().getName().matches("^controllers\\..*\\$class$")) {
+            return method.invoke(null, args);
+        } else if(Modifier.isStatic(method.getModifiers())) {
+            args[0] = Http.Request.current().controllerClass.getDeclaredField("MODULE$").get(null);
             return method.invoke(null, args);
         } else {
             Object instance = null;
