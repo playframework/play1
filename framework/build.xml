@@ -63,11 +63,15 @@
                windowtitle="Play! API">
             <classpath refid="project.classpath"/>
             <doctitle><![CDATA[<h1>Play! ${version}</h1>]]></doctitle>
-            <bottom><![CDATA[<a href="http://guillaume.bort.fr">Guillaume Bort</a> & <a href="http://www.zenexity.fr">zenexity</a> - Distributed under <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache 2 licence</a>, without any warrantly]]></bottom>
+            <bottom><![CDATA[<a href="http://guillaume.bort.fr">Guillaume Bort</a> &amp; <a href="http://www.zenexity.fr">zenexity</a> - Distributed under <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache 2 licence</a>, without any warrantly]]></bottom>
             <tag name="todo" scope="all" description="To do:"/>
             <group title="Libs" packages="play.libs.*"/>
-            <link offline="false" href="http://java.sun.com/j2se/1.5.0/docs/api/" />
-            <link href="http://developer.java.sun.com/developer/products/xml/docs/api/"/>
+            <link offline="false" href="http://java.sun.com/javaee/5/docs/api" />
+            <link offline="false" href="http://commons.apache.org/fileupload/apidocs" />
+            <link offline="false" href="http://google-gson.googlecode.com/svn/tags/1.2.3/docs/javadocs" />
+            <link offline="false" href="https://www.hibernate.org/hib_docs/v3/api" />
+            <link offline="false" href="http://www.mchange.com/projects/c3p0/apidocs" />
+            
         </javadoc>
     </target>
     
