@@ -24,15 +24,6 @@ class JPQLTest extends UnitTest {
     }
 
     @Test
-    def FindScalaModelAlt() {
-    	new User("tom@gmail.com", "secret", "Tom").save()
-        val tom: User = User.find("byEmail", "tom@gmail.com").first()
-        
-        assertNotNull(tom)
-        assertEquals("Tom", tom.fullname)
-    }
-    
-    @Test
     def deleteAndcount() {
     	deleteAll[User]
     	deleteAll[Juser]
