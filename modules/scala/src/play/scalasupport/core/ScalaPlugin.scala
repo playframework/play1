@@ -99,6 +99,7 @@ class ScalaPlugin extends PlayPlugin {
                                     }
                                     applicationClass.name = infos(0)
                                     applicationClass.javaFile = realFiles.get(infos(1)).get
+                                    applicationClass.javaSource = applicationClass.javaFile.contentAsString
                                     play.Play.classes.add(applicationClass)
                                 }
                                 applicationClass.compiled(byteCode)

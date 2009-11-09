@@ -8,7 +8,7 @@ class JPQLTest extends UnitTest {
     @Test
     def findJavaModel() {
     	new Juser("bob@gmail.com", "secret", "Bob").save()
-        val bob: Juser = find[Juser]("byEmail", "bob@gmail.com").first()
+        val bob: Juser = find[Juser]("byEmail", "bob@gmail.com").first
         
         assertNotNull(bob)
         assertEquals("Bob", bob.fullname)

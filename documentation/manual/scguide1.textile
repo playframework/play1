@@ -18,7 +18,7 @@ We will call this blog engine project **yabe**.
 
 !images/guide1-0!
 
-p(note). This application is distributed as an sample application as well. You can retrieve the final code in the **samples-and-tests/yabe-with-scala** directory of your play installation.
+p(note). This application is distributed as a sample application as well. You can retrieve the final code in the **samples-and-tests/yabe-with-scala** directory of your play installation.
 
 h2. <a>Prerequisites</a>
 
