@@ -3,6 +3,7 @@ package play.libs;
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
@@ -44,8 +45,8 @@ public class Mail {
 
     /**
      * Send an email in plain text
-     * @param from From address
-     * @param recipient To address
+     * @param from From address. Can be of the form xxx <m@m.com>
+     * @param recipient To address. Can be of the form xxx <m@m.com>
      * @param subject Subject
      * @param body Body
      */
@@ -55,8 +56,8 @@ public class Mail {
 
     /**
      * Send an email in text/html with a text/plain alternative
-     * @param from From address
-     * @param recipient To address
+     * @param from From address. Can be of the form xxx <m@m.com>
+     * @param recipient To address. Can be of the form xxx <m@m.com>
      * @param subject Subject
      * @param body text/html body content
      * @param alternate text/plain alternative content (optional)
@@ -67,8 +68,8 @@ public class Mail {
 
     /**
      * Send an email in text/html with a text/plain alternative and attachments
-     * @param from From address
-     * @param recipient To address
+     * @param from From address. Can be of the form xxx <m@m.com>
+     * @param recipient To address. Can be of the form xxx <m@m.com>
      * @param subject Subject
      * @param body text/html body content
      * @param alternate text/plain alternative content (optional)
@@ -80,8 +81,8 @@ public class Mail {
 
     /**
      * Send an email in text/plain format
-     * @param from From address
-     * @param recipients To addresses
+     * @param from From address. Can be of the form xxx <m@m.com>
+     * @param recipients To addresses. Can be of the form xxx <m@m.com>
      * @param subject Subject
      * @param body The text/plain body of the email
      */
@@ -91,8 +92,8 @@ public class Mail {
 
     /**
      * Send an email in text/plain
-     * @param from From address
-     * @param recipient To address
+     * @param from From address. Can be of the form xxx <m@m.com>
+     * @param recipient To address. Can be of the form xxx <m@m.com>
      * @param subject Subject
      * @param body plain/text body of the email
      * @param attachments File attachments
@@ -101,11 +102,10 @@ public class Mail {
         return send(from, new String[]{recipient}, subject, body, null, "text/plain", attachments);
     }
 
-
     /**
      * Send an email in text/plain
-     * @param from From address
-     * @param recipients To addresses
+     * @param from From address Can be of the form xxx <m@m.com>
+     * @param recipients To addresses Can be of the form xxx <m@m.com>
      * @param subject Subject
      * @param body Body
      * @param attachments File attachments
@@ -114,7 +114,21 @@ public class Mail {
         return send(from, null, recipients, subject, body, null, "text/plain", attachments);
     }
 
-    
+    /**
+     * Send an email
+     * @param from From address. Can be of the form xxx <m@m.com>
+     * @param replyTo ReplyTo address Can be of the form xxx <m@m.com>
+     * @param recipients To addresses
+     * @param subject Subject
+     * @param body body of the email
+     * @param alternate text/plain body (optional). This parameter is ignored if contentType is set to text/plain or is null.
+     * @param contentType The content type of the body (text/plain or text/html)
+     * @param attachments File attachments
+     */
+    public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) {
+        return send(from, replyTo, recipients, subject, body, alternate, contentType, null, null, attachments);
+    }
+
     /**
      * Send an email
      * @param from From address
@@ -124,9 +138,11 @@ public class Mail {
      * @param body body of the email
      * @param alternate text/plain body (optional). This parameter is ignored if contentType is set to text/plain or is null.
      * @param contentType The content type of the body (text/plain or text/html)
+     * @param charset The character set of the message (optional)
+     * @param headers The mail headers (optional)
      * @param attachments File attachments
      */
-    public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) {
+    public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, String charset, Map<String, String> headers, Object... attachments) {
         try {
             if (from == null) {
                 from = Play.configuration.getProperty("mail.smtp.from", "user@localhost");
@@ -176,6 +192,23 @@ public class Mail {
      * @param attachments File attachments
      */
     public static MimeMessage buildMessage(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) throws MessagingException {
+        return buildMessage(from, replyTo, recipients, subject, body, alternate, contentType, null, null, attachments);
+    }
+
+    /**
+     * Construct a MimeMessage
+     * @param from From address
+     * @param recipients To addresses
+     * @param subject Subject
+     * @param body body of the email
+     * @param alternate text/plain body (optional). This parameter is ignored if contentType is set to text/plain or is null.
+     * @param contentType The content type of the body (text/plain or text/html) (optional)
+     * @param charset The character set of the message (optional)
+     * @param headers The mail headers (optional)
+     * @param attachments File attachments
+     */
+    public static MimeMessage buildMessage(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, String charset, Map<String, String> headers, Object... attachments) throws MessagingException {
+
         MimeMessage msg = new MimeMessage(getSession());
 
         if (from == null) {
@@ -195,7 +228,10 @@ public class Mail {
             contentType = "text/plain";
         }
 
+        msg = addHeaders(msg, headers);
+        
         msg.setFrom(from instanceof InternetAddress ? (InternetAddress) from : new InternetAddress(from.toString()));
+        
         InternetAddress reply;
         if (replyTo == null) {
             reply = from instanceof InternetAddress ? (InternetAddress) from : new InternetAddress(from.toString());
@@ -210,9 +246,9 @@ public class Mail {
         }
         msg.setRecipients(javax.mail.Message.RecipientType.TO, addressTo);
 
-        msg.setSubject(subject, "utf-8");
+        msg.setSubject(subject, charset != null ? charset : "utf-8");
         if ("text/plain".equals(contentType)) {
-            msg.setText(body);
+            msg.setText(body, charset != null ? charset : "utf-8");
             if (attachments != null && attachments.length > 0) {
                 Multipart mp = new MimeMultipart();
                 handleAttachments(mp, attachments);
@@ -224,7 +260,7 @@ public class Mail {
 
                 Multipart mixed = new MimeMultipart("mixed");
 
-                Multipart mp = getMultipart(body, alternate, contentType);
+                Multipart mp = getMultipart(body, alternate, contentType, charset);
 
                 // Create a body part to house the multipart/alternative Part
                 MimeBodyPart contentPartRoot = new MimeBodyPart();
@@ -238,24 +274,35 @@ public class Mail {
                 msg.setContent(mixed);
             } else {
 
-                msg.setContent(getMultipart(body, alternate, contentType));
+                msg.setContent(getMultipart(body, alternate, contentType, charset));
             }
 
         }
         return msg;
     }
 
-    private static Multipart getMultipart(String body, String alternate, String contentType) throws MessagingException {
+    protected static MimeMessage addHeaders(MimeMessage msg, Map<String, String> headers) throws MessagingException {
+        if (headers != null && headers.size() > 0) {
+            Iterator<String> it = headers.keySet().iterator();
+            while (it.hasNext()) {
+                String name = it.next();
+                msg.setHeader(name, headers.get(name));
+            }
+        }
+        return msg;
+    }
+
+    protected static Multipart getMultipart(String body, String alternate, String contentType, String charset) throws MessagingException {
         Multipart mp = new MimeMultipart("alternative");
 
         if (!StringUtils.isEmpty(alternate)) {
             MimeBodyPart alternatePart = new MimeBodyPart();
-            alternatePart.setContent(alternate, "text/plain; charset=utf-8");
+            alternatePart.setContent(alternate, "text/plain; charset=" + (charset != null ? charset : "utf-8"));
             mp.addBodyPart(alternatePart);
         }
 
         MimeBodyPart bodyPart = new MimeBodyPart();
-        bodyPart.setContent(body, contentType + "; charset=utf-8");
+        bodyPart.setContent(body, contentType + "; charset=" + (charset != null ? charset : "utf-8"));
         mp.addBodyPart(bodyPart);
 
         return mp;
