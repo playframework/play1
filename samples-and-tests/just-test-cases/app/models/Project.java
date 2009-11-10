@@ -25,6 +25,10 @@ public class Project extends Model {
     @ManyToOne
     public Company company;
     
+    @OneToMany(cascade=CascadeType.PERSIST)
+    @MapKey(name="name")
+    public Map<String,Company> companies;
+    
     public String toString() {
         return name + " belongs to " + company;
     }

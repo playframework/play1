@@ -51,5 +51,21 @@
     assertTextNotPresent('No company')
     assertTextPresent('zenexity')
     
+    open('@{JPABinding.withMap()}?companyId=$[companyId]')
+    storeValue('id', 'objectId')
+    echo('Project id is $[objectId]')
+    assertTextPresent('1 in map')
+    
+    open('@{JPABinding.show()}?id=$[objectId]')
+    assertTextPresent('1 in map')
+    
+    open('@{JPABinding.editMap()}?id=$[objectId]')
+    assertTextPresent('1 in map')
+    assertTextPresent('{zenexity=zenexity}')
+    
+    open('@{JPABinding.editMapAndSave()}?id=$[objectId]')
+    assertTextPresent('1 in map')
+    assertTextPresent('{Coucou=Coucou}')
+    
 
 #{/selenium}
