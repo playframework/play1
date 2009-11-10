@@ -28,6 +28,7 @@ import javax.persistence.PostUpdate;
 import javax.persistence.Query;
 import org.hibernate.Session;
 import org.hibernate.collection.PersistentCollection;
+import org.hibernate.collection.PersistentMap;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.proxy.HibernateProxy;
@@ -100,9 +101,9 @@ public class JPASupport implements Serializable {
                 }
 
                 if (isEntity) {
-                    if (multiple) {
+                    if (multiple && Collection.class.isAssignableFrom(field.getType())) {
                         Collection l = new ArrayList();
-                        if (field.getType().isAssignableFrom(Set.class)) {
+                        if (Set.class.isAssignableFrom(field.getType())) {
                             l = new HashSet();
                         }
                         String[] ids = params.get(name + "." + field.getName() + "@id");
@@ -224,6 +225,16 @@ public class JPASupport implements Serializable {
                 if (doCascade) {
                     Object value = field.get(this);
                     if (value == null) {
+                        continue;
+                    }
+                    if (value instanceof PersistentMap) {
+                        if (((PersistentMap) value).wasInitialized()) {
+                            for (Object o : ((Map) value).values()) {
+                                if (o instanceof JPASupport) {
+                                    ((JPASupport) o).saveAndCascade(willBeSaved);
+                                }
+                            }
+                        }
                         continue;
                     }
                     if (value instanceof PersistentCollection) {
