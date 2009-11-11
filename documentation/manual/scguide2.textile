@@ -32,8 +32,9 @@ class User(
     var fullname: String
 ) extends Model {
  
-    var isAdmin: boolean = false
+    var isAdmin: Boolean = false
  
+    def this() = this(null, null, null)
 }
 
 If you're new to Scala then this class definition might look a bit strange. What is happening here is that the definition of 3 fields is combined with the definition of the primary constructor. Then there is a fourth field which is set to false by default.
@@ -42,6 +43,7 @@ Scala really takes care of a lot of boilerplate, here's what this code represent
 
 * a public class
 * a public 3-argument constructor
+* a public 0-argument constructor
 * 4 private fields
 * 4 public accessors and mutators
 
@@ -159,6 +161,7 @@ class Post(
  
     var postedAt: Date = new Date()
  
+    def this() = this(null, null, null)
 }
 
 Here we use the **@Lob** annotation to tell JPA to use a large text database type to store the post content. We have declared the relation to the User class using **@ManyToOne**. That means that each Post is authored by a single User, and that each User can author several Posts.
@@ -230,6 +233,7 @@ class Comment(
  
     var postedAt: Date = new Date()
  
+    def this() = this(null, null, null)
 }
 
 Let's write a first test case:
