@@ -8,7 +8,7 @@ class JPQLTest extends UnitTest {
     @Test
     def findJavaModel() {
     	new Juser("bob@gmail.com", "secret", "Bob").save()
-        val bob: Juser = find[Juser]("byEmail", "bob@gmail.com").first()
+        val bob: Juser = find[Juser]("byEmail", "bob@gmail.com").first
         
         assertNotNull(bob)
         assertEquals("Bob", bob.fullname)
@@ -23,15 +23,6 @@ class JPQLTest extends UnitTest {
         assertEquals("Harry", harry.fullname)
     }
 
-    @Test
-    def FindScalaModelAlt() {
-    	new User("tom@gmail.com", "secret", "Tom").save()
-        val tom: User = User.find("byEmail", "tom@gmail.com").first()
-        
-        assertNotNull(tom)
-        assertEquals("Tom", tom.fullname)
-    }
-    
     @Test
     def deleteAndcount() {
     	deleteAll[User]

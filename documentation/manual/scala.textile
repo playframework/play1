@@ -45,7 +45,8 @@ As always, if you make a mistake, play will just show you the error in a perfect
 
 !images/scala-error!
 
+h2. <a>Tutorial</a>
 
-
+p(note). We are currently writing a version of the "play tutorial":guide1 for scala. Read "The play tutorial (Scala version)":scguide1.
 
 

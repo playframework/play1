@@ -16,6 +16,6 @@ class User(
  
 }
 
-object User extends QueryMethods {
+object User {
 	val size = 98
 }
