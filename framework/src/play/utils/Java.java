@@ -130,7 +130,12 @@ public class Java {
         }
         if (m != null) {
             m.setAccessible(true);
-            return m.invoke(null, args);
+            if(Modifier.isStatic(m.getModifiers())) {
+                return m.invoke(null, args);
+            } else {
+                Object instance = m.getDeclaringClass().getDeclaredField("MODULE$").get(null);
+                return m.invoke(instance, args);
+            }
         }
         throw new NoSuchMethodException(method);
     }

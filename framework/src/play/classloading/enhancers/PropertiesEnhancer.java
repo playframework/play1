@@ -33,6 +33,11 @@ public class PropertiesEnhancer extends Enhancer {
         if (ctClass.isInterface()) {
             return;
         }
+        for(CtClass itf : ctClass.getInterfaces()) {
+            if(itf.getName().equals("scala.ScalaObject")) {
+                return;
+            }
+        }
         for (CtField ctField : ctClass.getDeclaredFields()) {
             try {
 
