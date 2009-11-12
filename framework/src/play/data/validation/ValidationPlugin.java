@@ -27,9 +27,14 @@ public class ValidationPlugin extends PlayPlugin {
     static ThreadLocal<Map<Object,String>> keys = new ThreadLocal();
 
     @Override
+    public void beforeInvocation() {
+        keys.set(new HashMap<Object, String>());
+        Validation.current.set(new Validation());
+    }
+
+    @Override
     public void beforeActionInvocation(Method actionMethod) {
         try {
-            keys.set(new HashMap<Object, String>());
             Validation.current.set(restore());
             boolean verify = false;
             for(Annotation[] annotations : actionMethod.getParameterAnnotations()) {
