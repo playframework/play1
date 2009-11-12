@@ -107,6 +107,7 @@ Add instant power to your application by enabling one of these modules.
 # "Google App Engine":gae
 # "Google Web Toolkit":gwt
 # "Bespin editor":bespin
+# "Cobertura test coverage":cobertura
 
 
 h2. <a name="references">References</a>
