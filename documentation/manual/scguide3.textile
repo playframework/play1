@@ -61,7 +61,7 @@ import models._
  
 object Application extends Actions {
  
-    def index {
+    def index() {
         val frontPost = find[Post]("order by postedAt desc").first
         val olderPosts = find[Post](
             "order by postedAt desc"
