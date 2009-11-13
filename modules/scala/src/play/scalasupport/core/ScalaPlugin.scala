@@ -30,7 +30,12 @@ class ScalaPlugin extends PlayPlugin {
             }
         }
         Play.javaPath foreach scan
+        //play.Logger.info("compileAll")
         classes.addAll(compiler compile sources.toList)
+    }
+
+    override def onClassesChange(modified: JList[ApplicationClass]) {
+        compileAll(new java.util.ArrayList[ApplicationClass]())
     }
 
     // Compiler
@@ -73,10 +78,12 @@ class ScalaPlugin extends PlayPlugin {
             }
 
             // Clear compilation results
-            virtualDirectory.clear
+            //virtualDirectory.clear
 
             // Compile
+            //play.Logger.info("Start compiling")
             run compileSources sourceFiles
+            //play.Logger.info("Done ...")
 
             // Retrieve result
             val classes = new java.util.ArrayList[ApplicationClass]()
@@ -92,7 +99,6 @@ class ScalaPlugin extends PlayPlugin {
                                     applicationClass = new ApplicationClass() {
 
                                         override def compile() = {
-                                            compileAll(new java.util.ArrayList[ApplicationClass]())
                                             javaByteCode
                                         }
 

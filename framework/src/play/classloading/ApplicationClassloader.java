@@ -221,6 +221,11 @@ public class ApplicationClassloader extends ClassLoader {
                 modifieds.add(applicationClass);
             }
         }
+        if(modifieds.size() > 0) {
+            for(PlayPlugin plugin : Play.plugins) {
+                plugin.onClassesChange(modifieds);
+            }
+        }
         List<ClassDefinition> newDefinitions = new ArrayList<ClassDefinition>();
         boolean dirtySig = false;
         for (ApplicationClass applicationClass : modifieds) {

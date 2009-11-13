@@ -181,6 +181,9 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public void onEvent(String message, Object context) {
     }
 
+    public void onClassesChange(List<ApplicationClass> modified) {
+    }
+
     /**
      * Let a chance to the plugin to compile it owns classes.
      * Must be added to the mutable list.
