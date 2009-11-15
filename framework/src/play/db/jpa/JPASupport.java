@@ -118,8 +118,6 @@ public class JPASupport implements Serializable {
                             q.setParameter(1, Binder.directBind(ids[0], findKeyType(Play.classloader.loadClass(relation))));
                             Object to = q.getSingleResult();
                             bw.set(field.getName(), o, to);
-                        } else {
-                            bw.set(field.getName(), o, null);
                         }
                     }
                 }
