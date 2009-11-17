@@ -4,6 +4,7 @@
         <title>Play! - Tests runner</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <script src="@{'/public/test-runner/jquery-1.3.2.min.js'}" type="text/javascript" charset="utf-8"></script>
+        <script src="@{'/public/test-runner/jquery.scrollTo-min.js'}" type="text/javascript" charset="utf-8"></script>
         <style type="text/css">
             html, body {
                 margin: 0;
@@ -81,11 +82,11 @@
                 background: #fff2ab;
                 color: #333;
             }
-            #bms, #sa {
+            #bms, #quickLinks {
                 color: #888;
                 font-size: 80%;
             }
-            #bms a, #sa a {
+            #bms a, #quickLinks a {
                 color: #888;
             }
             #start {
@@ -312,11 +313,15 @@
                     } else {
                         $('#header').addClass('passed');
                     }
+                    var areFailedTests = $('.test.failed').size();
                     $.ajax({
                        type: 'GET',
                        url: '@{TestRunner.run("end")}',
-                       data: {result: $('.test.failed').size() ? 'failed' : 'passed'}
+                       data: {result: areFailedTests ? 'failed' : 'passed'}
                     });
+                    if(areFailedTests) {
+                        $.scrollTo($('.test.failed'), 500);
+                    }
                 };
                                 
                 var runTest = function(testId, test) {
@@ -370,8 +375,8 @@
                                 
                 var testFail = function(test, result) {
                     test.removeClass('passing').addClass('failed');
-                    $('.touch', test).html('+');
-                    $('.testResult', test).html(result);					
+                    $('.touch', test).html('-');
+                    $('.testResult', test).html(result).show();
                     stop();
                 };
                         
@@ -387,13 +392,13 @@
                         $('#start').removeAttr('disabled').removeClass('disabled');
                         $('#bms').show();
                         $('#bms a').attr('href', bookmark());
-                        $('#sa').hide();
+                        $('#quickLinks').hide();
                     } else {
                         $('.nbToRun').text('no');
                         $('.nbToRunPluralize').text('');
                         $('#start').attr('disabled', 'true').addClass('disabled');
                         $('#bms').hide();
-                        $('#sa').show();
+                        $('#quickLinks').show();
                     }
                     $('.test, #header').removeClass('passed').removeClass('failed');
                     $('.touch').html('&sim;');
@@ -468,7 +473,13 @@
                     $('.test').addClass('selected');
                     updateSelected();
                 });
-                        
+                
+                $('#ra').click(function() {
+                    $('.test').addClass('selected');
+                    updateSelected();
+                    run();
+                });
+                
                 updateSelected();
 
                 if(/auto=yes/.exec(document.location.search)) {
@@ -492,7 +503,12 @@
             
             <div id="stopped">
                 <span id="start">Start !</span>
-                &nbsp; <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span> to run <span id="bms">(<a id="" href="#">Bookmark this link to save this configuration</a>)</span> <span id="sa">(<a id="" href="#">Select all</a>)</span>
+                &nbsp;
+                <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span> to run <span id="bms">(<a id="" href="#">Bookmark this link to save this configuration</a>)</span>
+                <span id="quickLinks">
+                    <span id="sa">(<a id="" href="#">Select all</a></span> -
+                    <span id="ra"><a id="" href="#">Run all</a>)</span>
+                </span>
             </div>
             
             <div id="started">
