@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -118,8 +119,8 @@ public class JPASupport implements Serializable {
                             q.setParameter(1, Binder.directBind(ids[0], findKeyType(Play.classloader.loadClass(relation))));
                             Object to = q.getSingleResult();
                             bw.set(field.getName(), o, to);
-                        } else {
-                            bw.set(field.getName(), o, null);
+                        } else if(ids != null && ids.length > 0 && ids[0].equals("")) {
+                            bw.set(field.getName(), o , null);
                         }
                     }
                 }

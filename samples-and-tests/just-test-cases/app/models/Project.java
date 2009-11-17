@@ -22,7 +22,7 @@ public class Project extends Model {
     public Date startDate;
     
     @Required
-    @ManyToOne
+    @ManyToOne(cascade=CascadeType.PERSIST) 
     public Company company;
     
     @OneToMany(cascade=CascadeType.PERSIST)
