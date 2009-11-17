@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import play.Logger;
@@ -96,11 +97,33 @@ public class JavaExtensions {
     }
 
     public static RawData raw(Object val, Object condition) {
-        if(condition == null) return new RawData("");
-        if(condition instanceof Boolean && !(Boolean)condition) return new RawData("");
-        if(condition instanceof Collection && ((Collection)condition).size() == 0) return new RawData("");
-        if(condition instanceof String && condition.toString().equals("")) return new RawData("");
-        return new RawData(val);
+        if(eval(condition)) {
+            return new RawData(val);
+        }
+        return new RawData("");
+    }
+
+    public static RawData asAttr(Map attributes, Object condition) {
+        if(eval(condition)) {
+            return asAttr(attributes);
+        }
+        return new RawData("");
+    }
+
+    public static RawData asAttr(Map attributes) {
+        StringBuffer buf = new StringBuffer();
+        for(Object key: attributes.keySet()) {
+            buf.append(key+"=\""+attributes.get(key)+"\" ");
+        }
+        return new RawData(buf);
+    }
+
+    protected static boolean eval(Object condition) {
+        if(condition == null) return false;
+        if(condition instanceof Boolean && !(Boolean)condition) return false;
+        if(condition instanceof Collection && ((Collection)condition).size() == 0) return false;
+        if(condition instanceof String && condition.toString().equals("")) return false;
+        return true;
     }
 
     public static String escapeXml(String str) {
