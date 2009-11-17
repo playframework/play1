@@ -95,6 +95,14 @@ public class JavaExtensions {
         return new RawData(val);
     }
 
+    public static RawData raw(Object val, Object condition) {
+        if(condition == null) return new RawData("");
+        if(condition instanceof Boolean && !(Boolean)condition) return new RawData("");
+        if(condition instanceof Collection && ((Collection)condition).size() == 0) return new RawData("");
+        if(condition instanceof String && condition.toString().equals("")) return new RawData("");
+        return new RawData(val);
+    }
+
     public static String escapeXml(String str) {
         return StringEscapeUtils.escapeXml(str);
     }
