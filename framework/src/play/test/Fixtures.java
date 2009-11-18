@@ -182,7 +182,7 @@ public class Fixtures {
             Collections.addAll(fields, clazz.getDeclaredFields());
             clazz = clazz.getSuperclass();
         }
-        for (Field field : type.getDeclaredFields()) {
+        for (Field field : fields) {
             boolean isEntity = false;
             String relation = null;
             if (field.isAnnotationPresent(OneToOne.class) || field.isAnnotationPresent(ManyToOne.class)) {
