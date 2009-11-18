@@ -9,7 +9,8 @@ import play.mvc.Http.Request;
  */
 public class UploadBinder implements SupportedType<Upload> {
 
-    public Upload bind(String value) {
+    @SuppressWarnings("unchecked")
+	public Upload bind(String value) {
         List<Upload> uploads = (List<Upload>)Request.current().args.get("__UPLOADS");
         for(Upload upload : uploads) {
             if(upload.getFieldName().equals(value)) {
