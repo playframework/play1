@@ -70,6 +70,10 @@ public class Mailer implements LocalVariablesSupport {
         infos.set(map);
     }
 
+    /**
+     * Can be of the form xxx <m@m.com>
+     * @param from
+     */
     public static void setFrom(Object from) {
         HashMap map = infos.get();
         if (map == null) {
@@ -79,6 +83,10 @@ public class Mailer implements LocalVariablesSupport {
         infos.set(map);
     }
 
+    /**
+     * Can be of the form xxx <m@m.com>
+     * @param replyTo
+     */
     public static void setReplyTo(Object replyTo) {
         HashMap map = infos.get();
         if (map == null) {
@@ -88,11 +96,49 @@ public class Mailer implements LocalVariablesSupport {
         infos.set(map);
     }
 
+    public static void setPersonal(String personal) {
+        HashMap map = infos.get();
+        if (map == null) {
+            throw new UnexpectedException("Mailer not instrumented ?");
+        }
+        map.put("personal", personal);
+        infos.set(map);
+    }
+
+    public static void setCharset(String bodyCharset) {
+        HashMap map = infos.get();
+        if (map == null) {
+            throw new UnexpectedException("Mailer not instrumented ?");
+        }
+        map.put("charset", bodyCharset);
+        infos.set(map);
+    }
+
+    public static void addHeader(String key, String value) {
+        HashMap map = infos.get();
+        if (map == null) {
+            throw new UnexpectedException("Mailer not instrumented ?");
+        }
+        HashMap<String, String> headers = (HashMap<String, String>) map.get("headers");
+        if (headers == null) {
+            headers = new HashMap<String, String>();
+        }
+        headers.put(key, value);
+        map.put("headers", headers);
+        infos.set(map);
+    }
+
     public static Future<Boolean> send(Object... args) {
         HashMap map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
         }
+
+         // Body character set
+         String charset = (String) infos.get().get("charset");
+
+         // Headers
+         Map<String, String> headers = (Map<String,String>) infos.get().get("headers");
 
         // Subject
         String subject = (String) infos.get().get("subject");
@@ -149,8 +195,8 @@ public class Mailer implements LocalVariablesSupport {
             }
         }
 
-         // Content type
-        
+        // Content type
+
         if (contentType == null) {
             if (bodyHtml != null) {
                 contentType = "text/html";
@@ -158,7 +204,7 @@ public class Mailer implements LocalVariablesSupport {
                 contentType = "text/plain";
             }
         }
-        
+
         // Recipients
         List<Object> recipientList = (List<Object>) infos.get().get("recipients");
         Object[] recipients = new Object[recipientList.size()];
@@ -188,9 +234,9 @@ public class Mailer implements LocalVariablesSupport {
         // Send
         final String body = (bodyHtml != null ? bodyHtml : bodyText);
         final String alternate = (bodyHtml != null ? bodyText : null);
-        
-        return Mail.send(from, replyTo, recipients, subject, body, alternate, contentType, attachements);
-    }
+
+       return Mail.send(from, replyTo, recipients, subject, body, alternate, contentType, charset, headers, attachements);
+  }
 
     public static boolean sendAndWait(Object... args) {
         try {

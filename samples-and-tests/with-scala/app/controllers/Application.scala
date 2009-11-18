@@ -17,7 +17,8 @@ object Application extends Actions {
         println("Check ...")
     }
     
-    def index(@Required name: String) {
+    def index(@Min(10) nimp: Int = 5, @Required name: String = "Guillaume") {
+        println(nimp)
         println(request.path)
         val age = 59 
         var yop = 8
@@ -32,11 +33,11 @@ object Application extends Actions {
     def addOne() {
         val user = new User("guillaume@gmail.com", "88style", "Guillaume")
         user.save()
-        index(null)
+        index()
     }
     
     def goJojo() {
-        index("Jojo") 
+        index(name="Jojo") 
     }
     
     def api = renderXml(<items><item id="3">Yop</item></items>) 

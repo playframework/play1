@@ -2,6 +2,7 @@ package play.data.binding;
 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -23,6 +24,7 @@ import play.Play;
 import play.PlayPlugin;
 import play.data.Upload;
 import play.data.validation.Validation;
+import play.exceptions.UnexpectedException;
 
 /**
  * The binder try to convert String values to Java objects.
@@ -190,6 +192,10 @@ public class Binder {
     }
 
     public static Object bind(String name, Class clazz, Type type, Map<String, String[]> params) {
+        return bind(name, clazz, type, params, null, null, 0);
+    }
+
+    public static Object bind(String name, Class clazz, Type type, Map<String, String[]> params, Object o, Method method, int parameterIndex) {
         Object result = null;
         // Let a chance to plugins to bind this object
         for(PlayPlugin plugin : Play.plugins) {
@@ -200,6 +206,17 @@ public class Binder {
         }
         result = bindInternal(name, clazz, type, params, "");
         if (result == MISSING) {
+            // Try the scala default
+            if(o != null && parameterIndex > 0) {
+                try {
+                    Method defaultMethod = method.getDeclaringClass().getDeclaredMethod(method.getName()+"$default$"+parameterIndex);
+                    return defaultMethod.invoke(o);
+                } catch(NoSuchMethodException e) {
+                    //
+                } catch(Exception e) {
+                    throw new UnexpectedException(e);
+                }
+            }
             if (clazz.equals(boolean.class)) {
                 return false;
             }

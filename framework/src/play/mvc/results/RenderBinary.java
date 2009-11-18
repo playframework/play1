@@ -90,12 +90,12 @@ public class RenderBinary extends Result {
                     if (name == null) {
                         response.setHeader("Content-Disposition", "inline");
                     } else {
-                        response.setHeader("Content-Disposition", "inline; filename=\"" + name + "\"");
+                        response.setHeader("Content-Disposition", "inline; filename*=utf-8''" + encoder.encode(name, "utf-8") + "; filename=\"" + encoder.encode(name, "utf-8") + "\"");
                     }
                 } else if (name == null) {
                     response.setHeader("Content-Disposition", "attachment");
                 } else {
-                    response.setHeader("Content-Disposition", "attachment; filename=\"" + name + "\"");
+                    response.setHeader("Content-Disposition", "attachment; filename*=utf-8''" + encoder.encode(name, "utf-8") + "; filename=\"" + encoder.encode(name, "utf-8") + "\"");
                 }
             }
             if (file != null) {
