@@ -18,17 +18,17 @@
 	// We are now in the chat room
 	assertTextPresent('You are now chatting as Bob')
 	type('message', 'Hello !')
-	keyPress('message', '\13')
+	click('send')
 	
 	// Wait the message
 	waitForTextPresent('Hello !')
 	
 	// Hop two more messages
 	type('message', 'Im bob !')
-	keyPress('message', '\13')
+	click('send')
 	pause(3000)
 	type('message', 'Anyone here ?')
-	keyPress('message', '\13')
+	click('send')
 	pause(3000)
 	
 	// Wait the message
