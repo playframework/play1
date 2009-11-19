@@ -1,10 +1,9 @@
 package controllers
  
 import play._
-import play.Scala._
 import play.mvc._
+import play.db.jpa._
 import play.data.validation._
-import play.db.jpa.QueryFunctions._
  
 import models._
 

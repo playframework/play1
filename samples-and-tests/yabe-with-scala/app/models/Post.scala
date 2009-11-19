@@ -5,41 +5,32 @@ import javax.persistence._
  
 import play.db.jpa._
 import play.data.validation._
-import play.db.jpa.QueryFunctions._
  
 @Entity
-class Post extends Model {
- 
+class Post(
+
     @Required
-    var title: String = _
+    @ManyToOne
+    var author: User,
     
     @Required
-    var postedAt: Date = _
+    var title: String,
     
     @Lob
     @Required
     @MaxSize(10000)
-    var content: String = _
+    var content: String
+
+) extends Model {
     
     @Required
-    @ManyToOne
-    var author: User = _
+    var postedAt = new Date()  
     
     @OneToMany(mappedBy="post", cascade=Array(CascadeType.ALL))
-    var comments: List[Comment] = _
+    var comments: List[Comment] = new ArrayList[Comment]
     
     @ManyToMany(cascade=Array(CascadeType.PERSIST))
-    var tags: Set[Tag] = _
-    
-    def this(author: User, title: String, content: String) { 
-        this()
-        this.comments = new ArrayList[Comment]
-        this.tags = new TreeSet[Tag]
-        this.author = author
-        this.title = title
-        this.content = content
-        this.postedAt = new Date()
-    }
+    var tags: Set[Tag] = new TreeSet[Tag]
     
     def addComment(author: String, content: String) = {
         val newComment = new Comment(this, author, content).save()

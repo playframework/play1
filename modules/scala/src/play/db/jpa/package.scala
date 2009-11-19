@@ -1,7 +1,8 @@
-package play.db.jpa
+package play.db {
 
-object QueryFunctions {
-	// Let's shorten things a bit here internally
+    package object jpa {
+
+        // Let's shorten things a bit here internally
 	import JPQL.{instance => i}
 	type M[T] = Manifest[T]
 	implicit private def manifest2entity[T](m: M[T]): String = m.erasure.getName()
@@ -18,28 +19,7 @@ object QueryFunctions {
 	def deleteAll[T](implicit m: M[T]) = i.deleteAll(m)
 	def findOneBy[T <: JPASupport](q: String, ps: AnyRef*)(implicit m: M[T]): T = i.findOneBy(m, q, ps.toArray).asInstanceOf[T]
 	def create[T <: JPASupport](name: String, ps: play.mvc.Scope.Params)(implicit m: M[T]): T = i.create(m, name, ps).asInstanceOf[T]
-}
 
-class ScalaQuery[T](val query: JPASupport.JPAQuery) {
-
-    def first = query.first().asInstanceOf[T]
-    def fetch() = asList[T](query.fetch())
-    def all = fetch()
-    def fetch(size: Int) = asList[T](query.fetch(size))
-    def from(offset: Int) = {
-        query.from(offset)
-        this
-    }
-
-    // ~~
-
-    private def asList[T](jlist: java.util.List[T]): List[T] = {
-        import scala.collection.mutable.ListBuffer
-        val buffer = ListBuffer[T]()
-        for(e <- jlist.toArray) {
-            buffer += e.asInstanceOf[T]
-        }
-        buffer.toList
     }
 
 }

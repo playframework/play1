@@ -37,6 +37,16 @@ public class Http {
          */
         public List<String> values;
 
+        public Header() {
+            this.values = new ArrayList<String>();
+        }
+
+        public Header(String name, String value) {
+            this.name = name;
+            this.values = new ArrayList<String>();
+            this.values.add(value);
+        }
+
         /**
          * First value
          * @return The first value

@@ -2,22 +2,19 @@ package controllers
 
 import play._
 import play.mvc._
-import play.data.validation._
 import play.libs._
 import play.cache._
-
-import play.Scala._
 import play.db.jpa._
-import play.db.jpa.QueryFunctions._
- 
+import play.data.validation._
+
 import models._
 
 trait Defaults extends Actions {
     
     @Before
     private def setDefaults {
-        renderArgs += "blogTitle" -> Play.configuration.getProperty("blog.title")
-        renderArgs += "blogBaseline" -> Play.configuration.getProperty("blog.baseline")
+        renderArgs += "blogTitle" -> configuration("blog.title")
+        renderArgs += "blogBaseline" -> configuration("blog.baseline")
     }
     
 }

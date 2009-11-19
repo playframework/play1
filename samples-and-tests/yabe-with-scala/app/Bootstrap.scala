@@ -1,6 +1,6 @@
 import play.jobs._
 import play.test._
-import play.db.jpa.QueryFunctions._
+import play.db.jpa._
  
 import models._
  

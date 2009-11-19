@@ -5,18 +5,14 @@ import javax.persistence._
  
 import play.db.jpa._
 import play.data.validation._
-import play.db.jpa.QueryFunctions._
  
 @Entity
-class Tag extends Model with Comparable[Tag] {
- 
-    @Required
-    var name:String = _
+class Tag private (
+
+    @Required 
+    var name:String
     
-    private def this(name: String) {
-        this()
-        this.name = name
-    }
+) extends Model with Comparable[Tag] {
     
     override def toString() = {
         name

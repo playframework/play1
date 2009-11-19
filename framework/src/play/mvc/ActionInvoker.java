@@ -200,8 +200,6 @@ public class ActionInvoker {
                     throw actionResult;
                 }
                 
-                throw new Ok();
-                
             } catch (IllegalAccessException ex) {
                 throw ex;
             } catch (IllegalArgumentException ex) {

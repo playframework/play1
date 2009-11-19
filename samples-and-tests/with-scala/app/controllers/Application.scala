@@ -1,20 +1,34 @@
-package controllers;
+package controllers 
 
-import scala.xml._
-
-import play._;
-import play.mvc._;
+import play._
+import play.mvc._
+import play.db.jpa._
 import play.data.validation._
 import play.libs._
-import play.db.jpa.QueryFunctions._
 
-import models._;
+import models._
 
 object Application extends Actions {
     
     @Before
     private def check {
-        println("Check ...")
+        println("Check ... " + configuration("yop", "nf") )
+        renderArgs += ("kiki" -> 9)
+    }
+    
+    def test {        
+        response <<< OK
+        response <<< "text/plain"
+        response <<< ("X-Test" -> "Yop")
+        response <<< """|Hello World
+                        |
+                        |My Name is Guillaume""".stripMargin        
+    }
+    
+    def test2 {        
+        response <<< NOT_FOUND
+        response <<< "text/html"
+        response <<< <h1>Not found, sorry</h1>        
     }
     
     def index(@Min(10) nimp: Int = 5, @Required name: String = "Guillaume") {
@@ -25,7 +39,13 @@ object Application extends Actions {
         yop = yop + 3
         println(name)
         
+        info("Yop %d", 9)
+        
         val users = find[User]("byPassword", "88style").fetch
+        
+        response <<< OK
+        response <<< "YOUHOU" 
+        response <<< "X-Yop" -> "hope"
         
         render(name, age, yop, users)
     }

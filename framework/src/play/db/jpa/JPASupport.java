@@ -40,6 +40,7 @@ import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
 import ch.lambdaj.function.closure.Closure;
+import java.lang.reflect.Constructor;
 import static ch.lambdaj.Lambda.closure;
 
 /**
@@ -63,7 +64,9 @@ public class JPASupport implements Serializable {
 
     public static <T extends JPASupport> T create(Class type, String name, Map<String, String[]> params) {
         try {
-            Object model = type.newInstance();
+            Constructor c = type.getDeclaredConstructor();
+            c.setAccessible(true);
+            Object model = c.newInstance();
             return (T) edit(model, name, params);
         } catch (Exception e) {
             throw new RuntimeException(e);
