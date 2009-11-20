@@ -67,3 +67,7 @@ samples-and-tests/yabe/test-result
 samples-and-tests/yabe/tmp
 *.ser
 modules/cobertura/lib
+samples-and-tests/yabe/.amateras
+samples-and-tests/yabe/.settings
+samples-and-tests/yabe/eclipse
+samples-and-tests/yabe/nbproject

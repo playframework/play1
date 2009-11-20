@@ -1,6 +1,5 @@
 package play.mvc;
 
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSerializer;
 import java.io.File;
 import java.io.InputStream;

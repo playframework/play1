@@ -87,6 +87,13 @@ public class Scope {
             put(key, value + "");
         }
 
+        public void now(String key, String value) {
+            if (key.contains(":")) {
+                throw new IllegalArgumentException("Character ':' is invalid in a flash key.");
+            }
+            data.put(key, value);
+        }
+
         public void error(String value, Object... args) {
             put("error", String.format(value, args));
         }
