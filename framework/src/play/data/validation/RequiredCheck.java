@@ -26,7 +26,7 @@ public class RequiredCheck extends AbstractAnnotationCheck<Required> {
         }
         if (value.getClass().isArray()) {
             try {
-            return value.getClass().getField("length").getInt(value) > 0;
+                return java.lang.reflect.Array.getLength(value) > 0;
             } catch(Exception e) {
                 throw new UnexpectedException(e);
             }

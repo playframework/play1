@@ -603,7 +603,7 @@ public class JPASupport implements Serializable {
     // File attachments
     public void setupAttachment() {
         for (Field field : getClass().getFields()) {
-            if (field.getType().equals(FileAttachment.class)) {
+            if (FileAttachment.class.isAssignableFrom(field.getType())) {
                 try {
                     FileAttachment attachment = (FileAttachment) field.get(this);
                     if (attachment != null) {

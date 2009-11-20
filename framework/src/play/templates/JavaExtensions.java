@@ -3,6 +3,8 @@ package play.templates;
 import groovy.lang.Closure;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -16,6 +18,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import org.apache.commons.lang.StringEscapeUtils;
 
+import play.Logger;
 import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.I18N;
@@ -141,8 +144,17 @@ public class JavaExtensions {
         return new SimpleDateFormat(pattern).format(new Date(timestamp));
     }
 
-    public static String nl2br(String data) {
-        return data.replace("\n", "<br/>");
+    public static RawData nl2br(String data) {
+        return new RawData(data.replace("\n", "<br/>"));
+    }
+
+    public static String urlEncode(String entity) {
+        try {
+            return URLEncoder.encode(entity, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            Logger.error(e, entity);
+        }
+        return entity;
     }
 
     public static String formatSize(Long bytes) {
