@@ -96,6 +96,10 @@ public class Mailer implements LocalVariablesSupport {
         infos.set(map);
     }
 
+    /**
+     * @deprecated 
+     * @param personal 
+     */
     public static void setPersonal(String personal) {
         HashMap map = infos.get();
         if (map == null) {
