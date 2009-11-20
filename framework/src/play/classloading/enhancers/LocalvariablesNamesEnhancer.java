@@ -1,6 +1,5 @@
 package play.classloading.enhancers;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +19,6 @@ import javassist.bytecode.Opcode;
 import javassist.compiler.Javac;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.libs.IO;
 
 /**
  * Track names of local variables ...
@@ -31,9 +29,10 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
         
         CtClass ctClass = makeClass(applicationClass);
-        if (!ctClass.subtypeOf(classPool.get(LocalVariablesSupport.class.getName()))) {
+        if (!ctClass.subtypeOf(classPool.get(LocalVariablesSupport.class.getName())) && !ctClass.getName().matches("^controllers\\..*\\$class$")) {
             return;
         }
+        
         for (CtMethod method : ctClass.getDeclaredMethods()) {
             
             // Signatures names

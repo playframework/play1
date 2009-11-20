@@ -2,6 +2,7 @@ package play.data.validation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import net.sf.oval.ConstraintViolation;
 import net.sf.oval.context.MethodParameterContext;
 import net.sf.oval.guard.Guard;
 import play.PlayPlugin;
+import play.exceptions.ActionNotFoundException;
 import play.exceptions.UnexpectedException;
 import play.utils.Java;
 import play.mvc.ActionInvoker;
@@ -27,9 +29,14 @@ public class ValidationPlugin extends PlayPlugin {
     static ThreadLocal<Map<Object,String>> keys = new ThreadLocal();
 
     @Override
+    public void beforeInvocation() {
+        keys.set(new HashMap<Object, String>());
+        Validation.current.set(new Validation());
+    }
+
+    @Override
     public void beforeActionInvocation(Method actionMethod) {
         try {
-            keys.set(new HashMap<Object, String>());
             Validation.current.set(restore());
             boolean verify = false;
             for(Annotation[] annotations : actionMethod.getParameterAnnotations()) {
@@ -78,7 +85,16 @@ public class ValidationPlugin extends PlayPlugin {
 
         public List<ConstraintViolation> validateAction(Method actionMethod) throws Exception {
             List<ConstraintViolation> violations = new ArrayList<ConstraintViolation>();
-            Object[] rArgs = ActionInvoker.getActionMethodArgs(actionMethod);
+            Object instance = null;
+            // Patch for scala defaults
+            if(!Modifier.isStatic(actionMethod.getModifiers()) && actionMethod.getDeclaringClass().getSimpleName().endsWith("$")) {
+                try {
+                    instance = actionMethod.getDeclaringClass().getDeclaredField("MODULE$").get(null);
+                } catch(Exception e) {
+                    throw new ActionNotFoundException(Http.Request.current().action, e);
+                }
+            }
+            Object[] rArgs = ActionInvoker.getActionMethodArgs(actionMethod, instance);
             validateMethodParameters(null, actionMethod, rArgs, violations);
             validateMethodPre(null, actionMethod, rArgs, violations);
             return violations;

@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -28,6 +29,7 @@ import javax.persistence.PostUpdate;
 import javax.persistence.Query;
 import org.hibernate.Session;
 import org.hibernate.collection.PersistentCollection;
+import org.hibernate.collection.PersistentMap;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.proxy.HibernateProxy;
@@ -38,6 +40,7 @@ import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
 import ch.lambdaj.function.closure.Closure;
+import java.lang.reflect.Constructor;
 import static ch.lambdaj.Lambda.closure;
 
 /**
@@ -61,7 +64,9 @@ public class JPASupport implements Serializable {
 
     public static <T extends JPASupport> T create(Class type, String name, Map<String, String[]> params) {
         try {
-            Object model = type.newInstance();
+            Constructor c = type.getDeclaredConstructor();
+            c.setAccessible(true);
+            Object model = c.newInstance();
             return (T) edit(model, name, params);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -100,9 +105,9 @@ public class JPASupport implements Serializable {
                 }
 
                 if (isEntity) {
-                    if (multiple) {
+                    if (multiple && Collection.class.isAssignableFrom(field.getType())) {
                         Collection l = new ArrayList();
-                        if (field.getType().isAssignableFrom(Set.class)) {
+                        if (Set.class.isAssignableFrom(field.getType())) {
                             l = new HashSet();
                         }
                         String[] ids = params.get(name + "." + field.getName() + "@id");
@@ -132,8 +137,8 @@ public class JPASupport implements Serializable {
                             q.setParameter(1, Binder.directBind(null, ids[0], findKeyType(Play.classloader.loadClass(relation))));
                             Object to = q.getSingleResult();
                             bw.set(field.getName(), o, to);
-                        } else {
-                            bw.set(field.getName(), o, null);
+                        } else if(ids != null && ids.length > 0 && ids[0].equals("")) {
+                            bw.set(field.getName(), o , null);
                         }
                     }
                 }
@@ -228,6 +233,16 @@ public class JPASupport implements Serializable {
                 if (doCascade) {
                     Object value = field.get(this);
                     if (value == null) {
+                        continue;
+                    }
+                    if (value instanceof PersistentMap) {
+                        if (((PersistentMap) value).wasInitialized()) {
+                            for (Object o : ((Map) value).values()) {
+                                if (o instanceof JPASupport) {
+                                    ((JPASupport) o).saveAndCascade(willBeSaved);
+                                }
+                            }
+                        }
                         continue;
                     }
                     if (value instanceof PersistentCollection) {

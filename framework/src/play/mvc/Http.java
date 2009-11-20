@@ -37,6 +37,16 @@ public class Http {
          */
         public List<String> values;
 
+        public Header() {
+            this.values = new ArrayList<String>();
+        }
+
+        public Header(String name, String value) {
+            this.name = name;
+            this.values = new ArrayList<String>();
+            this.values.add(value);
+        }
+
         /**
          * First value
          * @return The first value
@@ -56,6 +66,10 @@ public class Http {
          */
         public String name;
         /**
+         * Cookie domain
+         */
+        public String domain;
+        /**
          * Cookie path
          */
         public String path = "/";
@@ -67,8 +81,14 @@ public class Http {
          * Cookie value
          */
         public String value;
-        public boolean sendOnError = false;
+        /**
+         * Cookie max-age
+         */
         public Integer maxAge;
+        /**
+         * Don't use
+         */
+        public boolean sendOnError = false;
     }
 
     /**
@@ -337,6 +357,7 @@ public class Http {
             headers.put(name, h);
         }
 
+
         /**
          * Set a new cookie
          * @param name Cookie name
@@ -358,7 +379,16 @@ public class Http {
         }
 
         public void setCookie(String name, String value, Integer maxAge) {
-            if (cookies.containsKey(name)) {
+            setCookie(name, value, null, "/", maxAge);
+        }
+
+        public void setCookie(String name, String value, String domain, String path, String duration) {
+            int expire = Time.parseDuration(duration);
+            setCookie(name, value, domain, path, Integer.valueOf(expire));
+        }
+
+        public void setCookie(String name, String value, String domain, String path, Integer maxAge) {
+            if (cookies.containsKey(name) && cookies.get(name).path.equals(path) && ((cookies.get(name).domain == null && domain == null) || (cookies.get(name).domain.equals(domain)))) {
                 cookies.get(name).value = value;
                 if (maxAge != null) {
                     cookies.get(name).maxAge = maxAge;
@@ -367,6 +397,10 @@ public class Http {
                 Cookie cookie = new Cookie();
                 cookie.name = name;
                 cookie.value = value;
+                cookie.path = path;
+                if (domain != null) {
+                    cookie.domain = domain;
+                }
                 if (maxAge != null) {
                     cookie.maxAge = maxAge;
                 }

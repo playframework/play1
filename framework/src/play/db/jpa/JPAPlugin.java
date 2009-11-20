@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Properties;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import org.apache.log4j.Level;
@@ -217,6 +218,9 @@ public class JPAPlugin extends PlayPlugin {
             return;
         }
         EntityManager manager = JPA.entityManagerFactory.createEntityManager();
+        //if(Play.configuration.getProperty("future.bindJPAObjects", "false").equals("true")) {
+            manager.setFlushMode(FlushModeType.COMMIT);
+        //}
         if (autoTxs) {
             manager.getTransaction().begin();
         }

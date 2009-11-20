@@ -2,14 +2,14 @@
 # ~~~~~~~~~~~
 
 #{crud.types}
-GET			/												${type.controllerClass.name.substring(12)}.index
-GET			/${type.controllerName}							${type.controllerClass.name.substring(12)}.list
-GET			/${type.controllerName}/new						${type.controllerClass.name.substring(12)}.blank
-GET			/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12)}.show
-GET			/${type.controllerName}/{<\d+>id}/{field}		${type.controllerClass.name.substring(12)}.attachment
-GET			/${type.controllerName}/{<\d+>id}/edit			${type.controllerClass.name.substring(12)}.edit
-POST		/${type.controllerName}							${type.controllerClass.name.substring(12)}.create
-POST		/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12)}.save
-DELETE		/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12)}.delete 
+GET			/												${type.controllerClass.name.substring(12).replace('$','')}.index
+GET			/${type.controllerName}							${type.controllerClass.name.substring(12).replace('$','')}.list
+GET			/${type.controllerName}/new						${type.controllerClass.name.substring(12).replace('$','')}.blank
+GET			/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12).replace('$','')}.show
+GET			/${type.controllerName}/{<\d+>id}/{field}		${type.controllerClass.name.substring(12).replace('$','')}.attachment
+GET			/${type.controllerName}/{<\d+>id}/edit			${type.controllerClass.name.substring(12).replace('$','')}.edit
+POST		/${type.controllerName}							${type.controllerClass.name.substring(12).replace('$','')}.create
+POST		/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12).replace('$','')}.save
+DELETE		/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12).replace('$','')}.delete
 #{/crud.types}
 GET			/												CRUD.index

@@ -7,7 +7,7 @@ ${exception.errorDescription.replace('<strong>', '').replace('</strong>', '')}
 In ${exception.sourceFile} (around line ${exception.lineNumber})
 
 %{ 
-    from = exception.lineNumber - 5 >= 0 ? exception.lineNumber - 5 : 0
+    from = exception.lineNumber - 5 >= 0 && exception.lineNumber < exception.source.size() ? exception.lineNumber - 5 : 0
     to = exception.lineNumber + 5  < exception.source.size() ? exception.lineNumber + 5 : exception.source.size()-1          
 }%
 #{list items:exception.source[from..to], as:'line'}

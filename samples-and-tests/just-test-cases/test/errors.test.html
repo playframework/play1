@@ -1,6 +1,6 @@
 #{selenium 'Test the errors pages'}
 
-    // 404
+        // 404
 	open('@{HasErrors.willBeNotFound()}')
 	assertTextPresent('Not found')
 	assertTextPresent('Hop')
@@ -10,14 +10,19 @@
 	assertTextPresent('Execution exception')
 	assertTextPresent('In /app/controllers/HasErrors.java (around line 15)')
 	
+	// 500
+	open('@{HasErrors.willThrowErrorToo()}')
+	assertTextPresent('Template compilation error')
+	assertTextPresent(' is not opened.')
+	
 	// 404
 	open('/nimp')
 	assertTextPresent('Not found')
-    assertTextPresent('GET /nimp')
+        assertTextPresent('GET /nimp')
     
-    // 404
+        // 404
 	open('/application/nimp')
 	assertTextPresent('Not found')
-    assertTextPresent('application.nimp action not found')
+        assertTextPresent('application.nimp action not found')
 
 #{/selenium}

@@ -264,7 +264,7 @@ try:
 
 		memory_in_args=False
 		for arg in java_args:
-			if arg.startswith('Xm'):
+			if arg.startswith('-Xm'):
 				memory_in_args=True
 		if not memory_in_args:
 			memory = readConf('jvm.memory')
@@ -637,6 +637,10 @@ try:
 		print "~ Running in test mode"
 		print "~ Ctrl+C to stop"
 		print "~ "
+		print "~ Deleting %s" % os.path.normpath(os.path.join(application_path, 'tmp'))
+		if os.path.exists(os.path.join(application_path, 'tmp')):
+			shutil.rmtree(os.path.join(application_path, 'tmp'))
+		print "~"
 		test_result = os.path.join(application_path, 'test-result')
 		if os.path.exists(test_result):
 			shutil.rmtree(test_result)
@@ -887,7 +891,7 @@ try:
 			for module in modules:
 				lXML += '<link><name>%s</name><type>2</type><location>%s</location></link>' % (os.path.basename(module), os.path.join(module, 'app').replace('\\', '/'))
 				cXML += '<classpathentry kind="src" path="%s"/>' % (os.path.basename(module))
-			replaceAll(dotProject, r'%LINKS%', '<xlinkedResources>%s</linkedResources>' % lXML)
+			replaceAll(dotProject, r'%LINKS%', '<linkedResources>%s</linkedResources>' % lXML)
 			replaceAll(dotClasspath, r'%MODULES%', cXML)
 		else:
 			replaceAll(dotProject, r'%LINKS%', '')

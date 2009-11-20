@@ -15,6 +15,9 @@ public class Files {
      * @param to
      */
     public static void copy(File from, File to) {
+        if(from.getAbsolutePath().equals(to.getAbsolutePath())) {
+            return;
+        }
         FileInputStream is = null;
         FileOutputStream os = null;
         try {

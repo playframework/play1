@@ -6,6 +6,8 @@ import java.util.List;
 import javax.inject.Inject;
 import play.Play;
 import play.mvc.Controller;
+import play.mvc.Mailer;
+import play.jobs.Job;
 
 public class Injector {
     
@@ -14,6 +16,8 @@ public class Injector {
      */
     public static void inject(BeanSource source) {
         List<Class> classes = Play.classloader.getAssignableClasses(Controller.class);
+        classes.addAll(Play.classloader.getAssignableClasses(Mailer.class));
+	classes.addAll(Play.classloader.getAssignableClasses(Job.class));
         for(Class clazz : classes) {
             for(Field field : clazz.getDeclaredFields()) {
                 if(Modifier.isStatic(field.getModifiers()) && field.isAnnotationPresent(Inject.class)) {

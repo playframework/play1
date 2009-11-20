@@ -8,7 +8,7 @@
 		<div class="message <%= message.user == '${session.nick}' ? 'you' : '' %> <%= message.user == 'notice' ? 'notice' : '' %>">
 			<h2><%= message.user %></h2>
 			<p>
-				<%= message.text %>
+				<%= message.text.replace('\n', '<br/>') %>
 			</p>
 		</div>
 	</script>
@@ -16,17 +16,15 @@
 
 <div id="newMessage">
 	<textarea id="message" name="message"></textarea>
+	<input type="button" value="send" id="send"/>
 </div>
 
 <script type="text/javascript">
 
-	// Send message when user press ENTER
-	$('#message').keypress(function(e) {
-		if(e.keyCode == 13) {
-			var message = $('#message').val();
-			$('#message').val('');
-			$.post('@{postMessage()}', {message: message}); 
-		}
+	$('#send').click(function(e) {
+		var message = $('#message').val();
+		$('#message').val('');
+		$.post('@{postMessage()}', {message: message}); 
     });
 
 	// Retrieve new messages

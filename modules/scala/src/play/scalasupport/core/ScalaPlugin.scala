@@ -18,8 +18,6 @@ import java.util.{List => JList}
 
 class ScalaPlugin extends PlayPlugin {
 
-    private var compiler = new ScalaCompiler()
-
     override def compileAll(classes: JList[ApplicationClass]) = {
         val sources = ListBuffer[VFile]()
         def scan(path: VFile): Unit = {
@@ -30,10 +28,29 @@ class ScalaPlugin extends PlayPlugin {
             }
         }
         Play.javaPath foreach scan
-        classes.addAll(compiler compile sources.toList)
+        play.Logger.trace("SCALA compileAll")
+        classes.addAll(compile(sources))
+    }
+
+    override def onClassesChange(modified: JList[ApplicationClass]) {
+        val sources = new java.util.ArrayList[VFile]
+        modified foreach { cl: ApplicationClass =>
+            var source = cl.javaFile
+            if(!(sources contains source)) {
+                sources add source
+            }
+        }
+        compile(sources)
     }
 
     // Compiler
+
+    private var compiler = new ScalaCompiler()
+
+    def compile(sources: JList[VFile]) = {
+        play.Logger.trace("SCALA compile %s", sources)
+        compiler compile sources.toList
+    }
 
     class ScalaCompiler {
 
@@ -73,10 +90,12 @@ class ScalaPlugin extends PlayPlugin {
             }
 
             // Clear compilation results
-            virtualDirectory.clear
+            //virtualDirectory.clear
 
             // Compile
+            play.Logger.trace("SCALA Start compiling")
             run compileSources sourceFiles
+            play.Logger.trace("SCALA Done ...")
 
             // Retrieve result
             val classes = new java.util.ArrayList[ApplicationClass]()
@@ -92,13 +111,13 @@ class ScalaPlugin extends PlayPlugin {
                                     applicationClass = new ApplicationClass() {
 
                                         override def compile() = {
-                                            compileAll(new java.util.ArrayList[ApplicationClass]())
                                             javaByteCode
                                         }
 
                                     }
                                     applicationClass.name = infos(0)
                                     applicationClass.javaFile = realFiles.get(infos(1)).get
+                                    applicationClass.javaSource = applicationClass.javaFile.contentAsString
                                     play.Play.classes.add(applicationClass)
                                 }
                                 applicationClass.compiled(byteCode)

@@ -34,5 +34,27 @@ public class JPABinding extends Controller {
         render(company);
     }
     
+    public static void withMap(String companyId) {
+        Company company = Company.findById(companyId);
+        Project project = new Project();
+        project.companies = new HashMap();
+        project.companies.put(company.name, company);
+        project.save();
+        render("@show", project);
+    }
+    
+    public static void editMap(Long id) {
+        Project project = Project.findById(id);
+        project.companies.get("zenexity").name = "Coucou";
+        show(id);
+    }
+    
+    public static void editMapAndSave(Long id) {
+        Project project = Project.findById(id);
+        project.companies.get("zenexity").name = "Coucou";
+        project.save();
+        show(id);
+    }
+    
 }
 

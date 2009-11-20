@@ -210,6 +210,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                 Http.Cookie playCookie = new Http.Cookie();
                 playCookie.name = cookie.getName();
                 playCookie.path = cookie.getPath();
+                playCookie.domain = cookie.getDomain();
                 playCookie.secure = cookie.getSecure();
                 playCookie.value = cookie.getValue();
                 playCookie.maxAge = cookie.getMaxAge();
@@ -267,6 +268,9 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                         Cookie c = new Cookie(cookie.name, cookie.value);
                         c.setSecure(cookie.secure);
                         c.setPath(cookie.path);
+                        if (cookie.domain != null) {
+                            c.setDomain(cookie.domain);
+                        }
                         response.addCookie(c);
                     }
                 }
@@ -286,7 +290,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             }
             response.setStatus(500);
             String format = "html";
-            if(Request.current() != null) {
+            if (Request.current() != null) {
                 format = Request.current().format;
             }
             if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With")) && (format == null || format.equals("html"))) {
@@ -335,6 +339,9 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             Cookie c = new Cookie(cookie.name, cookie.value);
             c.setSecure(cookie.secure);
             c.setPath(cookie.path);
+            if (cookie.domain != null) {
+                c.setDomain(cookie.domain);
+            }
             if (cookie.maxAge != null) {
                 c.setMaxAge(cookie.maxAge);
             }

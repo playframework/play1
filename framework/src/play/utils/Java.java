@@ -17,6 +17,8 @@ import java.util.concurrent.FutureTask;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.bytecode.SourceFileAttribute;
+import play.Logger;
+import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.data.binding.Binder;
@@ -128,7 +130,12 @@ public class Java {
         }
         if (m != null) {
             m.setAccessible(true);
-            return m.invoke(null, args);
+            if(Modifier.isStatic(m.getModifiers())) {
+                return m.invoke(null, args);
+            } else {
+                Object instance = m.getDeclaringClass().getDeclaredField("MODULE$").get(null);
+                return m.invoke(instance, args);
+            }
         }
         throw new NoSuchMethodException(method);
     }
@@ -220,7 +227,7 @@ public class Java {
      */
     public static List<Method> findAllAnnotatedMethods(Class clazz, Class annotationType) {
         List<Method> methods = new ArrayList<Method>();
-        while (!clazz.equals(Object.class) && ControllerSupport.class.isAssignableFrom(clazz)) {
+        while (!clazz.equals(Object.class)) {
             for (Method method : clazz.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(annotationType)) {
                     methods.add(method);
@@ -229,6 +236,17 @@ public class Java {
             if (clazz.isAnnotationPresent(With.class)) {
                 for (Class withClass : ((With) clazz.getAnnotation(With.class)).value()) {
                     methods.addAll(findAllAnnotatedMethods(withClass, annotationType));
+                }
+            }
+            for(Class trait : clazz.getInterfaces()) {
+                if(trait.getName().startsWith("controllers.")) {
+                    // Hm
+                    try {
+                        Class traitClass = Play.classloader.loadClass(trait.getName()+"$class");
+                        methods.addAll(findAllAnnotatedMethods(traitClass, annotationType));
+                    } catch(ClassNotFoundException e) {
+                        Logger.warn("Found one trait " + trait.getName() + " but traitClass is missing ??");
+                    }
                 }
             }
             clazz = clazz.getSuperclass();

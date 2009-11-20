@@ -3,6 +3,7 @@ package play.data.binding;
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -25,6 +26,7 @@ import play.PlayPlugin;
 import play.data.Upload;
 import play.data.validation.Validation;
 import play.data.binding.annotations.As;
+import play.exceptions.UnexpectedException;
 
 /**
  * The binder try to convert String values to Java objects.
@@ -94,7 +96,7 @@ public class Binder {
                 }
                 return Enum.valueOf(clazz, value[0]);
             }
-            // Map 
+            // Map
             if (Map.class.isAssignableFrom(clazz)) {
                 Class keyClass = String.class;
                 Class valueClass = String.class;
@@ -202,6 +204,10 @@ public class Binder {
     }
 
     public static Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params) {
+        return bind(name, clazz, type, annotations, params, null, null, 0);
+    }
+
+    public static Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, Object o, Method method, int parameterIndex) {
         Object result = null;
         // Let a chance to plugins to bind this object
         for(PlayPlugin plugin : Play.plugins) {
@@ -213,6 +219,17 @@ public class Binder {
         result = bindInternal(name, clazz, type, annotations, params, "");
 
         if (result == MISSING) {
+            // Try the scala default
+            if(o != null && parameterIndex > 0) {
+                try {
+                    Method defaultMethod = method.getDeclaringClass().getDeclaredMethod(method.getName()+"$default$"+parameterIndex);
+                    return defaultMethod.invoke(o);
+                } catch(NoSuchMethodException e) {
+                    //
+                } catch(Exception e) {
+                    throw new UnexpectedException(e);
+                }
+            }
             if (clazz.equals(boolean.class)) {
                 return false;
             }
@@ -252,7 +269,6 @@ public class Binder {
     public static Object directBind(String value, Class clazz) throws Exception {
         return directBind(null, value, clazz);
     }
-
     public static Object directBind(Annotation[] annotations, String value, Class clazz) throws Exception {
         if (clazz.equals(String.class)) {
             return value;
@@ -271,139 +287,79 @@ public class Binder {
            }
        }
         
-       if (supportedTypes.containsKey(clazz)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            return supportedTypes.get(clazz).bind(annotations, value);
+        boolean nullOrEmpty = value == null || value.trim().length() == 0;
+
+        if (supportedTypes.containsKey(clazz)) {
+            return nullOrEmpty ? null : supportedTypes.get(clazz).bind(annotations, value);
         }
-        if (clazz.getName().equals("int")) {
-            if (value == null || value.trim().length() == 0) {
-                return 0;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            return Integer.parseInt(value);
-        }
-        if (clazz.equals(Integer.class)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            return Integer.parseInt(value);
-        }
-        if (clazz.getName().equals("byte")) {
-            if (value == null || value.trim().length() == 0) {
-                return 0;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            Byte b = Byte.parseByte(value);
-            if(b == null) {
-                return 0;
-            }
-            return b;
-        }
-        if (clazz.equals(Byte.class)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            return Byte.parseByte(value);
-        }
-        if (clazz.getName().equals("double")) {
-            if (value == null || value.trim().length() == 0) {
-                return 0D;
-            }
-            return Double.parseDouble(value);
-        }
-        if (clazz.equals(Double.class)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            return Double.parseDouble(value);
-        }
-        if (clazz.getName().equals("short")) {
-            if (value == null || value.trim().length() == 0) {
-                return 0;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            return Short.parseShort(value);
-        }
-        if (clazz.equals(Short.class)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            return Short.parseShort(value);
-        }
-        if (clazz.getName().equals("long")) {
-            if (value == null || value.trim().length() == 0) {
-                return 0L;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            return Long.parseLong(value);
-        }
-        if (clazz.equals(Long.class)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            return Long.parseLong(value);
-        }
-        if (clazz.getName().equals("float")) {
-            if (value == null || value.trim().length() == 0) {
-                return 0;
-            }
-            return Float.parseFloat(value);
-        }
-        if (clazz.equals(Float.class)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            return Float.parseFloat(value);
-        }
-        if (clazz.getName().equals("byte") || clazz.equals(Byte.class)) {
-            if (value == null || value.trim().length() == 0) {
+
+        // int or Integer binding
+        if (clazz.getName().equals("int") || clazz.equals(Integer.class)) {
+            if (nullOrEmpty)
                 return clazz.isPrimitive() ? 0 : null;
-            }
-            if (value.contains(".")) {
-                value = value.substring(0, value.indexOf("."));
-            }
-            return Byte.parseByte(value);
+
+            return Integer.parseInt(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
+
+        // long or Long binding
+        if (clazz.getName().equals("long") || clazz.equals(Long.class)) {
+            if (nullOrEmpty)
+                return clazz.isPrimitive() ? 0l : null;
+
+            return Long.parseLong(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
+        }
+
+        // byte or Byte binding
+        if (clazz.getName().equals("byte") || clazz.equals(Byte.class)) {
+            if (nullOrEmpty)
+                return clazz.isPrimitive() ? (byte)0 : null;
+
+            return Byte.parseByte(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
+        }
+
+        // short or Short binding
+        if (clazz.getName().equals("short") || clazz.equals(Short.class)) {
+            if (nullOrEmpty)
+                return clazz.isPrimitive() ? (short)0 : null;
+
+            return Short.parseShort(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
+        }
+
+        // float or Float binding
+        if (clazz.getName().equals("float") || clazz.equals(Float.class)) {
+            if (nullOrEmpty)
+                return clazz.isPrimitive() ? 0f : null;
+
+            return Float.parseFloat(value);
+        }
+
+        // double or Double binding
+        if (clazz.getName().equals("double") || clazz.equals(Double.class)) {
+            if (nullOrEmpty)
+                return clazz.isPrimitive() ? 0d : null;
+
+            return Double.parseDouble(value);
+        }
+
+        // BigDecimal binding
         if (clazz.equals(BigDecimal.class)) {
-            if (value == null || value.trim().length() == 0) {
+            if (nullOrEmpty)
                 return null;
-            }
+
             return new BigDecimal(value);
         }
-        if (clazz.getName().equals("boolean")) {
-            if (value == null || value.trim().length() == 0) {
-                return false;
-            }
+
+        // boolean or Boolean binding
+        if (clazz.getName().equals("boolean") || clazz.equals(Boolean.class)) {
+            if (nullOrEmpty)
+                return clazz.isPrimitive() ? false : null;
+
+            if (value.equals("1") || value.toLowerCase().equals("on") || value.toLowerCase().equals("yes"))
+                return true;
+
             return Boolean.parseBoolean(value);
         }
-        if (clazz.equals(Boolean.class)) {
-            if (value == null || value.trim().length() == 0) {
-                return null;
-            }
-            return Boolean.parseBoolean(value);
-        }
+
         return null;
     }
 }

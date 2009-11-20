@@ -37,7 +37,7 @@ public abstract class Cache {
 
     /**
      * Add an element only if it doesn't exist, and return only when 
-     * the element is effectivly cached.
+     * the element is effectively cached.
      * @param key Element key
      * @param value Element value
      * @param expiration Ex: 10s, 3mn, 8h
@@ -49,7 +49,7 @@ public abstract class Cache {
     }
 
     /**
-     * Add an element only if it doesn't exist and store it indefinitly.
+     * Add an element only if it doesn't exist and store it indefinitely.
      * @param key Element key
      * @param value Element value
      */
@@ -70,7 +70,7 @@ public abstract class Cache {
     }
 
     /**
-     * Set an element and return only when the element is effectivly cached.
+     * Set an element and return only when the element is effectively cached.
      * @param key Element key
      * @param value Element value
      * @param expiration Ex: 10s, 3mn, 8h
@@ -82,7 +82,7 @@ public abstract class Cache {
     }
 
     /**
-     * Set an element and store it indefinitly.
+     * Set an element and store it indefinitely.
      * @param key Element key
      * @param value Element value
      */
@@ -104,7 +104,7 @@ public abstract class Cache {
 
     /**
      * Replace an element only if it already exists and return only when the 
-     * element is effectivly cached.
+     * element is effectively cached.
      * @param key Element key
      * @param value Element value
      * @param expiration Ex: 10s, 3mn, 8h
@@ -116,7 +116,7 @@ public abstract class Cache {
     }
 
     /**
-     * Replace an element only if it already exists and store it indefinitly.
+     * Replace an element only if it already exists and store it indefinitely.
      * @param key Element key
      * @param value Element value
      */
@@ -191,7 +191,7 @@ public abstract class Cache {
 
     /**
      * Delete an element from the cache and return only when the 
-     * element is effectivly removed.
+     * element is effectively removed.
      * @param key The element key
      * @return If the element an eventually been deleted
      */
@@ -213,12 +213,13 @@ public abstract class Cache {
      * @param clazz The type class
      * @return The element value or null
      */
-    public static <T> T get(String key, Class<T> clazz) {
+    @SuppressWarnings("unchecked")
+	public static <T> T get(String key, Class<T> clazz) {
         return (T) cacheImpl.get(key);
     }
 
     /**
-     * Init the cache system.
+     * Initialize the cache system.
      */
     public static void init() {
         if(forcedCacheImpl != null) {

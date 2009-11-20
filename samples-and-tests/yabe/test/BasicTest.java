@@ -187,7 +187,12 @@ public class BasicTest extends UnitTest {
         assertEquals(0, Post.findTaggedWith("Green", "Blue").size());    
         
         List<Map> cloud = Tag.getCloud();
-        assertEquals("[{tag=Red, pound=2}, {tag=Blue, pound=1}, {tag=Green, pound=1}]", cloud.toString());
+        Collections.sort(cloud, new Comparator<Map>() {
+            public int compare(Map m1, Map m2) {
+                return m1.get("tag").toString().compareTo(m2.get("tag").toString());
+            }
+        });
+        assertEquals("[{tag=Blue, pound=1}, {tag=Green, pound=1}, {tag=Red, pound=2}]", cloud.toString());
         
     }
  

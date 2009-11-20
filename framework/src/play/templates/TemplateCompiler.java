@@ -84,8 +84,13 @@ public class TemplateCompiler {
             List<String> names = new ArrayList();
             Map<String, String> originalNames = new HashMap<String, String>();
             for (Class clazz : Play.classloader.getAllClasses()) {
-                names.add(clazz.getName().replace("$", "."));
-                originalNames.put(clazz.getName().replace("$", "."), clazz.getName());
+                if(clazz.getName().endsWith("$")) {
+                    names.add(clazz.getName().substring(0, clazz.getName().length()-1).replace("$", ".")+"$");
+                    originalNames.put(clazz.getName().substring(0, clazz.getName().length()-1).replace("$", ".")+"$", clazz.getName());
+                } else {
+                    names.add(clazz.getName().replace("$", "."));
+                    originalNames.put(clazz.getName().replace("$", "."), clazz.getName());
+                }
             }
             Collections.sort(names, new Comparator<String>() {
 

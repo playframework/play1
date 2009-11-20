@@ -176,8 +176,8 @@ public abstract class CRUD extends Controller {
                 return null;
             }
             ObjectType type = new ObjectType(entityClass);
-            type.name = controllerClass.getSimpleName();
-            type.controllerName = controllerClass.getSimpleName().toLowerCase();
+            type.name = controllerClass.getSimpleName().replace("$", "");
+            type.controllerName = controllerClass.getSimpleName().toLowerCase().replace("$", "");
             type.controllerClass = controllerClass;
             return type;
         }
@@ -186,7 +186,7 @@ public abstract class CRUD extends Controller {
             if (controllerClass.isAnnotationPresent(For.class)) {
                 return ((For) (controllerClass.getAnnotation(For.class))).value();
             }
-            String name = controllerClass.getSimpleName();
+            String name = controllerClass.getSimpleName().replace("$", "");
             name = "models." + name.substring(0, name.length() - 1);
             try {
                 return Play.classloader.loadClass(name);
@@ -280,7 +280,7 @@ public abstract class CRUD extends Controller {
 
         public List<ObjectField> getFields() {
             List fields = new ArrayList();
-            for (Field f : entityClass.getFields()) {
+            for (Field f : entityClass.getDeclaredFields()) {
                 if(Modifier.isTransient(f.getModifiers())) {
                     continue;
                 }

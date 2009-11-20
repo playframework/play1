@@ -139,7 +139,8 @@
 	assertText('j', '0')
 	assertText('l', '0')
 	assertText('k', '')
-	assertText('birth', '1980-12-21')
+	assertText('birth', '21/12/1980')
+
 	
 	//
 	open('@{Users.index()}')
@@ -156,16 +157,5 @@
 	assertText('birth', '')	
 	assertTextPresent('u.birth: Incorrect value')
 	
-	//
-	open('@{Users.index()}')
-	type('birth','12/21/80')
-	clickAndWait('go')
-	assertText('name', '')
-	assertText('b', '')
-	assertText('c', 'false')
-	assertText('i', '')
-	assertText('j', '0')
-	assertText('l', '0')
-	assertText('k', '')
-	assertText('birth', '1980-12-21')
+	
 #{/selenium}

@@ -147,6 +147,7 @@ public class HttpHandler implements IoHandler {
             Http.Cookie playCookie = new Http.Cookie();
             playCookie.name = cookie.getName();
             playCookie.path = cookie.getPath();
+            playCookie.domain = cookie.getDomain();
             playCookie.secure = cookie.isSecure();
             playCookie.value = cookie.getValue();
             request.cookies.put(playCookie.name, playCookie);
@@ -318,6 +319,9 @@ public class HttpHandler implements IoHandler {
                         DefaultCookie c = new DefaultCookie(cookie.name, cookie.value);
                         c.setSecure(cookie.secure);
                         c.setPath(cookie.path);
+                        if (cookie.domain != null) {
+                            c.setDomain(cookie.domain);
+                        }
                         response.addCookie(c);
                     }
                 }
@@ -502,6 +506,9 @@ public class HttpHandler implements IoHandler {
             DefaultCookie c = new DefaultCookie(cookie.name, cookie.value);
             c.setSecure(cookie.secure);
             c.setPath(cookie.path);
+            if (cookie.domain != null) {
+                c.setDomain(cookie.domain);
+            }
             if (cookie.maxAge != null) {
                 c.setMaxAge(cookie.maxAge);
             }

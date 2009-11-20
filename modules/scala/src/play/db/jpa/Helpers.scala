@@ -1,25 +1,15 @@
 package play.db.jpa
 
-object Helpers {
+class ScalaQuery[T](val query: JPASupport.JPAQuery) {
 
-    def jpql(query: String, args: Any*) = new SQuery(query, args:_*)
-
-}
-
-class SQuery(val jpql: String, val args: Any*) {
-
-    val jpaQuery = new JPASupport.JPAQuery(JPA.em().createQuery(jpql))
-    JPQL.instance.bindParameters(jpaQuery.query, args.map(_.asInstanceOf[AnyRef]):_*)
-    
-    // ~~
-
-    def first[T] = jpaQuery.first.asInstanceOf[T]
-    def from(start: Int) = {
-        jpaQuery.from(start)
+    def first = query.first().asInstanceOf[T]
+    def fetch() = asList[T](query.fetch())
+    def all = fetch()
+    def fetch(size: Int) = asList[T](query.fetch(size))
+    def from(offset: Int) = {
+        query.from(offset)
         this
     }
-    def fetch[T] = asList[T](jpaQuery.fetch())
-    def fetch[T](size: Int) = asList[T](jpaQuery.fetch(size))
 
     // ~~
 
