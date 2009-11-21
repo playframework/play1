@@ -53,12 +53,12 @@ public class BeanWrapper {
             if (name.equals("") && prefix.equals("") && newPrefix.startsWith(".")) {
                 newPrefix = newPrefix.substring(1);
             }
-            Logger.info("beanwrapper: bind name [" + name + "] annotation [" + Utils.toString(annotations) + "]");
-            Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), prop.field.getAnnotations(), params, newPrefix);
+            Logger.trace("beanwrapper: bind name [" + name + "] annotation [" + Utils.toString(annotations) + "]");
+            Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), (prop.field != null)?prop.field.getAnnotations():annotations, params, newPrefix);
             if (value != Binder.MISSING) {
                 prop.setValue(instance, value);
             } else {
-                Logger.info("beanwrapper: bind annotation [" + Utils.toString(annotations) + "]");
+                Logger.trace("beanwrapper: bind annotation [" + Utils.toString(annotations) + "]");
                 value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), annotations, params, newPrefix);
                 if (value != Binder.MISSING) {
                     prop.setValue(instance, value);

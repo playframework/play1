@@ -4,7 +4,6 @@ import models.*;
 import play.*;
 import play.mvc.*;
 import java.text.*;
-import play.data.binding.annotations.As;
 
 public class Users extends Controller {
 
@@ -12,7 +11,7 @@ public class Users extends Controller {
         render();
     }
     
-    public static void submit(@As("dd/MM/yyyy") User u) {
+    public static void submit(User u) {
         Logger.info("user date [" + u.birth + "]");
         render(u);
        

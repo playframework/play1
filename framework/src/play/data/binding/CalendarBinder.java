@@ -6,9 +6,7 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.Date;
 
-import org.apache.commons.lang.StringUtils;
 import play.data.binding.annotations.AnnotationHelper;
-import play.data.binding.annotations.As;
 import play.i18n.Lang;
 import play.libs.I18N;
 

@@ -26,7 +26,7 @@ import play.Play;
 import play.PlayPlugin;
 import play.data.Upload;
 import play.data.validation.Validation;
-import play.data.binding.annotations.As;
+import play.data.binding.annotations.Bind;
 import play.exceptions.UnexpectedException;
 import play.utils.Utils;
 
@@ -47,7 +47,6 @@ public class Binder {
     static Map<Class, BeanWrapper> beanwrappers = new HashMap<Class, BeanWrapper>();
 
     static BeanWrapper getBeanWrapper(Class clazz) {
-        Logger.info("getBeanWrapper: [" + clazz + "]");
         if (!beanwrappers.containsKey(clazz)) {
             BeanWrapper beanwrapper = new BeanWrapper(clazz);
             beanwrappers.put(clazz, beanwrapper);
@@ -58,7 +57,7 @@ public class Binder {
 
     static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String prefix) {
         try {
-            Logger.info("bindInternal: name [" + name + "] annotation [" + Utils.toString(annotations) + "] isComposite [" + isComposite(name + prefix, params.keySet()) + "]");
+            Logger.trace("bindInternal: name [" + name + "] annotation [" + Utils.toString(annotations) + "] isComposite [" + isComposite(name + prefix, params.keySet()) + "]");
 
             if (isComposite(name + prefix, params.keySet())) {
                 BeanWrapper beanWrapper = getBeanWrapper(clazz);
@@ -68,10 +67,11 @@ public class Binder {
 
             // Let see if we have a As annotation and a separator. If so, we need to split the values
             // Look up for the As annotation
+            // TODO: Move me somewhere else
             if (annotations != null) {
                 for (Annotation annotation : annotations) {
-                    if (value != null && value.length > 0 && annotation.annotationType().equals(As.class)) {
-                        final String separator = ((As) annotation).separator();
+                    if (value != null && value.length > 0 && annotation.annotationType().equals(Bind.class)) {
+                        final String separator = ((Bind) annotation).separator();
                         value = value[0].split(separator);
                     }
                 }
@@ -193,6 +193,7 @@ public class Binder {
                         r.add(directBind(annotations, v, componentClass));
                     } catch (Exception e) {
                         // ?? One item was bad
+                        Logger.debug(e, "error:");
                     }
                 }
                 return r;
@@ -203,7 +204,7 @@ public class Binder {
             }
             return directBind(annotations, value[0], clazz);
         } catch (Exception e) {
-            e.printStackTrace();
+           Logger.debug(e, "error:");
             Validation.addError(name + prefix, "validation.invalid");
             return MISSING;
         }
@@ -214,14 +215,12 @@ public class Binder {
     }
 
     public static Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, Object o, Method method, int parameterIndex) {
-       Logger.info("bind: name [" + name + "] annotation [" + Utils.toString(annotations) + "] ");
+       Logger.trace("bind: name [" + name + "] annotation [" + Utils.toString(annotations) + "] ");
 
         Object result = null;
         // Let a chance to plugins to bind this object
         for(PlayPlugin plugin : Play.plugins) {
-             Logger.info("bind: calling bind on plugin [" + plugin.toString() + "]");
             result = plugin.bind(name, clazz, type, annotations, params);
-            Logger.info("bind: returned value from [" + plugin.toString() + "] [" + result + "]");
             if(result != null) {
                 return result;
             }
@@ -281,7 +280,7 @@ public class Binder {
     }
 
     public static Object directBind(Annotation[] annotations, String value, Class clazz) throws Exception {
-         Logger.info("directBind: value [" + value + "] annotation [" + Utils.toString(annotations) + "] Class [" + clazz + "]");
+         Logger.trace("directBind: value [" + value + "] annotation [" + Utils.toString(annotations) + "] Class [" + clazz + "]");
 
         if (clazz.equals(String.class)) {
             return value;
@@ -289,9 +288,9 @@ public class Binder {
 
        if (annotations != null) {
            for (Annotation annotation : annotations) {
-               if (annotation.getClass().equals(As.class)) {
-                    Class<? extends SupportedType> toInstanciate = ((As)annotation).implementation();
-                    if (!(toInstanciate.equals(As.DEFAULT.class))) {
+               if (annotation.getClass().equals(Bind.class)) {
+                    Class<? extends SupportedType> toInstanciate = ((Bind)annotation).binder();
+                    if (!(toInstanciate.equals(Bind.DEFAULT.class))) {
                         // Instanciate the binder
                         SupportedType myInstance = toInstanciate.newInstance();
                         return myInstance.bind(annotations, value);

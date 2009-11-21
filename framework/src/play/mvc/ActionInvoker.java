@@ -351,7 +351,7 @@ public class ActionInvoker {
             } else {
                 params.putAll(Scope.Params.current().all());
             }
-              Logger.info("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.toString(method.getParameterAnnotations()[i]) + "]");
+            Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.toString(method.getParameterAnnotations()[i]) + "]");
 
             rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params, o, method, i+1);
         }
