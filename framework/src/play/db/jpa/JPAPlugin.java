@@ -42,12 +42,12 @@ public class JPAPlugin extends PlayPlugin {
                     Query query = JPA.em().createQuery("from " + clazz.getName() + " o where o.id = ?");
                     query.setParameter(1, play.data.binding.Binder.directBind(annotations, id + "", play.db.jpa.JPASupport.findKeyType(clazz)));
                     Object o = query.getSingleResult();
-                    return JPASupport.edit(o, name, params);
+                    return JPASupport.edit(o, name, params, annotations);
                 } catch(Exception e) {
                     return null;
                 }
             }
-            return JPASupport.create(clazz, name, params);
+            return JPASupport.create(clazz, name, params, annotations);
         }
         return super.bind(name, clazz, type, annotations, params);
     }

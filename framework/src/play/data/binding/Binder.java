@@ -21,12 +21,14 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.data.Upload;
 import play.data.validation.Validation;
 import play.data.binding.annotations.As;
 import play.exceptions.UnexpectedException;
+import play.utils.Utils;
 
 /**
  * The binder try to convert String values to Java objects.
@@ -45,16 +47,19 @@ public class Binder {
     static Map<Class, BeanWrapper> beanwrappers = new HashMap<Class, BeanWrapper>();
 
     static BeanWrapper getBeanWrapper(Class clazz) {
+        Logger.info("getBeanWrapper: [" + clazz + "]");
         if (!beanwrappers.containsKey(clazz)) {
             BeanWrapper beanwrapper = new BeanWrapper(clazz);
             beanwrappers.put(clazz, beanwrapper);
         }
         return beanwrappers.get(clazz);
     }
-    public static Object MISSING = new Object();
+    public final static Object MISSING = new Object();
 
     static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String prefix) {
         try {
+            Logger.info("bindInternal: name [" + name + "] annotation [" + Utils.toString(annotations) + "] isComposite [" + isComposite(name + prefix, params.keySet()) + "]");
+
             if (isComposite(name + prefix, params.keySet())) {
                 BeanWrapper beanWrapper = getBeanWrapper(clazz);
                 return beanWrapper.bind(name, type, params, prefix, annotations);
@@ -198,6 +203,7 @@ public class Binder {
             }
             return directBind(annotations, value[0], clazz);
         } catch (Exception e) {
+            e.printStackTrace();
             Validation.addError(name + prefix, "validation.invalid");
             return MISSING;
         }
@@ -208,10 +214,14 @@ public class Binder {
     }
 
     public static Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, Object o, Method method, int parameterIndex) {
+       Logger.info("bind: name [" + name + "] annotation [" + Utils.toString(annotations) + "] ");
+
         Object result = null;
         // Let a chance to plugins to bind this object
         for(PlayPlugin plugin : Play.plugins) {
+             Logger.info("bind: calling bind on plugin [" + plugin.toString() + "]");
             result = plugin.bind(name, clazz, type, annotations, params);
+            Logger.info("bind: returned value from [" + plugin.toString() + "] [" + result + "]");
             if(result != null) {
                 return result;
             }
@@ -269,7 +279,10 @@ public class Binder {
     public static Object directBind(String value, Class clazz) throws Exception {
         return directBind(null, value, clazz);
     }
+
     public static Object directBind(Annotation[] annotations, String value, Class clazz) throws Exception {
+         Logger.info("directBind: value [" + value + "] annotation [" + Utils.toString(annotations) + "] Class [" + clazz + "]");
+
         if (clazz.equals(String.class)) {
             return value;
         }

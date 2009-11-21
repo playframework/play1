@@ -40,6 +40,7 @@ import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
 import ch.lambdaj.function.closure.Closure;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import static ch.lambdaj.Lambda.closure;
 
@@ -62,25 +63,25 @@ public class JPASupport implements Serializable {
 
     public transient boolean willBeSaved = false;
 
-    public static <T extends JPASupport> T create(Class type, String name, Map<String, String[]> params) {
+    public static <T extends JPASupport> T create(Class type, String name, Map<String, String[]> params, Annotation[] annotations) {
         try {
             Constructor c = type.getDeclaredConstructor();
             c.setAccessible(true);
             Object model = c.newInstance();
-            return (T) edit(model, name, params);
+            return (T) edit(model, name, params, annotations);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     public <T extends JPASupport> T edit(String name, Params params) {
-        return (T) edit(this, name, params.all());
+        return (T) edit(this, name, params.all(), null);
     }
 
-    public static <T extends JPASupport> T edit(Object o, String name, Map<String, String[]> params) {
+    public static <T extends JPASupport> T edit(Object o, String name, Map<String, String[]> params, Annotation[] annotations) {
         try {
             BeanWrapper bw = new BeanWrapper(o.getClass());
-            bw.bind(name, o.getClass(), params, "", o, null);
+            bw.bind(name, o.getClass(), params, "", o, annotations);
             // relations
             Set<Field> fields = new HashSet<Field>();
             Class clazz = o.getClass();

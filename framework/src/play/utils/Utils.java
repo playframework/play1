@@ -1,5 +1,6 @@
 package play.utils;
 
+import java.lang.annotation.Annotation;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,6 +15,16 @@ import play.Play;
  * Generic utils
  */
 public class Utils {
+
+    public static String toString(Annotation[] annotations) {
+        String toReturn = "";
+        if (annotations != null) {
+            for (Annotation annotation : annotations) {
+                toReturn += annotation.toString() + " ";
+            }
+        }
+        return toReturn;
+    }
 
     public static String open(String file, Integer line) {
         if (Play.configuration.containsKey("play.editor")) {

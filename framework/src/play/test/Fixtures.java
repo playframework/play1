@@ -132,7 +132,7 @@ public class Fixtures {
                         serialize((Map) objects.get(key), "object", params);
                         Class cType = Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
-                        JPASupport model = JPASupport.create(cType, "object", params);
+                        JPASupport model = JPASupport.create(cType, "object", params, null);
                         model.save();
                         JPA.em().persist(model);
                         while (!cType.equals(JPASupport.class)) {

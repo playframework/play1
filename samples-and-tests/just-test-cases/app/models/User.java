@@ -25,7 +25,7 @@ public class User extends Model {
     public long l;
     public Long k;
 
-	@Required @As("dd/MM/yyyy")
+	@Required 
     public Date birth;
 
 	public String toString() {

@@ -2,7 +2,6 @@ package play;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import play.classloading.ApplicationClasses.ApplicationClass;

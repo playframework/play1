@@ -9,6 +9,7 @@ import java.util.Map;
 import play.Logger;
 import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
 import play.exceptions.UnexpectedException;
+import play.utils.Utils;
 
 /**
  * Parameters map to POJO binder.
@@ -52,9 +53,16 @@ public class BeanWrapper {
             if (name.equals("") && prefix.equals("") && newPrefix.startsWith(".")) {
                 newPrefix = newPrefix.substring(1);
             }
+            Logger.info("beanwrapper: bind name [" + name + "] annotation [" + Utils.toString(annotations) + "]");
             Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), prop.field.getAnnotations(), params, newPrefix);
             if (value != Binder.MISSING) {
                 prop.setValue(instance, value);
+            } else {
+                Logger.info("beanwrapper: bind annotation [" + Utils.toString(annotations) + "]");
+                value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), annotations, params, newPrefix);
+                if (value != Binder.MISSING) {
+                    prop.setValue(instance, value);
+                }
             }
         }
         return instance;

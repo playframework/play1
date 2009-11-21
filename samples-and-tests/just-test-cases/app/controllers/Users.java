@@ -12,7 +12,7 @@ public class Users extends Controller {
         render();
     }
     
-    public static void submit(User u) {
+    public static void submit(@As("dd/MM/yyyy") User u) {
         Logger.info("user date [" + u.birth + "]");
         render(u);
        

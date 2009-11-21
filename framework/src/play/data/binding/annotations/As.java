@@ -11,6 +11,7 @@ import play.data.binding.SupportedType;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.LOCAL_VARIABLE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 public @interface As {
+    
     String value() default "yyyy-MM-dd";
     String separator() default ",";
     Class<? extends SupportedType> implementation() default DEFAULT.class;

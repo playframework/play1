@@ -34,6 +34,7 @@ import play.mvc.results.NotFound;
 import play.mvc.results.Ok;
 import play.mvc.results.RenderBinary;
 import play.mvc.results.RenderText;
+import play.utils.Utils;
 
 /**
  * Invoke an action after an HTTP request
@@ -350,6 +351,8 @@ public class ActionInvoker {
             } else {
                 params.putAll(Scope.Params.current().all());
             }
+              Logger.info("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.toString(method.getParameterAnnotations()[i]) + "]");
+
             rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params, o, method, i+1);
         }
         return rArgs;
