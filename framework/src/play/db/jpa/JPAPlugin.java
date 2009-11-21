@@ -1,6 +1,7 @@
 package play.db.jpa;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class JPAPlugin extends PlayPlugin {
     public static boolean autoTxs = true;
 
     @Override
-    public Object bind(String name, Class clazz, java.lang.reflect.Type type, Map<String, String[]> params) {
+    public Object bind(String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations, Map<String, String[]> params) {
         // TODO need to be more generic in order to work with JPASupport
         if(Model.class.isAssignableFrom(clazz)) {
             String idKey = name + ".id"; 
@@ -39,16 +40,16 @@ public class JPAPlugin extends PlayPlugin {
                 String id = params.get(idKey)[0];
                 try {
                     Query query = JPA.em().createQuery("from " + clazz.getName() + " o where o.id = ?");
-                    query.setParameter(1, play.data.binding.Binder.directBind(id + "", play.db.jpa.JPASupport.findKeyType(clazz)));
+                    query.setParameter(1, play.data.binding.Binder.directBind(annotations, id + "", play.db.jpa.JPASupport.findKeyType(clazz)));
                     Object o = query.getSingleResult();
-                    return JPASupport.edit(o, name, params);
+                    return JPASupport.edit(o, name, params, annotations);
                 } catch(Exception e) {
                     return null;
                 }
             }
-            return JPASupport.create(clazz, name, params);
+            return JPASupport.create(clazz, name, params, annotations);
         }
-        return super.bind(name, clazz, type, params);
+        return super.bind(name, clazz, type, annotations, params);
     }
 
     @Override

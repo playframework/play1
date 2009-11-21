@@ -3,12 +3,14 @@ package models;
 import javax.persistence.*;
 import java.util.*;
 
+import play.data.binding.annotations.Bind;
 import play.db.jpa.*;
 
 @Entity
 public class Post extends Model {
 
     public String content;
+    @Bind(format = "yyyy-MM-dd")
     public Date postedAt;
     
     @OneToOne

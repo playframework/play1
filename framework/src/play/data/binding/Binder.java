@@ -1,6 +1,7 @@
 package play.data.binding;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -20,11 +21,14 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.data.Upload;
 import play.data.validation.Validation;
+import play.data.binding.annotations.Bind;
 import play.exceptions.UnexpectedException;
+import play.utils.Utils;
 
 /**
  * The binder try to convert String values to Java objects.
@@ -40,7 +44,6 @@ public class Binder {
         supportedTypes.put(Calendar.class, new CalendarBinder());
         supportedTypes.put(Locale.class, new LocaleBinder());
     }
-
     static Map<Class, BeanWrapper> beanwrappers = new HashMap<Class, BeanWrapper>();
 
     static BeanWrapper getBeanWrapper(Class clazz) {
@@ -50,15 +53,29 @@ public class Binder {
         }
         return beanwrappers.get(clazz);
     }
-    public static Object MISSING = new Object();
+    public final static Object MISSING = new Object();
 
-    static Object bindInternal(String name, Class clazz, Type type, Map<String, String[]> params, String prefix) {
+    static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String prefix) {
         try {
+            Logger.trace("bindInternal: name [" + name + "] annotation [" + Utils.toString(annotations) + "] isComposite [" + isComposite(name + prefix, params.keySet()) + "]");
+
             if (isComposite(name + prefix, params.keySet())) {
                 BeanWrapper beanWrapper = getBeanWrapper(clazz);
-                return beanWrapper.bind(name, type, params, prefix);
+                return beanWrapper.bind(name, type, params, prefix, annotations);
             }
             String[] value = params.get(name + prefix);
+
+            // Let see if we have a As annotation and a separator. If so, we need to split the values
+            // Look up for the As annotation
+            // TODO: Move me somewhere else
+            if (annotations != null) {
+                for (Annotation annotation : annotations) {
+                    if (value != null && value.length > 0 && annotation.annotationType().equals(Bind.class)) {
+                        final String separator = ((Bind) annotation).separator();
+                        value = value[0].split(separator);
+                    }
+                }
+            }
             // Arrays types
             if (clazz.isArray()) {
                 if (value == null) {
@@ -70,7 +87,7 @@ public class Binder {
                 Object r = Array.newInstance(clazz.getComponentType(), value.length);
                 for (int i = 0; i < value.length; i++) {
                     try {
-                        Array.set(r, i, directBind(value[i], clazz.getComponentType()));
+                        Array.set(r, i, directBind(annotations, value[i], clazz.getComponentType()));
                     } catch (Exception e) {
                         // ?? One item was bad
                     }
@@ -101,16 +118,16 @@ public class Binder {
                         String key = m.group(1);
                         Map<String, String[]> tP = new HashMap();
                         tP.put("key", new String[]{key});
-                        Object oKey = bindInternal("key", keyClass, keyClass, tP, "");
+                        Object oKey = bindInternal("key", keyClass, keyClass, annotations, tP, "");
                         if (oKey != MISSING) {
                             if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
                                 BeanWrapper beanWrapper = getBeanWrapper(valueClass);
-                                Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]");
+                                Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]", annotations);
                                 r.put(oKey, oValue);
                             } else {
                                 tP = new HashMap();
                                 tP.put("value", params.get(name + prefix + "[" + key + "]"));
-                                Object oValue = bindInternal("value", valueClass, valueClass, tP, "");
+                                Object oValue = bindInternal("value", valueClass, valueClass, annotations, tP, "");
                                 if (oValue != MISSING) {
                                     r.put(oKey, oValue);
                                 } else {
@@ -153,12 +170,12 @@ public class Binder {
                                 }
                                 if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
                                     BeanWrapper beanWrapper = getBeanWrapper(componentClass);
-                                    Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]");
+                                    Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]", annotations);
                                     ((List) r).set(key, oValue);
                                 } else {
                                     Map tP = new HashMap();
                                     tP.put("value", params.get(name + prefix + "[" + key + "]"));
-                                    Object oValue = bindInternal("value", componentClass, componentClass, tP, "");
+                                    Object oValue = bindInternal("value", componentClass, componentClass, annotations, tP, "");
                                     if (oValue != MISSING) {
                                         ((List) r).set(key, oValue);
                                     }
@@ -173,9 +190,10 @@ public class Binder {
                 }
                 for (String v : value) {
                     try {
-                        r.add(directBind(v, componentClass));
+                        r.add(directBind(annotations, v, componentClass));
                     } catch (Exception e) {
                         // ?? One item was bad
+                        Logger.debug(e, "error:");
                     }
                 }
                 return r;
@@ -184,27 +202,31 @@ public class Binder {
             if (value == null || value.length == 0) {
                 return MISSING;
             }
-            return directBind(value[0], clazz);
+            return directBind(annotations, value[0], clazz);
         } catch (Exception e) {
+           Logger.debug(e, "error:");
             Validation.addError(name + prefix, "validation.invalid");
             return MISSING;
         }
     }
 
-    public static Object bind(String name, Class clazz, Type type, Map<String, String[]> params) {
-        return bind(name, clazz, type, params, null, null, 0);
+    public static Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params) {
+        return bind(name, clazz, type, annotations, params, null, null, 0);
     }
 
-    public static Object bind(String name, Class clazz, Type type, Map<String, String[]> params, Object o, Method method, int parameterIndex) {
+    public static Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, Object o, Method method, int parameterIndex) {
+       Logger.trace("bind: name [" + name + "] annotation [" + Utils.toString(annotations) + "] ");
+
         Object result = null;
         // Let a chance to plugins to bind this object
         for(PlayPlugin plugin : Play.plugins) {
-            result = plugin.bind(name, clazz, type, params);
+            result = plugin.bind(name, clazz, type, annotations, params);
             if(result != null) {
                 return result;
             }
         }
-        result = bindInternal(name, clazz, type, params, "");
+        result = bindInternal(name, clazz, type, annotations, params, "");
+
         if (result == MISSING) {
             // Try the scala default
             if(o != null && parameterIndex > 0) {
@@ -252,16 +274,35 @@ public class Binder {
         return false;
     }
 
+
     public static Object directBind(String value, Class clazz) throws Exception {
+        return directBind(null, value, clazz);
+    }
+
+    public static Object directBind(Annotation[] annotations, String value, Class clazz) throws Exception {
+         Logger.trace("directBind: value [" + value + "] annotation [" + Utils.toString(annotations) + "] Class [" + clazz + "]");
 
         if (clazz.equals(String.class)) {
             return value;
         }
 
+       if (annotations != null) {
+           for (Annotation annotation : annotations) {
+               if (annotation.getClass().equals(Bind.class)) {
+                    Class<? extends SupportedType> toInstanciate = ((Bind)annotation).binder();
+                    if (!(toInstanciate.equals(Bind.DEFAULT.class))) {
+                        // Instanciate the binder
+                        SupportedType myInstance = toInstanciate.newInstance();
+                        return myInstance.bind(annotations, value);
+                    }
+               }
+           }
+       }
+        
         boolean nullOrEmpty = value == null || value.trim().length() == 0;
 
         if (supportedTypes.containsKey(clazz)) {
-            return nullOrEmpty ? null : supportedTypes.get(clazz).bind(value);
+            return nullOrEmpty ? null : supportedTypes.get(clazz).bind(annotations, value);
         }
 
         // int or Integer binding

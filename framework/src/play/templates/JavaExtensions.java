@@ -134,6 +134,11 @@ public class JavaExtensions {
         return new DecimalFormat(pattern).format(number);
     }
 
+    public static String format(Date date) {
+        // Get the pattern from the configuration
+        return new SimpleDateFormat(I18N.getDateFormat()).format(date);
+    }
+
     public static String format(Date date, String pattern) {
         return new SimpleDateFormat(pattern).format(date);
     }

@@ -40,6 +40,7 @@ import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
 import ch.lambdaj.function.closure.Closure;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import static ch.lambdaj.Lambda.closure;
 
@@ -62,25 +63,25 @@ public class JPASupport implements Serializable {
 
     public transient boolean willBeSaved = false;
 
-    public static <T extends JPASupport> T create(Class type, String name, Map<String, String[]> params) {
+    public static <T extends JPASupport> T create(Class type, String name, Map<String, String[]> params, Annotation[] annotations) {
         try {
             Constructor c = type.getDeclaredConstructor();
             c.setAccessible(true);
             Object model = c.newInstance();
-            return (T) edit(model, name, params);
+            return (T) edit(model, name, params, annotations);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     public <T extends JPASupport> T edit(String name, Params params) {
-        return (T) edit(this, name, params.all());
+        return (T) edit(this, name, params.all(), null);
     }
 
-    public static <T extends JPASupport> T edit(Object o, String name, Map<String, String[]> params) {
+    public static <T extends JPASupport> T edit(Object o, String name, Map<String, String[]> params, Annotation[] annotations) {
         try {
             BeanWrapper bw = new BeanWrapper(o.getClass());
-            bw.bind(name, o.getClass(), params, "", o);
+            bw.bind(name, o.getClass(), params, "", o, annotations);
             // relations
             Set<Field> fields = new HashSet<Field>();
             Class clazz = o.getClass();
@@ -120,7 +121,8 @@ public class JPASupport implements Serializable {
                                     continue;
                                 }
                                 Query q = JPA.em().createQuery("from " + relation + " where id = ?");
-                                q.setParameter(1, Binder.directBind(_id, findKeyType(Play.classloader.loadClass(relation))));
+                                // TODO: I think we need to type of direct bind -> primitive and object binder
+                                q.setParameter(1, Binder.directBind(null, _id, findKeyType(Play.classloader.loadClass(relation))));
                                 l.add(q.getSingleResult());
                             }
                         }
@@ -132,7 +134,8 @@ public class JPASupport implements Serializable {
                         }
                         if (ids != null && ids.length > 0 && !ids[0].equals("")) {
                             Query q = JPA.em().createQuery("from " + relation + " where id = ?");
-                            q.setParameter(1, Binder.directBind(ids[0], findKeyType(Play.classloader.loadClass(relation))));
+                            // TODO: I think we need to type of direct bind -> primitive and object binder
+                            q.setParameter(1, Binder.directBind(null, ids[0], findKeyType(Play.classloader.loadClass(relation))));
                             Object to = q.getSingleResult();
                             bw.set(field.getName(), o, to);
                         } else if(ids != null && ids.length > 0 && ids[0].equals("")) {
@@ -146,12 +149,14 @@ public class JPASupport implements Serializable {
                         fileAttachment = new FileAttachment(o, field.getName());
                         bw.set(field.getName(), o, fileAttachment);
                     }
-                    File file = Params.current().get(name + "." + field.getName(), File.class);
+                    // TODO: I think we need to type of direct bind -> primitive and object binder
+                    File file = Params.current().get(null, name + "." + field.getName(), File.class);
                     if (file != null && file.exists() && file.length() > 0) {
-                        fileAttachment.set(Params.current().get(name + "." + field.getName(), File.class));
+                        fileAttachment.set(Params.current().get(null, name + "." + field.getName(), File.class));
                         fileAttachment.filename = file.getName();
                     } else {
-                        String df = Params.current().get(name + "." + field.getName() + "_delete_", String.class);
+                        // TODO: I think we need to type of direct bind -> primitive and object binder
+                        String df = Params.current().get(null, name + "." + field.getName() + "_delete_", String.class);
                         if (df != null && df.equals("true")) {
                             fileAttachment.delete();
                             bw.set(field.getName(), o, null);

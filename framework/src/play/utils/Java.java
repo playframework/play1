@@ -155,7 +155,7 @@ public class Java {
         }
         Object[] rArgs = new Object[method.getParameterTypes().length];
         for (int i = 0; i < method.getParameterTypes().length; i++) {
-            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], args);
+            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], args);
         }
         return rArgs;
     }
@@ -264,6 +264,8 @@ public class Java {
             findAllFields(sClazz, found);
         }
     }
+
+     
     /** cache */
     private static Map<Field, FieldWrapper> wrappers = new HashMap<Field, FieldWrapper>();
 
@@ -373,4 +375,5 @@ public class Java {
             return "FieldWrapper (" + (writable ? "RW" : "R ") + ") for " + field;
         }
     }
+
 }

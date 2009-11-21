@@ -219,6 +219,8 @@ bc. <ul>
 #{/list}
 </ul>
 
+The same applies to **java.util.Date**.
+
 h3. Create custom extensions
 
 Your project may have specific formatting needs, in which case you can provide your own extensions.

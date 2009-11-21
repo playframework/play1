@@ -3,7 +3,6 @@ package controllers;
 import models.*;
 import play.*;
 import play.mvc.*;
-import java.util.*;
 import java.text.*;
 
 public class Users extends Controller {
@@ -13,10 +12,12 @@ public class Users extends Controller {
     }
     
     public static void submit(User u) {
+        Logger.info("user date [" + u.birth + "]");
         render(u);
+       
     }
 
-	public static void edit() {
+    	public static void edit() {
 		User u = fresh();
 		render(u);
 	}

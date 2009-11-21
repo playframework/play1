@@ -34,6 +34,7 @@ import play.mvc.results.NotFound;
 import play.mvc.results.Ok;
 import play.mvc.results.RenderBinary;
 import play.mvc.results.RenderText;
+import play.utils.Utils;
 
 /**
  * Invoke an action after an HTTP request
@@ -109,6 +110,9 @@ public class ActionInvoker {
             monitor = MonitorFactory.start(request.action+"()");
             
             // 5. Invoke the action
+
+            // There is a difference between a get and a post when binding data. The get does not care about validation while
+            // the post do.
             try {
                 // @Before
                 List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);
@@ -339,6 +343,7 @@ public class ActionInvoker {
         }
         Object[] rArgs = new Object[method.getParameterTypes().length];
         for (int i = 0; i < method.getParameterTypes().length; i++) {
+
             Class type = method.getParameterTypes()[i];
             Map<String, String[]> params = new HashMap();
             if(type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {
@@ -346,7 +351,9 @@ public class ActionInvoker {
             } else {
                 params.putAll(Scope.Params.current().all());
             }
-            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], params, o, method, i+1);
+            Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.toString(method.getParameterAnnotations()[i]) + "]");
+
+            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params, o, method, i+1);
         }
         return rArgs;
     }
