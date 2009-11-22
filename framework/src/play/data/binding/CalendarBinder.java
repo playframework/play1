@@ -32,7 +32,7 @@ public class CalendarBinder implements SupportedType<Calendar> {
             try {
                 cal.setTime(new SimpleDateFormat(I18N.getDateFormat()).parse(value));
             } catch (ParseException e) {
-                cal.setTime(Utils.AlternativeDateFormat.getDefaultFormatter().parse(value));
+                //cal.setTime(Utils.AlternativeDateFormat.getDefaultFormatter().parse(value));
             }
         }
 

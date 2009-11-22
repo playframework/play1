@@ -43,7 +43,8 @@ public class I18N {
         if (!StringUtils.isEmpty(globalDateFormat)) {
             return globalDateFormat;
         }
-        return new SimpleDateFormat().toPattern();
+        // Default value. It's completely arbitrary.
+        return "yyyy-MM-dd";
     }
     
 }

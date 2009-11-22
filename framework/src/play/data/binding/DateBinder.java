@@ -23,8 +23,9 @@ public class DateBinder implements SupportedType<Date> {
         try {
             return new SimpleDateFormat(I18N.getDateFormat()).parse(value);
         } catch(ParseException e) {
-            // Left empty
+            // Left empty. 
+             //return Utils.AlternativeDateFormat.getDefaultFormatter().parse(value);
         }
-        return Utils.AlternativeDateFormat.getDefaultFormatter().parse(value);
+       return null;
     }
 }
