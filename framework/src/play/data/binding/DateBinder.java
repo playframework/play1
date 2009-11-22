@@ -1,10 +1,12 @@
 package play.data.binding;
 
 import java.lang.annotation.Annotation;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import play.data.binding.annotations.AnnotationHelper;
 import play.libs.I18N;
+import play.utils.Utils;
 
 /**
  * Binder that support Date class.
@@ -18,7 +20,11 @@ public class DateBinder implements SupportedType<Date> {
             return date;
         }
 
-        // TODO: Check that the format matches otherwise throws an exception?
-        return new SimpleDateFormat(I18N.getDateFormat()).parse(value);
+        try {
+            return new SimpleDateFormat(I18N.getDateFormat()).parse(value);
+        } catch(ParseException e) {
+            // Left empty
+        }
+        return Utils.AlternativeDateFormat.getDefaultFormatter().parse(value);
     }
 }

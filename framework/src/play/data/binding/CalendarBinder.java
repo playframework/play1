@@ -1,6 +1,7 @@
 package play.data.binding;
 
 import java.lang.annotation.Annotation;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -9,6 +10,7 @@ import java.util.Date;
 import play.data.binding.annotations.AnnotationHelper;
 import play.i18n.Lang;
 import play.libs.I18N;
+import play.utils.Utils;
 
 /**
  * Binder that support Calendar class.
@@ -27,7 +29,11 @@ public class CalendarBinder implements SupportedType<Calendar> {
         if (date != null) {
             cal.setTime(date);
         } else {
-            cal.setTime(new SimpleDateFormat(I18N.getDateFormat()).parse(value));
+            try {
+                cal.setTime(new SimpleDateFormat(I18N.getDateFormat()).parse(value));
+            } catch (ParseException e) {
+                cal.setTime(Utils.AlternativeDateFormat.getDefaultFormatter().parse(value));
+            }
         }
 
         return cal;

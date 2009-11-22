@@ -2,10 +2,8 @@ package play.libs;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
-import play.Logger;
 import play.Play;
 import play.PlayConfiguration;
 import play.i18n.Lang;
