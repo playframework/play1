@@ -175,7 +175,7 @@ public class Mail {
                     }
                 };
             }
-            return sendMessage(buildMessage(from, replyTo, recipients, subject, body, alternate, contentType, attachments));
+            return sendMessage(buildMessage(from, replyTo, recipients, subject, body, alternate, contentType, charset, headers, attachments));
         } catch (MessagingException ex) {
             throw new MailException("Cannot send email", ex);
         }
@@ -228,8 +228,6 @@ public class Mail {
             contentType = "text/plain";
         }
 
-        msg = addHeaders(msg, headers);
-        
         msg.setFrom(from instanceof InternetAddress ? (InternetAddress) from : new InternetAddress(from.toString()));
         
         InternetAddress reply;
@@ -278,6 +276,11 @@ public class Mail {
             }
 
         }
+
+        // Apparently addHeaders must be after msg.setText, because setText will overwrite the "Content-Transfer-Encoding" header. Otherwise even if we write,
+        // addHeader("Content-Transfer-Encoding", "7bit"); the header will be, "Content-Transfer-Encoding: quoted-printable". .
+        msg = addHeaders(msg, headers);
+
         return msg;
     }
 

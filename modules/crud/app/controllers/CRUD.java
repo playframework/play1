@@ -112,7 +112,7 @@ public abstract class CRUD extends Controller {
             }
         }
         object.save();
-        flash.success(Messages.get("crud.created", type.name, object.getEntityId()));
+        flash.success(Messages.get("crud.created", type.modelName, object.getEntityId()));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
         }
@@ -129,10 +129,10 @@ public abstract class CRUD extends Controller {
         try {
             object.delete();            
         } catch(Exception e) {
-            flash.error(Messages.get("crud.delete.error", type.name, object.getEntityId()));
+            flash.error(Messages.get("crud.delete.error", type.modelName, object.getEntityId()));
             redirect(request.controller + ".show", object.getEntityId());
         }
-        flash.success(Messages.get("crud.deleted", type.name, object.getEntityId()));
+        flash.success(Messages.get("crud.deleted", type.modelName, object.getEntityId()));
         redirect(request.controller + ".list");
     }
 

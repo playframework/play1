@@ -1,0 +1,36 @@
+#{selenium 'Test the Flash scope'}
+
+	open('@{Flash.index()}')
+	assertTextNotPresent('Yop')
+
+	open('@{Flash.add()}')
+	assertTextPresent('Yop')	
+	
+	open('@{Flash.index()}')
+	assertTextPresent('Yop')
+	
+	open('@{Flash.index()}')
+	assertTextNotPresent('Yop')
+	
+	open('@{Flash.addNow()}')
+	assertTextPresent('Yop')
+	
+	open('@{Flash.index()}')
+	assertTextNotPresent('Yop')
+
+	open('@{Flash.add()}')
+	assertTextPresent('Yop')
+	
+	open('@{Flash.keep()}')
+	assertTextPresent('Yop')
+	
+	open('@{Flash.keep()}')
+	assertTextPresent('Yop')
+	
+	open('@{Flash.index()}')
+	assertTextPresent('Yop')
+	
+	open('@{Flash.index()}')
+	assertTextNotPresent('Yop')
+
+#{/selenium}
