@@ -3,11 +3,11 @@
     <type>org.netbeans.modules.ant.freeform</type>
     <configuration>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
-            <name>Play__framework_1.1 merge</name>
+            <name>Play! framework_1.1</name>
         </general-data>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/2">
             <!-- Do not use Project Properties customizer when editing this file manually. -->
-            <name>Play__framework_1.1 merge</name>
+            <name>Play! framework_1.1</name>
             <properties>
                 <property name="ant.script">framework/build.xml</property>
             </properties>
