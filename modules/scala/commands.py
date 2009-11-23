@@ -9,6 +9,7 @@ if play_command == 'scala:console':
      	do_java()
 	# replace last element with the console app
 	java_cmd[len(java_cmd)-1]="play.console.Console"
+	java_cmd.insert(2, '-Xmx256M -Xms32M')
   	subprocess.call(java_cmd, env=os.environ)
      	print
 	sys.exit(0)
