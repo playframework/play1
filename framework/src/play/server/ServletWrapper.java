@@ -218,6 +218,8 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             }
         }
 
+        request._init();
+
         return request;
     }
 

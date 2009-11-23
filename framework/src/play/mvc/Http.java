@@ -15,6 +15,7 @@ import java.util.Map;
 
 import play.Logger;
 import play.exceptions.UnexpectedException;
+import play.libs.Codec;
 import play.libs.Time;
 import play.utils.Utils;
 
@@ -178,6 +179,24 @@ public class Http {
          * New request or already submitted
          */
         public boolean isNew = true;
+        /**
+         * HTTP Basic User
+         */
+        public String user;
+        /**
+         * HTTP Basic Password
+         */
+        public String password;
+
+        public void _init() {
+            Header header = headers.get("authorization");
+            if(header != null && header.value().startsWith("Basic ")) {
+                String data = header.value().substring(6);
+                String decodedData = new String(Codec.decodeBASE64(data));
+                user = decodedData.split(":")[0];
+                password = decodedData.split(":").length > 1 ? decodedData.split(":")[1] : null;
+            }
+        }
 
         /**
          * Automatically resolve request format from the Accept header

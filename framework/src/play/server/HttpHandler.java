@@ -153,6 +153,8 @@ public class HttpHandler implements IoHandler {
             request.cookies.put(playCookie.name, playCookie);
         }
 
+        request._init();
+
         return request;
     }
 
