@@ -8,7 +8,7 @@ import play.data.validation._
 import models._
 
 @With(Array(classOf[Secure])) 
-object Admin extends Actions with Defaults {
+object Admin extends Controller with Defaults {
     
     @Before
     private def setConnectedUser{

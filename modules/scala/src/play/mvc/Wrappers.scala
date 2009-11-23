@@ -12,7 +12,7 @@ import play.scalasupport.wrappers.ControllerWrapper
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSupport
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport
 
-class Actions extends LocalVariablesSupport with ControllerSupport {
+class ScalaController extends LocalVariablesSupport with ControllerSupport {
 
     def request = Request.current()
     def response = Response.current()
@@ -64,8 +64,59 @@ class Actions extends LocalVariablesSupport with ControllerSupport {
         ControllerWrapper.notFoundIfNull(o)
     }
 
-    def ok() {
+    def ok {
         ControllerWrapper.ok()
+    }
+
+    def forbidden {
+        ControllerWrapper.forbidden()
+    }
+
+    def unauthorized {
+        ControllerWrapper.unauthorized("")
+    }
+
+}
+
+class RichRenderArgs(val renderArgs: RenderArgs) {
+
+    def +=(variable: Tuple2[String, Any]) {
+        renderArgs.put(variable._1, variable._2)
+    }
+
+}
+
+class RichSession(val session: Session) {
+
+    def apply(key: String) = session.get(key)
+
+}
+
+class RichResponse(val response: Response) {
+
+    val ContentTypeRE = """[-a-zA-Z]+/[-a-zA-Z]+""".r
+
+    def <<<(x: String) {
+        x match {
+            case ContentTypeRE() => response.contentType = x
+            case _ => response.print(x)
+        }
+    }
+
+    def <<<(header: Header) {
+        response.setHeader(header.name, header.value())
+    }
+
+    def <<<(header: Tuple2[String, String]) {
+        response.setHeader(header._1, header._2)
+    }
+
+    def <<<(status: Int) {
+        response.status = status
+    }
+
+    def <<<(xml: scala.xml.NodeSeq) {
+        response.print(xml)
     }
 
 }

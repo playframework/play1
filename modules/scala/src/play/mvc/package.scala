@@ -9,6 +9,7 @@ package play {
 
         implicit def richRenderArgs(x: RenderArgs) = new RichRenderArgs(x)
         implicit def richResponse(x: Response) = new RichResponse(x)
+        implicit def richSession(x: Session) = new RichSession(x)
 
         // -- HELPERS
 
@@ -25,46 +26,9 @@ package play {
         val NOT_FOUND       = 404
         val ERROR           = 500
 
-    }
+        // -- TYPES REDEFINITION
 
-}
-
-package play.mvc {
-
-    class RichRenderArgs(val renderArgs: RenderArgs) {
-
-        def +=(variable: Tuple2[String, Any]) {
-            renderArgs.put(variable._1, variable._2)
-        }
-
-    }
-
-    class RichResponse(val response: Response) {
-
-        val ContentTypeRE = """[-a-zA-Z]+/[-a-zA-Z]+""".r
-
-        def <<<(x: String) {
-            x match {
-                case ContentTypeRE() => response.contentType = x
-                case _ => response.print(x)
-            }
-        }
-
-        def <<<(header: Header) {
-            response.setHeader(header.name, header.value())
-        }
-
-        def <<<(header: Tuple2[String, String]) {
-            response.setHeader(header._1, header._2)
-        }
-
-        def <<<(status: Int) {
-            response.status = status
-        }
-
-        def <<<(xml: scala.xml.NodeSeq) {
-            response.print(xml)
-        }
+        type Controller = play.mvc.ScalaController
 
     }
 

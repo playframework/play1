@@ -9,7 +9,7 @@ import play.data.validation._
 
 import models._
 
-trait Defaults extends Actions {
+trait Defaults extends Controller {
     
     @Before
     private def setDefaults {
@@ -19,7 +19,7 @@ trait Defaults extends Actions {
     
 }
 
-object Application extends Actions with Defaults {
+object Application extends Controller with Defaults {
  
     def index() { 
         val frontPost = find[Post]("order by postedAt desc").first 

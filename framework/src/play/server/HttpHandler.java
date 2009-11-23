@@ -142,7 +142,7 @@ public class HttpHandler implements IoHandler {
             request.headers.put(hd.name, hd);
         }
         request.resolveFormat();
-
+        
         for (Cookie cookie : minaRequest.getCookies()) {
             Http.Cookie playCookie = new Http.Cookie();
             playCookie.name = cookie.getName();
@@ -152,6 +152,8 @@ public class HttpHandler implements IoHandler {
             playCookie.value = cookie.getValue();
             request.cookies.put(playCookie.name, playCookie);
         }
+
+        request._init();
 
         return request;
     }

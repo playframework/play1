@@ -238,6 +238,7 @@ public class Java {
                     methods.addAll(findAllAnnotatedMethods(withClass, annotationType));
                 }
             }
+            /** Seems not useful if interceptor are declared public ...
             for(Class trait : clazz.getInterfaces()) {
                 if(trait.getName().startsWith("controllers.")) {
                     // Hm
@@ -248,7 +249,7 @@ public class Java {
                         Logger.warn("Found one trait " + trait.getName() + " but traitClass is missing ??");
                     }
                 }
-            }
+            }**/
             clazz = clazz.getSuperclass();
         }
         return methods;

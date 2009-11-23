@@ -19,11 +19,9 @@ package object play {
 
     def configuration = new RichConfiguration(play.Play.configuration)
 
-}
 
-class RichConfiguration(val conf: java.util.Properties) {
+    // - IMPLICITS
 
-    def apply(key: String) = conf.getProperty(key)    
-    def apply(key: String, default: String) = conf.getProperty(key, default)
+    implicit def withEscape(x: Any) = new WithEscape(x)
 
 }

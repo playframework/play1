@@ -75,3 +75,8 @@ samples-and-tests/yabe/.amateras
 samples-and-tests/yabe/.settings
 samples-and-tests/yabe/eclipse
 samples-and-tests/yabe/nbproject
+samples-and-tests/with-scala/.amateras
+samples-and-tests/with-scala/.externalToolBuilders
+samples-and-tests/with-scala/.manager
+samples-and-tests/with-scala/.settings
+samples-and-tests/with-scala/eclipse

@@ -2,7 +2,7 @@ package play.db {
 
     package object jpa {
 
-        // Let's shorten things a bit here internally
+    // Let's shorten things a bit here internally
 	import JPQL.{instance => i}
 	type M[T] = Manifest[T]
 	implicit private def manifest2entity[T](m: M[T]): String = m.erasure.getName()
