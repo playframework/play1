@@ -149,7 +149,7 @@ public abstract class CRUD extends Controller {
         return Integer.parseInt(Play.configuration.getProperty("crud.pageSize", "30"));
     }
 
-    public static class ObjectType {
+    public static class ObjectType implements Comparable<ObjectType> {
 
         public Class<? extends CRUD> controllerClass;
         public Class<? extends JPASupport> entityClass;
@@ -298,6 +298,10 @@ public abstract class CRUD extends Controller {
                 }
             }
             return null;
+        }
+        
+        public int compareTo(ObjectType other) {
+            return modelName.compareTo(other.modelName);
         }
         
         public static class ObjectField {
