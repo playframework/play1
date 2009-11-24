@@ -1,15 +1,14 @@
 package controllers
  
 import play._
-import play.Scala._
 import play.mvc._
+import play.db.jpa._
 import play.data.validation._
-import play.db.jpa.QueryFunctions._
  
 import models._
 
 @With(Array(classOf[Secure])) 
-object Admin extends Actions with Defaults {
+object Admin extends Controller with Defaults {
     
     @Before
     private def setConnectedUser{

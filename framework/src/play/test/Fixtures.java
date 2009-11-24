@@ -6,11 +6,14 @@ import java.lang.reflect.ParameterizedType;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.persistence.ManyToMany;
@@ -129,10 +132,13 @@ public class Fixtures {
                         serialize((Map) objects.get(key), "object", params);
                         Class cType = Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
-                        JPASupport model = JPASupport.create(cType, "object", params);
+                        JPASupport model = JPASupport.create(cType, "object", params, null);
                         model.save();
                         JPA.em().persist(model);
-                        idCache.put(type + "-" + id, JPASupport.findKey(model));
+                        while (!cType.equals(JPASupport.class)) {
+                            idCache.put(cType.getName() + "-" + id, JPASupport.findKey(model));
+                            cType = cType.getSuperclass();
+                        }
                         // Not very good for performance but will avoid outOfMemory
                         JPA.em().flush();
                         JPA.em().clear();
@@ -170,7 +176,13 @@ public class Fixtures {
     }
 
     static void resolveDependencies(Class type, Map<String, String[]> serialized, Map<String, Object> idCache) {
-        for (Field field : type.getDeclaredFields()) {
+        Set<Field> fields = new HashSet<Field>();
+        Class clazz = type;
+        while (!clazz.equals(JPASupport.class)) {
+            Collections.addAll(fields, clazz.getDeclaredFields());
+            clazz = clazz.getSuperclass();
+        }
+        for (Field field : fields) {
             boolean isEntity = false;
             String relation = null;
             if (field.isAnnotationPresent(OneToOne.class) || field.isAnnotationPresent(ManyToOne.class)) {

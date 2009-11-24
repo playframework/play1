@@ -1,8 +1,8 @@
 0:play.CorePlugin
-1:play.db.DBPlugin
-2:play.db.jpa.JPAPlugin
-3:play.jobs.JobsPlugin
-4:play.i18n.MessagesPlugin
+1:play.data.parsing.TempFilePlugin
+2:play.data.validation.ValidationPlugin
+3:play.db.DBPlugin
+4:play.db.jpa.JPAPlugin
+5:play.i18n.MessagesPlugin
 6:play.libs.WS
-7:play.data.parsing.TempFilePlugin
-8:play.data.validation.ValidationPlugin
+7:play.jobs.JobsPlugin

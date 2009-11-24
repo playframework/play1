@@ -18,6 +18,7 @@ import play.exceptions.NoRouteFoundException;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 import play.templates.TemplateLoader;
+import play.utils.Default;
 
 /**
  * The router matches HTTP requests to action invocations
@@ -317,6 +318,8 @@ public class Router {
                                         } catch (UnsupportedEncodingException ex) {
                                         }
                                     }
+                                } else if(value.getClass().equals(Default.class)) {
+                                    // Skip defaults in queryString
                                 } else {
                                     try {
                                         queryString.append(URLEncoder.encode(key, "utf-8"));

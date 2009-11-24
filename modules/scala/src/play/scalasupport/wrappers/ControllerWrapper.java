@@ -65,4 +65,8 @@ public class ControllerWrapper extends Controller {
         Controller.renderBinary(stream);
     }
 
+    public static void forbidden() {
+        Controller.forbidden();
+    }
+
 }

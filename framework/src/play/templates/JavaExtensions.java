@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import play.Logger;
@@ -95,12 +96,47 @@ public class JavaExtensions {
         return new RawData(val);
     }
 
+    public static RawData raw(Object val, Object condition) {
+        if(eval(condition)) {
+            return new RawData(val);
+        }
+        return new RawData("");
+    }
+
+    public static RawData asAttr(Map attributes, Object condition) {
+        if(eval(condition)) {
+            return asAttr(attributes);
+        }
+        return new RawData("");
+    }
+
+    public static RawData asAttr(Map attributes) {
+        StringBuffer buf = new StringBuffer();
+        for(Object key: attributes.keySet()) {
+            buf.append(key+"=\""+attributes.get(key)+"\" ");
+        }
+        return new RawData(buf);
+    }
+
+    protected static boolean eval(Object condition) {
+        if(condition == null) return false;
+        if(condition instanceof Boolean && !(Boolean)condition) return false;
+        if(condition instanceof Collection && ((Collection)condition).size() == 0) return false;
+        if(condition instanceof String && condition.toString().equals("")) return false;
+        return true;
+    }
+
     public static String escapeXml(String str) {
         return StringEscapeUtils.escapeXml(str);
     }
 
     public static String format(Number number, String pattern) {
         return new DecimalFormat(pattern).format(number);
+    }
+
+    public static String format(Date date) {
+        // Get the pattern from the configuration
+        return new SimpleDateFormat(I18N.getDateFormat()).format(date);
     }
 
     public static String format(Date date, String pattern) {

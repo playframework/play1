@@ -6,7 +6,6 @@ import java.io.ByteArrayInputStream;
 
 import java.io.File;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import play.mvc.Router.Route;
 import play.mvc.results.Result;
 import java.lang.reflect.InvocationTargetException;
@@ -35,6 +34,7 @@ import play.mvc.results.NotFound;
 import play.mvc.results.Ok;
 import play.mvc.results.RenderBinary;
 import play.mvc.results.RenderText;
+import play.utils.Utils;
 
 /**
  * Invoke an action after an HTTP request
@@ -110,6 +110,9 @@ public class ActionInvoker {
             monitor = MonitorFactory.start(request.action+"()");
             
             // 5. Invoke the action
+
+            // There is a difference between a get and a post when binding data. The get does not care about validation while
+            // the post do.
             try {
                 // @Before
                 List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);
@@ -128,14 +131,14 @@ public class ActionInvoker {
                     }
                     if (!skip) {
                         before.setAccessible(true);
-                        invokeControllerMethod(before, getActionMethodArgs(before));
+                        invokeControllerMethod(before, true);
                     }
                 }
                 // Action
                 Result actionResult = null;
                 ControllerInstrumentation.initActionCall();
                 try {
-                    Object o = invokeControllerMethod(actionMethod, getActionMethodArgs(actionMethod));
+                    Object o = invokeControllerMethod(actionMethod, true);
                     if(o != null) {
                         if(o instanceof InputStream) {
                             Result.setContentTypeIfNotSet(response, "application/octet-stream");
@@ -162,7 +165,7 @@ public class ActionInvoker {
                             for (Class exception : exceptions) {
                                 if (exception.isInstance(args[0])) {
                                     mCatch.setAccessible(true);
-                                    invokeControllerMethod(mCatch, args);
+                                    invokeControllerMethod(mCatch, false);
                                     break;
                                 }
                             }
@@ -189,7 +192,7 @@ public class ActionInvoker {
                     }
                     if (!skip) {
                         after.setAccessible(true);
-                        invokeControllerMethod(after, getActionMethodArgs(after));
+                        invokeControllerMethod(after, true);
                     }
                 }
                 
@@ -200,8 +203,6 @@ public class ActionInvoker {
                 if(actionResult != null) {
                     throw actionResult;
                 }
-                
-                throw new Ok();
                 
             } catch (IllegalAccessException ex) {
                 throw ex;
@@ -261,7 +262,7 @@ public class ActionInvoker {
                         }
                         if (!skip) {
                             aFinally.setAccessible(true);
-                            invokeControllerMethod(aFinally, new Object[aFinally.getParameterTypes().length]);
+                            invokeControllerMethod(aFinally, false);
                         }
                     }
                 } catch(InvocationTargetException ex) {
@@ -287,10 +288,11 @@ public class ActionInvoker {
 
     }
 
-    public static Object invokeControllerMethod(Method method, Object[] args) throws Exception {
+    public static Object invokeControllerMethod(Method method, boolean withBind) throws Exception {
         if(Modifier.isStatic(method.getModifiers()) && !method.getDeclaringClass().getName().matches("^controllers\\..*\\$class$")) {
-            return method.invoke(null, args);
+            return method.invoke(null, getActionMethodArgs(method, null));
         } else if(Modifier.isStatic(method.getModifiers())) {
+            Object[] args = getActionMethodArgs(method, null);
             args[0] = Http.Request.current().controllerClass.getDeclaredField("MODULE$").get(null);
             return method.invoke(null, args);
         } else {
@@ -300,7 +302,7 @@ public class ActionInvoker {
             } catch(Exception e) {
                 throw new ActionNotFoundException(Http.Request.current().action, e);
             }
-            return method.invoke(instance, args);
+            return method.invoke(instance, getActionMethodArgs(method, instance));
         }
         
     }
@@ -334,13 +336,14 @@ public class ActionInvoker {
         return new Object[]{controllerClass, actionMethod};
     }
     
-    public static Object[] getActionMethodArgs(Method method) throws Exception {
+    public static Object[] getActionMethodArgs(Method method, Object o) throws Exception {
         String[] paramsNames = Java.parameterNames(method);      
         if (paramsNames == null && method.getParameterTypes().length > 0) {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }
         Object[] rArgs = new Object[method.getParameterTypes().length];
         for (int i = 0; i < method.getParameterTypes().length; i++) {
+
             Class type = method.getParameterTypes()[i];
             Map<String, String[]> params = new HashMap();
             if(type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {
@@ -348,7 +351,9 @@ public class ActionInvoker {
             } else {
                 params.putAll(Scope.Params.current().all());
             }
-            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], params);
+            Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.toString(method.getParameterAnnotations()[i]) + "]");
+
+            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params, o, method, i+1);
         }
         return rArgs;
     }

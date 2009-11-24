@@ -1,7 +1,7 @@
 package play;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import play.classloading.ApplicationClasses.ApplicationClass;
@@ -10,6 +10,8 @@ import play.mvc.Http.Response;
 import play.mvc.Router.Route;
 import play.mvc.results.Result;
 import play.templates.Template;
+import play.test.BaseTest;
+import play.test.TestEngine.TestResults;
 import play.vfs.VirtualFile;
 
 /**
@@ -27,11 +29,15 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      */
     public void onLoad() {
     }
+
+    public TestResults runTest(Class<BaseTest> clazz) {
+        return null;
+    }
     
     /**
      * Called when play need to bind a Java object from HTTP params
      */
-    public Object bind(String name, Class clazz, Type type, Map<String, String[]> params) {
+    public Object bind(String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations, Map<String, String[]> params) {
         return null;
     }
 
@@ -55,6 +61,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * @param template
      */
     public void onTemplateCompilation(Template template) {
+		
     }
 
     /**
@@ -179,6 +186,9 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * @param context depends on the plugin
      */
     public void onEvent(String message, Object context) {
+    }
+
+    public void onClassesChange(List<ApplicationClass> modified) {
     }
 
     /**

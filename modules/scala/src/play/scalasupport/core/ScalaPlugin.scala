@@ -1,6 +1,7 @@
 package play.scalasupport.core
 
 import play._
+import play.test._
 import play.vfs.{VirtualFile => VFile}
 import play.exceptions._
 import play.classloading.ApplicationClasses.ApplicationClass
@@ -16,9 +17,10 @@ import scala.tools.nsc.io._
 
 import java.util.{List => JList}
 
-class ScalaPlugin extends PlayPlugin {
+import org.scalatest.Suite
+import org.scalatest.tools.ScalaTestRunner
 
-    private var compiler = new ScalaCompiler()
+class ScalaPlugin extends PlayPlugin {
 
     override def compileAll(classes: JList[ApplicationClass]) = {
         val sources = ListBuffer[VFile]()
@@ -30,10 +32,36 @@ class ScalaPlugin extends PlayPlugin {
             }
         }
         Play.javaPath foreach scan
-        classes.addAll(compiler compile sources.toList)
+        play.Logger.trace("SCALA compileAll")
+        classes.addAll(compile(sources))
+    }
+
+    override def runTest(testClass: Class[BaseTest]) = {
+        testClass match {
+            case suite if classOf[Suite] isAssignableFrom testClass => ScalaTestRunner run suite.asInstanceOf[Class[Suite]]
+            case _ => null
+        }
+    }
+
+    override def onClassesChange(modified: JList[ApplicationClass]) {
+        val sources = new java.util.ArrayList[VFile]
+        modified foreach { cl: ApplicationClass =>
+            var source = cl.javaFile
+            if(!(sources contains source)) {
+                sources add source
+            }
+        }
+        compile(sources)
     }
 
     // Compiler
+
+    private var compiler = new ScalaCompiler()
+
+    def compile(sources: JList[VFile]) = {
+        play.Logger.trace("SCALA compile %s", sources)
+        compiler compile sources.toList
+    }
 
     class ScalaCompiler {
 
@@ -74,10 +102,12 @@ class ScalaPlugin extends PlayPlugin {
             }
 
             // Clear compilation results
-            virtualDirectory.clear
+            //virtualDirectory.clear
 
             // Compile
+            play.Logger.trace("SCALA Start compiling")
             run compileSources sourceFiles
+            play.Logger.trace("SCALA Done ...")
 
             // Retrieve result
             val classes = new java.util.ArrayList[ApplicationClass]()
@@ -93,7 +123,6 @@ class ScalaPlugin extends PlayPlugin {
                                     applicationClass = new ApplicationClass() {
 
                                         override def compile() = {
-                                            compileAll(new java.util.ArrayList[ApplicationClass]())
                                             javaByteCode
                                         }
 

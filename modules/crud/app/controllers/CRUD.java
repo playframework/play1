@@ -1,6 +1,5 @@
 package controllers;
 
-import com.sun.org.apache.xerces.internal.impl.xs.identity.ValueStore;
 import java.util.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
@@ -112,7 +111,7 @@ public abstract class CRUD extends Controller {
             }
         }
         object.save();
-        flash.success(Messages.get("crud.created", type.name, object.getEntityId()));
+        flash.success(Messages.get("crud.created", type.modelName, object.getEntityId()));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
         }
@@ -129,10 +128,10 @@ public abstract class CRUD extends Controller {
         try {
             object.delete();            
         } catch(Exception e) {
-            flash.error(Messages.get("crud.delete.error", type.name, object.getEntityId()));
+            flash.error(Messages.get("crud.delete.error", type.modelName, object.getEntityId()));
             redirect(request.controller + ".show", object.getEntityId());
         }
-        flash.success(Messages.get("crud.deleted", type.name, object.getEntityId()));
+        flash.success(Messages.get("crud.deleted", type.modelName, object.getEntityId()));
         redirect(request.controller + ".list");
     }
 
@@ -270,6 +269,7 @@ public abstract class CRUD extends Controller {
         public JPASupport findById(Object id) {
             Query query = JPA.getEntityManager().createQuery("from " + entityClass.getName() + " where id = ?");
             try {
+                // TODO: I think we need to type of direct bind -> primitive and object binder
                 query.setParameter(1, play.data.binding.Binder.directBind(id + "", play.db.jpa.JPASupport.findKeyType(entityClass)));
             } catch (Exception e) {
                 throw new RuntimeException("Something bad with id type ?", e);

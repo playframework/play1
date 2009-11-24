@@ -1,6 +1,7 @@
 package play.data.binding;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.util.List;
 import play.data.Upload;
 import play.mvc.Http.Request;
@@ -10,7 +11,8 @@ import play.mvc.Http.Request;
  */
 public class FileBinder implements SupportedType<File> {
 
-    public File bind(String value) {
+    @SuppressWarnings("unchecked")
+    public File bind(Annotation[] annotations, String value) {
         List<Upload> uploads = (List<Upload>)Request.current().args.get("__UPLOADS");
         for(Upload upload : uploads) {
             if(upload.getFieldName().equals(value)) {

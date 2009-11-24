@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>#{get 'title' /}</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/main.css'}">
+        <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+        #{get 'moreStyles' /}
+		<script src="@{'/public/javascripts/jquery-1.3.2.min.js'}" type="text/javascript" charset="utf-8"></script>
+		#{get 'moreScripts' /}
+    </head>
+    <body>
+		Connected as ${connected}
+		<hr>
+		
+        #{doLayout /}
+    </body>
+</html>

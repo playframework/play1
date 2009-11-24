@@ -1,6 +1,5 @@
 package play.mvc;
 
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSerializer;
 import java.io.File;
 import java.io.InputStream;
@@ -19,7 +18,6 @@ import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSupport;
-import play.data.binding.Unbinder;
 import play.data.validation.Validation;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
@@ -43,6 +41,7 @@ import play.mvc.results.Result;
 import play.mvc.results.Unauthorized;
 import play.templates.Template;
 import play.templates.TemplateLoader;
+import play.utils.Default;
 import play.vfs.VirtualFile;
 
 /**
@@ -320,12 +319,24 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             Map<String, Object> r = new HashMap<String, Object>();
             Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
             String[] names = (String[]) actionMethod.getDeclaringClass().getDeclaredField("$" + actionMethod.getName() + LocalVariablesNamesTracer.computeMethodHash(actionMethod.getParameterTypes())).get(null);
-            assert names.length == args.length : "Problem is action redirection";
-            for (int i = 0; i < names.length; i++) {
+            for (int i = 0; i < names.length && i< args.length; i++) {
+                boolean isDefault = false;
                 try {
-                    Unbinder.unBind(r, args[i], names[i]);
-                } catch (Exception e) {
-                    // hmm ...
+                    Method defaultMethod = actionMethod.getDeclaringClass().getDeclaredMethod(actionMethod.getName()+"$default$"+(i+1));
+                    // Patch for scala defaults
+                    if(!Modifier.isStatic(actionMethod.getModifiers()) && actionMethod.getDeclaringClass().getSimpleName().endsWith("$")) {
+                        Object instance = actionMethod.getDeclaringClass().getDeclaredField("MODULE$").get(null);
+                        if(defaultMethod.invoke(instance).equals(args[i])) {
+                            isDefault = true;
+                        }
+                    }                    
+                } catch(NoSuchMethodException e) {
+                    //
+                }
+                if(isDefault) {
+                    r.put(names[i], new Default(args[i]));
+                } else {
+                    r.put(names[i], args[i]);
                 }
             }
             try {
@@ -510,7 +521,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             }
             Scope.Params.current().__mergeWith(mapss);
             ControllerInstrumentation.initActionCall();
-            Java.invokeStatic(superMethod, ActionInvoker.getActionMethodArgs(superMethod));
+            Java.invokeStatic(superMethod, ActionInvoker.getActionMethodArgs(superMethod, null));
         } catch (InvocationTargetException ex) {
             // It's a Result ? (expected)
             if (ex.getTargetException() instanceof Result) {

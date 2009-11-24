@@ -30,3 +30,13 @@ GET			/public/					     staticDir:public
 # Catch all
 *           /sample/{controller}/{action}    sample.{controller}.{action}
 *			/{controller}/{action}		     {controller}.{action}
+
+# Data biding
+
+GET     /databinding/showDefaultDateFormat/{date}/?         DataBinding.showDefaultDateFormat
+GET     /databinding/showLocaleDateFormat/{date}/?          DataBinding.showLocaleDateFormat
+GET     /databinding/showDefaultLocaleDateFormat/{date}/?   DataBinding.showDefaultLocaleDateFormat
+GET     /databinding/showDateFormat/{date}/?                DataBinding.showDateFormat
+GET     /databinding/showList/{<.*>mailboxes}/?             DataBinding.showList
+GET     /databinding/showCalendar/{cal}/?               DataBinding.showCalendar
+GET     /databinding/changeLanguage/{lang}/?                DataBinding.changeLanguage

@@ -5,6 +5,7 @@ import play.db.jpa.*;
 import play.data.validation.*;
 import javax.persistence.*;
 import java.util.*;
+import play.data.binding.annotations.Bind;
 
 @Entity
 public class User extends Model {
@@ -25,6 +26,7 @@ public class User extends Model {
     public Long k;
 
 	@Required
+        @Bind(format = "dd/MM/yyyy")
     public Date birth;
 
 	public String toString() {

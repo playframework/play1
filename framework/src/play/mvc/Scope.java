@@ -1,5 +1,6 @@
 package play.mvc;
 
+import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -85,6 +86,13 @@ public class Scope {
                 put(key, (String) null);
             }
             put(key, value + "");
+        }
+
+        public void now(String key, String value) {
+            if (key.contains(":")) {
+                throw new IllegalArgumentException("Character ':' is invalid in a flash key.");
+            }
+            data.put(key, value);
         }
 
         public void error(String value, Object... args) {
@@ -293,9 +301,19 @@ public class Scope {
             return null;
         }
 
-        public <T> T get(String key, Class<T> type) {
+         public <T> T get(String key, Class<T> type) {
             try {
-                return (T) Binder.directBind(get(key), type);
+                // TODO: This is used by the test, but this is not the most convenient.
+                return (T) Binder.directBind(null, get(key), type);
+            } catch(Exception e) {
+                Validation.addError(key, "validation.invalid");
+                return null;
+            }
+        }
+
+        public <T> T get(Annotation[] annotations, String key, Class<T> type) {
+            try {
+                return (T) Binder.directBind(annotations, get(key), type);
             } catch(Exception e) {
                 Validation.addError(key, "validation.invalid");
                 return null;

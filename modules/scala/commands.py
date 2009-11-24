@@ -1,5 +1,17 @@
 # Scala
-
+import sys
+if play_command == 'scala:console':
+	check_application()
+  	load_modules()
+       	do_classpath()
+	#add precompiled classes to classpath
+	cp_args += ":"+os.path.normpath(os.path.join(application_path,'tmp/classes'))
+     	do_java()
+	# replace last element with the console app
+	java_cmd[len(java_cmd)-1]="play.console.Console"
+  	subprocess.call(java_cmd, env=os.environ)
+     	print
+	sys.exit(0)
 # ~~~~~~~~~~~~~~~~~~~~~~ New
 if play_command == 'new':
 	os.remove(os.path.join(application_path, 'app/controllers/Application.java'))

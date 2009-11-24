@@ -15,6 +15,7 @@ import java.util.Map;
 
 import play.Logger;
 import play.exceptions.UnexpectedException;
+import play.libs.Codec;
 import play.libs.Time;
 import play.utils.Utils;
 
@@ -36,6 +37,16 @@ public class Http {
          * Header value
          */
         public List<String> values;
+
+        public Header() {
+            this.values = new ArrayList<String>();
+        }
+
+        public Header(String name, String value) {
+            this.name = name;
+            this.values = new ArrayList<String>();
+            this.values.add(value);
+        }
 
         /**
          * First value
@@ -182,6 +193,24 @@ public class Http {
          * New request or already submitted
          */
         public boolean isNew = true;
+        /**
+         * HTTP Basic User
+         */
+        public String user;
+        /**
+         * HTTP Basic Password
+         */
+        public String password;
+
+        public void _init() {
+            Header header = headers.get("authorization");
+            if(header != null && header.value().startsWith("Basic ")) {
+                String data = header.value().substring(6);
+                String decodedData = new String(Codec.decodeBASE64(data));
+                user = decodedData.split(":")[0];
+                password = decodedData.split(":").length > 1 ? decodedData.split(":")[1] : null;
+            }
+        }
 
         /**
          * Automatically resolve request format from the Accept header
@@ -369,7 +398,16 @@ public class Http {
         }
 
         public void setCookie(String name, String value, Integer maxAge) {
-            if (cookies.containsKey(name)) {
+            setCookie(name, value, null, "/", maxAge);
+        }
+
+        public void setCookie(String name, String value, String domain, String path, String duration) {
+            int expire = Time.parseDuration(duration);
+            setCookie(name, value, domain, path, Integer.valueOf(expire));
+        }
+
+        public void setCookie(String name, String value, String domain, String path, Integer maxAge) {
+            if (cookies.containsKey(name) && cookies.get(name).path.equals(path) && ((cookies.get(name).domain == null && domain == null) || (cookies.get(name).domain.equals(domain)))) {
                 cookies.get(name).value = value;
                 if (maxAge != null) {
                     cookies.get(name).maxAge = maxAge;
@@ -378,6 +416,10 @@ public class Http {
                 Cookie cookie = new Cookie();
                 cookie.name = name;
                 cookie.value = value;
+                cookie.path = path;
+                if (domain != null) {
+                    cookie.domain = domain;
+                }
                 if (maxAge != null) {
                     cookie.maxAge = maxAge;
                 }

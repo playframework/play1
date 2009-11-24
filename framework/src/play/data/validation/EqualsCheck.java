@@ -30,9 +30,6 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
 
     public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator) {
         requireMessageVariablesRecreation();
-        if (value == null) {
-            return true;
-        }
         try {
             if (context != null) {
                 if (context instanceof MethodParameterContext) {
@@ -50,7 +47,7 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
                         return false;
                     }
                     otherKey = to;
-                    otherValue = Binder.bind(to, method.getParameterTypes()[index], method.getGenericParameterTypes()[index], Scope.Params.current().all());
+                    otherValue = Binder.bind(to, method.getParameterTypes()[index], method.getGenericParameterTypes()[index], method.getParameterAnnotations()[index], Scope.Params.current().all());
                 }
                 if (context instanceof FieldContext) {
                     FieldContext ctx = (FieldContext) context;
@@ -66,8 +63,8 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
-        if(otherValue == null || otherValue.toString().length() == 0) {
-            return true;
+        if(value == null) {
+            return otherValue == null;
         }
         return value.equals(otherValue);
     }

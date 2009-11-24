@@ -5,28 +5,22 @@ import javax.persistence._
  
 import play.db.jpa._
 import play.data.validation._
-import play.db.jpa.QueryFunctions._
  
 @Entity
-class User extends Model {
- 
+class User(
+
     @Email
     @Required
-    var email: String = _
+    var email: String,
     
     @Required
-    var password: String = _
+    var password: String,
     
-    var fullname: String = _
-    
-    var isAdmin: Boolean = _
-    
-    def this(email: String, password: String, fullname: String) {
-        this()
-        this.email = email
-        this.password = password
-        this.fullname = fullname
-    }
+    var fullname: String
+
+) extends Model {
+ 
+    var isAdmin = false
     
     override def toString() = email
  
