@@ -20,6 +20,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
@@ -37,6 +38,7 @@ import play.Play;
 import play.PlayPlugin;
 import play.data.binding.BeanWrapper;
 import play.data.binding.Binder;
+import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
 
@@ -64,8 +66,7 @@ public class JPASupport implements Serializable {
     public static <T extends JPASupport> T edit(Object o, String name, Map<String, String[]> params) {
         try {
             BeanWrapper bw = new BeanWrapper(o.getClass());
-            bw.bind(name, o.getClass(), params, "", o);
-            // relations
+            // Start with relations
             Set<Field> fields = new HashSet<Field>();
             Class clazz = o.getClass();
             while (!clazz.equals(JPASupport.class)) {
@@ -99,13 +100,19 @@ public class JPASupport implements Serializable {
                             ids = params.get(name + "." + field.getName() + ".id");
                         }
                         if (ids != null) {
+                            params.remove(name + "." + field.getName() + ".id");
+                            params.remove(name + "." + field.getName() + "@id");
                             for (String _id : ids) {
                                 if (_id.equals("")) {
                                     continue;
                                 }
                                 Query q = JPA.em().createQuery("from " + relation + " where id = ?");
                                 q.setParameter(1, Binder.directBind(_id, findKeyType(Play.classloader.loadClass(relation))));
-                                l.add(q.getSingleResult());
+                                try {
+                                    l.add(q.getSingleResult());
+                                } catch(NoResultException e) {
+                                    Validation.addError(name+"."+field.getName(), "validation.notFound", _id);
+                                }
                             }
                         }
                         bw.set(field.getName(), o, l);
@@ -115,12 +122,20 @@ public class JPASupport implements Serializable {
                             ids = params.get(name + "." + field.getName() + ".id");
                         }
                         if (ids != null && ids.length > 0 && !ids[0].equals("")) {
+                            params.remove(name + "." + field.getName() + ".id");
+                            params.remove(name + "." + field.getName() + "@id");
                             Query q = JPA.em().createQuery("from " + relation + " where id = ?");
                             q.setParameter(1, Binder.directBind(ids[0], findKeyType(Play.classloader.loadClass(relation))));
-                            Object to = q.getSingleResult();
-                            bw.set(field.getName(), o, to);
+                            try {
+                                Object to = q.getSingleResult();
+                                bw.set(field.getName(), o, to);
+                            } catch(NoResultException e) {
+                                Validation.addError(name+"."+field.getName(), "validation.notFound", ids[0]);
+                            }                            
                         } else if(ids != null && ids.length > 0 && ids[0].equals("")) {
                             bw.set(field.getName(), o , null);
+                            params.remove(name + "." + field.getName() + ".id");
+                            params.remove(name + "." + field.getName() + "@id");
                         }
                     }
                 }
@@ -132,6 +147,7 @@ public class JPASupport implements Serializable {
                     }
                     File file = Params.current().get(name + "." + field.getName(), File.class);
                     if (file != null && file.exists() && file.length() > 0) {
+                        params.remove(name + "." + field.getName());
                         fileAttachment.set(Params.current().get(name + "." + field.getName(), File.class));
                         fileAttachment.filename = file.getName();
                     } else {
@@ -143,6 +159,9 @@ public class JPASupport implements Serializable {
                     }
                 }
             }
+            // Then bind
+            bw.bind(name, o.getClass(), params, "", o);
+            
             return (T) o;
         } catch (Exception e) {
             throw new UnexpectedException(e);

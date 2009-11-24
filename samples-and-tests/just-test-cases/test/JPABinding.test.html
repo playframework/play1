@@ -39,6 +39,16 @@
     assertValue('id', '$[objectId]')
     assertTextNotPresent('No company')
     assertTextPresent('zenexity')
+
+	open('@{JPABinding.show()}?id=$[objectId]')
+    type('company', 'xxx')
+    clickAndWait('go')
+
+	assertValue('name', 'Hop')
+    echo('Project id is $[objectId]')
+	assertTextNotPresent('No company')
+	assertValue('company', '$[companyId]')
+	assertTextPresent('Object not found for id')
     
     open('@{JPABinding.index()}')
     

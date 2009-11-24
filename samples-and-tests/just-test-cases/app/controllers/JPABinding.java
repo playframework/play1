@@ -26,6 +26,7 @@ public class JPABinding extends Controller {
     
     public static void save(Project project) {
         project.save();
+        validation.keep();
         show(project.id);
     }
     
