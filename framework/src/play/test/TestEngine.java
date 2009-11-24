@@ -16,6 +16,7 @@ import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 import play.Play;
 import play.Logger;
+import play.PlayPlugin;
 
 /**
  * Run application tests
@@ -74,6 +75,13 @@ public class TestEngine {
         try {
             // Load test class
             final Class testClass = Play.classloader.loadClass(name);
+
+            for(PlayPlugin plugin : Play.plugins) {
+                TestResults pluginTestResults = plugin.runTest(testClass);
+                if(pluginTestResults != null) {
+                    return pluginTestResults;
+                }
+            }
 
             // VirtualClient test
             if(FunctionalTest.class.isAssignableFrom(testClass)) {
@@ -153,6 +161,10 @@ public class TestEngine {
         
         public List<TestResult> results = new ArrayList<TestResult>();
         public boolean passed = true;
+
+        public void add(TestResult result) {
+            this.results.add(result);
+        }
         
     }
     

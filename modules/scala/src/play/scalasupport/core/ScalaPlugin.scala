@@ -1,6 +1,7 @@
 package play.scalasupport.core
 
 import play._
+import play.test._
 import play.vfs.{VirtualFile => VFile}
 import play.exceptions._
 import play.classloading.ApplicationClasses.ApplicationClass
@@ -16,6 +17,9 @@ import scala.tools.nsc.io._
 
 import java.util.{List => JList}
 
+import org.scalatest.Suite
+import org.scalatest.tools.ScalaTestRunner
+
 class ScalaPlugin extends PlayPlugin {
 
     override def compileAll(classes: JList[ApplicationClass]) = {
@@ -30,6 +34,13 @@ class ScalaPlugin extends PlayPlugin {
         Play.javaPath foreach scan
         play.Logger.trace("SCALA compileAll")
         classes.addAll(compile(sources))
+    }
+
+    override def runTest(testClass: Class[BaseTest]) = {
+        testClass match {
+            case suite if classOf[Suite] isAssignableFrom testClass => ScalaTestRunner run suite.asInstanceOf[Class[Suite]]
+            case _ => null
+        }
     }
 
     override def onClassesChange(modified: JList[ApplicationClass]) {

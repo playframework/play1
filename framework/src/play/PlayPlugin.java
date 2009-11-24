@@ -10,6 +10,8 @@ import play.mvc.Http.Response;
 import play.mvc.Router.Route;
 import play.mvc.results.Result;
 import play.templates.Template;
+import play.test.BaseTest;
+import play.test.TestEngine.TestResults;
 import play.vfs.VirtualFile;
 
 /**
@@ -26,6 +28,10 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * Called at plugin loading
      */
     public void onLoad() {
+    }
+
+    public TestResults runTest(Class<BaseTest> clazz) {
+        return null;
     }
     
     /**
