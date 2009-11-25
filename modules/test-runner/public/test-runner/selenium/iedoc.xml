@@ -673,6 +673,36 @@ an empty (blank) url, like this: openWindow("", "myFunnyWindow").</p></comment>
 
 </function>
 
+<function name="selectPopUp">
+
+<param name="windowID">an identifier for the popup window, which can take on a                  number of different meanings</param>
+
+<comment>Simplifies the process of selecting a popup window (and does not offer
+functionality beyond what <code>selectWindow()</code> already provides).
+<ul>
+<li>If <code>windowID</code> is either not specified, or specified as
+"null", the first non-top window is selected. The top window is the one
+that would be selected by <code>selectWindow()</code> without providing a
+<code>windowID</code> . This should not be used when more than one popup
+window is in play.</li>
+<li>Otherwise, the window will be looked up considering
+<code>windowID</code> as the following in order: 1) the "name" of the
+window, as specified to <code>window.open()</code>; 2) a javascript
+variable which is a reference to a window; and 3) the title of the
+window. This is the same ordered lookup performed by
+<code>selectWindow</code> .</li>
+</ul></comment>
+
+</function>
+
+<function name="deselectPopUp">
+
+<comment>Selects the main window. Functionally equivalent to using
+<code>selectWindow()</code> and specifying no value for
+<code>windowID</code>.</comment>
+
+</function>
+
 <function name="selectFrame">
 
 <param name="locator">an <a href="#locators">element locator</a> identifying a frame or iframe</param>
@@ -726,9 +756,9 @@ The selected window will return true, while all others will return false.</p></c
 
 <function name="waitForPopUp">
 
-<param name="windowID">the JavaScript window "name" of the window that will appear (not the text of the title bar)</param>
+<param name="windowID">the JavaScript window "name" of the window that will appear (not the text of the title bar)                 If unspecified, or specified as "null", this command will                 wait for the first non-top window to appear (don't rely                 on this if you are working with multiple popups                 simultaneously).</param>
 
-<param name="timeout">a timeout in milliseconds, after which the action will return with an error</param>
+<param name="timeout">a timeout in milliseconds, after which the action will return with an error.                If this value is not specified, the default Selenium                timeout will be used. See the setTimeout() command.</param>
 
 <comment>Waits for a popup window to appear and load up.</comment>
 
@@ -1197,7 +1227,7 @@ This method will fail if the specified element isn't an input element.</comment>
 
 <param name="attributeName">name of an attribute on the windows</param>
 
-<comment>Returns every instance of some attribute from all known windows.</comment>
+<comment>Returns an array of JavaScript property values from all known windows having one.</comment>
 
 </function>
 
@@ -1267,25 +1297,25 @@ just send one "mousemove" at the start location and then one final one at the en
 
 <function name="getAllWindowIds">
 
-<return type="string[]">the IDs of all windows that the browser knows about.</return>
+<return type="string[]">Array of identifiers of all windows that the browser knows about.</return>
 
-<comment>Returns the IDs of all windows that the browser knows about.</comment>
+<comment>Returns the IDs of all windows that the browser knows about in an array.</comment>
 
 </function>
 
 <function name="getAllWindowNames">
 
-<return type="string[]">the names of all windows that the browser knows about.</return>
+<return type="string[]">Array of names of all windows that the browser knows about.</return>
 
-<comment>Returns the names of all windows that the browser knows about.</comment>
+<comment>Returns the names of all windows that the browser knows about in an array.</comment>
 
 </function>
 
 <function name="getAllWindowTitles">
 
-<return type="string[]">the titles of all windows that the browser knows about.</return>
+<return type="string[]">Array of titles of all windows that the browser knows about.</return>
 
-<comment>Returns the titles of all windows that the browser knows about.</comment>
+<comment>Returns the titles of all windows that the browser knows about in an array.</comment>
 
 </function>
 
@@ -1687,7 +1717,7 @@ id. Does nothing if the referenced tag doesn't exist.</comment>
 
 <function name="useXpathLibrary">
 
-<param name="libraryName">name of the desired library Only the following three can be chosen:   ajaxslt - Google's library   javascript - Cybozu Labs' faster library   default - The default library.  Currently the default library is ajaxslt. If libraryName isn't one of these three, then  no change will be made.</param>
+<param name="libraryName">name of the desired library Only the following three can be chosen: <ul>   <li>"ajaxslt" - Google's library</li>   <li>"javascript-xpath" - Cybozu Labs' faster library</li>   <li>"default" - The default library.  Currently the default library is "ajaxslt" .</li> </ul> If libraryName isn't one of these three, then  no change will be made.</param>
 
 <comment>Allows choice of one of the available libraries.</comment>
 

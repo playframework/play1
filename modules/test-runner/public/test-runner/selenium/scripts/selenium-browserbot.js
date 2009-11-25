@@ -316,12 +316,7 @@ BrowserBot.prototype.selectWindow = function(target) {
     }
     var result = target.match(/^([a-zA-Z]+)=(.*)/);
     if (!result) {
-        try {
-            this._selectWindowByName(target);
-        }
-        catch (e) {
-            this._selectWindowByTitle(target);
-        }
+        this._selectWindowByWindowId(target);
         return;
     }
     locatorType = result[1];
@@ -339,12 +334,30 @@ BrowserBot.prototype.selectWindow = function(target) {
     }
 };
 
+BrowserBot.prototype.selectPopUp = function(windowId) {
+    if (! windowId || windowId == 'null') {
+        this._selectFirstNonTopWindow();
+    }
+    else {
+        this._selectWindowByWindowId(windowId);
+    }
+};
+
 BrowserBot.prototype._selectTopWindow = function() {
     this.currentWindowName = null;
     this.currentWindow = this.topWindow;
     this.topFrame = this.topWindow;
     this.isSubFrameSelected = false;
 }
+
+BrowserBot.prototype._selectWindowByWindowId = function(windowId) {
+    try {
+        this._selectWindowByName(windowId);
+    }
+    catch (e) {
+        this._selectWindowByTitle(windowId);
+    }
+};
 
 BrowserBot.prototype._selectWindowByName = function(target) {
     this.currentWindow = this.getWindowByName(target, false);
@@ -362,15 +375,22 @@ BrowserBot.prototype._selectWindowByTitle = function(target) {
     }
 }
 
+BrowserBot.prototype._selectFirstNonTopWindow = function() {
+    var names = this.getNonTopWindowNames();
+    if (names.length) {
+        this._selectWindowByName(names[0]);
+    }
+};
+
 BrowserBot.prototype.selectFrame = function(target) {
     if (target.indexOf("index=") == 0) {
         target = target.substr(6);
         var frame = this.getCurrentWindow().frames[target];
         if (frame == null) {
-            throw new SeleniumError("Not found: frames["+index+"]");
+            throw new SeleniumError("Not found: frames["+target+"]");
         }
         if (!frame.document) {
-            throw new SeleniumError("frames["+index+"] is not a frame");
+            throw new SeleniumError("frames["+target+"] is not a frame");
         }
         this.currentWindow = frame;
         this.isSubFrameSelected = true;
@@ -993,6 +1013,19 @@ BrowserBot.prototype.getWindowNameByTitle = function(windowTitle) {
     } catch (e) {} // IE Perm denied
 
     throw new SeleniumError("Could not find window with title " + windowTitle);
+};
+
+BrowserBot.prototype.getNonTopWindowNames = function() {
+    var nonTopWindowNames = [];
+    
+    for (var windowName in this.openedWindows) {
+        var win = this.openedWindows[windowName];
+        if (! this._windowClosed(win) && win != this.topWindow) {
+            nonTopWindowNames.push(windowName);
+        }
+    }
+    
+    return nonTopWindowNames;
 };
 
 BrowserBot.prototype.getCurrentWindow = function(doNotModify) {

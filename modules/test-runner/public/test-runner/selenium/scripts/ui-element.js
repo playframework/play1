@@ -386,27 +386,115 @@ function UIElement(uiElementShorthand)
     this.init(uiElementShorthand);
 }
 
-// hang this off the UIElement "namespace"
+// hang this off the UIElement "namespace". This is a composite strategy.
 UIElement.defaultOffsetLocatorStrategy = function(locatedElement, pageElement) {
+    var strategies = [
+        UIElement.linkXPathOffsetLocatorStrategy
+        , UIElement.preferredAttributeXPathOffsetLocatorStrategy
+        , UIElement.simpleXPathOffsetLocatorStrategy
+    ];
+    
+    for (var i = 0; i < strategies.length; ++i) {
+        var strategy = strategies[i];
+        var offsetLocator = strategy(locatedElement, pageElement);
+        
+        if (offsetLocator) {
+            return offsetLocator;
+        }
+    }
+    
+    return null;
+};
+
+UIElement.simpleXPathOffsetLocatorStrategy = function(locatedElement,
+    pageElement)
+{
     if (is_ancestor(locatedElement, pageElement)) {
-        var offsetLocator;
+        var xpath = "";
         var recorder = Recorder.get(locatedElement.ownerDocument.defaultView);
-        var builderNames = [
-            'xpath:link'
-            , 'xpath:img'
-            , 'xpath:attributes'
-            , 'xpath:idRelative'
-            , 'xpath:href'
-            , 'xpath:position'
-        ];
-        for (var i = 0; i < builderNames.length; ++i) {
-            offsetLocator = recorder.locatorBuilders
-                .buildWith(builderNames[i], pageElement, locatedElement);
-            if (offsetLocator) {
-                return offsetLocator;
+        var locatorBuilders = recorder.locatorBuilders;
+        var currentNode = pageElement;
+        
+        while (currentNode != null && currentNode != locatedElement) {
+            xpath = locatorBuilders.relativeXPathFromParent(currentNode)
+                + xpath;
+            currentNode = currentNode.parentNode;
+        }
+        
+        var results = eval_xpath(xpath, locatedElement.ownerDocument,
+            { contextNode: locatedElement });
+        
+        if (results.length > 0 && results[0] == pageElement) {
+            return xpath;
+        }
+    }
+    
+    return null;
+};
+
+UIElement.linkXPathOffsetLocatorStrategy = function(locatedElement, pageElement)
+{
+    if (pageElement.nodeName == 'A' && is_ancestor(locatedElement, pageElement))
+    {
+        var text = pageElement.textContent
+            .replace(/^\s+/, "")
+            .replace(/\s+$/, "");
+        
+        if (text) {
+            var xpath = '/descendant::a[normalize-space()='
+                + text.quoteForXPath() + ']';
+            
+            var results = eval_xpath(xpath, locatedElement.ownerDocument,
+                { contextNode: locatedElement });
+            
+            if (results.length > 0 && results[0] == pageElement) {
+                return xpath;
             }
         }
     }
+    
+    return null;
+};
+
+// compare to the "xpath:attributes" locator strategy defined in the IDE source
+UIElement.preferredAttributeXPathOffsetLocatorStrategy =
+    function(locatedElement, pageElement)
+{
+    // this is an ordered listing of single attributes
+    var preferredAttributes =  [
+        'name'
+        , 'value'
+        , 'type'
+        , 'action'
+        , 'alt'
+        , 'title'
+        , 'class'
+        , 'src'
+        , 'href'
+        , 'onclick'
+    ];
+    
+    if (is_ancestor(locatedElement, pageElement)) {
+        var xpathBase = '/descendant::' + pageElement.nodeName.toLowerCase();
+        
+        for (var i = 0; i < preferredAttributes.length; ++i) {
+            var name = preferredAttributes[i];
+            var value = pageElement.getAttribute(name);
+            
+            if (value) {
+                var xpath = xpathBase + '[@' + name + '='
+                    + value.quoteForXPath() + ']';
+                    
+                var results = eval_xpath(xpath, locatedElement.ownerDocument,
+                    { contextNode: locatedElement });
+                
+                if (results.length > 0 && results[0] == pageElement) {
+                    return xpath;
+                }
+            }
+        }
+    }
+    
     return null;
 };
 
@@ -552,10 +640,9 @@ function UISpecifier(uiSpecifierStringOrPagesetName, elementName, args)
             // probably under unit test
             var kwargs = to_kwargs(this.args);
         }
+        
         return this.pagesetName + '::' + this.elementName + '(' + kwargs + ')';
     };
-    
-    
     
     // construct the object
     if (arguments.length < 2) {
@@ -949,9 +1036,11 @@ function UIMap()
         var is_fuzzy_match =
             BrowserBot.prototype.locateElementByUIElement.is_fuzzy_match;
         var pagesets = this.getPagesetsForPage(inDocument);
+        
         for (var i = 0; i < pagesets.length; ++i) {
             var pageset = pagesets[i];
             var uiElements = pageset.getUIElements();
+            
             for (var j = 0; j < uiElements.length; ++j) {
                 var uiElement = uiElements[j];
                 
@@ -1007,12 +1096,13 @@ function UIMap()
                                     defaultLocators[locator]);
                         }
                     }
+                    
                     // ok, matching the element failed. See if an offset
                     // locator can complete the match.
                     if (uiElement.getOffsetLocator) {
-                        for (var i = 0; i < locatedElements.length; ++i) {
+                        for (var k = 0; k < locatedElements.length; ++k) {
                             var offsetLocator = uiElement
-                                .getOffsetLocator(locatedElement, pageElement);
+                                .getOffsetLocator(locatedElements[k], pageElement);
                             if (offsetLocator) {
                                 return UI_GLOBAL.UI_PREFIX + '=' +
                                     new UISpecifier(pageset.name,

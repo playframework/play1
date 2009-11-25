@@ -1,15 +1,15 @@
 #{verbatim}
-<table cellpadding="1" cellspacing="1" border="1" width="100%" style="margin-bottom: 20px">
+<table cellpadding="1" cellspacing="1" border="0" width="100%" style="margin-bottom: 20px">
     <thead>
         <tr>
-            <th colspan="3" style="font-style:italic; background: #111; color: #fff">${_arg ?: 'Tests'}</th>
+            <th colspan="3" style="background: #111; color: #fff; padding: 5px">${_arg ?: 'Tests'}</th>
         </tr>
     </thead>
     <tbody>
       #{list items:_body.toString().split('\n'), as:'command'}
       %{ if(command.trim().startsWith('//') || command.trim().startsWith('#')) { %}
         <tr>
-            <td colspan="3" style="font-style:italic; background: lightgrey">${command}</td>
+            <td colspan="3" style="font-style:italic; background: #e2e2e2">${command}</td>
         </tr>
       %{ } else { 
             def parts = play.test.Helpers.seleniumCommand(command); }%

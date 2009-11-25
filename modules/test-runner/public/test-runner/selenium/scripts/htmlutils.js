@@ -181,6 +181,7 @@ function getText(element) {
 }
 
 function getTextContent(element, preformatted) {
+    if (element.style && (element.style.visibility == 'hidden' || element.style.display == 'none')) return '';
     if (element.nodeType == 3 /*Node.TEXT_NODE*/) {
         var text = element.data;
         if (!preformatted) {
@@ -188,7 +189,7 @@ function getTextContent(element, preformatted) {
         }
         return text;
     }
-    if (element.nodeType == 1 /*Node.ELEMENT_NODE*/) {
+    if (element.nodeType == 1 /*Node.ELEMENT_NODE*/ && element.nodeName != 'SCRIPT') {
         var childrenPreformatted = preformatted || (element.tagName == "PRE");
         var text = "";
         for (var i = 0; i < element.childNodes.length; i++) {
@@ -855,7 +856,7 @@ function openSeparateApplicationWindow(url, suppressMozillaWarning) {
     window.resizeTo(1200, 500);
     window.moveTo(window.screenX, 0);
 
-    var appWindow = window.open(url + '?start=true', 'main');
+    var appWindow = window.open(url + '?start=true', 'selenium_main_app_window');
     if (appWindow == null) {
         var errorMessage = "Couldn't open app window; is the pop-up blocker enabled?"
         LOG.error(errorMessage);
@@ -972,10 +973,16 @@ function getTimeoutTime(timeout) {
 }
 
 /**
- * Returns true iff the current environment is the IDE.
+ * Returns true iff the current environment is the IDE, and is not the chrome
+ * runner launched by the IDE.
  */
-function is_IDE()
-{
+function is_IDE() {
+    var locstr = window.location.href;
+    
+    if (locstr.indexOf('chrome://selenium-ide-testrunner') == 0) {
+         return false;
+    }
+    
     return (typeof(SeleniumIDE) != 'undefined');
 }
 
@@ -1019,7 +1026,7 @@ function hasJavascriptHref(element) {
     if (getTagName(element) != 'a') {
         return false;
     }
-    if (element.onclick) {
+    if (element.getAttribute('onclick')) {
         return false;
     }
     if (! element.href) {
@@ -1159,12 +1166,12 @@ function eval_xpath(xpath, inDocument, opts)
                     contextNode, namespaceResolver, 0, null);
         }
         catch (e) {
-            throw new SeleniumError("Invalid xpath: " + extractExceptionMessage(e));
+            throw new SeleniumError("Invalid xpath [1]: " + extractExceptionMessage(e));
         }
         finally{
             if (xpathResult == null) {
                 // If the result is null, we should still throw an Error.
-                throw new SeleniumError("Invalid xpath: " + xpath); 
+                throw new SeleniumError("Invalid xpath [2]: " + xpath); 
             }
         }
         var result = xpathResult.iterateNext();
@@ -1195,7 +1202,7 @@ function eval_xpath(xpath, inDocument, opts)
         xpathObj = xpathParse(xpath);
     }
     catch (e) {
-        throw new SeleniumError("Invalid xpath: " + extractExceptionMessage(e));
+        throw new SeleniumError("Invalid xpath [3]: " + extractExceptionMessage(e));
     }
     var xpathResult = xpathObj.evaluate(context);
     if (xpathResult && xpathResult.value) {
