@@ -239,7 +239,7 @@
                 background: #000;
                 opacity: .8;
                 position: fixed;
-                top: 180px;
+                top: 0;
                 left: 0;
                 right: 0;
                 bottom: 0;
@@ -247,20 +247,34 @@
             }
             #selenium {
                 position: fixed;
-                top: 200px;
-                bottom: 20px;
+                top: 20px;
+                bottom: 50px;
                 right: 20px;
                 left: 20px;
                 display: none;
                 z-index: 100000;
-                background: #fff;
+                color: #fff;
+				font-size: 110%;
+            }
+			#stopSelenium {
+                background: #c00;
+                color: #fff;
+                font-size: 90%;
+                border: 1px double #c00;
+                cursor: pointer;
+                padding: 2px 8px;
+                -moz-user-select: none;
             }
             #selenium iframe {
+				margin-top: 10px;
                 border: 1px solid #666;
+				background: #fff;
             }
         </style>
         <script type="text/javascript">
             $(function() {
+	
+				var title = window.top.document.title;
                 
                 $('#loading').ajaxStart(function() {
                     $(this).show();
@@ -325,7 +339,7 @@
                 };
                                 
                 var runTest = function(testId, test) {
-                    test.addClass('passing');
+					test.addClass('passing');
                     $('.touch', test).html('&nbsp;');
                     if(/.class$/.test(testId)) {
                         $.ajax({
@@ -370,6 +384,7 @@
                     test.removeClass('passing').addClass('passed');
                     $('.touch', test).html('+');
                     $('.testResult', test).html(result);
+					window.top.document.title = title;
                     runNextTest();
                 };
                                 
@@ -377,6 +392,7 @@
                     test.removeClass('passing').addClass('failed');
                     $('.touch', test).html('-');
                     $('.testResult', test).html(result).show();
+					window.top.document.title = title;
                     stop();
                 };
                         
@@ -455,6 +471,10 @@
                 });
                         
                 $('#stop').click(function() {
+                    stop();
+                });
+
+				$('#stopSelenium').click(function() {
                     stop();
                 });
 
@@ -574,6 +594,7 @@
         </div>
         <div id="selenium-mask"></div>
         <div id="selenium">
+			Play is running a selenium test... <span id="stopSelenium">Stop it</span>
             <iframe id="selenium-runner" width="100%" height="100%" src="about:blank"></iframe>
         </div>
     </body>

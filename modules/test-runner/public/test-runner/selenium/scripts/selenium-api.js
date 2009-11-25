@@ -179,7 +179,7 @@ function Selenium(browserbot) {
         return browserbot;
     };
     this.defaultTimeout = Selenium.DEFAULT_TIMEOUT;
-    this.mouseSpeed = 10;
+    this.mouseSpeed = Selenium.DEFAULT_MOUSE_SPEED;
 }
 
 Selenium.DEFAULT_TIMEOUT = 30 * 1000;
@@ -243,7 +243,7 @@ Selenium.prototype.doClick = function(locator) {
         
         elementWithHref.href = 'javascript:try { '
             + originalHref.replace(/^\s*javascript:/i, "")
-            + '} finally { window._executingJavascriptHref = undefined; }' ;
+            + ' } finally { window._executingJavascriptHref = undefined; }' ;
         
         win._executingJavascriptHref = true;
         
@@ -270,7 +270,7 @@ Selenium.prototype.doClick = function(locator) {
             }
             
             return false;
-        }, Selenium.DEFAULT_TIMEOUT);
+        }, this.defaultTimeout);
     }
     
     this.browserbot.clickElement(element);
@@ -981,6 +981,39 @@ Selenium.prototype.doSelectWindow = function(windowID) {
     this.browserbot.selectWindow(windowID);
 };
 
+Selenium.prototype.doSelectPopUp = function(windowID) {
+    /**
+    * Simplifies the process of selecting a popup window (and does not offer
+    * functionality beyond what <code>selectWindow()</code> already provides).
+    * <ul>
+    * <li>If <code>windowID</code> is either not specified, or specified as
+    * "null", the first non-top window is selected. The top window is the one
+    * that would be selected by <code>selectWindow()</code> without providing a
+    * <code>windowID</code> . This should not be used when more than one popup
+    * window is in play.</li>
+    * <li>Otherwise, the window will be looked up considering
+    * <code>windowID</code> as the following in order: 1) the "name" of the
+    * window, as specified to <code>window.open()</code>; 2) a javascript
+    * variable which is a reference to a window; and 3) the title of the
+    * window. This is the same ordered lookup performed by
+    * <code>selectWindow</code> .</li>
+    * </ul>
+    *
+    * @param windowID  an identifier for the popup window, which can take on a
+    *                  number of different meanings
+    */
+    this.browserbot.selectPopUp(windowID);
+};
+
+Selenium.prototype.doDeselectPopUp = function() {
+    /**
+    * Selects the main window. Functionally equivalent to using
+    * <code>selectWindow()</code> and specifying no value for
+    * <code>windowID</code>.
+    */
+    this.browserbot.selectWindow();
+}
+
 Selenium.prototype.doSelectFrame = function(locator) {
     /**
     * Selects a frame within the current window.  (You may invoke this command
@@ -1039,14 +1072,29 @@ Selenium.prototype.doWaitForPopUp = function(windowID, timeout) {
     * Waits for a popup window to appear and load up.
     *
     * @param windowID the JavaScript window "name" of the window that will appear (not the text of the title bar)
-    * @param timeout a timeout in milliseconds, after which the action will return with an error
+    *                 If unspecified, or specified as "null", this command will
+    *                 wait for the first non-top window to appear (don't rely
+    *                 on this if you are working with multiple popups
+    *                 simultaneously). 
+    * @param timeout a timeout in milliseconds, after which the action will return with an error.
+    *                If this value is not specified, the default Selenium
+    *                timeout will be used. See the setTimeout() command.
     */
+    if (! timeout) {
+        var timeout = this.defaultTimeout;
+    }
     var timeoutTime = getTimeoutTime(timeout);
     
     var popupLoadedPredicate = function () {
         var targetWindow;
         try {
-            targetWindow = selenium.browserbot.getWindowByName(windowID, true);
+            if (windowID && windowID != 'null') {
+                targetWindow = selenium.browserbot.getWindowByName(windowID, true);
+            }
+            else {
+                var names = selenium.browserbot.getNonTopWindowNames();
+                targetWindow = selenium.browserbot.getWindowByName(names[0], true);
+            }
         }
         catch (e) {
             if (new Date().getTime() > timeoutTime) {
@@ -1754,7 +1802,7 @@ Selenium.prototype.getAllFields = function() {
 };
 
 Selenium.prototype.getAttributeFromAllWindows = function(attributeName) {
-    /** Returns every instance of some attribute from all known windows.
+    /** Returns an array of JavaScript property values from all known windows having one.
     *
     * @param attributeName name of an attribute on the windows
     * @return string[] the set of values of this attribute from all known windows.
@@ -1828,7 +1876,13 @@ Selenium.prototype.doSetMouseSpeed = function(pixels) {
     * just send one "mousemove" at the start location and then one final one at the end location.</p>
     * @param pixels the number of pixels between "mousemove" events
     */
-    this.mouseSpeed = pixels;
+    var intValue = new Number(pixels);
+    if (intValue.constructor != Number ||
+    		intValue < 0 ) {
+    	this.mouseSpeed = Selenium.DEFAULT_MOUSE_SPEED;
+    } else {
+    	this.mouseSpeed = pixels;
+    }
 }
  
 Selenium.prototype.getMouseSpeed = function() {
@@ -1836,7 +1890,7 @@ Selenium.prototype.getMouseSpeed = function() {
     * 
     * @return number the number of pixels between "mousemove" events during dragAndDrop commands (default=10)
     */
-    this.mouseSpeed = pixels;
+    return this.mouseSpeed;
 }
 
 
@@ -1924,25 +1978,25 @@ Selenium.prototype.doWindowMaximize = function() {
 };
 
 Selenium.prototype.getAllWindowIds = function() {
-  /** Returns the IDs of all windows that the browser knows about.
+  /** Returns the IDs of all windows that the browser knows about in an array.
    *
-   * @return string[] the IDs of all windows that the browser knows about.
+   * @return string[] Array of identifiers of all windows that the browser knows about.
    */
    return this.getAttributeFromAllWindows("id");
 };
 
 Selenium.prototype.getAllWindowNames = function() {
-  /** Returns the names of all windows that the browser knows about.
+  /** Returns the names of all windows that the browser knows about in an array.
    *
-   * @return string[] the names of all windows that the browser knows about.
+   * @return string[] Array of names of all windows that the browser knows about.
    */
    return this.getAttributeFromAllWindows("name");
 };
 
 Selenium.prototype.getAllWindowTitles = function() {
-  /** Returns the titles of all windows that the browser knows about.
+  /** Returns the titles of all windows that the browser knows about in an array.
    *
-   * @return string[] the titles of all windows that the browser knows about.
+   * @return string[] Array of titles of all windows that the browser knows about.
    */
    return this.getAttributeFromAllWindows("document.title");
 };
@@ -2681,7 +2735,7 @@ Selenium.prototype.doCaptureEntirePageScreenshot = function(filename, kwargs) {
                 if (exceptionMessage ==
                     "Automation server can't create object") {
                     msg += 'Is it installed? Does it have permission to run '
-                        'as an add-on? See http://snapsie.sourceforge.net/';
+                        + 'as an add-on? See http://snapsie.sourceforge.net/';
                 }
                 else {
                     msg += exceptionMessage;
@@ -3027,9 +3081,11 @@ Selenium.prototype.doUseXpathLibrary = function(libraryName) {
 	* Allows choice of one of the available libraries.
     * @param libraryName name of the desired library
     * Only the following three can be chosen:
-    *   ajaxslt - Google's library
-    *   javascript - Cybozu Labs' faster library
-    *   default - The default library.  Currently the default library is ajaxslt.
+    * <ul>
+    *   <li>"ajaxslt" - Google's library</li>
+    *   <li>"javascript-xpath" - Cybozu Labs' faster library</li>
+    *   <li>"default" - The default library.  Currently the default library is "ajaxslt" .</li>
+    * </ul>
     * If libraryName isn't one of these three, then 
     * no change will be made.
     *   

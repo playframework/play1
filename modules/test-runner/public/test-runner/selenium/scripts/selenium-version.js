@@ -1,5 +1,5 @@
-Selenium.version = "1.0-beta-2";
-Selenium.revision = "2330";
+Selenium.version = "1.0.1";
+Selenium.revision = "final";
 
-window.top.document.title += " v" + Selenium.version + " [" + Selenium.revision + "]";
+window.top.document.title += " - Selenium v" + Selenium.version + " [" + Selenium.revision + "]";
 
