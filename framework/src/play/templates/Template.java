@@ -381,6 +381,10 @@ public class Template {
             return StringEscapeUtils.escapeHtml(val.toString());
         }
 
+        public Object get(String key) {
+            return Template.layoutData.get().get(key);
+        }
+
         static class RawData {
 
             public String data;
