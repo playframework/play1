@@ -128,23 +128,30 @@ public class Validation {
     
     static List<Validator> getValidators(Class clazz, String property, String name) {
         try {
-            Field field = clazz.getDeclaredField(property);
             List<Validator> validators = new ArrayList<Validator>();
-            for(Annotation annotation : field.getDeclaredAnnotations()) {
-                if(annotation.annotationType().getName().startsWith("play.data.validation")) {
-                    Validator validator = new Validator(annotation);
-                    validators.add(validator);
-                    if(annotation.annotationType().equals(Equals.class)) {
-                        validator.params.put("equalsTo", name + "." + ((Equals)annotation).value());
+            while(!clazz.equals(Object.class)) {
+                try {
+                    Field field = clazz.getDeclaredField(property);
+                    for(Annotation annotation : field.getDeclaredAnnotations()) {
+                        if(annotation.annotationType().getName().startsWith("play.data.validation")) {
+                            Validator validator = new Validator(annotation);
+                            validators.add(validator);
+                            if(annotation.annotationType().equals(Equals.class)) {
+                                validator.params.put("equalsTo", name + "." + ((Equals)annotation).value());
+                            }
+                            if(annotation.annotationType().equals(InFuture.class)) {
+                                validator.params.put("reference", ((InFuture)annotation).value());
+                            }
+                            if(annotation.annotationType().equals(InPast.class)) {
+                                validator.params.put("reference", ((InPast)annotation).value());
+                            }
+                        }
                     }
-                    if(annotation.annotationType().equals(InFuture.class)) {
-                        validator.params.put("reference", ((InFuture)annotation).value());
-                    }
-                    if(annotation.annotationType().equals(InPast.class)) {
-                        validator.params.put("reference", ((InPast)annotation).value());
-                    }
+                    break;
+                } catch(NoSuchFieldException e) {
+                    clazz = clazz.getSuperclass();
                 }
-            }
+            }            
             return validators;
         } catch(Exception e) {
             return new ArrayList<Validator>();
