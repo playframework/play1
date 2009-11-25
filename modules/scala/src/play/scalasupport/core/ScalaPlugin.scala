@@ -85,7 +85,8 @@ class ScalaPlugin extends PlayPlugin {
         private val virtualDirectory = new VirtualDirectory("(memory)", None)
         private val settings = new Settings()
         settings.debuginfo.level = 3
-        settings.outputDirs setSingleOutput virtualDirectory        
+        settings.outputDirs setSingleOutput virtualDirectory   
+        settings.deprecation.value = true
         private val compiler = new Global(settings, reporter)
 
         def compile(sources: List[VFile]) = {
