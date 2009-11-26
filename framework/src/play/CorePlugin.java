@@ -41,6 +41,10 @@ public class CorePlugin extends PlayPlugin {
      */
     @Override
     public boolean rawInvocation(Request request, Response response) throws Exception {
+        if (request.path.equals("/@kill")) {
+            System.out.println("@KILLED");
+            System.exit(0);
+        }
         if (request.path.equals("/@status")) {
             if (!Play.started) {
                 response.status = 503;

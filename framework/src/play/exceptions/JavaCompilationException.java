@@ -21,7 +21,7 @@ public class JavaCompilationException extends JavaException {
 
     @Override
     public String getErrorTitle() {
-        return String.format("Java compilation error");
+        return String.format("Compilation error");
     }
 
     @Override
