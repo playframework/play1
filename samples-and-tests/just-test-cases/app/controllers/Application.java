@@ -30,6 +30,10 @@ public class Application extends Controller {
         render();
     }
     
+    public static void dynamicClassBinding(boolean fail) {
+        render(fail);
+    }
+    
     public static void tagContexts() {
         render();
     }

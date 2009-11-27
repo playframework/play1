@@ -89,7 +89,8 @@ public class TemplateCompiler {
                     return o2.length() - o1.length();
                 }
             });
-            for (String cName : names) {
+            for (String cName : names) { // dynamic class binding
+                source = source.replaceAll("new " + Pattern.quote(cName) + "(\\([^)]*\\))", "_('" + originalNames.get(cName) + "').newInstance$1");
                 source = source.replaceAll("([a-zA-Z0-9.-_$]+)\\s+instanceof\\s+" + Pattern.quote(cName), "_('" + originalNames.get(cName).replace("$", "\\$") + "').isAssignableFrom($1.class)");
                 source = source.replaceAll("([^.])" + Pattern.quote(cName) + ".class", "$1_('" + originalNames.get(cName) + "')");
                 source = source.replaceAll("([^'\".])" + Pattern.quote(cName) + "([^'\"])", "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')$2");
