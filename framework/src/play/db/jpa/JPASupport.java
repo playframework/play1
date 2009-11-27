@@ -623,6 +623,11 @@ public class JPASupport implements Serializable {
                     if (attachment != null) {
                         attachment.model = this;
                         attachment.name = field.getName();
+                    } else {
+                        attachment = new FileAttachment();
+                        attachment.model = this;
+                        attachment.name = field.getName();
+                        field.set(this, attachment);
                     }
                 } catch (Exception ex) {
                     throw new UnexpectedException(ex);
