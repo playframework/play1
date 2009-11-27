@@ -67,6 +67,16 @@ p(note). **Note**
  
 Content of the **war** directory will be merged during the war export command. It's not specific to the GAE module.
 
+h2. <a>Deployment</a>
+
+To deploy your application to Google's cloud, you need to export your application as war
+then upload it using the Google App Engine SDK:
+
+bc. # play war test-gae -o test-gae.war
+# appcfg.sh update test-gae.war
+
+Make sure to specify your GAE application id in the 'war/WEB-INF/appengine-web.xml' file.
+
 h2. <a>About JPA</a>
 
 Play offers a cool abstraction of JPA through the JPASupport/Model classes. But when you use these classes on GAE a lot of problems occur. This is because the JPA support in GAE is very different of Hibernate + a relational database.
