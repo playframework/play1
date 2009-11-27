@@ -18,6 +18,10 @@ public class Application extends Controller {
         render();
     }
     
+    public static void simpleStatusCode() {
+        response.status = 204;
+    }
+    
     public static void hello(String name) {
         render(name);
     }

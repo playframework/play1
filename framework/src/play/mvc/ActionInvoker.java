@@ -24,6 +24,7 @@ import play.exceptions.ActionNotFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
+import play.mvc.results.NoResult;
 import play.utils.Java;
 import play.mvc.results.NotFound;
 import play.mvc.results.Ok;
@@ -180,7 +181,7 @@ public class ActionInvoker {
                     throw actionResult;
                 }
                 
-                throw new Ok();
+                throw new NoResult();
                 
             } catch (IllegalAccessException ex) {
                 throw ex;
