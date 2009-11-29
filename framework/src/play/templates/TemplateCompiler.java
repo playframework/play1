@@ -27,7 +27,13 @@ public class TemplateCompiler {
 
     public static List<String> extensionsClassnames = new ArrayList();
 
-    public static Template compile(VirtualFile file) {
+    /**
+     * Renders a template and executes any plugins
+     * @param name Name / key of template
+     * @param source The template source
+     * @return A Template
+     */
+    public static Template compile(String name, String source) {
         try {
 
             try {
@@ -39,13 +45,10 @@ public class TemplateCompiler {
             } catch (Throwable e) {
                 //
             }
-
-            String source = file.contentAsString();
-            String name = file.relativePath();
             Template template = new Template(name, source);
             long start = System.currentTimeMillis();
             new Compiler().hop(template);
-            Logger.trace("%sms to parse template %s", System.currentTimeMillis() - start, file.relativePath());
+            Logger.trace("%sms to parse template %s", System.currentTimeMillis() - start, name);
             for(PlayPlugin plugin : Play.plugins) {
             	plugin.onTemplateCompilation(template);
             }
@@ -55,6 +58,10 @@ public class TemplateCompiler {
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
+    }
+
+    public static Template compile(VirtualFile file) {
+        return compile(file.relativePath(), file.contentAsString());
     }
 
     public static class Compiler {
