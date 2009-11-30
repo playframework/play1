@@ -75,7 +75,7 @@ public class Fixtures {
 
     public static void deleteAll() {
         try {
-            List<String> names = new ArrayList();
+            List<String> names = new ArrayList<String>();
             ResultSet rs = DB.getConnection().getMetaData().getTables(null, null, null, new String[]{"TABLE"});
             while (rs.next()) {
                 String name = rs.getString("TABLE_NAME");
@@ -116,7 +116,7 @@ public class Fixtures {
             Object o = yaml.load(is);
             if (o instanceof LinkedHashMap) {
                 LinkedHashMap objects = (LinkedHashMap) o;
-                Map<String, Object> idCache = new HashMap();
+                Map<String, Object> idCache = new HashMap<String, Object>();
                 for (Object key : objects.keySet()) {
                     Matcher matcher = keyPattern.matcher(key.toString().trim());
                     if (matcher.matches()) {
@@ -128,7 +128,7 @@ public class Fixtures {
                         if (idCache.containsKey(type + "-" + id)) {
                             throw new RuntimeException("Cannot load fixture " + name + ", duplicate id '" + id + "' for type " + type);
                         }
-                        Map<String, String[]> params = new HashMap();
+                        Map<String, String[]> params = new HashMap<String, String[]>();
                         serialize((Map) objects.get(key), "object", params);
                         Class cType = Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);

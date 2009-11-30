@@ -29,7 +29,7 @@ public class FastTags {
      * @param args tag attributes
      * @param body tag inner body
      * @param out the output writer
-     * @param template encloding template
+     * @param template enclosing template
      * @param fromLine template line number where the tag is defined
      */
     public static void _form(Map<?,?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
@@ -62,7 +62,7 @@ public class FastTags {
      * @param args tag attributes
      * @param body tag inner body
      * @param out the output writer
-     * @param template encloding template
+     * @param template enclosing template
      * @param fromLine template line number where the tag is defined
      */
     public static void _a(Map<?,?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
@@ -225,7 +225,7 @@ public class FastTags {
                 name = ct + name.substring(1);
             }
             Template t = TemplateLoader.load(name);
-            Map newArgs = new HashMap();
+            Map<String, Object> newArgs = new HashMap<String, Object>();
             newArgs.putAll(template.getBinding().getVariables());
             newArgs.put("_isInclude", true);
             t.render(newArgs);
