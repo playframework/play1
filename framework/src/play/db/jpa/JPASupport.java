@@ -114,8 +114,8 @@ public class JPASupport implements Serializable {
                                     Validation.addError(name+"."+field.getName(), "validation.notFound", _id);
                                 }
                             }
-                        }
-                        bw.set(field.getName(), o, l);
+                            bw.set(field.getName(), o, l);
+                        }                        
                     } else {
                         String[] ids = params.get(name + "." + field.getName() + "@id");
                         if(ids == null) {

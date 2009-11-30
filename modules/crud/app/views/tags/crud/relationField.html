@@ -4,6 +4,7 @@
 	</label>
 	
 	#{if _field.multiple}
+		<input type="hidden" name="${field.name}@id" value="" />
 		<select id="${field.id}" name="${field.name}@id" multiple="yes">
 			%{ play.db.jpa.JPA.getEntityManager().createQuery("from " + _field.relation).getResultList().sort{ it.toString() }.each() { }%
 			%{

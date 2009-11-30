@@ -27,7 +27,6 @@ import play.i18n.Lang;
 import play.mvc.results.NoResult;
 import play.utils.Java;
 import play.mvc.results.NotFound;
-import play.mvc.results.Ok;
 
 /**
  * Invoke an action after an HTTP request
