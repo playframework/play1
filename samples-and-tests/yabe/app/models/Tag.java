@@ -17,7 +17,7 @@ public class Tag extends Model implements Comparable<Tag> {
     }
     
     public static Tag findOrCreateByName(String name) {
-        Tag tag = Tag.find("byName", name).one();
+        Tag tag = Tag.find("byName", name).first();
         if(tag == null) {
             tag = new Tag(name);
         }

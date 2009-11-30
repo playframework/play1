@@ -871,11 +871,19 @@ try:
 		shutil.copytree(os.path.join(play_base, 'resources/eclipse'), eclipse)
 		shutil.copytree(os.path.join(play_base, 'resources/eclipse/.settings'), dotSettings)
 		replaceAll(dotProject, r'%PROJECT_NAME%', application_name)
+		
+		playJarPath = os.path.join(play_base, 'framework','play.jar')
+		playSourcePath = os.path.dirname(playJarPath)
+		if os.name == 'nt':
+			playSourcePath=playSourcePath.replace('\\','/').capitalize()
 
 		cpXML = ""
 		for el in classpath:
 			if not os.path.basename(el) == "conf":
-				cpXML += '<classpathentry kind="lib" path="%s" />' % os.path.normpath(el)
+				if el == playJarPath:
+					cpXML += '<classpathentry kind="lib" path="%s" sourcepath="%s" />\n\t' % (os.path.normpath(el) , playSourcePath)
+				else:
+					cpXML += '<classpathentry kind="lib" path="%s" />\n\t' % os.path.normpath(el)
 		replaceAll(dotClasspath, r'%PROJECTCLASSPATH%', cpXML)
 
 		if len(modules):
