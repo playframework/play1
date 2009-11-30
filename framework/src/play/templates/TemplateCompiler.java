@@ -27,13 +27,7 @@ public class TemplateCompiler {
 
     public static List<String> extensionsClassnames = new ArrayList();
 
-    /**
-     * Renders a template and executes any plugins
-     * @param name Name / key of template
-     * @param source The template source
-     * @return A Template
-     */
-    public static Template compile(String name, String source) {
+    public static Template compile(VirtualFile file) {
         try {
 
             try {
@@ -45,10 +39,13 @@ public class TemplateCompiler {
             } catch (Throwable e) {
                 //
             }
+
+            String source = file.contentAsString();
+            String name = file.relativePath();
             Template template = new Template(name, source);
             long start = System.currentTimeMillis();
             new Compiler().hop(template);
-            Logger.trace("%sms to parse template %s", System.currentTimeMillis() - start, name);
+            Logger.trace("%sms to parse template %s", System.currentTimeMillis() - start, file.relativePath());
             for(PlayPlugin plugin : Play.plugins) {
             	plugin.onTemplateCompilation(template);
             }
@@ -60,8 +57,32 @@ public class TemplateCompiler {
         }
     }
 
-    public static Template compile(VirtualFile file) {
-        return compile(file.relativePath(), file.contentAsString());
+    public static Template compile(String key, String source) {
+        try {
+
+            try {
+                extensionsClassnames.clear();
+                List<Class> extensionsClasses = Play.classloader.getAssignableClasses(JavaExtensions.class);
+                for (Class extensionsClass : extensionsClasses) {
+                    extensionsClassnames.add(extensionsClass.getName());
+                }
+            } catch (Throwable e) {
+                //
+            }
+
+            Template template = new Template(key, source);
+            long start = System.currentTimeMillis();
+            new Compiler().hop(template);
+            Logger.trace("%sms to parse template %s", System.currentTimeMillis() - start, key);
+            for(PlayPlugin plugin : Play.plugins) {
+            	plugin.onTemplateCompilation(template);
+            }
+            return template;
+        } catch (PlayException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
     }
 
     public static class Compiler {

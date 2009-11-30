@@ -71,9 +71,13 @@ public class TemplateLoader {
         return templates.get(key);
     }
 
+    public static void cleanCompiledCache() {
+        // nothing to do in this version
+    }
+
     /**
      * Load a template
-     * @param path The path of the template (ex: Application/index.html) or the key of a stored template
+     * @param path The path of the template (ex: Application/index.html)
      * @return The executable template
      */
     public static Template load(String path) {
@@ -88,13 +92,7 @@ public class TemplateLoader {
                 break;
             }
         }
-
-        // If template not found try loading a cached template with a key(path)
-        if (template == null) {
-            template = templates.get(path);
-        }
-
-        // If template still not found try loading a virtual file
+        //TODO: remove ?
         if (template == null) {
             VirtualFile tf = Play.getVirtualFile(path);
             if (tf != null && tf.exists()) {
@@ -102,11 +100,13 @@ public class TemplateLoader {
             }
         }
 
+        if (template == null) {
+            template = templates.get(path);
+        } else {
+            throw new TemplateNotFoundException(path);
+        }
+        
         return template;
-    }
-
-    public static void cleanCompiledCache() {
-        // nothing to do in this version
     }
 
     /**
