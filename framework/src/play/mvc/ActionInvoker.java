@@ -88,7 +88,8 @@ public class ActionInvoker {
                 Controller.class.getDeclaredField("renderArgs").set(null, Scope.RenderArgs.current());
                 Controller.class.getDeclaredField("validation").set(null, Java.invokeStatic(Validation.class, "current"));
             }
-            
+
+            ControllerInstrumentation.stopActionCall();
             for (PlayPlugin plugin : Play.plugins) {
                 plugin.beforeActionInvocation(actionMethod);
             }
