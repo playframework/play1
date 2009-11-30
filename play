@@ -149,8 +149,8 @@ try:
 			
 	# ~~~~~~~~~~~~~~~~~ Override id
 	for a in remaining_args:
-		if a.find('--id=') == 0:
-			play_id = a[5:]
+		if a.find('--%') == 0:
+			play_id = a[3:]
 
 	if play_command == 'test' or play_command == 'auto-test':
 		play_id = 'test'

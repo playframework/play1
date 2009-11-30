@@ -147,7 +147,6 @@ public class JPASupport implements Serializable {
                     }
                     File file = Params.current().get(name + "." + field.getName(), File.class);
                     if (file != null && file.exists() && file.length() > 0) {
-                        params.remove(name + "." + field.getName());
                         fileAttachment.set(Params.current().get(name + "." + field.getName(), File.class));
                         fileAttachment.filename = file.getName();
                     } else {
@@ -157,6 +156,7 @@ public class JPASupport implements Serializable {
                             bw.set(field.getName(), o, null);
                         }
                     }
+                    params.remove(name + "." + field.getName());
                 }
             }
             // Then bind
