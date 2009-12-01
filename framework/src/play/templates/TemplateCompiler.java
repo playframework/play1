@@ -44,7 +44,32 @@ public class TemplateCompiler {
             Template template = new Template(name, source);
             long start = System.currentTimeMillis();
             new Compiler().hop(template);
-            Logger.trace("%sms to parse template %s", System.currentTimeMillis() - start, file.relativePath());
+            Logger.trace("%sms to parse template %s", System.currentTimeMillis() - start, name);
+            return template;
+        } catch (PlayException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
+    }
+
+	public static Template compile(String key, String source) {
+        try {
+
+            try {
+                extensionsClassnames.clear();
+                List<Class> extensionsClasses = Play.classloader.getAssignableClasses(JavaExtensions.class);
+                for (Class extensionsClass : extensionsClasses) {
+                    extensionsClassnames.add(extensionsClass.getName());
+                }
+            } catch (Throwable e) {
+                //
+            }
+
+            Template template = new Template(key, source);
+            long start = System.currentTimeMillis();
+            new Compiler().hop(template);
+            Logger.trace("%sms to parse template %s", System.currentTimeMillis() - start, key);
             return template;
         } catch (PlayException e) {
             throw e;
