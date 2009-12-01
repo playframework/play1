@@ -66,7 +66,7 @@ class IamADeveloper(unittest.TestCase):
         response = browser.open('http://localhost:9000/')
         self.assert_(waitFor(self.play, "Application 'YOP' is now started !"))
         self.assert_(browser.viewing_html())
-        self.assert_(browser.title() == 'Home')
+        self.assert_(browser.title() == 'Your application is ready !')
         
         html = response.get_data()
         self.assert_(html.count('Your application is ready !'))
@@ -86,14 +86,14 @@ class IamADeveloper(unittest.TestCase):
         
         response = browser.back()
         self.assert_(browser.viewing_html())
-        self.assert_(browser.title() == 'Home')
+        self.assert_(browser.title() == 'Your application is ready !')
         
         # Refresh
         step('Refresh home')
         
         response = browser.reload()
         self.assert_(browser.viewing_html())
-        self.assert_(browser.title() == 'Home')        
+        self.assert_(browser.title() == 'Your application is ready !')        
         html = response.get_data()
         self.assert_(html.count('Your application is ready !'))
         
@@ -142,7 +142,7 @@ class IamADeveloper(unittest.TestCase):
         edit(app, 'app/controllers/Application.java', 8, '        render();')
         response = browser.reload()
         self.assert_(browser.viewing_html())
-        self.assert_(browser.title() == 'Home')        
+        self.assert_(browser.title() == 'Your application is ready !')        
         html = response.get_data()
         self.assert_(html.count('Your application is ready !'))
 
@@ -151,7 +151,7 @@ class IamADeveloper(unittest.TestCase):
         
         response = browser.reload()
         self.assert_(browser.viewing_html())
-        self.assert_(browser.title() == 'Home')        
+        self.assert_(browser.title() == 'Your application is ready !')        
         html = response.get_data()
         self.assert_(html.count('Your application is ready !'))
         
