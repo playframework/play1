@@ -109,6 +109,7 @@ Add instant power to your application by enabling one of these modules.
 # "Security":secure
 # "Search":search
 # "Spring support":spring
+# "Guice support":guice
 # "Siena":siena
 # "Extended CSS":ecss
 # "Google App Engine":gae
