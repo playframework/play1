@@ -92,18 +92,19 @@ public class TemplateLoader {
                 break;
             }
         }
+
+		if (template == null) {
+            template = templates.get(path);
+        }
+
         //TODO: remove ?
         if (template == null) {
             VirtualFile tf = Play.getVirtualFile(path);
             if (tf != null && tf.exists()) {
                 template = TemplateLoader.load(tf);
-            }
-        }
-
-        if (template == null) {
-            template = templates.get(path);
-        } else {
-            throw new TemplateNotFoundException(path);
+            } else {
+				throw new TemplateNotFoundException(path);
+			}
         }
         
         return template;
