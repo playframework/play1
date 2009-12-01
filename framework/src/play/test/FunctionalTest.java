@@ -17,13 +17,11 @@ import play.mvc.Http.Response;
  */
 public abstract class FunctionalTest extends BaseTest {
 
-    @Before
-    public void before() {
+    public static void before() {
         new FakeInvocation().before();
     }
 
-    @After
-    public void after() {
+    public static void after() {
         new FakeInvocation().after();
         new FakeInvocation()._finally();
     }
@@ -146,11 +144,14 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     public static void makeRequest(final Request request, final Response response) {
+        before();
         ActionInvoker.invoke(request, response);
         try {
             response.out.flush();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
+        } finally {
+            after();
         }
     }
 
