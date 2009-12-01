@@ -213,7 +213,7 @@ public abstract class CRUD extends Controller {
             } else {
                 q += (where != null ? " where " + where : "");
             }
-            Query query = JPA.getEntityManager().createQuery(q);
+            Query query = JPA.em().createQuery(q);
             if (search != null && !search.equals("") && q.indexOf("?1") != -1) {
                 query.setParameter(1, "%" + search.toLowerCase() + "%");
             }
@@ -240,7 +240,7 @@ public abstract class CRUD extends Controller {
                 order = "ASC";
             }
             q += " order by " + orderBy + " " + order;
-            Query query = JPA.getEntityManager().createQuery(q);
+            Query query = JPA.em().createQuery(q);
             if (search != null && !search.equals("") && q.indexOf("?1") != -1) {
                 query.setParameter(1, "%" + search.toLowerCase() + "%");
             }
@@ -267,7 +267,7 @@ public abstract class CRUD extends Controller {
         }
 
         public JPASupport findById(Object id) {
-            Query query = JPA.getEntityManager().createQuery("from " + entityClass.getName() + " where id = ?");
+            Query query = JPA.em().createQuery("from " + entityClass.getName() + " where id = ?");
             try {
                 // TODO: I think we need to type of direct bind -> primitive and object binder
                 query.setParameter(1, play.data.binding.Binder.directBind(id + "", play.db.jpa.JPASupport.findKeyType(entityClass)));

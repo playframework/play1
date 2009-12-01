@@ -20,6 +20,8 @@ import zipfile
 # ~~~~~~~~~
 # Utilities
 
+toKill = None
+
 def replaceAll(file, searchExp, replaceExp):
 	replaceExp = replaceExp.replace('\\', '\\\\')
 	searchExp = searchExp.replace('$', '\\$')
@@ -147,8 +149,8 @@ try:
 			
 	# ~~~~~~~~~~~~~~~~~ Override id
 	for a in remaining_args:
-		if a.find('--id=') == 0:
-			play_id = a[5:]
+		if a.find('--%') == 0:
+			play_id = a[3:]
 
 	if play_command == 'test' or play_command == 'auto-test':
 		play_id = 'test'
@@ -342,11 +344,14 @@ try:
 	# ~~~~~~~~~~~~~~~~~~~~~~ [new] Create a new application
 	if play_command == 'new' or play_command == 'new,run':
 		withModules = []
+		application_name = None
 		try:
-			optlist, args = getopt.getopt(remaining_args, '', ['with='])
+			optlist, args = getopt.getopt(remaining_args, '', ['with=', 'name='])
 			for o, a in optlist:
 				if o in ('--with'):
 					withModules = a.split(',')
+				if o in ('--name'):
+				    application_name = a
 		except getopt.GetoptError, err:
 			print "~ %s" % str(err)
 			print "~ Sorry, unrecognized option"
@@ -357,7 +362,8 @@ try:
 			print "~"
 			sys.exit(-1)
 		print "~ The new application will be created in %s" % os.path.normpath(application_path)
-		application_name = raw_input("~ What is the application name? ")
+		if application_name is None:
+		    application_name = raw_input("~ What is the application name? ")
 		shutil.copytree(os.path.join(play_base, 'resources/application-skel'), application_path)
 		check_application()
 		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%APPLICATION_NAME%', application_name)
@@ -878,11 +884,19 @@ try:
 		shutil.copytree(os.path.join(play_base, 'resources/eclipse'), eclipse)
 		shutil.copytree(os.path.join(play_base, 'resources/eclipse/.settings'), dotSettings)
 		replaceAll(dotProject, r'%PROJECT_NAME%', application_name)
+		
+		playJarPath = os.path.join(play_base, 'framework','play.jar')
+		playSourcePath = os.path.dirname(playJarPath)
+		if os.name == 'nt':
+			playSourcePath=playSourcePath.replace('\\','/').capitalize()
 
 		cpXML = ""
 		for el in classpath:
 			if not os.path.basename(el) == "conf":
-				cpXML += '<classpathentry kind="lib" path="%s" />' % os.path.normpath(el)
+				if el == playJarPath:
+					cpXML += '<classpathentry kind="lib" path="%s" sourcepath="%s" />\n\t' % (os.path.normpath(el) , playSourcePath)
+				else:
+					cpXML += '<classpathentry kind="lib" path="%s" />\n\t' % os.path.normpath(el)
 		replaceAll(dotClasspath, r'%PROJECTCLASSPATH%', cpXML)
 
 		if len(modules):
@@ -948,8 +962,6 @@ try:
 
 except KeyboardInterrupt:
 	print '~ ...'
-	sys.exit(0)
-
-	
+	sys.exit(0)	
 
 

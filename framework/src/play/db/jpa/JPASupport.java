@@ -133,8 +133,8 @@ public class JPASupport implements Serializable {
                                     Validation.addError(name+"."+field.getName(), "validation.notFound", _id);
                                 }
                             }
-                        }
-                        bw.set(field.getName(), o, l);
+                            bw.set(field.getName(), o, l);
+                        }                        
                     } else {
                         String[] ids = params.get(name + "." + field.getName() + "@id");
                         if(ids == null) {
@@ -179,6 +179,7 @@ public class JPASupport implements Serializable {
                             bw.set(field.getName(), o, null);
                         }
                     }
+                    params.remove(name + "." + field.getName());
                 }
             }
             // Then bind
@@ -645,6 +646,11 @@ public class JPASupport implements Serializable {
                     if (attachment != null) {
                         attachment.model = this;
                         attachment.name = field.getName();
+                    } else {
+                        attachment = new FileAttachment();
+                        attachment.model = this;
+                        attachment.name = field.getName();
+                        field.set(this, attachment);
                     }
                 } catch (Exception ex) {
                     throw new UnexpectedException(ex);

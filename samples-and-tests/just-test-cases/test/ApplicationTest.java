@@ -14,5 +14,11 @@ public class ApplicationTest extends FunctionalTest {
         assertCharset("utf-8", response);
     }
     
+    @Test
+    public void testSimpleStatusCode() {
+        Response response = GET("/application/simplestatuscode");
+        assertStatus(204, response);
+    }
+    
 }
 

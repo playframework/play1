@@ -18,6 +18,22 @@ public class Bottle extends Model {
     @Required
     public String name2;
     
+    public Bottle() {
+    }
+    
+    public Bottle(String name1) {
+        this.name1 = name1;
+    }
+    
+    public Bottle(String name1, String name2) {
+        this.name1 = name1;
+        this.name2 = name2;
+    }
+    
+    public String toString() {
+        return name1+"-"+name2;
+    }
+    
     static class BottleCheck extends Check {
         
         public boolean isSatisfied(Object validatedObject, Object value) {

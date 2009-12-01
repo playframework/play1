@@ -205,8 +205,13 @@
             <and><os family="unix"/></and>
         </condition>
         
-        <echo message="Using ${basedir}/../play${playExtension}" />
+        <echo message="Testing development lifecycle (wait ...)" />
+
+        <exec executable="${basedir}/../samples-and-tests/i-am-a-developer/tests.py" failonerror="true">
+        </exec>
         
+        <echo message="Using ${basedir}/../play${playExtension}" />
+
         <antcall target="play-test">
             <param name="testAppPath" value="${basedir}/../samples-and-tests/just-test-cases"/>
         </antcall>

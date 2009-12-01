@@ -1,0 +1,12 @@
+#{selenium 'Test the template tricks'}
+
+	open('@{Application.dynamicClassBinding()}')
+	assertTextPresent('null-null - yop-null - kiki-coco')
+	
+	open('@{Application.dynamicClassBinding(true)}')
+	assertTextPresent('Template execution error')
+	assertTextPresent('In /app/views/Application/dynamicClassBinding.html (around line 4)')
+	assertTextPresent('Could not find matching constructor for: models.Bottle')
+	assertTextPresent('(java.lang.Integer, java.lang.String)')
+
+#{/selenium}

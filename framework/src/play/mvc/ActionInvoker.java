@@ -29,6 +29,7 @@ import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.libs.MimeTypes;
+import play.mvc.results.NoResult;
 import play.utils.Java;
 import play.mvc.results.NotFound;
 import play.mvc.results.Ok;
@@ -101,7 +102,8 @@ public class ActionInvoker {
                 Controller.class.getDeclaredField("renderArgs").set(null, Scope.RenderArgs.current());
                 Controller.class.getDeclaredField("validation").set(null, Validation.current());
             }
-            
+
+            ControllerInstrumentation.stopActionCall();
             for (PlayPlugin plugin : Play.plugins) {
                 plugin.beforeActionInvocation(actionMethod);
             }
@@ -203,6 +205,8 @@ public class ActionInvoker {
                 if(actionResult != null) {
                     throw actionResult;
                 }
+                
+                throw new NoResult();
                 
             } catch (IllegalAccessException ex) {
                 throw ex;

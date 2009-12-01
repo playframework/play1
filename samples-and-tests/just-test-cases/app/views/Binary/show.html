@@ -1,0 +1,21 @@
+<h1>${user.username}</h1>
+
+<img src="@{showAvatar(user.id)}" id="avatar" onload="a()"/>
+
+<p id="o">no image</p>
+<p>Filename is: ${user.avatar.filename}</p>
+
+<script>
+	var a = function() {
+		var img = document.getElementById('avatar')
+		document.getElementById('o').innerHTML = (img.width + 'x' + img.height)
+	}
+</script>
+
+#{form @save(), enctype:'multipart/form-data'}
+	<input type="hidden" name="user.id" value="${user.id}">
+	<input type="text" id="username" name="user.username" value="${user.username}">
+	<input type="file" id="avatar" name="user.avatar">
+	<input type="checkbox" id="delete" name="user.avatar_delete_" value="true">
+	<input type="submit">
+#{/form}
