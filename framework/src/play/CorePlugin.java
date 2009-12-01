@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import play.Play.Mode;
 import play.libs.Crypto;
 import play.mvc.Http.Header;
 import play.mvc.Http.Request;
@@ -46,7 +47,7 @@ public class CorePlugin extends PlayPlugin {
             response.status = 404;
             return true;
         }
-        if (request.path.equals("/@kill")) {
+        if (Play.mode == Mode.DEV && request.path.equals("/@kill")) {
             System.out.println("@KILLED");
             System.exit(0);
         }

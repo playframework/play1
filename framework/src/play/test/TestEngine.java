@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import org.junit.Assert;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -25,10 +26,15 @@ public class TestEngine {
     static ExecutorService executor = Executors.newCachedThreadPool();
 
     public static List<Class> allUnitTests() {
-        List<Class> classes = Play.classloader.getAssignableClasses(UnitTest.class);
+        List<Class> classes = Play.classloader.getAssignableClasses(Assert.class);
         for(ListIterator<Class> it = classes.listIterator(); it.hasNext(); ) {
-            if(Modifier.isAbstract(it.next().getModifiers())) {
+            Class c = it.next();
+            if(Modifier.isAbstract(c.getModifiers())) {
                 it.remove();
+            } else {
+                if(FunctionalTest.class.isAssignableFrom(c)) {
+                    it.remove();
+                }
             }
         }
         return classes;

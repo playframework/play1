@@ -320,7 +320,131 @@ class IamADeveloper(unittest.TestCase):
         self.assert_(browser.title() == 'Hello world app')        
         html = response.get_data()
         self.assert_(html.count('Hello Guillaume !!'))
+
+        # Create a new route
+        step('Create a new route')
         
+        insert(app, 'conf/routes', 7, "GET      /hello          Hello.hello")
+        try:
+            response = browser.open('http://localhost:9000/hello')
+            self.fail()
+        except urllib2.HTTPError, error:
+            self.assert_(browser.viewing_html())
+            self.assert_(browser.title() == 'Not found')
+            html = ''.join(error.readlines())
+            self.assert_(html.count('GET /hello'))
+        
+        # Create the new controller
+        step('Create the new controller')
+        time.sleep(1)
+        
+        create(app, 'app/controllers/Hello.java')
+        insert(app, 'app/controllers/Hello.java', 1, "package controllers;")
+        insert(app, 'app/controllers/Hello.java', 2, "import play.mvc.*;")
+        insert(app, 'app/controllers/Hello.java', 3, "public class Hello extends Application {")
+        insert(app, 'app/controllers/Hello.java', 4, "  public static void hello() {")
+        insert(app, 'app/controllers/Hello.java', 5, '      renderText("Hello");')
+        insert(app, 'app/controllers/Hello.java', 6, '  }')
+        insert(app, 'app/controllers/Hello.java', 7, '}')
+        
+        # Retry
+        step('Retry')
+        
+        browser.reload()
+        self.assert_(not browser.viewing_html())   
+        html = response.get_data()
+        self.assert_(html.count('Hello'))
+        
+        # Rename the Hello controller
+        step('Rename the Hello controller')
+        time.sleep(1)
+        
+        rename(app, 'app/controllers/Hello.java', 'app/controllers/Hello2.java')
+        edit(app, 'app/controllers/Hello2.java', 3, "public class Hello2 extends Application {")
+        
+        try:
+            browser.reload()
+            self.fail()
+        except urllib2.HTTPError, error:
+            self.assert_(browser.viewing_html())
+            self.assert_(browser.title() == 'Not found')
+
+        # Refresh again
+        step('Refresh again')
+            
+        try:
+            browser.reload()
+            self.fail()
+        except urllib2.HTTPError, error:
+            self.assert_(browser.viewing_html())
+            self.assert_(browser.title() == 'Not found')            
+
+        # Correct the routes file
+        step('Correct the routes file')
+        time.sleep(1)
+
+        edit(app, 'conf/routes', 7, "GET      /hello          Hello2.hello")
+
+        browser.reload()
+        self.assert_(not browser.viewing_html())   
+        html = response.get_data()
+        self.assert_(html.count('Hello'))        
+
+        # Retry
+        step('Retry')
+        
+        browser.reload()
+        self.assert_(not browser.viewing_html())   
+        html = response.get_data()
+        self.assert_(html.count('Hello'))
+        
+        # Rename again
+        step('Rename again')
+        time.sleep(1)
+        
+        rename(app, 'app/controllers/Hello2.java', 'app/controllers/Hello3.java')
+        edit(app, 'conf/routes', 7, "GET      /hello          Hello3.hello")
+        
+        try:
+            browser.reload()
+            self.fail()
+        except urllib2.HTTPError, error:
+            self.assert_(browser.viewing_html())
+            self.assert_(browser.title() == 'Application error')
+            html = ''.join(error.readlines())
+            self.assert_(html.count('Compilation error'))
+            self.assert_(html.count('/app/controllers/Hello3.java</strong> could not be compiled'))
+            self.assert_(html.count('The public type Hello2 must be defined in its own file'))
+            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Hello3.java around line 3)'))
+            self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
+            
+        # Refresh again
+        step('Refresh again')
+
+        try:
+            browser.reload()
+            self.fail()
+        except urllib2.HTTPError, error:
+            self.assert_(browser.viewing_html())
+            self.assert_(browser.title() == 'Application error')
+            html = ''.join(error.readlines())
+            self.assert_(html.count('Compilation error'))
+            self.assert_(html.count('/app/controllers/Hello3.java</strong> could not be compiled'))
+            self.assert_(html.count('The public type Hello2 must be defined in its own file'))
+            self.assert_(waitFor(self.play, 'ERROR ~'))
+            self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Hello3.java around line 3)'))
+            self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
+            
+        # Fix it
+        step('Fix it')
+        
+        edit(app, 'app/controllers/Hello3.java', 3, "public class Hello3 extends Application {")
+        browser.reload()
+        self.assert_(not browser.viewing_html())   
+        html = response.get_data()
+        self.assert_(html.count('Hello'))
+
         # Stop the application
         step('Kill play')
         
@@ -396,6 +520,12 @@ def insert(app, file, line, text):
     source.close()
     os.utime(fname, None)
 
+def create(app, file):
+    fname = os.path.join(app, file)
+    source = open(fname, 'w')
+    source.close()
+    os.utime(fname, None)
+
 def delete(app, file, line):
     fname = os.path.join(app, file)
     source = open(fname, 'r')
@@ -406,6 +536,9 @@ def delete(app, file, line):
     source.write(''.join(lines))
     source.close()
     os.utime(fname, None)    
+
+def rename(app, fro, to):
+    os.rename(os.path.join(app, fro), os.path.join(app, to))
 
 if __name__ == '__main__':
     unittest.main()
