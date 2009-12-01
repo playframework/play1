@@ -47,9 +47,9 @@ public class JavaExtensions {
     }
 
     public static String[] remove(String[] array, String s) {
-        List temp = new ArrayList(Arrays.asList(array));
+        List<String> temp = new ArrayList<String>(Arrays.asList(array));
         temp.remove(s);
-        return (String[]) temp.toArray(new String[temp.size()]);
+        return temp.toArray(new String[temp.size()]);
     }
 
     public static String toString(Closure closure) {

@@ -199,7 +199,7 @@ public class ActionInvoker {
                 monitor.stop();
                 monitor = null;
                 
-                // Ok, rethrow the original action result
+                // OK, re-throw the original action result
                 if(actionResult != null) {
                     throw actionResult;
                 }
@@ -213,7 +213,7 @@ public class ActionInvoker {
                 if (ex.getTargetException() instanceof Result) {
                     throw (Result) ex.getTargetException();
                 }
-                // Rethrow the enclosed exception
+                // Re-throw the enclosed exception
                 if (ex.getTargetException() instanceof PlayException) {
                     throw (PlayException) ex.getTargetException();
                 }
@@ -231,7 +231,7 @@ public class ActionInvoker {
                 plugin.onActionInvocationResult(result);
             }
 
-            // Ok there is a result to apply
+            // OK there is a result to apply
             // Save session & flash scope now
 
             Scope.Session.current().save();
@@ -345,7 +345,7 @@ public class ActionInvoker {
         for (int i = 0; i < method.getParameterTypes().length; i++) {
 
             Class type = method.getParameterTypes()[i];
-            Map<String, String[]> params = new HashMap();
+            Map<String, String[]> params = new HashMap<String, String[]>();
             if(type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {
                 params.put(paramsNames[i], Scope.Params.current().getAll(paramsNames[i]));
             } else {
