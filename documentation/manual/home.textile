@@ -8,7 +8,7 @@ h2. <a name="a">Hot stuff</a>
 
 We will describe here the new features progress
 
-# "Now the future -- supporting Scala":scala
+# "Now the future - supporting Scala":scala
 # "Some functional programming techniques, brought to Java":lambdaj
 
 

@@ -8,6 +8,8 @@ Then you can write all or parts of your play application using scala. You can of
 
 p(note). We are in very very active development on this stuff. You can try it for now as an experimental feature. Don't expect to write a complete play application in Scala right now.
 
+For a quick overview of the scala support, you can watch this "Scala screencast":http://vimeo.com/7731173
+
 h2. <a>Create a new application, with Scala support</a>
 
 You can automatically create a scala ready application, by using the **--with** option of the **play new** command. Just try:
@@ -21,11 +23,9 @@ bc. package controllers
 import play._
 import play.mvc._
  
-object Application extends ControllerObject {
+object Application extends Controller {
     
-    def index() {
-        render()
-    }
+    def index = render()
     
 }
 
@@ -33,11 +33,7 @@ It is very close to the Java version of the default Application controller.
 
 Now just run the application as usual using **play run** and it will display the standard welcome page. Now just edit the **Application.scala** file to replace the **render()** call:
 
-bc. ...
-def index() {
-    renderText("Hello scala !")
-}
-...
+bc. def index = "Hello scala !"
 
 Refresh the page, and see the magic. 
 
@@ -45,8 +41,69 @@ As always, if you make a mistake, play will just show you the error in a perfect
 
 !images/scala-error!
 
+h2. <a>Direct return types</a>
+
+As shown above, for simple action methods you can directly use the inferred return type to send the action result. For example using a String:
+
+bc. def index = "<h1>Hello world</h1>"
+
+And you can even use the built-in XML support to write XHTML in a literal way:
+
+bc. def index = <h1>Hello world</h1>
+
+If the return type looks like a binary stream, play will automatically use **renderBinary()**. So generating a captcha image using the built-in Captcha helper can be written as:
+
+bc. def index = Images.captcha
+
+h2. <a>Action parameters, and scala default arguments</a>
+
+You can declare some action parameter the same way you do it in Java:
+
+bc. def index(name: String) = <h1>Hello {name}</h1>
+
+To big plus of scala is the ability to define some default values to these parameters:
+
+bc. def index(name: String = "Guest") = <h1>Hello {name}</h1>
+
+This way if the **name** HTTP parameter is missing, play will use the default argument value.
+
+h2. <a>Controllers composition using traits</a>
+
+A controller can use several traits to combine several interceptor.
+
+Let's define a Secure trait:
+
+bc. package controllers
+ 
+import play.__
+import play.mvc.__ 
+ 
+trait Secure extends Controller {
+	
+	@Before
+	def check {
+		session("user") match {
+			name: String => info("Logged as %s", name)
+			_ => Security.login
+		}
+	}
+	
+}
+
+And you can them use it in the Application controller:
+
+bc. package controllers
+ 
+class Application extends Controller with Secure {
+	
+	def index = "Hello world"
+	
+}
+
 h2. <a>Tutorial</a>
 
-p(note). We are currently writing a version of the "play tutorial":guide1 for scala. Read "The play tutorial (Scala version)":scguide1.
+p(note). We are currently writing a version of the "play tutorial":guide1 for scala. 
+ 
+Read "The play tutorial (Scala version)":scguide1.
 
 
