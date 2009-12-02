@@ -31,7 +31,7 @@ import play.utils.Java;
 import play.mvc.results.NotFound;
 
 /**
- * Invoke an action after an HTTP request
+ * Invoke an action after an HTTP request.
  */
 public class ActionInvoker {
 
