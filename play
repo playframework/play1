@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Play! command line script www.playframework.org/
+# Play command line script www.playframework.org/
 
 import sys
 import os
