@@ -327,12 +327,15 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         }
 
         servletResponse.setStatus(response.status);
+        if (!response.headers.containsKey("cache-control")) {
+            servletResponse.setHeader("Cache-Control", "no-cache");
+        }
         Map<String, Http.Header> headers = response.headers;
         for (Map.Entry<String, Http.Header> entry : headers.entrySet()) {
             Http.Header hd = entry.getValue();
             String key = entry.getKey();
             for (String value : hd.values) {
-                servletResponse.addHeader(key, value);
+                servletResponse.setHeader(key, value);
             }
         }
 
@@ -348,9 +351,6 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                 c.setMaxAge(cookie.maxAge);
             }
             servletResponse.addCookie(c);
-        }
-        if (!response.headers.containsKey("cache-control")) {
-            servletResponse.setHeader("Cache-Control", "no-cache");
         }
 
         // Content

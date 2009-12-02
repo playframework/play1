@@ -9,7 +9,7 @@
 	</div>
 
 	<div id="crudListTable">
-		#{crud.table fields:superadmin ? ['title', 'company', 'postedAt', 'online'] : ['title', 'postedAt', 'online']}
+		#{crud.table fields:superadmin ? ['title', 'company', 'postedAt', 'online'] : ['title', 'postedAt', 'online'], sort: ['title', 'company', 'postedAt']}
 			#{crud.custom 'postedAt'}
 				${object.postedAt.since()}
 			#{/crud.custom}

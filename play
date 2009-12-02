@@ -258,9 +258,10 @@ try:
 			java_path = os.path.normpath("%s/bin/java" % os.environ['JAVA_HOME'])
 
 		for a in remaining_args:
-			if a.find('--') == 0:
+			if a.find('--with') == 0:
 				remaining_args.remove(a)
-
+			if a.find('--%') == 0:
+				remaining_args.remove(a)
 		# ~~~~~~~~~~~~~~~~~~~~~~ Read some configuration from conf/application.conf
 		java_args = remaining_args[:]
 
