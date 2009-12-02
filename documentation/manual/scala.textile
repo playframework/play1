@@ -94,7 +94,7 @@ And you can them use it in the Application controller:
 
 bc. package controllers
  
-class Application extends Controller with Secure {
+object Application extends Controller with Secure {
 	
 	def index = "Hello world"
 	
