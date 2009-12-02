@@ -14,4 +14,9 @@ public @interface Catch {
 
     Class[] value() default {};
 
+    /**
+     * Interceptor priority (0 is high priority)
+     */
+    int priority() default 0;
+
 }

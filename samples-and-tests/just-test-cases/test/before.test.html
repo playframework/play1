@@ -15,5 +15,9 @@
 	// Try to call a private method
 	open('/usingbefore/isPrivate')
 	assertTextPresent('Not found')
+	
+	// Try the priority of @Before
+	open('/usingbeforewithpriority/index')
+	assertTextPresent('yupyopyipyapdone')
 
 #{/selenium}

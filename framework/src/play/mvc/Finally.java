@@ -16,4 +16,10 @@ public @interface Finally {
      * Does not intercept these actions
      */
     String[] unless() default {};
+
+    /**
+     * Interceptor priority (0 is high priority)
+     */
+    int priority() default 0;
+    
 }

@@ -2,22 +2,25 @@ package play.mvc;
 
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
-import java.io.ByteArrayInputStream;
 
 import java.io.File;
 import java.io.InputStream;
-import play.mvc.Router.Route;
-import play.mvc.results.Result;
+import java.io.ByteArrayInputStream;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
-
 import java.util.Map;
+import java.util.Collections;
+import java.util.Comparator;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
+import play.mvc.Router.Route;
+import play.mvc.results.Result;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.data.binding.Binder;
@@ -38,7 +41,7 @@ import play.mvc.results.RenderText;
 import play.utils.Utils;
 
 /**
- * Invoke an action after an HTTP request
+ * Invoke an action after an HTTP request.
  */
 public class ActionInvoker {
 
@@ -118,6 +121,14 @@ public class ActionInvoker {
             try {
                 // @Before
                 List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);
+                Collections.sort(befores, new Comparator<Method>() {
+
+                    public int compare(Method m1, Method m2) {
+                        Before before1 = m1.getAnnotation(Before.class);
+                        Before before2 = m2.getAnnotation(Before.class);
+                        return before1.priority() - before2.priority();
+                    }
+                });
                 ControllerInstrumentation.stopActionCall();
                 for (Method before : befores) {
                     String[] unless = before.getAnnotation(Before.class).unless();
@@ -161,6 +172,14 @@ public class ActionInvoker {
                         // @Catch
                         Object[] args = new Object[] { ex.getTargetException() };
                         List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
+                        Collections.sort(catches, new Comparator<Method>() {
+
+                            public int compare(Method m1, Method m2) {
+                                Catch catch1 = m1.getAnnotation(Catch.class);
+                                Catch catch2 = m2.getAnnotation(Catch.class);
+                                return catch1.priority() - catch2.priority();
+                            }
+                        });
                         ControllerInstrumentation.stopActionCall();
                         for (Method mCatch : catches) {
                             Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
@@ -179,6 +198,14 @@ public class ActionInvoker {
                 
                 // @After
                 List<Method> afters = Java.findAllAnnotatedMethods(Controller.getControllerClass(), After.class);
+                Collections.sort(afters, new Comparator<Method>() {
+
+                    public int compare(Method m1, Method m2) {
+                        After after1 = m1.getAnnotation(After.class);
+                        After after2 = m2.getAnnotation(After.class);
+                        return after1.priority() - after2.priority();
+                    }
+                });
                 ControllerInstrumentation.stopActionCall();
                 for (Method after : afters) {
                     String[] unless = after.getAnnotation(After.class).unless();
@@ -251,6 +278,14 @@ public class ActionInvoker {
             if(Controller.getControllerClass() != null) {
                 try {
                     List<Method> allFinally = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Finally.class);
+                    Collections.sort(allFinally, new Comparator<Method>() {
+
+                        public int compare(Method m1, Method m2) {
+                            Finally finally1 = m1.getAnnotation(Finally.class);
+                            Finally finally2 = m2.getAnnotation(Finally.class);
+                            return finally1.priority() - finally2.priority();
+                        }
+                    });
                     ControllerInstrumentation.stopActionCall();
                     for (Method aFinally : allFinally) {
                         String[] unless = aFinally.getAnnotation(Finally.class).unless();
