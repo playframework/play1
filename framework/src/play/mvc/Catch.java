@@ -13,5 +13,6 @@ import java.lang.annotation.Target;
 public @interface Catch { 
 
     Class[] value() default {};
+    int priority() default 0;
 
 }

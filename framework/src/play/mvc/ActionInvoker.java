@@ -7,6 +7,8 @@ import play.mvc.results.Result;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,20 +38,20 @@ public class ActionInvoker {
     public static void invoke(Http.Request request, Http.Response response) {
         Monitor monitor = null;
         try {
-            if(!Play.started) {
+            if (!Play.started) {
                 return;
             }
-            
+
             Http.Request.current.set(request);
             Http.Response.current.set(response);
-            
+
             Scope.Params.current.set(new Scope.Params());
             Scope.RenderArgs.current.set(new Scope.RenderArgs());
             Scope.Session.current.set(Scope.Session.restore());
             Scope.Flash.current.set(Scope.Flash.restore());
 
             // 1. Route and resolve format if not already done
-            if(request.action == null) {
+            if (request.action == null) {
                 for (PlayPlugin plugin : Play.plugins) {
                     plugin.routeRequest(request);
                 }
@@ -69,7 +71,7 @@ public class ActionInvoker {
             } catch (ActionNotFoundException e) {
                 throw new NotFound(String.format("%s action not found", e.getAction()));
             }
-            
+
             Logger.trace("------- %s", actionMethod);
 
             // 3. Prepare request params
@@ -95,12 +97,20 @@ public class ActionInvoker {
             }
 
             // Monitoring
-            monitor = MonitorFactory.start(request.action+"()");
-            
+            monitor = MonitorFactory.start(request.action + "()");
+
             // 5. Invoke the action
             try {
                 // @Before
                 List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);
+                Collections.sort(befores, new Comparator<Method>() {
+
+                    public int compare(Method m1, Method m2) {
+                        Before before1 = m1.getAnnotation(Before.class);
+                        Before before2 = m2.getAnnotation(Before.class);
+                        return before1.priority() - before2.priority();
+                    }
+                });
                 ControllerInstrumentation.stopActionCall();
                 for (Method before : befores) {
                     String[] unless = before.getAnnotation(Before.class).unless();
@@ -132,16 +142,26 @@ public class ActionInvoker {
                         actionResult = (Result) ex.getTargetException();
                     } else {
                         // @Catch
-                        Object[] args = new Object[] { ex.getTargetException() };
+                        Object[] args = new Object[]{ex.getTargetException()};
                         List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
+                        Collections.sort(catches, new Comparator<Method>() {
+
+                            public int compare(Method m1, Method m2) {
+                                Catch catch1 = m1.getAnnotation(Catch.class);
+                                Catch catch2 = m2.getAnnotation(Catch.class);
+                                return catch1.priority() - catch2.priority();
+                            }
+                        });
                         ControllerInstrumentation.stopActionCall();
-                        for (Method mCatch : catches) if (Modifier.isStatic(mCatch.getModifiers())) {
-                            Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
-                            for (Class exception : exceptions) {
-                                if (exception.isInstance(args[0])) {
-                                    mCatch.setAccessible(true);
-                                    Java.invokeStatic(mCatch, args);
-                                    break;
+                        for (Method mCatch : catches) {
+                            if (Modifier.isStatic(mCatch.getModifiers())) {
+                                Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
+                                for (Class exception : exceptions) {
+                                    if (exception.isInstance(args[0])) {
+                                        mCatch.setAccessible(true);
+                                        Java.invokeStatic(mCatch, args);
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -149,9 +169,17 @@ public class ActionInvoker {
                         throw ex;
                     }
                 }
-                
+
                 // @After
                 List<Method> afters = Java.findAllAnnotatedMethods(Controller.getControllerClass(), After.class);
+                Collections.sort(afters, new Comparator<Method>() {
+
+                    public int compare(Method m1, Method m2) {
+                        After after1 = m1.getAnnotation(After.class);
+                        After after2 = m2.getAnnotation(After.class);
+                        return after1.priority() - after2.priority();
+                    }
+                });
                 ControllerInstrumentation.stopActionCall();
                 for (Method after : afters) {
                     String[] unless = after.getAnnotation(After.class).unless();
@@ -172,17 +200,17 @@ public class ActionInvoker {
                         }
                     }
                 }
-                
+
                 monitor.stop();
                 monitor = null;
-                
+
                 // Ok, rethrow the original action result
-                if(actionResult != null) {
+                if (actionResult != null) {
                     throw actionResult;
                 }
-                
+
                 throw new NoResult();
-                
+
             } catch (IllegalAccessException ex) {
                 throw ex;
             } catch (IllegalArgumentException ex) {
@@ -221,11 +249,19 @@ public class ActionInvoker {
             for (PlayPlugin plugin : Play.plugins) {
                 plugin.afterActionInvocation();
             }
-            
+
             // @Finally
-            if(Controller.getControllerClass() != null) {
+            if (Controller.getControllerClass() != null) {
                 try {
                     List<Method> allFinally = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Finally.class);
+                    Collections.sort(allFinally, new Comparator<Method>() {
+
+                        public int compare(Method m1, Method m2) {
+                            Finally finally1 = m1.getAnnotation(Finally.class);
+                            Finally finally2 = m2.getAnnotation(Finally.class);
+                            return finally1.priority() - finally2.priority();
+                        }
+                    });
                     ControllerInstrumentation.stopActionCall();
                     for (Method aFinally : allFinally) {
                         String[] unless = aFinally.getAnnotation(Finally.class).unless();
@@ -246,13 +282,13 @@ public class ActionInvoker {
                             }
                         }
                     }
-                } catch(InvocationTargetException ex) {
+                } catch (InvocationTargetException ex) {
                     StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex.getTargetException());
                     if (element != null) {
                         throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(), ex.getTargetException());
                     }
                     throw new JavaExecutionException(Http.Request.current().action, ex);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     throw new UnexpectedException("Exception while doing @Finally", e);
                 }
             }
@@ -262,7 +298,7 @@ public class ActionInvoker {
         } catch (Exception e) {
             throw new UnexpectedException(e);
         } finally {
-            if(monitor != null) {
+            if (monitor != null) {
                 monitor.stop();
             }
         }
@@ -279,9 +315,9 @@ public class ActionInvoker {
             String controller = fullAction.substring(0, fullAction.lastIndexOf("."));
             String action = fullAction.substring(fullAction.lastIndexOf(".") + 1);
             controllerClass = Play.classloader.getClassIgnoreCase(controller);
-            if(!ControllerSupport.class.isAssignableFrom(controllerClass)) {
+            if (!ControllerSupport.class.isAssignableFrom(controllerClass)) {
                 throw new ActionNotFoundException(fullAction, new Exception("class " + controller + " does not extend play.mvc.Controller"));
-                
+
             }
             actionMethod = Java.findActionMethod(action, controllerClass);
             if (actionMethod == null) {
@@ -294,9 +330,9 @@ public class ActionInvoker {
         }
         return new Object[]{controllerClass, actionMethod};
     }
-    
+
     public static Object[] getActionMethodArgs(Method method) throws Exception {
-        String[] paramsNames = Java.parameterNames(method);      
+        String[] paramsNames = Java.parameterNames(method);
         if (paramsNames == null && method.getParameterTypes().length > 0) {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }
@@ -304,7 +340,7 @@ public class ActionInvoker {
         for (int i = 0; i < method.getParameterTypes().length; i++) {
             Class type = method.getParameterTypes()[i];
             Map<String, String[]> params = new HashMap();
-            if(type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {
+            if (type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {
                 params.put(paramsNames[i], Scope.Params.current().getAll(paramsNames[i]));
             } else {
                 params.putAll(Scope.Params.current().all());
