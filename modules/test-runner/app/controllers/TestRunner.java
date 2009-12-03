@@ -61,6 +61,14 @@ public class TestRunner extends Controller {
         }
         if (test.endsWith(".test.html")) {
             File testFile = Play.getFile("test/" + test);
+            if (!testFile.exists()) {
+                for(VirtualFile root : Play.roots) {
+                    File moduleTestFile = Play.getFile(root.relativePath()+"/test/" + test);
+                    if(moduleTestFile.exists()) {
+                        testFile = moduleTestFile;
+                    }
+                }
+            }
             if (testFile.exists()) {
                 Template testTemplate = TemplateLoader.load(VirtualFile.open(testFile));
                 Map<String, Object> options = new HashMap<String, Object>();

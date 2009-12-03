@@ -18,6 +18,7 @@ import org.junit.runner.notification.RunListener;
 import play.Play;
 import play.Logger;
 import play.PlayPlugin;
+import play.vfs.VirtualFile;
 
 /**
  * Run application tests
@@ -50,12 +51,20 @@ public class TestEngine {
         }
         return classes;
     }
-    
-    public static List<String> allSeleniumTests() {
-        List<String> results = new ArrayList<String>();
-        File testDir = Play.getFile("test");
+
+    public static List<String> seleniumTests(String testPath, List<String> results) {
+        File testDir = Play.getFile(testPath);
         if(testDir.exists()) {
             scanForSeleniumTests(testDir, results);
+        }
+        return results;
+    }
+
+    public static List<String> allSeleniumTests() {
+        List<String> results = new ArrayList<String>();
+        seleniumTests("test", results);
+        for(VirtualFile root : Play.roots) {
+            seleniumTests(root.relativePath()+"/test", results);
         }
         return results;
     }
