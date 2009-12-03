@@ -1,16 +1,12 @@
 #{selenium 'Just test the simple scenario'}
 
-	open('/databinding/showDefaultDateFormat/1902-01-24/')
-        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
-        open('/databinding/showDefaultDateFormat?date=1902-01-24')
-        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
-
         open('/databinding/changeLanguage/fr/')
         open('/databinding/showLocaleDateFormat/1902-24-01/')
         assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
         open('/databinding/showLocaleDateFormat?date=1902-24-01')
         assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
 
+        <!-- No locale is defined for ch, so it uses the default locale date format from application.conf -->
         open('/databinding/changeLanguage/ch/')
         open('/databinding/showDefaultLocaleDateFormat/1902-01-24/')
         assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
@@ -25,9 +21,11 @@
         open('/databinding/showList/01/02/04/')
         assertTextPresent('[01, 02, 04]')
 
+        <!-- Force the locale -->
+        open('/databinding/changeLanguage/en/')
         open('/databinding/showCalendar/24-Jan-1902/')
         assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
         open('/databinding/showCalendar?cal=24-Jan-1902')
         assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
-	
+
 #{/selenium}	

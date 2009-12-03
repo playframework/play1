@@ -1,5 +1,6 @@
 package play.i18n;
 
+import java.util.Locale;
 import play.Logger;
 import play.Play;
 import play.mvc.Http.Request;
@@ -89,4 +90,20 @@ public class Lang {
             set(Play.langs.get(0));
         }
     }
+
+    /**
+     *
+     * @return the default locale if the Locale cannot be found otherwise the locale
+     * associated to the current Lang.
+     */
+    public static Locale getLocale() {
+        String lang = get();
+        for (Locale locale : Locale.getAvailableLocales()) {
+            if (locale.getLanguage().equals(lang)) {
+                return locale;
+            }
+        }
+        return Locale.getDefault();
+    }
+
 }

@@ -22,9 +22,9 @@ public class DateBinder implements SupportedType<Date> {
         try {
             return new SimpleDateFormat(I18N.getDateFormat()).parse(value);
         } catch (ParseException e) {
+             throw new IllegalArgumentException("Cannot convert [" + value + "] to a Date: " + e.toString());
             // Left empty. 
             // return Utils.AlternativeDateFormat.getDefaultFormatter().parse(value);
         }
-        throw new RuntimeException("Oops");
     }
 }
