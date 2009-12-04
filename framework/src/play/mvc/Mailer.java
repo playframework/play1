@@ -180,7 +180,7 @@ public class Mailer implements LocalVariablesSupport {
         // -           -> text/html
         String contentType = (String) infos.get().get("contentType");
         String bodyHtml = null;
-        String bodyText = null;
+        String bodyText = "";
         try {
             Template templateHtml = TemplateLoader.load(templateName + ".html");
             bodyHtml = templateHtml.render(templateHtmlBinding);

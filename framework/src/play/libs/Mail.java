@@ -240,7 +240,7 @@ public class Mail {
 
         InternetAddress[] addressTo = new InternetAddress[recipients.length];
         for (int i = 0; i < recipients.length; i++) {
-            addressTo[i] = recipients[i] instanceof InternetAddress ? (InternetAddress) recipients[i] : new InternetAddress(recipients[i].toString());
+            addressTo[i] = recipients[i] instanceof InternetAddress ? (InternetAddress) recipients[i] : new InternetAddress(recipients[i].toString().trim());
         }
         msg.setRecipients(javax.mail.Message.RecipientType.TO, addressTo);
 
