@@ -33,12 +33,12 @@
     // Should get an error
     assertTextPresent('no comments')
     assertTextPresent('Author is required')
-    type('author', 'Mex')
+    type('author', 'Me')
     type('code', 'XXXX')
     clickAndWait('css=input[type=submit]')
     
     // Check
-    assertTextPresent('Thanks for posting Me')
+    assertTextPresent('Thanks for posting Mex')
     assertTextPresent('1 comment')
     assertTextPresent('Hello')
 #{/selenium}
