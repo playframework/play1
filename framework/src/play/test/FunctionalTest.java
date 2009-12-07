@@ -5,8 +5,6 @@ import java.io.UnsupportedEncodingException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.regex.Pattern;
-import org.junit.After;
-import org.junit.Before;
 import play.Invoker.Invocation;
 import play.mvc.ActionInvoker;
 import play.mvc.Http.Request;
@@ -17,11 +15,11 @@ import play.mvc.Http.Response;
  */
 public abstract class FunctionalTest extends BaseTest {
 
-    public static void before() {
+    static void before() {
         new FakeInvocation().before();
     }
 
-    public static void after() {
+    static void after() {
         new FakeInvocation().after();
         new FakeInvocation()._finally();
     }
