@@ -368,6 +368,7 @@ try:
 		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%APPLICATION_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%SECRET_KEY%', secretKey())
 		replaceAll(os.path.join(application_path, 'resources/web.xml'), r'%APPLICATION_NAME%', application_name)
+		replaceAll(os.path.join(application_path, 'resources/web.xml'), r'%PLAY_ID%', play_id)
 		for m in withModules:
 			replaceAll(os.path.join(application_path, 'conf/application.conf'), r'#module.%s' % m, 'module.%s' % m)
 		print "~"
