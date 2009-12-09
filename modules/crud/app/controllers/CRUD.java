@@ -306,7 +306,7 @@ public abstract class CRUD extends Controller {
         
         public static class ObjectField {
 
-            public String type;
+            public String type = "unknow";
             public String name;
             public String relation;
             public boolean multiple;
