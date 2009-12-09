@@ -367,6 +367,7 @@ try:
 		check_application()
 		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%APPLICATION_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%SECRET_KEY%', secretKey())
+		replaceAll(os.path.join(application_path, 'resources/web.xml'), r'%APPLICATION_NAME%', application_name)
 		for m in withModules:
 			replaceAll(os.path.join(application_path, 'conf/application.conf'), r'#module.%s' % m, 'module.%s' % m)
 		print "~"
@@ -452,7 +453,11 @@ try:
 		else:
 			os.mkdir(war_path)
 		if not os.path.exists(os.path.join(war_path, 'WEB-INF')): os.mkdir(os.path.join(war_path, 'WEB-INF'))
-		shutil.copyfile(os.path.join(play_base, 'resources/war/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
+		# check if the user has defined a web.xml in his resources dir
+		if not os.path.exists(os.path.join(application_path, 'resources/web.xml')):
+			shutil.copyfile(os.path.join(play_base, 'resources/war/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
+		else:
+			shutil.copyfile(os.path.join(application_path, 'resources/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
 		application_name = readConf('application.name')
 		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%APPLICATION_NAME%', application_name)
 		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%PLAY_ID%', play_id)
