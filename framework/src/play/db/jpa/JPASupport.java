@@ -211,7 +211,13 @@ public class JPASupport implements Serializable {
         }
         // Cascade save
         try {
-            for (Field field : this.getClass().getDeclaredFields()) {
+            Set<Field> fields = new HashSet<Field>();
+            Class clazz = this.getClass();
+            while (!clazz.equals(Model.class)) {
+                Collections.addAll(fields, clazz.getDeclaredFields());
+                clazz = clazz.getSuperclass();
+            }
+            for (Field field : fields) {
                 field.setAccessible(true);
                 if (Modifier.isTransient(field.getModifiers())) {
                     continue;
