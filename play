@@ -452,7 +452,8 @@ try:
 		else:
 			os.mkdir(war_path)
 		if not os.path.exists(os.path.join(war_path, 'WEB-INF')): os.mkdir(os.path.join(war_path, 'WEB-INF'))
-		shutil.copyfile(os.path.join(play_base, 'resources/war/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
+		if not os.path.exists(os.path.join(war_path, 'WEB-INF/web.xml')):
+		    shutil.copyfile(os.path.join(play_base, 'resources/war/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
 		application_name = readConf('application.name')
 		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%APPLICATION_NAME%', application_name)
 		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%PLAY_ID%', play_id)
