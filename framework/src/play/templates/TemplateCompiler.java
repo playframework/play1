@@ -57,7 +57,7 @@ public class TemplateCompiler {
         }
     }
 
-	public static Template compile(String key, String source) {
+    public static Template compile(String key, String source) {
         try {
 
             try {
@@ -74,6 +74,10 @@ public class TemplateCompiler {
             long start = System.currentTimeMillis();
             new Compiler().hop(template);
             Logger.trace("%sms to parse template %s", System.currentTimeMillis() - start, key);
+
+            for(PlayPlugin plugin : Play.plugins) {
+                plugin.onTemplateCompilation(template);
+            }
 
             return template;
         } catch (PlayException e) {

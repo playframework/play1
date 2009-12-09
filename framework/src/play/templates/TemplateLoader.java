@@ -17,8 +17,8 @@ import play.exceptions.TemplateNotFoundException;
 public class TemplateLoader {
 
     protected static Map<String, Template> templates = new HashMap<String, Template>();
-	
-	/**
+
+    /**
      * Load a template from a virtual file
      * @param file A VirtualFile
      * @return The executable template
@@ -44,7 +44,7 @@ public class TemplateLoader {
         return templates.get(key);
     }
 
-	/**
+    /**
      * Load a template from a String
      * @param key A unique identifier for the template, used for retreiving a cached template
      * @param source The template source, leave as null, if you want to get the cached template
@@ -63,9 +63,11 @@ public class TemplateLoader {
                 templates.put(key, TemplateCompiler.compile(key, source));
             }
         }
+
         if (templates.get(key) == null) {
             throw new TemplateNotFoundException(key);
         }
+
         return templates.get(key);
     }
 
@@ -90,9 +92,11 @@ public class TemplateLoader {
                 break;
             }
         }
-		if (template == null) {
+        
+        if (template == null) {
             template = templates.get(path);
         }
+
         //TODO: remove ?
         if (template == null) {
             VirtualFile tf = Play.getVirtualFile(path);
@@ -102,6 +106,7 @@ public class TemplateLoader {
                 throw new TemplateNotFoundException(path);
             }
         }
+        
         return template;
     }
 
