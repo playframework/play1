@@ -213,7 +213,7 @@ public class JPASupport implements Serializable {
         try {
             Set<Field> fields = new HashSet<Field>();
             Class clazz = this.getClass();
-            while (!clazz.equals(Model.class)) {
+            while (!clazz.equals(JPASupport.class)) {
                 Collections.addAll(fields, clazz.getDeclaredFields());
                 clazz = clazz.getSuperclass();
             }
