@@ -1,12 +1,27 @@
 package play.test;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+
+import org.apache.commons.httpclient.methods.multipart.FilePart;
+import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
+import org.apache.commons.httpclient.methods.multipart.Part;
+import org.apache.commons.httpclient.methods.multipart.StringPart;
+import org.apache.commons.httpclient.params.HttpMethodParams;
+
 import play.Invoker.Invocation;
 import play.mvc.ActionInvoker;
+import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
@@ -14,6 +29,9 @@ import play.mvc.Http.Response;
  * Application tests support
  */
 public abstract class FunctionalTest extends BaseTest {
+	public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+	public static final String MULTIPART_FORM_DATA="multipart/form-data";
+
 
     static void before() {
         new FakeInvocation().before();
@@ -25,13 +43,17 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     // Requests
+    public static Response GET(String url) {
+    	return GET(newRequest(), url);
+    }
+    
     /**
      * sends a GET request to the application under tests.
+     * @param request
      * @param url relative url such as <em>"/products/1234"</em>
      * @return the response
      */
-    public static Response GET(String url) {
-        Request request = newRequest();
+    public static Response GET(Request request, String url) {
         String path = "";
         String queryString = "";
         if (url.contains("?")) {
@@ -45,27 +67,30 @@ public abstract class FunctionalTest extends BaseTest {
         request.path = path;
         request.querystring = queryString;
         request.body = new ByteArrayInputStream(new byte[0]);
-        //
-        Response response = newResponse();
-        //
-        makeRequest(request, response);
-        //
-        return response;
-    }
-    
-    public static Response POST(String url) {
-        return POST(url, "application/x-www-form-urlencoded", "");
+        return makeRequest(request);
     }
 
+    // convenience methods
+    public static Response POST(String url) {
+        return POST(url, APPLICATION_X_WWW_FORM_URLENCODED, "");
+    }
+
+    public static Response POST(String url, String contenttype, String body){
+    	return POST(url, contenttype, new ByteArrayInputStream(body.getBytes()));
+    }
+
+    public static Response POST(String url, String contenttype, InputStream body) {
+    	return POST(new Request(), url, contenttype, body);
+    }
     /**
      * Sends a POST request to the application under tests.
+     * @param request
      * @param url relative url such as <em>"/products/1234"</em>
      * @param contenttype content-type of the request
      * @param body posted data
      * @return the response
      */
-    public static Response POST(String url, String contenttype, String body) {
-        Request request = newRequest();
+    public static Response POST(Request request, String url, String contenttype, InputStream body) {
         String path = "";
         String queryString = "";
         if (url.contains("?")) {
@@ -79,24 +104,67 @@ public abstract class FunctionalTest extends BaseTest {
         request.url = url;
         request.path = path;
         request.querystring = queryString;
-        request.body = new ByteArrayInputStream(body.getBytes());
-        //
-        Response response = newResponse();
-        //
-        makeRequest(request, response);
-        //
-        return response;
+        request.body = body;
+        return makeRequest(request);
     }
+    
+    /**
+     * Sends a POST request to the application under tests as a multipart form. Designed for file upload testing.
+     * @param url relative url such as <em>"/products/1234"</em>
+     * @param parameters map of parameters to be posted
+     * @param files map containing files to be uploaded
+     * @return the response
+     */
+    public static Response POST(String url, Map<String, String> parameters, Map<String, File> files){
+		return POST(newRequest(),url,parameters, files);
+    }
+    
+    public static Response POST(Request request, String url, Map<String,String> parameters, Map<String, File> files){
+		List<Part> parts = new ArrayList<Part>();
+		
+		for (String key : parameters.keySet()) {
+			parts.add(new StringPart(key, parameters.get(key)));
+		}
+		
+		for (String key : files.keySet()){
+			Part filePart;
+			try {
+				filePart = new FilePart(key, files.get(key));
+			} catch (FileNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+			parts.add(filePart);
+		}
+		
+		MultipartRequestEntity requestEntity = new MultipartRequestEntity(parts.toArray(new Part[]{}), new HttpMethodParams());
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			requestEntity.writeRequest(baos);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		InputStream body = new ByteArrayInputStream(baos.toByteArray());
+		String contentType = requestEntity.getContentType();
+		Http.Header header = new Http.Header();
+		header.name = "content-type";
+		header.values = Arrays.asList(new String[] { contentType });
+		request.headers.put("content-type", header);
+		return POST(request, url, MULTIPART_FORM_DATA, body);
+    }
+    
 
+    public static Response PUT(String url, String contenttype, String body){
+    	return PUT(newRequest(), url, contenttype, body);
+    }
     /**
      * Sends a PUT request to the application under tests.
+     * @param request
      * @param url relative url such as <em>"/products/1234"</em>
      * @param contenttype content-type of the request
      * @param body data to send
      * @return the response
      */
-    public static Response PUT(String url, String contenttype, String body) {
-        Request request = newRequest();
+    public static Response PUT(Request request, String url, String contenttype, String body) {
         String path = "";
         String queryString = "";
         if (url.contains("?")) {
@@ -111,18 +179,20 @@ public abstract class FunctionalTest extends BaseTest {
         request.path = path;
         request.querystring = queryString;
         request.body = new ByteArrayInputStream(body.getBytes());
-        Response response = newResponse();
-        makeRequest(request, response);
-        return response;
+        return makeRequest(request);
     }
 
+    
+    public static Response DELETE(String url){
+    	return DELETE(newRequest(), url);
+    }
     /**
      * Sends a DELETE request to the application under tests.
+     * @param request
      * @param url relative url eg. <em>"/products/1234"</em>
      * @return the response
      */
-    public static Response DELETE(String url) {
-        Request request = newRequest();
+    public static Response DELETE(Request request, String url) {
         String path = "";
         String queryString = "";
         if (url.contains("?")) {
@@ -136,9 +206,7 @@ public abstract class FunctionalTest extends BaseTest {
         request.path = path;
         request.querystring = queryString;
         request.body = new ByteArrayInputStream(new byte[0]);
-        Response response = newResponse();
-        makeRequest(request, response);
-        return response;
+        return makeRequest(request);
     }
 
     public static void makeRequest(final Request request, final Response response) {
@@ -152,6 +220,13 @@ public abstract class FunctionalTest extends BaseTest {
             after();
         }
     }
+    
+	public static Response makeRequest(final Request request){
+		Response response = newResponse();
+		makeRequest(request, response);
+		return response;
+	}
+
 
     public static Response newResponse() {
         Response response = new Response();
