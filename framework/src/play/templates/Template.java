@@ -72,6 +72,11 @@ public class Template {
         this.source = source;
     }
 
+    public Template(String source) {
+        this.name = Codec.UUID();
+        this.source = source;
+    }
+
     public static class TClassLoader extends GroovyClassLoader {
 
         public TClassLoader() {
