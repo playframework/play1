@@ -5,6 +5,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import play.Play;
 import play.mvc.Http.Response;
 import play.mvc.results.Redirect;
 import play.test.Fixtures;
@@ -49,7 +50,7 @@ public class BinaryTest extends FunctionalTest {
 		Map<String,String> parameters= new HashMap<String,String>();
 		parameters.put("user.username", "username");
 		Map<String, File> files= new HashMap<String, File>();
-		File f = new File("test/fond1.png");
+		File f = Play.getFile("test/fond1.png");
 		assertTrue(f.exists());
 		files.put("user.avatar", f);
 		Response uploadResponse = POST(url, parameters, files);
