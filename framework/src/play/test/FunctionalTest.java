@@ -18,8 +18,10 @@ import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.junit.BeforeClass;
 
 import play.Invoker.Invocation;
+import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.mvc.ActionInvoker;
 import play.mvc.Http;
 import play.mvc.Http.Request;
@@ -32,6 +34,13 @@ public abstract class FunctionalTest extends BaseTest {
 	public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 	public static final String MULTIPART_FORM_DATA="multipart/form-data";
 
+	/**
+	 * Triggers Redirect when calling controller.action directly.
+	 */
+	@BeforeClass
+	public static void redirectInsteadOfCall(){
+		ControllerInstrumentation.stopActionCall();
+	}
 
     static void before() {
         new FakeInvocation().before();
@@ -74,13 +83,21 @@ public abstract class FunctionalTest extends BaseTest {
     public static Response POST(String url) {
         return POST(url, APPLICATION_X_WWW_FORM_URLENCODED, "");
     }
-
-    public static Response POST(String url, String contenttype, String body){
-    	return POST(url, contenttype, new ByteArrayInputStream(body.getBytes()));
+    
+    public static Response POST(Request request, String url){
+    	return POST(request, url, APPLICATION_X_WWW_FORM_URLENCODED, "");
     }
 
+    public static Response POST(String url, String contenttype, String body){
+    	return POST(newRequest(), url, contenttype, body);
+    }
+
+    public static Response POST(Request request, String url, String contenttype, String body){
+    	return POST(request, url, contenttype, new ByteArrayInputStream(body.getBytes()));
+    }
+    
     public static Response POST(String url, String contenttype, InputStream body) {
-    	return POST(new Request(), url, contenttype, body);
+    	return POST(newRequest(), url, contenttype, body);
     }
     /**
      * Sends a POST request to the application under tests.
