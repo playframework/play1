@@ -148,27 +148,39 @@ public class JavaExtensions {
     }
 
     public static String since(Date date) {
+        return since(date, false);
+    }
+    public static String since(Date date, Boolean stopAtMonth) {
         Date now = new Date();
         if (now.before(date)) {
             return "";
         }
         long delta = (now.getTime() - date.getTime()) / 1000;
         if (delta < 60) {
-            return Messages.get("since.seconds", delta);
+            return Messages.get("since.seconds", delta, pluralize(delta));
         }
         if (delta < 60 * 60) {
-            return Messages.get("since.minutes", delta / 60);
+            long minutes = delta / 60;
+            return Messages.get("since.minutes", minutes, pluralize(minutes));
         }
         if (delta < 24 * 60 * 60) {
-            return Messages.get("since.hours", delta / (60 * 60));
+            long hours = delta / (60 * 60);
+            return Messages.get("since.hours", hours, pluralize(hours));
         }
         if (delta < 30 * 24 * 60 * 60) {
-            return Messages.get("since.days", delta / (24 * 60 * 60));
+            long days = delta / (24 * 60 * 60);
+            return Messages.get("since.days", days, pluralize(days));
+        }
+        if (stopAtMonth)
+        {
+            return asdate(date.getTime(), Messages.get("since.format"));
         }
         if (delta < 365 * 24 * 60 * 60) {
-            return Messages.get("since.months", delta / (30 * 24 * 60 * 60));
+            long months = delta / (30 * 24 * 60 * 60);
+            return Messages.get("since.months", months, pluralize(months));
         }
-        return Messages.get("since.years", delta / (365 * 24 * 60 * 60));
+        long years = delta / (365 * 24 * 60 * 60);
+        return Messages.get("since.years", years, pluralize(years));
     }
 
     public static String asdate(Long timestamp, String pattern) {

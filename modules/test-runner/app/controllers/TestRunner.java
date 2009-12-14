@@ -42,7 +42,7 @@ public class TestRunner extends Controller {
         }
         if (test.endsWith(".class")) {
             Play.getFile("test-result").mkdir();
-            Thread.sleep(250);
+            java.lang.Thread.sleep(250);
             TestEngine.TestResults results = TestEngine.run(test.substring(0, test.length() - 6));
             response.status = results.passed ? 200 : 500;
             Template resultTemplate = TemplateLoader.load("TestRunner/results.html");

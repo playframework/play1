@@ -3,6 +3,8 @@ package play.libs;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import org.apache.commons.io.FileUtils;
 
 /**
  * Files utils
@@ -69,5 +71,14 @@ public class Files {
             }
         }
         return (path.delete());
+    }
+
+    public static boolean copyDir(File from, File to) {
+        try {
+            FileUtils.copyDirectory(from, to);
+            return true;
+        } catch(IOException e) {
+            return false;
+        }
     }
 }

@@ -62,9 +62,14 @@ public class FileAttachment {
         return f != null || get() != null;
     }
     
-    static File getStore() {
+    public static File getStore() {
         String name = Play.configuration.getProperty("attachments.path", "attachments");
-        File store = Play.getFile(name);
+        File store = null;
+        if(new File(name).isAbsolute()) {
+            store = new File(name);
+        } else {
+            store = Play.getFile(name);
+        }
         if(!store.exists()) {
             store.mkdirs();
         }

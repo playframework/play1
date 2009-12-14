@@ -102,7 +102,7 @@
             ${play.utils.Utils.open(exception.sourceFile, line_index+from) ? ('<a href="' + play.utils.Utils.open(exception.sourceFile, line_index+from) + '">').raw() : ''}
                 <div class="line ${exception.lineNumber == line_index+from ? 'error':''}">
                     <span class="lineNumber">${line_index+from}:</span>
-                    <pre>&nbsp;${line}</pre>
+                    <pre>&nbsp;${line.escapeHtml()}</pre>
                 </div>
             ${play.utils.Utils.open(exception.sourceFile, line_index+from) ? '</a>'.raw() : ''}
          #{/list}

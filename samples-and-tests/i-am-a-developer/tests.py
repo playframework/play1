@@ -29,7 +29,7 @@ class IamADeveloper(unittest.TestCase):
         self.assert_(waitFor(self.play, 'The new application will be created'))
         self.assert_(waitFor(self.play, 'OK, the application is created'))
         self.assert_(waitFor(self.play, 'Have fun!'))
-        self.play.terminate()
+        self.play.wait()
         
         self.assert_(os.path.exists(os.path.join(self.working_directory, 'yop')))
         self.assert_(os.path.exists(os.path.join(self.working_directory, 'yop/app')))

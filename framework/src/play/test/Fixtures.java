@@ -1,5 +1,6 @@
 package play.test;
 
+import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -16,16 +17,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+
+import org.apache.commons.io.FileUtils;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.scanner.ScannerException;
+
 import play.Logger;
 import play.Play;
 import play.db.DB;
 import play.db.DBPlugin;
+import play.db.jpa.FileAttachment;
 import play.db.jpa.JPA;
 import play.db.jpa.JPASupport;
 import play.exceptions.YAMLException;
@@ -211,4 +217,14 @@ public class Fixtures {
             }
         }
     }
+    
+    public static void deleteAttachmentsDir(){
+    	File atttachmentsDir = FileAttachment.getStore();
+		try{
+			if (atttachmentsDir.exists()) FileUtils.deleteDirectory(atttachmentsDir);
+		}catch(Exception e){
+			throw new RuntimeException(e);
+		}
+    }
+    
 }

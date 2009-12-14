@@ -77,6 +77,10 @@
 		#{if field.type == 'enum'}
 			#{crud.enumField name:field.name, value:(currentObject ? currentObject[field.name] : null), property:field /}
 		#{/if}
+		
+		#{if field.type == 'unknown'}
+			#{crud.unknownField name:field.name, value:(currentObject ? currentObject[field.name] : null) /}
+		#{/if}
 
     <span class="crudHelp">
         &{am}

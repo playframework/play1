@@ -284,8 +284,6 @@ try:
 		if application_mode == 'prod':
 			java_args.append('-server')
 
-		java_args.append('-Dcom.sun.management.jmxremote')
-
 		# The Java stuff
 		java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, 'play.server.Server']
 
@@ -487,7 +485,8 @@ try:
 		else:
 			os.mkdir(war_path)
 		if not os.path.exists(os.path.join(war_path, 'WEB-INF')): os.mkdir(os.path.join(war_path, 'WEB-INF'))
-		shutil.copyfile(os.path.join(play_base, 'resources/war/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
+		if not os.path.exists(os.path.join(war_path, 'WEB-INF/web.xml')):
+		    shutil.copyfile(os.path.join(play_base, 'resources/war/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
 		application_name = readConf('application.name')
 		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%APPLICATION_NAME%', application_name)
 		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%PLAY_ID%', play_id)

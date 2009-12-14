@@ -1,10 +1,11 @@
 # For use in JavaExtensions.since tag
-since.seconds = %s seconds ago
-since.minutes = %s minutes ago
-since.hours   = %s hours ago
-since.days    = %s days ago
-since.months  = %s months ago
-since.years   = %s years ago
+since.seconds = %s second%s ago
+since.minutes = %s minute%s ago
+since.hours   = %s hour%s ago
+since.days    = %s day%s ago
+since.months  = %s month%s ago
+since.years   = %s year%s ago
+since.format  = MMM d, yyyy
 
 # Validation messages
 validation.required=Required

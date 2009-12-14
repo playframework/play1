@@ -9,7 +9,7 @@ import play.mvc.Http.Response;
  */
 public class Redirect extends Result {
 
-    String url;
+    public String url;
     public int code=302;
     
     public Redirect(String url) {
