@@ -100,6 +100,105 @@ object Application extends Controller with Secure {
 	
 }
 
+
+h2. <a>How to define and access Models</a>
+
+Models can be defined not only in java but in scala as well. Unfortunately, due to the differences between the two langauges the Model API somewhat differs from the java version.
+
+h3. Main differences
+
+* fields are passed as contructor arguments
+* each and every class needs to extend Model[T] 
+* helper methods should be defined in the companion object
+* companion objects need to extend Model[T]
+here is an example:
+
+bc. @Entity
+class User(
+  //fields
+  @Email
+  @Required
+  var email: String,
+  @Required
+  var password: String,
+  var fullname: String
+) extends Model[User] {
+    //instance methods
+    var isAdmin = false
+    override def toString = email
+}
+//finder methods
+object User extends Model[User] {
+    def connect(email: String, password: String) = {
+        User.find("byEmailAndPassword", email, password).first
+    }
+}
+
+h3. <a>Running queries against Scala Models from Scala classes</a>
+
+The following methods are available when running queries against scala models:
+
+bc. def count(implicit m: M[T]) = i.count(m)
+def count(q: String, ps: AnyRef*)(implicit m: M[T])  
+def findAll(implicit m: M[T]) 
+def findById(id: Any)(implicit m: M[T]) 
+def findBy(q: String, ps: AnyRef*)(implicit m: M[T]) 
+def find(q: String, ps: AnyRef*)(implicit m: M[T]) 
+def all(implicit m: M[T]) 
+def delete(q: String, ps: AnyRef*)(implicit m: M[T]) 
+def deleteAll(implicit m: M[T]) = 
+def findOneBy(q: String, ps: AnyRef*)(implicit m: M[T]): T 
+def create(name: String, ps: play.mvc.Scope.Params)(implicit m: M[T]): T
+
+As you can see, it's really similar to the java API, so for example to count the number of users, you can just call count on the User class:
+
+bc. User.count
+
+p(note). One known limitation of the Scala Model API is that the *save* method is not working in a chained call fashion, so you always need to execute it on an instance, as you can see it later at the unit testing section
+
+h3. <a>Running queries against Java Models from Scala classes</a>
+
+In certain situations it might be desirable to query models written in java from scala.
+Since java models are not extending from the scala Model trait, Play needs to provide an alternative query interface which comes in the form of *QueryRunner* trait and the corresponding companion object. In order to utilize this feature you either need to import the query methods like
+
+bc. import play.db.jpa.QueryRunner._
+
+or you can mix in the trait
+
+bc. class MyController extends Controller with QueryRunner {...} 
+
+and the API is defined like this:
+
+bc. def count[T](implicit m: M[T]) = i.count(m)
+def count[T](q: String, ps: AnyRef*)(implicit m: M[T])  
+def findAll[T](implicit m: M[T]) 
+def findById[T](id: Any)(implicit m: M[T]) 
+def findBy[T](q: String, ps: AnyRef*)(implicit m: M[T]) 
+def find[T](q: String, ps: AnyRef*)(implicit m: M[T]) 
+def all[T](implicit m: M[T]) 
+def delete[T](q: String, ps: AnyRef*)(implicit m: M[T]) 
+def deleteAll[T](implicit m: M[T]) = 
+def findOneBy[T <: JPASupport](q: String, ps: AnyRef*)(implicit m: M[T]): T 
+def create[T <: JPASupport](name: String, ps: play.mvc.Scope.Params)(implicit m: M[T]): T
+
+
+Using the previous example *User.count* becomes *count[User]* 
+
+
+h2. <a>Unit Testing</a>
+
+ScalaTest support is integrated into Play, so one can easily write unit tests using ScalaTest, for example: 
+
+bc. class SpecStyle extends UnitTest with FlatSpec with ShouldMatchers {
+"Creating a user" should "be succesfull" in {
+  val user = new User("bob@gmail.com", "secret", "Bob")
+  user.save
+  bob = User.find("byEmail", "bob@gmail.com").first
+  bob should not be (null)
+  bob.fullname should be ("Bob")
+ }
+}
+
 h2. <a>Tutorial</a>
 
 p(note). We are currently writing a version of the "play tutorial":guide1 for scala. 

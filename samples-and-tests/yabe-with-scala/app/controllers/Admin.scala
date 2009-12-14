@@ -2,7 +2,6 @@ package controllers
  
 import play._
 import play.mvc._
-import play.db.jpa._
 import play.data.validation._
  
 import models._
@@ -13,19 +12,19 @@ object Admin extends Controller with Defaults {
     @Before
     private def setConnectedUser{
         if(Secure.Security.isConnected()) {
-            val user = find[User]("byEmail", Secure.Security.connected()).first
+            val user = User.find("byEmail", Secure.Security.connected()).first
             renderArgs += "user" -> user.fullname
         }
     }
  
     def index {
-        val posts = find[Post]("author.email", Secure.Security.connected()).fetch
+        val posts = Post.find("author.email", Secure.Security.connected()).fetch
         render(posts)
     }
     
     def form(id: Long) {
         if(id != 0) {
-            val post = findById[Post](id)
+            val post = Post.findById(id)
             render(post)
         }
         render()
@@ -35,11 +34,11 @@ object Admin extends Controller with Defaults {
         var post: Post = null
         if(id == 0) {
             // Create post
-            val author = find[User]("byEmail", Secure.Security.connected()).first;
+            val author = User.find("byEmail", Secure.Security.connected()).first;
             post = new Post(author, title, content)
         } else {
             // Retrieve post
-            post = findById[Post](id)
+            post = Post.findById(id)
             post.title = title
             post.content = content
             post.tags.clear()
@@ -72,7 +71,7 @@ object Security extends Secure.Security {
     
     private def check(profile: String) = {
         profile match {
-            case "admin" => find[User]("byEmail", Secure.Security.connected).first.isAdmin
+            case "admin" => User.find("byEmail", Secure.Security.connected).first.isAdmin
             case _ => false
         }
     }

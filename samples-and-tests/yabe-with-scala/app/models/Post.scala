@@ -21,7 +21,7 @@ class Post(
     @MaxSize(10000)
     var content: String
 
-) extends Model {
+) extends Model[Post] {
     
     @Required
     var postedAt = new Date()  
@@ -33,17 +33,18 @@ class Post(
     var tags: Set[Tag] = new TreeSet[Tag]
     
     def addComment(author: String, content: String) = {
-        val newComment = new Comment(this, author, content).save()
+        val newComment = new Comment(this, author, content)
+        newComment.save  
         comments.add(newComment)
         this
     }
     
     def previous = {
-        find[Post]("postedAt < ? order by postedAt desc", postedAt).first
+        Post.find("postedAt < ? order by postedAt desc", postedAt).first
     }
 
     def next = {
-        find[Post]("postedAt > ? order by postedAt asc", postedAt).first
+        Post.find("postedAt > ? order by postedAt asc", postedAt).first
     }
     
     def tagItWith(name: String) = {
@@ -57,16 +58,13 @@ class Post(
  
 }
 
-object Post {
+object Post extends Model[Post]{
     
     def findTaggedWith(tag: String) = {
-        find[Post]("select distinct p from Post p join p.tags as t where t.name = ?", tag).fetch
+        Post.find("select distinct p from Post p join p.tags as t where t.name = ?", tag).fetch
     }
     
     def findTaggedWith(tags: String*) = {
-        /*find[Po](
-            "select distinct p.id from Post p join p.tags as t where t.name in (:tags) group by p.id having count(t.id) = :size"
-        ).bind("tags", tags).bind("size", tags.length).fetch();*/
         Nil
     }
     

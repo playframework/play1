@@ -18,7 +18,7 @@ class User(
     
     var fullname: String
 
-) extends Model {
+) extends Model[User] {
  
     var isAdmin = false
     
@@ -26,10 +26,10 @@ class User(
  
 }
 
-object User {
+object User extends Model[User] {
     
     def connect(email: String, password: String) = {
-        find[User]("byEmailAndPassword", email, password).first
+        User.find("byEmailAndPassword", email, password).first
     }
     
 }

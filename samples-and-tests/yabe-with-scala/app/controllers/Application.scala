@@ -4,7 +4,6 @@ import play._
 import play.mvc._
 import play.libs._
 import play.cache._
-import play.db.jpa._
 import play.data.validation._
 
 import models._
@@ -22,13 +21,13 @@ trait Defaults extends Controller {
 object Application extends Controller with Defaults {
  
     def index() { 
-        val frontPost = find[Post]("order by postedAt desc").first 
-        val olderPosts = find[Post]("from Post order by postedAt desc").from(1).fetch
+        val frontPost = Post.find("order by postedAt desc").first 
+        val olderPosts = Post.find("from Post order by postedAt desc").from(1).fetch
         render(frontPost, olderPosts)
     }
     
     def show(id: Long) { 
-        val post = findById[Post](id)
+        val post = Post.findById(id)
         val randomID = Codec.UUID
         render(post, randomID)
     }
@@ -40,7 +39,7 @@ object Application extends Controller with Defaults {
         @Required(message="Please type the code") code: String, 
         randomID: String
     ) {
-        val post = findById[Post](postId)
+        val post = Post.findById(postId)
         
         Play.id match {            
             case "test" => // skip validation

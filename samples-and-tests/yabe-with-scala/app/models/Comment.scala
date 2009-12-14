@@ -21,7 +21,7 @@ class Comment(
        @MaxSize(10000)
        var content: String
 
-) extends Model {
+) extends Model[Comment] {
     
     @Required
     var postedAt = new Date()
