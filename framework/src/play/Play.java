@@ -168,10 +168,15 @@ public class Play {
         System.setProperty("play.path", Play.frameworkPath.getAbsolutePath());
         System.setProperty("application.path", Play.applicationPath.getAbsolutePath());
 
-        Logger.info("Starting %s", root.getAbsolutePath());
-
         // Read the configuration file
         readConfiguration();
+
+        // Configure logs
+        Logger.init();
+        String logLevel = configuration.getProperty("application.log", "INFO");
+        Logger.setUp(logLevel);
+
+        Logger.info("Starting %s", root.getAbsolutePath());
 
         if (configuration.getProperty("play.tmp", "tmp").equals("none")) {
             tmpDir = null;
@@ -197,10 +202,6 @@ public class Play {
 
         // Mode
         mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
-
-        // Configure logs
-        String logLevel = configuration.getProperty("application.log", "INFO");
-        Logger.setUp(logLevel);
 
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
