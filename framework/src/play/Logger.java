@@ -51,8 +51,9 @@ public class Logger {
     /**
      * Try to init stuff.
      */
-    static {
-        URL log4jConf = Logger.class.getResource("/log4j.properties");
+    private static void init(){
+		String log4jPath = Play.configuration.getProperty("application.log.path", "/log4j.properties");
+        URL log4jConf = Logger.class.getResource(log4jPath);
         if (log4jConf == null) {
             Properties shutUp = new Properties();
             shutUp.setProperty("log4j.rootLogger", "OFF");
@@ -81,6 +82,7 @@ public class Logger {
      * @param level TRACE,DEBUG,INFO,WARN,ERROR,FATAL
      */
     public static void setUp(String level) {
+    	init();
         if (forceJuli || log4j == null) {
             Logger.juli.setLevel(toJuliLevel(level));
         } else {
