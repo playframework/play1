@@ -708,10 +708,17 @@ try:
 			print "~ Oops. %s is already started! (or delete %s)" % (os.path.normpath(application_path), os.path.normpath(pid_path))
 			print "~"
 			sys.exit(1)
-		sout = open(os.path.join(log_path, 'system.out'), 'w')
+		
+		sysout = readConf('application.log.system.out')
+		sysout = sysout!='false' and sysout!='off'
+		if not sysout:
+		  sout = None
+		else:
+		  sout = open(os.path.join(log_path, 'system.out'), 'w')
 		pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
 		print "~ OK, %s is started" % os.path.normpath(application_path)
-		print "~ output is redirected to %s" % os.path.normpath(os.path.join(log_path, 'system.out'))
+		if sysout:
+		  print "~ output is redirected to %s" % os.path.normpath(os.path.join(log_path, 'system.out'))
 		pid_file = open(pid_path, 'w')
 		pid_file.write(str(pid))
 		print "~ pid is %s" % pid
@@ -750,11 +757,18 @@ try:
 			pid = open(pid_path).readline().strip()
 			os.remove(pid_path)
 			kill(pid)
-		
-		sout = open(os.path.join(log_path, 'system.out'), 'w')
+
+
+		sysout = readConf('application.log.system.out')
+		sysout = sysout!='false' and sysout!='off'
+		if not sysout:
+		  sout = None
+		else:
+		  sout = open(os.path.join(log_path, 'system.out'), 'w')
 		pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
 		print "~ OK, %s is restarted" % os.path.normpath(application_path)
-		print "~ output is redirected to %s" % os.path.normpath(os.path.join(log_path, 'system.out'))
+		if sysout:
+		  print "~ output is redirected to %s" % os.path.normpath(os.path.join(log_path, 'system.out'))
 		pid_file = open(pid_path, 'w')
 		pid_file.write(str(pid))
 		print "~ New pid is %s" % pid
