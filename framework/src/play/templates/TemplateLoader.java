@@ -47,7 +47,7 @@ public class TemplateLoader {
     /**
      * Load a template from a String
      * @param key A unique identifier for the template, used for retreiving a cached template
-     * @param source The template source, leave as null, if you want to get the cached template
+     * @param source The template source
      * @return A Template
      */
     public static Template load(String key, String source) {
@@ -56,23 +56,55 @@ public class TemplateLoader {
             if(template.loadFromCache()) {
                 templates.put(key, template);
             } else {
-                templates.put(key, TemplateCompiler.compile(key, source));
+                templates.put(key, TemplateCompiler.compile(template));
             }
         } else {
+			Template template = new Template(key, source);
             if (Play.mode == Play.Mode.DEV) {
-                templates.put(key, TemplateCompiler.compile(key, source));
+                templates.put(key, TemplateCompiler.compile(template));
             }
         }
-
         if (templates.get(key) == null) {
             throw new TemplateNotFoundException(key);
         }
-
         return templates.get(key);
     }
 
+    /**
+     * Clean the cache for that key
+     * Then load a template from a String
+     * @param key A unique identifier for the template, used for retreiving a cached template
+     * @param source The template source
+     * @return A Template
+     */
+    public static Template load(String key, String source, boolean reload) {
+            cleanCompiledCache(key);
+            return load(key, source);
+    }
+
+    /**
+     * Load template from a String, but don't cache it
+     * @param source The template source
+     * @return A Template
+     */
+    public static Template loadString(String source) {
+            Template template = new Template(source);
+            return TemplateCompiler.compile(template);
+    }
+
+    /**
+     * Cleans the cache for all templates
+     */
     public static void cleanCompiledCache() {
-        // nothing to do in this version
+        templates.clear();
+    }
+
+    /**
+     * Cleans the specified key from the cache
+     * @param key The template key
+     */
+    public static void cleanCompiledCache(String key) {
+        templates.remove(key);
     }
 
     /**
@@ -92,11 +124,9 @@ public class TemplateLoader {
                 break;
             }
         }
-        
-        if (template == null) {
+		if (template == null) {
             template = templates.get(path);
         }
-
         //TODO: remove ?
         if (template == null) {
             VirtualFile tf = Play.getVirtualFile(path);
@@ -106,7 +136,6 @@ public class TemplateLoader {
                 throw new TemplateNotFoundException(path);
             }
         }
-        
         return template;
     }
 
