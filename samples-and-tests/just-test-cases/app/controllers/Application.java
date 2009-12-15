@@ -13,6 +13,24 @@ import utils.*;
 
 public class Application extends Controller {
 
+    // bug
+    public static void aa() {
+        try {
+            int test = 1;
+        } catch (Exception ex) {
+        }
+    }
+    
+    // bug
+    public static void aaa() {
+        try {
+            boolean test = TestUtil.invokeTest("a");
+            Logger.info("test:" + test);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        renderText("IT WORKS");
+    }
 
     public static void index() {
         render();

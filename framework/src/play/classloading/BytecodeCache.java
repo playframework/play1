@@ -90,6 +90,14 @@ public class BytecodeCache {
             fos.write(0);
             fos.write(byteCode);
             fos.close();
+            /*// emit bytecode to standard class layout as well
+            if(!name.contains("/") && !name.contains("{")) {
+                f = new File(Play.tmpDir, "classes/"+(name.replace(".", "/"))+".class");
+                f.getParentFile().mkdirs();
+                fos = new FileOutputStream(f);
+                fos.write(byteCode);
+                fos.close();
+            }*/
             Logger.trace("%s cached", name);
         } catch (Exception e) {
             throw new RuntimeException(e);
