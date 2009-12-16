@@ -5,6 +5,7 @@ import javassist.CtClass;
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.Modifier;
+import javassist.NotFoundException;
 import javassist.bytecode.annotation.Annotation;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
@@ -54,6 +55,21 @@ public class ControllersEnhancer extends Enhancer {
                     break;
                 }
             }
+
+            // Perhaps it is a scala-generated accessor ?
+            if(ctMethod.getName().endsWith("_$eq")) {
+                isHandler = true;
+            } else {
+                if(ctClass.getName().endsWith("$") && ctMethod.getParameterTypes().length == 0) {
+                    try {
+                        ctClass.getField(ctMethod.getName());
+                        isHandler = true;
+                    } catch(NotFoundException e) {
+                        // ok
+                    }
+                }
+            }
+
             if (Modifier.isPublic(ctMethod.getModifiers()) && ((ctClass.getName().endsWith("$") && !ctMethod.getName().contains("$default$")) || (Modifier.isStatic(ctMethod.getModifiers()) && ctMethod.getReturnType().equals(CtClass.voidType))) && !isHandler) {
                 try {
                     ctMethod.insertBefore(
