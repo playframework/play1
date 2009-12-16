@@ -12,7 +12,7 @@ import play.data.binding.SupportedType;
 @Target({ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD, ElementType.TYPE})
 public @interface Bind {
 
-    // This referes to the "profile"
+    // This refers to the "profile"
     String profile() default "*";
     String format() default "yyyy-MM-dd";
     String separator() default ",";

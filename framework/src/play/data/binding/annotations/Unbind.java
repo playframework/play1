@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD, ElementType.TYPE})
 public @interface Unbind {
 
-    // This referes to the "profile"
+    // This refers to the "profile"
     String profile() default "*";
 
 }

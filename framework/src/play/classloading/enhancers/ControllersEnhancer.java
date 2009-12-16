@@ -50,8 +50,8 @@ public class ControllersEnhancer extends Enhancer {
             // Auto-redirect
             boolean isHandler = false;
             for(Annotation a : getAnnotations(ctMethod).getAnnotations()) {
-                if(a.getTypeName().startsWith("play.mvc.")) {
-                    isHandler = true;
+                if(a.getTypeName().startsWith("play.mvc.") ) {
+                      isHandler = true;
                     break;
                 }
             }
@@ -84,7 +84,7 @@ public class ControllersEnhancer extends Enhancer {
                 }
             }
             
-            // Enchance global catch to avoid potential unwanted catching of play.mvc.results.Result
+            // Enhance global catch to avoid potential unwanted catching of play.mvc.results.Result
             ctMethod.instrument(new ExprEditor() {
                 @Override
                 public void edit(Handler handler) throws CannotCompileException {

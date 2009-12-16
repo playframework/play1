@@ -17,7 +17,6 @@ public class Item extends Model {
     public Item(List list, String label) {
         this.label = label;
         this.list = list;
-        this.done = done;
         this.position = list.nextPosition++;
     }
     
@@ -28,7 +27,8 @@ public class Item extends Model {
     public static Item findById(Long id) {
         return all().filter("id", id).get();
     }
-    
+
+    @Override
     public String toString() {
         return label;
     }

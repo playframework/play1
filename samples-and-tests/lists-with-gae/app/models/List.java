@@ -42,7 +42,8 @@ public class List extends Model {
     public Collection<Item> oldItems() {
         return items.filter("done", true).order("-position").fetch();
     }
-    
+
+    @Override
     public String toString() {
         return name;
     }

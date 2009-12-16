@@ -84,3 +84,7 @@ samples-and-tests/test-scala/tmp
 samples-and-tests/test-scala/logs
 samples-and-tests/i-am-a-developer/i-am-working-here
 samples-and-tests/just-test-cases/attachments
+help
+*.iml
+*.ipr
+*.iws

@@ -99,6 +99,7 @@
     
     <target name="modules">
         <ant antfile="build.xml" target="build" dir="../modules/test-runner" />
+        <ant antfile="build.xml" target="build" dir="../modules/router" />
         <ant antfile="build.xml" target="build" dir="../modules/bespin" />
         <ant antfile="build.xml" target="build" dir="../modules/ecss" />
         <ant antfile="build.xml" target="build" dir="../modules/gae" />

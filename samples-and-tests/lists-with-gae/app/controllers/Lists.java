@@ -1,7 +1,8 @@
 package controllers;
 
-import models.*;
-import notifiers.*;
+import models.List;
+import models.Item;
+import notifiers.Notifier;
 import play.*;
 import play.mvc.*;
 import java.util.Collection;

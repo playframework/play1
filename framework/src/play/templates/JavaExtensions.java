@@ -269,7 +269,7 @@ public class JavaExtensions {
 
     public static String pluralize(Number n, String plural) {
         long l = n.longValue();
-        if (l != 1) {
+        if (l < 2) {
             return plural;
         }
         return "";

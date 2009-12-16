@@ -46,18 +46,38 @@ public class Router {
      * This one can be called to add new route. Last added is first in the route list. 
      */
     public static void addRoute(String method, String path, String action) {
-        prependRoute(method, path, action, null);
+       addRoute(method, path, action, null);
     }
-    
+
+    /**
+     * This one can be called to add new route. Last added is first in the route list.
+     */
+    public static void addRoute(String method, String path, String action, String params) {
+        prependRoute(method, path, action, params);
+    }
+
+    /**
+     * Add a route at the given position
+     */
+    public static void addRoute(int position, String method, String path, String action, String params) {
+        routes.add(position, getRoute(method, path, action, params));
+    }
+
+     /**
+     * Add a route at the given position
+     */
+    public static void addRoute(int position, String method, String path, String action) {
+        addRoute(position, method, path, action, null);
+    }
+   
     /**
      * This is used internally when reading the route file. The order the routes are added matters and
-     * we want the to append the routes to the list.
+     * we want the method to append the routes to the list.
      */
     protected static void appendRoute(String method, String path, String action, String params, String sourceFile, int line) {
         routes.add(getRoute(method, path, action, params, sourceFile, line));
     }
     
-
     public static Route getRoute(String method, String path, String action, String params) {
         return getRoute(method, path, action, params, null, 0);
     }
@@ -65,8 +85,7 @@ public class Router {
     public static Route getRoute(String method, String path, String action, String params, String sourceFile, int line) {
         Route route = new Route();
         route.method = method;
-        route.path = path;
-        route.path = route.path.replace("//", "/");
+        route.path = path.replace("//", "/");
         route.action = action;
         route.routesFile = sourceFile;
         route.routesFileLine = line;
@@ -432,7 +451,7 @@ public class Router {
         }
 
         public void addParams(String params) {
-            if (params == null) {
+            if (params == null || params.length() < 1) {
                 return;
             }
             params = params.substring(1, params.length() - 1);

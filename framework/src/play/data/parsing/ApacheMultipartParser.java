@@ -29,7 +29,10 @@ import org.apache.commons.fileupload.ProgressListener;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.io.FileCleaner;
 import org.apache.commons.io.output.DeferredFileOutputStream;
+import play.Logger;
 import play.Play;
+import play.data.FileUpload;
+import play.data.MemoryUpload;
 import play.data.Upload;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;
@@ -562,17 +565,26 @@ public class ApacheMultipartParser extends DataParser {
                         uploads = new ArrayList<Upload>();
                         Request.current().args.put("__UPLOADS", uploads);
                     }
-                    uploads.add(new Upload(fileItem));
+                    try {
+                        uploads.add(new FileUpload(fileItem));
+                    } catch(Exception e) {
+                         // GAE does not support it, we try in memory
+                        uploads.add(new MemoryUpload(fileItem));
+                    }
                     putMapEntry(result, fileItem.getFieldName(), fileItem.getFieldName());
                 }
             }
         } catch (FileUploadIOException e) {
+            Logger.debug(e, "error");
             throw new IllegalStateException("Error when handling upload", e);
         } catch (IOException e) {
+             Logger.debug(e, "error");
             throw new IllegalStateException("Error when handling upload", e);
         } catch (FileUploadException e) {
+            Logger.debug(e, "error");
             throw new IllegalStateException("Error when handling upload", e);
         } catch (Exception e) {
+            Logger.debug(e, "error");
             throw new UnexpectedException(e);
         }
         return result;

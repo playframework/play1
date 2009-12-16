@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -225,7 +226,7 @@ public class Java {
      * @param annotationType The annotation class
      * @return A list of method object
      */
-    public static List<Method> findAllAnnotatedMethods(Class clazz, Class annotationType) {
+    public static List<Method> findAllAnnotatedMethods(Class clazz, Class<? extends Annotation> annotationType) {
         List<Method> methods = new ArrayList<Method>();
         while (!clazz.equals(Object.class)) {
             for (Method method : clazz.getDeclaredMethods()) {
@@ -251,6 +252,20 @@ public class Java {
                 }
             }**/
             clazz = clazz.getSuperclass();
+        }
+        return methods;
+    }
+
+   /**
+     * Find all annotated method from a class
+     * @param classes The classes
+     * @param annotationType The annotation class
+     * @return A list of method object
+     */
+    public static List<Method> findAllAnnotatedMethods(List<Class> classes, Class<? extends Annotation> annotationType) {
+        List<Method> methods = new ArrayList<Method>();
+        for (Class clazz : classes) {
+            methods.addAll(findAllAnnotatedMethods(clazz, annotationType));
         }
         return methods;
     }

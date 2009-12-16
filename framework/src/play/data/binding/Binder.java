@@ -43,6 +43,7 @@ public class Binder {
         supportedTypes.put(Upload.class, new UploadBinder());
         supportedTypes.put(Calendar.class, new CalendarBinder());
         supportedTypes.put(Locale.class, new LocaleBinder());
+        supportedTypes.put(byte[].class, new ByteArrayBinder());
     }
     static Map<Class, BeanWrapper> beanwrappers = new HashMap<Class, BeanWrapper>();
 
@@ -57,7 +58,7 @@ public class Binder {
 
     static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String prefix) {
         try {
-            Logger.trace("bindInternal: name [" + name + "] annotation [" + Utils.toString(annotations) + "] isComposite [" + isComposite(name + prefix, params.keySet()) + "]");
+            Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.toString(annotations) + "] isComposite [" + isComposite(name + prefix, params.keySet()) + "]");
 
             if (isComposite(name + prefix, params.keySet())) {
                 BeanWrapper beanWrapper = getBeanWrapper(clazz);
@@ -65,8 +66,8 @@ public class Binder {
             }
             String[] value = params.get(name + prefix);
 
-            // Let see if we have a As annotation and a separator. If so, we need to split the values
-            // Look up for the As annotation
+            // Let see if we have a Bind annotation and a separator. If so, we need to split the values
+            // Look up for the Bind annotation
             // TODO: Move me somewhere else
             if (annotations != null) {
                 for (Annotation annotation : annotations) {
@@ -77,7 +78,7 @@ public class Binder {
                 }
             }
             // Arrays types
-            if (clazz.isArray()) {
+            if (clazz.isArray() && (clazz != byte[].class)) {
                 if (value == null) {
                     value = params.get(name + prefix + "[]");
                 }
@@ -85,7 +86,7 @@ public class Binder {
                     return MISSING;
                 }
                 Object r = Array.newInstance(clazz.getComponentType(), value.length);
-                for (int i = 0; i < value.length; i++) {
+                for (int i = 0; i <= value.length; i++) {
                     try {
                         Array.set(r, i, directBind(annotations, value[i], clazz.getComponentType()));
                     } catch (Exception e) {
