@@ -228,7 +228,9 @@ public class Java {
      */
     public static List<Method> findAllAnnotatedMethods(Class clazz, Class<? extends Annotation> annotationType) {
         List<Method> methods = new ArrayList<Method>();
-        while (!clazz.equals(Object.class)) {
+        // Clazz can be null if we are looking at an interface / annotation
+        while (clazz != null && !clazz.equals(Object.class)) {
+
             for (Method method : clazz.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(annotationType)) {
                     methods.add(method);

@@ -1,5 +1,6 @@
 package play.modules.router;
 
+import play.Logger;
 import play.PlayPlugin;
 import play.Play;
 import play.classloading.ApplicationClasses;
@@ -72,9 +73,24 @@ public class RouterPlugin extends PlayPlugin {
             }
         }
 
-        List<Method> serveStatics = Java.findAllAnnotatedMethods(controllerClasses, ServeStatic.class);
-        for (Method serveStatic : serveStatics) {
-            ServeStatic annotation = serveStatic.getAnnotation(ServeStatic.class);
+        for (Class clazz : controllerClasses) {
+            StaticRoutes annotation = (StaticRoutes)clazz.getAnnotation(StaticRoutes.class);
+            if (annotation != null) {
+                ServeStatic[] serveStatics =  annotation.serveStatics();
+                if (serveStatics != null) {
+                    for (ServeStatic serveStatic : serveStatics) {
+                        if (serveStatic.priority() != -1) {
+                            Router.addRoute(serveStatic.priority(), "GET", serveStatic.value(), "staticDir:" + serveStatic.directory());
+                        } else {
+                            Router.addRoute("GET", serveStatic.value(), "staticDir:" + serveStatic.directory());
+                        }
+                    }
+                }
+            }
+        }
+
+        for (Class clazz : controllerClasses) {
+            ServeStatic annotation = (ServeStatic)clazz.getAnnotation(ServeStatic.class);
             if (annotation != null) {
                 if (annotation.priority() != -1) {
                     Router.addRoute(annotation.priority(), "GET", annotation.value(), "staticDir:" + annotation.directory());
@@ -83,6 +99,7 @@ public class RouterPlugin extends PlayPlugin {
                 }
             }
         }
+
     }
 
     public List<Class> getControllerClasses() {
@@ -90,7 +107,9 @@ public class RouterPlugin extends PlayPlugin {
         List<ApplicationClasses.ApplicationClass> classes = Play.classes.all();
         for (ApplicationClasses.ApplicationClass clazz : classes) {
             if (clazz.name.startsWith("controllers.")) {
-                returnValues.add(clazz.javaClass);
+                if (!clazz.javaClass.isInterface() && !clazz.javaClass.isAnnotation()) {
+                    returnValues.add(clazz.javaClass);
+                }
             }
         }
         return returnValues;
