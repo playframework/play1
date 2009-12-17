@@ -88,3 +88,4 @@ help
 *.iml
 *.ipr
 *.iws
+modules/router/lib/router.jar
