@@ -116,6 +116,7 @@ Add instant power to your application by enabling one of these modules.
 # "Google Web Toolkit":gwt
 # "Bespin editor":bespin
 # "Cobertura test coverage":cobertura
+# "Routes using annotations":router
 
 
 h2. <a name="references">References</a>

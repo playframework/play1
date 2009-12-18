@@ -73,10 +73,34 @@ public class RouterPlugin extends PlayPlugin {
             }
         }
 
+        List<Method> heads = Java.findAllAnnotatedMethods(controllerClasses, Head.class);
+        for (Method head : heads) {
+            Head annotation = head.getAnnotation(Head.class);
+            if (annotation != null) {
+                if (annotation.priority() != -1) {
+                    Router.addRoute(annotation.priority(), "HEAD", annotation.value(), head.getDeclaringClass().getSimpleName() + "." + head.getName(), annotation.params());
+                } else {
+                    Router.addRoute("HEAD", annotation.value(), head.getDeclaringClass().getSimpleName() + "." + head.getName(), annotation.params());
+                }
+            }
+        }
+
+        List<Method> list = Java.findAllAnnotatedMethods(controllerClasses, Any.class);
+        for (Method any : list) {
+            Any annotation = any.getAnnotation(Any.class);
+            if (annotation != null) {
+                if (annotation.priority() != -1) {
+                    Router.addRoute(annotation.priority(), "*", annotation.value(), any.getDeclaringClass().getSimpleName() + "." + any.getName(), annotation.params());
+                } else {
+                    Router.addRoute("*", annotation.value(), any.getDeclaringClass().getSimpleName() + "." + any.getName(), annotation.params());
+                }
+            }
+        }
+
         for (Class clazz : controllerClasses) {
             StaticRoutes annotation = (StaticRoutes)clazz.getAnnotation(StaticRoutes.class);
             if (annotation != null) {
-                ServeStatic[] serveStatics =  annotation.serveStatics();
+                ServeStatic[] serveStatics =  annotation.value();
                 if (serveStatics != null) {
                     for (ServeStatic serveStatic : serveStatics) {
                         if (serveStatic.priority() != -1) {
