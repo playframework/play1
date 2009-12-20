@@ -28,6 +28,25 @@ public class FastTags {
         out.println("function(options) {var pattern = '" + args.get("arg").toString() + "'; for(key in options) { pattern = pattern.replace(':'+key, options[key]); } return pattern };");
     }
 
+    public static void _select(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        String name = args.get("arg").toString();
+        Object value = args.get("value");
+        TagContext.current().data.put("selected", value);
+        out.print("<select name=\"" + name +"\" size=\"1\">");
+        out.println(JavaExtensions.toString(body));
+        out.print("</select>");
+    }
+
+    public static void _option(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        Object value = args.get("arg");
+        Object selectedValue = TagContext.parent("select").data.get("selected");
+        boolean selected = selectedValue != null && value != null && selectedValue.equals(value);
+        out.print("<option value=\""+value+"\" "+(selected ? "selected" : "")+">");
+        out.println(JavaExtensions.toString(body));
+        out.print("</option>");
+    }
+
+
     /**
      * Generates a html form element linked to a controller action
      * @param args tag attributes
