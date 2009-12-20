@@ -182,8 +182,8 @@ public class JavaExtensions {
         return new SimpleDateFormat(pattern).format(new Date(timestamp));
     }
 
-    public static RawData nl2br(String data) {
-        return new RawData(data.replace("\n", "<br/>"));
+    public static RawData nl2br(Object data) {
+        return new RawData(data.toString().replace("\n", "<br/>"));
     }
 
     public static String urlEncode(String entity) {
