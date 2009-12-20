@@ -11,6 +11,8 @@ body {
     background: #fff;
     -webkit-border-radius: 8px;
     -webkit-box-shadow: 0 0 10px rgba(0,0,0,.2);
+    -moz-border-radius: 8px;
+    -moz-box-shadow: 0 0 10px rgba(0,0,0,.2);
 }
 
 a {
