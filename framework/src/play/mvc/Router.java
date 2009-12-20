@@ -48,7 +48,6 @@ public class Router {
         prependRoute(method, path, action, null);
     }
 
- 
     /**
      * This is used internally when reading the route file. The order the routes are added matters and
      * we want the to append the routes to the list.
@@ -65,12 +64,12 @@ public class Router {
         route.action = action;
         route.addParams(params);
         route.compute();
-	return route;
+        return route;
     }
 
     /**
      * Add a new route at the beginning of the route list
-     */ 
+     */
     private static void prependRoute(String method, String path, String action, String params) {
         routes.add(0, getRoute(method, path, action, params));
     }
@@ -114,7 +113,7 @@ public class Router {
                     String path = prefix + matcher.group("path");
                     String params = matcher.group("params");
                     appendRoute(method, path, action, params);
-                }                
+                }
             } else {
                 Logger.error("Invalid route definition : %s", line);
             }
@@ -258,7 +257,7 @@ public class Router {
                             if (value instanceof List) {
                                 value = ((List<Object>) value).get(0);
                             }
-                            if (!arg.constraint.matches(value.toString())) {
+                            if (!value.toString().startsWith(":") && !arg.constraint.matches(value.toString())) {
                                 allRequiredArgsAreHere = false;
                                 break;
                             }
@@ -285,8 +284,8 @@ public class Router {
                             path = path.substring(0, path.length() - 2);
                         }
                         for (Map.Entry<String, Object> entry : args.entrySet()) {
-                        	String key = entry.getKey();
-                        	Object value = entry.getValue();
+                            String key = entry.getKey();
+                            Object value = entry.getValue();
                             if (inPathArgs.contains(key) && value != null) {
                                 if (List.class.isAssignableFrom(value.getClass())) {
                                     List<Object> vals = (List<Object>) value;
@@ -303,7 +302,11 @@ public class Router {
                                         try {
                                             queryString.append(URLEncoder.encode(key, "utf-8"));
                                             queryString.append("=");
-                                            queryString.append(URLEncoder.encode(object.toString() + "", "utf-8"));
+                                            if (object.toString().startsWith(":")) {
+                                                queryString.append(object.toString() + "");
+                                            } else {
+                                                queryString.append(URLEncoder.encode(object.toString() + "", "utf-8"));
+                                            }
                                             queryString.append("&");
                                         } catch (UnsupportedEncodingException ex) {
                                         }
@@ -312,7 +315,11 @@ public class Router {
                                     try {
                                         queryString.append(URLEncoder.encode(key, "utf-8"));
                                         queryString.append("=");
-                                        queryString.append(URLEncoder.encode(value + "", "utf-8"));
+                                        if (value.toString().startsWith(":")) {
+                                            queryString.append(value.toString() + "");
+                                        } else {
+                                            queryString.append(URLEncoder.encode(value.toString() + "", "utf-8"));
+                                        }
                                         queryString.append("&");
                                     } catch (UnsupportedEncodingException ex) {
                                     }

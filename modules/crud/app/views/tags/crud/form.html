@@ -93,6 +93,9 @@
 						case "MinSize":
 							out.println(messages.get('crud.help.minlength', it.annotation.value()))
 							break;    
+						case "MaxSize":
+    						out.println(messages.get('crud.help.maxlength', it.annotation.value()))
+    						break;
 						case "Range":
 							out.println(messages.get('crud.help.range', it.annotation.min(), it.annotation.max()))
 							break;

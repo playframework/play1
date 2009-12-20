@@ -163,6 +163,9 @@ public class Fixtures {
     static void serialize(Map values, String prefix, Map<String, String[]> serialized) {
         for (Object key : values.keySet()) {
             Object value = values.get(key);
+            if(value == null) {
+                continue;
+            }
             if (value instanceof Map) {
                 serialize((Map) value, prefix + "." + key, serialized);
             } else if (value instanceof Date) {
