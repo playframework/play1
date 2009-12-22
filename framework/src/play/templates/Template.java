@@ -210,6 +210,9 @@ public class Template {
             monitor = null;
             Logger.trace("%sms to render template %s", System.currentTimeMillis() - start, name);
         } catch (NoRouteFoundException e) {
+            if(e.isSourceAvailable()) {
+                throw e;
+            }
             throwException(e);
         } catch (PlayException e) {
             throw (PlayException) cleanStackTrace(e);

@@ -263,11 +263,11 @@ public class TemplateCompiler {
 
         void action(boolean absolute) {
             String action = parser.getToken().trim();
-            if (action.trim().matches("^'.+'$")) {
+            if (action.trim().matches("^'[^']*'$")) {
                 if (absolute) {
-                    print("\tout.print(play.mvc.Http.Request.current().getBase() + play.mvc.Router.reverse(play.Play.getVirtualFile(" + action + ")));");
+                    print("\tout.print(play.mvc.Http.Request.current().getBase() + play.mvc.Router.reverseWithCheck("+action+", play.Play.getVirtualFile(" + action + ")));");
                 } else {
-                    print("\tout.print(play.mvc.Router.reverse(play.Play.getVirtualFile(" + action + ")));");
+                    print("\tout.print(play.mvc.Router.reverseWithCheck("+action+", play.Play.getVirtualFile(" + action + ")));");
                 }
             } else {
                 if (!action.endsWith(")")) {

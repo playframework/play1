@@ -229,6 +229,13 @@ public class Router {
         throw new NoRouteFoundException(file.relativePath());
     }
 
+    public static String reverseWithCheck(String name, VirtualFile file) {
+        if (file == null || !file.exists()) {
+            throw new NoRouteFoundException(name + " (file not found)");
+        }
+        return reverse(file);
+    }
+
     public static ActionDefinition reverse(String action, Map<String, Object> args) {
         if (action.startsWith("controllers.")) {
             action = action.substring(12);
