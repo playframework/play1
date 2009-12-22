@@ -84,8 +84,8 @@ public class JavaExtensions {
         return str;
     }
 
-    public static RawData escapeHtml(String htmlToEscape) {
-        return new RawData(StringEscapeUtils.escapeHtml(htmlToEscape));
+    public static String escapeHtml(String htmlToEscape) {
+        return StringEscapeUtils.escapeHtml(htmlToEscape);
     }
 
     public static String escapeJavaScript(String str) {
@@ -245,7 +245,7 @@ public class JavaExtensions {
         return n.longValue() % by == 0;
     }
 
-    public static RawData escape(Object o) {
+    public static String escape(Object o) {
         String string = o.toString();
         return escapeHtml(string);
     }
