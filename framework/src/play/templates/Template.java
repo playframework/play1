@@ -388,7 +388,7 @@ public class Template {
             return Template.layoutData.get().get(key);
         }
 
-        static class RawData {
+        public static class RawData {
 
             public String data;
 
