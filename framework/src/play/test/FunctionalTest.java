@@ -18,6 +18,7 @@ import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.junit.Before;
 import org.junit.BeforeClass;
 
 import play.Invoker.Invocation;
@@ -31,16 +32,24 @@ import play.mvc.Http.Response;
  * Application tests support
  */
 public abstract class FunctionalTest extends BaseTest {
-	public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
-	public static final String MULTIPART_FORM_DATA="multipart/form-data";
 
-	/**
-	 * Triggers Redirect when calling controller.action directly.
-	 */
-	@BeforeClass
-	public static void redirectInsteadOfCall(){
-		ControllerInstrumentation.stopActionCall();
-	}
+    public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+    public static final String MULTIPART_FORM_DATA = "multipart/form-data";
+
+    private static Map<String, Http.Cookie> savedCookies; // cookies stored between calls
+
+    @Before
+    public void clearCookies(){
+        savedCookies = null;
+    }
+
+    /**
+     * Triggers Redirect when calling controller.action directly.
+     */
+    @BeforeClass
+    public static void redirectInsteadOfCall() {
+        ControllerInstrumentation.stopActionCall();
+    }
 
     static void before() {
         new FakeInvocation().before();
@@ -53,9 +62,9 @@ public abstract class FunctionalTest extends BaseTest {
 
     // Requests
     public static Response GET(String url) {
-    	return GET(newRequest(), url);
+        return GET(newRequest(), url);
     }
-    
+
     /**
      * sends a GET request to the application under tests.
      * @param request
@@ -83,22 +92,23 @@ public abstract class FunctionalTest extends BaseTest {
     public static Response POST(String url) {
         return POST(url, APPLICATION_X_WWW_FORM_URLENCODED, "");
     }
-    
-    public static Response POST(Request request, String url){
-    	return POST(request, url, APPLICATION_X_WWW_FORM_URLENCODED, "");
+
+    public static Response POST(Request request, String url) {
+        return POST(request, url, APPLICATION_X_WWW_FORM_URLENCODED, "");
     }
 
-    public static Response POST(String url, String contenttype, String body){
-    	return POST(newRequest(), url, contenttype, body);
+    public static Response POST(String url, String contenttype, String body) {
+        return POST(newRequest(), url, contenttype, body);
     }
 
-    public static Response POST(Request request, String url, String contenttype, String body){
-    	return POST(request, url, contenttype, new ByteArrayInputStream(body.getBytes()));
+    public static Response POST(Request request, String url, String contenttype, String body) {
+        return POST(request, url, contenttype, new ByteArrayInputStream(body.getBytes()));
     }
-    
+
     public static Response POST(String url, String contenttype, InputStream body) {
-    	return POST(newRequest(), url, contenttype, body);
+        return POST(newRequest(), url, contenttype, body);
     }
+
     /**
      * Sends a POST request to the application under tests.
      * @param request
@@ -124,7 +134,7 @@ public abstract class FunctionalTest extends BaseTest {
         request.body = body;
         return makeRequest(request);
     }
-    
+
     /**
      * Sends a POST request to the application under tests as a multipart form. Designed for file upload testing.
      * @param url relative url such as <em>"/products/1234"</em>
@@ -132,47 +142,47 @@ public abstract class FunctionalTest extends BaseTest {
      * @param files map containing files to be uploaded
      * @return the response
      */
-    public static Response POST(String url, Map<String, String> parameters, Map<String, File> files){
-		return POST(newRequest(),url,parameters, files);
+    public static Response POST(String url, Map<String, String> parameters, Map<String, File> files) {
+        return POST(newRequest(), url, parameters, files);
     }
-    
-    public static Response POST(Request request, String url, Map<String,String> parameters, Map<String, File> files){
-		List<Part> parts = new ArrayList<Part>();
-		
-		for (String key : parameters.keySet()) {
-			parts.add(new StringPart(key, parameters.get(key)));
-		}
-		
-		for (String key : files.keySet()){
-			Part filePart;
-			try {
-				filePart = new FilePart(key, files.get(key));
-			} catch (FileNotFoundException e) {
-				throw new RuntimeException(e);
-			}
-			parts.add(filePart);
-		}
-		
-		MultipartRequestEntity requestEntity = new MultipartRequestEntity(parts.toArray(new Part[]{}), new HttpMethodParams());
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try {
-			requestEntity.writeRequest(baos);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		InputStream body = new ByteArrayInputStream(baos.toByteArray());
-		String contentType = requestEntity.getContentType();
-		Http.Header header = new Http.Header();
-		header.name = "content-type";
-		header.values = Arrays.asList(new String[] { contentType });
-		request.headers.put("content-type", header);
-		return POST(request, url, MULTIPART_FORM_DATA, body);
-    }
-    
 
-    public static Response PUT(String url, String contenttype, String body){
-    	return PUT(newRequest(), url, contenttype, body);
+    public static Response POST(Request request, String url, Map<String, String> parameters, Map<String, File> files) {
+        List<Part> parts = new ArrayList<Part>();
+
+        for (String key : parameters.keySet()) {
+            parts.add(new StringPart(key, parameters.get(key)));
+        }
+
+        for (String key : files.keySet()) {
+            Part filePart;
+            try {
+                filePart = new FilePart(key, files.get(key));
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            parts.add(filePart);
+        }
+
+        MultipartRequestEntity requestEntity = new MultipartRequestEntity(parts.toArray(new Part[]{}), new HttpMethodParams());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            requestEntity.writeRequest(baos);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        InputStream body = new ByteArrayInputStream(baos.toByteArray());
+        String contentType = requestEntity.getContentType();
+        Http.Header header = new Http.Header();
+        header.name = "content-type";
+        header.values = Arrays.asList(new String[]{contentType});
+        request.headers.put("content-type", header);
+        return POST(request, url, MULTIPART_FORM_DATA, body);
     }
+
+    public static Response PUT(String url, String contenttype, String body) {
+        return PUT(newRequest(), url, contenttype, body);
+    }
+
     /**
      * Sends a PUT request to the application under tests.
      * @param request
@@ -199,10 +209,10 @@ public abstract class FunctionalTest extends BaseTest {
         return makeRequest(request);
     }
 
-    
-    public static Response DELETE(String url){
-    	return DELETE(newRequest(), url);
+    public static Response DELETE(String url) {
+        return DELETE(newRequest(), url);
     }
+
     /**
      * Sends a DELETE request to the application under tests.
      * @param request
@@ -222,6 +232,7 @@ public abstract class FunctionalTest extends BaseTest {
         request.url = url;
         request.path = path;
         request.querystring = queryString;
+        if (savedCookies != null) request.cookies = savedCookies;
         request.body = new ByteArrayInputStream(new byte[0]);
         return makeRequest(request);
     }
@@ -229,6 +240,7 @@ public abstract class FunctionalTest extends BaseTest {
     public static void makeRequest(final Request request, final Response response) {
         before();
         ActionInvoker.invoke(request, response);
+        savedCookies = response.cookies;
         try {
             response.out.flush();
         } catch (IOException ex) {
@@ -237,13 +249,12 @@ public abstract class FunctionalTest extends BaseTest {
             after();
         }
     }
-    
-	public static Response makeRequest(final Request request){
-		Response response = newResponse();
-		makeRequest(request, response);
-		return response;
-	}
 
+    public static Response makeRequest(final Request request) {
+        Response response = newResponse();
+        makeRequest(request, response);
+        return response;
+    }
 
     public static Response newResponse() {
         Response response = new Response();
@@ -381,7 +392,5 @@ public abstract class FunctionalTest extends BaseTest {
         @Override
         public void execute() throws Exception {
         }
-        
     }
-    
 }
