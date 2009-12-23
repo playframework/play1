@@ -9,6 +9,7 @@
 ~ eclipsify      Create all eclipse configuration files
 ~ help           Display help on a specific command
 ~ id             Define the framework ID
+~ idealize       Create all IntelliJ Idea configuration files
 ~ modules        Display the computed modules list
 ~ netbeansify    Create all netbeans configuration files
 ~ new            Create a new application

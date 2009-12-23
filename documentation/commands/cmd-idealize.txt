@@ -1,0 +1,15 @@
+~ Name:
+~ ~~~~~
+~ idealize -- Create all IntelliJ Idea configuration files
+~
+~ Alias:
+~ ~~~~~
+~ idea
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play idealize [app_path]
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~

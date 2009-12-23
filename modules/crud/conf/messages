@@ -32,7 +32,8 @@ crud.search=Search
 crud.none=(None)
 
 crud.help.required=Required.
-crud.help.minlength=Minimal size is %d.
+crud.help.minlength=Min length is %d.
+crud.help.maxlength=Max length is %d.
 crud.help.email=Valid email address.
 crud.help.dateformat=&{%s} format.
 crud.help.numeric=Numeric.

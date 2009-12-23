@@ -51,8 +51,13 @@ public class Logger {
     /**
      * Try to init stuff.
      */
-    static {
-        URL log4jConf = Logger.class.getResource("/log4j.properties");
+    public static void init() {
+        String log4jPath = Play.configuration.getProperty("application.log.path", "/log4j.xml");
+        URL log4jConf = Logger.class.getResource(log4jPath);
+        if (log4jConf == null) { // try again with the .properties
+            log4jPath = Play.configuration.getProperty("application.log.path", "/log4j.properties");
+            log4jConf = Logger.class.getResource(log4jPath);
+        }
         if (log4jConf == null) {
             Properties shutUp = new Properties();
             shutUp.setProperty("log4j.rootLogger", "OFF");

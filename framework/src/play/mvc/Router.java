@@ -96,7 +96,7 @@ public class Router {
 
     /**
      * Add a new route at the beginning of the route list
-     */ 
+     */
     private static void prependRoute(String method, String path, String action, String params) {
         routes.add(0, getRoute(method, path, action, params));
     }
@@ -259,6 +259,13 @@ public class Router {
         throw new NoRouteFoundException(file.relativePath());
     }
 
+    public static String reverseWithCheck(String name, VirtualFile file) {
+        if (file == null || !file.exists()) {
+            throw new NoRouteFoundException(name + " (file not found)");
+        }
+        return reverse(file);
+    }
+
     public static ActionDefinition reverse(String action, Map<String, Object> args) {
         if (action.startsWith("controllers.")) {
             action = action.substring(12);
@@ -287,7 +294,7 @@ public class Router {
                             if (value instanceof List) {
                                 value = ((List<Object>) value).get(0);
                             }
-                            if (!arg.constraint.matches(value.toString())) {
+                            if (!value.toString().startsWith(":") && !arg.constraint.matches(value.toString())) {
                                 allRequiredArgsAreHere = false;
                                 break;
                             }
@@ -314,8 +321,8 @@ public class Router {
                             path = path.substring(0, path.length() - 2);
                         }
                         for (Map.Entry<String, Object> entry : args.entrySet()) {
-                        	String key = entry.getKey();
-                        	Object value = entry.getValue();
+                            String key = entry.getKey();
+                            Object value = entry.getValue();
                             if (inPathArgs.contains(key) && value != null) {
                                 if (List.class.isAssignableFrom(value.getClass())) {
                                     List<Object> vals = (List<Object>) value;
@@ -332,7 +339,11 @@ public class Router {
                                         try {
                                             queryString.append(URLEncoder.encode(key, "utf-8"));
                                             queryString.append("=");
-                                            queryString.append(URLEncoder.encode(object.toString() + "", "utf-8"));
+                                            if (object.toString().startsWith(":")) {
+                                                queryString.append(object.toString() + "");
+                                            } else {
+                                                queryString.append(URLEncoder.encode(object.toString() + "", "utf-8"));
+                                            }
                                             queryString.append("&");
                                         } catch (UnsupportedEncodingException ex) {
                                         }
@@ -343,7 +354,11 @@ public class Router {
                                     try {
                                         queryString.append(URLEncoder.encode(key, "utf-8"));
                                         queryString.append("=");
-                                        queryString.append(URLEncoder.encode(value + "", "utf-8"));
+                                        if (value.toString().startsWith(":")) {
+                                            queryString.append(value.toString() + "");
+                                        } else {
+                                            queryString.append(URLEncoder.encode(value.toString() + "", "utf-8"));
+                                        }
                                         queryString.append("&");
                                     } catch (UnsupportedEncodingException ex) {
                                     }

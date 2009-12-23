@@ -745,10 +745,17 @@ try:
 			print "~ Oops. %s is already started! (or delete %s)" % (os.path.normpath(application_path), os.path.normpath(pid_path))
 			print "~"
 			sys.exit(1)
-		sout = open(os.path.join(log_path, 'system.out'), 'w')
+		
+		sysout = readConf('application.log.system.out')
+		sysout = sysout!='false' and sysout!='off'
+		if not sysout:
+		  sout = None
+		else:
+		  sout = open(os.path.join(log_path, 'system.out'), 'w')
 		pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
 		print "~ OK, %s is started" % os.path.normpath(application_path)
-		print "~ output is redirected to %s" % os.path.normpath(os.path.join(log_path, 'system.out'))
+		if sysout:
+		  print "~ output is redirected to %s" % os.path.normpath(os.path.join(log_path, 'system.out'))
 		pid_file = open(pid_path, 'w')
 		pid_file.write(str(pid))
 		print "~ pid is %s" % pid
@@ -787,11 +794,18 @@ try:
 			pid = open(pid_path).readline().strip()
 			os.remove(pid_path)
 			kill(pid)
-		
-		sout = open(os.path.join(log_path, 'system.out'), 'w')
+
+
+		sysout = readConf('application.log.system.out')
+		sysout = sysout!='false' and sysout!='off'
+		if not sysout:
+		  sout = None
+		else:
+		  sout = open(os.path.join(log_path, 'system.out'), 'w')
 		pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
 		print "~ OK, %s is restarted" % os.path.normpath(application_path)
-		print "~ output is redirected to %s" % os.path.normpath(os.path.join(log_path, 'system.out'))
+		if sysout:
+		  print "~ output is redirected to %s" % os.path.normpath(os.path.join(log_path, 'system.out'))
 		pid_file = open(pid_path, 'w')
 		pid_file.write(str(pid))
 		print "~ New pid is %s" % pid
@@ -959,6 +973,36 @@ try:
 		print "~"
 
 		sys.exit(0)
+
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ [idealize] Create idea intellij configuration files
+	if play_command == 'idea' or play_command == 'idealize':
+		check_application()
+		load_modules()
+		do_classpath()
+		do_java()
+		application_name = readConf('application.name')
+		imlFile = os.path.join(application_path, application_name + '.iml')
+		shutil.copyfile(os.path.join(play_base, 'resources/idea/imlTemplate.xml'), imlFile)
+		cpXML = ""
+
+		replaceAll(imlFile, r'%PLAYHOME%', play_base.replace('\\', '/'))
+
+		if len(modules):
+			lXML = ""
+			cXML = ""
+			for module in modules:
+				lXML += '    <content url="file://%s">\n      <sourceFolder url="file://%s" isTestSource="false" />\n    </content>\n' % (module, os.path.join(module, 'app').replace('\\', '/'))
+				replaceAll(imlFile, r'%LINKS%', lXML)
+		else:
+			replaceAll(imlFile, r'%LINKS%', '')
+
+		print "~ OK, the application is ready for Intellij Idea"
+		print "~ Use File/New Module/Import Existing module"
+		print "~"
+		
+		sys.exit(0)
+
 
 	
 	# Module command ?

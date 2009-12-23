@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -159,7 +158,7 @@ public class JPASupport implements Serializable {
                         }
                     }
                 }
-                if (field.getType().equals(FileAttachment.class)) {
+                if (field.getType().equals(FileAttachment.class) && Params.current() != null) {
                     FileAttachment fileAttachment = ((FileAttachment) field.get(o));
                     if (fileAttachment == null) {
                         fileAttachment = new FileAttachment(o, field.getName());

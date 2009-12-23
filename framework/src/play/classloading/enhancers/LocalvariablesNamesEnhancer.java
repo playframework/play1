@@ -120,7 +120,6 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 int locals = b.getMaxLocals();
                 int stack = b.getMaxStack();
                 codeAttribute.setMaxLocals(locals);
-
                 if (stack > codeAttribute.getMaxStack()) {
                     codeAttribute.setMaxStack(stack);
                 }
@@ -152,7 +151,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                     // et que c'est dans la frame d'utilisation de cette variable on trace l'affectation.
                     // (en fait la frame commence à localVariableAttribute.startPc(i)-1 qui est la première affectation
                     //  mais aussi l'initialisation de la variable qui est deja tracé plus haut, donc on commence à localVariableAttribute.startPc(i))
-                    if (varNumber == localVariableAttribute.index(i) && index >= localVariableAttribute.startPc(i) && index <= localVariableAttribute.startPc(i) + localVariableAttribute.codeLength(i)) {
+                    if (varNumber == localVariableAttribute.index(i) && index >= localVariableAttribute.startPc(i) && index < localVariableAttribute.startPc(i) + localVariableAttribute.codeLength(i)) {
 
                         jv.compileStmnt("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.addVariable(\"" + name + "\", " + name + ");");
 
