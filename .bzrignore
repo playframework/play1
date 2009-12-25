@@ -75,3 +75,6 @@ samples-and-tests/i-am-a-developer/i-am-working-here
 samples-and-tests/just-test-cases/attachments
 samples-and-tests/booking/logs
 samples-and-tests/booking/tmp
+play.ipr
+play.iws
+*iml

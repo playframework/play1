@@ -49,11 +49,11 @@ public class DateBinder implements SupportedType<Date> {
         public static AlternativeDateFormat getDefaultFormatter() {
             if (dateformat.get() == null) {
                 dateformat.set(new AlternativeDateFormat(Locale.US,
-                        "yyyy-MM-dd'T'hh:mm:ss'Z'", // ISO8601 + timezone
-                        "yyyy-MM-dd'T'hh:mm:ss", // ISO8601
+                        "yyyy-MM-dd'T'HH:mm:ss'Z'", // ISO8601 + timezone
+                        "yyyy-MM-dd'T'HH:mm:ss", // ISO8601
                         "yyyy-MM-dd",
-                        "yyyyMMdd'T'hhmmss",
-                        "yyyyMMddhhmmss",
+                        "yyyyMMdd'T'HHmmss",
+                        "yyyyMMddHHmmss",
                         "dd'/'MM'/'yyyy",
                         "dd-MM-yyyy",
                         "ddMMyyyy",
