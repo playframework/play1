@@ -185,7 +185,7 @@ public class Mailer implements LocalVariablesSupport {
             Template templateHtml = TemplateLoader.load(templateName + ".html");
             bodyHtml = templateHtml.render(templateHtmlBinding);
         } catch (TemplateNotFoundException e) {
-            if (contentType != null && !"text/plain".equals(contentType)) {
+            if (contentType != null && !contentType.startsWith("text/plain")) {
                 throw e;
             }
         }
@@ -194,7 +194,7 @@ public class Mailer implements LocalVariablesSupport {
             Template templateText = TemplateLoader.load(templateName + ".txt");
             bodyText = templateText.render(templateTextBinding);
         } catch (TemplateNotFoundException e) {
-            if ("text/plain".equals(contentType)) {
+            if (bodyHtml == null && (contentType == null || (contentType != null && contentType.startsWith("text/plain")))) {
                 throw e;
             }
         }
