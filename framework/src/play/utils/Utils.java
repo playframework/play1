@@ -116,18 +116,18 @@ public class Utils {
         public static AlternativeDateFormat getDefaultFormatter() {
             if (dateformat.get() == null) {
                 dateformat.set(new AlternativeDateFormat(Locale.US,
-                        "yyyy-MM-dd'T'hh:mm:ss'Z'", // ISO8601 + timezone
-                        "yyyy-MM-dd'T'hh:mm:ss", // ISO8601
-                        "yyyy-MM-dd hh:mm:ss",
-                        "yyyyMMdd hhmmss",
+                        "yyyy-MM-dd'T'HH:mm:ss'Z'", // ISO8601 + timezone
+                        "yyyy-MM-dd'T'HH:mm:ss", // ISO8601
+                        "yyyy-MM-dd HH:mm:ss",
+                        "yyyyMMdd HHmmss",
                         "yyyy-MM-dd",
-                        "yyyyMMdd'T'hhmmss",
-                        "yyyyMMddhhmmss",
+                        "yyyyMMdd'T'HHmmss",
+                        "yyyyMMddHHmmss",
                         "dd'/'MM'/'yyyy",
                         "dd-MM-yyyy",
-                        "dd'/'MM'/'yyyy hh:mm:ss",
-                        "dd-MM-yyyy hh:mm:ss",
-                        "ddMMyyyy hhmmss",
+                        "dd'/'MM'/'yyyy HH:mm:ss",
+                        "dd-MM-yyyy HH:mm:ss",
+                        "ddMMyyyy HHmmss",
                         "ddMMyyyy"));
             }
             return dateformat.get();
