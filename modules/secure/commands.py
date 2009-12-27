@@ -22,10 +22,11 @@ if play_command == 'secure:ov' or play_command == 'secure:override':
 		print "~ %s" % str(err)
 		print "~ "
 		sys.exit(-1)
+
+if play_command.startswith('secure:'):
+	print "~ Use: --css to override the Secure css" 
+	print "~      --login to override the login page" 
+	print "~      --layout to override the login layout page" 
+	print "~ "
 	
-print "~ Use: --css to override the Secure css" 
-print "~      --login to override the login page" 
-print "~      --layout to override the login layout page" 
-print "~ "
-	
-sys.exit(0)
+	sys.exit(0)
