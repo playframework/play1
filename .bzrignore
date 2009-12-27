@@ -91,3 +91,4 @@ help
 *.ipr
 *.iws
 modules/router/lib/router.jar
+modules/grizzly/lib/play-grizzly.jar

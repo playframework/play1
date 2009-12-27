@@ -99,6 +99,7 @@
     
     <target name="modules">
         <ant antfile="build.xml" target="build" dir="../modules/test-runner" />
+        <ant antfile="build.xml" target="build" dir="../modules/grizzly" />
         <ant antfile="build.xml" target="build" dir="../modules/router" />
         <ant antfile="build.xml" target="build" dir="../modules/bespin" />
         <ant antfile="build.xml" target="build" dir="../modules/ecss" />
@@ -107,7 +108,7 @@
         <ant antfile="build.xml" target="build" dir="../modules/spring" />
         <ant antfile="build.xml" target="build" dir="../modules/search" />
         <ant antfile="build.xml" target="build" dir="../modules/siena" />
-	<ant antfile="build.xml" target="build" dir="../modules/tracer" />
+	    <ant antfile="build.xml" target="build" dir="../modules/tracer" />
         <ant antfile="build.xml" target="build" dir="../modules/scala" />
     </target>
     

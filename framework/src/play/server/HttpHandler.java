@@ -502,7 +502,6 @@ public class HttpHandler implements IoHandler {
                 minaResponse.addHeader(entry.getKey(), value);
             }
         }
-
         Map<String, Http.Cookie> cookies = response.cookies;
         for (Http.Cookie cookie : cookies.values()) {
             DefaultCookie c = new DefaultCookie(cookie.name, cookie.value);
