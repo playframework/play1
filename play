@@ -282,6 +282,14 @@ try:
 
 		if application_mode == 'prod':
 			java_args.append('-server')
+		
+		java_policy = readConf('java.policy')
+		if not java_policy == '':
+			policyFile = os.path.join(application_path, 'conf', java_policy)
+			if os.path.exists(policyFile):
+				print "~ using policy file \"%s\"" % policyFile
+				java_args.append('-Djava.security.manager')
+				java_args.append('-Djava.security.policy==%s' % policyFile)
 
 		# The Java stuff
 		java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, 'play.server.Server']
