@@ -8,9 +8,12 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.mail.*;
 import play.Logger;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSupport;
+import play.exceptions.MailException;
 import play.exceptions.TemplateNotFoundException;
 import play.exceptions.UnexpectedException;
 import play.libs.Mail;
@@ -47,14 +50,14 @@ public class Mailer implements LocalVariablesSupport {
         infos.set(map);
     }
 
-    public static void addAttachment(Object... attachments) {
+    public static void addAttachment(EmailAttachment... attachments) {
         HashMap map = infos.get();
         if (map == null) {
             throw new UnexpectedException("Mailer not instrumented ?");
         }
         List attachmentsList = (List) map.get("attachments");
         if (attachmentsList == null) {
-            attachmentsList = new ArrayList<Object>();
+            attachmentsList = new ArrayList<EmailAttachment>();
             map.put("attachments", attachmentsList);
         }
         attachmentsList.addAll(Arrays.asList(attachments));
@@ -72,6 +75,7 @@ public class Mailer implements LocalVariablesSupport {
 
     /**
      * Can be of the form xxx <m@m.com>
+     *
      * @param from
      */
     public static void setFrom(Object from) {
@@ -85,6 +89,7 @@ public class Mailer implements LocalVariablesSupport {
 
     /**
      * Can be of the form xxx <m@m.com>
+     *
      * @param replyTo
      */
     public static void setReplyTo(Object replyTo) {
@@ -93,19 +98,6 @@ public class Mailer implements LocalVariablesSupport {
             throw new UnexpectedException("Mailer not instrumented ?");
         }
         map.put("replyTo", replyTo);
-        infos.set(map);
-    }
-
-    /**
-     * @deprecated 
-     * @param personal 
-     */
-    public static void setPersonal(String personal) {
-        HashMap map = infos.get();
-        if (map == null) {
-            throw new UnexpectedException("Mailer not instrumented ?");
-        }
-        map.put("personal", personal);
         infos.set(map);
     }
 
@@ -133,116 +125,154 @@ public class Mailer implements LocalVariablesSupport {
     }
 
     public static Future<Boolean> send(Object... args) {
-        HashMap map = infos.get();
-        if (map == null) {
-            throw new UnexpectedException("Mailer not instrumented ?");
-        }
-
-         // Body character set
-         String charset = (String) infos.get().get("charset");
-
-         // Headers
-         Map<String, String> headers = (Map<String,String>) infos.get().get("headers");
-
-        // Subject
-        String subject = (String) infos.get().get("subject");
-
-        String templateName = (String) infos.get().get("method");
-        if (templateName.startsWith("notifiers.")) {
-            templateName = templateName.substring("notifiers.".length());
-        }
-        if (templateName.startsWith("controllers.")) {
-            templateName = templateName.substring("controllers.".length());
-        }
-        templateName = templateName.substring(0, templateName.indexOf("("));
-        templateName = templateName.replace(".", "/");
-
-        // overrides Template name
-        if (args.length > 0 && args[0] instanceof String && LocalVariablesNamesTracer.getAllLocalVariableNames(args[0]).isEmpty()) {
-            templateName = args[0].toString();
-        }
-
-        Map<String, Object> templateHtmlBinding = new HashMap();
-        Map<String, Object> templateTextBinding = new HashMap();
-        for (Object o : args) {
-            List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
-            for (String name : names) {
-                templateHtmlBinding.put(name, o);
-                templateTextBinding.put(name, o);
-            }
-        }
-
-        // The rule is as follow: If we ask for text/plain, we don't care about the HTML
-        // If we ask for HTML and there is a text/plain we add it as an alternative.
-        // If contentType is not specified look at the template available:
-        // - .txt only -> text/plain
-        // else
-        // -           -> text/html
-        String contentType = (String) infos.get().get("contentType");
-        String bodyHtml = null;
-        String bodyText = "";
         try {
-            Template templateHtml = TemplateLoader.load(templateName + ".html");
-            bodyHtml = templateHtml.render(templateHtmlBinding);
-        } catch (TemplateNotFoundException e) {
-            if (contentType != null && !contentType.startsWith("text/plain")) {
-                throw e;
+            final HashMap map = infos.get();
+            if (map == null) {
+                throw new UnexpectedException("Mailer not instrumented ?");
             }
-        }
 
-        try {
-            Template templateText = TemplateLoader.load(templateName + ".txt");
-            bodyText = templateText.render(templateTextBinding);
-        } catch (TemplateNotFoundException e) {
-            if (bodyHtml == null && (contentType == null || (contentType != null && contentType.startsWith("text/plain")))) {
-                throw e;
+            // Body character set
+            final String charset = (String) infos.get().get("charset");
+
+            // Headers
+            final Map<String, String> headers = (Map<String, String>) infos.get().get("headers");
+
+            // Subject
+            final String subject = (String) infos.get().get("subject");
+
+            String templateName = (String) infos.get().get("method");
+            if (templateName.startsWith("notifiers.")) {
+                templateName = templateName.substring("notifiers.".length());
             }
-        }
+            if (templateName.startsWith("controllers.")) {
+                templateName = templateName.substring("controllers.".length());
+            }
+            templateName = templateName.substring(0, templateName.indexOf("("));
+            templateName = templateName.replace(".", "/");
 
-        // Content type
+            // overrides Template name
+            if (args.length > 0 && args[0] instanceof String && LocalVariablesNamesTracer.getAllLocalVariableNames(args[0]).isEmpty()) {
+                templateName = args[0].toString();
+            }
 
-        if (contentType == null) {
-            if (bodyHtml != null) {
-                contentType = "text/html";
+            final Map<String, Object> templateHtmlBinding = new HashMap();
+            final Map<String, Object> templateTextBinding = new HashMap();
+            for (Object o : args) {
+                List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
+                for (String name : names) {
+                    templateHtmlBinding.put(name, o);
+                    templateTextBinding.put(name, o);
+                }
+            }
+
+            // The rule is as follow: If we ask for text/plain, we don't care about the HTML
+            // If we ask for HTML and there is a text/plain we add it as an alternative.
+            // If contentType is not specified look at the template available:
+            // - .txt only -> text/plain
+            // else
+            // -           -> text/html
+            String contentType = (String) infos.get().get("contentType");
+            String bodyHtml = null;
+            String bodyText = "";
+            try {
+                Template templateHtml = TemplateLoader.load(templateName + ".html");
+                bodyHtml = templateHtml.render(templateHtmlBinding);
+            } catch (TemplateNotFoundException e) {
+                if (contentType != null && !contentType.startsWith("text/plain")) {
+                    throw e;
+                }
+            }
+
+            try {
+                Template templateText = TemplateLoader.load(templateName + ".txt");
+                bodyText = templateText.render(templateTextBinding);
+            } catch (TemplateNotFoundException e) {
+                if (bodyHtml == null && (contentType == null || (contentType != null && contentType.startsWith("text/plain")))) {
+                    throw e;
+                }
+            }
+
+            // Content type
+
+            if (contentType == null) {
+                if (bodyHtml != null) {
+                    contentType = "text/html";
+                } else {
+                    contentType = "text/plain";
+                }
+            }
+
+            // Recipients
+            final List<Object> recipientList = (List<Object>) infos.get().get("recipients");
+            // From
+            final Object from = infos.get().get("from");
+            final Object replyTo = infos.get().get("replyTo");
+
+            Email email = null;
+            if (infos.get().get("attachments") == null) {
+                if (StringUtils.isEmpty(bodyHtml)) {
+                    email = new SimpleEmail();
+                    email.setMsg(bodyText);
+                } else {
+                    HtmlEmail htmlEmail = new HtmlEmail();
+                    htmlEmail.setHtmlMsg(bodyHtml);
+                    if (!StringUtils.isEmpty(bodyText)) {
+                        htmlEmail.setTextMsg(bodyText);
+                    }
+                    email = htmlEmail;
+                }
+
             } else {
-                contentType = "text/plain";
-            }
-        }
-
-        // Recipients
-        List<Object> recipientList = (List<Object>) infos.get().get("recipients");
-        Object[] recipients = new Object[recipientList.size()];
-        int i = 0;
-        for (Object recipient : recipientList) {
-            recipients[i] = recipient;
-            i++;
-        }
-
-        // From
-        Object from = infos.get().get("from");
-        Object replyTo = infos.get().get("replyTo");
-
-        // Attachment
-        Object[] attachements = new Object[0];
-        if (infos.get().get("attachments") != null) {
-            List<Object> objectList = (List<Object>) infos.get().get("attachments");
-            attachements = new Object[objectList.size()];
-            i = 0;
-            for (Object object : objectList) {
-                attachements[i] = object;
-                i++;
+                if (StringUtils.isEmpty(bodyHtml)) {
+                    email = new MultiPartEmail();
+                    email.setMsg(bodyText);
+                } else {
+                    HtmlEmail htmlEmail = new HtmlEmail();
+                    htmlEmail.setHtmlMsg(bodyHtml);
+                    if (!StringUtils.isEmpty(bodyText)) {
+                        htmlEmail.setTextMsg(bodyText);
+                    }
+                    email = htmlEmail;
+                }
+                MultiPartEmail multiPartEmail = (MultiPartEmail) email;
+                List<EmailAttachment> objectList = (List<EmailAttachment>) infos.get().get("attachments");
+                for (EmailAttachment object : objectList) {
+                    multiPartEmail.attach(object);
+                }
             }
 
+            if (from != null) {
+                email.setFrom(from.toString());
+            }
+
+            if (replyTo != null) {
+                email.addReplyTo(replyTo.toString());
+            }
+
+            for (Object recipient : recipientList) {
+                email.addTo(recipient.toString());
+            }
+
+            if (!StringUtils.isEmpty(charset)) {
+                email.setCharset(charset);
+            }
+
+            email.setSubject(subject);
+            email.updateContentType(contentType);
+
+            if (headers != null) {
+                for (String key : headers.keySet()) {
+                    email.addHeader(key, headers.get(key));
+                }
+            }
+
+            return Mail.send(email);
+        } catch (EmailException ex) {
+            throw new MailException("Cannot send email", ex);
         }
+    }
 
-        // Send
-        final String body = (bodyHtml != null ? bodyHtml : bodyText);
-        final String alternate = (bodyHtml != null ? bodyText : null);
-
-       return Mail.send(from, replyTo, recipients, subject, body, alternate, contentType, charset, headers, attachements);
-  }
-
-    public static boolean sendAndWait(Object... args) {
+    public static boolean sendAndWait(Object... args) throws EmailException {
         try {
             Future<Boolean> result = send(args);
             return result.get();

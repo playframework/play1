@@ -2,6 +2,9 @@ package controllers;
 
 import java.util.*;
 
+import org.apache.commons.mail.EmailAttachment;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.HtmlEmail;
 import play.*;
 import play.mvc.*;
 import play.libs.*;
@@ -94,8 +97,25 @@ public class Application extends Controller {
     }
     
     public static void mail4() {
-	notifiers.Welcome.welcome3();
+	    notifiers.Welcome.welcome3();
         renderText("OK4");
+    }
+
+     public static void mail5() throws EmailException {
+         HtmlEmail email = new HtmlEmail();
+         email.setHtmlMsg("<html><body><h1>A Title</h1></body></html>");
+         email.setTextMsg("alternative message");
+         EmailAttachment attachment = new EmailAttachment();
+         attachment.setDescription("An image");
+         attachment.setDisposition(EmailAttachment.ATTACHMENT);
+         attachment.setName("fond3.jpg");
+         attachment.setPath(Play.applicationPath.getPath() + java.io.File.separator + "test" + java.io.File.separator + "fond3.jpg") ;
+         email.attach(attachment);
+         email.setFrom("test@localhost");
+         email.addTo("test@localhost");
+         email.setSubject("test attachments");
+         Mail.send(email);
+        renderText("OK5");
     }
     
     public static void ifthenelse() {

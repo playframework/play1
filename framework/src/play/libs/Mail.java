@@ -1,39 +1,24 @@
 package play.libs;
 
-import java.io.File;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
-import javax.mail.Authenticator;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.mail.Email;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.HtmlEmail;
+import org.apache.commons.mail.MultiPartEmail;
 import play.Logger;
 import play.Play;
 import play.exceptions.MailException;
-import play.exceptions.UnexpectedException;
+
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.*;
 
 /**
  * Mail utils
@@ -43,115 +28,16 @@ public class Mail {
     public static Session session;
     public static boolean asynchronousSend = true;
 
-    /**
-     * Send an email in plain text
-     * @param from From address. Can be of the form xxx <m@m.com>
-     * @param recipient To address. Can be of the form xxx <m@m.com>
-     * @param subject Subject
-     * @param body Body
-     */
-    public static Future<Boolean> send(String from, String recipient, String subject, String body) {
-        return send(from, new String[]{recipient}, subject, body, null, "text/plain", new Object[0]);
-    }
-
-    /**
-     * Send an email in text/html with a text/plain alternative
-     * @param from From address. Can be of the form xxx <m@m.com>
-     * @param recipient To address. Can be of the form xxx <m@m.com>
-     * @param subject Subject
-     * @param body text/html body content
-     * @param alternate text/plain alternative content (optional)
-     */
-    public static Future<Boolean> send(String from, String recipient, String subject, String body, String alternate) {
-        return send(from, new String[]{recipient}, subject, body, alternate, "text/html", new Object[0]);
-    }
-
-    /**
-     * Send an email in text/html with a text/plain alternative and attachments
-     * @param from From address. Can be of the form xxx <m@m.com>
-     * @param recipient To address. Can be of the form xxx <m@m.com>
-     * @param subject Subject
-     * @param body text/html body content
-     * @param alternate text/plain alternative content (optional)
-     * @param obj the attachments to the email
-     */
-    public static Future<Boolean> send(String from, String recipient, String subject, String body, String alternate, Object... obj) {
-        return send(from, new String[]{recipient}, subject, body, alternate, "text/html", obj);
-    }
-
-    /**
-     * Send an email in text/plain format
-     * @param from From address. Can be of the form xxx <m@m.com>
-     * @param recipients To addresses. Can be of the form xxx <m@m.com>
-     * @param subject Subject
-     * @param body The text/plain body of the email
-     */
-    public static Future<Boolean> send(String from, String[] recipients, String subject, String body) {
-        return send(from, recipients, subject, body, null, "text/plain", new Object[0]);
-    }
-
-    /**
-     * Send an email in text/plain
-     * @param from From address. Can be of the form xxx <m@m.com>
-     * @param recipient To address. Can be of the form xxx <m@m.com>
-     * @param subject Subject
-     * @param body plain/text body of the email
-     * @param attachments File attachments
-     */
-    public static Future<Boolean> send(String from, String recipient, String subject, String body, Object... attachments) {
-        return send(from, new String[]{recipient}, subject, body, null, "text/plain", attachments);
-    }
-
-    /**
-     * Send an email in text/plain
-     * @param from From address Can be of the form xxx <m@m.com>
-     * @param recipients To addresses Can be of the form xxx <m@m.com>
-     * @param subject Subject
-     * @param body Body
-     * @param attachments File attachments
-     */
-    public static Future<Boolean> send(String from, String[] recipients, String subject, String body, Object... attachments) {
-        return send(from, null, recipients, subject, body, null, "text/plain", attachments);
-    }
 
     /**
      * Send an email
-     * @param from From address. Can be of the form xxx <m@m.com>
-     * @param replyTo ReplyTo address Can be of the form xxx <m@m.com>
-     * @param recipients To addresses
-     * @param subject Subject
-     * @param body body of the email
-     * @param alternate text/plain body (optional). This parameter is ignored if contentType is set to text/plain or is null.
-     * @param contentType The content type of the body (text/plain or text/html)
-     * @param attachments File attachments
      */
-    public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) {
-        return send(from, replyTo, recipients, subject, body, alternate, contentType, null, null, attachments);
-    }
-
-    /**
-     * Send an email
-     * @param from From address
-     * @param replyTo ReplyTo address
-     * @param recipients To addresses
-     * @param subject Subject
-     * @param body body of the email
-     * @param alternate text/plain body (optional). This parameter is ignored if contentType is set to text/plain or is null.
-     * @param contentType The content type of the body (text/plain or text/html)
-     * @param charset The character set of the message (optional)
-     * @param headers The mail headers (optional)
-     * @param attachments File attachments
-     */
-    public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, String charset, Map<String, String> headers, Object... attachments) {
+    public static Future<Boolean> send(Email email) {
         try {
-            if (from == null) {
-                from = Play.configuration.getProperty("mail.smtp.from", "user@localhost");
-            }
-            if (replyTo == null) {
-                replyTo = from;
-            }
+            email = buildMessage(email);
+
             if (Play.configuration.getProperty("mail.smtp", "").equals("mock") && Play.mode == Play.Mode.DEV) {
-                Mock.send(from, replyTo, recipients, subject, body, alternate, contentType, attachments);
+                Mock.send(email);
                 return new Future<Boolean>() {
 
                     public boolean cancel(boolean mayInterruptIfRunning) {
@@ -175,143 +61,41 @@ public class Mail {
                     }
                 };
             }
-            return sendMessage(buildMessage(from, replyTo, recipients, subject, body, alternate, contentType, charset, headers, attachments));
+
+            email.setMailSession(getSession());
+            return sendMessage(email);
         } catch (MessagingException ex) {
+            throw new MailException("Cannot send email", ex);
+        } catch (EmailException ex) {
             throw new MailException("Cannot send email", ex);
         }
     }
 
     /**
-     * Construct a MimeMessage
-     * @param from From address
-     * @param recipients To addresses
-     * @param subject Subject
-     * @param body body of the email
-     * @param alternate text/plain body (optional). This parameter is ignored if contentType is set to text/plain or is null.
-     * @param contentType The content type of the body (text/plain or text/html) (optional)
-     * @param attachments File attachments
+     *
      */
-    public static MimeMessage buildMessage(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) throws MessagingException {
-        return buildMessage(from, replyTo, recipients, subject, body, alternate, contentType, null, null, attachments);
-    }
+    public static Email buildMessage(Email email) throws MessagingException, EmailException {
 
-    /**
-     * Construct a MimeMessage
-     * @param from From address
-     * @param recipients To addresses
-     * @param subject Subject
-     * @param body body of the email
-     * @param alternate text/plain body (optional). This parameter is ignored if contentType is set to text/plain or is null.
-     * @param contentType The content type of the body (text/plain or text/html) (optional)
-     * @param charset The character set of the message (optional)
-     * @param headers The mail headers (optional)
-     * @param attachments File attachments
-     */
-    public static MimeMessage buildMessage(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, String charset, Map<String, String> headers, Object... attachments) throws MessagingException {
-
-        MimeMessage msg = new MimeMessage(getSession());
-
-        if (from == null) {
-            from = Play.configuration.getProperty("mail.smtp.from");
-        }
-        if (from == null) {
+        String from = Play.configuration.getProperty("mail.smtp.from");
+        if (email.getFromAddress() == null && !StringUtils.isEmpty(from)) {
+            email.setFrom(from);
+        } else if (email.getFromAddress() == null) {
             throw new MailException("Please define a 'from' email address", new NullPointerException());
         }
-        if (recipients == null || recipients.length == 0) {
+        if (email.getToAddresses() == null || email.getToAddresses().size() == 0) {
             throw new MailException("Please define a recipient email address", new NullPointerException());
         }
-        if (subject == null) {
+        if (email.getSubject() == null) {
             throw new MailException("Please define a subject", new NullPointerException());
         }
-
-        if (contentType == null) {
-            contentType = "text/plain";
+        if (email.getReplyToAddresses() == null || email.getReplyToAddresses().size() == 0) {
+            email.addReplyTo(email.getFromAddress().getAddress());
         }
 
-        msg.setFrom(from instanceof InternetAddress ? (InternetAddress) from : new InternetAddress(from.toString()));
-        
-        InternetAddress reply;
-        if (replyTo == null) {
-            reply = from instanceof InternetAddress ? (InternetAddress) from : new InternetAddress(from.toString());
-        } else {
-            reply = replyTo instanceof InternetAddress ? (InternetAddress) replyTo : new InternetAddress(replyTo.toString());
-        }
-        msg.setReplyTo(new InternetAddress[]{reply});
-
-        InternetAddress[] addressTo = new InternetAddress[recipients.length];
-        for (int i = 0; i < recipients.length; i++) {
-            addressTo[i] = recipients[i] instanceof InternetAddress ? (InternetAddress) recipients[i] : new InternetAddress(recipients[i].toString().trim());
-        }
-        msg.setRecipients(javax.mail.Message.RecipientType.TO, addressTo);
-
-        msg.setSubject(subject, charset != null ? charset : "utf-8");
-        if ("text/plain".equals(contentType)) {
-            msg.setText(body, charset != null ? charset : "utf-8");
-            if (attachments != null && attachments.length > 0) {
-                Multipart mp = new MimeMultipart();
-                handleAttachments(mp, attachments);
-                msg.setContent(mp);
-            }
-        } else {
-
-            if (attachments != null && attachments.length > 0) {
-
-                Multipart mixed = new MimeMultipart("mixed");
-
-                Multipart mp = getMultipart(body, alternate, contentType, charset);
-
-                // Create a body part to house the multipart/alternative Part
-                MimeBodyPart contentPartRoot = new MimeBodyPart();
-                contentPartRoot.setContent(mp);
-
-                mixed.addBodyPart(contentPartRoot);
-
-                // Add an attachment
-                handleAttachments(mixed, attachments);
-
-                msg.setContent(mixed);
-            } else {
-
-                msg.setContent(getMultipart(body, alternate, contentType, charset));
-            }
-
-        }
-
-        // Apparently addHeaders must be after msg.setText, because setText will overwrite the "Content-Transfer-Encoding" header. Otherwise even if we write,
-        // addHeader("Content-Transfer-Encoding", "7bit"); the header will be, "Content-Transfer-Encoding: quoted-printable". .
-        msg = addHeaders(msg, headers);
-
-        return msg;
+        return email;
     }
 
-    protected static MimeMessage addHeaders(MimeMessage msg, Map<String, String> headers) throws MessagingException {
-        if (headers != null && headers.size() > 0) {
-            Iterator<String> it = headers.keySet().iterator();
-            while (it.hasNext()) {
-                String name = it.next();
-                msg.setHeader(name, headers.get(name));
-            }
-        }
-        return msg;
-    }
-
-    protected static Multipart getMultipart(String body, String alternate, String contentType, String charset) throws MessagingException {
-        Multipart mp = new MimeMultipart("alternative");
-
-        if (!StringUtils.isEmpty(alternate)) {
-            MimeBodyPart alternatePart = new MimeBodyPart();
-            alternatePart.setContent(alternate, "text/plain; charset=" + (charset != null ? charset : "utf-8"));
-            mp.addBodyPart(alternatePart);
-        }
-
-        MimeBodyPart bodyPart = new MimeBodyPart();
-        bodyPart.setContent(body, contentType + "; charset=" + (charset != null ? charset : "utf-8"));
-        mp.addBodyPart(bodyPart);
-
-        return mp;
-    }
-
-    private static Session getSession() {
+    public static Session getSession() {
         if (session == null) {
             Properties props = new Properties();
             props.put("mail.smtp.host", Play.configuration.getProperty("mail.smtp.host"));
@@ -384,38 +168,19 @@ public class Mail {
         return session;
     }
 
-    private static void handleAttachments(Multipart mp, Object... attachments) throws MessagingException {
-        if (attachments != null) {
-            for (Object attachment : attachments) {
-                DataSource datasource = null;
-                if (attachment instanceof File) {
-                    datasource = new FileDataSource((File) attachment);
-                } else if (attachment instanceof DataSource) {
-                    datasource = (DataSource) attachment;
-                } else {
-                    throw new UnexpectedException(attachment.getClass().getName() + " type is not supported as attachement.");
-                }
-                MimeBodyPart part = new MimeBodyPart();
-                part.setDataHandler(new DataHandler(datasource));
-                part.setFileName(datasource.getName());
-                part.setContentID(Codec.UUID() + datasource.getName());
-                mp.addBodyPart(part);
-            }
-        }
-    }
-
     /**
      * Send a JavaMail message
+     *
      * @param msg A JavaMail message
      */
-    public static Future<Boolean> sendMessage(final Message msg) {
+    public static Future<Boolean> sendMessage(final Email msg) {
         if (asynchronousSend) {
             return executor.submit(new Callable<Boolean>() {
 
                 public Boolean call() {
                     try {
                         msg.setSentDate(new Date());
-                        Transport.send(msg);
+                        msg.send();
                         return true;
                     } catch (Throwable e) {
                         MailException me = new MailException("Error while sending email", e);
@@ -428,7 +193,7 @@ public class Mail {
             final StringBuffer result = new StringBuffer();
             try {
                 msg.setSentDate(new Date());
-                Transport.send(msg);
+                msg.send();
             } catch (Throwable e) {
                 MailException me = new MailException("Error while sending email", e);
                 Logger.error(me, "The email has not been sent");
@@ -458,6 +223,7 @@ public class Mail {
             };
         }
     }
+
     static ExecutorService executor = Executors.newCachedThreadPool();
 
     public static class SMTPAuthenticator extends Authenticator {
@@ -480,25 +246,70 @@ public class Mail {
 
         static Map<String, String> emails = new HashMap();
 
-        static void send(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) {
-            StringBuffer email = new StringBuffer();
-            email.append("From Mock Mailer\n\tNew email received by");
-            for (Object add : recipients) {
-                email.append(", " + (add instanceof InternetAddress ? ((InternetAddress) add).toString() : add.toString()));
+
+        public static String getContent(Part message) throws MessagingException,
+                IOException {
+
+            if (message.getContent() instanceof String) {
+                return message.getContentType() + ": " + (String) message.getContent();
+            } else if (message.getContent() != null && message.getContent() instanceof Multipart) {
+                Multipart part = (Multipart) message.getContent();
+                String text = "";
+                for (int i = 0; i < part.getCount(); i++) {
+                    BodyPart bodyPart = part.getBodyPart(i);
+                    if (!Message.ATTACHMENT.equals(bodyPart.getDisposition())) {
+                        text += getContent(part.getBodyPart(i));
+                    } else {
+                        return "attachment (" + bodyPart.getDisposition() + "): description " + bodyPart.getDescription() + " - name " + bodyPart.getFileName();
+                    }
+                }
+                return text;
             }
-            email.append("\n\tFrom: " + (from instanceof InternetAddress ? ((InternetAddress) from).toString() : from.toString()));
-            email.append("\n\tReplyTo: " + (replyTo instanceof InternetAddress ? ((InternetAddress) replyTo).toString() : replyTo.toString()));
-            email.append("\n\tSubject: " + subject);
-            email.append("\n\tAttachments: " + attachments.length);
-            email.append("\n\tBody(" + contentType + "): " + body);
-            if (!StringUtils.isEmpty(alternate)) {
-                email.append("\n\tAlternate Body(text/plain): " + alternate);
+            if (message.getContent() != null && message.getContent() instanceof Part) {
+                if (!Message.ATTACHMENT.equals(message.getDisposition())) {
+                    return getContent((Part) message.getContent());
+                } else {
+                    return "attachment (" + message.getDisposition() + "): description " + message.getDescription() + " - name " + message.getFileName();
+                }
             }
-            email.append("\n");
-            Logger.info(email.toString());
-            for (Object add : recipients) {
-                emails.put((add instanceof InternetAddress ? ((InternetAddress) add).getAddress() : add.toString()), email.toString());
+
+            return "";
+        }
+
+
+        static void send(Email email) throws MessagingException {
+
+            try {
+                final StringBuffer content = new StringBuffer();
+                Properties props = new Properties();
+                props.put("mail.smtp.host", "myfakesmtpserver.com");
+
+                Session session = Session.getInstance(props);
+                email.setMailSession(session);
+
+                email.buildMimeMessage();
+                final String body = getContent(email.getMimeMessage());
+
+                content.append("From Mock Mailer\n\tNew email received by");
+
+
+                content.append("\n\tFrom: " + email.getFromAddress().getAddress());
+                content.append("\n\tReplyTo: " + ((InternetAddress) email.getReplyToAddresses().get(0)).getAddress());
+                content.append("\n\tSubject: " + email.getSubject());
+                content.append("\n\tBody: " + body);
+
+                content.append("\n");
+                Logger.info(content.toString());
+
+                for (Object add : email.getToAddresses()) {
+                    content.append(", " + add.toString());
+                    emails.put(((InternetAddress) add).getAddress(), content.toString());
+                }
+
+            } catch (Exception e) {
+                Logger.error(e, "error sending mock email");
             }
+
         }
 
         public static String getLastMessageReceivedBy(String email) {
@@ -506,3 +317,4 @@ public class Mail {
         }
     }
 }
+
