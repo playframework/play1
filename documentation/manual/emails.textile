@@ -1,8 +1,31 @@
 h1. Sending emails with play
 
-You can use the play.libs.Mail utility to send emails very easily:
+Email are using the "jakarta commons email":http://commons.apache.org/email/userguide.html library under the hoot. You can use the play.libs.Mail utility to send emails very easily:
 
-bc. Mail.send("sender@zenexity.fr","recipient@zenexity.fr","Subject","Message");
+A simple email:
+
+bc. SimpleEmail email = new SimpleEmail();
+email.setFrom("sender@zenexity.fr");
+email.addTo("recipient@zenexity.fr");
+email.setSubject("subject");
+email.setMsg("Message");
+Mail.send(email); 
+
+An html email:
+
+bc. HtmlEmail email = new HtmlEmail();
+email.addTo("info@lunatech.com");
+email.setFrom(sender@lunatech.com", "Nicolas");
+email.setSubject("Test email with inline image");
+// embed the image and get the content id
+URL url = new URL("http://www.zenexity.fr/wp-content/themes/zenexity/images/logo.png");
+String cid = email.embed(url, "Zenexity logo");
+// set the html message
+email.setHtmlMsg("<html>Zenexity logo - <img src=\"cid:"+cid+"\"></html>");
+// set the alternative message
+email.setTextMsg("Your email client does not support HTML messages, too bad :(");
+
+More information about the commons email "here":http://commons.apache.org/email/userguide.html
 
 h2. <a>Mail and MVC integration</a>
 
@@ -26,7 +49,10 @@ public class Mails extends Mailer {
       setSubject("Welcome %s", user.name);
       addRecipient(user.email);
       addFrom("Me <me@me.com>");
-      addAttachment(Play.getFile("rules.pdf"));
+      EmailAttachment attachment = new EmailAttachment();
+      attachment.setDescription("A pdf document");
+      attachment.setPath(Play.getFile("rules.pdf").getPath());
+      addAttachment(attachment);
       send(user);
    }
  
