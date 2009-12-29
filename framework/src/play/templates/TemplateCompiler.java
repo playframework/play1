@@ -378,6 +378,9 @@ public class TemplateCompiler {
                         tName = tName.substring(tName.lastIndexOf(".") + 1);
                     }
                     for (Class c : fastClasses) {
+                        if (!c.isAnnotationPresent(FastTags.Namespace.class) && tSpace.length() > 0) {
+                            continue;
+                        }
                         if (c.isAnnotationPresent(FastTags.Namespace.class) && !((FastTags.Namespace) c.getAnnotation(FastTags.Namespace.class)).value().equals(tSpace)) {
                             continue;
                         }
