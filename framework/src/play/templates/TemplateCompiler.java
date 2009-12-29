@@ -371,16 +371,25 @@ public class TemplateCompiler {
                     List<Class> fastClasses = Play.classloader.getAssignableClasses(FastTags.class);
                     fastClasses.add(0, FastTags.class);
                     Method m = null;
+                    String tName = tag.name;
+                    String tSpace = "";
+                    if (tName.indexOf(".") > 0) {
+                        tSpace = tName.substring(0, tName.lastIndexOf("."));
+                        tName = tName.substring(tName.lastIndexOf(".") + 1);
+                    }
                     for (Class c : fastClasses) {
+                        if (c.isAnnotationPresent(FastTags.Namespace.class) && !((FastTags.Namespace) c.getAnnotation(FastTags.Namespace.class)).value().equals(tSpace)) {
+                            continue;
+                        }
                         try {
-                            m = c.getDeclaredMethod("_" + tag.name, Map.class, Closure.class, PrintWriter.class, Template.ExecutableTemplate.class, int.class);
+                            m = c.getDeclaredMethod("_" + tName, Map.class, Closure.class, PrintWriter.class, Template.ExecutableTemplate.class, int.class);
                         } catch (NoSuchMethodException ex) {
                             continue;
                         }
                     }
                     if (m != null) {
                         print("play.templates.TagContext.enterTag('" + tag.name + "');");
-                        print(m.getDeclaringClass().getName() + "._" + tag.name + "(attrs" + tagIndex + ",body" + tagIndex + ", out, this, " + tag.startLine + ");");
+                        print(m.getDeclaringClass().getName() + "._" + tName + "(attrs" + tagIndex + ",body" + tagIndex + ", out, this, " + tag.startLine + ");");
                         print("play.templates.TagContext.exitTag();");
                     } else {
                         print("invokeTag(" + tag.startLine + ",'" + tagName + "',attrs" + tagIndex + ",body" + tagIndex + ");");
