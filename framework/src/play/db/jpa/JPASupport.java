@@ -621,9 +621,10 @@ public class JPASupport implements Serializable {
 
     // File attachments
     public void setupAttachment() {
-        for (Field field : getClass().getFields()) {
+        for (Field field : getClass().getDeclaredFields()) {
             if (FileAttachment.class.isAssignableFrom(field.getType())) {
                 try {
+                	field.setAccessible(true);
                     FileAttachment attachment = (FileAttachment) field.get(this);
                     if (attachment != null) {
                         attachment.model = this;
@@ -642,9 +643,10 @@ public class JPASupport implements Serializable {
     }
 
     public void saveAttachment() {
-        for (Field field : getClass().getFields()) {
+        for (Field field : getClass().getDeclaredFields()) {
             if (field.getType().equals(FileAttachment.class)) {
                 try {
+                	field.setAccessible(true);
                     FileAttachment attachment = (FileAttachment) field.get(this);
                     if (attachment != null) {
                         attachment.model = this;
