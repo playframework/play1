@@ -92,3 +92,6 @@ help
 *.iws
 modules/router/lib/router.jar
 modules/grizzly/lib/play-grizzly.jar
+play.ipr
+play.iws
+*iml

@@ -108,7 +108,7 @@ public class TemplateCompiler {
             
             // Class header
             print("class ");
-            String className = "Template_" + ((template.name.hashCode()+"").replace("-", "M"));
+            String className = "Template_" + ((template.name.hashCode() + "").replace("-", "M"));
             print(className);
             println(" extends play.templates.Template.ExecutableTemplate {");
             println("public Object run() { use(play.templates.JavaExtensions) {");
@@ -251,9 +251,9 @@ public class TemplateCompiler {
             String action = parser.getToken().trim();
             if (action.trim().matches("^'.*'$")) {
                 if (absolute) {
-                    print("\tout.print(play.mvc.Http.Request.current().getBase() + play.mvc.Router.reverseWithCheck("+action+", play.Play.getVirtualFile(" + action + ")));");
+                    print("\tout.print(play.mvc.Http.Request.current().getBase() + play.mvc.Router.reverseWithCheck(" + action + ", play.Play.getVirtualFile(" + action + ")));");
                 } else {
-                    print("\tout.print(play.mvc.Router.reverseWithCheck("+action+", play.Play.getVirtualFile(" + action + ")));");
+                    print("\tout.print(play.mvc.Router.reverseWithCheck(" + action + ", play.Play.getVirtualFile(" + action + ")));");
                 }
             } else {
                 if (!action.endsWith(")")) {
@@ -296,8 +296,8 @@ public class TemplateCompiler {
             // Use inlineTag if exists
             try {
                 Method m = InlineTags.class.getDeclaredMethod("_" + tag.name, int.class, CALL.class);
-                print("play.templates.TagContext.enterTag('"+tag.name+"');");
-                print((String)m.invoke(null, new Object[] {tagIndex, CALL.START}));
+                print("play.templates.TagContext.enterTag('" + tag.name + "');");
+                print((String) m.invoke(null, new Object[]{tagIndex, CALL.START}));
                 tag.hasBody = false;
                 markLine(parser.getLine());
                 println();
@@ -314,7 +314,7 @@ public class TemplateCompiler {
                 print("body" + tagIndex + " = null;");
                 markLine(parser.getLine());
                 println();
-            }            
+            }
             skipLineBreak = true;
 
         }
@@ -343,26 +343,47 @@ public class TemplateCompiler {
                 template.doBodyLines.add(currentLine);
                 println();
             } else {
-                if(tag.hasBody) {
+                if (tag.hasBody) {
                     print("};"); // close body closure
                 }
                 println();
                 // Use inlineTag if exists
                 try {
                     Method m = InlineTags.class.getDeclaredMethod("_" + tag.name, int.class, CALL.class);
-                    println((String)m.invoke(null, new Object[] {tagIndex, CALL.END}));
+                    println((String) m.invoke(null, new Object[]{tagIndex, CALL.END}));
                     print("play.templates.TagContext.exitTag();");
                 } catch (Exception e) {
                     // Use fastTag if exists
-                    try {
-                        FastTags.class.getDeclaredMethod("_" + tag.name, Map.class, Closure.class, PrintWriter.class, Template.ExecutableTemplate.class, int.class);
-                        print("play.templates.TagContext.enterTag('"+tag.name+"');");
-                        print("play.templates.FastTags._" + tag.name + "(attrs" + tagIndex + ",body" + tagIndex + ", out, this, " + tag.startLine + ");");
+                    List<Class> fastClasses = Play.classloader.getAssignableClasses(FastTags.class);
+                    fastClasses.add(0, FastTags.class);
+                    Method m = null;
+                    String tName = tag.name;
+                    String tSpace = "";
+                    if (tName.indexOf(".") > 0) {
+                        tSpace = tName.substring(0, tName.lastIndexOf("."));
+                        tName = tName.substring(tName.lastIndexOf(".") + 1);
+                    }
+                    for (Class c : fastClasses) {
+                        if (!c.isAnnotationPresent(FastTags.Namespace.class) && tSpace.length() > 0) {
+                            continue;
+                        }
+                        if (c.isAnnotationPresent(FastTags.Namespace.class) && !((FastTags.Namespace) c.getAnnotation(FastTags.Namespace.class)).value().equals(tSpace)) {
+                            continue;
+                        }
+                        try {
+                            m = c.getDeclaredMethod("_" + tName, Map.class, Closure.class, PrintWriter.class, Template.ExecutableTemplate.class, int.class);
+                        } catch (NoSuchMethodException ex) {
+                            continue;
+                        }
+                    }
+                    if (m != null) {
+                        print("play.templates.TagContext.enterTag('" + tag.name + "');");
+                        print(m.getDeclaringClass().getName() + "._" + tName + "(attrs" + tagIndex + ",body" + tagIndex + ", out, this, " + tag.startLine + ");");
                         print("play.templates.TagContext.exitTag();");
-                    } catch (NoSuchMethodException ex) {
+                    } else {
                         print("invokeTag(" + tag.startLine + ",'" + tagName + "',attrs" + tagIndex + ",body" + tagIndex + ");");
                     }
-                }                
+                }
                 markLine(tag.startLine);
                 println();
             }
@@ -418,7 +439,7 @@ public class TemplateCompiler {
             ABS_ACTION, // @@{...}
             COMMENT, // *{...}*
         }
-        private int end,  begin,  end2,  begin2,  len;
+        private int end, begin, end2, begin2, len;
         private Token state = Token.PLAIN;
 
         private Token found(Token newState, int skip) {
@@ -442,9 +463,9 @@ public class TemplateCompiler {
         public String getToken() {
             return pageSource.substring(begin2, end2);
         }
-        
+
         public String checkNext() {
-            if(end2 < pageSource.length()) {
+            if (end2 < pageSource.length()) {
                 return pageSource.charAt(end2) + "";
             }
             return "";

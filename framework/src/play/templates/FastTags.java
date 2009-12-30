@@ -3,6 +3,10 @@ package play.templates;
 import groovy.lang.Closure;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -256,4 +260,13 @@ public class FastTags {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
         }
     }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public static @interface Namespace {
+
+        String value() default "";
+
+    }
+
 }

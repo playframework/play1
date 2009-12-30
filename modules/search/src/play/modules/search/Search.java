@@ -285,7 +285,7 @@ public class Search {
             play.modules.search.Field index = field.getAnnotation(play.modules.search.Field.class);
             if (index==null) continue;
             if (field.getType().isArray()) continue;
-            if (field.getType().isAssignableFrom(Collection.class)) continue;
+            if (Collection.class.isAssignableFrom(field.getType())) continue;
             
             String name = field.getName();
             String value = valueOf(object, field);
@@ -309,7 +309,7 @@ public class Search {
     
     public static IndexSearcher getIndexReader(String name) {
         try {
-            if (!indexReaders.containsKey(name) ) {
+            if (!indexReaders.containsKey(name) || !indexReaders.get(name).getIndexReader().isCurrent()) {
                 synchronized (Search.class) {
                     if (indexReaders.containsKey(name))
                         indexReaders.get(name).close();

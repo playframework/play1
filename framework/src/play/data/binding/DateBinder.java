@@ -26,5 +26,7 @@ public class DateBinder implements SupportedType<Date> {
             // Left empty. 
             // return Utils.AlternativeDateFormat.getDefaultFormatter().parse(value);
         }
+        
     }
+
 }
