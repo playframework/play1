@@ -251,7 +251,7 @@ try:
 			jpda_port = 0
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~~ Build java path
-	def do_java():
+	def do_java(className='play.server.Server'):
 		global java_cmd
 		global java_path
 		global pid_path
@@ -300,7 +300,7 @@ try:
 				java_args.append('-Djava.security.policy==%s' % policyFile)
 		
 		# The Java stuff
-		java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, 'play.server.Server']
+		java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, className]
 		
 		if not os.environ.has_key('PLAY_PID_PATH'):
 			pid_path = os.path.join(application_path, 'server.pid');
