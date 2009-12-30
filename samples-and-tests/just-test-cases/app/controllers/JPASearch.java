@@ -20,7 +20,7 @@ public class JPASearch extends Controller {
         else {
             if (field==null) field ="title";
             Query qr = Search.search(field+":"+query+"*", Book.class);
-            books = qr.page(0, 10).orderBy("title").reverse().fetch();
+            books = qr.page(0, 10).reverse().fetch();
         }
         render(books,field,query);
     }
