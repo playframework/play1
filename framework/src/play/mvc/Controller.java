@@ -26,6 +26,7 @@ import play.exceptions.UnexpectedException;
 import play.utils.Java;
 import play.libs.Time;
 import play.mvc.Http.Request;
+import play.mvc.Router.ActionDefinition;
 import play.mvc.results.Error;
 import play.mvc.results.Forbidden;
 import play.mvc.results.NotFound;
@@ -340,7 +341,18 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
                 }
             }
             try {
-                throw new Redirect(Router.reverse(action, r).toString(), permanent);
+                ActionDefinition actionDefinition = Router.reverse(action, r);
+                if(currentReverse.get() != null) {
+                    ActionDefinition currentActionDefinition =  currentReverse.get();
+                    currentActionDefinition.action = actionDefinition.action;
+                    currentActionDefinition.url = actionDefinition.url;
+                    currentActionDefinition.method = actionDefinition.method;
+                    currentActionDefinition.star = actionDefinition.star;
+                    currentActionDefinition.args = actionDefinition.args;
+                    currentReverse.remove();
+                } else {
+                    throw new Redirect(actionDefinition.toString(), permanent);
+                }
             } catch (NoRouteFoundException e) {
                 StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
                 if (element != null) {
@@ -558,4 +570,13 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         Request.current().isNew = false;
         throw new Suspend(task);
     }
+
+    private static ThreadLocal<ActionDefinition> currentReverse = new ThreadLocal<ActionDefinition>();
+
+    protected static ActionDefinition reverse() {
+        ActionDefinition actionDefinition = new ActionDefinition();
+        currentReverse.set(actionDefinition);
+        return actionDefinition;
+    }
+    
 }

@@ -283,6 +283,14 @@ try:
 
 		if application_mode == 'prod':
 			java_args.append('-server')
+		
+		java_policy = readConf('java.policy')
+		if not java_policy == '':
+			policyFile = os.path.join(application_path, 'conf', java_policy)
+			if os.path.exists(policyFile):
+				print "~ using policy file \"%s\"" % policyFile
+				java_args.append('-Djava.security.manager')
+				java_args.append('-Djava.security.policy==%s' % policyFile)
 
 		# The Java stuff
 		java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, className]
@@ -953,17 +961,18 @@ try:
 		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%PLAY_BASE%', play_base)
 		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%PLAY_ID%', play_id)
 		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%JPDA_PORT%', jpda_port)
-		os.rename(os.path.join(application_path, 'eclipse/debug.launch'), os.path.join(application_path, 'eclipse/%s.launch' % application_name))
 
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%PROJECT_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%PLAY_BASE%', play_base)
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%PLAY_ID%', play_id)
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%JPDA_PORT%', jpda_port)
-		os.rename(os.path.join(application_path, 'eclipse/test.launch'), os.path.join(application_path, 'eclipse/Test %s.launch' % application_name))	
 
 		replaceAll(os.path.join(application_path, 'eclipse/connect.launch'), r'%PROJECT_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'eclipse/connect.launch'), r'%JPDA_PORT%', jpda_port)
+		
 		os.rename(os.path.join(application_path, 'eclipse/connect.launch'), os.path.join(application_path, 'eclipse/Connect JPDA to %s.launch' % application_name))
+		os.rename(os.path.join(application_path, 'eclipse/test.launch'), os.path.join(application_path, 'eclipse/Test %s.launch' % application_name))	
+		os.rename(os.path.join(application_path, 'eclipse/debug.launch'), os.path.join(application_path, 'eclipse/%s.launch' % application_name))
 
 		print "~ OK, the application is ready for eclipse"
 		print "~ Use File/Import/General/Existing project to import %s into eclipse" % os.path.normpath(application_path)
