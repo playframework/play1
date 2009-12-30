@@ -40,13 +40,13 @@ public class Invoker {
     /**
      * Run the code in a new thread after a delay
      * @param invocation The code to run
-     * @param seconds The time to wait before
+     * @param millis The time to wait before, in milliseconds
      * @return The future object, to know when the task is completed
      */
-    public static Future invoke(final Invocation invocation, int seconds) {
+    public static Future invoke(final Invocation invocation, long millis) {
         Monitor monitor = MonitorFactory.getMonitor("Invocation queue", "elmts.");
         monitor.add(executor.getQueue().size());
-        return executor.schedule(invocation, seconds, TimeUnit.SECONDS);
+        return executor.schedule(invocation, millis, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -64,7 +64,7 @@ public class Invoker {
                     if (invocation.retry.task != null) {
                         invocation.retry.task.get();
                     } else {
-                        Thread.sleep(invocation.retry.timeout * 1000);
+                        Thread.sleep(invocation.retry.timeout);
                     }
                 } catch (Exception e) {
                     throw new UnexpectedException(e);
@@ -219,16 +219,16 @@ public class Invoker {
     public static class Suspend extends PlayException {
 
         /**
-         * Suspend for a timeout (in seconds).
+         * Suspend for a timeout (in milliseconds).
          */
-        int timeout;
+        long timeout;
         
         /**
          * Wait for task execution.
          */
         Future task;
 
-        public Suspend(int timeout) {
+        public Suspend(long timeout) {
             this.timeout = timeout;
         }
 
@@ -246,7 +246,7 @@ public class Invoker {
             if (task != null) {
                 return "Wait for " + task;
             }
-            return "Retry in " + timeout + " s.";
+            return "Retry in " + timeout + " ms.";
         }
     }
 
