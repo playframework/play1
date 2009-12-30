@@ -540,8 +540,15 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * Suspend the current request for a specified amount of time
      */
     protected static void suspend(String timeout) {
+    	suspend(1000 * Time.parseDuration(timeout));
+    }
+
+    /**
+     * Suspend the current request for a specified amount of time (in milliseconds)
+     */
+    protected static void suspend(int millis) {
         Request.current().isNew = false;
-        throw new Suspend(Time.parseDuration(timeout));
+        throw new Suspend(millis);
     }
 
     /**
