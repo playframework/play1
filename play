@@ -176,22 +176,34 @@ try:
 	# ~~~~~~~~~~~~~~~~~~~~~~ Modules list
 	def load_modules():
 		global modules
-  		if os.environ.has_key('MODULES'):
-  			if os.name == 'nt':
-  				modules = os.environ['MODULES'].split(';')
-  			else:
-  				modules = os.environ['MODULES'].split(':')
-  		else:
-  			modules = []
-  		pm = readConfs('module.')
-  		for m in pm:
-  			if '${play.path}' in m:
-  				m = m.replace('${play.path}', play_base)
-  			if not m[0] == '/':
-  				m = os.path.normpath(os.path.join(application_path, m))
-  			modules.append(m)
-  		if play_id == 'test':
-  			modules.append(os.path.normpath(os.path.join(play_base, 'modules/test-runner')))
+		if os.environ.has_key('MODULES'):
+			if os.name == 'nt':
+				modules = os.environ['MODULES'].split(';')
+			else:
+				modules = os.environ['MODULES'].split(':')
+		else:
+			modules = []
+		pm = readConfs('module.')
+		for m in pm:
+			om = m
+			if '${play.path}' in m:
+				m = m.replace('${play.path}', play_base)
+			if not m[0] == '/':
+				m = os.path.normpath(os.path.join(application_path, m))
+
+			if not os.path.exists(m):
+				print "~ Oops,"
+				print "~ Module not found: %s" % (m)
+				print "~"
+				if om.startswith('${play.path}/modules'):
+					print "~ You can try to install the missing module using 'play install %s'" % (om[21:])
+					print "~"
+				sys.exit(0)
+
+			modules.append(m)
+		if play_id == 'test':
+			modules.append(os.path.normpath(os.path.join(play_base, 'modules/test-runner')))
+
 		
 		
 	# ~~~~~~~~~~~~~~~~~~~~~~ Build classpath
@@ -1026,11 +1038,11 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Invalid command
 	print "~ Usage: play cmd [app_path] [--options]"
-  	print "~ "
-  	print "~ with,  new      Create a new application"
-  	print "~        run      Run the application in the current shell"
-  	print "~        help     Show play help"
-  	print "~"
+	print "~ "
+	print "~ with,  new      Create a new application"
+	print "~        run      Run the application in the current shell"
+	print "~        help     Show play help"
+	print "~"
 	if len(sys.argv) > 1:
 		print "~ Invalid command: %s" % sys.argv[1]
 		print "~"
