@@ -368,7 +368,12 @@ public class TemplateCompiler {
                     print("play.templates.TagContext.exitTag();");
                 } catch (Exception e) {
                     // Use fastTag if exists
-                    List<Class> fastClasses = Play.classloader.getAssignableClasses(FastTags.class);
+                    List<Class> fastClasses = new ArrayList<Class>();
+                    try {
+                        fastClasses = Play.classloader.getAssignableClasses(FastTags.class);
+                    } catch(Exception xe) {
+                        //
+                    }
                     fastClasses.add(0, FastTags.class);
                     Method m = null;
                     String tName = tag.name;

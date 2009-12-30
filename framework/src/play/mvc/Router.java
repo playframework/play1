@@ -1,6 +1,8 @@
 package play.mvc;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -367,6 +369,11 @@ public class Router {
         public ActionDefinition remove(String key) {
             args.remove(key);
             return reverse(action, args);
+        }
+
+        public ActionDefinition addRef(String fragment) {
+            url += "#" + fragment;
+            return this;
         }
 
         @Override
