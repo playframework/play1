@@ -77,8 +77,8 @@ public class Application extends Controller {
         renderText("OK");
     }
     
-    public static void reverse() {
-        render();
+    public static void reverserouting() {
+        render("Application/reverse.html");
     }
     
     public static void mail() {

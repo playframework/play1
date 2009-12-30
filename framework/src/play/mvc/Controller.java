@@ -342,14 +342,14 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             }
             try {
                 ActionDefinition actionDefinition = Router.reverse(action, r);
-                if(currentReverse.get() != null) {
-                    ActionDefinition currentActionDefinition =  currentReverse.get();
+                if(_currentReverse.get() != null) {
+                    ActionDefinition currentActionDefinition =  _currentReverse.get();
                     currentActionDefinition.action = actionDefinition.action;
                     currentActionDefinition.url = actionDefinition.url;
                     currentActionDefinition.method = actionDefinition.method;
                     currentActionDefinition.star = actionDefinition.star;
                     currentActionDefinition.args = actionDefinition.args;
-                    currentReverse.remove();
+                    _currentReverse.remove();
                 } else {
                     throw new Redirect(actionDefinition.toString(), permanent);
                 }
@@ -571,11 +571,14 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         throw new Suspend(task);
     }
 
-    private static ThreadLocal<ActionDefinition> currentReverse = new ThreadLocal<ActionDefinition>();
+    /**
+     * Don't use this directly if you don't know why
+     */
+    public static ThreadLocal<ActionDefinition> _currentReverse = new ThreadLocal<ActionDefinition>();
 
     protected static ActionDefinition reverse() {
         ActionDefinition actionDefinition = new ActionDefinition();
-        currentReverse.set(actionDefinition);
+        _currentReverse.set(actionDefinition);
         return actionDefinition;
     }
     

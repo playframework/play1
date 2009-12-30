@@ -84,31 +84,31 @@ def override(f, t):
 	toFile = os.path.join(application_path, t)
 	if os.path.exists(toFile):
 		response = raw_input("~ Warning! %s already exists and will be overriden (y/n)? " % toFile)
-		if not response == 'y':	
+		if not response == 'y':
 			return
 	if not os.path.exists(os.path.dirname(toFile)):
 		os.makedirs(os.path.dirname(toFile))
 	shutil.copyfile(fromFile, toFile)
 	print "~ Copied %s to %s " % (fromFile, toFile)
 			
-			
+
 # ~~~~~~~~~
 # Main
 
 try:
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the framework?
 	play_base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
 
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ What is the framework id?
 	id_file = os.path.join(play_base, 'id')
 	if os.path.exists(id_file):
 		play_id = open(id_file).readline().strip()
 	else:
-		play_id = ''	
-	
+		play_id = ''
 
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ Display logo
 	print r"~        _            _ "
 	print r"~  _ __ | | __ _ _  _| |"
@@ -116,16 +116,16 @@ try:
 	print r"~ |  __/|_|\____|\__ (_)"
 	print r"~ |_|            |__/   "
 	print r"~"
-
+	
 	play_version_file = os.path.join(play_base, 'framework/src/play/version')
 	if not os.path.exists(play_version_file):
 		print "~ Oops. %s file not found" % os.path.normpath(os.path.join(play_base, 'framework/src/play/version'))
 		print "~ Is the framework compiled? "
 		print "~"
 		sys.exit(-1)
-
+	
 	print "~ play! %s, http://www.playframework.org" % (open(play_version_file).readline().strip())
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the application?
 	application_path = None
 	remaining_args = []
@@ -140,27 +140,27 @@ try:
 			application_path = os.path.normpath(os.path.abspath(sys.argv[2]))
 			remaining_args = sys.argv[3:]
 
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command?
 	if len(sys.argv) > 1:
 		play_command = sys.argv[1]
 	else:
 		play_command = 'none'
-
 			
+	
 	# ~~~~~~~~~~~~~~~~~ Override id
 	for a in remaining_args:
 		if a.find('--%') == 0:
 			play_id = a[3:]
-
+	
 	if play_command == 'test' or play_command == 'auto-test':
 		play_id = 'test'
 
-
+	
 	if play_id:
 		print "~ framework ID is %s" % play_id
 	print "~"
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ Check if it's a valid application
 	def check_application():
 		global http_port
@@ -171,8 +171,8 @@ try:
 		http_port = readConf('http.port')
 		if not http_port:
 			http_port = '9000'
-		
 
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ Modules list
 	def load_modules():
 		global modules
@@ -195,17 +195,17 @@ try:
 				print "~ Oops,"
 				print "~ Module not found: %s" % (m)
 				print "~"
+
 				if om.startswith('${play.path}/modules'):
 					print "~ You can try to install the missing module using 'play install %s'" % (om[21:])
 					print "~"
 				sys.exit(0)
-
+				
 			modules.append(m)
 		if play_id == 'test':
 			modules.append(os.path.normpath(os.path.join(play_base, 'modules/test-runner')))
 
-		
-		
+
 	# ~~~~~~~~~~~~~~~~~~~~~~ Build classpath
 	def do_classpath():
 		global classpath
@@ -213,19 +213,19 @@ try:
 		global agent_path
 		
 		agent_path=os.path.join(play_base, 'framework/play.jar')
-
+		
 		classpath = []
-
-		# The default		
+		
+		# The default
 		classpath.append(os.path.normpath(os.path.join(application_path, 'conf')))
 		classpath.append(os.path.normpath(os.path.join(play_base, 'framework/play.jar')))
-
+		
 		# The application
 		if os.path.exists(os.path.join(application_path, 'lib')):
 		    for jar in os.listdir(os.path.join(application_path, 'lib')):
 			    if jar.endswith('.jar'):
 				    classpath.append(os.path.normpath(os.path.join(application_path, 'lib/%s' % jar)))
-
+		
 		# The modules
 		for module in modules:
 		    if os.path.exists(os.path.join(module, 'lib')):
@@ -234,17 +234,17 @@ try:
 				    for jar in os.listdir(libs):
 					    if jar.endswith('.jar'):
 						    classpath.append(os.path.normpath(os.path.join(libs, '%s' % jar)))
-
+		
 		# The framework
 		for jar in os.listdir(os.path.join(play_base, 'framework/lib')):
 			if jar.endswith('.jar'):
 				classpath.append(os.path.normpath(os.path.join(play_base, 'framework/lib/%s' % jar)))
 
-
+		
 		cp_args = ':'.join(classpath)
 		if os.name == 'nt':
 			cp_args = ';'.join(classpath)
-			
+	
 	def check_jpda():
 		global jpda_port
 		try:
@@ -254,13 +254,13 @@ try:
 		except socket.error, e:
 			print 'JPDA port %s is already used. Will try to use any free port for debugging' % jpda_port
 			jpda_port = 0
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~~ Build java path
-	def do_java(className='play.server.Server'):	
+	def do_java(className='play.server.Server'):
 		global java_cmd
 		global java_path
 		global pid_path
-		global application_mode 
+		global application_mode
 		global jpda_port
 		global log_path
 		
@@ -269,7 +269,7 @@ try:
 			java_path = "java"
 		else:
 			java_path = os.path.normpath("%s/bin/java" % os.environ['JAVA_HOME'])
-
+		
 		for a in remaining_args:
 			if a.find('--with') == 0:
 				remaining_args.remove(a)
@@ -277,7 +277,7 @@ try:
 				remaining_args.remove(a)
 		# ~~~~~~~~~~~~~~~~~~~~~~ Read some configuration from conf/application.conf
 		java_args = remaining_args[:]
-
+		
 		memory_in_args=False
 		for arg in java_args:
 			if arg.startswith('-Xm'):
@@ -286,13 +286,13 @@ try:
 			memory = readConf('jvm.memory')
 			if memory:
 				java_args = java_args + memory.split(' ')
-
+		
 		jpda_port = readConf('jpda.port')
 		if not jpda_port:
 			jpda_port = '8000'
-
+		
 		application_mode = readConf('application.mode')
-
+		
 		if application_mode == 'prod':
 			java_args.append('-server')
 		
@@ -303,7 +303,7 @@ try:
 				print "~ using policy file \"%s\"" % policyFile
 				java_args.append('-Djava.security.manager')
 				java_args.append('-Djava.security.policy==%s' % policyFile)
-
+		
 		# The Java stuff
 		java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, className]
 
@@ -311,16 +311,16 @@ try:
 			pid_path = os.path.join(application_path, 'server.pid');
 		else:
 			pid_path = os.environ['PLAY_PID_PATH'];
-
-		if not os.environ.has_key('PLAY_LOG_PATH'):	
+		
+		if not os.environ.has_key('PLAY_LOG_PATH'):
 			log_path = os.path.join(application_path, 'logs');
 		else:
 			log_path = os.environ['PLAY_LOG_PATH'];
-
+		
 		if not os.path.exists(log_path):
 			os.mkdir(log_path);
 
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~~~~~~~~~~~~~~~~ The commands ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -329,19 +329,19 @@ try:
 	# ~~~~~~~~~~~~~~~~~~~~~~ [help] Display help
 	if play_command == 'help':
 		if len(sys.argv) == 3:
-			cmd = sys.argv[2]	
+			cmd = sys.argv[2]
 		else:
 			cmd = 'all'
 		help_file = os.path.join(play_base, 'documentation/commands/cmd-%s.txt' % cmd)
 		if os.path.exists(help_file):
 			print open(help_file, 'r').read()
-			sys.exit(0)	
+			sys.exit(0)
 		else:
 			print '~ Oops, command \'%s\' not found. Try just \'play help\' to list all commands.' % cmd
 			print '~'
-			sys.exit(-1)			
+			sys.exit(-1)
 
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [id] Define the framework ID
 	if play_command == 'id':
 		if not play_id:
@@ -359,8 +359,8 @@ try:
 			if os.path.exists(id_file):
 				os.remove(id_file)
 		sys.exit(0)
-		
 
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [new] Create a new application
 	if play_command == 'new' or play_command == 'new,run':
 		withModules = []
@@ -429,7 +429,7 @@ try:
 		print "~"
 		if play_command == 'module': sys.exit(0)
 		
-	
+
 	# ~~~~~~~~~~~~~~~~~~~~~~ [secret] Generate a new secret key
 	if play_command == 'secret':
 		check_application()
@@ -440,7 +440,7 @@ try:
 		print "~"
 		sys.exit(0)
 
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [clean] Clean temporary files
 	if play_command == 'clean' or play_command == 'clean,run':
 		check_application()
@@ -450,7 +450,7 @@ try:
 		print "~"
 		if play_command == 'clean': sys.exit(0)
 		
-		
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [modules] Display the application modules
 	if play_command == 'modules':
 		check_application()
@@ -463,7 +463,7 @@ try:
 		else:
 			print "~ No modules"
 		print "~ "
-		sys.exit(0)	
+		sys.exit(0)
 	
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [war] Generate a WAR
@@ -560,8 +560,8 @@ try:
 		print "~ Have fun!"
 		print "~"
 		sys.exit(0)
-		
 
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [cp] Display the application classpath
 	if play_command == 'cp' or play_command == 'classpath':
 		check_application()
@@ -573,7 +573,7 @@ try:
 		print "~ "
 		sys.exit(0)
 		
-		
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [run] Run the application
 	if play_command == 'run' or play_command == 'new,run' or play_command == 'clean,run':
 		check_application()
@@ -594,7 +594,7 @@ try:
 		subprocess.call(java_cmd, env=os.environ)
 		print
 		sys.exit(0)
-
+	
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [status] Get application status
 	if play_command == 'status' or play_command == 'st':
@@ -614,7 +614,7 @@ try:
 		except getopt.GetoptError, err:
 			print "~ %s" % str(err)
 			print "~ "
-			sys.exit(-1)		
+			sys.exit(-1)
 		
 		if not url or not secret_key:
 			check_application()
@@ -655,7 +655,7 @@ try:
 		print
 		sys.exit(0)
 
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [test] Run the application tests
 	if play_command == 'test':
 		check_application()
@@ -677,7 +677,7 @@ try:
 		print
 		sys.exit(0)
 		
-		
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [auto-test] Run the application tests
 	if play_command == 'auto-test':
 		check_application()
@@ -694,9 +694,9 @@ try:
 		test_result = os.path.join(application_path, 'test-result')
 		if os.path.exists(test_result):
 			shutil.rmtree(test_result)
-		sout = open(os.path.join(log_path, 'system.out'), 'w')	
+		sout = open(os.path.join(log_path, 'system.out'), 'w')
 		play_process = subprocess.Popen(java_cmd, env=os.environ, stdout=sout)
-		soutint = open(os.path.join(log_path, 'system.out'), 'r')	
+		soutint = open(os.path.join(log_path, 'system.out'), 'r')
 		while True:
 			if play_process.poll():
  				print "~"
@@ -704,8 +704,8 @@ try:
 				print "~"
 				sys.exit(-1)
 			line = soutint.readline().strip()
-			if line:			    
- 				print line
+			if line:
+				print line
 				if line.find('Listening for HTTP') > -1:
 					soutint.close()
 					break
@@ -739,8 +739,8 @@ try:
 				kill(play_process.pid)
 				break
 		sys.exit(0)
-		
 
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [precompile] Precompile
 	if play_command == 'precompile':
 		check_application()
@@ -753,8 +753,8 @@ try:
 		subprocess.call(java_cmd, env=os.environ)
 		print
 		sys.exit(0)
-		
 
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [start] Start the application
 	if play_command == 'start':
 		check_application()
@@ -782,7 +782,7 @@ try:
 		print "~"
 		sys.exit(0)
 
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [stop] Stop the application
 	if play_command == 'stop':
 		check_application()
@@ -795,12 +795,12 @@ try:
 			sys.exit(-1)
 		pid = open(pid_path).readline().strip()
 		os.remove(pid_path)
-		kill(pid)		
+		kill(pid)
 		print "~ OK, %s is stopped" % application_path
 		print "~"
 		sys.exit(0)
 
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [restart] Restart the application
 	if play_command == 'restart':
 		check_application()
@@ -815,7 +815,7 @@ try:
 			os.remove(pid_path)
 			kill(pid)
 
-
+		
 		sysout = readConf('application.log.system.out')
 		sysout = sysout!='false' and sysout!='off'
 		if not sysout:
@@ -832,7 +832,7 @@ try:
 		print "~"
 		sys.exit(0)
 
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [pid] Display the pid of the running application
 	if play_command == 'pid':
 		check_application()
@@ -848,7 +848,7 @@ try:
 		print "~ "
 		sys.exit(0)
 
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [out] Follow logs of the running application
 	if play_command == 'out':
 		check_application()
@@ -873,7 +873,7 @@ try:
 			else:
 				print line
 
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [netbeansify] Create netbeans configuration files
 	if play_command == 'nb' or play_command == 'netbeansify':
 		check_application()
@@ -911,7 +911,7 @@ try:
 		print "~"
 		sys.exit(0)
 
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [eclipsify] Create eclipse configuration files
 	if play_command == 'ec' or play_command == 'eclipsify':
 		check_application()
@@ -930,12 +930,12 @@ try:
 			shutil.rmtree(eclipse)
 			if os.name == 'nt':
 				time.sleep(1)
-
+		
 		if os.path.exists(dotSettings):
 			shutil.rmtree(dotSettings)
 			if os.name == 'nt':
 				time.sleep(1)
-
+		
 		shutil.copyfile(os.path.join(play_base, 'resources/eclipse/.project'), dotProject)
 		shutil.copyfile(os.path.join(play_base, 'resources/eclipse/.classpath'), dotClasspath)
 		shutil.copyfile(os.path.join(play_base, 'resources/eclipse/.amateras'), dotAmateras)
@@ -947,7 +947,7 @@ try:
 		playSourcePath = os.path.dirname(playJarPath)
 		if os.name == 'nt':
 			playSourcePath=playSourcePath.replace('\\','/').capitalize()
-
+		
 		cpXML = ""
 		for el in classpath:
 			if not os.path.basename(el) == "conf":
@@ -956,7 +956,7 @@ try:
 				else:
 					cpXML += '<classpathentry kind="lib" path="%s" />\n\t' % os.path.normpath(el)
 		replaceAll(dotClasspath, r'%PROJECTCLASSPATH%', cpXML)
-
+		
 		if len(modules):
 			lXML = ""
 			cXML = ""
@@ -968,34 +968,34 @@ try:
 		else:
 			replaceAll(dotProject, r'%LINKS%', '')
 			replaceAll(dotClasspath, r'%MODULES%', '')
-
+		
 		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%PROJECT_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%PLAY_BASE%', play_base)
 		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%PLAY_ID%', play_id)
 		replaceAll(os.path.join(application_path, 'eclipse/debug.launch'), r'%JPDA_PORT%', jpda_port)
-
+		
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%PROJECT_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%PLAY_BASE%', play_base)
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%PLAY_ID%', play_id)
 		replaceAll(os.path.join(application_path, 'eclipse/test.launch'), r'%JPDA_PORT%', jpda_port)
-
+		
 		replaceAll(os.path.join(application_path, 'eclipse/connect.launch'), r'%PROJECT_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'eclipse/connect.launch'), r'%JPDA_PORT%', jpda_port)
 		
 		os.rename(os.path.join(application_path, 'eclipse/connect.launch'), os.path.join(application_path, 'eclipse/Connect JPDA to %s.launch' % application_name))
-		os.rename(os.path.join(application_path, 'eclipse/test.launch'), os.path.join(application_path, 'eclipse/Test %s.launch' % application_name))	
+		os.rename(os.path.join(application_path, 'eclipse/test.launch'), os.path.join(application_path, 'eclipse/Test %s.launch' % application_name))
 		os.rename(os.path.join(application_path, 'eclipse/debug.launch'), os.path.join(application_path, 'eclipse/%s.launch' % application_name))
-
+		
 		print "~ OK, the application is ready for eclipse"
 		print "~ Use File/Import/General/Existing project to import %s into eclipse" % os.path.normpath(application_path)
 		print "~"
 		print "~ Use eclipsify again when you want to update eclipse configuration files."
 		print "~ However, it's often better to delete and re-import the project into your workspace since eclipse keeps dirty caches..."
 		print "~"
-
+		
 		sys.exit(0)
 
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [idealize] Create idea intellij configuration files
 	if play_command == 'idea' or play_command == 'idealize':
 		check_application()
@@ -1006,9 +1006,9 @@ try:
 		imlFile = os.path.join(application_path, application_name + '.iml')
 		shutil.copyfile(os.path.join(play_base, 'resources/idea/imlTemplate.xml'), imlFile)
 		cpXML = ""
-
+		
 		replaceAll(imlFile, r'%PLAYHOME%', play_base.replace('\\', '/'))
-
+		
 		if len(modules):
 			lXML = ""
 			cXML = ""
@@ -1017,14 +1017,14 @@ try:
 				replaceAll(imlFile, r'%LINKS%', lXML)
 		else:
 			replaceAll(imlFile, r'%LINKS%', '')
-
+		
 		print "~ OK, the application is ready for Intellij Idea"
 		print "~ Use File/New Module/Import Existing module"
 		print "~"
 		
 		sys.exit(0)
 
-
+	
 	
 	# Module command ?
 	if play_command.find(':') > 0:
@@ -1035,7 +1035,7 @@ try:
 			if os.path.exists(commands):
 				execfile(commands)
 
-
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ Invalid command
 	print "~ Usage: play cmd [app_path] [--options]"
 	print "~ "
@@ -1051,6 +1051,6 @@ try:
 
 except KeyboardInterrupt:
 	print '~ ...'
-	sys.exit(0)	
+	sys.exit(0)
 
 
