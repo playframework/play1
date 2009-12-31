@@ -59,7 +59,8 @@ public class ControllersEnhancer extends Enhancer {
                     ctMethod.insertBefore(
                                "if(!play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.isActionCallAllowed()) {"+
                                     "play.mvc.Controller.redirect(\""+ctClass.getName()+"."+ctMethod.getName()+"\", $args);"+
-                               "}"+
+
+                               "return;}"+
                                "play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.stopActionCall();"
                     );
                 } catch (Exception e) {

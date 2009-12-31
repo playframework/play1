@@ -14,7 +14,7 @@ import play.PlayPlugin;
 public class BytecodeCache {
 
     // Please update the cache version at each release
-    static String version = "1.0.x";
+    static String version = "1.0.y";
 
     /**
      * Delete the bytecode
