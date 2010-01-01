@@ -593,8 +593,8 @@ try:
 			java_cmd.insert(2, '-Dplay.debug=yes')
 		try:
 			subprocess.call(java_cmd, env=os.environ)
-		except:
-			print "~ Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
+		except OSError:
+			print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
 			sys.exit(-1)
 		print
 		sys.exit(0)
@@ -679,8 +679,8 @@ try:
 		java_cmd.insert(2, '-Dplay.debug=yes')
 		try:
 			subprocess.call(java_cmd, env=os.environ)
-		except:
-			print "~ Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
+		except OSError:
+			print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
 			sys.exit(-1)
 		print
 		sys.exit(0)
@@ -705,8 +705,8 @@ try:
 		sout = open(os.path.join(log_path, 'system.out'), 'w')
 		try:
 			play_process = subprocess.Popen(java_cmd, env=os.environ, stdout=sout)
-		except:
-			print "~ Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
+		except OSError:
+			print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
 			sys.exit(-1)
 		soutint = open(os.path.join(log_path, 'system.out'), 'r')
 		while True:
@@ -764,8 +764,8 @@ try:
 		java_cmd.insert(2, '-Dprecompile=yes')
 		try:
 			subprocess.call(java_cmd, env=os.environ)
-		except:
-			print "~ Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
+		except OSError:
+			print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
 			sys.exit(-1)
 		print
 		sys.exit(0)
@@ -790,8 +790,8 @@ try:
 		  sout = open(os.path.join(log_path, 'system.out'), 'w')
 		try:
 			pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
-		except:
-			print "~ Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
+		except OSError:
+			print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
 			sys.exit(-1)
 		print "~ OK, %s is started" % os.path.normpath(application_path)
 		if sysout:
@@ -844,8 +844,8 @@ try:
 		  sout = open(os.path.join(log_path, 'system.out'), 'w')
 		try:
 			pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
-		except:
-			print "~ Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
+		except OSError:
+			print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
 			sys.exit(-1)
 		print "~ OK, %s is restarted" % os.path.normpath(application_path)
 		if sysout:
