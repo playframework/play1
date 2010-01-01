@@ -242,7 +242,9 @@ public class Router {
         if (action.startsWith("controllers.")) {
             action = action.substring(12);
         }
+	Map<String, Object> argsbackup = args;
         for (Route route : routes) {
+            args = new HashMap<String, Object>(argsbackup);
             if (route.actionPattern != null) {
                 Matcher matcher = route.actionPattern.matcher(action);
                 if (matcher.matches()) {
