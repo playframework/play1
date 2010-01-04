@@ -441,8 +441,12 @@ public class Template {
                         Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
                         String[] names = (String[]) actionMethod.getDeclaringClass().getDeclaredField("$" + actionMethod.getName() + LocalVariablesNamesTracer.computeMethodHash(actionMethod.getParameterTypes())).get(null);
                         if (param instanceof Object[]) {
+                            // too many parameters versus action, possibly a developer error. we must warn him.
+                            if( names.length<((Object[])param).length ) {
+                                throw new NoRouteFoundException(action,null);
+                            }
                             for (int i = 0; i < ((Object[]) param).length; i++) {
-                                r.put(names[i], ((Object[]) param)[i] == null ? null : ((Object[]) param)[i].toString());
+                                r.put( i < names.length ? names[i] : "", ((Object[]) param)[i] == null ? null : ((Object[]) param)[i].toString());
                             }
                         }
                         return Router.reverse(action, r);
