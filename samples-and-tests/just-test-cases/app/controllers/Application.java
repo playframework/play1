@@ -56,6 +56,10 @@ public class Application extends Controller {
         render();
     }
     
+    public static void tags() {
+        render();
+    }
+    
     public static void escapeData() {
         String oops = "&nbsp;<i>Yop <!-- Coucou --></i>&nbsp;";
         render(oops);
