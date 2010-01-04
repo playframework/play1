@@ -278,7 +278,7 @@ public class TemplateCompiler {
             if (tagText.indexOf(" ") > 0) {
                 tagName = tagText.substring(0, tagText.indexOf(" "));
                 tagArgs = tagText.substring(tagText.indexOf(" ") + 1).trim();
-                if (!tagArgs.matches("^[a-zA-Z0-9]+:.*$")) {
+                if (!tagArgs.matches("^[a-zA-Z0-9]+\\s*:.*$")) {
                     tagArgs = "arg:" + tagArgs;
                 }
                 tagArgs = tagArgs.replaceAll("[:]\\s*[@]", ":actionBridge.");
