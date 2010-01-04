@@ -233,9 +233,9 @@ public class TemplateCompiler {
 
         void expr() {
             String expr = parser.getToken().trim();
-            print("\tval=");
+            print("\t__val=");
             print(expr);
-            print(";out.print(val!=null?__safe(val):'')");
+            print(";out.print(__val!=null?__safe(__val):'')");
             markLine(parser.getLine());
             println();
         }
