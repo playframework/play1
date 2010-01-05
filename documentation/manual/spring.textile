@@ -38,4 +38,19 @@ bc. public Application extends Controller {
 
 h2. <a>@javax.inject.Inject support</a>
 
-Not implemented yet.
+You can now use the **@Inject** annotation to automatically inject defined beans in your controllers, jobs and mailer.
+
+It works on static fields defined in these artefact. For example to inject a **PriceWatcher** service defined in Spring to one of your controller, just do:
+
+bc. public class Application extends Controller {
+    
+    @Inject
+    static PriceWatcher prices;
+    
+    public static void index() {
+        prices.getAll(); // prices is defined here
+    }
+    
+}
+
+Auto-reload should work as exepected.

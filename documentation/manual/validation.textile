@@ -232,3 +232,25 @@ bc. #{ifErrors}
       <input type="submit" value="Say hello" /> 
    </div>
 #{/form}
+
+h2. <a>Custom validation</a>
+
+You don't find the validator you need in the **play.data.validation** package ? Write your own. You can use the generic **@CheckWith** annotation to bind your own **Check** implementation.
+
+For example:
+
+bc. public class User {
+    
+    @Required
+    @CheckWith(MyPasswordCheck.class)
+    public String password;
+    
+    static class MyPasswordCheck extends Check {
+        
+        public abstract boolean isSatisfied(Object user, Object password) {
+            return notMatchPreviousPasswords(password);
+        }
+        
+    }
+}
+

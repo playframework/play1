@@ -1,0 +1,124 @@
+h1. Play 1.0.1 -- Release notes
+
+**play 1.0.1** is a maintenance release of the play 1.0 branch. It fixes a lot of small bugs and provides a better binding for persistent JPA objects and auto-escaping of HTML and Javascript code in templates to avoid XSS security problems in your applications.
+
+p(note). **play 1.0.1** is a maintenance release and should be fully compatible with the previous version. If you encounter any problem please ask us on the Google Group.
+
+You can retrieve all the fixed bug on the "1.0.1 roadmap page":http://www.playframework.org/roadmap/1.0.1. We will describe more important changes here:
+
+h2. <a>Automatic escape of HTML code in templates</a>
+
+Now all dynamic expressions are automatically escaped by the template engine to avoid XSS security issues in your application. So the **title** variable containing **==&lt;h1>Title&lt;/h1>==**, and displayed in a dynamic expression will be correctly escaped:
+
+bc. ${title} --> &lt;h1&gt;Title&lt;/h1&gt;
+
+So if you want reallt display it in an unescaped way, you need to tell it explicitely using the **raw()** method:
+
+bc. ${title.raw()} --> <h1>Title</h1>
+
+Also, if you want to display a large part of raw HTML, you can use the **#{verbatim /}** tag:
+
+bc. #{verbatim}
+    ${title} --> <h1>Title</h1>
+#{/verbatim}
+
+Of course as this feature can break existing applications it is not enabled by default. You can enable it by adding this line to your **application.conf** file:
+
+bc. future.escapeInTemplates=true
+
+This line will be automatically added to new applications created with the 1.0.1 release.
+
+h2. <a>@javax.inject.Inject support</a>
+
+If you use a Dependency Injection container like the one provided by the "Spring module":spring, you can now use the **@Inject** annotation to automatically inject defined beans in your controllers, jobs and mailer.
+
+It works on static fields defined in these artefact. For example to inject a **PriceWatcher** service defined in Spring to one of your controller, just do:
+
+bc. public class Application extends Controller {
+    
+    @Inject
+    static PriceWatcher prices;
+    
+    public static void index() {
+        prices.getAll(); // prices is defined here
+    }
+    
+}
+
+Auto-reload should work as exepected.
+
+h2. <a>Better binding for JPA objects</a>
+
+Previously there was no way automatically bind a JPA object using the HTTP to Java binding. For example:
+
+bc. public static void save(User user) {
+    user.save(); // fail in 1.0
+}
+
+**User** being a JPA entity class, this code failed because User was a transient object created by the Binder and not yet managed by Hibernate.
+
+The old way was to use the **edit()** method, like:
+
+bc. public static void save(Long id) {
+    User user = User.findById(id);
+    user.edit(params);
+    user.save(); // ok
+}
+
+Now you can provide the **user.id** field yourself in the HTTP parameter. If play find the **id** field, it will load the instance from the database before editing it with the other parameters provided in the HTTP request. So you can then save it directly.
+
+bc. public static void save(User user) {
+    user.save(); // ok with 1.0.1
+}
+
+Of course as this feature can break existing applications it is not enabled by default. You can enable it by adding this line to your **application.conf** file:
+
+bc. future.bindJPAObjects=true
+
+This line will be automatically added to new applications created with the 1.0.1 release.
+
+h2. <a>Framework id can be set from command line</a>
+
+You can specify the "framework id":ids to use for a particular command directly from the command line. For example to run an application in production mode you can use:
+
+bc. play run --%production
+
+with these line defined in the **application.conf** file:
+
+bc. application.mode=dev
+%production.application.mode=prod
+
+It should be compatible with all commands using the framework id information. The default id is still defined using the **play id** command.
+
+By the way **play test** is then equivalent to:
+
+bc. play run --%test
+
+h2. <a>Custom validation</a>
+
+You don't find the validator you need in the **play.data.validation** package ? Write your own. You can use the generic **@CheckWith** annotation to bind your own **Check** implementation.
+
+For example:
+
+bc. public class User {
+    
+    @Required
+    @CheckWith(MyPasswordCheck.class)
+    public String password;
+    
+    static class MyPasswordCheck extends Check {
+        
+        public abstract boolean isSatisfied(Object user, Object password) {
+            return notMatchPreviousPasswords(password);
+        }
+        
+    }
+}
+
+h2. <a>Test runner update</a>
+
+We've updated selenium to the 1.0 final version and tweeked a little the UI. Selenium tests now run in fullscreen. And some new buttons like "Run all tests" have been added.
+
+!images/selenium-fullscreen!
+
+Also local documentation is now available when you run your application in test mode.
