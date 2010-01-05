@@ -1,6 +1,8 @@
 package controllers;
 
 import java.util.*;
+import java.io.File;
+import java.util.concurrent.Future;
 
 import play.*;
 import play.mvc.*;
@@ -14,14 +16,16 @@ import utils.*;
 public class Application extends Controller {
 
     // bug
+
     public static void aa() {
         try {
             int test = 1;
         } catch (Exception ex) {
         }
     }
-    
+
     // bug
+
     public static void aaa() {
         try {
             boolean test = TestUtil.invokeTest("a");
@@ -35,27 +39,27 @@ public class Application extends Controller {
     public static void index() {
         render();
     }
-    
+
     public static void simpleStatusCode() {
         response.status = 204;
     }
-    
+
     public static void hello(String name) {
         render(name);
     }
-    
+
     public static void yop() {
         render();
     }
-    
+
     public static void dynamicClassBinding(boolean fail) {
         render(fail);
     }
-    
+
     public static void tagContexts() {
         render();
     }
-    
+
     public static void tags() {
         render();
     }
@@ -64,44 +68,58 @@ public class Application extends Controller {
         String oops = "&nbsp;<i>Yop <!-- Coucou --></i>&nbsp;";
         render(oops);
     }
-    
+
     public static void aGetForm(String name) {
         render("Application/hello.html", name);
     }
-    
+
     public static void aGetForm2(String name) {
         name = "2" + name;
         render("Application/hello.html", name);
     }
-    
+
     public static void optional() {
         renderText("OK");
     }
-    
+
     public static void reverserouting() {
         render("Application/reverse.html");
     }
-    
+
     public static void mail() {
         notifiers.Welcome.welcome();
         renderText("OK");
     }
-    
+
     public static void mail2() {
         Welcome.welcome();
         renderText("OK2");
     }
-  
+
     public static void mail3() {
         notifiers.Welcome.welcome2();
         renderText("OK3");
     }
-    
+
     public static void mail4() {
-	notifiers.Welcome.welcome3();
+        notifiers.Welcome.welcome3();
         renderText("OK4");
     }
-    
+
+    /**
+     * This is to make sure that there is no endless recursion
+     */
+    public static void mail5() {
+        Mail.send("from@toto.com", "recipient@toto.com", "subject", "body");
+        Mail.send("from@toto.com", "recipient@toto.com", "subject", "body", "alternate");
+        Mail.send("from@toto.com", "recipient@toto.com", "subject", "body", "alternate", new File[0]);
+        Mail.send("from@toto.com", new String[]{"recipient@toto.com"}, "subject", "body");
+        Mail.send("from@toto.com", "recipient@toto.com", "subject", "subject", Play.getFile("test/fond1.jpg"));
+        Mail.send("from@toto.com", new String[]{"recipient@toto.com"}, "subject", "body", Play.getFile("test/fond1.jpg"));
+        Mail.send("from@toto.com", "recipient@toto.com", new String[]{"recipient@toto.com"}, "subject", "body", "alternate", "text/html", new File[0]);
+        renderText("OK5");
+    }
+
     public static void ifthenelse() {
         boolean a = true;
         boolean b = false;
@@ -113,31 +131,31 @@ public class Application extends Controller {
         Boolean h = true;
         Object i = null;
         Object j = new Object();
-        render(a,b,c,d,e,f,g,h,i,j);
+        render(a, b, c, d, e, f, g, h, i, j);
     }
-    
+
     public static void listTag() {
         List<String> a = new ArrayList<String>();
         a.add("aa");
         a.add("ab");
         a.add("ac");
-        int[] b = new int[] {0, 1, 2 , 3};
+        int[] b = new int[]{0, 1, 2, 3};
         Iterator d = a.iterator();
-        render(a,b,d);
+        render(a, b, d);
     }
-    
+
     public static void a() {
         render();
     }
-    
+
     public static void useSpringBean() {
-        Test test = (Test)Spring.getBean("test");
+        Test test = (Test) Spring.getBean("test");
         renderText(test.yop());
     }
-    
+
     @javax.inject.Inject
     static Test myTest;
-    
+
     public static void useSpringBeanInject() {
         renderText(myTest.yop());
     }

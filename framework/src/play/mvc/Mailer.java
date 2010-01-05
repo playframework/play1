@@ -223,13 +223,13 @@ public class Mailer implements LocalVariablesSupport {
         Object replyTo = infos.get().get("replyTo");
 
         // Attachment
-        Object[] attachements = new Object[0];
+        Object[] attachments = new Object[]{};
         if (infos.get().get("attachments") != null) {
             List<Object> objectList = (List<Object>) infos.get().get("attachments");
-            attachements = new Object[objectList.size()];
+            attachments = new Object[objectList.size()];
             i = 0;
             for (Object object : objectList) {
-                attachements[i] = object;
+                attachments[i] = object;
                 i++;
             }
 
@@ -239,7 +239,7 @@ public class Mailer implements LocalVariablesSupport {
         final String body = (bodyHtml != null ? bodyHtml : bodyText);
         final String alternate = (bodyHtml != null ? bodyText : null);
 
-       return Mail.send(from, replyTo, recipients, subject, body, alternate, contentType, charset, headers, attachements);
+       return Mail.send(from, replyTo, recipients, subject, body, alternate, contentType, charset, headers, attachments);
   }
 
     public static boolean sendAndWait(Object... args) {

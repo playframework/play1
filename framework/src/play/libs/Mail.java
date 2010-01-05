@@ -51,7 +51,7 @@ public class Mail {
      * @param body Body
      */
     public static Future<Boolean> send(String from, String recipient, String subject, String body) {
-        return send(from, new String[]{recipient}, subject, body, null, "text/plain", new Object[0]);
+        return send(from, null, new String[]{recipient}, subject, body, null, "text/plain", new File[0]);
     }
 
     /**
@@ -63,7 +63,7 @@ public class Mail {
      * @param alternate text/plain alternative content (optional)
      */
     public static Future<Boolean> send(String from, String recipient, String subject, String body, String alternate) {
-        return send(from, new String[]{recipient}, subject, body, alternate, "text/html", new Object[0]);
+         return send(from, null, new String[]{recipient}, subject, body, alternate, "text/html", new File[0]);
     }
 
     /**
@@ -73,10 +73,23 @@ public class Mail {
      * @param subject Subject
      * @param body text/html body content
      * @param alternate text/plain alternative content (optional)
-     * @param obj the attachments to the email
+     * @param attachments File attachments
      */
-    public static Future<Boolean> send(String from, String recipient, String subject, String body, String alternate, Object... obj) {
-        return send(from, new String[]{recipient}, subject, body, alternate, "text/html", obj);
+    public static Future<Boolean> send(String from, String recipient, String subject, String body, String alternate, File... attachments) {
+        return send(from, null, new String[]{recipient}, subject, body, alternate, "text/html", attachments);
+    }
+
+    /**
+     * Send an email in text/html with a text/plain alternative and attachments
+     * @param from From address. Can be of the form xxx <m@m.com>
+     * @param recipient To address. Can be of the form xxx <m@m.com>
+     * @param subject Subject
+     * @param body text/html body content
+     * @param alternate text/plain alternative content (optional)
+     * @param attachments DataSource attachments
+     */
+    public static Future<Boolean> send(String from, String recipient, String subject, String body, String alternate, DataSource... attachments) {
+        return send(from, null, new String[]{recipient}, subject, body, alternate, "text/html", attachments);
     }
 
     /**
@@ -87,7 +100,7 @@ public class Mail {
      * @param body The text/plain body of the email
      */
     public static Future<Boolean> send(String from, String[] recipients, String subject, String body) {
-        return send(from, recipients, subject, body, null, "text/plain", new Object[0]);
+        return send(from, recipients, subject, body, new File[0]);
     }
 
     /**
@@ -98,8 +111,20 @@ public class Mail {
      * @param body plain/text body of the email
      * @param attachments File attachments
      */
-    public static Future<Boolean> send(String from, String recipient, String subject, String body, Object... attachments) {
-        return send(from, new String[]{recipient}, subject, body, null, "text/plain", attachments);
+    public static Future<Boolean> send(String from, String recipient, String subject, String body, File... attachments) {
+        return send(from, new String[]{recipient}, subject, body, attachments);
+    }
+
+    /**
+     * Send an email in text/plain
+     * @param from From address. Can be of the form xxx <m@m.com>
+     * @param recipient To address. Can be of the form xxx <m@m.com>
+     * @param subject Subject
+     * @param body plain/text body of the email
+     * @param attachments DataSource attachments
+     */
+    public static Future<Boolean> send(String from, String recipient, String subject, String body, DataSource... attachments) {
+        return send(from, new String[]{recipient}, subject, body, attachments);
     }
 
     /**
@@ -110,7 +135,19 @@ public class Mail {
      * @param body Body
      * @param attachments File attachments
      */
-    public static Future<Boolean> send(String from, String[] recipients, String subject, String body, Object... attachments) {
+    public static Future<Boolean> send(String from, String[] recipients, String subject, String body, File... attachments) {
+        return send(from, null, recipients, subject, body, null, "text/plain", attachments);
+    }
+
+    /**
+     * Send an email in text/plain
+     * @param from From address Can be of the form xxx <m@m.com>
+     * @param recipients To addresses Can be of the form xxx <m@m.com>
+     * @param subject Subject
+     * @param body Body
+     * @param attachments DataSource attachments
+     */
+    public static Future<Boolean> send(String from, String[] recipients, String subject, String body, DataSource... attachments) {
         return send(from, null, recipients, subject, body, null, "text/plain", attachments);
     }
 
@@ -125,11 +162,50 @@ public class Mail {
      * @param contentType The content type of the body (text/plain or text/html)
      * @param attachments File attachments
      */
-    public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) {
-        return send(from, replyTo, recipients, subject, body, alternate, contentType, null, null, attachments);
+    public static Future<Boolean> send(String from, String replyTo, String[] recipients, String subject, String body, String alternate, String contentType, File... attachments) {
+        try {
+            InternetAddress fromI = null;
+            if (from != null) {
+                fromI = new InternetAddress(from.toString());
+            }
+            InternetAddress replyToI = null;
+            if (replyTo != null) {
+                replyToI = new InternetAddress(replyTo.toString());
+            }
+            return send(fromI, replyToI, recipients, subject, body, alternate, contentType, null, null, attachments);
+        } catch (MessagingException ex) {
+            throw new MailException("Cannot send email", ex);
+        }
     }
 
-    /**
+     /**
+     * Send an email
+     * @param from From address. Can be of the form xxx <m@m.com>
+     * @param replyTo ReplyTo address Can be of the form xxx <m@m.com>
+     * @param recipients To addresses
+     * @param subject Subject
+     * @param body body of the email
+     * @param alternate text/plain body (optional). This parameter is ignored if contentType is set to text/plain or is null.
+     * @param contentType The content type of the body (text/plain or text/html)
+     * @param attachments DataSource attachments
+     */
+    public static Future<Boolean> send(String from, String replyTo, String[] recipients, String subject, String body, String alternate, String contentType, DataSource... attachments) {
+        try {
+            InternetAddress fromI = null;
+            if (from != null) {
+                fromI = new InternetAddress(from.toString());
+            }
+            InternetAddress replyToI = null;
+            if (replyTo != null) {
+                replyToI = new InternetAddress(replyTo.toString());
+            }
+            return send(fromI, replyToI, recipients, subject, body, alternate, contentType, null, null, attachments);
+        } catch (MessagingException ex) {
+            throw new MailException("Cannot send email", ex);
+        }
+    }
+
+        /**
      * Send an email
      * @param from From address
      * @param replyTo ReplyTo address
@@ -142,10 +218,69 @@ public class Mail {
      * @param headers The mail headers (optional)
      * @param attachments File attachments
      */
-    public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, String charset, Map<String, String> headers, Object... attachments) {
+    public static Future<Boolean> send(String from, String replyTo, String[] recipients, String subject, String body, String alternate, String contentType, String charset, Map<String, String> headers, File... attachments) {
+         try {
+            InternetAddress fromI = null;
+            if (from != null) {
+                fromI = new InternetAddress(from.toString());
+            }
+            InternetAddress replyToI = null;
+            if (replyTo != null) {
+                replyToI = new InternetAddress(replyTo.toString());
+            }
+            return send(fromI, replyToI, recipients, subject, body, alternate, contentType, charset, headers, attachments);
+        } catch (MessagingException ex) {
+            throw new MailException("Cannot send email", ex);
+        }
+     }
+
+        /**
+     * Send an email
+     * @param from From address
+     * @param replyTo ReplyTo address
+     * @param recipients To addresses
+     * @param subject Subject
+     * @param body body of the email
+     * @param alternate text/plain body (optional). This parameter is ignored if contentType is set to text/plain or is null.
+     * @param contentType The content type of the body (text/plain or text/html)
+     * @param charset The character set of the message (optional)
+     * @param headers The mail headers (optional)
+     * @param attachments DataSource attachments
+     */
+    public static Future<Boolean> send(String from, String replyTo, String[] recipients, String subject, String body, String alternate, String contentType, String charset, Map<String, String> headers, DataSource... attachments) {
+         try {
+            InternetAddress fromI = null;
+            if (from != null) {
+                fromI = new InternetAddress(from.toString());
+            }
+            InternetAddress replyToI = null;
+            if (replyTo != null) {
+                replyToI = new InternetAddress(replyTo.toString());
+            }
+            return send(fromI, replyToI, recipients, subject, body, alternate, contentType, charset, headers, attachments);
+        } catch (MessagingException ex) {
+            throw new MailException("Cannot send email", ex);
+        }
+     }
+
+    /**
+     * Send an email
+     * @param from From address
+     * @param replyTo ReplyTo address
+     * @param recipients To addresses
+     * @param subject Subject
+     * @param body body of the email
+     * @param alternate text/plain body (optional). This parameter is ignored if contentType is set to text/plain or is null.
+     * @param contentType The content type of the body (text/plain or text/html)
+     * @param charset The character set of the message (optional)
+     * @param headers The mail headers (optional)
+     * @param attachments File or DataSource attachments
+     */
+    public static Future<Boolean> send(InternetAddress from, InternetAddress replyTo, String[] recipients, String subject, String body, String alternate, String contentType, String charset, Map<String, String> headers, Object... attachments) {
+
         try {
             if (from == null) {
-                from = Play.configuration.getProperty("mail.smtp.from", "user@localhost");
+                from = new InternetAddress(Play.configuration.getProperty("mail.smtp.from", "user@localhost"));
             }
             if (replyTo == null) {
                 replyTo = from;
@@ -191,8 +326,22 @@ public class Mail {
      * @param contentType The content type of the body (text/plain or text/html) (optional)
      * @param attachments File attachments
      */
-    public static MimeMessage buildMessage(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) throws MessagingException {
-        return buildMessage(from, replyTo, recipients, subject, body, alternate, contentType, null, null, attachments);
+    public static MimeMessage buildMessage(InternetAddress from, InternetAddress replyTo, String[] recipients, String subject, String body, String alternate, String contentType, File... attachments) throws MessagingException {
+         return buildMessage(from, replyTo, recipients, subject, body, alternate, contentType, null, null, attachments);
+    }
+
+     /**
+     * Construct a MimeMessage
+     * @param from From address
+     * @param recipients To addresses
+     * @param subject Subject
+     * @param body body of the email
+     * @param alternate text/plain body (optional). This parameter is ignored if contentType is set to text/plain or is null.
+     * @param contentType The content type of the body (text/plain or text/html) (optional)
+     * @param attachments DataSource attachments
+     */
+    public static MimeMessage buildMessage(InternetAddress from, InternetAddress replyTo, String[] recipients, String subject, String body, String alternate, String contentType, DataSource... attachments) throws MessagingException {
+         return buildMessage(from, replyTo, recipients, subject, body, alternate, contentType, null, null, attachments);
     }
 
     /**
@@ -205,14 +354,14 @@ public class Mail {
      * @param contentType The content type of the body (text/plain or text/html) (optional)
      * @param charset The character set of the message (optional)
      * @param headers The mail headers (optional)
-     * @param attachments File attachments
+     * @param attachments File or DataSource attachments
      */
-    public static MimeMessage buildMessage(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, String charset, Map<String, String> headers, Object... attachments) throws MessagingException {
+    public static MimeMessage buildMessage(InternetAddress from, InternetAddress replyTo, String[] recipients, String subject, String body, String alternate, String contentType, String charset, Map<String, String> headers, Object... attachments) throws MessagingException {
 
         MimeMessage msg = new MimeMessage(getSession());
 
         if (from == null) {
-            from = Play.configuration.getProperty("mail.smtp.from");
+            from = new InternetAddress(Play.configuration.getProperty("mail.smtp.from"));
         }
         if (from == null) {
             throw new MailException("Please define a 'from' email address", new NullPointerException());
@@ -228,19 +377,16 @@ public class Mail {
             contentType = "text/plain";
         }
 
-        msg.setFrom(from instanceof InternetAddress ? (InternetAddress) from : new InternetAddress(from.toString()));
+        msg.setFrom(from);
         
-        InternetAddress reply;
         if (replyTo == null) {
-            reply = from instanceof InternetAddress ? (InternetAddress) from : new InternetAddress(from.toString());
-        } else {
-            reply = replyTo instanceof InternetAddress ? (InternetAddress) replyTo : new InternetAddress(replyTo.toString());
-        }
-        msg.setReplyTo(new InternetAddress[]{reply});
+            replyTo = from;
+        } 
+        msg.setReplyTo(new InternetAddress[]{replyTo});
 
         InternetAddress[] addressTo = new InternetAddress[recipients.length];
         for (int i = 0; i < recipients.length; i++) {
-            addressTo[i] = recipients[i] instanceof InternetAddress ? (InternetAddress) recipients[i] : new InternetAddress(recipients[i].toString().trim());
+            addressTo[i] = new InternetAddress(recipients[i].toString());
         }
         msg.setRecipients(javax.mail.Message.RecipientType.TO, addressTo);
 
@@ -393,7 +539,11 @@ public class Mail {
                 } else if (attachment instanceof DataSource) {
                     datasource = (DataSource) attachment;
                 } else {
-                    throw new UnexpectedException(attachment.getClass().getName() + " type is not supported as attachement.");
+                    if (attachment != null) {
+                        throw new UnexpectedException(attachment.getClass().getName() + " type is not supported as attachement.");
+                    } else {
+                        throw new UnexpectedException("an attachment cannot be null.");
+                    }
                 }
                 MimeBodyPart part = new MimeBodyPart();
                 part.setDataHandler(new DataHandler(datasource));
@@ -489,7 +639,12 @@ public class Mail {
             email.append("\n\tFrom: " + (from instanceof InternetAddress ? ((InternetAddress) from).toString() : from.toString()));
             email.append("\n\tReplyTo: " + (replyTo instanceof InternetAddress ? ((InternetAddress) replyTo).toString() : replyTo.toString()));
             email.append("\n\tSubject: " + subject);
-            email.append("\n\tAttachments: " + attachments.length);
+            if (attachments != null && attachments.length > 0) {
+                for (Object attachment : attachments) {
+                    email.append("\n\tAttachments length: " + attachments.length);
+                    email.append("\n\tAttachment: " + attachment);
+                }
+            }
             email.append("\n\tBody(" + contentType + "): " + body);
             if (!StringUtils.isEmpty(alternate)) {
                 email.append("\n\tAlternate Body(text/plain): " + alternate);

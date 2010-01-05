@@ -25,5 +25,8 @@
 	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email4"])[1]}', 'subject4')
 	assertEquals('Yop4', '$[subject4]')
 
+    open('@{Application.mail5()}')
+	assertTextPresent('OK5')
+	
 
 #{/selenium}
