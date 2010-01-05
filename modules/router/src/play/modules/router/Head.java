@@ -11,10 +11,12 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Head {
 
-    public abstract String value();
+    String value();
 
-    public abstract String params() default "";
+    String params() default "";
 
-    public abstract int priority() default -1;
+    int priority() default -1;
+
+     String headers() default "accept:'*/*'";
 
 }

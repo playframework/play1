@@ -95,9 +95,9 @@ public class GAEPlugin extends PlayPlugin {
 
     @Override
     public void onRoutesLoaded() {
-        Router.addRoute("GET", "/_ah/login", "GAEActions.login");
-        Router.addRoute("POST", "/_ah/login", "GAEActions.doLogin");
-        Router.addRoute("GET", "/_ah/logout", "GAEActions.logout");
+        Router.prependRoute("GET", "/_ah/login", "GAEActions.login");
+        Router.prependRoute("POST", "/_ah/login", "GAEActions.doLogin");
+        Router.prependRoute("GET", "/_ah/logout", "GAEActions.logout");
     }
 
     @Override

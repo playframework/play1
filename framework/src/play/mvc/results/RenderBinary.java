@@ -18,6 +18,7 @@ public class RenderBinary extends Result {
     File file;
     InputStream is;
     String name;
+    String contentType;
 
     /**
      * send a binary stream as the response
@@ -35,8 +36,19 @@ public class RenderBinary extends Result {
      * @param inline true to set the response Content-Disposition to inline
      */
     public RenderBinary(InputStream is, String name, boolean inline) {
+        this(is, name, null, inline);
+    }
+
+    /**
+     * send a binary stream as the response
+     * @param is the stream to read from
+     * @param name the name to use as Content-Diposition attachement filename
+     * @param inline true to set the response Content-Disposition to inline
+     */
+    public RenderBinary(InputStream is, String name, String contentType, boolean inline) {
         this.is = is;
         this.name = name;
+        this.contentType = contentType;
         this.inline = inline;
     }
 
@@ -84,6 +96,9 @@ public class RenderBinary extends Result {
         try {
             if (name != null) {
                 setContentTypeIfNotSet(response, MimeTypes.getContentType(name));
+            }
+            if (contentType != null) {
+                response.contentType = contentType;
             }
             if (!response.headers.containsKey("Content-Disposition")) {
                 if (inline) {

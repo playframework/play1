@@ -46,13 +46,13 @@ public class Tracer extends PlayPlugin {
 	@Override
 	public void onApplicationStart() {
 		Logger.info("Tracer plugin starts");
-		Router.addRoute("get", "/modules/tracer/traces", "Traces.list");
-		Router.addRoute("get", "/modules/tracer/traces/{id}", "Traces.show");
-		Router.addRoute("get", "/modules/tracer/traces/{id}/json", "Traces.jsonTrace");
-		Router.addRoute("get", "/public", "staticDir:public");
-		Router.addRoute("get", "/modules/tracer/source/core", "Traces.getClassSource");
-		Router.addRoute("get", "/modules/tracer/source/template", "Traces.getTemplateSource");
-		Router.addRoute("get", "/modules/tracer/files", "Traces.getFile");
+		Router.prependRoute("get", "/modules/tracer/traces", "Traces.list");
+		Router.prependRoute("get", "/modules/tracer/traces/{id}", "Traces.show");
+		Router.prependRoute("get", "/modules/tracer/traces/{id}/json", "Traces.jsonTrace");
+		Router.prependRoute("get", "/public", "staticDir:public");
+		Router.prependRoute("get", "/modules/tracer/source/core", "Traces.getClassSource");
+		Router.prependRoute("get", "/modules/tracer/source/template", "Traces.getTemplateSource");
+		Router.prependRoute("get", "/modules/tracer/files", "Traces.getFile");
 	}
 	
 	@Override

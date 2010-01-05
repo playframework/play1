@@ -16,4 +16,6 @@ public @interface Get {
 
     int priority() default -1;
 
+    String headers() default "accept:'*/*'";
+
 }

@@ -130,6 +130,27 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
+     * Return a 200 OK application/binary response with content-disposition attachment
+     * @param is The stream to copy
+     * @param name The attachment name
+     * @param inline true to set the response Content-Disposition to inline
+     */
+    protected static void renderBinary(InputStream is, String name, boolean inline) {
+        throw new RenderBinary(is, name, inline);
+    }
+
+    /**
+     * Return a 200 OK application/binary response with content-disposition attachment
+     * @param is The stream to copy
+     * @param name The attachment name
+     * @param contentType The content type of the attachment
+     * @param inline true to set the response Content-Disposition to inline
+     */
+    protected static void renderBinary(InputStream is, String name, String contentType, boolean inline) {
+        throw new RenderBinary(is, name, contentType, inline);
+    }
+
+    /**
      * Return a 200 OK application/binary response
      * @param file The file to copy
      */

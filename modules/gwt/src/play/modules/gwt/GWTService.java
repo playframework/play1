@@ -43,8 +43,8 @@ public class GWTService implements SerializationPolicyProvider {
         // Ok. Will need to route this path as it's an URL
         for (Route route : Router.routes) {
             try {
-                route.matches("GET", serializationPolicyFilePath);
-            } catch(Throwable t) {
+                route.matches("GET", serializationPolicyFilePath, "*/*");
+            } catch(Throwable t) {                                          
                 if(t instanceof RenderStatic) {
                     serializationPolicyFilePath = ((RenderStatic)t).file;
                     break;
