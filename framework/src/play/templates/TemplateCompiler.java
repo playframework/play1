@@ -233,9 +233,9 @@ public class TemplateCompiler {
 
         void expr() {
             String expr = parser.getToken().trim();
-            print("\tval=");
+            print("\t__val=");
             print(expr);
-            print(";out.print(val!=null?__safe(val):'')");
+            print(";out.print(__val!=null?__safe(__val):'')");
             markLine(parser.getLine());
             println();
         }
@@ -278,7 +278,7 @@ public class TemplateCompiler {
             if (tagText.indexOf(" ") > 0) {
                 tagName = tagText.substring(0, tagText.indexOf(" "));
                 tagArgs = tagText.substring(tagText.indexOf(" ") + 1).trim();
-                if (!tagArgs.matches("^[a-zA-Z0-9]+:.*$")) {
+                if (!tagArgs.matches("^[a-zA-Z0-9]+\\s*:.*$")) {
                     tagArgs = "arg:" + tagArgs;
                 }
                 tagArgs = tagArgs.replaceAll("[:]\\s*[@]", ":actionBridge.");

@@ -143,7 +143,7 @@ Currently we don't validate the form content before creating the comment. We wou
 
 bc. public static void postComment(Long postId, @Required String author, @Required String content) {
     Post post = Post.findById(postId);
-    if (Validation.hasErrors()) {
+    if (validation.hasErrors()) {
         render("Application/show.html", post);
     }
     post.addComment(author, content);
