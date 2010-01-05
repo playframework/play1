@@ -20,6 +20,16 @@ public class RouterPlugin extends PlayPlugin {
     }
 
     @Override
+    public void onConfigurationRead() {
+        computeRoutes();
+    }
+
+    @Override
+    public void onRoutesLoaded() {
+        computeRoutes();
+    }
+
+    @Override
     public void onApplicationStart() {
         computeRoutes();
     }
@@ -31,9 +41,9 @@ public class RouterPlugin extends PlayPlugin {
             Get annotation = get.getAnnotation(Get.class);
             if (annotation != null) {
                 if (annotation.priority() != -1) {
-                    Router.addRoute(annotation.priority(), "GET", annotation.value(), get.getDeclaringClass().getSimpleName() + "." + get.getName(), annotation.params());
+                    Router.addRoute(annotation.priority(), "GET", annotation.value(), get.getDeclaringClass().getSimpleName() + "." + get.getName(), annotation.params(), annotation.headers());
                 } else {
-                    Router.addRoute("GET", annotation.value(), get.getDeclaringClass().getSimpleName() + "." + get.getName(), annotation.params());
+                    Router.prependRoute("GET", annotation.value(), get.getDeclaringClass().getSimpleName() + "." + get.getName(), annotation.params(), annotation.headers());
                 }
             }
         }
@@ -42,9 +52,9 @@ public class RouterPlugin extends PlayPlugin {
             Post annotation = post.getAnnotation(Post.class);
             if (annotation != null) {
                 if (annotation.priority() != -1) {
-                    Router.addRoute(annotation.priority(), "POST", annotation.value(), post.getDeclaringClass().getSimpleName() + "." + post.getName(), annotation.params());
+                    Router.addRoute(annotation.priority(), "POST", annotation.value(), post.getDeclaringClass().getSimpleName() + "." + post.getName(), annotation.params(), annotation.headers());
                 } else {
-                    Router.addRoute("POST", annotation.value(), post.getDeclaringClass().getSimpleName() + "." + post.getName(), annotation.params());
+                    Router.prependRoute("POST", annotation.value(), post.getDeclaringClass().getSimpleName() + "." + post.getName(), annotation.params(), annotation.headers());
                 }
 
             }
@@ -54,9 +64,9 @@ public class RouterPlugin extends PlayPlugin {
             Put annotation = put.getAnnotation(Put.class);
             if (annotation != null) {
                 if (annotation.priority() != -1) {
-                    Router.addRoute(annotation.priority(), "PUT", annotation.value(), put.getDeclaringClass().getSimpleName() + "." + put.getName(), annotation.params());
+                    Router.addRoute(annotation.priority(), "PUT", annotation.value(), put.getDeclaringClass().getSimpleName() + "." + put.getName(), annotation.params(), annotation.headers());
                 } else {
-                    Router.addRoute("PUT", annotation.value(), put.getDeclaringClass().getSimpleName() + "." + put.getName(), annotation.params());
+                    Router.prependRoute("PUT", annotation.value(), put.getDeclaringClass().getSimpleName() + "." + put.getName(), annotation.params(), annotation.headers());
                 }
             }
         }
@@ -66,9 +76,9 @@ public class RouterPlugin extends PlayPlugin {
             Delete annotation = delete.getAnnotation(Delete.class);
             if (annotation != null) {
                 if (annotation.priority() != -1) {
-                    Router.addRoute(annotation.priority(), "DELETE", annotation.value(), delete.getDeclaringClass().getSimpleName() + "." + delete.getName(), annotation.params());
+                    Router.addRoute(annotation.priority(), "DELETE", annotation.value(), delete.getDeclaringClass().getSimpleName() + "." + delete.getName(), annotation.params(), annotation.headers());
                 } else {
-                    Router.addRoute("DELETE", annotation.value(), delete.getDeclaringClass().getSimpleName() + "." + delete.getName(), annotation.params());
+                    Router.prependRoute("DELETE", annotation.value(), delete.getDeclaringClass().getSimpleName() + "." + delete.getName(), annotation.params(), annotation.headers());
                 }
             }
         }
@@ -78,9 +88,9 @@ public class RouterPlugin extends PlayPlugin {
             Head annotation = head.getAnnotation(Head.class);
             if (annotation != null) {
                 if (annotation.priority() != -1) {
-                    Router.addRoute(annotation.priority(), "HEAD", annotation.value(), head.getDeclaringClass().getSimpleName() + "." + head.getName(), annotation.params());
+                    Router.addRoute(annotation.priority(), "HEAD", annotation.value(), head.getDeclaringClass().getSimpleName() + "." + head.getName(), annotation.params(), annotation.headers());
                 } else {
-                    Router.addRoute("HEAD", annotation.value(), head.getDeclaringClass().getSimpleName() + "." + head.getName(), annotation.params());
+                    Router.prependRoute("HEAD", annotation.value(), head.getDeclaringClass().getSimpleName() + "." + head.getName(), annotation.params(), annotation.headers());
                 }
             }
         }
@@ -90,9 +100,10 @@ public class RouterPlugin extends PlayPlugin {
             Any annotation = any.getAnnotation(Any.class);
             if (annotation != null) {
                 if (annotation.priority() != -1) {
-                    Router.addRoute(annotation.priority(), "*", annotation.value(), any.getDeclaringClass().getSimpleName() + "." + any.getName(), annotation.params());
+                    Router.addRoute(annotation.priority(), "*", annotation.value(), any.getDeclaringClass().getSimpleName() + "." + any.getName(), annotation.params(), annotation.headers());
                 } else {
-                    Router.addRoute("*", annotation.value(), any.getDeclaringClass().getSimpleName() + "." + any.getName(), annotation.params());
+                    // Always the last one
+                    Router.prependRoute("*", annotation.value(), any.getDeclaringClass().getSimpleName() + "." + any.getName(), annotation.params(), annotation.headers());
                 }
             }
         }
@@ -104,9 +115,9 @@ public class RouterPlugin extends PlayPlugin {
                 if (serveStatics != null) {
                     for (ServeStatic serveStatic : serveStatics) {
                         if (serveStatic.priority() != -1) {
-                            Router.addRoute(serveStatic.priority(), "GET", serveStatic.value(), "staticDir:" + serveStatic.directory());
+                            Router.addRoute(serveStatic.priority(), "GET", serveStatic.value(), "staticDir:" + serveStatic.directory(), serveStatic.headers());
                         } else {
-                            Router.addRoute("GET", serveStatic.value(), "staticDir:" + serveStatic.directory());
+                            Router.prependRoute("GET", serveStatic.value(), "staticDir:" + serveStatic.directory(), serveStatic.headers());
                         }
                     }
                 }
@@ -117,9 +128,9 @@ public class RouterPlugin extends PlayPlugin {
             ServeStatic annotation = (ServeStatic)clazz.getAnnotation(ServeStatic.class);
             if (annotation != null) {
                 if (annotation.priority() != -1) {
-                    Router.addRoute(annotation.priority(), "GET", annotation.value(), "staticDir:" + annotation.directory());
+                    Router.addRoute(annotation.priority(), "GET", annotation.value(), "staticDir:" + annotation.directory(), annotation.headers());
                 } else {
-                    Router.addRoute("GET", annotation.value(), "staticDir:" + annotation.directory());
+                    Router.prependRoute("GET", annotation.value(), "staticDir:" + annotation.directory(), annotation.headers());
                 }
             }
         }
@@ -131,7 +142,7 @@ public class RouterPlugin extends PlayPlugin {
         List<ApplicationClasses.ApplicationClass> classes = Play.classes.all();
         for (ApplicationClasses.ApplicationClass clazz : classes) {
             if (clazz.name.startsWith("controllers.")) {
-                if (!clazz.javaClass.isInterface() && !clazz.javaClass.isAnnotation()) {
+                if (clazz.javaClass != null && !clazz.javaClass.isInterface() && !clazz.javaClass.isAnnotation()) {
                     returnValues.add(clazz.javaClass);
                 }
             }

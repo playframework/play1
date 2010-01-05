@@ -27,7 +27,8 @@ import play.utils.Default;
  */
 public class Router {
 
-    static Pattern routePattern = new Pattern("^({method}GET|POST|PUT|DELETE|OPTIONS|HEAD|\\*)?\\s+({path}/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?$");
+    static Pattern routePattern = new Pattern("^({method}GET|POST|PUT|DELETE|OPTIONS|HEAD|\\*)?\\s+({path}/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?(\\s*)({headers})?$");
+ 
     /**
      * Pattern used to locate a method override instruction in request.querystring
      */
@@ -47,50 +48,76 @@ public class Router {
     /**
      * This one can be called to add new route. Last added is first in the route list. 
      */
-    public static void addRoute(String method, String path, String action) {
-       addRoute(method, path, action, null);
+    public static void prependRoute(String method, String path, String action, String headers) {
+       prependRoute(method, path, action, null, headers);
     }
 
     /**
-     * This one can be called to add new route. Last added is first in the route list.
-     */
-    public static void addRoute(String method, String path, String action, String params) {
-        prependRoute(method, path, action, params);
-    }
+       * This one can be called to add new route. Last added is first in the route list.
+       */
+      public static void prependRoute(String method, String path, String action) {
+         prependRoute(method, path, action, null, null);
+      }
 
+    
     /**
      * Add a route at the given position
      */
-    public static void addRoute(int position, String method, String path, String action, String params) {
-        routes.add(position, getRoute(method, path, action, params));
+    public static void addRoute(int position, String method, String path, String action, String params, String headers) {
+        if (position > routes.size()) {
+            position = routes.size();
+        }
+        routes.add(position, getRoute(method, path, action, params, headers));
     }
 
      /**
      * Add a route at the given position
      */
-    public static void addRoute(int position, String method, String path, String action) {
-        addRoute(position, method, path, action, null);
+    public static void addRoute(int position, String method, String path, String headers) {
+        addRoute(position, method, path, null, null, headers);
     }
-   
+
+     /**
+     * Add a route at the given position
+     */
+    public static void addRoute(int position, String method, String path, String action, String headers) {
+        addRoute(position, method, path, action, null, headers);
+    }
+
+     /**
+     * Add a route at the given position
+     */
+    public static void addRoute(String method, String path, String action, String headers) {
+        addRoute(method, path, action, null, headers);
+    }
+
+     /**
+     * Add a route
+     */
+    public static void addRoute(String method, String path, String action, String params, String headers) {
+        appendRoute(method, path, action, params, headers, null, 0);
+    }
+
     /**
      * This is used internally when reading the route file. The order the routes are added matters and
      * we want the method to append the routes to the list.
      */
-    protected static void appendRoute(String method, String path, String action, String params, String sourceFile, int line) {
-        routes.add(getRoute(method, path, action, params, sourceFile, line));
+    public static void appendRoute(String method, String path, String action, String params, String headers, String sourceFile, int line) {
+        routes.add(getRoute(method, path, action, params, headers, sourceFile, line));
     }
     
-    public static Route getRoute(String method, String path, String action, String params) {
-        return getRoute(method, path, action, params, null, 0);
+    public static Route getRoute(String method, String path, String action, String params, String headers) {
+        return getRoute(method, path, action, params, headers, null, 0);
     }
     
-    public static Route getRoute(String method, String path, String action, String params, String sourceFile, int line) {
+    public static Route getRoute(String method, String path, String action, String params, String headers, String sourceFile, int line) {
         Route route = new Route();
         route.method = method;
         route.path = path.replace("//", "/");
         route.action = action;
         route.routesFile = sourceFile;
         route.routesFileLine = line;
+        route.addHeaders(headers);
         route.addParams(params);
         route.compute();
         return route;
@@ -99,8 +126,8 @@ public class Router {
     /**
      * Add a new route at the beginning of the route list
      */
-    private static void prependRoute(String method, String path, String action, String params) {
-        routes.add(0, getRoute(method, path, action, params));
+    public static void prependRoute(String method, String path, String action, String params, String headers) {
+        routes.add(0, getRoute(method, path, action, params, headers));
     }
 
     /**
@@ -144,7 +171,8 @@ public class Router {
                     String method = matcher.group("method");
                     String path = prefix + matcher.group("path");
                     String params = matcher.group("params");
-                    appendRoute(method, path, action, params, fileAbsolutePath, lineNumber);
+                    String headers = matcher.group("headers");
+                    appendRoute(method, path, action, params, headers, fileAbsolutePath, lineNumber);
                 }                
             } else {
                 Logger.error("Invalid route definition : %s", line);
@@ -167,12 +195,14 @@ public class Router {
             }
         }
     }
-    public static List<Route> routes = new ArrayList<Route>();
+    public static List<Route> routes = new ArrayList<Route>(500);
 
     public static void routeOnlyStatic(Http.Request request) {
         for (Route route : routes) {
             try {
-                if (route.matches(request.method, request.path) != null) {
+                Http.Header accept =  request.headers.get("accept");
+                String value = accept == null ? null : accept.value();
+                if (route.matches(request.method, request.path, value) != null) {
                     break;
                 }
             } catch (Throwable t) {
@@ -193,7 +223,9 @@ public class Router {
             }
         }
         for (Route route : routes) {
-            Map<String, String> args = route.matches(request.method, request.path);
+            Http.Header accept =  request.headers.get("accept");
+            String value = accept == null ? null : accept.value();
+            Map<String, String> args = route.matches(request.method, request.path, value);
             if (args != null) {
                 request.routeArgs = args;
                 request.action = route.action;
@@ -211,9 +243,9 @@ public class Router {
         throw new NotFound(request.method, request.path);
     }
 
-    public static Map<String, String> route(String method, String path) {
+    public static Map<String, String> route(String method, String path, String headers) {
         for (Route route : routes) {
-            Map<String, String> args = route.matches(method, path);
+            Map<String, String> args = route.matches(method, path, headers);
             if (args != null) {
                 args.put("action", route.action);
                 return args;
@@ -425,14 +457,15 @@ public class Router {
         Pattern pattern;
         List<Arg> args = new ArrayList<Arg>();
         Map<String, String> staticArgs = new HashMap<String, String>();
-        
+        Map<String, String> headers = new HashMap<String, String>();
+
 		public int routesFileLine;
 		public String routesFile;		
 		
         static Pattern customRegexPattern = new Pattern("\\{([a-zA-Z_0-9]+)\\}");
         static Pattern argsPattern = new Pattern("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}");
         static Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'");
-
+        
         public void compute() {
             // staticDir
             if (action.startsWith("staticDir:")) {
@@ -487,10 +520,32 @@ public class Router {
             }
         }
 
-        public Map<String, String> matches(String method, String path) {
-            if (method == null || this.method.equals("*") || method.equalsIgnoreCase(this.method)) {
-                Matcher matcher = pattern.matcher(path);
+         public void addHeaders(String params) {
+            if (params == null || params.length() < 1) {
+                return;
+            }
+             params = params.trim();
+           for (String param : params.split(",")) {
+                Matcher matcher = paramPattern.matcher(param);
                 if (matcher.matches()) {
+                      Logger.info("addHeaders: " + matcher.group(1).toLowerCase() + " - " +matcher.group(2) + "for " + toString());
+                    headers.put(matcher.group(1).toLowerCase(), matcher.group(2));
+                } else {
+                    Logger.warn("Ignoring %s (headers must be specified as key:'value',...)", params);
+                }
+            }
+        }
+
+        private boolean accept(String accept) {
+            Logger.info("accept: " + accept + " - " + this.headers.get("accept") + " " + toString());
+            return accept == null || accept.indexOf("*/*") != -1 || this.headers.get("accept").indexOf(accept) != -1;
+        }
+
+        public Map<String, String> matches(String method, String path, String accept) {
+            if (method == null || this.method.equals("*") || method.equalsIgnoreCase(this.method)) {
+
+                Matcher matcher = pattern.matcher(path);
+                if (matcher.matches() && accept(accept)) {
                     // Static dir
                     if (staticDir != null) {
                         throw new RenderStatic(staticDir + "/" + matcher.group("resource"));

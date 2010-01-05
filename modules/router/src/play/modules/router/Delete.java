@@ -16,6 +16,8 @@ public @interface Delete {
 
     int priority() default -1;
 
+    String headers() default "accept:'*/*'";
+
 }
 
 

@@ -40,10 +40,13 @@ public class Binder {
     static {
         supportedTypes.put(Date.class, new DateBinder());
         supportedTypes.put(File.class, new FileBinder());
+        supportedTypes.put(File[].class, new FileArrayBinder());
         supportedTypes.put(Upload.class, new UploadBinder());
+        supportedTypes.put(Upload[].class, new UploadArrayBinder());
         supportedTypes.put(Calendar.class, new CalendarBinder());
         supportedTypes.put(Locale.class, new LocaleBinder());
         supportedTypes.put(byte[].class, new ByteArrayBinder());
+        supportedTypes.put(byte[][].class, new ByteArrayArrayBinder());
     }
     static Map<Class, BeanWrapper> beanwrappers = new HashMap<Class, BeanWrapper>();
 
@@ -65,6 +68,8 @@ public class Binder {
                 return beanWrapper.bind(name, type, params, prefix, annotations);
             }
             String[] value = params.get(name + prefix);
+            Logger.trace("bindInternal: value [" + value + "]");
+
 
             // Let see if we have a Bind annotation and a separator. If so, we need to split the values
             // Look up for the Bind annotation
@@ -78,7 +83,8 @@ public class Binder {
                 }
             }
             // Arrays types
-            if (clazz.isArray() && (clazz != byte[].class)) {
+            // The array condiction is not so nice... We should find another way of doing this....
+            if (clazz.isArray() && (clazz != byte[].class && clazz != byte[][].class && clazz != File[].class && clazz != Upload[].class )) {
                 if (value == null) {
                     value = params.get(name + prefix + "[]");
                 }

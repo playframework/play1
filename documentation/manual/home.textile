@@ -67,8 +67,8 @@ Everything you need to know about Play.
 ## "Template syntax":templates#syntax
 ## "Template inheritance":templates#inheritance
 ## "Create tags":templates#tags
-## "Extending the templates language":template#extensions
-## "Implicit objects":template#implicits
+## "Extending the templates language":templates#extensions
+## "Implicit objects":templates#implicits
 # "The domain object model":model
 ## "Properties simulation":model#properties
 ## "Setup a database to persist your model objects":model#database

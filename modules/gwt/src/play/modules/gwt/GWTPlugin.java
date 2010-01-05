@@ -22,9 +22,9 @@ public class GWTPlugin extends PlayPlugin {
             }
         }
         if (useDefault) {
-            Router.addRoute("GET", "/app", "staticDir:gwt-public");
+            Router.prependRoute("GET", "/app", "staticDir:gwt-public");
         }
-        Router.addRoute("GET", "/@gwt", "dummy.dummy"); // protect it
+        Router.prependRoute("GET", "/@gwt", "dummy.dummy"); // protect it
     }
 
     @Override

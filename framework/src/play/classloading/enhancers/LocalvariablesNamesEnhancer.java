@@ -204,10 +204,22 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         public static Integer computeMethodHash(Class[] parameters) {
             String[] names = new String[parameters.length];
             for (int i = 0; i < parameters.length; i++) {
-                if (parameters[i].isArray()) {
-                    names[i] = parameters[i].getComponentType().getName() + "[]";
+                Class param = parameters[i];
+                names[i] = "";
+                if (param.isArray()) {
+                    int level = 1;
+                    param = param.getComponentType();
+                    // Array of array
+                    while (param.isArray()) {
+                        level++;
+                        param = param.getComponentType();
+                    }
+                    names[i] = param.getName();
+                    for (int j = 0; j < level; j++) {
+                      names[i] += "[]";
+                    }
                 } else {
-                    names[i] = parameters[i].getName();
+                    names[i] = param.getName();
                 }
             }
             return computeMethodHash(names);
