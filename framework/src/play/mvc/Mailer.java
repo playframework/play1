@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import play.Logger;
+import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSupport;
 import play.exceptions.TemplateNotFoundException;
@@ -16,6 +17,8 @@ import play.exceptions.UnexpectedException;
 import play.libs.Mail;
 import play.templates.Template;
 import play.templates.TemplateLoader;
+
+import javax.mail.internet.InternetAddress;
 
 /**
  * Application mailer support
@@ -211,13 +214,8 @@ public class Mailer implements LocalVariablesSupport {
 
         // Recipients
         List<Object> recipientList = (List<Object>) infos.get().get("recipients");
-        Object[] recipients = new Object[recipientList.size()];
-        int i = 0;
-        for (Object recipient : recipientList) {
-            recipients[i] = recipient;
-            i++;
-        }
-
+        Object[] recipients = recipientList.toArray(new Object[recipientList.size()]);
+ 
         // From
         Object from = infos.get().get("from");
         Object replyTo = infos.get().get("replyTo");
@@ -225,16 +223,10 @@ public class Mailer implements LocalVariablesSupport {
         // Attachment
         Object[] attachments = new Object[]{};
         if (infos.get().get("attachments") != null) {
-            List<Object> objectList = (List<Object>) infos.get().get("attachments");
-            attachments = new Object[objectList.size()];
-            i = 0;
-            for (Object object : objectList) {
-                attachments[i] = object;
-                i++;
-            }
-
+            List<Object> attachmentsList = (List<Object>) infos.get().get("attachments");
+            attachments = attachmentsList.toArray(new Object[attachmentsList.size()]);
         }
-
+        
         // Send
         final String body = (bodyHtml != null ? bodyHtml : bodyText);
         final String alternate = (bodyHtml != null ? bodyText : null);
