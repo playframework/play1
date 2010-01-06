@@ -173,7 +173,7 @@ public class Mail {
      * @param attachments File attachments
      */
     public static Future<Boolean> send(String from, String replyTo, String[] recipients, String subject, String body, String alternate, String contentType, File... attachments) {
-        return send(from, replyTo, recipients, subject, body, alternate, contentType, null, null, attachments);
+        return send(from, replyTo, recipients, subject, body, alternate, contentType, null, null, (Object[])attachments);
     }
 
     /**
@@ -189,7 +189,7 @@ public class Mail {
      * @param attachments DataSource attachments
      */
     public static Future<Boolean> send(String from, String replyTo, String[] recipients, String subject, String body, String alternate, String contentType, DataSource... attachments) {
-        return send(from, replyTo, recipients, subject, body, alternate, contentType, null, null, attachments);
+        return send(from, replyTo, recipients, subject, body, alternate, contentType, null, null, (Object[])attachments);
     }
 
 
