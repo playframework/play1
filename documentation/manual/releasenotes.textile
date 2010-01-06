@@ -1,18 +1,18 @@
 h1. Play 1.0.1 -- Release notes
 
-**play 1.0.1** is a maintenance release of the play 1.0 branch. It fixes a lot of small bugs and provides a better binding for persistent JPA objects and auto-escaping of HTML and Javascript code in templates to avoid XSS security problems in your applications.
+**play 1.0.1** is a maintenance release of the play 1.0 branch. It fixes a lot of small bugs, provides a better binding for persistent JPA objects, auto-escaping of HTML and Javascript code in templates to avoid XSS security problems.
 
-p(note). **play 1.0.1** is a maintenance release and should be fully compatible with the previous version. If you encounter any problem please ask us on the Google Group.
+p(note). **play 1.0.1** is a maintenance release and is fully compatible with the 1.0 version. If you encounter any problems please ask us on the Google Group.
 
-You can retrieve all the fixed bug on the "1.0.1 roadmap page":http://www.playframework.org/roadmap/1.0.1. We will describe more important changes here:
+You can read about the fixed bugs on the "1.0.1 roadmap page":http://www.playframework.org/roadmap/1.0.1. The most important changes are highlighted in this page:
 
 h2. <a>Automatic escape of HTML code in templates</a>
 
-Now all dynamic expressions are automatically escaped by the template engine to avoid XSS security issues in your application. So the **title** variable containing **==&lt;h1>Title&lt;/h1>==** and displayed in a dynamic expression will be correctly escaped:
+Now all dynamic expressions are escaped by the template engine to avoid XSS security issues in your application. So the **title** variable containing **==&lt;h1>Title&lt;/h1>==** is now escaped:
 
 bc. ${title} --> &lt;h1&gt;Title&lt;/h1&gt;
 
-If you want really display it in an unescaped way, you need to tell it explicitely using the **raw()** method:
+If you really want to display it in an unescaped way, you need to explicitely call the **raw()** method:
 
 bc. ${title.raw()} --> <h1>Title</h1>
 
@@ -22,17 +22,17 @@ bc. #{verbatim}
     ${title} --> <h1>Title</h1>
 #{/verbatim}
 
-Of course, as this feature can break existing applications it is not enabled by default. You can enable it by adding this line to your **application.conf** file:
+Of course, as this feature can break existing applications, it is not enabled by default. You can enable it by adding the following line to your **application.conf** file:
 
 bc. future.escapeInTemplates=true
 
-This line will be automatically added to new applications created with the 1.0.1 release.
+This line is  added to new applications created with the 1.0.1 release.
 
 h2. <a>@javax.inject.Inject support</a>
 
-If you use a Dependency Injection container like the one provided by the "Spring module":spring, you can now use the **@Inject** annotation to automatically inject defined beans in your controllers, jobs and mailer.
+You can now use the **@Inject** annotation if you are using a Dependency Injection container like the one provided by the "Spring module":spring. The the **@Inject** annotation automatically injects defined beans in your controllers, jobs and mailer. It works on static fields. 
 
-It works on static fields defined in these artefacts. For example to inject a **PriceWatcher** service defined in Spring to one of your controller, just do:
+For example to inject a **PriceWatcher** service defined in Spring to one of your controller, just do:
 
 bc. public class Application extends Controller {
     
@@ -45,7 +45,7 @@ bc. public class Application extends Controller {
     
 }
 
-Auto-reload should work as exepected.
+Auto-reload should work as expected.
 
 h2. <a>Better binding for JPA objects</a>
 
@@ -65,21 +65,23 @@ bc. public static void save(Long id) {
     user.save(); // ok
 }
 
-Now you can provide the **user.id** field yourself in the HTTP parameters. If Play find the **id** field, it will load the instance from the database before editing it using the other parameters provided in the HTTP request. So you can then save it directly.
+Now you can provide the **user.id** field yourself in the HTTP parameters. When Play find the **id** field, it loads the matching instance from the database before editing it. The other parameters provided by the HTTP request are then applied. So you can save it directly.
 
 bc. public static void save(User user) {
     user.save(); // ok with 1.0.1
 }
 
-Of course as this feature can break existing applications it is not enabled by default. You can enable it by adding this line to your **application.conf** file:
+Of course as this feature can break existing applications it is not enabled by default. You can enable it by adding the followin line to your **application.conf** file:
 
 bc. future.bindJPAObjects=true
 
-This line will be automatically added to new applications created with the 1.0.1 release.
+This line is added to new applications created with the 1.0.1 release.
 
-h2. <a>Framework id can be set from command line</a>
+h2. <a>Framework id can be set from the command line</a>
 
-You can specify the "framework id":ids to use for a particular command directly from the command line. For example to run an application in production mode you could use:
+The framework id allows you to run different configurations for a same play! application (ie dev, test, staging, production, etc...).
+
+Using the command line, you can now specify the application "framework id":ids the application will use. For example, to run an application in production mode:
 
 bc. play run --%production
 
@@ -88,7 +90,7 @@ With these lines defined in the **application.conf** file:
 bc. application.mode=dev
 %production.application.mode=prod
 
-It should be compatible with all the commands using the framework id information. The default id is still defined using the **play id** command.
+It is compatible with all the existing commands using the framework id information. The default id is still defined using the **play id** command.
 
 By the way ,**play test** is then equivalent to:
 
@@ -117,7 +119,7 @@ bc. public class User {
 
 h2. <a>Test runner update</a>
 
-We've updated selenium to the 1.0.1 final version and improved a little the UI. Selenium tests now run in fullscreen. And some new buttons like the "Run all tests" have been added.
+We've updated selenium to the 1.0.1 final version and improved the UI. Selenium tests now run in fullscreen. And some new functionalities like the "Run all tests" have been added.
 
 !images/selenium-fullscreen!
 
@@ -144,11 +146,17 @@ bc. <!DOCTYPE html>
     </body>
 </html>
 
-It's just the default and you can of course change to use any doctype if you want. However "HTML5":http://html5.org is surely the future and it way simpler.
+It's just the default and you can of course change it to any doctype if you wish. However "HTML5":http://html5.org is surely the future and is way simpler.
 
-Also the default template come with **JQuery** included. This is because modern web applications need a good Javascript framework and we love "JQuery":http://www.jquery.com. Again it is just the default and you can of course remove it and use whatever Javascript framework you want.
+The default template comes with the **JQuery** Javascript library. This is because modern web applications need a good Javascript framework and we love "JQuery":http://www.jquery.com. Again it is just the default and you can of course override it with whatever Javascript library you want.
 
-Oh, and it comes with 2 defaults placeholders to inject more scripts or styles in sub-templates.
+Oh, and it comes with 2 default placeholders to inject even more scripts and/or styles. For example, add in your view:
+
+bc. #{set 'moreScripts'}
+<script src="@{'/public/javascripts/gears_init.js'}" type="text/javascript" ></script>
+#{/set}
+
+And the gear Javascript library will be accessible in your view.
 
 h2. <a>Improved #{list} tag</a>
 
@@ -160,13 +168,13 @@ bc. #{list items:users, as:'user'}
     <li>${user}</li>
 #{/list}
 
-as:
+to:
 
 bc. #{list users, as:'user'}
     <li>${user}</li>
 #{/list}
 
-Also, the **as** parameter is now optional as well. It will use **i** as default variable name:
+The **as** parameter is now optional as well. It uses **i** as default variable name:
 
 bc. #{list 1..10}
     <li>${i}</li>
@@ -174,13 +182,13 @@ bc. #{list 1..10}
 
 h2. <a>New #{jsRoute /} tag</a>
 
-The **#{jsRoute /}** tag allow to import a server-side defined route as a Javascript function. It is very useful if you need to call an URL with an AJAX call using free variables.
+The **#{jsRoute /}** tag allows to import a server-side defined route as a Javascript function. It is very useful if you need to call an URL with an AJAX call using free variables.
 
 Let's see an example:
 
 bc. GET     /users/{id}        Users.show
 
-Now you can import this route client side:
+Now you can import this route on the client side:
 
 bc. <script type="text/javascript">
     var showUserAction = #{jsRoute @Users.show(':id')}
@@ -190,7 +198,7 @@ bc. <script type="text/javascript">
     }
 </script>
 
-As you see you use the **:name** syntax to declare free variables. You can mix free and fixed variables together. The **#{jsRoute /}** tag generate a Javascript function that you can reuse later. This function take a Javascript object as parameter that must define all the free variables.
+As you see you use the **:ame** syntax to declare free variables. You can mix free and fixed variables together. The **#{jsRoute /}** tag generates a Javascript function. This function takes a Javascript object as parameter that must define all the free variables.
 
 h2. <a>New sample application: 'booking'</a>
 
