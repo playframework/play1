@@ -222,5 +222,7 @@ To convert your Play! application into an IntelliJ IDEA project, use the **ideal
 
 bc. # play idealize myApp
 
+!images/intellij!
 
+You can use the Run and Debug using the context menu.
 
