@@ -213,3 +213,14 @@ h2. <a>Eclipse plugin is on his way</a>
 We are working hard to provide a dedicated eclipse plugin. The current status is alpha but already usable. You can find it in the **support/eclipse** directory of your play installation.
 
 !images/eclipse-plugin!
+
+h2. <a>Support for IntelliJ IDEA</a>
+
+Play! framework now supports "IntelliJ IDEA":http://www.jetbrains.com/idea/ out of the box!
+
+To convert your Play! application into an IntelliJ IDEA project, use the **idealize** command:
+
+bc. # play idealize myApp
+
+
+
