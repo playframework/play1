@@ -40,6 +40,10 @@ public class Application extends Controller {
         render();
     }
 
+    public static void index2() {
+        renderText(Router.reverse("Application.index2"));
+    }
+
     public static void simpleStatusCode() {
         response.status = 204;
     }
