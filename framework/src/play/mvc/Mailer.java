@@ -231,7 +231,7 @@ public class Mailer implements LocalVariablesSupport {
         final String body = (bodyHtml != null ? bodyHtml : bodyText);
         final String alternate = (bodyHtml != null ? bodyText : null);
 
-       return Mail.send(from, replyTo, recipients, subject, body, alternate, contentType, charset, headers, attachments);
+       return Mail.sendEmail(from, replyTo, recipients, subject, body, alternate, contentType, charset, headers, attachments);
   }
 
     public static boolean sendAndWait(Object... args) {

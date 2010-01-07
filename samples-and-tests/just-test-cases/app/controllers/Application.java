@@ -13,6 +13,8 @@ import play.modules.spring.*;
 import models.*;
 import utils.*;
 
+import javax.mail.internet.InternetAddress;
+
 public class Application extends Controller {
 
     // bug
@@ -113,14 +115,16 @@ public class Application extends Controller {
     /**
      * This is to make sure that there is no endless recursion
      */
-    public static void mail5() {
-        Mail.send("from@toto.com", "recipient@toto.com", "subject", "body");
-        Mail.send("from@toto.com", "recipient@toto.com", "subject", "body", "alternate");
-        Mail.send("from@toto.com", "recipient@toto.com", "subject", "body", "alternate", new File[0]);
+    public static void mail5() throws Exception {
+        Mail.send("from@toto.com", "replyTo@toto.com", "subject", "body");
+        Mail.send("from@toto.com", "replyTo@toto.com", "subject", "body", "alternate");
+        Mail.send("from@toto.com", "replyTo@toto.com", "subject", "body", "alternate", new File[0]);
         Mail.send("from@toto.com", new String[]{"recipient@toto.com"}, "subject", "body");
-        Mail.send("from@toto.com", "recipient@toto.com", "subject", "subject", Play.getFile("test/fond1.jpg"));
+        Mail.send("from@toto.com", "replyTo@toto.com", "subject", "subject", Play.getFile("test/fond1.jpg"));
         Mail.send("from@toto.com", new String[]{"recipient@toto.com"}, "subject", "body", Play.getFile("test/fond1.jpg"));
-        Mail.send("from@toto.com", "recipient@toto.com", new String[]{"recipient@toto.com"}, "subject", "body", "alternate", "text/html", new File[0]);
+        Mail.send(new InternetAddress("from@toto.com"), null, new String[]{"recipient@toto.com"}, "subject", "body", null, null,  Play.getFile("test/fond1.jpg"), Play.getFile("test/fond1.jpg"));
+        Mail.send("from@toto.com", "replyTo@toto.com", new String[]{"recipient@toto.com"}, "subject", "body", "alternate", "text/html", new File[0]);
+        Mail.sendEmail(new InternetAddress("from@toto.com"), new InternetAddress("replyTo@toto.com"), new InternetAddress[]{new InternetAddress("recipient@toto.com")}, "subject", "body", "alternate", "text/html", null, null, new File[0]);
         renderText("OK5");
     }
 
