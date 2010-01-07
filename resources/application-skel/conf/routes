@@ -2,6 +2,8 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+#GET(html,xml,json)    {myhost}.mydomain.com/tasks/{id}          Tasks.show(format:'xml')
+
 # Home page
 GET     /                                       Application.index
 

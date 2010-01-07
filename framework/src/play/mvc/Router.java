@@ -27,7 +27,7 @@ import play.utils.Default;
  */
 public class Router {
 
-    static Pattern routePattern = new Pattern("^({method}GET|POST|PUT|DELETE|OPTIONS|HEAD|\\*)?\\s+({path}/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?(\\s*)({headers})?$");
+    static Pattern routePattern = new Pattern("^({method}GET|POST|PUT|DELETE|OPTIONS|HEAD|\\*)[(]?({headers}[^)]*)(\\))?\\s+({path}/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?(\\s*)$");
  
     /**
      * Pattern used to locate a method override instruction in request.querystring
@@ -117,9 +117,10 @@ public class Router {
         route.action = action;
         route.routesFile = sourceFile;
         route.routesFileLine = line;
-        route.addHeaders(headers);
+        route.addFormat(headers);
         route.addParams(params);
         route.compute();
+        Logger.info("Adding [" + route.toString() + "] with params [" + params + "] and headers [" + headers + "]");
         return route;
     }
 
@@ -200,9 +201,8 @@ public class Router {
     public static void routeOnlyStatic(Http.Request request) {
         for (Route route : routes) {
             try {
-                Http.Header accept =  request.headers.get("accept");
-                String value = accept == null ? null : accept.value();
-                if (route.matches(request.method, request.path, value) != null) {
+                String format = request.format;
+                if (route.matches(request.method, request.path, format) != null) {
                     break;
                 }
             } catch (Throwable t) {
@@ -223,9 +223,8 @@ public class Router {
             }
         }
         for (Route route : routes) {
-            Http.Header accept =  request.headers.get("accept");
-            String value = accept == null ? null : accept.value();
-            Map<String, String> args = route.matches(request.method, request.path, value);
+            String format = request.format;
+            Map<String, String> args = route.matches(request.method, request.path, format);
             if (args != null) {
                 request.routeArgs = args;
                 request.action = route.action;
@@ -457,7 +456,7 @@ public class Router {
         Pattern pattern;
         List<Arg> args = new ArrayList<Arg>();
         Map<String, String> staticArgs = new HashMap<String, String>();
-        Map<String, String> headers = new HashMap<String, String>();
+        List<String> formats = new ArrayList<String>();
 
 		public int routesFileLine;
 		public String routesFile;		
@@ -520,32 +519,37 @@ public class Router {
             }
         }
 
-         public void addHeaders(String params) {
+        // TODO: Add args names
+
+        public void addFormat(String params) {
             if (params == null || params.length() < 1) {
                 return;
             }
-             params = params.trim();
-           for (String param : params.split(",")) {
-                Matcher matcher = paramPattern.matcher(param);
-                if (matcher.matches()) {
-                      Logger.info("addHeaders: " + matcher.group(1).toLowerCase() + " - " +matcher.group(2) + "for " + toString());
-                    headers.put(matcher.group(1).toLowerCase(), matcher.group(2));
-                } else {
-                    Logger.warn("Ignoring %s (headers must be specified as key:'value',...)", params);
-                }
+            params = params.trim();
+            for (String param : params.split(",")) {
+                formats.add(param);
             }
         }
 
-        private boolean accept(String accept) {
-            Logger.info("accept: " + accept + " - " + this.headers.get("accept") + " " + toString());
-            return accept == null || accept.indexOf("*/*") != -1 || this.headers.get("accept").indexOf(accept) != -1;
+        private boolean contains(String accept) {
+            Logger.info("accept: " + accept + " - " + accept + " " + toString());
+            boolean contains = (accept == null);
+            if (accept != null) {
+                for (String format : this.formats) {
+                    contains = format.startsWith(accept);
+                    if (contains) {
+                        break;
+                    }
+                }
+            }
+            return contains;
         }
 
         public Map<String, String> matches(String method, String path, String accept) {
             if (method == null || this.method.equals("*") || method.equalsIgnoreCase(this.method)) {
 
                 Matcher matcher = pattern.matcher(path);
-                if (matcher.matches() && accept(accept)) {
+                if (matcher.matches() && contains(accept)) {
                     // Static dir
                     if (staticDir != null) {
                         throw new RenderStatic(staticDir + "/" + matcher.group("resource"));

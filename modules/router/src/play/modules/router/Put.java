@@ -17,6 +17,8 @@ public @interface Put {
 
     int priority() default -1;
 
-    String headers() default "accept:'*/*'";
+    String matchFormat() default "html'";
+
+    String matchHost() default "*'";
 
 }
