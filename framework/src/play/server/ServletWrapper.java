@@ -121,7 +121,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                     attachFile(servletResponse, file);
                 } else {
                     long last = file.lastModified();
-                    String etag = last + "-" + file.hashCode();
+                    String etag = "\"" + last + "-" + file.hashCode() + "\"";
                     if (!isModified(etag, last, servletRequest)) {
                         servletResponse.setHeader("Etag", etag);
                         servletResponse.setStatus(304);
