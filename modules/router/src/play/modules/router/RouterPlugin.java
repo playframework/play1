@@ -41,9 +41,9 @@ public class RouterPlugin extends PlayPlugin {
             Get annotation = get.getAnnotation(Get.class);
             if (annotation != null) {
                 if (annotation.priority() != -1) {
-                    Router.addRoute(annotation.priority(), "GET", annotation.value(), get.getDeclaringClass().getSimpleName() + "." + get.getName(), annotation.params(), annotation.matchFormat());
+                    Router.addRoute(annotation.priority(), "GET", annotation.value(), get.getDeclaringClass().getSimpleName() + "." + get.getName(), annotation.params(), annotation.accept());
                 } else {
-                    Router.prependRoute("GET", annotation.value(), get.getDeclaringClass().getSimpleName() + "." + get.getName(), annotation.params(), annotation.matchFormat());
+                    Router.prependRoute("GET", annotation.value(), get.getDeclaringClass().getSimpleName() + "." + get.getName(), annotation.params(), annotation.accept());
                 }
             }
         }
@@ -52,9 +52,9 @@ public class RouterPlugin extends PlayPlugin {
             Post annotation = post.getAnnotation(Post.class);
             if (annotation != null) {
                 if (annotation.priority() != -1) {
-                    Router.addRoute(annotation.priority(), "POST", annotation.value(), post.getDeclaringClass().getSimpleName() + "." + post.getName(), annotation.params(), annotation.matchFormat());
+                    Router.addRoute(annotation.priority(), "POST", annotation.value(), post.getDeclaringClass().getSimpleName() + "." + post.getName(), annotation.params(), annotation.accept());
                 } else {
-                    Router.prependRoute("POST", annotation.value(), post.getDeclaringClass().getSimpleName() + "." + post.getName(), annotation.params(), annotation.matchFormat());
+                    Router.prependRoute("POST", annotation.value(), post.getDeclaringClass().getSimpleName() + "." + post.getName(), annotation.params(), annotation.accept());
                 }
 
             }
@@ -64,9 +64,9 @@ public class RouterPlugin extends PlayPlugin {
             Put annotation = put.getAnnotation(Put.class);
             if (annotation != null) {
                 if (annotation.priority() != -1) {
-                    Router.addRoute(annotation.priority(), "PUT", annotation.value(), put.getDeclaringClass().getSimpleName() + "." + put.getName(), annotation.params(), annotation.matchFormat());
+                    Router.addRoute(annotation.priority(), "PUT", annotation.value(), put.getDeclaringClass().getSimpleName() + "." + put.getName(), annotation.params(), annotation.accept());
                 } else {
-                    Router.prependRoute("PUT", annotation.value(), put.getDeclaringClass().getSimpleName() + "." + put.getName(), annotation.params(), annotation.matchFormat());
+                    Router.prependRoute("PUT", annotation.value(), put.getDeclaringClass().getSimpleName() + "." + put.getName(), annotation.params(), annotation.accept());
                 }
             }
         }
@@ -76,9 +76,9 @@ public class RouterPlugin extends PlayPlugin {
             Delete annotation = delete.getAnnotation(Delete.class);
             if (annotation != null) {
                 if (annotation.priority() != -1) {
-                    Router.addRoute(annotation.priority(), "DELETE", annotation.value(), delete.getDeclaringClass().getSimpleName() + "." + delete.getName(), annotation.params(), annotation.matchFormat());
+                    Router.addRoute(annotation.priority(), "DELETE", annotation.value(), delete.getDeclaringClass().getSimpleName() + "." + delete.getName(), annotation.params(), annotation.accept());
                 } else {
-                    Router.prependRoute("DELETE", annotation.value(), delete.getDeclaringClass().getSimpleName() + "." + delete.getName(), annotation.params(), annotation.matchFormat());
+                    Router.prependRoute("DELETE", annotation.value(), delete.getDeclaringClass().getSimpleName() + "." + delete.getName(), annotation.params(), annotation.accept());
                 }
             }
         }
@@ -88,9 +88,9 @@ public class RouterPlugin extends PlayPlugin {
             Head annotation = head.getAnnotation(Head.class);
             if (annotation != null) {
                 if (annotation.priority() != -1) {
-                    Router.addRoute(annotation.priority(), "HEAD", annotation.value(), head.getDeclaringClass().getSimpleName() + "." + head.getName(), annotation.params(), annotation.matchFormat());
+                    Router.addRoute(annotation.priority(), "HEAD", annotation.value(), head.getDeclaringClass().getSimpleName() + "." + head.getName(), annotation.params(), annotation.accept());
                 } else {
-                    Router.prependRoute("HEAD", annotation.value(), head.getDeclaringClass().getSimpleName() + "." + head.getName(), annotation.params(), annotation.matchFormat());
+                    Router.prependRoute("HEAD", annotation.value(), head.getDeclaringClass().getSimpleName() + "." + head.getName(), annotation.params(), annotation.accept());
                 }
             }
         }
@@ -100,10 +100,10 @@ public class RouterPlugin extends PlayPlugin {
             Any annotation = any.getAnnotation(Any.class);
             if (annotation != null) {
                 if (annotation.priority() != -1) {
-                    Router.addRoute(annotation.priority(), "*", annotation.value(), any.getDeclaringClass().getSimpleName() + "." + any.getName(), annotation.params(), annotation.matchFormat());
+                    Router.addRoute(annotation.priority(), "*", annotation.value(), any.getDeclaringClass().getSimpleName() + "." + any.getName(), annotation.params(), annotation.accept());
                 } else {
                     // Always the last one
-                    Router.prependRoute("*", annotation.value(), any.getDeclaringClass().getSimpleName() + "." + any.getName(), annotation.params(), annotation.matchFormat());
+                    Router.prependRoute("*", annotation.value(), any.getDeclaringClass().getSimpleName() + "." + any.getName(), annotation.params(), annotation.accept());
                 }
             }
         }
@@ -115,9 +115,9 @@ public class RouterPlugin extends PlayPlugin {
                 if (serveStatics != null) {
                     for (ServeStatic serveStatic : serveStatics) {
                         if (serveStatic.priority() != -1) {
-                            Router.addRoute(serveStatic.priority(), "GET", serveStatic.value(), "staticDir:" + serveStatic.directory(), serveStatic.matchFormat());
+                            Router.addRoute(serveStatic.priority(), "GET", serveStatic.value(), "staticDir:" + serveStatic.directory(), serveStatic.accept());
                         } else {
-                            Router.prependRoute("GET", serveStatic.value(), "staticDir:" + serveStatic.directory(), serveStatic.matchFormat());
+                            Router.prependRoute("GET", serveStatic.value(), "staticDir:" + serveStatic.directory(), serveStatic.accept());
                         }
                     }
                 }
@@ -128,9 +128,9 @@ public class RouterPlugin extends PlayPlugin {
             ServeStatic annotation = (ServeStatic)clazz.getAnnotation(ServeStatic.class);
             if (annotation != null) {
                 if (annotation.priority() != -1) {
-                    Router.addRoute(annotation.priority(), "GET", annotation.value(), "staticDir:" + annotation.directory(), annotation.matchFormat());
+                    Router.addRoute(annotation.priority(), "GET", annotation.value(), "staticDir:" + annotation.directory(), annotation.accept());
                 } else {
-                    Router.prependRoute("GET", annotation.value(), "staticDir:" + annotation.directory(), annotation.matchFormat());
+                    Router.prependRoute("GET", annotation.value(), "staticDir:" + annotation.directory(), annotation.accept());
                 }
             }
         }

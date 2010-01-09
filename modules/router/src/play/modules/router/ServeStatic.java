@@ -16,8 +16,6 @@ public @interface ServeStatic {
 
     int priority() default -1;
 
-    String matchFormat() default "html'";
-
-    String matchHost() default "*'";
+    String accept() default "html'";
 
 }

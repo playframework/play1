@@ -16,8 +16,8 @@ public @interface Get {
 
     int priority() default -1;
 
-    String matchFormat() default "html'";
+    String produce() default "*'";
 
-    String matchHost() default "*'";
+    String accept() default "html'";
 
 }

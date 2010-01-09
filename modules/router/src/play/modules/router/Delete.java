@@ -16,9 +16,11 @@ public @interface Delete {
 
     int priority() default -1;
 
-    String matchFormat() default "html'";
+    String consume() default "html'";
 
-    String matchHost() default "*'";
+    String produce() default "*'";
+
+    String accept() default "html'";
 
 }
 
