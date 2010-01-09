@@ -473,6 +473,7 @@ public class Router {
         Map<String, String> staticArgs = new HashMap<String, String>();
         List<String> formats = new ArrayList<String>();
         String host;
+        Arg hostArg = null;
 
         public int routesFileLine;
         public String routesFile;
@@ -498,6 +499,22 @@ public class Router {
                 this.staticDir = action.substring("staticDir:".length());
             } else {
                 // URL pattern
+                // Is there is a host argument, append it.
+                if (!path.startsWith("/")) {
+                    String p = this.path;
+                    this.path = p.substring(p.indexOf("/"));
+                    this.host = p.substring(0, p.indexOf("/"));
+
+                    Matcher m = new Pattern(".*\\{({name}.*)\\}.*").matcher(host);
+
+                    if (m.matches()) {
+                        String name = m.group("name");
+                        hostArg = new Arg();
+                        hostArg.name = name;
+                    }
+                    this.host = this.host.replaceFirst("\\{.*\\}", "");
+                    this.hostPattern = new Pattern(host);
+                }
                 String patternString = path;
                 patternString = customRegexPattern.replacer("\\{<[^/]+>$1\\}").replace(patternString);
                 Matcher matcher = argsPattern.matcher(patternString);
@@ -507,15 +524,7 @@ public class Router {
                     arg.constraint = new Pattern(matcher.group(1));
                     args.add(arg);
                 }
-                // Is there is a host argument, append it.
-                if (!patternString.startsWith("/")) {
-                    this.path = patternString.substring(patternString.indexOf("/"));
-                    this.host = patternString.substring(0, patternString.indexOf("/"));
-                    patternString = this.path;
-                    // Remove {}
-                    this.host = this.host.replace("\\{.*\\}", "");
-                    this.hostPattern = new Pattern(host);
-                } 
+
                 patternString = argsPattern.replacer("({$2}$1)").replace(patternString);
                 this.pattern = new Pattern(patternString);
                 // Action pattern
@@ -565,8 +574,6 @@ public class Router {
                     return true;
                 }
                 for (String format : this.formats) {
-                    Logger.info("accept: " + accept + " - " + format + " " + toString());
-
                     contains = format.startsWith(accept);
                     if (contains) {
                         break;
@@ -589,6 +596,7 @@ public class Router {
             if (method == null || this.method.equals("*") || method.equalsIgnoreCase(this.method)) {
 
                 Matcher matcher = pattern.matcher(path);
+
                 boolean hostMatches = (host == null);
                 if (host != null) {
                     Matcher hostMatcher = hostPattern.matcher(host);
@@ -603,6 +611,9 @@ public class Router {
                         Map<String, String> localArgs = new HashMap<String, String>();
                         for (Arg arg : args) {
                             localArgs.put(arg.name, matcher.group(arg.name));
+                        }
+                        if (hostArg != null && host != null) {
+                            localArgs.put(hostArg.name, host);
                         }
                         localArgs.putAll(staticArgs);
                         return localArgs;
