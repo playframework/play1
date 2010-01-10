@@ -25,6 +25,7 @@ import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.data.Upload;
+import play.data.binding.annotations.Unbind;
 import play.data.validation.Validation;
 import play.data.binding.annotations.Bind;
 import play.exceptions.UnexpectedException;
@@ -59,7 +60,20 @@ public class Binder {
     }
     public final static Object MISSING = new Object();
 
-    static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String prefix) {
+    private static String toString(String[] values) {
+        String toReturn = "";
+        if (values != null) {
+        for (String value : values) {
+              toReturn = "," +value;
+        }
+        }
+        if (toReturn.equals("")) {
+            return toReturn;
+        }
+        return toReturn.substring(1);
+    }
+
+    static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String prefix, String[] profiles) {
         try {
             Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.toString(annotations) + "] isComposite [" + isComposite(name + prefix, params.keySet()) + "]");
 
@@ -67,21 +81,37 @@ public class Binder {
                 BeanWrapper beanWrapper = getBeanWrapper(clazz);
                 return beanWrapper.bind(name, type, params, prefix, annotations);
             }
+
             String[] value = params.get(name + prefix);
             Logger.trace("bindInternal: value [" + value + "]");
-
-
+            Logger.trace("bindInternal: profile [" + toString(profiles) + "]");
             // Let see if we have a Bind annotation and a separator. If so, we need to split the values
-            // Look up for the Bind annotation
-            // TODO: Move me somewhere else
+            // Look up for the Bind annotation. Extract the profile if there is any.
+            // TODO: Move me somewhere else?
+            String[] localProfiles = null;
             if (annotations != null) {
                 for (Annotation annotation : annotations) {
                     if (value != null && value.length > 0 && annotation.annotationType().equals(Bind.class)) {
-                        final String separator = ((Bind) annotation).separator();
+                        Bind bind = ((Bind) annotation);
+                        final String separator = bind.separator();
+                        localProfiles = bind.profiles().split(",");
                         value = value[0].split(separator);
+                    }
+                    if (annotation.annotationType().equals(Unbind.class)) {
+                        Unbind bind = ((Unbind) annotation);
+                        String[] localUnbindProfiles = bind.profiles().split(",");
+                        if (localUnbindProfiles != null && contains(profiles, localUnbindProfiles)) {
+                             return MISSING;
+                        }
                     }
                 }
             }
+
+            // If the profile does not match return null
+            if (localProfiles != null && !contains(profiles, localProfiles)) {
+                return MISSING;
+            }
+
             // Arrays types
             // The array condiction is not so nice... We should find another way of doing this....
             if (clazz.isArray() && (clazz != byte[].class && clazz != byte[][].class && clazz != File[].class && clazz != Upload[].class )) {
@@ -125,7 +155,7 @@ public class Binder {
                         String key = m.group(1);
                         Map<String, String[]> tP = new HashMap();
                         tP.put("key", new String[]{key});
-                        Object oKey = bindInternal("key", keyClass, keyClass, annotations, tP, "");
+                        Object oKey = bindInternal("key", keyClass, keyClass, annotations, tP, "", localProfiles);
                         if (oKey != MISSING) {
                             if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
                                 BeanWrapper beanWrapper = getBeanWrapper(valueClass);
@@ -134,7 +164,7 @@ public class Binder {
                             } else {
                                 tP = new HashMap();
                                 tP.put("value", params.get(name + prefix + "[" + key + "]"));
-                                Object oValue = bindInternal("value", valueClass, valueClass, annotations, tP, "");
+                                Object oValue = bindInternal("value", valueClass, valueClass, annotations, tP, "", localProfiles);
                                 if (oValue != MISSING) {
                                     r.put(oKey, oValue);
                                 } else {
@@ -182,7 +212,7 @@ public class Binder {
                                 } else {
                                     Map tP = new HashMap();
                                     tP.put("value", params.get(name + prefix + "[" + key + "]"));
-                                    Object oValue = bindInternal("value", componentClass, componentClass, annotations, tP, "");
+                                    Object oValue = bindInternal("value", componentClass, componentClass, annotations, tP, "", localProfiles);
                                     if (oValue != MISSING) {
                                         ((List) r).set(key, oValue);
                                     }
@@ -211,10 +241,27 @@ public class Binder {
             }
             return directBind(annotations, value[0], clazz);
         } catch (Exception e) {
-           Logger.debug(e, "error:");
-            Validation.addError(name + prefix, "validation.invalid");
-            return MISSING;
+           Validation.addError(name + prefix, "validation.invalid");
+           return MISSING;
         }
+    }
+
+    public static boolean contains(String[] profiles, String[] localProfiles) {
+     if (localProfiles != null) {
+            for (String l : localProfiles) {
+                if ("*".equals(l)) {
+                    return true;
+                }
+                if (profiles != null) {
+                    for (String p : profiles) {
+                        if (l.equals(p) || "*".equals(p)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public static Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params) {
@@ -222,21 +269,35 @@ public class Binder {
     }
 
     public static Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, Object o, Method method, int parameterIndex) {
-       Logger.trace("bind: name [" + name + "] annotation [" + Utils.toString(annotations) + "] ");
+        Logger.trace("bind: name [" + name + "] annotation [" + Utils.toString(annotations) + "] ");
 
         Object result = null;
         // Let a chance to plugins to bind this object
-        for(PlayPlugin plugin : Play.plugins) {
+        for (PlayPlugin plugin : Play.plugins) {
             result = plugin.bind(name, clazz, type, annotations, params);
-            if(result != null) {
+            if (result != null) {
                 return result;
             }
         }
-        result = bindInternal(name, clazz, type, annotations, params, "");
+        String[] profiles = null;
+        if (annotations != null) {
+            for (Annotation annotation : annotations) {
+                if (annotation.annotationType().equals(Bind.class)) {
+                    Bind bind = ((Bind) annotation);
+                    final String separator = bind.separator();
+                    profiles = bind.profiles().split(",");
+                }
+                if (annotation.annotationType().equals(Unbind.class)) {
+                    Unbind bind = ((Unbind) annotation);
+                    profiles = bind.profiles().split(",");
+                }
+            }
+        }
+        result = bindInternal(name, clazz, type, annotations, params, "", profiles);
 
         if (result == MISSING) {
             // Try the scala default
-            if(o != null && parameterIndex > 0) {
+            if (o != null && parameterIndex > 0) {
                 try {
                     Method defaultMethod = method.getDeclaringClass().getDeclaredMethod(method.getName()+"$default$"+parameterIndex);
                     return defaultMethod.invoke(o);

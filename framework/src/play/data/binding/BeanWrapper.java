@@ -2,12 +2,11 @@ package play.data.binding;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import play.Logger;
 import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
+import play.data.binding.annotations.Bind;
 import play.exceptions.UnexpectedException;
 import play.utils.Utils;
 
@@ -34,6 +33,7 @@ public class BeanWrapper {
 				break;
 			}
 		}
+        
         registerSetters(forClass, isScala);
         registerFields(forClass);
     }
@@ -54,12 +54,12 @@ public class BeanWrapper {
                 newPrefix = newPrefix.substring(1);
             }
             Logger.trace("beanwrapper: bind name [" + name + "] annotation [" + Utils.toString(annotations) + "]");
-            Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), (prop.field != null)?prop.field.getAnnotations():annotations, params, newPrefix);
+            Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), (prop.field != null)?prop.field.getAnnotations():annotations, params, newPrefix, prop.profiles);
             if (value != Binder.MISSING) {
                 prop.setValue(instance, value);
             } else {
                 Logger.trace("beanwrapper: bind annotation [" + Utils.toString(annotations) + "]");
-                value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), annotations, params, newPrefix);
+                value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), annotations, params, newPrefix, prop.profiles);
                 if (value != Binder.MISSING) {
                     prop.setValue(instance, value);
                 }
@@ -147,13 +147,15 @@ public class BeanWrapper {
         private Class type;
         private Type genericType;
         private String name;
+        private String[] profiles;
 
         Property(String propertyName, Method setterMethod) {
             name = propertyName;
             setter = setterMethod;
             type = setter.getParameterTypes()[0];
-            annotations = setter.getAnnotations();
+            annotations =  setter.getAnnotations();
             genericType = setter.getGenericParameterTypes()[0];
+            setProfiles(this.annotations);
         }
 
         Property(Field field) {
@@ -163,6 +165,18 @@ public class BeanWrapper {
             type = field.getType();
             annotations = field.getAnnotations();
             genericType = field.getGenericType();
+            setProfiles(this.annotations);
+        }
+
+        public void setProfiles(Annotation[] annotations) {
+            if (annotations != null) {
+                for (Annotation annotation : annotations) {
+                    if (annotation.annotationType().equals(Bind.class)) {
+                        Bind bind = ((Bind) annotation);
+                        profiles = bind.profiles().split(",");
+                    }
+                }
+            }
         }
 
         public void setValue(Object instance, Object value) {

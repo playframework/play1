@@ -11,6 +11,6 @@ import java.lang.annotation.Target;
 public @interface Unbind {
 
     // This refers to the "profile"
-    String profile() default "*";
+    String profiles() default "*";
 
 }

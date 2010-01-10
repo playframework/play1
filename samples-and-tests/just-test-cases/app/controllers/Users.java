@@ -10,7 +10,7 @@ public class Users extends Controller {
     public static void index() {
         render();
     }
-    
+
     public static void submit(User u) {
         Logger.info("user date [" + u.birth + "]");
         render(u);

@@ -13,7 +13,7 @@ import play.data.binding.SupportedType;
 public @interface Bind {
 
     // This refers to the "profile"
-    String profile() default "*";
+    String profiles() default "*";
     String format() default "yyyy-MM-dd";
     String separator() default ",";
     Class<? extends SupportedType> binder() default DEFAULT.class;

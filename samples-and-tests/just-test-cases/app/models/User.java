@@ -26,7 +26,7 @@ public class User extends Model {
     public Long k;
 
 	@Required
-        @Bind(format = "dd/MM/yyyy")
+    @Bind(format = "dd/MM/yyyy")
     public Date birth;
 
 	public String toString() {
