@@ -13,15 +13,19 @@ import re
 import subprocess
 import time
 import webbrowser
+import urllib
 import urllib2
 import socket
 import getopt
 import zipfile
+import imp
+import tempfile
 
 # ~~~~~~~~~
 # Utilities
 
 toKill = None
+modules_server = 'http://localhost:9000'
 
 def replaceAll(file, searchExp, replaceExp):
 	replaceExp = replaceExp.replace('\\', '\\\\')
@@ -90,7 +94,141 @@ def override(f, t):
 		os.makedirs(os.path.dirname(toFile))
 	shutil.copyfile(fromFile, toFile)
 	print "~ Copied %s to %s " % (fromFile, toFile)
-			
+
+def load_module_list():
+	try:
+		url = '%s/modules' % modules_server
+		proxy_handler = urllib2.ProxyHandler({})
+		req = urllib2.Request(url)
+		req.add_header('Accept', 'application/json')
+		opener = urllib2.build_opener(proxy_handler)
+		result = opener.open(req)
+		return json.loads(result.read())
+	except urllib2.HTTPError, e:
+		print "~ Oops,"
+		print "~ Cannot fetch the modules list from %s (%s)..." % (url, e.code)
+		print "~"
+		sys.exit(-1)
+	except urllib2.URLError, e:
+		print "~ Oops,"
+		print "~ Cannot fetch the modules list from %s ..." % (url)
+		print "~"
+		sys.exit(-1)
+
+class Downloader(object):
+	before = .0
+	history = []
+	cycles = 0
+	average = lambda self: sum(self.history) / (len(self.history) or 1)
+
+	def __init__(self, width=55):
+		self.width = width
+		self.kibi = lambda bits: bits / 2 ** 10
+		self.proc = lambda a, b: a / (b * 0.01)
+
+	def retrieve(self, url, destination, callback=None):
+		self.size = 0
+		time.clock()
+		try: urllib.urlretrieve(url, destination, self.progress)
+		except KeyboardInterrupt:
+			print '\n~ Download cancelled'
+			print '~'
+			for i in range(5):
+				try:
+					os.remove(destination)
+					break
+				except:
+					time.sleep(.1)
+			else: raise
+			if callback: callback()
+			sys.exit()
+		print ''
+		return self.size
+
+	def progress(self, blocks, blocksize, filesize):
+		self.cycles += 1
+		bits = min(blocks*blocksize, filesize)
+		done = self.proc(bits, filesize) if bits != filesize else 100
+		bar = self.bar(done)
+		if not self.cycles % 3 and bits != filesize:
+			now = time.clock()
+			elapsed = now-self.before
+			if elapsed:
+				speed = self.kibi(blocksize * 3 / elapsed)
+				self.history.append(speed)
+				self.history = self.history[-4:]
+			self.before = now
+		average = round(sum(self.history[-4:]) / 4, 1)
+		self.size = self.kibi(bits)
+		print '\r~ [%s] %s KiB/s  ' % (bar, str(average)),
+
+	def bar(self, done):
+		span = self.width * done * 0.01
+		offset = len(str(int(done))) - .99
+		result = ('%d%%' % (done,)).center(self.width)
+		return result.replace(' ', '-', int(span - offset))
+
+class Unzip:
+	def __init__(self, verbose = False, percent = 10):
+		self.verbose = verbose
+		self.percent = percent
+
+	def extract(self, file, dir):
+		if not dir.endswith(':') and not os.path.exists(dir):
+			os.mkdir(dir)
+		zf = zipfile.ZipFile(file)
+		# create directory structure to house files
+		self._createstructure(file, dir)
+		num_files = len(zf.namelist())
+		percent = self.percent
+		divisions = 100 / percent
+		perc = int(num_files / divisions)
+        # extract files to directory structure
+		for i, name in enumerate(zf.namelist()):
+			if self.verbose == True:
+				print "Extracting %s" % name
+			elif perc > 0 and (i % perc) == 0 and i > 0:
+				complete = int (i / perc) * percent
+			if not name.endswith('/'):
+				outfile = open(os.path.join(dir, name), 'wb')
+				outfile.write(zf.read(name))
+				outfile.flush()
+				outfile.close()
+
+
+	def _createstructure(self, file, dir):
+		self._makedirs(self._listdirs(file), dir)
+
+	def _makedirs(self, directories, basedir):
+		""" Create any directories that don't currently exist """
+		for dir in directories:
+			curdir = os.path.join(basedir, dir)
+			if not os.path.exists(curdir):
+				os.makedirs(curdir)
+
+	def _listdirs(self, file):
+		""" Grabs all the directories in the zip structure
+		This is necessary to create the structure before trying
+		to extract the file to it. """
+		zf = zipfile.ZipFile(file)
+		dirs = []
+		for name in zf.namelist():
+			dn = os.path.dirname(name)
+			dirs.append(dn)
+		dirs.sort()
+		return dirs
+
+
+
+# ~~~~~~~~~~
+# Dynamically load more modules
+
+def load_module(name):
+	base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
+	mod_desc = imp.find_module(name, [os.path.join(base, 'framework/pym')])
+	return imp.load_module(name, mod_desc[0], mod_desc[1], mod_desc[2])
+
+json = load_module('simplejson')
 
 # ~~~~~~~~~
 # Main
@@ -124,7 +262,9 @@ try:
 		print "~"
 		sys.exit(-1)
 	
-	print "~ play! %s, http://www.playframework.org" % (open(play_version_file).readline().strip())
+	play_version = open(play_version_file).readline().strip()
+	
+	print "~ play! %s, http://www.playframework.org" % (play_version)
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the application?
 	application_path = None
@@ -326,6 +466,154 @@ try:
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	
 	
+	# ~~~~~~~~~~~~~~~~~~~~~~ [list-modules] Display the modules list
+	if play_command == 'list-modules' or play_command == 'lm':
+		print "~ You can also browse this list online at %s/modules" % modules_server
+		print "~"
+		
+		modules_list = load_module_list()
+		
+		for mod in modules_list['modules']:
+			print "~ [%s]" % mod['name']
+			print "~   %s" % mod['fullname']
+			print "~   %s/modules/%s" % (modules_server, mod['name'])
+			
+			vl = ''
+			i = 0
+			for v in mod['versions']:
+				vl += v["version"]
+				i = i+1
+				if i < len(mod['versions']):
+					vl += ', '
+			
+			if vl:
+				print "~   Versions: %s" % vl
+			else:
+				print "~   (No versions released yet)"
+			print "~"
+		
+		print "~ To install one of these modules use:"
+		print "~ play install module-version (eg: play install scala-1.0)"
+		print "~"
+		print "~ Or you can just install the default release of a module using:"
+		print "~ play install module (eg: play install scala)"
+		print "~"
+			
+		sys.exit(0)
+	
+	# ~~~~~~~~~~~~~~~~~~~~~~ [build-module] Build a module
+	if play_command == 'build-module' or play_command == 'bm':
+		
+		version = raw_input("~ What is the module version number? ")
+		fwkMatch = raw_input("~ What are the playframework versions required? ")
+		
+		build_file = os.path.join(application_path, 'build.xml')
+		if os.path.exists(build_file):
+			print "~"
+			print "~ Building..."
+			print "~"
+			os.system('ant -f %s -Dplay.path=%s' % (build_file, play_base) )
+			print "~"
+		
+		mv = '%s-%s' % (os.path.basename(application_path), version)
+		print("~ Packaging %s ... " % mv)
+		
+		dist_dir = os.path.join(application_path, 'dist')
+		if os.path.exists(dist_dir):
+			shutil.rmtree(dist_dir)
+		os.mkdir(dist_dir)
+		
+		manifest = os.path.join(application_path, 'manifest')
+		manifestF = open(manifest, 'w')
+		manifestF.write('version=%s\nframeworkVersions=%s\n' % (version, fwkMatch))
+		manifestF.close()
+		
+		zip = zipfile.ZipFile(os.path.join(dist_dir, '%s.zip' % mv), 'w', zipfile.ZIP_STORED)
+		for (dirpath, dirnames, filenames) in os.walk(application_path):
+			if dirpath == dist_dir:
+				continue
+			for file in filenames:
+				zip.write(os.path.join(dirpath, file), os.path.join(dirpath[len(application_path):], file))
+		zip.close()
+		
+		os.remove(manifest)
+		
+		print "~"
+		print "~ Done!"
+		print "~ Package is available at %s" % os.path.join(dist_dir, '%s.zip' % mv)
+		print "~"
+		
+		sys.exit(0)
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ [install] Install a module
+	if play_command == 'install':
+		name = cmd = sys.argv[2]
+		groups = re.match(r'^([a-zA-Z0-9]+)([-](.*))?$', name)
+		module = groups.group(1)
+		version = groups.group(3)
+		
+		modules_list = load_module_list()
+		fetch = None
+		
+		for mod in modules_list['modules']:
+			if mod['name'] == module:
+				for v in mod['versions']:
+					if version == None and v['isDefault']:
+						print '~ This module is compatible with: %s' % v['matches']
+						ok = raw_input('~ Do you want to install this version (y/n)? ')
+						if not ok == 'y':
+							print '~'
+							sys.exit(-1)
+						print '~ Installing module %s-%s...' % (module, v['version'])
+						fetch = '%s/modules/%s-%s.zip' % (modules_server, module, v['version'])
+						break
+					if version  == v['version']:
+						print '~ This module is compatible with: %s' % v['matches']
+						ok = raw_input('~ Do you want to install this version (y/n)? ')
+						if not ok == 'y':
+							print '~'
+							sys.exit(-1)
+
+						print '~ Installing module %s-%s...' % (module, v['version'])
+						fetch = '%s/modules/%s-%s.zip' % (modules_server, module, v['version'])
+						break
+						
+		if fetch == None:
+			print '~ No module found \'%s\'' % name
+			print '~ Try play list-modules to get the modules list'
+			print '~'
+			sys.exit(-1)
+		
+		archive = os.path.join(play_base, 'modules/%s-%s.zip' % (module, v['version']))
+		if os.path.exists(archive):
+			os.remove(archive)
+		
+		print '~'
+		print '~ Fetching %s' % fetch
+		Downloader().retrieve(fetch, archive)
+		
+		if not os.path.exists(archive):
+			print '~ Oops, file does not exist'
+			print '~'
+			sys.exist(-1)
+		
+		print '~ Unzipping...'
+		
+		if os.path.exists(os.path.join(play_base, 'modules/%s-%s' % (module, v['version']))):
+			shutil.rmtree(os.path.join(play_base, 'modules/%s-%s' % (module, v['version'])))
+		os.mkdir(os.path.join(play_base, 'modules/%s-%s' % (module, v['version'])))
+		
+		Unzip().extract(archive, os.path.join(play_base, 'modules/%s-%s' % (module, v['version'])))
+		os.remove(archive)
+		print '~'
+		print '~ Module %s-%s is installed!' % (module, v['version'])
+		print '~ You can now use it by add adding this line to application.conf file:'
+		print '~'
+		print '~ module.%s=${play.path}/modules/%s-%s' % (module, module, v['version'])
+		print '~'
+		sys.exit(0)
+
+	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [help] Display help
 	if play_command == 'help':
 		if len(sys.argv) == 3:
@@ -461,7 +749,7 @@ try:
 			for module in modules:
 				print "~ %s" % module
 		else:
-			print "~ No modules"
+			print "~ No modules installed in this application"
 		print "~ "
 		sys.exit(0)
 	
