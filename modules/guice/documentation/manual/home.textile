@@ -1,0 +1,52 @@
+h1. Guice module
+
+The Guice module helps you to inject Guice managed components into your play application. The injection points are defined by the upcoming  **@javax.inject.Inject** annotation, which is bundled with play at the moment. 
+
+There are two ways to use the module: you either can define your own injector (which can be useful if you have an existing injector or if you want to have full control over your modules) or play will scan the classpath for classes that implement **com.google.inject.AbstractModule** and inject based on these modules.
+
+h2. <a>Enable the Guice  module for the application</a>
+
+You can enable the Guice module by adding the following line to your application's **/conf/application.conf** file:
+
+bc. module.guice=${play.path}/modules/guice
+
+(if you are using a standard **application.conf** the line above should be already there, you will just need to uncomment it)
+
+h2. <a>Defining a Guice injector</a>
+
+Defining a custom injector is easy, you just need to implement the **play.modules.guice.GuiceSupport** interface. For example:
+
+bc. package utils;
+import play.modules.guice.GuiceSupport;
+import com.google.inject.*;
+public class GuicyDummy extends GuiceSupport {
+        protected Injector configure() {
+           return
+           Guice.createInjector(
+		//your modules should come here
+           );
+        }
+}
+
+After defining this class play will use the injector defined in the **configure** method to inject into your application's Controller, Job and Mail classes (based on **@javax.inject.Inject**).
+
+h2. <a>Using AbstractModules</a>
+
+Alternatively, play will scan the classpath for classes that implement AbstractModule.
+For example:
+
+bc. package utils;
+import com.google.inject.*;
+public class GuicyDummy extends AbstractModule {
+    public void configure() {
+	//your bindings should come here
+    }
+}
+
+In this case play will pick up this module and inject it into your application's Controller, Job and Mail classes (marked by **@javax.inject.Inject**). Note, the custom injector strategy will always take precedent.
+ 
+
+h2. <a>Limitations</a>
+
+The Guice module is not playing well with the Spring one, so please make sure you activate only one of them. It's also worth mentioning that right now, following play's convention, injection is working for static fields only.
+

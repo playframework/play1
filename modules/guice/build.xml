@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="guice module" default="build" basedir=".">
+<project name="Guice support" default="build" basedir=".">
 
     <path id="project.classpath">
-        <pathelement path="../../framework/classes"/>
-        <fileset dir="../../framework/lib">
+        <pathelement path="${play.path}/framework/classes"/>
+        <fileset dir="${play.path}/framework/lib">
             <include name="*.jar"/>
         </fileset>
-        <fileset dir="../../framework">
+        <fileset dir="${play.path}/framework">
             <include name="*.jar"/>
         </fileset>
         <fileset dir="lib">
@@ -27,8 +27,8 @@
         </copy>
         <jar destfile="lib/play-guice.jar" basedir="tmp/classes">
             <manifest>
-                <section name="Play">
-                    <attribute name="Specification-Title" value="Guice module"/>
+                <section name="Play-module">
+                    <attribute name="Specification-Title" value="Guice support"/>
                 </section>
             </manifest>
         </jar>
