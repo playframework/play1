@@ -1,0 +1,40 @@
+*{ You can use plain selenium command using the selenium tag }*
+
+#{fixture delete:'all', load:'stocks.yml' /}
+
+#{selenium 'Try the GWT UI'}
+	open('/')
+	
+	// Hop
+	assertTextPresent('Play with GWT - StockWatch')
+	waitForText('css=.symbol-ABC', 'ABC')
+	assertText('css=.symbol-ABC', 'ABC')
+	assertText('css=.symbol-DCE', 'DCE')
+	assertText('css=.symbol-FGH', 'FGH')
+	
+	// Add a symbol
+	assertElementNotPresent('css=.symbol-LCL')
+	type('css=.newSymbolTextBox', 'LCL')
+	click('css=.addStockButton')
+	waitForText('css=.symbol-LCL', 'LCL')
+	
+	// Try to add a bad symbol
+	type('css=.newSymbolTextBox', 'hs hgsfè§')
+	click('css=.addStockButton')
+	waitForAlertPresent() 
+	assertAlert('*not a valid symbol*')
+	type('css=.newSymbolTextBox', '')
+	
+	// Delete a symbol
+	click('css=.removeButton-DCE')
+	waitForElementNotPresent('css=.symbol-DCE')
+	assertTextNotPresent('DCE')
+	
+	// Check update
+	storeText('css=.price-LCL', 'oldPrice')
+	
+	// Wait 10 seconds. The price should change !
+	pause(10000)
+	storeText('css=.price-LCL', 'newPrice')
+	assertNotEquals('$[oldPrice]', '$[newPrice]')
+#{/selenium}

@@ -1,0 +1,101 @@
+h1. Google Web Toolkit support
+
+This module provides a helper to simplify the integration of a GWT UI with Play as an application server.
+
+h2. <a>First, download the GWT SDK</a>
+
+p. This module is designed to work with the latest version of GWT. A the time of writing, this is the 1.6.4 version. Before working with the Play GWT module, you have to download the GWT SDK and set the GWT_PATH environment variable.
+
+h2. <a>Setting up a GWT project</a>
+
+Start to create a new application in the classical way. 
+
+bc. # play new test-gwt
+
+Then edit the conf/application.conf file to enable the GWTmodule :
+
+bc. # Additional modules
+# ~~~~~
+# A module is another play! application. Add a line for each module you want
+# to add to your application. Modules path are either absolutes or relative to
+# the application root.
+#
+module.gwt=${play.path}/modules/gwt
+
+Now use the **gwt:init** command to bootstrap your GWT project in the existing Play application:
+
+bc. play gwt:init test-gwt
+
+This will add some files and directories to your project : 
+
+* A **/gwt-public** directory that will host all the GWT compiled resources. A default **index.html** file has been created to launch the GWT UI. If you don't define any specific route to serve this **staticDir**, the GWT module will automatically map it to the **/app** path; so the GWT will be available at the **http://localhost:9000/app** URL.
+* The **/app/Main.gwt.xml** GWT module descriptor file. It is the main GWT module of your application. By default, it defines the **client.Main** class as entry point.
+* The **/app/client** package that is the default package used by GWT. A **client.Main** class is created for the default entry point.
+
+h2. <a>Using the GWT hosted mode</a>
+
+First start you Play application.
+
+bc. play run test-gwt
+
+The start the GWT hosted mode browser, using the **play gwt:browser** command.
+
+bc. play gwt:browser test-gwt
+
+bq. At the first run, GWT will compile your main module a first time. Now you can make changes in your application and refresh the hosted mode browser to see the result.
+
+!images/gwt!
+
+h2. <a>Creating a service using GWT-RPC</a>
+
+If you follow the GWT manual, it will explain you how to expose a service with GWT-RPC using a **RemoteServiceServlet**. 
+
+Exposing a GWT service with Play is almost the same, but since you can't define servlets in a Play application, you have to use the provided support class, **play.modules.gwt.GWTService**.
+
+For example, to implement this service:
+
+bc. package client;
+ 
+import com.google.gwt.user.client.rpc.*;
+ 
+@RemoteServiceRelativePath("hello")
+public interface HelloService extends RemoteService {
+ 
+    String sayHello(String name);
+    
+}
+
+simply create a class that extends the **play.modules.gwt.GWTService**, and define the service URL path with the **play.modules.gwt.GWTServicePath** annotation. Like this:
+
+bc. package services;
+ 
+import com.google.gwt.user.server.rpc.*;
+import play.modules.gwt.*;
+import client.*;
+ 
+@GWTServicePath("/main/hello")
+public class HelloServiceImpl extends GWTService implements HelloService {
+ 
+    public String sayHello(String name) {
+        return "Hello " + name;
+    }
+ 
+}
+
+This is the only difference from the GWT documentation.
+
+h2. <a>Debugging the GWT UI</a>
+
+When you run the GWT UI in hosted mode, a Java VM simulate the execution of the client **Java code. You must understand** that in this mode, you use 2 Java VM:
+
+* The first one to run your Play application
+* The second one to run the client UI
+
+So if you want to debug all the application you have to attach 2 debugging sessions using JPDA. This is not a problem... For example, using netbeans, create a netbeans project with the **play netbeansify** command:
+
+bc. # play netbeansify test-gwt
+
+Now open the **test-gwt** project in netbeans and use the debug button to attach the 2 debugging session. By default the Play application listens for the debugger on port 8000, and the GWT browser on port 3408. 
+
+Now you can set breakpoints either in the server code, or in the client code, and netbeans will automatically break on the correct JPDA session and let you debug the Java code.
+

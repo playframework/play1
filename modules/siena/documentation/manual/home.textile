@@ -1,0 +1,16 @@
+h1. Siena module
+
+The siena module automatically enable "Siena":http://www.sienaproject.com support for your application.
+
+p(note). **Note** that it only support the Google App Engine persistence manager for now. So it is currently intended to be used with the "GAE module":gae.
+
+h2. <a>Enable the Siena module for the application</a>
+
+In the **/conf/application.conf** file, enable the Siena module by adding this line:
+
+bc. # The siena module
+module.siena=${play.path}/modules/siena
+
+h2. <a>Using siena</a>
+
+For more informations check at the "Siena documentation":http://www.sienaproject.com/documentation.html page.

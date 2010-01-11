@@ -95,3 +95,7 @@ modules/grizzly/lib/play-grizzly.jar
 play.ipr
 play.iws
 *iml
+modules/router-head
+modules/gwt/samples-and-tests/logs
+modules/gwt/samples-and-tests/test-result
+modules/gwt/samples-and-tests/tmp
