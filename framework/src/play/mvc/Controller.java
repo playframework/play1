@@ -31,6 +31,7 @@ import play.mvc.Router.ActionDefinition;
 import play.mvc.results.Error;
 import play.mvc.results.Forbidden;
 import play.mvc.results.NotFound;
+import play.mvc.results.NotModified;
 import play.mvc.results.Ok;
 import play.mvc.results.Redirect;
 import play.mvc.results.RedirectToStatic;
@@ -172,6 +173,13 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
     }
 
     /**
+     * Send a 304 Not Modified response
+     */
+    protected static void notModified() {
+        throw new NotModified();
+    }
+
+    /**
      * Send a 401 Unauthorized response
      * @param realm The realm name
      */
@@ -180,7 +188,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
     }
 
     /**
-     * Send a 404 Not Found reponse
+     * Send a 404 Not Found response
      * @param what The Not Found resource name
      */
     protected static void notFound(String what) {
@@ -188,14 +196,14 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
     }
 
     /**
-     * Send a 200 OK reponse
+     * Send a 200 OK response
      */
     protected static void ok() {
         throw new Ok();
     }
 
     /**
-     * Send a 404 Not Found reponse if object is null
+     * Send a 404 Not Found response if object is null
      * @param o The object to check
      */
     protected static void notFoundIfNull(Object o) {
