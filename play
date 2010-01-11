@@ -25,7 +25,7 @@ import tempfile
 # Utilities
 
 toKill = None
-modules_server = 'http://localhost:9000'
+modules_server = 'http://www.playframework.org'
 
 def replaceAll(file, searchExp, replaceExp):
 	replaceExp = replaceExp.replace('\\', '\\\\')
