@@ -98,6 +98,7 @@
     </target>
     
     <target name="modules">
+        <property name="play.path" value="../.."/>
         <ant antfile="build.xml" target="build" dir="../modules/test-runner" />
         <ant antfile="build.xml" target="build" dir="../modules/grizzly" />
         <ant antfile="build.xml" target="build" dir="../modules/router" />
