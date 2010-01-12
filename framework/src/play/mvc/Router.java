@@ -568,7 +568,7 @@ public class Router {
         }
 
         private boolean contains(String accept) {
-             boolean contains = (accept == null);
+            boolean contains = (accept == null);
             if (accept != null) {
                 if (this.formats.size() == 0) {
                     return true;
