@@ -174,10 +174,10 @@ bc. #{list users, as:'user'}
     <li>${user}</li>
 #{/list}
 
-The **as** parameter is now optional as well. It uses **i** as default variable name:
+The **as** parameter is now optional as well. It uses **_** as default variable name:
 
-bc. #{list 1..10}
-    <li>${i}</li>
+bc. #{list users}
+    <li>${_}</li>
 #{/list}
 
 h2. <a>New #{jsRoute /} tag</a>
