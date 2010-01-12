@@ -42,6 +42,12 @@ public class Validation {
             public List<Error> allForKey(String key) {
                 return Validation.errors(key);
             }
+
+            public Error get(String key) {
+                return forKey(key);
+            }
+
+
             
         };
     }
