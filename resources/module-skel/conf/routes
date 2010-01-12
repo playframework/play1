@@ -1,7 +1,8 @@
-# Routes
 # This file defines all module routes (Higher priority routes first)
+#
 # import these routes in the main app as :
-# *       /               												module:%MODULE%
+# *     /                       module:%MODULE%
+#
 # ~~~~
 
-GET     /%MODULE_LOWERCASE%                     Module.index
+GET     /?                      Module.index

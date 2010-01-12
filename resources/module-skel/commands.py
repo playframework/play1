@@ -1,5 +1,6 @@
 # Here you can create play commands that are specific to the module
-Example below:
+
+# Example below:
 # ~~~~
 if play_command == 'hello':
 	try:

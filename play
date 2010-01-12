@@ -698,28 +698,36 @@ try:
 		print "~"
 		if play_command == 'new': sys.exit(0)
 		
-	# ~~~~~~~~~~~~~~~~~~~~~~ [module] Create a new module
-	if play_command == 'module':
+	# ~~~~~~~~~~~~~~~~~~~~~~ [new-module] Create a new module
+	if play_command == 'new-module':
 		if os.path.exists(application_path):
 			print "~ Oops. %s already exists" % application_path
 			print "~"
 			sys.exit(-1)
 			
 		print "~ The new module will be created in %s" % os.path.normpath(application_path)
-		application_name = raw_input("~ What is the modules name? ")
+		print "~"
+		application_name = os.path.basename(application_path)
 		shutil.copytree(os.path.join(play_base, 'resources/module-skel'), application_path)
 		# check_application()
-		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%MODULE%', application_name)
+		replaceAll(os.path.join(application_path, 'build.xml'), r'%MODULE%', application_name)
 		replaceAll(os.path.join(application_path, 'conf/messages'), r'%MODULE%', application_name)
 		replaceAll(os.path.join(application_path, 'conf/routes'), r'%MODULE%', application_name)
 		replaceAll(os.path.join(application_path, 'conf/routes'), r'%MODULE_LOWERCASE%', string.lower(application_name))
-		os.rename(os.path.join(application_path, 'app/views/Module'), os.path.join(application_path, 'app/views/%s' % application_name))
+		os.mkdir(os.path.join(application_path, 'app/controllers/%s' % application_name))
+		os.mkdir(os.path.join(application_path, 'app/models/%s' % application_name))
+		os.mkdir(os.path.join(application_path, 'app/views/%s' % application_name))
+		os.mkdir(os.path.join(application_path, 'app/views/tags/%s' % application_name))
+		os.mkdir(os.path.join(application_path, 'src/play/modules/%s' % application_name))
 		
 		print "~ OK, the module is created."
-		print "~ Start using it by adding this line in the application.conf modules list: module.%s=../modules/%s" % application_name, application_name
+		print "~ Start using it by adding this line in the application.conf modules list: "
+		print "~ module.%s=%s" % (application_name, os.path.normpath(application_path))
+		print "~"
 		print "~ Have fun!"
 		print "~"
-		if play_command == 'module': sys.exit(0)
+		
+		sys.exit(0)
 		
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [secret] Generate a new secret key
