@@ -532,7 +532,11 @@ try:
 		for (dirpath, dirnames, filenames) in os.walk(application_path):
 			if dirpath == dist_dir:
 				continue
+			if dirpath.find('/.') > -1 or dirpath.find('/tmp/') > -1  or dirpath.find('/test-result/') > -1 or dirpath.find('/logs/') > -1 or dirpath.find('/eclipse/') > -1 or dirpath.endswith('/test-result') or dirpath.endswith('/logs')  or dirpath.endswith('/eclipse'):
+				continue
 			for file in filenames:
+				if file.find('~') > -1 or file.endswith('.iml') or file.startswith('.'):
+					continue
 				zip.write(os.path.join(dirpath, file), os.path.join(dirpath[len(application_path):], file))
 		zip.close()
 		

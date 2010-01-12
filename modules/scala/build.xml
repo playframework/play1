@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="scala module" default="build" basedir=".">
+<project name="Scala" default="build" basedir=".">
 
     <path id="project.classpath">
-        <pathelement path="../../framework/classes"/>
-        <fileset dir="../../framework/lib">
+        <pathelement path="${play.path}/framework/classes"/>
+        <fileset dir="${play.path}/framework/lib">
             <include name="*.jar"/>                        
         </fileset> 
         <fileset dir="lib">
@@ -38,7 +38,7 @@
         <jar destfile="lib/play-scala.jar" basedir="tmp/classes">
             <manifest>
                 <section name="Play">
-                    <attribute name="Specification-Title" value="Scala module"/>
+                    <attribute name="Specification-Title" value="Scala"/>
                 </section>
             </manifest>
         </jar>
