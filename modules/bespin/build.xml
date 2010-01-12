@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="bespin module" default="build" basedir=".">
+<project name="Bespin" default="build" basedir=".">
 
     <path id="project.classpath">
-        <pathelement path="../../framework/classes"/>
-        <fileset dir="../../framework/lib">
+        <pathelement path="${play.path}/framework/classes"/>
+        <fileset dir="${play.path}/framework/lib">
             <include name="*.jar"/>                        
         </fileset>        
     </path>
@@ -24,7 +24,7 @@
         <jar destfile="lib/play-bespin.jar" basedir="tmp/classes">
             <manifest>
                 <section name="Play">
-                    <attribute name="Specification-Title" value="Bespin module"/>
+                    <attribute name="Specification-Title" value="Bespin" />
                 </section>
             </manifest>
         </jar>
