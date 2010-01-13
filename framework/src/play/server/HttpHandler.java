@@ -491,7 +491,7 @@ public class HttpHandler implements IoHandler {
         }
         if (response.contentType != null) {
             minaResponse.setHeader("Content-Type", response.contentType + (response.contentType.startsWith("text/") && !response.contentType.contains("charset") ? "; charset=utf-8" : ""));
-        } else {
+        } else if (response.headers.get("Content-Type") == null) {
             minaResponse.setHeader("Content-Type", "text/plain; charset=utf-8");
         }
         minaResponse.setStatus(HttpResponseStatus.forId(response.status));
