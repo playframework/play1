@@ -2,9 +2,8 @@ package models;
  
 import java.util.*;
 import javax.persistence.*;
- 
-import play.data.binding.annotations.Bind;
-import play.db.jpa.*;
+
+import play.data.binding.annotations.As;
 import play.data.validation.*;
  
 @Entity
@@ -13,7 +12,7 @@ public class Post extends Model {
     @Required
     public String title;
     
-    @Required @Bind(format = "yyyy-MM-dd")
+    @Required @As("yyyy-MM-dd")
     public Date postedAt;
     
     @Lob

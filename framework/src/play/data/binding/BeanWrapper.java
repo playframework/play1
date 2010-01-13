@@ -6,7 +6,8 @@ import java.util.*;
 
 import play.Logger;
 import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
-import play.data.binding.annotations.Bind;
+import play.data.binding.annotations.As;
+import play.data.binding.annotations.NoBinding;
 import play.exceptions.UnexpectedException;
 import play.utils.Utils;
 
@@ -171,9 +172,9 @@ public class BeanWrapper {
         public void setProfiles(Annotation[] annotations) {
             if (annotations != null) {
                 for (Annotation annotation : annotations) {
-                    if (annotation.annotationType().equals(Bind.class)) {
-                        Bind bind = ((Bind) annotation);
-                        profiles = bind.profiles().split(",");
+                    if (annotation.annotationType().equals(NoBinding.class)) {
+                        NoBinding as = ((NoBinding) annotation);
+                        profiles = as.value();
                     }
                 }
             }

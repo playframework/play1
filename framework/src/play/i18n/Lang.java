@@ -98,12 +98,20 @@ public class Lang {
      */
     public static Locale getLocale() {
         String lang = get();
+        Locale locale = getLocale(lang);
+        if (locale != null) {
+            return locale;
+        }
+        return Locale.getDefault();
+    }
+
+     public static Locale getLocale(String lang) {
         for (Locale locale : Locale.getAvailableLocales()) {
             if (locale.getLanguage().equals(lang)) {
                 return locale;
             }
         }
-        return Locale.getDefault();
+        return null;
     }
 
 }
