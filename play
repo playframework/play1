@@ -1224,7 +1224,6 @@ try:
 		dotProject = os.path.join(application_path, '.project')
 		dotClasspath = os.path.join(application_path, '.classpath')
 		dotSettings = os.path.join(application_path, '.settings')
-		dotAmateras = os.path.join(application_path, '.amateras')
 		eclipse = os.path.join(application_path, 'eclipse')
 		if os.path.exists(eclipse):
 			shutil.rmtree(eclipse)
@@ -1238,7 +1237,6 @@ try:
 		
 		shutil.copyfile(os.path.join(play_base, 'resources/eclipse/.project'), dotProject)
 		shutil.copyfile(os.path.join(play_base, 'resources/eclipse/.classpath'), dotClasspath)
-		shutil.copyfile(os.path.join(play_base, 'resources/eclipse/.amateras'), dotAmateras)
 		shutil.copytree(os.path.join(play_base, 'resources/eclipse'), eclipse)
 		shutil.copytree(os.path.join(play_base, 'resources/eclipse/.settings'), dotSettings)
 		replaceAll(dotProject, r'%PROJECT_NAME%', application_name)
