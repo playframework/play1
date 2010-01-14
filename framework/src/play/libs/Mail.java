@@ -79,7 +79,7 @@ public class Mail {
      * @param attachments File attachments
      */
     public static Future<Boolean> send(String from, String recipient, String subject, String body, String alternate, File... attachments) {
-        return send(from, null, new String[]{recipient}, subject, body, alternate, "text/html", attachments);
+        return send(from, null, new String[]{recipient}, subject, body, alternate, "text/html", (Object[])attachments);
     }
 
     /**
@@ -93,7 +93,7 @@ public class Mail {
      * @param attachments DataSource attachments
      */
     public static Future<Boolean> send(String from, String recipient, String subject, String body, String alternate, DataSource... attachments) {
-        return send(from, null, new String[]{recipient}, subject, body, alternate, "text/html", attachments);
+        return send(from, null, new String[]{recipient}, subject, body, alternate, "text/html", (Object[])attachments);
     }
 
     /**
@@ -118,7 +118,7 @@ public class Mail {
      * @param attachments File attachments
      */
     public static Future<Boolean> send(String from, String recipient, String subject, String body, File... attachments) {
-        return send(from, new String[]{recipient}, subject, body, attachments);
+        return send(from, new String[]{recipient}, subject, body, (File[])attachments);
     }
 
     /**
@@ -131,7 +131,7 @@ public class Mail {
      * @param attachments DataSource attachments
      */
     public static Future<Boolean> send(String from, String recipient, String subject, String body, DataSource... attachments) {
-        return send(from, new String[]{recipient}, subject, body, attachments);
+        return send(from, new String[]{recipient}, subject, body, (DataSource[])attachments);
     }
 
     /**
@@ -144,7 +144,7 @@ public class Mail {
      * @param attachments File attachments
      */
     public static Future<Boolean> send(String from, String[] recipients, String subject, String body, File... attachments) {
-        return send(from, null, recipients, subject, body, null, "text/plain", attachments);
+        return send(from, null, recipients, subject, body, null, "text/plain", (Object[])attachments);
     }
 
     /**
@@ -157,7 +157,7 @@ public class Mail {
      * @param attachments DataSource attachments
      */
     public static Future<Boolean> send(String from, String[] recipients, String subject, String body, DataSource... attachments) {
-        return send(from, null, recipients, subject, body, null, "text/plain", attachments);
+        return send(from, null, recipients, subject, body, null, "text/plain", (Object[])attachments);
     }
 
     /**
@@ -207,7 +207,7 @@ public class Mail {
      * @param attachments File attachments
      */
     public static Future<Boolean> send(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) {
-       return  sendEmail(from, replyTo, recipients, subject, body, alternate, contentType, null, null, attachments);
+       return  sendEmail(from, replyTo, recipients, subject, body, alternate, contentType, null, null, (Object[])attachments);
     }
 
 
@@ -242,6 +242,14 @@ public class Mail {
             if (replyToI == null) {
                 replyToI = fromI;
             }
+            InternetAddress[] recipientsI = new InternetAddress[recipients.length];
+            for(int i=0; i<recipients.length; i++) {
+                if(recipients[i] instanceof InternetAddress) {
+                    recipientsI[i] = (InternetAddress)recipients[i];
+                } else {
+                    recipientsI[i] = new InternetAddress(recipients[i].toString());
+                }
+            }
             if (Play.configuration.getProperty("mail.smtp", "").equals("mock") && Play.mode == Play.Mode.DEV) {
                 Mock.send(fromI, replyToI, recipients, subject, body, alternate, contentType, attachments);
                 return new Future<Boolean>() {
@@ -267,7 +275,7 @@ public class Mail {
                     }
                 };
             }
-            return sendMessage(buildMessage(fromI, replyToI, recipients, subject, body, alternate, contentType, charset, headers, attachments));
+            return sendMessage(buildMimeMessage(fromI, replyToI, recipientsI, subject, body, alternate, contentType, charset, headers, (Object[])attachments));
         } catch (MessagingException ex) {
             throw new MailException("Cannot send email", ex);
         }
@@ -298,7 +306,7 @@ public class Mail {
             addressTo[i++] = recipient.toString();
           }
       }
-      return buildMimeMessage(from != null ? from.toString() : null, replyTo != null ? replyTo.toString() : null, addressTo, subject, body, alternate, contentType, null, null, attachments);
+      return buildMimeMessage(from != null ? from.toString() : (String)null, replyTo != null ? replyTo.toString() : (String)null, addressTo, subject, body, alternate, contentType, (String)null, (Map<String, String>)null, (Object[])attachments);
     }
  
     /**
@@ -331,7 +339,7 @@ public class Mail {
                 addressTo[i++] = new InternetAddress(recipient.toString());
             }
         }
-        return buildMimeMessage(fromI, replyToI, addressTo, subject, body, alternate, contentType, null, null, attachments);
+        return buildMimeMessage(fromI, replyToI, addressTo, subject, body, alternate, contentType, null, null, (Object[])attachments);
     }
 
     /**
@@ -346,7 +354,7 @@ public class Mail {
      * @param attachments File attachments
      */
     public static MimeMessage buildMimeMessage(InternetAddress from, InternetAddress replyTo, InternetAddress[] recipients, String subject, String body, String alternate, String contentType, Object... attachments) throws MessagingException {
-        return buildMessage(from, replyTo, recipients, subject, body, alternate, contentType, null, null, attachments);
+        return buildMessage(from, replyTo, recipients, subject, body, alternate, contentType, null, null, (Object[])attachments);
     }
 
     /**
