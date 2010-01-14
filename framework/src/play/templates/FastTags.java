@@ -50,7 +50,6 @@ public class FastTags {
         out.print("</option>");
     }
 
-
     /**
      * Generates a html form element linked to a controller action
      * @param args tag attributes

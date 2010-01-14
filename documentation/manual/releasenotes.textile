@@ -180,9 +180,9 @@ bc. #{list users}
     <li>${_}</li>
 #{/list}
 
-h2. <a>New #{jsRoute /} tag</a>
+h2. <a>New #{jsAction /} tag</a>
 
-The **#{jsRoute /}** tag allows to import a server-side defined route as a Javascript function. It is very useful if you need to call an URL with an AJAX call using free variables.
+The **#{jsAction /}** tag allows to import a server-side defined route as a Javascript function. It is very useful if you need to call an URL with an AJAX call using free variables.
 
 Let's see an example:
 
@@ -191,14 +191,14 @@ bc. GET     /users/{id}        Users.show
 Now you can import this route on the client side:
 
 bc. <script type="text/javascript">
-    var showUserAction = #{jsRoute @Users.show(':id')}
+    var showUserAction = #{jsAction @Users.show(':id')}
     
     var displayUserDetail = function(userId) {
-        $('userDetail').load( showUserAction({id: userId}) )
+        $('#userDetail').load( showUserAction({id: userId}) )
     }
 </script>
 
-As you see you use the **:ame** syntax to declare free variables. You can mix free and fixed variables together. The **#{jsRoute /}** tag generates a Javascript function. This function takes a Javascript object as parameter that must define all the free variables.
+As you see you use the **:ame** syntax to declare free variables. You can mix free and fixed variables together. The **#{jsAction /}** tag generates a Javascript function. This function takes a Javascript object as parameter that must define all the free variables.
 
 h2. <a>New sample application: 'booking'</a>
 
