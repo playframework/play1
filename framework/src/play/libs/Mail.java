@@ -251,7 +251,7 @@ public class Mail {
                 IOException {
 
             if (message.getContent() instanceof String) {
-                return message.getContentType() + ": " + (String) message.getContent();
+                return message.getContentType() + ": " + (String) message.getContent() + " \n\t";
             } else if (message.getContent() != null && message.getContent() instanceof Multipart) {
                 Multipart part = (Multipart) message.getContent();
                 String text = "";
@@ -269,7 +269,7 @@ public class Mail {
                 if (!Message.ATTACHMENT.equals(message.getDisposition())) {
                     return getContent((Part) message.getContent());
                 } else {
-                    return "attachment (" + message.getDisposition() + "): description " + message.getDescription() + " - name " + message.getFileName();
+                    return "attachment (" + message.getDisposition() + "): description: " + (message.getDescription() != null ? message.getDescription() : "none") + " - name: " + message.getFileName();
                 }
             }
 
@@ -296,7 +296,7 @@ public class Mail {
                 content.append("\n\tFrom: " + email.getFromAddress().getAddress());
                 content.append("\n\tReplyTo: " + ((InternetAddress) email.getReplyToAddresses().get(0)).getAddress());
                 content.append("\n\tSubject: " + email.getSubject());
-                content.append("\n\tBody: " + body);
+                content.append("\n\t" + body);
 
                 content.append("\n");
                 Logger.info(content.toString());
