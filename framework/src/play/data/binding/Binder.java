@@ -107,12 +107,6 @@ public class Binder {
                 }
             }
 
-//            // If the profile does not match return null
-//            if (localValue != null && !contains(profiles, localValue)) {
-//                return MISSING;
-//            }
-
-
             // Arrays types
             // The array condiction is not so nice... We should find another way of doing this....
             if (clazz.isArray() && (clazz != byte[].class && clazz != byte[][].class && clazz != File[].class && clazz != Upload[].class )) {
