@@ -16,7 +16,7 @@ import play.exceptions.UnexpectedException;
 public class Validation {
 
     static ThreadLocal<Validation> current = new ThreadLocal<Validation>();
-    List<Error> errors = new ArrayList();
+    List<Error> errors = new ArrayList<Error>();
     boolean keep = false;
     
     protected Validation() {
@@ -201,7 +201,7 @@ public class Validation {
     public static class Validator {
         
         public Annotation annotation;
-        public Map<String,Object> params = new HashMap();
+        public Map<String,Object> params = new HashMap<String, Object>();
         
         public Validator(Annotation annotation) {
             this.annotation = annotation;
