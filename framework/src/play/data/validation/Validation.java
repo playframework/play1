@@ -195,7 +195,7 @@ public class Validation {
     public static class Validator {
         
         public Annotation annotation;
-        public Map<String,Object> params = new HashMap();
+        public Map<String,Object> params = new HashMap<String,Object>();
         
         public Validator(Annotation annotation) {
             this.annotation = annotation;
