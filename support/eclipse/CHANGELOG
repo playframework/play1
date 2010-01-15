@@ -1,3 +1,6 @@
+0.3.0:
+   * Fix links for actions when modules are involved
+   * Introduce wizards for models, views and controllers
 0.2.3: Minor fixes in the editors
 0.2.2: Folding for the HTML editor
 0.2.1: Custom editor for application.conf and new icons
