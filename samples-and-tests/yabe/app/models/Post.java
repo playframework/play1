@@ -5,7 +5,8 @@ import javax.persistence.*;
 
 import play.data.binding.annotations.As;
 import play.data.validation.*;
- 
+import play.db.jpa.Model;
+
 @Entity
 public class Post extends Model {
  

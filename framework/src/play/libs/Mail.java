@@ -100,7 +100,7 @@ public class Mail {
             Properties props = new Properties();
             props.put("mail.smtp.host", Play.configuration.getProperty("mail.smtp.host"));
 
-            String channelEncryption = "clear";
+            String channelEncryption;
             if (Play.configuration.containsKey("mail.smtp.protocol") && Play.configuration.getProperty("mail.smtp.protocol", "smtp").equals("smtps")) {
                 // Backward compatibility before stable5
                 channelEncryption = "starttls";
@@ -171,7 +171,7 @@ public class Mail {
     /**
      * Send a JavaMail message
      *
-     * @param msg A JavaMail message
+     * @param msg An Email message
      */
     public static Future<Boolean> sendMessage(final Email msg) {
         if (asynchronousSend) {
@@ -244,14 +244,14 @@ public class Mail {
 
     public static class Mock {
 
-        static Map<String, String> emails = new HashMap();
+        static Map<String, String> emails = new HashMap<String, String>();
 
 
         public static String getContent(Part message) throws MessagingException,
                 IOException {
 
             if (message.getContent() instanceof String) {
-                return message.getContentType() + ": " + (String) message.getContent() + " \n\t";
+                return message.getContentType() + ": " + message.getContent() + " \n\t";
             } else if (message.getContent() != null && message.getContent() instanceof Multipart) {
                 Multipart part = (Multipart) message.getContent();
                 String text = "";
