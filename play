@@ -1260,7 +1260,10 @@ try:
 			cXML = ""
 			for module in modules:
 				lXML += '<link><name>%s</name><type>2</type><location>%s</location></link>\n' % (os.path.basename(module), os.path.join(module, 'app').replace('\\', '/'))
-				lXML += '<link><name>conf/%s</name><type>2</type><location>%s/conf</location></link>\n' % (os.path.basename(module), module.replace('\\', '/'))
+				if os.path.exists(os.path.join(module, "conf")):
+					lXML += '<link><name>conf/%s</name><type>2</type><location>%s/conf</location></link>\n' % (os.path.basename(module), module.replace('\\', '/'))
+				if os.path.exists(os.path.join(module, "public")):
+					lXML += '<link><name>public/%s</name><type>2</type><location>%s/public</location></link>\n' % (os.path.basename(module), module.replace('\\', '/'))
 				cXML += '<classpathentry kind="src" path="%s"/>' % (os.path.basename(module))
 			replaceAll(dotProject, r'%LINKS%', '<linkedResources>%s</linkedResources>' % lXML)
 			replaceAll(dotClasspath, r'%MODULES%', cXML)
