@@ -165,9 +165,7 @@ public class Play {
         } catch (Exception e) {
             throw new UnexpectedException("Where is the framework ?", e);
         }
-        System.setProperty("play.path", Play.frameworkPath.getAbsolutePath());
-        System.setProperty("application.path", Play.applicationPath.getAbsolutePath());
-
+        
         // Read the configuration file
         readConfiguration();
 

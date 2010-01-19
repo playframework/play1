@@ -163,7 +163,7 @@ public class Scope {
                             session.put(matcher.group(1), matcher.group(2));
                         }
                     } else {
-                        Logger.warn("Corrupted HTTP session from %s", Http.Request.current().remoteAddress);
+                        // SKIP Logger.warn("Corrupted HTTP session from %s", Http.Request.current().remoteAddress);
                     }
                 }
                 if(!session.contains("___ID")) {
