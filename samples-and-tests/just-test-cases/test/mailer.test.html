@@ -31,7 +31,7 @@
 	storeLastReceivedEmailBy('test@localhost', 'email5')
 	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email5"])[1]}', 'subject5')
 	assertEquals('test attachments', '$[subject5]')
-    store('javascript{/name\s+(.*)/.exec(storedVars["email5"])[1]}', 'body')
-	assertEquals('fond3.jpg', '$[body]')
+    store('javascript{/name:\s+(.*)\s*/.exec(storedVars["email5"])[1]}', 'body')
+	assertEquals('fond2.png', '$[body]')
 
 #{/selenium}

@@ -260,7 +260,10 @@ public class Mail {
                     if (!Message.ATTACHMENT.equals(bodyPart.getDisposition())) {
                         text += getContent(part.getBodyPart(i));
                     } else {
-                        return "attachment (" + bodyPart.getDisposition() + "): description " + bodyPart.getDescription() + " - name " + bodyPart.getFileName();
+                        text += "attachment: \n" +
+                       "\t\t name: " + (StringUtils.isEmpty(bodyPart.getFileName()) ? "none" : bodyPart.getFileName()) + "\n" +
+                       "\t\t disposition: " + bodyPart.getDisposition() + "\n" +
+                       "\t\t description: " +  (StringUtils.isEmpty(bodyPart.getDescription()) ? "none" : bodyPart.getDescription())  + "\n\t";
                     }
                 }
                 return text;
@@ -269,7 +272,10 @@ public class Mail {
                 if (!Message.ATTACHMENT.equals(message.getDisposition())) {
                     return getContent((Part) message.getContent());
                 } else {
-                    return "attachment (" + message.getDisposition() + "): description: " + (message.getDescription() != null ? message.getDescription() : "none") + " - name: " + message.getFileName();
+                    return "attachment: \n" +
+                           "\t\t name: " + (StringUtils.isEmpty(message.getFileName()) ? "none" : message.getFileName()) + "\n" +
+                           "\t\t disposition: " + message.getDisposition() + "\n" +
+                           "\t\t description: " + (StringUtils.isEmpty(message.getDescription()) ? "none" : message.getDescription()) + "\n\t";
                 }
             }
 

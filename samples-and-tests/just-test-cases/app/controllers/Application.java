@@ -112,9 +112,12 @@ public class Application extends Controller {
         EmailAttachment attachment = new EmailAttachment();
         attachment.setDescription("An image");
         attachment.setDisposition(EmailAttachment.ATTACHMENT);
-        attachment.setName("fond3.jpg");
-        attachment.setPath(Play.applicationPath.getPath() + java.io.File.separator + "test" + java.io.File.separator + "fond3.jpg");
+        attachment.setPath(Play.applicationPath.getPath() + java.io.File.separator + "test" + java.io.File.separator + "fond2.png");
+        EmailAttachment attachment2 = new EmailAttachment();
+        attachment2.setName("fond3.jpg");
+        attachment2.setPath(Play.applicationPath.getPath() + java.io.File.separator + "test" + java.io.File.separator + "fond3.jpg");
         email.attach(attachment);
+        email.attach(attachment2);
         email.setFrom("test@localhost");
         email.addTo("test@localhost");
         email.setSubject("test attachments");
