@@ -659,7 +659,7 @@ public class Mail {
                     if (!Message.ATTACHMENT.equals(bodyPart.getDisposition())) {
                         text += getContent(part.getBodyPart(i));
                     } else {
-                        return "attachment (" + bodyPart.getDisposition() + "): description " + bodyPart.getDescription() + " - name " + bodyPart.getFileName();
+                        text += "attachment (" + bodyPart.getDisposition() + "): description " +  (bodyPart.getDescription() != null ? bodyPart.getDescription(): "none")  + " - name " + (bodyPart.getFileName() != null ? bodyPart.getFileName() : "none") + " \n\t";
                     }
                 }
                 return text;
@@ -668,7 +668,7 @@ public class Mail {
                 if (!Message.ATTACHMENT.equals(message.getDisposition())) {
                     return getContent((Part) message.getContent());
                 } else {
-                    return "attachment (" + message.getDisposition() + "): description: " + (message.getDescription() != null ? message.getDescription(): "none") + " - name: " + message.getFileName();
+                    return "attachment (" + message.getDisposition() + "): description: " + (message.getDescription() != null ? message.getDescription(): "none") + " - name: " + (message.getFileName() != null ? message.getFileName() : "none") + " \n\t";
                 }
             }
 
