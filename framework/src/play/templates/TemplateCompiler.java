@@ -383,7 +383,7 @@ public class TemplateCompiler {
                     }
                     if (m != null) {
                         print("play.templates.TagContext.enterTag('" + tag.name + "');");
-                        print(m.getDeclaringClass().getName() + "._" + tName + "(attrs" + tagIndex + ",body" + tagIndex + ", out, this, " + tag.startLine + ");");
+                        print("_('"+m.getDeclaringClass().getName() + "')._" + tName + "(attrs" + tagIndex + ",body" + tagIndex + ", out, this, " + tag.startLine + ");");
                         print("play.templates.TagContext.exitTag();");
                     } else {
                         print("invokeTag(" + tag.startLine + ",'" + tagName + "',attrs" + tagIndex + ",body" + tagIndex + ");");

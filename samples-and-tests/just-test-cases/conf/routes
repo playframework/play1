@@ -27,6 +27,10 @@ HEAD		/ressource/{id}					Rest.head
 # Map static resources from the /app/public folder to the /public path
 GET			/public/					     staticDir:public
 
+#bug in router.reverse
+GET     /notmatch/{name}/{action}                         Application.{action}
+GET     /index2                                           Application.index2
+
 # Catch all
 *           /sample/{controller}/{action}    sample.{controller}.{action}
 *			/{controller}/{action}		     {controller}.{action}

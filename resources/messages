@@ -25,3 +25,4 @@ validation.past=Must be in the past
 validation.before=Must be before %2$s
 validation.object=Validation failed
 validation.notFound=Object not found for id %2$s
+validation.url=Not a valid URL

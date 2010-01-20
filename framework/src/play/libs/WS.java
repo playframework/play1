@@ -667,6 +667,7 @@ public class WS extends PlayPlugin {
         public Map<String, String> headers = new HashMap<String, String> ();
         public Map<String, Object> parameters = new HashMap<String, Object> ();
         public String mimeType;
+        public Integer timeout;
 
         private WSRequest(String url) {
             this.url = url;
@@ -726,6 +727,16 @@ public class WS extends PlayPlugin {
          */
         public WSRequest mimeType(String mimeType) {
             this.mimeType = mimeType;
+            return this;
+        }
+
+        public WSRequest timeout(int to) {
+            this.timeout = to;
+            return this;
+        }
+
+        public WSRequest timeout(String duration) {
+            this.timeout = 1000 + Time.parseDuration(duration);
             return this;
         }
 
@@ -840,7 +851,9 @@ public class WS extends PlayPlugin {
         private HttpResponse executeRequest(HttpMethod method) {
             this.checkRelease();
             httpMethod.set(method);
-            httpMethod.get().getParams().setSoTimeout(5000);
+            if(this.timeout != null) {
+                httpMethod.get().getParams().setSoTimeout(this.timeout);
+            }
             httpMethod.get().setDoAuthentication(true);
             try {
                 if (this.headers != null) {
@@ -1014,12 +1027,13 @@ public class WS extends PlayPlugin {
          * @return the json response
          */
         public JsonElement getJson() {
+            String json = "";
             try {
-                String json = method.getResponseBodyAsString();
-                Logger.info(json);
+                json = method.getResponseBodyAsString();
                 return new JsonParser().parse(json);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                Logger.error("Bad JSON: \n%s", json);
+                throw new RuntimeException("Cannot parse JSON (check logs)", e);
             } finally {
                 method.releaseConnection();
             }

@@ -11,7 +11,7 @@
         %LINKS% 
         <orderEntry type="inheritedJdk" />     
         <orderEntry type="module-library">
-            <library name="Porject Libraries">
+            <library name="Project Libraries">
                 <CLASSES>
                     <root url="file://$MODULE_DIR$/lib" />
                 </CLASSES>

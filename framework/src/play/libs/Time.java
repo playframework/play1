@@ -32,7 +32,7 @@ public class Time {
      */
     public static int parseDuration(String duration) {
         if (duration == null) {
-            return 60 * 60 * 24 * 365;
+            return 60 * 60 * 24 * 30;
         }
         int toAdd = -1;
         if (days.matcher(duration).matches()) {

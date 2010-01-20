@@ -2,7 +2,7 @@
 	#{if _fields}
 		<input type="hidden" name="searchFields" value="${_fields.toString().substring(1, _fields.toString().length()-1).replace(',', '')}" />
 	#{/if}
-	<input type="text" name="search" value="${params.search?.escape()}" /> <input type="submit" value="&{'crud.search'}" />
+	<input type="text" name="search" value="${params.search?.escape()?.raw()}" /> <input type="submit" value="&{'crud.search'}" />
 	#{if _caller.params.search}
 		(<a href="@{list()}">&{'crud.list.totalSize', _caller.totalCount}</a>)
 	#{/if}

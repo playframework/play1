@@ -36,7 +36,7 @@
 
 <div id="e">
 #{list items:1..5}
-    ${loop_parity == 'even' ? '=' : '-'} ${loop_index}. ${loop} ${loop_isLast ? '.' : ','} <br/>
+    ${_parity == 'even' ? '=' : '-'} ${_index}. ${_} ${_isLast ? '.' : ','} <br/>
 #{/list}
 </div>
 
@@ -85,7 +85,7 @@
 
 <div id="j">
 #{list a}
-    ${loop_parity == 'even' ? '=' : '-'} ${loop_index}. ${loop} ${loop_isLast ? '.' : ','} <br/>
+    ${_parity == 'even' ? '=' : '-'} ${_index}. ${_} ${_isLast ? '.' : ','} <br/>
 #{/list}
 </div>
 
@@ -93,7 +93,7 @@
 
 <div id="k">
 #{list 1..5}
-    ${loop_parity == 'even' ? '=' : '-'} ${loop_index}. ${loop} ${loop_isLast ? '.' : ','} <br/>
+    ${_parity == 'even' ? '=' : '-'} ${_index}. ${_} ${_isLast ? '.' : ','} <br/>
 #{/list}
 </div>
 

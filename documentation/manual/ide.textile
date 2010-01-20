@@ -1,11 +1,11 @@
 h1. Setting up your preferred IDE
 
 
-"Eclipse":#eclipse | "Netbeans":#netbeans | "Textmate":#textmate | "Other IDEs":#custom
+"Eclipse":#eclipse | "Netbeans":#netbeans | "IntelliJ IDEA:#intellij| "Textmate":#textmate | "Other IDEs":#custom
 
 Working with play is easy. You don't even need a sophisticated IDE as play compiles and refreshes the modifications you make to your source files automatically. So you can easily work using a simple text editor.
 
-However, using a modern Java IDE provides cool productivity features like auto-completion, on-the-fly compilation, assisted refactoring and debugging. Play supports the "Netbeans":http://www.netbeans.org and "Eclipse":http://www.eclipse.org platforms.
+However, using a modern Java IDE provides cool productivity features like auto-completion, on-the-fly compilation, assisted refactoring and debugging. Play supports the "Netbeans":http://www.netbeans.org, "IntelliJ IDEA":http://www.jetbrains.com/idea/index.html and "Eclipse":http://www.eclipse.org platforms.
 
 
 h2(#eclipse). <a>Generate configuration files for eclipse</a>
@@ -44,6 +44,22 @@ If you make any important change to your application such as changing the classp
 p(note). **Do not commit the nbproject directory when you work in a team!**
  
 The generated configuration files contains absolute references to your framework installation. These are specific to your own installation. When you work in a team on the same application, each developer must keep his netbeans configuration files private.
+
+h2(#intellij). <a>Generate configuration files for IntelliJ IDEA</a>
+
+play provides a command to simplify IntelliJ IDEA configuration. To transform an existing application to a valid IntelliJ IDEA module/project, use the **idealize** command:
+
+bc. # play idealize myApp
+
+Then you can just import the application in IntelliJ using the import module facility.
+
+!images/intellij!
+
+You can use the Run and Debug using the context menu. 
+
+p(note). **Do not commit the .iml files when you work in a team!**
+ 
+The generated configuration files contains absolute references to your framework installation. These are specific to your own installation. When you work in a team on the same application, each developer must keep his IntelliJ IDEA configuration files private.
 
 
 h2(#textmate). <a>Textmate</a>

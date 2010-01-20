@@ -247,7 +247,7 @@ public class HttpHandler implements IoHandler {
                     }
                     boolean useEtag = Play.configuration.getProperty("http.useETag", "true").equals("true");
                     long last = file.lastModified();
-                    String etag = last + "-" + file.hashCode();
+                    String etag = "\"" + last + "-" + file.hashCode() + "\"";
                     if (!isModified(etag, last, minaRequest)) {
                         if (useEtag) {
                             minaResponse.setHeader("Etag", etag);

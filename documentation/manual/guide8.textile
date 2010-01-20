@@ -204,7 +204,7 @@ bc. static boolean check(String profile) {
     return false;
 }
 
-Now we can build an administration menu that depends of the user role. Update the **yabe/views/main.html** to integrate a top level menu:
+Now we can build an administration menu that depends of the user role. Update the **yabe/views/admin.html** to integrate a top level menu:
 
 bc. ...
 <div id="main">

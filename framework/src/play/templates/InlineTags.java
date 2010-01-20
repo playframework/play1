@@ -70,13 +70,13 @@ public class InlineTags {
         StringBuffer s = new StringBuffer();
         switch(f) {
             case START:
-                s.append("if(!attrs"+index+"['as']) {attrs"+index+"['as'] = 'loop';};");
+                s.append("if(!attrs"+index+"['as']) {attrs"+index+"['as'] = '';};");
                 s.append("if(!attrs"+index+"['items']) {attrs"+index+"['items'] = attrs"+index+"['arg'];};");
                 s.append("if(attrs"+index+"['items']) { play.templates.TagContext.parent().data.put('_executeNextElse', false);");
                 s.append("_iter"+index+" = attrs"+index+"['items'].iterator();");
                 s.append("for (_i = 1; _iter"+index+".hasNext(); _i++) {");
                 s.append("_item"+index+" = _iter"+index+".next();");
-                s.append("setProperty(attrs"+index+"['as'], _item"+index+");");
+                s.append("setProperty(attrs"+index+"['as'] ?: '_', _item"+index+");");
                 s.append("setProperty(attrs"+index+"['as']+'_index', _i);");
                 s.append("setProperty(attrs"+index+"['as']+'_isLast', !_iter"+index+".hasNext());");
                 s.append("setProperty(attrs"+index+"['as']+'_isFirst', _i == 1);");
