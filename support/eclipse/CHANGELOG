@@ -1,3 +1,6 @@
+0.3.1:
+   * Include wizards in the Play! menu
+   * Add packages support to wizards
 0.3.0:
    * Fix links for actions when modules are involved
    * Introduce wizards for models, views and controllers
