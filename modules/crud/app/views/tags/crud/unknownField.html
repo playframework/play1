@@ -2,7 +2,7 @@
 	<label for="${field.id}">
 		&{_name}
 	</label>
-    ${_value?.escape()}
+    ${_value?.escape()?.raw()}
 	#{ifError field.name}
 		<span class="error">${field.error}</span>
 	#{/ifError}

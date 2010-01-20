@@ -49,7 +49,7 @@
 					}%
 				%{ } else { }%
 					%{ if(i == 0) { }%
-						<a href="@{show(object.id)}">${object[field]?.toString()?.escape() ?: '(no value)'}</a>
+						<a href="@{show(object.id)}">${object[field]?.toString()?.escape()?.raw() ?: '(no value)'}</a>
 					%{ } else { }%
                         %{ if(_caller.type.getField(field).type == 'file') { }%
                             %{ if(object[field]) { }%
@@ -58,7 +58,7 @@
                                 
                              %{ } }%
                         %{ } else { }%
-                            ${object[field]?.escape()}
+                            ${object[field]?.escape()?.raw()}
                         %{ } }%
 					%{ } }%
 				%{ } }%
@@ -73,7 +73,7 @@
 				#{doBody body:handler /}
 			%{ } else { }%
 				<td>
-					<a href="@{show(object.id)}">${object.toString()?.escape() ?: '(no value)'}</a>
+					<a href="@{show(object.id)}">${object.toString()?.escape()?.raw() ?: '(no value)'}</a>
 				</td>
 			%{ } }%
 		%{ } }%
