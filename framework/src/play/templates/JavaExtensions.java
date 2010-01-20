@@ -24,7 +24,7 @@ import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.I18N;
 import play.templates.Template.ExecutableTemplate.RawData;
-import play.utils.HTML;
+import play.utils.HTMLUtils;
 
 /**
  * Java extensions in templates
@@ -86,7 +86,7 @@ public class JavaExtensions {
     }
 
     public static String escapeHtml(String htmlToEscape) {
-        return HTML.htmlEscape(htmlToEscape);
+        return HTMLUtils.htmlEscape(htmlToEscape);
     }
 
     public static String escapeJavaScript(String str) {
