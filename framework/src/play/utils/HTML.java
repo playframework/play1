@@ -151,6 +151,6 @@ public class HTML {
                 return referredCharacter.charValue();
             }
             return CHAR_NULL;
-        }
+        } 
     }
 }
