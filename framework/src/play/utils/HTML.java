@@ -32,7 +32,7 @@ import java.util.Properties;
  * @author Martin Kersten
  * @since 1.2.1
  */
-public class HTMLUtils {
+public class HTML {
 
     /*
      * Shared instance of pre-parsed HTML character entity references.
