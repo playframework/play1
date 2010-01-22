@@ -194,7 +194,7 @@ public class Logger {
     public static void debug(Throwable e, String message, Object... args) {
         if (forceJuli || log4j == null) {
             try {
-                if (!niceThrowable(Priority.DEBUG, e, message, args)) {
+                if (!niceThrowable(org.apache.log4j.Level.DEBUG, e, message, args)) {
                     juli.log(Level.CONFIG, format(message, args), e);
                 }
             } catch (Throwable ex) {
@@ -202,7 +202,7 @@ public class Logger {
             }
         } else {
             try {
-                if (!niceThrowable(Priority.DEBUG, e, message, args)) {
+                if (!niceThrowable(org.apache.log4j.Level.DEBUG, e, message, args)) {
                     if (recordCaller) {
                         CallInfo ci = getCallerInformations(3);
                         org.apache.log4j.Logger.getLogger(ci.className).debug(format(message, args), e);
@@ -251,7 +251,7 @@ public class Logger {
     public static void info(Throwable e, String message, Object... args) {
         if (forceJuli || log4j == null) {
             try {
-                if (!niceThrowable(Priority.INFO, e, message, args)) {
+                if (!niceThrowable(org.apache.log4j.Level.INFO, e, message, args)) {
                     juli.log(Level.INFO, format(message, args), e);
                 }
             } catch (Throwable ex) {
@@ -259,7 +259,7 @@ public class Logger {
             }
         } else {
             try {
-                if (!niceThrowable(Priority.INFO, e, message, args)) {
+                if (!niceThrowable(org.apache.log4j.Level.INFO, e, message, args)) {
                     if (recordCaller) {
                         CallInfo ci = getCallerInformations(3);
                         org.apache.log4j.Logger.getLogger(ci.className).info(format(message, args), e);
@@ -308,7 +308,7 @@ public class Logger {
     public static void warn(Throwable e, String message, Object... args) {
         if (forceJuli || log4j == null) {
             try {
-                if (!niceThrowable(Priority.WARN, e, message, args)) {
+                if (!niceThrowable(org.apache.log4j.Level.WARN, e, message, args)) {
                     juli.log(Level.WARNING, format(message, args), e);
                 }
             } catch (Throwable ex) {
@@ -316,7 +316,7 @@ public class Logger {
             }
         } else {
             try {
-                if (!niceThrowable(Priority.WARN, e, message, args)) {
+                if (!niceThrowable(org.apache.log4j.Level.WARN, e, message, args)) {
                     if (recordCaller) {
                         CallInfo ci = getCallerInformations(3);
                         org.apache.log4j.Logger.getLogger(ci.className).warn(format(message, args), e);
@@ -365,7 +365,7 @@ public class Logger {
     public static void error(Throwable e, String message, Object... args) {
         if (forceJuli || log4j == null) {
             try {
-                if (!niceThrowable(Priority.ERROR, e, message, args)) {
+                if (!niceThrowable(org.apache.log4j.Level.ERROR, e, message, args)) {
                     juli.log(Level.SEVERE, format(message, args), e);
                 }
             } catch (Throwable ex) {
@@ -373,7 +373,7 @@ public class Logger {
             }
         } else {
             try {
-                if (!niceThrowable(Priority.ERROR, e, message, args)) {
+                if (!niceThrowable(org.apache.log4j.Level.ERROR, e, message, args)) {
                     if (recordCaller) {
                         CallInfo ci = getCallerInformations(3);
                         org.apache.log4j.Logger.getLogger(ci.className).error(format(message, args), e);
@@ -422,7 +422,7 @@ public class Logger {
     public static void fatal(Throwable e, String message, Object... args) {
         if (forceJuli || log4j == null) {
             try {
-                if (!niceThrowable(Priority.FATAL, e, message, args)) {
+                if (!niceThrowable(org.apache.log4j.Level.FATAL, e, message, args)) {
                     juli.log(Level.SEVERE, format(message, args), e);
                 }
             } catch (Throwable ex) {
@@ -430,7 +430,7 @@ public class Logger {
             }
         } else {
             try {
-                if (!niceThrowable(Priority.FATAL, e, message, args)) {
+                if (!niceThrowable(org.apache.log4j.Level.FATAL, e, message, args)) {
                     if (recordCaller) {
                         CallInfo ci = getCallerInformations(3);
                         org.apache.log4j.Logger.getLogger(ci.className).fatal(format(message, args), e);
