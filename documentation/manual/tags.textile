@@ -197,9 +197,9 @@ bc. #{set 'title'}
     Profile of ${user.login}
 #{/set}
 
-h2. <a>jsRoute</a>
+h2. <a>jsAction</a>
 
-The **#{jsRoute /}** tag allow to import a server-side defined route as a Javascript function. It is very useful if you need to call an URL with an AJAX call using free variables.
+The **#{jsAction /}** tag allow to import a server-side defined route as a Javascript function. It is very useful if you need to call an URL with an AJAX call using free variables.
 
 Let's see an example:
 
@@ -208,7 +208,7 @@ bc. GET     /users/{id}        Users.show
 Now you can import this route client side:
 
 bc. <script type="text/javascript">
-    var showUserAction = #{jsRoute @Users.show(':id')}
+    var showUserAction = #{jsAction @Users.show(':id') /}
     
     var displayUserDetail = function(userId) {
         $('userDetail').load( showUserAction({id: userId}) )
