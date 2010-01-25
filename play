@@ -663,7 +663,7 @@ try:
 				if o in ('--with'):
 					withModules = a.split(',')
 				if o in ('--name'):
-				    application_name = a
+					application_name = a
 		except getopt.GetoptError, err:
 			print "~ %s" % str(err)
 			print "~ Sorry, unrecognized option"
@@ -673,6 +673,26 @@ try:
 			print "~ Oops. %s already exists" % application_path
 			print "~"
 			sys.exit(-1)
+		
+		md = []
+		for m in withModules:
+			dirname = None
+			if os.path.exists(os.path.join(play_base, 'modules/%s' % m)) and os.path.isdir(os.path.join(play_base, 'modules/%s' % m)):
+				dirname = m
+			else:
+				for f in os.listdir(os.path.join(play_base, 'modules')):
+					if os.path.isdir(os.path.join(play_base, 'modules/%s' % f)) and f.find(m) == 0:
+						dirname = f
+						break
+			
+			if not dirname:
+				print "~ Oops. No module %s found" % m
+				print "~ Try to install it using 'play install %s'" % m
+				print "~"
+				sys.exit(-1)
+			
+			md.append(dirname)	
+			
 		print "~ The new application will be created in %s" % os.path.normpath(application_path)
 		if application_name is None:
 		    application_name = raw_input("~ What is the application name? ")
@@ -680,9 +700,13 @@ try:
 		check_application()
 		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%APPLICATION_NAME%', application_name)
 		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%SECRET_KEY%', secretKey())
-		for m in withModules:
-			replaceAll(os.path.join(application_path, 'conf/application.conf'), r'#module.%s' % m, 'module.%s' % m)
 		print "~"
+		
+		for m in md:
+			mn = m
+			if mn.find('-') > 0:
+				mn = mn[:mn.find('-')]
+			replaceAll(os.path.join(application_path, 'conf/application.conf'), r'# Syntax: module.{name}={path}', '# Syntax: module.{name}={path}\nmodule.%s=${play.path}/modules/%s' % (mn, m) )
 		
 		# modules
 		check_application()

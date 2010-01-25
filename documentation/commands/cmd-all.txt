@@ -4,12 +4,15 @@
 ~ Available commands are: 
 ~ ~~~~~~~~~~~~~~~~~~~~~~~
 ~ auto-test      Automatically run all application tests
+~ build-module   Build and package a module
 ~ classpath      Display the computed classpath
 ~ clean          Delete temporary files (including the bytecode cache)
 ~ eclipsify      Create all eclipse configuration files
 ~ help           Display help on a specific command
 ~ id             Define the framework ID
 ~ idealize       Create all IntelliJ Idea configuration files
+~ install        Install a module
+~ list-modules   List modules available from the central modules repository
 ~ modules        Display the computed modules list
 ~ netbeansify    Create all netbeans configuration files
 ~ new            Create a new application
