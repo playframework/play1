@@ -1035,7 +1035,7 @@ try:
 		soutint = open(os.path.join(log_path, 'system.out'), 'r')
 		while True:
 			if play_process.poll():
- 				print "~"
+				print "~"
 				print "~ Oops, application has not started?"
 				print "~"
 				sys.exit(-1)
@@ -1335,6 +1335,12 @@ try:
 		os.rename(os.path.join(application_path, 'eclipse/connect.launch'), os.path.join(application_path, 'eclipse/Connect JPDA to %s.launch' % application_name))
 		os.rename(os.path.join(application_path, 'eclipse/test.launch'), os.path.join(application_path, 'eclipse/Test %s.launch' % application_name))
 		os.rename(os.path.join(application_path, 'eclipse/debug.launch'), os.path.join(application_path, 'eclipse/%s.launch' % application_name))
+		
+		# Module-specific modifications
+		for module in modules:
+			commands = os.path.join(module, 'commands.py')
+			if os.path.exists(commands):
+				execfile(commands)
 		
 		print "~ OK, the application is ready for eclipse"
 		print "~ Use File/Import/General/Existing project to import %s into eclipse" % os.path.normpath(application_path)
