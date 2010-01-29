@@ -22,10 +22,11 @@ The **eclipsify** command generates several launchers for the application. The m
 
 If you make any important change to your application such as changing the classpath, use **eclipsify** again to regenerate the configuration files.
 
+Additionally, an Eclipse plugin is available in your Play distribution, in the **support/eclipse** directory. To install it, simply copy the jar file you will find to the **dropins** folder of your Eclipse installation.
+
 p(note). **Do not commit eclipse configuration files when you work in a team!**
 
 The generated configuration files contains absolute references to your framework installation. These are specific to your own installation. When you work in a team, each developer must keep his eclipse configuration files private. 
-
 
 h2(#netbeans). <a>Generate configuration files for Netbeans</a>
 
