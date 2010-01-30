@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<plugin id="play" name="DataNucleus plug-ins" provider-name="www.playframework.org">
-    <extension point="org.datanucleus.classloader_resolver">
-        <class-loader-resolver name="playApplicationLoader" class-name="play.modules.gae.ClassResolver"/>
-    </extension>
-</plugin>

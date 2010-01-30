@@ -164,8 +164,7 @@ public class Application extends Controller {
     }
 
     public static void useSpringBean() {
-        Test test = (Test) Spring.getBean("test");
-        renderText(test.yop());
+
     }
 
     @javax.inject.Inject

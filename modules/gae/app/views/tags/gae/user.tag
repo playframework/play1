@@ -1,1 +1,0 @@
-${play.modules.gae.GAE.userService.currentUser}

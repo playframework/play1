@@ -2,14 +2,13 @@ h1. Play framework documentation
 
 Welcome to the play framework documentation. This documentation is intended for the *1.1 release* and may significantly differs from previous versions of the framework. 
 
-p(note). The 1.1 branch is in active devlopment.
+p(note). The 1.1 branch is in active development.
 
 h2. <a name="a">Hot stuff</a>
 
 We will describe here the new features progress
 
-# "Now the future - supporting Scala":scala
-# "Some functional programming techniques, brought to Java":lambdaj
+# "Now the future - supporting Scala":http://www.playframework.org/modules/scala
 
 
 h2. <a name="started">Getting started</a>
@@ -89,9 +88,9 @@ h2. <a name="cook">Cookbook</a>
 
 Tips about everything and anything.
 
+# "Using play modules, and the modules repository":modules
 # "More about the JPA support":jpa
 # "Using data validation":validation
-# "Application modularization":modules
 # "How to configure logs":logs
 # "Manage application.conf in several environments":ids
 # "Setting up i18n":i18n
@@ -99,24 +98,6 @@ Tips about everything and anything.
 # "Put your application in production":production
 # "Sending emails":emails
 # "OpenID integration":openid
-
-
-h2. <a name="modules">Other batteries included</a>
-
-Add instant power to your application by enabling one of these modules.
-
-# "CRUD":crud
-# "Security":secure
-# "Search":search
-# "Spring support":spring
-# "Guice support":guice
-# "Siena":siena
-# "Extended CSS":ecss
-# "Google App Engine":gae
-# "Google Web Toolkit":gwt
-# "Bespin editor":bespin
-# "Cobertura test coverage":cobertura
-# "Routes using annotations":router
 
 
 h2. <a name="references">References</a>

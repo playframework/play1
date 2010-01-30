@@ -1,3 +1,0 @@
-h1. Module documentation
-
-Write your module documentation here.

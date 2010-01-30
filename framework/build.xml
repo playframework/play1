@@ -99,18 +99,6 @@
     
     <target name="modules">
         <property name="play.path" value="../.."/>
-        <ant antfile="build.xml" target="build" dir="../modules/test-runner" />
-        <ant antfile="build.xml" target="build" dir="../modules/grizzly" />
-        <ant antfile="build.xml" target="build" dir="../modules/router" />
-        <ant antfile="build.xml" target="build" dir="../modules/bespin" />
-        <ant antfile="build.xml" target="build" dir="../modules/ecss" />
-        <ant antfile="build.xml" target="build" dir="../modules/gae" />
-        <ant antfile="build.xml" target="build" dir="../modules/gwt" />
-        <ant antfile="build.xml" target="build" dir="../modules/spring" />
-        <ant antfile="build.xml" target="build" dir="../modules/search" />
-        <ant antfile="build.xml" target="build" dir="../modules/siena" />
-	    <ant antfile="build.xml" target="build" dir="../modules/tracer" />
-        <ant antfile="build.xml" target="build" dir="../modules/scala" />
     </target>
     
     <!-- Netbeans support -->
@@ -221,10 +209,6 @@
         
         <antcall target="play-test">
             <param name="testAppPath" value="${basedir}/../samples-and-tests/forum"/>
-        </antcall>
-        
-        <antcall target="play-test">
-            <param name="testAppPath" value="${basedir}/../samples-and-tests/with-gwt"/>
         </antcall>
         
         <antcall target="play-test">
