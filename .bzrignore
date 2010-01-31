@@ -100,3 +100,6 @@ modules/gwt/samples-and-tests/logs
 modules/gwt/samples-and-tests/test-result
 modules/gwt/samples-and-tests/tmp
 modules/siena-1.0
+samples-and-tests/zencontact/logs
+samples-and-tests/zencontact/test-result
+samples-and-tests/zencontact/tmp

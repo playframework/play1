@@ -834,6 +834,12 @@ try:
 			print "~ Oops. The destination path already exists but does not seem to host a valid WAR structure"
 			print "~"
 			sys.exit(-1)
+			
+		if war_path.startswith(application_path):
+			print "~ Oops. Please specify a destination directory outside of the application"
+			print "~"
+			sys.exit(-1)
+			
 		print "~ Packaging current version of the framework and the application to %s ..." % (os.path.normpath(war_path))
 		if os.path.exists(war_path): shutil.rmtree(war_path)
 		if os.path.exists(os.path.join(application_path, 'war')):
@@ -884,8 +890,15 @@ try:
 				os.remove(war_zip_path)
 			zip = zipfile.ZipFile(war_zip_path, 'w', zipfile.ZIP_STORED)
 			for (dirpath, dirnames, filenames) in os.walk(war_path):
+				if dirpath == dist_dir:
+					continue
+				if dirpath.find('/.') > -1:
+					continue
 				for file in filenames:
+					if file.find('~') > -1 or file.startswith('.'):
+						continue
 					zip.write(os.path.join(dirpath, file), os.path.join(dirpath[len(war_path):], file))
+
 			zip.close()
 		print "~ Done !"
 		print "~"
@@ -1382,7 +1395,7 @@ try:
 			cXML = ""
 			for module in modules:
 				lXML += '    <content url="file://%s">\n      <sourceFolder url="file://%s" isTestSource="false" />\n    </content>\n' % (module, os.path.join(module, 'app').replace('\\', '/'))
-				replaceAll(imlFile, r'%LINKS%', lXML)
+			replaceAll(imlFile, r'%LINKS%', lXML)
 		else:
 			replaceAll(imlFile, r'%LINKS%', '')
 		

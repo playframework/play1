@@ -74,7 +74,7 @@ public class Play {
     /**
      * All loaded application classes
      */
-    public static ApplicationClasses classes = new ApplicationClasses();
+    public static ApplicationClasses classes;
     /**
      * The application classLoader
      */
@@ -170,6 +170,8 @@ public class Play {
 
         // Read the configuration file
         readConfiguration();
+
+        Play.classes = new ApplicationClasses();
 
         // Configure logs
         Logger.init();

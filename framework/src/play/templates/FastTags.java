@@ -7,6 +7,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,10 +35,13 @@ public class FastTags {
 
     public static void _select(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         String name = args.get("arg").toString();
+        String size = args.containsKey("size") ? args.get("size").toString() : "1";
         Object value = args.get("value");
         TagContext.current().data.put("selected", value);
-        out.print("<select name=\"" + name +"\" size=\"1\">");
-        out.println(JavaExtensions.toString(body));
+        out.print("<select name=\"" + name +"\" size=\""+size+"\" "+serialize(args, "name", "size")+">");
+        if(body != null) {
+            out.println(JavaExtensions.toString(body));
+        }
         out.print("</select>");
     }
 
@@ -45,7 +49,7 @@ public class FastTags {
         Object value = args.get("arg");
         Object selectedValue = TagContext.parent("select").data.get("selected");
         boolean selected = selectedValue != null && value != null && selectedValue.equals(value);
-        out.print("<option value=\""+value+"\" "+(selected ? "selected" : "")+">");
+        out.print("<option value=\""+(value == null ? "" : value)+"\" "+(selected ? "selected" : "")+""+serialize(args, "selected", "value")+">");
         out.println(JavaExtensions.toString(body));
         out.print("</option>");
     }
@@ -78,7 +82,7 @@ public class FastTags {
             actionDef.url += separator + "x-http-method-override=" + actionDef.method;
             actionDef.method = "POST";
         }
-        out.print("<form " + (args.get("id") == null ? "" : "id=\"" + args.get("id") + "\" ") + "action=\"" + actionDef.url + "\" method=\"" + actionDef.method + "\" accept-charset=\"utf-8\" enctype=\"" + enctype + "\">");
+        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method + "\" accept-charset=\"utf-8\" enctype=\"" + enctype + "\" "+serialize(args, "action", "method", "accept-charset", "enctype")+">");
         out.println(JavaExtensions.toString(body));
         out.print("</form>");
     }
@@ -104,11 +108,11 @@ public class FastTags {
             }
             String id = Codec.UUID();
             out.print("<form method=\"POST\" id=\"" + id + "\" style=\"display:none\" action=\"" + actionDef.url + "\"></form>");
-            out.print("<a" + (args.get("id") == null ? "" : " id=\"" + args.get("id") + "\" ") + (args.get("class") == null ? "" : " class=\"" + args.get("class") + "\" ") +" href=\"javascript:document.getElementById('" + id + "').submit();\">");
+            out.print("<a href=\"javascript:document.getElementById('" + id + "').submit();\" "+serialize(args, "href")+">");
             out.print(JavaExtensions.toString(body));
             out.print("</a>");
         } else {
-            out.print("<a" + (args.get("id") == null ? "" : " id=\"" + args.get("id") + "\" ") + (args.get("class") == null ? "" : " class=\"" + args.get("class") + "\" ") + " href=\"" + actionDef.url + "\">");
+            out.print("<a href=\"" + actionDef.url + "\" "+serialize(args, "href")+">");
             out.print(JavaExtensions.toString(body));
             out.print("</a>");
         }
@@ -258,6 +262,22 @@ public class FastTags {
         } catch (TemplateNotFoundException e) {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
         }
+    }
+
+
+    static String serialize(Map<?, ?> args, String... unless) {
+        StringBuffer attrs = new StringBuffer();
+        for(Object o : args.keySet()) {
+            String attr = o.toString();
+            String value = args.get(o) == null ? "" : args.get(o).toString();
+            if(Arrays.binarySearch(unless, attr) < 0 && !attr.equals("arg")) {
+                attrs.append(attr);
+                attrs.append("=\"");
+                attrs.append(value);
+                attrs.append("\" ");
+            }
+        }
+        return attrs.toString();
     }
 
     @Retention(RetentionPolicy.RUNTIME)

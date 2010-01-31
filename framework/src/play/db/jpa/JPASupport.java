@@ -190,6 +190,14 @@ public class JPASupport implements Serializable {
         }
     }
 
+    public boolean validateAndSave() {
+        if(Validation.current().valid(this).ok) {
+            save();
+            return true;
+        }
+        return false;
+    }
+
     /**
      * store (ie insert) the entity.
      */
@@ -229,7 +237,9 @@ public class JPASupport implements Serializable {
             return;
         } else {
             avoidCascadeSaveLoops.get().add(this);
-            PlayPlugin.postEvent("JPASupport.objectUpdated", this);
+            if(willBeSaved) {
+                PlayPlugin.postEvent("JPASupport.objectUpdated", this);
+            }
         }
         // Cascade save
         try {
