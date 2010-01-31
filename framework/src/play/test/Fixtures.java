@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -29,6 +30,7 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 
 import play.Logger;
 import play.Play;
+import play.classloading.ApplicationClasses;
 import play.db.DB;
 import play.db.DBPlugin;
 import play.db.jpa.FileAttachment;
@@ -60,6 +62,15 @@ public class Fixtures {
             types[i] = classes.get(i);
         }
         delete(types);
+    }
+
+    public static void deleteAllEntities() {
+        List<Class> classes = new ArrayList<Class>();
+        for (ApplicationClasses.ApplicationClass c :
+                Play.classes.getAnnotatedClasses(Entity.class)) {
+            classes.add(c.javaClass);
+        }
+        Fixtures.delete(classes);
     }
 
     static String getForeignKeyToggleStmt(boolean enable) {
@@ -163,7 +174,7 @@ public class Fixtures {
     static void serialize(Map values, String prefix, Map<String, String[]> serialized) {
         for (Object key : values.keySet()) {
             Object value = values.get(key);
-            if(value == null) {
+            if (value == null) {
                 continue;
             }
             if (value instanceof Map) {
@@ -220,14 +231,15 @@ public class Fixtures {
             }
         }
     }
-    
-    public static void deleteAttachmentsDir(){
-    	File atttachmentsDir = FileAttachment.getStore();
-		try{
-			if (atttachmentsDir.exists()) FileUtils.deleteDirectory(atttachmentsDir);
-		}catch(Exception e){
-			throw new RuntimeException(e);
-		}
+
+    public static void deleteAttachmentsDir() {
+        File atttachmentsDir = FileAttachment.getStore();
+        try {
+            if (atttachmentsDir.exists()) {
+                FileUtils.deleteDirectory(atttachmentsDir);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
-    
 }
