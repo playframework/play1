@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    	<title>Zencontact, by zenexity  ★ #{get 'title' /}</title>
+    	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <link rel="stylesheet" type="text/css" media="screen" href="@{'public/stylesheets/style.css'}" />
+        <link rel="stylesheet" type="text/css" media="screen" href="@{'public/stylesheets/south-street/jquery-ui-1.7.2.custom.css'}" />
+    	<script src="@{'public/javascripts/jquery-1.4.min.js'}" type="text/javascript" charset="utf-8"></script>
+    	<script src="@{'public/javascripts/jquery-ui-1.7.2.custom.min.js'}" type="text/javascript" charset="utf-8"></script>
+    	<script src="@{'public/javascripts/jquery.editinplace.packed.js'}" type="text/javascript" charset="utf-8"></script>
+    </head>
+	<body>
+	    <div id="zencontact">
+    		<header>
+    			<img src="@{'public/images/logo.png'}" alt="logo" id="logo" />
+    			<h1>Zencontact <span>by zenexity</span></h1>
+    		</header>
+    		<nav>
+    			<a id="home" href="@{index()}" class="${request.action =~ /index/ ? 'selected' : ''}">Home</a>
+    			<a id="list" href="@{list()}" class="${request.action =~ /list/ ? 'selected' : ''}">List</a>
+    			<a id="new" href="@{form()}" class="${request.action =~ /form|save/ ? 'selected' : ''}">New</a>
+    		</nav>
+    		<section>
+    		    #{doLayout /}
+    		</section>
+    		<footer>
+    			<a href="http://www.w3.org/TR/html5/">html5</a> - 
+    			<a href="http://www.w3.org/TR/css3-roadmap/">css3</a> - 
+    			<a href="http://www.playframework.org/">playframework</a> 
+    		</footer>
+		</div>
+	</body>
+</html>

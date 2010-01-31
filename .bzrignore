@@ -78,3 +78,6 @@ samples-and-tests/booking/tmp
 play.ipr
 play.iws
 *iml
+samples-and-tests/zencontact/logs
+samples-and-tests/zencontact/test-result
+samples-and-tests/zencontact/tmp

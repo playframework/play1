@@ -1,0 +1,12 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+<p id="time">
+    <span>${now.format("EEEE',' MMMM dd',' yyyy")}</span>${now.format("hh'h' MM'mn' ss's'")}
+</p>
+
+<script type="text/javascript" charset="utf-8">
+    setInterval(function() {
+        $('section').load('@{index()} #time')
+    }, 1000)
+</script>
