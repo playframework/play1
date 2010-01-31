@@ -37,7 +37,9 @@ public class FastTags {
         Object value = args.get("value");
         TagContext.current().data.put("selected", value);
         out.print("<select name=\"" + name +"\" size=\"1\">");
-        out.println(JavaExtensions.toString(body));
+        if(body != null) {
+            out.println(JavaExtensions.toString(body));
+        }
         out.print("</select>");
     }
 
@@ -45,7 +47,7 @@ public class FastTags {
         Object value = args.get("arg");
         Object selectedValue = TagContext.parent("select").data.get("selected");
         boolean selected = selectedValue != null && value != null && selectedValue.equals(value);
-        out.print("<option value=\""+value+"\" "+(selected ? "selected" : "")+">");
+        out.print("<option value=\""+(value == null ? "" : value)+"\" "+(selected ? "selected" : "")+">");
         out.println(JavaExtensions.toString(body));
         out.print("</option>");
     }
