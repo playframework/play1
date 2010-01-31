@@ -167,6 +167,14 @@ public class JPASupport implements Serializable {
         }
     }
 
+    public boolean validateAndSave() {
+        if(Validation.current().valid(this).ok) {
+            save();
+            return true;
+        }
+        return false;
+    }
+
     /**
      * store (ie insert) the entity.
      */
