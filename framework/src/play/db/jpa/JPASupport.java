@@ -206,7 +206,9 @@ public class JPASupport implements Serializable {
             return;
         } else {
             avoidCascadeSaveLoops.get().add(this);
-            PlayPlugin.postEvent("JPASupport.objectUpdated", this);
+            if(willBeSaved) {
+                PlayPlugin.postEvent("JPASupport.objectUpdated", this);
+            }
         }
         // Cascade save
         try {
