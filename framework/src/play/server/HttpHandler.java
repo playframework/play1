@@ -410,6 +410,8 @@ public class HttpHandler implements IoHandler {
         }
     }
 
+    private final static Map<String, RenderStatic> staticPathsCache = new HashMap();
+
     static class MinaInvocation extends Invoker.Invocation {
 
         private IoSession session;
@@ -426,7 +428,6 @@ public class HttpHandler implements IoHandler {
             this.response = response;
             this.session = session;
         }
-        private Map<String, RenderStatic> staticPathsCache = new HashMap();
 
         @Override
         public boolean init() {
@@ -437,7 +438,9 @@ public class HttpHandler implements IoHandler {
                 super.init();
             }
             if (Play.mode == Mode.PROD && staticPathsCache.containsKey(request.path)) {
-                serveStatic(session, minaResponse, minaRequest, staticPathsCache.get(request.path));
+                synchronized (staticPathsCache) {
+                    serveStatic(session, minaResponse, minaRequest, staticPathsCache.get(request.path));
+                }
                 return false;
             }
             try {
@@ -447,7 +450,9 @@ public class HttpHandler implements IoHandler {
                 return false;
             } catch (RenderStatic e) {
                 if (Play.mode == Mode.PROD) {
-                    staticPathsCache.put(request.path, e);
+                    synchronized (staticPathsCache) {
+                        staticPathsCache.put(request.path, e);
+                    }
                 }
                 serveStatic(session, minaResponse, minaRequest, e);
                 return false;
