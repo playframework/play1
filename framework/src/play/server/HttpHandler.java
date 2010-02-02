@@ -438,9 +438,12 @@ public class HttpHandler implements IoHandler {
                 super.init();
             }
             if (Play.mode == Mode.PROD && staticPathsCache.containsKey(request.path)) {
+                RenderStatic rs = null;
                 synchronized (staticPathsCache) {
-                    serveStatic(session, minaResponse, minaRequest, staticPathsCache.get(request.path));
+                    rs = staticPathsCache.get(request.path);
                 }
+                serveStatic(session, minaResponse, minaRequest, rs);
+
                 return false;
             }
             try {
