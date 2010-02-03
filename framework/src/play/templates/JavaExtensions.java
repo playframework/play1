@@ -1,6 +1,10 @@
 package play.templates;
 
 import groovy.lang.Closure;
+import groovy.util.XmlSlurper;
+import groovy.util.slurpersupport.GPathResult;
+
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -17,7 +21,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.lang.StringEscapeUtils;
+import org.xml.sax.SAXException;
 
 import play.Logger;
 import play.i18n.Lang;
@@ -38,6 +46,14 @@ public class JavaExtensions {
             }
         }
         return false;
+    }
+
+    public static GPathResult asXml(String xml) {
+    	try {
+			return (new XmlSlurper()).parseText(xml);
+		} catch (Exception e) {
+			throw new RuntimeException("invalid XML");
+		}
     }
 
     public static String[] add(String[] array, String o) {
