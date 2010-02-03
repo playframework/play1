@@ -2,7 +2,7 @@
 # ~~~~~~~~~~~
 
 #{crud.types}
-GET			/												${type.controllerClass.name.substring(12)}.index
+GET			/?												${type.controllerClass.name.substring(12)}.index
 GET			/${type.controllerName}							${type.controllerClass.name.substring(12)}.list
 GET			/${type.controllerName}/new						${type.controllerClass.name.substring(12)}.blank
 GET			/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12)}.show
