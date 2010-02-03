@@ -17,7 +17,7 @@
 					}
 				}
 			}%
-			<option value="${it.id}" ${selected ? 'selected="true"' : ''}>${it}</option>
+			<option value="${it.id}" ${selected ? 'selected="true"'.raw() : ''}>${it}</option>
 			%{ } }%
 		</select>
 	#{/if}
@@ -35,7 +35,7 @@
 					}
 				}
 			}%
-			<option value="${it.id}" ${selected ? 'selected="true"' : ''}>${it}</option>
+			<option value="${it.id}" ${selected ? 'selected="true"'.raw() : ''}>${it}</option>
 			%{ } }%
 		</select>
 	#{/else}
