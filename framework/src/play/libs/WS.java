@@ -21,11 +21,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpState;
@@ -960,6 +960,10 @@ public class WS extends PlayPlugin {
         
         public String getHeader(String key) {
             return method.getResponseHeader(key).getValue();
+        }
+
+        public Header[] getHeaders() {
+            return method.getResponseHeaders();
         }
 
         /**
