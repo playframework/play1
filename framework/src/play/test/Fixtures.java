@@ -189,6 +189,14 @@ public class Fixtures {
                     r[i++] = el.toString();
                 }
                 serialized.put(prefix + "." + key.toString(), r);
+            } else if (value instanceof String && value.toString().matches("<<<\\s*\\{[^}]+}\\s*")) {
+                Matcher m = Pattern.compile("<<<\\s*\\{([^}]+)}\\s*").matcher(value.toString());
+                m.find();
+                String file = m.group(1);
+                VirtualFile f = Play.getVirtualFile(file);
+                if(f != null && f.exists()) {
+                    serialized.put(prefix + "." + key.toString(), new String[]{f.contentAsString()});
+                }
             } else {
                 serialized.put(prefix + "." + key.toString(), new String[]{value.toString()});
             }

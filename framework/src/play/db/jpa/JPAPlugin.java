@@ -152,6 +152,15 @@ public class JPAPlugin extends PlayPlugin {
                     Logger.trace("JPA Model : %s", clazz);
                 }
             }
+            String[] moreEntities = Play.configuration.getProperty("jpa.entities", "").split(", ");
+            for(String entity : moreEntities) {
+                if(entity.trim().equals("")) continue;
+                try {
+                    cfg.addAnnotatedClass(Play.classloader.loadClass(entity));
+                } catch(Exception e) {
+                    Logger.warn("JPA -> Entity not found: %s", entity);
+                }
+            }
             Logger.trace("Initializing JPA ...");
             try {
                 JPA.entityManagerFactory = cfg.buildEntityManagerFactory();
