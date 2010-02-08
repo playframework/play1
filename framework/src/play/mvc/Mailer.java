@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import play.Logger;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
@@ -214,6 +216,30 @@ public class Mailer implements LocalVariablesSupport {
 
         // Recipients
         List<Object> recipientList = (List<Object>) infos.get().get("recipients");
+        if(recipientList == null || recipientList.isEmpty()) {
+            return new Future<Boolean>() {
+
+                public boolean cancel(boolean mayInterruptIfRunning) {
+                    return false;
+                }
+
+                public boolean isCancelled() {
+                    return false;
+                }
+
+                public boolean isDone() {
+                    return true;
+                }
+
+                public Boolean get() throws InterruptedException, ExecutionException {
+                    return false;
+                }
+
+                public Boolean get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+                    return false;
+                }
+            };
+        }
         Object[] recipients = recipientList.toArray(new Object[recipientList.size()]);
  
         // From
