@@ -40,7 +40,7 @@ public class IO {
     }
 
     /**
-     * Read the Stream conten as a string (always use utf-8)
+     * Read the Stream content as a string (always use utf-8)
      * @param is The stream to read
      * @return The String content
      * @throws java.io.IOException
