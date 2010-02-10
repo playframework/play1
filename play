@@ -36,11 +36,13 @@ def secretKey():
 
 def readConf(key):
 	if application_path:
+		keyRe = re.compile('^%' + play_id + '.' + key + '\s*=')
 		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
-			if line.startswith('%' + play_id + '.' + key + "="):
+			if keyRe.match(line):
 				return line[line.find('=')+1:].strip()
+		keyRe = re.compile('^' + key + '\s*=')
 		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
-			if line.startswith(key + "="):
+			if keyRe.match(line):
 				return line[line.find('=')+1:].strip()
 	return ''
 
