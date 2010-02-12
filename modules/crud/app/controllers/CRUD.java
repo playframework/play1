@@ -376,6 +376,9 @@ public abstract class CRUD extends Controller {
                 if (field.isAnnotationPresent(Id.class)) {
                     type = null;
                 }
+                if (field.isAnnotationPresent(Transient.class)) {
+                    type = null;
+                }
                 name = field.getName();
             }
 
