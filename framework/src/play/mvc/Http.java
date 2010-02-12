@@ -114,7 +114,7 @@ public class Http {
          */
         public String url;
         /**
-         * HTPP method
+         * HTTP method
          */
         public String method;
         /**
