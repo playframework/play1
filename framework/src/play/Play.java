@@ -434,6 +434,9 @@ public class Play {
             return;
         }
         try {
+            for (PlayPlugin plugin : plugins) {
+                plugin.beforeDetectingChanges();
+            }
             classloader.detectChanges();
             Router.detectChanges(NO_PREFIX);
             if (conf.lastModified() > startedAt) {

@@ -83,6 +83,9 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
         return false;
     }
 
+    public void beforeDetectingChanges() {
+    }
+
     /**
      * It's time for the plugin to detect changes.
      * Throw an exception is the application must be reloaded.
