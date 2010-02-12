@@ -60,8 +60,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * Let the plugin to modify the parsed template.
      * @param template
      */
-    public void onTemplateCompilation(Template template) {
-		
+    public void onTemplateCompilation(Template template) {	
     }
 
     /**

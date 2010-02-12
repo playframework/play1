@@ -287,7 +287,7 @@ public class ApplicationClasses {
     
     /**
      * Retrieve the corresponding source file for a given class name.
-     * It handle innerClass too !
+     * It handles innerClass too !
      * @param name The fully qualified class name 
      * @return The virtualFile if found
      */
@@ -305,4 +305,10 @@ public class ApplicationClasses {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return classes.toString();
+    }
+
 }

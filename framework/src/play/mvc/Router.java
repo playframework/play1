@@ -85,6 +85,10 @@ public class Router {
         addRoute(position, method, path, action, null, headers);
     }
 
+    public static void addRoute(String method, String path, String action) {
+        addRoute(method, path, action, null);
+    }
+
     /**
      * Add a route at the given position
      */
