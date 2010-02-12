@@ -150,6 +150,19 @@ public class Fixtures {
                         Class cType = Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
                         JPASupport model = JPASupport.create(cType, "object", params, null);
+                        for(Field f : model.getClass().getFields()) {
+                            if(f.getType().isAssignableFrom(FileAttachment.class)) {
+                                String[] value = params.get("object."+f.getName());
+                                if(value != null && value.length > 0) {
+                                    VirtualFile vf = Play.getVirtualFile(value[0]);
+                                    if(vf != null && vf.exists()) {
+                                        FileAttachment fa = new FileAttachment();
+                                        fa.set(vf.getRealFile());
+                                        f.set(model, fa);
+                                    }
+                                }
+                            }
+                        }
                         model.save();
                         JPA.em().persist(model);
                         while (!cType.equals(JPASupport.class)) {
