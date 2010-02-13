@@ -149,7 +149,7 @@ public class Fixtures {
                         serialize((Map) objects.get(key), "object", params);
                         Class cType = Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
-                        JPASupport model = JPASupport.create(cType, "object", params, null);
+                        JPASupport model = JPASupport.create(cType, "object", params);
                         for(Field f : model.getClass().getFields()) {
                             if(f.getType().isAssignableFrom(FileAttachment.class)) {
                                 String[] value = params.get("object."+f.getName());
@@ -202,6 +202,14 @@ public class Fixtures {
                     r[i++] = el.toString();
                 }
                 serialized.put(prefix + "." + key.toString(), r);
+            } else if (value instanceof String && value.toString().matches("<<<\\s*\\{[^}]+}\\s*")) {
+                Matcher m = Pattern.compile("<<<\\s*\\{([^}]+)}\\s*").matcher(value.toString());
+                m.find();
+                String file = m.group(1);
+                VirtualFile f = Play.getVirtualFile(file);
+                if(f != null && f.exists()) {
+                    serialized.put(prefix + "." + key.toString(), new String[]{f.contentAsString()});
+                }
             } else {
                 serialized.put(prefix + "." + key.toString(), new String[]{value.toString()});
             }

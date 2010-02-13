@@ -175,7 +175,7 @@ From your code, your can then obtain a **java.sql.Connection** from the **play.d
 bc. Connection conn = DB.getConnection();
 conn.createStatement().execute("select * from products");
 
-h2. <a>Persist you object model with Hibernate</a>
+h2. <a>Persist your object model with Hibernate</a>
 
 You can use Hibernate (through JPA) to persist your Java objects in the Database automatically.
 

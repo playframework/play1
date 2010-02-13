@@ -173,7 +173,7 @@ public class PropertiesEnhancer extends Enhancer {
             if (o == null) {
                 throw new NullPointerException("Try to read " + property + " on null object " + targetType + " (" + invocationPoint + ")");
             }
-            if (!o.getClass().getClassLoader().equals(Play.classloader)) {
+            if (o.getClass().getClassLoader() == null || !o.getClass().getClassLoader().equals(Play.classloader)) {
                 return o.getClass().getField(property).get(o);
             }
             String getter = "get" + property.substring(0, 1).toUpperCase() + property.substring(1);

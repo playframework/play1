@@ -14,7 +14,7 @@
                         label = messages.get( _property.relation +'.' + it );
 
                 }%
-                <option value="${it}" ${selected ? 'selected="true"' : ''}>${label}</option>
+                <option value="${it}" ${selected ? 'selected="true"'.raw() : ''}>${label}</option>
                 %{ } }%
         </select>
 

@@ -362,7 +362,7 @@ public class Router {
                             }
                             continue; // format is a special key
                         }
-                        if (!args.containsKey(staticKey) || args.get(staticKey) == null || !args.get(staticKey).equals(route.staticArgs.get(staticKey))) {
+                        if (!args.containsKey(staticKey) || args.get(staticKey) == null || !args.get(staticKey).toString().equals(route.staticArgs.get(staticKey))) {
                             allRequiredArgsAreHere = false;
                             break;
                         }

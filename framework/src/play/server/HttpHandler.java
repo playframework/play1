@@ -30,6 +30,7 @@ import org.apache.mina.common.IoHandler;
 import org.apache.mina.common.IoSession;
 import org.apache.mina.common.WriteFuture;
 
+import org.apache.mina.filter.codec.ProtocolDecoderException;
 import play.Invoker;
 import play.Logger;
 import play.Play;
@@ -159,7 +160,7 @@ public class HttpHandler implements IoHandler {
     }
 
     public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
-        if (!(cause instanceof IOException)) {
+        if (!(cause instanceof IOException) && !(cause instanceof ProtocolDecoderException)) {
             Logger.error(cause, "Caught in Server !");
         }
         session.close();
@@ -443,7 +444,6 @@ public class HttpHandler implements IoHandler {
                     rs = staticPathsCache.get(request.path);
                 }
                 serveStatic(session, minaResponse, minaRequest, rs);
-
                 return false;
             }
             try {

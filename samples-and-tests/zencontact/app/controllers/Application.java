@@ -27,13 +27,13 @@ public class Application extends Controller {
         render(contact);
     }
     
-    public static void save(Contact contact) {
-        if(contact.validateAndSave()) {
-            list();
-        }        
-        // Errors
-        if(request.isAjax()) error("Invalid value");
-        render("@form", contact);
+    public static void save(@Valid Contact contact) {
+        if(validation.hasErrors()) {
+            if(request.isAjax()) error("Invalid value");
+            render("@form", contact);
+        }
+        contact.save();
+        list();
     }
 
 }

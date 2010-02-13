@@ -104,3 +104,4 @@ samples-and-tests/zencontact/logs
 samples-and-tests/zencontact/test-result
 samples-and-tests/zencontact/tmp
 modules/scala
+modules/*

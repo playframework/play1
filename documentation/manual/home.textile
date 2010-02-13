@@ -71,7 +71,7 @@ Everything you need to know about Play.
 # "The domain object model":model
 ## "Properties simulation":model#properties
 ## "Setup a database to persist your model objects":model#database
-## "Persist you object model with Hibernate":model#hibernate
+## "Persist your object model with Hibernate":model#hibernate
 ## "The stateless model":model#stateless
 # "A little of asynchronism using jobs":jobs
 ## "Bootstrap jobs":jobs#concepts
