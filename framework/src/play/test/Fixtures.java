@@ -149,7 +149,7 @@ public class Fixtures {
                         serialize((Map) objects.get(key), "object", params);
                         Class cType = Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
-                        JPASupport model = JPASupport.create(cType, "object", params);
+                        JPASupport model = JPASupport.create(cType, "object", params, null);
                         for(Field f : model.getClass().getFields()) {
                             if(f.getType().isAssignableFrom(FileAttachment.class)) {
                                 String[] value = params.get("object."+f.getName());
