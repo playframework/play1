@@ -85,8 +85,11 @@ public class Router {
         addRoute(position, method, path, action, null, headers);
     }
 
+    /**
+     * Add a new route. Will be first in the route list 
+     */
     public static void addRoute(String method, String path, String action) {
-        addRoute(method, path, action, null);
+        prependRoute(method, path, action);
     }
 
     /**
