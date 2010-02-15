@@ -46,9 +46,9 @@ public class ValidCheck extends AbstractAnnotationCheck<Required> {
         } else {
             for (ConstraintViolation violation : violations) {
                 if (violation.getContext() instanceof FieldContext) {
-                    FieldContext ctx = (FieldContext) violation.getContext();
-                    String fkey = key + "." + ctx.getField().getName();
-                    Error error = new Error(fkey, violation.getMessage(), violation.getMessageVariables() == null ? new String[0] : violation.getMessageVariables().values().toArray(new String[0]));
+                    final FieldContext ctx = (FieldContext) violation.getContext();
+                    final String fkey = (key == null ? "" : key + ".") + ctx.getField().getName();
+                    final Error error = new Error(fkey, violation.getMessage(), violation.getMessageVariables() == null ? new String[0] : violation.getMessageVariables().values().toArray(new String[0]));
                     Validation.current().errors.add(error);
                 }
             }
