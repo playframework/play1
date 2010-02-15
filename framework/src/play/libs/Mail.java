@@ -202,7 +202,6 @@ public class Mail {
         return sendEmail(from, replyTo, recipients, subject, body, alternate, contentType, null, null, (Object[]) attachments);
     }
 
-
     /**
      * Send an email
      *
@@ -218,6 +217,25 @@ public class Mail {
      * @param attachments File or DataSource attachments
      */
     public static Future<Boolean> sendEmail(Object from, Object replyTo, Object[] recipients, String subject, String body, String alternate, String contentType, String charset, Map<String, String> headers, Object... attachments) {
+        return sendEmail(from, replyTo, recipients, new Object[0], new Object[0], subject, body, alternate, contentType, null, null, (Object[]) attachments);
+
+    }
+
+    /**
+     * Send an email
+     *
+     * @param from        From address a String or an InternetAddress
+     * @param replyTo     ReplyTo address  a String or an InternetAddress
+     * @param recipients  To addresses  an Array of String or/and  InternetAddress
+     * @param subject     Subject
+     * @param body        body of the email
+     * @param alternate   text/plain body (optional). This parameter is ignored if contentType is set to text/plain or is null.
+     * @param contentType The content type of the body (text/plain or text/html)
+     * @param charset     The character set of the message (optional)
+     * @param headers     The mail headers (optional)
+     * @param attachments File or DataSource attachments
+     */
+    public static Future<Boolean> sendEmail(Object from, Object replyTo, Object[] recipients, Object[] ccs, Object[] bccs, String subject, String body, String alternate, String contentType, String charset, Map<String, String> headers, Object... attachments) {
         try {
             InternetAddress fromI = null;
             if (from != null) {
@@ -235,15 +253,19 @@ public class Mail {
             }
             InternetAddress[] recipientsI = new InternetAddress[recipients.length];
             for (int i = 0; i < recipients.length; i++) {
-                if (recipients[i] instanceof InternetAddress) {
-                    recipientsI[i] = (InternetAddress) recipients[i];
-                } else {
-                    recipientsI[i] = new InternetAddress(recipients[i].toString());
-                }
+                recipientsI[i] = new InternetAddress(recipients[i].toString());
+            }
+            InternetAddress[] ccsI = new InternetAddress[ccs.length];
+            for (int i = 0; i < ccs.length; i++) {
+                ccsI[i] = new InternetAddress(ccs[i].toString());
+            }
+            InternetAddress[] bccsI = new InternetAddress[bccs.length];
+            for (int i = 0; i < bccs.length; i++) {
+                bccsI[i] = new InternetAddress(bccs[i].toString());
             }
 
             if (Play.configuration.getProperty("mail.smtp", "").equals("mock") && Play.mode == Play.Mode.DEV) {
-                Mock.send(buildMimeMessage(fromI, replyToI, recipientsI, subject, body, alternate, contentType, charset, headers == null ? new HashMap<String, String>() : headers, true, (Object[]) attachments));
+                Mock.send(buildMimeMessage(fromI, replyToI, recipientsI, ccsI, bccsI, subject, body, alternate, contentType, charset, headers == null ? new HashMap<String, String>() : headers, true, (Object[]) attachments));
                 return new Future<Boolean>() {
 
                     public boolean cancel(boolean mayInterruptIfRunning) {
@@ -267,7 +289,7 @@ public class Mail {
                     }
                 };
             }
-            return sendMessage(buildMimeMessage(fromI, replyToI, recipientsI, subject, body, alternate, contentType, charset, headers == null ? new HashMap<String, String>() : headers, (Object[]) attachments));
+            return sendMessage(buildMimeMessage(fromI, replyToI, recipientsI, ccsI, bccsI, subject, body, alternate, contentType, charset, headers == null ? new HashMap<String, String>() : headers, false, (Object[]) attachments));
         } catch (MessagingException ex) {
             throw new MailException("Cannot send email", ex);
         }
@@ -365,8 +387,11 @@ public class Mail {
         return buildMimeMessage(from, replyTo, recipients, subject, body, alternate, contentType, charset, headers, false, attachments);
     }
 
-
     private static MimeMessage buildMimeMessage(InternetAddress from, InternetAddress replyTo, InternetAddress[] recipients, String subject, String body, String alternate, String contentType, String charset, Map<String, String> headers, boolean mock, Object... attachments) throws MessagingException {
+        return buildMimeMessage(from, replyTo, recipients, new InternetAddress[0], new InternetAddress[0], subject, body, alternate, contentType, charset, headers, mock, attachments);
+    }
+
+    private static MimeMessage buildMimeMessage(InternetAddress from, InternetAddress replyTo, InternetAddress[] recipients, InternetAddress[] ccs, InternetAddress[] bccs, String subject, String body, String alternate, String contentType, String charset, Map<String, String> headers, boolean mock, Object... attachments) throws MessagingException {
 
         MimeMessage msg = new MimeMessage(getSession(mock));
 
@@ -394,6 +419,8 @@ public class Mail {
         }
         msg.setReplyTo(new InternetAddress[]{replyTo});
         msg.setRecipients(javax.mail.Message.RecipientType.TO, recipients);
+        msg.setRecipients(javax.mail.Message.RecipientType.CC, ccs);
+        msg.setRecipients(javax.mail.Message.RecipientType.BCC, bccs);
 
         msg.setSubject(subject, charset != null ? charset : "utf-8");
         if ("text/plain".equals(contentType)) {
@@ -660,9 +687,9 @@ public class Mail {
                         text += getContent(part.getBodyPart(i));
                     } else {
                         text += "attachment: \n" +
-                                              "\t\t name: " + (StringUtils.isEmpty(bodyPart.getFileName()) ? "none" : bodyPart.getFileName()) + "\n" +
-                                              "\t\t disposition: " + bodyPart.getDisposition() + "\n" +
-                                              "\t\t description: " +  (StringUtils.isEmpty(bodyPart.getDescription()) ? "none" : bodyPart.getDescription())  + "\n\t";
+                                "\t\t name: " + (StringUtils.isEmpty(bodyPart.getFileName()) ? "none" : bodyPart.getFileName()) + "\n" +
+                                "\t\t disposition: " + bodyPart.getDisposition() + "\n" +
+                                "\t\t description: " + (StringUtils.isEmpty(bodyPart.getDescription()) ? "none" : bodyPart.getDescription()) + "\n\t";
                     }
                 }
                 return text;
@@ -672,9 +699,9 @@ public class Mail {
                     return getContent((Part) message.getContent());
                 } else {
                     return "attachment: \n" +
-                                     "\t\t name: " + (StringUtils.isEmpty(message.getFileName()) ? "none" : message.getFileName()) + "\n" +
-                                     "\t\t disposition: " + message.getDisposition() + "\n" +
-                                     "\t\t description: " + (StringUtils.isEmpty(message.getDescription()) ? "none" : message.getDescription()) + "\n\t";
+                            "\t\t name: " + (StringUtils.isEmpty(message.getFileName()) ? "none" : message.getFileName()) + "\n" +
+                            "\t\t disposition: " + message.getDisposition() + "\n" +
+                            "\t\t description: " + (StringUtils.isEmpty(message.getDescription()) ? "none" : message.getDescription()) + "\n\t";
                 }
             }
 
@@ -692,19 +719,22 @@ public class Mail {
 
                 content.append("From Mock Mailer\n\tNew email received by");
 
-
-                content.append("\n\tFrom: " + ((InternetAddress)email.getFrom()[0]).getAddress());
-                content.append("\n\tReplyTo: " + ((InternetAddress)email.getReplyTo()[0]).getAddress());
+                content.append("\n\tFrom: " + ((InternetAddress) email.getFrom()[0]).getAddress());
+                content.append("\n\tReplyTo: " + ((InternetAddress) email.getReplyTo()[0]).getAddress());
                 content.append("\n\tSubject: " + email.getSubject());
+                content.append("\n\tTo: ");
+                for (Address add : email.getAllRecipients()) {
+                    content.append(add.toString() + ", ");
+                    emails.put(((InternetAddress) add).getAddress(), content.toString());
+                }
+                // remove the last ,
+                content.delete(content.length() - 2, content.length());
                 content.append("\n\t" + body);
 
                 content.append("\n");
                 Logger.info(content.toString());
 
-                for (Object add : email.getAllRecipients()) {
-                    content.append(", " + add.toString());
-                    emails.put(((InternetAddress) add).getAddress(), content.toString());
-                }
+
 
             } catch (Exception e) {
                 Logger.error(e, "error sending mock email");

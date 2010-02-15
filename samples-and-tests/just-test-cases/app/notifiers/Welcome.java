@@ -15,6 +15,8 @@ public class Welcome extends Mailer {
         String msg = "Welcome";
         setSubject("Yop3");
         addRecipient("toto@localhost");
+        addBcc("nicolas@localhost");
+        addCc("guillaume@localhost");
         send(msg);
     }    
     

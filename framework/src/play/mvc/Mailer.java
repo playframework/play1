@@ -52,6 +52,34 @@ public class Mailer implements LocalVariablesSupport {
         infos.set(map);
     }
 
+    public static void addBcc(Object... bccs) {
+        HashMap map = infos.get();
+        if (map == null) {
+            throw new UnexpectedException("Mailer not instrumented ?");
+        }
+        List bccsList = (List<String>) map.get("bccs");
+        if (bccsList == null) {
+            bccsList = new ArrayList<String>();
+            map.put("bccs", bccsList);
+        }
+        bccsList.addAll(Arrays.asList(bccs));
+        infos.set(map);
+    }
+
+    public static void addCc(Object... ccs) {
+        HashMap map = infos.get();
+        if (map == null) {
+            throw new UnexpectedException("Mailer not instrumented ?");
+        }
+        List ccsList = (List<String>) map.get("ccs");
+        if (ccsList == null) {
+            ccsList = new ArrayList<String>();
+            map.put("ccs", ccsList);
+        }
+        ccsList.addAll(Arrays.asList(ccs));
+        infos.set(map);
+    }
+
     public static void addAttachment(Object... attachments) {
         HashMap map = infos.get();
         if (map == null) {
@@ -241,6 +269,19 @@ public class Mailer implements LocalVariablesSupport {
             };
         }
         Object[] recipients = recipientList.toArray(new Object[recipientList.size()]);
+
+        List<Object> ccsList = (List<Object>) infos.get().get("ccs");
+        Object[] ccs = new Object[0];
+        if (ccsList != null) {
+            ccs = ccsList.toArray(new Object[ccsList.size()]);
+        }
+
+        List<Object> bccsList = (List<Object>) infos.get().get("bccs");
+        Object[] bccs = new Object[0];
+        if (bccsList != null) {
+            bccs = bccsList.toArray(new Object[bccsList.size()]);
+        }
+
  
         // From
         Object from = infos.get().get("from");
@@ -257,7 +298,7 @@ public class Mailer implements LocalVariablesSupport {
         final String body = (bodyHtml != null ? bodyHtml : bodyText);
         final String alternate = (bodyHtml != null ? bodyText : null);
 
-       return Mail.sendEmail(from, replyTo, recipients, subject, body, alternate, contentType, charset, headers, attachments);
+       return Mail.sendEmail(from, replyTo, recipients, ccs, bccs, subject, body, alternate, contentType, charset, headers, attachments);
   }
 
     public static boolean sendAndWait(Object... args) {
