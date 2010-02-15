@@ -3,7 +3,10 @@ package play.libs;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.util.UUID;
+
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 import play.exceptions.UnexpectedException;
 
 /**
@@ -91,30 +94,18 @@ public class Codec {
      * Write a byte array as hexedecimal String.
      */
     public static String byteToHexString(byte[] bytes) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < bytes.length; ++i) {
-            int v = bytes[i];
-            if (v < 0) {
-                v += 256;
-            }
-            String n = Integer.toHexString(v);
-            if(n.length() == 1)
-                n = "0" + n;
-            builder.append(n);
-        }
-
-        return builder.toString();
+        return String.valueOf(Hex.encodeHex(bytes));
     }
 
     /**
      * Transform an hexadecimal String to a byte array.
      */
     public static byte[] hexStringToByte(String hexString) {
-        byte[] raw = new byte[16];
-        for(int i=0;i<16;i++) {
-            raw[i] = Integer.decode("0x" + hexString.substring(i*2, i*2+2)).byteValue();
+        try {
+            return Hex.decodeHex(hexString.toCharArray());
+        } catch (DecoderException e) {
+            throw new UnexpectedException(e);
         }
-        return raw;
     }
 
 }
