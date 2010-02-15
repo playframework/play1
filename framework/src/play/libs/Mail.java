@@ -725,7 +725,6 @@ public class Mail {
                 content.append("\n\tTo: ");
                 for (Address add : email.getAllRecipients()) {
                     content.append(add.toString() + ", ");
-                    emails.put(((InternetAddress) add).getAddress(), content.toString());
                 }
                 // remove the last ,
                 content.delete(content.length() - 2, content.length());
@@ -734,7 +733,9 @@ public class Mail {
                 content.append("\n");
                 Logger.info(content.toString());
 
-
+                for (Address add : email.getAllRecipients()) {
+                    emails.put(((InternetAddress) add).getAddress(), content.toString());
+                }
 
             } catch (Exception e) {
                 Logger.error(e, "error sending mock email");
