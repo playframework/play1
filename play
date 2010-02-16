@@ -364,18 +364,18 @@ try:
 		
 		# The application
 		if os.path.exists(os.path.join(application_path, 'lib')):
-		    for jar in os.listdir(os.path.join(application_path, 'lib')):
-			    if jar.endswith('.jar'):
-				    classpath.append(os.path.normpath(os.path.join(application_path, 'lib/%s' % jar)))
+			for jar in os.listdir(os.path.join(application_path, 'lib')):
+				if jar.endswith('.jar'):
+					classpath.append(os.path.normpath(os.path.join(application_path, 'lib/%s' % jar)))
 		
 		# The modules
 		for module in modules:
-		    if os.path.exists(os.path.join(module, 'lib')):
-			    libs = os.path.join(module, 'lib')
-			    if os.path.exists(libs):
-				    for jar in os.listdir(libs):
-					    if jar.endswith('.jar'):
-						    classpath.append(os.path.normpath(os.path.join(libs, '%s' % jar)))
+			if os.path.exists(os.path.join(module, 'lib')):
+				libs = os.path.join(module, 'lib')
+				if os.path.exists(libs):
+					for jar in os.listdir(libs):
+						if jar.endswith('.jar'):
+							classpath.append(os.path.normpath(os.path.join(libs, '%s' % jar)))
 		
 		# The framework
 		for jar in os.listdir(os.path.join(play_base, 'framework/lib')):
@@ -565,6 +565,11 @@ try:
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ [install] Install a module
 	if play_command == 'install':
+		if len(sys.argv) < 3:
+			help_file = os.path.join(play_base, 'documentation/commands/cmd-install.txt')
+			print open(help_file, 'r').read()
+			sys.exit(0)
+
 		name = cmd = sys.argv[2]
 		groups = re.match(r'^([a-zA-Z0-9]+)([-](.*))?$', name)
 		module = groups.group(1)
@@ -631,7 +636,6 @@ try:
 		print '~'
 		sys.exit(0)
 
-	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [help] Display help
 	if play_command == 'help':
 		if len(sys.argv) == 3:
