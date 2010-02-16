@@ -7,11 +7,11 @@ The Play! framework also comes with the handy **jsAction** tag to get a method d
 
 h2. <a>Using jQuery with the jsAction tag</a>
 
-The **#{jsAction /}** tag allow to import a server-side defined route as a JavaScript function. It is very useful if you need to call an URL with an AJAX call using free variables.
+The #{jsAction /} tag returns a JavaScript function which constructs a URL based on a server action and free variables. It does not perform any AJAX request, these have to be done by hand using the returned URL.
 
 Let's see an example:
 
-bc. GET     /users/{id}        Users.show
+bc. GET     /hotels/list        Hotels.list
 
 Now you can import this route client side:
 
