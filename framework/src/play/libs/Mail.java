@@ -301,6 +301,28 @@ public class Mail {
 
                 content.append("\n\tFrom: " + email.getFromAddress().getAddress());
                 content.append("\n\tReplyTo: " + ((InternetAddress) email.getReplyToAddresses().get(0)).getAddress());
+                content.append("\n\tTo: ");
+                for (Object add : email.getToAddresses()) {
+                    content.append(add.toString() + ", ");
+                }
+                // remove the last ,
+                content.delete(content.length() - 2, content.length());
+                if (email.getCcAddresses() != null && !email.getCcAddresses().isEmpty()) {
+                    content.append("\n\tCc: ");
+                    for (Object add : email.getCcAddresses()) {
+                        content.append(add.toString() + ", ");
+                    }
+                    // remove the last ,
+                    content.delete(content.length() - 2, content.length());
+                }
+                 if (email.getBccAddresses() != null && !email.getBccAddresses().isEmpty()) {
+                    content.append("\n\tBcc: ");
+                    for (Object add : email.getBccAddresses()) {
+                        content.append(add.toString() + ", ");
+                    }
+                    // remove the last ,
+                    content.delete(content.length() - 2, content.length());
+                }
                 content.append("\n\tSubject: " + email.getSubject());
                 content.append("\n\t" + body);
 

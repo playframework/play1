@@ -50,6 +50,34 @@ public class Mailer implements LocalVariablesSupport {
         infos.set(map);
     }
 
+    public static void addBcc(Object... bccs) {
+        HashMap map = infos.get();
+        if (map == null) {
+            throw new UnexpectedException("Mailer not instrumented ?");
+        }
+        List bccsList = (List<String>) map.get("bccs");
+        if (bccsList == null) {
+            bccsList = new ArrayList<String>();
+            map.put("bccs", bccsList);
+        }
+        bccsList.addAll(Arrays.asList(bccs));
+        infos.set(map);
+    }
+
+    public static void addCc(Object... ccs) {
+        HashMap map = infos.get();
+        if (map == null) {
+            throw new UnexpectedException("Mailer not instrumented ?");
+        }
+        List ccsList = (List<String>) map.get("ccs");
+        if (ccsList == null) {
+            ccsList = new ArrayList<String>();
+            map.put("ccs", ccsList);
+        }
+        ccsList.addAll(Arrays.asList(ccs));
+        infos.set(map);
+    }
+
     public static void addAttachment(EmailAttachment... attachments) {
         HashMap map = infos.get();
         if (map == null) {
@@ -249,10 +277,29 @@ public class Mailer implements LocalVariablesSupport {
                 email.addReplyTo(replyTo.toString());
             }
 
-            for (Object recipient : recipientList) {
-                email.addTo(recipient.toString());
+            if (recipientList != null) {
+                for (Object recipient : recipientList) {
+                    email.addTo(recipient.toString());
+                }
+            } else {
+                throw new MailException("You must specify at least one recipient.");
             }
 
+
+            List<Object> ccsList = (List<Object>) infos.get().get("ccs");
+            if (ccsList != null) {
+                for (Object cc : ccsList) {
+                    email.addCc(cc.toString());
+                }
+            }
+
+            List<Object> bccsList = (List<Object>) infos.get().get("bccs");
+            if (bccsList != null) {
+
+                for (Object bcc : bccsList) {
+                    email.addBcc(bcc.toString());
+                }
+            }
             if (!StringUtils.isEmpty(charset)) {
                 email.setCharset(charset);
             }
