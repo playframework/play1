@@ -98,6 +98,7 @@ Tips about everything and anything.
 # "Put your application in production":production
 # "Sending emails":emails
 # "OpenID integration":openid
+# "Ajax":ajax
 
 
 h2. <a name="references">References</a>

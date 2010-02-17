@@ -199,7 +199,7 @@ bc. #{set 'title'}
 
 h2. <a>jsAction</a>
 
-The **#{jsAction /}** tag allow to import a server-side defined route as a Javascript function. It is very useful if you need to call an URL with an AJAX call using free variables.
+The #{jsAction /} tag returns a JavaScript function which constructs a URL based on a server action and free variables. It does not perform any AJAX request, these have to be done by hand using the returned URL.
 
 Let's see an example:
 
@@ -214,4 +214,5 @@ bc. <script type="text/javascript">
         $('userDetail').load( showUserAction({id: userId}) )
     }
 </script>
+
 

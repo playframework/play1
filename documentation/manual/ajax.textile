@@ -1,0 +1,45 @@
+h1. Ajax in the Play! framework
+
+The Play! framework allows you to easily perform Ajax request and shipped with "jQuery":http://jquery.com by default.
+This section described how to effectively use "jQuery":http://jquery.com within the framework.
+
+The Play! framework also comes with the handy **jsAction** tag to get a method definition from the controller transparently.
+
+h2. <a>Using jQuery with the jsAction tag</a>
+
+The #{jsAction /} tag returns a JavaScript function which constructs a URL based on a server action and free variables. It does not perform any AJAX request, these have to be done by hand using the returned URL.
+
+Let's see an example:
+
+bc. GET     /hotels/list        Hotels.list
+
+Now you can import this route client side:
+
+bc. <script type="text/javascript">
+   var listAction = #{jsAction @list(':search', ':size', ':page') /}
+   $('#result').load(listAction({search: 'x', size: '10', page: '1'}), function() {
+       $('#content').css('visibility', 'visible')
+   })
+
+</script>
+
+In this example we are requesting the list method from the default Application controller. We are also passing three parameters: search, size and page.
+The request we perform is then saved into the listAction variable. Now using jQuery and the **load** function we are performing a request (an HTTP GET request in fact).
+
+In fact, the following request is sent:
+
+bc. GET /hotels/list?search=x&size=10&page=1
+
+In that case the request returns HTML data.
+
+However, it is also possible to return JSON or XML and to have jQuery interpret the data.
+In you controller, use the appropriate render method (renderJSON, renderXML or an XML template).
+
+Please refer to the "jQuery":http://docs.jquery.com/Main_Page documentation for more info.
+
+Also please note that we could perform a POST, the jQuery method should then be changed to:
+
+bc. $.post(listAction, function(data) {
+  $('.result').html(data);
+});
+
