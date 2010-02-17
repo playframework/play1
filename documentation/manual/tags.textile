@@ -52,6 +52,31 @@ bc. <form action="/client/create" id="frm" method="POST" accept-charset="utf-8" 
  ...
 </form>
 
+h2. <a>field</a>
+
+The field tag is an helper, based on the spirit of the Don't Repeat
+Yourself spirit. It works this way:
+
+Instead of writing this:
+
+bc. <p>
+  <label>&{'user.name'}</label>
+  <input type="text" id="user_name" name="user.name" value="${user?.name}" class="${errors.forKey('user.name') ? 'has_error' : ''}">
+  <span class="error">${errors.forKey('user.name')}</span>
+</p>
+
+You can just write:
+
+bc. #{field 'user.name'}
+<p>
+  <label>&{field.name}</label>
+  <input type="text" id="${field.id}" name="${field.name}" value="${field.value}" class="${field.errorClass}">
+  <span class="error">${field.error}</span>
+</p>
+#{/}
+
+So you don't repeat **user.name** again and again.
+
 h2. <a>get</a>
 
 Retrieve a value defined with a **set** tag. You may use  the get/set mechanism to exchange values between templates, layouts and sub-templates.
