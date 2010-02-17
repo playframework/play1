@@ -21,12 +21,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import play.Invoker;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.data.validation.Validation;
 import play.exceptions.PlayException;
+import play.exceptions.UnexpectedException;
 import play.libs.MimeTypes;
 import play.utils.Utils;
 import play.mvc.ActionInvoker;
@@ -49,7 +51,11 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     public void contextInitialized(ServletContextEvent e) {
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
-        Play.init(root, e.getServletContext().getInitParameter("play.id"));
+        final String playId = e.getServletContext().getInitParameter("play.id");
+        if (StringUtils.isEmpty(playId)) {
+            throw new UnexpectedException("Please define a play.id parameter in your web.xml file. Without that parameter, play! cannot start your application. Please add a context-param into the WEB-INF/web.xml file.");
+        }
+        Play.init(root, playId);
         // Reload the rules, but this time with the context. Not really efficient through...
         Router.load(e.getServletContext().getContextPath());
     }
