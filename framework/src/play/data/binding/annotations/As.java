@@ -14,7 +14,7 @@ public @interface As {
 
     String[] value();
     String[] lang() default {"*"};
-    String[]  format() default {"html"};
+    String[] format() default {"html"};
     Class<? extends SupportedType> binder() default DEFAULT.class;
 
     public static final class DEFAULT implements SupportedType {

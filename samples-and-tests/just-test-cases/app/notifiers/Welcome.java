@@ -17,8 +17,8 @@ public class Welcome extends Mailer {
         setFrom("x@x.com");
         setSubject("Yop3");
         addRecipient("toto@localhost");
-        addBcc("nicolas@localhost");
-        addCc("guillaume@localhost");
+        //addBcc("nicolas@localhost");
+        //addCc("guillaume@localhost");
         send(msg);
     }    
     
