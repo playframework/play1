@@ -13,7 +13,6 @@ import javassist.expr.Handler;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
-import play.mvc.Controller;
 
 /**
  * Enhance controllers classes. 

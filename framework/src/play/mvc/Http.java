@@ -16,6 +16,7 @@ import java.util.Map;
 import play.Logger;
 import play.exceptions.UnexpectedException;
 import play.libs.Codec;
+import play.libs.MimeTypes;
 import play.libs.Time;
 import play.utils.Utils;
 
@@ -303,7 +304,7 @@ public class Http {
                         if (browserDate.getTime() >= last) {
                             return false;
                         }
-                    } catch (ParseException ex) {
+                    } catch (ParseException ex) {                               
                         Logger.error("Can't parse date", ex);
                     }
                     return true;

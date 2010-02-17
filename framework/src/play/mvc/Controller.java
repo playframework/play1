@@ -7,17 +7,20 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import org.w3c.dom.Document;
 import play.Invoker.Suspend;
+import play.Logger;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSupport;
+import play.data.binding.Binder;
 import play.data.validation.Validation;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
@@ -370,6 +373,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
                 }
             }
             try {
+
                 ActionDefinition actionDefinition = Router.reverse(action, r);
                 if(_currentReverse.get() != null) {
                     ActionDefinition currentActionDefinition =  _currentReverse.get();
@@ -446,17 +450,20 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     protected static void render(Object... args) {
         String templateName = null;
+        final Request request = Request.current();
+        final String format = request.format;
+
         if (args.length > 0 && args[0] instanceof String && LocalVariablesNamesTracer.getAllLocalVariableNames(args[0]).isEmpty()) {
             templateName = args[0].toString();
         } else {
-            templateName = Http.Request.current().action.replace(".", "/") + "." + (Http.Request.current().format == null ? "html" : Http.Request.current().format);
+            templateName = request.action.replace(".", "/") + "." + (format == null ? "html" : format);
         }
         if(templateName.startsWith("@")) {
             templateName = templateName.substring(1);
             if(!templateName.contains(".")) {
-                templateName = Http.Request.current().controller + "." + templateName;
+                templateName = request.controller + "." + templateName;
             }
-            templateName = templateName.replace(".", "/") + "." + (Http.Request.current().format == null ? "html" : Http.Request.current().format);
+            templateName = templateName.replace(".", "/") + "." + (format == null ? "html" : format);
         }
         renderTemplate(templateName, args);
     }

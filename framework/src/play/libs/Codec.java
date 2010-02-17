@@ -91,7 +91,7 @@ public class Codec {
     }
 
     /**
-     * Write a byte array as hexedecimal String.
+     * Write a byte array as hexadecimal String.
      */
     public static String byteToHexString(byte[] bytes) {
         return String.valueOf(Hex.encodeHex(bytes));
