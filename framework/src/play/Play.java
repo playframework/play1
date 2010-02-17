@@ -1,9 +1,6 @@
 package play;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
@@ -16,6 +13,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipInputStream;
 
 import play.cache.Cache;
 import play.classloading.ApplicationClasses;
@@ -155,18 +153,27 @@ public class Play {
         try {
             URL versionUrl = Play.class.getResource("/play/version");
             URI uri = new URI(versionUrl.toString().replace(" ", "%20"));
-            if (uri.getScheme().equals("jar")) {
+            if (uri.getScheme().equals("jar") ) {
                 String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
                 frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
-            } else if (uri.getScheme().equals("file")) {
+            } else if (uri.getScheme().equals("file") ) {
                 frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
+            } else if (uri.getScheme().equals("vfszip") || uri.getScheme().equals("vfsfile")) {
+                String file = uri.toURL().toExternalForm();
+                file = file.replaceAll("vfszip://", "file:///");
+                file = file.replaceAll("vfsfile://", "file:///");
+                //vfszip vfszip:/Applications/Servers/jboss-5.1.0.GA/server/default/deploy/ldas-play.war/WEB-INF/lib/play.jar/play/version
+                frameworkPath = new File(file).getParentFile().getParentFile().getParentFile().getParentFile();
+            } else {
+                throw new UnexpectedException("Cannot find the Play! framework");
             }
-            version = IO.readContentAsString(versionUrl.openStream());
+
         } catch (Exception e) {
             throw new UnexpectedException("Where is the framework ?", e);
         }
-        System.setProperty("play.path", Play.frameworkPath.getAbsolutePath());
-        System.setProperty("application.path", Play.applicationPath.getAbsolutePath());
+        System.out.println("Play.frameworkPath " + frameworkPath);
+        System.setProperty("play.path", frameworkPath.getAbsolutePath());
+        System.setProperty("application.path", applicationPath.getAbsolutePath());
 
         // Read the configuration file
         readConfiguration();
