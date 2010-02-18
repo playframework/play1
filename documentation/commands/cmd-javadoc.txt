@@ -1,0 +1,18 @@
+~ Name:
+~ ~~~~~
+~ javadoc -- Generate the Javadocs for your project
+~
+~ Alias:
+~ ~~~~~
+~ jd
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play javadoc [app_path]
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Generate the Javadoc for your project, not including Play classes. Resulting
+~ html file will be in a javadoc folder in your application directory. The logs
+~ of the commands are logs/javadoc.log and logs/javadoc.err.
+~
