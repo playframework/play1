@@ -871,7 +871,37 @@ try:
 			else:
 				print line
 
-	
+	# ~~~~~~~~~~~~~~~~~~~~~~ [javadoc] Generates the javadoc for the project
+	if play_command == 'jd' or play_command == 'javadoc':
+		check_application()
+		load_modules()
+		do_classpath()
+		do_java()
+		if not os.environ.has_key('JAVA_HOME'):
+			javadoc_path = "javadoc"
+		else:
+			javadoc_path = os.path.normpath("%s/bin/javadoc" % os.environ['JAVA_HOME'])
+
+		fileList = []
+		def add_java_files(app_path):
+			for root, subFolders, files in os.walk(os.path.join(app_path, 'app')):
+				for file in files:
+					if file.endswith(".java"):
+						fileList.append(os.path.join(root, file))
+		add_java_files(application_path)
+		for module in modules:
+			add_java_files(os.path.normpath(module))
+		outdir = os.path.join(application_path, 'javadoc')
+		sout = open(os.path.join(log_path, 'javadoc.log'), 'w')
+		serr = open(os.path.join(log_path, 'javadoc.err'), 'w')
+		if (os.path.isdir(outdir)):
+			shutil.rmtree(outdir)
+		javadoc_cmd = [javadoc_path, '-classpath', cp_args, '-d', outdir] + fileList
+		print "Generating Javadoc in " + outdir + "..."
+		subprocess.call(javadoc_cmd, env=os.environ, stdout=sout, stderr=serr)
+		print "Done! You can open " + os.path.join(outdir, 'overview-tree.html') + " in your browser."
+		sys.exit(0)
+
 	# ~~~~~~~~~~~~~~~~~~~~~~ [netbeansify] Create netbeans configuration files
 	if play_command == 'nb' or play_command == 'netbeansify':
 		check_application()
