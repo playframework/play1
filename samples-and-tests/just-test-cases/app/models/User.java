@@ -30,6 +30,9 @@ public class User extends Model {
     @As("dd/MM/yyyy")
     public Date birth;
 
+    @Email
+    public String email;
+
 	public String toString() {
 		return name;
 	}

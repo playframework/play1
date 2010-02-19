@@ -341,7 +341,7 @@ public class Http {
         /**
          * Send this file directly
          */
-        public File direct;
+        public Object direct;
         /**
          * Bind to thread
          */

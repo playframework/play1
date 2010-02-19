@@ -1,12 +1,15 @@
 package play.server;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
 import java.text.ParseException;
 import java.util.Arrays;
@@ -168,27 +171,54 @@ public class HttpHandler implements IoHandler {
 
     public void messageSent(IoSession session, Object message) throws Exception {
         if (message instanceof DefaultHttpResponse) {
-            if (session.getAttribute("file") != null) {
-                FileChannel channel = ((FileChannel) session.getAttribute("file"));
-                WriteFuture future = session.write(channel);
-                final DefaultHttpResponse res = (DefaultHttpResponse) message;
-                future.addListener(new IoFutureListener<IoFuture>() {
+            if (session.getAttribute("directstream") != null) {
 
-                    public void operationComplete(IoFuture future) {
-                        FileChannel channel = (FileChannel) future.getSession().getAttribute("file");
-                        future.getSession().removeAttribute("file");
-                        try {
-                            if (channel != null) {
-                                channel.close();
+                // FileChannel
+                if(session.getAttribute("directstream") instanceof FileChannel) {
+                    FileChannel channel = ((FileChannel) session.getAttribute("directstream"));
+                    WriteFuture future = session.write(channel);
+                    final DefaultHttpResponse res = (DefaultHttpResponse) message;
+                    future.addListener(new IoFutureListener<IoFuture>() {
+
+                        public void operationComplete(IoFuture future) {
+                            FileChannel channel = (FileChannel) future.getSession().getAttribute("directstream");
+                            future.getSession().removeAttribute("directstream");
+                            try {
+                                if (channel != null) {
+                                    channel.close();
+                                }
+                            } catch (IOException e) {
+                                Logger.error(e, "Unexpected error");
                             }
-                        } catch (IOException e) {
-                            Logger.error(e, "Unexpected error");
+                            if (!HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION))) {
+                                future.getSession().close();
+                            }
                         }
-                        if (!HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION))) {
-                            future.getSession().close();
+                    });
+                }
+
+                // Simple InputStream
+                if(session.getAttribute("directstream") instanceof InputStream) {
+                    final InputStream is = ((InputStream) session.getAttribute("directstream"));
+                    WriteFuture future = session.write(is);
+                    final DefaultHttpResponse res = (DefaultHttpResponse) message;
+                    future.addListener(new IoFutureListener<IoFuture>() {
+
+                        public void operationComplete(IoFuture future) {
+                            future.getSession().removeAttribute("directstream");
+                            try {
+                                if (is != null) {
+                                    is.close();
+                                }
+                            } catch (IOException e) {
+                                Logger.error(e, "Unexpected error");
+                            }
+                            if (!HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION))) {
+                                future.getSession().close();
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         }
     }
@@ -210,7 +240,7 @@ public class HttpHandler implements IoHandler {
     public static void attachFile(IoSession session, MutableHttpResponse response, VirtualFile file) throws IOException {
         response.setStatus(HttpResponseStatus.OK);
         response.setHeader("Content-Type", MimeTypes.getContentType(file.getName()));
-        session.setAttribute("file", file.channel());
+        session.setAttribute("directstream", file.channel());
         response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + file.length());
     }
 
@@ -406,7 +436,7 @@ public class HttpHandler implements IoHandler {
         res.setHeader("Server", signature);
         res.normalize(req);
         WriteFuture future = session.write(res);
-        if ((session.getAttribute("file") == null) && !HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION))) {
+        if ((session.getAttribute("directstream") == null) && !HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION))) {
             future.addListener(IoFutureListener.CLOSE);
         }
     }
@@ -489,20 +519,38 @@ public class HttpHandler implements IoHandler {
     }
 
     static void copyResponse(IoSession session, Request request, Response response, MutableHttpRequest minaRequest, MutableHttpResponse minaResponse) throws IOException {
-        response.out.flush();
         Logger.trace("Invoke: " + request.path + ": " + response.status);
-        if ((response.direct != null) && response.direct.isFile()) {
-            session.setAttribute("file", new FileInputStream(response.direct).getChannel());
-            response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + response.direct.length());
+        response.out.flush();
+        
+        // Direct stream or wrap ByteArray content
+        if (response.direct != null) {
+
+            // File -> Use a FileChannel
+            if(response.direct instanceof File && ((File)response.direct).isFile()) {
+                session.setAttribute("directstream", new FileInputStream((File)response.direct).getChannel());
+                response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + ((File)response.direct).length());
+            }
+
+            // Simple stream -> Deleguate to StreamWriteFilter
+            if(response.direct instanceof InputStream) {
+                session.setAttribute("directstream", response.direct);
+            }
+            
         } else {
             minaResponse.setContent(IoBuffer.wrap(((ByteArrayOutputStream) response.out).toByteArray()));
         }
+
+        // Content-Type
         if (response.contentType != null) {
             minaResponse.setHeader("Content-Type", response.contentType + (response.contentType.startsWith("text/") && !response.contentType.contains("charset") ? "; charset=utf-8" : ""));
         } else if (response.headers.get("Content-Type") == null) {
             minaResponse.setHeader("Content-Type", "text/plain; charset=utf-8");
         }
+
+        // Statis
         minaResponse.setStatus(HttpResponseStatus.forId(response.status));
+
+        // Headers
         Map<String, Http.Header> headers = response.headers;
         for (Map.Entry<String, Http.Header> entry : headers.entrySet()) {
             Http.Header hd = entry.getValue();
@@ -510,6 +558,8 @@ public class HttpHandler implements IoHandler {
                 minaResponse.addHeader(entry.getKey(), value);
             }
         }
+
+        // Cookies
         Map<String, Http.Cookie> cookies = response.cookies;
         for (Http.Cookie cookie : cookies.values()) {
             DefaultCookie c = new DefaultCookie(cookie.name, cookie.value);
@@ -523,9 +573,13 @@ public class HttpHandler implements IoHandler {
             }
             minaResponse.addCookie(c);
         }
+
+        // Cache
         if (!response.headers.containsKey("cache-control") && !response.headers.containsKey("Cache-Control")) {
             minaResponse.setHeader("Cache-Control", "no-cache");
         }
+
+        // ->
         HttpHandler.writeResponse(session, minaRequest, minaResponse);
     }
 }

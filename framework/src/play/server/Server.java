@@ -8,6 +8,7 @@ import java.util.Properties;
 
 import org.apache.asyncweb.common.HttpCodecFactory;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.stream.StreamWriteFilter;
 import org.apache.mina.transport.socket.SocketAcceptor;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 
@@ -48,6 +49,7 @@ public class Server {
         }
         Server.port = httpPort;
         acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new HttpCodecFactory()));
+        acceptor.getFilterChain().addLast("stream", new StreamWriteFilter());
         acceptor.setReuseAddress(true);
         acceptor.getSessionConfig().setReuseAddress(true);
         acceptor.getSessionConfig().setReceiveBufferSize(1024 * 100);

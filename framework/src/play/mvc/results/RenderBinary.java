@@ -115,22 +115,17 @@ public class RenderBinary extends Result {
             }
             if (file != null) {
                 if (!file.exists()) {
-                    throw new UnexpectedException("Your file buffer does not exists");
+                    throw new UnexpectedException("Your file does not exists ("+file+")");
                 }
                 if (!file.canRead()) {
-                    throw new UnexpectedException("Can't read your file buffer");
+                    throw new UnexpectedException("Can't read your file ("+file+")");
                 }
                 if (!file.isFile()) {
-                    throw new UnexpectedException("Your file buffer is not a file");
+                    throw new UnexpectedException("Your file is not a real file ("+file+")");
                 }
                 response.direct = file;
             } else {
-                byte[] buffer = new byte[8092];
-                int count = 0;
-                while ((count = is.read(buffer)) > 0) {
-                    response.out.write(buffer, 0, count);
-                }
-                is.close();
+                response.direct = is;
             }
         } catch (Exception e) {
             throw new UnexpectedException(e);

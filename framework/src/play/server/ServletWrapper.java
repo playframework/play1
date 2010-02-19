@@ -124,7 +124,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             } else {
                 if (Play.mode == Play.Mode.DEV) {
                     servletResponse.setHeader("Cache-Control", "no-cache");
-                    attachFile(servletResponse, file);
+                    copyStream(servletResponse, file.inputstream());
                 } else {
                     long last = file.lastModified();
                     String etag = "\"" + last + "-" + file.hashCode() + "\"";
@@ -135,7 +135,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                         servletResponse.setHeader("Last-Modified", Utils.getHttpDateFormatter().format(new Date(last)));
                         servletResponse.setHeader("Cache-Control", "max-age=" + Play.configuration.getProperty("http.cacheControl", "3600"));
                         servletResponse.setHeader("Etag", etag);
-                        attachFile(servletResponse, file);
+                        copyStream(servletResponse, file.inputstream());
                     }
                 }
             }
@@ -362,16 +362,17 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         // Content
 
         response.out.flush();
-        if (response.direct != null) {
-            attachFile(servletResponse, VirtualFile.open(response.direct));
+        if (response.direct != null && response.direct instanceof File) {
+            copyStream(servletResponse, VirtualFile.open((File) response.direct).inputstream());
+        } else if (response.direct != null && response.direct instanceof InputStream) {
+            copyStream(servletResponse, (InputStream) response.direct);
         } else {
             servletResponse.getOutputStream().write(((ByteArrayOutputStream) response.out).toByteArray());
         }
 
     }
 
-    private void attachFile(HttpServletResponse servletResponse, VirtualFile file) throws IOException {
-        InputStream is = file.inputstream();
+    private void copyStream(HttpServletResponse servletResponse, InputStream is) throws IOException {
         OutputStream os = servletResponse.getOutputStream();
         byte[] buffer = new byte[8096];
         int read = 0;
