@@ -18,4 +18,20 @@
 	open('@{Validation.index()}?bottle.name1=Hop&bottle.name2=Hop')
 	assertTextPresent('[]')
 
+
+    open('@{Validation.user()}')
+    assertTextPresent('[Required, Validation failed]')
+
+    open('@{Validation.user()}?user.name=Nicolas')
+    assertTextPresent('[Required, Validation failed]')
+
+    open('@{Validation.user()}?user.birth=12/12/1992&user.email=nico')
+    assertTextPresent('[Invalid email address, Validation failed]')
+
+    open('@{Validation.user()}?user.birth=12/12/1992&user.email=nico%2Bplay@lunatech.com')
+	assertTextPresent('[]')
+
+    open('@{Validation.user()}?user.birth=12/12/1992&user.email=NICO%2Bplay@LUNATECH.COM')
+	assertTextPresent('[]')
+
 #{/selenium}

@@ -27,6 +27,9 @@ public class User extends Model {
 	@Required
     public Date birth;
 
+    @Email
+    public String email;
+
 	public String toString() {
 		return name;
 	}
