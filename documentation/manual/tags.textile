@@ -34,7 +34,7 @@ bc. #{extends 'main.html' /}
 
 h2. <a>form</a>
 
-Insert a **form** tag. HTTP method is guessed from the route, and defaults to POST. 
+Insert a **form** tag. HTTP method is guessed from the route, and defaults to POST. If there are both GET and POST routes configured for the URL, the tag will default to using the first route defined in routes.  
 
 Optional **id** attribute sets an id to the form element. 
 Optional **enctype** attribute sets the form's data encoding. it defaults to ''application/x-www-form-urlencoded''.
