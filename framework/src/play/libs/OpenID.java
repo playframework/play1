@@ -24,9 +24,7 @@ public class OpenID {
         this.id = id;
         this.returnAction = this.realmAction = Request.current().action;
     }
-
     // ~~~ API
-    
     String id;
     String returnAction;
     String realmAction;
@@ -34,7 +32,7 @@ public class OpenID {
     List<String> sregOptional = new ArrayList<String>();
     Map<String, String> axRequired = new HashMap<String, String>();
     Map<String, String> axOptional = new HashMap<String, String>();
-    
+
     public OpenID returnTo(String action) {
         this.returnAction = action;
         return this;
@@ -131,8 +129,8 @@ public class OpenID {
             url += "&openid.mode=checkid_setup";
             url += "&openid.claimed_id=" + URLEncoder.encode(claimedId, "utf8");
             url += "&openid.identity=" + URLEncoder.encode(delegate == null ? claimedId : delegate, "utf8");
-            url += "&openid.return_to=" + URLEncoder.encode(Request.current().getBase() + Router.reverse(returnAction), "utf8");
-            url += "&openid.realm=" + URLEncoder.encode(Request.current().getBase() + Router.reverse(realmAction), "utf8");
+            url += "&openid.return_to=" + URLEncoder.encode(returnAction.startsWith("http") ? returnAction : Request.current().getBase() + Router.reverse(returnAction), "utf8");
+            url += "&openid.realm=" + URLEncoder.encode(realmAction.startsWith("http") ? realmAction : Request.current().getBase() + Router.reverse(realmAction), "utf8");
 
             for (String a : sregOptional) {
                 url += "&openid.sreg.optional=" + a;
@@ -150,25 +148,25 @@ public class OpenID {
                 for (String a : axRequired.keySet()) {
                     url += "&openid.ax.type." + a + "=" + axRequired.get(a);
                 }
-                if(!axRequired.isEmpty()) {
+                if (!axRequired.isEmpty()) {
                     String r = "";
                     for (String a : axRequired.keySet()) {
                         r += "," + a;
                     }
                     r = r.substring(1);
-                    url += "&openid.ax.required="+r;
+                    url += "&openid.ax.required=" + r;
                 }
-                if(!axOptional.isEmpty()) {
+                if (!axOptional.isEmpty()) {
                     String r = "";
                     for (String a : axOptional.keySet()) {
                         r += "," + a;
                     }
                     r = r.substring(1);
-                    url += "&openid.ax.if_available="+r;
+                    url += "&openid.ax.if_available=" + r;
                 }
             }
 
-            
+
             // Debug
             Logger.trace("Send request %s", url);
 
@@ -181,13 +179,12 @@ public class OpenID {
             return false;
         }
     }
-    
+
     // ~~~~ Main API
-    
     public static OpenID id(String id) {
         return new OpenID(id);
     }
-    
+
     /**
      * Normalize the given openid as a standard openid
      */
@@ -276,11 +273,14 @@ public class OpenID {
 
         return null;
     }
-    
+
     // ~~~~ Utils
-    
     static String extractHref(String link) {
         Matcher m = Pattern.compile("href=\"([^\"]*)\"").matcher(link);
+        if (m.find()) {
+            return m.group(1).trim();
+        }
+        m = Pattern.compile("href=\'([^\']*)\'").matcher(link);
         if (m.find()) {
             return m.group(1).trim();
         }
@@ -301,16 +301,14 @@ public class OpenID {
         }
         return server;
     }
-    
-    // ~~~~ Result class
 
+    // ~~~~ Result class
     public static class UserInfo {
 
         /**
          * OpenID
          */
         public String id;
-        
         /**
          * Extensions values
          */
