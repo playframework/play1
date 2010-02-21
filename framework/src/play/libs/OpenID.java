@@ -131,8 +131,8 @@ public class OpenID {
             url += "&openid.mode=checkid_setup";
             url += "&openid.claimed_id=" + URLEncoder.encode(claimedId, "utf8");
             url += "&openid.identity=" + URLEncoder.encode(delegate == null ? claimedId : delegate, "utf8");
-            url += "&openid.return_to=" + URLEncoder.encode(Request.current().getBase() + Router.reverse(returnAction), "utf8");
-            url += "&openid.realm=" + URLEncoder.encode(Request.current().getBase() + Router.reverse(realmAction), "utf8");
+            url += "&openid.return_to=" + URLEncoder.encode(returnAction.startsWith("http") ? returnAction : Request.current().getBase() + Router.reverse(returnAction), "utf8");
+            url += "&openid.realm=" + URLEncoder.encode(realmAction.startsWith("http") ? realmAction : Request.current().getBase() + Router.reverse(realmAction), "utf8");
 
             for (String a : sregOptional) {
                 url += "&openid.sreg.optional=" + a;
