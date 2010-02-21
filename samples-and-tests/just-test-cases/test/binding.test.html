@@ -29,4 +29,24 @@
         assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
 
 
+         <!-- As and NoBinding -->
+        open('@{DataBinding.signinPage()}')
+        type('userName', 'x')
+	    type('password', 'x')
+        clickAndWait('submit')
+
+        assertTextPresent('Authentication failed!')
+        assertText('userNameResult', 'x')
+        assertText('passwordResult', 'x')
+        assertText('roleResult', '')
+        
+        type('userName', 'nicolas')
+	    type('password', 'nicolas')
+        clickAndWait('submit')
+
+        assertTextPresent('Authentication successful!')
+        assertText('userNameResult', 'nicolas')
+        assertText('passwordResult', 'nicolas')
+        assertText('roleResult', '')
+
 #{/selenium}	

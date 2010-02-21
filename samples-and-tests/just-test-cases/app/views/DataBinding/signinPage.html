@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Data Binding test</title>
+</head>
+<body>
+<div id="message">
+    #{if flash.error}
+    <p class="fError">
+        <strong>${flash.error}</strong>
+    </p>
+    #{/if}
+    #{if flash.success}
+    <p class="fSuccess">
+        <strong>${flash.success}</strong>
+    </p>
+    #{/if}
+</div>
+
+<form action="@{DataBinding.signin()}" method="post">
+    <table>
+        <tbody>
+        <tr>
+            <th>Username:</th>
+            <td><input id="userName" type="text" name="person.userName" value="${person?.userName}"/></td>
+        </tr>
+        <tr>
+            <th>Password:</th>
+            <td><input id="password" type="password" name="person.password" value="${person?.password}"/></td>
+        </tr>
+        </tbody>
+    </table>
+    <input type="hidden" name="person.role" value="admin"/>
+    <input id="submit" type="submit" value="Signin"/>
+</form>
+
+<div id="userNameResult">${person?.userName}</div>
+<div id="passwordResult">${person?.password}</div>
+<div id="roleResult">${person?.role}</div>
+</body>
+</html>

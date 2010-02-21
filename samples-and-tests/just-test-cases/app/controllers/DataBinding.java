@@ -4,6 +4,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import models.Person;
+import play.Logger;
 import play.data.binding.annotations.As;
 import play.i18n.Lang;
 import play.mvc.Controller;
@@ -11,7 +13,7 @@ import play.mvc.Controller;
 public class DataBinding extends Controller {
 
     public static void showDefaultDateFormat(Date date) {
-       renderText(date);
+        renderText(date);
     }
 
     public static void changeLanguage(String lang) {
@@ -37,4 +39,27 @@ public class DataBinding extends Controller {
     public static void showCalendar(@As("dd-MMM-yyyy") Calendar cal) {
         renderText(cal.getTime());
     }
+
+    public static void signinPage() {
+        render();
+    }
+
+    public static void signin(@As("secure") Person person) {
+        Person verifyPerson = get();
+        flash.clear();
+        if (verifyPerson.userName.equals(person.userName) && verifyPerson.password.equals(person.password)) {
+           flash.success("Authentication successful!");
+        } else {
+           flash.error("Authentication failed!"); 
+        }
+        render("/DataBinding/signinPage.html", person);
+    }
+
+    static Person get() {
+        Person person = new Person();
+        person.userName = "nicolas";
+        person.password = "nicolas";
+        return person;
+    }
 }
+

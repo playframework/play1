@@ -19,7 +19,7 @@ public class BeanWrapper {
     final static int notwritableField = Modifier.FINAL | Modifier.NATIVE | Modifier.STATIC;
     final static int notaccessibleMethod = Modifier.NATIVE | Modifier.STATIC;
     private Class beanClass;
-    /** 
+    /**
      * a cache for our properties and setters
      */
     private Map<String, Property> wrappers = new HashMap();
@@ -29,12 +29,12 @@ public class BeanWrapper {
         this.beanClass = forClass;
         boolean isScala = false;
         for (Class intf : forClass.getInterfaces()) {
-			if ("scala.ScalaObject".equals(intf.getName())) {
-				isScala = true;
-				break;
-			}
-		}
-        
+            if ("scala.ScalaObject".equals(intf.getName())) {
+                isScala = true;
+                break;
+            }
+        }
+
         registerSetters(forClass, isScala);
         registerFields(forClass);
     }
@@ -50,18 +50,27 @@ public class BeanWrapper {
 
     public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Object instance, Annotation[] annotations) throws Exception {
         for (Property prop : wrappers.values()) {
+            Logger.trace("beanwrapper: prefix [" + prefix + "] prop.getName() [" + prop.getName() + "]");
+            for (String key : params.keySet()) {
+                Logger.trace("key: [" + key + "]");
+            }
+
             String newPrefix = prefix + "." + prop.getName();
             if (name.equals("") && prefix.equals("") && newPrefix.startsWith(".")) {
                 newPrefix = newPrefix.substring(1);
             }
             Logger.trace("beanwrapper: bind name [" + name + "] annotation [" + Utils.toString(annotations) + "]");
-            Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), (prop.field != null)?prop.field.getAnnotations():annotations, params, newPrefix, prop.profiles);
+            Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), prop.getAnnotations(), params, newPrefix, prop.profiles);
             if (value != Binder.MISSING) {
-                prop.setValue(instance, value);
+                if (value != Binder.NO_BINDING) {
+                    prop.setValue(instance, value);
+                }
             } else {
-                Logger.trace("beanwrapper: bind annotation [" + Utils.toString(annotations) + "]");
+                Logger.trace("beanwrapper: bind annotation [" + Utils.toString(prop.getAnnotations()) + "]");
                 value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), annotations, params, newPrefix, prop.profiles);
-                if (value != Binder.MISSING) {
+                Logger.trace("beanwrapper: value [" + value + "]");
+
+                if (value != Binder.MISSING && value != Binder.NO_BINDING) {
                     prop.setValue(instance, value);
                 }
             }
@@ -87,7 +96,7 @@ public class BeanWrapper {
     }
 
     private boolean isScalaSetter(Method method) {
-    	return (!method.isAnnotationPresent(PlayPropertyAccessor.class) && method.getName().endsWith("_$eq") && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
+        return (!method.isAnnotationPresent(PlayPropertyAccessor.class) && method.getName().endsWith("_$eq") && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
     }
 
     protected Object newBeanInstance() throws InstantiationException, IllegalAccessException {
@@ -125,15 +134,15 @@ public class BeanWrapper {
             String name = method.getName();
             String propertyname;
             if (isScala) {
-            	if (!isScalaSetter(method)) {
-            		continue;
-            	}
-            	propertyname = method.getName().substring(0, method.getName().length()-4);
+                if (!isScalaSetter(method)) {
+                    continue;
+                }
+                propertyname = method.getName().substring(0, method.getName().length() - 4);
             } else {
-            	if (!isSetter(method)) {
-            		continue;
-            	}
-            	propertyname = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
+                if (!isSetter(method)) {
+                    continue;
+                }
+                propertyname = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
             }
             Property wrapper = new Property(propertyname, method);
             wrappers.put(propertyname, wrapper);
@@ -154,7 +163,7 @@ public class BeanWrapper {
             name = propertyName;
             setter = setterMethod;
             type = setter.getParameterTypes()[0];
-            annotations =  setter.getAnnotations();
+            annotations = setter.getAnnotations();
             genericType = setter.getGenericParameterTypes()[0];
             setProfiles(this.annotations);
         }
