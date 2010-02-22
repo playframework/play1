@@ -709,7 +709,7 @@ try:
 				print "~"
 				sys.exit(-1)
 			
-			md.append(dirname)	
+			md.append(dirname)
 			
 		print "~ The new application will be created in %s" % os.path.normpath(application_path)
 		if application_name is None:
@@ -883,12 +883,18 @@ try:
 			if os.path.exists(os.path.join(to, 'build.xml')):
 				os.remove(os.path.join(to, 'build.xml'))
 		pm = readConfs('module.')
-  		for m in pm:
+		for m in pm:
 			nm = os.path.basename(m)
-  			replaceAll(os.path.join(war_path, 'WEB-INF/application/conf/application.conf'), m, '../modules/%s' % nm)
+			replaceAll(os.path.join(war_path, 'WEB-INF/application/conf/application.conf'), m, '../modules/%s' % nm)
 		
 		if not os.path.exists(os.path.join(war_path, 'WEB-INF/resources')): os.mkdir(os.path.join(war_path, 'WEB-INF/resources'))
 		shutil.copyfile(os.path.join(play_base, 'resources/messages'), os.path.join(war_path, 'WEB-INF/resources/messages'))
+		
+		# Module-specific modifications
+		for module in modules:
+			commands = os.path.join(module, 'commands.py')
+			if os.path.exists(commands):
+				execfile(commands)
 		
 		if war_zip_path:
 			print "~ Creating zipped archive to %s ..." % (os.path.normpath(war_zip_path))
