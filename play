@@ -901,6 +901,7 @@ try:
 			if os.path.exists(war_zip_path):
 				os.remove(war_zip_path)
 			zip = zipfile.ZipFile(war_zip_path, 'w', zipfile.ZIP_STORED)
+			dist_dir = os.path.join(application_path, 'dist')
 			for (dirpath, dirnames, filenames) in os.walk(war_path):
 				if dirpath == dist_dir:
 					continue
