@@ -80,12 +80,22 @@ public class Fixtures {
         if (DBPlugin.url.startsWith("jdbc:mysql:")) {
             return "SET foreign_key_checks = " + (enable ? "1" : "0") + ";";
         }
+         if (DBPlugin.url.startsWith("jdbc:oracle:")) {
+            return "'ALTER TABLE '||substr(c.table_name,1,35)|| \n" +
+                    "' " + (enable ? "ENABLE" : "DISABLE") + " CONSTRAINT '||constraint_name||' ;' \n" +
+                    "from user_constraints c, user_tables u \n" +
+                    "where c.table_name = u.table_name; ";
+        }
         return null;
     }
 
     static String getDeleteTableStmt(String name) {
-        if (DBPlugin.url.startsWith("jdbc:mysql:")) {
+        if (DBPlugin.url.startsWith("jdbc:mysql:") ) {
             return "TRUNCATE TABLE " + name;
+        } else if (DBPlugin.url.startsWith("jdbc:postgresql:") ) {
+            return "TRUNCATE TABLE " + name + " cascade";
+        } else if (DBPlugin.url.startsWith("jdbc:oracle:")) {
+            return "TRUNCATE TABLE " + name ;
         }
         return "DELETE FROM " + name;
     }
@@ -98,15 +108,17 @@ public class Fixtures {
                 String name = rs.getString("TABLE_NAME");
                 names.add(name);
             }
-            if (getForeignKeyToggleStmt(false) != null) {
-                DB.execute(getForeignKeyToggleStmt(false));
+            final String disableConstraints = getForeignKeyToggleStmt(false);
+            if (disableConstraints != null) {
+                DB.execute(disableConstraints);
             }
             for (String name : names) {
                 Logger.trace("Dropping content of table %s", name);
-                DB.execute(getDeleteTableStmt(name));
+                DB.execute(getDeleteTableStmt(name) + ";");
             }
-            if (getForeignKeyToggleStmt(true) != null) {
-                DB.execute(getForeignKeyToggleStmt(true));
+            final String enableConstraints = getForeignKeyToggleStmt(true);
+            if (enableConstraints != null) {
+                DB.execute(enableConstraints);
             }
             if (JPA.isEnabled()) {
                 JPA.em().clear();
