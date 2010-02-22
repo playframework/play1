@@ -35,7 +35,6 @@ import play.libs.MimeTypes;
 import play.mvc.results.NoResult;
 import play.utils.Java;
 import play.mvc.results.NotFound;
-import play.mvc.results.Ok;
 import play.mvc.results.RenderBinary;
 import play.mvc.results.RenderText;
 import play.utils.Utils;

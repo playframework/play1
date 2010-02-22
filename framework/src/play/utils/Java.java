@@ -18,6 +18,7 @@ import java.util.concurrent.FutureTask;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.bytecode.SourceFileAttribute;
+import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
@@ -93,6 +94,10 @@ public class Java {
      */
     public static Object invokeStatic(Class clazz, String method) throws Exception {
         return invokeStatic(clazz, method, new Object[0]);
+    }
+
+    public static Object invokeStatic(String clazz, String method) throws Exception {
+        return invokeStatic(Play.classloader.loadClass(clazz), method, new Object[0]);
     }
 
     /**

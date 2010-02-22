@@ -62,14 +62,16 @@ public class ApplicationClasses {
      */
     public List<ApplicationClass> getAssignableClasses(Class clazz) {
         List<ApplicationClass> results = new ArrayList<ApplicationClass>();
-        for (ApplicationClass applicationClass : classes.values()) {
-            try {
-                Play.classloader.loadClass(applicationClass.name);
-            } catch (ClassNotFoundException ex) {
-                throw new UnexpectedException(ex);
-            }
-            if (clazz.isAssignableFrom(applicationClass.javaClass) && !applicationClass.javaClass.getName().equals(clazz.getName())) {
-                results.add(applicationClass);
+        if(clazz != null) {
+            for (ApplicationClass applicationClass : classes.values()) {
+                try {
+                    Play.classloader.loadClass(applicationClass.name);
+                } catch (ClassNotFoundException ex) {
+                    throw new UnexpectedException(ex);
+                }
+                if (clazz.isAssignableFrom(applicationClass.javaClass) && !applicationClass.javaClass.getName().equals(clazz.getName())) {
+                    results.add(applicationClass);
+                }
             }
         }
         return results;

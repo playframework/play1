@@ -451,5 +451,11 @@ public class Scope {
         public <T> T get(String key, Class<T> clazz) {
             return (T) this.get(key);
         }
+
+        @Override
+        public String toString() {
+            return data.toString();
+        }
+        
     }
 }

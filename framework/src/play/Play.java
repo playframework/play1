@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.ZipInputStream;
 
 import play.cache.Cache;
 import play.classloading.ApplicationClasses;
@@ -171,7 +170,7 @@ public class Play {
         } catch (Exception e) {
             throw new UnexpectedException("Where is the framework ?", e);
         }
-        System.out.println("Play.frameworkPath " + frameworkPath);
+
         System.setProperty("play.path", frameworkPath.getAbsolutePath());
         System.setProperty("application.path", applicationPath.getAbsolutePath());
 

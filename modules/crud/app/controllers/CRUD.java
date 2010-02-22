@@ -13,9 +13,9 @@ import play.exceptions.*;
 import play.i18n.*;
 
 public abstract class CRUD extends Controller {
-    
+
     @Before
-    static void addType() {
+    public static void addType() throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         renderArgs.put("type", type);
     }
@@ -100,7 +100,9 @@ public abstract class CRUD extends Controller {
     public static void create() throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        JPASupport object = type.entityClass.newInstance();
+        Constructor constructor = type.entityClass.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        JPASupport object = (JPASupport) constructor.newInstance();
         validation.valid(object.edit("object", params));
         if (validation.hasErrors()) {
             renderArgs.put("error", Messages.get("crud.hasErrors"));
@@ -126,8 +128,8 @@ public abstract class CRUD extends Controller {
         notFoundIfNull(type);
         JPASupport object = type.findById(id);
         try {
-            object.delete();            
-        } catch(Exception e) {
+            object.delete();
+        } catch (Exception e) {
             flash.error(Messages.get("crud.delete.error", type.modelName, object.getEntityId()));
             redirect(request.controller + ".show", object.getEntityId());
         }
@@ -155,16 +157,16 @@ public abstract class CRUD extends Controller {
         public String name;
         public String modelName;
         public String controllerName;
-        
+
         public ObjectType(Class modelClass) {
             this.modelName = modelClass.getSimpleName();
             this.entityClass = modelClass;
         }
-        
+
         public ObjectType(String modelClass) throws ClassNotFoundException {
             this(Play.classloader.loadClass(modelClass));
         }
-        
+
         public static ObjectType forClass(String modelClass) throws ClassNotFoundException {
             return new ObjectType(modelClass);
         }
@@ -185,6 +187,14 @@ public abstract class CRUD extends Controller {
             if (controllerClass.isAnnotationPresent(For.class)) {
                 return ((For) (controllerClass.getAnnotation(For.class))).value();
             }
+            for(Type it : controllerClass.getGenericInterfaces()) {
+                if(it instanceof ParameterizedType) {
+                    ParameterizedType type = (ParameterizedType)it;
+                    if(((Class)type.getRawType()).getSimpleName().equals("CRUDWrapper")) {
+                        return (Class)type.getActualTypeArguments()[0];
+                    }
+                }                
+            }
             String name = controllerClass.getSimpleName().replace("$", "");
             name = "models." + name.substring(0, name.length() - 1);
             try {
@@ -195,11 +205,11 @@ public abstract class CRUD extends Controller {
         }
 
         public Object getListAction() {
-            return Router.reverse(controllerClass.getName() + ".list");
+            return Router.reverse(controllerClass.getName().replace("$", "") + ".list");
         }
 
         public Object getBlankAction() {
-            return Router.reverse(controllerClass.getName() + ".blank");
+            return Router.reverse(controllerClass.getName().replace("$", "") + ".blank");
         }
 
         public Long count(String search, String searchFields, String where) {
@@ -280,7 +290,7 @@ public abstract class CRUD extends Controller {
         public List<ObjectField> getFields() {
             List fields = new ArrayList();
             for (Field f : entityClass.getDeclaredFields()) {
-                if(Modifier.isTransient(f.getModifiers())) {
+                if (Modifier.isTransient(f.getModifiers())) {
                     continue;
                 }
                 ObjectField of = new ObjectField(f);
@@ -299,11 +309,16 @@ public abstract class CRUD extends Controller {
             }
             return null;
         }
-        
+
         public int compareTo(ObjectType other) {
             return modelName.compareTo(other.modelName);
         }
-        
+
+        @Override
+        public String toString() {
+            return modelName;
+        }
+
         public static class ObjectField {
 
             public String type = "unknown";
@@ -312,7 +327,7 @@ public abstract class CRUD extends Controller {
             public boolean multiple;
             public boolean searchable;
             public Object[] choices;
-            
+
             public ObjectField(Field field) {
                 if (CharSequence.class.isAssignableFrom(field.getType())) {
                     type = "text";
@@ -385,8 +400,6 @@ public abstract class CRUD extends Controller {
             public Object[] getChoices() {
                 return choices;
             }
-
-            
         }
     }
 }

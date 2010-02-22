@@ -376,7 +376,11 @@ public class Template {
         }
 
         public Class _(String className) throws Exception {
-            return Play.classloader.loadClass(className);
+            try {
+                return Play.classloader.loadClass(className);
+            } catch(ClassNotFoundException e) {
+                return null;
+            }
         }
 
         public String __safe(Object val) {
