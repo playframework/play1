@@ -154,14 +154,14 @@ public class ActionInvoker {
                     Object o = invokeControllerMethod(actionMethod, true);
                     if(o != null) {
                         if(o instanceof InputStream) {
-                            Result.setContentTypeIfNotSet(response, "application/octet-stream");
+                            response.setContentTypeIfNotSet("application/octet-stream");
                             throw new RenderBinary((InputStream)o, null ,true);
                         }
                         if(o instanceof File) {
-                            Result.setContentTypeIfNotSet(response, "application/octet-stream");
+                            response.setContentTypeIfNotSet("application/octet-stream");
                             throw new RenderBinary((File)o);
                         }
-                        Result.setContentTypeIfNotSet(response, MimeTypes.getContentType("x."+request.format, "text/plain"));
+                        response.setContentTypeIfNotSet(MimeTypes.getContentType("x."+request.format, "text/plain"));
                         throw new InvocationTargetException(new RenderText(o.toString()));
                     }
                 } catch (InvocationTargetException ex) {
@@ -396,4 +396,6 @@ public class ActionInvoker {
         }
         return rArgs;
     }
+
+
 }

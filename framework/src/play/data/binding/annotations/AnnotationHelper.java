@@ -12,7 +12,6 @@ import play.i18n.Lang;
 public class AnnotationHelper {
 
     /**
-     *
      * @param annotations
      * @param value
      * @return null if it cannot be converted because there is no annotation.
@@ -26,9 +25,10 @@ public class AnnotationHelper {
                     As as = (As) annotation;
                     final String format = as.value()[0];
                     if (!StringUtils.isEmpty(format)) {
-
                         if (!"*".equals(as.lang()[0])) {
-                            Locale locale = Lang.getLocale(as.lang()[0]);
+                            // It can be comma separated
+                            // if one of the lang matches
+                            Locale locale = getLocale(as.lang());
                             if (locale != null) {
                                 return new SimpleDateFormat(format, locale).parse(value);
                             }
@@ -39,6 +39,16 @@ public class AnnotationHelper {
             }
         }
         return null;
-     }
-    
+    }
+
+    public static Locale getLocale(String[] langs) {
+        for (String lang: langs) {
+            Locale locale = Lang.getLocale(lang);
+            if (locale != null) {
+                return locale;
+            }
+        }
+        return null;
+    }
+
 }

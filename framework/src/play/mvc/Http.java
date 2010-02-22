@@ -377,6 +377,11 @@ public class Http {
             headers.put(name, h);
         }
 
+        public void setContentTypeIfNotSet(String contentType) {
+            if(this.contentType == null) {
+                this.contentType = contentType;
+            }
+        }
 
         /**
          * Set a new cookie

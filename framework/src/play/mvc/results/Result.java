@@ -16,10 +16,8 @@ public abstract class Result extends RuntimeException {
     
     public abstract void apply(Http.Request request, Http.Response response);
     
-    public static void setContentTypeIfNotSet(Http.Response response, String contentType) {
-        if(response.contentType == null) {
-            response.contentType = contentType;
-        }
+    protected void setContentTypeIfNotSet(Http.Response response, String contentType) {
+       response.setContentTypeIfNotSet(contentType);
     }
 
 }
