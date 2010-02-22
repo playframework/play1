@@ -80,11 +80,21 @@ public class Fixtures {
         if (DBPlugin.url.startsWith("jdbc:mysql:")) {
             return "SET foreign_key_checks = " + (enable ? "1" : "0") + ";";
         }
+        if (DBPlugin.url.startsWith("jdbc:oracle:")) {
+            return "'ALTER TABLE '||substr(c.table_name,1,35)|| \n" +
+                    "' " + (enable ? "ENABLE" : "DISABLE") + " CONSTRAINT '||constraint_name||' ;' \n" +
+                    "from user_constraints c, user_tables u \n" +
+                    "where c.table_name = u.table_name; ";
+        }
         return null;
     }
 
     static String getDeleteTableStmt(String name) {
         if (DBPlugin.url.startsWith("jdbc:mysql:")) {
+            return "TRUNCATE TABLE " + name;
+        } else if (DBPlugin.url.startsWith("jdbc:postgresql:")) {
+            return "TRUNCATE TABLE " + name + " cascade";
+        } else if (DBPlugin.url.startsWith("jdbc:oracle:")) {
             return "TRUNCATE TABLE " + name;
         }
         return "DELETE FROM " + name;
@@ -92,21 +102,23 @@ public class Fixtures {
 
     public static void deleteAll() {
         try {
-            List<String> names = new ArrayList();
+            List<String> names = new ArrayList<String>();
             ResultSet rs = DB.getConnection().getMetaData().getTables(null, null, null, new String[]{"TABLE"});
             while (rs.next()) {
                 String name = rs.getString("TABLE_NAME");
                 names.add(name);
             }
-            if (getForeignKeyToggleStmt(false) != null) {
-                DB.execute(getForeignKeyToggleStmt(false));
+            final String disableConstraints = getForeignKeyToggleStmt(false);
+            if (disableConstraints != null) {
+                DB.execute(disableConstraints);
             }
             for (String name : names) {
                 Logger.trace("Dropping content of table %s", name);
-                DB.execute(getDeleteTableStmt(name));
+                DB.execute(getDeleteTableStmt(name) + ";");
             }
-            if (getForeignKeyToggleStmt(true) != null) {
-                DB.execute(getForeignKeyToggleStmt(true));
+            final String enableConstraints = getForeignKeyToggleStmt(true);
+            if (enableConstraints != null) {
+                DB.execute(enableConstraints);
             }
             if (JPA.isEnabled()) {
                 JPA.em().clear();
@@ -133,7 +145,7 @@ public class Fixtures {
             Object o = yaml.load(is);
             if (o instanceof LinkedHashMap) {
                 LinkedHashMap objects = (LinkedHashMap) o;
-                Map<String, Object> idCache = new HashMap();
+                Map<String, Object> idCache = new HashMap<String, Object>();
                 for (Object key : objects.keySet()) {
                     Matcher matcher = keyPattern.matcher(key.toString().trim());
                     if (matcher.matches()) {
@@ -145,17 +157,17 @@ public class Fixtures {
                         if (idCache.containsKey(type + "-" + id)) {
                             throw new RuntimeException("Cannot load fixture " + name + ", duplicate id '" + id + "' for type " + type);
                         }
-                        Map<String, String[]> params = new HashMap();
+                        Map<String, String[]> params = new HashMap<String, String[]>();
                         serialize((Map) objects.get(key), "object", params);
                         Class cType = Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
                         JPASupport model = JPASupport.create(cType, "object", params);
-                        for(Field f : model.getClass().getFields()) {
-                            if(f.getType().isAssignableFrom(FileAttachment.class)) {
-                                String[] value = params.get("object."+f.getName());
-                                if(value != null && value.length > 0) {
+                        for (Field f : model.getClass().getFields()) {
+                            if (f.getType().isAssignableFrom(FileAttachment.class)) {
+                                String[] value = params.get("object." + f.getName());
+                                if (value != null && value.length > 0) {
                                     VirtualFile vf = Play.getVirtualFile(value[0]);
-                                    if(vf != null && vf.exists()) {
+                                    if (vf != null && vf.exists()) {
                                         FileAttachment fa = new FileAttachment();
                                         fa.set(vf.getRealFile());
                                         f.set(model, fa);
@@ -207,7 +219,7 @@ public class Fixtures {
                 m.find();
                 String file = m.group(1);
                 VirtualFile f = Play.getVirtualFile(file);
-                if(f != null && f.exists()) {
+                if (f != null && f.exists()) {
                     serialized.put(prefix + "." + key.toString(), new String[]{f.contentAsString()});
                 }
             } else {
