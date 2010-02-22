@@ -724,7 +724,7 @@ try:
 			mn = m
 			if mn.find('-') > 0:
 				mn = mn[:mn.find('-')]
-			replaceAll(os.path.join(application_path, 'conf/application.conf'), r'# Syntax: module.{name}={path}', '# Syntax: module.{name}={path}\nmodule.%s=${play.path}/modules/%s' % (mn, m) )
+			replaceAll(os.path.join(application_path, 'conf/application.conf'), r'# ---- MODULES ----', '# ---- MODULES ----\nmodule.%s=${play.path}/modules/%s' % (mn, m) )
 		
 		# modules
 		check_application()
