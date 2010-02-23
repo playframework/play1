@@ -232,7 +232,6 @@ public class Java {
         List<Method> methods = new ArrayList<Method>();
         // Clazz can be null if we are looking at an interface / annotation
         while (clazz != null && !clazz.equals(Object.class)) {
-
             for (Method method : clazz.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(annotationType)) {
                     methods.add(method);
@@ -243,18 +242,6 @@ public class Java {
                     methods.addAll(findAllAnnotatedMethods(withClass, annotationType));
                 }
             }
-            /** Seems not useful if interceptor are declared public ...
-            for(Class trait : clazz.getInterfaces()) {
-                if(trait.getName().startsWith("controllers.")) {
-                    // Hm
-                    try {
-                        Class traitClass = Play.classloader.loadClass(trait.getName()+"$class");
-                        methods.addAll(findAllAnnotatedMethods(traitClass, annotationType));
-                    } catch(ClassNotFoundException e) {
-                        Logger.warn("Found one trait " + trait.getName() + " but traitClass is missing ??");
-                    }
-                }
-            }**/
             clazz = clazz.getSuperclass();
         }
         return methods;
