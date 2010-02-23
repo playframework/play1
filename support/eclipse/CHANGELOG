@@ -1,4 +1,4 @@
-0.4.2:
+0.4.3:
    * Fix the bug "all text is idented when hitting tab"
 0.4.1:
    * Fix a bug in the autocomplete
