@@ -192,6 +192,8 @@ bc. <ul>
 #{/list}
 </ul>
 
+You can find a list of available methods within the "API documentation":/@api/play/templates/JavaExtensions.html.
+
 h3. Create custom extensions
 
 Your project may have specific formatting needs, in which case you can provide your own extensions.
