@@ -9,7 +9,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
-import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
 import java.text.ParseException;
 import java.util.Arrays;

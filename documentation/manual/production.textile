@@ -68,7 +68,9 @@ But if you plan to host several applications in the same server or load balance 
 
 **Note that using a front-end HTTP server will never give you better performance than using play server directly!**
 
-This example shows you how to configure [[http://www.lighttpd.net/|lighttpd]] as a front-end web server. Note that you can do the same with Apache, but if you only need virtual hosting or load balancing, lighttpd is a very good choice and much easier to configure!
+h3. Setup with lighttpd
+
+This example shows you how to configure "lighttpd":http://www.lighttpd.net/ as a front-end web server. Note that you can do the same with Apache, but if you only need virtual hosting or load balancing, lighttpd is a very good choice and much easier to configure!
 
 The **/etc/lighttpd/lighttpd.conf** file should define things like this:
 
@@ -89,6 +91,19 @@ $HTTP["host"] =~ "www.loadbalancedapp.com" {
           ( "host" => "127.0.0.1", "port" => 9001 ) ) 
     )
 }
+
+h3. Setup with Apache
+
+The example below shows a simple setup with "Apache httpd server":http://httpd.apache.org/ running in front of a standard play configuration. 
+
+bc. LoadModule proxy_module modules/mod_proxy.so
+...
+<VirtualHost *:80>
+  ProxyPreserveHost On
+  ServerName www.loadbalancedapp.com
+  ProxyPass / http://127.0.0.1:9000/
+  ProxyPassReverse / http://127.0.0.1:9000/
+</VirtualHost>
 
 
 h3. Advanced proxy settings

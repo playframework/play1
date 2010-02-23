@@ -1,0 +1,10 @@
+# you describe your data using the YAML notation here
+# and then load them using Fixtures.load("data.yml")
+
+Nose(nose):
+    title:  Nose
+    
+Face(bob):
+    name:   Bob
+    nose:   nose
+    

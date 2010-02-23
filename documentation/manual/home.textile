@@ -109,8 +109,8 @@ Extended references for day to day hacking.
 # "Template tags and extensions reference":tags
 
 
+h2. <a name="versionnotes">Version notes</a>
 
+New versions of play include certain changes.
 
-
-
-
+# "Play 1.0.1":releasenotes-1.0.1

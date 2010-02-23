@@ -80,7 +80,7 @@ public class Fixtures {
         if (DBPlugin.url.startsWith("jdbc:mysql:")) {
             return "SET foreign_key_checks = " + (enable ? "1" : "0") + ";";
         }
-         if (DBPlugin.url.startsWith("jdbc:oracle:")) {
+        if (DBPlugin.url.startsWith("jdbc:oracle:")) {
             return "'ALTER TABLE '||substr(c.table_name,1,35)|| \n" +
                     "' " + (enable ? "ENABLE" : "DISABLE") + " CONSTRAINT '||constraint_name||' ;' \n" +
                     "from user_constraints c, user_tables u \n" +
@@ -92,10 +92,10 @@ public class Fixtures {
     static String getDeleteTableStmt(String name) {
         if (DBPlugin.url.startsWith("jdbc:mysql:") ) {
             return "TRUNCATE TABLE " + name;
-        } else if (DBPlugin.url.startsWith("jdbc:postgresql:") ) {
+        } else if (DBPlugin.url.startsWith("jdbc:postgresql:")) {
             return "TRUNCATE TABLE " + name + " cascade";
         } else if (DBPlugin.url.startsWith("jdbc:oracle:")) {
-            return "TRUNCATE TABLE " + name ;
+            return "TRUNCATE TABLE " + name;
         }
         return "DELETE FROM " + name;
     }
@@ -167,7 +167,7 @@ public class Fixtures {
                                 String[] value = params.get("object."+f.getName());
                                 if(value != null && value.length > 0) {
                                     VirtualFile vf = Play.getVirtualFile(value[0]);
-                                    if(vf != null && vf.exists()) {
+                                    if (vf != null && vf.exists()) {
                                         FileAttachment fa = new FileAttachment();
                                         fa.set(vf.getRealFile());
                                         f.set(model, fa);
@@ -219,7 +219,7 @@ public class Fixtures {
                 m.find();
                 String file = m.group(1);
                 VirtualFile f = Play.getVirtualFile(file);
-                if(f != null && f.exists()) {
+                if (f != null && f.exists()) {
                     serialized.put(prefix + "." + key.toString(), new String[]{f.contentAsString()});
                 }
             } else {

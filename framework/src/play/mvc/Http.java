@@ -357,11 +357,18 @@ public class Http {
 
         /**
          * Get a response header
-         * @param name Header name
+         * @param name Header name case-insensitive
          * @return the header value as a String
          */
         public String getHeader(String name) {
-            return headers.get(name).value();
+            for(String key : headers.keySet()) {
+                if(key.toLowerCase().equals(name.toLowerCase())) {
+                    if(headers.get(key) != null) {
+                        return headers.get(key).value();
+                    }
+                }
+            }
+            return null;
         }
 
         /**
