@@ -9,15 +9,15 @@ since.format  = MMM d, yyyy
 
 # Validation messages
 validation.required=Required
-validation.minSize=Minimal size is %2$d
-validation.maxSize=Maximal size is %2$d
+validation.minSize=Minimum size is %2$d
+validation.maxSize=Maximum size is %2$d
 validation.email=Invalid email address
 validation.range=Not in the range %2$d through %3$d
-validation.min=Must be greater than %2$d
-validation.max=Must be lower than %2$d
+validation.min=Cannot be lower than %2$d
+validation.max=Cannot be greater than %2$d
 validation.match=Must match %2$s
 validation.isTrue=Must be checked
-validation.equals=Must be equals to &{%2$s}
+validation.equals=Must equals &{%2$s}
 validation.invalid=Incorrect value
 validation.future=Must be in the future
 validation.after=Must be after %2$s
