@@ -122,12 +122,29 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
     }
 
     /**
+     * Return a 200 OK application/binary response. Content is streamed
+     * @param is The stream to copy
+     */
+    protected static void renderBinary(InputStream is, long length) {
+        throw new RenderBinary(is, null, length, true);
+    }
+
+    /**
      * Return a 200 OK application/binary response with content-disposition attachment
      * @param is The stream to copy
      * @param name The attachment name
      */
     protected static void renderBinary(InputStream is, String name) {
         throw new RenderBinary(is, name, false);
+    }
+
+    /**
+     * Return a 200 OK application/binary response with content-disposition attachment
+     * @param is The stream to copy. COntent is streamed
+     * @param name The attachment name
+     */
+    protected static void renderBinary(InputStream is, String name, long length) {
+        throw new RenderBinary(is, name, length, false);
     }
 
     /**

@@ -15,6 +15,7 @@ public class RenderBinary extends Result {
 
     private static URLCodec encoder = new URLCodec();
     boolean inline = false;
+    long length = 0;
     File file;
     InputStream is;
     String name;
@@ -28,6 +29,10 @@ public class RenderBinary extends Result {
         this(is, name, false);
     }
 
+    public RenderBinary(InputStream is, String name, long length) {
+        this(is, name, length, false);
+    }
+
     /**
      * send a binary stream as the response
      * @param is the stream to read from
@@ -37,6 +42,13 @@ public class RenderBinary extends Result {
     public RenderBinary(InputStream is, String name, boolean inline) {
         this.is = is;
         this.name = name;
+        this.inline = inline;
+    }
+
+    public RenderBinary(InputStream is, String name, long length, boolean inline) {
+        this.is = is;
+        this.name = name;
+        this.length = length;
         this.inline = inline;
     }
 
@@ -100,17 +112,31 @@ public class RenderBinary extends Result {
             }
             if (file != null) {
                 if (!file.exists()) {
-                    throw new UnexpectedException("Your file does not exists ("+file+")");
+                    throw new UnexpectedException("Your file does not exists (" + file + ")");
                 }
                 if (!file.canRead()) {
-                    throw new UnexpectedException("Can't read your file ("+file+")");
+                    throw new UnexpectedException("Can't read your file (" + file + ")");
                 }
                 if (!file.isFile()) {
-                    throw new UnexpectedException("Your file is not a real file ("+file+")");
+                    throw new UnexpectedException("Your file is not a real file (" + file + ")");
                 }
                 response.direct = file;
             } else {
-                response.direct = is;
+                if (response.getHeader("Content-Length") != null) {
+                    response.direct = is;
+                } else {
+                    if (length != 0) {
+                        response.setHeader("Content-Length", length + "");
+                        response.direct = is;
+                    } else {
+                        byte[] buffer = new byte[8092];
+                        int count = 0;
+                        while ((count = is.read(buffer)) > 0) {
+                            response.out.write(buffer, 0, count);
+                        }
+                        is.close();
+                    }
+                }
             }
         } catch (Exception e) {
             throw new UnexpectedException(e);
