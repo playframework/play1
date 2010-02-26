@@ -440,7 +440,7 @@ public class HttpHandler implements IoHandler {
         }
     }
 
-    private final static Map<String, RenderStatic> staticPathsCache = new HashMap();
+    private final static Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
 
     static class MinaInvocation extends Invoker.Invocation {
 
