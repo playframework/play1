@@ -221,6 +221,13 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
     }
 
     /**
+     * Send a TODO response
+     */
+    protected static void todo() {
+        notFound("This action has not been implemented Yet (" + request.action + ")");
+    }
+
+    /**
      * Send a 404 Not Found response if object is null
      * @param o The object to check
      */
