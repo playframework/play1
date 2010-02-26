@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import org.w3c.dom.Document;
 import play.Invoker.Suspend;
+import play.Logger;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
@@ -266,6 +267,15 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
      */
     protected static void error(String reason) {
         throw new Error(reason);
+    }
+
+    /**
+     * Send a 500 Error response
+     * @param reason The reason
+     */
+    protected static void error(Exception reason) {
+        Logger.error(reason, "error()");
+        throw new Error(reason.toString());
     }
 
     /**

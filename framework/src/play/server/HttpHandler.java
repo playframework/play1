@@ -320,7 +320,7 @@ public class HttpHandler implements IoHandler {
             //
         }
         String format = Request.current().format;
-        minaResponse.setStatus(HttpResponseStatus.forId(500));
+        minaResponse.setStatus(HttpResponseStatus.forId(404));
         if ("XMLHttpRequest".equals(minaRequest.getHeader("X-Requested-With")) && (format == null || format.equals("html"))) {
             format = "txt";
         }
