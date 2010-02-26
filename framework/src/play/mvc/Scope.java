@@ -1,5 +1,6 @@
 package play.mvc;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import play.Logger;
 import play.Play;
 import play.data.binding.Binder;
@@ -67,6 +69,7 @@ public class Scope {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
         }        // ThreadLocal access
+
         static ThreadLocal<Flash> current = new ThreadLocal<Flash>();
 
         public static Flash current() {
@@ -136,7 +139,7 @@ public class Scope {
         public boolean contains(String key) {
             return data.containsKey(key);
         }
-        
+
         public String toString() {
             return data.toString();
         }
@@ -167,7 +170,7 @@ public class Scope {
                         // SKIP Logger.warn("Corrupted HTTP session from %s", Http.Request.current().remoteAddress);
                     }
                 }
-                if(!session.contains("___ID")) {
+                if (!session.contains("___ID")) {
                     session.put("___ID", Codec.UUID());
                 }
                 return session;
@@ -175,14 +178,14 @@ public class Scope {
                 throw new UnexpectedException("Corrupted HTTP session from " + Http.Request.current().remoteAddress, e);
             }
         }
-        
+
         Map<String, String> data = new HashMap<String, String>();        // ThreadLocal access
         public static ThreadLocal<Session> current = new ThreadLocal<Session>();
 
         public static Session current() {
             return current.get();
         }
-        
+
         public String getId() {
             return data.get("___ID");
         }
@@ -199,11 +202,11 @@ public class Scope {
                 }
                 String sessionData = URLEncoder.encode(session.toString(), "utf-8");
                 String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
-                if(Play.configuration.getProperty("application.session.maxAge") == null) {
+                if (Play.configuration.getProperty("application.session.maxAge") == null) {
                     Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData);
                 } else {
                     Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, Play.configuration.getProperty("application.session.maxAge"));
-                }                
+                }
             } catch (Exception e) {
                 throw new UnexpectedException("Session serializationProblem", e);
             }
@@ -262,6 +265,7 @@ public class Scope {
         public static Params current() {
             return current.get();
         }
+
         boolean requestIsParsed;
         private Map<String, String[]> data = new HashMap<String, String[]>();
 
@@ -275,18 +279,23 @@ public class Scope {
                         _mergeWith(dataParser.parse(request.body));
                     }
                 }
+                try {
+                    request.body.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 requestIsParsed = true;
             }
         }
-        
+
         public void put(String key, String value) {
-            data.put(key, new String[] {value});
+            data.put(key, new String[]{value});
         }
-        
+
         public void put(String key, String[] values) {
             data.put(key, values);
         }
-        
+
         public void remove(String key) {
             data.remove("where");
         }
@@ -301,11 +310,11 @@ public class Scope {
             return null;
         }
 
-         public <T> T get(String key, Class<T> type) {
+        public <T> T get(String key, Class<T> type) {
             try {
                 // TODO: This is used by the test, but this is not the most convenient.
                 return (T) Binder.directBind(null, get(key), type);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 Validation.addError(key, "validation.invalid");
                 return null;
             }
@@ -314,7 +323,7 @@ public class Scope {
         public <T> T get(Annotation[] annotations, String key, Class<T> type) {
             try {
                 return (T) Binder.directBind(annotations, get(key), type);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 Validation.addError(key, "validation.invalid");
                 return null;
             }
@@ -357,13 +366,13 @@ public class Scope {
         }
 
         void _mergeWith(Map<String, String[]> map) {
-        	for (Map.Entry<String, String[]> entry : map.entrySet()) {
+            for (Map.Entry<String, String[]> entry : map.entrySet()) {
                 Utils.Maps.mergeValueInMap(data, entry.getKey(), entry.getValue());
             }
         }
 
         void __mergeWith(Map<String, String> map) {
-        	for (Map.Entry<String, String> entry : map.entrySet()) {
+            for (Map.Entry<String, String> entry : map.entrySet()) {
                 Utils.Maps.mergeValueInMap(data, entry.getKey(), entry.getValue());
             }
         }
@@ -394,7 +403,7 @@ public class Scope {
                         StringBuilder sb = new StringBuilder();
                         boolean coma = false;
                         for (String d : data.get(key)) {
-                            if(coma) sb.append(",");
+                            if (coma) sb.append(",");
                             sb.append(d);
                             coma = true;
                         }
@@ -409,7 +418,7 @@ public class Scope {
                         StringBuilder sb = new StringBuilder();
                         boolean coma = false;
                         for (String d : data.get(key)) {
-                            if(coma) sb.append(",");
+                            if (coma) sb.append(",");
                             sb.append(d);
                             coma = true;
                         }
@@ -424,8 +433,8 @@ public class Scope {
         @Override
         public String toString() {
             return data.toString();
-        }        
-        
+        }
+
     }
 
     /**
@@ -456,6 +465,6 @@ public class Scope {
         public String toString() {
             return data.toString();
         }
-        
+
     }
 }
