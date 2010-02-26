@@ -1,3 +1,5 @@
+0.4.4:
+   * Introduce preference panes, make color for syntax highlighting configurable
 0.4.3:
    * Fix the bug "all text is idented when hitting tab"
 0.4.1:
