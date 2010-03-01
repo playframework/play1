@@ -265,6 +265,7 @@ public class HttpHandler implements IoHandler {
                 if (raw) {
                     copyResponse(session, Request.current(), Response.current(), minaRequest, minaResponse);
                 } else {
+                    minaResponse.setContentType(MimeTypes.getContentType(file.getName()));
                     if (Play.mode == Play.Mode.DEV) {
                         minaResponse.setHeader("Cache-Control", "no-cache");
                     } else {
