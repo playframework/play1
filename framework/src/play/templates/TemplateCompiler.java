@@ -292,7 +292,7 @@ public class TemplateCompiler {
             if (tagText.indexOf(" ") > 0) {
                 tagName = tagText.substring(0, tagText.indexOf(" "));
                 tagArgs = tagText.substring(tagText.indexOf(" ") + 1).trim();
-                if (!tagArgs.matches("^[a-zA-Z0-9]+\\s*:.*$")) {
+                if (!tagArgs.matches("^[_a-zA-Z0-9]+\\s*:.*$")) {
                     tagArgs = "arg:" + tagArgs;
                 }
                 tagArgs = tagArgs.replaceAll("[:]\\s*[@]", ":actionBridge.");
@@ -306,7 +306,11 @@ public class TemplateCompiler {
             tag.startLine = parser.getLine();
             tag.hasBody = hasBody;
             tagsStack.push(tag);
-            print("attrs" + tagIndex + " = [" + tagArgs + "];");
+            if(tagArgs.trim().equals("_:_")) {
+                print("attrs" + tagIndex + " = _attrs;");
+            } else {
+                print("attrs" + tagIndex + " = [" + tagArgs + "];");
+            }
             // Use inlineTag if exists
             try {
                 Method m = InlineTags.class.getDeclaredMethod("_" + tag.name, int.class, CALL.class);
