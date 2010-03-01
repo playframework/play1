@@ -91,7 +91,13 @@ def override(f, t):
 		os.makedirs(os.path.dirname(toFile))
 	shutil.copyfile(fromFile, toFile)
 	print "~ Copied %s to %s " % (fromFile, toFile)
-			
+
+def isParentOf(path1, path2):
+	if len(path2) < len(path1) or len(path2) < 2:
+		return False
+	if (path1 == path2):
+		return True
+	return isParentOf(path1, os.path.dirname(path2))
 
 # ~~~~~~~~~
 # Main
@@ -464,7 +470,7 @@ try:
 			print "~"
 			sys.exit(-1)
 			
-		if war_path.startswith(application_path):
+		if isParentOf(application_path, war_path):
 			print "~ Oops. Please specify a destination directory outside of the application"
 			print "~"
 			sys.exit(-1)
@@ -506,9 +512,9 @@ try:
 			if os.path.exists(os.path.join(to, 'build.xml')):
 				os.remove(os.path.join(to, 'build.xml'))
 		pm = readConfs('module.')
-  		for m in pm:
+		for m in pm:
 			nm = os.path.basename(m)
-  			replaceAll(os.path.join(war_path, 'WEB-INF/application/conf/application.conf'), m, '../modules/%s' % nm)
+			replaceAll(os.path.join(war_path, 'WEB-INF/application/conf/application.conf'), m, '../modules/%s' % nm)
 		
 		if not os.path.exists(os.path.join(war_path, 'WEB-INF/resources')): os.mkdir(os.path.join(war_path, 'WEB-INF/resources'))
 		shutil.copyfile(os.path.join(play_base, 'resources/messages'), os.path.join(war_path, 'WEB-INF/resources/messages'))
@@ -518,6 +524,7 @@ try:
 			if os.path.exists(war_zip_path):
 				os.remove(war_zip_path)
 			zip = zipfile.ZipFile(war_zip_path, 'w', zipfile.ZIP_STORED)
+			dist_dir = os.path.join(application_path, 'dist')
 			for (dirpath, dirnames, filenames) in os.walk(war_path):
 				if dirpath == dist_dir:
 					continue
