@@ -336,7 +336,7 @@ public class TemplateCompiler {
         void endTag() {
             String tagName = parser.getToken().trim();
             if (tagsStack.isEmpty()) {
-                throw new TemplateCompilationException(template, currentLine, "#{/" + tagName + "} is not opened.");
+                throw new TemplateCompilationException(template, parser.getLine(), "#{/" + tagName + "} is not opened.");
             }
             Tag tag = (Tag) tagsStack.pop();
             String lastInStack = tag.name;
