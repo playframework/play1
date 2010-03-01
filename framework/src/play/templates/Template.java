@@ -314,7 +314,7 @@ public class Template {
         public Object getProperty(String property) {
             try {
                 if (property.equals("actionBridge")) {
-                    return new ActionBridge();
+                    return new ActionBridge(this);
                 }
                 return super.getProperty(property);
             } catch (MissingPropertyException mpe) {
@@ -411,18 +411,21 @@ public class Template {
 
         static class ActionBridge extends GroovyObjectSupport {
 
+            ExecutableTemplate template = null;
             String controller = null;
 
-            public ActionBridge(String controllerPart) {
+            public ActionBridge(ExecutableTemplate template, String controllerPart) {
+                this.template = template;
                 this.controller = controllerPart;
             }
 
-            public ActionBridge() {
+            public ActionBridge(ExecutableTemplate template) {
+                this.template = template;
             }
 
             @Override
             public Object getProperty(String property) {
-                return new ActionBridge(controller == null ? property : controller + "." + property);
+                return new ActionBridge(template, controller == null ? property : controller + "." + property);
             }
 
             @Override
@@ -449,7 +452,11 @@ public class Template {
                                 r.put( i < names.length ? names[i] : "", ((Object[]) param)[i] == null ? null : ((Object[]) param)[i].toString());
                             }
                         }
-                        return Router.reverse(action, r);
+                        Router.ActionDefinition def = Router.reverse(action, r);
+                        if(template.template.name.endsWith(".html") || template.template.name.endsWith(".xml")) {
+                            def.url = def.url.replace("&", "&amp;");
+                        }
+                        return def;
                     } catch (ActionNotFoundException e) {
                         throw new NoRouteFoundException(action, null);
                     }
