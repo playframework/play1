@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -505,6 +506,38 @@ public class JPASupport implements Serializable {
         return getClass().getSimpleName() + "[" + getEntityId() + "]";
     }
 
+    public static class JPAQueryException extends RuntimeException {
+
+        public JPAQueryException(String message) {
+            super(message);
+        }
+
+        public JPAQueryException(String message, Throwable e) {
+            super(message + ": " + e.getMessage(), e);
+        }
+
+        public static Throwable findBestCause(Throwable e) {
+            Throwable best = e;
+            Throwable cause = e;
+            int it = 0;
+            while((cause = cause.getCause()) != null && it++ < 10) {
+                if(cause == null) {
+                    break;
+                }
+                if(cause instanceof ClassCastException) {
+                    best = cause;
+                    break;
+                }
+                if(cause instanceof SQLException) {
+                    best = cause;
+                    break;
+                }
+            }
+            return best;
+        }
+
+    }
+
     /**
      * A JPAQuery
      */
@@ -535,7 +568,7 @@ public class JPASupport implements Serializable {
                 }
                 return (T) results.get(0);
             } catch (Exception e) {
-                throw new IllegalArgumentException("Error while executing query <strong>" + sq + "</strong>", e);
+                throw new JPAQueryException("Error while executing query <strong>" + sq + "</strong>", JPAQueryException.findBestCause(e));
             }
         }
 
@@ -565,7 +598,7 @@ public class JPASupport implements Serializable {
             try {
                 return query.getResultList();
             } catch (Exception e) {
-                throw new IllegalArgumentException("Error while executing query <strong>" + sq + "</strong>", e);
+                throw new JPAQueryException("Error while executing query <strong>" + sq + "</strong>", JPAQueryException.findBestCause(e));
             }
         }
 
@@ -587,7 +620,7 @@ public class JPASupport implements Serializable {
                 query.setMaxResults(max);
                 return query.getResultList();
             } catch (Exception e) {
-                throw new IllegalArgumentException("Error while executing query <strong>" + sq + "</strong>", e);
+                throw new JPAQueryException("Error while executing query <strong>" + sq + "</strong>", JPAQueryException.findBestCause(e));
             }
         }
 
@@ -614,7 +647,7 @@ public class JPASupport implements Serializable {
             try {
                 return query.getResultList();
             } catch (Exception e) {
-                throw new IllegalArgumentException("Error while executing query <strong>" + sq + "</strong>", e);
+                throw new JPAQueryException("Error while executing query <strong>" + sq + "</strong>", JPAQueryException.findBestCause(e));
             }
         }
 
