@@ -33,5 +33,11 @@ public class Project extends Model {
         return name + " belongs to " + company;
     }
     
+    public Project() {}
+    
+    public Project(String name) {
+        this.name = name;
+    }
+    
 }
 

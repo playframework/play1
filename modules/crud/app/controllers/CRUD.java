@@ -233,9 +233,12 @@ public abstract class CRUD extends Controller {
             } else {
                 q += (where != null ? " where " + where : "");
             }
-            if (orderBy == null) {
+            if (orderBy == null && order == null) {
                 orderBy = "id";
-                order = "DESC";
+                order = "ASC";
+            }
+            if (orderBy == null && order != null) {
+                orderBy = "id";
             }
             if (order == null || (!order.equals("ASC") && !order.equals("DESC"))) {
                 order = "ASC";

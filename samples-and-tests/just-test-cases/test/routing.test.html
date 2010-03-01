@@ -93,5 +93,12 @@
 	assertText('h', '/aGetForm/?name=Yop')
 	assertText('i', '/optionalSlash')
 	
+	// Reverse
+	open('@{Application.reverserouting2()}')
+    assertTextPresent('/jpabinding/save?project.name=colcoz')
+
+	// Reverse
+	open('@{Application.reverserouting3()}')
+    assertTextPresent('/jpabinding/save?project.name=COLCOZ')	
 	
 #{/selenium}	

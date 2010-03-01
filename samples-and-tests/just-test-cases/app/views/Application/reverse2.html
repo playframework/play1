@@ -1,0 +1,1 @@
+@{JPABinding.save(new models.Project('colcoz'))}
