@@ -94,7 +94,7 @@
 	assertTextPresent('Edit Job')
 	
 	// Make a mistake
-	select('object_category', '(None)')
+	select('object_category', '(Please select a value)')
 	clickAndWait('css=input[name=_save]')
 	assertText('css=span.error', 'Required')
 	
