@@ -328,7 +328,7 @@ public class HttpHandler implements IoHandler {
         if (format == null) {
             format = "txt";
         }
-        minaResponse.setContentType(MimeTypes.getContentType("xxx." + format, "text/plain"));
+        minaResponse.setContentType(MimeTypes.getContentType("404." + format, "text/plain"));
         String errorHtml = TemplateLoader.load("errors/404." + format).render(binding);
         try {
             minaResponse.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
@@ -380,7 +380,7 @@ public class HttpHandler implements IoHandler {
             if (format == null) {
                 format = "txt";
             }
-            response.setContentType(MimeTypes.getContentType("xxx." + format, "text/plain"));
+            response.setContentType(MimeTypes.getContentType("500." + format, "text/plain"));
             try {
                 String errorHtml = TemplateLoader.load("errors/500." + format).render(binding);
                 response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
