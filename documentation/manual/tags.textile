@@ -85,6 +85,12 @@ bc. <head>
     <title>#{get 'title' /}
 </head>
 
+You can also use the get tag in the following way, which will display "Homepage" if title has not been specified.
+
+bc. <head>
+    <title>#{get 'title'}Homepage #{/} 
+</head>
+
 h2. <a>i18n</a>
 
 Export localized messages in Javascript. Localized messages are available from your javascript code using the **i18n()** function.
