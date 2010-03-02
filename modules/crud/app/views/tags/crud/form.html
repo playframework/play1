@@ -30,15 +30,19 @@
 
 	%{ if(fieldsHandler[fieldName]) { }%
 		%{
-			def handler = fieldsHandler[fieldName];
-			handler.setProperty('fieldName', 'object.' + field.name + (field.type == 'relation' ? '@id' : ''));
-            def oldObject = handler.getProperty('object');
-			handler.setProperty('object', currentObject);
-			out.println(handler.toString());
-			handler.setProperty('object', oldObject);
-			handler.setProperty('fieldName', null);
+			def handler = fieldsHandler[fieldName]
+			handler.setProperty('fieldName', 'object.' + field?.name + (field?.type == 'relation' ? '@id' : ''))
+            def oldObject = handler.getProperty('object')
+			handler.setProperty('object', currentObject)
+			out.println(handler.toString())
+			handler.setProperty('object', oldObject)
+			handler.setProperty('fieldName', null)
 		}%
 	%{ } else { }%
+	
+	    #{ifnot field}
+	        %{ throw new play.exceptions.TagInternalException('Field not found -> ' + fieldName) }%
+	    #{/ifnot}
 
 		#{if field.type == 'text'}
 			#{crud.textField name:field.name, value:(currentObject ? currentObject[field.name] : null) /}

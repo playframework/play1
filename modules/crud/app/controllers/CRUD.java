@@ -233,9 +233,12 @@ public abstract class CRUD extends Controller {
             } else {
                 q += (where != null ? " where " + where : "");
             }
-            if (orderBy == null) {
+            if (orderBy == null && order == null) {
                 orderBy = "id";
-                order = "DESC";
+                order = "ASC";
+            }
+            if (orderBy == null && order != null) {
+                orderBy = "id";
             }
             if (order == null || (!order.equals("ASC") && !order.equals("DESC"))) {
                 order = "ASC";
@@ -312,6 +315,7 @@ public abstract class CRUD extends Controller {
             public boolean multiple;
             public boolean searchable;
             public Object[] choices;
+            public boolean required;
             
             public ObjectField(Field field) {
                 if (CharSequence.class.isAssignableFrom(field.getType())) {
@@ -378,6 +382,9 @@ public abstract class CRUD extends Controller {
                 }
                 if (field.isAnnotationPresent(Transient.class)) {
                     type = null;
+                }
+                if (field.isAnnotationPresent(Required.class)) {
+                    required = true;
                 }
                 name = field.getName();
             }

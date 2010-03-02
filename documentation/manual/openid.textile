@@ -32,13 +32,16 @@ public static void authenticate(String user) {
     if(OpenID.isAuthenticationResponse()) {
         UserInfo verifiedUser = OpenID.getVerifiedID();
         if(verifiedUser == null) {
-            flash.put("error", "Oops. Authentication has failed");
+            flash.error("Oops. Authentication has failed");
             login();
         } 
         session.put("user", verifiedUser.id);
         index();
     } else {
-        OpenID.id(user).verify(); // will redirect the user
+        if(!OpenID.id(user).verify()) { // will redirect the user
+            flash.error("Cannot verify your OpenID");
+            login();
+        } 
     }
 }
 

@@ -91,6 +91,17 @@ public class Application extends Controller {
     public static void reverserouting() {
         render("Application/reverse.html");
     }
+    
+    public static void reverserouting2() {
+        render("Application/reverse2.html");
+    }
+    
+    public static void reverserouting3() {
+        Object def = reverse(); {
+            JPABinding.save(new Project("COLCOZ"));
+        }
+        renderText(def);
+    }
 
     public static void mail() {
         notifiers.Welcome.welcome();

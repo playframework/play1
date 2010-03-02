@@ -4,7 +4,6 @@ import groovy.lang.Closure;
 import groovy.util.XmlSlurper;
 import groovy.util.slurpersupport.GPathResult;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -22,10 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.lang.StringEscapeUtils;
-import org.xml.sax.SAXException;
 
 import play.Logger;
 import play.i18n.Lang;
@@ -49,11 +45,11 @@ public class JavaExtensions {
     }
 
     public static GPathResult asXml(String xml) {
-    	try {
-			return (new XmlSlurper()).parseText(xml);
-		} catch (Exception e) {
-			throw new RuntimeException("invalid XML");
-		}
+        try {
+            return (new XmlSlurper()).parseText(xml);
+        } catch (Exception e) {
+            throw new RuntimeException("invalid XML");
+        }
     }
 
     public static String[] add(String[] array, String o) {
@@ -64,7 +60,7 @@ public class JavaExtensions {
     }
 
     public static String[] remove(String[] array, String s) {
-        List temp = new ArrayList(Arrays.asList(array));
+        List<String> temp = new ArrayList<String>(Arrays.asList(array));
         temp.remove(s);
         return (String[]) temp.toArray(new String[temp.size()]);
     }
@@ -152,7 +148,11 @@ public class JavaExtensions {
     }
 
     public static String format(Date date, String pattern) {
-        return new SimpleDateFormat(pattern).format(date);
+        return format(date, pattern, Lang.get());
+    }
+
+    public static String format(Date date, String pattern, String lang) {
+        return new SimpleDateFormat(pattern, new Locale(lang)).format(date);
     }
 
     public static Integer page(Number number, Integer pageSize) {
@@ -196,7 +196,11 @@ public class JavaExtensions {
     }
 
     public static String asdate(Long timestamp, String pattern) {
-        return new SimpleDateFormat(pattern).format(new Date(timestamp));
+        return asdate(timestamp, pattern, Lang.get());
+    }
+
+    public static String asdate(Long timestamp, String pattern, String lang) {
+        return new SimpleDateFormat(pattern, new Locale(lang)).format(new Date(timestamp));
     }
 
     public static RawData nl2br(Object data) {
@@ -333,7 +337,7 @@ public class JavaExtensions {
     /**
      * return the last item of a list or null if the List is null
      */
-    public static Object last(List items) {
+    public static Object last(List<?> items) {
         return (items == null) ? null : items.get(items.size() - 1);
     }
 

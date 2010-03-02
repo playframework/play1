@@ -33,11 +33,14 @@
 	assertTextPresent('2 Jobs')
 	
 	// Try the column sort
-	assertTable('css=#crudListTable table.1.0', 'Play developper wanted')
-	assertTable('css=#crudListTable table.2.0', 'Java developper wanted')
+	assertTable('css=#crudListTable table.2.0', 'Play developper wanted')
+	assertTable('css=#crudListTable table.1.0', 'Java developper wanted')
 	clickAndWait('link=Title')
 	assertTable('css=#crudListTable table.2.0', 'Play developper wanted')
 	assertTable('css=#crudListTable table.1.0', 'Java developper wanted')
+	clickAndWait('link=Title')
+	assertTable('css=#crudListTable table.1.0', 'Play developper wanted')
+	assertTable('css=#crudListTable table.2.0', 'Java developper wanted')
 	clickAndWait('link=Creation date*')
 	assertTable('css=#crudListTable table.2.0', 'Play developper wanted')
 	assertTable('css=#crudListTable table.1.0', 'Java developper wanted')
@@ -94,7 +97,7 @@
 	assertTextPresent('Edit Job')
 	
 	// Make a mistake
-	select('object_category', '(None)')
+	select('object_category', '(Please select a value)')
 	clickAndWait('css=input[name=_save]')
 	assertText('css=span.error', 'Required')
 	

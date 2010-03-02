@@ -79,10 +79,10 @@ public class FastTags {
         }
         if (!("GET".equals(actionDef.method) || "POST".equals(actionDef.method))) {
             String separator = actionDef.url.indexOf('?') != -1 ? "&" : "?";
-            actionDef.url += separator + "x-http-method-override=" + actionDef.method;
+            actionDef.url += separator + "x-http-method-override=" + actionDef.method.toUpperCase();
             actionDef.method = "POST";
         }
-        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method + "\" accept-charset=\"utf-8\" enctype=\"" + enctype + "\" "+serialize(args, "action", "method", "accept-charset", "enctype")+">");
+        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toUpperCase() + "\" accept-charset=\"utf-8\" enctype=\"" + enctype + "\" "+serialize(args, "action", "method", "accept-charset", "enctype")+">");
         out.println(JavaExtensions.toString(body));
         out.print("</form>");
     }
