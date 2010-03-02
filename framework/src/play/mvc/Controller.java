@@ -21,6 +21,7 @@ import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSupport;
 import play.data.binding.Binder;
+import play.data.binding.Unbinder;
 import play.data.validation.Validation;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
@@ -423,7 +424,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
                 if(isDefault) {
                     r.put(names[i], new Default(args[i]));
                 } else {
-                    r.put(names[i], args[i]);
+                    Unbinder.unBind(r, args[i], names[i]);
                 }
             }
             try {
