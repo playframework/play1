@@ -18,6 +18,12 @@ For example:
 
 bc. <h1>Client ${client.name}</h1>
 
+If you can't be sure of client being null, there is a groovy shortcut:
+
+bc. <h1>Client ${client?.name}</h1>
+
+Which will only display the client name if the client is not null. 
+
 h3. Tags : #{tagName /}
 
 A tag is a template fragment that can be called with parameters. If the tag has only one parameter, by convention it is called "arg" and its name can be omitted.
