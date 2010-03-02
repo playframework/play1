@@ -18,6 +18,12 @@ For example:
 
 bc. <h1>Client ${client.name}</h1>
 
+If you can't be sure of client being null, there is a groovy shortcut:
+
+bc. <h1>Client ${client?.name}</h1>
+
+Which will only display the client name if the client is not null.
+
 h3. Template decorators : #{extends  /} and  #{doLayout  /}
 
 Decorators provide a clean solution to share a page layout (or design) across several templates. 
@@ -219,7 +225,11 @@ bc. <ul>
 #{/list}
 </ul>
 
+<<<<<<< TREE
 The same applies to **java.util.Date**.
+=======
+You can find a list of available methods within the "API documentation":/@api/play/templates/JavaExtensions.html.
+>>>>>>> MERGE-SOURCE
 
 h3. Create custom extensions
 

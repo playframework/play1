@@ -265,6 +265,13 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
+     * Send a TODO response
+     */
+    protected static void todo() {
+        notFound("This action has not been implemented Yet (" + request.action + ")");
+    }
+
+    /**
      * Send a 404 Not Found response if object is null
      * @param o The object to check
      */
@@ -311,6 +318,15 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     protected static void error(String reason) {
         throw new Error(reason);
+    }
+
+    /**
+     * Send a 500 Error response
+     * @param reason The reason
+     */
+    protected static void error(Exception reason) {
+        Logger.error(reason, "error()");
+        throw new Error(reason.toString());
     }
 
     /**

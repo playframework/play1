@@ -399,6 +399,10 @@ public class Http {
             setCookie(name, value, (Integer) null);
         }
 
+        public void removeCookie(String name) {
+            setCookie(name, "", 0);
+        }
+
         /**
          * Set a new cookie that will expire in (current) + duration
          * @param name

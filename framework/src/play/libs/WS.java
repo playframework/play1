@@ -117,7 +117,6 @@ public class WS extends PlayPlugin {
             httpMethod.get().releaseConnection();
         }
     }
-    
 
     static {
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
@@ -131,7 +130,7 @@ public class WS extends PlayPlugin {
                     int port,
                     InetAddress localAddress,
                     int localPort) throws IOException, UnknownHostException {
-                
+
                 // get inetAddresses
                 InetAddress[] inetAddresses = InetAddress.getAllByName(host);
 
@@ -184,20 +183,20 @@ public class WS extends PlayPlugin {
         String proxyPort = Play.configuration.getProperty("http.proxyPort", System.getProperty("http.proxyPort"));
         String proxyUser = Play.configuration.getProperty("http.proxyUser", System.getProperty("http.proxyUser"));
         String proxyPassword = Play.configuration.getProperty("http.proxyPassword", System.getProperty("http.proxyPassword"));
-        
+
         if (proxyHost != null) {
-        	int proxyPortInt = 0;
-        	try{
-        		proxyPortInt = Integer.parseInt(proxyPort);
-        	} catch (NumberFormatException e){
-        		Logger.error("Cannot parse the proxy port property '%s'. Check property http.proxyPort either in System configuration or in Play config file.", proxyPort);
-        		throw new IllegalStateException("WS proxy is misconfigured -- check the logs for details");
-        	}
-        	httpClient.getHostConfiguration().setProxy(proxyHost, proxyPortInt);
-        	if (proxyUser != null){
-        		AuthScope scope = new AuthScope(proxyHost, proxyPortInt);
-        		httpClient.getState().setProxyCredentials(scope, new UsernamePasswordCredentials(proxyUser, proxyPassword));
-        	}
+            int proxyPortInt = 0;
+            try {
+                proxyPortInt = Integer.parseInt(proxyPort);
+            } catch (NumberFormatException e) {
+                Logger.error("Cannot parse the proxy port property '%s'. Check property http.proxyPort either in System configuration or in Play config file.", proxyPort);
+                throw new IllegalStateException("WS proxy is misconfigured -- check the logs for details");
+            }
+            httpClient.getHostConfiguration().setProxy(proxyHost, proxyPortInt);
+            if (proxyUser != null) {
+                AuthScope scope = new AuthScope(proxyHost, proxyPortInt);
+                httpClient.getState().setProxyCredentials(scope, new UsernamePasswordCredentials(proxyUser, proxyPassword));
+            }
         }
 
     }
@@ -285,7 +284,7 @@ public class WS extends PlayPlugin {
         getMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-            	for (Map.Entry<String, Object> entry : headers.entrySet()) {
+                for (Map.Entry<String, Object> entry : headers.entrySet()) {
                     getMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
@@ -340,7 +339,7 @@ public class WS extends PlayPlugin {
         postMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-            	for (Map.Entry<String, String> entry : headers.entrySet()) {
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
                     postMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
@@ -393,7 +392,7 @@ public class WS extends PlayPlugin {
         postMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-            	for (Map.Entry<String, Object> entry : headers.entrySet()) {
+                for (Map.Entry<String, Object> entry : headers.entrySet()) {
                     postMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
@@ -452,7 +451,7 @@ public class WS extends PlayPlugin {
         postMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-            	for (Map.Entry<String, Object> entry : headers.entrySet()) {
+                for (Map.Entry<String, Object> entry : headers.entrySet()) {
                     postMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
@@ -491,7 +490,7 @@ public class WS extends PlayPlugin {
         deleteMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-            	for (Map.Entry<String, String> entry : headers.entrySet()) {
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
                     deleteMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
@@ -531,7 +530,7 @@ public class WS extends PlayPlugin {
         headMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-            	for (Map.Entry<String, String> entry : headers.entrySet()) {
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
                     headMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
@@ -570,7 +569,7 @@ public class WS extends PlayPlugin {
         traceMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-            	for (Map.Entry<String, String> entry : headers.entrySet()) {
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
                     traceMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
@@ -609,7 +608,7 @@ public class WS extends PlayPlugin {
         optionsMethod.get().setDoAuthentication(true);
         try {
             if (headers != null) {
-            	for (Map.Entry<String, String> entry : headers.entrySet()) {
+                for (Map.Entry<String, String> entry : headers.entrySet()) {
                     optionsMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
                 }
             }
@@ -664,8 +663,8 @@ public class WS extends PlayPlugin {
         public String url;
         public String body;
         public FileParam[] fileParams;
-        public Map<String, String> headers = new HashMap<String, String> ();
-        public Map<String, Object> parameters = new HashMap<String, Object> ();
+        public Map<String, String> headers = new HashMap<String, String>();
+        public Map<String, Object> parameters = new HashMap<String, Object>();
         public String mimeType;
         public Integer timeout;
 
@@ -710,7 +709,7 @@ public class WS extends PlayPlugin {
             if (this.parameters != null && !this.parameters.isEmpty()) {
                 method.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 putOrPost.setRequestEntity(new StringRequestEntity(createQueryString()));
-            } 
+            }
             if (this.body != null) {
                 if (this.parameters != null && !this.parameters.isEmpty()) {
                     throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
@@ -769,39 +768,44 @@ public class WS extends PlayPlugin {
             this.body = body;
             return this;
         }
-        
+
         /**
          * Add a header to the request
          * @param name header name
          * @param value header value
          * @return the WSRequest for chaining.
          */
-        public WSRequest setHeader (String name, String value) {
-            this.headers.put(name,value);
+        public WSRequest setHeader(String name, String value) {
+            this.headers.put(name, value);
             return this;
         }
-        
+
         /**
          * Add a parameter to the request
          * @param name parameter name
          * @param value parameter value
          * @return the WSRequest for chaining.
          */
-        public WSRequest setParameter (String name, String value) {
-            this.parameters.put(name,value);
+        public WSRequest setParameter(String name, String value) {
+            this.parameters.put(name, value);
             return this;
         }
-        
+
+        public WSRequest setParameter(String name, Object value) {
+            this.parameters.put(name, value);
+            return this;
+        }
+
         /**
          * Use the provided headers when executing request.
          * @param headers
          * @return the WSRequest for chaining.
          */
-        public WSRequest headers(Map<String, String> headers){
-        	this.headers = headers;
-        	return this;
+        public WSRequest headers(Map<String, String> headers) {
+            this.headers = headers;
+            return this;
         }
-        
+
         /**
          * Add parameters to request.
          * If POST or PUT, parameters are passed in body using x-www-form-urlencoded if alone, or form-data if there is files too.
@@ -810,6 +814,11 @@ public class WS extends PlayPlugin {
          */
         public WSRequest params(Map<String, Object> parameters) {
             this.parameters = parameters;
+            return this;
+        }
+
+        public WSRequest setParameters(Map<String, String> parameters) {
+            this.parameters.putAll(parameters);
             return this;
         }
 
@@ -851,7 +860,7 @@ public class WS extends PlayPlugin {
         private HttpResponse executeRequest(HttpMethod method) {
             this.checkRelease();
             httpMethod.set(method);
-            if(this.timeout != null) {
+            if (this.timeout != null) {
                 httpMethod.get().getParams().setSoTimeout(this.timeout);
             }
             httpMethod.get().setDoAuthentication(true);
@@ -957,7 +966,7 @@ public class WS extends PlayPlugin {
         public String getContentType() {
             return method.getResponseHeader("content-type").getValue();
         }
-        
+
         public String getHeader(String key) {
             return method.getResponseHeader(key).getValue();
         }

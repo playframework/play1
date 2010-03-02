@@ -35,6 +35,7 @@ import play.Play;
 import play.Play.Mode;
 import play.classloading.BytecodeCache;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
+import play.data.binding.Unbinder;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.NoRouteFoundException;
@@ -215,7 +216,7 @@ public class Template {
             monitor = null;
             Logger.trace("%sms to render template %s", System.currentTimeMillis() - start, name);
         } catch (NoRouteFoundException e) {
-            if(e.isSourceAvailable()) {
+            if (e.isSourceAvailable()) {
                 throw e;
             }
             throwException(e);
@@ -235,7 +236,7 @@ public class Template {
             }
             throwException(e);
         } finally {
-            if(monitor != null) {
+            if (monitor != null) {
                 monitor.stop();
             }
         }
@@ -319,7 +320,7 @@ public class Template {
         public Object getProperty(String property) {
             try {
                 if (property.equals("actionBridge")) {
-                    return new ActionBridge();
+                    return new ActionBridge(this);
                 }
                 return super.getProperty(property);
             } catch (MissingPropertyException mpe) {
@@ -360,7 +361,7 @@ public class Template {
             // all other vars are template-specific
             args.put("_caller", getBinding().getVariables());
             if (attrs != null) {
-            	for (Map.Entry<String, Object> entry : attrs.entrySet()) {
+                for (Map.Entry<String, Object> entry : attrs.entrySet()) {
                     args.put("_" + entry.getKey(), entry.getValue());
                 }
             }
@@ -387,7 +388,7 @@ public class Template {
             if(val instanceof RawData) {
                 return ((RawData)val).data;
             }
-            if(!template.name.endsWith(".html") || TagContext.hasParentTag("verbatim")) {
+            if (!template.name.endsWith(".html") || TagContext.hasParentTag("verbatim")) {
                 return val.toString();
             }
             return StringEscapeUtils.escapeHtml(val.toString());
@@ -402,7 +403,7 @@ public class Template {
             public String data;
 
             public RawData(Object val) {
-                if(val == null) {
+                if (val == null) {
                     data = "";
                 } else {
                     data = val.toString();
@@ -412,23 +413,25 @@ public class Template {
             public String toString() {
                 return data;
             }
-
         }
 
         static class ActionBridge extends GroovyObjectSupport {
 
+            ExecutableTemplate template = null;
             String controller = null;
 
-            public ActionBridge(String controllerPart) {
+            public ActionBridge(ExecutableTemplate template, String controllerPart) {
+                this.template = template;
                 this.controller = controllerPart;
             }
 
-            public ActionBridge() {
+            public ActionBridge(ExecutableTemplate template) {
+                this.template = template;
             }
 
             @Override
             public Object getProperty(String property) {
-                return new ActionBridge(controller == null ? property : controller + "." + property);
+                return new ActionBridge(template, controller == null ? property : controller + "." + property);
             }
 
             @Override
@@ -448,14 +451,18 @@ public class Template {
                         String[] names = (String[]) actionMethod.getDeclaringClass().getDeclaredField("$" + actionMethod.getName() + LocalVariablesNamesTracer.computeMethodHash(actionMethod.getParameterTypes())).get(null);
                         if (param instanceof Object[]) {
                             // too many parameters versus action, possibly a developer error. we must warn him.
-                            if( names.length<((Object[])param).length ) {
-                                throw new NoRouteFoundException(action,null);
+                            if (names.length < ((Object[]) param).length) {
+                                throw new NoRouteFoundException(action, null);
                             }
                             for (int i = 0; i < ((Object[]) param).length; i++) {
-                                r.put( i < names.length ? names[i] : "", ((Object[]) param)[i] == null ? null : ((Object[]) param)[i].toString());
+                                Unbinder.unBind(r, ((Object[]) param)[i], i < names.length ? names[i] : "");
                             }
                         }
-                        return Router.reverse(action, r);
+                        Router.ActionDefinition def = Router.reverse(action, r);
+                        if (template.template.name.endsWith(".html") || template.template.name.endsWith(".xml")) {
+                            def.url = def.url.replace("&", "&amp;");
+                        }
+                        return def;
                     } catch (ActionNotFoundException e) {
                         throw new NoRouteFoundException(action, null);
                     }

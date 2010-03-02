@@ -287,12 +287,12 @@ public class OpenID {
         return null;
     }
 
-    static String discoverServer(String tok) {
-        if (tok.startsWith("http")) {
-            tok = WS.url(tok).get().getString();
+    public static String discoverServer(String openid) {
+        if (openid.startsWith("http")) {
+            openid = WS.url(openid).get().getString();
         }
-        Matcher openid2Provider = Pattern.compile("<link[^>]+openid2[.]provider[^>]+>", Pattern.CASE_INSENSITIVE).matcher(tok);
-        Matcher openidServer = Pattern.compile("<link[^>]+openid[.]server[^>]+>", Pattern.CASE_INSENSITIVE).matcher(tok);
+        Matcher openid2Provider = Pattern.compile("<link[^>]+openid2[.]provider[^>]+>", Pattern.CASE_INSENSITIVE).matcher(openid);
+        Matcher openidServer = Pattern.compile("<link[^>]+openid[.]server[^>]+>", Pattern.CASE_INSENSITIVE).matcher(openid);
         String server = null;
         if (openid2Provider.find()) {
             server = extractHref(openid2Provider.group());

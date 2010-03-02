@@ -227,7 +227,11 @@ class Unzip:
 		dirs.sort()
 		return dirs
 
-
+def isParentOf(path1, path2):
+	if len(path2) < len(path1) or len(path2) < 2:
+		return False
+	if (path1 == path2):
+		return True
 
 # ~~~~~~~~~~
 # Dynamically load more modules

@@ -113,6 +113,13 @@ public class ApplicationClasses {
     }
 
     /**
+     * Remove a class from cache
+     */
+    public void remove(ApplicationClass applicationClass) {
+        classes.remove(applicationClass.name);
+    }
+
+    /**
      * Does this class is already loaded ?
      * @param name The fully qualified class name
      */

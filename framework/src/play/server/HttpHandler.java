@@ -265,6 +265,7 @@ public class HttpHandler implements IoHandler {
                 if (raw) {
                     copyResponse(session, Request.current(), Response.current(), minaRequest, minaResponse);
                 } else {
+                    minaResponse.setContentType(MimeTypes.getContentType(file.getName()));
                     if (Play.mode == Play.Mode.DEV) {
                         minaResponse.setHeader("Cache-Control", "no-cache");
                     } else {
@@ -320,14 +321,14 @@ public class HttpHandler implements IoHandler {
             //
         }
         String format = Request.current().format;
-        minaResponse.setStatus(HttpResponseStatus.forId(500));
+        minaResponse.setStatus(HttpResponseStatus.forId(404));
         if ("XMLHttpRequest".equals(minaRequest.getHeader("X-Requested-With")) && (format == null || format.equals("html"))) {
             format = "txt";
         }
         if (format == null) {
             format = "txt";
         }
-        minaResponse.setContentType(MimeTypes.getContentType("xxx." + format, "text/plain"));
+        minaResponse.setContentType(MimeTypes.getContentType("404." + format, "text/plain"));
         String errorHtml = TemplateLoader.load("errors/404." + format).render(binding);
         try {
             minaResponse.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
@@ -379,7 +380,7 @@ public class HttpHandler implements IoHandler {
             if (format == null) {
                 format = "txt";
             }
-            response.setContentType(MimeTypes.getContentType("xxx." + format, "text/plain"));
+            response.setContentType(MimeTypes.getContentType("500." + format, "text/plain"));
             try {
                 String errorHtml = TemplateLoader.load("errors/500." + format).render(binding);
                 response.setContent(IoBuffer.wrap(errorHtml.getBytes("utf-8")));
@@ -440,7 +441,7 @@ public class HttpHandler implements IoHandler {
         }
     }
 
-    private final static Map<String, RenderStatic> staticPathsCache = new HashMap();
+    private final static Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
 
     static class MinaInvocation extends Invoker.Invocation {
 

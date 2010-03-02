@@ -7,7 +7,7 @@
 	assertTextPresent('[Required, Validation failed]')
 	
 	open('@{Validation.index()}?bottle.name2=Ho')
-	assertTextPresent('[Required, Minimal size is 3, Validation failed]')
+	assertTextPresent('[Required, Minimum size is 3, Validation failed]')
 	
 	open('@{Validation.index()}?bottle.name2=Hop')
 	assertTextPresent('[Required, Validation failed]')

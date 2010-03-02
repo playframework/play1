@@ -23,7 +23,12 @@
 	#{/if}
 	#{else}
 		<select id="${field.id}" name="${field.name}@id">
-			<option value="">&{'crud.none'}</option>
+		    #{ifnot _field.required}
+                <option value="">&{'crud.none'}</option>              
+		    #{/ifnot}
+		    #{else}
+                <option value="">&{'crud.selectValue'}</option>
+		    #{/else}
 			%{ play.db.jpa.JPA.getEntityManager().createQuery("from " + _field.relation).getResultList().sort{ it.toString() }.each() { }%
 			%{
 				selected = false

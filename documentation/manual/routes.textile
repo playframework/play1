@@ -202,6 +202,11 @@ p(note). **Continuing the discussion**
 When the Router has determined which Java call to invoke for the received HTTP Request, the play framework then invokes that Java call. "Let's see how the Controller works":controllers.
 
 
+h2. <a name="content-types">Setting content types</a>
+
+You can specify the content type of the response in the routes file:
+
+bc. GET      /stylesheets/dynamic_css          css.SiteCSS(format:'css')
 
 
 

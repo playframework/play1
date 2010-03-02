@@ -30,6 +30,7 @@ crud.deleted=The &{%s} has been deleted
 crud.delete.error=Cannot delete this object
 crud.search=Search
 crud.none=(None)
+crud.selectValue=(Please select a value)
 
 crud.help.required=Required.
 crud.help.minlength=Min length is %d.
