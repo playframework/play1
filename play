@@ -710,7 +710,7 @@ try:
 				dirname = m
 			else:
 				for f in os.listdir(os.path.join(play_base, 'modules')):
-					if os.path.isdir(os.path.join(play_base, 'modules/%s' % f)) and f.find(m) == 0:
+					if os.path.isdir(os.path.join(play_base, 'modules/%s' % f)) and f.find('%s-' % m) == 0:
 						dirname = f
 						break
 			
