@@ -7,6 +7,7 @@ import net.sf.oval.context.OValContext;
 import play.db.jpa.FileAttachment;
 import play.exceptions.UnexpectedException;
 
+@SuppressWarnings("serial")
 public class RequiredCheck extends AbstractAnnotationCheck<Required> {
     
     final static String mes = "validation.required";
@@ -18,8 +19,8 @@ public class RequiredCheck extends AbstractAnnotationCheck<Required> {
         if (value instanceof String) {
             return value.toString().trim().length() > 0;
         }
-        if (value instanceof Collection) {
-            return ((Collection)value).size() > 0;
+        if (value instanceof Collection<?>) {
+            return ((Collection<?>)value).size() > 0;
         }
         if (value instanceof FileAttachment) {
             return ((FileAttachment)value).isSet();

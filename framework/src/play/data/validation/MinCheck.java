@@ -6,6 +6,7 @@ import net.sf.oval.Validator;
 import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import net.sf.oval.context.OValContext;
 
+@SuppressWarnings("serial")
 public class MinCheck extends AbstractAnnotationCheck<Min> {
 
     final static String mes = "validation.min";
@@ -42,7 +43,7 @@ public class MinCheck extends AbstractAnnotationCheck<Min> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap();
+        Map<String, String> messageVariables = new HashMap<String, String>();
         messageVariables.put("min", Double.toString(min));
         return messageVariables;
     }
