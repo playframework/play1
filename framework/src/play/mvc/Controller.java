@@ -16,6 +16,7 @@ import org.w3c.dom.Document;
 import play.Invoker.Suspend;
 import play.Logger;
 import play.Play;
+import play.PlayPlugin;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
@@ -484,10 +485,21 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             throw new UnexpectedException(ex);
         }
         try {
-            Template template = TemplateLoader.load(templateName);
-            throw new RenderTemplate(template, templateBinding.data);
+            // Give a chance to the plugin to render using their own template engine.
+            boolean raw = false;
+            for (PlayPlugin plugin : Play.plugins) {
+                // Let the plugin throw his own render exception
+                if (plugin.renderTemplate(templateName, templateBinding.data)) {
+                    raw = true;
+                    break;
+                }
+            }
+            if (!raw) {
+                Template template = TemplateLoader.load(templateName);
+                throw new RenderTemplate(template, templateBinding.data);
+            }
         } catch (TemplateNotFoundException ex) {
-            if(ex.isSourceAvailable()) {
+            if(ex.isSourceAvailable()) {                        
                 throw ex;
             }
             StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex);

@@ -4,10 +4,13 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.exceptions.TemplateNotFoundException;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Router.Route;
+import play.mvc.Scope;
 import play.mvc.results.Result;
 import play.templates.Template;
 import play.test.BaseTest;
@@ -33,7 +36,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public TestResults runTest(Class<BaseTest> clazz) {
         return null;
     }
-    
+
     /**
      * Called when play need to bind a Java object from HTTP params
      */
@@ -50,22 +53,32 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Enhance this class
+     *
      * @param applicationClass
      * @throws java.lang.Exception
      */
     public void enhance(ApplicationClass applicationClass) throws Exception {
     }
-    
+
     /**
      * Let the plugin to modify the parsed template.
-     * @param template
+     *
+     * @param template TODO: This is not used at all :( ...
      */
-    public void onTemplateCompilation(Template template) {	
+    public void onTemplateCompilation(Template template) {
+    }
+
+    /**
+     *
+     */
+    public boolean renderTemplate(String templateName, Map<String, Object> args) throws TemplateNotFoundException {
+        return false;
     }
 
     /**
      * Let a chance to this plugin to fully manage this request
-     * @param request The Play request
+     *
+     * @param request  The Play request
      * @param response The Play response
      * @return true if this plugin has managed this request
      */
@@ -75,7 +88,8 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Let a chance to this plugin to manage a static ressource
-     * @param request The Play request
+     *
+     * @param request  The Play request
      * @param response The Play response
      * @return true if this plugin has managed this request
      */
@@ -130,6 +144,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Called if an exception occured during the invocation.
+     *
      * @param e The catched exception.
      */
     public void onInvocationException(Throwable e) {
@@ -152,13 +167,15 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Called when the action method has thrown a result.
+     *
      * @param result The result object for the request.
      */
     public void onActionInvocationResult(Result result) {
     }
-    
+
     /**
      * Called when the request has been routed.
+     *
      * @param route The route selected.
      */
     public void onRequestRouting(Route route) {
@@ -182,8 +199,9 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public void onRoutesLoaded() {
     }
 
-    /** 
+    /**
      * Event may be sent by plugins or other components
+     *
      * @param message convention: pluginClassShortName.message
      * @param context depends on the plugin
      */
@@ -202,6 +220,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Let some plugins route themself
+     *
      * @param request
      */
     public void routeRequest(Request request) {
@@ -216,10 +235,10 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
             playPlugin.onEvent(message, context);
         }
     }
-    
+
     // ~~~~~
-    
+
     public int compareTo(PlayPlugin o) {
         return (index < o.index ? -1 : (index == o.index ? 0 : 1));
-    }       
+    }
 }

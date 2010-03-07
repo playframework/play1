@@ -99,6 +99,7 @@
     
     <target name="modules">
         <property name="play.path" value="../.."/>
+        <ant antfile="build.xml" target="build" dir="../modules/test-runner" />
     </target>
     
     <!-- Netbeans support -->
