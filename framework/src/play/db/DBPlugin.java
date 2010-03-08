@@ -10,7 +10,6 @@ import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.util.Properties;
-import java.util.regex.Pattern;
 import jregex.Matcher;
 import play.Logger;
 import play.Play;

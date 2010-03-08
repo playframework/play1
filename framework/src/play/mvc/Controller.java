@@ -362,7 +362,6 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
             Map<String, Object> r = new HashMap<String, Object>();
             Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
             String[] names = (String[]) actionMethod.getDeclaringClass().getDeclaredField("$" + actionMethod.getName() + LocalVariablesNamesTracer.computeMethodHash(actionMethod.getParameterTypes())).get(null);
-            assert names.length == args.length : "Problem in action redirection";
             for (int i = 0; i < names.length; i++) {
                 try {
                     Unbinder.unBind(r, args[i], names[i]);

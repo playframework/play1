@@ -1,18 +1,17 @@
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import play.libs.WS;
 import play.libs.WS.FileParam;
+import play.libs.WS.HttpResponse;
 import play.test.UnitTest;
 
-import com.google.gson.*;
+import com.google.gson.JsonObject;
 
 
 public class RestTest extends UnitTest{
@@ -28,6 +27,19 @@ public class RestTest extends UnitTest{
 	@Test
 	public void testGet(){
 		assertEquals("对!", WS.url("http://localhost:9003/ressource/%s","ééééééçççççç汉语漢語").get().getString());
+	}
+	@Test
+	public void testHead(){
+		HttpResponse headResponse = WS.url("http://localhost:9003/ressource/%s","ééééééçççççç汉语漢語").head();
+		assertNull(headResponse.getString());
+		// Headers should be the same for the HEAD and the GET. Deactivated because it fails, see bug 532674
+		// https://bugs.launchpad.net/play/+bug/532674
+		/*
+		HttpResponse getResponse = WS.url("http://localhost:9003/ressource/%s","ééééééçççççç汉语漢語").get();
+		Header[] getHeaders = getResponse.getHeaders();
+		for (int i = 0; i < getHeaders.length; i++) {
+			//assertEquals(getHeaders[i].getValue(), headResponse.getHeader(getHeaders[i].getName()));
+		} */
 	}
 	@Test
 	public void testPost(){

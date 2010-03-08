@@ -8,18 +8,19 @@ import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import net.sf.oval.context.OValContext;
 import play.exceptions.UnexpectedException;
 
+@SuppressWarnings("serial")
 public class CheckWithCheck extends AbstractAnnotationCheck<CheckWith> {
 
     final static String mes = "validation.invalid";
 
-    Map<String,String> variables = new HashMap();
+    Map<String, String> variables = new HashMap<String, String>();
     Check check;
 
     @Override
     public void configure(CheckWith checkWith) {
         setMessage(checkWith.message());
         try {
-            Constructor constructor = checkWith.value().getDeclaredConstructor();
+            Constructor<?> constructor = checkWith.value().getDeclaredConstructor();
             constructor.setAccessible(true);
             check = (Check)constructor.newInstance();
             check.checkWithCheck = this;

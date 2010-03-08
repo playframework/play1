@@ -1,8 +1,6 @@
 package play.mvc;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -177,6 +175,12 @@ public class Router {
                 }
                 return;
             }
+        }
+        // Not found - if the request was a HEAD, let's see if we can find a corresponding GET
+        if (request.method.equals("HEAD")) {
+            request.method = "GET";
+            route(request);
+            request.method = "HEAD";
         }
         throw new NotFound(request.method, request.path);
     }
