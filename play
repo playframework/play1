@@ -27,6 +27,7 @@ def replaceAll(file, searchExp, replaceExp):
 	searchExp = searchExp.replace('$', '\\$')
 	searchExp = searchExp.replace('{', '\\{')
 	searchExp = searchExp.replace('}', '\\}')
+	searchExp = searchExp.replace('.', '\\.')
 	for line in fileinput.input(file, inplace=1):
 		line = re.sub(searchExp, replaceExp, line)
 		sys.stdout.write(line)
@@ -486,7 +487,10 @@ try:
 		    shutil.copyfile(os.path.join(play_base, 'resources/war/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
 		application_name = readConf('application.name')
 		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%APPLICATION_NAME%', application_name)
-		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%PLAY_ID%', play_id)
+		if play_id:
+			replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%PLAY_ID%', play_id)
+		else:
+			replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%PLAY_ID%', 'war')
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/application')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/application'))
 		shutil.copytree(application_path, os.path.join(war_path, 'WEB-INF/application'))
 		if os.path.exists(os.path.join(war_path, 'WEB-INF/application/war')):
@@ -509,6 +513,10 @@ try:
 			shutil.copytree(module, to)
 			if os.path.exists(os.path.join(to, 'src')):
 				shutil.rmtree(os.path.join(to, 'src'))
+			if os.path.exists(os.path.join(to, 'dist')):
+				shutil.rmtree(os.path.join(to, 'dist'))
+			if os.path.exists(os.path.join(to, 'samples-and-tests')):
+				shutil.rmtree(os.path.join(to, 'samples-and-tests'))
 			if os.path.exists(os.path.join(to, 'build.xml')):
 				os.remove(os.path.join(to, 'build.xml'))
 		pm = readConfs('module.')
@@ -742,6 +750,8 @@ try:
 		do_java()
 		if os.path.exists(os.path.join(application_path, 'tmp')):
 			shutil.rmtree(os.path.join(application_path, 'tmp'))
+		if os.path.exists(os.path.join(application_path, 'precompiled')):
+			shutil.rmtree(os.path.join(application_path, 'precompiled'))
 		java_cmd.insert(2, '-Dprecompile=yes')
 		try:
 			subprocess.call(java_cmd, env=os.environ)

@@ -8,6 +8,8 @@ import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObjectSupport;
 import groovy.lang.MissingPropertyException;
 import groovy.lang.Script;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
@@ -49,6 +51,7 @@ import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.Codec;
+import play.libs.IO;
 import play.utils.Java;
 import play.mvc.ActionInvoker;
 import play.mvc.Http.Request;
@@ -84,24 +87,22 @@ public class Template {
         }
     }
 
+    public void loadPrecompiled() {
+        try {
+            File file = Play.getFile("precompiled/templates/" + name);
+            byte[] code = IO.readContent(file);
+            directLoad(code);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot load precompiled template " +name);
+        }
+    }
+
     public boolean loadFromCache() {
         try {
             long start = System.currentTimeMillis();
-            TClassLoader tClassLoader = new TClassLoader();
             byte[] bc = BytecodeCache.getBytecode(name, source);
             if (bc != null) {
-
-                String[] lines = new String(bc, "utf-8").split("\n");
-                this.linesMatrix = (HashMap<Integer, Integer>) Java.deserialize(Codec.decodeBASE64(lines[1]));
-                this.doBodyLines = (HashSet<Integer>) Java.deserialize(Codec.decodeBASE64(lines[3]));
-                for (int i = 4; i < lines.length; i = i + 2) {
-                    String className = lines[i];
-                    byte[] byteCode = Codec.decodeBASE64(lines[i + 1]);
-                    Class c = tClassLoader.defineTemplate(className, byteCode);
-                    if (compiledTemplate == null) {
-                        compiledTemplate = c;
-                    }
-                }
+                directLoad(bc);
                 Logger.trace("%sms to load template %s from cache", System.currentTimeMillis() - start, name);
                 return true;
             }
@@ -109,6 +110,21 @@ public class Template {
             Logger.warn(e, "Cannot load %s from cache", name);
         }
         return false;
+    }
+
+    void directLoad(byte[] code) throws Exception {
+        TClassLoader tClassLoader = new TClassLoader();
+        String[] lines = new String(code, "utf-8").split("\n");
+        this.linesMatrix = (HashMap<Integer, Integer>) Java.deserialize(Codec.decodeBASE64(lines[1]));
+        this.doBodyLines = (HashSet<Integer>) Java.deserialize(Codec.decodeBASE64(lines[3]));
+        for (int i = 4; i < lines.length; i = i + 2) {
+            String className = lines[i];
+            byte[] byteCode = Codec.decodeBASE64(lines[i + 1]);
+            Class c = tClassLoader.defineTemplate(className, byteCode);
+            if (compiledTemplate == null) {
+                compiledTemplate = c;
+            }
+        }
     }
 
     public void compile() {
@@ -156,6 +172,18 @@ public class Template {
                 // Cache
                 BytecodeCache.cacheBytecode(sb.toString().getBytes("utf-8"), name, source);
                 compiledTemplate = tClassLoader.loadClass(groovyClassesForThisTemplate.get(0).getName());
+                if (System.getProperty("precompile") != null) {
+                    try {
+                        // emit bytecode to standard class layout as well
+                        File f = Play.getFile("precompiled/templates/" + name.replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"));
+                        f.getParentFile().mkdirs();
+                        FileOutputStream fos = new FileOutputStream(f);
+                        fos.write(sb.toString().getBytes("utf-8"));
+                        fos.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
 
                 Logger.trace("%sms to compile template %s to %d classes", System.currentTimeMillis() - start, name, groovyClassesForThisTemplate.size());
 

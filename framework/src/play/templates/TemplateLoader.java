@@ -17,8 +17,8 @@ import play.exceptions.TemplateNotFoundException;
 public class TemplateLoader {
 
     protected static Map<String, Template> templates = new HashMap<String, Template>();
-	
-	/**
+
+    /**
      * Load a template from a virtual file
      * @param file A VirtualFile
      * @return The executable template
@@ -26,6 +26,12 @@ public class TemplateLoader {
     public static Template load(VirtualFile file) {
         String key = (file.relativePath().hashCode()+"").replace("-", "M");
         if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {
+            if(Play.usePrecompiled) {
+                Template template = new Template(file.relativePath().replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"), file.contentAsString());
+                template.loadPrecompiled();
+                templates.put(key, template);
+                return template;
+            }
             Template template = new Template(file.relativePath(), file.contentAsString());
             if(template.loadFromCache()) {
                 templates.put(key, template);
@@ -113,6 +119,13 @@ public class TemplateLoader {
         List<Template> res = new ArrayList<Template>();
         for (VirtualFile virtualFile : Play.templatesPath) {
             scan(res, virtualFile);
+        }
+        for(VirtualFile root : Play.roots) {
+            VirtualFile vf = root.child("conf/routes");
+            if(vf != null && vf.exists()) {
+                Template template = load(vf);
+                template.compile();
+            }
         }
         return res;
     }
