@@ -36,6 +36,7 @@ public class Play {
 
         DEV, PROD
     }
+
     /**
      * Is the application started
      */
@@ -128,7 +129,7 @@ public class Play {
      * Framework version
      */
     public static String version = null;
-    
+
     // pv
     static boolean firstStart = true;
 
@@ -136,8 +137,9 @@ public class Play {
 
     /**
      * Init the framework
+     *
      * @param root The application path
-     * @param id The framework id to use
+     * @param id   The framework id to use
      */
     public static void init(File root, String id) {
         // Simple things
@@ -152,10 +154,10 @@ public class Play {
         try {
             URL versionUrl = Play.class.getResource("/play/version");
             URI uri = new URI(versionUrl.toString().replace(" ", "%20"));
-            if (uri.getScheme().equals("jar") ) {
+            if (uri.getScheme().equals("jar")) {
                 String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
                 frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
-            } else if (uri.getScheme().equals("file") ) {
+            } else if (uri.getScheme().equals("file")) {
                 frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
             } else if (uri.getScheme().equals("vfszip") || uri.getScheme().equals("vfsfile")) {
                 String file = uri.toURL().toExternalForm();
@@ -164,12 +166,12 @@ public class Play {
                 //vfszip vfszip:/Applications/Servers/jboss-5.1.0.GA/server/default/deploy/ldas-play.war/WEB-INF/lib/play.jar/play/version
                 frameworkPath = new File(file).getParentFile().getParentFile().getParentFile().getParentFile();
             } else if (uri.getScheme().equals("wsjar")) {
-               String file = uri.toURL().toExternalForm();
+                String file = uri.toURL().toExternalForm();
                 file = file.substring("wsjar:file:".length(), file.lastIndexOf("!"));
                 //wsjar:file:/opt/IBM/WebSphere/profile/installedApps/node/ldas-play_war.ear/ldas-play.war/WEB-INF/lib/play.jar!/play/version
                 frameworkPath = new File(file).getParentFile().getParentFile();
             } else {
-               throw new UnexpectedException("Cannot find the Play! framework - trying with uri: " + uri + " scheme " + uri.getScheme());
+                throw new UnexpectedException("Cannot find the Play! framework - trying with uri: " + uri + " scheme " + uri.getScheme());
             }
         } catch (Exception e) {
             throw new UnexpectedException("Where is the framework ?", e);
@@ -221,7 +223,7 @@ public class Play {
         javaPath = new ArrayList<VirtualFile>();
         javaPath.add(appRoot.child("app"));
         javaPath.add(appRoot.child("conf"));
-        
+
         // Build basic templates path
         templatesPath = new ArrayList<VirtualFile>();
         templatesPath.add(appRoot.child("app/views"));
@@ -235,7 +237,7 @@ public class Play {
 
         // Load modules
         loadModules();
-        
+
         // Enable a first classloader
         classloader = new ApplicationClassloader();
 
@@ -316,7 +318,7 @@ public class Play {
      */
     public static synchronized void start() {
         try {
-            
+
             if (started) {
                 stop();
             }
@@ -411,6 +413,7 @@ public class Play {
 
     /**
      * Force all java source and template compilation.
+     *
      * @return success ?
      */
     static boolean preCompile() {
@@ -530,13 +533,13 @@ public class Play {
     }
 
     /**
-     * Load all modules. 
+     * Load all modules.
      * You can even specify the list using the MODULES environement variable.
      */
     public static void loadModules() {
         if (System.getenv("MODULES") != null) {
             // Modules path is prepended with a env property
-            if(System.getenv("MODULES") != null && System.getenv("MODULES").trim().length()>0) {
+            if (System.getenv("MODULES") != null && System.getenv("MODULES").trim().length() > 0) {
                 for (String m : System.getenv("MODULES").split(System.getProperty("os.name").startsWith("Windows") ? ";" : ":")) {
                     File modulePath = new File(m);
                     if (!modulePath.exists() || !modulePath.isDirectory()) {
@@ -565,13 +568,14 @@ public class Play {
         if (Play.id.equals("test")) {
             addModule("test-runner", new File(Play.frameworkPath, "modules/test-runner"));
         }
-        if(Play.mode == Mode.DEV) {
+        if (Play.mode == Mode.DEV) {
             addModule("_docviewer", new File(Play.frameworkPath, "modules/docviewer"));
         }
     }
 
     /**
      * Add a play application (as plugin)
+     *
      * @param path The application path
      */
     public static void addModule(String name, File path) {
@@ -587,13 +591,14 @@ public class Play {
             modulesRoutes.put(name, root.child("conf/routes"));
         }
         roots.add(root);
-        if(!name.startsWith("_")) {
+        if (!name.startsWith("_")) {
             Logger.info("Module %s is available (%s)", name, path.getAbsolutePath());
         }
     }
 
     /**
      * Search a VirtualFile in all loaded applications and plugins
+     *
      * @param path Relative path from the applications root
      * @return The virtualFile or null
      */
@@ -603,6 +608,7 @@ public class Play {
 
     /**
      * Search a File in the current application
+     *
      * @param path Relative path from the application root
      * @return The file even if it doesn't exist
      */

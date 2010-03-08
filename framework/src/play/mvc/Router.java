@@ -249,6 +249,12 @@ public class Router {
                 return route;
             }
         }
+        // Not found - if the request was a HEAD, let's see if we can find a corresponding GET
+        if (request.method.equals("HEAD")) {
+            request.method = "GET";
+            route(request);
+            request.method = "HEAD";
+        }
         throw new NotFound(request.method, request.path);
     }
 

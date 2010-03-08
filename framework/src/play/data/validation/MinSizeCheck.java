@@ -6,6 +6,7 @@ import net.sf.oval.Validator;
 import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import net.sf.oval.context.OValContext;
 
+@SuppressWarnings("serial")
 public class MinSizeCheck extends AbstractAnnotationCheck<MinSize> {
 
     final static String mes = "validation.minSize";
@@ -28,7 +29,7 @@ public class MinSizeCheck extends AbstractAnnotationCheck<MinSize> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap();
+        Map<String, String> messageVariables = new HashMap<String, String>();
         messageVariables.put("minSize", Integer.toString(minSize));
         return messageVariables;
     }
