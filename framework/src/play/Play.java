@@ -163,10 +163,14 @@ public class Play {
                 file = file.replaceAll("vfsfile://", "file:///");
                 //vfszip vfszip:/Applications/Servers/jboss-5.1.0.GA/server/default/deploy/ldas-play.war/WEB-INF/lib/play.jar/play/version
                 frameworkPath = new File(file).getParentFile().getParentFile().getParentFile().getParentFile();
+	    } else if (uri.getScheme().equals("wsjar")) {
+               String file = uri.toURL().toExternalForm();
+                file = file.substring("wsjar:file:".length(), file.lastIndexOf("!"));
+                //wsjar:file:/opt/IBM/WebSphere/profile/installedApps/node/ldas-play_war.ear/ldas-play.war/WEB-INF/lib/play.jar!/play/version
+                frameworkPath = new File(file).getParentFile().getParentFile();
             } else {
-                throw new UnexpectedException("Cannot find the Play! framework");
+               throw new UnexpectedException("Cannot find the Play! framework - trying with uri: " + uri + " scheme " + uri.getScheme());
             }
-
         } catch (Exception e) {
             throw new UnexpectedException("Where is the framework ?", e);
         }
