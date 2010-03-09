@@ -58,7 +58,7 @@ public class JPAPlugin extends PlayPlugin {
     public void onApplicationStart() {
         if (JPA.entityManagerFactory == null) {
             List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
-            if (classes.isEmpty()) {
+            if (classes.isEmpty() && Play.configuration.getProperty("jpa.entities", "").equals("")) {
                 return;
             }
             if (DB.datasource == null) {

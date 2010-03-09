@@ -439,27 +439,12 @@ try:
 	
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [war] Generate a WAR
-	if play_command == 'war':
+		
+	def package_as_war(war_path, war_zip_path):
 		check_application()
 		load_modules()
 		do_classpath()
 		do_java()
-		
-		war_path = None
-		war_zip_path = None
-		try:
-			optlist, args = getopt.getopt(remaining_args, 'o:', ['output=', 'zip'])
-			for o, a in optlist:
-				if o in ('-o', '--output'):
-					war_path = os.path.normpath(os.path.abspath(a))
-			for o, a in optlist:
-				if o in ('--zip'):
-					war_zip_path = war_path + '.war'
-		except getopt.GetoptError, err:
-			print "~ %s" % str(err)
-			print "~ Please specify a path where to generate the WAR, using the -o or --output option"
-			print "~ "
-			sys.exit(-1)
 		
 		if not war_path:
 			print "~ Oops. Please specify a path where to generate the WAR, using the -o or --output option"
@@ -544,6 +529,26 @@ try:
 					zip.write(os.path.join(dirpath, file), os.path.join(dirpath[len(war_path):], file))
 
 			zip.close()
+
+	if play_command == 'war':
+		war_path = None
+		war_zip_path = None
+		try:
+			optlist, args = getopt.getopt(remaining_args, 'o:', ['output=', 'zip'])
+			for o, a in optlist:
+				if o in ('-o', '--output'):
+					war_path = os.path.normpath(os.path.abspath(a))
+			for o, a in optlist:
+				if o in ('--zip'):
+					war_zip_path = war_path + '.war'
+		except getopt.GetoptError, err:
+			print "~ %s" % str(err)
+			print "~ Please specify a path where to generate the WAR, using the -o or --output option"
+			print "~ "
+			sys.exit(-1)
+			
+		package_as_war(war_path, war_zip_path)
+		
 		print "~ Done !"
 		print "~"
 		print "~ You can now load %s as a standard WAR into your servlet container" % (os.path.normpath(war_path))
