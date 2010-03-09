@@ -25,7 +25,7 @@ public class Unbinder {
             if (!result.containsKey(name)) {
                 result.put(name, src != null ? src.toString() : null);
             } else {
-                List<Object> objects = (List<Object>) result.get(name);
+                @SuppressWarnings("unchecked") List<Object> objects = (List<Object>) result.get(name);
                 objects.add(src != null ? src.toString() : null);
             }
         } else if (src.getClass().isArray()) {

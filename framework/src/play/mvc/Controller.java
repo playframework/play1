@@ -485,14 +485,14 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
         }
         return null;
     }
-    
+
     /**
      * Retrieve annotation for the controller class
      * @param clazz The annotation class
      * @return Annotation object or null if not found
      */
     protected static <T extends Annotation> T getControllerInheritedAnnotation(Class<T> clazz) {
-        Class c = getControllerClass();
+        Class<?> c = getControllerClass();
         while(!c.equals(Object.class)) {
             if (c.isAnnotationPresent(clazz)) {
                 return (T)c.getAnnotation(clazz);
@@ -506,7 +506,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
      * Retrieve annotation for the action method
      * @return Annotation object or null if not found
      */
-    protected static Class getControllerClass() {
+    protected static Class<?> getControllerClass() {
         return Play.classloader.getClassIgnoreCase("controllers." + Http.Request.current().controller);
     }
 

@@ -20,7 +20,7 @@ public class BeanWrapper {
     /** 
      * a cache for our properties and setters
      */
-    private Map<String, Property> wrappers = new HashMap();
+    private Map<String, Property> wrappers = new HashMap<String, Property>();
 
     public BeanWrapper(Class forClass) {
         Logger.trace("Bean wrapper for class %s", forClass.getName());
@@ -101,7 +101,6 @@ public class BeanWrapper {
 
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
-            String name = method.getName();
             if (!isSetter(method)) {
                 continue;
             }

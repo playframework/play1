@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.UnmodifiableClassException;
 import java.net.MalformedURLException;
@@ -19,7 +20,6 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import play.Logger;
@@ -63,7 +63,7 @@ public class ApplicationClassloader extends ClassLoader {
      * You know ...
      */
     @Override
-    protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
+    protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 
         Class c = findLoadedClass(name);
         if (c != null) {
@@ -348,7 +348,7 @@ public class ApplicationClassloader extends ClassLoader {
             for (VirtualFile virtualFile : Play.javaPath) {
                 all.addAll(getAllClasses(virtualFile));
             }
-            List<String> classNames = new ArrayList();
+            List<String> classNames = new ArrayList<String>();
             for (int i = 0; i < all.size(); i++) {
                 if (all.get(i) != null && !all.get(i).compiled) {
                     classNames.add(all.get(i).name);
@@ -415,7 +415,7 @@ public class ApplicationClassloader extends ClassLoader {
      * @param clazz The annotation class.
      * @return A list of class
      */
-    public List<Class> getAnnotatedClasses(Class clazz) {
+    public List<Class> getAnnotatedClasses(Class<? extends Annotation> clazz) {
         getAllClasses();
         List<Class> results = new ArrayList<Class>();
         for (ApplicationClass c : Play.classes.getAnnotatedClasses(clazz)) {
@@ -426,7 +426,7 @@ public class ApplicationClassloader extends ClassLoader {
 
     public List<Class> getAnnotatedClasses(Class[] clazz) {
         List<Class> results = new ArrayList<Class>();
-        for (Class cl : clazz) {
+        for (Class<? extends Annotation> cl : clazz) {
             results.addAll(getAnnotatedClasses(cl));
         }
         return results;

@@ -86,20 +86,20 @@ public class JobsPlugin extends PlayPlugin {
 
     @Override
     public void afterApplicationStart() {
-        List<Class> jobs = new ArrayList<Class>();
+        List<Class<?>> jobs = new ArrayList<Class<?>>();
         for (Class clazz : Play.classloader.getAllClasses()) {
             if (Job.class.isAssignableFrom(clazz)) {
                 jobs.add(clazz);
             }
         }
         scheduledJobs = new ArrayList<Job>();
-        for (final Class clazz : jobs) {
+        for (final Class<?> clazz : jobs) {
             // @OnApplicationStart
             if (clazz.isAnnotationPresent(OnApplicationStart.class)) {
                 try {
-                    Job job = ((Job) clazz.newInstance());
+                    Job<?> job = ((Job<?>) clazz.newInstance());
                     scheduledJobs.add(job);
-                    job.run();     
+                    job.run();
                     if(job.wasError) {
                         if(job.lastException != null) {
                             throw job.lastException;
@@ -120,7 +120,7 @@ public class JobsPlugin extends PlayPlugin {
             // @On
             if (clazz.isAnnotationPresent(On.class)) {
                 try {
-                    Job job = ((Job) clazz.newInstance());
+                    Job<?> job = ((Job<?>) clazz.newInstance());
                     scheduledJobs.add(job);
                     scheduleForCRON(job);
                 } catch (InstantiationException ex) {
@@ -151,7 +151,7 @@ public class JobsPlugin extends PlayPlugin {
         executor = new ScheduledThreadPoolExecutor(core, new ThreadPoolExecutor.AbortPolicy());
     }
 
-    public static void scheduleForCRON(Job job) {
+    public static <V> void scheduleForCRON(Job<V> job) {
         if (job.getClass().isAnnotationPresent(On.class)) {
             String cron = ((On) (job.getClass().getAnnotation(On.class))).value();
             if (cron.startsWith("cron.")) {
@@ -162,7 +162,7 @@ public class JobsPlugin extends PlayPlugin {
                     Date now = new Date();
                     Date nextDate = Time.parseCRONExpression(cron);
                     long delay = nextDate.getTime() - now.getTime();
-                    executor.schedule((Callable)job, delay, TimeUnit.MILLISECONDS);
+                    executor.schedule((Callable<V>)job, delay, TimeUnit.MILLISECONDS);
                     job.executor = executor;
                 } catch (Exception ex) {
                     throw new UnexpectedException(ex);

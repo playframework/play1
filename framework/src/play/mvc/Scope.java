@@ -300,6 +300,7 @@ public class Scope {
             return null;
         }
 
+        @SuppressWarnings("unchecked")
         public <T> T get(String key, Class<T> type) {
             try {
                 return (T) Binder.directBind(get(key), type);
@@ -437,6 +438,7 @@ public class Scope {
             return data.get(key);
         }
 
+        @SuppressWarnings("unchecked")
         public <T> T get(String key, Class<T> clazz) {
             return (T) this.get(key);
         }

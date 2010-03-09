@@ -43,11 +43,11 @@ public class Utils {
             }
         }
 
-        public static Map filterMap(Map<?,?> map, String keypattern) {
+        public static <K,V> Map<K,V> filterMap(Map<K,V> map, String keypattern) {
             try {
-                Map filtered = (Map) map.getClass().newInstance();
-                for (Map.Entry<?, ?> entry : map.entrySet()) {
-                	Object key = entry.getKey();
+                @SuppressWarnings("unchecked") Map<K, V> filtered = map.getClass().newInstance();
+                for (Map.Entry<K, V> entry : map.entrySet()) {
+                    K key = entry.getKey();
                     if (key.toString().matches(keypattern)) {
                         filtered.put(key, entry.getValue());
                     }

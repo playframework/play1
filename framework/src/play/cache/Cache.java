@@ -213,6 +213,7 @@ public abstract class Cache {
      * @param clazz The type class
      * @return The element value or null
      */
+    @SuppressWarnings("unchecked")
     public static <T> T get(String key, Class<T> clazz) {
         return (T) cacheImpl.get(key);
     }

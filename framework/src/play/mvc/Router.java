@@ -270,7 +270,8 @@ public class Router {
                             break;
                         } else {
                             if (value instanceof List) {
-                                value = ((List<Object>) value).get(0);
+                                @SuppressWarnings("unchecked") List<Object> l = (List<Object>) value;
+                                value = l.get(0);
                             }
                             if (!value.toString().startsWith(":") && !arg.constraint.matches(value.toString())) {
                                 allRequiredArgsAreHere = false;
@@ -303,7 +304,7 @@ public class Router {
                             Object value = entry.getValue();
                             if (inPathArgs.contains(key) && value != null) {
                                 if (List.class.isAssignableFrom(value.getClass())) {
-                                    List<Object> vals = (List<Object>) value;
+                                    @SuppressWarnings("unchecked") List<Object> vals = (List<Object>) value;
                                     path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", vals.get(0) + "");
                                 } else {
                                     path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value + "");
@@ -312,7 +313,7 @@ public class Router {
                                 // Do nothing -> The key is static
                             } else if (value != null) {
                                 if (List.class.isAssignableFrom(value.getClass())) {
-                                    List<Object> vals = (List<Object>) value;
+                                    @SuppressWarnings("unchecked") List<Object> vals = (List<Object>) value;
                                     for (Object object : vals) {
                                         try {
                                             queryString.append(URLEncoder.encode(key, "utf-8"));

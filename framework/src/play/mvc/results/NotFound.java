@@ -16,14 +16,11 @@ import play.templates.TemplateLoader;
  */
 public class NotFound extends Result {
 
-    private String why;
-    
     /**
      * @param why a description of the problem
      */
     public NotFound(String why) {
         super(why);
-        this.why = why;
     }
 
     /**

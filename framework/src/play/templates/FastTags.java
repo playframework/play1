@@ -255,7 +255,7 @@ public class FastTags {
                 name = ct + name.substring(1);
             }
             Template t = TemplateLoader.load(name);
-            Map newArgs = new HashMap();
+            Map<String, Object> newArgs = new HashMap<String, Object>();
             newArgs.putAll(template.getBinding().getVariables());
             newArgs.put("_isInclude", true);
             t.render(newArgs);

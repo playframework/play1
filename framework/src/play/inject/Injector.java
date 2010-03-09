@@ -18,10 +18,10 @@ public class Injector {
         List<Class> classes = Play.classloader.getAssignableClasses(Controller.class);
         classes.addAll(Play.classloader.getAssignableClasses(Mailer.class));
         classes.addAll(Play.classloader.getAssignableClasses(Job.class));
-        for(Class clazz : classes) {
+        for(Class<?> clazz : classes) {
             for(Field field : clazz.getDeclaredFields()) {
                 if(Modifier.isStatic(field.getModifiers()) && field.isAnnotationPresent(Inject.class)) {
-                    Class type = field.getType();
+                    Class<?> type = field.getType();
                     field.setAccessible(true);
                     try {
                         field.set(null, source.getBeanOfType(type));

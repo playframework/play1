@@ -112,6 +112,7 @@ public class Template {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     void directLoad(byte[] code) throws Exception {
         TClassLoader tClassLoader = new TClassLoader();
         String[] lines = new String(code, "utf-8").split("\n");
@@ -138,16 +139,15 @@ public class Template {
                 final List<GroovyClass> groovyClassesForThisTemplate = new ArrayList<GroovyClass>();
                 // ~~~ Please !
                 CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
-                compilerConfiguration.setSourceEncoding("utf-8"); // ouf                        
+                compilerConfiguration.setSourceEncoding("utf-8"); // ouf
                 CompilationUnit compilationUnit = new CompilationUnit(compilerConfiguration);
                 compilationUnit.addSource(new SourceUnit(name, groovySource, compilerConfiguration, tClassLoader, compilationUnit.getErrorCollector()));
                 Field phasesF = compilationUnit.getClass().getDeclaredField("phaseOperations");
                 phasesF.setAccessible(true);
                 LinkedList[] phases = (LinkedList[]) phasesF.get(compilationUnit);
-                LinkedList output = new LinkedList();
+                LinkedList<GroovyClassOperation> output = new LinkedList<GroovyClassOperation>();
                 phases[Phases.OUTPUT] = output;
                 output.add(new GroovyClassOperation() {
-
                     public void call(GroovyClass gclass) {
                         groovyClassesForThisTemplate.add(gclass);
                     }
@@ -457,7 +457,6 @@ public class Template {
             }
 
             @Override
-            @SuppressWarnings("unchecked")
             public Object invokeMethod(String name, Object param) {
                 try {
                     if (controller == null) {

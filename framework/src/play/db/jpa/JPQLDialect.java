@@ -4,7 +4,6 @@ import javax.persistence.Query;
 
 public class JPQLDialect {
 
-    @SuppressWarnings("unused")
     public String createFindByQuery(String entityName, String entityClass, String query, Object... params) {
         if (query == null || query.trim().length() == 0) {
             return "from " + entityName;
@@ -30,7 +29,6 @@ public class JPQLDialect {
         return "from " + entityName + " where " + query;
     }
 
-    @SuppressWarnings("unused")
     public String createDeleteQuery(String entityName, String entityClass, String query, Object... params) {
         if (query == null) {
             return "delete from " + entityName;
@@ -50,7 +48,6 @@ public class JPQLDialect {
         return "delete from " + entityName + " where " + query;
     }
 
-    @SuppressWarnings("unused")
     public String createCountQuery(String entityName, String entityClass, String query, Object... params) {
         if (query.trim().toLowerCase().startsWith("select ")) {
             return query;
@@ -76,7 +73,6 @@ public class JPQLDialect {
         return "select count(e) from " + entityName + " e where " + query;
     }
 
-    @SuppressWarnings("unused")
     public Query bindParameters(Query q, Object... params) {
         if (params == null) {
             return q;

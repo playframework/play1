@@ -2,8 +2,6 @@ package play.mvc.results;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.InstanceCreator;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;

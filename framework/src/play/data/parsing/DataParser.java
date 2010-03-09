@@ -23,7 +23,7 @@ public abstract class DataParser {
         DataParser parser = parsers.get(mimeType);
         if (parser == null) {
             Logger.warn("no parser registered for content type %s", mimeType);
-            return new HashMap();
+            return new HashMap<String, String[]>();
         }
         return parser.parse(new ByteArrayInputStream(request.querystring.getBytes("utf-8")));
     }

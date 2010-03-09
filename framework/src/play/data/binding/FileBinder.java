@@ -11,7 +11,7 @@ import play.mvc.Http.Request;
 public class FileBinder implements SupportedType<File> {
 
     public File bind(String value) {
-        List<Upload> uploads = (List<Upload>)Request.current().args.get("__UPLOADS");
+        @SuppressWarnings("unchecked") List<Upload> uploads = (List<Upload>)Request.current().args.get("__UPLOADS");
         for(Upload upload : uploads) {
             if(upload.getFieldName().equals(value)) {
                 File file = upload.asFile();

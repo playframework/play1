@@ -24,7 +24,7 @@ import play.templates.InlineTags.CALL;
  */
 public class TemplateCompiler {
 
-    static List<String> extensionsClassnames = new ArrayList();
+    static List<String> extensionsClassnames = new ArrayList<String>();
 
     public static Template compile(VirtualFile file) {
         try {
@@ -102,7 +102,7 @@ public class TemplateCompiler {
             String source = template.source;
 
             // Static access
-            List<String> names = new ArrayList();
+            List<String> names = new ArrayList<String>();
             Map<String, String> originalNames = new HashMap<String, String>();
             for (Class clazz : Play.classloader.getAllClasses()) {
                 names.add(clazz.getName().replace("$", "."));
@@ -187,7 +187,7 @@ public class TemplateCompiler {
                 throw new TemplateCompilationException(template, tag.startLine, "#{" + tag.name + "} is not closed.");
             }
 
-            // Done !            
+            // Done!
             template.groovySource = groovySource.toString();
 
             Logger.trace("%s is compiled to %s", template.name, template.groovySource);
@@ -386,7 +386,7 @@ public class TemplateCompiler {
                         tSpace = tName.substring(0, tName.lastIndexOf("."));
                         tName = tName.substring(tName.lastIndexOf(".") + 1);
                     }
-                    for (Class c : fastClasses) {
+                    for (Class<?> c : fastClasses) {
                         if (!c.isAnnotationPresent(FastTags.Namespace.class) && tSpace.length() > 0) {
                             continue;
                         }

@@ -259,7 +259,7 @@ public class Invoker {
         static WaitForTasksCompletion instance;
 
         public WaitForTasksCompletion() {
-            queue = new HashMap();
+            queue = new HashMap<Future, Invocation>();
             setName("WaitForTasksCompletion");
             setDaemon(true);
             start();

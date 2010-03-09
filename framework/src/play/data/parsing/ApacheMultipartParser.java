@@ -557,7 +557,7 @@ public class ApacheMultipartParser extends DataParser {
                 if (fileItem.isFormField()) {
                     putMapEntry(result, fileItem.getFieldName(), fileItem.getString("UTF-8"));
                 } else {
-                    List<Upload> uploads = (List<Upload>) Request.current().args.get("__UPLOADS");
+                    @SuppressWarnings("unchecked") List<Upload> uploads = (List<Upload>) Request.current().args.get("__UPLOADS");
                     if (uploads == null) {
                         uploads = new ArrayList<Upload>();
                         Request.current().args.put("__UPLOADS", uploads);
@@ -853,7 +853,7 @@ public class ApacheMultipartParser extends DataParser {
      * @param header
      *            Map where to store the current header.
      */
-    private void parseHeaderLine(Map headers, String header) {
+    private void parseHeaderLine(Map<String, String> headers, String header) {
         final int colonOffset = header.indexOf(':');
         if (colonOffset == -1) {
             // This header line is malformed, skip it.
