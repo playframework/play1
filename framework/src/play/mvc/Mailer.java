@@ -20,6 +20,8 @@ import play.libs.Mail;
 import play.templates.Template;
 import play.templates.TemplateLoader;
 
+import javax.mail.internet.InternetAddress;
+
 /**
  * Application mailer support
  */
@@ -270,16 +272,33 @@ public class Mailer implements LocalVariablesSupport {
             }
 
             if (from != null) {
-                email.setFrom(from.toString());
+                try {
+                    InternetAddress iAddress = new InternetAddress(from.toString());
+                    email.setFrom(iAddress.getAddress(), iAddress.getPersonal());
+                } catch (Exception e) {
+                    email.setFrom(from.toString());
+                }
+
             }
 
             if (replyTo != null) {
-                email.addReplyTo(replyTo.toString());
+                try {
+                    InternetAddress iAddress = new InternetAddress(replyTo.toString());
+                    email.addReplyTo(iAddress.getAddress(), iAddress.getPersonal());
+                } catch (Exception e) {
+                    email.addReplyTo(replyTo.toString());
+                }
+
             }
 
             if (recipientList != null) {
                 for (Object recipient : recipientList) {
-                    email.addTo(recipient.toString());
+                    try {
+                        InternetAddress iAddress = new InternetAddress(recipient.toString());
+                        email.addTo(iAddress.getAddress(), iAddress.getPersonal());
+                    } catch (Exception e) {
+                        email.addTo(recipient.toString());
+                    }
                 }
             } else {
                 throw new MailException("You must specify at least one recipient.");
@@ -297,7 +316,12 @@ public class Mailer implements LocalVariablesSupport {
             if (bccsList != null) {
 
                 for (Object bcc : bccsList) {
-                    email.addBcc(bcc.toString());
+                    try {
+                        InternetAddress iAddress = new InternetAddress(bcc.toString());
+                        email.addBcc(iAddress.getAddress(), iAddress.getPersonal());
+                    } catch (Exception e) {
+                        email.addBcc(bcc.toString());
+                    }
                 }
             }
             if (!StringUtils.isEmpty(charset)) {
