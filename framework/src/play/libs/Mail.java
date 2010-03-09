@@ -671,7 +671,7 @@ public class Mail {
 
     public static class Mock {
 
-        static Map<String, String> emails = new HashMap();
+        static Map<String, String> emails = new HashMap<String, String>();
 
         public static String getContent(Part message) throws MessagingException,
                 IOException {

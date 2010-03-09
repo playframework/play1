@@ -243,9 +243,8 @@ public class Time {
         protected static final int NO_SPEC_INT = 98; // '?'
         protected static final Integer ALL_SPEC = new Integer(ALL_SPEC_INT);
         protected static final Integer NO_SPEC = new Integer(NO_SPEC_INT);
-        protected static Map monthMap = new HashMap(20);
-        protected static Map dayMap = new HashMap(60);
-        
+        protected static Map<String, Integer> monthMap = new HashMap<String, Integer>(20);
+        protected static Map<String, Integer> dayMap = new HashMap<String, Integer>(60);
 
         static {
             monthMap.put("JAN", new Integer(0));
