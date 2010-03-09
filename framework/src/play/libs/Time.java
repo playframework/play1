@@ -22,7 +22,7 @@ public class Time {
 
     static Pattern days = Pattern.compile("^([0-9]+)d$");
     static Pattern hours = Pattern.compile("^([0-9]+)h$");
-    static Pattern minutes = Pattern.compile("^([0-9]+)mn$");
+    static Pattern minutes = Pattern.compile("^([0-9]+)mi?n$");
     static Pattern seconds = Pattern.compile("^([0-9]+)s$");
 
     /**
