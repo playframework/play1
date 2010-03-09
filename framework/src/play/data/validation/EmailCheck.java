@@ -5,6 +5,7 @@ import net.sf.oval.Validator;
 import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import net.sf.oval.context.OValContext;
 
+@SuppressWarnings("serial")
 public class EmailCheck extends AbstractAnnotationCheck<Email> {
 
     final static String mes = "validation.email";

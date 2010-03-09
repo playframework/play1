@@ -37,6 +37,7 @@ public class DB {
      * Open a connection for the current thread.
      * @return A valid SQL connection
      */
+    @SuppressWarnings("deprecation")
     public static Connection getConnection() {
         try {
             if (JPA.isEnabled()) {

@@ -170,6 +170,10 @@ db.driver=com.mysql.jdbc.Driver
 db.user=root
 db.pass=
 
+You can also specify a JPA dialect with the configuration option:
+
+bc. jpa.dialect=<dialect>
+
 From your code, your can then obtain a **java.sql.Connection** from the **play.db.DB** and use it in the standard way.
 
 bc. Connection conn = DB.getConnection();

@@ -32,6 +32,7 @@ public class Validation {
     /**
      * @return The list of all errors
      */
+    @SuppressWarnings({"serial",  "unused"})
     public static List<Error> errors() {
         return new ArrayList<Error>(current.get().errors) {
             
@@ -120,13 +121,13 @@ public class Validation {
     
     // ~~~~ Integration helper
     
-    static Map<String,List<Validator>> getValidators(Class clazz, String name) {
+    static Map<String,List<Validator>> getValidators(Class<?> clazz, String name) {
         Map<String,List<Validator>> result = new HashMap<String,List<Validator>>();
         searchValidator(clazz, name, result);
         return result;
     }
     
-    static List<Validator> getValidators(Class clazz, String property, String name) {
+    static List<Validator> getValidators(Class<?> clazz, String property, String name) {
         try {
             List<Validator> validators = new ArrayList<Validator>();
             while(!clazz.equals(Object.class)) {
@@ -158,7 +159,7 @@ public class Validation {
         }
     }
     
-    static void searchValidator(Class clazz, String name, Map<String,List<Validator>> result) {
+    static void searchValidator(Class<?> clazz, String name, Map<String,List<Validator>> result) {
         for(Field field : clazz.getDeclaredFields()) {
             
             List<Validator> validators = new ArrayList<Validator>();
@@ -392,7 +393,7 @@ public class Validation {
         return Validation.valid(key, o);
     }
 
-    static ValidationResult applyCheck(AbstractAnnotationCheck check, String key, Object o) {
+    static ValidationResult applyCheck(AbstractAnnotationCheck<?> check, String key, Object o) {
         try {
             ValidationResult result = new ValidationResult();
             if (!check.isSatisfied(o, o, null, null)) {

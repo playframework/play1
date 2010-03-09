@@ -24,9 +24,9 @@
 		am = ''
 	}%
 
-<div class="crudField">
-
 	%{ def field = currentType.getField(fieldName) }%
+
+<div class="crudField crud_${field.type}">
 
 	%{ if(fieldsHandler[fieldName]) { }%
 		%{

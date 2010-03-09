@@ -13,6 +13,7 @@ import java.util.Enumeration;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
@@ -48,6 +49,8 @@ import play.vfs.VirtualFile;
  */
 public class ServletWrapper extends HttpServlet implements ServletContextListener {
 
+    private boolean routerInitializedWithContext = false;
+
     public void contextInitialized(ServletContextEvent e) {
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
@@ -56,8 +59,10 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             throw new UnexpectedException("Please define a play.id parameter in your web.xml file. Without that parameter, play! cannot start your application. Please add a context-param into the WEB-INF/web.xml file.");
         }
         Play.init(root, playId);
-        // Reload the rules, but this time with the context. Not really efficient through...
-        Router.load(e.getServletContext().getContextPath());
+        // Servlet 2.4 does not allow you to get the context path from the servletcontext...
+        if (isGreaterThan(e.getServletContext(), 2, 4)) {
+            loadRouter(e.getServletContext().getContextPath());
+        }
     }
 
     public void contextDestroyed(ServletContextEvent e) {
@@ -70,8 +75,28 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         Play.stop();
     }
 
+    private void loadRouter(String contextPath) {
+        Router.load(contextPath);
+        routerInitializedWithContext = true;
+    }
+
+
+    public static boolean isGreaterThan(ServletContext context, int majorVersion, int minorVersion) {
+        int contextMajorVersion = context.getMajorVersion();
+        int contextMinorVersion = context.getMinorVersion();
+        return (contextMajorVersion > majorVersion) || (contextMajorVersion == majorVersion && contextMinorVersion > minorVersion);
+    }
+
+
     @Override
     protected void service(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+
+        if (!routerInitializedWithContext) {
+            // Reload the rules, but this time with the context. Not really efficient through...
+            // Servlet 2.4 does not allow you to get the context path from the servletcontext...
+            loadRouter(httpServletRequest.getContextPath());
+        }
+
         Logger.trace("ServletWrapper>service " + httpServletRequest.getRequestURI());
         Request request = null;
         try {
@@ -109,7 +134,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
         VirtualFile file = Play.getVirtualFile(renderStatic.file);
         if (file == null || file.isDirectory() || !file.exists()) {
-            //serve404(session, minaResponse, minaRequest, new NotFound("The file " + renderStatic.file + " does not exist"));
+            serve404(servletRequest, servletResponse, new NotFound("The file " + renderStatic.file + " does not exist"));
         } else {
             servletResponse.setContentType(MimeTypes.getContentType(file.getName()));
             boolean raw = false;
@@ -253,7 +278,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         if (format == null) {
             format = "txt";
         }
-        servletResponse.setContentType(MimeTypes.getContentType("xxx." + format, "text/plain"));
+        servletResponse.setContentType(MimeTypes.getContentType("404." + format, "text/plain"));
         String errorHtml = TemplateLoader.load("errors/404." + format).render(binding);
         try {
             servletResponse.getOutputStream().write(errorHtml.getBytes("utf-8"));

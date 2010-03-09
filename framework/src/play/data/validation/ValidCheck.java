@@ -10,6 +10,7 @@ import net.sf.oval.context.OValContext;
 import play.exceptions.UnexpectedException;
 import play.utils.Java;
 
+@SuppressWarnings("serial")
 public class ValidCheck extends AbstractAnnotationCheck<Required> {
 
     final static String mes = "validation.object";

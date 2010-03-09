@@ -14,6 +14,7 @@ import play.exceptions.UnexpectedException;
 import play.utils.Java;
 import play.mvc.Scope;
 
+@SuppressWarnings("serial")
 public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
 
     final static String mes = "validation.equals";
@@ -71,7 +72,7 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
 
     @Override
     public Map<String, String> createMessageVariables() {
-        Map<String, String> messageVariables = new HashMap();
+        Map<String, String> messageVariables = new HashMap<String, String>();
         messageVariables.put("to", otherKey);
         return messageVariables;
     }

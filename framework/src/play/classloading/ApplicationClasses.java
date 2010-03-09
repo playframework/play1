@@ -213,18 +213,6 @@ public class ApplicationClasses {
          * @return the enhanced byteCode
          */
         public byte[] enhance() {
-            /*try {
-                // emit bytecode to standard class layout as well
-                if(!name.contains("/") && !name.contains("{")) {
-                    File f = new File(Play.tmpDir, "original-classes/"+(name.replace(".", "/"))+".class");
-                    f.getParentFile().mkdirs();
-                    FileOutputStream fos = new FileOutputStream(f);
-                    fos.write(this.javaByteCode);
-                    fos.close();
-                }
-            } catch(Exception e) {
-                e.printStackTrace();
-            }*/
             this.enhancedByteCode = this.javaByteCode;
             for (Class enhancer : enhancers) {
                 try {
@@ -242,6 +230,18 @@ public class ApplicationClasses {
                     Logger.trace("%sms to apply %s to %s", System.currentTimeMillis()-start, plugin, name);
                 } catch (Exception e) {
                     throw new UnexpectedException("While applying " + plugin + " on " + name, e);
+                }
+            }
+            if(System.getProperty("precompile") != null) {
+                try {
+                    // emit bytecode to standard class layout as well
+                    File f = Play.getFile("precompiled/java/"+(name.replace(".", "/"))+".class");
+                    f.getParentFile().mkdirs();
+                    FileOutputStream fos = new FileOutputStream(f);
+                    fos.write(this.enhancedByteCode);
+                    fos.close();
+                } catch(Exception e) {
+                    e.printStackTrace();
                 }
             }
             return this.enhancedByteCode;

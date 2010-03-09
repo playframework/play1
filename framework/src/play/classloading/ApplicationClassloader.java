@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import play.Logger;
@@ -84,6 +85,28 @@ public class ApplicationClassloader extends ClassLoader {
 
     // ~~~~~~~~~~~~~~~~~~~~~~~
     protected Class loadApplicationClass(String name) {
+
+        if(Play.usePrecompiled) {
+            try {
+                File file = Play.getFile("precompiled/java/"+name.replace(".", "/")+".class");
+                if(!file.exists()) {
+                    return null;
+                }
+                byte[] code = IO.readContent(file);
+                Class clazz = findLoadedClass(name);
+                if(clazz == null) {
+                    clazz = defineClass(name, code, 0, code.length, protectionDomain);
+                }
+                ApplicationClass applicationClass = Play.classes.getApplicationClass(name);
+                if(applicationClass != null) {
+                    applicationClass.javaClass = clazz;
+                }
+                return clazz;
+            } catch(Exception e) {
+                throw new RuntimeException("Cannot find precompiled class file for "+name);
+            }
+        }
+
         long start = System.currentTimeMillis();
         ApplicationClass applicationClass = Play.classes.getApplicationClass(name);
         if (applicationClass != null) {
@@ -336,13 +359,19 @@ public class ApplicationClassloader extends ClassLoader {
                     classNames.add(all.get(i).name);
                 }
             }
-            Play.classes.compiler.compile(classNames.toArray(new String[classNames.size()]));
+
+            // Or use directly the precompiled version
+            if(!Play.usePrecompiled) {
+                Play.classes.compiler.compile(classNames.toArray(new String[classNames.size()]));
+            }
+
             for (ApplicationClass applicationClass : Play.classes.all()) {
                 Class clazz = loadApplicationClass(applicationClass.name);
                 if (clazz != null) {
                     allClasses.add(clazz);
                 }
             }
+
             Collections.sort(allClasses, new Comparator<Class>() {
 
                 public int compare(Class o1, Class o2) {
@@ -377,6 +406,9 @@ public class ApplicationClassloader extends ClassLoader {
         getAllClasses();
         for (ApplicationClass c : Play.classes.all()) {
             if (c.name.equalsIgnoreCase(name)) {
+                if (Play.usePrecompiled) {
+                    return c.javaClass;
+                }
                 return loadApplicationClass(c.name);
             }
         }
