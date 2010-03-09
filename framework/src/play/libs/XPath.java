@@ -19,7 +19,6 @@ public class XPath {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static Node selectNode(String path, Object node) {
         try {
             List<Node> nodes = selectNodes(path, node);
