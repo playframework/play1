@@ -1,3 +1,6 @@
+0.5.0:
+   * Add a link to open tests (either in Eclipse's internal browser or external)
+   * More robust way of finding the route file (especially when no editor is open)
 0.4.5:
    * Fix remaining bugs introduced by fixing the tab bug (links didn't revert to their state after hover)
 0.4.4:
