@@ -297,7 +297,7 @@ public class Scope {
         }
 
         public void remove(String key) {
-            data.remove("where");
+           data.remove(key);
         }
 
         public String get(String key) {
