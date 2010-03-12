@@ -47,7 +47,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * @return the job completion
      */
     public Future<V> now() {
-        return JobsPlugin.executor.submit((Callable) this);
+        return JobsPlugin.executor.submit((Callable<V>) this);
     }
 
     /**
@@ -62,8 +62,8 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * Start this job in several seconds
      * @return the job completion
      */
-    public Future in(int seconds) {
-        return JobsPlugin.executor.schedule((Callable) this, seconds, TimeUnit.SECONDS);
+    public Future<V> in(int seconds) {
+        return JobsPlugin.executor.schedule((Callable<V>) this, seconds, TimeUnit.SECONDS);
     }
 
     /**

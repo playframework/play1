@@ -86,13 +86,13 @@ public class JobsPlugin extends PlayPlugin {
 
     @Override
     public void afterApplicationStart() {
-        List<Class> jobs = new ArrayList();
+        List<Class> jobs = new ArrayList<Class>();
         for (Class clazz : Play.classloader.getAllClasses()) {
             if (Job.class.isAssignableFrom(clazz)) {
                 jobs.add(clazz);
             }
         }
-        scheduledJobs = new ArrayList();
+        scheduledJobs = new ArrayList<Job>();
         for (final Class clazz : jobs) {
             // @OnApplicationStart
             if (clazz.isAnnotationPresent(OnApplicationStart.class)) {

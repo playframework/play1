@@ -576,7 +576,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * Call the parent action adding this objects to the params scope
      */
     protected static void parent(Object... args) {
-        Map<String, Object> map = new HashMap();
+        Map<String, Object> map = new HashMap<String, Object>();
         for (Object o : args) {
             List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
             for (String name : names) {
@@ -590,7 +590,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * Call the parent method
      */
     protected static void parent() {
-        parent(new HashMap());
+        parent(new HashMap<String, Object>());
     }
 
     /**
@@ -617,7 +617,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             if (superMethod == null) {
                 throw new RuntimeException("PAF");
             }
-            Map<String, String> mapss = new HashMap();
+            Map<String, String> mapss = new HashMap<String, String>();
             for (Map.Entry<String, Object> entry : map.entrySet()) {
             	Object value = entry.getValue();
                 mapss.put(entry.getKey(),value == null ? null : value.toString());
