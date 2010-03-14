@@ -504,6 +504,14 @@ try:
 				shutil.rmtree(os.path.join(to, 'samples-and-tests'))
 			if os.path.exists(os.path.join(to, 'build.xml')):
 				os.remove(os.path.join(to, 'build.xml'))
+			if os.path.exists(os.path.join(to, 'commands.py')):
+				os.remove(os.path.join(to, 'commands.py'))
+			if os.path.exists(os.path.join(to, 'lib')):
+				shutil.rmtree(os.path.join(to, 'lib'))
+			if os.path.exists(os.path.join(to, 'nbproject')):
+				shutil.rmtree(os.path.join(to, 'nbproject'))
+			if os.path.exists(os.path.join(to, 'documentation')):
+				shutil.rmtree(os.path.join(to, 'documentation'))
 		pm = readConfs('module.')
 		for m in pm:
 			nm = os.path.basename(m)
