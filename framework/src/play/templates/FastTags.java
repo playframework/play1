@@ -18,7 +18,7 @@ import play.exceptions.TemplateExecutionException;
 import play.exceptions.TemplateNotFoundException;
 import play.libs.Codec;
 import play.mvc.Router.ActionDefinition;
-import play.templates.Template.ExecutableTemplate;
+import play.templates.GroovyTemplate.ExecutableTemplate;
 
 /**
  * Fast tags implementation

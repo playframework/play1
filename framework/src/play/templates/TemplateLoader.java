@@ -24,24 +24,24 @@ public class TemplateLoader {
      * @return The executable template
      */
     public static Template load(VirtualFile file) {
-        String key = (file.relativePath().hashCode()+"").replace("-", "M");
+        String key = (file.relativePath().hashCode() + "").replace("-", "M");
         if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {
-            if(Play.usePrecompiled) {
-                Template template = new Template(file.relativePath().replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"), file.contentAsString());
+            if (Play.usePrecompiled) {
+                Template template = new GroovyTemplate(file.relativePath().replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"), file.contentAsString());
                 template.loadPrecompiled();
                 templates.put(key, template);
                 return template;
             }
-            Template template = new Template(file.relativePath(), file.contentAsString());
-            if(template.loadFromCache()) {
+            Template template = new GroovyTemplate(file.relativePath(), file.contentAsString());
+            if (template.loadFromCache()) {
                 templates.put(key, template);
             } else {
-                templates.put(key, TemplateCompiler.compile(file));
+                templates.put(key, new GroovyTemplateCompiler().compile(file));
             }
         } else {
             Template template = templates.get(key);
             if (Play.mode == Play.Mode.DEV && template.timestamp < file.lastModified()) {
-                templates.put(key, TemplateCompiler.compile(file));
+                templates.put(key, new GroovyTemplateCompiler().compile(file));
             }
         }
         if (templates.get(key) == null) {
@@ -58,16 +58,16 @@ public class TemplateLoader {
      */
     public static Template load(String key, String source) {
         if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {
-            Template template = new Template(key, source);
-            if(template.loadFromCache()) {
+            Template template = new GroovyTemplate(key, source);
+            if (template.loadFromCache()) {
                 templates.put(key, template);
             } else {
-                templates.put(key, TemplateCompiler.compile(template));
+                templates.put(key, new GroovyTemplateCompiler().compile(template));
             }
         } else {
-			Template template = new Template(key, source);
+            Template template = new GroovyTemplate(key, source);
             if (Play.mode == Play.Mode.DEV) {
-                templates.put(key, TemplateCompiler.compile(template));
+                templates.put(key, new GroovyTemplateCompiler().compile(template));
             }
         }
         if (templates.get(key) == null) {
@@ -84,8 +84,8 @@ public class TemplateLoader {
      * @return A Template
      */
     public static Template load(String key, String source, boolean reload) {
-            cleanCompiledCache(key);
-            return load(key, source);
+        cleanCompiledCache(key);
+        return load(key, source);
     }
 
     /**
@@ -94,8 +94,8 @@ public class TemplateLoader {
      * @return A Template
      */
     public static Template loadString(String source) {
-            Template template = new Template(source);
-            return TemplateCompiler.compile(template);
+        Template template = new GroovyTemplate(source);
+        return new GroovyTemplateCompiler().compile(template);
     }
 
     /**
@@ -121,7 +121,7 @@ public class TemplateLoader {
     public static Template load(String path) {
         Template template = null;
         for (VirtualFile vf : Play.templatesPath) {
-            if(vf == null) {
+            if (vf == null) {
                 continue;
             }
             VirtualFile tf = vf.child(path);
@@ -130,7 +130,7 @@ public class TemplateLoader {
                 break;
             }
         }
-		if (template == null) {
+        if (template == null) {
             template = templates.get(path);
         }
         //TODO: remove ?
@@ -154,9 +154,9 @@ public class TemplateLoader {
         for (VirtualFile virtualFile : Play.templatesPath) {
             scan(res, virtualFile);
         }
-        for(VirtualFile root : Play.roots) {
+        for (VirtualFile root : Play.roots) {
             VirtualFile vf = root.child("conf/routes");
-            if(vf != null && vf.exists()) {
+            if (vf != null && vf.exists()) {
                 Template template = load(vf);
                 template.compile();
             }

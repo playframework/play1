@@ -1,6 +1,6 @@
 package play.templates;
 
-public class InlineTags {
+public class GroovyInlineTags {
     
     public enum CALL {
         START, END

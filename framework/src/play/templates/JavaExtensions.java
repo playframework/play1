@@ -27,7 +27,7 @@ import play.Logger;
 import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.I18N;
-import play.templates.Template.ExecutableTemplate.RawData;
+import play.templates.Template.RawData;
 import play.utils.HTML;
 
 /**
@@ -110,14 +110,14 @@ public class JavaExtensions {
     }
 
     public static RawData raw(Object val, Object condition) {
-        if(eval(condition)) {
+        if (eval(condition)) {
             return new RawData(val);
         }
         return new RawData("");
     }
 
     public static RawData asAttr(Map attributes, Object condition) {
-        if(eval(condition)) {
+        if (eval(condition)) {
             return asAttr(attributes);
         }
         return new RawData("");
@@ -125,17 +125,25 @@ public class JavaExtensions {
 
     public static RawData asAttr(Map attributes) {
         StringBuffer buf = new StringBuffer();
-        for(Object key: attributes.keySet()) {
-            buf.append(key+"=\""+attributes.get(key)+"\" ");
+        for (Object key : attributes.keySet()) {
+            buf.append(key + "=\"" + attributes.get(key) + "\" ");
         }
         return new RawData(buf);
     }
 
     protected static boolean eval(Object condition) {
-        if(condition == null) return false;
-        if(condition instanceof Boolean && !(Boolean)condition) return false;
-        if(condition instanceof Collection && ((Collection)condition).size() == 0) return false;
-        if(condition instanceof String && condition.toString().equals("")) return false;
+        if (condition == null) {
+            return false;
+        }
+        if (condition instanceof Boolean && !(Boolean) condition) {
+            return false;
+        }
+        if (condition instanceof Collection && ((Collection) condition).size() == 0) {
+            return false;
+        }
+        if (condition instanceof String && condition.toString().equals("")) {
+            return false;
+        }
         return true;
     }
 
@@ -167,6 +175,7 @@ public class JavaExtensions {
     public static String since(Date date) {
         return since(date, false);
     }
+
     public static String since(Date date, Boolean stopAtMonth) {
         Date now = new Date();
         if (now.before(date)) {
@@ -188,8 +197,7 @@ public class JavaExtensions {
             long days = delta / (24 * 60 * 60);
             return Messages.get("since.days", days, pluralize(days));
         }
-        if (stopAtMonth)
-        {
+        if (stopAtMonth) {
             return asdate(date.getTime(), Messages.get("since.format"));
         }
         if (delta < 365 * 24 * 60 * 60) {

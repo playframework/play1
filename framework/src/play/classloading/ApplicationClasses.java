@@ -1,7 +1,6 @@
 package play.classloading;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,7 +17,6 @@ import play.classloading.enhancers.MailerEnhancer;
 import play.classloading.enhancers.PropertiesEnhancer;
 import play.classloading.enhancers.SigEnhancer;
 import play.exceptions.UnexpectedException;
-import play.libs.IO;
 import play.vfs.VirtualFile; 
  
 /**
