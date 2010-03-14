@@ -82,8 +82,8 @@ public class ControllersEnhancer extends Enhancer {
                 try {
                     ctMethod.insertBefore(
                             "if(!play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.isActionCallAllowed()) {"
-                                + "play.mvc.Controller.redirect(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\", $args);"
-                            + "return;}"
+                            + "play.mvc.Controller.redirect(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\", $args);"
+                            + (ctMethod.getReturnType().equals(CtClass.voidType) ? "return;}" : "return null;}")
                             + "play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.stopActionCall();");
                 } catch (Exception e) {
                     Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (autoredirect).", applicationClass.name, ctMethod.getName());
