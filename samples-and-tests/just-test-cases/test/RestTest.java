@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,21 +43,21 @@ public class RestTest extends UnitTest{
 		} */
 	}
 	@Test
-	public void testPost(){
+	public void testPost() throws UnsupportedEncodingException{
 		JsonObject jsonResponse = new JsonObject();
 		jsonResponse.addProperty("id", 101);
 		assertEquals(jsonResponse.toString(), WS.url("http://localhost:9003/ressource/%s", "名字").params(params).post().getJson().toString());
-		File fileToSend = new File(new URLDecoder().decode(getClass().getResource("/kiki.txt").getFile()));
+		File fileToSend = new File(new URLDecoder().decode(getClass().getResource("/kiki.txt").getFile(), "utf-8"));
 		assertTrue(fileToSend.exists());
 		assertEquals("POSTED!", WS.url("http://localhost:9003/ressource/file/%s", "名字").files(new FileParam(fileToSend, "file")).post().getString());
 		assertEquals("FILE AND PARAMS POSTED!", WS.url("http://localhost:9003/ressource/fileAndParams/%s", "名字").files(new FileParam(fileToSend, "file")).params(params).post().getString());
 	}
 	@Test
-	public void testPut(){
+	public void testPut() throws UnsupportedEncodingException{
 		JsonObject jsonResponse = new JsonObject();
 		jsonResponse.addProperty("id", 101);
 		assertEquals(jsonResponse.toString(), WS.url("http://localhost:9003/ressource/%s", "名字").params(params).put().getJson().toString());
-		File fileToSend = new File(new URLDecoder().decode(getClass().getResource("/kiki.txt").getFile()));
+		File fileToSend = new File(new URLDecoder().decode(getClass().getResource("/kiki.txt").getFile(), "utf-8"));
 		assertTrue(fileToSend.exists());
 		assertEquals("POSTED!", WS.url("http://localhost:9003/ressource/file/%s", "名字").files(new FileParam(fileToSend, "file")).put().getString());
 		assertEquals("FILE AND PARAMS POSTED!", WS.url("http://localhost:9003/ressource/fileAndParams/%s", "名字").files(new FileParam(fileToSend, "file")).params(params).put().getString());
