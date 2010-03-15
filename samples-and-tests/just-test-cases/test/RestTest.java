@@ -50,7 +50,6 @@ public class RestTest extends UnitTest{
 		assertTrue(fileToSend.exists());
 		assertEquals("POSTED!", WS.url("http://localhost:9003/ressource/file/%s", "名字").files(new FileParam(fileToSend, "file")).post().getString());
 		assertEquals("FILE AND PARAMS POSTED!", WS.url("http://localhost:9003/ressource/fileAndParams/%s", "名字").files(new FileParam(fileToSend, "file")).params(params).post().getString());
-		
 	}
 	@Test
 	public void testPut(){
@@ -61,5 +60,11 @@ public class RestTest extends UnitTest{
 		assertTrue(fileToSend.exists());
 		assertEquals("POSTED!", WS.url("http://localhost:9003/ressource/file/%s", "名字").files(new FileParam(fileToSend, "file")).put().getString());
 		assertEquals("FILE AND PARAMS POSTED!", WS.url("http://localhost:9003/ressource/fileAndParams/%s", "名字").files(new FileParam(fileToSend, "file")).params(params).put().getString());
+	}
+	@Test
+	public void testMethodOverride() {
+		JsonObject jsonResponse = new JsonObject();
+		jsonResponse.addProperty("id", 101);
+		assertEquals(jsonResponse.toString(), WS.url("http://localhost:9003/ressource/%s", "名字").setHeader("X-HTTP-Method-Override", "POST").params(params).get().getJson().toString());
 	}
 }
