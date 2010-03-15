@@ -14,7 +14,6 @@ public class JPASearch extends Controller {
 
     public static void index(String query, String field) {
         List<Book> books = null;
-        Object ob = JPA.em().find(Book.class, 6L);
         if (query==null|| query.equals("")) 
            books = Book.findAll();
         else {

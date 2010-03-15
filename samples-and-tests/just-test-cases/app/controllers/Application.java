@@ -21,6 +21,7 @@ public class Application extends Controller {
 
     public static void aa() {
         try {
+            @SuppressWarnings("unused")
             int test = 1;
         } catch (Exception ex) {
         }
@@ -135,7 +136,7 @@ public class Application extends Controller {
         Mail.send("from@toto.com", new String[]{"recipient@toto.com"}, "subject", "body", Play.getFile("test/fond1.jpg"));
         Mail.send(new InternetAddress("from@toto.com"), null, new String[]{"recipient@toto.com"}, "subject", "body", null, null,  Play.getFile("test/fond1.jpg"), Play.getFile("test/fond1.jpg"));
         Mail.send("from@toto.com", "replyTo@toto.com", new String[]{"recipient@toto.com"}, "subject", "body", "alternate", "text/html", new File[0]);
-        Mail.sendEmail(new InternetAddress("from@toto.com"), new InternetAddress("replyTo@toto.com"), new InternetAddress[]{new InternetAddress("recipient@toto.com")}, "subject", "body", "alternate", "text/html", null, null, new File[0]);
+        Mail.sendEmail(new InternetAddress("from@toto.com"), new InternetAddress("replyTo@toto.com"), new InternetAddress[]{new InternetAddress("recipient@toto.com")}, "subject", "body", "alternate", "text/html", null, null, (Object[])new File[0]);
         renderText("OK5");
     }
 
@@ -180,7 +181,7 @@ public class Application extends Controller {
     }
 
     public static void googleSearch(String word) {
-        WS.HttpResponse response = WS.GET("http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=%s", word);
+        WS.HttpResponse response = WS.url("http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=%s", word).get();
         long results = response.getJson().getAsJsonObject().getAsJsonObject("responseData").getAsJsonObject("cursor").getAsJsonPrimitive("estimatedResultCount").getAsLong();
         renderText(results);
     }

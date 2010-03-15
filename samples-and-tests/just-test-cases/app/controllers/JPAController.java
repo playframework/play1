@@ -111,13 +111,13 @@ public class JPAController extends Controller {
 	}
 	
 	public static void edit(String name, String newName) {
-	    User u = User.find("byName", name).one();
+	    User u = User.find("byName", name).first();
 	    u.name = newName;
 	    list();
 	}
 	
 	public static void editAndSave(String name, String newName) {
-	    User u = User.find("byName", name).one();
+	    User u = User.find("byName", name).first();
 	    u.name = newName;
 	    u.save();
 	    list();
