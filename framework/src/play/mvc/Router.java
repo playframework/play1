@@ -83,7 +83,10 @@ public class Router {
      * end with a '/' character.
      */
     static void parse(VirtualFile routeFile, String prefix) {
-        String content = TemplateLoader.load(routeFile).render(new HashMap<String, Object>());
+        String content = routeFile.contentAsString();
+        if(content.indexOf("${") > -1 || content.indexOf("#{") > -1) {
+            content = TemplateLoader.load(routeFile).render(new HashMap<String, Object>());
+        }
         for (String line : content.split("\n")) {
             line = line.trim().replaceAll("\\s+", " ");
             if (line.length() == 0 || line.startsWith("#")) {
