@@ -297,7 +297,7 @@ public class Scope {
         }
 
         public void remove(String key) {
-           data.remove(key);
+            data.remove(key);
         }
 
         public String get(String key) {
@@ -310,6 +310,7 @@ public class Scope {
             return null;
         }
 
+        @SuppressWarnings("unchecked")
         public <T> T get(String key, Class<T> type) {
             try {
                 // TODO: This is used by the test, but this is not the most convenient.
@@ -457,6 +458,7 @@ public class Scope {
             return data.get(key);
         }
 
+        @SuppressWarnings("unchecked")
         public <T> T get(String key, Class<T> clazz) {
             return (T) this.get(key);
         }

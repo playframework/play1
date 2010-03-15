@@ -45,6 +45,7 @@ public class Application extends Controller {
         }
         post.addComment(author, content);
         flash.success("Thanks for posting %s", author);
+        Cache.delete(randomID);
         show(postId);
     }
     

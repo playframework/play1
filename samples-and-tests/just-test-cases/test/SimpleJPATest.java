@@ -35,9 +35,11 @@ public class SimpleJPATest extends UnitTest {
         assertEquals(0, a.l);
         assertNull(a.k);
         assertNull(b.birth);
-        assertEquals(109, a.birth.getYear());
-        assertEquals(11, a.birth.getMonth());
-        assertEquals(12, a.birth.getDate());
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(a.birth);
+        assertEquals(2009, cal.get(Calendar.YEAR));
+        assertEquals(11, cal.get(Calendar.MONTH));
+        assertEquals(12, cal.get(Calendar.DAY_OF_MONTH));
     }
     
     @Test
@@ -46,14 +48,14 @@ public class SimpleJPATest extends UnitTest {
         User a = users.get(0);
         User b = users.get(1);
         //
-        assertEquals(a, User.find("byName", "A").one());
-        assertEquals(b, User.find("byNameAndC", "B", true).one());
-        assertNull(User.find("byNameAndC", "B", false).one());
-        assertEquals(a, User.find("byNameLikeAndJ", "%a%", 45).one());
-        assertEquals(b, User.find("byNameLikeAndBAndCAndLAndI", "%b%", false, true, 10000L, 34).one());
-        assertNull(User.find("byNameLikeAndBAndCAndLAndI", "%b%", false, true, 10000L, 32).one());
-        assertEquals(a, User.find("byBIsNull").one());
-        assertEquals(b, User.find("byBIsNotNull").one());
+        assertEquals(a, User.find("byName", "A").first());
+        assertEquals(b, User.find("byNameAndC", "B", true).first());
+        assertNull(User.find("byNameAndC", "B", false).first());
+        assertEquals(a, User.find("byNameLikeAndJ", "%a%", 45).first());
+        assertEquals(b, User.find("byNameLikeAndBAndCAndLAndI", "%b%", false, true, 10000L, 34).first());
+        assertNull(User.find("byNameLikeAndBAndCAndLAndI", "%b%", false, true, 10000L, 32).first());
+        assertEquals(a, User.find("byBIsNull").first());
+        assertEquals(b, User.find("byBIsNotNull").first());
     }
     
     @Test
@@ -62,16 +64,16 @@ public class SimpleJPATest extends UnitTest {
         User a = users.get(0);
         User b = users.get(1);
         //
-        assertEquals(a, User.find("name", "A").one());
-        assertEquals(a, User.find("name = ?", "A").one());
-        assertEquals(a, User.find("name=?", "A").one());
-        assertEquals(b, User.find("name = ? and c = ?", "B", true).one());
-        assertNull(User.find("name = ? and c = ?", "B", false).one());
-        assertEquals(a, User.find("name like ? and j = ?", "%A%", 45).one());
-        assertEquals(b, User.find("name like ? and b = ? and c = ? and l = ? and i = ?", "%B%", false, true, 10000L, 34).one());
-        assertNull(User.find("name like ? and b = ? and c = ? and l = ? and i = ?", "%B%", false, true, 10000L, 32).one());
-        assertEquals(a, User.find("b is null").one());
-        assertEquals(b, User.find("b is not null").one());
+        assertEquals(a, User.find("name", "A").first());
+        assertEquals(a, User.find("name = ?", "A").first());
+        assertEquals(a, User.find("name=?", "A").first());
+        assertEquals(b, User.find("name = ? and c = ?", "B", true).first());
+        assertNull(User.find("name = ? and c = ?", "B", false).first());
+        assertEquals(a, User.find("name like ? and j = ?", "%A%", 45).first());
+        assertEquals(b, User.find("name like ? and b = ? and c = ? and l = ? and i = ?", "%B%", false, true, 10000L, 34).first());
+        assertNull(User.find("name like ? and b = ? and c = ? and l = ? and i = ?", "%B%", false, true, 10000L, 32).first());
+        assertEquals(a, User.find("b is null").first());
+        assertEquals(b, User.find("b is not null").first());
     }  
     
     @Test
@@ -80,23 +82,23 @@ public class SimpleJPATest extends UnitTest {
         User a = users.get(0);
         User b = users.get(1);
         //
-        assertEquals(a, User.find("from User where name = ?", "A").one());
-        assertEquals(b, User.find("from User where  name = ? and c = ?", "B", true).one());
-        assertNull(User.find("from User where name = ? and c = ?", "B", false).one());
-        assertEquals(a, User.find("from User where name like ? and j = ?", "%A%", 45).one());
-        assertEquals(b, User.find("from User where name like ? and b = ? and c = ? and l = ? and i = ?", "%B%", false, true, 10000L, 34).one());
-        assertNull(User.find("from User where name like ? and b = ? and c = ? and l = ? and i = ?", "%B%", false, true, 10000L, 32).one());
-        assertEquals(a, User.find("from User where b is null").one());
-        assertEquals(b, User.find("from User where b is not null").one());
+        assertEquals(a, User.find("from User where name = ?", "A").first());
+        assertEquals(b, User.find("from User where  name = ? and c = ?", "B", true).first());
+        assertNull(User.find("from User where name = ? and c = ?", "B", false).first());
+        assertEquals(a, User.find("from User where name like ? and j = ?", "%A%", 45).first());
+        assertEquals(b, User.find("from User where name like ? and b = ? and c = ? and l = ? and i = ?", "%B%", false, true, 10000L, 34).first());
+        assertNull(User.find("from User where name like ? and b = ? and c = ? and l = ? and i = ?", "%B%", false, true, 10000L, 32).first());
+        assertEquals(a, User.find("from User where b is null").first());
+        assertEquals(b, User.find("from User where b is not null").first());
         
-        assertEquals(a, User.find("select u from User u where u.name = ?", "A").one());
-        assertEquals(b, User.find("select u from User u where u.name = ? and u.c = ?", "B", true).one());
-        assertNull(User.find("select u from User u where u.name = ? and u.c = ?", "B", false).one());
-        assertEquals(a, User.find("select u from User u where u.name like ? and u.j = ?", "%A%", 45).one());
-        assertEquals(b, User.find("select u from User u where u.name like ? and u.b = ? and u.c = ? and u.l = ? and u.i = ?", "%B%", false, true, 10000L, 34).one());
-        assertNull(User.find("select u from User u where u.name like ? and u.b = ? and u.c = ? and u.l = ? and u.i = ?", "%B%", false, true, 10000L, 32).one());
-        assertEquals(a, User.find("select u from User u where u.b is null").one());
-        assertEquals(b, User.find("select u from User u where u.b is not null").one());
+        assertEquals(a, User.find("select u from User u where u.name = ?", "A").first());
+        assertEquals(b, User.find("select u from User u where u.name = ? and u.c = ?", "B", true).first());
+        assertNull(User.find("select u from User u where u.name = ? and u.c = ?", "B", false).first());
+        assertEquals(a, User.find("select u from User u where u.name like ? and u.j = ?", "%A%", 45).first());
+        assertEquals(b, User.find("select u from User u where u.name like ? and u.b = ? and u.c = ? and u.l = ? and u.i = ?", "%B%", false, true, 10000L, 34).first());
+        assertNull(User.find("select u from User u where u.name like ? and u.b = ? and u.c = ? and u.l = ? and u.i = ?", "%B%", false, true, 10000L, 32).first());
+        assertEquals(a, User.find("select u from User u where u.b is null").first());
+        assertEquals(b, User.find("select u from User u where u.b is not null").first());
     } 
     
     @Test
@@ -105,12 +107,12 @@ public class SimpleJPATest extends UnitTest {
         User a = users.get(0);
         User b = users.get(1);
         //
-        assertEquals(a, User.find("from User order by name ASC").one());
-        assertEquals(b, User.find("from User order by name DESC").one()); 
-        assertEquals(a, User.find("from User order by b ASC").one());
-        assertEquals(b, User.find("from User order by b DESC").one());
-        assertEquals(b, User.find("from User order by j ASC").one());
-        assertEquals(a, User.find("from User order by j DESC").one());
+        assertEquals(a, User.find("from User order by name ASC").first());
+        assertEquals(b, User.find("from User order by name DESC").first()); 
+        assertEquals(a, User.find("from User order by b ASC").first());
+        assertEquals(b, User.find("from User order by b DESC").first());
+        assertEquals(b, User.find("from User order by j ASC").first());
+        assertEquals(a, User.find("from User order by j DESC").first());
     }
     
 }

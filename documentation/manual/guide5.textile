@@ -113,6 +113,7 @@ bc. public static void postComment(
     }
     post.addComment(author, content);
     flash.success("Thanks for posting %s", author);
+    Cache.delete(randomID);
     show(postId);
 }
 

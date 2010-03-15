@@ -147,9 +147,12 @@ public class Router {
      *                  end with a '/' character.
      */
     static void parse(VirtualFile routeFile, String prefix) {
-        String content = TemplateLoader.load(routeFile).render(new HashMap<String, Object>());
         String fileAbsolutePath = routeFile.getRealFile().getAbsolutePath();
         int lineNumber = 0;
+        String content = routeFile.contentAsString();
+        if(content.indexOf("${") > -1 || content.indexOf("#{") > -1) {
+            content = TemplateLoader.load(routeFile).render(new HashMap<String, Object>());
+        }
         for (String line : content.split("\n")) {
             lineNumber++;
             line = line.trim().replaceAll("\\s+", " ");
@@ -352,7 +355,8 @@ public class Router {
                             break;
                         } else {
                             if (value instanceof List) {
-                                value = ((List<Object>) value).get(0);
+                                @SuppressWarnings("unchecked") List<Object> l = (List<Object>) value;
+                                value = l.get(0);
                             }
                             if (!value.toString().startsWith(":") && !arg.constraint.matches(value.toString())) {
                                 allRequiredArgsAreHere = false;
@@ -385,7 +389,7 @@ public class Router {
                             Object value = entry.getValue();
                             if (inPathArgs.contains(key) && value != null) {
                                 if (List.class.isAssignableFrom(value.getClass())) {
-                                    List<Object> vals = (List<Object>) value;
+                                    @SuppressWarnings("unchecked") List<Object> vals = (List<Object>) value;
                                     path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", vals.get(0) + "");
                                 } else {
                                     path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value + "");
@@ -394,7 +398,7 @@ public class Router {
                                 // Do nothing -> The key is static
                             } else if (value != null) {
                                 if (List.class.isAssignableFrom(value.getClass())) {
-                                    List<Object> vals = (List<Object>) value;
+                                    @SuppressWarnings("unchecked") List<Object> vals = (List<Object>) value;
                                     for (Object object : vals) {
                                         try {
                                             queryString.append(URLEncoder.encode(key, "utf-8"));

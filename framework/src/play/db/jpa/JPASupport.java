@@ -28,10 +28,8 @@ import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostUpdate;
 import javax.persistence.Query;
-import org.hibernate.Session;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.collection.PersistentMap;
-import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.proxy.HibernateProxy;
 import play.Play;
@@ -779,10 +777,6 @@ public class JPASupport implements Serializable {
     @PostUpdate
     public void onSave() {
         saveAttachment();
-    }
-
-    private Session rawSession() {
-        return ((HibernateEntityManager) em()).getSession();
     }
 
 }

@@ -75,18 +75,18 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             CtField signature = CtField.make("public static String[] $" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes()) + " = " + iv.toString(), ctClass);
             ctClass.addField(signature);
             
-            // No variables name, skip ...
+            // No variable name, skip...
             if(localVariableAttribute == null) {
                 continue;
-            } 
+            }
             
-            // Bon.
-            // Alors là il s'agit après chaque instruction de creation d'une variable locale
-            // d'insérer un appel à play.utils.LocalVariables.addVariable('var', var)
-            // et sans tout péter ...
+            // OK.
+            // Here after each local variable creation instruction,
+            // we insert a call to play.utils.LocalVariables.addVariable('var', var)
+            // without breaking everything...
             for (int i = 0; i < localVariableAttribute.tableLength(); i++) {
 
-                // le nom de la variable locale
+                // name of the local variable
                 String name = localVariableAttribute.getConstPool().getUtf8Info(localVariableAttribute.nameIndex(i));
                 if (name.equals("this")) {
                     continue;
@@ -97,20 +97,17 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 ctClass.defrost();
                 */
                 
-                // l'instruction a laquelle cette variable locale est créée
+                // The instruction at which this local variable has been created
                 Integer pc = localVariableAttribute.startPc(i);
 
-                // on bouge a l'instrcution suivante (insertionPc)
+                // Move to the next instruction (insertionPc)
                 CodeIterator iterator = codeAttribute.iterator();
                 iterator.move(pc);
                 Integer insertionPc = iterator.next();
                 
                 Javac jv = new Javac(ctClass);
-                
-                // Is parameter variable ?
-                boolean isParameter = i < method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1);
 
-                // compile le bout de code
+                // Compile the code snippet
                 jv.recordLocalVariables(codeAttribute, insertionPc);
                 jv.recordParams(method.getParameterTypes(), Modifier.isStatic(method.getModifiers()));
                 jv.setMaxLocals(codeAttribute.getMaxLocals());
@@ -127,7 +124,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 iterator.insert(b.getExceptionTable(), insertionPc);
                 
 
-                // Ensuite il faut tracer également chaque reaffectation de la variable.
+                // Then we need to trace each affectation to the variable
                 CodeIterator codeIterator = codeAttribute.iterator();
                 
                 // Bon chaque instruction de cette méthode
@@ -139,7 +136,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                     // printOp(op);
                     
                     int varNumber = -1;
-                    // La variable change
+                    // The variable changes
                     if (storeByCode.containsKey(op)) {
                         varNumber = storeByCode.get(op);
                         if (varNumber == -2) {
@@ -236,7 +233,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             }
             return hash;
         }
-        static ThreadLocal<Stack<Map<String, Object>>> localVariables = new ThreadLocal();
+        static ThreadLocal<Stack<Map<String, Object>>> localVariables = new ThreadLocal<Stack<Map<String, Object>>>();
 
         public static void checkEmpty() {
             if(localVariables.get() != null && localVariables.get().size() != 0) {

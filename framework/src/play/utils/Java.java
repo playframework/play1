@@ -8,7 +8,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,7 +91,7 @@ public class Java {
      * @return The result
      * @throws java.lang.Exception
      */
-    public static Object invokeStatic(Class clazz, String method) throws Exception {
+    public static Object invokeStatic(Class<?> clazz, String method) throws Exception {
         return invokeStatic(clazz, method, new Object[0]);
     }
 
@@ -108,7 +107,7 @@ public class Java {
      * @return The result
      * @throws java.lang.Exception
      */
-    public static Object invokeStatic(Class clazz, String method, Object... args) throws Exception {
+    public static Object invokeStatic(Class<?> clazz, String method, Object... args) throws Exception {
         Class[] types = new Class[args.length];
         for (int i = 0; i < args.length; i++) {
             types[i] = args[i].getClass();
@@ -118,7 +117,7 @@ public class Java {
         return m.invoke(null, args);
     }
 
-    public static Object invokeStaticOrParent(Class clazz, String method, Object... args) throws Exception {
+    public static Object invokeStaticOrParent(Class<?> clazz, String method, Object... args) throws Exception {
         Class[] types = new Class[args.length];
         for (int i = 0; i < args.length; i++) {
             types[i] = args[i].getClass();
@@ -228,7 +227,7 @@ public class Java {
      * @param annotationType The annotation class
      * @return A list of method object
      */
-    public static List<Method> findAllAnnotatedMethods(Class clazz, Class<? extends Annotation> annotationType) {
+    public static List<Method> findAllAnnotatedMethods(Class<?> clazz, Class<? extends Annotation> annotationType) {
         List<Method> methods = new ArrayList<Method>();
         // Clazz can be null if we are looking at an interface / annotation
         while (clazz != null && !clazz.equals(Object.class)) {
@@ -308,7 +307,6 @@ public class Java {
     public static class FieldWrapper {
 
         final static int unwritableModifiers = Modifier.FINAL | Modifier.NATIVE | Modifier.STATIC;
-        private Type type;
         private Method setter;
         private Method getter;
         private Field field;

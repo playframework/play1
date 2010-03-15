@@ -2,6 +2,7 @@ package play.classloading;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,7 +59,7 @@ public class ApplicationClasses {
      * @param clazz The superclass, or the interface.
      * @return A list of application classes.
      */
-    public List<ApplicationClass> getAssignableClasses(Class clazz) {
+    public List<ApplicationClass> getAssignableClasses(Class<?> clazz) {
         List<ApplicationClass> results = new ArrayList<ApplicationClass>();
         if(clazz != null) {
             for (ApplicationClass applicationClass : classes.values()) {
@@ -80,7 +81,7 @@ public class ApplicationClasses {
      * @param clazz The annotation class.
      * @return A list of application classes.
      */
-    public List<ApplicationClass> getAnnotatedClasses(Class clazz) {
+    public List<ApplicationClass> getAnnotatedClasses(Class<? extends Annotation> clazz) {
         List<ApplicationClass> results = new ArrayList<ApplicationClass>();
         for (ApplicationClass applicationClass : classes.values()) {
             try {
@@ -169,7 +170,7 @@ public class ApplicationClasses {
         /**
          * The in JVM loaded class
          */
-        public Class javaClass;
+        public Class<?> javaClass;
         
         /**
          * Last time than this class was compiled

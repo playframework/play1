@@ -53,7 +53,6 @@ public class Binder {
     public final static Object MISSING = new Object();
     public final static Object NO_BINDING = new Object();
 
-
     // TODO move me to Utils
 
     private static String toString(String[] values) {
@@ -69,6 +68,7 @@ public class Binder {
         return toReturn.substring(1);
     }
 
+    @SuppressWarnings("unchecked")
     static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String prefix, String[] profiles) {
         try {
             Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.toString(annotations) + "] isComposite [" + isComposite(name + prefix, params.keySet()) + "]");
@@ -139,13 +139,13 @@ public class Binder {
                     valueClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[1];
                 }
                 // Search for all params
-                Map r = new HashMap();
+                Map<Object, Object> r = new HashMap<Object, Object>();
                 for (String param : params.keySet()) {
                     Pattern p = Pattern.compile("^" + name + prefix + "\\[([^\\]]+)\\](.*)$");
                     Matcher m = p.matcher(param);
                     if (m.matches()) {
                         String key = m.group(1);
-                        Map<String, String[]> tP = new HashMap();
+                        Map<String, String[]> tP = new HashMap<String, String[]>();
                         tP.put("key", new String[]{key});
                         Object oKey = bindInternal("key", keyClass, keyClass, annotations, tP, "", value);
                         if (oKey != MISSING) {
@@ -154,7 +154,7 @@ public class Binder {
                                 Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]", annotations);
                                 r.put(oKey, oValue);
                             } else {
-                                tP = new HashMap();
+                                tP = new HashMap<String, String[]>();
                                 tP.put("value", params.get(name + prefix + "[" + key + "]"));
                                 Object oValue = bindInternal("value", valueClass, valueClass, annotations, tP, "", value);
                                 if (oValue != MISSING) {
@@ -194,15 +194,15 @@ public class Binder {
                             Matcher m = p.matcher(param);
                             if (m.matches()) {
                                 int key = Integer.parseInt(m.group(1));
-                                while (((List) r).size() <= key) {
-                                    ((List) r).add(null);
+                                while (((List<?>) r).size() <= key) {
+                                    ((List<?>) r).add(null);
                                 }
                                 if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
                                     BeanWrapper beanWrapper = getBeanWrapper(componentClass);
                                     Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]", annotations);
                                     ((List) r).set(key, oValue);
                                 } else {
-                                    Map tP = new HashMap();
+                                    Map<String, String[]> tP = new HashMap<String, String[]>();
                                     tP.put("value", params.get(name + prefix + "[" + key + "]"));
                                     Object oValue = bindInternal("value", componentClass, componentClass, annotations, tP, "", value);
                                     if (oValue != MISSING) {

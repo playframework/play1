@@ -105,6 +105,10 @@ public class HttpHandler implements IoHandler {
             request.contentType = "text/html".intern();
         }
 
+        if (minaRequest.getHeader("X-HTTP-Method-Override") != null) {
+            request.method = minaRequest.getHeader("X-HTTP-Method-Override").intern();
+        }
+
         if (minaRequest.getFileContent() == null) {
             request.body = buffer.asInputStream();
         } else {

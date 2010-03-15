@@ -9,17 +9,17 @@ import java.util.Stack;
  */
 public class TagContext {
     
-    static ThreadLocal<Stack<TagContext>> currentStack = new ThreadLocal();
+    static ThreadLocal<Stack<TagContext>> currentStack = new ThreadLocal<Stack<TagContext>>();
     
     public String tagName;
-    public Map<String,Object> data = new HashMap();
+    public Map<String, Object> data = new HashMap<String, Object>();
 
     public TagContext(String tagName) {
         this.tagName = tagName;
     }
     
     public static void init() {
-        currentStack.set(new Stack());
+        currentStack.set(new Stack<TagContext>());
         enterTag("ROOT");
     }
     

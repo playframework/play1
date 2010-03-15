@@ -113,6 +113,7 @@ public class ApplicationCompiler {
     /**
      * Please compile this className
      */
+    @SuppressWarnings("deprecation")
     public void compile(String[] classNames) {
 
         ICompilationUnit[] compilationUnits = new CompilationUnit[classNames.length];

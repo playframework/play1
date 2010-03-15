@@ -387,7 +387,7 @@ public class ActionInvoker {
 
             Class type = method.getParameterTypes()[i];
             Map<String, String[]> params = new HashMap<String, String[]>();
-            if(type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {
+            if (type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {
                 params.put(paramsNames[i], Scope.Params.current().getAll(paramsNames[i]));
             } else {
                 params.putAll(Scope.Params.current().all());

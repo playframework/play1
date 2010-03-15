@@ -144,7 +144,7 @@ public class JPAPlugin extends PlayPlugin {
             } catch (Exception e) {
                 Logger.error(e, "Error trying to override the hibernate classLoader (new hibernate version ???)");
             }
-            for (Class clazz : classes) {
+            for (Class<? extends Annotation> clazz : classes) {
                 if (clazz.isAnnotationPresent(Entity.class)) {
                     cfg.addAnnotatedClass(clazz);
                     Logger.trace("JPA Model : %s", clazz);
