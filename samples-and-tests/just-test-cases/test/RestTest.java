@@ -45,8 +45,10 @@ public class RestTest extends UnitTest {
     public void testHead() {
         HttpResponse headResponse = WS.url("http://localhost:9003/ressource/%s", "ééééééçççççç汉语漢語").head();
         Header[] headResponseHeaders = headResponse.getHeaders();
+        assertTrue(headResponse.getStatus() == 200);
         assertNull(headResponse.getString());
         HttpResponse getResponse = WS.url("http://localhost:9003/ressource/%s", "ééééééçççççç汉语漢語").get();
+        assertTrue(getResponse.getStatus() == 200);
         Header[] getResponseHeaders = getResponse.getHeaders();
         for (int i = 0; i < getResponseHeaders.length; i++) {
             if (!"Set-Cookie".equals(getResponseHeaders[i].getName())) {
