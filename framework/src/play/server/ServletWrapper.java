@@ -1,24 +1,5 @@
 package play.server;
 
-import java.io.*;
-import java.net.URI;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-
-import java.util.HashMap;
-import java.util.Map;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.asyncweb.common.HttpHeaderConstants;
 import org.apache.commons.lang.StringUtils;
 import play.Invoker;
 import play.Logger;
@@ -28,17 +9,30 @@ import play.data.validation.Validation;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.MimeTypes;
-import play.utils.Utils;
 import play.mvc.ActionInvoker;
 import play.mvc.Http;
-import play.mvc.Router;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import play.mvc.Router;
 import play.mvc.Scope;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 import play.templates.TemplateLoader;
+import play.utils.Utils;
 import play.vfs.VirtualFile;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URI;
+import java.text.ParseException;
+import java.util.*;
 
 /**
  * Servlet implementation.
@@ -207,6 +201,10 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             request.contentType = "text/html".intern();
         }
 
+        if (httpServletRequest.getHeader("X-HTTP-Method-Override") != null) {
+            request.method = httpServletRequest.getHeader("X-HTTP-Method-Override").intern();
+        }
+
         request.body = httpServletRequest.getInputStream();
         request.secure = httpServletRequest.isSecure();
 
@@ -222,6 +220,22 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
         request.remoteAddress = httpServletRequest.getRemoteAddr();
 
+        if (Play.configuration.containsKey("XForwardedSupport") && httpServletRequest.getHeader("X-Forwarded-For") != null) {
+            if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(",")).contains(request.remoteAddress)) {
+                throw new RuntimeException("This proxy request is not authorized");
+            } else {
+                request.secure = ("https".equals(Play.configuration.get("XForwardedProto")) || "https".equals(httpServletRequest.getHeader("X-Forwarded-Proto")) || "on".equals(httpServletRequest.getHeader("X-Forwarded-Ssl")));
+                if (Play.configuration.containsKey("XForwardedHost")) {
+                    request.host = (String) Play.configuration.get("XForwardedHost");
+                } else if (httpServletRequest.getHeader("X-Forwarded-Host") != null) {
+                    request.host = httpServletRequest.getHeader("X-Forwarded-Host");
+                }
+                if (httpServletRequest.getHeader("X-Forwarded-For") != null) {
+                    request.remoteAddress = httpServletRequest.getHeader("X-Forwarded-For");
+                }
+            }
+        }
+        
         Enumeration headersNames = httpServletRequest.getHeaderNames();
         while (headersNames.hasMoreElements()) {
             Http.Header hd = new Http.Header();
