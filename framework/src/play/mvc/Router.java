@@ -180,7 +180,7 @@ public class Router {
             }
         }
         // Not found - if the request was a HEAD, let's see if we can find a corresponding GET
-        if (request.method.equals("HEAD")) {
+        if (request.method.equalsIgnoreCase("head")) {
             request.method = "GET";
             route(request);
             request.method = "HEAD";
@@ -463,7 +463,7 @@ public class Router {
         }
 
         public Map<String, String> matches(String method, String path) {
-            if (method == null || this.method.equals("*") || method.equalsIgnoreCase(this.method)) {
+            if (method == null || this.method.equals("*") || method.equalsIgnoreCase(this.method) || (method.equalsIgnoreCase("head") && ("get").equalsIgnoreCase(this.method))) {
                 Matcher matcher = pattern.matcher(path);
                 if (matcher.matches()) {
                     // Static dir
