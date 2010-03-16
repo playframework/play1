@@ -15,6 +15,7 @@ POST		/ressource/fileAndParams/{id}	Rest.postOrPutFileAndParams
 PUT			/ressource/fileAndParams/{id}	Rest.postOrPutFileAndParams
 
 GET			/ressource/{id}					Rest.get
+HEAD		/ressource/{id}					Rest.get
 POST		/ressource/{id}					Rest.postOrPut
 PUT			/ressource/{id}					Rest.postOrPut
 DELETE		/ressource/{id}					Rest.delete
