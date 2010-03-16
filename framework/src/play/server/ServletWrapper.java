@@ -235,8 +235,8 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                 }
             }
         }
-
-        Enumeration headersNames = httpServletRequest.getHeaderNames();
+        
+	Enumeration headersNames = httpServletRequest.getHeaderNames();
         while (headersNames.hasMoreElements()) {
             Http.Header hd = new Http.Header();
             hd.name = (String) headersNames.nextElement();
