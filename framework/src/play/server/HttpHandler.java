@@ -533,10 +533,11 @@ public class HttpHandler implements IoHandler {
             }
 
         } else {
-            response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, String.valueOf(response.out.size()));
+            byte[] content = response.out.toByteArray();
+            response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, String.valueOf(content.length));
             // If it is not a HEAD
             if (!request.method.equals("HEAD")) {
-                minaResponse.setContent(IoBuffer.wrap(((ByteArrayOutputStream) response.out).toByteArray()));
+                minaResponse.setContent(IoBuffer.wrap(content));
             } else {
                 minaResponse.setContent(IoBuffer.wrap(new byte[0]));
             }
