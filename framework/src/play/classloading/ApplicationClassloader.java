@@ -86,24 +86,24 @@ public class ApplicationClassloader extends ClassLoader {
     // ~~~~~~~~~~~~~~~~~~~~~~~
     protected Class loadApplicationClass(String name) {
 
-        if(Play.usePrecompiled) {
+        if (Play.usePrecompiled) {
             try {
-                File file = Play.getFile("precompiled/java/"+name.replace(".", "/")+".class");
-                if(!file.exists()) {
+                File file = Play.getFile("precompiled/java/" + name.replace(".", "/") + ".class");
+                if (!file.exists()) {
                     return null;
                 }
                 byte[] code = IO.readContent(file);
                 Class clazz = findLoadedClass(name);
-                if(clazz == null) {
+                if (clazz == null) {
                     clazz = defineClass(name, code, 0, code.length, protectionDomain);
                 }
                 ApplicationClass applicationClass = Play.classes.getApplicationClass(name);
-                if(applicationClass != null) {
+                if (applicationClass != null) {
                     applicationClass.javaClass = clazz;
                 }
                 return clazz;
-            } catch(Exception e) {
-                throw new RuntimeException("Cannot find precompiled class file for "+name);
+            } catch (Exception e) {
+                throw new RuntimeException("Cannot find precompiled class file for " + name);
             }
         }
 
@@ -343,41 +343,54 @@ public class ApplicationClassloader extends ClassLoader {
     public List<Class> getAllClasses() {
         if (allClasses == null) {
             allClasses = new ArrayList<Class>();
-            List<ApplicationClass> all = new ArrayList<ApplicationClass>();
 
-            // Let's plugins play
-            for (PlayPlugin plugin : Play.plugins) {
-                plugin.compileAll(all);
-            }
-
-            for (VirtualFile virtualFile : Play.javaPath) {
-                all.addAll(getAllClasses(virtualFile));
-            }
-            List<String> classNames = new ArrayList<String>();
-            for (int i = 0; i < all.size(); i++) {
-                if (all.get(i) != null && !all.get(i).compiled) {
-                    classNames.add(all.get(i).name);
-                }
-            }
-
-            // Or use directly the precompiled version
-            if(!Play.usePrecompiled) {
-                Play.classes.compiler.compile(classNames.toArray(new String[classNames.size()]));
-            }
-
-            for (ApplicationClass applicationClass : Play.classes.all()) {
-                Class clazz = loadApplicationClass(applicationClass.name);
-                if (clazz != null) {
+            if (Play.usePrecompiled) {
+                
+                List<ApplicationClass> applicationClasses = new ArrayList<ApplicationClass>();
+                scanPrecompiled(applicationClasses, "", Play.getVirtualFile("precompiled/java"));
+                Play.classes.clear();
+                for (ApplicationClass applicationClass : applicationClasses) {
+                    Play.classes.add(applicationClass);
+                    Class clazz = loadApplicationClass(applicationClass.name);
+                    applicationClass.javaClass = clazz;
+                    applicationClass.compiled = true;
                     allClasses.add(clazz);
                 }
-            }
 
-            Collections.sort(allClasses, new Comparator<Class>() {
+            } else {
+                List<ApplicationClass> all = new ArrayList<ApplicationClass>();
 
-                public int compare(Class o1, Class o2) {
-                    return o1.getName().compareTo(o2.getName());
+                // Let's plugins play
+                for (PlayPlugin plugin : Play.plugins) {
+                    plugin.compileAll(all);
                 }
-            });
+
+                for (VirtualFile virtualFile : Play.javaPath) {
+                    all.addAll(getAllClasses(virtualFile));
+                }
+                List<String> classNames = new ArrayList<String>();
+                for (int i = 0; i < all.size(); i++) {
+                    if (all.get(i) != null && !all.get(i).compiled) {
+                        classNames.add(all.get(i).name);
+                    }
+                }
+
+                Play.classes.compiler.compile(classNames.toArray(new String[classNames.size()]));
+
+                for (ApplicationClass applicationClass : Play.classes.all()) {
+                    Class clazz = loadApplicationClass(applicationClass.name);
+                    if (clazz != null) {
+                        allClasses.add(clazz);
+                    }
+                }
+
+                Collections.sort(allClasses, new Comparator<Class>() {
+
+                    public int compare(Class o1, Class o2) {
+                        return o1.getName().compareTo(o2.getName());
+                    }
+                });
+            }
         }
         return allClasses;
     }
@@ -470,6 +483,19 @@ public class ApplicationClassloader extends ClassLoader {
         } else {
             for (VirtualFile virtualFile : current.list()) {
                 scan(classes, packageName + current.getName() + ".", virtualFile);
+            }
+        }
+    }
+
+    void scanPrecompiled(List<ApplicationClass> classes, String packageName, VirtualFile current) {
+        if (!current.isDirectory()) {
+            if (current.getName().endsWith(".class") && !current.getName().startsWith(".")) {
+                String classname = packageName.substring(5) + current.getName().substring(0, current.getName().length() - 6);
+                classes.add(new ApplicationClass(classname));
+            }
+        } else {
+            for (VirtualFile virtualFile : current.list()) {
+                scanPrecompiled(classes, packageName + current.getName() + ".", virtualFile);
             }
         }
     }
