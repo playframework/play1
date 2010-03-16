@@ -150,6 +150,8 @@ public class Play {
         // Guess the framework path
         try {
             URL versionUrl = Play.class.getResource("/play/version");
+            // Read the content of the file
+            Play.version = new LineNumberReader(new InputStreamReader(versionUrl.openStream())).readLine();
             URI uri = new URI(versionUrl.toString().replace(" ", "%20"));
             if (uri.getScheme().equals("jar")) {
                 String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
