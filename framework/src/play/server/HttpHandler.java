@@ -1,37 +1,7 @@
 package play.server;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.nio.channels.FileChannel;
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.asyncweb.common.Cookie;
-import org.apache.asyncweb.common.DefaultCookie;
-import org.apache.asyncweb.common.DefaultHttpResponse;
-import org.apache.asyncweb.common.HttpHeaderConstants;
-import org.apache.asyncweb.common.HttpRequest;
-import org.apache.asyncweb.common.HttpResponseStatus;
-import org.apache.asyncweb.common.MutableHttpRequest;
-import org.apache.asyncweb.common.MutableHttpResponse;
-import org.apache.mina.common.IdleStatus;
-import org.apache.mina.common.IoBuffer;
-import org.apache.mina.common.IoFuture;
-import org.apache.mina.common.IoFutureListener;
-import org.apache.mina.common.IoHandler;
-import org.apache.mina.common.IoSession;
-import org.apache.mina.common.WriteFuture;
-
+import org.apache.asyncweb.common.*;
+import org.apache.mina.common.*;
 import org.apache.mina.filter.codec.ProtocolDecoderException;
 import play.Invoker;
 import play.Logger;
@@ -41,17 +11,28 @@ import play.PlayPlugin;
 import play.data.validation.Validation;
 import play.exceptions.PlayException;
 import play.libs.MimeTypes;
-import play.utils.Utils;
 import play.mvc.ActionInvoker;
 import play.mvc.Http;
-import play.mvc.Router;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+import play.mvc.Router;
 import play.mvc.Scope;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 import play.templates.TemplateLoader;
+import play.utils.Utils;
 import play.vfs.VirtualFile;
+
+import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.channels.FileChannel;
+import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * HTTP Handler
@@ -177,7 +158,7 @@ public class HttpHandler implements IoHandler {
             if (session.getAttribute("directstream") != null) {
 
                 // FileChannel
-                if(session.getAttribute("directstream") instanceof FileChannel) {
+                if (session.getAttribute("directstream") instanceof FileChannel) {
                     FileChannel channel = ((FileChannel) session.getAttribute("directstream"));
                     WriteFuture future = session.write(channel);
                     final DefaultHttpResponse res = (DefaultHttpResponse) message;
@@ -201,7 +182,7 @@ public class HttpHandler implements IoHandler {
                 }
 
                 // Simple InputStream
-                if(session.getAttribute("directstream") instanceof InputStream) {
+                if (session.getAttribute("directstream") instanceof InputStream) {
                     final InputStream is = ((InputStream) session.getAttribute("directstream"));
                     WriteFuture future = session.write(is);
                     final DefaultHttpResponse res = (DefaultHttpResponse) message;
@@ -240,10 +221,12 @@ public class HttpHandler implements IoHandler {
         session.getConfig().setIdleTime(IdleStatus.BOTH_IDLE, 300);
     }
 
-    public static void attachFile(IoSession session, MutableHttpResponse response, VirtualFile file) throws IOException {
+    public static void attachFile(IoSession session, MutableHttpRequest request, MutableHttpResponse response, VirtualFile file) throws IOException {
         response.setStatus(HttpResponseStatus.OK);
         response.setHeader("Content-Type", MimeTypes.getContentType(file.getName()));
-        session.setAttribute("directstream", file.channel());
+        if (!request.getMethod().equals(HttpMethod.HEAD)) {
+            session.setAttribute("directstream", file.channel());
+        }
         response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + file.length());
     }
 
@@ -293,8 +276,9 @@ public class HttpHandler implements IoHandler {
                         if (useEtag) {
                             minaResponse.setHeader("Etag", etag);
                         }
-                        attachFile(session, minaResponse, file);
+                        attachFile(session, minaRequest, minaResponse, file);
                     }
+
                     writeResponse(session, minaRequest, minaResponse);
                 }
             }
@@ -440,7 +424,7 @@ public class HttpHandler implements IoHandler {
         res.setHeader("Server", signature);
         res.normalize(req);
         WriteFuture future = session.write(res);
-        if ((session.getAttribute("directstream") == null) && !HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION))) {
+        if ((req.getMethod().equals(HttpMethod.HEAD)) || (session.getAttribute("directstream") == null) && !HttpHeaderConstants.VALUE_KEEP_ALIVE.equalsIgnoreCase(res.getHeader(HttpHeaderConstants.KEY_CONNECTION))) {
             future.addListener(IoFutureListener.CLOSE);
         }
     }
@@ -525,23 +509,37 @@ public class HttpHandler implements IoHandler {
     static void copyResponse(IoSession session, Request request, Response response, MutableHttpRequest minaRequest, MutableHttpResponse minaResponse) throws IOException {
         Logger.trace("Invoke: " + request.path + ": " + response.status);
         response.out.flush();
-        
+
         // Direct stream or wrap ByteArray content
         if (response.direct != null) {
 
             // File -> Use a FileChannel
-            if(response.direct instanceof File && ((File)response.direct).isFile()) {
-                session.setAttribute("directstream", new FileInputStream((File)response.direct).getChannel());
-                response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + ((File)response.direct).length());
+            if (response.direct instanceof File && ((File) response.direct).isFile()) {
+                response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, "" + ((File) response.direct).length());
+                if (!request.method.equals("HEAD")) {
+                    session.setAttribute("directstream", new FileInputStream((File) response.direct).getChannel());
+                } else {
+                    minaResponse.setContent(IoBuffer.wrap(new byte[0]));
+                }
             }
 
             // Simple stream -> Deleguate to StreamWriteFilter
-            if(response.direct instanceof InputStream) {
-                session.setAttribute("directstream", response.direct);
+            if (response.direct instanceof InputStream) {
+                if (!request.method.equals("HEAD")) {
+                    session.setAttribute("directstream", response.direct);
+                } else {
+                    minaResponse.setContent(IoBuffer.wrap(new byte[0]));
+                }
             }
-            
+
         } else {
-            minaResponse.setContent(IoBuffer.wrap(((ByteArrayOutputStream) response.out).toByteArray()));
+            response.setHeader(HttpHeaderConstants.KEY_CONTENT_LENGTH, String.valueOf(response.out.size()));
+            // If it is not a HEAD
+            if (!request.method.equals("HEAD")) {
+                minaResponse.setContent(IoBuffer.wrap(((ByteArrayOutputStream) response.out).toByteArray()));
+            } else {
+                minaResponse.setContent(IoBuffer.wrap(new byte[0]));
+            }
         }
 
         // Content-Type
