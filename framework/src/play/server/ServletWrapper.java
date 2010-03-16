@@ -1,10 +1,6 @@
 package play.server;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URI;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -22,6 +18,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.asyncweb.common.HttpHeaderConstants;
 import org.apache.commons.lang.StringUtils;
 import play.Invoker;
 import play.Logger;
@@ -149,7 +146,12 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             } else {
                 if (Play.mode == Play.Mode.DEV) {
                     servletResponse.setHeader("Cache-Control", "no-cache");
-                    copyStream(servletResponse, file.inputstream());
+                    servletResponse.setHeader("Content-Length", String.valueOf(file.length()));
+                    if (!servletRequest.getMethod().equals("HEAD")) {
+                        copyStream(servletResponse, file.inputstream());
+                    } else {
+                        copyStream(servletResponse, new ByteArrayInputStream(new byte[0]));
+                    }
                 } else {
                     long last = file.lastModified();
                     String etag = "\"" + last + "-" + file.hashCode() + "\"";
@@ -272,6 +274,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         }
         String format = Request.current().format;
         servletResponse.setStatus(404);
+        // Do we have an ajax request? If we have then we want to display some text even if it is html that is requested
         if ("XMLHttpRequest".equals(servletRequest.getHeader("X-Requested-With")) && (format == null || format.equals("html"))) {
             format = "txt";
         }
@@ -326,13 +329,14 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             if (Request.current() != null) {
                 format = Request.current().format;
             }
+            // Do we have an ajax request? If we have then we want to display some text even if it is html that is requested
             if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With")) && (format == null || format.equals("html"))) {
                 format = "txt";
             }
             if (format == null) {
                 format = "txt";
             }
-            response.setContentType(MimeTypes.getContentType("xxx." + format, "text/plain"));
+            response.setContentType(MimeTypes.getContentType("500." + format, "text/plain"));
             try {
                 String errorHtml = TemplateLoader.load("errors/500." + format).render(binding);
                 response.getOutputStream().write(errorHtml.getBytes("utf-8"));
@@ -388,11 +392,23 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
         response.out.flush();
         if (response.direct != null && response.direct instanceof File) {
-            copyStream(servletResponse, VirtualFile.open((File) response.direct).inputstream());
+            File file = (File) response.direct;
+            servletResponse.setHeader("Content-Length", String.valueOf(file.length()));
+            if (!request.method.equals("HEAD")) {
+                copyStream(servletResponse, VirtualFile.open(file).inputstream());
+            } else {
+                copyStream(servletResponse, new ByteArrayInputStream(new byte[0]));
+            }
         } else if (response.direct != null && response.direct instanceof InputStream) {
             copyStream(servletResponse, (InputStream) response.direct);
         } else {
-            servletResponse.getOutputStream().write(((ByteArrayOutputStream) response.out).toByteArray());
+            byte[] content = ((ByteArrayOutputStream) response.out).toByteArray();
+            servletResponse.setHeader("Content-Length", String.valueOf(content.length));
+            if (!request.method.equals("HEAD")) {
+                servletResponse.getOutputStream().write(content);
+            } else {
+                copyStream(servletResponse, new ByteArrayInputStream(new byte[0]));
+            }
         }
 
     }
