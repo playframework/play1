@@ -184,6 +184,7 @@ public class Router {
             request.method = "GET";
             route(request);
             request.method = "HEAD";
+            return;
         }
         throw new NotFound(request.method, request.path);
     }
