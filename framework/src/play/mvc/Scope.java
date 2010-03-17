@@ -186,6 +186,10 @@ public class Scope {
             return data.get("___ID");
         }
 
+        public String getAuthenticityToken() {
+            return Crypto.sign(getId());
+        }
+
         void save() {
             try {
                 StringBuilder session = new StringBuilder();

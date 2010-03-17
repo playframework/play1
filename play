@@ -33,7 +33,7 @@ def replaceAll(file, searchExp, replaceExp):
 		sys.stdout.write(line)
 
 def secretKey():
-	return ''.join([random.choice('abcdefghijklmnopqrstuvwxyz0123456789') for i in range(64)])
+	return ''.join([random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') for i in range(64)])
 
 def readConf(key):
 	if application_path:
