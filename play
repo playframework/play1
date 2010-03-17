@@ -242,14 +242,10 @@ try:
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ Check if it's a valid application
 	def check_application():
-		global http_port
 		if application_path and not os.path.exists(os.path.join(application_path, 'conf/routes')):
 			print "~ Oops. %s does not seem to host a valid application" % os.path.normpath(application_path)
 			print "~"
 			sys.exit(-1)
-		http_port = play_app.readConf('http.port')
-		if not http_port:
-			http_port = '9000'
 
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ Display logo
@@ -375,7 +371,7 @@ try:
 			cp_args = ';'.join(classpath)
 	
 	def check_jpda():
-		global jpda_port
+		jpda_port = play_app.readConf('jpda_port')
 		try:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.bind(('127.0.0.1', int(jpda_port)))
@@ -417,8 +413,6 @@ try:
 				java_args = java_args + memory.split(' ')
 		
 		jpda_port = play_app.readConf('jpda.port')
-		if not jpda_port:
-			jpda_port = '8000'
 		
 		application_mode = play_app.readConf('application.mode')
 		
@@ -991,11 +985,7 @@ try:
 		if not url or not secret_key:
 			check_application()
 			if not url:
-				http_port = play_app.readConf('http.port')
-				if not http_port:
-					http_port = 9000
-				else:
-					http_port = int(http_port)
+				http_port = int(play_app.readConf('http.port'))
 				url = 'http://localhost:%s/@status' % http_port
 			if not secret_key:
 				secret_key = play_app.readConf('application.secret')
@@ -1090,6 +1080,7 @@ try:
 					soutint.close()
 					break
 		# Launch the browser
+		http_port = play_app.readConf('http_port')
 		print "~"
 		print "~ Loading the test runner at %s ..." % ('http://localhost:%s/@tests' % http_port)
 		try:
@@ -1427,7 +1418,6 @@ try:
 		
 		sys.exit(0)
 
-	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [idealize] Create idea intellij configuration files
 	if play_command == 'idea' or play_command == 'idealize':
 		check_application()

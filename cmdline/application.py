@@ -12,7 +12,8 @@ class PlayApplication():
     """Parse and access Play configuration file"""
 
     DEFAULTS = {
-        'http_port': '9000'
+        'http_port': '9000',
+        'jpda_port': '8000'
     }
 
     def __init__(self, application_path, play_base, play_id):
