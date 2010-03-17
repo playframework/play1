@@ -562,7 +562,7 @@ public class Play {
                 }
             }
         }
-        for (Enumeration e = configuration.propertyNames(); e.hasMoreElements();) {
+        for (Enumeration<?> e = configuration.propertyNames(); e.hasMoreElements();) {
             String pName = e.nextElement().toString();
             if (pName.startsWith("module.")) {
                 String moduleName = pName.substring(7);
