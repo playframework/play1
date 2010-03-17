@@ -70,7 +70,7 @@ public abstract class CRUD extends Controller {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         JPASupport object = type.findById(id);
-        validation.valid(object.edit("object", params));
+        validation.valid(object.edit("object", params.all()));
         if (validation.hasErrors()) {
             renderArgs.put("error", Messages.get("crud.hasErrors"));
             try {
@@ -103,7 +103,7 @@ public abstract class CRUD extends Controller {
         Constructor constructor = type.entityClass.getDeclaredConstructor();
         constructor.setAccessible(true);
         JPASupport object = (JPASupport) constructor.newInstance();
-        validation.valid(object.edit("object", params));
+        validation.valid(object.edit("object", params.all()));
         if (validation.hasErrors()) {
             renderArgs.put("error", Messages.get("crud.hasErrors"));
             try {

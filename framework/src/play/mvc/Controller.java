@@ -565,11 +565,11 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
-     * Retrieve annotation for the action method
+     * Retrieve the controller class
      * @return Annotation object or null if not found
      */
     protected static Class<?> getControllerClass() {
-        return Play.classloader.getClassIgnoreCase("controllers." + Http.Request.current().controller);
+        return Http.Request.current().controllerClass;
     }
 
     /**

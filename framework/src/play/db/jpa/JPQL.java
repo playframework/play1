@@ -94,7 +94,7 @@ public class JPQL {
 
     public JPASupport create(String entity, String name, Params params) throws Exception {
         Object o = Play.classloader.loadClass(entity).newInstance();
-        return ((JPASupport)o).edit(name, params);
+        return ((JPASupport)o).edit(name, params.all());
     }
 
     @SuppressWarnings("unused")
