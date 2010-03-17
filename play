@@ -21,8 +21,9 @@ import zipfile
 import imp
 import tempfile
 
+import cmdline.cmdloader as cmdloader
+import cmdline.java as javautils
 from cmdline.application import *
-from cmdline.java import *
 
 # ~~~~~~~~~
 # Utilities
@@ -282,6 +283,9 @@ try:
 			remaining_args = sys.argv[3:]
 	play_app = PlayApplication(application_path, play_base, play_id)
 
+	cmdloader.load_all(play_base)
+	print cmdloader.commands['run']
+
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command?
 	if len(sys.argv) > 1:
@@ -331,45 +335,6 @@ try:
 		for m in modules:
 			print m
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ Build classpath
-	def do_classpath():
-		global classpath
-		global cp_args
-		global agent_path
-		
-		agent_path=os.path.join(play_base, 'framework/play.jar')
-		
-		classpath = []
-		
-		# The default
-		classpath.append(os.path.normpath(os.path.join(application_path, 'conf')))
-		classpath.append(os.path.normpath(os.path.join(play_base, 'framework/play.jar')))
-		
-		# The application
-		if os.path.exists(os.path.join(application_path, 'lib')):
-			for jar in os.listdir(os.path.join(application_path, 'lib')):
-				if jar.endswith('.jar'):
-					classpath.append(os.path.normpath(os.path.join(application_path, 'lib/%s' % jar)))
-		
-		# The modules
-		for module in modules:
-			if os.path.exists(os.path.join(module, 'lib')):
-				libs = os.path.join(module, 'lib')
-				if os.path.exists(libs):
-					for jar in os.listdir(libs):
-						if jar.endswith('.jar'):
-							classpath.append(os.path.normpath(os.path.join(libs, '%s' % jar)))
-		
-		# The framework
-		for jar in os.listdir(os.path.join(play_base, 'framework/lib')):
-			if jar.endswith('.jar'):
-				classpath.append(os.path.normpath(os.path.join(play_base, 'framework/lib/%s' % jar)))
-
-		
-		cp_args = ':'.join(classpath)
-		if os.name == 'nt':
-			cp_args = ';'.join(classpath)
-	
 	def check_jpda():
 		jpda_port = play_app.readConf('jpda_port')
 		try:
@@ -447,7 +412,13 @@ try:
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~~~~~~~~~~~~~~~~ The commands ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	
+
+	if play_command in cmdloader.commands:
+		load_modules()
+		cmdloader.commands[play_command].execute(play_app, remaining_args)
+		sys.exit(0)
+
+
 	# ~~~~~~~~~~~~~~~~~~~~~~ [list-modules] Display the modules list
 	if play_command == 'list-modules' or play_command == 'lm':
 		print "~ You can also browse this list online at %s/modules" % modules_server
