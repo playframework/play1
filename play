@@ -21,6 +21,8 @@ import zipfile
 import imp
 import tempfile
 
+from cmdline.application import *
+
 # ~~~~~~~~~
 # Utilities
 
@@ -39,29 +41,6 @@ def replaceAll(file, searchExp, replaceExp):
 
 def secretKey():
 	return ''.join([random.choice('abcdefghijklmnopqrstuvwxyz0123456789') for i in range(64)])
-
-def readConf(key):
-	if application_path:
-		keyRe = re.compile('^%' + play_id + '.' + key + '\s*=')
-		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
-			if keyRe.match(line):
-				return line[line.find('=')+1:].strip()
-		keyRe = re.compile('^' + key + '\s*=')
-		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
-			if keyRe.match(line):
-				return line[line.find('=')+1:].strip()
-	return ''
-
-def readConfs(key):
-	result = []
-	if application_path:
-		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
-			if line.startswith(key):
-				result.append(line[line.find('=')+1:].strip())
-		for line in open(os.path.join(application_path, 'conf/application.conf')).readlines():
-			if line.startswith('%' + play_id + '.' + key):
-				result.append(line[line.find('=')+1:].strip())
-	return result
 
 def isParentOf(path1, path2):
 	if len(path2) < len(path1) or len(path2) < 2:
@@ -193,7 +172,7 @@ class Unzip:
 		percent = self.percent
 		divisions = 100 / percent
 		perc = int(num_files / divisions)
-        # extract files to directory structure
+		# extract files to directory structure
 		for i, name in enumerate(zf.namelist()):
 			if self.verbose == True:
 				print "Extracting %s" % name
@@ -252,7 +231,14 @@ try:
 	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the framework?
 	play_base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
 
-	
+	# load all commands
+	commands = {}
+	for cmdfile in os.listdir(os.path.join(play_base, "cmdline", "commands")):
+		if cmdfile != "__init__.py" and cmdfile.endswith(".py"):
+			cmd = cmdfile.replace(".py", "")
+			print "Import " + cmd
+			commands[cmd] = __import__('cmdline.commands.' + cmd, fromlist='*')
+
 	# ~~~~~~~~~~~~~~~~~~~~~~ What is the framework id?
 	id_file = os.path.join(play_base, 'id')
 	if os.path.exists(id_file):
@@ -293,6 +279,7 @@ try:
 		else:
 			application_path = os.path.normpath(os.path.abspath(sys.argv[2]))
 			remaining_args = sys.argv[3:]
+	play_app = PlayApplication(application_path, play_base, play_id)
 
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command?
@@ -322,11 +309,10 @@ try:
 			print "~ Oops. %s does not seem to host a valid application" % os.path.normpath(application_path)
 			print "~"
 			sys.exit(-1)
-		http_port = readConf('http.port')
+		http_port = play_app.readConf('http.port')
 		if not http_port:
 			http_port = '9000'
 
-	
 	# ~~~~~~~~~~~~~~~~~~~~~~ Modules list
 	def load_modules():
 		global modules
@@ -337,28 +323,23 @@ try:
 				modules = os.environ['MODULES'].split(':')
 		else:
 			modules = []
-		pm = readConfs('module.')
-		for m in pm:
-			om = m
-			if '${play.path}' in m:
-				m = m.replace('${play.path}', play_base)
-			if not m[0] == '/':
-				m = os.path.normpath(os.path.join(application_path, m))
 
-			if not os.path.exists(m):
-				print "~ Oops,"
-				print "~ Module not found: %s" % (m)
+		try:
+			modules = play_app.modules()
+		except ModuleNotFound as e:
+			m = e.value
+			print "~ Oops,"
+			print "~ Module not found: %s" % (m)
+			print "~"
+			if om.startswith('${play.path}/modules'):
+				print "~ You can try to install the missing module using 'play install %s'" % (m[21:])
 				print "~"
-
-				if om.startswith('${play.path}/modules'):
-					print "~ You can try to install the missing module using 'play install %s'" % (om[21:])
-					print "~"
-				sys.exit(0)
-				
-			modules.append(m)
+			sys.exit(0)
 		if play_id == 'test':
 			modules.append(os.path.normpath(os.path.join(play_base, 'modules/test-runner')))
-
+		print len(modules)
+		for m in modules:
+			print m
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Build classpath
 	def do_classpath():
@@ -437,20 +418,20 @@ try:
 			if arg.startswith('-Xm'):
 				memory_in_args=True
 		if not memory_in_args:
-			memory = readConf('jvm.memory')
+			memory = play_app.readConf('jvm.memory')
 			if memory:
 				java_args = java_args + memory.split(' ')
 		
-		jpda_port = readConf('jpda.port')
+		jpda_port = play_app.readConf('jpda.port')
 		if not jpda_port:
 			jpda_port = '8000'
 		
-		application_mode = readConf('application.mode')
+		application_mode = play_app.readConf('application.mode')
 		
 		if application_mode == 'prod':
 			java_args.append('-server')
 		
-		java_policy = readConf('java.policy')
+		java_policy = play_app.readConf('java.policy')
 		if not java_policy == '':
 			policyFile = os.path.join(application_path, 'conf', java_policy)
 			if os.path.exists(policyFile):
@@ -478,7 +459,10 @@ try:
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~~~~~~~~~~~~~~~~ The commands ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	
+	print commands
+	if commands[play_command] != None:
+		commands[play_command].execute()
+		sys.exit(0)
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [list-modules] Display the modules list
 	if play_command == 'list-modules' or play_command == 'lm':
@@ -852,7 +836,7 @@ try:
 		if not os.path.exists(os.path.join(war_path, 'WEB-INF')): os.mkdir(os.path.join(war_path, 'WEB-INF'))
 		if not os.path.exists(os.path.join(war_path, 'WEB-INF/web.xml')):
 		    shutil.copyfile(os.path.join(play_base, 'resources/war/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
-		application_name = readConf('application.name')
+		application_name = play_app.readConf('application.name')
 		replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%APPLICATION_NAME%', application_name)
 		if play_id:
 			replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%PLAY_ID%', play_id)
@@ -894,7 +878,7 @@ try:
 				shutil.rmtree(os.path.join(to, 'nbproject'))
 			if os.path.exists(os.path.join(to, 'documentation')):
 				shutil.rmtree(os.path.join(to, 'documentation'))
-		pm = readConfs('module.')
+		pm = play_app.readConfs('module.')
 		for m in pm:
 			nm = os.path.basename(m)
 			replaceAll(os.path.join(war_path, 'WEB-INF/application/conf/application.conf'), m, '../modules/%s' % nm)
@@ -1017,14 +1001,14 @@ try:
 		if not url or not secret_key:
 			check_application()
 			if not url:
-				http_port = readConf('http.port')
+				http_port = play_app.readConf('http.port')
 				if not http_port:
 					http_port = 9000
 				else:
 					http_port = int(http_port)
 				url = 'http://localhost:%s/@status' % http_port
 			if not secret_key:
-				secret_key = readConf('application.secret')
+				secret_key = play_app.readConf('application.secret')
 		
 		import hmac
 		from hashlib import sha1 as sha
@@ -1178,7 +1162,7 @@ try:
 			print "~"
 			sys.exit(1)
 		
-		sysout = readConf('application.log.system.out')
+		sysout = play_app.readConf('application.log.system.out')
 		sysout = sysout!='false' and sysout!='off'
 		if not sysout:
 		  sout = None
@@ -1232,7 +1216,7 @@ try:
 			kill(pid)
 
 		
-		sysout = readConf('application.log.system.out')
+		sysout = play_app.readConf('application.log.system.out')
 		sysout = sysout!='false' and sysout!='off'
 		if not sysout:
 		  sout = None
@@ -1329,7 +1313,7 @@ try:
 		check_application()
 		load_modules()
 		do_classpath()
-		application_name = readConf('application.name')
+		application_name = play_app.readConf('application.name')
 		if not application_name:
 			application_name = os.path.dirname(application_path)
 		nbproject = os.path.join(application_path, 'nbproject')
@@ -1368,7 +1352,7 @@ try:
 		load_modules()
 		do_classpath()
 		do_java()
-		application_name = readConf('application.name')
+		application_name = play_app.readConf('application.name')
 		if not application_name:
 			application_name = os.path.dirname(application_path)
 		dotProject = os.path.join(application_path, '.project')
@@ -1460,7 +1444,7 @@ try:
 		load_modules()
 		do_classpath()
 		do_java()
-		application_name = readConf('application.name')
+		application_name = play_app.readConf('application.name')
 		imlFile = os.path.join(application_path, application_name + '.iml')
 		shutil.copyfile(os.path.join(play_base, 'resources/idea/imlTemplate.xml'), imlFile)
 		cpXML = ""
