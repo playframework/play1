@@ -289,6 +289,12 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         throw new NotFound("");
     }
 
+    protected static void checkAuthenticity() {
+        if(params.get("authenticityToken") == null || !params.get("authenticityToken").equals(session.getAuthenticityToken())) {
+            forbidden("Bad authenticity token");
+        }
+    }
+
     /**
      * Send a 403 Forbidden response
      * @param reason The reason
