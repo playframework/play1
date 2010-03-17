@@ -11,7 +11,7 @@ class ModuleNotFound(Exception):
 class PlayApplication():
     """Parse and access Play configuration file"""
 
-    defaults = {
+    DEFAULTS = {
         'http_port': '9000'
     }
 
@@ -31,8 +31,8 @@ class PlayApplication():
             for line in open(self.confpath).readlines():
                 if keyRe.match(line):
                     return line[line.find('=')+1:].strip()
-        if key in defaults:
-            return defaults[key]
+        if key in self.DEFAULTS:
+            return self.DEFAULTS[key]
         return ''
 
     def readConfs(self, key):

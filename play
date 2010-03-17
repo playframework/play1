@@ -22,6 +22,7 @@ import imp
 import tempfile
 
 from cmdline.application import *
+from cmdline.java import *
 
 # ~~~~~~~~~
 # Utilities
@@ -231,20 +232,24 @@ try:
 	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the framework?
 	play_base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
 
-	# load all commands
-	commands = {}
-	for cmdfile in os.listdir(os.path.join(play_base, "cmdline", "commands")):
-		if cmdfile != "__init__.py" and cmdfile.endswith(".py"):
-			cmd = cmdfile.replace(".py", "")
-			print "Import " + cmd
-			commands[cmd] = __import__('cmdline.commands.' + cmd, fromlist='*')
-
 	# ~~~~~~~~~~~~~~~~~~~~~~ What is the framework id?
 	id_file = os.path.join(play_base, 'id')
 	if os.path.exists(id_file):
 		play_id = open(id_file).readline().strip()
 	else:
 		play_id = ''
+
+	
+	# ~~~~~~~~~~~~~~~~~~~~~~ Check if it's a valid application
+	def check_application():
+		global http_port
+		if application_path and not os.path.exists(os.path.join(application_path, 'conf/routes')):
+			print "~ Oops. %s does not seem to host a valid application" % os.path.normpath(application_path)
+			print "~"
+			sys.exit(-1)
+		http_port = play_app.readConf('http.port')
+		if not http_port:
+			http_port = '9000'
 
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ Display logo
@@ -301,17 +306,6 @@ try:
 	if play_id:
 		print "~ framework ID is %s" % play_id
 	print "~"
-	
-	# ~~~~~~~~~~~~~~~~~~~~~~ Check if it's a valid application
-	def check_application():
-		global http_port
-		if application_path and not os.path.exists(os.path.join(application_path, 'conf/routes')):
-			print "~ Oops. %s does not seem to host a valid application" % os.path.normpath(application_path)
-			print "~"
-			sys.exit(-1)
-		http_port = play_app.readConf('http.port')
-		if not http_port:
-			http_port = '9000'
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Modules list
 	def load_modules():
@@ -331,7 +325,7 @@ try:
 			print "~ Oops,"
 			print "~ Module not found: %s" % (m)
 			print "~"
-			if om.startswith('${play.path}/modules'):
+			if m.startswith('${play.path}/modules'):
 				print "~ You can try to install the missing module using 'play install %s'" % (m[21:])
 				print "~"
 			sys.exit(0)
@@ -459,10 +453,6 @@ try:
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~~~~~~~~~~~~~~~~ The commands ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	print commands
-	if commands[play_command] != None:
-		commands[play_command].execute()
-		sys.exit(0)
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [list-modules] Display the modules list
 	if play_command == 'list-modules' or play_command == 'lm':
