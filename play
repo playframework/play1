@@ -902,12 +902,6 @@ try:
 		if not os.path.exists(os.path.join(war_path, 'WEB-INF/resources')): os.mkdir(os.path.join(war_path, 'WEB-INF/resources'))
 		shutil.copyfile(os.path.join(play_base, 'resources/messages'), os.path.join(war_path, 'WEB-INF/resources/messages'))
 		
-		# Module-specific modifications
-		for module in modules:
-			commands = os.path.join(module, 'commands.py')
-			if os.path.exists(commands):
-				execfile(commands)
-		
 		if war_zip_path:
 			print "~ Creating zipped archive to %s ..." % (os.path.normpath(war_zip_path))
 			if os.path.exists(war_zip_path):
