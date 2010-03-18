@@ -29,7 +29,7 @@ import play.data.validation.Validation;
  */
 public class Binder {
 
-    static Map<Class, SupportedType> supportedTypes = new HashMap<Class, SupportedType>();
+    static Map<Class<?>, SupportedType<?>> supportedTypes = new HashMap<Class<?>, SupportedType<?>>();
 
     static {
         supportedTypes.put(Date.class, new DateBinder());
@@ -39,9 +39,9 @@ public class Binder {
         supportedTypes.put(Locale.class, new LocaleBinder());
     }
 
-    static Map<Class, BeanWrapper> beanwrappers = new HashMap<Class, BeanWrapper>();
+    static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<Class<?>, BeanWrapper>();
 
-    static BeanWrapper getBeanWrapper(Class clazz) {
+    static BeanWrapper getBeanWrapper(Class<?> clazz) {
         if (!beanwrappers.containsKey(clazz)) {
             BeanWrapper beanwrapper = new BeanWrapper(clazz);
             beanwrappers.put(clazz, beanwrapper);
@@ -190,7 +190,7 @@ public class Binder {
         }
     }
 
-    public static Object bind(String name, Class clazz, Type type, Map<String, String[]> params) {
+    public static Object bind(String name, Class<?> clazz, Type type, Map<String, String[]> params) {
         Object result = null;
         // Let a chance to plugins to bind this object
         for(PlayPlugin plugin : Play.plugins) {
@@ -236,7 +236,7 @@ public class Binder {
         return false;
     }
 
-    public static Object directBind(String value, Class clazz) throws Exception {
+    public static Object directBind(String value, Class<?> clazz) throws Exception {
 
         if (clazz.equals(String.class)) {
             return value;

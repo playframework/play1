@@ -88,7 +88,7 @@ public class TestEngine {
 
         try {
             // Load test class
-            final Class testClass = Play.classloader.loadClass(name);
+            final Class<?> testClass = Play.classloader.loadClass(name);
 
             // VirtualClient test
             if(FunctionalTest.class.isAssignableFrom(testClass)) {
@@ -104,8 +104,8 @@ public class TestEngine {
                 } catch(Exception e) {
                     Logger.error("VirtualClient test has failed", e);
                 }
-            } else {       
-                // Simple test            
+            } else {
+                // Simple test
                 JUnitCore junit = new JUnitCore();
                 junit.addListener(new Listener(testClass.getName(), testResults));
                 junit.run(testClass);
