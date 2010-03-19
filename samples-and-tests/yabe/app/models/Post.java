@@ -40,8 +40,9 @@ public class Post extends Model {
     }
     
     public Post addComment(String author, String content) {
-        Comment newComment = new Comment(this, author, content).save();
+        Comment newComment = new Comment(this, author, content);
         this.comments.add(newComment);
+        this.save();
         return this;
     }
     
