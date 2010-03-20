@@ -197,10 +197,6 @@
                 background: #9BCF81 !important;
                 padding: 3px 5px;
             }
-			.testResult table .pending span {
-                background: #E9BC46;
-				padding: 3px 5px;
-            }
             .testResult table .failed span {
                 background: #EF8686 !important;
                 padding: 3px 5px;
@@ -553,7 +549,7 @@
                 #{list items:unitTests, as:'test'}
                 <li>
                     <div class="test" id="${test.name}.class">
-                        <span class="touch">+</span><a href="@{TestRunner.run(test.name+'.class')}">${test.name.replace('.','/')}</a>
+                        <span class="touch">+</span><a href="@{TestRunner.run(test.name+'.class')}">${test.name.replace('.','/')}.java</a>
                         <div class="testResult"></div>
                     </div>
                 </li>

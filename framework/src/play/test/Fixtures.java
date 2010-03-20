@@ -43,11 +43,11 @@ public class Fixtures {
 
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
 
-    public static void delete(Class... types) {
+    public static void delete(Class<?>... types) {
         if (getForeignKeyToggleStmt(false) != null) {
             DB.execute(getForeignKeyToggleStmt(false));
         }
-        for (Class type : types) {
+        for (Class<?> type : types) {
             JPA.em().createQuery("delete from " + type.getName()).executeUpdate();
         }
         if (getForeignKeyToggleStmt(true) != null) {
@@ -56,8 +56,8 @@ public class Fixtures {
         JPA.em().clear();
     }
 
-    public static void delete(List<Class> classes) {
-        Class[] types = new Class[classes.size()];
+    public static void delete(List<Class<?>> classes) {
+        Class<?>[] types = new Class[classes.size()];
         for (int i = 0; i < types.length; i++) {
             types[i] = classes.get(i);
         }
@@ -65,7 +65,7 @@ public class Fixtures {
     }
 
     public static void deleteAllEntities() {
-        List<Class> classes = new ArrayList<Class>();
+        List<Class<?>> classes = new ArrayList<Class<?>>();
         for (ApplicationClasses.ApplicationClass c :
                 Play.classes.getAnnotatedClasses(Entity.class)) {
             classes.add(c.javaClass);
@@ -143,8 +143,8 @@ public class Fixtures {
             }
             Yaml yaml = new Yaml();
             Object o = yaml.load(is);
-            if (o instanceof LinkedHashMap) {
-                LinkedHashMap objects = (LinkedHashMap) o;
+            if (o instanceof LinkedHashMap<?, ?>) {
+                @SuppressWarnings("unchecked") LinkedHashMap<Object, Map<?, ?>> objects = (LinkedHashMap<Object, Map<?, ?>>) o;
                 Map<String, Object> idCache = new HashMap<String, Object>();
                 for (Object key : objects.keySet()) {
                     Matcher matcher = keyPattern.matcher(key.toString().trim());
@@ -158,8 +158,8 @@ public class Fixtures {
                             throw new RuntimeException("Cannot load fixture " + name + ", duplicate id '" + id + "' for type " + type);
                         }
                         Map<String, String[]> params = new HashMap<String, String[]>();
-                        serialize((Map) objects.get(key), "object", params);
-                        Class cType = Play.classloader.loadClass(type);
+                        serialize((Map<?, ?>) objects.get(key), "object", params);
+                        Class<?> cType = Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
                         JPASupport model = JPASupport.create(cType, "object", params, null);
                         for(Field f : model.getClass().getFields()) {
@@ -196,18 +196,18 @@ public class Fixtures {
         }
     }
 
-    static void serialize(Map values, String prefix, Map<String, String[]> serialized) {
+    static void serialize(Map<?, ?> values, String prefix, Map<String, String[]> serialized) {
         for (Object key : values.keySet()) {
             Object value = values.get(key);
             if (value == null) {
                 continue;
             }
-            if (value instanceof Map) {
-                serialize((Map) value, prefix + "." + key, serialized);
+            if (value instanceof Map<?, ?>) {
+                serialize((Map<?, ?>) value, prefix + "." + key, serialized);
             } else if (value instanceof Date) {
                 serialized.put(prefix + "." + key.toString(), new String[]{new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss").format(((Date) value))});
-            } else if (value instanceof List) {
-                List l = (List) value;
+            } else if (value instanceof List<?>) {
+                List<?> l = (List<?>) value;
                 String[] r = new String[l.size()];
                 int i = 0;
                 for (Object el : l) {
@@ -228,9 +228,9 @@ public class Fixtures {
         }
     }
 
-    static void resolveDependencies(Class type, Map<String, String[]> serialized, Map<String, Object> idCache) {
+    static void resolveDependencies(Class<?> type, Map<String, String[]> serialized, Map<String, Object> idCache) {
         Set<Field> fields = new HashSet<Field>();
-        Class clazz = type;
+        Class<?> clazz = type;
         while (!clazz.equals(JPASupport.class)) {
             Collections.addAll(fields, clazz.getDeclaredFields());
             clazz = clazz.getSuperclass();
@@ -243,7 +243,7 @@ public class Fixtures {
                 relation = field.getType().getName();
             }
             if (field.isAnnotationPresent(OneToMany.class) || field.isAnnotationPresent(ManyToMany.class)) {
-                Class fieldType = (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                 isEntity = true;
                 relation = fieldType.getName();
             }

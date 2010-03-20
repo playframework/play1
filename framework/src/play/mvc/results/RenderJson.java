@@ -20,7 +20,7 @@ public class RenderJson extends Result {
         json = new Gson().toJson(o);
     }
     
-    public RenderJson(Object o, JsonSerializer... adapters) {
+    public RenderJson(Object o, JsonSerializer<?>... adapters) {
         GsonBuilder gson = new GsonBuilder();
         for(Object adapter : adapters) {
             Type t = getMethod(adapter.getClass(), "serialize").getParameterTypes()[0];;
@@ -44,7 +44,7 @@ public class RenderJson extends Result {
     
     //
     
-    static Method getMethod(Class clazz, String name) {
+    static Method getMethod(Class<?> clazz, String name) {
         for(Method m : clazz.getDeclaredMethods()) {
             if(m.getName().equals(name)) {
                 return m;

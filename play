@@ -357,7 +357,7 @@ try:
 				
 			modules.append(m)
 		if play_id == 'test':
-			modules.append(os.path.normpath(os.path.join(play_base, 'modules/test-runner')))
+			modules.append(os.path.normpath(os.path.join(play_base, 'modules/testrunner')))
 
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Build classpath
@@ -594,6 +594,7 @@ try:
 			if mod['name'] == module:
 				for v in mod['versions']:
 					if version == None and v['isDefault']:
+						print '~ Will install %s-%s' % (module, v['version'])
 						print '~ This module is compatible with: %s' % v['matches']
 						ok = raw_input('~ Do you want to install this version (y/n)? ')
 						if not ok == 'y':
@@ -603,6 +604,7 @@ try:
 						fetch = '%s/modules/%s-%s.zip' % (modules_server, module, v['version'])
 						break
 					if version  == v['version']:
+						print '~ Will install %s-%s' % (module, v['version'])
 						print '~ This module is compatible with: %s' % v['matches']
 						ok = raw_input('~ Do you want to install this version (y/n)? ')
 						if not ok == 'y':

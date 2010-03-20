@@ -293,6 +293,8 @@ static void addDefaults() {
     renderArgs.put("blogBaseline", Play.configuration.getProperty("blog.baseline"));
 }
 
+p(note). You will need to import **play.Play** in the Application.java file.
+
 All variables added to the **renderArgs** scope will be available from the templates. And you can see that the method reads the variable's values from the **Play.configuration** object. This object contains all configuration keys from the **/yabe/conf/application.conf** file.
 
 Add these 2 keys to the configuration file:
@@ -310,7 +312,7 @@ h2. <a>Adding some style</a>
 
 Now the blog home page is almost done, but it's not very pretty. We'll add some style to make it shinier. As you have seen, the main template file main.html includes the **/public/stylesheets/main.css** stylesheet. We'll keep it but add more style rules to it.
 
-You can "download it here":files/main.css, and copy it to the **/public/stylsheets/main.css** file.
+You can "download it here":files/main.css, and copy it to the **/public/stylesheets/main.css** file.
 
 Refresh the home page and you should now see a styled page.
 

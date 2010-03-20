@@ -25,6 +25,5 @@ public class PostTest extends UnitTest {
         assertEquals("Jojo", post.postedBy.name);
         assertEquals("I need help !", post.topic.subject);
         assertEquals("Play help", post.topic.forum.name);
-        assertEquals(1242079200000L, post.postedAt.getTime());
     }
 }

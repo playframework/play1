@@ -61,7 +61,7 @@ public class CorePlugin extends PlayPlugin {
             Header authorization = request.headers.get("authorization");
             if (authorization != null && Crypto.sign("@status").equals(authorization.value())) {
                 response.print(computeApplicationStatus());
-                response.status = 200;                
+                response.status = 200;
                 return true;
             } else {
                 response.status = 401;
