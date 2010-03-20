@@ -578,7 +578,7 @@ public class Play {
             }
         }
         if (Play.id.equals("test")) {
-            addModule("test-runner", new File(Play.frameworkPath, "modules/test-runner"));
+            addModule("_testrunner", new File(Play.frameworkPath, "modules/testrunner"));
         }
         if (Play.mode == Mode.DEV) {
             addModule("_docviewer", new File(Play.frameworkPath, "modules/docviewer"));

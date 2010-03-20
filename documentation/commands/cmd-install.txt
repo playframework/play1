@@ -1,0 +1,17 @@
+~ Name:
+~ ~~~~~
+~ install -- Download and install a Play module
+~
+~ Synopsis:
+~ ~~~~~~~~~
+~ play install [module_name]
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Modules are 3rd party software to extend Play's capabilities.
+~ Available modules are listed with the play list-modules command,
+~ or online at http://www.playframework.org/modules
+~
+~ Once installed, Play modules can be included in any Play application
+~ by adding the correct line to conf/application.conf.
+~

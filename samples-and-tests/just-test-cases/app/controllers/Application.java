@@ -167,19 +167,7 @@ public class Application extends Controller {
     public static void a() {
         render();
     }
-
-    public static void useSpringBean() {
-        Test test = (Test) Spring.getBean("test");
-        renderText(test.yop());
-    }
-
-    @javax.inject.Inject
-    static Test myTest;
-
-    public static void useSpringBeanInject() {
-        renderText(myTest.yop());
-    }
-
+    
     public static void googleSearch(String word) {
         WS.HttpResponse response = WS.url("http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=%s", word).get();
         long results = response.getJson().getAsJsonObject().getAsJsonObject("responseData").getAsJsonObject("cursor").getAsJsonPrimitive("estimatedResultCount").getAsLong();
