@@ -1,0 +1,601 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <title>Play! - Tests runner</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <script src="@{'/public/test-runner/jquery-1.3.2.min.js'}" type="text/javascript" charset="utf-8"></script>
+        <script src="@{'/public/test-runner/jquery.scrollTo-min.js'}" type="text/javascript" charset="utf-8"></script>
+        <style type="text/css">
+            html, body {
+                margin: 0;
+                padding: 0;
+                font-family: Helvetica, Arial, Sans;
+                background: #EEEEEE;
+                -moz-user-select: none;
+            }
+            a {
+                outline: none;
+            }
+            .block {
+                padding: 20px;
+                border-bottom: 1px solid #aaa;
+            }
+            #header {
+                position: relative;
+            }
+            #header h1 {
+                font-weight: normal;
+                font-size: 28px;
+                margin: 0;
+            }
+            #header {
+                background: #a4c4f3;
+            }
+            #header p {
+                color: #333;
+            }
+            #results {
+                background: #f6f6f6;
+            }
+            label {
+                font-weight: bold;
+                display: block;
+            }
+            .field {
+                margin-bottom: 15px;
+            }
+            small {
+                color: #888;
+                font-size: 80%;
+                position: relative;
+                top: -3px;
+            }
+            #tests h2 {
+                color: #333;
+                font-weight: normal;               	
+                border-left: 4px solid #ccc; 
+                padding-left: 5px;  
+                -moz-user-select: none;   	
+            }
+            #tests h2 span {
+                cursor: pointer;   
+            }
+            ul {
+                list-style: none;
+                margin-bottom: 40px;
+                padding-left: 20px;
+            }
+            li {
+                padding: 2px;
+                margin-bottom: 4px;
+            }
+            .test a {
+                background: #fafafa;
+                padding: 3px 6px;
+                color: #666;   
+                font-weight: bold;
+                text-decoration: none;   
+                cursor: pointer;  
+                -moz-user-select: none;
+            }
+            .selected a {
+                background: #fff2ab;
+                color: #333;
+            }
+            #bms, #quickLinks {
+                color: #888;
+                font-size: 80%;
+            }
+            #bms a, #quickLinks a {
+                color: #888;
+            }
+            #start {
+                background: #70c111;
+                color: #fff;
+                font-size: 120%;
+                border: 1px double #70c111;
+                cursor: pointer;
+                padding: 3px 8px;
+                -moz-user-select: none;
+            }
+            #stop {
+                background: #c00;
+                color: #fff;
+                font-size: 120%;
+                border: 1px double #c00;
+                cursor: pointer;
+                padding: 3px 8px;
+                -moz-user-select: none;
+            }
+            #start.disabled {
+                background: #b7d2aa;
+                cursor: default;
+            }
+            #results {
+                font-size: 110%;
+                color: #999;
+            }
+            #started {
+                display: none;
+            }
+            .running #started {
+                display: block;
+            }
+            .running #stopped {
+                display: none;
+            }
+            .running #tests h2 span {
+                cursor: default;
+            }
+            .running .test {
+                cursor: default;
+            }
+            .passed a, #header.passed {
+                background: #81CF5A !important;
+            }
+            .failed a, #header.failed {
+                background: #EF6868 !important;
+            }
+            .passing .touch {
+                background: url(@{'/public/test-runner/running.gif'}) no-repeat;
+            }
+            .passing a {
+                background: #95D7EF;
+            }
+            .passed .touch {
+                color: #81CF5A !important;
+            }
+            .failed .touch {
+                color: #EF6868 !important;
+            }
+            .touch {
+                color: #bbb;				
+                padding: 2px 10px 2px 5px;
+                cursor: default;
+                font-family: monospace;
+                font-size: 110%;
+                font-weight: bold;
+            }
+            .failed .touch, .passed .touch {
+                cursor: pointer;
+            }
+            .testResult {
+                display: none;
+                background: #fff;
+                margin-left: 24px;
+                margin-top: 6px;
+                margin-bottom: 10px;
+                padding: 8px;
+                font-size: 80%;
+                border-left: 6px solid #ccc;
+                -moz-user-select: text !important;
+            }
+            .testResult .status_passed {
+                background: #9BCF81 !important;
+            }
+            .testResult .status_failed {
+                background: #EF8686 !important;
+            }
+            .testResult .status_done {
+                background: #EFEFD1 !important;
+            }            
+            .testResult table {
+                width: 100%;
+                border: none;
+            }
+            .testResult table td {
+                padding: 5px;
+                border: none;
+            }
+            .testResult .error {
+                color: #c00;
+            }
+            .testResult .time {
+                color: #999;
+            }
+            .testResult table .passed span {
+                background: #9BCF81 !important;
+                padding: 3px 5px;
+            }
+            .testResult table .failed span {
+                background: #EF8686 !important;
+                padding: 3px 5px;
+            }
+            .testResult table .source {
+                margin-top: 10px;
+            }
+            .testResult table .source span {
+                color: #fff;
+                font-size: 85%;
+                padding: 1px 3px;
+                background: #666;
+            }
+            .testResult table pre {
+                display: none;
+            }
+            .testResult table .sourceLine {
+                border-left: 3px solid #c00;
+                padding: 4px 3px;
+                color: #000;
+                font-size: 85%;
+                margin-bottom: 10px;
+            }
+            #loading {
+                background: #c00;
+                color: #fff;
+                position: absolute;
+                top: 0;
+                right: 0;
+                padding: 4px 5px;
+                font-size: 80%;
+                display: none;
+            }
+            .testResult a {
+                background: white !important;
+                font-weight: normal !important;
+                padding: 0 !important;
+            }
+            #selenium-mask {
+                background: #000;
+                opacity: .8;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                display: none;
+            }
+            #selenium {
+                position: fixed;
+                top: 20px;
+                bottom: 50px;
+                right: 20px;
+                left: 20px;
+                display: none;
+                z-index: 100000;
+                color: #fff;
+				font-size: 110%;
+            }
+			#stopSelenium {
+                background: #c00;
+                color: #fff;
+                font-size: 90%;
+                border: 1px double #c00;
+                cursor: pointer;
+                padding: 2px 8px;
+                -moz-user-select: none;
+            }
+            #selenium iframe {
+				margin-top: 10px;
+                border: 1px solid #666;
+				background: #fff;
+            }
+        </style>
+        <script type="text/javascript">
+            $(function() {
+	
+				var title = window.top.document.title;
+                
+                $('#loading').ajaxStart(function() {
+                    $(this).show();
+                }).ajaxStop(function() {
+                    $(this).hide();
+                });
+                
+                var testError = function(msg) {
+                    alert('An unexpected error occured. Check server logs !\n\n'+msg);
+                    stop();
+                    updateSelected();
+                }
+                        
+                var run = function() {
+                    updateSelected();
+                    $(document.body).addClass('running');
+                    $('.test, #header').removeClass('passed').removeClass('failed');
+                    $.ajax({
+                       type: 'GET',
+                       url: '@{TestRunner.run("init")}',
+                       success: function() {
+                           runNextTest();
+                       },
+                       error: function(req) {
+                           testError(req.responseText);
+                       }
+                    });
+                }
+
+                var runNextTest = function() {
+                    if($(document.body).is('.running')) {
+                        var test = $('.test.selected:not(.passed,.failed):first');
+                        if(test.size()) {
+                            var testId = test.attr('id');
+                            runTest(testId, test);
+                        } else {
+                            result();
+                        }
+                    }					
+                }
+                                
+                var result = function() {
+                    $('#selenium-mask, #selenium').hide();
+                    $('#selenium-runner').attr('src', 'about:blank');
+                    clearInterval(window.checkResult);
+                    $(document.body).removeClass('running');
+                    $('.passing').removeClass('passing');
+                    if($('.test.failed').size()) {
+                        $('#header').addClass('failed');
+                    } else {
+                        $('#header').addClass('passed');
+                    }
+                    var areFailedTests = $('.test.failed').size();
+                    $.ajax({
+                       type: 'GET',
+                       url: '@{TestRunner.run("end")}',
+                       data: {result: areFailedTests ? 'failed' : 'passed'}
+                    });
+                    if(areFailedTests) {
+                        $.scrollTo($('.test.failed'), 500);
+                    }
+                };
+                                
+                var runTest = function(testId, test) {
+					test.addClass('passing');
+                    $('.touch', test).html('&nbsp;');
+                    if(/.class$/.test(testId)) {
+                        $.ajax({
+                            type: 'GET',
+                            dataType: 'html',
+                            url: '@{TestRunner.run("XXX")}'.replace('XXX', testId),
+                            complete: function(res, status) {
+                                var results = jQuery("<div/>").append(res.responseText).find('table');
+                                if(!results || !results.size()) {
+                                    results = '<strong class="error">Error, the test has not been properly run. Check the server logs, or open this test in another browser tab to see the error page.</strong>';
+                                }
+                                if(status == 'success') {
+                                    testSuccess(test, results);
+                                } else {
+                                    testFail(test, results);
+                                };
+                            }
+                        });
+                    }
+                    if(/.test.html/.test(testId)) {
+                        $('#selenium-runner').attr('src', '@{'/public/test-runner/selenium/TestRunner.html'}?baseUrl=http://localhost:${play.configuration['http.port'] ?: '9000'}&test=/@tests/'+testId+'.suite&auto=true&close=true&resultsUrl=/@tests/'+testId);
+                        $('#selenium-mask, #selenium').show();
+                        window.checkResult = setInterval(function() {
+                             var req = $.ajax({url: '@{TestRunner.run("XXX.result")}'.replace('XXX', testId), async: false});
+                             if(req.status == 200) {
+                                 var results = jQuery("<div/>").append(req.responseText).find('table');
+                                 clearInterval(window.checkResult);
+                                 $('#selenium-mask, #selenium').hide();
+                                 testSuccess(test, results);
+                             }
+                             if(req.status == 500) {
+                                 var results = jQuery("<div/>").append(req.responseText).find('table');
+                                 clearInterval(window.checkResult);
+                                 $('#selenium-mask, #selenium').hide();
+                                 testFail(test, results);
+                             }
+                        }, 2000);
+                    }
+                };
+                                
+                var testSuccess = function(test, result) {
+                    test.removeClass('passing').addClass('passed');
+                    $('.touch', test).html('+');
+                    $('.testResult', test).html(result);
+					window.top.document.title = title;
+                    runNextTest();
+                };
+                                
+                var testFail = function(test, result) {
+                    test.removeClass('passing').addClass('failed');
+                    $('.touch', test).html('-');
+                    $('.testResult', test).html(result).show();
+					window.top.document.title = title;
+                    stop();
+                };
+                        
+                var stop = function() {
+                    result();
+                };
+                        
+                var updateSelected = function() {
+                    var nb = $('.test.selected').size();
+                    if(nb) {
+                        $('.nbToRun').text(nb);
+                        $('.nbToRunPluralize').text((nb>1) ? 's' : '');
+                        $('#start').removeAttr('disabled').removeClass('disabled');
+                        $('#bms').show();
+                        $('#bms a').attr('href', bookmark());
+                        $('#quickLinks').hide();
+                    } else {
+                        $('.nbToRun').text('no');
+                        $('.nbToRunPluralize').text('');
+                        $('#start').attr('disabled', 'true').addClass('disabled');
+                        $('#bms').hide();
+                        $('#quickLinks').show();
+                    }
+                    $('.test, #header').removeClass('passed').removeClass('failed');
+                    $('.touch').html('&sim;');
+                    $('.testResult').hide();
+                }
+
+                var bookmark = function() {
+                    var url = 'http://'+document.location.host;
+                    if(document.location.port && url.indexOf(":") == -1) {
+                        url += ':'+document.location.port;
+                    }
+                    url += document.location.pathname;
+                    url += '?select=';
+                    var v = false;
+                    $('.test.selected').each(function() {
+                        if(v) url += ',';
+                        url += $(this).attr('id');	
+                        v = true;					
+                    });
+                    if(url)
+                        return url;
+                }
+                        
+                $('.test a').click(function(e) {
+                    e.preventDefault();
+                    if($(document.body).is('.running')) return;
+                    $(this).closest('.test').toggleClass('selected');
+                    updateSelected();
+                });
+
+                $('.test .touch').click(function(e) {
+                    e.preventDefault();
+                    var test = $(this).closest('.test')
+                    if($(test).is('.failed,.passed')) {
+                        $('.testResult', test).toggle();
+                        $(this).html( $(this).html() == '-' ? '+' : '-' );
+                    }
+                });
+                        
+                $('#tests h2 span').click(function() {
+                    if($(document.body).is('.running')) return;
+                    var ul = $(this).parent().next('ul');
+                    if( $('.test', ul).size() ==  $('.test.selected', ul).size() ) {
+                        $('.test', ul).removeClass('selected');
+                    } else {
+                        $('.test', ul).addClass('selected');
+                    }
+                    updateSelected();
+                });
+                        
+                $('#start').click(function() {
+                    if($(this).is('.disabled')) return;
+                    run();
+                });
+                        
+                $('#stop').click(function() {
+                    stop();
+                });
+
+				$('#stopSelenium').click(function() {
+                    stop();
+                });
+
+                if(/select=/.exec(document.location.search)) {
+                    var toSelect = /select=([^&]+)/.exec(document.location.search)[1].split(',');
+                    if(toSelect[0] == 'all') {
+                        $('.test').addClass('selected');
+                    } else {
+                        $(toSelect).each(function() {
+                            $(document.getElementById(this)).addClass('selected');
+                        });
+                    }
+                }
+
+                $('#sa').click(function() {
+                    $('.test').addClass('selected');
+                    updateSelected();
+                });
+                
+                $('#ra').click(function() {
+                    $('.test').addClass('selected');
+                    updateSelected();
+                    run();
+                });
+                
+                updateSelected();
+
+                if(/auto=yes/.exec(document.location.search)) {
+                    run();
+                }
+                        
+            });
+        </script>
+    </head>
+    <body>
+        <div id="header" class="block">
+            <h1>
+                Tests runner
+            </h1>           
+            <p>
+                <strong>Select the tests to run</strong>, then click [Start] and pray
+            </p>
+            <div id="loading">working ...</div>
+        </div>
+        <div id="results" class="block">
+            
+            <div id="stopped">
+                <span id="start">Start !</span>
+                &nbsp;
+                <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span> to run <span id="bms">(<a id="" href="#">Bookmark this link to save this configuration</a>)</span>
+                <span id="quickLinks">
+                    <span id="sa">(<a id="" href="#">Select all</a></span> -
+                    <span id="ra"><a id="" href="#">Run all</a>)</span>
+                </span>
+            </div>
+            
+            <div id="started">
+                <span id="stop">Stop ...</span>
+                &nbsp;(running <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span>)
+            </div>
+            
+            <div id="finished">
+                
+            </div>
+            
+        </div>
+        <div id="tests" class="block">
+            
+            #{if unitTests}
+            <h2><span>There ${unitTests.size().pluralize('is', 'are')} ${unitTests.size()} unit test${unitTests.size().pluralize()},</span></h2>
+            <ul>
+                #{list items:unitTests, as:'test'}
+                <li>
+                    <div class="test" id="${test.name}.class">
+                        <span class="touch">+</span><a href="@{TestRunner.run(test.name+'.class')}">${test.name.replace('.','/')}.java</a>
+                        <div class="testResult"></div>
+                    </div>
+                </li>
+                #{/list}
+            </ul>
+            %{ tis = true; }%
+            #{/if}
+            
+            #{if functionalTests}
+            <h2><span>${tis ? '' : 'There '+functionalTests.size().pluralize('is', 'are')} ${tis && !seleniumTests ? 'and' : ''} ${functionalTests.size()} functional test${functionalTests.size().pluralize()},</span></h2>
+            <ul>
+                #{list items:functionalTests, as:'test'}
+                <li>
+                    <div class="test" id="${test.name}.class">
+                        <span class="touch">+</span><a href="@{TestRunner.run(test.name+'.class')}">${test.name.replace('.','/')}.java</a>
+                        <div class="testResult"></div>
+                    </div>
+                </li>
+                #{/list}
+            </ul>
+            %{ tis = true; }%
+            #{/if}
+            
+            #{if seleniumTests}
+            <h2><span>${tis ? '' : 'There '+seleniumTests.size().pluralize('is', 'are')} ${tis ? 'and' : ''} ${seleniumTests.size()} selenium test${seleniumTests.size().pluralize()},</span></h2>
+            <ul>
+                #{list items:seleniumTests, as:'test'}
+                <li>
+                    <div class="test" id="${test}">
+                        <span class="touch">+</span><a href="@{'/public/test-runner/selenium/TestRunner.html'}?baseUrl=http://localhost:${play.configuration['http.port'] ?: '9000'}&test=/@tests/${test}.suite">${test}</a>
+                        <div class="testResult"></div>
+                    </div>
+                </li>
+                #{/list}
+            </ul>
+            #{/if}
+            
+            #{if !functionalTests && !unitTests && !seleniumTests}
+            <h2><span>There is no test to run</span></h2>
+            #{/if}
+            
+        </div>
+        <div id="selenium-mask"></div>
+        <div id="selenium">
+			Play is running a selenium test... <span id="stopSelenium">Stop it</span>
+            <iframe id="selenium-runner" width="100%" height="100%" src="about:blank"></iframe>
+        </div>
+    </body>
+</html>
