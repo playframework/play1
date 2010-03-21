@@ -7,7 +7,9 @@ import javax.persistence.*;
 
 import play.*;
 import play.mvc.*;
-import play.db.jpa.*;
+import play.db.Model;
+import play.db.jpa.FileAttachment;
+import play.db.jpa.JPA;
 import play.data.validation.*;
 import play.exceptions.*;
 import play.i18n.*;
@@ -34,7 +36,7 @@ public abstract class CRUD extends Controller {
         if (page < 1) {
             page = 1;
         }
-        List<JPASupport> objects = type.findPage(page, search, searchFields, orderBy, order, (String) request.args.get("where"));
+        List<Model> objects = type.findPage(page, search, searchFields, orderBy, order, (String) request.args.get("where"));
         Long count = type.count(search, searchFields, (String) request.args.get("where"));
         Long totalCount = type.count(null, null, (String) request.args.get("where"));
         try {
@@ -47,7 +49,7 @@ public abstract class CRUD extends Controller {
     public static void show(String id) {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        JPASupport object = type.findById(id);
+        Model object = type.findById(id);
         try {
             render(type, object);
         } catch (TemplateNotFoundException e) {
@@ -58,7 +60,7 @@ public abstract class CRUD extends Controller {
     public static void attachment(String id, String field) throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        JPASupport object = type.findById(id);
+        Model object = type.findById(id);
         FileAttachment attachment = (FileAttachment) object.getClass().getField(field).get(object);
         if (attachment == null) {
             notFound();
@@ -69,8 +71,9 @@ public abstract class CRUD extends Controller {
     public static void save(String id) throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        JPASupport object = type.findById(id);
-        validation.valid(object.edit("object", params.all()));
+        Model object = type.findById(id);
+        play.db.jpa.JPASupport.edit(object, "object", params.all(), null);
+        validation.valid(object);
         if (validation.hasErrors()) {
             renderArgs.put("error", Messages.get("crud.hasErrors"));
             try {
@@ -79,12 +82,12 @@ public abstract class CRUD extends Controller {
                 render("CRUD/show.html", type, object);
             }
         }
-        object.save();
-        flash.success(Messages.get("crud.saved", type.modelName, object.getEntityId()));
+        object._save();
+        flash.success(Messages.get("crud.saved", type.modelName, object._getKey()));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
         }
-        redirect(request.controller + ".show", object.getEntityId());
+        redirect(request.controller + ".show", object._getKey());
     }
 
     public static void blank() {
@@ -102,8 +105,9 @@ public abstract class CRUD extends Controller {
         notFoundIfNull(type);
         Constructor constructor = type.entityClass.getDeclaredConstructor();
         constructor.setAccessible(true);
-        JPASupport object = (JPASupport) constructor.newInstance();
-        validation.valid(object.edit("object", params.all()));
+        Model object = (Model) constructor.newInstance();
+        play.db.jpa.JPASupport.edit(object, "object", params.all(), null);
+        validation.valid(object);
         if (validation.hasErrors()) {
             renderArgs.put("error", Messages.get("crud.hasErrors"));
             try {
@@ -112,28 +116,28 @@ public abstract class CRUD extends Controller {
                 render("CRUD/blank.html", type);
             }
         }
-        object.save();
-        flash.success(Messages.get("crud.created", type.modelName, object.getEntityId()));
+        object._save();
+        flash.success(Messages.get("crud.created", type.modelName, object._getKey()));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
         }
         if (params.get("_saveAndAddAnother") != null) {
             redirect(request.controller + ".blank");
         }
-        redirect(request.controller + ".show", object.getEntityId());
+        redirect(request.controller + ".show", object._getKey());
     }
 
     public static void delete(String id) {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        JPASupport object = type.findById(id);
+        Model object = type.findById(id);
         try {
-            object.delete();
+            object._delete();
         } catch (Exception e) {
-            flash.error(Messages.get("crud.delete.error", type.modelName, object.getEntityId()));
-            redirect(request.controller + ".show", object.getEntityId());
+            flash.error(Messages.get("crud.delete.error", type.modelName, object._getKey()));
+            redirect(request.controller + ".show", object._getKey());
         }
-        flash.success(Messages.get("crud.deleted", type.modelName, object.getEntityId()));
+        flash.success(Messages.get("crud.deleted", type.modelName, object._getKey()));
         redirect(request.controller + ".list");
     }
 
@@ -153,7 +157,7 @@ public abstract class CRUD extends Controller {
     public static class ObjectType implements Comparable<ObjectType> {
 
         public Class<? extends CRUD> controllerClass;
-        public Class<? extends JPASupport> entityClass;
+        public Class<? extends Model> entityClass;
         public String name;
         public String modelName;
         public String controllerName;
@@ -173,7 +177,7 @@ public abstract class CRUD extends Controller {
 
         public static ObjectType get(Class controllerClass) {
             Class entityClass = getEntityClassForController(controllerClass);
-            if (entityClass == null || !JPASupport.class.isAssignableFrom(entityClass)) {
+            if (entityClass == null || !Model.class.isAssignableFrom(entityClass)) {
                 return null;
             }
             ObjectType type = new ObjectType(entityClass);
@@ -279,7 +283,7 @@ public abstract class CRUD extends Controller {
             return q;
         }
 
-        public JPASupport findById(Object id) {
+        public Model findById(Object id) {
             Query query = JPA.em().createQuery("from " + entityClass.getName() + " where id = ?");
             try {
                 // TODO: I think we need to type of direct bind -> primitive and object binder
@@ -287,7 +291,7 @@ public abstract class CRUD extends Controller {
             } catch (Exception e) {
                 throw new RuntimeException("Something bad with id type ?", e);
             }
-            return (JPASupport) query.getSingleResult();
+            return (Model) query.getSingleResult();
         }
 
         public List<ObjectField> getFields() {
@@ -358,7 +362,7 @@ public abstract class CRUD extends Controller {
                 if (FileAttachment.class.isAssignableFrom(field.getType())) {
                     type = "file";
                 }
-                if (JPASupport.class.isAssignableFrom(field.getType())) {
+                if (Model.class.isAssignableFrom(field.getType())) {
                     if (field.isAnnotationPresent(OneToOne.class)) {
                         if (field.getAnnotation(OneToOne.class).mappedBy().equals("")) {
                             type = "relation";

@@ -16,7 +16,7 @@ public class JPAEnhancer extends Enhancer {
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
         CtClass ctClass = makeClass(applicationClass);
 
-        if (!ctClass.subtypeOf(classPool.get("play.db.jpa.JPASupport"))) {
+        if (!ctClass.subtypeOf(classPool.get("play.db.jpa.JPABase"))) {
             return;
         }
         
@@ -58,7 +58,7 @@ public class JPAEnhancer extends Enhancer {
         ctClass.addMethod(findAll);
 
         // findById
-        CtMethod findById = CtMethod.make("public static play.db.jpa.JPASupport findById(Object id) { return play.db.jpa.JPQL.instance.findById(\"" + entityName + "\", id); }", ctClass);
+        CtMethod findById = CtMethod.make("public static play.db.jpa.JPABase findById(Object id) { return play.db.jpa.JPQL.instance.findById(\"" + entityName + "\", id); }", ctClass);
         ctClass.addMethod(findById);
 
         // findBy        
@@ -86,11 +86,11 @@ public class JPAEnhancer extends Enhancer {
         ctClass.addMethod(deleteAll);
 
         // findOneBy
-        CtMethod findOneBy = CtMethod.make("public static play.db.jpa.JPASupport findOneBy(String query, Object[] params) { return play.db.jpa.JPQL.instance.findOneBy(\"" + entityName + "\", query, params); }", ctClass);
+        CtMethod findOneBy = CtMethod.make("public static play.db.jpa.JPABase findOneBy(String query, Object[] params) { return play.db.jpa.JPQL.instance.findOneBy(\"" + entityName + "\", query, params); }", ctClass);
         ctClass.addMethod(findOneBy);
         
         // create     
-        CtMethod create = CtMethod.make("public static play.db.jpa.JPASupport create(String name, play.mvc.Scope.Params params) { return play.db.jpa.JPQL.instance.create(\"" + entityName + "\", name, params); }", ctClass);
+        CtMethod create = CtMethod.make("public static play.db.jpa.JPABase create(String name, play.mvc.Scope.Params params) { return play.db.jpa.JPQL.instance.create(\"" + entityName + "\", name, params); }", ctClass);
         ctClass.addMethod(create);
 
         // Done.

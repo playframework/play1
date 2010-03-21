@@ -37,7 +37,7 @@ import java.lang.reflect.Constructor;
 @MappedSuperclass
 public class JPASupport extends JPABase {
 
-    public static <T extends JPASupport> T create(Class type, String name, Map<String, String[]> params, Annotation[] annotations) {
+    public static <T extends JPABase> T create(Class type, String name, Map<String, String[]> params, Annotation[] annotations) {
         try {
             Constructor c = type.getDeclaredConstructor();
             c.setAccessible(true);
@@ -48,13 +48,13 @@ public class JPASupport extends JPABase {
         }
     }
 
-    public static <T extends JPASupport> T edit(Object o, String name, Map<String, String[]> params, Annotation[] annotations) {
+    public static <T extends JPABase> T edit(Object o, String name, Map<String, String[]> params, Annotation[] annotations) {
         try {
             BeanWrapper bw = new BeanWrapper(o.getClass());
             // Start with relations
             Set<Field> fields = new HashSet<Field>();
             Class clazz = o.getClass();
-            while (!clazz.equals(JPASupport.class)) {
+            while (!clazz.equals(Object.class)) {
                 Collections.addAll(fields, clazz.getDeclaredFields());
                 clazz = clazz.getSuperclass();
             }
@@ -175,7 +175,7 @@ public class JPASupport extends JPABase {
     /**
      * store (ie insert) the entity.
      */
-    public <T extends JPASupport> T save() {
+    public <T extends JPABase> T save() {
         _save();
         return (T) this;
     }
@@ -183,16 +183,16 @@ public class JPASupport extends JPABase {
     /**
      * Refresh the entity state.
      */
-    public <T extends JPASupport> T refresh() {
-        _refresh();
+    public <T extends JPABase> T refresh() {
+        em().refresh(this);
         return (T) this;
     }
 
     /**
      * Merge this object to obtain a managed entity (usefull when the object comes from the Cache).
      */
-    public <T extends JPASupport> T merge() {
-        _merge();
+    public <T extends JPABase> T merge() {
+        em().merge(this);
         return (T) this;
     }
 
@@ -200,12 +200,12 @@ public class JPASupport extends JPABase {
      * Delete the entity.
      * @return The deleted entity.
      */
-    public <T extends JPASupport> T delete() {
+    public <T extends JPABase> T delete() {
         _delete();
         return (T) this;
     }
 
-    public static <T extends JPASupport> T create(String name, Params params) {
+    public static <T extends JPABase> T create(String name, Params params) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 
@@ -231,7 +231,7 @@ public class JPASupport extends JPABase {
     /**
      * Find all entities of this type
      */
-    public static <T extends JPASupport> List<T> findAll() {
+    public static <T extends JPABase> List<T> findAll() {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 
@@ -240,7 +240,7 @@ public class JPASupport extends JPABase {
      * @param id The entity id
      * @return The entity
      */
-    public static <T extends JPASupport> T findById(Object id) {
+    public static <T extends JPABase> T findById(Object id) {
         throw new UnsupportedOperationException("Please annotate your JPA model with @javax.persistence.Entity annotation.");
     }
 

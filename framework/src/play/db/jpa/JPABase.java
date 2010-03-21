@@ -5,7 +5,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,25 +20,20 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
-import javax.persistence.PostLoad;
-import javax.persistence.PostPersist;
-import javax.persistence.PostUpdate;
-import javax.persistence.Query;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.collection.PersistentMap;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.proxy.HibernateProxy;
 import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
-import play.mvc.Scope.Params;
 
 /**
  * A super class for JPA entities 
  */
 @MappedSuperclass
-public class JPABase implements Serializable {
+public class JPABase implements Serializable, play.db.Model {
 
-    void _save() {
+    public void _save() {
         if (!em().contains(this)) {
             em().persist(this);
             PlayPlugin.postEvent("JPASupport.objectPersisted", this);
@@ -67,19 +61,7 @@ public class JPABase implements Serializable {
         }
     }
 
-    void _refresh() {
-        em().refresh(this);
-    }
-
-    void _merge() {
-        em().merge(this);
-    }
-
-    void _edit(String name, Params params) {
-        JPASupport.edit(this, name, params.all(), null);
-    }
-
-    void _delete() {
+    public void _delete() {
         try {
             avoidCascadeSaveLoops.set(new ArrayList<JPABase>());
             try {
@@ -111,13 +93,6 @@ public class JPABase implements Serializable {
         }
     }
 
-    /**
-     * Retrieve the current entityManager
-     * @return the current entityManager
-     */
-    public static EntityManager em() {
-        return JPA.em();
-    }
     // ~~~ SAVING
     public transient boolean willBeSaved = false;
     static transient ThreadLocal<List<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<List<JPABase>>();
@@ -207,6 +182,14 @@ public class JPABase implements Serializable {
             }
         }
         return false;
+    }
+
+    /**
+     * Retrieve the current entityManager
+     * @return the current entityManager
+     */
+    public static EntityManager em() {
+        return JPA.em();
     }
 
     /**
@@ -335,6 +318,10 @@ public class JPABase implements Serializable {
         return null;
     }
 
+    public Object _getKey() {
+        return findKey(this);
+    }
+
     public static Class findKeyType(Class c) {
         try {
             while (!c.equals(Object.class)) {
@@ -351,6 +338,11 @@ public class JPABase implements Serializable {
         }
         return null;
     }
+
+    public Class _getKeyType() {
+        return findKeyType(this.getClass());
+    }
+
     private transient Object key;
 
     public Object getEntityId() {
@@ -359,4 +351,13 @@ public class JPABase implements Serializable {
         }
         return key;
     }
+
+    public void _loader() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public List<Property> _properties() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 }

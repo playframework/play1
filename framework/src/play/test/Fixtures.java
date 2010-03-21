@@ -31,11 +31,12 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses;
+import play.data.binding.Binder;
 import play.db.DB;
 import play.db.DBPlugin;
+import play.db.Model;
 import play.db.jpa.FileAttachment;
 import play.db.jpa.JPA;
-import play.db.jpa.JPASupport;
 import play.exceptions.YAMLException;
 import play.vfs.VirtualFile;
 
@@ -161,7 +162,7 @@ public class Fixtures {
                         serialize((Map<?, ?>) objects.get(key), "object", params);
                         Class<?> cType = Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
-                        JPASupport model = JPASupport.create(cType, "object", params, null);
+                        Model model = (Model)Binder.bind("object", cType, cType, null, params);
                         for(Field f : model.getClass().getFields()) {
                             if(f.getType().isAssignableFrom(FileAttachment.class)) {
                                 String[] value = params.get("object."+f.getName());
@@ -175,10 +176,9 @@ public class Fixtures {
                                 }
                             }
                         }
-                        model.save();
-                        JPA.em().persist(model);
-                        while (!cType.equals(JPASupport.class)) {
-                            idCache.put(cType.getName() + "-" + id, JPASupport.findKey(model));
+                        model._save();
+                        while (!cType.equals(Object.class)) {
+                            idCache.put(cType.getName() + "-" + id, model._getKey());
                             cType = cType.getSuperclass();
                         }
                         // Not very good for performance but will avoid outOfMemory
@@ -231,7 +231,7 @@ public class Fixtures {
     static void resolveDependencies(Class<?> type, Map<String, String[]> serialized, Map<String, Object> idCache) {
         Set<Field> fields = new HashSet<Field>();
         Class<?> clazz = type;
-        while (!clazz.equals(JPASupport.class)) {
+        while (!clazz.equals(Object.class)) {
             Collections.addAll(fields, clazz.getDeclaredFields());
             clazz = clazz.getSuperclass();
         }
