@@ -441,10 +441,12 @@ public class Template {
 
             ExecutableTemplate template = null;
             String controller = null;
+            boolean absolute = false;
 
-            public ActionBridge(ExecutableTemplate template, String controllerPart) {
+            public ActionBridge(ExecutableTemplate template, String controllerPart, boolean absolute) {
                 this.template = template;
                 this.controller = controllerPart;
+                this.absolute = absolute;
             }
 
             public ActionBridge(ExecutableTemplate template) {
@@ -453,7 +455,12 @@ public class Template {
 
             @Override
             public Object getProperty(String property) {
-                return new ActionBridge(template, controller == null ? property : controller + "." + property);
+                return new ActionBridge(template, controller == null ? property : controller + "." + property, absolute);
+            }
+
+            public Object _abs() {
+                this.absolute = true;
+                return this;
             }
 
             @Override
@@ -480,6 +487,7 @@ public class Template {
                             }
                         }
                         Router.ActionDefinition def = Router.reverse(action, r);
+                        if(absolute) def.absolute();
                         if (template.template.name.endsWith(".html") || template.template.name.endsWith(".xml")) {
                             def.url = def.url.replace("&", "&amp;");
                         }

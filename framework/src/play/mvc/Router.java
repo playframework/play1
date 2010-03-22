@@ -391,6 +391,10 @@ public class Router {
         public String toString() {
             return url;
         }
+
+        public void absolute() {
+            url  = Http.Request.current().getBase() + url;
+        }
     }
 
     public static class Route {

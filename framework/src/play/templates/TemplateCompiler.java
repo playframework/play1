@@ -274,7 +274,7 @@ public class TemplateCompiler {
                     action = action + "()";
                 }
                 if (absolute) {
-                    print("\tout.print(play.mvc.Http.Request.current().getBase() + actionBridge." + action + ");");
+                    print("\tout.print(actionBridge._abs()." + action + ");");
                 } else {
                     print("\tout.print(actionBridge." + action + ");");
                 }
@@ -295,8 +295,10 @@ public class TemplateCompiler {
                 if (!tagArgs.matches("^[_a-zA-Z0-9]+\\s*:.*$")) {
                     tagArgs = "arg:" + tagArgs;
                 }
-                tagArgs = tagArgs.replaceAll("[:]\\s*[@]", ":actionBridge.");
-                tagArgs = tagArgs.replaceAll("(\\s)[@]", "$1actionBridge.");
+                tagArgs = tagArgs.replaceAll("[:]\\s*[@]{2}", ":actionBridge._abs().");
+                tagArgs = tagArgs.replaceAll("(\\s)[@]{2}", "$1actionBridge._abs().");
+                tagArgs = tagArgs.replaceAll("[:]\\s*[@]{1}", ":actionBridge.");
+                tagArgs = tagArgs.replaceAll("(\\s)[@]{1}", "$1actionBridge.");
             } else {
                 tagName = tagText;
                 tagArgs = ":";
