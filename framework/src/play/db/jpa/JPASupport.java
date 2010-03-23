@@ -746,13 +746,13 @@ public class JPASupport implements Serializable {
     }
     // Events
     @PostLoad
-    public void onLoad() {
+    public void afterLoad() {
         setupAttachment();
     }
 
     @PostPersist
     @PostUpdate
-    public void onSave() {
+    public void afterSave() {
         saveAttachment();
     }
 

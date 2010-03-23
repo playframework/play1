@@ -1,11 +1,12 @@
 package play.data.binding;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  * Binder that support Date class.
@@ -19,7 +20,7 @@ public class DateBinder implements SupportedType<Date> {
     public static class AlternativeDateFormat {
 
         Locale locale;
-        List<SimpleDateFormat> formats = new ArrayList<SimpleDateFormat>();
+        List<DateTimeFormatter> formats = new ArrayList<DateTimeFormatter>();
 
         public AlternativeDateFormat(Locale locale, String... alternativeFormats) {
             super();
@@ -29,17 +30,15 @@ public class DateBinder implements SupportedType<Date> {
 
         public void setFormats(String... alternativeFormats) {
             for (String format : alternativeFormats) {
-                formats.add(new SimpleDateFormat(format, locale));
+                formats.add(DateTimeFormat.forPattern(format));
             }
         }
 
         public Date parse(String source) throws ParseException {
-            for (SimpleDateFormat dateFormat : formats) {
-                if (source.length() == dateFormat.toPattern().replace("\'", "").length()) {
-                    try {
-                        return dateFormat.parse(source);
-                    } catch (ParseException ex) {
-                    }
+            for (DateTimeFormatter dateFormat : formats) {
+                try {
+                    return dateFormat.parseDateTime(source).toDate();
+                } catch (Exception ex) {
                 }
             }
             throw new ParseException("Date format not understood", 0);
