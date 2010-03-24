@@ -271,7 +271,7 @@ public class Template {
             return layoutR.replace("____%LAYOUT%____", writer.toString().trim());
         }
         if (writer != null) {
-            return writer.toString();
+            return writer.toString().replace("____%LAYOUT%____", "");
         }
         return null;
     }
