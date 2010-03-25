@@ -240,7 +240,7 @@ public class Template {
             Logger.trace("%sms to render template %s", System.currentTimeMillis() - start, name);
         } catch (NoRouteFoundException e) {
             if (e.isSourceAvailable()) {
-                throw e;
+                throw (NoRouteFoundException)cleanStackTrace(e);
             }
             throwException(e);
         } catch (PlayException e) {
@@ -483,7 +483,11 @@ public class Template {
                                 throw new NoRouteFoundException(action, null);
                             }
                             for (int i = 0; i < ((Object[]) param).length; i++) {
-                                Unbinder.unBind(r, ((Object[]) param)[i], i < names.length ? names[i] : "");
+                                if(((Object[]) param)[i] instanceof Router.ActionDefinition) {
+                                    Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "");
+                                } else {
+                                    Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "");
+                                }
                             }
                         }
                         Router.ActionDefinition def = Router.reverse(action, r);
