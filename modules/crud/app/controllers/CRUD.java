@@ -1,20 +1,31 @@
 package controllers;
 
-import com.sun.org.apache.xerces.internal.impl.xs.identity.ValueStore;
-import java.util.*;
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import javax.persistence.*;
+import play.Logger;
+import play.Play;
+import play.data.validation.MaxSize;
+import play.data.validation.Password;
+import play.data.validation.Required;
+import play.db.jpa.FileAttachment;
+import play.db.jpa.JPA;
+import play.db.jpa.JPASupport;
+import play.exceptions.TemplateNotFoundException;
+import play.i18n.Messages;
+import play.mvc.Before;
+import play.mvc.Controller;
+import play.mvc.Router;
 
-import play.*;
-import play.mvc.*;
-import play.db.jpa.*;
-import play.data.validation.*;
-import play.exceptions.*;
-import play.i18n.*;
+import javax.persistence.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.util.*;
 
 public abstract class CRUD extends Controller {
-    
+
     @Before
     static void addType() {
         ObjectType type = ObjectType.get(getControllerClass());
@@ -71,7 +82,18 @@ public abstract class CRUD extends Controller {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         JPASupport object = type.findById(id);
-        validation.valid(object.edit("object", params));
+        object = object.edit("object", params);
+        // Look if we need to deserialize
+        for (ObjectType.ObjectField field : type.getFields()) {
+            if (field.type.equals("serializedText") && params.get("object." + field.name) != null) {
+                Field f = object.getClass().getDeclaredField(field.name);
+                 Logger.info("Set [" + field.name + "]");
+                f.set(object, CRUD.collectionDeserializer(params.get("object." + field.name),(Class)((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0]));
+            }
+        }
+
+               
+        validation.valid(object);
         if (validation.hasErrors()) {
             renderArgs.put("error", Messages.get("crud.hasErrors"));
             try {
@@ -127,8 +149,8 @@ public abstract class CRUD extends Controller {
         notFoundIfNull(type);
         JPASupport object = type.findById(id);
         try {
-            object.delete();            
-        } catch(Exception e) {
+            object.delete();
+        } catch (Exception e) {
             flash.error(Messages.get("crud.delete.error", type.modelName, object.getEntityId()));
             redirect(request.controller + ".show", object.getEntityId());
         }
@@ -156,16 +178,16 @@ public abstract class CRUD extends Controller {
         public String name;
         public String modelName;
         public String controllerName;
-        
+
         public ObjectType(Class modelClass) {
             this.modelName = modelClass.getSimpleName();
             this.entityClass = modelClass;
         }
-        
+
         public ObjectType(String modelClass) throws ClassNotFoundException {
             this(Play.classloader.loadClass(modelClass));
         }
-        
+
         public static ObjectType forClass(String modelClass) throws ClassNotFoundException {
             return new ObjectType(modelClass);
         }
@@ -281,9 +303,9 @@ public abstract class CRUD extends Controller {
         }
 
         public List<ObjectField> getFields() {
-            List fields = new ArrayList();                 
+            List fields = new ArrayList();
             for (Field f : entityClass.getFields()) {
-                if(Modifier.isTransient(f.getModifiers()) || Modifier.isFinal(f.getModifiers())) {
+                if (Modifier.isTransient(f.getModifiers()) || Modifier.isFinal(f.getModifiers())) {
                     continue;
                 }
                 ObjectField of = new ObjectField(f);
@@ -302,11 +324,11 @@ public abstract class CRUD extends Controller {
             }
             return null;
         }
-        
+
         public int compareTo(ObjectType other) {
             return modelName.compareTo(other.modelName);
         }
-        
+
         public static class ObjectField {
 
             public String type = "unknown";
@@ -316,7 +338,8 @@ public abstract class CRUD extends Controller {
             public boolean searchable;
             public Object[] choices;
             public boolean required;
-            
+            public String serializedValue;
+
             public ObjectField(Field field) {
                 if (CharSequence.class.isAssignableFrom(field.getType())) {
                     type = "text";
@@ -372,6 +395,13 @@ public abstract class CRUD extends Controller {
                         }
                     }
                 }
+                if (Collection.class.isAssignableFrom(field.getType()) || field.getType().isArray()) {
+                    if (!field.isAnnotationPresent(OneToMany.class) ||
+                            (field.isAnnotationPresent(ManyToMany.class))) {
+                        //Class fieldType = (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                        type = "serializedText";
+                    }
+                }
                 if (field.getType().isEnum()) {
                     type = "enum";
                     relation = field.getType().getSimpleName();
@@ -392,9 +422,63 @@ public abstract class CRUD extends Controller {
             public Object[] getChoices() {
                 return choices;
             }
-
-            
         }
+    }
+
+    public static String collectionSerializer(Collection<?> coll) {
+        StringBuffer sb = new StringBuffer();
+        for (Object obj : coll) {
+            sb.append("\"" + obj.toString() + "\",");
+        }
+        if (sb.length() > 2) {
+            return sb.substring(0, sb.length() - 1);
+        }
+        return null;
+
+    }
+
+    public static String arraySerializer(Object[] coll) {
+       return collectionSerializer(Arrays.asList(coll));
+    }
+
+    public static Collection<?> collectionDeserializer(String target, Class<?> type) {
+        String[] targets = target.trim().split(",");
+        Collection results;
+        if (type.isAssignableFrom(List.class)) {
+            results = new ArrayList();
+        } else {
+            results = new TreeSet();
+        }
+        for (String targ : targets) {
+            if (targ.length() > 1) {
+                targ = targ.substring(1, targ.length() - 1);
+            }
+            if (type.isEnum()) {
+                Object[] constants = type.getEnumConstants();
+                for (Object c : constants) {
+                    if  (c.toString().equals(targ)) {
+                        results.add(c);
+                    }
+                }
+            } else if (CharSequence.class.isAssignableFrom(type)) {
+                results.add(targ);
+            } else if (Integer.class.isAssignableFrom(type)) {
+                results.add(Integer.valueOf(targ));
+            } else if (Float.class.isAssignableFrom(type)) {
+                results.add(Float.valueOf(targ));
+            } else if (Boolean.class.isAssignableFrom(type)) {
+                 results.add(Boolean.valueOf(targ));
+            } else if (Double.class.isAssignableFrom(type)) {
+                 results.add(Double.valueOf(targ));
+            } else if (Long.class.isAssignableFrom(type)) {
+                results.add(Long.valueOf(targ));
+            }  else if (Byte.class.isAssignableFrom(type)) {
+                 results.add(Byte.valueOf(targ));
+            }
+        }
+
+        return results;
+
     }
 }
 

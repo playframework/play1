@@ -19,10 +19,13 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.data.Upload;
 import play.data.validation.Validation;
+import play.utils.Utils;
 
 /**
  * The binder try to convert String values to Java objects.
@@ -48,10 +51,13 @@ public class Binder {
         }
         return beanwrappers.get(clazz);
     }
+
     public static Object MISSING = new Object();
 
     @SuppressWarnings("unchecked")
     static Object bindInternal(String name, Class clazz, Type type, Map<String, String[]> params, String prefix) {
+        Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] isComposite [" + isComposite(name + prefix, params.keySet()) + "]");
+
         try {
             if (isComposite(name + prefix, params.keySet())) {
                 BeanWrapper beanWrapper = getBeanWrapper(clazz);
@@ -76,6 +82,9 @@ public class Binder {
                 }
                 return r;
             }
+            Logger.trace("bindInternal: value [" + value + "]");
+
+
             // Enums
             if (Enum.class.isAssignableFrom(clazz)) {
                 if (value == null || value.length == 0) {
@@ -152,7 +161,9 @@ public class Binder {
                                 }
                                 if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
                                     BeanWrapper beanWrapper = getBeanWrapper(componentClass);
+                                    Logger.info("param [" + param + "]");
                                     Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]");
+                                    Logger.info("oValue [" + oValue + "]");
                                     ((List) r).set(key, oValue);
                                 } else {
                                     Map<String, String[]> tP = new HashMap<String, String[]>();
@@ -193,9 +204,9 @@ public class Binder {
     public static Object bind(String name, Class<?> clazz, Type type, Map<String, String[]> params) {
         Object result = null;
         // Let a chance to plugins to bind this object
-        for(PlayPlugin plugin : Play.plugins) {
+        for (PlayPlugin plugin : Play.plugins) {
             result = plugin.bind(name, clazz, type, params);
-            if(result != null) {
+            if (result != null) {
                 return result;
             }
         }
@@ -236,7 +247,7 @@ public class Binder {
         return false;
     }
 
-    public static Object directBind(String value, Class<?> clazz) throws Exception {
+    public static Object directBind(String value, Class clazz) throws Exception {
 
         if (clazz.equals(String.class)) {
             return value;
@@ -246,6 +257,10 @@ public class Binder {
 
         if (supportedTypes.containsKey(clazz)) {
             return nullOrEmpty ? null : supportedTypes.get(clazz).bind(value);
+        }
+
+        if (Enum.class.isAssignableFrom(clazz)) {
+            return Enum.valueOf(clazz, value);
         }
 
         // int or Integer binding
@@ -267,7 +282,7 @@ public class Binder {
         // byte or Byte binding
         if (clazz.getName().equals("byte") || clazz.equals(Byte.class)) {
             if (nullOrEmpty)
-                return clazz.isPrimitive() ? (byte)0 : null;
+                return clazz.isPrimitive() ? (byte) 0 : null;
 
             return Byte.parseByte(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
@@ -275,7 +290,7 @@ public class Binder {
         // short or Short binding
         if (clazz.getName().equals("short") || clazz.equals(Short.class)) {
             if (nullOrEmpty)
-                return clazz.isPrimitive() ? (short)0 : null;
+                return clazz.isPrimitive() ? (short) 0 : null;
 
             return Short.parseShort(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }

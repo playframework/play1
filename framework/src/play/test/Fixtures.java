@@ -174,6 +174,7 @@ public class Fixtures {
                                     }
                                 }
                             }
+
                         }
                         model.save();
                         JPA.em().persist(model);

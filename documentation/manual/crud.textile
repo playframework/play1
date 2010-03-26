@@ -193,3 +193,23 @@ bc. #{crud.table fields:['name', 'company', 'edit']}
  
 #{/crud.table}
 
+h2. List of String and List of enumeration
+
+The CRUD module is showing them as a text field. In this text field, the list is represented by a comma separated list of String.
+For example:
+
+bc. public class MyEntity extends JPASupport {
+  @CollectionOfElements
+  public List<MyEnum> listOfThing;
+  @CollectionOfElements
+  public List<String> listOfString;
+
+}
+
+is showned as:
+
+"myEnumId1","myEnumId2" for the listOfThing and "string1","string2" for the listOfString. Per definition, this is what you should first customize in your CRUD module.
+
+h2. <a>Limitation</a>
+
+The crud module will show the relation that are unidirectional in only one entity, the one that is does not have the mappedBy attribute.
