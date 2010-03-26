@@ -221,4 +221,4 @@ is showned as:
 
 h2. <a>Limitation</a>
 
-The crud module will show the relations that are unidirectional in one entity: the one that does not have the mappedBy attribute.
+The crud module will show the relations that are unidirectional in one entity: the one that  does not have the mappedBy attribute.

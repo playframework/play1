@@ -87,11 +87,9 @@ public abstract class CRUD extends Controller {
         for (ObjectType.ObjectField field : type.getFields()) {
             if (field.type.equals("serializedText") && params.get("object." + field.name) != null) {
                 Field f = object.getClass().getDeclaredField(field.name);
-                 Logger.info("Set [" + field.name + "]");
                 f.set(object, CRUD.collectionDeserializer(params.get("object." + field.name),(Class)((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0]));
             }
         }
-
                
         validation.valid(object);
         if (validation.hasErrors()) {
@@ -395,10 +393,9 @@ public abstract class CRUD extends Controller {
                         }
                     }
                 }
-                if (Collection.class.isAssignableFrom(field.getType()) || field.getType().isArray()) {
-                    if (!field.isAnnotationPresent(OneToMany.class) ||
-                            (field.isAnnotationPresent(ManyToMany.class))) {
-                        //Class fieldType = (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                if (Collection.class.isAssignableFrom(field.getType())) {
+                    if (!(field.isAnnotationPresent(OneToMany.class) ||
+                            (field.isAnnotationPresent(ManyToMany.class)))) {
                         type = "serializedText";
                     }
                 }
@@ -444,7 +441,8 @@ public abstract class CRUD extends Controller {
     public static Collection<?> collectionDeserializer(String target, Class<?> type) {
         String[] targets = target.trim().split(",");
         Collection results;
-        if (type.isAssignableFrom(List.class)) {
+        Logger.info("type [" + type + "]");
+        if (List.class.isAssignableFrom(type)) {
             results = new ArrayList();
         } else {
             results = new TreeSet();
