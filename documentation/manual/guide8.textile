@@ -43,15 +43,15 @@ h2. <a>Customizing the authentication process</a>
 
 The application has to provide an instance of **controllers.Secure.Security** to customize the authentication process. By creating our own version of this class we will be able to specify exactly how users should be authenticated.
 
-Create a **yabe/controllers/Security.java** file and override the **authentify()** method:
+Create a **yabe/controllers/Security.java** file and override the **authenticate()** method:
 
 bc. package controllers;
  
 import models.*;
  
 public class Security extends Secure.Security {
- 
-    static boolean authentify(String username, String password) {
+
+    static boolean authenticate(String username, String password) {
         return true;
     }
     
@@ -59,7 +59,7 @@ public class Security extends Secure.Security {
 
 As we already have the User objects part of the blog model, it is easy to implement a working version of this method:
 
-bc. static boolean authentify(String username, String password) {
+bc. static boolean authenticate(String username, String password) {
     return User.connect(username, password) != null;
 }
 
