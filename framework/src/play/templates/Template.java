@@ -486,7 +486,7 @@ public class Template {
                                 if(((Object[]) param)[i] instanceof Router.ActionDefinition) {
                                     Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "");
                                 } else {
-                                    Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "");
+                                    Unbinder.unBind(r, ((Object[]) param)[i], i < names.length ? names[i] : "");
                                 }
                             }
                         }
