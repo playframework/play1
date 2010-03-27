@@ -54,6 +54,7 @@ public class Unbinder {
                 boolean oldAcc = field.isAccessible();
                 field.setAccessible(true);
                 try {
+                    // Make sure the fied type is not Class to avoid endless loop. Class is not a primitive.
                     if (!field.isSynthetic() && !field.getType().equals(Class.class)) {
                         unBind(result, field.get(src), field.getType(), newName);
                     }
