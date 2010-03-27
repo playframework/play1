@@ -93,7 +93,7 @@ public class Template {
             byte[] code = IO.readContent(file);
             directLoad(code);
         } catch (Exception e) {
-            throw new RuntimeException("Cannot load precompiled template " +name);
+            throw new RuntimeException("Cannot load precompiled template " + name);
         }
     }
 
@@ -148,6 +148,7 @@ public class Template {
                 LinkedList<GroovyClassOperation> output = new LinkedList<GroovyClassOperation>();
                 phases[Phases.OUTPUT] = output;
                 output.add(new GroovyClassOperation() {
+
                     public void call(GroovyClass gclass) {
                         groovyClassesForThisTemplate.add(gclass);
                     }
@@ -240,7 +241,7 @@ public class Template {
             Logger.trace("%sms to render template %s", System.currentTimeMillis() - start, name);
         } catch (NoRouteFoundException e) {
             if (e.isSourceAvailable()) {
-                throw (NoRouteFoundException)cleanStackTrace(e);
+                throw (NoRouteFoundException) cleanStackTrace(e);
             }
             throwException(e);
         } catch (PlayException e) {
@@ -483,15 +484,21 @@ public class Template {
                                 throw new NoRouteFoundException(action, null);
                             }
                             for (int i = 0; i < ((Object[]) param).length; i++) {
-                                if(((Object[]) param)[i] instanceof Router.ActionDefinition) {
+                                if (((Object[]) param)[i] instanceof Router.ActionDefinition && ((Object[]) param)[i] != null) {
                                     Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "");
+                                } else if (isSimpleParam(actionMethod.getParameterTypes()[i])) {
+                                    if (((Object[]) param)[i] != null) {
+                                        Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "");
+                                    }
                                 } else {
                                     Unbinder.unBind(r, ((Object[]) param)[i], i < names.length ? names[i] : "");
                                 }
                             }
                         }
                         Router.ActionDefinition def = Router.reverse(action, r);
-                        if(absolute) def.absolute();
+                        if (absolute) {
+                            def.absolute();
+                        }
                         if (template.template.name.endsWith(".html") || template.template.name.endsWith(".xml")) {
                             def.url = def.url.replace("&", "&amp;");
                         }
@@ -507,5 +514,9 @@ public class Template {
                 }
             }
         }
+    }
+
+    static boolean isSimpleParam(Class type) {
+        return Number.class.isAssignableFrom(type) || type.equals(String.class) || type.isPrimitive();
     }
 }
