@@ -54,7 +54,9 @@ public class Unbinder {
                 boolean oldAcc = field.isAccessible();
                 field.setAccessible(true);
                 try {
-                    unBind(result, field.get(src), field.getType(), newName);
+                    if (!field.isSynthetic() && !field.getType().equals(Class.class)) {
+                        unBind(result, field.get(src), field.getType(), newName);
+                    }
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException("Object" + src.getClass() + " won't unbind field " + field.getName(), e);
                 } catch (IllegalArgumentException e) {
