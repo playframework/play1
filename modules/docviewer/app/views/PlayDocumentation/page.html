@@ -8,13 +8,37 @@
             <div id="body">
                 <div id="page">
                     
-                    #{if id != 'home'}
-                    <div id="bc">
-                        <a href="@{index()}">Table of contents</a> » ${title}
-                    </div>
+                    #{if module}
+                        <div id="bc">
+                            <a href="@{index()}">Table of contents</a> » <a href="@{page('home', module)}">${module}</a> » ${title}
+                        </div>
                     #{/if}
+                    #{else}
+                    
+                        #{if id != 'home'}
+                        <div id="bc">
+                            <a href="@{index()}">Table of contents</a> » ${title}
+                        </div>
+                        #{/if}
+                        
+                    #{/else}
                     
                     ${html.raw()}
+                    
+                    #{if modules}
+                        <h2><a>Installed modules</a></h2>
+                        
+                        <p>
+                            You can also browse the documentation of the installed modules.
+                        </p>
+                        
+                        <ol>
+                            #{list modules, as:'module'}
+                                <li><a href="modules/${module}/home">${module}</a></li>
+                            #{/list}
+                        </ol>
+                    #{/if}
+                    
                 </div>
             </div>
         </div>
