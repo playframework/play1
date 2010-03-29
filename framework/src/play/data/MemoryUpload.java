@@ -16,7 +16,15 @@ public class MemoryUpload implements Upload {
     public File asFile() {
         throw new UnsupportedOperationException();
     }
-    
+
+    public File asFile(File file) {
+        throw new UnsupportedOperationException();
+    }
+
+    public File asFile(String name) {
+        throw new UnsupportedOperationException();
+    }
+
     public byte[] asBytes() {
         return fileItem.get();
     }
@@ -44,5 +52,4 @@ public class MemoryUpload implements Upload {
     public boolean isInMemory() {
         return fileItem.isInMemory();
     }
-
 }

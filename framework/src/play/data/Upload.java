@@ -13,4 +13,6 @@ public interface Upload {
     public Long getSize();
     public boolean isInMemory();
     public File asFile();
+    public File asFile(File file);
+    public File asFile(String name);
 }
