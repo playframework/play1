@@ -4,12 +4,18 @@ import sys, os
 
 NAMES = ['help']
 
-def execute(command, app, args=[]):
+def execute(**kargs):
+    command = kargs.get("command")
+    app = kargs.get("app")
+    args = kargs.get("args")
+
+    play_env = kargs.get("env")
+
     if len(sys.argv) == 3:
-        cmd = args[2]
+        cmd = sys.argv[2]
     else:
         cmd = 'all'
-    help_file = os.path.join(app.play_base, 'documentation', 'commands', 'cmd-%s.txt' % cmd)
+    help_file = os.path.join(play_env["basedir"], 'documentation', 'commands', 'cmd-%s.txt' % cmd)
     if os.path.exists(help_file):
         print open(help_file, 'r').read()
     else:

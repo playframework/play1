@@ -1,7 +1,4 @@
-import os
-import os.path
-import re
-import socket
+import sys, os, os.path, re, socket
 
 class ModuleNotFound(Exception):
     def __init__(self, value):
@@ -19,43 +16,48 @@ class PlayApplication():
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Constructor
 
-    def __init__(self, application_path, play_base, play_id):
+    def __init__(self, application_path, env):
         self.path = application_path
         if application_path is not None:
             self.confpath = os.path.join(application_path, 'conf/application.conf')
         else:
             self.confpath = None
-        self.play_id = play_id
-        self.play_base = play_base
+        self.play_env = env
         self.jpda_port = self.readConf('jpda_port')
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Configuration File
 
     def check(self):
-        if not os.path.exists(os.path.join(self.path, 'conf/routes')):
-            print "~ Oops. %s does not seem to host a valid application" % os.path.normpath(application_path)
+        if not os.path.exists(os.path.join(self.path, 'conf', 'routes')):
+            print "~ Oops. %s does not seem to host a valid application" % os.path.normpath(self.path)
             print "~"
             sys.exit(-1)
 
     def readConf(self, key):
         if (self.confpath is None):
             return ''
-        for keyRe in [re.compile('^%' + self.play_id + '.' + key + '\s*='), re.compile('^' + key + '\s*=')]:
-            for line in open(self.confpath).readlines():
-                if keyRe.match(line):
-                    return line[line.find('=')+1:].strip()
+        try:
+            for keyRe in [re.compile('^%' + self.play_env["id"] + '.' + key + '\s*='), re.compile('^' + key + '\s*=')]:
+                for line in open(self.confpath).readlines():
+                    if keyRe.match(line):
+                        return line[line.find('=')+1:].strip()
+        except:
+            return '' # The conf file doesn't exist (invalid app)
         if key in self.DEFAULTS:
             return self.DEFAULTS[key]
         return ''
 
     def readConfs(self, key):
         result = []
-        for line in open(self.confpath).readlines():
-            if line.startswith(key):
-                result.append(line[line.find('=')+1:].strip())
-        for line in open(self.confpath).readlines():
-            if line.startswith('%' + self.play_id + '.' + key):
-                result.append(line[line.find('=')+1:].strip())
+        try:
+            for line in open(self.confpath).readlines():
+                if line.startswith(key):
+                    result.append(line[line.find('=')+1:].strip())
+            for line in open(self.confpath).readlines():
+                if line.startswith('%' + self.play_env["id"] + '.' + key):
+                    result.append(line[line.find('=')+1:].strip())
+        except:
+            None # Invalid app
         return result
 
     def modules(self):
@@ -63,13 +65,39 @@ class PlayApplication():
         for m in self.readConfs('module.'):
             om = m
             if '${play.path}' in m:
-                m = m.replace('${play.path}', self.play_base)
-            if not m[0] == '/':
+                m = m.replace('${play.path}', self.play_env["basedir"])
+            if m[0] is not '/':
                 m = os.path.normpath(os.path.join(application_path, m))
             if not os.path.exists(m):
-                raise ModuleNotFound(m)
+                print "~ Oops,"
+                print "~ Module not found: %s" % (m)
+                print "~"
+                if m.startswith('${play.path}/modules'):
+                    print "~ You can try to install the missing module using 'play install %s'" % (m[21:])
+                    print "~"
+                sys.exit(-1)
             modules.append(m)
+        if self.play_env["id"] == 'test':
+            modules.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'modules/testrunner')))
         return modules
+
+    def load_modules():
+        if os.environ.has_key('MODULES'):
+            if os.name == 'nt':
+                modules = os.environ['MODULES'].split(';')
+            else:
+                modules = os.environ['MODULES'].split(':')
+        else:
+            modules = []
+
+        if play_app is not None:
+            try:
+                modules = play_app.modules()
+            except ModuleNotFound as e:
+                m = e.value
+
+            if play_env["id"] == 'test':
+                modules.append(os.path.normpath(os.path.join(play_env["basedir"], 'modules/testrunner')))
 
     # ~~~~~~~~~~~~~~~~~~~~~~ JAVA
 
@@ -78,7 +106,7 @@ class PlayApplication():
 
         # The default
         classpath.append(os.path.normpath(os.path.join(self.path, 'conf')))
-        classpath.append(os.path.normpath(os.path.join(self.play_base, 'framework/play.jar')))
+        classpath.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'framework/play.jar')))
 
         # The application
         if os.path.exists(os.path.join(self.path, 'lib')):
@@ -96,14 +124,14 @@ class PlayApplication():
                             classpath.append(os.path.normpath(os.path.join(libs, '%s' % jar)))
 
         # The framework
-        for jar in os.listdir(os.path.join(self.play_base, 'framework/lib')):
+        for jar in os.listdir(os.path.join(self.play_env["basedir"], 'framework/lib')):
             if jar.endswith('.jar'):
-                classpath.append(os.path.normpath(os.path.join(self.play_base, 'framework/lib/%s' % jar)))
+                classpath.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'framework/lib/%s' % jar)))
 
         return classpath
 
     def agent_path(self):
-        return os.path.join(self.play_base, 'framework/play.jar')
+        return os.path.join(self.play_env["basedir"], 'framework/play.jar')
 
     def cp_args(self):
         classpath = self.getClasspath()
@@ -126,7 +154,7 @@ class PlayApplication():
 
     def log_path(self):
         if not os.environ.has_key('PLAY_LOG_PATH'):
-            log_path = os.path.join(application_path, 'logs');
+            log_path = os.path.join(self.path, 'logs');
         else:
             log_path = os.environ['PLAY_LOG_PATH'];
         if not os.path.exists(log_path):
@@ -167,6 +195,6 @@ class PlayApplication():
                 java_args.append('-Djava.security.manager')
                 java_args.append('-Djava.security.policy==%s' % policyFile)
 
-        java_cmd = [self.java_path(), '-javaagent:%s' % self.agent_path()] + java_args + ['-classpath', self.cp_args(), '-Dapplication.path=%s' % self.path, '-Dplay.id=%s' % self.play_id, className]
+        java_cmd = [self.java_path(), '-javaagent:%s' % self.agent_path()] + java_args + ['-classpath', self.cp_args(), '-Dapplication.path=%s' % self.path, '-Dplay.id=%s' % self.play_env["id"], className]
         return java_cmd
 

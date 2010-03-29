@@ -12,7 +12,11 @@ NAMES = LM + BM + IM
 # TODO: Make that configurable
 modules_server = 'http://www.playframework.org'
 
-def execute(command, app, args=[]):
+def execute(**kargs):
+    command = kargs.get("command")
+    app = kargs.get("app")
+    args = kargs.get("args")
+
     if command in LM:
         list(app, args)
     elif command in BM:
