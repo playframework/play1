@@ -29,6 +29,7 @@ import play.utils.Java;
 import play.libs.Time;
 import play.mvc.Http.Request;
 import play.mvc.Router.ActionDefinition;
+import play.mvc.results.BadRequest;
 import play.mvc.results.Error;
 import play.mvc.results.Forbidden;
 import play.mvc.results.NotFound;
@@ -186,7 +187,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
      * @param o The Java object to serialize
      * @param adapters A set of GSON serializers/deserializers/instance creator to use
      */
-    protected static void renderJSON(Object o, JsonSerializer... adapters) {
+    protected static void renderJSON(Object o, JsonSerializer<?>... adapters) {
         throw new RenderJson(o, adapters);
     }
 
@@ -195,6 +196,13 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
      */
     protected static void notModified() {
         throw new NotModified();
+    }
+
+    /**
+     * Send a 400 Bad request
+     */
+    protected static void badRequest() {
+        throw new BadRequest();
     }
 
     /**
@@ -544,7 +552,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
         try {
             Method method = Http.Request.current().invokedMethod;
             String name = method.getName();
-            Class clazz = method.getDeclaringClass().getSuperclass();
+            Class<?> clazz = method.getDeclaringClass().getSuperclass();
             Method superMethod = null;
             while (!clazz.getName().equals("play.mvc.Controller") && !clazz.getName().equals("java.lang.Object")) {
                 for (Method m : clazz.getDeclaredMethods()) {
@@ -594,7 +602,7 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
     /**
      * Suspend this request and wait for the task completion
      */
-    protected static void waitFor(Future task) {
+    protected static void waitFor(Future<?> task) {
         Request.current().isNew = false;
         throw new Suspend(task);
     }

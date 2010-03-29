@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Catch { 
 
-    Class[] value() default {};
+    Class<?>[] value() default {};
     
     /**
      * Interceptor priority (0 is high priority)

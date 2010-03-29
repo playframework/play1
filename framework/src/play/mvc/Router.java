@@ -273,7 +273,7 @@ public class Router {
                             allRequiredArgsAreHere = false;
                             break;
                         } else {
-                            if (value instanceof List) {
+                            if (value instanceof List<?>) {
                                 @SuppressWarnings("unchecked") List<Object> l = (List<Object>) value;
                                 value = l.get(0);
                             }

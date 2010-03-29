@@ -1,9 +1,6 @@
 package play.mvc;
 
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
 import java.io.ByteArrayInputStream;
-import play.mvc.results.Result;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -11,8 +8,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-
 import java.util.Map;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -21,14 +18,18 @@ import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.data.binding.Binder;
 import play.data.parsing.UrlEncodedParser;
 import play.data.validation.Validation;
-import play.exceptions.JavaExecutionException;
 import play.exceptions.ActionNotFoundException;
+import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.mvc.results.NoResult;
-import play.utils.Java;
 import play.mvc.results.NotFound;
+import play.mvc.results.Result;
+import play.utils.Java;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
 
 /**
  * Invoke an action after an HTTP request.
@@ -64,7 +65,7 @@ public class ActionInvoker {
             try {
                 Object[] ca = getActionMethod(request.action);
                 actionMethod = (Method) ca[1];
-                request.controller = ((Class) ca[0]).getName().substring(12);
+                request.controller = ((Class<?>) ca[0]).getName().substring(12);
                 request.actionMethod = actionMethod.getName();
                 request.action = request.controller + "." + request.actionMethod;
                 request.invokedMethod = actionMethod;
@@ -155,8 +156,8 @@ public class ActionInvoker {
                         ControllerInstrumentation.stopActionCall();
                         for (Method mCatch : catches) {
                             if (Modifier.isStatic(mCatch.getModifiers())) {
-                                Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
-                                for (Class exception : exceptions) {
+                                Class<?>[] exceptions = mCatch.getAnnotation(Catch.class).value();
+                                for (Class<?> exception : exceptions) {
                                     if (exception.isInstance(args[0])) {
                                         mCatch.setAccessible(true);
                                         Java.invokeStatic(mCatch, args);
@@ -307,7 +308,7 @@ public class ActionInvoker {
 
     public static Object[] getActionMethod(String fullAction) {
         Method actionMethod = null;
-        Class controllerClass = null;
+        Class<?> controllerClass = null;
         try {
             if (!fullAction.startsWith("controllers.")) {
                 fullAction = "controllers." + fullAction;
@@ -338,7 +339,7 @@ public class ActionInvoker {
         }
         Object[] rArgs = new Object[method.getParameterTypes().length];
         for (int i = 0; i < method.getParameterTypes().length; i++) {
-            Class type = method.getParameterTypes()[i];
+            Class<?> type = method.getParameterTypes()[i];
             Map<String, String[]> params = new HashMap<String, String[]>();
             if (type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {
                 params.put(paramsNames[i], Scope.Params.current().getAll(paramsNames[i]));
