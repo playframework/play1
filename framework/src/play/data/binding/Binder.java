@@ -20,6 +20,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -94,7 +95,7 @@ public class Binder {
 
             // Enums
             if (Enum.class.isAssignableFrom(clazz)) {
-                if (value == null || value.length == 0) {
+                if (value == null || value.length == 0 || StringUtils.isEmpty(value[0])) {
                     return MISSING;
                 }
                 return Enum.valueOf(clazz, value[0]);
@@ -301,7 +302,7 @@ public class Binder {
         }
 
         if (Enum.class.isAssignableFrom(clazz)) {
-            return Enum.valueOf(clazz, value);
+            return nullOrEmpty ? null :  Enum.valueOf(clazz, value);
         }
 
         // int or Integer binding
