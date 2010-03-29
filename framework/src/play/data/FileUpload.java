@@ -10,7 +10,7 @@ import play.exceptions.UnexpectedException;
 import play.libs.Files;
 import play.libs.IO;
 
-public class FileUpload implements Upload {
+public class FileUpload extends Upload {
 
     FileItem fileItem;
     File defaultFile;

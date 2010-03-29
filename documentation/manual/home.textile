@@ -78,7 +78,10 @@ Everything you need to know about Play.
 ## "Running the tests":test#running
 ## "Fixtures":test#fixtures
 ## "Continuous integration":test#continus
-
+# "Play and your application server":applicationserver
+## "Packaging your Play application":applicationserver
+## "Deploying your Play application":applicationserver
+## "Application server compatibility matrix":applicationserver
 
 h2. <a name="cook">Cookbook</a>
 

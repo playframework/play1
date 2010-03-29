@@ -5,7 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import org.apache.commons.fileupload.FileItem;
 
-public class MemoryUpload implements Upload {
+public class MemoryUpload extends Upload {
 
     FileItem fileItem;
 
