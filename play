@@ -13,13 +13,10 @@ import re
 import subprocess
 import time
 import webbrowser
-import urllib
 import urllib2
 import socket
 import getopt
-import zipfile
 import imp
-import tempfile
 
 import framework.pym.cmdloader as cmdloader
 import framework.pym.java as javautils
@@ -204,76 +201,6 @@ try:
 				os.remove(id_file)
 		sys.exit(0)
 
-	
-	# ~~~~~~~~~~~~~~~~~~~~~~ [new] Create a new application
-	if play_command == 'new' or play_command == 'new,run':
-		withModules = []
-		application_name = None
-		try:
-			optlist, args = getopt.getopt(remaining_args, '', ['with=', 'name='])
-			for o, a in optlist:
-				if o in ('--with'):
-					withModules = a.split(',')
-				if o in ('--name'):
-					application_name = a
-		except getopt.GetoptError, err:
-			print "~ %s" % str(err)
-			print "~ Sorry, unrecognized option"
-			print "~ "
-			sys.exit(-1)
-		if os.path.exists(application_path):
-			print "~ Oops. %s already exists" % application_path
-			print "~"
-			sys.exit(-1)
-		
-		md = []
-		for m in withModules:
-			dirname = None
-			if os.path.exists(os.path.join(play_env["basedir"], 'modules/%s' % m)) and os.path.isdir(os.path.join(play_env["basedir"], 'modules/%s' % m)):
-				dirname = m
-			else:
-				for f in os.listdir(os.path.join(play_env["basedir"], 'modules')):
-					if os.path.isdir(os.path.join(play_env["basedir"], 'modules/%s' % f)) and f.find('%s-' % m) == 0:
-						dirname = f
-						break
-			
-			if not dirname:
-				print "~ Oops. No module %s found" % m
-				print "~ Try to install it using 'play install %s'" % m
-				print "~"
-				sys.exit(-1)
-			
-			md.append(dirname)
-			
-		print "~ The new application will be created in %s" % os.path.normpath(application_path)
-		if application_name is None:
-		    application_name = raw_input("~ What is the application name? ")
-		shutil.copytree(os.path.join(play_env["basedir"], 'resources/application-skel'), application_path)
-		check_application()
-		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%APPLICATION_NAME%', application_name)
-		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'%SECRET_KEY%', secretKey())
-		print "~"
-		
-		for m in md:
-			mn = m
-			if mn.find('-') > 0:
-				mn = mn[:mn.find('-')]
-			replaceAll(os.path.join(application_path, 'conf/application.conf'), r'# ---- MODULES ----', '# ---- MODULES ----\nmodule.%s=${play.path}/modules/%s' % (mn, m) )
-		
-		# modules
-		check_application()
-		load_modules()
-		for module in modules:
-			commands = os.path.join(module, 'commands.py')
-			if os.path.exists(commands):
-				execfile(commands)
-		
-		print "~ OK, the application is created."
-		print "~ Start it with : play run %s" % sys.argv[2]
-		print "~ Have fun!"
-		print "~"
-		if play_command == 'new': sys.exit(0)
-		
 	# ~~~~~~~~~~~~~~~~~~~~~~ [new-module] Create a new module
 	if play_command == 'new-module':
 		if os.path.exists(application_path):
@@ -372,27 +299,6 @@ try:
 		print
 		sys.exit(0)
 
-	
-	# ~~~~~~~~~~~~~~~~~~~~~~ [precompile] Precompile
-	if play_command == 'precompile':
-		check_application()
-		load_modules()
-		do_classpath()
-		do_java()
-		if os.path.exists(os.path.join(application_path, 'tmp')):
-			shutil.rmtree(os.path.join(application_path, 'tmp'))
-		if os.path.exists(os.path.join(application_path, 'precompiled')):
-			shutil.rmtree(os.path.join(application_path, 'precompiled'))
-		java_cmd.insert(2, '-Dprecompile=yes')
-		try:
-			subprocess.call(java_cmd, env=os.environ)
-		except OSError:
-			print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
-			sys.exit(-1)
-		print
-		sys.exit(0)
-
-
 	# ~~~~~~~~~~~~~~~~~~~~~~ [out] Follow logs of the running application
 	if play_command == 'out':
 		check_application()
@@ -417,37 +323,6 @@ try:
 			else:
 				print line
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ [javadoc] Generates the javadoc for the project
-	if play_command == 'jd' or play_command == 'javadoc':
-		check_application()
-		load_modules()
-		do_classpath()
-		do_java()
-		if not os.environ.has_key('JAVA_HOME'):
-			javadoc_path = "javadoc"
-		else:
-			javadoc_path = os.path.normpath("%s/bin/javadoc" % os.environ['JAVA_HOME'])
-
-		fileList = []
-		def add_java_files(app_path):
-			for root, subFolders, files in os.walk(os.path.join(app_path, 'app')):
-				for file in files:
-					if file.endswith(".java"):
-						fileList.append(os.path.join(root, file))
-		add_java_files(application_path)
-		for module in modules:
-			add_java_files(os.path.normpath(module))
-		outdir = os.path.join(application_path, 'javadoc')
-		sout = open(os.path.join(log_path, 'javadoc.log'), 'w')
-		serr = open(os.path.join(log_path, 'javadoc.err'), 'w')
-		if (os.path.isdir(outdir)):
-			shutil.rmtree(outdir)
-		javadoc_cmd = [javadoc_path, '-classpath', cp_args, '-d', outdir] + fileList
-		print "Generating Javadoc in " + outdir + "..."
-		subprocess.call(javadoc_cmd, env=os.environ, stdout=sout, stderr=serr)
-		print "Done! You can open " + os.path.join(outdir, 'overview-tree.html') + " in your browser."
-		sys.exit(0)
-
 	# Module command ?
 	if play_command.find(':') > 0:
 		app.check()
@@ -455,7 +330,6 @@ try:
 			commands = os.path.join(module, 'commands.py')
 			if os.path.exists(commands):
 				execfile(commands)
-
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ Invalid command
 	print "~ Usage: play cmd [app_path] [--options]"
