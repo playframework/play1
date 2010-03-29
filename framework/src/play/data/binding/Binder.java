@@ -57,6 +57,7 @@ public class Binder {
     @SuppressWarnings("unchecked")
     static Object bindInternal(String name, Class clazz, Type type, Map<String, String[]> params, String prefix) {
         Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] isComposite [" + isComposite(name + prefix, params.keySet()) + "]");
+        boolean returnNullValue = new Boolean(Play.configuration.getProperty("future.binding.string.value.returnNull", "false"));
 
         try {
             if (isComposite(name + prefix, params.keySet())) {
@@ -73,9 +74,15 @@ public class Binder {
                     return MISSING;
                 }
                 Object r = Array.newInstance(clazz.getComponentType(), value.length);
+                int j = 0;
                 for (int i = 0; i < value.length; i++) {
                     try {
-                        Array.set(r, i, directBind(value[i], clazz.getComponentType()));
+                        Object obj = directBind(value[i], clazz.getComponentType());
+                        if (!returnNullValue) {
+                            Array.set(r, j++, obj);
+                        } else if (obj != null) {
+                            Array.set(r, j++, obj);
+                        }
                     } catch (Exception e) {
                         // ?? One item was bad
                     }
@@ -110,19 +117,32 @@ public class Binder {
                         Map<String, String[]> tP = new HashMap<String, String[]>();
                         tP.put("key", new String[]{key});
                         Object oKey = bindInternal("key", keyClass, keyClass, tP, "");
+
                         if (oKey != MISSING) {
                             if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
                                 BeanWrapper beanWrapper = getBeanWrapper(valueClass);
                                 Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]");
-                                r.put(oKey, oValue);
+                                if (oValue != null && returnNullValue) {
+                                    r.put(oKey, oValue);
+                                } else if (!returnNullValue) {
+                                    r.put(oKey, oValue);
+                                }
                             } else {
                                 tP = new HashMap<String, String[]>();
                                 tP.put("value", params.get(name + prefix + "[" + key + "]"));
                                 Object oValue = bindInternal("value", valueClass, valueClass, tP, "");
-                                if (oValue != MISSING) {
-                                    r.put(oKey, oValue);
-                                } else {
-                                    r.put(oKey, null);
+                                if (oKey != null && returnNullValue) {
+                                    if (oValue != MISSING) {
+                                        r.put(oKey, oValue);
+                                    } else {
+                                        r.put(oKey, null);
+                                    }
+                                } else if (!returnNullValue) {
+                                    if (oValue != MISSING) {
+                                        r.put(oKey, oValue);
+                                    } else {
+                                        r.put(oKey, null);
+                                    }
                                 }
                             }
                         }
@@ -148,29 +168,40 @@ public class Binder {
                 if (type instanceof ParameterizedType) {
                     componentClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
                 }
+                Logger.trace("bindInternal: componentClass [" + componentClass + "]");
                 if (value == null) {
                     value = params.get(name + prefix + "[]");
-                    if (value == null && r instanceof List) {
+                    if (value == null && r instanceof Collection) {
                         for (String param : params.keySet()) {
                             Pattern p = Pattern.compile("^" + name + prefix + "\\[([0-9]+)\\](.*)$");
                             Matcher m = p.matcher(param);
                             if (m.matches()) {
                                 int key = Integer.parseInt(m.group(1));
-                                while (((List<?>) r).size() <= key) {
-                                    ((List<?>) r).add(null);
+                                while (((Collection<?>) r).size() <= key) {
+                                    ((Collection<?>) r).add(null);
                                 }
                                 if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
                                     BeanWrapper beanWrapper = getBeanWrapper(componentClass);
-                                    Logger.info("param [" + param + "]");
+                                    Logger.trace("bindInternal: param [" + param + "]");
                                     Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]");
-                                    Logger.info("oValue [" + oValue + "]");
-                                    ((List) r).set(key, oValue);
+                                    Logger.trace("bindInternal: oValue [" + oValue + "]");
+                                    if (r instanceof List) {
+                                        ((List) r).set(key, oValue);
+                                    } else if (r instanceof Set) {
+                                        ((Set) r).add(oValue);
+                                    }
                                 } else {
                                     Map<String, String[]> tP = new HashMap<String, String[]>();
                                     tP.put("value", params.get(name + prefix + "[" + key + "]"));
                                     Object oValue = bindInternal("value", componentClass, componentClass, tP, "");
-                                    if (oValue != MISSING) {
-                                        ((List) r).set(key, oValue);
+                                    if (!returnNullValue) {
+                                        if (oValue != MISSING) {
+                                            ((List) r).set(key, oValue);
+                                        }
+                                    } else if (oValue != null) {
+                                        if (oValue != MISSING) {
+                                            ((List) r).set(key, oValue);
+                                        }
                                     }
                                 }
                             }
@@ -183,7 +214,12 @@ public class Binder {
                 }
                 for (String v : value) {
                     try {
-                        r.add(directBind(v, componentClass));
+                        Object newValue = directBind(v, componentClass);
+                        if (!returnNullValue) {
+                            r.add(newValue);
+                        } else if (newValue != null) {
+                            r.add(newValue);
+                        }
                     } catch (Exception e) {
                         // ?? One item was bad
                     }
@@ -248,12 +284,17 @@ public class Binder {
     }
 
     public static Object directBind(String value, Class clazz) throws Exception {
+        Logger.trace("directBind: value [" + value + "] class [" + clazz + "] ");
+
+        boolean returnNullValue = new Boolean(Play.configuration.getProperty("future.binding.string.value.returnNull", "false"));
+        boolean nullOrEmpty = value == null || value.trim().length() == 0;
 
         if (clazz.equals(String.class)) {
-            return value;
+            if (!returnNullValue) {
+                return value;
+            }
+            return nullOrEmpty ? null : value;
         }
-
-        boolean nullOrEmpty = value == null || value.trim().length() == 0;
 
         if (supportedTypes.containsKey(clazz)) {
             return nullOrEmpty ? null : supportedTypes.get(clazz).bind(value);

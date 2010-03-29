@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import play.Logger;
+import play.Play;
 import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
 import play.exceptions.UnexpectedException;
 
@@ -17,7 +18,7 @@ public class BeanWrapper {
     final static int notwritableField = Modifier.FINAL | Modifier.NATIVE | Modifier.STATIC;
     final static int notaccessibleMethod = Modifier.NATIVE | Modifier.STATIC;
     private Class<?> beanClass;
-    /** 
+    /**
      * a cache for our properties and setters
      */
     private Map<String, Property> wrappers = new HashMap<String, Property>();
@@ -39,14 +40,21 @@ public class BeanWrapper {
     }
 
     public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Object instance) throws Exception {
+        boolean returnNullValue = new Boolean(Play.configuration.getProperty("future.binding.string.value.returnNull", "false"));
+
         for (Property prop : wrappers.values()) {
+
             String newPrefix = prefix + "." + prop.getName();
             if (name.equals("") && prefix.equals("") && newPrefix.startsWith(".")) {
                 newPrefix = newPrefix.substring(1);
             }
             Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), params, newPrefix);
             if (value != Binder.MISSING) {
-                prop.setValue(instance, value);
+                if (value != null && returnNullValue) {
+                    prop.setValue(instance, value);
+                } else if (!returnNullValue) {
+                    prop.setValue(instance, value);
+                }
             }
         }
         return instance;
@@ -95,7 +103,7 @@ public class BeanWrapper {
     private void registerSetters(Class<?> clazz) {
         if (clazz == Object.class) {
             return;
-        // deep walk (superclass first)
+            // deep walk (superclass first)
         }
         registerSetters(clazz.getSuperclass());
 
