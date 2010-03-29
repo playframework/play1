@@ -5,23 +5,9 @@
 import sys
 import os
 import os.path
-import string
-import shutil
-import fileinput
-import random
-import re
-import subprocess
-import time
-import webbrowser
-import urllib2
-import socket
-import getopt
-import imp
 
 import framework.pym.cmdloader as cmdloader
-import framework.pym.java as javautils
-from framework.pym.modules import Downloader, Unzip
-from framework.pym.application import *
+from framework.pym.application import PlayApplication
 from framework.pym.utils import *
 
 # ~~~~~~~~~
@@ -110,7 +96,6 @@ try:
 			env=play_env)
 		sys.exit(0)
 
-
 	# Module command ?
 	if play_command.find(':') > 0:
 		app.check()
@@ -131,9 +116,6 @@ try:
 		print "~"
 	sys.exit(-1)
 
-
 except KeyboardInterrupt:
 	print '~ ...'
 	sys.exit(0)
-
-

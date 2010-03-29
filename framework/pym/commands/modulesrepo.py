@@ -6,6 +6,7 @@ import shutil
 import string
 
 from framework.pym.utils import *
+from framework.pym.modules import Downloader, Unzip
 import framework.pym.simplejson as json
 
 NM = ['new-module']
