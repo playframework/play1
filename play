@@ -372,7 +372,6 @@ try:
 		print
 		sys.exit(0)
 
-
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [precompile] Precompile
 	if play_command == 'precompile':
@@ -393,109 +392,7 @@ try:
 		print
 		sys.exit(0)
 
-	
-	# ~~~~~~~~~~~~~~~~~~~~~~ [start] Start the application
-	if play_command == 'start':
-		check_application()
-		load_modules()
-		do_classpath()
-		do_java()
-		if os.path.exists(pid_path):
-			print "~ Oops. %s is already started! (or delete %s)" % (os.path.normpath(application_path), os.path.normpath(pid_path))
-			print "~"
-			sys.exit(1)
-		
-		sysout = play_app.readConf('application.log.system.out')
-		sysout = sysout!='false' and sysout!='off'
-		if not sysout:
-		  sout = None
-		else:
-		  sout = open(os.path.join(log_path, 'system.out'), 'w')
-		try:
-			pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
-		except OSError:
-			print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
-			sys.exit(-1)
-		print "~ OK, %s is started" % os.path.normpath(application_path)
-		if sysout:
-		  print "~ output is redirected to %s" % os.path.normpath(os.path.join(log_path, 'system.out'))
-		pid_file = open(pid_path, 'w')
-		pid_file.write(str(pid))
-		print "~ pid is %s" % pid
-		print "~"
-		sys.exit(0)
 
-	
-	# ~~~~~~~~~~~~~~~~~~~~~~ [stop] Stop the application
-	if play_command == 'stop':
-		check_application()
-		load_modules()
-		do_classpath()
-		do_java()
-		if not os.path.exists(pid_path):
-			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
-			print "~"
-			sys.exit(-1)
-		pid = open(pid_path).readline().strip()
-		os.remove(pid_path)
-		kill(pid)
-		print "~ OK, %s is stopped" % application_path
-		print "~"
-		sys.exit(0)
-
-	
-	# ~~~~~~~~~~~~~~~~~~~~~~ [restart] Restart the application
-	if play_command == 'restart':
-		check_application()
-		load_modules()
-		do_classpath()
-		do_java()
-		if not os.path.exists(pid_path):
-			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
-			print "~"
-		else:
-			pid = open(pid_path).readline().strip()
-			os.remove(pid_path)
-			kill(pid)
-
-		
-		sysout = play_app.readConf('application.log.system.out')
-		sysout = sysout!='false' and sysout!='off'
-		if not sysout:
-		  sout = None
-		else:
-		  sout = open(os.path.join(log_path, 'system.out'), 'w')
-		try:
-			pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
-		except OSError:
-			print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
-			sys.exit(-1)
-		print "~ OK, %s is restarted" % os.path.normpath(application_path)
-		if sysout:
-		  print "~ output is redirected to %s" % os.path.normpath(os.path.join(log_path, 'system.out'))
-		pid_file = open(pid_path, 'w')
-		pid_file.write(str(pid))
-		print "~ New pid is %s" % pid
-		print "~"
-		sys.exit(0)
-
-	
-	# ~~~~~~~~~~~~~~~~~~~~~~ [pid] Display the pid of the running application
-	if play_command == 'pid':
-		check_application()
-		load_modules()
-		do_classpath()
-		do_java()
-		if not os.path.exists(pid_path):
-			print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(application_path)
-			print "~"
-			sys.exit(-1)
-		pid = open(pid_path).readline().strip()
-		print "~ PID of the running applications is %s" % pid
-		print "~ "
-		sys.exit(0)
-
-	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [out] Follow logs of the running application
 	if play_command == 'out':
 		check_application()
@@ -708,18 +605,15 @@ try:
 		
 		sys.exit(0)
 
-	
-	
 	# Module command ?
 	if play_command.find(':') > 0:
-		check_application()
-		load_modules()
-		for module in modules:
+		app.check()
+		for module in app.modules():
 			commands = os.path.join(module, 'commands.py')
 			if os.path.exists(commands):
 				execfile(commands)
 
-	
+
 	# ~~~~~~~~~~~~~~~~~~~~~~ Invalid command
 	print "~ Usage: play cmd [app_path] [--options]"
 	print "~ "

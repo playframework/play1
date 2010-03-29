@@ -1,4 +1,4 @@
-# Base commands: run, new, clean
+# Command related to creation and execution: run, new, clean, test, auto-test
 
 import sys
 import os

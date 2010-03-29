@@ -8,7 +8,6 @@ def execute(**kargs):
     command = kargs.get("command")
     app = kargs.get("app")
     args = kargs.get("args")
-
     play_env = kargs.get("env")
 
     if len(sys.argv) == 3:
