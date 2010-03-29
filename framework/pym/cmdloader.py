@@ -10,6 +10,8 @@ def load_all(play_path):
             mod = load_module(play_path, name)
             try:
                 for name in mod.NAMES:
+                    if name in commands:
+                        print "Warning: conflict on command " + name
                     commands[name] = mod
             except:
                 print "Warning: error loading command " + name
