@@ -21,7 +21,10 @@ class PlayApplication():
 
     def __init__(self, application_path, play_base, play_id):
         self.path = application_path
-        self.confpath = os.path.join(application_path, 'conf/application.conf')
+        if application_path is not None:
+            self.confpath = os.path.join(application_path, 'conf/application.conf')
+        else:
+            self.confpath = None
         self.play_id = play_id
         self.play_base = play_base
         self.jpda_port = self.readConf('jpda_port')
@@ -35,6 +38,8 @@ class PlayApplication():
             sys.exit(-1)
 
     def readConf(self, key):
+        if (self.confpath is None):
+            return ''
         for keyRe in [re.compile('^%' + self.play_id + '.' + key + '\s*='), re.compile('^' + key + '\s*=')]:
             for line in open(self.confpath).readlines():
                 if keyRe.match(line):

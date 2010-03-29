@@ -1,6 +1,6 @@
 import os
 import subprocess
-import cmdline.java as javautils
+import framework.pym.java as javautils
 
 NAMES = ['run']
 
