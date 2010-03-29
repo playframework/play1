@@ -2,7 +2,7 @@ import os, os.path
 import subprocess
 from framework.pym.utils import *
 
-NAMES = ['start', 'stop', 'restart', 'pid']
+NAMES = ['start', 'stop', 'restart', 'pid', 'out']
 
 def execute(**kargs):
     command = kargs.get("command")
@@ -18,6 +18,8 @@ def execute(**kargs):
         restart(app)
     if command == 'pid':
         pid(app)
+    if command == 'out':
+        out(app)
 
 def start(app, args):
     app.check()
@@ -99,6 +101,26 @@ def pid(app):
     pid = open(app.pid_path()).readline().strip()
     print "~ PID of the running applications is %s" % pid
     print "~ "
+
+def out(app):
+    app.check()
+    if not os.path.exists(os.path.join(app.log_path(), 'system.out')):
+        print "~ Oops! %s not found" % os.path.normpath(os.path.join(app.log_path(), 'system.out'))
+        print "~"
+        sys.exit(-1)
+    sout = open(os.path.join(app.log_path(), 'system.out'), 'r')
+    try:
+        sout.seek(-5000, os.SEEK_END)
+    except IOError:
+        sout.seek(0)
+    while True:
+        where = sout.tell()
+        line = sout.readline().strip()
+        if not line:
+            time.sleep(1)
+            sout.seek(where)
+        else:
+            print line
 
 def kill(pid):
     if os.name == 'nt':

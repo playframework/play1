@@ -35,9 +35,9 @@ try:
 	play_env["basedir"] = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
 
 	# ~~~~~~~~~~~~~~~~~~~~~~ What is the framework id?
-	id_file = os.path.join(play_env['basedir'], 'id')
-	if os.path.exists(id_file):
-		play_env["id"] = open(id_file).readline().strip()
+	play_env["id_file"] = os.path.join(play_env['basedir'], 'id')
+	if os.path.exists(play_env["id_file"]):
+		play_env["id"] = open(play_env["id_file"]).readline().strip()
 	else:
 		play_env["id"] = ''
 
@@ -76,8 +76,6 @@ try:
 
 	play_app = PlayApplication(application_path, play_env)
 
-	cmdloader.load_all(play_env["basedir"])
-
 	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command?
 	if len(sys.argv) > 1:
 		play_command = sys.argv[1]
@@ -97,83 +95,12 @@ try:
 		print "~ framework ID is %s" % play_env["id"]
 	print "~"
 
-	def check_jpda():
-		jpda_port = play_app.readConf('jpda_port')
-		try:
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			s.bind(('127.0.0.1', int(jpda_port)))
-			s.close()
-		except socket.error, e:
-			print 'JPDA port %s is already used. Will try to use any free port for debugging' % jpda_port
-			jpda_port = 0
-	
-	# ~~~~~~~~~~~~~~~~~~~~~~~ Build java path
-	def do_java(className='play.server.Server'):
-		global java_cmd
-		global java_path
-		global pid_path
-		global application_mode
-		global jpda_port
-		global log_path
-		
-		# ~~~~~~~~~~~~~~~~~~~~~~ JAVA_HOME/bin/java is used if defined
-		if not os.environ.has_key('JAVA_HOME'):
-			java_path = "java"
-		else:
-			java_path = os.path.normpath("%s/bin/java" % os.environ['JAVA_HOME'])
-		
-		for a in remaining_args:
-			if a.find('--with') == 0:
-				remaining_args.remove(a)
-			if a.find('--%') == 0:
-				remaining_args.remove(a)
-		# ~~~~~~~~~~~~~~~~~~~~~~ Read some configuration from conf/application.conf
-		java_args = remaining_args[:]
-		
-		memory_in_args=False
-		for arg in java_args:
-			if arg.startswith('-Xm'):
-				memory_in_args=True
-		if not memory_in_args:
-			memory = play_app.readConf('jvm.memory')
-			if memory:
-				java_args = java_args + memory.split(' ')
-		
-		jpda_port = play_app.readConf('jpda.port')
-		
-		application_mode = play_app.readConf('application.mode')
-		
-		if application_mode == 'prod':
-			java_args.append('-server')
-		
-		java_policy = play_app.readConf('java.policy')
-		if not java_policy == '':
-			policyFile = os.path.join(application_path, 'conf', java_policy)
-			if os.path.exists(policyFile):
-				print "~ using policy file \"%s\"" % policyFile
-				java_args.append('-Djava.security.manager')
-				java_args.append('-Djava.security.policy==%s' % policyFile)
-		
-		# The Java stuff
-		java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_env["id"], className]
-
-		if not os.environ.has_key('PLAY_PID_PATH'):
-			pid_path = os.path.join(application_path, 'server.pid');
-		else:
-			pid_path = os.environ['PLAY_PID_PATH'];
-		
-		if not os.environ.has_key('PLAY_LOG_PATH'):
-			log_path = os.path.join(application_path, 'logs');
-		else:
-			log_path = os.environ['PLAY_LOG_PATH'];
-		
-		if not os.path.exists(log_path):
-			os.mkdir(log_path);
-
-	
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~~~~~~~~~~~~~~~~ The commands ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	# ~~~~~~~~~~~~~~~~~~~~~~ Load all commands
+	cmdloader.load_all(play_env["basedir"])
 
 	if play_command in cmdloader.commands:
 		cmdloader.commands[play_command].execute(
@@ -183,145 +110,6 @@ try:
 			env=play_env)
 		sys.exit(0)
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ [id] Define the framework ID
-	if play_command == 'id':
-		if not play_env["id"]:
-			print "~ framework ID is not set"
-		new_id = raw_input("~ What is the new framework ID (or blank to unset)? ")
-		if new_id:
-			print "~"
-			print "~ OK, the framework ID is now %s" % new_id
-			print "~"
-			open(id_file, 'w').write(new_id)
-		else:
-			print "~"
-			print "~ OK, the framework ID is unset"
-			print "~"
-			if os.path.exists(id_file):
-				os.remove(id_file)
-		sys.exit(0)
-
-	# ~~~~~~~~~~~~~~~~~~~~~~ [new-module] Create a new module
-	if play_command == 'new-module':
-		if os.path.exists(application_path):
-			print "~ Oops. %s already exists" % application_path
-			print "~"
-			sys.exit(-1)
-			
-		print "~ The new module will be created in %s" % os.path.normpath(application_path)
-		print "~"
-		application_name = os.path.basename(application_path)
-		shutil.copytree(os.path.join(play_env["basedir"], 'resources/module-skel'), application_path)
-		# check_application()
-		replaceAll(os.path.join(application_path, 'build.xml'), r'%MODULE%', application_name)
-		replaceAll(os.path.join(application_path, 'conf/messages'), r'%MODULE%', application_name)
-		replaceAll(os.path.join(application_path, 'conf/routes'), r'%MODULE%', application_name)
-		replaceAll(os.path.join(application_path, 'conf/routes'), r'%MODULE_LOWERCASE%', string.lower(application_name))
-		os.mkdir(os.path.join(application_path, 'app/controllers/%s' % application_name))
-		os.mkdir(os.path.join(application_path, 'app/models/%s' % application_name))
-		os.mkdir(os.path.join(application_path, 'app/views/%s' % application_name))
-		os.mkdir(os.path.join(application_path, 'app/views/tags/%s' % application_name))
-		os.mkdir(os.path.join(application_path, 'src/play/modules/%s' % application_name))
-		
-		print "~ OK, the module is created."
-		print "~ Start using it by adding this line in the application.conf modules list: "
-		print "~ module.%s=%s" % (application_name, os.path.normpath(application_path))
-		print "~"
-		print "~ Have fun!"
-		print "~"
-		
-		sys.exit(0)
-		
-
-	# ~~~~~~~~~~~~~~~~~~~~~~ [secret] Generate a new secret key
-	if play_command == 'secret':
-		check_application()
-		print "~ Generating the secret key..."
-		sk = secretKey()
-		replaceAll(os.path.join(application_path, 'conf/application.conf'), r'application.secret=.*', 'application.secret=%s' % sk)
-		print "~ Keep the secret : %s" % sk
-		print "~"
-		sys.exit(0)
-
-
-	# ~~~~~~~~~~~~~~~~~~~~~~ [status] Get application status
-	if play_command == 'status' or play_command == 'st':
-		url = ''
-		secret_key = ''
-
-		try:
-			optlist, args = getopt.getopt(remaining_args, '', ['url=', 'secret='])
-			for o, a in optlist:
-				if o in ('--url'):
-					if a.endswith('/'):
-						url = a + '@status'
-					else:
-						url = a + '/@status'
-				if o in ('--secret'):
-					secret_key = a
-		except getopt.GetoptError, err:
-			print "~ %s" % str(err)
-			print "~ "
-			sys.exit(-1)
-		
-		if not url or not secret_key:
-			check_application()
-			if not url:
-				http_port = int(play_app.readConf('http.port'))
-				url = 'http://localhost:%s/@status' % http_port
-			if not secret_key:
-				secret_key = play_app.readConf('application.secret')
-		
-		import hmac
-		from hashlib import sha1 as sha
-		
-		hm = hmac.new(secret_key, '@status', sha)
-		authorization = hm.hexdigest()
-		
-		try:
-			proxy_handler = urllib2.ProxyHandler({})
-			req = urllib2.Request(url)
-			req.add_header('Authorization', authorization)
-			opener = urllib2.build_opener(proxy_handler)
-			status = opener.open(req);
-			print '~ Status from %s,' % url
-			print '~'
-			print status.read()
-			print '~'
-		except urllib2.HTTPError, e:
-			print "~ Cannot retrieve the application status... (%s)" % (e.code)
-			print "~"
-			sys.exit(-1)
-		except urllib2.URLError, e:
-			print "~ Cannot contact the application..."
-			print "~"
-			sys.exit(-1)
-		print
-		sys.exit(0)
-
-	# ~~~~~~~~~~~~~~~~~~~~~~ [out] Follow logs of the running application
-	if play_command == 'out':
-		check_application()
-		load_modules()
-		do_classpath()
-		do_java()
-		if not os.path.exists(os.path.join(log_path, 'system.out')):
-			print "~ Oops! %s not found" % os.path.normpath(os.path.join(log_path, 'system.out'))
-			print "~"
-			sys.exit(-1)
-		sout = open(os.path.join(log_path, 'system.out'), 'r')
-		try:
-			sout.seek(-5000, os.SEEK_END)
-		except IOError:
-			sout.seek(0)
-		while True:
-			where = sout.tell()
-			line = sout.readline().strip()
-			if not line:
-				time.sleep(1)
-				sout.seek(where)
-			else:
-				print line
 
 	# Module command ?
 	if play_command.find(':') > 0:

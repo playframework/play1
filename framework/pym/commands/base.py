@@ -13,7 +13,7 @@ import framework.pym.java as javautils
 
 from framework.pym.utils import *
 
-NAMES = ['run', 'new', 'new,run', 'clean', 'clean,run', 'test', 'auto-test']
+NAMES = ['run', 'new', 'new,run', 'clean', 'clean,run', 'test', 'auto-test', 'id']
 
 def execute(**kargs):
     command = kargs.get("command")
@@ -21,6 +21,8 @@ def execute(**kargs):
     args = kargs.get("args")
     env = kargs.get("env")
 
+    if command == 'id':
+        id(env)
     if command == 'new' or command == 'new,run':
         new(app, args, env)
     if command == 'clean' or command == 'clean,run':
@@ -223,3 +225,19 @@ def autotest(app, args):
             print "~"
             kill(play_process.pid)
             break
+
+def id(play_env):
+    if not play_env["id"]:
+        print "~ framework ID is not set"
+    new_id = raw_input("~ What is the new framework ID (or blank to unset)? ")
+    if new_id:
+        print "~"
+        print "~ OK, the framework ID is now %s" % new_id
+        print "~"
+        open(play_env["id_file"], 'w').write(new_id)
+    else:
+        print "~"
+        print "~ OK, the framework ID is unset"
+        print "~"
+        if os.path.exists(play_env["id_file"]):
+            os.remove(play_env["id_file"])

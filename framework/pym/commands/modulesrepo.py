@@ -1,13 +1,19 @@
-# Display the modules list
+import os
+import sys
+import zipfile
+import urllib2
+import shutil
+import string
 
-import sys, zipfile, urllib2
+from framework.pym.utils import *
 import framework.pym.simplejson as json
 
+NM = ['new-module']
 LM = ['list-modules', 'lm']
 BM = ['build-modules', 'bm']
 IM = ['install']
 
-NAMES = LM + BM + IM
+NAMES = NM + LM + BM + IM
 
 # TODO: Make that configurable
 modules_server = 'http://www.playframework.org'
@@ -16,13 +22,44 @@ def execute(**kargs):
     command = kargs.get("command")
     app = kargs.get("app")
     args = kargs.get("args")
+    env = kargs.get("env")
 
-    if command in LM:
+    if command in NM:
+        new(app, args, env)
+    elif command in LM:
         list(app, args)
     elif command in BM:
         build(app, args)
     elif command in IM:
         install(app, args)
+
+def new(app, args, play_env):
+    if os.path.exists(app.path):
+        print "~ Oops. %s already exists" % app.path
+        print "~"
+        sys.exit(-1)
+
+    print "~ The new module will be created in %s" % os.path.normpath(app.path)
+    print "~"
+    application_name = os.path.basename(app.path)
+    shutil.copytree(os.path.join(play_env["basedir"], 'resources/module-skel'), app.path)
+    # check_application()
+    replaceAll(os.path.join(app.path, 'build.xml'), r'%MODULE%', application_name)
+    replaceAll(os.path.join(app.path, 'conf/messages'), r'%MODULE%', application_name)
+    replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE%', application_name)
+    replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE_LOWERCASE%', string.lower(application_name))
+    os.mkdir(os.path.join(app.path, 'app/controllers/%s' % application_name))
+    os.mkdir(os.path.join(app.path, 'app/models/%s' % application_name))
+    os.mkdir(os.path.join(app.path, 'app/views/%s' % application_name))
+    os.mkdir(os.path.join(app.path, 'app/views/tags/%s' % application_name))
+    os.mkdir(os.path.join(app.path, 'src/play/modules/%s' % application_name))
+
+    print "~ OK, the module is created."
+    print "~ Start using it by adding this line in the application.conf modules list: "
+    print "~ module.%s=%s" % (application_name, os.path.normpath(app.path))
+    print "~"
+    print "~ Have fun!"
+    print "~"
 
 def list(app, args):
     print "~ You can also browse this list online at %s/modules" % modules_server
@@ -72,7 +109,7 @@ def build(app, args):
     version = raw_input("~ What is the module version number? ")
     fwkMatch = raw_input("~ What are the playframework versions required? ")
 
-    build_file = os.path.join(application_path, 'build.xml')
+    build_file = os.path.join(app.path, 'build.xml')
     if os.path.exists(build_file):
         print "~"
         print "~ Building..."
@@ -80,21 +117,21 @@ def build(app, args):
         os.system('ant -f %s -Dplay.path=%s' % (build_file, ftb) )
         print "~"
 
-    mv = '%s-%s' % (os.path.basename(application_path), version)
+    mv = '%s-%s' % (os.path.basename(app.path), version)
     print("~ Packaging %s ... " % mv)
 
-    dist_dir = os.path.join(application_path, 'dist')
+    dist_dir = os.path.join(app.path, 'dist')
     if os.path.exists(dist_dir):
         shutil.rmtree(dist_dir)
     os.mkdir(dist_dir)
 
-    manifest = os.path.join(application_path, 'manifest')
+    manifest = os.path.join(app.path, 'manifest')
     manifestF = open(manifest, 'w')
     manifestF.write('version=%s\nframeworkVersions=%s\n' % (version, fwkMatch))
     manifestF.close()
 
     zip = zipfile.ZipFile(os.path.join(dist_dir, '%s.zip' % mv), 'w', zipfile.ZIP_STORED)
-    for (dirpath, dirnames, filenames) in os.walk(application_path):
+    for (dirpath, dirnames, filenames) in os.walk(app.path):
         if dirpath == dist_dir:
             continue
         if dirpath.find('/.') > -1 or dirpath.find('/tmp/') > -1  or dirpath.find('/test-result/') > -1 or dirpath.find('/logs/') > -1 or dirpath.find('/eclipse/') > -1 or dirpath.endswith('/test-result') or dirpath.endswith('/logs')  or dirpath.endswith('/eclipse') or dirpath.endswith('/nbproject'):
@@ -102,7 +139,7 @@ def build(app, args):
         for file in filenames:
             if file.find('~') > -1 or file.endswith('.iml') or file.startswith('.'):
                 continue
-            zip.write(os.path.join(dirpath, file), os.path.join(dirpath[len(application_path):], file))
+            zip.write(os.path.join(dirpath, file), os.path.join(dirpath[len(app.path):], file))
     zip.close()
 
     os.remove(manifest)
