@@ -215,7 +215,7 @@ public class Java {
                 }
             }
             if(clazz.isAnnotationPresent(With.class)) {
-                for(Class<? extends Annotation> withClass : ((With)clazz.getAnnotation(With.class)).value()) {
+                for(Class<?> withClass : ((With)clazz.getAnnotation(With.class)).value()) {
                     methods.addAll(findAllAnnotatedMethods(withClass, annotationType));
                 }
             }
