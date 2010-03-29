@@ -4,7 +4,7 @@ import framework.pym.java as javautils
 
 NAMES = ['run']
 
-def execute(app, args=[]):
+def execute(command, app, args=[]):
     app.check()
     disable_check_jpda = False
     if args.count('-f') == 1:
@@ -25,4 +25,3 @@ def execute(app, args=[]):
         print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
         sys.exit(-1)
     print
-    sys.exit(0)

@@ -6,11 +6,13 @@ commands = {}
 def load_all(play_path):
     for filename in os.listdir(os.path.join(play_path, 'framework', 'pym', 'commands')):
         if filename != "__init__.py" and filename.endswith(".py"):
-            print "import " + filename
             name = filename.replace(".py", "")
             mod = load_module(play_path, name)
-            for name in mod.NAMES:
-                commands[name] = mod
+            try:
+                for name in mod.NAMES:
+                    commands[name] = mod
+            except:
+                print "Warning: error loading command " + name
 
 def load_module(base, name):
     mod_desc = imp.find_module(name, [os.path.join(base, 'framework', 'pym', 'commands')])
