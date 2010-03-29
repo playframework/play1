@@ -42,7 +42,7 @@ def replaceAll(file, searchExp, replaceExp):
 		sys.stdout.write(line)
 
 def secretKey():
-	return ''.join([random.choice('abcdefghijklmnopqrstuvwxyz0123456789') for i in range(64)])
+	return ''.join([random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') for i in range(64)])
 
 def isParentOf(path1, path2):
 	if len(path2) < len(path1) or len(path2) < 2:
@@ -330,10 +330,7 @@ try:
 				print "~"
 			sys.exit(0)
 		if play_id == 'test':
-			modules.append(os.path.normpath(os.path.join(play_base, 'modules/test-runner')))
-		print len(modules)
-		for m in modules:
-			print m
+			modules.append(os.path.normpath(os.path.join(play_base, 'modules/testrunner')))
 
 	def check_jpda():
 		jpda_port = play_app.readConf('jpda_port')
@@ -533,6 +530,7 @@ try:
 			if mod['name'] == module:
 				for v in mod['versions']:
 					if version == None and v['isDefault']:
+						print '~ Will install %s-%s' % (module, v['version'])
 						print '~ This module is compatible with: %s' % v['matches']
 						ok = raw_input('~ Do you want to install this version (y/n)? ')
 						if not ok == 'y':
@@ -542,6 +540,7 @@ try:
 						fetch = '%s/modules/%s-%s.zip' % (modules_server, module, v['version'])
 						break
 					if version  == v['version']:
+						print '~ Will install %s-%s' % (module, v['version'])
 						print '~ This module is compatible with: %s' % v['matches']
 						ok = raw_input('~ Do you want to install this version (y/n)? ')
 						if not ok == 'y':
@@ -840,12 +839,6 @@ try:
 		
 		if not os.path.exists(os.path.join(war_path, 'WEB-INF/resources')): os.mkdir(os.path.join(war_path, 'WEB-INF/resources'))
 		shutil.copyfile(os.path.join(play_base, 'resources/messages'), os.path.join(war_path, 'WEB-INF/resources/messages'))
-		
-		# Module-specific modifications
-		for module in modules:
-			commands = os.path.join(module, 'commands.py')
-			if os.path.exists(commands):
-				execfile(commands)
 		
 		if war_zip_path:
 			print "~ Creating zipped archive to %s ..." % (os.path.normpath(war_zip_path))

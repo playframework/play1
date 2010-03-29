@@ -44,9 +44,9 @@ public class ModelTests extends UnitTest {
     
     @Test 
     public void likeFinders() {
-        Job phpDev = Job.find("byTitleLike", "%php%").one();
-        Job javaDev = Job.find("byTitleLike", "%java%").one();
-        Job playDev = Job.find("byTitleLike", "%play%").one();
+        Job phpDev = Job.find("byTitleLike", "%php%").first();
+        Job javaDev = Job.find("byTitleLike", "%java%").first();
+        Job playDev = Job.find("byTitleLike", "%play%").first();
         assertNotNull(phpDev);
         assertNotNull(javaDev);
         assertNotNull(playDev);

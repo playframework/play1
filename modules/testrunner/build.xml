@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="test-runner module" default="build" basedir=".">
+<project name="testrunner module" default="build" basedir=".">
 
     <path id="project.classpath">
         <pathelement path="../../framework/classes"/>
@@ -21,7 +21,7 @@
                 <include name="**/play.plugins"/>
             </fileset>
         </copy>
-        <jar destfile="lib/play-test-runner.jar" basedir="tmp/classes">
+        <jar destfile="lib/play-testrunner.jar" basedir="tmp/classes">
             <manifest>
                 <section name="Play">
                     <attribute name="Specification-Title" value="Test runner module"/>

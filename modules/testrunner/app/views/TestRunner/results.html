@@ -27,10 +27,6 @@
                 background: #81CF5A !important;
                 padding: 3px 5px;
             }
-			.pending span {
-                background: #E9BC46;
-				padding: 3px 5px;
-            }
             #header.failed {
                 background: #EF6868 !important;
             }
@@ -77,7 +73,7 @@
             <table>
                 #{list items:results.results, as:'result'}
                 <tr>
-                    <td width="20%" class="${result.passed && result.time >= 0 ? 'passed' : (result.time < 0 ? 'pending' : 'failed')}" valign="top">
+                    <td width="20%" class="${result.passed ? 'passed' : 'failed'}" valign="top">
                         <span>${result.name}</span>
                     </td>
                     <td class="${result.error ? 'error' : ''}" valign="top">
@@ -100,13 +96,11 @@
                         #{/if}
                         #{/if}
                         #{else}
-                        ${result.time < 0 ? 'Pending...' : 'OK'}
+                        Ok
                         #{/else}
                     </td>
                     <td width="5%" align="right" class="time" valign="top">
-						#{if result.time >= 0}
-							 ${result.time} ms
-						#{/if}                       
+                        ${result.time} ms
                     </td>
                 </tr>
                 #{/list}

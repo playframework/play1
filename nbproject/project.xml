@@ -24,9 +24,9 @@
                     <encoding>UTF-8</encoding>
                 </source-folder>
                 <source-folder>
-                    <label>modules/test-runner/sources</label>
+                    <label>modules/testrunner/sources</label>
                     <type>java</type>
-                    <location>modules/test-runner/src</location>
+                    <location>modules/testrunner/src</location>
                     <encoding>UTF-8</encoding>
                 </source-folder>
             </folders>
@@ -78,7 +78,7 @@
                         <location>framework/src</location>
                     </source-folder>
                     <source-folder style="packages">
-                        <label>modules/test-runner/sources</label>
+                        <label>modules/testrunner/sources</label>
                         <location>modules/test-runner/src</location>
                     </source-folder>
                     <source-file>

@@ -18,13 +18,15 @@ public class BeanWrapper {
 
     final static int notwritableField = Modifier.FINAL | Modifier.NATIVE | Modifier.STATIC;
     final static int notaccessibleMethod = Modifier.NATIVE | Modifier.STATIC;
-    private Class beanClass;
-    /**
+
+    private Class<?> beanClass;
+
+    /** 
      * a cache for our properties and setters
      */
     private Map<String, Property> wrappers = new HashMap<String, Property>();
 
-    public BeanWrapper(Class forClass) {
+    public BeanWrapper(Class<?> forClass) {
         Logger.trace("Bean wrapper for class %s", forClass.getName());
         this.beanClass = forClass;
         boolean isScala = false;
@@ -103,7 +105,7 @@ public class BeanWrapper {
         return beanClass.newInstance();
     }
 
-    private void registerFields(Class clazz) {
+    private void registerFields(Class<?> clazz) {
         // recursive stop condition
         if (clazz == Object.class) {
             return;
@@ -122,7 +124,7 @@ public class BeanWrapper {
         registerFields(clazz.getSuperclass());
     }
 
-    private void registerSetters(Class clazz, boolean isScala) {
+    private void registerSetters(Class<?> clazz, boolean isScala) {
         if (clazz == Object.class) {
             return;
             // deep walk (superclass first)
@@ -154,7 +156,7 @@ public class BeanWrapper {
         private Annotation[] annotations;
         private Method setter;
         private Field field;
-        private Class type;
+        private Class<?> type;
         private Type genericType;
         private String name;
         private String[] profiles;
@@ -210,7 +212,7 @@ public class BeanWrapper {
             return name;
         }
 
-        Class getType() {
+        Class<?> getType() {
             return type;
         }
 

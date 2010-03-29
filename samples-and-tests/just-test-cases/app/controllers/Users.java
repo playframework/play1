@@ -25,7 +25,7 @@ public class Users extends Controller {
 	
 	public static void save() {
 		User u = fresh();
-		u.edit("u", params);
+		u.edit("u", params.all());
 		render(u);
 	}
 		
