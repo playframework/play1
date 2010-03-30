@@ -49,7 +49,10 @@ import play.templates.TemplateLoader;
 import play.vfs.VirtualFile;
 
 /**
- * Application controller support
+ * Application controller support: The controller receives input and initiates a response by making calls on model objects.
+ *
+ * This is the class that your controllers should extend.
+ * 
  */
 public abstract class Controller implements ControllerSupport, LocalVariablesSupport {
 
