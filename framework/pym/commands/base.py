@@ -9,8 +9,6 @@ import urllib2
 import webbrowser
 import time
 
-import framework.pym.java as javautils
-
 from framework.pym.utils import *
 
 NAMES = ['run', 'new', 'new,run', 'clean', 'clean,run', 'test', 'auto-test', 'id']

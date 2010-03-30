@@ -15,107 +15,106 @@ from framework.pym.utils import *
 
 try:
 
-	play_env = dict()
+    play_env = dict()
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the framework?
-	play_env["basedir"] = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
+    # ~~~~~~~~~~~~~~~~~~~~~~ Where is the framework?
+    play_env["basedir"] = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ What is the framework id?
-	play_env["id_file"] = os.path.join(play_env['basedir'], 'id')
-	if os.path.exists(play_env["id_file"]):
-		play_env["id"] = open(play_env["id_file"]).readline().strip()
-	else:
-		play_env["id"] = ''
+    # ~~~~~~~~~~~~~~~~~~~~~~ What is the framework id?
+    play_env["id_file"] = os.path.join(play_env['basedir'], 'id')
+    if os.path.exists(play_env["id_file"]):
+        play_env["id"] = open(play_env["id_file"]).readline().strip()
+    else:
+        play_env["id"] = ''
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ Display logo
-	print r"~        _            _ "
-	print r"~  _ __ | | __ _ _  _| |"
-	print r"~ | '_ \| |/ _' | || |_|"
-	print r"~ |  __/|_|\____|\__ (_)"
-	print r"~ |_|            |__/   "
-	print r"~"
+    # ~~~~~~~~~~~~~~~~~~~~~~ Display logo
+    print r"~        _            _ "
+    print r"~  _ __ | | __ _ _  _| |"
+    print r"~ | '_ \| |/ _' | || |_|"
+    print r"~ |  __/|_|\____|\__ (_)"
+    print r"~ |_|            |__/   "
+    print r"~"
 
-	play_version_file = os.path.join(play_env["basedir"], 'framework/src/play/version')
-	if not os.path.exists(play_version_file):
-		print "~ Oops. %s file not found" % os.path.normpath(os.path.join(play_env["basedir"], 'framework/src/play/version'))
-		print "~ Is the framework compiled? "
-		print "~"
-		sys.exit(-1)
+    play_version_file = os.path.join(play_env["basedir"], 'framework/src/play/version')
+    if not os.path.exists(play_version_file):
+        print "~ Oops. %s file not found" % os.path.normpath(os.path.join(play_env["basedir"], 'framework/src/play/version'))
+        print "~ Is the framework compiled? "
+        print "~"
+        sys.exit(-1)
 
-	play_env["version"] = open(play_version_file).readline().strip()
+    play_env["version"] = open(play_version_file).readline().strip()
 
-	print "~ play! %s, http://www.playframework.org" % (play_env["version"])
+    print "~ play! %s, http://www.playframework.org" % (play_env["version"])
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ Where is the application?
-	application_path = None
-	remaining_args = []
-	if len(sys.argv) == 2:
-		application_path = os.getcwd()
-		remaining_args = sys.argv[2:]
-	if len(sys.argv) > 2:
-		if sys.argv[2].startswith('-'):
-			application_path = os.getcwd()
-			remaining_args = sys.argv[2:]
-		else:
-			application_path = os.path.normpath(os.path.abspath(sys.argv[2]))
-			remaining_args = sys.argv[3:]
+    # ~~~~~~~~~~~~~~~~~~~~~~ Where is the application?
+    application_path = None
+    remaining_args = []
+    if len(sys.argv) == 2:
+        application_path = os.getcwd()
+        remaining_args = sys.argv[2:]
+    if len(sys.argv) > 2:
+        if sys.argv[2].startswith('-'):
+            application_path = os.getcwd()
+            remaining_args = sys.argv[2:]
+        else:
+            application_path = os.path.normpath(os.path.abspath(sys.argv[2]))
+            remaining_args = sys.argv[3:]
 
-	play_app = PlayApplication(application_path, play_env)
+    play_app = PlayApplication(application_path, play_env)
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ What is the command?
-	if len(sys.argv) > 1:
-		play_command = sys.argv[1]
-	else:
-		play_command = 'none'
+    # ~~~~~~~~~~~~~~~~~~~~~~ What is the command?
+    if len(sys.argv) > 1:
+        play_command = sys.argv[1]
+    else:
+        play_command = 'none'
 
-	# ~~~~~~~~~~~~~~~~~ Override id
-	for a in remaining_args:
-		if a.find('--%') == 0:
-			play_env["id"] = a[3:]
-	
-	if play_command == 'test' or play_command == 'auto-test':
-		play_env["id"] = 'test'
+    # ~~~~~~~~~~~~~~~~~ Override id
+    for a in remaining_args:
+        if a.find('--%') == 0:
+            play_env["id"] = a[3:]
+    
+    if play_command == 'test' or play_command == 'auto-test':
+        play_env["id"] = 'test'
 
-	
-	if play_env["id"] is not '':
-		print "~ framework ID is %s" % play_env["id"]
-	print "~"
+    
+    if play_env["id"] is not '':
+        print "~ framework ID is %s" % play_env["id"]
+    print "~"
 
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	# ~~~~~~~~~~~~~~~~~~~~~~ The commands ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~~~~~~~~~~~~~~~~~~~~~~ The commands ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ Load all commands
-	cmdloader.load_all(play_env["basedir"])
+    cmdloader.load_all(play_env["basedir"])
 
-	if play_command in cmdloader.commands:
-		cmdloader.commands[play_command].execute(
-			command=play_command,
-			app=play_app,
-			args=remaining_args,
-			env=play_env)
-		sys.exit(0)
+    if play_command in cmdloader.commands:
+        cmdloader.commands[play_command].execute(
+            command=play_command,
+            app=play_app,
+            args=remaining_args,
+            env=play_env)
+        sys.exit(0)
 
-	# Module command ?
-	if play_command.find(':') > 0:
-		app.check()
-		for module in app.modules():
-			commands = os.path.join(module, 'commands.py')
-			if os.path.exists(commands):
-				execfile(commands)
+    # Module command ?
+    if play_command.find(':') > 0:
+        app.check()
+        for module in app.modules():
+            commands = os.path.join(module, 'commands.py')
+            if os.path.exists(commands):
+                execfile(commands)
 
-	# ~~~~~~~~~~~~~~~~~~~~~~ Invalid command
-	print "~ Usage: play cmd [app_path] [--options]"
-	print "~ "
-	print "~ with,  new      Create a new application"
-	print "~        run      Run the application in the current shell"
-	print "~        help     Show play help"
-	print "~"
-	if len(sys.argv) > 1:
-		print "~ Invalid command: %s" % sys.argv[1]
-		print "~"
-	sys.exit(-1)
+    # ~~~~~~~~~~~~~~~~~~~~~~ Invalid command
+    print "~ Usage: play cmd [app_path] [--options]"
+    print "~ "
+    print "~ with,  new      Create a new application"
+    print "~        run      Run the application in the current shell"
+    print "~        help     Show play help"
+    print "~"
+    if len(sys.argv) > 1:
+        print "~ Invalid command: %s" % sys.argv[1]
+        print "~"
+    sys.exit(-1)
 
 except KeyboardInterrupt:
-	print '~ ...'
-	sys.exit(0)
+    print '~ ...'
+    sys.exit(0)

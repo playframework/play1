@@ -1,4 +1,7 @@
-import sys, os, os.path, re, socket
+import sys
+import os, os.path
+import re
+import socket
 
 class ModuleNotFound(Exception):
     def __init__(self, value):
