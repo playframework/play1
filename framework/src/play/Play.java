@@ -304,6 +304,18 @@ public class Play {
             matcher.appendTail(newValue);
             configuration.setProperty(key.toString(), newValue.toString());
         }
+        // Include
+        Map toInclude = new HashMap();
+        for (Object key : configuration.keySet()) {
+            if(key.toString().startsWith("@include.")) {
+                try {
+                    toInclude.putAll(IO.readUtf8Properties(appRoot.child("conf/" + configuration.getProperty(key.toString())).inputstream()));
+                } catch (Exception ex) {
+                    Logger.warn("Missing include: %s", key);
+                }
+            }
+        }
+        configuration.putAll(toInclude);
         // Plugins
         for (PlayPlugin plugin : plugins) {
             plugin.onConfigurationRead();
