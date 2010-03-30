@@ -9,7 +9,7 @@ def load_all(play_path):
             name = filename.replace(".py", "")
             mod = load_module(play_path, name)
             try:
-                for name in mod.NAMES:
+                for name in mod.COMMANDS:
                     if name in commands:
                         print "Warning: conflict on command " + name
                     commands[name] = mod

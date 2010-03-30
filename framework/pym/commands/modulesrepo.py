@@ -13,7 +13,7 @@ LM = ['list-modules', 'lm']
 BM = ['build-modules', 'bm']
 IM = ['install']
 
-NAMES = NM + LM + BM + IM
+COMMANDS = NM + LM + BM + IM
 
 # TODO: Make that configurable
 modules_server = 'http://www.playframework.org'

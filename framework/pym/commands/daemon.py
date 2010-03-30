@@ -2,7 +2,7 @@ import os, os.path
 import subprocess
 from framework.pym.utils import *
 
-NAMES = ['start', 'stop', 'restart', 'pid', 'out']
+COMMANDS = ['start', 'stop', 'restart', 'pid', 'out']
 
 def execute(**kargs):
     command = kargs.get("command")

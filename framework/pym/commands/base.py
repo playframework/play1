@@ -11,7 +11,7 @@ import time
 
 from framework.pym.utils import *
 
-NAMES = ['run', 'new', 'new,run', 'clean', 'clean,run', 'test', 'auto-test', 'id']
+COMMANDS = ['run', 'new', 'new,run', 'clean', 'clean,run', 'test', 'auto-test', 'id']
 
 def execute(**kargs):
     command = kargs.get("command")

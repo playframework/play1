@@ -4,7 +4,7 @@ import subprocess
 
 from framework.pym.utils import *
 
-NAMES = ['precompile']
+COMMANDS = ['precompile']
 
 def execute(**kargs):
     command = kargs.get("command")

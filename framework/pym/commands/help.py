@@ -2,7 +2,7 @@
 
 import sys, os
 
-NAMES = ['help']
+COMMANDS = ['help']
 
 def execute(**kargs):
     command = kargs.get("command")

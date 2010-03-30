@@ -6,7 +6,7 @@ import zipfile
 
 from framework.pym.utils import *
 
-NAMES = ["war"]
+COMMANDS = ["war"]
 
 
 def execute(**kargs):

@@ -3,7 +3,7 @@ import shutil
 
 from framework.pym.utils import *
 
-NAMES = ['eclipsify', 'ec']
+COMMANDS = ['eclipsify', 'ec']
 
 def execute(**kargs):
     app = kargs.get("app")

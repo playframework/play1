@@ -7,7 +7,7 @@ from hashlib import sha1 as sha
 
 from framework.pym.utils import *
 
-NAMES = ['status', 'st']
+COMMANDS = ['status', 'st']
 
 def execute(**kargs):
     app = kargs.get("app")

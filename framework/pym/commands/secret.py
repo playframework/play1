@@ -1,6 +1,6 @@
 from framework.pym.utils import *
 
-NAMES = ['secret']
+COMMANDS = ['secret']
 
 def execute(**kargs):
     app = kargs.get("app")

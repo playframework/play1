@@ -3,7 +3,7 @@ import shutil
 
 from framework.pym.utils import *
 
-NAMES = ['idealize', 'idea']
+COMMANDS = ['idealize', 'idea']
 
 def execute(**kargs):
     command = kargs.get("command")

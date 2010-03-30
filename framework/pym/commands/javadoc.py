@@ -4,7 +4,7 @@ import subprocess
 
 from framework.pym.utils import *
 
-NAMES = ['javadoc', 'jd']
+COMMANDS = ['javadoc', 'jd']
 
 def execute(**kargs):
     command = kargs.get("command")

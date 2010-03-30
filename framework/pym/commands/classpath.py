@@ -1,6 +1,6 @@
 # Show the computed classpath for the application
 
-NAMES = ['cp', 'classpath']
+COMMANDS = ['cp', 'classpath']
 
 def execute(**kargs):
     command = kargs.get("command")

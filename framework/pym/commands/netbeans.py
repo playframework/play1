@@ -3,7 +3,7 @@ import shutil
 
 from framework.pym.utils import *
 
-NAMES = ['netbeansify', 'nb']
+COMMANDS = ['netbeansify', 'nb']
 
 def execute(**kargs):
     command = kargs.get("command")
