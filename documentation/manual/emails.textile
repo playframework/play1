@@ -25,14 +25,14 @@ public class Mails extends Mailer {
    public static void welcome(User user) {
       setSubject("Welcome %s", user.name);
       addRecipient(user.email);
-      addFrom("Me <me@me.com>");
+      setFrom("Me <me@me.com>");
       addAttachment(Play.getFile("rules.pdf"));
       send(user);
    }
  
    public static void lostPassword(User user) {
       String newpassword = user.password;
-      addFrom("Robot <robot@thecompany.com>");
+      setFrom("Robot <robot@thecompany.com>");
       setSubject("Your password has been reset");
       addRecipient(user.email);
       send(user, newpassword);
