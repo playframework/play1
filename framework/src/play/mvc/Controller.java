@@ -54,31 +54,74 @@ import play.vfs.VirtualFile;
 public abstract class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
-     * The current HTTP request
+     * The current HTTP request: the message sent by the client to the server.
+     *
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
+     * ie : controller.request - controller.request.current()
+     *
      */
     protected static Http.Request request = null;
     /**
-     * The current HTTP response
+     * The current HTTP response: The message sent back from the server after a request.
+     *
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
+     * ie : controller.response - controller.response.current()
+     *
      */
     protected static Http.Response response = null;
     /**
-     * The current HTTP session
+     * The current HTTP session. The Play! session is not living on the server side but on the client side.
+     * In fact, it is stored in a signed cookie. This session is therefore limited to 4kb.
+     *
+     * From Wikipedia:
+     * 
+     * Client-side sessions use cookies and cryptographic techniques to maintain state without storing as much data on the server. When presenting a dynamic web page, the server sends the current state data to the client (web browser) in the form of a cookie. The client saves the cookie in memory or on disk. With each successive request, the client sends the cookie back to the server, and the server uses the data to "remember" the state of the application for that specific client and generate an appropriate response.
+     * This mechanism may work well in some contexts; however, data stored on the client is vulnerable to tampering by the user or by software that has access to the client computer. To use client-side sessions where confidentiality and integrity are required, the following must be guaranteed:
+     * Confidentiality: Nothing apart from the server should be able to interpret session data.
+     * Data integrity: Nothing apart from the server should manipulate session data (accidentally or maliciously).
+     * Authenticity: Nothing apart from the server should be able to initiate valid sessions.
+     * To accomplish this, the server needs to encrypt the session data before sending it to the client, and modification of such information by any other party should be prevented via cryptographic means.
+     * Transmitting state back and forth with every request is only practical when the size of the cookie is small. In essence, client-side sessions trade server disk space for the extra bandwidth that each web request will require. Moreover, web browsers limit the number and size of cookies that may be stored by a web site. To improve efficiency and allow for more session data, the server may compress the data before creating the cookie, decompressing it later when the cookie is returned by the client.
+     *
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
+     * ie : controller.session - controller.session.current()
      */
     protected static Scope.Session session = null;
     /**
-     * The current flash scope
+     * The current flash scope. The flash is a temporary storage mechanism that is a hash map
+     * You can store values associated with keys and later retrieve them.
+     * It has one special property: by default, values stored into the flash during the processing of a request
+     * will be available during the processing of the immediately following request.
+     * Once that second request has been processed, those values are removed automatically from the storage
+     *
+     * This scope is very useful to display messages after issuing a Redirect.
+     *
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
+     * ie : controller.flash - controller.flash.current()
      */
     protected static Scope.Flash flash = null;
     /**
-     * The current HTTP params
+     * The current HTTP params. This scope allows you to access the HTTP parameters supplied with the request.
+     *
+     * This is useful for example to know which submit button a user pressed on a form.
+     *
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
+     * ie : controller.params - controller.params.current()
      */
     protected static Scope.Params params = null;
     /**
-     * The current renderArgs (used in templates)
+     * The current renderArgs scope: This is a hash map that is accessible during the rendering phase. It means you can access
+     * variables stored in this scope during the rendering phase (the template phase). 
+     *
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
+     * ie : controller.renderArgs - controller.renderArgs.current()
      */
     protected static Scope.RenderArgs renderArgs = null;
     /**
-     * The current Validation
+     * The current Validation object. It allows you to validate objects and to retrieve potential validations errors for those objects.
+     *
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
+     * ie : controller.validation - controller.validation.current()
      */
     protected static Validation validation = null;
 
