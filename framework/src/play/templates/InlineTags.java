@@ -74,13 +74,13 @@ public class InlineTags {
                 s.append("if(!attrs"+index+"['items']) {attrs"+index+"['items'] = attrs"+index+"['arg'];};");
                 s.append("if(attrs"+index+"['items']) { play.templates.TagContext.parent().data.put('_executeNextElse', false);");
                 s.append("_iter"+index+" = attrs"+index+"['items'].iterator();");
-                s.append("for (_i = 1; _iter"+index+".hasNext(); _i++) {");
+                s.append("for (_"+index+"_i = 1; _iter"+index+".hasNext(); _"+index+"_i++) {");
                 s.append("_item"+index+" = _iter"+index+".next();");
                 s.append("setProperty(attrs"+index+"['as'] ?: '_', _item"+index+");");
-                s.append("setProperty(attrs"+index+"['as']+'_index', _i);");
+                s.append("setProperty(attrs"+index+"['as']+'_index', _"+index+"_i);");
                 s.append("setProperty(attrs"+index+"['as']+'_isLast', !_iter"+index+".hasNext());");
-                s.append("setProperty(attrs"+index+"['as']+'_isFirst', _i == 1);");
-                s.append("setProperty(attrs"+index+"['as']+'_parity', _i%2==0?'even':'odd');");
+                s.append("setProperty(attrs"+index+"['as']+'_isFirst', _"+index+"_i == 1);");
+                s.append("setProperty(attrs"+index+"['as']+'_parity', _"+index+"_i%2==0?'even':'odd');");
                 break;
             case END:
                 s.append("};");
