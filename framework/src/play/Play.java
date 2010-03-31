@@ -160,8 +160,8 @@ public class Play {
                 frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
             } else if (uri.getScheme().equals("vfszip") || uri.getScheme().equals("vfsfile")) {
                 String file = uri.toURL().toExternalForm();
-                file = file.replaceAll("vfszip://", "file:///");
-                file = file.replaceAll("vfsfile://", "file:///");
+                file = file.replaceAll("vfszip:", "file://");
+                file = file.replaceAll("vfsfile:", "file://");
                 //vfszip vfszip:/Applications/Servers/jboss-5.1.0.GA/server/default/deploy/ldas-play.war/WEB-INF/lib/play.jar/play/version
                 frameworkPath = new File(file).getParentFile().getParentFile().getParentFile().getParentFile();
             } else if (uri.getScheme().equals("wsjar")) {
