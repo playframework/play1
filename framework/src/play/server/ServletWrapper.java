@@ -92,6 +92,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         Request request = null;
         try {
             request = parseRequest(httpServletRequest);
+            Request.current.set(request);
             Logger.trace("ServletWrapper>service, request: " + request);
             Response response = new Response();
             Response.current.set(response);
