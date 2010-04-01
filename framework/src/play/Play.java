@@ -36,6 +36,7 @@ public class Play {
 
         DEV, PROD
     }
+
     /**
      * Is the application started
      */
@@ -135,8 +136,9 @@ public class Play {
 
     /**
      * Init the framework
+     *
      * @param root The application path
-     * @param id The framework id to use
+     * @param id   The framework id to use
      */
     public static void init(File root, String id) {
         // Simple things
@@ -149,32 +151,28 @@ public class Play {
 
         // Guess the framework path
         try {
+
             URL versionUrl = Play.class.getResource("/play/version");
             // Read the content of the file
             Play.version = new LineNumberReader(new InputStreamReader(versionUrl.openStream())).readLine();
+
+            // This is used only by the embedded server (Mina, Netty, Jetty etc)
             URI uri = new URI(versionUrl.toString().replace(" ", "%20"));
-            if (uri.getScheme().equals("jar")) {
-                String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
-                frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
-            } else if (uri.getScheme().equals("file")) {
-                frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
-            } else if (uri.getScheme().equals("vfszip") || uri.getScheme().equals("vfsfile")) {
-                String file = uri.toURL().toExternalForm();
-                file = file.replaceAll("vfszip:", "");
-                file = file.replaceAll("vfsfile:", "");
-                //vfszip vfszip:/Applications/Servers/jboss-5.1.0.GA/server/default/deploy/ldas-play.war/WEB-INF/lib/play.jar/play/version
-                frameworkPath = new File(file).getParentFile().getParentFile().getParentFile().getParentFile();
-            } else if (uri.getScheme().equals("wsjar")) {
-                String file = uri.toURL().toExternalForm();
-                file = file.substring("wsjar:file:".length(), file.lastIndexOf("!"));
-                //wsjar:file:/opt/IBM/WebSphere/profile/installedApps/node/ldas-play_war.ear/ldas-play.war/WEB-INF/lib/play.jar!/play/version
-                frameworkPath = new File(file).getParentFile().getParentFile();
-            } else {
-                throw new UnexpectedException("Cannot find the Play! framework - trying with uri: " + uri + " scheme " + uri.getScheme());
+            if (frameworkPath == null || !frameworkPath.exists()) {
+                if (uri.getScheme().equals("jar")) {
+                    String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
+                    frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
+                } else if (uri.getScheme().equals("file")) {
+                    frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
+                } else {
+                    throw new UnexpectedException("Cannot find the Play! framework - trying with uri: " + uri + " scheme " + uri.getScheme());
+                }
             }
         } catch (Exception e) {
             throw new UnexpectedException("Where is the framework ?", e);
         }
+
+
         System.setProperty("play.path", frameworkPath.getAbsolutePath());
         System.setProperty("application.path", applicationPath.getAbsolutePath());
 
@@ -307,7 +305,7 @@ public class Play {
         // Include
         Map toInclude = new HashMap();
         for (Object key : configuration.keySet()) {
-            if(key.toString().startsWith("@include.")) {
+            if (key.toString().startsWith("@include.")) {
                 try {
                     toInclude.putAll(IO.readUtf8Properties(appRoot.child("conf/" + configuration.getProperty(key.toString())).inputstream()));
                 } catch (Exception ex) {
@@ -423,6 +421,7 @@ public class Play {
 
     /**
      * Force all java source and template compilation.
+     *
      * @return success ?
      */
     static boolean preCompile() {
@@ -446,7 +445,7 @@ public class Play {
             long start = System.currentTimeMillis();
             classloader.getAllClasses();
             Logger.trace("%sms to precompile the Java stuff", System.currentTimeMillis() - start);
-            if(!lazyLoadTemplates) {
+            if (!lazyLoadTemplates) {
                 start = System.currentTimeMillis();
                 TemplateLoader.getAllTemplate();
                 Logger.trace("%sms to precompile the templates", System.currentTimeMillis() - start);
@@ -557,7 +556,7 @@ public class Play {
     }
 
     /**
-     * Load all modules. 
+     * Load all modules.
      * You can even specify the list using the MODULES environement variable.
      */
     public static void loadModules() {
@@ -599,6 +598,7 @@ public class Play {
 
     /**
      * Add a play application (as plugin)
+     *
      * @param path The application path
      */
     public static void addModule(String name, File path) {
@@ -621,6 +621,7 @@ public class Play {
 
     /**
      * Search a VirtualFile in all loaded applications and plugins
+     *
      * @param path Relative path from the applications root
      * @return The virtualFile or null
      */
@@ -630,6 +631,7 @@ public class Play {
 
     /**
      * Search a File in the current application
+     *
      * @param path Relative path from the application root
      * @return The file even if it doesn't exist
      */

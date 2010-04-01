@@ -49,6 +49,8 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         if (StringUtils.isEmpty(playId)) {
             throw new UnexpectedException("Please define a play.id parameter in your web.xml file. Without that parameter, play! cannot start your application. Please add a context-param into the WEB-INF/web.xml file.");
         }
+        // This is really important as we know this parameter already (we are running in a servlet container)
+        Play.frameworkPath = root.getParentFile();
         Play.init(root, playId);
         
         // Servlet 2.4 does not allow you to get the context path from the servletcontext...
