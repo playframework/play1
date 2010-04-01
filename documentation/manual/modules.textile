@@ -46,3 +46,10 @@ You can even load routes from all available modules:
 
 bc. GET     /	     module:*
 
+h2. <a>Listing modules from the repository</a>
+
+bc. play list-modules
+
+h2. <a>Installing a new module</a>
+
+bc. play install module-name

@@ -35,6 +35,8 @@ public class Binder {
 
     static Map<Class<?>, SupportedType<?>> supportedTypes = new HashMap<Class<?>, SupportedType<?>>();
 
+    static boolean returnNullValue = new Boolean(Play.configuration.getProperty("future.bindingReturnNull", "false"));
+
     static {
         supportedTypes.put(Date.class, new DateBinder());
         supportedTypes.put(File.class, new FileBinder());
@@ -58,7 +60,6 @@ public class Binder {
     @SuppressWarnings("unchecked")
     static Object bindInternal(String name, Class clazz, Type type, Map<String, String[]> params, String prefix) {
         Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] isComposite [" + isComposite(name + prefix, params.keySet()) + "]");
-        boolean returnNullValue = new Boolean(Play.configuration.getProperty("future.binding.string.value.returnNull", "false"));
 
         try {
             if (isComposite(name + prefix, params.keySet())) {
@@ -287,7 +288,6 @@ public class Binder {
     public static Object directBind(String value, Class clazz) throws Exception {
         Logger.trace("directBind: value [" + value + "] class [" + clazz + "] ");
 
-        boolean returnNullValue = new Boolean(Play.configuration.getProperty("future.binding.string.value.returnNull", "false"));
         boolean nullOrEmpty = value == null || value.trim().length() == 0;
 
         if (clazz.equals(String.class)) {

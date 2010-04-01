@@ -40,7 +40,7 @@ public class BeanWrapper {
     }
 
     public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Object instance) throws Exception {
-        boolean returnNullValue = new Boolean(Play.configuration.getProperty("future.binding.string.value.returnNull", "false"));
+        boolean returnNullValue = Binder.returnNullValue;
 
         for (Property prop : wrappers.values()) {
 
