@@ -6,6 +6,15 @@ p(note). **play 1.0.2** is a maintenance release and is fully compatible with th
 
 You can read about the fixed bugs on the "1.0.2 roadmap page":http://www.playframework.org/roadmap/1.0.2. The most important changes are highlighted in this page:
 
+h2. <a>Empty parameters now bind to null objects</a>
+
+Before the 1.0.2 release, an empty parameter would bind to an empty string. However, when binding an array or a list of String you would that was not so handy.
+In order to remain backward compatible we introduce a new property to enable this new behavior. To enable it, add the following line to you **application.conf** file:
+
+future.binding.string.value.returnNull=true
+
+This line is added to new applications created with the 1.0.2 release.
+
 h2. <a>Automatic escape of HTML code in templates</a>
 
 Now all dynamic expressions are escaped by the template engine to avoid XSS security issues in your application. So the **title** variable containing **==&lt;h1>Title&lt;/h1>==** is now escaped:
