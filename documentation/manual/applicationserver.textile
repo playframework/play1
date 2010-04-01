@@ -20,7 +20,7 @@ bc. play war myapp -o myapp.war
 
 You are now ready to deploy your application.
 
-It is advised to "isolate" your Play! application from the other applications to avoid version mismatch between the application libraries. This step is not standartize by the JEE / Servlet Container specification, it is therefore vendor specific.
+It is advised to "isolate" your Play! application from the other applications to avoid version mismatch between the application libraries. This step is not standardize by the JEE / Servlet Container specification, it is therefore vendor specific.
 
 We recommend you refer to your application server manual in order to "isolate" your war.
 
