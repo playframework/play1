@@ -57,11 +57,11 @@ public class Secure extends Controller {
         // Check tokens
         Boolean allowed = false;
         try {
+            // This is the deprecated method name
+            allowed = (Boolean)Security.invoke("authentify", username, password);
+        } catch (UnsupportedOperationException e ) {
             // This is the official method name
             allowed = (Boolean)Security.invoke("authenticate", username, password);
-        } catch (NoSuchMethodException e ) {
-              // This is the deprecated method name
-            allowed = (Boolean)Security.invoke("authentify", username, password);
         }
         if(validation.hasErrors() || !allowed) {
             flash.keep("url");
@@ -108,13 +108,13 @@ public class Secure extends Controller {
          * @return
          */
         static boolean authentify(String username, String password) {
-            return true;
+            throw new UnsupportedOperationException();
         }
 
         /**
          * This method is called during the authentication process. This is where you check if
          * the user is allowed to log in into the system. This is the actual authentication process
-         * agaisnt a third party system (most of the time a DB).
+         * against a third party system (most of the time a DB).
          *
          * @param username
          * @param password
