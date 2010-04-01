@@ -78,6 +78,11 @@ Everything you need to know about Play.
 ## "Running the tests":test#running
 ## "Fixtures":test#fixtures
 ## "Continuous integration":test#continus
+# "Deployment options":deployment
+## "Standalone Play application":deployment#aStandalonePlayapplicationa
+## "Application servers":deployment#aApplicationserversa
+## "Google Application Engine":deployment#aGoogleApplicationEngineGAEa
+## "Stax cloud hosting platform":deployment#aStaxcloudhostingplatforma"
 # "Play and your application server":applicationserver
 ## "Application server compatibility matrix":applicationserver#aCompatibilitymatrixa
 ## "Deploying your Play application":applicationserver#aDeployinga
