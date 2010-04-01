@@ -35,8 +35,6 @@ public class Binder {
 
     static Map<Class<?>, SupportedType<?>> supportedTypes = new HashMap<Class<?>, SupportedType<?>>();
 
-    static boolean returnNullValue = new Boolean(Play.configuration.getProperty("future.bindingReturnNull", "false"));
-
     static {
         supportedTypes.put(Date.class, new DateBinder());
         supportedTypes.put(File.class, new FileBinder());
@@ -80,9 +78,7 @@ public class Binder {
                 for (int i = 0; i < value.length; i++) {
                     try {
                         Object obj = directBind(value[i], clazz.getComponentType());
-                        if (!returnNullValue) {
-                            Array.set(r, j++, obj);
-                        } else if (obj != null) {
+                        if (obj != null) {
                             Array.set(r, j++, obj);
                         }
                     } catch (Exception e) {
@@ -124,27 +120,15 @@ public class Binder {
                             if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
                                 BeanWrapper beanWrapper = getBeanWrapper(valueClass);
                                 Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]");
-                                if (oValue != null && returnNullValue) {
-                                    r.put(oKey, oValue);
-                                } else if (!returnNullValue) {
-                                    r.put(oKey, oValue);
-                                }
+                                r.put(oKey, oValue);
                             } else {
                                 tP = new HashMap<String, String[]>();
                                 tP.put("value", params.get(name + prefix + "[" + key + "]"));
                                 Object oValue = bindInternal("value", valueClass, valueClass, tP, "");
-                                if (oKey != null && returnNullValue) {
-                                    if (oValue != MISSING) {
-                                        r.put(oKey, oValue);
-                                    } else {
-                                        r.put(oKey, null);
-                                    }
-                                } else if (!returnNullValue) {
-                                    if (oValue != MISSING) {
-                                        r.put(oKey, oValue);
-                                    } else {
-                                        r.put(oKey, null);
-                                    }
+                                if (oValue != MISSING) {
+                                    r.put(oKey, oValue);
+                                } else {
+                                    r.put(oKey, null);
                                 }
                             }
                         }
@@ -196,14 +180,8 @@ public class Binder {
                                     Map<String, String[]> tP = new HashMap<String, String[]>();
                                     tP.put("value", params.get(name + prefix + "[" + key + "]"));
                                     Object oValue = bindInternal("value", componentClass, componentClass, tP, "");
-                                    if (!returnNullValue) {
-                                        if (oValue != MISSING) {
-                                            ((List) r).set(key, oValue);
-                                        }
-                                    } else if (oValue != null) {
-                                        if (oValue != MISSING) {
-                                            ((List) r).set(key, oValue);
-                                        }
+                                    if (oValue != MISSING) {
+                                        ((List) r).set(key, oValue);
                                     }
                                 }
                             }
@@ -217,11 +195,7 @@ public class Binder {
                 for (String v : value) {
                     try {
                         Object newValue = directBind(v, componentClass);
-                        if (!returnNullValue) {
-                            r.add(newValue);
-                        } else if (newValue != null) {
-                            r.add(newValue);
-                        }
+                        r.add(newValue);
                     } catch (Exception e) {
                         // ?? One item was bad
                     }
@@ -288,21 +262,18 @@ public class Binder {
     public static Object directBind(String value, Class clazz) throws Exception {
         Logger.trace("directBind: value [" + value + "] class [" + clazz + "] ");
 
-        boolean nullOrEmpty = value == null || value.trim().length() == 0;
-
         if (clazz.equals(String.class)) {
-            if (!returnNullValue) {
-                return value;
-            }
-            return nullOrEmpty ? null : value;
+            return value;
         }
+        
+        boolean nullOrEmpty = value == null || value.trim().length() == 0;
 
         if (supportedTypes.containsKey(clazz)) {
             return nullOrEmpty ? null : supportedTypes.get(clazz).bind(value);
         }
 
         if (Enum.class.isAssignableFrom(clazz)) {
-            return nullOrEmpty ? null :  Enum.valueOf(clazz, value);
+            return nullOrEmpty ? null : Enum.valueOf(clazz, value);
         }
 
         // int or Integer binding

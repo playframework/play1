@@ -221,6 +221,16 @@ bc. ?client.customers[0].id=123
 &client.customers[2].id=789
 
 
+h2. <a>JPA objects binding</a>
+
+You can automatically bind a JPA object using the HTTP to Java binding.
+
+You can provide the **user.id** field yourself in the HTTP parameters. When Play find the **id** field, it loads the matching instance from the database before editing it. The other parameters provided by the HTTP request are then applied. So you can save it directly.
+
+bc. public static void save(User user) {
+    user.save(); // ok with 1.0.1
+}
+
 h2. <a name="result">Result types</a>
 
 An action method has to generate an HTTP response. The easiest way to do this is to emit a Result object. When a Result object is emitted, the normal execution flow is interrupted and the method returns.

@@ -40,7 +40,6 @@ public class BeanWrapper {
     }
 
     public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Object instance) throws Exception {
-        boolean returnNullValue = Binder.returnNullValue;
 
         for (Property prop : wrappers.values()) {
 
@@ -50,11 +49,7 @@ public class BeanWrapper {
             }
             Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), params, newPrefix);
             if (value != Binder.MISSING) {
-                if (value != null && returnNullValue) {
-                    prop.setValue(instance, value);
-                } else if (!returnNullValue) {
-                    prop.setValue(instance, value);
-                }
+                prop.setValue(instance, value);
             }
         }
         return instance;
