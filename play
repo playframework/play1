@@ -6,7 +6,7 @@ import sys
 import os
 import os.path
 
-import framework.pym.cmdloader as cmdloader
+from framework.pym.cmdloader import CommandLoader
 from framework.pym.application import PlayApplication
 from framework.pym.utils import *
 
@@ -85,7 +85,13 @@ try:
     # ~~~~~~~~~~~~~~~~~~~~~~ The commands ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    cmdloader.load_all(play_env["basedir"])
+    cmdloader = CommandLoader(play_env["basedir"])
+
+    # Module command ?
+#    for module in app.modules():
+#        commands = os.path.join(module, 'commands.py')
+#        if os.path.exists(commands):
+#            execfile(commands)
 
     if play_command in cmdloader.commands:
         cmdloader.commands[play_command].execute(
@@ -95,13 +101,6 @@ try:
             env=play_env)
         sys.exit(0)
 
-    # Module command ?
-    if play_command.find(':') > 0:
-        app.check()
-        for module in app.modules():
-            commands = os.path.join(module, 'commands.py')
-            if os.path.exists(commands):
-                execfile(commands)
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Invalid command
     print "~ Usage: play cmd [app_path] [--options]"

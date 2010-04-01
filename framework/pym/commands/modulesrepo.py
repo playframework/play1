@@ -4,9 +4,11 @@ import zipfile
 import urllib2
 import shutil
 import string
+import imp
+import time
+import urllib
 
 from framework.pym.utils import *
-import framework.pym.simplejson as json
 
 NM = ['new-module']
 LM = ['list-modules', 'lm']
@@ -14,6 +16,14 @@ BM = ['build-modules', 'bm']
 IM = ['install']
 
 COMMANDS = NM + LM + BM + IM
+
+def load_module(name):
+    base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
+    mod_desc = imp.find_module(name, [os.path.join(base, 'framework/pym')])
+    return imp.load_module(name, mod_desc[0], mod_desc[1], mod_desc[2])
+
+json = load_module('simplejson')
+
 
 # TODO: Make that configurable
 modules_server = 'http://www.playframework.org'
@@ -29,9 +39,9 @@ def execute(**kargs):
     elif command in LM:
         list(app, args)
     elif command in BM:
-        build(app, args)
+        build(app, args, env)
     elif command in IM:
-        install(app, args)
+        install(app, args, env)
 
 class Downloader(object):
     before = .0
@@ -113,6 +123,27 @@ class Unzip:
                 outfile.flush()
                 outfile.close()
 
+    def _createstructure(self, file, dir):
+        self._makedirs(self._listdirs(file), dir)
+
+    def _makedirs(self, directories, basedir):
+        """ Create any directories that don't currently exist """
+        for dir in directories:
+            curdir = os.path.join(basedir, dir)
+            if not os.path.exists(curdir):
+                os.makedirs(curdir)
+
+    def _listdirs(self, file):
+            """ Grabs all the directories in the zip structure
+            This is necessary to create the structure before trying
+            to extract the file to it. """
+            zf = zipfile.ZipFile(file)
+            dirs = []
+            for name in zf.namelist():
+                    dn = os.path.dirname(name)
+                    dirs.append(dn)
+            dirs.sort()
+            return dirs
 
 def new(app, args, play_env):
     if os.path.exists(app.path):
@@ -174,8 +205,8 @@ def list(app, args):
     print "~ play install module (eg: play install scala)"
     print "~"
 
-def build(app, args):
-    ftb = play_base
+def build(app, args, env):
+    ftb = env["basedir"]
 
     try:
         optlist, args = getopt.getopt(remaining_args, '', ['framework='])
@@ -230,9 +261,9 @@ def build(app, args):
     print "~ Package is available at %s" % os.path.join(dist_dir, '%s.zip' % mv)
     print "~"
 
-def install(app, args):
+def install(app, args, env):
     if len(sys.argv) < 3:
-        help_file = os.path.join(play_base, 'documentation/commands/cmd-install.txt')
+        help_file = os.path.join(env["basedir"], 'documentation/commands/cmd-install.txt')
         print open(help_file, 'r').read()
         sys.exit(0)
 
@@ -275,7 +306,7 @@ def install(app, args):
         print '~'
         sys.exit(-1)
     
-    archive = os.path.join(play_base, 'modules/%s-%s.zip' % (module, v['version']))
+    archive = os.path.join(env["basedir"], 'modules/%s-%s.zip' % (module, v['version']))
     if os.path.exists(archive):
         os.remove(archive)
     
@@ -290,11 +321,11 @@ def install(app, args):
     
     print '~ Unzipping...'
     
-    if os.path.exists(os.path.join(play_base, 'modules/%s-%s' % (module, v['version']))):
-        shutil.rmtree(os.path.join(play_base, 'modules/%s-%s' % (module, v['version'])))
-    os.mkdir(os.path.join(play_base, 'modules/%s-%s' % (module, v['version'])))
+    if os.path.exists(os.path.join(env["basedir"], 'modules/%s-%s' % (module, v['version']))):
+        shutil.rmtree(os.path.join(env["basedir"], 'modules/%s-%s' % (module, v['version'])))
+    os.mkdir(os.path.join(env["basedir"], 'modules/%s-%s' % (module, v['version'])))
     
-    Unzip().extract(archive, os.path.join(play_base, 'modules/%s-%s' % (module, v['version'])))
+    Unzip().extract(archive, os.path.join(env["basedir"], 'modules/%s-%s' % (module, v['version'])))
     os.remove(archive)
     print '~'
     print '~ Module %s-%s is installed!' % (module, v['version'])

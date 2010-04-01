@@ -1,21 +1,32 @@
 import imp
 import os
 
-commands = {}
+class CommandLoader:
+    def __init__(self, play_path):
+        self.path = os.path.join(play_path, 'framework', 'pym', 'commands')
+        self.commands = {}
+        self.load_core()
 
-def load_all(play_path):
-    for filename in os.listdir(os.path.join(play_path, 'framework', 'pym', 'commands')):
-        if filename != "__init__.py" and filename.endswith(".py"):
-            name = filename.replace(".py", "")
-            mod = load_module(play_path, name)
-            try:
-                for name in mod.COMMANDS:
-                    if name in commands:
-                        print "Warning: conflict on command " + name
-                    commands[name] = mod
-            except:
-                print "Warning: error loading command " + name
+    def load_core(self):
+        for filename in os.listdir(self.path):
+            if filename != "__init__.py" and filename.endswith(".py"):
+                name = filename.replace(".py", "")
+                mod = load_python_module(name, self.path)
+                self._load_cmd_from(mod)
 
-def load_module(base, name):
-    mod_desc = imp.find_module(name, [os.path.join(base, 'framework', 'pym', 'commands')])
+    def load_play_module(self, name, fullpath):
+        mod = load_python_module(name, fullpath)
+        self._load_cmd_from(mod)
+
+    def _load_cmd_from(self, mod):
+        try:
+            for name in mod.COMMANDS:
+                if name in self.commands:
+                    print "Warning: conflict on command " + name
+                self.commands[name] = mod
+        except:
+            print "Warning: error loading command " + name
+
+def load_python_module(name, location):
+    mod_desc = imp.find_module(name, [location])
     return imp.load_module(name, mod_desc[0], mod_desc[1], mod_desc[2])
