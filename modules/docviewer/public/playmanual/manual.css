@@ -373,21 +373,25 @@ pre.description {
 }
 
 table {
-    margin: 10px;
+    margin-top: 50px;
+    font-size: 12px;
     border: 1px solid silver;
-    -webkit-box-shadow: 0px 0px 5px rgba(0,0,0,0.9);
-    -moz-box-shadow: 0px 0px 5px rgba(0,0,0,0.9);
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+    border-collapse: true;
 }
 
 td, th {
     padding: 10px;
+       margin-left: auto;
+    margin-right: auto;
+    border: 1px solid silver;
+    text-align: center;
 }
 
 th {
-    background-color: #c3c2c2;
-    border-bottom: 2px solid #aaa9a9;
+    font-weight: bold;
 }
 
 

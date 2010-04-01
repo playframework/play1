@@ -1,6 +1,6 @@
 h1. Play framework documentation
 
-Welcome to the play framework documentation. This documentation is intended for the *1.0.1 release* and may significantly differs from previous versions of the framework. Check the "release notes of the 1.0.1 version":releasenotes.
+Welcome to the play framework documentation. This documentation is intended for the *1.0.2 release* and may significantly differs from previous versions of the framework. Check the "release notes of the 1.0.2 version":releasenotes-1.0.2.
 
 p(note). This is a work in progress, feel free to ask any question not covered into these documents or report any error. You can contribute to the documentation the "same way you can contribute code":faq.
 
@@ -87,6 +87,7 @@ h2. <a name="cook">Cookbook</a>
 
 Tips about everything and anything.
 
+# "Security Guide":security
 # "More about the JPA support":jpa
 # "Using data validation":validation
 # "Application modularization":modules
@@ -128,4 +129,5 @@ h2. <a name="versionnotes">Version notes</a>
 
 New versions of play include certain changes.
 
+# "Play 1.0.2":releasenotes-1.0.2
 # "Play 1.0.1":releasenotes-1.0.1
