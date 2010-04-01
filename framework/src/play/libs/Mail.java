@@ -419,8 +419,12 @@ public class Mail {
         }
         msg.setReplyTo(new InternetAddress[]{replyTo});
         msg.setRecipients(javax.mail.Message.RecipientType.TO, recipients);
-        msg.setRecipients(javax.mail.Message.RecipientType.CC, ccs);
-        msg.setRecipients(javax.mail.Message.RecipientType.BCC, bccs);
+        if (ccs != null && ccs.length > 0) {
+            msg.setRecipients(javax.mail.Message.RecipientType.CC, ccs);
+        }
+        if (bccs != null && bccs.length > 0) {
+            msg.setRecipients(javax.mail.Message.RecipientType.BCC, bccs);
+        }
 
         msg.setSubject(subject, charset != null ? charset : "utf-8");
         if ("text/plain".equals(contentType)) {
