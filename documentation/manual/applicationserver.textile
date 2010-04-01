@@ -6,7 +6,7 @@ h2. <a>Compatibility matrix</a>
 
 
 || JBoss 4.2.x || JBoss 5.x || JBoss 6M2 || Glasshfish v3 || IBM Websphere 6.1 ||IBM Websphere 7 || Geronimo 2.x || Tomcat 6.x || Jetty 7.x || Resin 4.0.5 ||
-|  √ | √ | √ | √ | √ | √ | √ | √ |  √ | √ |
+| ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  ✓ | ✓  |
 
 
 h2. <a>Deploying</a>
