@@ -1,0 +1,59 @@
+h1. Application Server / Servlet Container
+
+
+h2. <a>Compatibility matrix</a>
+
+
+|| Name || Version || Supported ||
+| JBoss | 4.2.x | √ |
+| JBoss | 5.x | √ |
+| JBoss | 6Mx | √ |
+| Glassfish | v2 | ? |
+| Glassfish | v3 | √ |
+| IBM Websphere | | √ |
+| Geronimo | | √ |
+| Tomcat | | √ |
+| Jetty | | √ |
+
+
+h2. <a>Deploying</a>
+
+You need to package your application as a war file. This is easily done with the following command:
+
+bc. play war myapp -o myapp.war
+
+
+You are now ready to deploy your application.
+
+It is advised to "isolate" your Play! application from the other applications to avoid version mismatch between the application libraries. This step is not standartize by the JEE / Servlet Container specification, it is therefore vendor specific.
+
+We recommend you refer to your application server manual in order to "isolate" your war.
+
+As an example below is how you isolate a war file in JBoss Application server. Note that this is an optional step.
+
+This section describes how to deploy your Play! application in a JBoss application server. 
+
+In order to isolate your Play! application war file, add the following file in your application war directory:
+
+Edit myapp.war/WEB-INF/jboss-web.xml
+
+and insert the following content:
+
+bc. 
+<jboss-web>
+ <class-loading java2classloadingcompliance="false">
+ <loader-repository>
+ com.example:archive=unique-archive-name
+ <loader-repository-config>java2ParentDelegation=false</loader-repository-config>
+ </loader-repository>
+</class-loading>
+</jboss-web>
+
+Replace com.example:archive=unique-archive-name with whatever you wish as long as it is unique.            
+
+
+
+
+
+
+

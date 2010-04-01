@@ -1,6 +1,6 @@
 h1. Play framework documentation
 
-Welcome to the play framework documentation. This documentation is intended for the *1.0.2 release* and may significantly differs from previous versions of the framework. Check the "release notes of the 1.0.2 version":releasenotes-1.0.2.
+Welcome to the play framework documentation. This documentation is intended for the *1.0.1 release* and may significantly differs from previous versions of the framework. Check the "release notes of the 1.0.1 version":releasenotes.
 
 p(note). This is a work in progress, feel free to ask any question not covered into these documents or report any error. You can contribute to the documentation the "same way you can contribute code":faq.
 
@@ -79,15 +79,14 @@ Everything you need to know about Play.
 ## "Fixtures":test#fixtures
 ## "Continuous integration":test#continus
 # "Play and your application server":applicationserver
-## "Packaging your Play application":applicationserver
-## "Deploying your Play application":applicationserver
-## "Application server compatibility matrix":applicationserver
+## "Application server compatibility matrix":applicationserver#aCompatibilitymatrixa
+## "Deploying your Play application":applicationserver#aDeployinga
+
 
 h2. <a name="cook">Cookbook</a>
 
 Tips about everything and anything.
 
-# "Security Guide":security
 # "More about the JPA support":jpa
 # "Using data validation":validation
 # "Application modularization":modules
@@ -129,5 +128,4 @@ h2. <a name="versionnotes">Version notes</a>
 
 New versions of play include certain changes.
 
-# "Play 1.0.2":releasenotes-1.0.2
 # "Play 1.0.1":releasenotes-1.0.1

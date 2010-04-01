@@ -93,7 +93,6 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         Request request = null;
         try {
             request = parseRequest(httpServletRequest);
-            Request.current.set(request);
             Logger.trace("ServletWrapper>service, request: " + request);
             Response response = new Response();
             Response.current.set(response);
@@ -189,6 +188,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     @SuppressWarnings("unchecked")
     public static Request parseRequest(HttpServletRequest httpServletRequest) throws Exception {
         Request request = new Http.Request();
+        Request.current.set(request);
         URI uri = new URI(httpServletRequest.getRequestURI());
         request.method = httpServletRequest.getMethod().intern();
         request.path = uri.getPath();

@@ -371,3 +371,26 @@ pre.description {
     border-top: 1px solid #F3B438;
     border-bottom: 1px solid #F3B438;
 }
+
+table {
+    margin: 10px;
+    border: 1px solid silver;
+    -webkit-box-shadow: 0px 0px 5px rgba(0,0,0,0.9);
+    -moz-box-shadow: 0px 0px 5px rgba(0,0,0,0.9);
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+}
+
+td, th {
+    padding: 10px;
+}
+
+th {
+    background-color: #c3c2c2;
+    border-bottom: 2px solid #aaa9a9;
+}
+
+
+tr {
+    margin: 5px;
+}
