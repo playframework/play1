@@ -12,26 +12,26 @@ h3. Keep your secret... Secret.
 
 The session is a hash of key/values, signed but not encrypted. That means that as long as your secret is safe, it is not possible for third party to forge sessions.
 
-The secret is stored in conf/application.conf. It is very important to keep it for you: do not commit it in a public repository, and when you install an application written by someone else change the secret for your own. You can do that with the command "play secret".
+The secret is stored in conf/application.conf. It is very important to keep it for you: do not commit it in a public repository, and when you install an application written by someone else change the secret key to your own. You can do that with the command "play secret".
 
 h3. Don't store critical data
 
 However, since it is not encrypted, you should not store critical data in the session. It can be seen by looking at the user cookie, by sniffing the connection on a local network or over wifi.
 
-The session is store in a cookie, and cookies are limited to 4K. In addition to this limit, only strings can be stored.
+The session is stored in a cookie, and cookies are limited to 4K. In addition to this limit, only strings can be stored.
 
 h2. <a name="started">Cross Site Scripting</a>
 
-Cross-site scripting is one of the most common vulnerabilities in web applications. It consists in injecting malicious Javascript into webpage using forms that your application provide.
+Cross-site scripting is one of the most common vulnerabilities in web applications. It consists in injecting malicious Javascript into webpage using forms that your application provides.
 
 Let's say you're writing a blog, and anyone can add a comment. If you blindly include what commenters have written into your HTML page, you're opening your site to attacks. It can be:
 * Show a popup to your visitors
 * Redirect your visitors to a site controlled by the attacker
 * Steal information supposed to be visible only to the current user, and send it back to the attacker's site
 
-Consequently it is very important to be protected from these attacks.
+Consequently it is very important to be protected from those attacks.
 
-Since the version 1.0.1, Play's template engine automatically escapes strings. For that, you need to ensure escapeInTemplates is enabled in your application.conf. It is by default in newly created apps but if your application was created prior to 1.0.1 release, it may not be enabled.
+Since the version 1.0.1, Play's template engine automatically escapes strings. For that, you need to ensure escapeInTemplates is enabled in your application.conf. It is by default in newly created applications. If your application was created prior to 1.0.1 release, it may not be enabled.
 
 bc. future.escapeInTemplates=true
 
@@ -67,9 +67,9 @@ To prevent this attack, the first thing to do is to use GET and POST methods app
 
 For POST requests the only way to secure critical actions properly is to issue an authenticity token. Play 1.0.2 now has a built-in helper to handle that:
 
-* a new checkAuthenticity()* method available in controllers, that check for a valid authenticity token in the request parameters and send a forbidden response if something is bad.
-* session.getAuthenticityToken()* generate an authenticity token only valid for the current session.
-* **#{authenticityToken /}** create an hidden input field that you can add to any form.
+* a new checkAuthenticity()* method available in controllers, that checks for a valid authenticity token in the request parameters and send a forbidden response if something is bad.
+* session.getAuthenticityToken()* generates an authenticity token only valid for the current session.
+* **#{authenticityToken /}** creates an hidden input field that you can add to any form.
 
 So for example:
 
