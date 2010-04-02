@@ -11,13 +11,52 @@ The most popular deployment options are:
 
 h2. <a>Standalone Play! application</a>
 
-A Play! application can be run using the standard embedded server: Mina, a high performance and high scalability network server.
-Different "modules":http://playframework.org/modules allows you to use a different server (Grizzly, Netty, etc...) as well.
+A Play! application can be run using the standard embedded server: Mina, a high performance and high scalability network server. Different "modules":http://playframework.org/modules allows you to use a different server (Grizzly, Netty, etc...) as well. 
+
 Please refer to the "'Put your application in production' page":production for more information.
 
 h2. <a>Application servers</a>
 
 Your Play! application can also run inside your favorite application server. Most of the application servers are supported out of the box.
+
+h3. Application server compatibility matrix
+
+|| JBoss 4.2.x || JBoss 5.x || JBoss 6M2 || Glasshfish v3 || IBM Websphere 6.1 ||IBM Websphere 7 || Geronimo 2.x || Tomcat 6.x || Jetty 7.x || Resin 4.0.5 ||
+| ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  ✓ | ✓  |
+
+These application server are known to work with play 1.0.2; but feel free to report any other working deployment.
+
+h3. Deploying
+
+You need to package your application as a war file. This is easily done with the following command:
+
+bc. play war myapp -o myapp.war
+
+p(note). Please note that your application server must support deployment of exploded war files.
+
+You are now ready to deploy your application.
+
+It is advised to "isolate" your Play! application from the other applications to avoid version mismatch between the application libraries. This step is not standardize by the JEE / Servlet Container specification, it is therefore vendor specific.
+
+We recommend you refer to your application server manual in order to "isolate" your war. As an example below is how you isolate a war file in JBoss Application server. Note that this is an optional step:
+
+Insert the following content (or create the file) in your application war directory at myapp.war/WEB-INF/jboss-web.xml:
+
+bc. 
+<jboss-web>
+ <class-loading java2classloadingcompliance="false">
+ <loader-repository>
+ com.example:archive=unique-archive-name
+ <loader-repository-config>java2ParentDelegation=false</loader-repository-config>
+ </loader-repository>
+</class-loading>
+</jboss-web>
+
+Replace com.example:archive=unique-archive-name with whatever you wish as long as it is unique.            
+
+
+
+
 Refer to the "application servers section":applicationserver for more information.
 
 h2. <a>Google Application Engine (GAE)</a>

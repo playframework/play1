@@ -1,237 +1,53 @@
 h1. Play 1.0.2 -- Release notes
 
-**play 1.0.2** is a maintenance release of the play 1.0 branch. It fixes a lot of small bugs, provides a better binding for persistent JPA objects, auto-escaping of HTML and Javascript code in templates to avoid XSS security problems.
+**play 1.0.2** is a maintenance release of the play 1.0 branch. The major new features are the support for the modules repository, and a built-in protection against CRSF attacks. Also it fixes a lot of small bugs.
 
-p(note). **play 1.0.2** is a maintenance release and is fully compatible with the 1.0 version. If you encounter any problems please ask us on the Google Group.
+p(note). **play 1.0.2** is a maintenance release and is fully compatible with the 1.0 serie. If you encounter any problems please ask us on the Google Group.
 
 You can read about the fixed bugs on the "1.0.2 roadmap page":http://www.playframework.org/roadmap/1.0.2. The most important changes are highlighted in this page:
 
-h2. <a>Empty parameters now bind to null objects</a>
+h2. <a>Modules repository</a>
 
-Before the 1.0.2 release, an empty parameter would bind to an empty string. However, when binding an array or a list of String you would that was not so handy.
-In order to remain backward compatible we introduce a new property to enable this new behavior. To enable it, add the following line to you **application.conf** file:
+The goal of the modules repository is to centralize all contributed modules for the play framework, and allow easy install of them. The new commands related to the repository are:
 
-future.binding.string.value.returnNull=true
+* **play list-modules**, to list the content of the repository 
+* **play install**, to install locally a version of a module 
+* **play new-module**, to create a new module skeleton 
+* **play build-module**, to package a module and publish it to the repository 
 
-This line is added to new applications created with the 1.0.2 release.
+Also, you will see that almost all modules have been deleted. Only a bunch of 'core' modules are directly availables: testrunner, docviewer, crud and secure.
 
-h2. <a>Automatic escape of HTML code in templates</a>
+Other modules are now optional. So if you want for example install the gwt support, just type 'play install gwt', and you will get the latest version of the module.
 
-Now all dynamic expressions are escaped by the template engine to avoid XSS security issues in your application. So the **title** variable containing **==&lt;h1>Title&lt;/h1>==** is now escaped:
+Why have we moved modules? Because we need to focus on the core framework to have a simple project to manage. Also, as many people wanted to contributed some modules, it is easy to do it this way: each module is a standalone project with a dedicated maintener. So please, if you want to report a bug on a specific module, just use the project homepage and the bug tracker dedicated to the module. 
 
-bc. ${title} --> &lt;h1&gt;Title&lt;/h1&gt;
+Also, the lifecycle of modules is no more tied to the framework lifecycle. A module can release more often than the framework itself. And finally as the framework does not contain anymore optional modules, the play package size has been divided by two.
 
-If you really want to display it in an unescaped way, you need to explicitely call the **raw()** method:
+Read more about the modules repository on "this dedicated page":modules.
 
-bc. ${title.raw()} --> <h1>Title</h1>
+h2. <a>HEAD method supported by default</a>
 
-Also, if you want to display a large part of raw HTML, you can use the **#{verbatim /}** tag:
+Play now respond automatically to HEAD requests if there is an existing route for the GET method. This is because it is requested by the HTTP RFC that any resource respond to HEAD request as well.
 
-bc. #{verbatim}
-    ${title} --> <h1>Title</h1>
-#{/verbatim}
+"http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html":http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html 
 
-Of course, as this feature can break existing applications, it is not enabled by default. You can enable it by adding the following line to your **application.conf** file:
+bq. The HEAD method is identical to GET except that the server MUST NOT return a message-body in the response. The metainformation contained in the HTTP headers in response to a HEAD request SHOULD be identical to the information sent in response to a GET request. This method can be used for obtaining metainformation about the entity implied by the request without transferring the entity-body itself. This method is often used for testing hypertext links for validity, accessibility, and recent modification.
 
-bc. future.escapeInTemplates=true
+So any HEAD request will invoke your action method, but the response content will not be sent to the client. You can of course specialize that by adding a custom route to respond to HEAD requests specifically in your routes file. So, for example:
 
-This line is  added to new applications created with the 1.0.1 release.
+bc. GET     /orders/{id}         Orders.show
+HEAD    /orders/{id}         Orders.showHead
 
-h2. <a>@javax.inject.Inject support</a>
+h2. <a>Better support for application server deployment</a>
 
-You can now use the **@Inject** annotation if you are using a Dependency Injection container like the one provided by the "Spring module":spring. The the **@Inject** annotation automatically injects defined beans in your controllers, jobs and mailer. It works on static fields. 
+We have tested the deployement of a play generated War archive on several application servers. You can check the current "compatibility matrix":deployment.
 
-For example to inject a **PriceWatcher** service defined in Spring to one of your controller, just do:
+h2. <a>A new command to generate the application JavaDoc</a>
 
-bc. public class Application extends Controller {
-    
-    @Inject
-    static PriceWatcher prices;
-    
-    public static void index() {
-        prices.getAll(); // prices is defined here
-    }
-    
-}
+Now with you can generate the **JavaDoc** for your project with easily, using:
 
-Auto-reload should work as expected.
+bc. play javadoc 
 
-h2. <a>Better binding for JPA objects</a>
+It will generate the doc for your project and the included modules.
 
-Previously there was no way to automatically bind a JPA object using the HTTP to Java binding. For example:
-
-bc. public static void save(User user) {
-    user.save(); // fail in 1.0
-}
-
-**User** being a JPA entity class, this code failed because user was a transient object created by the Binder and not yet managed by Hibernate.
-
-The old way was to use the **edit()** method, like:
-
-bc. public static void save(Long id) {
-    User user = User.findById(id);
-    user.edit(params);
-    user.save(); // ok
-}
-
-Now you can provide the **user.id** field yourself in the HTTP parameters. When Play find the **id** field, it loads the matching instance from the database before editing it. The other parameters provided by the HTTP request are then applied. So you can save it directly.
-
-bc. public static void save(User user) {
-    user.save(); // ok with 1.0.1
-}
-
-Of course as this feature can break existing applications it is not enabled by default. You can enable it by adding the followin line to your **application.conf** file:
-
-bc. future.bindJPAObjects=true
-
-This line is added to new applications created with the 1.0.1 release.
-
-h2. <a>Framework id can be set from the command line</a>
-
-The framework id allows you to run different configurations for a same play! application (ie dev, test, staging, production, etc...).
-
-Using the command line, you can now specify the application "framework id":ids the application will use. For example, to run an application in production mode:
-
-bc. play run --%production
-
-With these lines defined in the **application.conf** file:
-
-bc. application.mode=dev
-%production.application.mode=prod
-
-It is compatible with all the existing commands using the framework id information. The default id is still defined using the **play id** command.
-
-By the way ,**play test** is then equivalent to:
-
-bc. play run --%test
-
-h2. <a>Custom validation</a>
-
-You don't find the validator you need in the **play.data.validation** package? Write your own. You can use the generic **@CheckWith** annotation to bind your own **Check** implementation.
-
-For example:
-
-bc. public class User {
-    
-    @Required
-    @CheckWith(MyPasswordCheck.class)
-    public String password;
-    
-    static class MyPasswordCheck extends Check {
-        
-        public abstract boolean isSatisfied(Object user, Object password) {
-            return notMatchPreviousPasswords(password);
-        }
-        
-    }
-}
-
-h2. <a>Test runner update</a>
-
-We've updated selenium to the 1.0.1 final version and improved the UI. Selenium tests now run in fullscreen. And some new functionalities like the "Run all tests" have been added.
-
-!images/selenium-fullscreen!
-
-Also local documentation is now available when you run your application in test mode.
-
-h2. <a>HTML5 as default doctype and JQuery in new applications</a>
-
-New applications come with a default HTML skeleton. Previously it was a **XHTML 1.0 Transitional** formatted HTML. Now it comes with a **HTML5** doctype by default:
-
-bc. <!DOCTYPE html>
- 
-<html>
-    <head>
-        <title>#{get 'title' /}</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/main.css'}">
-        #{get 'moreStyles' /}
-        <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
-        <script src="@{'/public/javascripts/jquery-1.3.2.min.js'}" type="text/javascript" charset="utf-8"></script>
-        #{get 'moreScripts' /}
-    </head>
-    <body>
-        #{doLayout /}
-    </body>
-</html>
-
-It's just the default and you can of course change it to any doctype if you wish. However "HTML5":http://html5.org is surely the future and is way simpler.
-
-The default template comes with the **JQuery** Javascript library. This is because modern web applications need a good Javascript framework and we love "JQuery":http://www.jquery.com. Again it is just the default and you can of course override it with whatever Javascript library you want.
-
-Oh, and it comes with 2 default placeholders to inject even more scripts and/or styles. For example, add in your view:
-
-bc. #{set 'moreScripts'}
-<script src="@{'/public/javascripts/gears_init.js'}" type="text/javascript" ></script>
-#{/set}
-
-And the gear Javascript library will be accessible in your view.
-
-h2. <a>Improved #{list} tag</a>
-
-The **items** parameter is now optional and can be replaced by the default **arg** argument.
-
-So you can rewrite:
-
-bc. #{list items:users, as:'user'}
-    <li>${user}</li>
-#{/list}
-
-to:
-
-bc. #{list users, as:'user'}
-    <li>${user}</li>
-#{/list}
-
-The **as** parameter is now optional as well. It uses **_** as default variable name:
-
-bc. #{list users}
-    <li>${_}</li>
-#{/list}
-
-h2. <a>New #{jsAction /} tag</a>
-
-The **#{jsAction /}** tag allows to import a server-side defined route as a Javascript function. It is very useful if you need to call an URL with an AJAX call using free variables.
-
-Let's see an example:
-
-bc. GET     /users/{id}        Users.show
-
-Now you can import this route on the client side:
-
-bc. <script type="text/javascript">
-    var showUserAction = #{jsAction @Users.show(':id')}
-    
-    var displayUserDetail = function(userId) {
-        $('#userDetail').load( showUserAction({id: userId}) )
-    }
-</script>
-
-As you see you use the **:ame** syntax to declare free variables. You can mix free and fixed variables together. The **#{jsAction /}** tag generates a Javascript function. This function takes a Javascript object as parameter that must define all the free variables.
-
-h2. <a>New sample application: 'booking'</a>
-
-The **booking** application is a port of the well known "booking application from the JBoss seam framework":http://docs.jboss.com/seam/latest/reference/en-US/html/tutorial.html#booking.
-
-It demonstrates how you can manage complex states client side in a RestFul way with a stateless web framework.
-
-!images/booking!
-
-h2. <a>Eclipse plugin is on his way</a>
-
-We are working hard to provide a dedicated eclipse plugin. The current status is alpha but already usable. You can find it in the **support/eclipse** directory of your play installation.
-
-!images/eclipse-plugin!
-
-h2. <a>Support for IntelliJ IDEA</a>
-
-Play! framework now supports "IntelliJ IDEA":http://www.jetbrains.com/idea/ out of the box!
-
-To convert your Play! application into an IntelliJ IDEA project, use the **idealize** command:
-
-bc. # play idealize myApp
-
-!images/intellij!
-
-You can use the Run and Debug using the context menu.
 
