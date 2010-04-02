@@ -12,7 +12,7 @@ h3. Keep your secret... Secret.
 
 The session is a hash of key/values, signed but not encrypted. That means that as long as your secret is safe, it is not possible for third party to forge sessions.
 
-The secret is store in conf/application.conf. It is very important to keep it for you: do not commit it in a public repository, and when you install an application written by someone else change the secret for your own. You can do that with the command "play secret".
+The secret is stored in conf/application.conf. It is very important to keep it for you: do not commit it in a public repository, and when you install an application written by someone else change the secret for your own. You can do that with the command "play secret".
 
 h3. Don't store critical data
 
@@ -27,8 +27,7 @@ Cross-site scripting is one of the most common vulnerabilities in web applicatio
 Let's say you're writing a blog, and anyone can add a comment. If you blindly include what commenters have written into your HTML page, you're opening your site to attacks. It can be:
 * Show a popup to your visitors
 * Redirect your visitors to a site controlled by the attacker
-* Show a popup to your visitors
-* Steal information supposed to be visible only to the current user, and send it back by xmlhttprequest to the attacker's site
+* Steal information supposed to be visible only to the current user, and send it back to the attacker's site
 
 Consequently it is very important to be protected from these attacks.
 
