@@ -1,6 +1,6 @@
 h1. Play 1.0.2 -- Release notes
 
-**play 1.0.2** is a maintenance release of the play 1.0 branch. The major new features are the support for the modules repository and built-in protection against CRSF attacks. It also fixes a lot of small bugs.
+**play 1.0.2** is a maintenance release of the play 1.0 branch. The major new features are the support for the modules repository and built-in protection against CSRF attacks. It also fixes a lot of small bugs.
 
 p(note). **play 1.0.2** is a maintenance release and is fully compatible with the 1.0 serie. If you encounter any problems please ask us on the Google Group.
 
@@ -25,6 +25,36 @@ As an immediate benefit, the lifecycle of modules is no more tied to the framewo
 
 Read more about the modules repository on "this dedicated page":modules.
 
+h2. <a>Built-in Cross-Site Request Forgery protection</a>
+
+The CSRF attack can be really problematic in web applications;
+
+bq. This attack method works by including malicious code or a link in a page that accesses a web application that the user is believed to have authenticated. If the session for that web application has not timed out, an attacker may execute unauthorized commands.
+
+To prevent this attack, the first thing to do is to use GET and POST method appropriately. That means that only POST methods must be used to run an interaction that can change the state of the application.
+
+For POST requests the only way to secure critical actions properly is to issue an authenticity token. Play 1.0.2 now has some built-in helper to handle that:
+
+* a new **checkAuthenticity()** method available in controllers, that check for a valid authenticity token in the request parameters and send a forbidden response if something is bad.
+* **session.getAuthenticityToken()** generate an authenticity token only valid for the current session.
+* **#{authenticityToken /}** create an hidden input field that you can add to any form.
+
+So for example:
+
+bc. public static destroyMyAccount() {
+    checkAuthenticity();
+    ...
+}
+
+Will only work when called from a form including a proper authenticity token:
+
+bc. #{form @ destroyMyAccount()}
+    #{authenticityToken /}
+    <input type="submit" value="destroy my account">
+#{/form}
+
+You can of course add this as a before filter if you want to protect all actions of a hierarchy of controllers. Read more on the "Security Guide":security.
+
 h2. <a>HEAD method supported by default</a>
 
 Play now responds automatically to HEAD requests if there is an existing route for the GET method. This is because it is requested by the HTTP RFC that any resource respond to HEAD request as well.
@@ -38,9 +68,50 @@ So any HEAD request will invoke your action method, but the response content wil
 bc. GET     /orders/{id}         Orders.show
 HEAD    /orders/{id}         Orders.showHead
 
+h2. <a>New sample application, 'zencontact'</a>
+
+A new sample, that is a port of a "Wicket based contact management application":http://blog.zenika.com/index.php?post/2009/03/10/Concours-Développer-une-application-web-en-Wicket3. Also there is a Scala version of this application available in the Scala module package for those interested.
+
+!images/zencontact!
+
 h2. <a>Better support for application server deployment</a>
 
 We have tested the deployment of a play generated WAR archive on several application servers. You can check the current "compatibility matrix":deployment.
+
+|| JBoss 4.2.x || JBoss 5.x || JBoss 6M2 || Glasshfish v3 || IBM Websphere 6.1 ||IBM Websphere 7 || Geronimo 2.x || Tomcat 6.x || Jetty 7.x || Resin 4.0.5 ||
+| ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  ✓ | ✓  |
+
+
+h2. <a>New features for reversed action in templates</a>
+
+The **@@** syntax, that allow to reverse an action to an **absolute** URL, in now available in tags parameters. For example:
+
+bc. #{form @@save()}
+...
+#{/}
+
+It is very useful if you use the template engine to generate stuff like emails, in which you need to express URL in an absolute fashion.
+
+Also the binding of complex objects in now supported. So for example, with this action:
+
+bc. public static void search(SearchParams params) {
+    ...
+}
+
+SearchParams, being:
+
+bc. public class SearchParams {
+    public String keywords;
+    public String mode;
+}
+
+You can use in a template, something like:
+
+bc. @{search(params)}
+
+That would generate a URL containing several values in the queryString, like:
+
+bc. /search?params.keywords=xxxx&params.mode=AND
 
 h2. <a>A new command to generate the application JavaDoc</a>
 
@@ -50,4 +121,17 @@ bc. play javadoc
 
 It generates the javadoc API documentation for your project and its modules.
 
+h2. <a>An even better Eclipse plugin in this release</a>
 
+The eclipse plugin now have several new features:
+
+* Advanced route file editor, with content assist, missing action detection, and hyperlinks
+* Advanced template files editor, with some content assist, and hyperlinks
+* Wizard to create new Controllers, Models and Templates
+* Integrated test runner (using an embedded web browser)
+
+!images/route-completion!
+
+!images/eclipse-tests!
+
+To install this plugin, copy the jar file from PLAY_HOME/support/eclipse in ECLIPSE_HOME/dropins.
