@@ -44,7 +44,7 @@ We have tested the deployment of a play generated WAR archive on several applica
 
 h2. <a>A new command to generate the application JavaDoc</a>
 
-Now with you can generate the **JavaDoc** for your project easily, using:
+Now you can generate the **JavaDoc** for your project easily, using:
 
 bc. play javadoc 
 
