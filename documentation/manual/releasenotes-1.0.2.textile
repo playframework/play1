@@ -1,53 +1,53 @@
 h1. Play 1.0.2 -- Release notes
 
-**play 1.0.2** is a maintenance release of the play 1.0 branch. The major new features are the support for the modules repository, and a built-in protection against CRSF attacks. Also it fixes a lot of small bugs.
+**play 1.0.2** is a maintenance release of the play 1.0 branch. The major new features are the support for the modules repository and built-in protection against CRSF attacks. It also fixes a lot of small bugs.
 
 p(note). **play 1.0.2** is a maintenance release and is fully compatible with the 1.0 serie. If you encounter any problems please ask us on the Google Group.
 
-You can read about the fixed bugs on the "1.0.2 roadmap page":http://www.playframework.org/roadmap/1.0.2. The most important changes are highlighted in this page:
+You can read about the fixed bugs on the "1.0.2 roadmap page":http://www.playframework.org/roadmap/1.0.2. The most important changes are highlighted on this page:
 
 h2. <a>Modules repository</a>
 
-The goal of the modules repository is to centralize all contributed modules for the play framework, and allow easy install of them. The new commands related to the repository are:
+The goal of the modules repository is to centralize all contributed modules for the play framework, and allow easy installation. The new modules related commands are:
 
 * **play list-modules**, to list the content of the repository 
-* **play install**, to install locally a version of a module 
+* **play install**, to install a version of a module locally
 * **play new-module**, to create a new module skeleton 
 * **play build-module**, to package a module and publish it to the repository 
 
-Also, you will see that almost all modules have been deleted. Only a bunch of 'core' modules are directly availables: testrunner, docviewer, crud and secure.
+Also, you will see that almost all modules have been deleted. Only a bunch of 'core' modules are directly available: testrunner, docviewer, crud and secure.
 
-Other modules are now optional. So if you want for example install the gwt support, just type 'play install gwt', and you will get the latest version of the module.
+Other modules are now optional. So if you want for example to install the gwt support, just type 'play install gwt', and you will get the latest version of the module.
 
-Why have we moved modules? Because we need to focus on the core framework to have a simple project to manage. Also, as many people wanted to contributed some modules, it is easy to do it this way: each module is a standalone project with a dedicated maintener. So please, if you want to report a bug on a specific module, just use the project homepage and the bug tracker dedicated to the module. 
+Why have we moved modules? Because we need to focus on the core framework to have a simple project to manage. Also, as many people wanted to contributed some modules, it is easy to do it this way: each module is a standalone project with a dedicated maintainer. So please, if you want to report a bug on a specific module, just use its project homepage and its dedicated bug tracker.
 
-Also, the lifecycle of modules is no more tied to the framework lifecycle. A module can release more often than the framework itself. And finally as the framework does not contain anymore optional modules, the play package size has been divided by two.
+As an immediate benefit, the lifecycle of modules is no more tied to the framework lifecycle. A module can be released more often than the framework itself. And finally, because the framework does not contain optional modules anymore, the play distribution size has been divided by two.
 
 Read more about the modules repository on "this dedicated page":modules.
 
 h2. <a>HEAD method supported by default</a>
 
-Play now respond automatically to HEAD requests if there is an existing route for the GET method. This is because it is requested by the HTTP RFC that any resource respond to HEAD request as well.
+Play now responds automatically to HEAD requests if there is an existing route for the GET method. This is because it is requested by the HTTP RFC that any resource respond to HEAD request as well.
 
 "http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html":http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html 
 
 bq. The HEAD method is identical to GET except that the server MUST NOT return a message-body in the response. The metainformation contained in the HTTP headers in response to a HEAD request SHOULD be identical to the information sent in response to a GET request. This method can be used for obtaining metainformation about the entity implied by the request without transferring the entity-body itself. This method is often used for testing hypertext links for validity, accessibility, and recent modification.
 
-So any HEAD request will invoke your action method, but the response content will not be sent to the client. You can of course specialize that by adding a custom route to respond to HEAD requests specifically in your routes file. So, for example:
+So any HEAD request will invoke your action method, but the response content will not be sent to the client. You can of course specialize it by adding a custom route to respond to HEAD requests with your routes file. For example:
 
 bc. GET     /orders/{id}         Orders.show
 HEAD    /orders/{id}         Orders.showHead
 
 h2. <a>Better support for application server deployment</a>
 
-We have tested the deployement of a play generated War archive on several application servers. You can check the current "compatibility matrix":deployment.
+We have tested the deployment of a play generated WAR archive on several application servers. You can check the current "compatibility matrix":deployment.
 
 h2. <a>A new command to generate the application JavaDoc</a>
 
-Now with you can generate the **JavaDoc** for your project with easily, using:
+Now with you can generate the **JavaDoc** for your project easily, using:
 
 bc. play javadoc 
 
-It will generate the doc for your project and the included modules.
+It generates the javadoc API documentation for your project and its modules.
 
 
