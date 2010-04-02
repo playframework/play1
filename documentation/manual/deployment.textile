@@ -11,13 +11,13 @@ The most popular deployment options are:
 
 h2. <a>Standalone Play! application</a>
 
-The simplest and the more robust way is to simply run play application in PROD mode without any container. You can use a frontal HTTP server like Lighttpd or Apache if you need more advanced HTTP features like virtual hosting.
+The simplest and the more robust way is to simply run your play application without any container. You can use a frontal HTTP server like Lighttpd or Apache if you need more advanced HTTP features like virtual hosting.
 
-The built-in HTTP server can serve thousand of HTTP requests par second so it will never be the bottleneck. Moreover it uses a more efficient threading model (where a servlet container uses 1 thread per request). Different "modules":http://playframework.org/modules allows you to use a different servers (Grizzly, Netty, etc...) as well.
+The built-in HTTP server can serve thousand of HTTP requests par second so it will never be the performance bottleneck. Moreover it uses a more efficient threading model (where a servlet container uses 1 thread per request). Different "modules":http://playframework.org/modules allow you to use different servers (Grizzly, Netty, etc...) as well.
 
-It supports long polling that allow to manage very long request (waiting for a long task to complete), and direct streaming a File objects (and now of any InputStream if you specify the Content-Length), without blocking the execution thread pool.
+Those servers support long polling and allow to manage very long requests (waiting for a long task to complete), and direct streaming of File objects (and any InputStream if you specify the Content-Length), without blocking the execution thread.
 
-Also you will have less problems running your application this way, as you will use the same environment that you used for the development process. A lot of bug can be discovered only when you deploy to a JEE application server (different home dir, classloader issues, libraries conflicts, etc...).
+You will have less problems running your application this way, as you will use the same environment that you used during the development process. A lot of bugs can be discovered only when you deploy to a JEE application server (different home dir, classloader issues, library conflicts, etc...).
 
 Please refer to the "'Put your application in production' page":production for more information.
 
@@ -28,7 +28,7 @@ Your Play! application can also run inside your favorite application server. Mos
 h3. Application server compatibility matrix
 
 || JBoss 4.2.x || JBoss 5.x || JBoss 6M2 || Glasshfish v3 || IBM Websphere 6.1 ||IBM Websphere 7 || Geronimo 2.x || Tomcat 6.x || Jetty 7.x || Resin 4.0.5 ||
-| ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  ✓ | ✓  |
+| ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  ✓ | ✓  |                                                                                                                                                            
 
 These application server are known to work with play 1.0.2; but feel free to report any other working deployment.
 
