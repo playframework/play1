@@ -60,4 +60,32 @@ bc. createQuery("SELECT * from Stuff WHERE type=" + theType;
 
 h2. <a name="started">Cross Site Request Forgery</a>
 
+The CSRF attack can be really problematic in web applications;
+
+bq. This attack method works by including malicious code or a link in a page that accesses a web application that the user is believed to have authenticated. If the session for that web application has not timed out, an attacker may execute unauthorized commands.
+
+To prevent this attack, the first thing to do is to use GET and POST methods appropriately. That means that only POST method should be used to change the state of the application.
+
+For POST requests the only way to secure critical actions properly is to issue an authenticity token. Play 1.0.2 now has a built-in helper to handle that:
+
+* a new checkAuthenticity()* method available in controllers, that check for a valid authenticity token in the request parameters and send a forbidden response if something is bad.
+* session.getAuthenticityToken()* generate an authenticity token only valid for the current session.
+* **#{authenticityToken /}** create an hidden input field that you can add to any form.
+
+So for example:
+
+bc. public static destroyMyAccount() {
+    checkAuthenticity();
+    ...
+}
+
+Will only work when called from a form including a proper authenticity token:
+
+bc. #{form @ destroyMyAccount()}
+    #{authenticityToken /}
+    <input type="submit" value="destroy my account">
+#{/form}
+
+You can of course add this as a before filter if you want to protect all actions of a hierarchy of controllers.
+
 "More on cross-site request forgery":http://en.wikipedia.org/wiki/Cross-site_request_forgery
