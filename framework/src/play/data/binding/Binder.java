@@ -145,6 +145,7 @@ public class Binder {
                     Matcher m = p.matcher(param);
                     if (m.matches()) {
                         String key = m.group(1);
+                        value = params.get(param);
                         Map<String, String[]> tP = new HashMap<String, String[]>();
                         tP.put("key", new String[]{key});
                         Object oKey = bindInternal("key", keyClass, keyClass, annotations, tP, "", value);
