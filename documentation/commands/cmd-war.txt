@@ -23,5 +23,5 @@
 ~ --zip:
 ~ By default, the script create an exploded WAR. If you want a zipped archive, specify the --zip option.
 ~
-~ --id={fwk_id}:
-~ Use this id for the bundled framework
+~ --%fwk_id:
+~ Use this id to run the application (override the default framework id)

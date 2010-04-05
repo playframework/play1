@@ -769,6 +769,7 @@ try:
 		replaceAll(os.path.join(application_path, 'build.xml'), r'%MODULE%', application_name)
 		replaceAll(os.path.join(application_path, 'conf/messages'), r'%MODULE%', application_name)
 		replaceAll(os.path.join(application_path, 'conf/routes'), r'%MODULE%', application_name)
+		replaceAll(os.path.join(application_path, 'commands.py'), r'%MODULE%', application_name)
 		replaceAll(os.path.join(application_path, 'conf/routes'), r'%MODULE_LOWERCASE%', string.lower(application_name))
 		os.mkdir(os.path.join(application_path, 'app/controllers/%s' % application_name))
 		os.mkdir(os.path.join(application_path, 'app/models/%s' % application_name))

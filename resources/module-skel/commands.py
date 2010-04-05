@@ -2,9 +2,9 @@
 
 # Example below:
 # ~~~~
-if play_command == 'hello':
+if play_command == '%MODULE%:hello':
 	try:
-		print "~ Hello"
+		print "~ Hello from %MODULE%"
 		sys.exit(0)
 				
 	except getopt.GetoptError, err:
