@@ -48,4 +48,4 @@ h2. <a>Quality is in the details</a>
 
 In the Play! framework, much of the quality turns out to be in the details: they may be small things individually, rather than big important features, but they add up to result in a more comfortable and more productive development experience. The warm feeling you get when building something with Play! is the absence of the frustration that usually results from fighting the framework.
 
-p(note). By "Pether Hilton":http://hilton.org.uk/about_ph.phtml, originally published on the "Lunatech Research":http://www.lunatech-research.com/archives/2010/03/15/play-framework-usability blog.
+p(note). By "Peter Hilton":http://hilton.org.uk/about_ph.phtml, originally published on the "Lunatech Research":http://www.lunatech-research.com/archives/2010/03/15/play-framework-usability blog.
