@@ -482,7 +482,7 @@ public class JPASupport implements Serializable {
         if ((this == other)) {
             return true;
         }
-        if (!(this.getClass().equals(other.getClass()))) {
+        if (!this.getClass().isAssignableFrom(other.getClass())) {
             return false;
         }
         if (this.getEntityId() == null) {
