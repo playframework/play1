@@ -53,10 +53,13 @@ def isParentOf(path1, path2):
 
 def getWithModules(args, env):
     withModules = []
-    optlist, newargs = getopt.getopt(args, '', ['with=', 'name='])
-    for o, a in optlist:
-        if o in ('--with='):
-            withModules = a.split(',')
+    try:
+        optlist, newargs = getopt.getopt(args, '', ['with='])
+        for o, a in optlist:
+            if o in ('--with='):
+                withModules = a.split(',')
+    except getopt.GetoptError:
+        pass # Other argument that --with= has been passed (which is OK)
     md = []
     for m in withModules:
         dirname = None
