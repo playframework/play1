@@ -72,11 +72,10 @@ try:
     for a in remaining_args:
         if a.find('--%') == 0:
             play_env["id"] = a[3:]
-    
+
     if play_command == 'test' or play_command == 'auto-test':
         play_env["id"] = 'test'
 
-    
     if play_env["id"] is not '':
         print "~ framework ID is %s" % play_env["id"]
     print "~"
@@ -87,20 +86,24 @@ try:
 
     cmdloader = CommandLoader(play_env["basedir"])
 
-    # Module command ?
-#    for module in app.modules():
-#        commands = os.path.join(module, 'commands.py')
-#        if os.path.exists(commands):
-#            execfile(commands)
+    # Load module commands
+    if play_app:
+        for module in play_app.modules():
+            cmdloader.load_play_module(module)
+    for module in getWithModules(remaining_args, play_env):
+        cmdloader.load_play_module(module)
 
     if play_command in cmdloader.commands:
-        cmdloader.commands[play_command].execute(
-            command=play_command,
-            app=play_app,
-            args=remaining_args,
-            env=play_env)
+        for name in cmdloader.modules:
+            module = cmdloader.modules[name]
+            if 'before' in dir(module):
+                module.before(command=play_command, app=play_app, args=remaining_args, env=play_env)
+        cmdloader.commands[play_command].execute(command=play_command, app=play_app, args=remaining_args, env=play_env)
+        for name in cmdloader.modules:
+            module = cmdloader.modules[name]
+            if 'after' in dir(module):
+                module.after(command=play_command, app=play_app, args=remaining_args, env=play_env)
         sys.exit(0)
-
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Invalid command
     print "~ Usage: play cmd [app_path] [--options]"

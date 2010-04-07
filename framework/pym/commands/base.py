@@ -51,7 +51,7 @@ def new(app, args, env):
         print "~ Oops. %s already exists" % app.path
         print "~"
         sys.exit(-1)
-    
+
     md = []
     for m in withModules:
         dirname = None
@@ -68,9 +68,9 @@ def new(app, args, env):
             print "~ Try to install it using 'play install %s'" % m
             print "~"
             sys.exit(-1)
-        
+
         md.append(dirname)
-        
+
     print "~ The new application will be created in %s" % os.path.normpath(app.path)
     if application_name is None:
         application_name = raw_input("~ What is the application name? ")
@@ -79,20 +79,20 @@ def new(app, args, env):
     replaceAll(os.path.join(app.path, 'conf/application.conf'), r'%APPLICATION_NAME%', application_name)
     replaceAll(os.path.join(app.path, 'conf/application.conf'), r'%SECRET_KEY%', secretKey())
     print "~"
-    
+
     for m in md:
         mn = m
         if mn.find('-') > 0:
             mn = mn[:mn.find('-')]
         replaceAll(os.path.join(app.path, 'conf/application.conf'), r'# ---- MODULES ----', '# ---- MODULES ----\nmodule.%s=${play.path}/modules/%s' % (mn, m) )
-    
+
     # modules
     app.check()
     for module in app.modules():
         commands = os.path.join(module, 'commands.py')
         if os.path.exists(commands):
             execfile(commands)
-    
+
     print "~ OK, the application is created."
     print "~ Start it with : play run %s" % sys.argv[2]
     print "~ Have fun!"

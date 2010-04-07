@@ -3,6 +3,7 @@ import os, os.path
 import re
 import random
 import fileinput
+import getopt
 
 
 def replaceAll(file, searchExp, replaceExp):
@@ -49,3 +50,23 @@ def isParentOf(path1, path2):
         return False
     if (path1 == path2):
         return True
+
+def getWithModules(args, env):
+    withModules = []
+    optlist, newargs = getopt.getopt(args, '', ['with=', 'name='])
+    for o, a in optlist:
+        if o in ('--with='):
+            withModules = a.split(',')
+    md = []
+    for m in withModules:
+        dirname = None
+        candidate = os.path.join(env["basedir"], 'modules/%s' % m)
+        if os.path.exists(candidate) and os.path.isdir(candidate):
+            dirname = candidate
+        else:
+            for f in os.listdir(os.path.join(env["basedir"], 'modules')):
+                if os.path.isdir(os.path.join(env["basedir"], 'modules/%s' % f)) and f.find('%s-' % m) == 0:
+                    dirname = os.path.join(env["basedir"], 'modules/%s' % f)
+                    break
+        md.append(dirname)
+    return md

@@ -5,6 +5,7 @@ class CommandLoader:
     def __init__(self, play_path):
         self.path = os.path.join(play_path, 'framework', 'pym', 'commands')
         self.commands = {}
+        self.modules = {}
         self.load_core()
 
     def load_core(self):
@@ -14,18 +15,21 @@ class CommandLoader:
                 mod = load_python_module(name, self.path)
                 self._load_cmd_from(mod)
 
-    def load_play_module(self, name, fullpath):
-        mod = load_python_module(name, fullpath)
+    def load_play_module(self, modname):
+        mod = load_python_module("commands", modname)
         self._load_cmd_from(mod)
 
     def _load_cmd_from(self, mod):
         try:
             for name in mod.COMMANDS:
                 if name in self.commands:
-                    print "Warning: conflict on command " + name
+                    print "~ Warning: conflict on command " + name
                 self.commands[name] = mod
-        except:
-            print "Warning: error loading command " + name
+            if 'MODULE' in dir(mod):
+                self.modules[mod.MODULE] = mod
+        except Exception as ex:
+            print "~ Warning: error loading command " + name
+            print ex
 
 def load_python_module(name, location):
     mod_desc = imp.find_module(name, [location])

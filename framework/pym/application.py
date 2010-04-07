@@ -173,7 +173,7 @@ class PlayApplication():
             print 'JPDA port %s is already used. Will try to use any free port for debugging' % self.jpda_port
             self.jpda_port = 0
 
-    def java_cmd(self, java_args, className='play.server.Server'):
+    def java_cmd(self, java_args, cp_args=None, className='play.server.Server'):
         memory_in_args=False
         for arg in java_args:
             if arg.startswith('-Xm'):
@@ -182,6 +182,8 @@ class PlayApplication():
             memory = self.readConf('jvm.memory')
             if memory:
                 java_args = java_args + memory.split(' ')
+        if cp_args is None:
+            cp_args = self.cp_args()
 
         jpda_port = self.readConf('jpda.port')
 
@@ -198,6 +200,6 @@ class PlayApplication():
                 java_args.append('-Djava.security.manager')
                 java_args.append('-Djava.security.policy==%s' % policyFile)
 
-        java_cmd = [self.java_path(), '-javaagent:%s' % self.agent_path()] + java_args + ['-classpath', self.cp_args(), '-Dapplication.path=%s' % self.path, '-Dplay.id=%s' % self.play_env["id"], className]
+        java_cmd = [self.java_path(), '-javaagent:%s' % self.agent_path()] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % self.path, '-Dplay.id=%s' % self.play_env["id"], className]
         return java_cmd
 
