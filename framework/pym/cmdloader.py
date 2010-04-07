@@ -16,8 +16,11 @@ class CommandLoader:
                 self._load_cmd_from(mod)
 
     def load_play_module(self, modname):
-        mod = load_python_module("commands", modname)
-        self._load_cmd_from(mod)
+        try:
+            mod = load_python_module("commands", modname)
+            self._load_cmd_from(mod)
+        except:
+            pass # No command to load in this module
 
     def _load_cmd_from(self, mod):
         try:
