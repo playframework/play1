@@ -195,6 +195,8 @@ def autotest(app, args):
                 break
     # Launch the browser
     http_port = app.readConf('http.port')
+    if not http_port:
+        http_port = 9000
     print "~"
     print "~ Loading the test runner at %s ..." % ('http://localhost:%s/@tests' % http_port)
     try:
@@ -239,3 +241,21 @@ def id(play_env):
         print "~"
         if os.path.exists(play_env["id_file"]):
             os.remove(play_env["id_file"])
+
+# ~~~~~~~~~ UTILS
+
+def kill(pid):
+    if os.name == 'nt':
+        import ctypes
+        handle = ctypes.windll.kernel32.OpenProcess(1, False, int(pid))
+        if not ctypes.windll.kernel32.TerminateProcess(handle, 0):
+            print "~ Cannot kill the process with pid %s (ERROR %s)" % (pid, ctypes.windll.kernel32.GetLastError())
+            print "~ "
+            sys.exit(-1)
+    else:
+        try:
+            os.kill(int(pid), 15)
+        except OSError:
+            print "~ Play was not running (Process id %s not found)" % pid
+            print "~"
+            sys.exit(-1)

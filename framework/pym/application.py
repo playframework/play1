@@ -103,6 +103,7 @@ class PlayApplication():
             if play_env["id"] == 'test':
                 modules.append(os.path.normpath(os.path.join(play_env["basedir"], 'modules/testrunner')))
 
+
     # ~~~~~~~~~~~~~~~~~~~~~~ JAVA
 
     def getClasspath(self):
