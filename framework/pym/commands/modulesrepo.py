@@ -157,6 +157,7 @@ def new(app, args, play_env):
     shutil.copytree(os.path.join(play_env["basedir"], 'resources/module-skel'), app.path)
     # check_application()
     replaceAll(os.path.join(app.path, 'build.xml'), r'%MODULE%', application_name)
+    replaceAll(os.path.join(app.path, 'commands.py'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'conf/messages'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE_LOWERCASE%', string.lower(application_name))
