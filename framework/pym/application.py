@@ -96,8 +96,9 @@ class PlayApplication():
         if play_app is not None:
             try:
                 modules = play_app.modules()
-            except ModuleNotFound as e:
-                m = e.value
+            except ModuleNotFound, e:
+                print 'Module not found %s' % e
+                sys.exit(-1)
 
             if play_env["id"] == 'test':
                 modules.append(os.path.normpath(os.path.join(play_env["basedir"], 'modules/testrunner')))

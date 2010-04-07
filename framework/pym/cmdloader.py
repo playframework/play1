@@ -30,9 +30,8 @@ class CommandLoader:
                 self.commands[name] = mod
             if 'MODULE' in dir(mod):
                 self.modules[mod.MODULE] = mod
-        except Exception as ex:
+        except Exception:
             print "~ Warning: error loading command " + name
-            print ex
 
 def load_python_module(name, location):
     mod_desc = imp.find_module(name, [location])
