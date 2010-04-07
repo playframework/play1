@@ -25,6 +25,8 @@ public class Job extends Model {
     public String detail;
     
     @Lob
+    // Rename to avoir mysql being lost
+    @Column(name = "jobboard_index")
     public String index;
     
     @ManyToOne

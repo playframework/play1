@@ -151,28 +151,22 @@ public class Play {
 
         // Guess the framework path
         try {
+
             URL versionUrl = Play.class.getResource("/play/version");
             // Read the content of the file
             Play.version = new LineNumberReader(new InputStreamReader(versionUrl.openStream())).readLine();
+
+            // This is used only by the embedded server (Mina, Netty, Jetty etc)
             URI uri = new URI(versionUrl.toString().replace(" ", "%20"));
-            if (uri.getScheme().equals("jar")) {
-                String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
-                frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
-            } else if (uri.getScheme().equals("file")) {
-                frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
-            } else if (uri.getScheme().equals("vfszip") || uri.getScheme().equals("vfsfile")) {
-                String file = uri.toURL().toExternalForm();
-                file = file.replaceAll("vfszip://", "file:///");
-                file = file.replaceAll("vfsfile://", "file:///");
-                //vfszip vfszip:/Applications/Servers/jboss-5.1.0.GA/server/default/deploy/ldas-play.war/WEB-INF/lib/play.jar/play/version
-                frameworkPath = new File(file).getParentFile().getParentFile().getParentFile().getParentFile();
-            } else if (uri.getScheme().equals("wsjar")) {
-                String file = uri.toURL().toExternalForm();
-                file = file.substring("wsjar:file:".length(), file.lastIndexOf("!"));
-                //wsjar:file:/opt/IBM/WebSphere/profile/installedApps/node/ldas-play_war.ear/ldas-play.war/WEB-INF/lib/play.jar!/play/version
-                frameworkPath = new File(file).getParentFile().getParentFile();
-            } else {
-                throw new UnexpectedException("Cannot find the Play! framework - trying with uri: " + uri + " scheme " + uri.getScheme());
+            if (frameworkPath == null || !frameworkPath.exists()) {
+                if (uri.getScheme().equals("jar")) {
+                    String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
+                    frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
+                } else if (uri.getScheme().equals("file")) {
+                    frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
+                } else {
+                    throw new UnexpectedException("Cannot find the Play! framework - trying with uri: " + uri + " scheme " + uri.getScheme());
+                }
             }
         } catch (Exception e) {
             throw new UnexpectedException("Where is the framework ?", e);
@@ -307,6 +301,18 @@ public class Play {
             matcher.appendTail(newValue);
             configuration.setProperty(key.toString(), newValue.toString());
         }
+        // Include
+        Map toInclude = new HashMap();
+        for (Object key : configuration.keySet()) {
+            if (key.toString().startsWith("@include.")) {
+                try {
+                    toInclude.putAll(IO.readUtf8Properties(appRoot.child("conf/" + configuration.getProperty(key.toString())).inputstream()));
+                } catch (Exception ex) {
+                    Logger.warn("Missing include: %s", key);
+                }
+            }
+        }
+        configuration.putAll(toInclude);
         // Plugins
         for (PlayPlugin plugin : plugins) {
             plugin.onConfigurationRead();

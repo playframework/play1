@@ -200,6 +200,20 @@ bc. <ul>
 #{/list}
 </ul>
 
+The **items** parameter is optional and can be replaced by the default **arg** argument.
+
+So you can rewrite:
+
+bc. #{list items:users, as:'user'}
+    <li>${user}</li>
+#{/list}
+
+to:
+
+bc. #{list users, as:'user'}
+    <li>${user}</li>
+#{/list}
+
 **for** loops are easy to create using Groovy **range** object :
 
 bc. #{list items:0..10, as:'i'}
@@ -210,6 +224,11 @@ bc. #{list items:'a'..'z', as:'letter'}
     ${letter} ${letter_isLast ? '' : '|' }
 #{/list}
 
+The **as** parameter is optional as well. It uses **_** as default variable name:
+
+bc. #{list users}
+    <li>${_}</li>
+#{/list}
 
 h2. <a>set</a>
 

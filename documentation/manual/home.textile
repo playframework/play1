@@ -4,13 +4,13 @@ Welcome to the play framework documentation. This documentation is intended for 
 
 p(note). The 1.1 branch is in active development.
 
+<div id="searchBox"><form action="http://www.google.com/cse" id="cse-search-box"><div><input type="hidden" name="cx" value="002614023023983855063:jn1mu_7bof0" /><input type="hidden" name="ie" value="UTF-8" /><input type="text" name="q" size="31" style="font-size:14px"/> <input type="submit" name="sa" value="Search with google" style="font-size:14px"/></div></form><script type="text/javascript" src="http://www.google.com/coop/cse/brand?form=cse-search-box&lang=en"></script></div>
+
 h2. <a name="a">Hot stuff</a>
 
 We will describe here the new features progress
 
 # "Now the future - supporting Scala":http://www.playframework.org/modules/scala
-
-<div id="searchBox"><form action="http://www.google.com/cse" id="cse-search-box"><div><input type="hidden" name="cx" value="002614023023983855063:jn1mu_7bof0" /><input type="hidden" name="ie" value="UTF-8" /><input type="text" name="q" size="31" style="font-size:14px"/> <input type="submit" name="sa" value="Search with google" style="font-size:14px"/></div></form><script type="text/javascript" src="http://www.google.com/coop/cse/brand?form=cse-search-box&lang=en"></script></div>
 
 h2. <a name="started">Getting started</a>
 
@@ -84,6 +84,11 @@ Everything you need to know about Play.
 ## "Running the tests":test#running
 ## "Fixtures":test#fixtures
 ## "Continuous integration":test#continus
+# "Deployment options":deployment
+## "Standalone Play application":deployment#aStandalonePlayapplicationa
+## "Running on a JEE application servers":deployment#aApplicationserversa
+## "Google Application Engine":deployment#aGoogleApplicationEngineGAEa
+## "Stax cloud hosting platform":deployment#aStaxcloudhostingplatforma"
 
 
 h2. <a name="cook">Cookbook</a>
@@ -91,6 +96,7 @@ h2. <a name="cook">Cookbook</a>
 Tips about everything and anything.
 
 # "Using play modules, and the modules repository":modules
+# "Security Guide":security
 # "More about the JPA support":jpa
 # "Using data validation":validation
 # "How to configure logs":logs
@@ -115,4 +121,5 @@ h2. <a name="versionnotes">Version notes</a>
 
 New versions of play include certain changes.
 
+# "Play 1.0.2":releasenotes-1.0.2
 # "Play 1.0.1":releasenotes-1.0.1

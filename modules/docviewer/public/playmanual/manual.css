@@ -371,3 +371,30 @@ pre.description {
     border-top: 1px solid #F3B438;
     border-bottom: 1px solid #F3B438;
 }
+
+table {
+    margin-top: 25px;
+    font-size: 12px;
+    border: 1px solid silver;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+    border-collapse: true;
+}
+
+td, th {
+    padding: 10px;
+       margin-left: auto;
+    margin-right: auto;
+    border: 1px solid silver;
+    text-align: center;
+}
+
+th {
+    font-weight: bold;
+}
+
+
+tr {
+    margin: 5px;
+}

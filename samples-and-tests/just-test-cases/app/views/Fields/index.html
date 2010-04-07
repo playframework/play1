@@ -1,0 +1,9 @@
+#{form @post()}
+    
+    #{field 'project.name'}
+        <input id="${field.id}" name="${field.name}" value="${field.value}"> <span class="error" style="color:#c00">${field.error}</span>
+    #{/field}
+    
+    <input type="submit" id="go">
+    
+#{/form}

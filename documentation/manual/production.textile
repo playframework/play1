@@ -106,6 +106,61 @@ bc. LoadModule proxy_module modules/mod_proxy.so
 </VirtualHost>
 
 
+h3. Apache as a front proxy to allow transparent upgrade of your application
+
+The basic idea is to run 2 Play! instances of your web application and let the front end proxy load balance them. In case one is not available, it will forward all the requests to the available one.
+
+Let's start our the same Play! application two times: one on port 9999 and one on port 9998.
+
+Copy the application 2 times and edit the application.conf in the conf directory to change the port numbers.
+
+For each web application directory:
+
+bc. play start mysuperwebapp
+
+Now, let's configure our Apache web server to have a load balancer.
+
+In Apache, I have the following configuration:
+
+bc. <VirtualHost mysuperwebapp.com:80>
+  ServerName mysuperwebapp.com
+  <Location /balancer-manager>
+    SetHandler balancer-manager
+    Order Deny,Allow
+    Deny from all
+    Allow from .mysuperwebapp.com
+  </Location>
+  <Proxy balancer://mycluster>
+    BalancerMember http://localhost:9999
+    BalancerMember http://localhost:9998 status=+H
+  </Proxy>
+  <Proxy *>
+    Order Allow,Deny
+    Allow From All
+  </Proxy>
+  ProxyPreserveHost On
+  ProxyPass /balancer-manager !
+  ProxyPass / balancer://mycluster/
+  ProxyPassReverse / http://localhost:9999/
+  ProxyPassReverse / http://localhost:9998/
+</VirtualHost>
+
+The important part is balancer://mycluster. This declares a load balancer. The +H option means that the second Play! application is on stand-by. But you can also instructs to load balance.
+
+Everytime you want to upgrade mysuperwebapp, here is what you need to do:
+
+bc. play stop mysuperwebapp1
+
+The load-balancer then forward everything to mysuperwebapp2. In the meantime update mysuperwebapp1. Once you are done:
+
+bc. play start mysuperwebapp1
+
+You can now safely update mysuperwebapp2.
+
+Apache also provides a way to view the status of your cluster. Simply point your browser to /balancer-manager to view the current status of your clusters.
+
+Because Play! is completely stateless you don't have to manage sessions between the 2 clusters. You can actually easily scale to more than 2 play! instances.
+
 h3. Advanced proxy settings
 
 When using a HTTP frontal server, requests addresses are seen as coming from the http server. In a usual setup, where you both have the play app and the proxy running on the same machine, the play app will see the requests coming from 127.0.0.1.

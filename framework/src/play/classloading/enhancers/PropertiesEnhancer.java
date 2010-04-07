@@ -221,8 +221,8 @@ public class PropertiesEnhancer extends Enhancer {
         }
 
         public static void invokeWriteProperty(Object o, String property, Class valueType, Object value, String targetType, String invocationPoint) throws Throwable {
-            if (o == null) {
-                throw new NullPointerException("Ecriture de la propriété " + property + " sur un objet null de type " + targetType + " (" + invocationPoint + ")");
+	    if (o == null) { 
+               throw new NullPointerException("Attempting to write a property  " + property + " on a null object of type " + targetType + " (" + invocationPoint + ")");
             }
             String setter = "set" + property.substring(0, 1).toUpperCase() + property.substring(1);
             try {

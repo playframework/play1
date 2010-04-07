@@ -60,7 +60,7 @@ public Post(User author, String title, String content) {
 }
 ...
 
-p(note). Note that we use a **TreeSet** here in order to keep the tag list in a predictible order (alphabetical order in fact, because of our previous compareTo implementation).
+p(note). Note that we use a **TreeSet** here in order to keep the tag list in a predictable order (alphabetical order in fact, because of our previous compareTo implementation).
 
 We will keep this relationship unidirectional.
 
@@ -123,7 +123,7 @@ I give you the needed JPQL query because you will likely use it in several web p
 bc. ...
 public static List<Post> findTaggedWith(String... tags) {
     return Post.find(
-        "select distinct p.id from Post p join p.tags as t where t.name in (:tags) group by p.id having count(t.id) = :size"
+            "select distinct p from Post p join p.tags as t where t.name in (:tags) group by p.id, p.author, p.title, p.content,p.postedAt having count(t.id) = :size"
     ).bind("tags", tags).bind("size", tags.length).fetch();
 }
 ...

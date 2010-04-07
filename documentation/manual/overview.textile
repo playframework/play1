@@ -112,8 +112,10 @@ The play framework was initially inspired by our own Java applications. It has a
 * Integrated Cache support, with easy use of the distributed memcached system if needed.
 * Straightforward Web services consumption either in JSON or XML (we talk *real* web services here; not the SOAP stuff).
 * OpenID support for distributed authentication.
+* Your web application ready to be deployed anywhere (Application server, GAE, Cloud, etc...)
 * Image manipulation API.
 * ...
+
 
 The modular architecture lets you combine a web application with many others. Thanks to "application modules":modules, you can reuse your java code, templates and static resources (such as Javascript and CSS files) in a simple way.
 

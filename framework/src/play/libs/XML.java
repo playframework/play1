@@ -50,6 +50,6 @@ public class XML {
             Logger.warn("Parsing error when building Document object from xml file '" + file + "'.", e);
         }
         return null;
-
     }
+    
 }

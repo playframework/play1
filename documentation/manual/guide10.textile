@@ -6,7 +6,7 @@ Of course we've already written unit tests in order to test all the yabe model l
 
 h2. <a>Testing the controller part</a>
 
-Play gives you a way to test directly the controller part of the application using JUnit. We call these tests **'Functional tests'**. This is because we want to test complete functionalities of the web application.
+Play gives you a way to test directly the controller part of the application using JUnit. We call these tests **'Functional tests'**. This is because we want to test the complete functionality of the web application.
 
 Basically a functional test calls the play **ActionInvoker** directly, simulating an HTTP request. So we give an HTTP method, an URI and HTTP parameters. Play then routes the request, invokes the corresponding action and sends you back the filled response. You can then analyze it to check that the response content is like you expected.
 

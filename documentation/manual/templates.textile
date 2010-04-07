@@ -76,6 +76,20 @@ bc. <h1>Client ${client.name}</h1>
     #{/list}
 </ul>
 
+All dynamic expressions are escaped by the template engine to avoid XSS security issues in your application. So the **title** variable containing **==&lt;h1>Title&lt;/h1>==** is now escaped:
+
+bc. ${title} --> &lt;h1&gt;Title&lt;/h1&gt;
+
+If you really want to display it in an unescaped way, you need to explicitely call the **raw()** method:
+
+bc. ${title.raw()} --> <h1>Title</h1>
+
+Also, if you want to display a large part of raw HTML, you can use the **#{verbatim /}** tag:
+
+bc. #{verbatim}
+    ${title} --> <h1>Title</h1>
+#{/verbatim}
+
 h3. Actions : @{…} or @@{…}
 
 You can use the Router to (reverse) generate a URL corresponding to a specified route. From a template you can use the special **@{…}** syntax to do that.

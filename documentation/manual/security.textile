@@ -1,0 +1,90 @@
+h1. Security Guide
+
+Play Framework is designed with security in mind - but it is impossible to prevent developers using the framework to mess up and open holes. The guide describes the common security issues in web applications and how avoid them in Play applications.
+
+h2. <a name="started">Sessions</a>
+
+Often you need to keep information associated to a user, in particular the logged in status. Without a session, the user would need to pass credential at each request.
+
+That's what sessions are for: a set of cookies stored in the user browser that identify him to the website, and provide other information your web application may choose to store there rather than in the data layer; for example the language.
+
+h3. Keep your secret... Secret.
+
+The session is a hash of key/values, signed but not encrypted. That means that as long as your secret is safe, it is not possible for third party to forge sessions.
+
+The secret is stored in conf/application.conf. It is very important to keep it for you: do not commit it in a public repository, and when you install an application written by someone else change the secret key to your own. You can do that with the command "play secret".
+
+h3. Don't store critical data
+
+However, since it is not encrypted, you should not store critical data in the session. It can be seen by looking at the user cookie, by sniffing the connection on a local network or over wifi.
+
+The session is stored in a cookie, and cookies are limited to 4K. In addition to this limit, only strings can be stored.
+
+h2. <a name="started">Cross Site Scripting</a>
+
+Cross-site scripting is one of the most common vulnerabilities in web applications. It consists in injecting malicious Javascript into webpage using forms that your application provides.
+
+Let's say you're writing a blog, and anyone can add a comment. If you blindly include what commenters have written into your HTML page, you're opening your site to attacks. It can be:
+* Show a popup to your visitors
+* Redirect your visitors to a site controlled by the attacker
+* Steal information supposed to be visible only to the current user, and send it back to the attacker's site
+
+Consequently it is very important to be protected from those attacks.
+
+Since the version 1.0.1, Play's template engine automatically escapes strings. For that, you need to ensure escapeInTemplates is enabled in your application.conf. It is by default in newly created applications. If your application was created prior to 1.0.1 release, it may not be enabled.
+
+bc. future.escapeInTemplates=true
+
+It is strongly recommended to enable this option. When you really need to insert unescaped HTML in your templates, you can do so using the raw() method on the string. But if the string comes from a user input, you need to make sure it is sanitized first.
+
+When sanitizing user inputs, always prefer whitelisting (only allow a list of safe tags) to blacklisting (forbid a list of unsafe tags and allow all the rest).
+
+"More on cross-site scripting":http://en.wikipedia.org/wiki/Cross-site_scripting
+
+h2. <a name="started">SQL Injection</a>
+
+SQL injection is an exploit consisting in using user input to execute an SQL query that was not intended by the developer. This can be used to destroy data, or to get access to data that shouldn't be visible to the current user.
+
+!http://imgs.xkcd.com/comics/exploits_of_a_mom.png!
+
+When you are using high level "find" methods, you should be covered against SQL injection. When you build your own queries manually, you need to be careful not to concatenate strings with + but by using "?" marks.
+
+This is good:
+
+bc. createQuery("SELECT * from Stuff WHERE type= ?1").setParameter(1, theType);
+
+This is NOT:
+
+bc. createQuery("SELECT * from Stuff WHERE type=" + theType;
+
+h2. <a name="started">Cross Site Request Forgery</a>
+
+The CSRF attack can be really problematic in web applications;
+
+bq. This attack method works by including malicious code or a link in a page that accesses a web application that the user is believed to have authenticated. If the session for that web application has not timed out, an attacker may execute unauthorized commands.
+
+To prevent this attack, the first thing to do is to use GET and POST methods appropriately. That means that only POST method should be used to change the state of the application.
+
+For POST requests the only way to secure critical actions properly is to issue an authenticity token. Play 1.0.2 now has a built-in helper to handle that:
+
+* a new checkAuthenticity()* method available in controllers, that checks for a valid authenticity token in the request parameters and send a forbidden response if something is bad.
+* session.getAuthenticityToken()* generates an authenticity token only valid for the current session.
+* **#{authenticityToken /}** creates an hidden input field that you can add to any form.
+
+So for example:
+
+bc. public static destroyMyAccount() {
+    checkAuthenticity();
+    ...
+}
+
+Will only work when called from a form including a proper authenticity token:
+
+bc. #{form @ destroyMyAccount()}
+    #{authenticityToken /}
+    <input type="submit" value="destroy my account">
+#{/form}
+
+You can of course add this as a before filter if you want to protect all actions of a hierarchy of controllers.
+
+"More on cross-site request forgery":http://en.wikipedia.org/wiki/Cross-site_request_forgery

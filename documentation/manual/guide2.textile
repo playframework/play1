@@ -94,7 +94,7 @@ public void createAndRetrieveUser() {
     new User("bob@gmail.com", "secret", "Bob").save();
     
     // Retrieve the user with email address bob@gmail.com
-    User bob = User.find("byEmail", "bob@gmail.com").one();
+    User bob = User.find("byEmail", "bob@gmail.com").first();
     
     // Test 
     assertNotNull(bob);

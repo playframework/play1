@@ -175,6 +175,7 @@ public class Fixtures {
                                     }
                                 }
                             }
+
                         }
                         model._save();
                         while (!cType.equals(Object.class)) {

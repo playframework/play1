@@ -1,9 +1,0 @@
-#{field 'object.' + _name}
-	<label for="${field.id}">
-		&{_name}
-	</label>
-    ${_value?.escape()?.raw()}
-	#{ifError field.name}
-		<span class="error">${field.error}</span>
-	#{/ifError}
-#{/field}

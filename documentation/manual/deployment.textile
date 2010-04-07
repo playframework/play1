@@ -1,0 +1,79 @@
+h1. Deployment options
+
+Play! applications can be deployed virtually anywhere: inside servlet container, as standalone server, Google Application Engine, Stack, a Cloud, etc...
+
+The most popular deployment options are:
+
+# "Standalone Play application":deployment#aStandalonePlayapplicationa
+# "Application servers":deployment#aApplicationserversa
+# "Google Application Engine":deployment#aGoogleApplicationEngineGAEa
+# "Stax cloud hosting platform":deployment#aStaxcloudhostingplatforma
+
+h2. <a>Standalone Play! application</a>
+
+The simplest and the more robust way is to simply run your play application without any container. You can use a frontal HTTP server like Lighttpd or Apache if you need more advanced HTTP features like virtual hosting.
+
+The built-in HTTP server can serve thousand of HTTP requests par second so it will never be the performance bottleneck. Moreover it uses a more efficient threading model (where a servlet container uses 1 thread per request). Different "modules":http://playframework.org/modules allow you to use different servers (Grizzly, Netty, etc...) as well.
+
+Those servers support long polling and allow to manage very long requests (waiting for a long task to complete), and direct streaming of File objects (and any InputStream if you specify the Content-Length), without blocking the execution thread.
+
+You will have less problems running your application this way, as you will use the same environment that you used during the development process. A lot of bugs can be discovered only when you deploy to a JEE application server (different home dir, classloader issues, library conflicts, etc...).
+
+Please refer to the "'Put your application in production' page":production for more information.
+
+h2. <a>Application servers</a>
+
+Your Play! application can also run inside your favorite application server. Most of the application servers are supported out of the box.
+
+h3. Application server compatibility matrix
+
+|| JBoss 4.2.x || JBoss 5.x || JBoss 6M2 || Glasshfish v3 || IBM Websphere 6.1 ||IBM Websphere 7 || Geronimo 2.x || Tomcat 6.x || Jetty 7.x || Resin 4.0.5 ||
+| ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  ✓ | ✓  |                                                                                                                                                            
+
+These application server are known to work with play 1.0.2; but feel free to report any other working deployment.
+
+h3. Deploying
+
+You need to package your application as a war file. This is easily done with the following command:
+
+bc. play war myapp -o myapp.war
+
+p(note). Please note that your application server must support deployment of exploded war files.
+
+You are now ready to deploy your application.
+
+It is advised to "isolate" your Play! application from the other applications to avoid version mismatch between the application libraries. This step is not standardize by the JEE / Servlet Container specification, it is therefore vendor specific.
+
+We recommend you refer to your application server manual in order to "isolate" your war. As an example below is how you isolate a war file in JBoss Application server. Note that this is an optional step:
+
+Insert the following content (or create the file) in your application war directory at myapp.war/WEB-INF/jboss-web.xml:
+
+bc. 
+<jboss-web>
+ <class-loading java2classloadingcompliance="false">
+ <loader-repository>
+ com.example:archive=unique-archive-name
+ <loader-repository-config>java2ParentDelegation=false</loader-repository-config>
+ </loader-repository>
+</class-loading>
+</jboss-web>
+
+Replace com.example:archive=unique-archive-name with whatever you wish as long as it is unique.            
+
+h2. <a>Google Application Engine (GAE)</a>
+
+A Play! application can very easily be deployed to the GAE. It is a matter of installing the relevant "GAE module.":http://playframework.org/modules/gae
+
+bc. play install gae
+
+Deploying to the Google Application Engine is again really easy:
+
+bc. play gae:deploy myapp
+
+Refer to the "module documentation":http://playframework.org/modules/gae-1.0.2/home for more information.
+
+h2. <a>Stax cloud hosting platform</a>
+
+Easy deployment to the "Stax cloud hosting platform":http://www.stax.net : again nothing easier. Install the stax module and deploy within seconds.
+
+Refer to the "module documentation":http://www.playframework.org/modules/stax-1.0.1/home for more information.

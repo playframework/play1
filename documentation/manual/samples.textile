@@ -8,6 +8,18 @@ The final application from the "play guide":guide1 tutorial.
 
 !images/yabe!
 
+h2. <a>Zencontact</a>
+
+A simple contact management application.
+
+!images/zencontact!
+
+h2. <a>Booking</a>
+
+A port of the well known 'booking' application from the JBoss seam framework.
+
+!images/booking!
+
 h2. <a>Forum</a>
 
 A simple forum application using JPA.
@@ -25,15 +37,3 @@ h2. <a>Chat</a>
 An HTTP based chat application. We use the asynchronous request model to be able to handle a lot of simultaneous connected users without resources waste.
 
 !images/chat!
-
-h2. <a>Stock watcher</a>
-
-Based on the default GWT tutorial, it shows how to use GWT within a play application.
-
-!images/stocks!
-
-h2. <a>My lists</a>
-
-A clone of the the well known 37Signals TadaList application built using the Google App Engine support. It uses Siena as persistence engine.
-
-!images/lists!

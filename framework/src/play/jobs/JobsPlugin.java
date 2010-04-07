@@ -135,6 +135,9 @@ public class JobsPlugin extends PlayPlugin {
                     Job job = (Job) clazz.newInstance();
                     scheduledJobs.add(job);
                     String value = ((Every) (job.getClass().getAnnotation(Every.class))).value();
+                    if (value.startsWith("cron.")) {
+                        value = Play.configuration.getProperty(value);
+                    }
                     executor.scheduleWithFixedDelay(job, Time.parseDuration(value), Time.parseDuration(value), TimeUnit.SECONDS);
                 } catch (InstantiationException ex) {
                     throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());

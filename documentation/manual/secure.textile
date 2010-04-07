@@ -35,13 +35,13 @@ This controller will be automatically protected with the default authentication 
 
 h2. <a>Customize the authentication mechanism</a>
 
-By default, the login page will accept any login/password. To customize it your application has to provide a **Security** provider. Just create a class in the **controllers** package that extends the **controllers.Secure.Security** class. Then you can override the **authentify(String username, String password)** method.
+By default, the login page will accept any login/password. To customize it your application has to provide a **Security** provider. Just create a class in the **controllers** package that extends the **controllers.Secure.Security** class. Then you can override the **authenticate(String username, String password)** method.
 
 bc. package controllers;
  
 public class Security extends Secure.Security {
     
-    static boolean authentify(String username, String password) {
+    static boolean authenticate(String username, String password) {
         User user = User.find("byEmail", username).first();
         return user != null && user.password.equals(password);
     }    

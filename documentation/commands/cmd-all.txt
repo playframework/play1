@@ -12,6 +12,7 @@
 ~ id             Define the framework ID
 ~ idealize       Create all IntelliJ Idea configuration files
 ~ install        Install a module
+~ javadoc        Generate your application javadoc
 ~ list-modules   List modules available from the central modules repository
 ~ modules        Display the computed modules list
 ~ netbeansify    Create all netbeans configuration files

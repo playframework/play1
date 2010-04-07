@@ -197,8 +197,10 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
             if (!tagArgs.matches("^[_a-zA-Z0-9]+\\s*:.*$")) {
                 tagArgs = "arg:" + tagArgs;
             }
-            tagArgs = tagArgs.replaceAll("[:]\\s*[@]", ":actionBridge.");
-            tagArgs = tagArgs.replaceAll("(\\s)[@]", "$1actionBridge.");
+            tagArgs = tagArgs.replaceAll("[:]\\s*[@]{2}", ":actionBridge._abs().");
+            tagArgs = tagArgs.replaceAll("(\\s)[@]{2}", "$1actionBridge._abs().");
+            tagArgs = tagArgs.replaceAll("[:]\\s*[@]{1}", ":actionBridge.");
+            tagArgs = tagArgs.replaceAll("(\\s)[@]{1}", "$1actionBridge.");
         } else {
             tagName = tagText;
             tagArgs = ":";
@@ -316,7 +318,6 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         tagIndex--;
         skipLineBreak = true;
     }
-    
 }
 
 

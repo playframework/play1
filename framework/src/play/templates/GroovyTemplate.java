@@ -362,10 +362,12 @@ public class GroovyTemplate extends Template {
 
             ExecutableTemplate template = null;
             String controller = null;
+            boolean absolute = false;
 
-            public ActionBridge(ExecutableTemplate template, String controllerPart) {
+            public ActionBridge(ExecutableTemplate template, String controllerPart, boolean absolute) {
                 this.template = template;
                 this.controller = controllerPart;
+                this.absolute = absolute;
             }
 
             public ActionBridge(ExecutableTemplate template) {
@@ -374,11 +376,15 @@ public class GroovyTemplate extends Template {
 
             @Override
             public Object getProperty(String property) {
-                return new ActionBridge(template, controller == null ? property : controller + "." + property);
+                return new ActionBridge(template, controller == null ? property : controller + "." + property, absolute);
+            }
+
+            public Object _abs() {
+                this.absolute = true;
+                return this;
             }
 
             @Override
-            @SuppressWarnings("unchecked")
             public Object invokeMethod(String name, Object param) {
                 try {
                     if (controller == null) {
@@ -398,10 +404,21 @@ public class GroovyTemplate extends Template {
                                 throw new NoRouteFoundException(action, null);
                             }
                             for (int i = 0; i < ((Object[]) param).length; i++) {
-                                Unbinder.unBind(r, ((Object[]) param)[i], i < names.length ? names[i] : "");
+                                if (((Object[]) param)[i] instanceof Router.ActionDefinition && ((Object[]) param)[i] != null) {
+                                    Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "");
+                                } else if (isSimpleParam(actionMethod.getParameterTypes()[i])) {
+                                    if (((Object[]) param)[i] != null) {
+                                        Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "");
+                                    }
+                                } else {
+                                    Unbinder.unBind(r, ((Object[]) param)[i], i < names.length ? names[i] : "");
+                                }
                             }
                         }
                         Router.ActionDefinition def = Router.reverse(action, r);
+                        if (absolute) {
+                            def.absolute();
+                        }
                         if (template.template.name.endsWith(".html") || template.template.name.endsWith(".xml")) {
                             def.url = def.url.replace("&", "&amp;");
                         }
@@ -417,5 +434,9 @@ public class GroovyTemplate extends Template {
                 }
             }
         }
+    }
+
+    static boolean isSimpleParam(Class type) {
+        return Number.class.isAssignableFrom(type) || type.equals(String.class) || type.isPrimitive();
     }
 }
