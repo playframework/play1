@@ -35,10 +35,6 @@ public abstract class DataParser {
     static {
         parsers.put("application/x-www-form-urlencoded", new UrlEncodedParser());
         parsers.put("multipart/form-data", new ApacheMultipartParser());
-        JsonParser jsonparser = new JsonParser();
-        // this is the official json mimetype as defined in RFC4627
-        parsers.put("application/json", jsonparser);
-        parsers.put("application/javascript", jsonparser);
     }
 
     public static void putMapEntry(Map<String, String[]> map, String name, String value) {

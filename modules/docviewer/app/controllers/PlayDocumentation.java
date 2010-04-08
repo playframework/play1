@@ -62,7 +62,7 @@ public class PlayDocumentation extends Controller {
     //
     
     static String toHTML(String textile) {
-        String html = new org.eclipse.mylyn.wikitext.core.parser.MarkupParser(new org.eclipse.mylyn.wikitext.textile.core.TextileLanguage()).parseToHtml(textile);
+        String html = new play.org.eclipse.mylyn.wikitext.core.parser.MarkupParser(new play.org.eclipse.mylyn.wikitext.textile.core.TextileLanguage()).parseToHtml(textile);
         html = html.substring(html.indexOf("<body>") + 6, html.lastIndexOf("</body>"));
         return html;
     }
