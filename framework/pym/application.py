@@ -1,6 +1,7 @@
 import sys
 import os, os.path
 import re
+import shutil
 import socket
 
 class ModuleNotFound(Exception):
@@ -103,6 +104,24 @@ class PlayApplication():
             if play_env["id"] == 'test':
                 modules.append(os.path.normpath(os.path.join(play_env["basedir"], 'modules/testrunner')))
 
+    def override(self, f, t):
+        fromFile = None
+        for module in self.modules():
+            pc = os.path.join(module, f)
+            if os.path.exists(pc): fromFile = pc
+        if not fromFile:
+            print "~ %s not found in any modules" % f
+            print "~ "
+            sys.exit(-1)
+        toFile = os.path.join(self.path, t)
+        if os.path.exists(toFile):
+            response = raw_input("~ Warning! %s already exists and will be overriden (y/n)? " % toFile)
+            if not response == 'y':
+                return
+        if not os.path.exists(os.path.dirname(toFile)):
+            os.makedirs(os.path.dirname(toFile))
+        shutil.copyfile(fromFile, toFile)
+        print "~ Copied %s to %s " % (fromFile, toFile)
 
     # ~~~~~~~~~~~~~~~~~~~~~~ JAVA
 
