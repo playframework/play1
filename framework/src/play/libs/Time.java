@@ -862,7 +862,7 @@ public class Time {
             return buf.toString();
         }
 
-        protected String getExpressionSetSummary(java.util.ArrayList list) {
+        protected String getExpressionSetSummary(java.util.ArrayList<Integer> list) {
 
             if (list.contains(NO_SPEC)) {
                 return "?";
@@ -873,10 +873,10 @@ public class Time {
 
             StringBuffer buf = new StringBuffer();
 
-            Iterator itr = list.iterator();
+            Iterator<Integer> itr = list.iterator();
             boolean first = true;
             while (itr.hasNext()) {
-                Integer iVal = (Integer) itr.next();
+                Integer iVal = itr.next();
                 String val = iVal.toString();
                 if (!first) {
                     buf.append(",");

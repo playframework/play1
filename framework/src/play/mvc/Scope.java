@@ -1,6 +1,5 @@
 package play.mvc;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -9,7 +8,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
 import play.Logger;
 import play.Play;
 import play.data.binding.Binder;
@@ -325,6 +323,7 @@ public class Scope {
             }
         }
 
+        @SuppressWarnings("unchecked")
         public <T> T get(Annotation[] annotations, String key, Class<T> type) {
             try {
                 return (T) Binder.directBind(annotations, get(key), type);

@@ -85,7 +85,6 @@ public class JPQL {
         return ((JPASupport) o).edit(name, params.all());
     }
 
-    @SuppressWarnings("unused")
     public String createFindByQuery(String entityName, String entityClass, String query, Object... params) {
         if (query == null || query.trim().length() == 0) {
             return "from " + entityName;
@@ -111,7 +110,6 @@ public class JPQL {
         return "from " + entityName + " where " + query;
     }
 
-    @SuppressWarnings("unused")
     public String createDeleteQuery(String entityName, String entityClass, String query, Object... params) {
         if (query == null) {
             return "delete from " + entityName;
@@ -131,7 +129,6 @@ public class JPQL {
         return "delete from " + entityName + " where " + query;
     }
 
-    @SuppressWarnings("unused")
     public String createCountQuery(String entityName, String entityClass, String query, Object... params) {
         if (query.trim().toLowerCase().startsWith("select ")) {
             return query;
@@ -157,7 +154,6 @@ public class JPQL {
         return "select count(e) from " + entityName + " e where " + query;
     }
 
-    @SuppressWarnings("unused")
     public Query bindParameters(Query q, Object... params) {
         if (params == null) {
             return q;

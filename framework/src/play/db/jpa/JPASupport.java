@@ -37,7 +37,7 @@ import java.lang.reflect.Constructor;
 @MappedSuperclass
 public class JPASupport extends JPABase {
 
-    public static <T extends JPABase> T create(Class type, String name, Map<String, String[]> params, Annotation[] annotations) {
+    public static <T extends JPABase> T create(Class<?> type, String name, Map<String, String[]> params, Annotation[] annotations) {
         try {
             Constructor c = type.getDeclaredConstructor();
             c.setAccessible(true);

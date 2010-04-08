@@ -6,7 +6,6 @@ import java.util.*;
 
 import play.Logger;
 import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
-import play.data.binding.annotations.As;
 import play.data.binding.annotations.NoBinding;
 import play.exceptions.UnexpectedException;
 import play.utils.Utils;
@@ -133,7 +132,6 @@ public class BeanWrapper {
 
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
-            String name = method.getName();
             String propertyname;
             if (isScala) {
                 if (!isScalaSetter(method)) {

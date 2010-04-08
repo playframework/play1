@@ -16,7 +16,7 @@ import play.exceptions.UnexpectedException;
 public class Validation {
 
     static ThreadLocal<Validation> current = new ThreadLocal<Validation>();
-    List<Error> errors = new ArrayList();
+    List<Error> errors = new ArrayList<Error>();
     boolean keep = false;
     
     protected Validation() {

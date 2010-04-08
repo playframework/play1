@@ -84,6 +84,7 @@ public class TestEngine {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static TestResults run(final String name) {
         final TestResults testResults = new TestResults();
 
@@ -112,8 +113,8 @@ public class TestEngine {
                 } catch(Exception e) {
                     Logger.error("VirtualClient test has failed", e);
                 }
-            } else {       
-                // Simple test            
+            } else {
+                // Simple test
                 JUnitCore junit = new JUnitCore();
                 junit.addListener(new Listener(testClass.getName(), testResults));
                 junit.run(testClass);

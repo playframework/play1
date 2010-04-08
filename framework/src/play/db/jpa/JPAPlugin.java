@@ -16,7 +16,6 @@ import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
-import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.type.Type;
 import play.Logger;
 import play.Play;

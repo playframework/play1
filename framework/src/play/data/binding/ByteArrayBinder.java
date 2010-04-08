@@ -2,7 +2,6 @@ package play.data.binding;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
-import play.Logger;
 import play.data.Upload;
 import play.mvc.Http.Request;
 

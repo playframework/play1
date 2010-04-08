@@ -1,6 +1,5 @@
 package play.data.binding;
 
-import play.Logger;
 import play.data.Upload;
 import play.mvc.Http.Request;
 

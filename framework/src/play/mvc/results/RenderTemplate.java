@@ -1,22 +1,11 @@
 package play.mvc.results;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.StringBufferInputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.FilenameUtils;
-import org.w3c.dom.Document;
-import play.Logger;
-import play.Play;
 import play.libs.MimeTypes;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
-import play.mvc.Router;
 import play.templates.Template;
 
 /**

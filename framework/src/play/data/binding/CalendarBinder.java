@@ -4,7 +4,6 @@ import java.lang.annotation.Annotation;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Locale;
 import java.util.Date;
 
 import play.data.binding.annotations.AnnotationHelper;

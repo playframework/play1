@@ -19,7 +19,7 @@ import play.templates.GroovyInlineTags.CALL;
  */
 public class GroovyTemplateCompiler extends TemplateCompiler {
 
-    public static List<String> extensionsClassnames = new ArrayList();
+    public static List<String> extensionsClassnames = new ArrayList<String>();
 
     @Override
     public Template compile(Template template) {
@@ -40,7 +40,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         String source = template.source;
 
         // Static access
-        List<String> names = new ArrayList();
+        List<String> names = new ArrayList<String>();
         Map<String, String> originalNames = new HashMap<String, String>();
         for (Class clazz : Play.classloader.getAllClasses()) {
             if (clazz.getName().endsWith("$")) {

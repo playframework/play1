@@ -1,8 +1,6 @@
 package play.data.binding;
 
-import java.io.File;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.List;
 import play.data.Upload;
 import play.mvc.Http.Request;
