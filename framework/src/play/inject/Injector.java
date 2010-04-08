@@ -6,6 +6,7 @@ import java.util.List;
 import javax.inject.Inject;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
+import play.jobs.Job;
 import play.mvc.Mailer;
 
 public class Injector {
