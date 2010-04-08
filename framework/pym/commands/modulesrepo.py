@@ -12,7 +12,7 @@ from framework.pym.utils import *
 
 NM = ['new-module']
 LM = ['list-modules', 'lm']
-BM = ['build-modules', 'bm']
+BM = ['build-module', 'bm']
 IM = ['install']
 
 COMMANDS = NM + LM + BM + IM
@@ -210,7 +210,7 @@ def build(app, args, env):
     ftb = env["basedir"]
 
     try:
-        optlist, args = getopt.getopt(remaining_args, '', ['framework='])
+        optlist, args = getopt.getopt(args, '', ['framework='])
         for o, a in optlist:
             if o in ('--framework'):
                 ftb = a
