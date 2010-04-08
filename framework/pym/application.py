@@ -70,7 +70,7 @@ class PlayApplication():
             if '${play.path}' in m:
                 m = m.replace('${play.path}', self.play_env["basedir"])
             if m[0] is not '/':
-                m = os.path.normpath(os.path.join(application_path, m))
+                m = os.path.normpath(os.path.join(self.path, m))
             if not os.path.exists(m):
                 print "~ Oops,"
                 print "~ Module not found: %s" % (m)
