@@ -18,6 +18,7 @@ import play.Play;
 import play.PlayPlugin;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
+import play.libs.Expression;
 import play.utils.Java;
 import play.libs.Time;
 
@@ -135,9 +136,7 @@ public class JobsPlugin extends PlayPlugin {
                     Job job = (Job) clazz.newInstance();
                     scheduledJobs.add(job);
                     String value = ((Every) (job.getClass().getAnnotation(Every.class))).value();
-                    if (value.startsWith("cron.")) {
-                        value = Play.configuration.getProperty(value);
-                    }
+                    value = Expression.evaluate(value, value).toString();
                     executor.scheduleWithFixedDelay(job, Time.parseDuration(value), Time.parseDuration(value), TimeUnit.SECONDS);
                 } catch (InstantiationException ex) {
                     throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
@@ -163,6 +162,7 @@ public class JobsPlugin extends PlayPlugin {
             if (cron != null && !cron.equals("")) {
                 try {
                     Date now = new Date();
+                    cron = Expression.evaluate(cron, cron).toString();
                     Date nextDate = Time.parseCRONExpression(cron);
                     long delay = nextDate.getTime() - now.getTime();
                     executor.schedule((Callable<V>)job, delay, TimeUnit.MILLISECONDS);

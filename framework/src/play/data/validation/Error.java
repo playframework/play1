@@ -11,7 +11,7 @@ public class Error {
     String key;
     String[] variables;
 
-    Error(String key, String message, String[] variables) {
+    public Error(String key, String message, String[] variables) {
         this.message = message;
         this.key = key;
         this.variables = variables;

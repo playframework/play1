@@ -121,13 +121,13 @@ public class Validation {
     
     // ~~~~ Integration helper
     
-    static Map<String,List<Validator>> getValidators(Class<?> clazz, String name) {
+    public static Map<String,List<Validator>> getValidators(Class<?> clazz, String name) {
         Map<String,List<Validator>> result = new HashMap<String,List<Validator>>();
         searchValidator(clazz, name, result);
         return result;
     }
     
-    static List<Validator> getValidators(Class<?> clazz, String property, String name) {
+    public static List<Validator> getValidators(Class<?> clazz, String property, String name) {
         try {
             List<Validator> validators = new ArrayList<Validator>();
             while(!clazz.equals(Object.class)) {
