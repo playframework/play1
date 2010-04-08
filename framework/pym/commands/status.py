@@ -18,7 +18,7 @@ def execute(**kargs):
     secret_key = ''
 
     try:
-        optlist, args = getopt.getopt(remaining_args, '', ['url=', 'secret='])
+        optlist, args2 = getopt.getopt(args, '', ['url=', 'secret='])
         for o, a in optlist:
             if o in ('--url'):
                 if a.endswith('/'):
@@ -35,10 +35,14 @@ def execute(**kargs):
     if not url or not secret_key:
         app.check()
         if not url:
-            http_port = int(play_app.readConf('http.port'))
+            http_port = app.readConf('http.port')
+            if http_port == '':
+                http_port = 9000
+            else:
+                http_port = int(http_port)
             url = 'http://localhost:%s/@status' % http_port
         if not secret_key:
-            secret_key = play_app.readConf('application.secret')
+            secret_key = app.readConf('application.secret')
 
     hm = hmac.new(secret_key, '@status', sha)
     authorization = hm.hexdigest()
