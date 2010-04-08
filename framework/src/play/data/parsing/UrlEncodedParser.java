@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+
+import play.Logger;
 import play.exceptions.UnexpectedException;
 import play.utils.Utils;
 
