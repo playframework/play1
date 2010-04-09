@@ -117,10 +117,12 @@ def package_as_war(app, env, war_path, war_zip_path):
     for m in pm:
         nm = os.path.basename(m)
         replaceAll(os.path.join(war_path, 'WEB-INF/application/conf/application.conf'), m, '../modules/%s' % nm)
-    
+
     if not os.path.exists(os.path.join(war_path, 'WEB-INF/resources')): os.mkdir(os.path.join(war_path, 'WEB-INF/resources'))
     shutil.copyfile(os.path.join(env["basedir"], 'resources/messages'), os.path.join(war_path, 'WEB-INF/resources/messages'))
-    
+
+    deleteFrom(war_path, app.readConf('war.exclude').split("|"))
+
     if war_zip_path:
         print "~ Creating zipped archive to %s ..." % (os.path.normpath(war_zip_path))
         if os.path.exists(war_zip_path):
@@ -138,3 +140,21 @@ def package_as_war(app, env, war_path, war_zip_path):
                 zip.write(os.path.join(dirpath, file), os.path.join(dirpath[len(war_path):], file))
 
         zip.close()
+
+
+# Recursively delete all files/folders in root whose name equals to filename
+# We could pass a "ignore" parameter to copytree, but that's not supported in Python 2.5
+
+def deleteFrom(root, filenames):
+    for f in os.listdir(root):
+        fullpath = os.path.join(root, f)
+        if f in filenames:
+            delete(fullpath)
+        elif os.path.isdir(fullpath):
+            deleteFrom(fullpath, filenames)
+
+def delete(filename):
+    if os.path.isdir(filename):
+        shutil.rmtree(filename)
+    else:
+        os.remove(filename)
