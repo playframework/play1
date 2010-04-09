@@ -16,8 +16,11 @@ def execute(**kargs):
     classpath = app.getClasspath()
 
     application_name = app.readConf('application.name')
-    if not application_name:
+    if application_name:
+        application_name = application_name.replace("/", " ")
+    else:
         application_name = os.path.dirname(app.path)
+    print "name = " + application_name
     dotProject = os.path.join(app.path, '.project')
     dotClasspath = os.path.join(app.path, '.classpath')
     dotSettings = os.path.join(app.path, '.settings')
