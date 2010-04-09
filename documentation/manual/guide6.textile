@@ -32,7 +32,7 @@ public class Tag extends Model implements Comparable<Tag> {
  
 }
 
-Because we want something like lazy tags creation we will always get them using the **findOrCreateByName(String name)** factory method. Let's add it to the Tag class:
+Because we want something like lazy tag creation we will always get them using the **findOrCreateByName(String name)** factory method. Let’s add it to the Tag class:
 
 bc. public static Tag findOrCreateByName(String name) {
     Tag tag = Tag.find("byName", name).first();
@@ -44,7 +44,7 @@ bc. public static Tag findOrCreateByName(String name) {
 
 h2. <a>Tagging posts</a>
 
-Now it's time to link the new Tag model with the Post one. Let's add the correct relationship to the Post class:
+Now it’s time to link the new Tag model with the Post one. Let’s add the correct relationship to the Post class:
 
 bc. ...
 @ManyToMany(cascade=CascadeType.PERSIST)
@@ -116,7 +116,7 @@ Make sure that it works.
 
 h2. <a>A little more difficult now</a>
 
-Well, we won't use it in our blog right now, but what if we wanted to retrieve posts tagged with several tags? It's more difficult than it seems.
+Well, we won’t use it in our blog right now, but what if we wanted to retrieve posts tagged with several tags? It’s more difficult than it seems.
 
 I give you the needed JPQL query because you will likely use it in several web projects:
 
@@ -130,7 +130,7 @@ public static List<Post> findTaggedWith(String... tags) {
 
 The tricky part is that we have to use a **having count** statement to filter only posts that have exactly **all tags** from the joined view.
 
-p(note). **Note** that we can't use the **Post.find("...", tags, tags.count)** signature here. It's just because **tags** is already a **vararg**.
+p(note). **Note** that we can’t use the **Post.find("…", tags, tags.count)** signature here. It’s just because **tags** is already a **vararg**.
 
 You can test it by adding more checks to the previous test:
 
@@ -143,7 +143,7 @@ assertEquals(0, Post.findTaggedWith("Green", "Blue").size());
 
 h2. <a>The tag cloud</a>
 
-Where we have tags, we need a tag cloud. Let's add a method to the **Tag** class to generate the tag cloud:
+Where we have tags, we need a tag cloud. Let’s add a method to the **Tag** class to generate the tag cloud:
 
 bc. public static List<Map> getCloud() {
     List<Map> result = Tag.find(
@@ -152,9 +152,9 @@ bc. public static List<Map> getCloud() {
     return result;
 }
 
-Here we use a handy feature of hibernate that allows to return a custom object from a JPA query. It will result a **List** containing for each tag a **Map** with two attributes: **name** for the tag name and **pound** for the tag count.
+Here we use a handy Hibernate feature that allows to return a custom object from a JPA query. It will result a **List** containing for each tag a **Map** with two attributes: **name** for the tag name and **pound** for the tag count.
 
-Let's test it by adding one more check to our tags test:
+Let’s test it by adding one more check to our tags test:
 
 bc. ...
 List<Map> cloud = Tag.getCloud();
@@ -165,7 +165,7 @@ assertEquals(
 
 h2. <a>Adding tags to the Blog UI</a>
 
-We can now use the new tagging stuff to add one more way to browse the blog. As always to work efficiently we need to add a bunch of test tags to our initial data set.
+We can now use the new tagging stuff to add one more way to browse the blog. As always, to work efficiently we need to add a bunch of test tags to our initial data set.
 
 Modify the **/yabe/conf/initial-data.yml** file to add some tags to the tests posts. For example:
 
@@ -198,9 +198,9 @@ Post(jeffPost):
                     A Play
 ...
 
-p(note). Add the Tags declaration at the top of the YAML file, because they need to be created before that any Post reference them.
+p(note). Add the Tags declaration at the top of the YAML file, because they need to be created before any Post references them.
 
-You need to restart your application to force loading the new initial data set. Note how play tells you problems even in YAML files:
+You need to restart your application to force loading of the new initial data set. Note how Play even tells you about problems in YAML files:
 
 !images/guide6-1!
 
@@ -228,9 +228,9 @@ bc. ...
 
 !images/guide6-2!
 
-h2. <a>The new 'tagged with' page</a>
+h2. <a>The new ‘tagged with’ page</a>
 
-Now we can add a new way to list blog posts by tags. Above we left the link blank, we will replace it by a link to the new **listTagged** action:
+Now we can add a new way to list blog posts by tags. Above we left the link blank; we will replace it by a link to the new **listTagged** action:
 
 bc. ...
 - Tagged 
@@ -257,7 +257,7 @@ Well, we have a problem because we have an existing route that conflicts with th
 bc. GET     /posts/{id}                     Application.show
 GET     /posts/{tag}                    Application.listTagged
 
-But because we'll assume that **id** are numeric and **tag** are not, we can easily solve the situation using a regular expression to restrict the first route:
+But because we’ll assume that an **id** is numeric and a **tag** is not, we can easily solve the situation using a regular expression to restrict the first route:
 
 bc. GET     /posts/{<[0-9]+>id}             Application.show
 GET     /posts/{tag}                    Application.listTagged 
