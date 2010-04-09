@@ -316,7 +316,7 @@ bc. #{selenium}
     // Check the back link
     clickAndWait('link=Back to form')
     
-    // Home page ?
+    // Home page?
     assertTextNotPresent('Hello bob!')
 #{/selenium}
 

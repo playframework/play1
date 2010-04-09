@@ -1,10 +1,10 @@
 h1. Sample applications
 
-Play comes with a set of sample applications in the the **samples-and-test** directory of the framework installation path. We use them to run our automated test suite, and you can take a look at them to discover typical play usages.
+Play comes with a set of sample applications in the the **samples-and-test** directory of the framework installation path. We use them to run our automated test suite, and you can take a look at them to discover typical Play usages.
 
 h2. <a>Yet Another Blog Engine</a>
 
-The final application from the "play guide":guide1 tutorial.
+The final application from the "Play guide":guide1 tutorial.
 
 !images/yabe!
 
@@ -28,12 +28,12 @@ A simple forum application using JPA.
 
 h2. <a>Jobboard</a>
 
-A full faetured job board application that uses the CRUD module to automatically generate the administration area. 
+A full featured job board application that uses the CRUD module to automatically generate the administration area. 
 
 !images/jobboard!
 
 h2. <a>Chat</a>
 
-An HTTP based chat application. We use the asynchronous request model to be able to handle a lot of simultaneous connected users without resources waste.
+An HTTP-based chat application. We use the asynchronous request model to be able to handle a lot of simultaneous connected users without wasting resources.
 
 !images/chat!
