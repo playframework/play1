@@ -16,14 +16,14 @@ Your first steps with Play and your first 5 minutes of fun.
 # "Usability - details matter as much as features":usability
 # "Frequently Asked Questions":faq
 # "Installation guide":install
-# "Your first application — the 'Hello World' tutorial":firstapp
+# "Your first application — the ‘Hello World’ tutorial":firstapp
 # "Set up your preferred IDE":ide
 # "Sample applications":samples
 
 
 h2. <a name="guide">Tutorial -- Play guide, a real world app step-by-step</a>
 
-Learn play by coding **'Yet Another Blog Engine'**, from start to finish. Each chapter will be an occasion to learn one more cool Play feature.
+Learn play by coding **‘Yet Another Blog Engine’**, from start to finish. Each chapter will be an occasion to learn one more cool Play feature.
 
 # "Starting up the project":guide1
 # "A first iteration of the data model":guide2
