@@ -1,4 +1,4 @@
-package play.data.parsing;
+package play.data.binding.urlencoded;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import play.Logger;
+import play.data.parsing.DataParser;
 import play.exceptions.UnexpectedException;
 import play.utils.Utils;
 

@@ -1,5 +1,5 @@
 0:play.CorePlugin
-1:play.data.parsing.TempFilePlugin
+1:play.data.binding.multipart.TempFilePlugin
 2:play.data.validation.ValidationPlugin
 3:play.db.DBPlugin
 4:play.db.jpa.JPAPlugin

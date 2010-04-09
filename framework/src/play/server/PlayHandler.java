@@ -83,7 +83,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     private static Map<String, RenderStatic> staticPathsCache = new HashMap();
 
-    public class NettyInvocation extends Invoker.DirectInvocation {
+    public class NettyInvocation extends Invoker.Invocation {
 
 
         private final ChannelHandlerContext ctx;
@@ -144,7 +144,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 Logger.trace("run: begin");
                 super.run();
             } catch (Exception e) {
-                e.printStackTrace();
                 serve500(e, ctx, nettyRequest);
             }
             Logger.trace("run: end");

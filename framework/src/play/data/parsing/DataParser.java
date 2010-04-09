@@ -1,5 +1,7 @@
 package play.data.parsing;
 
+import play.data.binding.multipart.ApacheMultipartParser;
+import play.data.binding.urlencoded.UrlEncodedParser;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;

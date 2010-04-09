@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 import play.Logger;
 import play.Play;
-import play.data.binding.Binder;
+import play.data.binding.map.Binder;
 import play.data.parsing.DataParser;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;

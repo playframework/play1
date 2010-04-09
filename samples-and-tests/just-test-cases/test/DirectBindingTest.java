@@ -3,7 +3,7 @@ import play.test.*;
 import play.cache.*;
 import java.util.*;
 import java.math.*;
-import static play.data.binding.Binder.directBind;
+import static play.data.binding.map.Binder.directBind;
 
 import models.*;
 

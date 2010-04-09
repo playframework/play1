@@ -5,7 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.fileupload.FileItem;
-import play.data.parsing.TempFilePlugin;
+import play.data.binding.multipart.TempFilePlugin;
 import play.exceptions.UnexpectedException;
 import play.libs.Files;
 import play.libs.IO;

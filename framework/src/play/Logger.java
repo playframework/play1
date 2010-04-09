@@ -455,7 +455,7 @@ public class Logger {
                 // Clean stack trace
                 List<StackTraceElement> cleanTrace = new ArrayList<StackTraceElement>();
                 for (StackTraceElement se : toClean.getStackTrace()) {
-                    if (se.getClassName().startsWith("play.server.HttpHandler$MinaInvocation")) {
+                    if (se.getClassName().startsWith("play.server.PlayHandler$NettyInvocation")) {
                         cleanTrace.add(new StackTraceElement("Invocation", "HTTP Request", "Play!", -1));
                         break;
                     }

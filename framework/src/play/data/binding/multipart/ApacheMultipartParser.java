@@ -1,4 +1,4 @@
-package play.data.parsing;
+package play.data.binding.multipart;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -34,6 +34,7 @@ import play.Play;
 import play.data.FileUpload;
 import play.data.MemoryUpload;
 import play.data.Upload;
+import play.data.parsing.DataParser;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;
 

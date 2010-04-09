@@ -1,4 +1,4 @@
-package play.data.binding;
+package play.data.binding.map.types;
 
 import play.data.Upload;
 import play.mvc.Http.Request;

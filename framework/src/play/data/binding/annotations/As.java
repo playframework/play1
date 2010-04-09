@@ -5,7 +5,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import play.data.binding.SupportedType;
+import play.data.binding.map.types.SupportedType;
 
 
 @Retention(RetentionPolicy.RUNTIME)

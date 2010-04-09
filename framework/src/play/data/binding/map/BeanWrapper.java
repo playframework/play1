@@ -1,4 +1,4 @@
-package play.data.binding;
+package play.data.binding.map;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;

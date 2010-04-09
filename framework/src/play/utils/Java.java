@@ -19,7 +19,7 @@ import javassist.CtClass;
 import javassist.bytecode.SourceFileAttribute;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
-import play.data.binding.Binder;
+import play.data.binding.map.Binder;
 import play.exceptions.UnexpectedException;
 import play.mvc.After;
 import play.mvc.Before;

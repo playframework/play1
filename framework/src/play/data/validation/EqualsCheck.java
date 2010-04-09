@@ -9,7 +9,7 @@ import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import net.sf.oval.context.FieldContext;
 import net.sf.oval.context.MethodParameterContext;
 import net.sf.oval.context.OValContext;
-import play.data.binding.Binder;
+import play.data.binding.map.Binder;
 import play.exceptions.UnexpectedException;
 import play.utils.Java;
 import play.mvc.Scope;

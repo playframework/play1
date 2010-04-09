@@ -287,7 +287,7 @@ public abstract class CRUD extends Controller {
             Query query = JPA.em().createQuery("from " + entityClass.getName() + " where id = ?");
             try {
                 // TODO: I think we need to type of direct bind -> primitive and object binder
-                query.setParameter(1, play.data.binding.Binder.directBind(id + "", play.db.jpa.JPASupport.findKeyType(entityClass)));
+                query.setParameter(1, play.data.binding.map.Binder.directBind(id + "", play.db.jpa.JPASupport.findKeyType(entityClass)));
             } catch (Exception e) {
                 throw new RuntimeException("Something bad with id type ?", e);
             }

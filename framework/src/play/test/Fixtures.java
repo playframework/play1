@@ -31,7 +31,7 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses;
-import play.data.binding.Binder;
+import play.data.binding.map.Binder;
 import play.db.DB;
 import play.db.DBPlugin;
 import play.db.Model;

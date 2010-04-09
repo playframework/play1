@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import play.data.binding.Binder;
+import play.data.binding.map.Binder;
 
 /**
  * I18n Helper

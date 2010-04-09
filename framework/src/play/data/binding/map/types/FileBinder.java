@@ -1,30 +1,28 @@
-package play.data.binding;
-
-import play.data.Upload;
-import play.mvc.Http.Request;
+package play.data.binding.map.types;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.List;
+import play.data.Upload;
+import play.mvc.Http.Request;
 
 /**
  * Bind file form multipart/form-data request.
  */
-public class FileListBinder implements SupportedType<List<File>> {
+public class FileBinder implements SupportedType<File> {
 
     @SuppressWarnings("unchecked")
-    public List<File> bind(Annotation[] annotations, String value) {
+    public File bind(Annotation[] annotations, String value) {
         List<Upload> uploads = (List<Upload>)Request.current().args.get("__UPLOADS");
-        List<File> fileArray = new ArrayList<File>();
         for(Upload upload : uploads) {
             if(upload.getFieldName().equals(value)) {
                 File file = upload.asFile();
                 if(file.length() > 0) {
-                    fileArray.add(file);
-                }
+                    return file;
+                } 
+                return null;
             }
         }
-        return fileArray;
+        return null;
     }
 }
