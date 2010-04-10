@@ -1,10 +1,10 @@
 h1. Setting up i18n
 
-Internationalization is a means of adapting your application to different languages and allow for regional differences. Follow theses steps to enable internationalization in your application.
+Internationalization is a means of adapting your application to different languages to allow for regional differences. Follow these steps to enable internationalization in your application.
 
 h2. <a>Only use UTF-8!</a>
 
-play supports only one encoding: UTF-8. Since encoding problems can be weird and difficult to deal with, we made the choice to support only one encoding. UTF-8 allows you to display all characters for all languages.
+Play supports only one encoding: UTF-8. Since encoding problems can be weird and difficult to deal with, we made the choice to support only one encoding. UTF-8 allows you to display all characters for all languages.
 
 Be sure to be consistent with UTF-8 usage throughout your application:
 
@@ -15,7 +15,7 @@ Be sure to be consistent with UTF-8 usage throughout your application:
 
 p(note). **Note**
  
-The UTF-8 encoding issue is the reason why most of the play configuration files, even though they are Java properties files, are not named *.properties. Java imposes the requirement that properties files must be encoded with **iso-8859-1**. Play configuration files must be UTF-8 encoded. Need we say more?
+The UTF-8 encoding issue is the reason why most of the Play configuration files, even though they are Java properties files, are not named *.properties. Java imposes the requirement that properties files must be encoded with **iso-8859-1**. Play configuration files must be UTF-8 encoded. Need we say more?
 
 h2. <a>Externalize your messages</a>
 
@@ -23,12 +23,12 @@ To support i18n you have to externalize all messages in your application.
 
 Create a file named **messages** in the **conf/** directory of the application. This file is really just a Java properties file.
 
-bc. hello=Hello !
+bc. hello=Hello!
 back=Back
 
 Then you can define a specific **message** file for each language used in your application. Just add the ISO language code as a file extension. 
 
-For example, the message file containing the corresponding French translations in **conf/messages.fr**:
+For example, the message file containing the corresponding French translations is **conf/messages.fr**:
 
 bc. hello=Bonjour!
 back=Retour
@@ -39,9 +39,9 @@ In the **conf/application.conf** file, define a list of supported languages:
 
 bc. application.langs=fr,en,ja
 
-On the first request from a new user, play will guess the default language to use. It does so by parsing the HTTP **Accept-language** header. It will then save the chosen language in a **PLAY_LANG** cookie. So the next request will use the same language.
+On the first request from a new user, Play will guess the default language to use. It does so by parsing the HTTP **Accept-language** header. It will then save the chosen language in a **PLAY_LANG** cookie. So the next request will use the same language.
 
-From your application code your can retrieve the current language for the user by accessing the **play.i18n.Lang** object :
+From your application code your can retrieve the current language for the user by accessing the **play.i18n.Lang** object:
 
 bc. String lang = Lang.get();
 
@@ -49,9 +49,9 @@ If you want to permanently change the user language, use the change() method:
 
 bc. Lang.change("ja");
 
-The new value will be saved back in the user's language cookie.
+The new value will be saved back to the user’s language cookie.
 
-h2. Retrieve localized messages
+h2. <a>Retrieve localized messages</a>
 
 From the application code, you can retrieve messages defined in message files. From Java, use the **play.i18n.Messages** object.
 
@@ -69,7 +69,7 @@ bc. public static void hello(String user) {
     renderText(Messages.get("hello", user));
 }
 
-From a template you can use the special **&{...}** syntax to display localized messages :
+From a template you can use the special **&{…}** syntax to display localized messages:
 
 bc. <h1>&{'hello'}</h1>
 
