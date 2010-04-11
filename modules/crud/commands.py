@@ -1,7 +1,7 @@
 # CRUD
 
 import getopt
-from framework.pym.utils import *
+from play.utils import *
 
 COMMANDS = ['crud:ov', 'crud:override']
 
