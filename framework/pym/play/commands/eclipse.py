@@ -1,7 +1,7 @@
 import os, os.path
 import shutil
 
-from framework.pym.utils import *
+from play.utils import *
 
 COMMANDS = ['eclipsify', 'ec']
 

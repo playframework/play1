@@ -3,7 +3,7 @@ import os
 
 class CommandLoader:
     def __init__(self, play_path):
-        self.path = os.path.join(play_path, 'framework', 'pym', 'commands')
+        self.path = os.path.join(play_path, 'framework', 'pym', 'play', 'commands')
         self.commands = {}
         self.modules = {}
         self.load_core()

@@ -1,6 +1,6 @@
 import os, os.path
 import subprocess
-from framework.pym.utils import *
+from play.utils import *
 
 COMMANDS = ['start', 'stop', 'restart', 'pid', 'out']
 

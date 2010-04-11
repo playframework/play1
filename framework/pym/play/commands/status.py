@@ -5,7 +5,7 @@ import hmac
 import urllib2
 from hashlib import sha1 as sha
 
-from framework.pym.utils import *
+from play.utils import *
 
 COMMANDS = ['status', 'st']
 

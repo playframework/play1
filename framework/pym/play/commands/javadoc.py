@@ -2,7 +2,7 @@ import os, os.path
 import shutil
 import subprocess
 
-from framework.pym.utils import *
+from play.utils import *
 
 COMMANDS = ['javadoc', 'jd']
 

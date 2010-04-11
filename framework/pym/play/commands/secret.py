@@ -1,4 +1,4 @@
-from framework.pym.utils import *
+from play.utils import *
 
 COMMANDS = ['secret']
 

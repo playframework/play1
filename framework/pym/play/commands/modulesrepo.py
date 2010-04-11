@@ -8,7 +8,7 @@ import imp
 import time
 import urllib
 
-from framework.pym.utils import *
+from play.utils import *
 
 NM = ['new-module']
 LM = ['list-modules', 'lm']

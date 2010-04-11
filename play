@@ -6,9 +6,11 @@ import sys
 import os
 import os.path
 
-from framework.pym.cmdloader import CommandLoader
-from framework.pym.application import PlayApplication
-from framework.pym.utils import *
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), 'framework', 'pym'))
+
+from play.cmdloader import CommandLoader
+from play.application import PlayApplication
+from play.utils import *
 
 # ~~~~~~~~~
 # Main

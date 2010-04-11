@@ -9,7 +9,7 @@ import urllib2
 import webbrowser
 import time
 
-from framework.pym.utils import *
+from play.utils import *
 
 COMMANDS = ['run', 'new', 'new,run', 'clean', 'clean,run', 'test', 'auto-test', 'id']
 
