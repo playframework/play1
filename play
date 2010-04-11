@@ -90,6 +90,7 @@ try:
     if play_app:
         for module in play_app.modules():
             cmdloader.load_play_module(module)
+
     for module in getWithModules(remaining_args, play_env):
         cmdloader.load_play_module(module)
 

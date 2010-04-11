@@ -17,7 +17,8 @@ class CommandLoader:
 
     def load_play_module(self, modname):
         try:
-            mod = load_python_module("commands", modname)
+            leafname = os.path.basename(modname).split('.')[0]
+            mod = imp.load_source(leafname, os.path.join(modname, "commands.py"))
             self._load_cmd_from(mod)
         except:
             pass # No command to load in this module
@@ -36,3 +37,4 @@ class CommandLoader:
 def load_python_module(name, location):
     mod_desc = imp.find_module(name, [location])
     return imp.load_module(name, mod_desc[0], mod_desc[1], mod_desc[2])
+
