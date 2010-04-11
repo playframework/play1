@@ -17,24 +17,24 @@ REST states a few key design principles:
 * Every resource is uniquely addressable using an URI
 * All resources share a uniform interface for the transfer of state between client and resource. 
 
-If you're using HTTP, these interfaces are defined by the set of available HTTP methods. The protocol used to access the resource state is:
+If you’re using HTTP, these interfaces are defined by the set of available HTTP methods. The protocol used to access the resource state is:
 
 * Client-server
 * Stateless
 * Cacheable
 * Layered
 
-If an application follows the main REST design principles, the application is RESTFul. The play framework makes it easy to build RESTFul applications:
+If an application follows the main REST design principles, the application is RESTFul. The Play framework makes it easy to build RESTFul applications:
 
-* The play router interprets both URI and HTTP methods to route a request to a Java call. Regular expressions-based URI patterns provides you even more flexibility. 
-* The protocol is stateless. This means you can't save any state on the server between two successive requests.
-* play considers HTTP as a key feature, thus the framework gives you full access to HTTP information.
+* The Play router interprets both URI and HTTP methods to route a request to a Java call. Regular expressions-based URI patterns give you even more flexibility. 
+* The protocol is stateless. This means you can’t save any state on the server between two successive requests.
+* Play considers HTTP as a key feature, thus the framework gives you full access to HTTP information.
 
 h2. <a name="syntax">The routes file syntax</a>
 
-The **conf/routes** file is the configuration file used by the Router. This file list all the routes needed by the application. Each route consists of an HTTP method + URI pattern associated to a Java call.
+The **conf/routes** file is the configuration file used by the Router. This file lists all the routes needed by the application. Each route consists of an HTTP method + URI pattern associated with a Java call.
 
-Let's see what a route definition looks like:
+Let’s see what a route definition looks like:
 
 bc. GET    /clients/{id}             Clients.show           
 
@@ -55,7 +55,7 @@ The HTTP method can be any one of the any valid methods supported by HTTP:
 * **DELETE**
 * **HEAD**
 
-If you specify * as method, this route will match the HTTP Request for any methods.
+If you specify * as method, this route will match the HTTP Request for any method.
 
 bc. *   /clients/{id}             Clients.show           
 
@@ -67,7 +67,7 @@ PUT /clients/1212
 
 h3. The URI Pattern
 
-The URI pattern defines the request path needed by the route Some parts of the route can be dynamic. Any dynamic part must be specified within braces {...}.
+The URI pattern defines the request path needed by the route Some parts of the route can be dynamic. Any dynamic part must be specified within braces {…}.
 
 bc. /clients/all
 
@@ -75,7 +75,7 @@ exactly matches:
 
 bc. /clients/all
 
-but ...
+but…
 
 bc. /clients/{id}
 
@@ -84,7 +84,7 @@ independently matches:
 bc. /clients/12121
 /clients/toto
 
-A URI pattern may have more than one dynamic part :
+A URI pattern may have more than one dynamic part:
 
 bc. /clients/{id}/accounts/{accountId}
 
@@ -104,21 +104,21 @@ p(note). **Note**
  
 Dynamic parts are named. The Controller can later retrieve the dynamic parts from the HTTP params map.
 
-By default play considers the trailing URL slash as important. For example, this route:
+By default Play considers the trailing URL slash as important. For example, this route:
 
 bc. GET     /clients         Clients.index
 
-will match the */clients* URL but not the */clients/* one. You can tell play that you want to match both URL adding a question mark after the trailing slash. For example:
+will match the */clients* URL but not */clients/*. You can tell Play that you want to match both URL adding a question mark after the trailing slash. For example:
 
 bc. GET     /clients/?       Clients.index
 
-p(note). The URI pattern cannot have any optional part excepted that trailing slash.
+p(note). The URI pattern cannot have any optional part except for that trailing slash.
 
 h3. Java call definition
 
-The last part a route definition is the Java call. This part is defined by the fully qualified name of an action method. The action method must be a static, public method of a Controller class. A Controller class must be defined in the **controllers** package and must be a subclass of **play.mvc.Controller**.
+The last part of a route definition is the Java call. This part is defined by the fully-qualified name of an action method. The action method must be a static, public method of a Controller class. A Controller class must be defined in the **controllers** package and must be a subclass of **play.mvc.Controller**.
 
-You can add a Java package before the Controller class name if it isn't defined directly under the controllers package. The **controllers** package itself is implicit, so you don't need to specify it. 
+You can add a Java package before the Controller class name if it isn’t defined directly under the controllers package. The **controllers** package itself is implicit, so you don’t need to specify it. 
 
 bc. GET    /admin             admin.Dashboard.index           
 
@@ -126,7 +126,7 @@ h3. Assign static args
 
 In some cases, you want to reuse an existing action but define a more specific route based on the values of some of the arguments.
 
-Let's see how in this example:
+Let’s see how in this example:
 
 bc. public static void page(String id) {
     Page page = Page.findById(id);
@@ -137,17 +137,17 @@ With the corresponding route:
 
 bc. GET    /pages/{id}         Application.page
 
-Now, I want to define a URL alias for the page with id 'home'. I can define another route with a static argument:
+Now, I want to define a URL alias for the page with ID ‘home’. I can define another route with a static argument:
 
 bc. GET    /home               Application.page(id:'home')
 GET    /pages/{id}         Application.page
 
-The first route is equivalent to the second one when the page id is 'home'. However, since it has higher priority, this route will be used as the default for the call to Application.page with id 'home'.
+The first route is equivalent to the second one when the page ID is ‘home’. However, since it has higher priority, this route will be used as the default for the call to Application.page with ID ‘home’.
 
 
 h2. <a name="priority">Routes priority</a>
 
-Many routes can match the same request. If there is any conflict, the first route (following the declaration order)is used.
+Many routes can match the same request. If there is any conflict, the first route (following the declaration order) is used.
 
 For example:
 
@@ -169,14 +169,14 @@ For example:
 
 bc. GET    /public/               staticDir:public
 
-When supplied with a request for a /public/* path, play will serve your files from the application /public folder.
+When supplied with a request for a /public/* path, Play will serve your files from the application /public folder.
 
 Priorities are applied as for a standard route.
 
 
 h2. <a name="reverse">Reverse routing: generate some URL</a>
 
-The Router can be used to generate a URL from within a Java call. So you're able to centralize in one only configuration file all your URI patterns, and then be more confident when refactoring your application.
+The Router can be used to generate a URL from within a Java call. So you’re able to centralize in one only configuration file all your URI patterns, and then be more confident when refactoring your application.
 
 For example, with this route definition:
 
@@ -199,7 +199,7 @@ The priority order is again used to find the most specific Route able to generat
 
 p(note). **Continuing the discussion**
  
-When the Router has determined which Java call to invoke for the received HTTP Request, the play framework then invokes that Java call. "Let's see how the Controller works":controllers.
+When the Router has determined which Java call to invoke for the received HTTP Request, the Play framework then invokes that Java call. "Let’s see how the Controller works":controllers.
 
 
 h2. <a name="content-types">Setting content types</a>

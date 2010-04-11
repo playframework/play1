@@ -1,8 +1,8 @@
 h1. The domain object model
 
-The model has a central position in a play application. It's the domain-specific representation of the information on which the application operates. 
+The model has a central position in a Play application. It’s the domain-specific representation of the information on which the application operates. 
 
-Martin fowler defines it as:
+Martin Fowler defines it as:
 
 bq. Responsible for representing concepts of the business, information about the business situation, and business rules. State that reflects the business situation is controlled and used here, even though the technical details of storing it are delegated to the infrastructure. This layer is the heart of business software.
 
@@ -12,15 +12,15 @@ Martin fowler again has named this anti-pattern "Anemic object model":http://www
 
 bq. The basic symptom of an Anemic Domain Model is that at first blush it looks like the real thing. There are objects, many named after the nouns in the domain space, and these objects are connected with the rich relationships and structure that true domain models have. The catch comes when you look at the behavior, and you realize that there is hardly any behavior on these objects, making them little more than bags of getters and setters. Indeed often these models come with design rules that say that you are not to put any domain logic in the the domain objects. Instead there are a set of service objects which capture all the domain logic. These services live on top of the domain model and use the domain model for data.
  
-The fundamental horror of this anti-pattern is that it's so contrary to the basic idea of object-oriented design; which is to combine data and process together. The anemic domain model is really just a procedural style design, exactly the kind of thing that object bigots like me (and Eric) have been fighting since our early days in Smalltalk. What's worse, many people think that anemic objects are real objects, and thus completely miss the point of what object-oriented design is all about.
+The fundamental horror of this anti-pattern is that it’s so contrary to the basic idea of object-oriented design; which is to combine data and process together. The anemic domain model is really just a procedural style design, exactly the kind of thing that object bigots like me (and Eric) have been fighting since our early days in Smalltalk. What’s worse, many people think that anemic objects are real objects, and thus completely miss the point of what object-oriented design is all about.
 
 h2. <a>Properties simulation</a>
 
-If you take a look at play sample applications, you will often see that classes declare public variables. Now if you’re a Java developer with any experience at all, warning sirens are probably clanging like mad at the sight of a public variable. In Java (as in other object-oriented languages), best practice says to make all fields private and provide accessors and mutators. This is to promote encapsulation, a concept critical to object oriented design.
+If you take a look at Play sample applications, you will often see that classes declare public variables. Now if you’re a Java developer with any experience at all, warning sirens are probably clanging like mad at the sight of a public variable. In Java (as in other object-oriented languages), best practice says to make all fields private and provide accessors and mutators. This is to promote encapsulation, a concept critical to object oriented design.
 
 Java has no truly built-in property definition system. It use a convention named Java Beans: a property on a Java object is defined by a couple of getXxx/setXxx methods. If the property is read-only there is only a getter.
 
-Although the system works well, it's very tedious to write. For each property you have to declare a private variable and write two methods. Thus, most of time the getter and setter implementation is always the same:
+Although the system works well, it’s very tedious to write. For each property you have to declare a private variable and write two methods. Thus, most of time the getter and setter implementation is always the same:
 
 bc. private String name;
  
@@ -32,7 +32,7 @@ public void setName(String value) {
     name = value;
 }
 
-The Model portion of the play framework automatically generates this pattern while keeping your code clean. Effectively, all public variables become instance properties. The convention is that any **public**, **non static**, **non final** field of a class is seen as a property.
+The Model portion of the Play framework automatically generates this pattern while keeping your code clean. Effectively, all public variables become instance properties. The convention is that any **public**, **non static**, **non final** field of a class is seen as a property.
 
 For example, when you define a class like this:
 
@@ -79,10 +79,10 @@ bc. product.setName("My product");
 product.setPrice(58);
 
 p(note). **Warning!**
+ 
+You can’t directly use getter and setter methods to access properties if you rely on automatic generation. These methods are generated at runtime. So if you reference them in code you write, the compiler won’t find the methods and will generate an error.
 
-You can't directly use getter and setter methods to access properties if you rely on automatic generation. These methods are generated at runtime. So if you reference them in code you write, the compiler won't find the methods and will generate an error.
-
-Of course you can define the getter and setter methods yourself. If a method exists play will use the existing accessors.
+Of course you can define the getter and setter methods yourself. If a method exists Play will use the existing accessors.
 
 So to protect the value of the price property of the Product class, you can write:
 
@@ -93,7 +93,7 @@ bc. public class Product {
  
     public void setPrice(Integer price) {
         if (price < 0) {
-            throw new IllegalArgumentException("Price can't be negative!");
+            throw new IllegalArgumentException("Price can’t be negative!");
         }
         this.price = price;
     }
@@ -183,7 +183,7 @@ h2. <a>Persist your object model with Hibernate</a>
 
 You can use Hibernate (through JPA) to persist your Java objects in the Database automatically.
 
-When you define JPA entities by adding **@javax.persistence.Entity** annotations to any Java object, play will automatically start a JPA entity manager.
+When you define JPA entities by adding **@javax.persistence.Entity** annotations to any Java object, Play will automatically start a JPA entity manager.
 
 bc. @Entity
 public class Product {
@@ -193,9 +193,9 @@ public class Product {
  
 }
 
-p(note). **warning!**
+p(note). **Warning!**
  
-A common mistake is to use the hibernate @Entity annotation instead of the JPA one. Remember that play uses Hibernate through the JPA API.
+A common mistake is to use the hibernate @Entity annotation instead of the JPA one. Remember that Play uses Hibernate through the JPA API.
 
 You can then obtain the EntityManager from the **play.db.jpa.JPA** object:
 
@@ -222,7 +222,7 @@ product.delete();
 
 h2. <a>Keep the model stateless</a>
 
-Play is designed to operate in a 'share nothing' architecture. The idea is to keep the application completely stateless. By doing this you will allow your application to run on as many server nodes as needed at the same time.
+Play is designed to operate in a ‘share nothing’ architecture. The idea is to keep the application completely stateless. By doing this you will allow your application to run on as many server nodes as needed at the same time.
 
 What are the common traps you should avoid to keep the model stateless? **Do not store any object on the Java heap for multiple requests**
 
@@ -233,8 +233,8 @@ h4. When you want to keep data across multiple requests you have several choices
 2. Save the data permanently into a durable storage (like a database). For example if you need to create an object with a "wizard" that spans multiple requests:
 
 * Initialize and persist the object into the database at the first request.
-* Save the the id of the newly created object into the flash scope.
-* During successive requests, retrieve the object from the database using the object id, update it, and save it again. 
+* Save the the ID of the newly-created object into the flash scope.
+* During successive requests, retrieve the object from the database using the object ID, update it, and save it again. 
 
 3. Save the data temporarily into a transient storage (such as the Cache). For example if you need to create an object with a "wizard" that spans multiple requests:
 
@@ -247,4 +247,4 @@ The Cache is not a reliable storage but if you put an object in the cache you sh
 
 p(note). **Continuing the discussion**
  
-Now we'll check how to perform operations outside of any HTTP request using the "jobs system":jobs.
+Now we’ll check how to perform operations outside any HTTP request using the "jobs system":jobs.
