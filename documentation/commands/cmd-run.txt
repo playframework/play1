@@ -9,16 +9,16 @@
 ~ Description:
 ~ ~~~~~~~~~~~~
 ~ Run the application hosted at the app_path directory. If app_path is omitted, the current directory is used.
-~ The application is run in foreground in the current shell. You can then stop it using Ctrl+C.
+~ The application is run in the foreground in the current shell. You can then stop it using Ctrl+C.
 ~
-~ The script first try to locate the java program using the $JAVA_HOME environment variable (from $JAVA_HOME/bin).
+~ The script first tries to locate the java program using the $JAVA_HOME environment variable (from $JAVA_HOME/bin).
 ~ If the $JAVA_HOME variable is not defined, the default java command available from the PATH is used.
 ~
 ~ All options specified after the application path are passed to the JVM (example. -Xms=64m -Xmx=256m).
 ~ All the shell environment variables are passed to the JVM.
 ~
 ~ If the application is in DEV mode, a JPDA session is automatically opened on the port specified by the jpda.port
-~ property of the conf/application.conf file (default to 8000). If the JPDA port is already used, another available
+~ property of the conf/application.conf file (defaulting to 8000). If the JPDA port is already in use, another available
 ~ port is automatically chosen.
 ~
 ~ Options:
@@ -27,4 +27,4 @@
 ~ Disable the JPDA port checking and force the jpda.port value.
 ~
 ~ --%fwk_id:
-~ Use this id to run the application (override the default framework id)
+~ Use this ID to run the application (override the default framework ID)

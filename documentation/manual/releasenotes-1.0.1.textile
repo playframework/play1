@@ -1,12 +1,12 @@
 h1. Play 1.0.1 -- Release notes
 
-**play 1.0.1** is a maintenance release of the play 1.0 branch. It fixes a lot of small bugs, provides a better binding for persistent JPA objects, auto-escaping of HTML and Javascript code in templates to avoid XSS security problems.
+**Play 1.0.1** is a maintenance release of the Play 1.0 branch. It fixes a lot of small bugs, provides a better binding for persistent JPA objects, auto-escaping of HTML and JavaScript code in templates to avoid XSS security problems.
 
-p(note). **play 1.0.1** is a maintenance release and is fully compatible with the 1.0 version. If you encounter any problems please ask us on the Google Group.
+p(note). **Play 1.0.1** is a maintenance release and is fully compatible with the 1.0 version. If you encounter any problems please ask us on the Google Group.
 
-You can read about the fixed bugs on the "1.0.1 roadmap page":http://www.playframework.org/roadmap/1.0.1. The most important changes are highlighted in this page:
+You can read about the fixed bugs on the "1.0.1 road map page":http://www.playframework.org/roadmap/1.0.1. The most important changes are highlighted in this page:
 
-h2. <a>Automatic escape of HTML code in templates</a>
+h2. <a>Automatic escaping for HTML code in templates</a>
 
 Now all dynamic expressions are escaped by the template engine to avoid XSS security issues in your application. So the **title** variable containing **==&lt;h1>Title&lt;/h1>==** is now escaped:
 
@@ -32,7 +32,7 @@ h2. <a>@javax.inject.Inject support</a>
 
 You can now use the **@Inject** annotation if you are using a Dependency Injection container like the one provided by the "Spring module":spring. The the **@Inject** annotation automatically injects defined beans in your controllers, jobs and mailer. It works on static fields. 
 
-For example to inject a **PriceWatcher** service defined in Spring to one of your controller, just do:
+For example to inject a **PriceWatcher** service defined in Spring to one of your controllers, just do:
 
 bc. public class Application extends Controller {
     
@@ -65,23 +65,23 @@ bc. public static void save(Long id) {
     user.save(); // ok
 }
 
-Now you can provide the **user.id** field yourself in the HTTP parameters. When Play find the **id** field, it loads the matching instance from the database before editing it. The other parameters provided by the HTTP request are then applied. So you can save it directly.
+Now you can provide the **user.id** field yourself in the HTTP parameters. When Play finds the **id** field, it loads the matching instance from the database before editing it. The other parameters provided by the HTTP request are then applied. So you can save it directly.
 
 bc. public static void save(User user) {
     user.save(); // ok with 1.0.1
 }
 
-Of course as this feature can break existing applications it is not enabled by default. You can enable it by adding the followin line to your **application.conf** file:
+Of course as this feature can break existing applications it is not enabled by default. You can enable it by adding the following line to your **application.conf** file:
 
 bc. future.bindJPAObjects=true
 
 This line is added to new applications created with the 1.0.1 release.
 
-h2. <a>Framework id can be set from the command line</a>
+h2. <a>Framework ID can be set from the command line</a>
 
-The framework id allows you to run different configurations for a same play! application (ie dev, test, staging, production, etc...).
+The framework ID allows you to run different configurations for a same Play application (ie dev, test, staging, production, etc…).
 
-Using the command line, you can now specify the application "framework id":ids the application will use. For example, to run an application in production mode:
+Using the command line, you can now specify the application "framework ID":ids the application will use. For example, to run an application in production mode:
 
 bc. play run --%production
 
@@ -90,15 +90,15 @@ With these lines defined in the **application.conf** file:
 bc. application.mode=dev
 %production.application.mode=prod
 
-It is compatible with all the existing commands using the framework id information. The default id is still defined using the **play id** command.
+It is compatible with all the existing commands using the framework ID information. The default ID is still defined using the **play id** command.
 
-By the way ,**play test** is then equivalent to:
+By the way, **play test** is then equivalent to:
 
 bc. play run --%test
 
 h2. <a>Custom validation</a>
 
-You don't find the validator you need in the **play.data.validation** package? Write your own. You can use the generic **@CheckWith** annotation to bind your own **Check** implementation.
+Can’t find the validator you need in the **play.data.validation** package? Write your own. You can use the generic **@CheckWith** annotation to bind your own **Check** implementation.
 
 For example:
 
@@ -119,7 +119,7 @@ bc. public class User {
 
 h2. <a>Test runner update</a>
 
-We've updated selenium to the 1.0.1 final version and improved the UI. Selenium tests now run in fullscreen. And some new functionalities like the "Run all tests" have been added.
+We’ve updated Selenium to the 1.0.1 final version and improved the UI. Selenium tests now run in fullscreen. And some new functionalities like the "Run all tests" have been added.
 
 !images/selenium-fullscreen!
 
@@ -146,9 +146,9 @@ bc. <!DOCTYPE html>
     </body>
 </html>
 
-It's just the default and you can of course change it to any doctype if you wish. However "HTML5":http://html5.org is surely the future and is way simpler.
+It’s just the default and you can of course change it to any doctype if you wish. However "HTML5":http://html5.org is surely the future and is way simpler.
 
-The default template comes with the **JQuery** Javascript library. This is because modern web applications need a good Javascript framework and we love "JQuery":http://www.jquery.com. Again it is just the default and you can of course override it with whatever Javascript library you want.
+The default template comes with the **JQuery** JavaScript library. This is because modern web applications need a good JavaScript framework and we love "JQuery":http://www.jquery.com. Again it is just the default and you can of course override it with whatever JavaScript library you want.
 
 Oh, and it comes with 2 default placeholders to inject even more scripts and/or styles. For example, add in your view:
 
@@ -156,7 +156,7 @@ bc. #{set 'moreScripts'}
 <script src="@{'/public/javascripts/gears_init.js'}" type="text/javascript" ></script>
 #{/set}
 
-And the gear Javascript library will be accessible in your view.
+And the gear JavaScript library will be accessible in your view.
 
 h2. <a>Improved #{list} tag</a>
 
@@ -168,7 +168,7 @@ bc. #{list items:users, as:'user'}
     <li>${user}</li>
 #{/list}
 
-to:
+as:
 
 bc. #{list users, as:'user'}
     <li>${user}</li>
@@ -182,9 +182,9 @@ bc. #{list users}
 
 h2. <a>New #{jsAction /} tag</a>
 
-The **#{jsAction /}** tag allows to import a server-side defined route as a Javascript function. It is very useful if you need to call an URL with an AJAX call using free variables.
+The **#{jsAction /}** tag allows to import a server-side defined route as a JavaScript function. It is very useful if you need to call an URL with an AJAX call using free variables.
 
-Let's see an example:
+Let’s see an example:
 
 bc. GET     /users/{id}        Users.show
 
@@ -198,31 +198,30 @@ bc. <script type="text/javascript">
     }
 </script>
 
-As you see you use the **:ame** syntax to declare free variables. You can mix free and fixed variables together. The **#{jsAction /}** tag generates a Javascript function. This function takes a Javascript object as parameter that must define all the free variables.
+As you see you use the **:name** syntax to declare free variables. You can mix free and fixed variables together. The **#{jsAction /}** tag generates a JavaScript function. This function takes a JavaScript object as parameter that must define all the free variables.
 
-h2. <a>New sample application: 'booking'</a>
+h2. <a>New sample application: ‘booking’</a>
 
-The **booking** application is a port of the well known "booking application from the JBoss seam framework":http://docs.jboss.com/seam/latest/reference/en-US/html/tutorial.html#booking.
+The **booking** application is a port of the well known "booking application from the JBoss Seam framework":http://docs.jboss.com/seam/latest/reference/en-US/html/tutorial.html#booking.
 
-It demonstrates how you can manage complex states client side in a RestFul way with a stateless web framework.
+It demonstrates how you can manage complex states client side in a RESTful way with a stateless web framework.
 
 !images/booking!
 
-h2. <a>Eclipse plugin is on his way</a>
+h2. <a>Eclipse plug-in is on his way</a>
 
-We are working hard to provide a dedicated eclipse plugin. The current status is alpha but already usable. You can find it in the **support/eclipse** directory of your play installation.
+We are working hard to provide a dedicated Eclipse plug-in. The current status is alpha but already usable. You can find it in the **support/eclipse** directory of your Play installation.
 
 !images/eclipse-plugin!
 
 h2. <a>Support for IntelliJ IDEA</a>
 
-Play! framework now supports "IntelliJ IDEA":http://www.jetbrains.com/idea/ out of the box!
+The Play framework now supports "IntelliJ IDEA":http://www.jetbrains.com/idea/ out of the box!
 
-To convert your Play! application into an IntelliJ IDEA project, use the **idealize** command:
+To convert your Play application into an IntelliJ IDEA project, use the **idealize** command:
 
 bc. # play idealize myApp
 
 !images/intellij!
 
 You can use the Run and Debug using the context menu.
-

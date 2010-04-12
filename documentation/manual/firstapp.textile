@@ -39,7 +39,7 @@ The **‘play new’** command creates a new directory **helloworld/** and popul
 
 **lib/** contains all optional Java libraries packaged as standard .jar files.
 
-**public/** contains all the publicly available resources, which includes Javascript, stylesheets and images directories.
+**public/** contains all the publicly available resources, which includes JavaScript, stylesheets and images directories.
 
 **test/** contains all the application tests. Tests are either written either as Java JUnit tests or as Selenium tests.
 

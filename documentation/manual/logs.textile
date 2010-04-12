@@ -1,6 +1,6 @@
 h1. Configure logs
 
-The play logger is built on "Log4j":http://logging.apache.org/log4j/1.2/index.html. Since most Java libraries use Log4j or a wrapper able to use Log4j as a backend, you can easily configure logging that is well suited to your application.
+The Play logger is built on "Log4j":http://logging.apache.org/log4j/1.2/index.html. Since most Java libraries use Log4j or a wrapper able to use Log4j as a backend, you can easily configure logging that is well-suited to your application.
 
 h2. <a>Logging from your application</a>
 
@@ -30,7 +30,7 @@ You can change this value without restarting the server. Note that this level on
 
 If you need to fully configure Log4j, create a **log4j.properties** file in the **conf/** directory. Since this directory is the first element of the classpath, this file will be the default used by all libraries.
 
-The default log4j configuration is the following:
+The default Log4j configuration is the following:
 
 bc. log4j.rootLogger=ERROR, Console
 

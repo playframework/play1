@@ -1,6 +1,6 @@
 h1. Play 1.0.1 -- Release notes
 
-**play 1.0.1** is a maintenance release of the play 1.0 branch. It fixes a lot of small bugs, provides a better binding for persistent JPA objects, auto-escaping of HTML and Javascript code in templates to avoid XSS security problems.
+**play 1.0.1** is a maintenance release of the play 1.0 branch. It fixes a lot of small bugs, provides a better binding for persistent JPA objects, auto-escaping of HTML and JavaScript code in templates to avoid XSS security problems.
 
 p(note). **play 1.0.1** is a maintenance release and is fully compatible with the 1.0 version. If you encounter any problems please ask us on the Google Group.
 
@@ -148,7 +148,7 @@ bc. <!DOCTYPE html>
 
 It's just the default and you can of course change it to any doctype if you wish. However "HTML5":http://html5.org is surely the future and is way simpler.
 
-The default template comes with the **JQuery** Javascript library. This is because modern web applications need a good Javascript framework and we love "JQuery":http://www.jquery.com. Again it is just the default and you can of course override it with whatever Javascript library you want.
+The default template comes with the **JQuery** JavaScript library. This is because modern web applications need a good JavaScript framework and we love "JQuery":http://www.jquery.com. Again it is just the default and you can of course override it with whatever JavaScript library you want.
 
 Oh, and it comes with 2 default placeholders to inject even more scripts and/or styles. For example, add in your view:
 
@@ -156,7 +156,7 @@ bc. #{set 'moreScripts'}
 <script src="@{'/public/javascripts/gears_init.js'}" type="text/javascript" ></script>
 #{/set}
 
-And the gear Javascript library will be accessible in your view.
+And the gear JavaScript library will be accessible in your view.
 
 h2. <a>Improved #{list} tag</a>
 
@@ -182,7 +182,7 @@ bc. #{list users}
 
 h2. <a>New #{jsAction /} tag</a>
 
-The **#{jsAction /}** tag allows to import a server-side defined route as a Javascript function. It is very useful if you need to call an URL with an AJAX call using free variables.
+The **#{jsAction /}** tag allows to import a server-side defined route as a JavaScript function. It is very useful if you need to call an URL with an AJAX call using free variables.
 
 Let's see an example:
 
@@ -198,7 +198,7 @@ bc. <script type="text/javascript">
     }
 </script>
 
-As you see you use the **:ame** syntax to declare free variables. You can mix free and fixed variables together. The **#{jsAction /}** tag generates a Javascript function. This function takes a Javascript object as parameter that must define all the free variables.
+As you see you use the **:ame** syntax to declare free variables. You can mix free and fixed variables together. The **#{jsAction /}** tag generates a JavaScript function. This function takes a JavaScript object as parameter that must define all the free variables.
 
 h2. <a>New sample application: 'booking'</a>
 

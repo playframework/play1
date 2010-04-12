@@ -11,7 +11,7 @@
 ~ Display the content of the app_path.logs/system.out file and wait for new lines to display.
 ~ If app_path is omitted, the current directory is used.
 ~
-~ It is pretty the same than a 'tail -f logs/system.out'
+~ It is pretty much the same than a 'tail -f logs/system.out'
 ~
 ~ The logs/system.out contains the System.out stream when the application is run in background.
 ~

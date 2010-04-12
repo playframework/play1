@@ -1,16 +1,16 @@
-h1. Sending emails with play
+h1. Sending e-mail with Play
 
-You can use the play.libs.Mail utility to send emails very easily:
+You can use the play.libs.Mail utility to send e-mail very easily:
 
 bc. Mail.send("sender@zenexity.fr","recipient@zenexity.fr","Subject","Message");
 
 h2. <a>Mail and MVC integration</a>
 
-You can also send complex, dynamic emails using the standard templates mechanism and syntax.
+You can also send complex, dynamic e-mail using the standard templates mechanism and syntax.
 
 First,  define a **Mailer notifier** in your application. Your mailer notifier must subclass **play.mvc.Mailer** and be part of the **notifiers** package. 
 
-Each public static method will be an email sender, in a similar manner as actions for a MVC controller.
+Each public static method will be an e-mail sender, in a similar manner as actions for a MVC controller.
 
 For example:
 
@@ -40,9 +40,9 @@ public class Mails extends Mailer {
  
 }
 
-h3. text/html email 
+h3. text/html e-mail 
 
-The send call will render the app/views/Mails/welcome.html template as the body of the email message.
+The send call will render the app/views/Mails/welcome.html template as the body of the e-mail message.
 
 bc. <html><body><p>Welcome <b>${user.name}</b>, </p>
 ...
@@ -58,11 +58,11 @@ Your new password is <b>${newpassword}</b>.
 </body>
 </html>
 
-h3. text/plain email
+h3. text/plain e-mail
 
-If no HTML template is defined, then a text/plain email is sent using the text template.
+If no HTML template is defined, then a text/plain e-mail is sent using the text template.
 
-The send call will render the app/views/Mails/welcome.txt template as the body of the email message.
+The send call will render the app/views/Mails/welcome.txt template as the body of the e-mail message.
 
 bc. Welcome ${user.name},
 ...
@@ -75,7 +75,7 @@ bc. Hello ${user.name},
  
 Your new password is ${newpassword}.
 
-h3. text/html email with text/plain alternative
+h3. text/html e-mail with text/plain alternative
 
 If an HTML template is defined and a text template exists, then the text template will be used as an alternative message. In our previous example, if both 
 
@@ -85,12 +85,11 @@ and
 
 app/views/Mails/lostPassword.txt
 
-are defined, then the email will be sent in text/html as defined in lostPassword.html with an alternative part as defined in lostPassword.txt.
-So you can send nice HMTL emails to your friends and still please those geeky friends that still use mutt ;)
+are defined, then the e-mail will be sent in text/html as defined in lostPassword.html with an alternative part as defined in lostPassword.txt. So you can send nice HMTL e-mail to your friends and still please those geeky friends that still use mutt ;)
 
 h2. <a>SMTP configuration</a>
 
-First of all, you need to define the smtp server to use:
+First of all, you need to define the SMTP server to use:
 
 bc. mail.smtp.host=smtp.taldius.net
 
@@ -101,21 +100,21 @@ mail.smtp.pass=topsecret
 
 h3. Channel & ports
 
-There are two ways to send the email over an encrypted channel. If your server supports the **starttls** command (see: rfc 2487), you can use a clear connection on port 25 that will switch to SSL/TLS. You can do so by adding this configuration option:
+There are two ways to send the e-mail over an encrypted channel. If your server supports the **starttls** command (see: RFC 2487), you can use a clear connection on port 25 that will switch to SSL/TLS. You can do so by adding this configuration option:
 
 bc. mail.smtp.channel=starttls
 
-Your server may also provide a smtp-over-ssl (smtps) connector, that is a SSL socket listening on port 465. In that case, you tell play to use this setup using the configuration option:
+Your server may also provide a SMTP-over-SSL (SMTPS) connector, that is a SSL socket listening on port 465. In that case, you tell Play to use this setup using the configuration option:
 
 bc. mail.smtp.channel=ssl
 
 h2. <a>More about configuration</a>
 
-Under the hood, play uses JavaMail to perform the actual smtp transactions. If you need to see what's going on, try:
+Under the hood, Play uses JavaMail to perform the actual SMTP transactions. If you need to see what’s going on, try:
 
 bc. mail.debug=true
 
-When using ssl connections with JavaMail, the default ssl behavior is to drop the connection if the remote server certificate is not signed by a root certificate. This is the case in particular when using a self-signed certificate. Play's default behavior is to skip that check. You can control this using the following property:
+When using SSL connections with JavaMail, the default SSL behavior is to drop the connection if the remote server certificate is not signed by a root certificate. This is the case in particular when using a self-signed certificate. Play’s default behavior is to skip that check. You can control this using the following property:
 
 bc. mail.smtp.socketFactory.class
 
@@ -125,7 +124,7 @@ bc. mail.smtp.port=2500
 
 h2. <a>Using Gmail</a>
 
-To use gmail's servers, use this configuration: 
+To use Gmail’s servers, use this configuration: 
 
 bc. mail.smtp.host=smtp.gmail.com
 mail.smtp.user=yourGmailLogin

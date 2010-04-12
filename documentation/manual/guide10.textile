@@ -2,7 +2,7 @@ h1. Completing the application tests
 
 We’ve now finished the blog engine we wanted to create in this tutorial. However the project itself is not yet completely finished. To be totally confident with our code we need to add more tests to the project. 
 
-Of course we’ve already written unit tests in order to test all the yabe model layer functionalities. And it’s great as it will ensure that the core functionalities of the blog engine are well tested. But a web application is not only about the ‘model’ part. We need to ensure that the web interface works as expected. That means testing the controller layer of the yabe blog engine. But we even need to test the UI itself, as for example, our Javascript code.
+Of course we’ve already written unit tests in order to test all the yabe model layer functionalities. And it’s great as it will ensure that the core functionalities of the blog engine are well tested. But a web application is not only about the ‘model’ part. We need to ensure that the web interface works as expected. That means testing the controller layer of the yabe blog engine. But we even need to test the UI itself, as for example, our JavaScript code.
 
 h2. <a>Testing the controller part</a>
 

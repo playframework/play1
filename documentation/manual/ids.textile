@@ -1,18 +1,18 @@
 h1. Manage application.conf in several environments
 
-When you work in a team, different developers will use different configuration keys in their **application.conf**. For example, the log level, some database configuration... This generally leads to recurrent conflicts when you commit the file using your VCS. 
+When you work in a team, different developers will use different configuration keys in their **application.conf**. For example, the log level, some database configuration… This generally leads to recurrent conflicts when you commit the file using your VCS. 
 
 Furthermore, different deployment environments - e.g. dev, test, staging and production - need different configurations.
 
 h2. <a>The framework ID</a>
 
-To resolve this problem, play allows you to give an **ID** to each framework installation. Use the **id** command of the play tool to define this ID :
+To resolve this problem, Play allows you to give an **ID** to each framework installation. Use the **id** command of the play tool to define this ID:
 
 bc. play id
 
 !images/id!
 
-You can then prefix your configuration keys with the framework ID for which the configuration option is intended :
+You can then prefix your configuration keys with the framework ID for which the configuration option is intended:
 
 bc. application.name=Cool app
 application.mode=dev
@@ -30,9 +30,9 @@ application.log=INFO
 %prod.application.log=INFO
 %prod.application.mode=prod
 
-h2. <a>Framework id can be set from command line</a>
+h2. <a>Framework ID can be set from the command line</a>
 
-You can specify the framework id to use for a particular command directly from the command line. For example to run an application in production mode you can use:
+You can specify the framework ID to use for a particular command directly from the command line. For example to run an application in production mode you can use:
 
 bc. play run --%production
 
@@ -41,9 +41,9 @@ with these line defined in the **application.conf** file:
 bc. application.mode=dev
 %production.application.mode=prod
 
-It should be compatible with all commands using the framework id information. The default id is still defined using the **play id** command.
+It should be compatible with all commands using the framework ID information. The default ID is still defined using the **play id** command.
 
-By the way **play test** is then equivalent to:
+By the way, **play test** is then equivalent to:
 
 bc. play run --%test
 

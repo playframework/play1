@@ -4,17 +4,17 @@ Here some simple tips to optimize your application for production.
 
 h2. <a>Configure your application.conf for production</a>
 
-First off, the best way to specify production mode is to give a specific ID to your production framework. Let's pick **production** as an example. Refer "manage application.conf in several environments":ids to see how.
+First off, the best way to specify production mode is to give a specific ID to your production framework. Let’s pick **production** as an example. Refer "manage application.conf in several environments":ids to see how.
 
 h3. Set the framework in prod mode:
 
 bc. %production.application.mode=prod
 
-In this mode, the framework will pre-compile all Java sources and templates. If an error is found at this step, the application will not start. The sources modifications will not be hot reloaded.
+In this mode, the framework will pre-compile all Java sources and templates. If an error is found at this step, the application will not start. Source modifications will not be hot reloaded.
 
 h3. Define a real database:
 
-If you have used a development database (either **db=mem** or **db=fs**), you should configure a more robust database engine :
+If you have used a development database (either **db=mem** or **db=fs**), you should configure a more robust database engine:
 
 bc. %production.db.url=jdbc:mysql://localhost/prod
 %production.db.driver=com.mysql.jdbc.Driver
@@ -25,7 +25,7 @@ h3. Disable JPA automatic schema update:
 
 If you have used the automatic schema update feature provided by Hibernate, you should disable this feature for production. 
 
-For your production server, it's usually a bad idea to let Hibernate automatically ALTER your productions schema and data... 
+For your production server, it’s usually a bad idea to let Hibernate automatically ALTER your productions schema and data… 
 
 The initial deployment is potentially a different issue. In this case only specify:
 
@@ -33,16 +33,16 @@ bc. %production.jpa.ddl=create
 
 h3. Define a secure secret key:
 
-The play secret key is used to secure cryptographic functions, like the session signature. Your application must keep this key very secret.
+The Play secret key is used to secure cryptographic functions, like the session signature. Your application must keep this key very secret.
 
 bc. %production.application.secret=c12d1c59af499d20f4955d07255ed8ea333
 
-You can use the **play secret** command to generate a new secure and random key (At least on a 'real' OS). If you plan to distribute your application to several servers, remember to use the **same key** for all application instances!
+You can use the **play secret** command to generate a new secure and random key (at least on a ‘real’ OS). If you plan to distribute your application to several servers, remember to use the **same key** for all application instances!
 
 
 h2. <a>Configure logging</a>
 
-For production it's a good idea to use rolling log files. Do not send log to the Console, since they will be written in the **logs/system.out** file and it will grow without bound!
+For production it’s a good idea to use rolling log files. Do not send logging to the Console, since it will be written to the **logs/system.out** file and it will grow without bound!
 
 Create a custom **log4j.properties** in the **conf/**, directory:
 
@@ -58,7 +58,7 @@ log4j.appender.Rolling.MaxBackupIndex=100
 log4j.appender.Rolling.layout=org.apache.log4j.PatternLayout
 log4j.appender.Rolling.layout.ConversionPattern=%d{ABSOLUTE} %-5p ~ %m%n
 
-h2. <a>Setup a front-end HTTP server</a>
+h2. <a>Set-up a front-end HTTP server</a>
 
 You can easily deploy your application as a stand-alone server by setting the application HTTP port to **80**:
 
@@ -66,9 +66,9 @@ bc. %production.http.port=80
 
 But if you plan to host several applications in the same server or load balance several instances of your application for scalability or fault tolerance, you can use a front-end HTTP server.
 
-**Note that using a front-end HTTP server will never give you better performance than using play server directly!**
+**Note that using a front-end HTTP server will never give you better performance than using Play server directly!**
 
-h3. Setup with lighttpd
+h3. Set-up with lighttpd
 
 This example shows you how to configure "lighttpd":http://www.lighttpd.net/ as a front-end web server. Note that you can do the same with Apache, but if you only need virtual hosting or load balancing, lighttpd is a very good choice and much easier to configure!
 
@@ -92,9 +92,9 @@ $HTTP["host"] =~ "www.loadbalancedapp.com" {
     )
 }
 
-h3. Setup with Apache
+h3. Set-up with Apache
 
-The example below shows a simple setup with "Apache httpd server":http://httpd.apache.org/ running in front of a standard play configuration. 
+The example below shows a simple set-up with "Apache httpd server":http://httpd.apache.org/ running in front of a standard Play configuration. 
 
 bc. LoadModule proxy_module modules/mod_proxy.so
 ...
@@ -108,9 +108,9 @@ bc. LoadModule proxy_module modules/mod_proxy.so
 
 h3. Apache as a front proxy to allow transparent upgrade of your application
 
-The basic idea is to run 2 Play! instances of your web application and let the front end proxy load balance them. In case one is not available, it will forward all the requests to the available one.
+The basic idea is to run 2 Play instances of your web application and let the front-end proxy load-balance them. In case one is not available, it will forward all the requests to the available one.
 
-Let's start our the same Play! application two times: one on port 9999 and one on port 9998.
+Let’s start our the same Play application two times: one on port 9999 and one on port 9998.
 
 Copy the application 2 times and edit the application.conf in the conf directory to change the port numbers.
 
@@ -118,7 +118,7 @@ For each web application directory:
 
 bc. play start mysuperwebapp
 
-Now, let's configure our Apache web server to have a load balancer.
+Now, let’s configure our Apache web server to have a load balancer.
 
 In Apache, I have the following configuration:
 
@@ -145,9 +145,9 @@ bc. <VirtualHost mysuperwebapp.com:80>
   ProxyPassReverse / http://localhost:9998/
 </VirtualHost>
 
-The important part is balancer://mycluster. This declares a load balancer. The +H option means that the second Play! application is on stand-by. But you can also instructs to load balance.
+The important part is balancer://mycluster. This declares a load balancer. The +H option means that the second Play application is on stand-by. But you can also instruct it to load-balance.
 
-Everytime you want to upgrade mysuperwebapp, here is what you need to do:
+Every time you want to upgrade mysuperwebapp, here is what you need to do:
 
 bc. play stop mysuperwebapp1
 
@@ -159,21 +159,20 @@ You can now safely update mysuperwebapp2.
 
 Apache also provides a way to view the status of your cluster. Simply point your browser to /balancer-manager to view the current status of your clusters.
 
-Because Play! is completely stateless you don't have to manage sessions between the 2 clusters. You can actually easily scale to more than 2 play! instances.
+Because Play is completely stateless you don’t have to manage sessions between the 2 clusters. You can actually easily scale to more than 2 Play instances.
 
 h3. Advanced proxy settings
 
-When using a HTTP frontal server, requests addresses are seen as coming from the http server. In a usual setup, where you both have the play app and the proxy running on the same machine, the play app will see the requests coming from 127.0.0.1.
+When using a HTTP frontal server, request addresses are seen as coming from the HTTP server. In a usual set-up, where you both have the Play app and the proxy running on the same machine, the Play app will see the requests coming from 127.0.0.1.
 
-Proxy servers can add a specific header to request to tell the proxied application where the request came from. Most web servers will add a X-Forwarded-For header with the remote client IP address as first argument. If you enable the forward support in your play app configuration:
+Proxy servers can add a specific header to request to tell the proxied application where the request came from. Most web servers will add a X-Forwarded-For header with the remote client IP address as first argument. If you enable the forward support in your Play app configuration:
 
 bc. XForwardedSupport=127.0.0.1,10.0.0.25
 
 Play will change the request.remoteAddress from the IP of the proxy with the IP of the client. You have to list the IP addresses of your proxy servers for this to work.
 
-However, the host header is untouched, it'll remain issued by the proxy. If you use Apache 2.x, you can add a directive like: 
+However, the host header is untouched, it’ll remain issued by the proxy. If you use Apache 2.x, you can add a directive like: 
 
 bc. ProxyPreserveHost on
 
-The host: header will be the original host request header issued by the client. By combining theses two techniques, your app is like directly exposed.
-
+The host: header will be the original host request header issued by the client. By combining theses two techniques, your app will appear to be directly exposed.

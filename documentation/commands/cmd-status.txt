@@ -12,10 +12,10 @@
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
-~ This script try to connect to the /@status URL of the running application to request the application status.
-~ The application status contains usefull informations about the running application.
+~ This script tries to connect to the /@status URL of the running application to request the application status.
+~ The application status contains useful informations about the running application.
 ~
-~ The status command is aimed to monitor application running on production servers.
+~ The status command is aimed at monitoring applications running on production servers.
 ~
 ~ Options:
 ~ ~~~~~~~~

@@ -1,4 +1,4 @@
-h1. Five cool things you can do with play
+h1. Five cool things you can do with Play
 
 Five examples to show the philosophy behind the Play framework.
 

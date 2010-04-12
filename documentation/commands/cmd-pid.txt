@@ -1,6 +1,6 @@
 ~ Name:
 ~ ~~~~~
-~ pid -- Show the pid of a running application
+~ pid -- Show the process ID of a running application
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~

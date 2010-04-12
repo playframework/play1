@@ -37,4 +37,4 @@ p(note). **Warning**
  
 The ''ecss'' module just enable constants in static CSS files. The CSS files will not be parsed for each request.
  
-If you want to enable CSS variables whose values depend on your application context, it's a different story... You can for example generate the stylesheet from a play Controller action, or define some CSS rules in your main HTML template.
+If you want to enable CSS variables whose values depend on your application context, it's a different story... You can for example generate the stylesheet from a Play Controller action, or define some CSS rules in your main HTML template.

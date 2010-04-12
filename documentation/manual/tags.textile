@@ -2,11 +2,11 @@ h1. Built-in template tags
 
 These are the standard tags built in the template engine.
 
-p(note). If you want to search the standard play Java extensions, you should look at the "JavaDoc":/@api/play/templates/JavaExtensions.html
+p(note). If you want to search the standard Play Java extensions, you should look at the "JavaDoc":/@api/play/templates/JavaExtensions.html
 
 h2. <a>a</a>
 
-The **a** tag inserts a HTML link to a controller action.
+The **a** tag inserts an HTML link to a controller action.
 
 bc. #{a @Application.logout()}Disconnect#{/a}
 
@@ -14,7 +14,7 @@ Rendered as:
 
 bc. <a href="/application/logout">Disconnect</a>
 
-If the action you try call does not have any route able to invoke it using a GET method, play will automatically generate an hidden form that will be submitted on link click using javascript.
+If the action you try call does not have any route able to invoke it using a GET method, Play will automatically generate a hidden form that will be submitted on link click using JavaScript.
 
 h2. <a>doLayout</a>
 
@@ -28,25 +28,25 @@ bc. <!-- common header here -->
 
 h2. <a>extends</a>
 
-Make the template inherit another template.
+Makes the template inherit another template.
 
 bc. #{extends 'main.html' /}
 
 h2. <a>form</a>
 
-Insert a **form** tag. HTTP method is guessed from the route, and defaults to POST. If there are both GET and POST routes configured for the URL, the tag will default to using the first route defined in routes.  
+Inserts a **form** tag. The HTTP method is guessed from the route, and defaults to POST. If there are both GET and POST routes configured for the URL, the tag will default to using the first route defined in routes.  
 
-Optional **id** attribute sets an id to the form element. 
-Optional **enctype** attribute sets the form's data encoding. it defaults to ''application/x-www-form-urlencoded''.
+* Optional **id** attribute sets an ID to the form element. 
+* Optional **enctype** attribute sets the form’s data encoding. it defaults to ‘application/x-www-form-urlencoded’.
 
-Charset encoding is always ''utf-8''
+Charset encoding is always ‘utf-8’.
 
 bc. #{form @Client.create() , id:'creationForm' enctype:'multipart/form-data' }
    ...
 #{/form}
 
 
-Rendered as :
+Rendered as:
 
 bc. <form action="/client/create" id="frm" method="POST" accept-charset="utf-8" enctype="multipart/form-data">
  ...
@@ -54,8 +54,7 @@ bc. <form action="/client/create" id="frm" method="POST" accept-charset="utf-8" 
 
 h2. <a>field</a>
 
-The field tag is an helper, based on the spirit of the Don't Repeat
-Yourself spirit. It works this way:
+The field tag is an helper, based on the spirit of the Don’t Repeat Yourself spirit. It works this way:
 
 Instead of writing this:
 
@@ -75,11 +74,11 @@ bc. #{field 'user.name'}
 </p>
 #{/}
 
-So you don't repeat **user.name** again and again.
+So you don’t repeat **user.name** again and again.
 
 h2. <a>get</a>
 
-Retrieve a value defined with a **set** tag. You may use  the get/set mechanism to exchange values between templates, layouts and sub-templates.
+Retrieves a value defined with a **set** tag. You may use  the get/set mechanism to exchange values between templates, layouts and sub-templates.
 
 bc. <head>
     <title>#{get 'title' /}
@@ -93,7 +92,7 @@ bc. <head>
 
 h2. <a>i18n</a>
 
-Export localized messages in Javascript. Localized messages are available from your javascript code using the **i18n()** function.
+Exports localized messages in JavaScript. Localized messages are available from your JavaScript code using the **i18n()** function.
 
 Define your translations in the **conf/messages** file.
 
@@ -104,14 +103,14 @@ Include the messages in your template (or layout) page:
 
 bc. #{i18n /}
 
-And retrieve keys from Javascript:
+And retrieve keys from JavaScript:
 
 bc. alert(i18n('hello_world'));
 alert(i18n('hello_someone', 'John'));
 
 h2. <a>include</a>
 
-Include another template. All variable of the current template are directly availables in the included template.
+Includes another template. All variables of the current template are directly available in the included template.
 
 bc. <div id="tree">
     #{include 'tree.html' /}
@@ -119,7 +118,7 @@ bc. <div id="tree">
 
 h2. <a>if</a>
 
-Evaluate the given test, and if true, evaluate the tag body.
+Evaluates the given test, and if true, evaluates the tag body.
 
 bc. #{if user.countryCode == 'en"' }
     Connected user is ${user}
@@ -150,7 +149,7 @@ bc. #{if user}
     Please log in
 #{/else}
 
-However, you can use it also with the **list** tag and it will be executed if the list was empty.
+However, you can also use it with the **list** tag and it will be executed if the list was empty.
 
 bc. #{list items:task, as:'task'}
     <li>${task}</li>
@@ -178,7 +177,7 @@ As for **else**, you can use it with the **list** tag.
 
 h2. <a>list</a>
 
-Iterate over an object collection.
+Iterates over an object collection.
 
 bc. <ul>
 #{list items:products, as:'product'}
@@ -186,7 +185,7 @@ bc. <ul>
 #{/list}
 </ul>
 
-The tag define implicit variables in his body. The variable names are prefixed with the loop variable name.
+The tag defines implicit variables in his body. The variable names are prefixed with the loop variable name.
 
 * **name_index**, the index of the item, starting at 1
 * **name_isLast**, true for the last element
@@ -208,13 +207,13 @@ bc. #{list items:users, as:'user'}
     <li>${user}</li>
 #{/list}
 
-to:
+as:
 
 bc. #{list users, as:'user'}
     <li>${user}</li>
 #{/list}
 
-**for** loops are easy to create using Groovy **range** object :
+**for** loops are easy to create using Groovy **range** object:
 
 bc. #{list items:0..10, as:'i'}
     ${i}
@@ -249,9 +248,9 @@ bc. #{set 'title'}
 
 h2. <a>jsAction</a>
 
-The #{jsAction /} tag returns a JavaScript function which constructs a URL based on a server action and free variables. It does not perform any AJAX request, these have to be done by hand using the returned URL.
+The #{jsAction /} tag returns a JavaScript function which constructs a URL based on a server action and free variables. It does not perform an AJAX request; these have to be done by hand using the returned URL.
 
-Let's see an example:
+Let’s see an example:
 
 bc. GET     /users/{id}        Users.show
 
@@ -264,5 +263,3 @@ bc. <script type="text/javascript">
         $('userDetail').load( showUserAction({id: userId}) )
     }
 </script>
-
-

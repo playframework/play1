@@ -12,7 +12,7 @@ Start to create a new application in the classical way.
 
 bc. # play new test-gwt
 
-Then edit the conf/application.conf file to enable the GWTmodule :
+Then edit the conf/application.conf file to enable the GWTmodule:
 
 bc. # Additional modules
 # ~~~~~
@@ -26,7 +26,7 @@ Now use the **gwt:init** command to bootstrap your GWT project in the existing P
 
 bc. play gwt:init test-gwt
 
-This will add some files and directories to your project : 
+This will add some files and directories to your project: 
 
 * A **/gwt-public** directory that will host all the GWT compiled resources. A default **index.html** file has been created to launch the GWT UI. If you don't define any specific route to serve this **staticDir**, the GWT module will automatically map it to the **/app** path; so the GWT will be available at the **http://localhost:9000/app** URL.
 * The **/app/Main.gwt.xml** GWT module descriptor file. It is the main GWT module of your application. By default, it defines the **client.Main** class as entry point.
