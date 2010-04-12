@@ -191,4 +191,10 @@ public class Application extends Controller {
         renderText(results);
     }
 
+    public static void selectTag(){
+      List<User> users = new ArrayList<User>(10);
+      for(long i = 0; i < 10; i++)
+        users.add(new User("User-" + i));
+      render(users);
+    }
 }

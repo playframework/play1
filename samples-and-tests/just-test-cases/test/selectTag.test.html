@@ -1,0 +1,12 @@
+#{selenium 'Check #select tag'}
+	open('@{Application.selectTag()}')
+	assertElementPresent('css=#select1 option')
+	assertTextPresent('One king-size bed')
+	assertElementPresent('css=#select1 option[value=3]')
+#{/selenium}
+#{selenium 'Check #select tag with iterable based content'}
+	open('@{Application.selectTag()}')
+	assertElementPresent('css=#select2 option')
+	assertText('css=#select2 option[value="User-9"]', 'User-9')
+	assertElementPresent('css=#select2 option[value="User-5"][selected]')
+#{/selenium}

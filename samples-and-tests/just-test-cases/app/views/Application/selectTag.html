@@ -1,0 +1,9 @@
+*{Retro-compatibility}*
+#{select 'booking.beds', value:2, id:'select1'}
+	#{option 1}One king-size bed#{/option}
+	#{option 2}Two double beds#{/option}
+	#{option 3}Three beds#{/option}
+#{/select}
+
+*{New select with "automatic" options}*
+#{select 'users', items:users, valueProperty:'name', labelProperty:'name', value:'User-5', class:"test", id:'select2' /}

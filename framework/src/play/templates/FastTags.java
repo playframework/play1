@@ -38,23 +38,11 @@ public class FastTags {
         out.println("<input type=\"hidden\" name=\"authenticityToken\" value=\"" + Session.current().getAuthenticityToken()+"\">");
     }
 
-    public static void _select(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        String name = args.get("arg").toString();
-        String size = args.containsKey("size") ? args.get("size").toString() : "1";
-        Object value = args.get("value");
-        TagContext.current().data.put("selected", value);
-        out.print("<select name=\"" + name +"\" size=\""+size+"\" "+serialize(args, "name", "size")+">");
-        if(body != null) {
-            out.println(JavaExtensions.toString(body));
-        }
-        out.print("</select>");
-    }
-
     public static void _option(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         Object value = args.get("arg");
         Object selectedValue = TagContext.parent("select").data.get("selected");
         boolean selected = selectedValue != null && value != null && selectedValue.equals(value);
-        out.print("<option value=\""+(value == null ? "" : value)+"\" "+(selected ? "selected" : "")+""+serialize(args, "selected", "value")+">");
+        out.print("<option value=\""+(value == null ? "" : value)+"\" "+(selected ? "selected=\"selected\"" : "")+""+serialize(args, "selected", "value")+">");
         out.println(JavaExtensions.toString(body));
         out.print("</option>");
     }
@@ -270,7 +258,7 @@ public class FastTags {
     }
 
 
-    static String serialize(Map<?, ?> args, String... unless) {
+    public static String serialize(Map<?, ?> args, String... unless) {
         StringBuffer attrs = new StringBuffer();
         for(Object o : args.keySet()) {
             String attr = o.toString();
