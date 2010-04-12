@@ -299,7 +299,7 @@ All variables added to the **renderArgs** scope will be available from the templ
 
 Add these 2 keys to the configuration file:
 
-bc. # Configuration of the blog engine
+bc. # Blog engine configuration
 # ~~~~~
 blog.title=Yet another blog
 blog.baseline=We won't write about anything

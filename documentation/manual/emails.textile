@@ -42,7 +42,7 @@ public class Mails extends Mailer {
 
 h3. text/html e-mail 
 
-The send call will render the app/views/Mails/welcome.html template as the body of the e-mail message.
+The send call will render the app/views/Mails/welcome.html template as the e-mail message body.
 
 bc. <html><body><p>Welcome <b>${user.name}</b>, </p>
 ...
@@ -62,7 +62,7 @@ h3. text/plain e-mail
 
 If no HTML template is defined, then a text/plain e-mail is sent using the text template.
 
-The send call will render the app/views/Mails/welcome.txt template as the body of the e-mail message.
+The send call will render the app/views/Mails/welcome.txt template as the e-mail message body.
 
 bc. Welcome ${user.name},
 ...

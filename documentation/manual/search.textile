@@ -1,6 +1,6 @@
 h1. Search module
 
-The **Search** module allows you to have basic full text search functionalities to your JPA Model. It is based on Lucene, and requires a real file system to store its indexes.
+The **Search** module allows you to have basic full text search functionality to your JPA Model. It is based on Lucene, and requires a real file system to store its indexes.
 
 h2. <a> Enable the module</a>
 

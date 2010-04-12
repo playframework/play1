@@ -169,7 +169,7 @@ Proxy servers can add a specific header to request to tell the proxied applicati
 
 bc. XForwardedSupport=127.0.0.1,10.0.0.25
 
-Play will change the request.remoteAddress from the IP of the proxy with the IP of the client. You have to list the IP addresses of your proxy servers for this to work.
+Play will change the request.remoteAddress from the proxy’s IP to the client’s IP. You have to list the IP addresses of your proxy servers for this to work.
 
 However, the host header is untouched, it’ll remain issued by the proxy. If you use Apache 2.x, you can add a directive like: 
 

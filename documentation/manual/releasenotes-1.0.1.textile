@@ -119,7 +119,7 @@ bc. public class User {
 
 h2. <a>Test runner update</a>
 
-We’ve updated Selenium to the 1.0.1 final version and improved the UI. Selenium tests now run in fullscreen. And some new functionalities like the "Run all tests" have been added.
+We’ve updated Selenium to the 1.0.1 final version and improved the UI. Selenium tests now run in fullscreen. And some new functionality like the "Run all tests" have been added.
 
 !images/selenium-fullscreen!
 
@@ -208,7 +208,7 @@ It demonstrates how you can manage complex states client side in a RESTful way w
 
 !images/booking!
 
-h2. <a>Eclipse plug-in is on his way</a>
+h2. <a>Eclipse plug-in is on its way</a>
 
 We are working hard to provide a dedicated Eclipse plug-in. The current status is alpha but already usable. You can find it in the **support/eclipse** directory of your Play installation.
 

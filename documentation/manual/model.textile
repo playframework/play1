@@ -84,7 +84,7 @@ You can’t directly use getter and setter methods to access properties if you r
 
 Of course you can define the getter and setter methods yourself. If a method exists Play will use the existing accessors.
 
-So to protect the value of the price property of the Product class, you can write:
+So to protect the Product class’ price property value, you can write:
 
 bc. public class Product {
  
@@ -233,13 +233,13 @@ h4. When you want to keep data across multiple requests you have several choices
 2. Save the data permanently into a durable storage (like a database). For example if you need to create an object with a "wizard" that spans multiple requests:
 
 * Initialize and persist the object into the database at the first request.
-* Save the the ID of the newly-created object into the flash scope.
+* Save the newly-created object’s ID into the flash scope.
 * During successive requests, retrieve the object from the database using the object ID, update it, and save it again. 
 
 3. Save the data temporarily into a transient storage (such as the Cache). For example if you need to create an object with a "wizard" that spans multiple requests:
 
 * Initialize the object and save it into the Cache at the first request.
-* Save the key of the newly created object into the flash scope
+* Save the newly-created object’s key into the flash scope
 * During successive requests, retrieve the object from the cache (with the correct key), update it, and save it into the cache again. 
 * At the end of the last request in the chain, save the object permanently (into the database for example)
 

@@ -40,11 +40,11 @@ bc. %server01.jpa.ddl=create
 
 h2. <a>Setting up a frontal HTTP server</a>
 
-Now we could just change the default port of the embedded HTTP server to 80 in order to have a real production server. However it will limit us to installing only one Play application on a given server. As we typically want to install several applications in the same server (but using different IP host names), we need to use a frontal HTTP server as reverse proxy.
+Now we could just change the embedded HTTP server’s default port to 80 in order to have a real production server. However it will limit us to installing only one Play application on a given server. As we typically want to install several applications in the same server (but using different IP host names), we need to use a frontal HTTP server as reverse proxy.
 
 You can choose any HTTP server and configure it as reverse proxy, however it is generally a good choice to take something light and fast like "LIGHTTPD":http://www.lighttpd.net/. 
 
-The exact configuration of LIGHTTPD is out of the scope of this tutorial, but should be something like:
+The exact configuration of LIGHTTPD is beyond the scope of this tutorial, but should be something like:
 
 bc. server.modules = (
       "mod_access",

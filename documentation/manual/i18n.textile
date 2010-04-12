@@ -21,7 +21,7 @@ h2. <a>Externalize your messages</a>
 
 To support i18n you have to externalize all messages in your application. 
 
-Create a file named **messages** in the **conf/** directory of the application. This file is really just a Java properties file.
+Create a file named **messages** in the application’s **conf/** directory. This file is really just a Java properties file.
 
 bc. hello=Hello!
 back=Back

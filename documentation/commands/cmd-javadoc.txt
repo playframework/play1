@@ -13,6 +13,6 @@
 ~ Description:
 ~ ~~~~~~~~~~~~
 ~ Generate the Javadoc for your project, not including Play classes. Resulting
-~ html file will be in a javadoc folder in your application directory. The logs
-~ of the commands are logs/javadoc.log and logs/javadoc.err.
+~ html file will be in a javadoc folder in your application directory. The
+~ commands' logs are logs/javadoc.log and logs/javadoc.err.
 ~

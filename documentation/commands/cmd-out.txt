@@ -8,7 +8,7 @@
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
-~ Display the content of the app_path.logs/system.out file and wait for new lines to display.
+~ Display the app_path.logs/system.out file's contents and wait for new lines to display.
 ~ If app_path is omitted, the current directory is used.
 ~
 ~ It is pretty much the same than a 'tail -f logs/system.out'

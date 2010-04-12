@@ -20,7 +20,7 @@
 ~ All options specified after the application path are passed to the JVM (example. -Xms=64m -Xmx=256m).
 ~ All the shell environment variables are passed to the JVM.
 ~
-~ A JPDA session is automatically opened on the port specified by the jpda.port property of the conf/application.conf 
+~ A JPDA session is automatically opened on the port specified by the conf/application.conf file's jpda.port property
 ~ file (default to 8000). If the JPDA port is already used, another available port is automatically chosen.
 ~
 ~ Options:

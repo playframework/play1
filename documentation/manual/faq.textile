@@ -1,10 +1,11 @@
 h1. Frequently Asked Questions
 
+
 h2. <a>How Play compares to framework X?</a>
 
 Nowadays, you have a very large number of choices for developing web applications. Play being a Java web application framework, let’s compare it to other Java frameworks. Play is built for a ‘share nothing’ architecture (think about it as a Stateless framework). So it’s very different from all these Java stateful and components based frameworks like Seam, Tapestry or Wicket. It’s closer to Spring MVC or Struts (or Struts 2), but way more opinionated.
 
-However Play is a very unique Java framework. It does not really rely on the so-called Java Enterprise standards. It uses Java but tries to push all the good things from the frameworks based on scripting languages like Ruby On Rails, Django, Pylons, Symfony, Grails, Cake PHP, etc. to the Java world. We really tried to get the best of the Java platform without getting the pain of traditional Java web development: slow development cycle, too much abstraction, too much configuration…
+However Play is a very unique Java framework. It does not really rely on the so-called Java Enterprise standards. It uses Java but tries to push all the good things from the frameworks based on scripting languages like Ruby On Rails, Django, Pylons, Symfony, Grails, Cake PHP, etc. to the Java world. We really tried to get the best out of the Java platform without getting the pain of traditional Java web development: slow development cycle, too much abstraction, too much configuration…
 
 h2. <a>Please rename the ‘play’ package to ‘org.playframework’!</a>
 
@@ -22,7 +23,7 @@ No. Even if we use Groovy as the base technology for the Play templating system,
 
 h2. <a>You guys don’t even know how to program in Java...</a>
 
-We are fully aware that we made choices that are pretty uncommon in the Java world, and that Play does not blindly follow all the so-called Java ‘good practices’. But all members of the Play teams are very experienced Java developers and we are totally aware of the choices we made and the rules we broke.
+We are fully aware that we made choices that are pretty uncommon in the Java world, and that Play does not blindly follow all the so-called Java ‘good practices’. But all of the Play team members are very experienced Java developers and we are totally aware of the choices we made and the rules we broke.
 
 Java itself is a very generic programming language and not originally designed for web application development. It is a very different thing to write a generic and reusable Java library and to create a web application. A web application itself doesn’t need to be designed to be reusable. You need less abstraction, less configuration. Reusability does exist for Web applications, but through Web service API rather than language-level integration.
 

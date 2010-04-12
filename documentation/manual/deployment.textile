@@ -23,7 +23,7 @@ Please refer to the "'Put your application in production' page":production for m
 
 h2. <a>Application servers</a>
 
-Your Play application can also run inside your favorite application server. Most of the application servers are supported out of the box.
+Your Play application can also run inside your favorite application server. Most application servers are supported out of the box.
 
 h3. Application server compatibility matrix
 

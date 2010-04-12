@@ -32,7 +32,7 @@ You will of course need a text editor. If you are accustomed to using a full fea
 
 Later in this tutorial we will use Lighttpd and MySql to show how to deploy a Play application in ‘production’ mode. But Play can work without these components so if you can’t install them, it’s not a problem.
 
-h2. <a>Installation of the Play framework</a>
+h2. <a>Installing the Play framework</a>
 
 Installation is very simple. Just download the latest binary package from the download page and unzip it to any path.
 
@@ -54,7 +54,7 @@ It will prompt you for the application full name. Type **‘Yet Another Blog Eng
 
 The **‘play new’** command creates a new directory **yabe/** and populates it with a series of files and directories, the most important being:
 
-**app/** contains the core of the application, split between models, controllers and views directories. It can contain other Java packages as well. This is the directory where *.java source files live.
+**app/** contains the application’s core, split between models, controllers and views directories. It can contain other Java packages as well. This is the directory where *.java source files live.
 
 **conf/** contains all the configuration files for the application, especially the main **application.conf** file, the **routes** definition files and the **messages** files used for internationalization.
 
@@ -199,7 +199,7 @@ h2. <a>Using a version control system (VCS) to track changes</a>
 
 When you work on a project, it’s highly recommended to store your source code in a VCS. It allows you to revert to a previous version if a change breaks something, work with several people and give access to all the successive versions of the application. Of course you can use any VCS to store your project, but here we will use Bazaar as an example. Bazaar is a distributed source version control system.
 
-Installing Bazaar is out of the scope of this tutorial but it is very easy on any system. Once you have a working installation of Bazaar, go to the blog directory and init the application versioning by typing:
+Installing Bazaar is beyond the scope of this tutorial but it is very easy on any system. Once you have a working installation of Bazaar, go to the blog directory and init the application versioning by typing:
 
 bc. $ bzr init
 

@@ -18,7 +18,7 @@ If the action you try call does not have any route able to invoke it using a GET
 
 h2. <a>doLayout</a>
 
-Used with template inheritance, this tag insert the content of the evaluated sub-template.
+Used with template inheritance, this tag insert the evaluated sub-template’s contents.
 
 bc. <!-- common header here -->
 <div id="content">
@@ -54,7 +54,7 @@ bc. <form action="/client/create" id="frm" method="POST" accept-charset="utf-8" 
 
 h2. <a>field</a>
 
-The field tag is an helper, based on the spirit of the Don’t Repeat Yourself spirit. It works this way:
+The field tag is an helper, based on the spirit of the Don’t Repeat Yourself. It works this way:
 
 Instead of writing this:
 
@@ -110,7 +110,7 @@ alert(i18n('hello_someone', 'John'));
 
 h2. <a>include</a>
 
-Includes another template. All variables of the current template are directly available in the included template.
+Includes another template. All of the current template’s variables are directly available in the included template.
 
 bc. <div id="tree">
     #{include 'tree.html' /}
@@ -185,9 +185,9 @@ bc. <ul>
 #{/list}
 </ul>
 
-The tag defines implicit variables in his body. The variable names are prefixed with the loop variable name.
+The tag defines implicit variables in its body. The variable names are prefixed with the loop variable name.
 
-* **name_index**, the index of the item, starting at 1
+* **name_index**, the item’s index, starting at 1
 * **name_isLast**, true for the last element
 * **name_isFirst**, true for the first element
 * **name_parity**, alternate between **odd** and **even** value

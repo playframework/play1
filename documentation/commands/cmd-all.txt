@@ -19,12 +19,12 @@
 ~ new            Create a new application
 ~ new-module     Create a new module
 ~ out            Follow logs/system.out file
-~ pid            Show the pid of a running application
+~ pid            Show a running application's process ID
 ~ precompile     Precompile all Java sources and templates to speed up application start-up
 ~ run            Run the application in the current shell
 ~ restart        Restart the running application
 ~ secret         Generate a new secret key
-~ status         Display the status of the running application
+~ status         Display the running application's status
 ~ start          Start the application in the background
 ~ stop           Stop the running application
 ~ test           Run the application in test mode in the current shell

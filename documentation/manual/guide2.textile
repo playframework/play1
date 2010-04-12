@@ -103,7 +103,7 @@ public void createAndRetrieveUser() {
 
 As you can see, the Model superclass gives us two very useful methods: **save()** and **find()**.
 
-p(note). You can read more about the methods of the Model class in the "manual page":jpa about Play and JPA.
+p(note). You can read more about the Model class’ methods in the "manual page":jpa about Play and JPA.
 
 Select the **BasicTests.java** in the test runner, click start and check that all is green. 
 
@@ -213,7 +213,7 @@ h2. <a>Finish with Comment</a>
 
 The last thing that we need to add to this first model draft is the ability to attach comments to posts.
 
-The creation of the Comment class is pretty straightforward.
+Creating the Comment class is pretty straightforward.
 
 bc. package models;
  
@@ -293,7 +293,7 @@ public Post(User author, String title, String content) {
 }
 ...
 
-Note how we have used the **mappedBy** attribute to tell JPA that the post field of the Comment class maintains the relationship. When you define a bi-directional relation with JPA it is very important to tell it which side will maintain the relationship. In this case, since the Comments belong to the Post, it’s better that the Comment class maintains the relationship.
+Note how we have used the **mappedBy** attribute to tell JPA that the Comment class’s post field maintains the relationship. When you define a bi-directional relation with JPA it is very important to tell it which side will maintain the relationship. In this case, since the Comments belong to the Post, it’s better that the Comment class maintains the relationship.
 
 We have set the **cascade** property to tell JPA that we want Post deletion be cascaded to comments. This way, if you delete a post, all related comments will be deleted as well.
 

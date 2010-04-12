@@ -4,13 +4,13 @@ Validations ensure that the data has certain values or meets specific requiremen
 
 h2. <a>How does it work?</a>
 
-Each request has it own **Validation** object which collects errors. From a controller, you access it directly using the **validation** variable. You can still access a subset of the API using static methods of the **play.data.validation.Validation** class.
+Each request has it own **Validation** object which collects errors. From a controller, you access it directly using the **validation** variable. You can still access a subset of the API using the **play.data.validation.Validation** class’ static methods.
 
 The validation object maintains a collection of **play.data.validation.Error** objects. Each error has two properties:
 
 * The **key**. This helps you to determine which data element caused the error. The key value can be set arbitrarily but when Play generates errors, it uses default conventions that follow the Java variables’ names.
 
-* The **message**. This contains the textual description of the error. The message can be a plain message or refer to a key from a message bundle (typically for internationalization support).
+* The **message**. This contains the error’s textual description. The message can be a plain message or refer to a key from a message bundle (typically for internationalization support).
 
 Let’s see how to validate a simple HTTP parameter:
 
@@ -55,7 +55,7 @@ Default messages are keys that refer to the message bundle. So in the **conf/mes
 
 bc. validation.required=%s is required
 
-You can change this default message and override it for each language of the application. The **%s** placeholder will be replaced by the error key. You can override using the **error.message(String field)** method.
+You can change this default message and override it for each application language. The **%s** placeholder will be replaced by the error key. You can override using the **error.message(String field)** method.
 
 For example:
 

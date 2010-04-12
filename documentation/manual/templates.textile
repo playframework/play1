@@ -6,7 +6,7 @@ Templates are stored in the **app/views** directory.
 
 h2. <a name="syntax">Template syntax</a>
 
-A template file is a text file, some parts of which have placeholders for dynamically generated content. Dynamic elements of the template are written using the "Groovy":http://groovy.codehaus.org/ language. Groovy’s syntax is very close to Java’s. 
+A template file is a text file, some parts of which have placeholders for dynamically generated content. The  template’s dynamic elements are written using the "Groovy":http://groovy.codehaus.org/ language. Groovy’s syntax is very close to Java’s. 
 
 Dynamic elements are resolved during template execution. The rendered result is then sent as part of the HTTP response.
 
@@ -151,7 +151,7 @@ bc. <h1>Main template</h1>
 
 h2. <a>Create tags</a>
 
-You can easily create specifics tags for your application. A tag is a simple template file, stored in the **app/views/tags** directory. The name of the template file is used as the tag name.
+You can easily create specifics tags for your application. A tag is a simple template file, stored in the **app/views/tags** directory. The template’s file name is used as the tag name.
 
 To create a **hello** tag, just create the **app/views/tags/hello.html** file.
 

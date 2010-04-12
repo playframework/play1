@@ -187,7 +187,7 @@ From your code, you can generate the URL able to invoke Clients.show:
 bc. map.put("id", 1541);
 String url = Router.reverse("Clients.show", map).url;  GET /clients/1541
 
-p(note). The URL generation is integrated into many components of the framework. You never should use the Router.reverse operation directly.
+p(note). The URL generation is integrated into many of the framework’s components. You never should use the Router.reverse operation directly.
 
 If you add parameters that are not included in the URI pattern, these parameters will be added to the query string:
 
@@ -204,7 +204,7 @@ When the Router has determined which Java call to invoke for the received HTTP R
 
 h2. <a name="content-types">Setting content types</a>
 
-You can specify the content type of the response in the routes file:
+You can specify the response’s content type in the routes file:
 
 bc. GET      /stylesheets/dynamic_css          css.SiteCSS(format:'css')
 

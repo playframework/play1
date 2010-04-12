@@ -11,7 +11,7 @@ As we will use the command line a lot, it's better to use a Unix-like OS. If you
 You will of course need a text editor. If you are accustomed to use a full featured Java IDE like Eclipse or Netbeans you can of course use it. However with Play you can have fun working with a simple text editor like Textmate, Emacs or VI. This is because the framework manages the compilation and the deployment process itself. We will soon see that…
 
 
-h2. <a>Installation of the Play framework</a>
+h2. <a>Installing the Play framework</a>
 
 Installation is very simple. Just download the latest binary package from the download page and unzip it to any path.
 
@@ -33,7 +33,7 @@ It will prompt you for the application full name. Type **‘Hello world’**.
 
 The **‘play new’** command creates a new directory **helloworld/** and populates it with a series of files and directories, the most important being:
 
-**app/** contains the core of the application, split between models, controllers and views directories. It can contain other Java package as well. This is the directory where *.java source files live.
+**app/** contains the application’s core, split between models, controllers and views directories. It can contain other Java package as well. This is the directory where *.java source files live.
 
 **conf/** contains all the application’s configuration files, especially the main **application.conf** file, the **routes** definition files and the **messages** files used for internationalization.
 
@@ -59,7 +59,7 @@ You can see the new application by opening a browser to "http://localhost:9000":
 
 Let’s see how the new application can display this page. 
 
-The main entry point of your application is the **conf/routes** file. This file defines all accessible URL of the application. If you open the generated routes file you will see this first ‘route’:
+The main entry point of your application is the **conf/routes** file. This file defines all of the application’s accessible URLs. If you open the generated routes file you will see this first ‘route’:
 
 bc. GET		/			Application.index
 

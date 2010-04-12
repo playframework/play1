@@ -127,7 +127,7 @@ bc. ..
 #{/ifErrors}
 ...
 
-p(note). Typically for more complex forms, error messages are not managed this way but externalized in the **messages** file and each error is printed in side of the corresponding field.
+p(note). Typically for more complex forms, error messages are not managed this way but externalized in the **messages** file and each error is printed inside the corresponding field.
 
 Check that the captcha is now fully functional.
 

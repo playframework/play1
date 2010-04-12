@@ -163,7 +163,7 @@ bc. <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w
     </body>
 </html>
 
-As you can see, it’s very close to the template used for the front part of the blog engine. You have replaced the **Log in** link by a **Log out** link that calls the **logout** action of the **Secure** controller provided by the secure module.
+As you can see, it’s very close to the template used for the front part of the blog engine. You have replaced the **Log in** link by a **Log out** link that calls the **Secure** controller’s **logout** action provided by the secure module.
 
 Now let’s use it in the **yabe/app/views/Admin/index.html** template:
 
@@ -237,7 +237,7 @@ Note how we used the **#{secure.check /}** tag to show part of the menu only to 
 
 !images/guide8-5!
 
-But that’s not yet enough to secure the CRUD section of the site! If a user knows the URL he can still access it. We have to protect the controllers as well. We can do so easily using the **@Check** annotation. For example, for the **Posts** controller:
+But that’s not yet enough to secure the site’s CRUD section! If a user knows the URL he can still access it. We have to protect the controllers as well. We can do so easily using the **@Check** annotation. For example, for the **Posts** controller:
 
 bc. package controllers;
  

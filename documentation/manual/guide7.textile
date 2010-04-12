@@ -80,7 +80,7 @@ public String toString() {
 
 h2. <a>Adding validation</a>
 
-The main problem of the generated administration area is that forms don’t contain any validation rules. But actually the CRUD module is able to extract the validation rules from the validation annotations if the model class is correctly annotated.
+The generated administration area’s main problem is that forms don’t contain any validation rules. But actually the CRUD module is able to extract the validation rules from the validation annotations if the model class is correctly annotated.
 
 Let’s add some annotations to the **User** class:
 

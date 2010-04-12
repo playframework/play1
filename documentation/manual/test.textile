@@ -145,7 +145,7 @@ The **auto-test** command do the same than the **test** command, but it automati
 
 This is a useful command if you want to set up a continuous integration system; 
 
-After the run, all results are saved to the **/test-result** directory. Moreover, this directory contains a marker file (either **result.failed** or **result.passed**) for the final result of the test suite. Finally, this directory contains all the logs, in an **application.log** file.
+After the run, all results are saved to the **/test-result** directory. Moreover, this directory contains a marker file (either **result.failed** or **result.passed**) for the test suite’s final result. Finally, this directory contains all the logs, in an **application.log** file.
 
 So setting up a continuous integration system to test your application, could be:
 

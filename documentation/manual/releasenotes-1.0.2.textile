@@ -2,15 +2,15 @@ h1. Play 1.0.2 -- Release notes
 
 **Play 1.0.2** is a maintenance release of the Play 1.0 branch. The major new features are the support for the modules repository and built-in protection against CSRF attacks. It also fixes a lot of small bugs.
 
-p(note). **Play 1.0.2** is a maintenance release and is fully compatible with the 1.0 serie. If you encounter any problems please ask us on the Google Group.
+p(note). **Play 1.0.2** is a maintenance release and is fully compatible with the 1.0 series. If you encounter any problems please ask us on the Google Group.
 
 You can read about the fixed bugs on the "1.0.2 road map page":http://www.playframework.org/roadmap/1.0.2. The most important changes are highlighted on this page:
 
 h2. <a>Module repository</a>
 
-The goal of the module0 repository is to centralize all contributed modules for the Play framework, and allow easy installation. The new modules related commands are:
+The module repository’s goal is to centralize all contributed modules for the Play framework, and allow easy installation. The new modules related commands are:
 
-* **play list-modules**, to list the content of the repository 
+* **play list-modules**, to list the repository’s contents 
 * **play install**, to install a version of a module locally
 * **play new-module**, to create a new module skeleton 
 * **play build-module**, to package a module and publish it to the repository 
@@ -31,7 +31,7 @@ The CSRF attack can be really problematic in web applications;
 
 bq. This attack method works by including malicious code or a link in a page that accesses a web application that the user is believed to have authenticated. If the session for that web application has not timed out, an attacker may execute unauthorized commands.
 
-To prevent this attack, the first thing to do is to use GET and POST method appropriately. That means that only POST methods must be used to run an interaction that can change the state of the application.
+To prevent this attack, the first thing to do is to use GET and POST method appropriately. That means that only POST methods must be used to run an interaction that can change the application’s state.
 
 For POST requests, the only way to secure critical actions properly is to issue an authenticity token. Play 1.0.2 now has a built-in helper to handle that:
 

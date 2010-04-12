@@ -14,7 +14,7 @@ There are different architectural models with different strategies. Some protoco
  
 Some technologies like SOAP try to give access to the model object domain through the Web. However, SOAP is just another RPC-style protocol, in this case using HTTP as a transport protocol. It is not an application protocol.
 
-The principles of the Web are not fundamentally object-oriented. So a layer is needed to adapt HTTP to your favorite language. 
+The web’s principles are not fundamentally object-oriented. So a layer is needed to adapt HTTP to your favorite language. 
 
 
 h2. <a name="overview">A controller overview</a>
@@ -85,7 +85,7 @@ But wait, there are better ways to do this :)
 
 h3. From the action method signature
 
-You can retrieve HTTP parameters directly from the action method signature. The name of the Java parameter must be the same as the HTTP parameter.
+You can retrieve HTTP parameters directly from the action method signature. The Java parameter’s name must be the same as the HTTP parameter’s.
 
 For example, in this request:
 
@@ -135,7 +135,7 @@ Note that if the parameter is missing in the HTTP Request, or if automatic conve
 
 h3. Date
 
-A date object can be automatically bound if the string representation of the date matches one of the following patterns:
+A date object can be automatically bound if the date’s string representation matches one of the following patterns:
 
 * yyyy-MM-dd'T'hh:mm:ss'Z' // ISO8601 + timezone
 * yyyy-MM-dd'T'hh:mm:ss" // ISO8601
@@ -214,7 +214,7 @@ bc. ?client.name=Zenexity
 &client.address.zip=75009
 &client.address.country=France
 
-In order to update a list of model objects, use array notation and reference the id of the object. For example imagine the Client model has a list of Customer models declared as **List<Customer> customers**. To update the list of Customers you would provide a query string like the following:
+In order to update a list of model objects, use array notation and reference the object’s ID. For example imagine the Client model has a list of Customer models declared as **List<Customer> customers**. To update the list of Customers you would provide a query string like the following:
 
 bc. ?client.customers[0].id=123
 &client.customers[1].id=456
@@ -275,7 +275,7 @@ bc. public class Clients extends Controller {
  
 }
 
-A template name is automatically deduced from the Play conventions. The path of the default template is resolved using the Controller and action names. 
+A template name is automatically deduced from the Play conventions. The default template path is resolved using the Controller and action names. 
 
 In this example the invoked template is:
 
@@ -326,7 +326,7 @@ You can only pass **local variables** in this way.
 
 h4. Specify another template
 
-If you don’t want to use the default template, you can specify your own template file during the **render(…)** call. Just pass it as the first parameter of the render method:
+If you don’t want to use the default template, you can specify your own template file during the **render(…)** call. Just pass it as the render method’s first parameter:
 
 Example:
 
@@ -373,7 +373,7 @@ bc. GET    /clients/{id}            Clients.show
 POST   /clients                 Clients.create 
 
 * The browser sends a POST to the **/clients** URL.
-* The Router invokes the **create** action of the **Clients** controller.
+* The Router invokes the **Clients** controller’s **create** action.
 * The action method call the **show** action method directly.
 * The Java call is intercepted and the Router reverse route generation creates the URL needed to invoke Clients.show with an id parameter.
 * The HTTP Response is **302 Location:/clients/3132**.
