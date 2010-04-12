@@ -1,14 +1,14 @@
 h1. Play framework documentation
 
-Welcome to the play framework documentation. This documentation is intended for the *1.0.2 release* and may significantly differs from previous versions of the framework. Check the "release notes of the 1.0.2 version":releasenotes-1.0.2.
+Welcome to the Play framework documentation. This documentation is intended for the *1.0.2 release* and may significantly differ from previous versions of the framework. Check the "version 1.0.2 release notes":releasenotes-1.0.2.
 
-p(note). This is a work in progress, feel free to ask any question not covered into these documents or report any error. You can contribute to the documentation the "same way you can contribute code":faq.
+p(note). This is a work in progress, feel free to ask any question not covered into these documents or report any errors. You can contribute to the documentation the "same way you can contribute code":faq.
 
 <div id="searchBox"><form action="http://www.google.com/cse" id="cse-search-box"><div><input type="hidden" name="cx" value="002614023023983855063:jn1mu_7bof0" /><input type="hidden" name="ie" value="UTF-8" /><input type="text" name="q" size="31" style="font-size:14px"/> <input type="submit" name="sa" value="Search with google" style="font-size:14px"/></div></form><script type="text/javascript" src="http://www.google.com/coop/cse/brand?form=cse-search-box&lang=en"></script></div>
 
 h2. <a name="started">Getting started</a>
 
-Your first steps with play and your first 5 minutes of fun.
+Your first steps with Play and your first 5 minutes of fun.
 
 # "Play framework overview":overview
 # "Watch the screencast":http://vimeo.com/7087610
@@ -16,14 +16,14 @@ Your first steps with play and your first 5 minutes of fun.
 # "Usability - details matter as much as features":usability
 # "Frequently Asked Questions":faq
 # "Installation guide":install
-# "Your first application — the 'Hello World' tutorial":firstapp
+# "Your first application — the ‘Hello World’ tutorial":firstapp
 # "Set up your preferred IDE":ide
 # "Sample applications":samples
 
 
-h2. <a name="guide">Tutorial -- Play guide, a real world app step by step</a>
+h2. <a name="guide">Tutorial -- Play guide, a real world app step-by-step</a>
 
-Learn play by coding **'Yet Another Blog Engine'**, from start to finish. Each chapter will be an occasion to learn one more cool Play feature.
+Learn play by coding **‘Yet Another Blog Engine’**, from start to finish. Each chapter will be a chance to learn one more cool Play feature.
 
 # "Starting up the project":guide1
 # "A first iteration of the data model":guide2
@@ -50,12 +50,12 @@ Everything you need to know about Play.
 ## "The routes file syntax":routes#syntax
 ## "Routes priority":routes#priority
 ## "Serving static resources":routes#static
-## "Reverse routing : generate some URL":routes#reverse
+## "Reverse routing: generate some URL":routes#reverse
 # "Controllers":controllers
 ## "A Controller overview":controllers#overview
 ## "Retrieve HTTP parameters":controllers#params
 ## "Return a result":controllers#result
-## "Actions chaining":controllers#chaining
+## "Action chaining":controllers#chaining
 ## "Interceptions":controllers#interceptions
 ## "Session and Flash scopes":controllers#session
 # "The template engine":templates
@@ -80,7 +80,7 @@ Everything you need to know about Play.
 ## "Continuous integration":test#continus
 # "Deployment options":deployment
 ## "Standalone Play application":deployment#aStandalonePlayapplicationa
-## "Running on a JEE application servers":deployment#aApplicationserversa
+## "Running on JEE application servers":deployment#aApplicationserversa
 ## "Google Application Engine":deployment#aGoogleApplicationEngineGAEa
 ## "Stax cloud hosting platform":deployment#aStaxcloudhostingplatforma"
 
@@ -89,7 +89,7 @@ h2. <a name="cook">Cookbook</a>
 
 Tips about everything and anything.
 
-# "Using play modules, and the modules repository":modules
+# "Using Play modules, and the modules repository":modules
 # "Security Guide":security
 # "More about the JPA support":jpa
 # "Using data validation":validation
@@ -98,7 +98,7 @@ Tips about everything and anything.
 # "Setting up i18n":i18n
 # "Use cache and configure Memcached":cache
 # "Put your application in production":production
-# "Sending emails":emails
+# "Sending e-mail":emails
 # "OpenID integration":openid
 # "Doing Ajax with JQuery":ajax
 
@@ -109,7 +109,7 @@ h2. <a name="modules">Distribution Modules</a>
 
 h2. <a name="references">References</a>
 
-Extended references for day to day hacking.
+Extended references for day-to-day hacking.
 
 # "Browse API documentation":/@api/index.html
 # "Template tags and extensions reference":tags
@@ -117,7 +117,7 @@ Extended references for day to day hacking.
 
 h2. <a name="versionnotes">Version notes</a>
 
-New versions of play include certain changes.
+New versions of Play include certain changes.
 
 # "Play 1.0.2":releasenotes-1.0.2
 # "Play 1.0.1":releasenotes-1.0.1

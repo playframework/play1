@@ -1,6 +1,6 @@
 ~ Name:
 ~ ~~~~~
-~ pid -- Show the pid of a running application
+~ pid -- Show a running application's process ID
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
@@ -8,7 +8,7 @@
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
-~ Display the content of the app_path.logs/server.pid file.
+~ Display the app_path.logs/server.pid file's contents.
 ~ If app_path is omitted, the current directory is used.
 ~
 ~ The server.pid file contains the pid of the running Java process when the application is run

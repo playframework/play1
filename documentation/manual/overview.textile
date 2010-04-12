@@ -1,27 +1,27 @@
 h1. Play framework overview
 
-The Play framework is a clean alternative to bloated Enterprise Java stacks. It focuses on developers productivity and targets RESTful architectures. Play is a perfect companion for *agile software development*.
+The Play framework is a clean alternative to bloated Enterprise Java stacks. It focuses on developer productivity and targets RESTful architectures. Play is a perfect companion to *agile software development*.
 
-The Play framework's goal is to ease web applications development while sticking with Java. Let's see how this is possible.
+The Play framework’s goal is to ease web applications development while sticking with Java. Let’s see how this is possible.
 
 p(note). **Wanna see some code?** 
  
-Check "Five cool things you can do with play":5things, or start directly with "hello world tutorial":firstapp.
+Check "Five cool things you can do with play":5things, or start directly with the "hello world tutorial":firstapp.
 
 
 h2. <a name="java">A Java framework without the pain</a>
 
-Play is a pure Java framework and allows you to keep your preferred development tools and libraries. If you already use Java as a development platform you don't need to switch to another language, another IDE and other libraries. *Just switch to a more productive Java environment!*
+Play is a pure Java framework and allows you to keep your preferred development tools and libraries. If you already use Java as a development platform you don’t need to switch to another language, another IDE and other libraries. *Just switch to a more productive Java environment!*
 
 h2. <a name="reload">Fix the bug and hit Reload</a>
 
 The Java platform is infamous for its low productivity, mainly due to repeated and tedious compile-package-deploy cycles.
 
-That's why we rethought the development cycle to make developing with play an efficient process.
+That’s why we rethought the development cycle to make developing with Play an efficient process.
 
 The framework compiles your Java sources directly and hot-reloads them into the JVM without the need to restart the server. You can then edit, reload and see your modifications immediately, just as in a LAMP or Rails environment. 
 
-It's so fun that you can even work with a simple text editor and skip a full-featured Java IDE if you want.
+It’s so fun that you can even work with a simple text editor and skip a full-featured Java IDE if you want.
 
 !images/editor!
 
@@ -29,7 +29,7 @@ Whenever an error occurs, the framework makes its best effort to identify and sh
 
 !images/guide1-3!
 
-Even the stacktraces are stripped down and optimized to make it easier to solve problems. Look how templates execution is nicely integrated to the Java stacktrace. 
+Even the stack traces are stripped down and optimized to make it easier to solve problems. Look how template execution is nicely integrated to the Java stack trace. 
 
 !images/stacktrace!
 
@@ -37,29 +37,29 @@ h2. <a>Simple stateless MVC architecture</a>
 
 You’ve got a database on one side and a web browser on the other. Why should you have a state in between?
 
-Stateful and component based Java Web framework make it easy to automatically save page state, but brings a lot of other problems: what happens if the user opens a second window? What if the user hits the browser back button?
+Stateful and component based Java Web frameworks make it easy to automatically save page state, but that brings a lot of other problems: what happens if the user opens a second window? What if the user hits the browser back button?
 
 The "Share Nothing":http://zef.me/883/the-share-nothing-architecture architecture is promoted by many Web application frameworks from PHP to Ruby on Rails or Django. As the browser is becoming more and more powerful, it is now easy to use Ajax or offline storage to solve the state problems client-side.
 
-We don't need to hack the HTTP model anymore to rebuild a fake state over the Web. Another aspect of the “share nothing” is to make it easier to render portions of the page in parallel, and to do partial page updates (or progressive enhancements).
+We don’t need to hack the HTTP model anymore to rebuild a fake state over the Web. Another aspect of “share nothing” is to make it easier to render portions of the page in parallel, and to do partial page updates (or progressive enhancements).
 
 
 h2. <a name="http">HTTP-to-code mapping</a>
 
-If you're already using another Java Web framework like the Servlet API or the Struts framework, you have already used an abstract view of the HTTP protocol with strange Java APIs and concepts. We think differently. A Web application framework should give you full, straightforward access to HTTP and its concepts. This is a fundamental difference between Play and other Java web application frameworks.
+If you’re already using another Java Web framework like the Servlet API or the Struts framework, you have already used an abstract view of the HTTP protocol with strange Java APIs and concepts. We think differently. A Web application framework should give you full, straightforward access to HTTP and its concepts. This is a fundamental difference between Play and other Java web application frameworks.
 
-HTTP, the Request/Response pattern, the REST architectural style, content-type negotiation, URI are all major concepts for the play framework. 
+HTTP, the Request/Response pattern, the REST architectural style, content-type negotiation, URI are all major concepts for the Play framework. 
 
 For instance, binding a URI pattern to a Java call is just one line:
 
 bc. GET    /clients/{id}        Clients.show
 
-If AJAX, REST and managing back/forward movement between web pages are some of the issues you face in your day-to-day web development, just give play a try.
+If AJAX, REST and managing back/forward movement between web pages are some of the issues you face in your day-to-day web development, just give Play a try.
 
 
 h2. <a name="templates">Efficient templating engine</a>
 
-We like the idea behind JSP & Expression Language. But why do we need so many configuration files to create a Tag library? Why can't we have full access to the underlying object model? JSP has a lot of limitations and this is indeed frustrating. That's why we've created a custom template system, inspired by JSP but without its constraints!
+We like the idea behind JSP & Expression Language. But why do we need so many configuration files to create a Tag library? Why can’t we have full access to the underlying object model? JSP has a lot of limitations and this is indeed frustrating. That’s why we’ve created a custom template system, inspired by JSP but without its constraints!
 
 You and anyone else should be tired of writing things like this:
 
@@ -79,12 +79,12 @@ We think you would certainly prefer to write:
 
 bc. You have ${emails.unread ?: 'no'} ${emails.unread?.pluralize('email')} !
 
-The expression language used by the play template engine is "Groovy":http://groovy.codehaus.org/, which provides a syntax consistent with Java. While play mainly uses the templating system to render HTML responses, you are free to use it to generate any other documents such as email messages, json responses, etc.
+The expression language used by the play template engine is "Groovy":http://groovy.codehaus.org/, which provides a syntax consistent with Java. While Play mainly uses the templating system to render HTML responses, you are free to use it to generate any other documents such as e-mail messages, JSON responses, etc.
 
 
 h2. <a>JPA on steroids</a>
 
-JPA is the cleanest ORM API available for Java. If you already know it you will be amazed how simpler it becomes with play. Nothing to configure, play will automatically start the JPA Entity Manager and magically synchronize it while the code is reloaded. 
+JPA is the cleanest ORM API available for Java. If you already know it you will be amazed how much simpler it becomes with Play. With nothing to configure, Play will automatically start the JPA Entity Manager and magically synchronize it while the code is reloaded. 
 
 Moreover if you use the provided **play.db.jpa.Model** superclass it will help make your code prettier. Have a look:
 
@@ -105,20 +105,20 @@ The integrated test runner makes it easy to work in a TDD mode. You can write al
 
 h2. <a name="full-stack">Full-stack application framework</a>
 
-The play framework was initially inspired by our own Java applications. It has all the tools needed to create a modern web application:
+The Play framework was initially inspired by our own Java applications. It has all the tools needed to create a modern web application:
 
 * Relational Database support through JDBC.
 * Object-Relational Mapping using Hibernate (with the JPA API).
 * Integrated Cache support, with easy use of the distributed memcached system if needed.
 * Straightforward Web services consumption either in JSON or XML (we talk *real* web services here; not the SOAP stuff).
 * OpenID support for distributed authentication.
-* Your web application ready to be deployed anywhere (Application server, GAE, Cloud, etc...)
+* Your web application ready to be deployed anywhere (application server, GAE, Cloud, etc...)
 * Image manipulation API.
 * ...
 
 
-The modular architecture lets you combine a web application with many others. Thanks to "application modules":modules, you can reuse your java code, templates and static resources (such as Javascript and CSS files) in a simple way.
+The modular architecture lets you combine a web application with many others. Thanks to "application modules":modules, you can reuse your Java code, templates and static resources (such as JavaScript and CSS files) in a simple way.
 
 p(note). **Give it a try**
  
-"Install the play framework":install and start developing your first application.
+"Install the Play framework":install and start developing your first application.

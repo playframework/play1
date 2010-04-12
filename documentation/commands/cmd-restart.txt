@@ -11,9 +11,9 @@
 ~ Restart the application hosted at the app_path directory. If app_path is omitted, the current directory is used.
 ~ The application is run in background in the current shell. You can then stop it using the 'stop' command.
 ~
-~ The script first try to stop the running application using the server.pid file to locate the running Java process.
+~ The script first tries to stop the running application using the server.pid file to locate the running Java process.
 ~
-~ The script first try to locate the java program using the $JAVA_HOME environment variable (from $JAVA_HOME/bin).
+~ The script first tries to locate the java command using the $JAVA_HOME environment variable (from $JAVA_HOME/bin).
 ~ If the $JAVA_HOME variable is not defined, the default java command available from the PATH is used.
 ~
 ~ All options specified after the application path are passed to the JVM (example. -Xms=64m -Xmx=256m).
@@ -25,4 +25,4 @@
 ~ Options:
 ~ ~~~~~~~~~
 ~ --%fwk_id:
-~ Use this id to run the application (override the default framework id)
+~ Use this ID to run the application (override the default framework ID)

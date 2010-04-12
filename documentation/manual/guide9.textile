@@ -1,8 +1,8 @@
 h1. Creating a custom editor area
 
-In the previous part we have created an administration area for yabe and prepared the 'My posts' section. This page will give each author a list of his own posts, and the ability to edit them or create a new one as well.
+In the previous part we have created an administration area for yabe and prepared the ‘My posts’ section. This page will give each author a list of his own posts, and the ability to edit them or create a new one as well.
 
-We could easily reuse the CRUD module as a start for this page but here we will create something from scratch. We need a lot of personalization on these screens.
+We could easily reuse the CRUD module as a basis for this page but here we will create something from scratch. We need a lot of personalization on these screens.
 
 h2. <a>Start with the user posts list</a>
 
@@ -33,9 +33,9 @@ The first screen is ready:
 
 !images/guide9-1!
 
-h2. <a>The 'write a new post page'</a>
+h2. <a>The ‘write a new post’ page</a>
 
-We will create a form to create a new post. Basically with a form you have 2 actions: one to display the form and one to handle the form submission. Let's create the new **Admin.form** and **Admin.save** actions that will display and handle submission of the form:
+We will create a form to create a new post. Basically with a form you have 2 actions: one to display the form and one to handle the form submission. Let’s create the new **Admin.form** and **Admin.save** actions that will display and handle form submission:
 
 Add the routes in the **yabe/conf/routes** file:
 
@@ -130,13 +130,13 @@ bc. public static void save(String title, String content, String tags) {
     index();
 }
 
-p(note). Here we use render("@form") as a shortcut of render("Admin/form.html"). It just says play to use the default template of the form action.
+p(note). Here we use render("@form") as a shortcut of render("Admin/form.html"). It just tells Play to use the form action’s default template.
 
 Test it!
 
-h2. <a>Reusing this stuff for Post 'edition'</a>
+h2. <a>Reusing this stuff for editing Posts</a>
 
-We have defined the HTML form and the Java action able to create a new blog Post. But we also need to allow edition of existing posts. We can easily reuse exactly the same code with a few modifications.
+We have defined the HTML form and the Java action able to create a new blog Post. But we also need to allow editing existing posts. We can easily reuse exactly the same code with a few modifications.
 
 First we need the **Admin.form** to retrieve an existing Post:
 
@@ -148,7 +148,7 @@ bc. public static void form(Long id) {
     render();
 }
 
-As you see we made it optional, so the same action will retrieve an existing post only if the **id** parameter is filled. So you can now link the post list of the main screen to the edition form. Edit the **yabe/app/views/Admin/index.html** template:
+As you see we made it optional, so the same action will retrieve an existing post only if the **id** parameter is filled. So you can now link the main screen’s post list to the edit form. Edit the **yabe/app/views/Admin/index.html** template:
 
 bc. #{extends 'admin.html' /}
  
@@ -168,12 +168,12 @@ Well, very easy but we have a problem. If you look at the actual URL generated b
 
 bc. /admin/new?id=3
 
-It works, but it's not really pretty. We will define another route that will use a different URL pattern if the **id** parameter is submitted:
+It works, but it’s not really pretty. We will define another route that will use a different URL pattern if the **id** parameter is submitted:
 
 bc. GET     /admin/myPosts/{id}                 Admin.form
 GET     /admin/new                          Admin.form
 
-As you can see we define this route before the old one, so it has an higher priority. That means that if an **id** parameter is submitted play will prefer this URL pattern. If not, it will still use the old route.
+As you can see we define this route before the old one, so it has a higher priority. That means that if an **id** parameter is submitted Play will prefer this URL pattern. If not, it will still use the old route.
 
 Refresh the **My posts** page and you should get better URL on these links.
 
@@ -226,9 +226,9 @@ bc. #{extends 'admin.html' /}
     
 #{/form}
 
-As you can see we have updated the form destination action to add the post id as first action parameter if it exists. So when the post has an id field set (meaning that the post already exists in the system), it will be sent the the **Admin.save** action. 
+As you can see we have updated the form destination action to add the post ID as the first action parameter if it exists. So when the post has an id field set (meaning that the post already exists in the system), it will be sent the the **Admin.save** action. 
 
-Now we can change the **save()** method a little to handle both creation and edition cases:
+Now we can change the **save()** method a little to handle both creation and editing cases:
 
 bc. public static void save(Long id, String title, String content, String tags) {
     Post post;
@@ -265,6 +265,6 @@ And for better URL we will use the same trick as before, by adding a new preferr
 bc. POST    /admin/myPosts/{id}                  Admin.save
 POST    /admin/new                          Admin.save
 
-That's done! Now we're using the same action for both creating new blog posts and editing old ones, and the administration area is finished!
+That’s done! Now we’re using the same action for both creating new blog posts and editing old ones, and the administration area is finished!
 
 p(note). Go to the "next part":guide10. 

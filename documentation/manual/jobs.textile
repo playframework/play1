@@ -1,10 +1,10 @@
 h1. Jobs
 
-Because play is a web application framework, most of the application logic is done by controllers responding to HTTP requests. 
+Because Play is a web application framework, most of the application logic is done by controllers responding to HTTP requests. 
 
-But sometimes you will need to execute some application logic outside of any HTTP request. It can be useful for initialization tasks, maintenance tasks or to run long task without blocking the HTTP request execution pool.
+But sometimes you will need to execute some application logic outside of any HTTP request. It can be useful for initialization tasks, maintenance tasks or to run long tasks without blocking the HTTP request execution pool.
 
-Jobs are fully managed by the framework. That means that play will manage for you all the database connection stuff, JPA entity manager synchronization and transactions management for you. To create a job you just need to extends the **play.jobs.Job** super class.
+Jobs are fully managed by the framework. That means that Play will manage all the database connection stuff, JPA entity manager synchronization and transactions management for you. To create a job you just need to extend the **play.jobs.Job** super class.
 
 bc. package jobs;
  
@@ -37,7 +37,7 @@ Here the use of **String** is just for the example, of course a job can return a
 
 h2. <a>Bootstrap job</a>
 
-Bootstrap jobs are executed by play at application start time. To mark your job as a bootstrap job you just need to add the **@OnApplicationStart** annotation.
+Bootstrap jobs are executed by Play at application start time. To mark your job as a bootstrap job you just need to add the **@OnApplicationStart** annotation.
 
 bc. import play.jobs.*;
  
@@ -53,17 +53,17 @@ public class Bootstrap extends Job {
     
 }
 
-You don't need to return a result. Even if you do it, the result will be lost.
+You don’t need to return a result. Even if you do it, the result will be lost.
 
 p(note). **Warning**
  
-When you run the application in DEV mode, the application waits the first HTTP request to start. Moreover when you are in DEV mode, the application will sometime automatically restart when needed. 
+When you run the application in DEV mode, the application waits for the first HTTP request to start. Moreover when you are in DEV mode, the application will sometimes automatically restart when needed. 
  
 When you run in PROD mode, the application will start synchronously with the server start.
 
 h2. <a>Scheduled job</a>
 
-Scheduled jobs are run periodically by the framework. You can ask play to run a job at a specific interval using the **@Every** annotation.
+Scheduled jobs are run periodically by the framework. You can ask Play to run a job at a specific interval using the **@Every** annotation.
 
 bc. import play.jobs.*;
  
@@ -98,17 +98,17 @@ p(note). **Tip**
  
 We use the CRON expression parser from the "Quartz library":http://www.opensymphony.com/quartz/wikidocs/CronTriggers%20Tutorial.html.
 
-You don't need to return a result. Even if you do it, the result will be lost.
+You don’t need to return a result. Even if you do it, the result will be lost.
 
 h2. <a>Suspendable requests</a>
 
 Play is intended to work with very short requests. It uses a fixed thread pool to process requests queued by the HTTP connector. To get optimum results, the thread pool should be as small as possible. We typically use the optimum value of **nb of processors + 1** to set the default pool size.
 
-That means that if a request is very long (for example waiting for a long computation) it will block the thread pool and penalize your application responsiveness. Of course you could add more threads to the pool, but it will result in resources waste, and anyway the pool will never be infinite.
+That means that if a request is very long (for example waiting for a long computation) it will block the thread pool and penalize your application responsiveness. Of course you could add more threads to the pool, but it will result in wasted resources, and anyway the pool will never be infinite.
 
-Think for example about a chat application where browsers send a blocking HTTP request that waits for a new message to display. These requests can be very very long (typically several seconds) and will block the thread pool. If you plan to allow 100 users to connect simultaneously to your chat application you will need to provision at least 100 threads. OK it's feasible. But what about 1,000 users? Or 10,000?
+Think for example about a chat application where browsers send a blocking HTTP request that waits for a new message to display. These requests can be very very long (typically several seconds) and will block the thread pool. If you plan to allow 100 users to connect simultaneously to your chat application you will need to provision at least 100 threads. OK it’s feasible. But what about 1,000 users? Or 10,000?
 
-To resolve these use cases, play allows you to suspend temporarily a request. The HTTP request will keep connected, but the request execution will be popped out of the thread pool and tried again later. You can either tell play to try the request later after a fixed delay, or wait for a Job completion.
+To resolve these use cases, Play allows you to temporarily suspend a request. The HTTP request will stay connected, but the request execution will be popped out of the thread pool and tried again later. You can either tell Play to try the request later after a fixed delay, or wait for a Job completion.
 
 p(note). **Tip**
  
@@ -126,9 +126,9 @@ bc. public static void generatePDF(Long reportId) {
     renderBinary((Future<InputStream>)request.args.get("task").get());
 }
 
-This action will be called twice. The first one the **request.isNew** tag is set to true. So the action will create a Job and start it immediately. Then it tells play to wait for the task completion before trying the action again. After the task is completed, play will call the action again. This time the **request.isNew** tag is set to false. The action will retrieve the job result and send it as the HTTP response.
+This action will be called twice. The first one the **request.isNew** tag is set to true. So the action will create a Job and start it immediately. Then it tells Play to wait for the task completion before trying the action again. After the task is completed, Play will call the action again. This time the **request.isNew** tag is set to false. The action will retrieve the job result and send it as the HTTP response.
 
 p(note). **Continuing the discussion**
  
-Finally, let's see how you can "test your applications":test.
+Finally, let’s see how you can "test your applications":test.
 

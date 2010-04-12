@@ -1,6 +1,6 @@
 ~ Name:
 ~ ~~~~~
-~ start -- Start the application in background
+~ start -- Start the application in the background
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
@@ -11,7 +11,7 @@
 ~ Start the application hosted at the app_path directory. If app_path is omitted, the current directory is used.
 ~ The application is run in background in the current shell. You can then stop it using the 'stop' command.
 ~
-~ The script first try to locate the java program using the $JAVA_HOME environment variable (from $JAVA_HOME/bin).
+~ The script first tries to locate the java command using the $JAVA_HOME environment variable (from $JAVA_HOME/bin).
 ~ If the $JAVA_HOME variable is not defined, the default java command available from the PATH is used.
 ~
 ~ All options specified after the application path are passed to the JVM (example. -Xms=64m -Xmx=256m).
@@ -20,10 +20,10 @@
 ~ The PID of the created Java process is written to the server.pid file.
 ~ The System.out stream is redirected to the logs/system.out file.
 ~
-~ This way to run an application is aimed to be used on production servers. In development mode, prefer the 'run'
-~ command that run the application in foreground mode.
+~ This way to run an application is intended to be used on production servers. In development mode, prefer the 'run'
+~ command that runs the application in foreground mode.
 ~
 ~ Options:
 ~ ~~~~~~~~~
 ~ --%fwk_id:
-~ Use this id to run the application (override the default framework id)
+~ Use this ID to run the application (override the default framework ID)
