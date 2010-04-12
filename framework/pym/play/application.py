@@ -13,19 +13,15 @@ class ModuleNotFound(Exception):
 class PlayApplication:
     """A Play Application: conf file, java"""
 
-    DEFAULTS = {
-        'http_port': '9000',
-        'jpda_port': '8000'
-    }
-
     # ~~~~~~~~~~~~~~~~~~~~~~ Constructor
 
     def __init__(self, application_path, env):
         self.path = application_path
         if application_path is not None:
-            self.confpath = os.path.join(application_path, 'conf/application.conf')
+            confpath = os.path.join(application_path, 'conf/application.conf')
+            self.conf = PlayConfParser(confpath, env["id"])
         else:
-            self.confpath = None
+            self.conf = None
         self.play_env = env
         self.jpda_port = self.readConf('jpda_port')
 
@@ -38,31 +34,16 @@ class PlayApplication:
             sys.exit(-1)
 
     def readConf(self, key):
-        if (self.confpath is None):
+        if (self.conf is None):
             return ''
-        try:
-            for keyRe in [re.compile('^%' + self.play_env["id"] + '.' + key + '\s*='), re.compile('^' + key + '\s*=')]:
-                for line in open(self.confpath).readlines():
-                    if keyRe.match(line):
-                        return line[line.find('=')+1:].strip()
-        except:
-            return '' # The conf file doesn't exist (invalid app)
-        if key in self.DEFAULTS:
-            return self.DEFAULTS[key]
-        return ''
+        return self.conf.get(key)
 
     def readConfs(self, key):
-        result = []
-        try:
-            for line in open(self.confpath).readlines():
-                if line.startswith(key):
-                    result.append(line[line.find('=')+1:].strip())
-            for line in open(self.confpath).readlines():
-                if line.startswith('%' + self.play_env["id"] + '.' + key):
-                    result.append(line[line.find('=')+1:].strip())
-        except:
-            None # Invalid app
-        return result
+        if (self.conf is None):
+            return []
+        return self.conf.getAll(key)
+
+    # ~~~~~~~~~~~~~~~~~~~~~~ Modules
 
     def modules(self):
         modules = []
@@ -110,7 +91,7 @@ class PlayApplication:
             pc = os.path.join(module, f)
             if os.path.exists(pc): fromFile = pc
         if not fromFile:
-            print "~ %s not found in any modules" % f
+            print "~ %s not found in any module" % f
             print "~ "
             sys.exit(-1)
         toFile = os.path.join(self.path, t)
@@ -214,7 +195,7 @@ class PlayApplication:
             java_args.append('-server')
 
         java_policy = self.readConf('java.policy')
-        if not java_policy == '':
+        if java_policy != '':
             policyFile = os.path.join(self.path, 'conf', java_policy)
             if os.path.exists(policyFile):
                 print "~ using policy file \"%s\"" % policyFile
@@ -224,3 +205,41 @@ class PlayApplication:
         java_cmd = [self.java_path(), '-javaagent:%s' % self.agent_path()] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % self.path, '-Dplay.id=%s' % self.play_env["id"], className]
         return java_cmd
 
+class PlayConfParser:
+
+    DEFAULTS = {
+        'http.port': '9000',
+        'jpda.port': '8000'
+    }
+
+    def __init__(self, filepath, frameworkId):
+        self.id = frameworkId
+        f = file(filepath)
+        self.entries = dict()
+        for line in f:
+            linedef = line.strip()
+            if len(linedef) == 0:
+                continue
+            if linedef[0] in ('!', '#'):
+                continue
+            if linedef.find('=') == -1:
+                continue
+            self.entries[linedef.split('=')[0].rstrip()] = linedef.split('=')[1].lstrip()
+        f.close()
+
+    def get(self, key):
+        idkey = '%' + self.id + "." + key
+        if idkey in self.entries:
+            return self.entries[idkey]
+        if key in self.entries:
+            return self.entries[key]
+        if key in self.DEFAULTS:
+            return self.DEFAULTS[key]
+        return ''
+
+    def getAll(self, query):
+        result = []
+        for (key, value) in self.entries.items():
+            if key.startswith(query) or key.startswith('%' + self.id + '.' + key):
+                result.append(value)
+        return result

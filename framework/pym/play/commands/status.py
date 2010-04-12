@@ -35,11 +35,7 @@ def execute(**kargs):
     if not url or not secret_key:
         app.check()
         if not url:
-            http_port = app.readConf('http.port')
-            if http_port == '':
-                http_port = 9000
-            else:
-                http_port = int(http_port)
+            http_port = int(app.readConf('http.port'))
             url = 'http://localhost:%s/@status' % http_port
         if not secret_key:
             secret_key = app.readConf('application.secret')

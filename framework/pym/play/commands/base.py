@@ -195,8 +195,6 @@ def autotest(app, args):
                 break
     # Launch the browser
     http_port = app.readConf('http.port')
-    if not http_port:
-        http_port = 9000
     print "~"
     print "~ Loading the test runner at %s ..." % ('http://localhost:%s/@tests' % http_port)
     try:
