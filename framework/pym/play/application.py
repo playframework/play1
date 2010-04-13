@@ -19,7 +19,10 @@ class PlayApplication:
         self.path = application_path
         if application_path is not None:
             confpath = os.path.join(application_path, 'conf/application.conf')
-            self.conf = PlayConfParser(confpath, env["id"])
+            try:
+                self.conf = PlayConfParser(confpath, env["id"])
+            except:
+                self.conf = None # No app / Invalid app
         else:
             self.conf = None
         self.play_env = env
@@ -187,7 +190,7 @@ class PlayApplication:
         if cp_args is None:
             cp_args = self.cp_args()
 
-        jpda_port = self.readConf('jpda.port')
+        self.jpda_port = self.readConf('jpda.port')
 
         application_mode = self.readConf('application.mode')
 
