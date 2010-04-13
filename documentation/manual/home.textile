@@ -102,6 +102,12 @@ Tips about everything and anything.
 # "OpenID integration":openid
 # "Doing Ajax with JQuery":ajax
 
+h2. <a name="modules">Distribution Modules</a>
+
+These optional modules are included with the standard distribution. "More modules":http://www.playframework.org/modules.
+
+# "CRUD":crud
+# "Secure":secure
 
 h2. <a name="references">References</a>
 

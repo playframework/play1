@@ -309,6 +309,7 @@ try:
 	for a in remaining_args:
 		if a.find('--%') == 0:
 			play_id = a[3:]
+			
 	
 	if play_command == 'test' or play_command == 'auto-test':
 		play_id = 'test'
@@ -829,6 +830,7 @@ try:
 	# ~~~~~~~~~~~~~~~~~~~~~~ [war] Generate a WAR
 		
 	def package_as_war(war_path, war_zip_path):
+
 		check_application()
 		load_modules()
 		do_classpath()
@@ -927,6 +929,7 @@ try:
 			zip.close()
 
 	if play_command == 'war':
+		remaining_args.remove('--%%%s' % play_id)
 		war_path = None
 		war_zip_path = None
 		try:
