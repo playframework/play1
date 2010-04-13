@@ -4,6 +4,7 @@ These are the standard tags built in the template engine.
 
 p(note). If you want to search the standard Play Java extensions, you should look at the "JavaDoc":/@api/play/templates/JavaExtensions.html
 
+
 h2. <a>a</a>
 
 The **a** tag inserts an HTML link to a controller action.
@@ -16,6 +17,7 @@ bc. <a href="/application/logout">Disconnect</a>
 
 If the action you try call does not have any route able to invoke it using a GET method, Play will automatically generate a hidden form that will be submitted on link click using JavaScript.
 
+
 h2. <a>doLayout</a>
 
 Used with template inheritance, this tag insert the evaluated sub-template’s contents.
@@ -26,31 +28,52 @@ bc. <!-- common header here -->
 </div>
 <!-- common footer here -->
 
+
+h2. <a>else</a>
+
+Of course used with the **if** tag.
+
+bc. #{if user}
+    Connected user is ${user}
+#{/if}
+#{else}
+    Please log in
+#{/else}
+
+However, you can also use it with the **list** tag and it will be executed if the list was empty.
+
+bc. #{list items:task, as:'task'}
+    <li>${task}</li>
+#{/li}
+ 
+#{else}
+    Nothing to do...
+#{/else}
+
+
+h2. <a>elseif</a>
+
+bc. #{if tasks.size() > 1}
+    Busy tasklist
+#{/if}
+ 
+#{elseif tasks}
+    One task on the list
+#{/elseif}
+ 
+#{else}
+    Nothing to do
+#{/else}
+
+As for **else**, you can use it with the **list** tag.
+
+
 h2. <a>extends</a>
 
 Makes the template inherit another template.
 
 bc. #{extends 'main.html' /}
 
-h2. <a>form</a>
-
-Inserts a **form** tag. The HTTP method is guessed from the route, and defaults to POST. If there are both GET and POST routes configured for the URL, the tag will default to using the first route defined in routes.  
-
-* Optional **id** attribute sets an ID to the form element. 
-* Optional **enctype** attribute sets the form’s data encoding. it defaults to ‘application/x-www-form-urlencoded’.
-
-Charset encoding is always ‘utf-8’.
-
-bc. #{form @Client.create() , id:'creationForm' enctype:'multipart/form-data' }
-   ...
-#{/form}
-
-
-Rendered as:
-
-bc. <form action="/client/create" id="frm" method="POST" accept-charset="utf-8" enctype="multipart/form-data">
- ...
-</form>
 
 h2. <a>field</a>
 
@@ -76,6 +99,28 @@ bc. #{field 'user.name'}
 
 So you don’t repeat **user.name** again and again.
 
+
+h2. <a>form</a>
+
+Inserts a **form** tag. The HTTP method is guessed from the route, and defaults to POST. If there are both GET and POST routes configured for the URL, the tag will default to using the first route defined in routes.  
+
+* Optional **id** attribute sets an ID to the form element. 
+* Optional **enctype** attribute sets the form’s data encoding. it defaults to ‘application/x-www-form-urlencoded’.
+
+Charset encoding is always ‘utf-8’.
+
+bc. #{form @Client.create() , id:'creationForm' enctype:'multipart/form-data' }
+   ...
+#{/form}
+
+
+Rendered as:
+
+bc. <form action="/client/create" id="frm" method="POST" accept-charset="utf-8" enctype="multipart/form-data">
+ ...
+</form>
+
+
 h2. <a>get</a>
 
 Retrieves a value defined with a **set** tag. You may use  the get/set mechanism to exchange values between templates, layouts and sub-templates.
@@ -89,6 +134,7 @@ You can also use the get tag in the following way, which will display "Homepage"
 bc. <head>
     <title>#{get 'title'}Homepage #{/} 
 </head>
+
 
 h2. <a>i18n</a>
 
@@ -108,13 +154,6 @@ And retrieve keys from JavaScript:
 bc. alert(i18n('hello_world'));
 alert(i18n('hello_someone', 'John'));
 
-h2. <a>include</a>
-
-Includes another template. All of the current template’s variables are directly available in the included template.
-
-bc. <div id="tree">
-    #{include 'tree.html' /}
-</div>
 
 h2. <a>if</a>
 
@@ -130,6 +169,7 @@ bc. #{if ( request.actionMethod == 'administer'  && user.isAdmin() ) }
     You are admin, allowed to administer.
 #{/if}
 
+
 h2. <a>ifnot</a>
 
 Cleaner alternative to #{if !condition}
@@ -138,42 +178,34 @@ bc. #{ifnot tasks}
     No tasks today
 #{/if}
 
-h2. <a>else</a>
 
-Of course used with the **if** tag.
+h2. <a>include</a>
 
-bc. #{if user}
-    Connected user is ${user}
-#{/if}
-#{else}
-    Please log in
-#{/else}
+Includes another template. All of the current template’s variables are directly available in the included template.
 
-However, you can also use it with the **list** tag and it will be executed if the list was empty.
+bc. <div id="tree">
+    #{include 'tree.html' /}
+</div>
 
-bc. #{list items:task, as:'task'}
-    <li>${task}</li>
-#{/li}
- 
-#{else}
-    Nothing to do...
-#{/else}
 
-h2. <a>elseif</a>
+h2. <a>jsAction</a>
 
-bc. #{if tasks.size() > 1}
-    Busy tasklist
-#{/if}
- 
-#{elseif tasks}
-    One task on the list
-#{/elseif}
- 
-#{else}
-    Nothing to do
-#{/else}
+The #{jsAction /} tag returns a JavaScript function which constructs a URL based on a server action and free variables. It does not perform an AJAX request; these have to be done by hand using the returned URL.
 
-As for **else**, you can use it with the **list** tag.
+Let’s see an example:
+
+bc. GET     /users/{id}        Users.show
+
+Now you can import this route client side:
+
+bc. <script type="text/javascript">
+    var showUserAction = #{jsAction @Users.show(':id') /}
+    
+    var displayUserDetail = function(userId) {
+        $('userDetail').load( showUserAction({id: userId}) )
+    }
+</script>
+
 
 h2. <a>list</a>
 
@@ -229,6 +261,7 @@ bc. #{list users}
     <li>${_}</li>
 #{/list}
 
+
 h2. <a>set</a>
 
 Define a value which can be retrieve in the same template or any layout with the **get** tag.
@@ -246,20 +279,3 @@ bc. #{set 'title'}
     Profile of ${user.login}
 #{/set}
 
-h2. <a>jsAction</a>
-
-The #{jsAction /} tag returns a JavaScript function which constructs a URL based on a server action and free variables. It does not perform an AJAX request; these have to be done by hand using the returned URL.
-
-Let’s see an example:
-
-bc. GET     /users/{id}        Users.show
-
-Now you can import this route client side:
-
-bc. <script type="text/javascript">
-    var showUserAction = #{jsAction @Users.show(':id') /}
-    
-    var displayUserDetail = function(userId) {
-        $('userDetail').load( showUserAction({id: userId}) )
-    }
-</script>
