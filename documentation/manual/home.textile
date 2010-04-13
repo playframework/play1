@@ -104,6 +104,8 @@ Tips about everything and anything.
 
 h2. <a name="modules">Distribution Modules</a>
 
+These optional modules are included with the standard distribution. "More modules":http://www.playframework.org/modules.
+
 # "CRUD":crud
 # "Secure":secure
 
