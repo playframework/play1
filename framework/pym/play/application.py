@@ -170,6 +170,7 @@ class PlayApplication:
         return log_path
 
     def check_jpda(self):
+        self.jpda_port = self.readConf('jpda.port')
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.bind(('127.0.0.1', int(self.jpda_port)))
