@@ -41,7 +41,7 @@ Stateful and component based Java Web frameworks make it easy to automatically s
 
 The "Share Nothing":http://zef.me/883/the-share-nothing-architecture architecture is promoted by many Web application frameworks from PHP to Ruby on Rails or Django. As the browser is becoming more and more powerful, it is now easy to use Ajax or offline storage to solve the state problems client-side.
 
-We don’t need to hack the HTTP model anymore to rebuild a fake state over the Web. Another aspect of “share nothing” is to make it easier to render portions of the page in parallel, and to do partial page updates (or progressive enhancements).
+We don’t need to hack the HTTP model anymore to rebuild a fake state over the Web. Another aspect of ‘share nothing’ is to make it easier to render portions of the page in parallel, and to do partial page updates (or progressive enhancements).
 
 
 h2. <a name="http">HTTP-to-code mapping</a>
@@ -54,12 +54,12 @@ For instance, binding a URI pattern to a Java call is just one line:
 
 bc. GET    /clients/{id}        Clients.show
 
-If AJAX, REST and managing back/forward movement between web pages are some of the issues you face in your day-to-day web development, just give Play a try.
+If Ajax, REST and managing back/forward movement between web pages are some of the issues you face in your day-to-day web development, just give Play a try.
 
 
 h2. <a name="templates">Efficient templating engine</a>
 
-We like the idea behind JSP & Expression Language. But why do we need so many configuration files to create a Tag library? Why can’t we have full access to the underlying object model? JSP has a lot of limitations and this is indeed frustrating. That’s why we’ve created a custom template system, inspired by JSP but without its constraints!
+We like the idea behind JSP & Expression Language. But why do we need so many configuration files to create a tag library? Why can’t we have full access to the underlying object model? JSP has a lot of limitations and this is indeed frustrating. That’s why we’ve created a custom template system, inspired by JSP but without its constraints!
 
 You and anyone else should be tired of writing things like this:
 
@@ -84,7 +84,7 @@ The expression language used by the play template engine is "Groovy":http://groo
 
 h2. <a>JPA on steroids</a>
 
-JPA is the cleanest ORM API available for Java. If you already know it you will be amazed how much simpler it becomes with Play. With nothing to configure, Play will automatically start the JPA Entity Manager and magically synchronize it while the code is reloaded. 
+The Java Persistence API (JPA) is the cleanest object-relational mapping ORM) API available for Java. If you already know it you will be amazed how much simpler it becomes with Play. With nothing to configure, Play will automatically start the JPA Entity Manager and magically synchronize it while the code is reloaded. 
 
 Moreover if you use the provided **play.db.jpa.Model** superclass it will help make your code prettier. Have a look:
 
@@ -99,23 +99,21 @@ bc. public void messages(int page) {
 
 h2. <a>Test driven development (if you like it)</a>
 
-The integrated test runner makes it easy to work in a TDD mode. You can write all kind of tests, from simple unit tests to full acceptance tests, and run them directly in a browser using "Selenium":http://seleniumhq.org/. Code coverage is also measured.
+The integrated test runner makes it easy for you do test-driven development (TDD). You can write all kinds of tests, from simple unit tests to full acceptance tests, and run them directly in a browser using "Selenium":http://seleniumhq.org/. Code coverage is also measured.
 
 !images/guide2-2!
 
 h2. <a name="full-stack">Full-stack application framework</a>
 
-The Play framework was initially inspired by our own Java applications. It has all the tools needed to create a modern web application:
+The Play framework was initially inspired by our own Java applications. It has all the tools needed to create a modern web application, including:
 
-* Relational Database support through JDBC.
-* Object-Relational Mapping using Hibernate (with the JPA API).
-* Integrated Cache support, with easy use of the distributed memcached system if needed.
-* Straightforward Web services consumption either in JSON or XML (we talk *real* web services here; not the SOAP stuff).
+* relational database support through JDBC.
+* object-relational mapping using Hibernate (with the JPA API).
+* integrated cache support, with easy use of the distributed memcached system if needed.
+* straightforward web services consumption either in JSON or XML (we are talking *real* web services here; not the SOAP stuff).
 * OpenID support for distributed authentication.
-* Your web application ready to be deployed anywhere (application server, GAE, Cloud, etc...)
-* Image manipulation API.
-* ...
-
+* your web application ready to be deployed anywhere (application server, Google App Engine, Cloud, etc…)
+* image manipulation API.
 
 The modular architecture lets you combine a web application with many others. Thanks to "application modules":modules, you can reuse your Java code, templates and static resources (such as JavaScript and CSS files) in a simple way.
 
