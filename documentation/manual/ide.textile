@@ -1,8 +1,5 @@
 h1. Setting up your preferred IDE
 
-
-"Eclipse":#eclipse | "Netbeans":#netbeans | "IntelliJ IDEA":#intellij | "Textmate":#textmate | "Other IDEs":#custom
-
 Working with Play is easy. You don’t even need a sophisticated IDE as Play compiles and refreshes the modifications you make to your source files automatically. So you can easily work using a simple text editor.
 
 However, using a modern Java IDE provides cool productivity features like auto-completion, on-the-fly compilation, assisted refactoring and debugging. Play supports the "NetBeans":http://www.netbeans.org, "IntelliJ IDEA":http://www.jetbrains.com/idea/index.html and "Eclipse":http://www.eclipse.org platforms.
@@ -18,15 +15,15 @@ You then need to import the application into your Workspace with the **File/Impo
 
 !images/eclipse!
 
-The **eclipsify** command generates several launchers for the application. The main launcher in only usable with the **Run As** eclipse command. You can then use the "Connect JPDA launcher" using "Debug As" to start a debugging session at any time. Stopping the debugging session will not stop the server.
+The **eclipsify** command generates several launchers for the application. The main launcher in only usable with the **Run As** Eclipse command. You can then use the *Connect JPDA launcher* using *Debug As* to start a debugging session at any time. Stopping the debugging session will not stop the server.
 
 If you make any important changes to your application, such as changing the classpath, use **eclipsify** again to regenerate the configuration files.
 
-Additionally, an Eclipse plugin is available in your Play distribution, in the **support/eclipse** directory. To install it, simply copy the jar file you will find to the **dropins** folder of your Eclipse installation.
+Additionally, an Eclipse plugin is available in your Play distribution, in the **support/eclipse** directory. To install it, simply copy the JAR file you will find to your Eclipse installation’s **dropins** folder.
 
-p(note). **Do not commit eclipse configuration files when you work in a team!**
+p(note). **Do not commit Eclipse configuration files when you work in a team!**
 
-The generated configuration files contains absolute references to your framework installation. These are specific to your own installation. When you work in a team, each developer must keep his eclipse configuration files private. 
+The generated configuration files contain absolute references to your framework installation. These are specific to your own installation. When you work in a team, each developer must keep his Eclipse configuration files private. 
 
 h2(#netbeans). <a>Generate configuration files for NetBeans</a>
 
@@ -38,7 +35,7 @@ Then you can just open the application as a NetBeans project.
 
 !images/netbeans!
 
-Use the standard "Run" button to start the application. When the application is started you can attach a debugging session at any time using the "Debug" button. Stopping the debugging session doesn’t stop the server.
+Use the standard *Run* button to start the application. When the application is started you can attach a debugging session at any time using the *Debug* button. Stopping the debugging session doesn’t stop the server.
 
 If you make any important change to your application such as changing the classpath, use **netbeansify** again to regenerate the configuration files. 
 
@@ -56,7 +53,7 @@ Then you can just import the application in IntelliJ using the import module fac
 
 !images/intellij!
 
-You can use the Run and Debug using the context menu. 
+You can use the *Run* and *Debug* using the context menu. 
 
 p(note). **Do not commit the .iml files when you work in a team!**
  
@@ -70,10 +67,9 @@ Download and install the bundle provided for "Textmate":http://macromates.com/ t
 !images/editor!
 
 
-
 h2(#custom). <a>Manually configure your preferred editor</a>
 
-As Play applications are standard Java applications, you don’t need any specific plugin to work with your preferred editor.  This, however, requires a little bit of knowledge on how Play works:
+As Play applications are standard Java applications, you don’t need a specific plug-in to work with your preferred editor.  This, however, requires a little bit of knowledge of how Play works.
 
 h3. Classpath settings
 
@@ -81,12 +77,12 @@ A Play application classpath is built as follows (in this order):
 
 * The **/conf** directory for the application
 * The **$PLAY_PATH/framework/play.jar**
-* All jar files found in your application **/lib** directory
-* All jar files found in the **$PLAY_PATH/framework/lib** directory
+* All JAR files found in your application **/lib** directory
+* All JAR files found in the **$PLAY_PATH/framework/lib** directory
 
 p(note). *Tip*
  
-If you have any modules enabled, you will need to add all modules’ libraries (from the $module/lib directory) to the classpath as well.
+If you have any modules enabled, you will need to add all modules’ libraries (from the *$module/lib directory*) to the classpath as well.
 
 
 h3. Main class to run
@@ -102,7 +98,7 @@ To enable HotSwap reloading you have to load a Java agent packaged in the **play
 
 bc. java -javaagent:"$PLAY_PATH/framework/play.jar" ...
 
-It’s not required, but will speed up class reloading when it is possible.
+It’s not required, but will speed-up class reloading when it is possible.
 
 
 h2. <a>Debugging issues</a>
@@ -113,11 +109,11 @@ To avoid this behavior, a better way is to start a fresh debugging session after
 
 So the correct workflow for debugging is:
 
-* Make changes to your source code.
-* Refresh the browser to see the results. (At this time Play will reload your code modifications and redefine classes in the JVM.)
-* If something goes wrong and you need to debug, start a new debug session.
-* Debug and correct your code.
-* Disconnect the debugger.
+# <span>Make changes to your source code.</span>
+# <span>Refresh the browser to see the results. (At this time Play will reload your code modifications and redefine classes in the JVM.)</span>
+# <span>If something goes wrong and you need to debug, start a new debug session.</span>
+# <span>Debug and correct your code.</span>
+# <span>Disconnect the debugger.</span>
 
 By using this work-flow you will always have a debugger synchronized with the code loaded in the JVM.
 

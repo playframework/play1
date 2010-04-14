@@ -220,6 +220,9 @@ p {
     margin-left: 30px;
     margin-top: -10px;
 }
+#page ol span {
+    color: black;
+}
 
 #page ol ol {
     margin-left: 22px;
