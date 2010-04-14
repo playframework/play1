@@ -2,6 +2,7 @@ package play.libs;
 
 import play.*;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,18 +12,11 @@ import java.util.regex.Pattern;
  */
 public class MimeTypes {
 
-    private static Properties mimetypes;
-    private static Pattern extPattern;    
+    private static Properties mimetypes = null;
+    private static Pattern extPattern;
 
     static {
-        try {
-            InputStream is = MimeTypes.class.getClassLoader().getResourceAsStream("play/libs/mime-types.properties");
-            mimetypes = new Properties();
-            mimetypes.load(is);
-            extPattern = Pattern.compile("^.*\\.([^.]+)$");
-        } catch (Exception ex) {
-            Logger.warn(ex.getMessage());
-        }
+        extPattern = Pattern.compile("^.*\\.([^.]+)$");
     }
 
     /**
@@ -47,7 +41,7 @@ public class MimeTypes {
             ext = matcher.group(1);
         }
         if (ext.length() > 0) {
-            String mimeType = mimetypes.getProperty(ext);
+            String mimeType = mimetypes().getProperty(ext);
             if (mimeType == null) {
                 return defaultMimeType;
             }
@@ -92,10 +86,32 @@ public class MimeTypes {
         if (mimeType == null) {
             return false;
         } else if (mimeType.indexOf(";") != -1) {
-            return mimetypes.contains(mimeType.split(";")[0]);
+            return mimetypes().contains(mimeType.split(";")[0]);
         } else {
-            return mimetypes.contains(mimeType);
+            return mimetypes().contains(mimeType);
         }
     }
-    
+
+    private static Properties mimetypes() {
+        if (mimetypes == null) {
+            try {
+                InputStream is = MimeTypes.class.getClassLoader().getResourceAsStream("play/libs/mime-types.properties");
+                mimetypes = new Properties();
+                mimetypes.load(is);
+            } catch (Exception ex) {
+                Logger.warn(ex.getMessage());
+            }
+            Enumeration<Object> confenum = Play.configuration.keys();
+            while (confenum.hasMoreElements()) {
+                String key = (String)confenum.nextElement();
+                if (key.startsWith("mimetype.")) {
+                    String type = key.substring(key.indexOf('.'));
+                    String value = (String)Play.configuration.get(key);
+                    mimetypes.setProperty(type, value);
+                }
+            }
+        }
+        return mimetypes;
+    }
+
 }

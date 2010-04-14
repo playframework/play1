@@ -255,6 +255,7 @@ public class Play {
     /**
      * Read application.conf and resolve overriden key using the play id mechanism.
      */
+    @SuppressWarnings("unchecked")
     static void readConfiguration() {
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         conf = appRoot.child("conf/application.conf");
