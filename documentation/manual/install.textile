@@ -18,7 +18,7 @@ Download the latest "Play binary package":http://download.playframework.org/ and
 
 p(note). *Tip*
  
-If you need to rebuild the framework for whatever reason, run *ant* in the *$PLAY_HOME/framework* directory.
+If you need to rebuild the framework for some reason, run **ant** in the **$PLAY_HOME/framework/** directory.
 
 
 h2. <a>Build from the latest sources</a>
@@ -33,7 +33,7 @@ bc. # bzr checkout lp:play
 
 The Play framework is ready to use.
 
-p(note). *lp:play* currently aliases to *http:bazaar.launchpad.net/%7Eplay-developers/play/1.0/*
+p(note). **lp:play** currently aliases to **http:bazaar.launchpad.net/%7Eplay-developers/play/1.0/**
 
 
 h2. <a>Using the play command</a>

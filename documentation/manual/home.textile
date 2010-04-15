@@ -1,6 +1,6 @@
 h1. Play framework documentation
 
-Welcome to the Play framework documentation. This documentation is intended for the *1.0.2 release* and may significantly differ from previous versions of the framework. Check the "version 1.0.2 release notes":releasenotes-1.0.2.
+Welcome to the Play framework documentation. This documentation is intended for the **1.0.2 release** and may significantly differ from previous versions of the framework. Check the "version 1.0.2 release notes":releasenotes-1.0.2.
 
 p(note). This is a work in progress, feel free to ask any question not covered into these documents or report any errors. You can contribute to the documentation the "same way you can contribute code":faq.
 
