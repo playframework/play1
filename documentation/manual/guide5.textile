@@ -1,12 +1,12 @@
 h1. Setting up a captcha
 
-Because anyone can post a comment to our blog engine, we should protect it a little to avoid automated spam. A simple way to protect a form from this is to add a captcha image.
+Because anyone can post a comment to our blog engine, we should protect it a little to avoid automated spam. A simple way to protect a form from this is to add a "captcha":http://en.wikipedia.org/wiki/Captcha image.
 
 h2. <a>Generating the captcha image</a>
 
-We’ll start to see how we can easily generate a captcha image using Play. Basically we will just use another action, except that it will return a binary stream instead of HTML responses like what we’ve returned so far.
+We’ll start to see how we can easily generate a captcha image using Play. Basically we will just use another action, except that it will return a binary stream instead of the HTML responses like we’ve returned so far.
 
-Play being a **full-stack** web framework, we try to include built-in constructs for web applications’ most typical needs; generating a captcha is one of them. We can use the **play.libs.Images** utility to simply generate a captcha image, and then write it to the HTTP response. 
+Since Play is a **full-stack** web framework, we try to include built-in constructs for web applications’ most typical needs; generating a captcha is one of them. We can use the **play.libs.Images** utility to simply generate a captcha image, and then write it to the HTTP response. 
 
 As usual, we will start with a simple implementation. Add the **captcha** action to the **Application** controller:
 
@@ -17,7 +17,7 @@ bc. public static void captcha() {
 
 Note that we can pass the captcha object directly to the renderBinary() method because the Images.Captcha class implements java.io.InputStream. 
 
-p(note). **Don’t forget** to import the play.libs.*.
+p(note). **Don’t forget** to import **play.libs.***.
 
 Now add a new route to the **/yabe/conf/routes** file:
 
@@ -29,15 +29,15 @@ And try the **captcha** action by opening "http://localhost:9000/captcha":http:/
 
 It should generate a random text for each refresh.
 
-h2. <a>How to manage the state?</a>
+h2. <a>How do we manage the state?</a>
 
-Until now it was easy, but the most complicated part is coming. To validate the captcha we need to save somewhere the random text written to the captcha image and then check it at the form submission time. 
+Until now it was easy, but the most complicated part is coming. To validate the captcha we need to save the random text written to the captcha image somewhere and then check it at the form submission time. 
 
 Of course we could just put the text to the user session at the image generation time and then retrieve it later. But this solution has two drawbacks:
 
 **First**, the Play session is stored as a cookie. It solves a lot of problems in terms of architecture but has a lot of implications. Data written to the session cookie are signed (so the user can’t modify them) but not encrypted. If we write the captcha code to the session anybody could easily resolve it by reading the session cookie.
 
-**Second**, remember than Play is a **stateless** framework. We want to manage things in a purely stateless way. Typically, what happens if a user simultaneously opens two different blog pages with two different captcha images? We have to track the captcha code for each form.
+**Second**, remember that Play is a **stateless** framework. We want to manage things in a purely stateless way. Typically, what happens if a user simultaneously opens two different blog pages with two different captcha images? We have to track the captcha code for each form.
 
 So to resolve the problem we need two things. We will store the captcha secret key on the server side. Because it is transient data we can easily use the Play **Cache**. Moreover because cached data have a limited life time it will add one more security mechanism (let’s say that a captcha code will be available for only 10mn). Then to resolve the code later we need to generate a **unique ID**. This unique ID will be added to each form as an hidden field and implicitely references a generated captcha code.
 
@@ -54,7 +54,7 @@ bc. public static void captcha(String id) {
 
 Note that the **getText()** method takes any color as parameter. It will use this color to draw the text.
 
-p(note). **Don’t forget** to import the play.cache.*.
+p(note). **Don’t forget** to import **play.cache.***.
 
 h2. <a>Adding the captcha image to the comment form</a>
 
