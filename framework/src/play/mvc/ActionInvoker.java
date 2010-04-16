@@ -1,43 +1,43 @@
 package play.mvc;
 
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
-
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.io.ByteArrayInputStream;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Collections;
-import java.util.Comparator;
 
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
-import play.mvc.Router.Route;
-import play.mvc.results.Result;
+import play.cache.annotations.Cache;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.data.binding.map.Binder;
 import play.data.binding.urlencoded.UrlEncodedParser;
 import play.data.validation.Validation;
-import play.exceptions.JavaExecutionException;
 import play.exceptions.ActionNotFoundException;
+import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.libs.MimeTypes;
+import play.mvc.Router.Route;
 import play.mvc.results.NoResult;
-import play.utils.Java;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderBinary;
 import play.mvc.results.RenderText;
+import play.mvc.results.Result;
+import play.utils.Java;
 import play.utils.Utils;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
 
 /**
  * Invoke an action after an HTTP request.
@@ -50,10 +50,10 @@ public class ActionInvoker {
             if(!Play.started) {
                 return;
             }
-            
+
             Http.Request.current.set(request);
             Http.Response.current.set(response);
-            
+
             Scope.Params.current.set(new Scope.Params());
             Scope.RenderArgs.current.set(new Scope.RenderArgs());
             Scope.Session.current.set(Scope.Session.restore());
@@ -66,7 +66,7 @@ public class ActionInvoker {
                 }
                 Route route = Router.route(request);
                 for (PlayPlugin plugin : Play.plugins) {
-                	plugin.onRequestRouting(route);
+                    plugin.onRequestRouting(route);
                 }
             }
             request.resolveFormat();
@@ -85,7 +85,7 @@ public class ActionInvoker {
                 Logger.error(e, "%s action not found", e.getAction());
                 throw new NotFound(String.format("%s action not found", e.getAction()));
             }
-            
+
             Logger.trace("------- %s", actionMethod);
 
             // 3. Prepare request params
@@ -112,12 +112,13 @@ public class ActionInvoker {
 
             // Monitoring
             monitor = MonitorFactory.start(request.action+"()");
-            
+
             // 5. Invoke the action
 
             // There is a difference between a get and a post when binding data. The get does not care about validation while
-            // the post do.
+            // the post does.
             try {
+
                 // @Before
                 List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);
                 Collections.sort(befores, new Comparator<Method>() {
@@ -146,55 +147,76 @@ public class ActionInvoker {
                         invokeControllerMethod(before, true);
                     }
                 }
-                // Action
-                Result actionResult = null;
-                ControllerInstrumentation.initActionCall();
-                try {
-                    Object o = invokeControllerMethod(actionMethod, true);
-                    if(o != null) {
-                        if(o instanceof InputStream) {
-                            response.setContentTypeIfNotSet("application/octet-stream");
-                            throw new RenderBinary((InputStream)o, null ,true);
-                        }
-                        if(o instanceof File) {
-                            response.setContentTypeIfNotSet("application/octet-stream");
-                            throw new RenderBinary((File)o);
-                        }
-                        response.setContentTypeIfNotSet(MimeTypes.getContentType("x."+request.format, "text/plain"));
-                        throw new InvocationTargetException(new RenderText(o.toString()));
-                    }
-                } catch (InvocationTargetException ex) {
-                    // It's a Result ? (expected)
-                    if (ex.getTargetException() instanceof Result) {
-                        actionResult = (Result) ex.getTargetException();
-                    } else {
-                        // @Catch
-                        Object[] args = new Object[] { ex.getTargetException() };
-                        List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
-                        Collections.sort(catches, new Comparator<Method>() {
 
-                            public int compare(Method m1, Method m2) {
-                                Catch catch1 = m1.getAnnotation(Catch.class);
-                                Catch catch2 = m2.getAnnotation(Catch.class);
-                                return catch1.priority() - catch2.priority();
+                // Action
+
+                Result actionResult = null;
+                String cacheKey = "actioncache:" + request.action + ":" + request.querystring;
+
+                // Check the cache (only for GET or HEAD)
+                if ((request.method.equals("GET") || request.method.equals("GET")) &&
+                    actionMethod.isAnnotationPresent(Cache.class))
+                {
+                    actionResult = (Result)play.cache.Cache.get(cacheKey);
+                }
+
+                if (actionResult == null) {
+                    ControllerInstrumentation.initActionCall();
+                    try {
+                        Object o = invokeControllerMethod(actionMethod, true);
+                        if(o != null) {
+                            if(o instanceof InputStream) {
+                                response.setContentTypeIfNotSet("application/octet-stream");
+                                throw new RenderBinary((InputStream)o, null ,true);
                             }
-                        });
-                        ControllerInstrumentation.stopActionCall();
-                        for (Method mCatch : catches) {
-                            Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
-                            for (Class exception : exceptions) {
-                                if (exception.isInstance(args[0])) {
-                                    mCatch.setAccessible(true);
-                                    invokeControllerMethod(mCatch, false);
-                                    break;
+                            if(o instanceof File) {
+                                response.setContentTypeIfNotSet("application/octet-stream");
+                                throw new RenderBinary((File)o);
+                            }
+                            response.setContentTypeIfNotSet(MimeTypes.getContentType("x."+request.format, "text/plain"));
+                            throw new InvocationTargetException(new RenderText(o.toString()));
+                        }
+                    } catch (InvocationTargetException ex) {
+                        // It's a Result ? (expected)
+                        if (ex.getTargetException() instanceof Result) {
+                            actionResult = (Result) ex.getTargetException();
+
+                            // Cache it if needed
+                            if ((request.method.equals("GET") || request.method.equals("HEAD")) &&
+                                    actionMethod.isAnnotationPresent(Cache.class))
+                            {
+                                play.cache.Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(Cache.class).duration());
+                            }
+
+                        } else {
+                            // @Catch
+                            Object[] args = new Object[] { ex.getTargetException() };
+                            List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
+                            Collections.sort(catches, new Comparator<Method>() {
+
+                                public int compare(Method m1, Method m2) {
+                                    Catch catch1 = m1.getAnnotation(Catch.class);
+                                    Catch catch2 = m2.getAnnotation(Catch.class);
+                                    return catch1.priority() - catch2.priority();
+                                }
+                            });
+                            ControllerInstrumentation.stopActionCall();
+                            for (Method mCatch : catches) {
+                                Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
+                                for (Class exception : exceptions) {
+                                    if (exception.isInstance(args[0])) {
+                                        mCatch.setAccessible(true);
+                                        invokeControllerMethod(mCatch, false);
+                                        break;
+                                    }
                                 }
                             }
-                        }
 
-                        throw ex;
+                            throw ex;
+                        }
                     }
                 }
-                
+
                 // @After
                 List<Method> afters = Java.findAllAnnotatedMethods(Controller.getControllerClass(), After.class);
                 Collections.sort(afters, new Comparator<Method>() {
@@ -253,7 +275,6 @@ public class ActionInvoker {
                 }
                 throw new JavaExecutionException(Http.Request.current().action, ex);
             }
-
 
         } catch (Result result) {
 
@@ -358,7 +379,7 @@ public class ActionInvoker {
             if(controllerClass == null) {
                 throw new ActionNotFoundException(fullAction, new Exception("Controller " + controller + " not found"));
             }
-            if(!ControllerSupport.class.isAssignableFrom(controllerClass)) {                
+            if(!ControllerSupport.class.isAssignableFrom(controllerClass)) {
                 // Try the scala way
                 controllerClass = Play.classloader.getClassIgnoreCase(controller+"$");
                 if(!ControllerSupport.class.isAssignableFrom(controllerClass)) {

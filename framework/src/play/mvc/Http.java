@@ -302,7 +302,7 @@ public class Http {
                         if (browserDate.getTime() >= last) {
                             return false;
                         }
-                    } catch (ParseException ex) {                               
+                    } catch (ParseException ex) {
                         Logger.error("Can't parse date", ex);
                     }
                     return true;
