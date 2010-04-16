@@ -29,6 +29,15 @@ public class FixturesTest extends UnitTest {
                 "JOIN v.tags as t " +
                 "WHERE t.label IN ('China', 'Wedding') " +
                 "GROUP BY v.id HAVING count(t.id) = 2 ").fetch().size());
+
+		assertEquals(1, Bloc.count());
+		
+		Bloc b = Bloc.<Bloc>findAll().get(0);
+		assertEquals("Yop", b.name);
+		assertEquals(2, b.criterias.size());
+		assertEquals("value1", b.criterias.get("key1"));
+		assertEquals("value2", b.criterias.get("key2"));
+
     }
 
 }
