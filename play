@@ -929,7 +929,10 @@ try:
 			zip.close()
 
 	if play_command == 'war':
-		remaining_args.remove('--%%%s' % play_id)
+		try:
+			remaining_args.remove('--%%%s' % play_id)
+		except:
+			pass
 		war_path = None
 		war_zip_path = None
 		try:

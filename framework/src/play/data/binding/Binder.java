@@ -26,7 +26,6 @@ import play.Play;
 import play.PlayPlugin;
 import play.data.Upload;
 import play.data.validation.Validation;
-import play.utils.Utils;
 
 /**
  * The binder try to convert String values to Java objects.
