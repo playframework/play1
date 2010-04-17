@@ -61,17 +61,17 @@ public class BeanWrapper {
                 newPrefix = newPrefix.substring(1);
             }
             Logger.trace("beanwrapper: bind name [" + name + "] annotation [" + Utils.toString(annotations) + "]");
-            Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), prop.getAnnotations(), params, newPrefix, prop.profiles);
-            if (value != Binder.MISSING) {
-                if (value != Binder.NO_BINDING) {
+            Object value = OldBinder.bindInternal(name, prop.getType(), prop.getGenericType(), prop.getAnnotations(), params, newPrefix, prop.profiles);
+            if (value != OldBinder.MISSING) {
+                if (value != OldBinder.NO_BINDING) {
                     prop.setValue(instance, value);
                 }
             } else {
                 Logger.trace("beanwrapper: bind annotation [" + Utils.toString(prop.getAnnotations()) + "]");
-                value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), annotations, params, newPrefix, prop.profiles);
+                value = OldBinder.bindInternal(name, prop.getType(), prop.getGenericType(), annotations, params, newPrefix, prop.profiles);
                 Logger.trace("beanwrapper: value [" + value + "]");
 
-                if (value != Binder.MISSING && value != Binder.NO_BINDING) {
+                if (value != OldBinder.MISSING && value != OldBinder.NO_BINDING) {
                     prop.setValue(instance, value);
                 }
             }

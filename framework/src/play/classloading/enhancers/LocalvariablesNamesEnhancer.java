@@ -88,6 +88,15 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
                 // name of the local variable
                 String name = localVariableAttribute.getConstPool().getUtf8Info(localVariableAttribute.nameIndex(i));
+
+                // Normalize the variable name
+                // For several reasons, both variables name and name$1 will be aliased to name
+                String aliasedName = name;
+                if(aliasedName.contains("$")) {
+                    aliasedName = aliasedName.substring(0, aliasedName.indexOf("$"));
+                }
+
+
                 if (name.equals("this")) {
                     continue;
                 }
@@ -111,7 +120,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 jv.recordLocalVariables(codeAttribute, insertionPc);
                 jv.recordParams(method.getParameterTypes(), Modifier.isStatic(method.getModifiers()));
                 jv.setMaxLocals(codeAttribute.getMaxLocals());
-                jv.compileStmnt("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.addVariable(\"" + name + "\", " + name + ");");
+                jv.compileStmnt("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.addVariable(\"" + aliasedName + "\", " + name + ");");
 
                 Bytecode b = jv.getBytecode();
                 int locals = b.getMaxLocals();
@@ -150,7 +159,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                     //  mais aussi l'initialisation de la variable qui est deja tracé plus haut, donc on commence à localVariableAttribute.startPc(i))
                     if (varNumber == localVariableAttribute.index(i) && index >= localVariableAttribute.startPc(i) && index < localVariableAttribute.startPc(i) + localVariableAttribute.codeLength(i)) {
 
-                        jv.compileStmnt("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.addVariable(\"" + name + "\", " + name + ");");
+                        jv.compileStmnt("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.addVariable(\"" + aliasedName + "\", " + name + ");");
 
                         b = jv.getBytecode();
                         locals = b.getMaxLocals();

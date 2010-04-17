@@ -13,7 +13,7 @@ import play.Invoker;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
-import play.data.validation.Validation;
+
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Messages;
@@ -36,6 +36,7 @@ import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.*;
 
+import play.data.validation.Validation;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
 
 
@@ -472,7 +473,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         try {
             binding.put("errors", Validation.errors());
         } catch (Exception ex) {
-            Logger.error(ex, "Error when getting Validation errors");
+            //Logger.error(ex, "Error when getting Validation errors");
         }
 
         return binding;

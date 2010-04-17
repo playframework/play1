@@ -1,5 +1,6 @@
-package play.data.binding.map;
+package play.data.binding.urlencoded;
 
+import play.data.binding.map.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 

@@ -60,15 +60,18 @@ public class ApplicationClasses {
      */
     public List<ApplicationClass> getAssignableClasses(Class<?> clazz) {
         List<ApplicationClass> results = new ArrayList<ApplicationClass>();
-        if(clazz != null) {
+        if (clazz != null) {
             for (ApplicationClass applicationClass : classes.values()) {
                 try {
                     Play.classloader.loadClass(applicationClass.name);
                 } catch (ClassNotFoundException ex) {
                     throw new UnexpectedException(ex);
                 }
-                if (clazz.isAssignableFrom(applicationClass.javaClass) && !applicationClass.javaClass.getName().equals(clazz.getName())) {
-                    results.add(applicationClass);
+                try {
+                    if (clazz.isAssignableFrom(applicationClass.javaClass) && !applicationClass.javaClass.getName().equals(clazz.getName())) {
+                        results.add(applicationClass);
+                    }
+                } catch (Exception e) {
                 }
             }
         }
@@ -115,6 +118,10 @@ public class ApplicationClasses {
      */
     public void remove(ApplicationClass applicationClass) {
         classes.remove(applicationClass.name);
+    }
+
+    public void remove(String applicationClass) {
+        classes.remove(applicationClass);
     }
 
     /**
@@ -307,5 +314,4 @@ public class ApplicationClasses {
     public String toString() {
         return classes.toString();
     }
-
 }

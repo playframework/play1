@@ -31,7 +31,7 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses;
-import play.data.binding.map.Binder;
+import play.data.binding.map.OldBinder;
 import play.db.DB;
 import play.db.DBPlugin;
 import play.db.Model;
@@ -162,7 +162,7 @@ public class Fixtures {
                         serialize((Map<?, ?>) objects.get(key), "object", params);
                         Class<?> cType = Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
-                        Model model = (Model)Binder.bind("object", cType, cType, null, params);
+                        Model model = (Model)OldBinder.bind("object", cType, cType, null, params);
                         for(Field f : model.getClass().getFields()) {
                             if(f.getType().isAssignableFrom(FileAttachment.class)) {
                                 String[] value = params.get("object."+f.getName());

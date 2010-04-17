@@ -1,4 +1,4 @@
-package play.data.binding.map.types;
+package play.data.binding.types;
 
 import java.lang.annotation.Annotation;
 import java.text.ParseException;

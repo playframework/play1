@@ -469,6 +469,12 @@ public class Logger {
                     if (se.getClassName().startsWith("java.lang.reflect.")) {
                         continue; // not very interesting
                     }
+                    if (se.getClassName().startsWith("scala.tools.")) {
+                        continue; // not very interesting
+                    }
+                    if (se.getClassName().startsWith("scala.collection.")) {
+                        continue; // not very interesting
+                    }
                     cleanTrace.add(se);
                 }
                 toClean.setStackTrace(cleanTrace.toArray(new StackTraceElement[cleanTrace.size()]));

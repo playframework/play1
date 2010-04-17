@@ -18,7 +18,7 @@ import play.PlayPlugin;
 import play.cache.annotations.Cache;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
-import play.data.binding.map.Binder;
+import play.data.binding.map.OldBinder;
 import play.data.binding.urlencoded.UrlEncodedParser;
 import play.data.validation.Validation;
 import play.exceptions.ActionNotFoundException;
@@ -415,7 +415,7 @@ public class ActionInvoker {
             }
             Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.toString(method.getParameterAnnotations()[i]) + "]");
 
-            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params, o, method, i+1);
+            rArgs[i] = OldBinder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params, o, method, i+1);
         }
         return rArgs;
     }

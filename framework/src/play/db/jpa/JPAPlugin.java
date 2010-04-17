@@ -40,7 +40,7 @@ public class JPAPlugin extends PlayPlugin {
                 String id = params.get(idKey)[0];
                 try {
                     Query query = JPA.em().createQuery("from " + clazz.getName() + " o where o.id = ?");
-                    query.setParameter(1, play.data.binding.map.Binder.directBind(annotations, id + "", play.db.jpa.JPASupport.findKeyType(clazz)));
+                    query.setParameter(1, play.data.binding.map.OldBinder.directBind(annotations, id + "", play.db.jpa.JPASupport.findKeyType(clazz)));
                     Object o = query.getSingleResult();
                     return JPASupport.edit(o, name, params, annotations);
                 } catch(Exception e) {

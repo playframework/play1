@@ -24,7 +24,7 @@ import javax.persistence.PostUpdate;
 import javax.persistence.Query;
 import play.Play;
 import play.data.binding.map.BeanWrapper;
-import play.data.binding.map.Binder;
+import play.data.binding.map.OldBinder;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
@@ -93,7 +93,7 @@ public class JPASupport extends JPABase {
                                 }
                                 Query q = JPA.em().createQuery("from " + relation + " where id = ?");
                                 // TODO: I think we need two type of direct bind -> primitive and object binder
-                                q.setParameter(1, Binder.directBind(null, _id, findKeyType(Play.classloader.loadClass(relation))));
+                                q.setParameter(1, OldBinder.directBind(null, _id, findKeyType(Play.classloader.loadClass(relation))));
 
                                 try {
                                     l.add(q.getSingleResult());
@@ -113,7 +113,7 @@ public class JPASupport extends JPABase {
                             params.remove(name + "." + field.getName() + "@id");
                             Query q = JPA.em().createQuery("from " + relation + " where id = ?");
                             // TODO: I think we need two type of direct bind -> primitive and object binder
-                            q.setParameter(1, Binder.directBind(null, ids[0], findKeyType(Play.classloader.loadClass(relation))));
+                            q.setParameter(1, OldBinder.directBind(null, ids[0], findKeyType(Play.classloader.loadClass(relation))));
                             try {
                                 Object to = q.getSingleResult();
                                 bw.set(field.getName(), o, to);

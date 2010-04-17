@@ -65,6 +65,19 @@ public class SigEnhancer extends Enhancer {
             }
         }
 
+        if(ctClass.getName().endsWith("$")) {
+            sigChecksum.append("Singletons->");
+            for(CodeIterator i = ctClass.getDeclaredConstructors()[0].getMethodInfo().getCodeAttribute().iterator(); i.hasNext(); ) {
+                int index = i.next();
+                int op = i.byteAt(index);
+                sigChecksum.append(op);
+                if(op == Opcode.LDC) {
+                    sigChecksum.append("["+i.get().getConstPool().getLdcValue(i.byteAt(index+1))+"]");;
+                }
+                sigChecksum.append(".");
+            }
+        }
+
         // Done.
         applicationClass.sigChecksum = sigChecksum.toString().hashCode();
     }
