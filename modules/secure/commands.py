@@ -1,32 +1,39 @@
 # Secure
 
-# ~~~~~~~~~~~~~~~~~~~~~~ [secure:ov] Override a view
-if play_command == 'secure:ov' or play_command == 'secure:override':
-	try:
-		optlist, args = getopt.getopt(remaining_args, '', ['css', 'login', 'layout'])
-		for o, a in optlist:				
-			if o == '--css':
-				override('public/stylesheets/secure.css', 'public/stylesheets/secure.css')
-				print "~ "
-				sys.exit(0)
-			if o == '--login':
-				override('app/views/Secure/login.html', 'app/views/Secure/login.html')
-				print "~ "
-				sys.exit(0)
-			if o == '--layout':
-				override('app/views/Secure/layout.html', 'app/views/Secure/layout.html')
-				print "~ "
-				sys.exit(0)
-				
-	except getopt.GetoptError, err:
-		print "~ %s" % str(err)
-		print "~ "
-		sys.exit(-1)
+MODULE = "secure"
 
-if play_command.startswith('secure:'):
-	print "~ Use: --css to override the Secure css" 
-	print "~      --login to override the login page" 
-	print "~      --layout to override the login layout page" 
-	print "~ "
-	
-	sys.exit(0)
+COMMANDS = ["secure:", "secure:ov", "secure:override"]
+
+def execute(**kargs):
+    command = kargs.get("command")
+    app = kargs.get("app")
+    args = kargs.get("args")
+    env = kargs.get("env")
+
+    if command == 'secure:':
+        print "~ Use: --css to override the Secure css" 
+        print "~      --login to override the login page" 
+        print "~      --layout to override the login layout page" 
+        print "~ "
+        return
+
+    try:
+        optlist, args2 = getopt.getopt(args, '', ['css', 'login', 'layout'])
+        for o, a in optlist:
+            if o == '--css':
+                override('public/stylesheets/secure.css', 'public/stylesheets/secure.css')
+                print "~ "
+                return
+            if o == '--login':
+                override('app/views/Secure/login.html', 'app/views/Secure/login.html')
+                print "~ "
+                return
+            if o == '--layout':
+                override('app/views/Secure/layout.html', 'app/views/Secure/layout.html')
+                print "~ "
+                return
+
+    except getopt.GetoptError, err:
+        print "~ %s" % str(err)
+        print "~ "
+        sys.exit(-1)
