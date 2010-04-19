@@ -20,7 +20,6 @@ def execute(**kargs):
         application_name = application_name.replace("/", " ")
     else:
         application_name = os.path.dirname(app.path)
-    print "name = " + application_name
     dotProject = os.path.join(app.path, '.project')
     dotClasspath = os.path.join(app.path, '.classpath')
     dotSettings = os.path.join(app.path, '.settings')
@@ -46,13 +45,22 @@ def execute(**kargs):
     if os.name == 'nt':
         playSourcePath=playSourcePath.replace('\\','/').capitalize()
 
+    cpJarToSource = {}
+    for el in classpath:
+        if os.path.basename(el) != "conf" and el.endswith('-sources.jar'):
+            cpJarToSource[el.replace('-sources', '')] = el
+
     cpXML = ""
     for el in classpath:
-        if not os.path.basename(el) == "conf":
+        if os.path.basename(el) != "conf":
             if el == playJarPath:
                 cpXML += '<classpathentry kind="lib" path="%s" sourcepath="%s" />\n\t' % (os.path.normpath(el) , playSourcePath)
             else:
-                cpXML += '<classpathentry kind="lib" path="%s" />\n\t' % os.path.normpath(el)
+                if cpJarToSource.has_key(el):
+                    cpXML += '<classpathentry kind="lib" path="%s" sourcepath="%s"/>\n\t' % (os.path.normpath(el), cpJarToSource[el])
+                else:
+                    cpXML += '<classpathentry kind="lib" path="%s"/>\n\t' % os.path.normpath(el)
+
     replaceAll(dotClasspath, r'%PROJECTCLASSPATH%', cpXML)
 
     if len(modules):
