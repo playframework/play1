@@ -1,5 +1,8 @@
 # Secure
 
+import getopt
+from play.utils import *
+
 MODULE = "secure"
 
 COMMANDS = ["secure:", "secure:ov", "secure:override"]
@@ -21,15 +24,15 @@ def execute(**kargs):
         optlist, args2 = getopt.getopt(args, '', ['css', 'login', 'layout'])
         for o, a in optlist:
             if o == '--css':
-                override('public/stylesheets/secure.css', 'public/stylesheets/secure.css')
+                app.override('public/stylesheets/secure.css', 'public/stylesheets/secure.css')
                 print "~ "
                 return
             if o == '--login':
-                override('app/views/Secure/login.html', 'app/views/Secure/login.html')
+                app.override('app/views/Secure/login.html', 'app/views/Secure/login.html')
                 print "~ "
                 return
             if o == '--layout':
-                override('app/views/Secure/layout.html', 'app/views/Secure/layout.html')
+                app.override('app/views/Secure/layout.html', 'app/views/Secure/layout.html')
                 print "~ "
                 return
 
