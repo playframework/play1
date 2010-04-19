@@ -29,7 +29,8 @@ public abstract class Binder {
     public static Binder getBinder() {
         return getBinder(Request.current().contentType);
     }
-    
+
+    @SuppressWarnings("unchecked")
     public static <T> T directBind(String value, Class<T> type, Annotation[] annotations) {
         try {
             return (T)DirectBinder.directBind(value, type, annotations);

@@ -1,6 +1,5 @@
 package play.data.binding.multipart;
 
-import play.data.binding.map.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 

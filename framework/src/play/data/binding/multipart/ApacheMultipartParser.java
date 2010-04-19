@@ -25,9 +25,8 @@ import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.ParameterParser;
-import org.apache.commons.fileupload.ProgressListener;
 import org.apache.commons.fileupload.disk.DiskFileItem;
-import org.apache.commons.io.FileCleaner;
+import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.io.output.DeferredFileOutputStream;
 import play.Logger;
 import play.Play;
@@ -82,8 +81,13 @@ public class ApacheMultipartParser extends DataParser {
      *
      * @version $Id: DiskFileItem.java,v 1.3 2005/07/26 03:05:02 rafaelsteil Exp $
      */
-    public static class AutoFileItem
-            implements FileItem {
+    public static class AutoFileItem implements FileItem {
+
+        private static FileCleaningTracker fileTracker;
+
+        static {
+            fileTracker = new FileCleaningTracker();
+        }
 
         // ----------------------------------------------------- Manifest constants
         /**
@@ -96,7 +100,9 @@ public class ApacheMultipartParser extends DataParser {
         /**
          * Size of buffer to use when writing an item to disk.
          */
-        private static final int WRITE_BUFFER_SIZE = 2048;        // ----------------------------------------------------------- Data members
+        private static final int WRITE_BUFFER_SIZE = 2048;
+
+        // ----------------------------------------------------------- Data members
         /**
          * Counter used in unique identifier generation.
          */
@@ -514,7 +520,7 @@ public class ApacheMultipartParser extends DataParser {
             String fileName = "upload_" + getUniqueId() + ".tmp";
 
             File f = new File(tempDir, fileName);
-            FileCleaner.track(f, this);
+            fileTracker.track(f, this);
             return f;
         }
         // -------------------------------------------------------- Private methods
@@ -630,67 +636,6 @@ public class ApacheMultipartParser extends DataParser {
      * {@link #sizeMax}. A value of -1 indicates no maximum.
      */
     private long fileSizeMax = -1;
-    /**
-     * The content encoding to use when reading part headers.
-     */
-    private String headerEncoding;
-    /**
-     * The progress listener.
-     */
-    private ProgressListener listener;
-
-    // ----------------------------------------------------- Property accessors
-    /**
-     * Returns the maximum allowed size of a complete request, as opposed to
-     * {@link #getFileSizeMax()}.
-     * 
-     * @return The maximum allowed size, in bytes. The default value of -1
-     *         indicates, that there is no limit.
-     * 
-     * @see #setSizeMax(long)
-     * 
-     */
-    private long getSizeMax() {
-        return sizeMax;
-    }
-
-    /**
-     * Sets the maximum allowed size of a complete request, as opposed to
-     * {@link #setFileSizeMax(long)}.
-     * 
-     * @param sizeMax
-     *            The maximum allowed size, in bytes. The default value of -1
-     *            indicates, that there is no limit.
-     * 
-     * @see #getSizeMax()
-     * 
-     */
-    private void setSizeMax(long sizeMax) {
-        this.sizeMax = sizeMax;
-    }
-
-    /**
-     * Returns the maximum allowed size of a single uploaded file, as opposed to
-     * {@link #getSizeMax()}.
-     * 
-     * @see #setFileSizeMax(long)
-     * @return Maximum size of a single uploaded file.
-     */
-    private long getFileSizeMax() {
-        return fileSizeMax;
-    }
-
-    /**
-     * Sets the maximum allowed size of a single uploaded file, as opposed to
-     * {@link #getSizeMax()}.
-     * 
-     * @see #getFileSizeMax()
-     * @param fileSizeMax
-     *            Maximum size of a single uploaded file.
-     */
-    private void setFileSizeMax(long fileSizeMax) {
-        this.fileSizeMax = fileSizeMax;
-    }
 
     // ------------------------------------------------------ Protected methods
     /**
@@ -804,7 +749,7 @@ public class ApacheMultipartParser extends DataParser {
      */
     private Map /* String, String */ parseHeaders(String headerPart) {
         final int len = headerPart.length();
-        Map headers = new HashMap();
+        Map<String, String> headers = new HashMap<String, String>();
         int start = 0;
         for (;;) {
             int end = parseEndOfLine(headerPart, start);
@@ -1092,7 +1037,7 @@ public class ApacheMultipartParser extends DataParser {
                 throw new FileUploadException("the request was rejected because " + "no multipart boundary was found");
             }
 
-            multi = new MultipartStream(input, boundary);
+            multi = new MultipartStream(input, boundary, null);
             multi.setHeaderEncoding(charEncoding);
 
             skipPreamble = true;
@@ -1255,14 +1200,6 @@ public class ApacheMultipartParser extends DataParser {
         private static final long serialVersionUID = -9073026332015646668L;
 
         /**
-         * Constructs a <code>InvalidContentTypeException</code> with no
-         * detail message.
-         */
-        public InvalidContentTypeException() {
-            // Nothing to do.
-        }
-
-        /**
          * Constructs an <code>InvalidContentTypeException</code> with the
          * specified detail message.
          * 
@@ -1370,24 +1307,6 @@ public class ApacheMultipartParser extends DataParser {
          * The exceptions UID, for serializing an instance.
          */
         private static final long serialVersionUID = -2474893167098052828L;
-
-        /**
-         * @deprecated Replaced by
-         *             {@link #SizeLimitExceededException(String, long, long)}
-         */
-        public SizeLimitExceededException() {
-            this(null, 0, 0);
-        }
-
-        /**
-         * @deprecated Replaced by
-         *             {@link #SizeLimitExceededException(String, long, long)}
-         * @param message
-         *            The exceptions detail message.
-         */
-        public SizeLimitExceededException(String message) {
-            this(message, 0, 0);
-        }
 
         /**
          * Constructs a <code>SizeExceededException</code> with the specified
