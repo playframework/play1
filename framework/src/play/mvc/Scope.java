@@ -193,6 +193,8 @@ public class Scope {
         }
 
         void save() {
+            String secureProperty = Play.configuration.getProperty("application.session.secure");
+            boolean secure = (secureProperty != null && secureProperty.equals("true"));
             try {
                 StringBuilder session = new StringBuilder();
                 for (String key : data.keySet()) {
@@ -205,9 +207,9 @@ public class Scope {
                 String sessionData = URLEncoder.encode(session.toString(), "utf-8");
                 String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
                 if (Play.configuration.getProperty("application.session.maxAge") == null) {
-                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData);
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, secure);
                 } else {
-                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, Play.configuration.getProperty("application.session.maxAge"));
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, Play.configuration.getProperty("application.session.maxAge"), secure);
                 }
             } catch (Exception e) {
                 throw new UnexpectedException("Session serializationProblem", e);

@@ -2,7 +2,6 @@ package play.server;
 
 
 import org.jboss.netty.buffer.*;
-import play.Logger;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -16,7 +15,6 @@ import java.nio.channels.ScatteringByteChannel;
  */
 public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedChannelBuffer {
 
-    private final File file;
     private final FileInputStream is;
 
 
@@ -25,7 +23,6 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
             throw new NullPointerException("file");
         }
         try {
-            this.file = file;
             this.is = new TemporyFileInputStream(file);
         } catch (Exception e) {
             throw new RuntimeException(e);

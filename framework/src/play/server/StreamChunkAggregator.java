@@ -1,16 +1,11 @@
 package play.server;
 
 import org.apache.commons.io.IOUtils;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.*;
-import org.jboss.netty.handler.codec.frame.TooLongFrameException;
 import org.jboss.netty.handler.codec.http.HttpChunk;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpMessage;
-import play.Logger;
 import play.Play;
-import play.mvc.Http;
-import play.mvc.Scope;
 
 import java.io.*;
 import java.util.List;

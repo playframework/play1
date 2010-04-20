@@ -80,6 +80,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     }
 
     @Override
+    @SuppressWarnings("unused")
     void end() {
         for (String n : extensionsClassnames) {
             println(" } ");
@@ -291,7 +292,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
                     tSpace = tName.substring(0, tName.lastIndexOf("."));
                     tName = tName.substring(tName.lastIndexOf(".") + 1);
                 }
-                for (Class c : fastClasses) {
+                for (Class<?> c : fastClasses) {
                     if (!c.isAnnotationPresent(FastTags.Namespace.class) && tSpace.length() > 0) {
                         continue;
                     }

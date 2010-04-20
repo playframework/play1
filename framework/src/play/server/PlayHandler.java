@@ -45,10 +45,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
 
-    private HttpRequest originalRequest;
-    private boolean readingChunks;
-
-
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
         Logger.trace("messageReceived: begin");

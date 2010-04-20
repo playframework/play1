@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
@@ -678,7 +679,7 @@ public class WS extends PlayPlugin {
             }
         }
 
-        private void checkFileBody(EntityEnclosingMethod method) throws FileNotFoundException {
+        private void checkFileBody(EntityEnclosingMethod method) throws FileNotFoundException, UnsupportedEncodingException {
             EntityEnclosingMethod putOrPost = (EntityEnclosingMethod) method;
             if (this.fileParams != null) {
                 //could be optimized, we know the size of this array.
@@ -704,17 +705,16 @@ public class WS extends PlayPlugin {
                 }
                 putOrPost.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[parts.size()]), putOrPost.getParams()));
                 return;
-
             }
             if (this.parameters != null && !this.parameters.isEmpty()) {
                 method.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                putOrPost.setRequestEntity(new StringRequestEntity(createQueryString()));
+                putOrPost.setRequestEntity(new StringRequestEntity(createQueryString(), "application/x-www-form-urlencoded", null));
             }
             if (this.body != null) {
                 if (this.parameters != null && !this.parameters.isEmpty()) {
                     throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
                 }
-                putOrPost.setRequestEntity(new StringRequestEntity(this.body));
+                putOrPost.setRequestEntity(new StringRequestEntity(this.body, null, null));
             }
 
         }
