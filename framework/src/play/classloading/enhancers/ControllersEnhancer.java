@@ -64,8 +64,8 @@ public class ControllersEnhancer extends Enhancer {
                 }
             }
 
-            // Perhaps it is a scala-generated accessor ?
-            if (ctMethod.getName().endsWith("_$eq")) {
+            // Perhaps it is a scala-generated method ?
+            if (ctMethod.getName().contains("$")) {
                 isHandler = true;
             } else {
                 if (ctClass.getName().endsWith("$") && ctMethod.getParameterTypes().length == 0) {
