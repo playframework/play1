@@ -226,15 +226,15 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content);
         nettyResponse.setContent(buf);
         //if (keepAlive) {
-        setContentLength(nettyResponse, response.out.size());
+        //    setContentLength(nettyResponse, response.out.size());
         //}
         ChannelFuture f = ctx.getChannel().write(nettyResponse);
 
         // Decide whether to close the connection or not.
-        if (!keepAlive) {
+        //if (!keepAlive) {
             // Close the connection when the whole content is written out.
             f.addListener(ChannelFutureListener.CLOSE);
-        }
+        //}
     }
 
     public static void copyResponse(ChannelHandlerContext ctx, Request request, Response response, HttpRequest nettyRequest) throws Exception {
