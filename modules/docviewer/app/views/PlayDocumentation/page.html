@@ -34,7 +34,12 @@
                         
                         <ol>
                             #{list modules, as:'module'}
-                                <li><a href="modules/${module}/home">${module}</a></li>
+                                <li>
+                                    <a href="modules/${module}/home">${module}</a>
+                                    #{if apis.contains(module)}
+                                        — <a href="/@api/-${module}/index.html">Browse API</a>
+                                    #{/if}
+                                </li>
                             #{/list}
                         </ol>
                     #{/if}

@@ -27,6 +27,7 @@ public class PlayDocumentation extends Controller {
         String title = getTitle(textile);
         
         List<String> modules = new ArrayList();
+        List<String> apis = new ArrayList();
         if(id.equals("home") && module == null) {
             for(String key : Play.modules.keySet()) {
                 VirtualFile mr = Play.modules.get(key);
@@ -34,10 +35,13 @@ public class PlayDocumentation extends Controller {
                 if(home.exists()) {
                     modules.add(key);
                 }
+                if(mr.child("documentation/api/index.html").exists()) {
+                    apis.add(key);
+                }
             }
         }
         
-        render(id, html, title, modules, module);
+        render(id, html, title, modules, apis, module);
     }
     
     public static void image(String name, String module) {
