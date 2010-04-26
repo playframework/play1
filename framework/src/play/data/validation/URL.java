@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 import net.sf.oval.configuration.annotation.Constraint;
 
 /**
- * This field must be a valid email.
- * Message key: validation.email
+ * This field must be a valid url.
+ * Message key: validation.url
  * $1: field name
  */
 @Retention(RetentionPolicy.RUNTIME)
