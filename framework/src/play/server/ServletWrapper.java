@@ -213,7 +213,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         request.body = httpServletRequest.getInputStream();
         request.secure = httpServletRequest.isSecure();
 
-        request.url = uri.toString();
+        request.url = uri.toString() + (httpServletRequest.getQueryString() == null ? "" : "?" + httpServletRequest.getQueryString());
         request.host = httpServletRequest.getHeader("host");
         if (request.host.contains(":")) {
             request.port = Integer.parseInt(request.host.split(":")[1]);
