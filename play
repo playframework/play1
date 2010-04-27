@@ -37,9 +37,9 @@ try:
     print r"~ |_|            |__/   "
     print r"~"
 
-    play_version_file = os.path.join(play_env["basedir"], 'framework/src/play/version')
+    play_version_file = os.path.join(play_env["basedir"], 'framework', 'src', 'play', 'version')
     if not os.path.exists(play_version_file):
-        print "~ Oops. %s file not found" % os.path.normpath(os.path.join(play_env["basedir"], 'framework/src/play/version'))
+        print "~ Oops. %s file not found" % os.path.normpath(os.path.join(play_env["basedir"], 'framework', 'src', 'play', 'version'))
         print "~ Is the framework compiled? "
         print "~"
         sys.exit(-1)
