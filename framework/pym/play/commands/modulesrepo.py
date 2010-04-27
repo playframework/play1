@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 import zipfile
 import urllib2
 import shutil
@@ -17,6 +18,8 @@ IM = ['install']
 
 COMMANDS = NM + LM + BM + IM
 
+DEFAULT_REPO = 'http://www.playframework.org'
+
 def load_module(name):
     base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
     mod_desc = imp.find_module(name, [os.path.join(base, 'framework/pym')])
@@ -24,15 +27,17 @@ def load_module(name):
 
 json = load_module('simplejson')
 
-
-# TODO: Make that configurable
-modules_server = 'http://www.playframework.org'
+repositories = []
 
 def execute(**kargs):
+    global repositories
+
     command = kargs.get("command")
     app = kargs.get("app")
     args = kargs.get("args")
     env = kargs.get("env")
+
+    repositories = get_repositories(env['basedir'])
 
     if command in NM:
         new(app, args, env)
@@ -42,6 +47,18 @@ def execute(**kargs):
         build(app, args, env)
     elif command in IM:
         install(app, args, env)
+
+def get_repositories(play_base):
+    repopath = os.path.join(play_base, 'repositories')
+    if os.path.exists(repopath):
+        repos = []
+        f = file(repopath)
+        for line in f:
+            if not re.match("^\s*#", line) and not line.strip() == "":
+                repos.append(line.strip())
+        if len(repos) > 0:
+            return repos
+    return [DEFAULT_REPO]
 
 class Downloader(object):
     before = .0
@@ -175,15 +192,17 @@ def new(app, args, play_env):
     print "~"
 
 def list(app, args):
-    print "~ You can also browse this list online at %s/modules" % modules_server
+    print "~ You can also browse this list online at:"
+    for repo in repositories:
+        print "~    %s/modules" % repo
     print "~"
 
     modules_list = load_module_list()
 
-    for mod in modules_list['modules']:
+    for mod in modules_list:
         print "~ [%s]" % mod['name']
         print "~   %s" % mod['fullname']
-        print "~   %s/modules/%s" % (modules_server, mod['name'])
+        print "~   %s/modules/%s" % (mod['server'], mod['name'])
         
         vl = ''
         i = 0
@@ -275,8 +294,8 @@ def install(app, args, env):
     
     modules_list = load_module_list()
     fetch = None
-    
-    for mod in modules_list['modules']:
+
+    for mod in modules_list:
         if mod['name'] == module:
             for v in mod['versions']:
                 if version == None and v['isDefault']:
@@ -287,7 +306,7 @@ def install(app, args, env):
                         print '~'
                         sys.exit(-1)
                     print '~ Installing module %s-%s...' % (module, v['version'])
-                    fetch = '%s/modules/%s-%s.zip' % (modules_server, module, v['version'])
+                    fetch = '%s/modules/%s-%s.zip' % (mod['server'], module, v['version'])
                     break
                 if version  == v['version']:
                     print '~ Will install %s-%s' % (module, v['version'])
@@ -298,9 +317,9 @@ def install(app, args, env):
                         sys.exit(-1)
 
                     print '~ Installing module %s-%s...' % (module, v['version'])
-                    fetch = '%s/modules/%s-%s.zip' % (modules_server, module, v['version'])
+                    fetch = '%s/modules/%s-%s.zip' % (mod['server'], module, v['version'])
                     break
-                    
+
     if fetch == None:
         print '~ No module found \'%s\'' % name
         print '~ Try play list-modules to get the modules list'
@@ -310,22 +329,22 @@ def install(app, args, env):
     archive = os.path.join(env["basedir"], 'modules/%s-%s.zip' % (module, v['version']))
     if os.path.exists(archive):
         os.remove(archive)
-    
+
     print '~'
     print '~ Fetching %s' % fetch
     Downloader().retrieve(fetch, archive)
-    
+
     if not os.path.exists(archive):
         print '~ Oops, file does not exist'
         print '~'
         sys.exist(-1)
-    
+
     print '~ Unzipping...'
-    
+
     if os.path.exists(os.path.join(env["basedir"], 'modules/%s-%s' % (module, v['version']))):
         shutil.rmtree(os.path.join(env["basedir"], 'modules/%s-%s' % (module, v['version'])))
     os.mkdir(os.path.join(env["basedir"], 'modules/%s-%s' % (module, v['version'])))
-    
+
     Unzip().extract(archive, os.path.join(env["basedir"], 'modules/%s-%s' % (module, v['version'])))
     os.remove(archive)
     print '~'
@@ -337,6 +356,30 @@ def install(app, args, env):
     sys.exit(0)
 
 def load_module_list():
+
+    def addServer(module, server):
+        module['server'] = server
+        return module
+
+    def any(arr, func):
+        for x in arr:
+            if func(x): return True
+        return False
+
+    modules = None
+    rev = repositories[:] # clone
+    rev.reverse()
+    for repo in rev:
+        result = load_modules_from(repo)
+        if modules == None:
+            modules = map(lambda m: addServer(m, repo), result['modules'])
+        else:
+            for module in result['modules']:
+                if not any(modules, lambda m: m['name'] == module['name']):
+                    modules.append(addServer(module, repo))
+    return modules
+
+def load_modules_from(modules_server):
     try:
         url = '%s/modules' % modules_server
         proxy_handler = urllib2.ProxyHandler({})
@@ -356,24 +399,3 @@ def load_module_list():
         print "~"
         sys.exit(-1)
 
-    def _createstructure(self, file, dir):
-        self._makedirs(self._listdirs(file), dir)
-
-    def _makedirs(self, directories, basedir):
-        """ Create any directories that don't currently exist """
-        for dir in directories:
-            curdir = os.path.join(basedir, dir)
-            if not os.path.exists(curdir):
-                os.makedirs(curdir)
-
-    def _listdirs(self, file):
-        """ Grabs all the directories in the zip structure
-        This is necessary to create the structure before trying
-        to extract the file to it. """
-        zf = zipfile.ZipFile(file)
-        dirs = []
-        for name in zf.namelist():
-            dn = os.path.dirname(name)
-            dirs.append(dn)
-        dirs.sort()
-        return dirs

@@ -1,0 +1,13 @@
+# This file contains module repositories to be used in this Play install.
+#
+# One URL per repository, and each repository must be such as the following
+# REST URLs exist and return the correct JSON responses:
+# <URL>/modules
+# <URL>/modules/<modulename>
+# <URL>/modules/<modulename>-<moduleversion>.zip
+# etc.
+#
+# The repositories are ordered in ascending priority order,
+# e.g. repository down on the list have a higher priority.
+
+http://www.playframework.org
