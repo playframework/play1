@@ -181,11 +181,6 @@ public class ActionInvoker {
                             Controller.renderText(o);
                         }
 
-                        // Default to renderTemplate
-                        else {
-                            Controller.render();
-                        }
-
                     } catch (InvocationTargetException ex) {
                         // It's a Result ? (expected)
                         if (ex.getTargetException() instanceof Result) {

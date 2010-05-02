@@ -31,7 +31,7 @@ public class BinaryTest extends FunctionalTest {
 	}
 	
 	@Test
-	public void testUploadSomething(){
+	public void testUploadSomething() {
 		String imageURL=null;
 		try{
 			Binary.showAvatar(1l);
