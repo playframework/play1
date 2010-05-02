@@ -135,7 +135,7 @@ public class ActionInvoker {
                     boolean skip = false;
                     for (String un : unless) {
                         if (!un.contains(".")) {
-                            un = before.getDeclaringClass().getName().substring(12) + "." + un;
+                            un = before.getDeclaringClass().getName().substring(12).replace("$", "") + "." + un;
                         }
                         if (un.equals(request.action)) {
                             skip = true;
@@ -164,18 +164,28 @@ public class ActionInvoker {
                     ControllerInstrumentation.initActionCall();
                     try {
                         Object o = invokeControllerMethod(actionMethod, true);
+
+                        // Return type inference
                         if(o != null) {
+
                             if(o instanceof InputStream) {
-                                response.setContentTypeIfNotSet("application/octet-stream");
-                                throw new RenderBinary((InputStream)o, null ,true);
+                                Controller.renderBinary((InputStream)o);
                             }
                             if(o instanceof File) {
-                                response.setContentTypeIfNotSet("application/octet-stream");
-                                throw new RenderBinary((File)o);
+                                Controller.renderBinary((File)o);
                             }
-                            response.setContentTypeIfNotSet(MimeTypes.getContentType("x."+request.format, "text/plain"));
-                            throw new InvocationTargetException(new RenderText(o.toString()));
+                            if(o instanceof Map) {
+                                Controller.renderTemplate((Map<String,Object>)o);
+                            }
+
+                            Controller.renderText(o);
                         }
+
+                        // Default to renderTemplate
+                        else {
+                            Controller.render();
+                        }
+
                     } catch (InvocationTargetException ex) {
                         // It's a Result ? (expected)
                         if (ex.getTargetException() instanceof Result) {

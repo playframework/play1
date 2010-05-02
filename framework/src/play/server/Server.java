@@ -42,7 +42,7 @@ public class Server {
         bootstrap.setPipelineFactory(new HttpServerPipelineFactory());
         bootstrap.bind(new InetSocketAddress(address, httpPort));
         bootstrap.setOption("child.tcpNoDelay", true);
-        bootstrap.setOption("child.keepAlive", true);
+        bootstrap.setOption("child.keepAlive", false);
 
         try {
             if (Play.mode == Mode.DEV) {

@@ -48,7 +48,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
         Logger.trace("messageReceived: begin");
-
+        
         final Object msg = e.getMessage();
         if (msg instanceof HttpRequest) {
             final HttpRequest nettyRequest = (HttpRequest) msg;
@@ -225,6 +225,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(content);
         nettyResponse.setContent(buf);
+        setContentLength(nettyResponse, response.out.size());
         //if (keepAlive) {
         //    setContentLength(nettyResponse, response.out.size());
         //}

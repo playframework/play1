@@ -94,11 +94,11 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         Logger.trace("ServletWrapper>service " + httpServletRequest.getRequestURI());
         Request request = null;
         try {
+            Response response = new Response();
+            response.out = new ByteArrayOutputStream();
+            Response.current.set(response);
             request = parseRequest(httpServletRequest);
             Logger.trace("ServletWrapper>service, request: " + request);
-            Response response = new Response();
-            Response.current.set(response);
-            response.out = new ByteArrayOutputStream();
             boolean raw = false;
             for (PlayPlugin plugin : Play.plugins) {
                 if (plugin.rawInvocation(request, response)) {
@@ -212,7 +212,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         request.body = httpServletRequest.getInputStream();
         request.secure = httpServletRequest.isSecure();
 
-        request.url = uri.toString();
+        request.url = uri.toString() + (httpServletRequest.getQueryString() == null ? "" : "?" + httpServletRequest.getQueryString());
         request.host = httpServletRequest.getHeader("host");
         if (request.host.contains(":")) {
             request.port = Integer.parseInt(request.host.split(":")[1]);

@@ -138,6 +138,14 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
+     * Return a 200 OK text/html response
+     * @param html The response content
+     */
+    protected static void renderHtml(Object html) {
+        throw new RenderText(html == null ? "" : html.toString());
+    }
+
+    /**
      * Return a 200 OK text/plain response
      * @param pattern The response content to be formatted (with String.format)
      * @param args Args for String.format
@@ -460,7 +468,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * @param permanent true -> 301, false -> 302
      * @param args Method arguments
      */
-    public static void redirect(String action, boolean permanent, Object... args) {
+    protected static void redirect(String action, boolean permanent, Object... args) {
         try {
             Map<String, Object> r = new HashMap<String, Object>();
             Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
@@ -525,24 +533,28 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     protected static void renderTemplate(String templateName, Object... args) {
         // Template datas
-        Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
+        Map<String,Object> templateBinding = new HashMap<String,Object>();
         for (Object o : args) {
             List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
             for (String name : names) {
                 templateBinding.put(name, o);
             }
         }
+        renderTemplate(templateName, templateBinding);
+        
+    }
+
+    protected static void renderTemplate(String templateName, Map<String,Object> args) {
+        // Template datas
+        Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
+        templateBinding.data.putAll(args);
         templateBinding.put("session", Scope.Session.current());
         templateBinding.put("request", Http.Request.current());
         templateBinding.put("flash", Scope.Flash.current());
         templateBinding.put("params", Scope.Params.current());
+        templateBinding.put("errors", Validation.errors());
         try {
-            templateBinding.put("errors", Validation.errors());
-        } catch (Exception ex) {
-            throw new UnexpectedException(ex);
-        }
-        try {
-            Template template = TemplateLoader.load(templateName);
+            Template template = TemplateLoader.load(template(templateName));
             throw new RenderTemplate(template, templateBinding.data);
         } catch (TemplateNotFoundException ex) {
             if(ex.isSourceAvailable()) {
@@ -557,20 +569,28 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         }
     }
 
+    protected static void renderTemplate(Map<String,Object> args) {
+        renderTemplate(template(), args);
+    }
+
     /**
      * Render the corresponding template
      * @param args The template data
      */
     protected static void render(Object... args) {
         String templateName = null;
-        final Request request = Request.current();
-        final String format = request.format;
-
         if (args.length > 0 && args[0] instanceof String && LocalVariablesNamesTracer.getAllLocalVariableNames(args[0]).isEmpty()) {
             templateName = args[0].toString();
         } else {
-            templateName = request.action.replace(".", "/") + "." + (format == null ? "html" : format);
+            templateName = template();
         }
+        renderTemplate(templateName, args);
+    }
+
+    protected static String template() {
+        final Request request = Request.current();
+        final String format = request.format;
+        String templateName = request.action.replace(".", "/") + "." + (format == null ? "html" : format);
         if(templateName.startsWith("@")) {
             templateName = templateName.substring(1);
             if(!templateName.contains(".")) {
@@ -578,7 +598,20 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             }
             templateName = templateName.replace(".", "/") + "." + (format == null ? "html" : format);
         }
-        renderTemplate(templateName, args);
+        return templateName;
+    }
+
+    protected static String template(String templateName) {
+        final Request request = Request.current();
+        final String format = request.format;
+        if(templateName.startsWith("@")) {
+            templateName = templateName.substring(1);
+            if(!templateName.contains(".")) {
+                templateName = request.controller + "." + templateName;
+            }
+            templateName = templateName.replace(".", "/") + "." + (format == null ? "html" : format);
+        }
+        return templateName;
     }
 
     /**
