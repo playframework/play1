@@ -25,17 +25,23 @@
 		var message = $('#message').val();
 		$('#message').val('');
 		$.post('@{postMessage()}', {message: message}); 
-    });
+	});
 
 	// Retrieve new messages
 	var getMessages = function() {
-		$.getJSON('@{newMessages()}', function(messages) {
-			$(messages).each(function() {
-				display(this);
-			});
-			getMessages();
+		$.ajax({
+			url: '@{newMessages()}',
+			success: function(messages) {
+				$(messages).each(function() {
+					display(this);
+				});
+			},
+			complete: function() {
+				getMessages();
+			},
+			dataType: 'json'
 		});
-	}	
+	}
 	getMessages();
 	
 	// Display a message
