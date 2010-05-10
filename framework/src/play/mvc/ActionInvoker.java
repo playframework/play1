@@ -177,8 +177,11 @@ public class ActionInvoker {
                             if(o instanceof Map) {
                                 Controller.renderTemplate((Map<String,Object>)o);
                             }
+                            if(o instanceof Object[]) {
+                                Controller.render(o);
+                            }
 
-                            Controller.renderText(o);
+                            Controller.renderHtml(o);
                         }
 
                     } catch (InvocationTargetException ex) {

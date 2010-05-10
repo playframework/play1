@@ -38,6 +38,7 @@ import play.mvc.results.Ok;
 import play.mvc.results.Redirect;
 import play.mvc.results.RedirectToStatic;
 import play.mvc.results.RenderBinary;
+import play.mvc.results.RenderHtml;
 import play.mvc.results.RenderTemplate;
 import play.mvc.results.RenderText;
 import play.mvc.results.RenderJson;
@@ -142,7 +143,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * @param html The response content
      */
     protected static void renderHtml(Object html) {
-        throw new RenderText(html == null ? "" : html.toString());
+        throw new RenderHtml(html == null ? "" : html.toString());
     }
 
     /**
