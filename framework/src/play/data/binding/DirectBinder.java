@@ -16,7 +16,7 @@ import play.utils.Utils;
 
 /**
  * The DirectBinder know how to bind simple text value to simple java types.
- * It does not opperate on complex objects nor List nor Arrays  
+ * It does not operate on complex objects nor List nor Arrays  
  */
 class DirectBinder {
 

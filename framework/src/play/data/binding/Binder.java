@@ -43,6 +43,14 @@ public abstract class Binder {
         return directBind(value, type, new Annotation[0]);
     }
 
+    /**
+     * Bind a request parameter from the request.
+     * @param type This is the targeted type. 
+     * @param gtype
+     * @param annotations An annotation that can be set next to the targeted type
+     * @param <T>
+     * @return
+     */
     public abstract <T> T bindFromRequest(Class<T> type, Type gtype, Annotation[] annotations);
     
     public <T> T bindFromRequest(Class<T> type, Annotation[] annotations) {
