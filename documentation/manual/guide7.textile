@@ -10,7 +10,7 @@ The CRUD module is a generic application that introspects the model classes to c
 
 To enable the CRUD module, add this line to the **/yabe/conf/application.conf** file:
 
-bc. # Import he crud module
+bc. # Import the crud module
 module.crud=${play.path}/modules/crud
 
 Then this module comes with a generic set of **routes** that we can reuse for now. To imports these routes just add this line to the **/yabe/conf/routes** file:
