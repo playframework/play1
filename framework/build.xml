@@ -51,7 +51,7 @@
         </copy>
     </target>
     
-    <target name="javadoc" description="Generate the Javadoc">
+    <target name="javadoc" description="Generate the Javadoc" depends="version">
         <delete dir="../documentation/api" />
         <javadoc packagenames="play.*"
                sourcepath="src"           
