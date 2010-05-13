@@ -268,7 +268,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         if (file != null && file.isFile()) {
             try {
 
-                addEtag(request, nettyResponse, file);
+                nettyResponse = addEtag(request, nettyResponse, file);
 
                 nettyResponse.setHeader(CONTENT_TYPE, (MimeTypes.getContentType(file.getName(), "text/plain")));
                 RandomAccessFile raf;
@@ -586,7 +586,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 } else {
                     final File localFile = file.getRealFile();
                     final boolean keepAlive = isKeepAlive(nettyRequest);
-                    addEtag(request, nettyResponse, localFile);
+                    nettyResponse = addEtag(request, nettyResponse, localFile);
 
                     RandomAccessFile raf;
                     raf = new RandomAccessFile(localFile, "r");
@@ -657,7 +657,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         return true;
     }
 
-    private static void addEtag(Request request, HttpResponse httpResponse, File file) throws IOException {
+    private static HttpResponse addEtag(Request request, HttpResponse httpResponse, File file) throws IOException {
         if (Play.mode == Play.Mode.DEV) {
             httpResponse.setHeader(CACHE_CONTROL, "no-cache");
         } else {
@@ -672,7 +672,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         long last = file.lastModified();
         final String etag = "\"" + last + "-" + file.hashCode() + "\"";
         if (!isModified(etag, last, request)) {
-            httpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED);
+            httpResponse.setStatus(HttpResponseStatus.NOT_MODIFIED);
             if (useEtag) {
                 httpResponse.setHeader(ETAG, etag);
             }
@@ -683,6 +683,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 httpResponse.setHeader(ETAG, etag);
             }
         }
+        return httpResponse;
     }
 
     public static boolean isKeepAlive(HttpMessage message) {
