@@ -11,6 +11,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
@@ -63,15 +65,22 @@ public class JPAPlugin extends PlayPlugin {
             if (classes.isEmpty() && Play.configuration.getProperty("jpa.entities", "").equals("")) {
                 return;
             }
-            if (DB.datasource == null) {
-                throw new JPAException("Cannot start a JPA manager without a properly configured database", new NullPointerException("No datasource"));
+
+            final String dataSource = Play.configuration.getProperty("hibernate.connection.datasource");
+            if (StringUtils.isEmpty(dataSource) && DB.datasource == null) {
+                throw new JPAException("Cannot start a JPA manager without a properly configured database", new NullPointerException("No datasource configured"));
             }
+
             Ejb3Configuration cfg = new Ejb3Configuration();
-            cfg.setDataSource(DB.datasource);
+
+            if (DB.datasource != null) {
+                cfg.setDataSource(DB.datasource);
+            }
+            
             if (!Play.configuration.getProperty("jpa.ddl", "update").equals("none")) {
                 cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty("jpa.ddl", "update"));
             }
-            cfg.setProperty("hibernate.dialect", getDefaultDialect(Play.configuration.getProperty("db.driver")));
+            cfg.setProperty("hibernate.dialect", getDefaultDialect(Play.configuration.getProperty("db.driver", "")));
             cfg.setProperty("javax.persistence.transaction", "RESOURCE_LOCAL");
 
             // Explicit SAVE for JPASupport is implemented here
