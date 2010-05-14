@@ -216,7 +216,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     protected static void writeResponse(ChannelHandlerContext ctx, Response response, HttpResponse nettyResponse, HttpRequest nettyRequest) throws IOException {
         byte[] content = null;
 
-        final boolean keepAlive = isKeepAlive(nettyResponse);
+        final boolean keepAlive = isKeepAlive(nettyRequest);
         if (nettyRequest.getMethod().equals(HttpMethod.HEAD)) {
             content = new byte[0];
         } else {
@@ -264,7 +264,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             is = (InputStream) obj;
         }
 
-        final boolean keepAlive = isKeepAlive(nettyResponse);
+        final boolean keepAlive = isKeepAlive(nettyRequest);
         if (file != null && file.isFile()) {
             try {
 
@@ -596,7 +596,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                     Logger.trace("keep alive " + keepAlive);
                     Logger.trace("content type " + (MimeTypes.getContentType(localFile.getName(), "text/plain")));
 
-                    if (isKeepAlive(nettyRequest)) {
+                    if (keepAlive) {
                         setContentLength(nettyResponse, fileLength);
                     }
                     nettyResponse.setHeader(CONTENT_TYPE, (MimeTypes.getContentType(localFile.getName(), "text/plain")));
@@ -609,7 +609,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                     // Write the content.
                     ChannelFuture writeFuture = ch.write(new ChunkedFile(raf, 0, fileLength, 8192));
 
-                    if (!isKeepAlive(nettyRequest)) {
+                    if (!keepAlive) {
                         // Close the connection when the whole content is written out.
                         writeFuture.addListener(ChannelFutureListener.CLOSE);
                     }
