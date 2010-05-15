@@ -154,7 +154,7 @@ public class ActionInvoker {
                 String cacheKey = "actioncache:" + request.action + ":" + request.querystring;
 
                 // Check the cache (only for GET or HEAD)
-                if ((request.method.equals("GET") || request.method.equals("GET")) &&
+                if ((request.method.equals("GET") || request.method.equals("HEAD")) &&
                     actionMethod.isAnnotationPresent(Cache.class))
                 {
                     actionResult = (Result)play.cache.Cache.get(cacheKey);
