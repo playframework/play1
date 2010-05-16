@@ -18,7 +18,7 @@ We will call this blog engine project **yabe**.
 
 !images/guide1-0!
 
-p(note). This tutorial is also distributed as a sample application. You can find the final code in the **samples-and-tests/yabe** directory of your Play installation.
+p(note). This tutorial is also distributed as a sample application. You can find the final code in your Play installation’s **samples-and-tests/yabe/** directory.
 
 h2. <a>Prerequisites</a>
 
@@ -26,9 +26,9 @@ First of all, make sure that you have a working Java installation. Play requires
 
 As we will use the command line a lot, it’s better to use a Unix-like OS. If you run a Windows system, it will also work fine; you’ll just have to type a few commands in the command prompt.
 
-We will assume that you already have knowledge of Java and Web development (especially HTML, CSS and JavaScript). However you don’t need to have a deep knowledge of all the JEE components. Play is a ‘full stack’ Java framework and it provides or encapsulates all the parts of the Java API that you will need. No need to know how to configure a JPA entity manager or deploy a JEE component.
+We will assume that you already have knowledge of Java and Web development (especially HTML, CSS and JavaScript). However you don’t need to have a deep knowledge of all the Java Enterprise Edition (JEE) components. Play is a ‘full stack’ Java framework and it provides or encapsulates all the parts of the Java API that you will need. There is no need to know how to configure a JPA entity manager or deploy a JEE component.
 
-You will of course need a text editor. If you are accustomed to using a full featured Java IDE like Eclipse or NetBeans you can of course use it. However with Play you can have fun working with a simple text editor like Textmate, Emacs or VI. This is because the framework manages the compilation and the deployment process itself. As we will soon see…
+You will of course need a text editor. If you are accustomed to using a fully-featured Java IDE like Eclipse or NetBeans you can of course use it. However with Play you can have fun working with a simple text editor like Textmate, Emacs or VI. This is because the framework manages the compilation and the deployment process itself. As we will soon see…
 
 Later in this tutorial we will use Lighttpd and MySql to show how to deploy a Play application in ‘production’ mode. But Play can work without these components so if you can’t install them, it’s not a problem.
 
@@ -38,7 +38,7 @@ Installation is very simple. Just download the latest binary package from the do
 
 p(note). If you’re using Windows, it is generally a good idea to avoid space characters in the path, so for example **c:\play** would be a better choice than **c:\Documents And Settings\user\play**.
 
-To work efficiently, you need to add the Play directory to your working path. It allows you to just type **‘play’** at the command prompt to use the play utility. To check that the installation worked, just open a new command line and type **‘play’**; it should show you the play basic usage help.
+To work efficiently, you need to add the Play directory to your working path. It allows you to just type **play** at the command prompt to use the play utility. To check that the installation worked, just open a new command line and type **play**; it should show you the play basic usage help.
 
 h2. <a>Project creation</a>
 
@@ -48,17 +48,17 @@ Open a new command line and type:
 
 bc. ~$ play new yabe
 
-It will prompt you for the application full name. Type **‘Yet Another Blog Engine’**.
+It will prompt you for the application full name. Type **Yet Another Blog Engine**.
 
 !images/guide1-1!
 
-The **‘play new’** command creates a new directory **yabe/** and populates it with a series of files and directories, the most important being:
+The **play new** command creates a new directory **yabe/** and populates it with a series of files and directories, the most important being:
 
-**app/** contains the application’s core, split between models, controllers and views directories. It can contain other Java packages as well. This is the directory where *.java source files live.
+**app/** contains the application’s core, split between models, controllers and views directories. It can contain other Java packages as well. This is the directory where **.java** source files live.
 
 **conf/** contains all the configuration files for the application, especially the main **application.conf** file, the **routes** definition files and the **messages** files used for internationalization.
 
-**lib/** contains all optional Java libraries packaged as standard .jar files.
+**lib/** contains all optional Java libraries packaged as standard **.jar** files.
 
 **public/** contains all the publicly available resources, which includes JavaScript files, stylesheets and images directories.
 
@@ -70,11 +70,11 @@ Now if you’re a seasoned Java developer, you may wonder where all the .class f
 
 That allows two very important things in the development process. The first one is that Play will detect changes you make to any Java source file and automatically reload them at runtime. The second is that when a Java exception occurs, Play will create better error reports showing you the exact source code.
 
-p(note). In fact Play can keep a bytecode cache in the application **/tmp** directory, but only to speed up things between restart on large applications. You can discard this cache using the **‘play clean’** command if needed.
+p(note). In fact Play keeps a bytecode cache in the application’s **tmp/** directory, but only to speed things up between restart on large applications. You can discard this cache using the **play clean** command if needed.
 
 h2. <a>Running the application</a>
 
-We can now test the newly-created application. Just return to the command line, go to the newly-created **yabe/** directory and type **‘play run’**. Play will now load the application and start a web server on port 9000.
+We can now test the newly-created application. Just return to the command line, go to the newly-created **yabe/** directory and type **play run**. Play will now load the application and start a web server on port 9000.
 
 You can see the new application by opening a browser to "http://localhost:9000":http://localhost:9000. A new application has a standard welcome page that just tells you that it was successfully created.
 
@@ -86,7 +86,7 @@ The main entry point of your application is the **conf/routes** file. This file 
 
 bc. GET		/			Application.index
 
-That simply tells Play that when the web server receives a **GET** request for the **/** path, it must call the **Application.index** Java method. In this case, **Application.index** is a shortcut for **controllers.Application.index**, because the controllers package is implicit. 
+That simply tells Play that when the web server receives a **GET** request for the **/** path, it must call the **Application.index** Java method. In this case, **Application.index** is a shortcut for **controllers.Application.index**, because the **controllers** package is implicit. 
 
 When you create standalone Java applications you generally use a single entry point defined by a method such as:
 
@@ -94,7 +94,7 @@ bc. public static void main(String[] args) {
   ... 
 }
 
-A Play application has several entry points, one for each URL. We call these methods **‘action’** methods. Action methods are defined in special classes that we call **‘controllers’**.
+A Play application has several entry points, one for each URL. We call these methods **action** methods. Action methods are defined in special classes that we call **controllers**.
 
 Let’s see what the **controllers.Application** controller looks like. Open the **yabe/app/controllers/Application.java** source file:
 
@@ -112,7 +112,7 @@ public class Application extends Controller {
 
 Notice that controller classes extend the **play.mvc.Controller** class. This class provides many useful methods for controllers, like the **render()** method we use in the index action.
 
-The index action is defined as a **‘public static void’** method. This is how action methods are defined. You can see that action methods are static, because the controller classes are never instantiated. They are marked public to authorize the framework to call them in response to a URL. They always return void.  
+The index action is defined as a **public static void** method. This is how action methods are defined. You can see that action methods are static, because the controller classes are never instantiated. They are marked public to authorize the framework to call them in response to a URL. They always return void.  
 
 The default index action is simple: it calls the **render()** method which tells Play to render a template. Using a template is the most common way (but not the only one) to generate the HTTP response.
 
@@ -125,7 +125,7 @@ bc. #{extends 'main.html' /}
  
 #{welcome /}
 
-The template content seems pretty light. In fact, all you see are Play tags. Play tags are very close to JSP taglib. This is the **#{welcome /}** tag that generates the welcome message you saw in the browser. 
+The template content seems pretty light. In fact, all you see are Play tags. Play tags are similar to JSP tags. This is the **#{welcome /}** tag that generates the welcome message you saw in the browser. 
 
 The **#{extends /}** tag tells Play that this template inherits another template called **main.html**. Template inheritance is a powerful concept that allows you to create complex web pages by reusing common parts.
 
@@ -149,7 +149,7 @@ bc. <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w
 
 Do you see the **#{doLayout /}** tag? This is where the content of **Application/index.html** will be inserted.
  
-We can try to edit the controller file to see how Play automatically reloads it. Open the **yabe/app/controllers/Application.java** file in a text editor, and add a mistake by removing the trailing semicolon after the render() call:
+We can try to edit the controller file to see how Play automatically reloads it. Open the **yabe/app/controllers/Application.java** file in a text editor, and add a mistake by removing the trailing semicolon after the **render()** call:
 
 bc. public static void index() {
     render()
@@ -166,7 +166,7 @@ bc. public static void index() {
     render();
 }
 
-This time, Play has correctly reloaded the controller and replaced the old code in the JVM. Each request to the **‘/’** URL will output the ‘Yop’ message to the console.
+This time, Play has correctly reloaded the controller and replaced the old code in the JVM. Each request to the **/** URL will output the ‘Yop’ message to the console.
 
 You can remove this useless line, and now edit the **yabe/app/views/Application/index.html** template to replace the welcome message:
 
@@ -179,7 +179,7 @@ Like for Java code changes, just refresh the page in the browser to see the modi
 
 p(note). We will now start to code the blog application. You can either continue to work with a text editor or open the project in a Java IDE like Eclipse or NetBeans. If you want to set-up a Java IDE, please check "this page":ide. 
 
-h2. <a>Setting up the database</a>
+h2. <a>Setting-up the database</a>
 
 One more thing before starting to code. For the blog engine, we will need a database. For development purposes, Play comes with a stand alone SQL database management system called HSQLDB. This is the best way to start a project before switching to a more robust database if needed. You can choose to have either an in-memory database or a filesystem database that will keep your data between application restarts. 
 
@@ -195,9 +195,9 @@ Now, go back to your browser and refresh the welcome page. Play will automatical
 
 bc. INFO  ~ Connected to jdbc:hsqldb:mem:playembed
 
-h2. <a>Using a version control system (VCS) to track changes</a>
+h2. <a>Using a version control system 	to track changes</a>
 
-When you work on a project, it’s highly recommended to store your source code in a VCS. It allows you to revert to a previous version if a change breaks something, work with several people and give access to all the successive versions of the application. Of course you can use any VCS to store your project, but here we will use Bazaar as an example. Bazaar is a distributed source version control system.
+When you work on a project, it’s highly recommended to store your source code in a version control system (VCS). It allows you to revert to a previous version if a change breaks something, work with several people and give access to all the successive versions of the application. Of course you can use any VCS to store your project, but here we will use Bazaar as an example. "Bazaar":http://bazaar-vcs.org/ is a distributed source version control system.
 
 Installing Bazaar is beyond the scope of this tutorial but it is very easy on any system. Once you have a working installation of Bazaar, go to the blog directory and init the application versioning by typing:
 
