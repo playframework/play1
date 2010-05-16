@@ -414,7 +414,7 @@ try:
 			jpda_port = 0
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~~ Build java path
-	def do_java(className='play.server.Server'):
+	def do_java(className='play.server.Server',args=[]):
 		global java_cmd
 		global java_path
 		global pid_path
@@ -434,7 +434,9 @@ try:
 			if a.find('--%') == 0:
 				remaining_args.remove(a)
 		# ~~~~~~~~~~~~~~~~~~~~~~ Read some configuration from conf/application.conf
-		java_args = remaining_args[:]
+		java_args = []
+		if (args == []):
+		    java_args = remaining_args[:]
 		
 		memory_in_args=False
 		for arg in java_args:
@@ -463,7 +465,7 @@ try:
 				java_args.append('-Djava.security.policy==%s' % policyFile)
 		
 		# The Java stuff
-		java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, className]
+		java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, className] + args
 
 		if not os.environ.has_key('PLAY_PID_PATH'):
 			pid_path = os.path.join(application_path, 'server.pid');
