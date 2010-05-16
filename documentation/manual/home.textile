@@ -29,7 +29,7 @@ Your first steps with Play and your first 5 minutes of fun.
 
 h2. <a name="guide">Tutorial -- Play guide, a real world app step-by-step</a>
 
-Learn play by coding **‘Yet Another Blog Engine’**, from start to finish. Each chapter will be a chance to learn one more cool Play feature.
+Learn Play by coding **‘Yet Another Blog Engine’**, from start to finish. Each chapter will be a chance to learn one more cool Play feature.
 
 # "Starting up the project":guide1
 # "A first iteration of the data model":guide2

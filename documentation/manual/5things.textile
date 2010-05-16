@@ -2,9 +2,9 @@ h1. Five cool things you can do with Play
 
 Five examples to show the philosophy behind the Play framework.
 
-h2. <a>1. Bind an HTTP parameter to a Java method parameter</a>
+h2. <a>Bind an HTTP parameter to a Java method parameter</a>
 
-Retrieving HTTP parameters from Java code is really simple with Play. Just declare method parameters with the same name as the HTTP parameters.
+Retrieving HTTP parameters from Java code is really simple with Play. Just declare method parameters with the same names as the HTTP parameters.
 
 For example, with this request:
 
@@ -40,9 +40,9 @@ bc. <form action="/Directory/add" method="POST">
 </form>
 
 
-h2. <a>2. Redirect to an action by calling the corresponding Java method</a>
+h2. <a>Redirect to an action by calling the corresponding Java method</a>
 
-There is no equivalent to the Java Servlet **forward** command with Play. But redirecting to another action is really simple. Just call the corresponding Java method and Play will generate the correct HTTP "Redirect" response.
+There is no equivalent to the Java Servlet **forward** command with Play. But redirecting to another action is really simple. Just call the corresponding Java method and Play will generate the correct HTTP ‘Redirect’ response.
 
 bc. public static void show(Long id) {
     Article article = Article.findById(id);
@@ -68,7 +68,7 @@ That will generate the following HTML:
 bc. <a href="/articles/15">My new article</a>
 
 
-h2. <a>3. Don’t Repeat Yourself when passing Java objects to templates</a>
+h2. <a>Don’t Repeat Yourself when passing Java objects to templates</a>
 
 In most Java frameworks, in order to pass Java objects to the template system you need to write something like:
 
@@ -87,9 +87,9 @@ render(article, user);
 
 And retrieve objects from their Java local name in the template. That saves a lot of useless lines of code…
 
-h2. <a>4. JPA on steroids</a>
+h2. <a>JPA on steroids</a>
 
-JPA is surely the best ORM API available for Java. If you know it you will be amazed how simpler it becomes with Play. With nothing to configure, Play will automatically start the JPA Entity Manager using Hibernate and magically synchronize it when code is reloaded.
+JPA is surely the best object-relational mapping (ORM) API available for Java. If you know it you will be amazed how much simpler it becomes with Play. With nothing to configure, Play will automatically start the JPA Entity Manager using Hibernate and magically synchronize it when code is reloaded.
 
 Moreover, if you use the provided **play.db.jpa.Model** superclass it will help to make your code prettier. Take a look:
 
@@ -102,7 +102,7 @@ bc. public void messages(int page) {
     render(connectedUser, messages);
 }
 
-h2. <a>5. Straightforward file upload management</a>
+h2. <a>Straightforward file upload management</a>
 
 File upload management is very simple with Play.
 

@@ -2,13 +2,6 @@ h1. Deployment options
 
 Play applications can be deployed virtually anywhere: inside Servlet containers, as standalone servers, in Google Application Engine, Stack, a Cloud, etc...
 
-The most popular deployment options are:
-
-# "Standalone Play application":deployment#aStandalonePlayapplicationa
-# "Application servers":deployment#aApplicationserversa
-# "Google Application Engine":deployment#aGoogleApplicationEngineGAEa
-# "Stax cloud hosting platform":deployment#aStaxcloudhostingplatforma
-
 h2. <a>Standalone Play application</a>
 
 The simplest and the more robust way is to simply run your Play application without any container. You can use a frontal HTTP server like Lighttpd or Apache if you need more advanced HTTP features like virtual hosting.
