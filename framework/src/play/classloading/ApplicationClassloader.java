@@ -38,7 +38,7 @@ import play.libs.IO;
 public class ApplicationClassloader extends ClassLoader {
 
     /**
-     * This protection domain will be affecter to all loaded classes.
+     * This protection domain applies to all loaded classes.
      */
     public ProtectionDomain protectionDomain;
 
