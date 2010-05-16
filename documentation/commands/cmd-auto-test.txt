@@ -15,19 +15,19 @@
 ~ The System.out stream is redirected to the logs/system.out file. All application and framework logs are written to
 ~ the test-results/application.log file.
 ~
-~ The script first try to locate the java program using the $JAVA_HOME environment variable (from $JAVA_HOME/bin).
+~ The script first tries to locate the java command using the $JAVA_HOME environment variable (from $JAVA_HOME/bin).
 ~ If the $JAVA_HOME variable is not defined, the default java command available from the PATH is used.
 ~
 ~ All options specified after the application path are passed to the JVM (example. -Xms=64m -Xmx=256m).
 ~ All the shell environment variables are passed to the JVM.
 ~
-~ The script try to run a browser using the OS default registred web browser. If the application has compilation
+~ The script tries to run a browser using the OS default registred web browser. If the application has compilation
 ~ errors, the script fail without trying to launch the browser.
 ~
-~ All tests results are written to the test-results/ directory. If all tests pass, a test-results/result.passed file is
+~ All test results are written to the test-results/ directory. If all tests pass, a test-results/result.passed file is
 ~ created. If one or more tests fail, a test-results/result.failed file is created.
 ~
 ~ All the test-results/* content is deleted before running the tests.
 ~
-~ This script is aimed to be used in continuous integration environments.
+~ This script is intended to be used in continuous integration environments.
 ~

@@ -1,36 +1,36 @@
-h1. Using play modules
+h1. Using Play modules
 
-A play application can be assembled from several application modules. This allows you to reuse application components across several application or split a large application into several smaller applications.
+A Play application can be assembled from several application modules. This allows you to reuse application components across several application or split a large application into several smaller applications.
 
-h2. <a>What is a module ?</a>
+h2. <a>What is a module?</a>
 
-A module is just another play application; however some differences exist in the way resources are loaded for an application module :
+A module is just another Play application; however some differences exist in the way resources are loaded for an application module:
 
 * A module does not have a **conf/application.conf** file.
 * A module can have a **conf/routes** file, but these routes will not be  loaded automatically.
 * All files are first searched for in the main application path, then in all loaded modules.
-* A module can contains plain Java code packaged as a jar file in the module/lib directory.
+* A module can contain plain Java code packaged as a JAR file in the module/lib directory.
 * Everything in a module is optional.
 
 You can create a module with the **play new-module** command.
 
 h2. <a>How to load a module from an application</a>
 
-The default modules installation path is in the **$PLAY_HOME/modules** directory. This way all modules are automatically available to all application run with the framework.
+The default modules installation path is in the **$PLAY_HOME/modules** directory. This way all modules are automatically available to all applications run with the framework.
 
 If you want to load external modules from an application, just declare external modules in the application.conf file in the main application.
 
 bc. # Additional modules
 # ~~~~~
-# A module is another play application. Add a line for each module you want
+# A module is another Play application. Add a line for each module you want
 # to add to your application. Module paths are either absolute or relative to
 # the application root.
 #
 module.crud=${play.path}/modules/crud
 
-You can also create a standalone project that contains all modules needed by your application. You just need to copy all modules in the same directory than your application. 
+You can also create a standalone project that contains all modules needed by your application. You just need to copy all modules into the same directory as your application. 
 
-Let's say you have a large application with a CMS component, a forum component, a directory component and using the GWT module. You can create a project using this layout:
+Let’s say you have a large application with a CMS component, a forum component, a directory component and using the GWT module. You can create a project using this layout:
 
 bc. /my-project
     /cms
@@ -52,7 +52,7 @@ module.directory=../directory
 
 When you run the main application (using **play run my-project/main**) it will load all these modules in memory as a larger application.
 
-p(note). If modules path are relative, they are resolved from the main application root.
+p(note). If module paths are relative, they are resolved from the main application root.
 
 h2. <a>Load default routes from modules</a>
 
@@ -65,11 +65,11 @@ You can even load routes from all available modules:
 
 bc. GET     /	     module:*
 
-h2. <a>Using the modules repository</a>
+h2. <a>Using the module repository</a>
 
-The "modules repository":http://www.playframework.org/modules identifies all modules contributed by the community. A module can have several versions. You have to check from the modules documentation which version you need to use for your framework version.
+The "module repository":http://www.playframework.org/modules identifies all modules contributed by the community. A module can have several versions. You have to check the module’s documentation for which version you need to use for your framework version.
 
-You can also browse the modules repository using the **play list-modules** command. 
+You can also browse the module repository using the **play list-modules** command. 
 
 bc. gbo-mac:~ guillaume$ play11 list-modules
 ~        _            _ 
@@ -93,7 +93,7 @@ bc. gbo-mac:~ guillaume$ play11 list-modules
 ~   Versions: 1.0
 ...
 
-You can install a module using the **play install {module}-{version}** command. For example, to install the scala support to the framework, use:
+You can install a module using the **play install {module}-{version}** command. For example, to install the Scala support to the framework, use:
 
 bc. play install scala-head
 
@@ -105,19 +105,19 @@ Modules installed this way are downloaded to the **/modules** directory of your 
 
 bc. play install gwt --path=my-project
 
-h2. <a>Contributing a new module to the modules repository</a>
+h2. <a>Contributing a new module to the module repository</a>
 
 First you need to have an OpenID. It will help us to authenticate you as author of your modules. Then send us a module registration request on the Google Group.
 
 Please tell us:
 
-* More about your module. What is it ?
+* More about your module. What is it?
 * Your module name. It must match the [a-zA-Z]+ regular expression.
 * A short description of the module.
 * Your project home page.
 * Your OpenID.
-* Your module must be hosted somewhere with the source code available and a way to report bugs. If you don't have any idea, github, google code or launchpad are good choices. 
+* Your module must be hosted somewhere with the source code available and a way to report bugs. If you don’t have any idea, github, Google Code and Launchpad are good choices. 
 
-To release your module, simply use the play build-module command. Then connect to the modules repository and upload the generated package.
+To release your module, simply use the play build-module command. Then connect to the module repository and upload the generated package.
 
-You can of course use the offical Google Group to provide help and share about your work.
+You can of course use the offical Google Group to provide help and share information about your work.

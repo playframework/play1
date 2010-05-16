@@ -1,5 +1,8 @@
 package play;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.jamonapi.MonitorFactory;
 import com.jamonapi.utils.Misc;
 import java.io.PrintWriter;
@@ -20,20 +23,37 @@ public class CorePlugin extends PlayPlugin {
     /**
      * Get the appication status
      */
-    public static String computeApplicationStatus() {
-        StringBuffer dump = new StringBuffer();
-        for (PlayPlugin plugin : Play.plugins) {
-            try {
-                String status = plugin.getStatus();
-                if (status != null) {
-                    dump.append(status);
-                    dump.append("\n");
+    public static String computeApplicationStatus(boolean json) {
+        if(json) {
+            JsonObject o = new JsonObject();
+            for (PlayPlugin plugin : Play.plugins) {
+                try {
+                    JsonObject status = plugin.getJsonStatus();
+                    if (status != null) {
+                        o.add(plugin.getClass().getName(), status);
+                    }
+                } catch (Throwable e) {
+                    JsonObject error = new JsonObject();
+                    error.add("error", new JsonPrimitive(e.getMessage()));
+                    o.add(plugin.getClass().getName(), error);
                 }
-            } catch (Throwable e) {
-                dump.append(plugin.getClass().getName() + ".getStatus() has failed (" + e.getMessage() + ")");
             }
+            return o.toString();
+        } else {
+            StringBuffer dump = new StringBuffer();
+            for (PlayPlugin plugin : Play.plugins) {
+                try {
+                    String status = plugin.getStatus();
+                    if (status != null) {
+                        dump.append(status);
+                        dump.append("\n");
+                    }
+                } catch (Throwable e) {
+                    dump.append(plugin.getClass().getName() + ".getStatus() has failed (" + e.getMessage() + ")");
+                }
+            }
+            return dump.toString();
         }
-        return dump.toString();
     }
 
     /**
@@ -51,21 +71,20 @@ public class CorePlugin extends PlayPlugin {
             System.out.println("@KILLED");
             System.exit(0);
         }
-        if (request.path.equals("/@status")) {
-            if (!Play.started) {
-                response.status = 503;
-                response.print("Not started");
-                return true;
-            }
-            response.contentType = "text/plain";
+        if (request.path.equals("/@status") || request.path.equals("/@status.json")) {
+            response.contentType = request.path.contains(".json") ? "application/json" : "text/plain";
             Header authorization = request.headers.get("authorization");
-            if (authorization != null && Crypto.sign("@status").equals(authorization.value())) {
-                response.print(computeApplicationStatus());
+            if (request.isLoopback || (authorization != null && Crypto.sign("@status").equals(authorization.value()))) {
+                response.print(computeApplicationStatus(request.path.contains(".json")));
                 response.status = 200;
                 return true;
             } else {
                 response.status = 401;
-                response.print("Not authorized");
+                if(response.contentType.equals("application/json")) {
+                    response.print("{\"error\": \"Not authorized\"}");
+                } else {
+                    response.print("Not authorized");
+                }
                 return true;
             }
         }
@@ -135,21 +154,83 @@ public class CorePlugin extends PlayPlugin {
         out.println("Scheduled task count: " + Invoker.executor.getTaskCount());
         out.println("Queue size: " + Invoker.executor.getQueue().size());
         out.println();
-        out.println("Monitors:");
-        out.println("~~~~~~~~");
-        Object[][] data = Misc.sort(MonitorFactory.getRootMonitor().getBasicData(), 3, "desc");
-        int lm = 10;
-        for (Object[] row : data) {
-            if (row[0].toString().length() > lm) {
-                lm = row[0].toString().length();
+        try {
+            out.println("Monitors:");
+            out.println("~~~~~~~~");
+            Object[][] data = Misc.sort(MonitorFactory.getRootMonitor().getBasicData(), 3, "desc");
+            int lm = 10;
+            for (Object[] row : data) {
+                if (row[0].toString().length() > lm) {
+                    lm = row[0].toString().length();
+                }
             }
-        }
-        for (Object[] row : data) {
-            if(((Double)row[1])>0) {
-                out.println(String.format("%-" + (lm) + "s -> %8.0f hits; %8.1f avg; %8.1f min; %8.1f max;", row[0], row[1], row[2], row[6], row[7]));
+            for (Object[] row : data) {
+                if(((Double)row[1])>0) {
+                    out.println(String.format("%-" + (lm) + "s -> %8.0f hits; %8.1f avg; %8.1f min; %8.1f max;", row[0], row[1], row[2], row[6], row[7]));
+                }
             }
+        } catch(Exception e) {
+            out.println("No monitors found");
         }
         return sw.toString();
+    }
+
+    @Override
+    public JsonObject getJsonStatus() {
+        JsonObject status = new JsonObject();
+
+        {
+            JsonObject java = new JsonObject();
+            java.addProperty("version", System.getProperty("java.version"));
+            status.add("java", java);
+        }
+
+        {
+            JsonObject memory = new JsonObject();
+            memory.addProperty("max", Runtime.getRuntime().maxMemory());
+            memory.addProperty("free", Runtime.getRuntime().freeMemory());
+            memory.addProperty("total", Runtime.getRuntime().totalMemory());
+            status.add("memory", memory);
+        }
+
+        {
+            JsonObject application = new JsonObject();
+            application.addProperty("uptime", Play.started ? System.currentTimeMillis() - Play.startedAt : -1);
+            application.addProperty("path", Play.applicationPath.getAbsolutePath());
+            status.add("application", application);
+        }
+
+        {
+            JsonObject pool = new JsonObject();
+            pool.addProperty("size", Invoker.executor.getPoolSize());
+            pool.addProperty("active", Invoker.executor.getActiveCount());
+            pool.addProperty("scheduled", Invoker.executor.getTaskCount());
+            pool.addProperty("queue", Invoker.executor.getQueue().size());
+            status.add("pool", pool);
+        }
+
+        {
+            JsonArray monitors = new JsonArray();
+            try {
+                Object[][] data = Misc.sort(MonitorFactory.getRootMonitor().getBasicData(), 3, "desc");
+                for (Object[] row : data) {
+                    if(((Double)row[1])>0) {
+                        JsonObject o = new JsonObject();
+                        o.addProperty("name", row[0].toString());
+                        o.addProperty("hits", (Double)row[1]);
+                        o.addProperty("avg", (Double)row[2]);
+                        o.addProperty("min", (Double)row[6]);
+                        o.addProperty("max", (Double)row[7]);
+                        monitors.add(o);
+                    }
+                }
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+            status.add("monitors", monitors);
+        }
+
+        return status;
     }
 
     /**

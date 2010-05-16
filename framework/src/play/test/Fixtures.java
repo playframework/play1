@@ -175,6 +175,9 @@ public class Fixtures {
                                     }
                                 }
                             }
+                            if (f.getType().isAssignableFrom(Map.class)) {
+                                f.set(model, objects.get(key).get(f.getName()));
+                            }
 
                         }
                         model._save();

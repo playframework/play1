@@ -8,7 +8,7 @@
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
-~ Delete the tmp directory of the application hosted at the app_path directory.
+~ Delete the application's tmp directory hosted at the app_path directory.
 ~ If app_path is omitted, the current directory is used. 
 ~
 ~ The tmp directory of any application contains the compiled bytecode cache, used to

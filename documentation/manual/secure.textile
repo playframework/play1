@@ -16,7 +16,7 @@ In the **conf/routes** file, import the default module routes by adding this lin
 bc. # Import Secure routes
 *      /                module:secure
 
-p(note). **Note** that it's not required to use the default routes file. You can also define your own routes, or mix the two.
+p(note). **Note** that it’s not required to use the default routes file. You can also define your own routes, or mix the two.
 
 h2. <a>Protecting a controller</a>
 
@@ -52,7 +52,7 @@ p(note). **Note** that you can override other methods as well to customize how t
 
 h2. <a>Retrieving the connected user</a>
 
-From your application code, your can reuse the Security helper that you've just created to retrieve the connected user.
+From your application code, your can reuse the Security helper that you’ve just created to retrieve the connected user.
 
 bc. @With(Secure.class)
 public class Application extends Controller {

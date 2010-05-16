@@ -1,6 +1,6 @@
 ~ Name:
 ~ ~~~~~
-~ precompile -- Precompile all Java sources and templates to speed up application start
+~ precompile -- Precompile all Java sources and templates to speed up application start-up
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
@@ -10,9 +10,9 @@
 ~ ~~~~~~~~~~~~
 ~ Compile the application hosted at the app_path directory. If app_path is omitted, the current directory is used.
 ~
-~ Compilation is done in PROD mode. Any compilation error are displayed and the process fail. Bytecode is written to
+~ Compilation is done in PROD mode. Any compilation errors are displayed and the process fails. Bytecode is written to
 ~ the tmp/bytecode/PROD directory.
 ~
-~ Note that with play, this step is totally optional. It just speed up the startup process. You can precompile an application
-~ before to send it to the production server.
+~ Note that with Play, this step is totally optional. It just speeds up the start-up process. You can precompile an application
+~ before sending it to the production server.
 ~

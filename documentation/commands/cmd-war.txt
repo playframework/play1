@@ -1,6 +1,6 @@
 ~ Name:
 ~ ~~~~~
-~ war -- Export the application as a standalone WAR archive
+~ war -- Export the application as a stand-alone WAR archive
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
@@ -8,20 +8,20 @@
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
-~ Package a snapshot of the play framework and the application hosted at the app_path directory as a WAR package. 
+~ Package a snapshot of the Play framework and the application hosted at the app_path directory as a WAR package. 
 ~ If app_path is omitted, the current directory is used.
 ~
 ~ All required modules are included as well.
 ~
-~ You can then deploy the created WAR to a servlet container like Tomcat or Jetty.
+~ You can then deploy the created WAR to a Servlet container like Tomcat or Jetty.
 ~
 ~ Options:
 ~ ~~~~~~~~~
 ~ --output, or -o: 
-~ The path where the WAR directory will be created. The content of this directory will first be deleted.
+~ The path where the WAR directory will be created. The contents of this directory will first be deleted.
 ~
 ~ --zip:
-~ By default, the script create an exploded WAR. If you want a zipped archive, specify the --zip option.
+~ By default, the script creates an exploded WAR. If you want a zipped archive, specify the --zip option.
 ~
 ~ --%fwk_id:
-~ Use this id to run the application (override the default framework id)
+~ Use this ID to run the application (override the default framework ID)

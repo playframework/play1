@@ -481,6 +481,15 @@ public class Router {
         public void absolute() {
             url  = Http.Request.current().getBase() + url;
         }
+
+        public ActionDefinition secure() {
+            if(url.contains("http://")) {
+                url = url.replace("http:", "https:");
+                return this;
+            }
+            url = "https://" + Http.Request.current().host + url;
+            return this;
+        }
     }
 
     public static class Route {

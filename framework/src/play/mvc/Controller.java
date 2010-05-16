@@ -351,7 +351,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     protected static void checkAuthenticity() {
-        if(params.get("authenticityToken") == null || !params.get("authenticityToken").equals(session.getAuthenticityToken())) {
+        if(Scope.Params.current().get("authenticityToken") == null || !Scope.Params.current().get("authenticityToken").equals(Scope.Session.current().getAuthenticityToken())) {
             forbidden("Bad authenticity token");
         }
     }

@@ -8,10 +8,10 @@
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
-~ Display a prompt to define the framework installation id. Each framework installation can have its own id.
+~ Display a prompt to define the framework installation ID. Each framework installation can have its own ID.
 ~
-~ Ids can be used in applications configuration files to specify different settings for different environements
+~ IDs can be used in applications configuration files to specify different settings for different environments
 ~ or different developers.
 ~ 
-~ Setting a framework id is totally optional.
+~ Setting a framework ID is totally optional.
 ~

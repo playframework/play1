@@ -24,9 +24,9 @@ import play.data.binding.map.OldBinder;
  */
 public class Messages {
 
-    static protected Properties defaults;
+    static public Properties defaults;
 
-    static protected Map<String, Properties> locales = new HashMap<String, Properties>();
+    static public Map<String, Properties> locales = new HashMap<String, Properties>();
     
     static Pattern recursive = Pattern.compile("&\\{(.*?)\\}");
 

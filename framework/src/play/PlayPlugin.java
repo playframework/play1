@@ -1,6 +1,7 @@
 package play;
 
 import java.lang.annotation.Annotation;
+import com.google.gson.JsonObject;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,13 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * Retun the plugin status
      */
     public String getStatus() {
+        return null;
+    }
+
+    /**
+     * Retun the plugin status in JSON format
+     */
+    public JsonObject getJsonStatus() {
         return null;
     }
 

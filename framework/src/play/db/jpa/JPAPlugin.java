@@ -23,6 +23,7 @@ import play.PlayPlugin;
 import play.db.DB;
 import play.exceptions.JPAException;
 import play.utils.Utils;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * JPA Plugin
@@ -59,11 +60,18 @@ public class JPAPlugin extends PlayPlugin {
             if (classes.isEmpty() && Play.configuration.getProperty("jpa.entities", "").equals("")) {
                 return;
             }
-            if (DB.datasource == null) {
-                throw new JPAException("Cannot start a JPA manager without a properly configured database", new NullPointerException("No datasource"));
+
+ 	    final String dataSource = Play.configuration.getProperty("hibernate.connection.datasource");
+            if (StringUtils.isEmpty(dataSource) && DB.datasource == null) {
+                throw new JPAException("Cannot start a JPA manager without a properly configured database", new NullPointerException("No datasource configured"));
             }
+
             Ejb3Configuration cfg = new Ejb3Configuration();
-            cfg.setDataSource(DB.datasource);
+
+            if (DB.datasource != null) {
+                cfg.setDataSource(DB.datasource);
+            }
+
             if (!Play.configuration.getProperty("jpa.ddl", "update").equals("none")) {
                 cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty("jpa.ddl", "update"));
             }
@@ -171,19 +179,51 @@ public class JPAPlugin extends PlayPlugin {
     }
 
     static String getDefaultDialect(String driver) {
-        if (driver.equals("org.hsqldb.jdbcDriver")) {
+        String dialect = Play.configuration.getProperty("jpa.dialect");
+        if (dialect != null) {
+            return dialect;
+        } else if (driver.equals("org.hsqldb.jdbcDriver")) {
             return "org.hibernate.dialect.HSQLDialect";
         } else if (driver.equals("com.mysql.jdbc.Driver")) {
             return "play.db.jpa.MySQLDialect";
+        } else if (driver.equals("org.postgresql.Driver")) {
+            return "org.hibernate.dialect.PostgreSQLDialect";
+        } else if (driver.toLowerCase().equals("com.ibm.db2.jdbc.app.DB2Driver")) {
+            return "org.hibernate.dialect.DB2Dialect";
+        } else if (driver.equals("com.ibm.as400.access.AS400JDBCDriver")) {
+            return "org.hibernate.dialect.DB2400Dialect";
+        } else if (driver.equals("com.ibm.as400.access.AS390JDBCDriver")) {
+            return "org.hibernate.dialect.DB2390Dialect";
+        } else if (driver.equals("oracle.jdbc.driver.OracleDriver")) {
+            return "org.hibernate.dialect.Oracle9iDialect";
+        } else if (driver.equals("com.sybase.jdbc2.jdbc.SybDriver")) {
+            return "org.hibernate.dialect.SybaseAnywhereDialect";
+        } else if ("com.microsoft.jdbc.sqlserver.SQLServerDriver".equals(driver)) {
+            return "org.hibernate.dialect.SQLServerDialect";
+        } else if ("com.sap.dbtech.jdbc.DriverSapDB".equals(driver)) {
+            return "org.hibernate.dialect.SAPDBDialect";
+        } else if ("com.informix.jdbc.IfxDriver".equals(driver)) {
+            return "org.hibernate.dialect.InformixDialect";
+        } else if ("com.ingres.jdbc.IngresDriver".equals(driver)) {
+            return "org.hibernate.dialect.IngresDialect";
+        } else if ("progress.sql.jdbc.JdbcProgressDriver".equals(driver)) {
+            return "org.hibernate.dialect.ProgressDialect";
+        } else if ("com.mckoi.JDBCDriver".equals(driver)) {
+            return "org.hibernate.dialect.MckoiDialect";
+        } else if ("InterBase.interclient.Driver".equals(driver)) {
+            return "org.hibernate.dialect.InterbaseDialect";
+        } else if ("com.pointbase.jdbc.jdbcUniversalDriver".equals(driver)) {
+            return "org.hibernate.dialect.PointbaseDialect";
+        } else if ("com.frontbase.jdbc.FBJDriver".equals(driver)) {
+            return "org.hibernate.dialect.FrontbaseDialect";
+        } else if ("org.firebirdsql.jdbc.FBDriver".equals(driver)) {
+            return "org.hibernate.dialect.FirebirdDialect";
         } else {
-            String dialect = Play.configuration.getProperty("jpa.dialect");
-            if (dialect != null) {
-                return dialect;
-            }
             throw new UnsupportedOperationException("I do not know which hibernate dialect to use with " +
-                    driver + ", use the property jpa.dialect in config file");
+                    driver + " and I cannot guess it, use the property jpa.dialect in config file");
         }
     }
+
 
     @Override
     public void onApplicationStop() {

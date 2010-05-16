@@ -18,3 +18,12 @@ vendor.VenueVendor(venue1):
     tags:             [at11, at12, ft1, ft2]
 vendor.VenueVendor(venue2):
     tags:             [at11, ft1]
+    
+# Bloc
+Bloc(b):
+    name:   Yop
+    criterias:
+        ? key1
+        : value1
+        ? key2
+        : value2

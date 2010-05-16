@@ -2,17 +2,17 @@ h1. Test your application
 
 Creating automatic test suites for your application is a good way to make it robust. It allows you to work in a very agile way.
 
-Play! tests are built using "Junit 4":http://www.junit.org/|JUnit 4 or "Selenium":http://seleniumhq.org/|Selenium depending what you want to test. 
+Play tests are built using "JUnit 4":http://www.junit.org/ or "Selenium":http://seleniumhq.org/ depending what you want to test. 
 
 h2. <a>Writing tests</a>
 
-The tests must be created in the **test/** directory. This folder will be added to sources path only when the application is run in **test** mode. You can write 3 differents kind of test.
+The tests must be created in the **test/** directory. This folder will only be added to sources path when the application is run in **test** mode. You can write 3 differents kind of test.
 
 h3. Unit test
 
 A unit test is written using JUnit. In this kind of test you can test the model of your application (including some utilities). 
 
-Here a example of a Unit test:
+Here is an example of a Unit test:
 
 bc. import play.test.*;
 import org.junit.*;
@@ -35,7 +35,7 @@ h3. Functional test
 
 A functional test is written using JUnit. In this kind of test you can test your application by accessing directly the controller objects. 
 
-Here a example of a Functional test:
+Here is an example of a Functional test:
 
 bc. import play.test.*;
 import play.mvc.*;
@@ -54,11 +54,11 @@ public class ApplicationTest extends FunctionalTest {
 
 h3. Selenium test
 
-Acceptance tests are written using selenium. Here you can test your application by running it in an automated browser. 
+Acceptance tests are written using Selenium. Here you can test your application by running it in an automated browser. 
 
-Selenium tests are written using HTML table. You can either use this native syntax or use the **#{selenium /}** tag.
+Selenium tests are written using HTML tables. You can either use this native syntax or use the **#{selenium /}** tag.
 
-Here a example of a selenium test:
+Here is an example of a Selenium test:
 
 bc. #{selenium 'Test security'}
  
@@ -100,7 +100,7 @@ User(guillaume):
    name:    guillaume
    company: zen
 
-And then : 
+And then: 
 
 bc. @Before
 public void setUp() {
@@ -108,7 +108,7 @@ public void setUp() {
     Fixtures.load("data.yml");
 }
 
-For selenium tests, you can use the **#{fixture /}** tag :
+For Selenium tests, you can use the **#{fixture /}** tag:
 
 bc. #{fixture delete:'all', load:'data.yml' /}
  
@@ -120,7 +120,7 @@ bc. #{fixture delete:'all', load:'data.yml' /}
 
 h2. <a>Running the tests</a>
 
-To run the tests, you must run your application in **test** mode using the '**play test**' command.
+To run the tests, you must run your application in **test** mode using the **play test** command.
 
 bc. # play test myApp
 
@@ -130,9 +130,9 @@ In this mode, Play will automatically load the **test-runner** module. This modu
 
 When you run a test, the result is saved into the **/test-result** directory of your application.
 
-On the test runner page, each test is a link. You can 'right click' and 'Open in a new tab', to run the test directly outside of the test-runner. 
+On the test runner page, each test is a link. You can ‘right click’ and ‘Open in a new tab’, to run the test directly outside of the test-runner. 
 
-When you run tests this way, play will start with a special **test** framework ID. So you can define special configurations in the **application.conf** file.
+When you run tests this way, Play will start with a special **test** framework ID. So you can define special configurations in the **application.conf** file.
 
 For example:
 
@@ -141,17 +141,17 @@ bc. %test.db=mem
 
 h2. <a>Continuous integration, and running the tests automatically</a>
 
-The '**auto-test**' command do the same than the '**test**' command, but it automatically launch a browser, run all the tests, and stop.
+The **auto-test** command do the same than the **test** command, but it automatically launch a browser, run all the tests, and stop.
 
 This is a useful command if you want to set up a continuous integration system; 
 
-After the run, all results are saved to the **/test-result** directory. Moreover, this directory contains a marker file (either **result.failed** or **result.passed**) for the final result of the test suite. Finally, this directory contains all the logs, in a **application.log** file.
+After the run, all results are saved to the **/test-result** directory. Moreover, this directory contains a marker file (either **result.failed** or **result.passed**) for the test suite’s final result. Finally, this directory contains all the logs, in an **application.log** file.
 
 So setting up a continuous integration system to test your application, could be:
 
 * Checkout the latest version of your application
-* Run '**play auto-test**'
-* Wait the end of the process
-* Check for marker file **result.passed** or **result.failed** in the **/test-result** directory
+* Run **play auto-test**
+* Wait for the end of the process
+* Check for the marker file **result.passed** or **result.failed** in the **/test-result** directory
 
-Run these step in a CRON tab, and you're done!
+Run these steps in a CRON tab, and you’re done!

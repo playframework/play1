@@ -200,6 +200,10 @@ public class Http {
          * HTTP Basic Password
          */
         public String password;
+        /**
+         * Request comes from loopback interface
+         */
+        public boolean isLoopback;
 
         public void _init() {
             Header header = headers.get("authorization");

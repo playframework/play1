@@ -2,33 +2,33 @@ h1. Viewing and posting comments
 
 The blog home page is now set, and we will continue by writing the post details page. This page will show all the comments about the current post, and will include a form to post new comments.
 
-h2. <a>Creating the 'show' action</a>
+h2. <a>Creating the ‘show’ action</a>
 
-To display the post details page, we will need a new action method on the Application controller. Let's call it **show()**:
+To display the post details page, we will need a new action method on the Application controller. Let’s call it **show()**:
 
 bc. public static void show(Long id) {
     Post post = Post.findById(id);
     render(post);
 }
 
-As you can see this action is pretty simple. We declare the **id** method parameter to automatically retrieve the HTTP **'id'** parameter as a Long Java object. This parameter will be extracted either from the queryString, from the URL path or from the request body.
+As you can see this action is pretty simple. We declare the **id** method parameter to automatically retrieve the HTTP **‘id’** parameter as a Long Java object. This parameter will be extracted either from the queryString, from the URL path or from the request body.
 
-p(note). If we try to send an **id** HTTP parameter that is not a valid number, the id variable value will be null and play will automatically add a validation error to the **errors** container.
+p(note). If we try to send an **id** HTTP parameter that is not a valid number, the id variable value will be null and Play will automatically add a validation error to the **errors** container.
 
-This action will display the **/yabe/app/views/Application/show.html** template :
+This action will display the **/yabe/app/views/Application/show.html** template:
 
 bc. #{extends 'main.html' /}
 #{set title:post.title /}
  
 #{display post:post, as:'full' /}
 
-Because we've already written the display tag, this page is really simple to write.
+Because we’ve already written the display tag, this page is really simple to write.
 
 h2. <a>Adding links to the details page</a>
 
-In the display tag we've left all links empty (using #). It's now time to make these links point to the **Application.show** action. With play you can easily build links in a template using the **@{...} notation**. This syntax uses the router to 'reverse' the URL needed to call the specified action. 
+In the display tag we’ve left all links empty (using #). It’s now time to make these links point to the **Application.show** action. With Play you can easily build links in a template using the **@{...} notation**. This syntax uses the router to ‘reverse’ the URL needed to call the specified action. 
 
-Let's edit the **/yabe/app/views/tags/display.html** tag :
+Let’s edit the **/yabe/app/views/tags/display.html** tag:
 
 bc. ...
 <h2 class="post-title">
@@ -40,7 +40,7 @@ You can new refresh the home page, and click on a post title to display it.
 
 !images/guide4-0!
 
-It's great, but it lacks a link to go back to the home page. Edit the **/yabe/app/views/main.html** template to complete the title link:
+It’s great, but it lacks a link to go back to the home page. Edit the **/yabe/app/views/main.html** template to complete the title link:
 
 bc. ...
 <div id="title">
@@ -54,11 +54,11 @@ We can now navigate between the home page and the post detail pages.
 
 h2. <a>Specifying a better URL</a>
 
-As you can see, the post detail page URL looks like
+As you can see, the post detail page URL looks like:
 
 bc. /application/show?id=1
 
-This is because play has used the default 'catch all' route.
+This is because Play has used the default ‘catch all’ route.
 
 bc. *       /{controller}/{action}                  {controller}.{action}
 
@@ -72,7 +72,7 @@ Refresh the browser and check that it now uses the correct URL.
 
 h2. <a>Adding some pagination</a>
 
-To allow users to navigate easily through posts, we will add a pagination mechanism. We'll extend the Post class to be able to fetch previous and next post as required:
+To allow users to navigate easily through posts, we will add a pagination mechanism. We’ll extend the Post class to be able to fetch previous and next post as required:
 
 bc. public Post previous() {
     return Post.find("postedAt < ? order by postedAt desc", postedAt).first();
@@ -82,7 +82,7 @@ public Post next() {
     return Post.find("postedAt > ? order by postedAt asc", postedAt).first();
 }
 
-We will call these methods several times during a request so they could be optimized, but they're good enough for now. Also, add the pagination links at the top of the show.html template (before the **#{display/}** tag):
+We will call these methods several times during a request so they could be optimized, but they’re good enough for now. Also, add the pagination links at the top of the show.html template (before the **#{display/}** tag):
 
 bc. <ul id="pagination">
     #{if post.previous()}
@@ -101,11 +101,11 @@ bc. <ul id="pagination">
     #{/if}
 </ul>
 
-It's better now.
+It’s better now.
 
 h2. <a>Adding the comment form</a>
 
-Now it's time to set up a comments form. We'll start by adding the **postComment** action method to the Application controller.
+Now it’s time to set up a comments form. We’ll start by adding the **postComment** action method to the Application controller.
 
 bc. public static void postComment(Long postId, String author, String content) {
     Post post = Post.findById(postId);
@@ -115,7 +115,7 @@ bc. public static void postComment(Long postId, String author, String content) {
 
 As you can see we just reuse the **addComment()** method we previously added to the Post class.
 
-Let's write the HTML form in the show.html template (after the **#{display /}** tag in fact):
+Let’s write the HTML form in the show.html template (after the **#{display /}** tag in fact):
 
 bc. <h3>Post a comment</h3>
  
@@ -139,7 +139,7 @@ You can now try posting a new comment. It should just work.
 
 h2. <a>Adding validation</a>
 
-Currently we don't validate the form content before creating the comment. We would like to make both fields required. We can easily use the play validation mechanism to ensure that the HTTP parameters are correctly filled in. Modify the **postComment** action to add **@Required** validation annotations and check that no error occurs:
+Currently we don’t validate the form content before creating the comment. We would like to make both fields required. We can easily use the Play validation mechanism to ensure that the HTTP parameters are correctly filled in. Modify the **postComment** action to add **@Required** validation annotations and check that no error occurs:
 
 bc. public static void postComment(Long postId, @Required String author, @Required String content) {
     Post post = Post.findById(postId);
@@ -150,7 +150,7 @@ bc. public static void postComment(Long postId, @Required String author, @Requir
     show(postId);
 }
 
-p(note). **Don't forget** to import play.data.validation.* as well.
+p(note). **Don’t forget** to import play.data.validation.* as well.
 
 As you can see, in case of validation errors, we re-display the post detail page. We have to modify the form code to display the error message:
 
@@ -179,7 +179,7 @@ bc. <h3>Post a comment</h3>
 
 Note that we reuse the posted parameters to fill the HTML input values.
 
-To make the UI feedback more pleasant for the poster, we will add a little Javascript to automatically focus the comment form in case of an error. As this script uses "JQuery":files/jquery-1.3.2.min.js and "JQuery Tools":files/jquery.tools.min.js as support libraries, you have to include them. Download these 2 libraries to the **/yabe/public/javascripts** directory and modify the **main.html** template to include them:
+To make the UI feedback more pleasant for the poster, we will add a little JavaScript to automatically focus the comment form in case of an error. As this script uses "JQuery":files/jquery-1.3.2.min.js and "JQuery Tools":files/jquery.tools.min.js as support libraries, you have to include them. Download these 2 libraries to the **/yabe/public/javascripts** directory and modify the **main.html** template to include them:
 
 bc. ...
     <script src="@{'/public/javascripts/jquery-1.3.2.min.js'}"></script>
@@ -233,11 +233,11 @@ bc. ...
 
 !images/guide4-3!
 
-The last thing we will adjust in this form is the URL used for the **postComment** action. As always it uses the default catch all route because we didn't define any specific route. So add this route to the application routes file:
+The last thing we will adjust in this form is the URL used for the **postComment** action. As always, it uses the default catch-all route because we didn’t define any specific route. So add this route to the application routes file:
 
 bc. POST    /posts/{postId}/comments                Application.postComment
 
-That's done. As always, commit the version to bazaar.
+That’s done. As always, commit the version to bazaar.
 
 p(note). Go to the "next part":guide5. 
 

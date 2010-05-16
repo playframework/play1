@@ -4,15 +4,15 @@ Here we will start to write the model for our blog engine.
 
 h2. <a>Introduction to JPA</a>
 
-The model layer has a central position in a play application (and in fact in all well designed applications). It is the domain-specific representation of the information on which the application operates. As we want to create a blog engine, the model layer will certainly contain classes like User, Post and Comment.
+The model layer has a central position in a Play application (and in fact in all well-designed applications). It is the domain-specific representation of the information on which the application operates. As we want to create a blog engine, the model layer will certainly contain classes like User, Post and Comment.
 
-Because most model objects need to survive between application restarts, we have to save them in a persistent datastore. A common choice is to use a relational database. But because Java is an object oriented language, we will use an **'Object Relational Mapper'** to help reduce the impedance mismatch.
+Because most model objects need to survive between application restarts, we have to save them in a persistent datastore. A common choice is to use a relational database. But because Java is an object oriented language, we will use an **‘Object Relational Mapper’** to help reduce the impedance mismatch.
 
-JPA is a Java specification that defines a standard API for object relational mapping. As an implementation of JPA, play uses the well-known "Hibernate":http://www.hibernate.org framework. One advantage of using JPA over the standard Hibernate API is that all the 'mapping' is declared directly in the Java objects.
+JPA is a Java specification that defines a standard API for object relational mapping. As an implementation of JPA, Play uses the well-known "Hibernate":http://www.hibernate.org framework. One advantage of using JPA over the standard Hibernate API is that all the ’mapping’ is declared directly in the Java objects.
 
-If you have ever used Hibernate or JPA before you will be surprised by the simplicity added by play. No need to configure anything; JPA just works out of the box with play.
+If you have ever used Hibernate or JPA before you will be surprised by the simplicity added by Play. No need to configure anything; JPA just works out of the box with Play.
 
-If you don't know JPA, you can read "some of these simple presentations":http://java.sun.com/javaee/5/docs/tutorial/doc/bnbpz.html before continuing.
+If you don’t know JPA, you can read "some of these simple presentations":http://java.sun.com/javaee/5/docs/tutorial/doc/bnbpz.html before continuing.
 
 h2. <a>Starting with the User class</a>
 
@@ -43,35 +43,35 @@ public class User extends Model {
 
 The **@Entity** annotation marks this class as a managed JPA entity, and the Model superclass automatically provides a set of useful JPA helpers that we will discover later. All fields of this class will be automatically persisted to the database. 
 
-p(note). It's not required that your model objects extend the **play.db.jpa.Model** class. You can use plain JPA as well. But extending this class is a good choice in most cases as it will make a lot of the JPA stuff easier.
+p(note). It’s not required that your model objects extend the **play.db.jpa.Model** class. You can use plain JPA as well. But extending this class is a good choice in most cases as it will make a lot of the JPA stuff easier.
 
-If you have used JPA before, you know that every JPA entity must provide an **@Id** property. Here the Model superclass provides an automatically generated numeric id, and in most cases this is good enough.
+If you have used JPA before, you know that every JPA entity must provide an **@Id** property. Here the Model superclass provides an automatically generated numeric ID, and in most cases this is good enough.
 
-p(note). Don't think about this provided **id** field as a **functional identifier** but as a **technical identifier**. It is generally a good idea to keep both concepts separated and to keep an automatically generated numeric id as a technical identifier.
+p(note). Don’t think about this provided **id** field as a **functional identifier** but as a **technical identifier**. It is generally a good idea to keep both concepts separated and to keep an automatically generated numeric ID as a technical identifier.
 
-Now if youâ€™re a Java developer with any experience at all, warning sirens are probably clanging like mad at the sight of a public variable. In Java (as in other object-oriented languages), best practice says to make all fields private and provide accessors and mutators. This is to promote encapsulation, a concept critical to object oriented design. In fact, play takes care of that for you and automatically generates getters and setters while preserving encapsulation; we will see how it works later in this tutorial.
+Now if you’re a Java developer with any experience at all, warning sirens are probably clanging like mad at the sight of a public variable. In Java (as in other object-oriented languages), best practice says to make all fields private and provide accessors and mutators. This is to promote encapsulation, a concept critical to object oriented design. In fact, Play takes care of that for you and automatically generates getters and setters while preserving encapsulation; we will see how it works later in this tutorial.
 
-You can now refresh the application homepage, to see the result. In fact, unless you made a mistake, you should not see any change: play has automatically compiled and loaded the User class, but this does not add any new feature to the application.
+You can now refresh the application home page, to see the result. In fact, unless you made a mistake, you should not see any change: Play has automatically compiled and loaded the User class, but this does not add any new features to the application.
 
 h2. <a>Writing the first test</a>
 
 A good way to test the newly created User class is to write a JUnit test case. It will allow you to incrementally complete the application model and ensure that all is fine.
 
-To run a test case, you need to start the application in a special 'test' mode. Stop the currently running application, open a command line and type:
+To run a test case, you need to start the application in a special ‘test’ mode. Stop the currently running application, open a command line and type:
 
 bc. ~$ play test
 
 !images/guide2-0!
 
-The **'play test'** command is almost the same as **'play run'**, except that it loads a test runner module that allows you to run test suite directly from a browser. 
+The **‘play test’** command is almost the same as **‘play run’**, except that it loads a test runner module that allows you to run test suite directly from a browser. 
 
-p(note). When you run a play application in **test mode**, play will automatically switch to the **test** framework id and load the **application.conf** file accordingly. Check "this page":ids for more information.
+p(note). When you run a Play application in **test mode**, Play will automatically switch to the **test** framework ID and load the **application.conf** file accordingly. Check "this page":ids for more information.
 
-Open a browser to the "http://localhost:9000/@tests":http://localhost:9000/@tests URL to see the test runner. Try to select all the default tests and run them; all should be green... But these default tests don't really test anything.
+Open a browser to the "http://localhost:9000/@tests":http://localhost:9000/@tests URL to see the test runner. Try to select all the default tests and run them; all should be green… But these default tests don’t really test anything.
 
 !images/guide2-1!
 
-To test the model part of the application we will use a JUnit test. As you can see a default BasicTests.java already exists, so let's open it (**/yabe/test/BasicTest.java**):
+To test the model part of the application we will use a JUnit test. As you can see, a default BasicTests.java already exists, so let’s open it (**/yabe/test/BasicTest.java**):
 
 bc. import org.junit.*;
 import play.test.*;
@@ -93,7 +93,7 @@ public void createAndRetrieveUser() {
     // Create a new user and save it
     new User("bob@gmail.com", "secret", "Bob").save();
     
-    // Retrieve the user with email address bob@gmail.com
+    // Retrieve the user with e-mail address bob@gmail.com
     User bob = User.find("byEmail", "bob@gmail.com").first();
     
     // Test 
@@ -101,13 +101,13 @@ public void createAndRetrieveUser() {
     assertEquals("Bob", bob.fullname);
 }
 
-As you can see, the Model superclass gives us two very useful methods : **save()** and **find()**.
+As you can see, the Model superclass gives us two very useful methods: **save()** and **find()**.
 
-p(note). You can read more about the methods of the Model class in the "manual page":jpa about play and JPA.
+p(note). You can read more about the Model class’ methods in the "manual page":jpa about Play and JPA.
 
 Select the **BasicTests.java** in the test runner, click start and check that all is green. 
 
-We will need a method on the User class that checks if a user with a specified username and password exists. Let's write it and test it.
+We will need a method on the User class that checks if a user with a specified username and password exists. Let’s write it and test it.
 
 In the **User.java** source, add the **connect()** method:
 
@@ -128,11 +128,11 @@ public void tryConnectAsUser() {
     assertNull(User.connect("tom@gmail.com", "secret"));
 }
 
-Each time you make a modification you can run all the tests from the play test runner to make sure you didn't break anything. 
+Each time you make a modification you can run all the tests from the Play test runner to make sure you didn’t break anything. 
 
 h2. <a>The Post class</a>
 
-The Post class will represent blog posts. Let's write a first implementation:
+The Post class will represent blog posts. Let’s write a first implementation:
 
 bc. package models;
  
@@ -164,9 +164,9 @@ public class Post extends Model {
 
 Here we use the **@Lob** annotation to tell JPA to use a large text database type to store the post content. We have declared the relation to the User class using **@ManyToOne**. That means that each Post is authored by a single User, and that each User can author several Posts.
 
-We will write a new test case to check that the Post class works as expected. But before writing more tests, we need to do something in the JUnit class. In the current test, the database content is never deleted, so each new run creates more and more objects. It will become problematic soon when more advanced tests will start to count objects to check that all is fine.
+We will write a new test case to check that the Post class works as expected. But before writing more tests, we need to do something in the JUnit class. In the current test, the database content is never deleted, so each new run creates more and more objects. This will soon become problematic, when more advanced tests count objects to check that all is fine.
 
-So let's write a JUnit **setup()** method to delete the database before each test:
+So let’s write a JUnit **setup()** method to delete the database before each test:
 
 bc. public class BasicTest extends UnitTest {
  
@@ -181,7 +181,7 @@ bc. public class BasicTest extends UnitTest {
 
 p(note). The **@Before** concept is a core concept of the JUnit testing tool.
 
-As you can see, the Fixtures class is a helper to deal with your database during tests. Run the test again to check that you haven't broken anything, and start to write the next test:
+As you can see, the Fixtures class is a helper to deal with your database during tests. Run the test again to check that you haven’t broken anything, and start to write the next test:
 
 bc. @Test
 public void createPost() {
@@ -194,7 +194,7 @@ public void createPost() {
     // Test that the post has been created
     assertEquals(1, Post.count());
     
-    // Retrieve all post created by bob
+    // Retrieve all posts created by Bob
     List<Post> bobPosts = Post.find("byAuthor", bob).fetch();
     
     // Tests
@@ -207,13 +207,13 @@ public void createPost() {
     assertNotNull(firstPost.postedAt);
 }
 
-p(note). **Don't forget** to import the **java.util.List** or will get a compilation error.
+p(note). **Don’t forget** to import the **java.util.List** or will get a compilation error.
 
 h2. <a>Finish with Comment</a>
 
 The last thing that we need to add to this first model draft is the ability to attach comments to posts.
 
-The creation of the Comment class is pretty straightforward.
+Creating the Comment class is pretty straightforward.
 
 bc. package models;
  
@@ -243,7 +243,7 @@ public class Comment extends Model {
  
 }
 
-Let's write a first test case:
+Let’s write a first test case:
 
 bc. @Test
 public void postComments() {
@@ -276,7 +276,7 @@ public void postComments() {
     assertNotNull(secondComment.postedAt);
 }
 
-You can see that navigation between Post and Comments is not very easy: we need to use a query to retrieve all comments attached to Post. We can do better by setting up the other side of the relationship to the Post class. 
+You can see that navigation between Post and Comments is not very easy: we need to use a query to retrieve all comments attached to a Post. We can do better by setting up the other side of the relationship with the Post class. 
 
 Add the comments field to the Post class:
 
@@ -293,19 +293,20 @@ public Post(User author, String title, String content) {
 }
 ...
 
-Note how we have used the **mappedBy** attribute to tell JPA that the post field of the Comment class maintains the relationship. When you define a bi-directional relation with JPA it is very important to tell it which side will maintain the relationship. In this case, since the Comments belong to the Post it's better that the Comment class maintains the relationship.
+Note how we have used the **mappedBy** attribute to tell JPA that the Comment class’s post field maintains the relationship. When you define a bi-directional relation with JPA it is very important to tell it which side will maintain the relationship. In this case, since the Comments belong to the Post, it’s better that the Comment class maintains the relationship.
 
-We have set the **cascade** property to tell JPA that we want the Post deletion be cascaded to comments. This way, if you delete a post, all related comments will be deleted as well.
+We have set the **cascade** property to tell JPA that we want Post deletion be cascaded to comments. This way, if you delete a post, all related comments will be deleted as well.
 
 With this new relationship, we will add a helper method to the Post class to simplify adding comments:
 
 bc. public Post addComment(String author, String content) {
     Comment newComment = new Comment(this, author, content).save();
     this.comments.add(newComment);
+    this.save();
     return this;
 }
 
-Let's write another test case to check that it works:
+Let’s write another test case to check that it works:
 
 bc. @Test
 public void useTheCommentsRelation() {
@@ -379,11 +380,11 @@ public void fullTest() {
     assertNull(User.connect("jeff@gmail.com", "badpassword"));
     assertNull(User.connect("tom@gmail.com", "secret"));
  
-    // Find all bob's posts
+    // Find all of Bob's posts
     List<Post> bobPosts = Post.find("author.email", "bob@gmail.com").fetch();
     assertEquals(2, bobPosts.size());
  
-    // Find all comments related to bob's posts
+    // Find all comments related to Bob's posts
     List<Comment> bobComments = Comment.find("post.author.email", "bob@gmail.com").fetch();
     assertEquals(3, bobComments.size());
  
@@ -405,11 +406,11 @@ h2. <a>Save your work</a>
 
 We have now finished a huge part of the blog engine. Now that we have created and tested all these things, we can start to develop the web application itself.
 
-But before continuing, it's time to save your work in bazaar. Open a command line an type **bzr st** to see the modifications made since the latest commit:
+But before continuing, it’s time to save your work in bazaar. Open a command line an type **bzr st** to see the modifications made since the latest commit:
 
 bc. $ bzr st
 
-As you can see, some new files are not under version control. The **test-result** folder doesn't need to be versioned, so let's ignore it.
+As you can see, some new files are not under version control. The **test-result** folder doesn’t need to be versioned, so let’s ignore it.
 
 bc. $ bzr ignore test-result
 

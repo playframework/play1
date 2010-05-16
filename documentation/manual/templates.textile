@@ -1,24 +1,24 @@
 h1. The template engine
 
-Play has an efficient templating system which allows to dynamically generate HTML, XML, JSON or any other text based format documents. The template engine uses "Groovy":http://groovy.codehaus.org/ as its expression language. Reuse your code with custom tags. Centralize your pages design with templates decorators. 
+Play has an efficient templating system which allows to dynamically generate HTML, XML, JSON or any text-based formatted document. The template engine uses "Groovy":http://groovy.codehaus.org/ as an expression language. A tag system allows you to create reusable functions.
 
 Templates are stored in the **app/views** directory. 
 
 h2. <a name="syntax">Template syntax</a>
 
-A template file is a text file, some parts of which have placeholders for dynamically generated content. Dynamic elements of the template are written using the "Groovy":http://groovy.codehaus.org/ language. Groovy's syntax is very close to Java's. 
+A template file is a text file, some parts of which have placeholders for dynamically generated content. The  template’s dynamic elements are written using the "Groovy":http://groovy.codehaus.org/ language. Groovy’s syntax is very close to Java’s. 
 
 Dynamic elements are resolved during template execution. The rendered result is then sent as part of the HTTP response.
 
-h3. Expressions : ${…}
+h3. Expressions: ${…}
 
-The simplest way to make a dynamic element is to declare an expression. The syntax used here is **${…}**. The result of evaluating the expressions is inserted in place of the expression.
+The simplest way to make a dynamic element is to declare an expression. The syntax used here is **${…}**. The result of evaluating the expression is inserted in place of the expression.
 
 For example:
 
 bc. <h1>Client ${client.name}</h1>
 
-If you can't be sure of client being null, there is a groovy shortcut:
+If you can’t be sure of client being null, there is a Groovy shortcut:
 
 bc. <h1>Client ${client?.name}</h1>
 
@@ -51,11 +51,11 @@ bc. <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 </body>
 </html>
 
-h3. Tags : #{tagName /}
+h3. Tags: #{tagName /}
 
 A tag is a template fragment that can be called with parameters. If the tag has only one parameter, by convention it is called "arg" and its name can be omitted.
 
-For example, this tag inserts a SCRIPT tag to load a Javascript file:
+For example, this tag inserts a SCRIPT tag to load a JavaScript file:
 
 bc. #{script 'jquery.js' /}
 
@@ -90,7 +90,7 @@ bc. #{verbatim}
     ${title} --> <h1>Title</h1>
 #{/verbatim}
 
-h3. Actions : @{…} or @@{…}
+h3. Actions: @{…} or @@{…}
 
 You can use the Router to (reverse) generate a URL corresponding to a specified route. From a template you can use the special **@{…}** syntax to do that.
 
@@ -103,9 +103,9 @@ bc. <h1>Client ${client.name}</h1>
 <hr />
 <a href="@{Clients.index()}">Back</a>
 
-The **@@{…}** syntax does the same but generates an absolute URL (notably useful for email, ...).
+The **@@{…}** syntax does the same but generates an absolute URL (notably useful for e-mail, …).
 
-h3. Messages : &{…}
+h3. Messages: &{…}
 
 If your application needs internationalization you can use the **&{…}** syntax to display an internationalized message:
 
@@ -117,16 +117,16 @@ To display this message in a template, simply use:
 
 bc. <h1>&{'clientName', client.name}</h1>
 
-h3. Comment : ==*{…}*==
+h3. Comment: ==*{…}*==
 
-Comments aren't evaluated by the template engine. They are just comments...
+Comments aren’t evaluated by the template engine. They are just comments…
 
 bc. *{**** Display the user name ****}*
 <div class="name">
     ${user.name}
 </div>
 
-h3. Scripts : ==%{…}%==
+h3. Scripts: ==%{…}%==
 
 A script is a more complicated set of expressions. A script can declare some variables and define some statements. Use the **%{…}%** syntax to insert a script.
 
@@ -178,7 +178,7 @@ bc. <h1>Main template</h1>
 
 h2. <a>Create tags</a>
 
-You can easily create specifics tags for your application. A tag is a simple template file, stored in the **app/views/tags** directory. The name of the template file is used as the tag name.
+You can easily create specifics tags for your application. A tag is a simple template file, stored in the **app/views/tags** directory. The template’s file name is used as the tag name.
 
 To create a **hello** tag, just create the **app/views/tags/hello.html** file.
 
@@ -190,7 +190,7 @@ bc. #{hello /}
 
 h3. Retrieve tags parameters
 
-Tag parameters are exposed as template variables. The variable names are constructed with the '_' character prepended to the parameter name. 
+Tag parameters are exposed as template variables. The variable names are constructed with the ‘_’ character prepended to the parameter name. 
 
 For example: 
 
@@ -227,15 +227,15 @@ bc. #{hello}
 
 h2. <a>Java object extensions in templates</a>
 
-When you use your Java object within the template engine, new methods are added to it. These methods don't exist in the original Java class and are dynamically added by the template engine.
+When you use your Java object within the template engine, new methods are added to it. These methods don’t exist in the original Java class and are dynamically added by the template engine.
 
 For example, to allow easy number formatting in a template, a **format** method is added to **java.lang.Number**.
 
-It's then very easy to format a number:
+It’s then very easy to format a number:
 
 bc. <ul>
 #{list items:products, as:'product'}
-    <li>${product.name}. Price : ${product.price.format('## ###,00')} €</li>
+    <li>${product.name}. Price: ${product.price.format('## ###,00')} €</li>
 #{/list}
 </ul>
 
@@ -272,13 +272,13 @@ Use your formatter like this:
 
 bc. <em>Price: ${123456.324234.ccyAmount()}</em>
 
-Template extension classes are automatically detected by play at startup. You just have to restart your application to make them available.
+Template extension classes are automatically detected by Play at start-up. You just have to restart your application to make them available.
 
 h2. <a>Implicit objects available from a template</a>
 
 All objects added to the **renderArgs** scope are directly injected as template variables. 
 
-For instance, to inject a ''user'' bean into the template from a controller:
+For instance, to inject a ‘user’ bean into the template from a controller:
 
 bc. renderArgs.put("user", user );
 
@@ -295,6 +295,6 @@ When you render a template from an action, the framework also adds implicit obje
 
 p(note). **Continuing the discussion**
  
-The last layer of a play application is the "domain object model":model.
+The last layer of a Play application is the "domain object model":model.
 
  

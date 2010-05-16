@@ -19,7 +19,7 @@ Post(firstBobPost):
                     The model has a central position in a Play! application. It is the domain-specific 
                     representation of the information on which the application operates.
                     
-                    Martin fowler defines it as :
+                    Martin fowler defines it as:
                         
                     Responsible for representing concepts of the business, information about the 
                     business situation, and business rules. State that reflects the business situation 

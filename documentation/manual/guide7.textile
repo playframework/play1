@@ -1,10 +1,10 @@
 h1. Setting up a basic administration area using CRUD
 
-Currently, we have no way to create new blog posts and moderate comments using the blog UI. Play provides an out of the box **CRUD** module that will help quickly generate a basic administration area.
+Currently, we have no way to create new blog posts or moderate comments using the blog UI. Play provides an out of the box **CRUD** module that will help quickly generate a basic administration area.
 
 h2. <a>Enabling the CRUD module</a>
 
-A play application can be assembled from several application modules. This lets you reuse components across several applications or split a large application into several smaller ones.
+A Play application can be assembled from several application modules. This lets you reuse components across several applications or split a large application into several smaller ones.
 
 The CRUD module is a generic application that introspects the model classes to create simple lists and forms.
 
@@ -13,7 +13,7 @@ To enable the CRUD module, add this line to the **/yabe/conf/application.conf** 
 bc. # Import the crud module
 module.crud=${play.path}/modules/crud
 
-Then this module comes with a generic set of **routes** that we can reuse for now. To imports these routes just add this line to the **/yabe/conf/routes** file:
+Then this module comes with a generic set of **routes** that we can reuse for now. To import these routes just add this line to the **/yabe/conf/routes** file:
 
 bc. # Import CRUD routes
 *      /admin              module:crud
@@ -36,7 +36,7 @@ import play.mvc.*;
 public class Posts extends CRUD {    
 }
 
-p(note). The convention is to pluralize the model object name to create the corresponding controller. This way, play will automatically find the associated model object for each controller. If you need to use a different name, you can still use the **@CRUD.For** annotation. Check the "manual page":crud.
+p(note). The convention is to pluralize the model object name to create the corresponding controller. This way, Play will automatically find the associated model object for each controller. If you need to use a different name, you can still use the **@CRUD.For** annotation. Check the "manual page":crud.
 
 Create the same for all model objects:
 
@@ -80,9 +80,9 @@ public String toString() {
 
 h2. <a>Adding validation</a>
 
-The main problem of the generated administration area is that forms don't contain any validation rules. But actually the CRUD module is able to extract the validation rules from the validation annotations if the model class is correctly annotated.
+The generated administration area’s main problem is that forms don’t contain any validation rules. But actually the CRUD module is able to extract the validation rules from the validation annotations if the model class is correctly annotated.
 
-Let's add some annotations to the **User** class:
+Let’s add some annotations to the **User** class:
 
 bc. package models;
  
@@ -111,7 +111,7 @@ Now if you go to the edition or creation form for the **User** model object, you
 
 !images/guide7-2!
 
-Let's do the same for the **Post** class:
+Let’s do the same for the **Post** class:
 
 bc. package models;
  
@@ -151,7 +151,7 @@ And check the result:
 
 !images/guide7-3!
 
-Here you see an interesting side effect: the **@MaxSize** validation rule has changed the way play displays the Post form. It now uses a large text area for the content field.
+Here you see an interesting side effect: the **@MaxSize** validation rule has changed the way Play displays the Post form. It now uses a large text area for the content field.
 
 Finally we can add validation rules to the **Comment** and **Tag** classes as well:
 
@@ -205,7 +205,7 @@ As you can see the form labels are a little rough. Play uses the Java field name
 
 p(note). In fact, you can have a separate **messages** file for each language supported by your application. For example, you could put French messages in the **/yabe/conf/messages.fr** file.
 
-Add these label to the **messages** file:
+Add these labels to the **messages** file:
 
 bc. title=Title
 content=Content
@@ -223,13 +223,13 @@ Then refresh any form, and you will see the new form labels:
 
 !images/guide7-4!
 
-h2. <a>Customizing the 'Comments' data list</a>
+h2. <a>Customizing the ‘Comments’ data list</a>
 
-The CRUD module is made to be fully customizable. For example if you look at the comments list page, the way that data is listed is not great. We would like to add more columns, especially the 'related post' column to help us filter the list easily.
+The CRUD module is made to be fully customizable. For example if you look at the comments list page, the way that data is listed is not great. We would like to add more columns, especially the ‘related post’ column to help us filter the list easily.
 
-In fact as your applications keep the master, you can really override any **action** or **template** provided by the CRUD module. For example if we want to customize the 'comments list' view, we just have to provide another **/yabe/app/views/Comments/list.html** template.
+In fact, as your applications keep the master, you can really override any **action** or **template** provided by the CRUD module. For example if we want to customize the ‘comments list’ view, we just have to provide another **/yabe/app/views/Comments/list.html** template.
 
-The **CRUD** module provides more play commands when it's enabled. The **crud:ov** command helps you override any template. From a command line, type:
+The **CRUD** module provides more Play commands when it’s enabled. The **crud:ov** command helps you override any template. From a command line, type:
 
 bc. $ play crud:ov --template Comments/list
 
@@ -279,11 +279,11 @@ bc. #{crud.table fields:['content', 'post', 'author']}
  #{/crud.custom}
 #{/crud.table}
 
-p(note). Yes there is some groovy syntaxic sugar at work here.
+p(note). Yes, there is some Groovy syntactic sugar at work here.
 
-h2. <a>Customizing the 'Post' form</a>
+h2. <a>Customizing the ‘Post’ form</a>
 
-We can customize the generated forms as well. For example, the way we enter tags in the Post form is not really easy. We could build something better. Let's override the **Posts/show** template:
+We can customize the generated forms as well. For example, the way we enter tags in the Post form is not really easy. We could build something better. Let’s override the **Posts/show** template:
 
 bc. $ play crud:ov --template Posts/show
 
@@ -355,7 +355,7 @@ bc. #{crud.form}
     #{/crud.custom}
 #{/crud.form}
 
-This is a little hacky and we could do better here, but we have now a simpler tags selector using a little bit of javascript:
+This is a little hacky and we could do better here, but we have now a simpler tags selector using a little bit of JavaScript:
 
 !images/guide7-6!
 
