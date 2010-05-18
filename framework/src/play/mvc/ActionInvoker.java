@@ -26,12 +26,9 @@ import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
-import play.libs.MimeTypes;
 import play.mvc.Router.Route;
 import play.mvc.results.NoResult;
 import play.mvc.results.NotFound;
-import play.mvc.results.RenderBinary;
-import play.mvc.results.RenderText;
 import play.mvc.results.Result;
 import play.utils.Java;
 import play.utils.Utils;
@@ -44,6 +41,7 @@ import com.jamonapi.MonitorFactory;
  */
 public class ActionInvoker {
 
+    @SuppressWarnings("unchecked")
     public static void invoke(Http.Request request, Http.Response response) {
         Monitor monitor = null;
         try {
