@@ -40,6 +40,7 @@ import play.data.validation.Validation;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
 
 
+@ChannelPipelineCoverage("one")
 public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();

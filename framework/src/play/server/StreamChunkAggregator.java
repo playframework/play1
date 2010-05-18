@@ -11,6 +11,7 @@ import java.io.*;
 import java.util.List;
 import java.util.UUID;
 
+@ChannelPipelineCoverage("one")
 public class StreamChunkAggregator extends SimpleChannelUpstreamHandler {
 
     private volatile HttpMessage currentMessage;
