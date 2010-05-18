@@ -63,7 +63,7 @@ When you need to make sure that the object is deleted before continuing, you can
 
 bc. Cache.safeDelete("product_"+id);
 
-This method is blocking and returns a boolean value indicating whether he object has been deleted or not. So the full pattern that ensures an item is deleted from the cache is:
+This method is blocking and returns a boolean value indicating whether the object has been deleted or not. So the full pattern that ensures an item is deleted from the cache is:
 
 bc. if(!Cache.safeDelete("product_"+id)) {
     throw new Exception("Oops, the product has not been removed from the cache");
