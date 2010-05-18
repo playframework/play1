@@ -446,6 +446,47 @@ public class Http {
             setHeader("Last-Modified", Utils.getHttpDateFormatter().format(new Date(lastModified)));
             setHeader("Etag", etag);
         }
+        /**
+         * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support
+         * these features and will ignore the headers. Refer to the browsers' documentation to
+         * know what versions support them.
+         * @param allowOrigin a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
+         */
+        public void accessControl(String allowOrigin) {
+            accessControl(allowOrigin, null, false);
+        }
+
+        /**
+         * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support
+         * these features and will ignore the headers. Refer to the browsers' documentation to
+         * know what versions support them.
+         * @param allowOrigin a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
+         * @param allowCredentials Let the browser send the cookies when doing a x-domain request. Only respected by the browser if allowOrigin != "*"
+         */
+        public void accessControl(String allowOrigin, boolean allowCredentials) {
+            accessControl(allowOrigin, null, allowCredentials);
+        }
+
+        /**
+         * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support
+         * these features and will ignore the headers. Refer to the browsers' documentation to
+         * know what versions support them.
+         * @param allowOrigin a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
+         * @param allowMethods a comma separated list of HTTP methods allowed, or null for all.
+         * @param allowCredentials Let the browser send the cookies when doing a x-domain request. Only respected by the browser if allowOrigin != "*"
+         */
+        public void accessControl(String allowOrigin, String allowMethods, boolean allowCredentials) {
+            setHeader("Access-Control-Allow-Origin", allowOrigin);
+            if (allowMethods != null) {
+                setHeader("Access-Control-Allow-Methods", allowMethods);
+            }
+            if (allowCredentials == true) {
+                if (allowOrigin.equals("*")) {
+                    Logger.warn("Response.accessControl: When the allowed domain is \"*\", Allow-Credentials is likely to be ignored by the browser.");
+                }
+                setHeader("Access-Control-Allow-Credentials", "true");
+            }
+        }
 
         public void print(Object o) {
             try {

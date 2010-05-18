@@ -116,7 +116,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 int locals = b.getMaxLocals();
                 int stack = b.getMaxStack();
                 codeAttribute.setMaxLocals(locals);
-                if (stack > codeAttribute.getMaxStack()) {
+                if (stack > codeAttribute.getMaxStack()) {                           
                     codeAttribute.setMaxStack(stack);
                 }
                 iterator.insert(insertionPc, b.get());
@@ -155,7 +155,6 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                         locals = b.getMaxLocals();
                         stack = b.getMaxStack();
                         codeAttribute.setMaxLocals(locals);
-
                         if (stack > codeAttribute.getMaxStack()) {
                             codeAttribute.setMaxStack(stack);
                         }
@@ -169,6 +168,9 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             // init variable tracer
             method.insertBefore("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.enter();");
             method.insertAfter("play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.exit();", true);
+
+            // Check that - Why insertAfter sometimes set the wrong MaxStacks
+            codeAttribute.setMaxStack(codeAttribute.computeMaxStack());
 
         }
 
