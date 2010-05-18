@@ -173,5 +173,11 @@ public class Application extends Controller {
         long results = response.getJson().getAsJsonObject().getAsJsonObject("responseData").getAsJsonObject("cursor").getAsJsonPrimitive("estimatedResultCount").getAsLong();
         renderText(results);
     }
+    
+    private static void toList(String str) {
+        str = "YOP";
+        int i = 0;
+        str.charAt(i++);
+    }
 
 }
