@@ -331,10 +331,11 @@ public class Router {
     }
 
     public static ActionDefinition reverse(String action, Map<String, Object> args) {
+        System.out.println("**** reverse " + action + " - " + args.toString());
         if (action.startsWith("controllers.")) {
             action = action.substring(12);
         }
-	Map<String, Object> argsbackup = args;
+        Map<String, Object> argsbackup = args;
         for (Route route : routes) {
             args = new HashMap<String, Object>(argsbackup);
             if (route.actionPattern != null) {

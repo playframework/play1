@@ -15,7 +15,7 @@ import java.util.Map;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
-import play.cache.annotations.Cache;
+import play.cache.CacheFor;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.data.binding.map.OldBinder;
@@ -155,7 +155,7 @@ public class ActionInvoker {
 
                 // Check the cache (only for GET or HEAD)
                 if ((request.method.equals("GET") || request.method.equals("HEAD")) &&
-                    actionMethod.isAnnotationPresent(Cache.class))
+                    actionMethod.isAnnotationPresent(CacheFor.class))
                 {
                     actionResult = (Result)play.cache.Cache.get(cacheKey);
                 }
@@ -191,9 +191,9 @@ public class ActionInvoker {
 
                             // Cache it if needed
                             if ((request.method.equals("GET") || request.method.equals("HEAD")) &&
-                                    actionMethod.isAnnotationPresent(Cache.class))
+                                    actionMethod.isAnnotationPresent(CacheFor.class))
                             {
-                                play.cache.Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(Cache.class).duration());
+                                play.cache.Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
                             }
 
                         } else {
