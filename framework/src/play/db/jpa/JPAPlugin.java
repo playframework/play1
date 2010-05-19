@@ -93,7 +93,7 @@ public class JPAPlugin extends PlayPlugin {
 
                 @Override
                 public int[] findDirty(Object o, Serializable id, Object[] arg2, Object[] arg3, String[] arg4, Type[] arg5) {
-                    if (o instanceof JPASupport && !((JPASupport) o).willBeSaved) {
+                    if (o instanceof JPABase && !((JPABase) o).willBeSaved) {
                         return new int[0];
                     }
                     return null;
@@ -103,8 +103,8 @@ public class JPAPlugin extends PlayPlugin {
                 public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
                     if (collection instanceof PersistentCollection) {
                         Object o = ((PersistentCollection) collection).getOwner();
-                        if (o instanceof JPASupport) {
-                            return ((JPASupport) o).willBeSaved;
+                        if (o instanceof JPABase) {
+                            return ((JPABase) o).willBeSaved;
                         }
                     } else {
                         System.out.println("HOO: Case not handled !!!");
@@ -116,8 +116,8 @@ public class JPAPlugin extends PlayPlugin {
                 public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
                     if (collection instanceof PersistentCollection) {
                         Object o = ((PersistentCollection) collection).getOwner();
-                        if (o instanceof JPASupport) {
-                            return ((JPASupport) o).willBeSaved;
+                        if (o instanceof JPABase) {
+                            return ((JPABase) o).willBeSaved;
                         }
                     } else {
                         System.out.println("HOO: Case not handled !!!");
@@ -129,8 +129,8 @@ public class JPAPlugin extends PlayPlugin {
                 public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException {
                     if (collection instanceof PersistentCollection) {
                         Object o = ((PersistentCollection) collection).getOwner();
-                        if (o instanceof JPASupport) {
-                            return ((JPASupport) o).willBeSaved;
+                        if (o instanceof JPABase) {
+                            return ((JPABase) o).willBeSaved;
                         }
                     } else {
                         System.out.println("HOO: Case not handled !!!");
