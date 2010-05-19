@@ -79,7 +79,7 @@ public class JPAPlugin extends PlayPlugin {
             cfg.setProperty("hibernate.dialect", getDefaultDialect(Play.configuration.getProperty("db.driver")));
             cfg.setProperty("javax.persistence.transaction", "RESOURCE_LOCAL");
 
-            // Explicit SAVE for JPASupport is implemented here
+            // Explicit SAVE for JPABase is implemented here
             // ~~~~~~
             // We've hacked the org.hibernate.event.def.AbstractFlushingEventListener line 271, to flush collection update,remove,recreation
             // only if the owner will be saved.
