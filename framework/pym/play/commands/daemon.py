@@ -15,7 +15,7 @@ def execute(**kargs):
     if command == 'stop':
         stop(app)
     if command == 'restart':
-        restart(app)
+        restart(app, args)
     if command == 'pid':
         pid(app)
     if command == 'out':
@@ -60,7 +60,7 @@ def stop(app):
     print "~"
 
 
-def restart(app):
+def restart(app, args):
     app.check()
     if not os.path.exists(app.pid_path()):
         print "~ Oops! %s is not started (server.pid not found)" % os.path.normpath(app.path)
@@ -70,13 +70,13 @@ def restart(app):
         os.remove(app.pid_path())
         kill(pid)
 
-    sysout = play_app.readConf('application.log.system.out')
+    sysout = app.readConf('application.log.system.out')
     sysout = sysout!='false' and sysout!='off'
-    java_cmd = app.java_cmd()
+    java_cmd = app.java_cmd(args)
     if not sysout:
       sout = None
     else:
-      sout = open(os.path.join(log_path, 'system.out'), 'w')
+      sout = open(os.path.join(app.log_path(), 'system.out'), 'w')
     try:
         pid = subprocess.Popen(java_cmd, stdout=sout, env=os.environ).pid
     except OSError:
@@ -85,7 +85,7 @@ def restart(app):
     print "~ OK, %s is restarted" % os.path.normpath(app.path)
     if sysout:
       print "~ output is redirected to %s" % os.path.normpath(os.path.join(app.log_path(), 'system.out'))
-    pid_file = open(pid_path, 'w')
+    pid_file = open(app.pid_path(), 'w')
     pid_file.write(str(pid))
     print "~ New pid is %s" % pid
     print "~"
