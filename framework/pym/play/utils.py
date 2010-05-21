@@ -17,6 +17,15 @@ def replaceAll(file, searchExp, replaceExp):
         line = re.sub(searchExp, replaceExp, line)
         sys.stdout.write(line)
 
+def fileHas(file, searchExp):
+    # The file doesn't get closed if we don't iterate to the end, so
+    # we must continue even after we found the match.
+    found = False
+    for line in fileinput.input(file):
+        if line.find(searchExp) > -1:
+            found = True
+    return found
+
 def secretKey():
     return ''.join([random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') for i in range(64)])
 

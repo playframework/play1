@@ -69,7 +69,10 @@ class PlayApplication:
             modules.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'modules/testrunner')))
         return modules
 
-    def load_modules():
+    def module_names(self):
+        return map(lambda x: x[7:],self.conf.getAllKeys("module."))
+
+    def load_modules(self):
         if os.environ.has_key('MODULES'):
             if os.name == 'nt':
                 modules = os.environ['MODULES'].split(';')
@@ -106,6 +109,9 @@ class PlayApplication:
             os.makedirs(os.path.dirname(toFile))
         shutil.copyfile(fromFile, toFile)
         print "~ Copied %s to %s " % (fromFile, toFile)
+
+    def name(self):
+        return self.readConf("application.name")
 
     # ~~~~~~~~~~~~~~~~~~~~~~ JAVA
 
@@ -240,6 +246,13 @@ class PlayConfParser:
         if key in self.DEFAULTS:
             return self.DEFAULTS[key]
         return ''
+
+    def getAllKeys(self, query):
+        result = []
+        for (key, value) in self.entries.items():
+            if key.startswith(query) or key.startswith('%' + self.id + '.' + key):
+                result.append(key)
+        return result
 
     def getAll(self, query):
         result = []

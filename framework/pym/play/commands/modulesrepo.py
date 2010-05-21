@@ -14,9 +14,10 @@ from play.utils import *
 NM = ['new-module']
 LM = ['list-modules', 'lm']
 BM = ['build-module', 'bm']
+AM = ['add']
 IM = ['install']
 
-COMMANDS = NM + LM + BM + IM
+COMMANDS = NM + LM + BM + IM + AM
 
 DEFAULT_REPO = 'http://www.playframework.org'
 
@@ -47,6 +48,8 @@ def execute(**kargs):
         build(app, args, env)
     elif command in IM:
         install(app, args, env)
+    elif command in AM:
+        add(app, args, env)
 
 def get_repositories(play_base):
     repopath = os.path.join(play_base, 'repositories')
@@ -354,6 +357,43 @@ def install(app, args, env):
     print '~ module.%s=${play.path}/modules/%s-%s' % (module, module, v['version'])
     print '~'
     sys.exit(0)
+
+def add(app, args, env):
+    app.check()
+
+    try:
+        optlist, args = getopt.getopt(args, '', ['module='])
+        for o, a in optlist:
+            if o in ('--module'):
+                m = a
+    except getopt.GetoptError, err:
+        print "~ %s" % str(err)
+        print "~ "
+        sys.exit(-1)
+
+    if m is None:
+        print "~ Usage: play add --module=<modulename>"
+        print "~ "
+        sys.exit(-1)
+
+    appConf = os.path.join(app.path, 'conf/application.conf')
+    if not fileHas(appConf, '# ---- MODULES ----'):
+        print "~ Line '---- MODULES ----' missing in your application.conf. Add it to use this command."
+        print "~ "
+        sys.exit(-1)
+
+    mn = m
+    if mn.find('-') > 0:
+        mn = mn[:mn.find('-')]
+
+    if mn in app.module_names():
+        print "~ Module %s already declared in application.conf, not doing anything." % mn
+        print "~ "
+        sys.exit(-1)
+
+    replaceAll(appConf, r'# ---- MODULES ----', '# ---- MODULES ----\nmodule.%s=${play.path}/modules/%s' % (mn, m) )
+    print "~ Module %s add to application %s." % (mn, app.name())
+    print "~ "
 
 def load_module_list():
 
