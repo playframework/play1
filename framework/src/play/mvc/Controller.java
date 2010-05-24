@@ -641,8 +641,12 @@ public abstract class Controller implements ControllerSupport, LocalVariablesSup
      * Suspend the current request for a specified amount of time
      */
     protected static void suspend(String timeout) {
+        suspend(Time.parseDuration(timeout));
+    }
+
+    protected static void suspend(int timeout) {
         Request.current().isNew = false;
-        throw new Suspend(Time.parseDuration(timeout));
+        throw new Suspend(timeout);
     }
 
     /**
