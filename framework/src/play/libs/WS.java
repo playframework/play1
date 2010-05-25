@@ -120,64 +120,6 @@ public class WS extends PlayPlugin {
 
     static {
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
-        ProtocolSocketFactory factory = new ProtocolSocketFactory() {
-
-            /**
-             * @see #createSocket(java.lang.String,int,java.net.InetAddress,int)
-             */
-            public Socket createSocket(
-                    String host,
-                    int port,
-                    InetAddress localAddress,
-                    int localPort) throws IOException, UnknownHostException {
-
-                // get inetAddresses
-                InetAddress[] inetAddresses = InetAddress.getAllByName(host);
-
-
-                for (int i = 0; i < inetAddresses.length; i++) {
-                    try {
-                        Socket socket = new Socket(inetAddresses[i], port, localAddress,
-                                localPort);
-
-                        return socket;
-                    } catch (SocketException se) {
-                        Logger.error("Socket exception on " + inetAddresses[i] + "; will try another dns record if exists.");
-                    }
-                }
-                // tried all
-                throw new SocketException("Cannot connect to " + host);
-            }
-
-            public Socket createSocket(
-                    final String host,
-                    final int port,
-                    final InetAddress localAddress,
-                    final int localPort,
-                    final HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
-                if (params == null) {
-                    throw new IllegalArgumentException("Parameters may not be null");
-                }
-                int timeout = params.getConnectionTimeout();
-                if (timeout == 0) {
-                    return createSocket(host, port, localAddress, localPort);
-                }
-                return ControllerThreadSocketFactory.createSocket(
-                        this, host, port, localAddress, localPort, timeout);
-            }
-
-            /**
-             * @see ProtocolSocketFactory#createSocket(java.lang.String,int,InetAddress,int)
-            )
-             */
-            public Socket createSocket(String host, int port) throws IOException,
-                    UnknownHostException {
-                return createSocket(host, port, null, 0);
-            }
-        };
-
-        Protocol protocol = new Protocol("http", factory, 80);
-        Protocol.registerProtocol("http", protocol);
         httpClient = new HttpClient(connectionManager);
         String proxyHost = Play.configuration.getProperty("http.proxyHost", System.getProperty("http.proxyHost"));
         String proxyPort = Play.configuration.getProperty("http.proxyPort", System.getProperty("http.proxyPort"));
