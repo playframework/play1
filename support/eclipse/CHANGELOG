@@ -1,3 +1,7 @@
+0.6.0:
+   * More robust missing actions for the routes editor, and support in the template editor
+   * Propose actions inherited from superclasses in autocomplete
+   * Soft tabs
 0.6.0: Errors for missing actions in the routes editor
 0.5.1: Bug fixes
 0.5.0:
