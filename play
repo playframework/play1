@@ -332,7 +332,7 @@ try:
 
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ Modules list
-	def load_modules():
+	def load_modules(failOnMissing=True):
 		global modules
 		if os.environ.has_key('MODULES'):
 			if os.name == 'nt':
@@ -349,7 +349,7 @@ try:
 			if not m[0] == '/':
 				m = os.path.normpath(os.path.join(application_path, m))
 
-			if not os.path.exists(m):
+			if not os.path.exists(m) and failOnMissing:
 				print "~ Oops,"
 				print "~ Module not found: %s" % (m)
 				print "~"
@@ -1177,9 +1177,21 @@ try:
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [start] Start the application
 	if play_command == 'start':
+		force = False
+		try:
+			optlist, args = getopt.getopt(remaining_args, '', ['force'])
+			for o, a in optlist:
+				if o in ('--force'):
+					force = True
+		except getopt.GetoptError, err:
+			print "~ %s" % str(err)
+			print "~ "
+			sys.exit(-1)
 		check_application()
-		load_modules()
+		load_modules(not force)
 		do_classpath()
+		if remaining_args.count('--force') == 1:
+			remaining_args.remove('--force')
 		do_java()
 		if os.path.exists(pid_path):
 			print "~ Oops. %s is already started! (or delete %s)" % (os.path.normpath(application_path), os.path.normpath(pid_path))
@@ -1205,7 +1217,6 @@ try:
 		print "~ pid is %s" % pid
 		print "~"
 		sys.exit(0)
-
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [stop] Stop the application
 	if play_command == 'stop':

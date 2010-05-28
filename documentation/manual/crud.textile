@@ -198,7 +198,7 @@ h2. List of String and List of enumeration
 The CRUD module is showing them as a text field. In this text field, the list is represented by a comma separated list of String.
 For example:
 
-bc.@Entity
+bc. @Entity
 public class Account extends Model {
 
         @CollectionOfElements
