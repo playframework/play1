@@ -233,6 +233,7 @@ public class FastTags {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static void _include(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         try {
             if (!args.containsKey("arg") || args.get("arg") == null) {

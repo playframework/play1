@@ -10,6 +10,13 @@ import org.w3c.dom.Text;
  */
 public class XPath {
 
+    /**
+     * Select all nodes that are selected by this XPath expression. If multiple nodes match,
+     * multiple nodes will be returned. Nodes will be returned in document-order,
+     * @param path
+     * @param node
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public static List<Node> selectNodes(String path, Object node) {
         try {
@@ -19,6 +26,12 @@ public class XPath {
         }
     }
 
+    /**
+     * 
+     * @param path
+     * @param node
+     * @return
+     */
     public static Node selectNode(String path, Object node) {
         try {
             List<Node> nodes = selectNodes(path, node);
@@ -31,6 +44,11 @@ public class XPath {
         }
     }
 
+    /**
+     * Return the text of a node, or the value of an attribute
+     * @param path the XPath to execute
+     * @param node the node, node-set or Context object for evaluation. This value can be null.
+     */
     public static String selectText(String path, Object node) {
         try {
             Node rnode = (Node) new DOMXPath(path).selectSingleNode(node);

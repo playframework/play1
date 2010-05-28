@@ -177,7 +177,7 @@ public class Invoker {
                     after();
                 }
             } catch (Suspend e) {
-                suspend(((Suspend) e));
+                suspend(e);
             } catch (Throwable e) {
                 onException(e);
             } finally {

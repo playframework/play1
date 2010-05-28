@@ -817,6 +817,12 @@ public class WS extends PlayPlugin {
             return this;
         }
 
+        /**
+         * Add parameters to request.
+         * If POST or PUT, parameters are passed in body using x-www-form-urlencoded if alone, or form-data if there is files too.
+         * For any other method, those params are appended to the queryString. 
+         * @return the WSRequest for chaining.
+         */
         public WSRequest setParameters(Map<String, String> parameters) {
             this.parameters.putAll(parameters);
             return this;

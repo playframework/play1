@@ -430,15 +430,14 @@ public class Play {
                 classloader.getAllClasses();
                 Logger.info("Application is precompiled");
                 return true;
-            } else {
-                Logger.error("Precompiled classes are missing!!");
-                try {
-                    System.exit(-1);
-                } catch (Exception ex) {
-                    // Will not work in some application servers
-                }
-                return false;
             }
+            Logger.error("Precompiled classes are missing!!");
+            try {
+                System.exit(-1);
+            } catch (Exception ex) {
+                // Will not work in some application servers
+            }
+            return false;
         }
         try {
             Logger.info("Precompiling ...");

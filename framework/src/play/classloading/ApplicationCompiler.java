@@ -232,9 +232,7 @@ public class ApplicationCompiler {
             public void acceptResult(CompilationResult result) {
                 // If error
                 if (result.hasErrors()) {
-                    IProblem[] problems = result.getErrors();
-                    for (int i = 0; i < problems.length; i++) {
-                        IProblem problem = problems[i];
+                    for (IProblem problem: result.getErrors()) {
                         String className = new String(problem.getOriginatingFileName()).replace("/", ".");
                         className = className.substring(0, className.length() - 5);
                         String message = problem.getMessage();

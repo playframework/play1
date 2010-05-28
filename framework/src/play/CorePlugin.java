@@ -39,21 +39,20 @@ public class CorePlugin extends PlayPlugin {
                 }
             }
             return o.toString();
-        } else {
-            StringBuffer dump = new StringBuffer();
-            for (PlayPlugin plugin : Play.plugins) {
-                try {
-                    String status = plugin.getStatus();
-                    if (status != null) {
-                        dump.append(status);
-                        dump.append("\n");
-                    }
-                } catch (Throwable e) {
-                    dump.append(plugin.getClass().getName() + ".getStatus() has failed (" + e.getMessage() + ")");
-                }
-            }
-            return dump.toString();
         }
+        StringBuffer dump = new StringBuffer();
+        for (PlayPlugin plugin : Play.plugins) {
+            try {
+                String status = plugin.getStatus();
+                if (status != null) {
+                    dump.append(status);
+                    dump.append("\n");
+                }
+            } catch (Throwable e) {
+                dump.append(plugin.getClass().getName() + ".getStatus() has failed (" + e.getMessage() + ")");
+            }
+        }
+        return dump.toString();
     }
 
     /**
@@ -78,15 +77,14 @@ public class CorePlugin extends PlayPlugin {
                 response.print(computeApplicationStatus(request.path.contains(".json")));
                 response.status = 200;
                 return true;
-            } else {
-                response.status = 401;
-                if(response.contentType.equals("application/json")) {
-                    response.print("{\"error\": \"Not authorized\"}");
-                } else {
-                    response.print("Not authorized");
-                }
-                return true;
             }
+            response.status = 401;
+            if(response.contentType.equals("application/json")) {
+                response.print("{\"error\": \"Not authorized\"}");
+            } else {
+                response.print("Not authorized");
+            }
+            return true;
         }
         return super.rawInvocation(request, response);
     }

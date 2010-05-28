@@ -144,6 +144,7 @@ public class IO {
 
     /**
      * Copy an stream to another one.
+     * @throws java.io.IOException
      */
     public static void write(InputStream is, OutputStream os) throws IOException {
         int read = 0;

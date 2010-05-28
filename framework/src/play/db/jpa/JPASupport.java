@@ -35,6 +35,7 @@ import java.lang.reflect.Constructor;
  * A super class for JPA entities 
  */
 @MappedSuperclass
+@SuppressWarnings("unchecked")
 public class JPASupport extends JPABase {
 
     public static <T extends JPABase> T create(Class<?> type, String name, Map<String, String[]> params, Annotation[] annotations) {

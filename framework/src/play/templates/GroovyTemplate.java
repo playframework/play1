@@ -191,7 +191,7 @@ public class GroovyTemplate extends Template {
             currentTemplate.set(this);
         }
         if (!args.containsKey("_body") && !args.containsKey("_isLayout") && !args.containsKey("_isInclude")) {
-            layoutData.set(new HashMap());
+            layoutData.set(new HashMap<Object, Object>());
             TagContext.init();
         }
         ExecutableTemplate t = (ExecutableTemplate) InvokerHelper.createScript(compiledTemplate, binding);

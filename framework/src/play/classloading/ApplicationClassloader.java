@@ -112,26 +112,24 @@ public class ApplicationClassloader extends ClassLoader {
         if (applicationClass != null) {
             if (applicationClass.isDefinable()) {
                 return applicationClass.javaClass;
-            } else {
-                byte[] bc = BytecodeCache.getBytecode(name, applicationClass.javaSource);
-                if (bc != null) {
-                    applicationClass.enhancedByteCode = bc;
-                    applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
-                    resolveClass(applicationClass.javaClass);
-                    Logger.trace("%sms to load class %s from cache", System.currentTimeMillis() - start, name);
-                    return applicationClass.javaClass;
-                }
-                if (applicationClass.javaByteCode != null || applicationClass.compile() != null) {
-                    applicationClass.enhance();
-                    applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
-                    BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, name, applicationClass.javaSource);
-                    resolveClass(applicationClass.javaClass);
-                    Logger.trace("%sms to load class %s", System.currentTimeMillis() - start, name);
-                    return applicationClass.javaClass;
-                } else {
-                    Play.classes.classes.remove(name);
-                }
             }
+            byte[] bc = BytecodeCache.getBytecode(name, applicationClass.javaSource);
+            if (bc != null) {
+                applicationClass.enhancedByteCode = bc;
+                applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
+                resolveClass(applicationClass.javaClass);
+                Logger.trace("%sms to load class %s from cache", System.currentTimeMillis() - start, name);
+                return applicationClass.javaClass;
+            }
+            if (applicationClass.javaByteCode != null || applicationClass.compile() != null) {
+                applicationClass.enhance();
+                applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
+                BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, name, applicationClass.javaSource);
+                resolveClass(applicationClass.javaClass);
+                Logger.trace("%sms to load class %s", System.currentTimeMillis() - start, name);
+                return applicationClass.javaClass;
+            }
+            Play.classes.classes.remove(name);
         }
         return null;
     }
