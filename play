@@ -309,6 +309,8 @@ try:
 	for a in remaining_args:
 		if a.find('--%') == 0:
 			play_id = a[3:]
+	if remaining_args.count('--%%%s' % play_id) == 1:
+		remaining_args.remove('--%%%s' % play_id)
 			
 	
 	if play_command == 'test' or play_command == 'auto-test':
