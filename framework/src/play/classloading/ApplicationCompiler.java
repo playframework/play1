@@ -157,9 +157,8 @@ public class ApplicationCompiler {
                         if (bytes != null) {
                             ClassFileReader classFileReader = new ClassFileReader(bytes, name.toCharArray(), true);
                             return new NameEnvironmentAnswer(classFileReader, null);
-                        } else {
-                            return null;
                         }
+                        return null;
                     }
 
                     char[] fileName = name.toCharArray();
@@ -171,11 +170,10 @@ public class ApplicationCompiler {
                         if (applicationClass.javaByteCode != null) {
                             ClassFileReader classFileReader = new ClassFileReader(applicationClass.javaByteCode, fileName, true);
                             return new NameEnvironmentAnswer(classFileReader, null);
-                        } else {
-                            // Cascade compilation
-                            ICompilationUnit compilationUnit = new CompilationUnit(name);
-                            return new NameEnvironmentAnswer(compilationUnit, null);
                         }
+                        // Cascade compilation
+                        ICompilationUnit compilationUnit = new CompilationUnit(name);
+                        return new NameEnvironmentAnswer(compilationUnit, null);
                     }
 
                     // So it's a standard class

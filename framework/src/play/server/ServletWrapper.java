@@ -420,7 +420,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         } else if (response.direct != null && response.direct instanceof InputStream) {
             copyStream(servletResponse, (InputStream) response.direct);
         } else {
-            byte[] content = ((ByteArrayOutputStream) response.out).toByteArray();
+            byte[] content = response.out.toByteArray();
             servletResponse.setHeader("Content-Length", String.valueOf(content.length));
             if (!request.method.equals("HEAD")) {
                 servletResponse.getOutputStream().write(content);

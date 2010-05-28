@@ -52,7 +52,7 @@ public class Messages {
         if (value == null) {
             value = key.toString();
         }
-        String message = String.format(value, coolStuff(value, (Object[])args));
+        String message = String.format(value, coolStuff(value, args));
         Matcher matcher = recursive.matcher(message);
         StringBuffer sb = new StringBuffer();
         while(matcher.find()) {
@@ -69,7 +69,7 @@ public class Messages {
         Class[] conversions = new Class[args.length];
         
         Matcher matcher = formatterPattern.matcher(pattern);
-        int incrementalPosition = 1;        
+        int incrementalPosition = 1;
         while(matcher.find()) {
             String conversion = matcher.group(6);
             Integer position;

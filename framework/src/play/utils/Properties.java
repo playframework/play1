@@ -103,7 +103,7 @@ public class Properties extends HashMap<String, String> {
     }
 
     public Object getClassInstance(String key) throws IllegalArgumentException {
-        String s = (String) get(key);
+        String s = get(key);
         if (s == null || "".equals(s)) {
             throw new IllegalArgumentException("Setting " + key + " must be a valid classname  : " + key);
         }

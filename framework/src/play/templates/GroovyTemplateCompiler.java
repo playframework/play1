@@ -100,7 +100,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
             String[] lines = text.split("\n", 10000);
             for (int i = 0; i < lines.length; i++) {
                 String line = lines[i];
-                if (line.length() > 0 && (int) line.charAt(line.length() - 1) == 13) {
+                if (line.length() > 0 && line.charAt(line.length() - 1) == 13) {
                     line = line.substring(0, line.length() - 1);
                 }
 
@@ -248,7 +248,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         if (tagsStack.isEmpty()) {
             throw new TemplateCompilationException(template, parser.getLine(), "#{/" + tagName + "} is not opened.");
         }
-        Tag tag = (Tag) tagsStack.pop();
+        Tag tag = tagsStack.pop();
         String lastInStack = tag.name;
         if (tagName.equals("")) {
             tagName = lastInStack;
@@ -296,7 +296,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
                     if (!c.isAnnotationPresent(FastTags.Namespace.class) && tSpace.length() > 0) {
                         continue;
                     }
-                    if (c.isAnnotationPresent(FastTags.Namespace.class) && !((FastTags.Namespace) c.getAnnotation(FastTags.Namespace.class)).value().equals(tSpace)) {
+                    if (c.isAnnotationPresent(FastTags.Namespace.class) && !c.getAnnotation(FastTags.Namespace.class).value().equals(tSpace)) {
                         continue;
                     }
                     try {

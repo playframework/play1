@@ -92,9 +92,6 @@ public class RenderBinary extends Result {
      */
     public RenderBinary(File file) {
         this(file, file.getName(), true);
-        if (file == null) {
-            throw new RuntimeException("file is null");
-        }
     }
 
     /**

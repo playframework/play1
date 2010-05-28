@@ -223,7 +223,7 @@ public class Mailer implements LocalVariablesSupport {
                 Template templateText = TemplateLoader.load(templateName + ".txt");
                 bodyText = templateText.render(templateTextBinding);
             } catch (TemplateNotFoundException e) {
-                if (bodyHtml == null && (contentType == null || (contentType != null && contentType.startsWith("text/plain")))) {
+                if (bodyHtml == null && (contentType == null || contentType.startsWith("text/plain"))) {
                     throw e;
                 }
             }
@@ -349,7 +349,7 @@ public class Mailer implements LocalVariablesSupport {
         }
     }
 
-    public static boolean sendAndWait(Object... args) throws EmailException {
+    public static boolean sendAndWait(Object... args) {
         try {
             Future<Boolean> result = send(args);
             return result.get();

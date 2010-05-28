@@ -635,7 +635,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     protected static <T extends Annotation> T getControllerAnnotation(Class<T> clazz) {
         if (getControllerClass().isAnnotationPresent(clazz)) {
-            return (T)getControllerClass().getAnnotation(clazz);
+            return getControllerClass().getAnnotation(clazz);
         }
         return null;
     }
@@ -649,7 +649,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         Class<?> c = getControllerClass();
         while(!c.equals(Object.class)) {
             if (c.isAnnotationPresent(clazz)) {
-                return (T)c.getAnnotation(clazz);
+                return c.getAnnotation(clazz);
             }
             c = c.getSuperclass();
         }

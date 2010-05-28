@@ -159,7 +159,7 @@ public class Fixtures {
                             throw new RuntimeException("Cannot load fixture " + name + ", duplicate id '" + id + "' for type " + type);
                         }
                         Map<String, String[]> params = new HashMap<String, String[]>();
-                        serialize((Map<?, ?>) objects.get(key), "object", params);
+                        serialize(objects.get(key), "object", params);
                         Class<?> cType = Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
                         Model model = (Model)OldBinder.bind("object", cType, cType, null, params);

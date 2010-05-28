@@ -30,7 +30,7 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
     }
 
 
-    public InputStream getInputStream() throws IOException {
+    public InputStream getInputStream() {
         return is;
     }
 

@@ -40,7 +40,7 @@ public class Error {
         Object[] args = new Object[variables.length + 1];
         System.arraycopy(variables, 0, args, 1, variables.length);
         args[0] = key;
-        return Messages.get(message, (Object[])args);
+        return Messages.get(message, args);
     }
 
     @Override

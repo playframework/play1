@@ -54,10 +54,10 @@ public class JobsPlugin extends PlayPlugin {
                     out.print(" run at application start.");
                 }
                 if(job.getClass().isAnnotationPresent(On.class)) {
-                    out.print(" run with cron expression " + ((On)job.getClass().getAnnotation(On.class)).value() + ".");
+                    out.print(" run with cron expression " + job.getClass().getAnnotation(On.class).value() + ".");
                 }
                 if(job.getClass().isAnnotationPresent(Every.class)) {
-                    out.print(" run every " + ((Every)job.getClass().getAnnotation(Every.class)).value() + ".");
+                    out.print(" run every " + job.getClass().getAnnotation(Every.class).value() + ".");
                 }
                 if(job.lastRun > 0) {
                     out.print(" (last run at " + df.format(new Date(job.lastRun)));
@@ -135,7 +135,7 @@ public class JobsPlugin extends PlayPlugin {
                 try {
                     Job job = (Job) clazz.newInstance();
                     scheduledJobs.add(job);
-                    String value = ((Every) (job.getClass().getAnnotation(Every.class))).value();
+                    String value = job.getClass().getAnnotation(Every.class).value();
                     value = Expression.evaluate(value, value).toString();
                     executor.scheduleWithFixedDelay(job, Time.parseDuration(value), Time.parseDuration(value), TimeUnit.SECONDS);
                 } catch (InstantiationException ex) {
@@ -155,7 +155,7 @@ public class JobsPlugin extends PlayPlugin {
 
     public static <V> void scheduleForCRON(Job<V> job) {
         if (job.getClass().isAnnotationPresent(On.class)) {
-            String cron = ((On) (job.getClass().getAnnotation(On.class))).value();
+            String cron = job.getClass().getAnnotation(On.class).value();
             if (cron.startsWith("cron.")) {
                 cron = Play.configuration.getProperty(cron);
             }

@@ -416,7 +416,7 @@ public class WS extends PlayPlugin {
                 }
             }
 
-            postMethod.get().setRequestBody((NameValuePair[]) nvps.toArray(new NameValuePair[nvps.size()]));
+            postMethod.get().setRequestBody(nvps.toArray(new NameValuePair[nvps.size()]));
             httpClient.executeMethod(null, postMethod.get(), states.get());
             return new HttpResponse(postMethod.get());
         } catch (Exception e) {
@@ -680,7 +680,7 @@ public class WS extends PlayPlugin {
         }
 
         private void checkFileBody(EntityEnclosingMethod method) throws FileNotFoundException, UnsupportedEncodingException {
-            EntityEnclosingMethod putOrPost = (EntityEnclosingMethod) method;
+            EntityEnclosingMethod putOrPost = method;
             if (this.fileParams != null) {
                 //could be optimized, we know the size of this array.
                 List<Part> parts = new ArrayList<Part>();
@@ -692,7 +692,7 @@ public class WS extends PlayPlugin {
                         Object value = this.parameters.get(key);
                         if (value instanceof Collection || value.getClass().isArray()) {
                             Collection values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection) value;
-                            for (Object v : (Collection) values) {
+                            for (Object v : values) {
                                 parts.add(new StringPart(key, v.toString(), "utf-8"));
                             }
                         } else {
@@ -907,7 +907,7 @@ public class WS extends PlayPlugin {
                     if (value instanceof Collection || value.getClass().isArray()) {
                         Collection values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection) value;
                         boolean first = true;
-                        for (Object v : (Collection) values) {
+                        for (Object v : values) {
                             if (!first) {
                                 sb.append("&");
                             }

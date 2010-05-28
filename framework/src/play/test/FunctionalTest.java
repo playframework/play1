@@ -368,7 +368,7 @@ public abstract class FunctionalTest extends BaseTest {
      * @return the response body as an <em>utf-8 string</em>
      */
     public static String getContent(Response response) {
-        byte[] data = ((ByteArrayOutputStream) response.out).toByteArray();
+        byte[] data = response.out.toByteArray();
         try {
             return new String(data, "utf-8");
         } catch (UnsupportedEncodingException ex) {

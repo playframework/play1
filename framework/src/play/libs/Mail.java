@@ -60,8 +60,6 @@ public class Mail {
 
             email.setMailSession(getSession());
             return sendMessage(email);
-        } catch (MessagingException ex) {
-            throw new MailException("Cannot send email", ex);
         } catch (EmailException ex) {
             throw new MailException("Cannot send email", ex);
         }
@@ -70,7 +68,7 @@ public class Mail {
     /**
      *
      */
-    public static Email buildMessage(Email email) throws MessagingException, EmailException {
+    public static Email buildMessage(Email email) throws EmailException {
 
         String from = Play.configuration.getProperty("mail.smtp.from");
         if (email.getFromAddress() == null && !StringUtils.isEmpty(from)) {
@@ -279,7 +277,7 @@ public class Mail {
         }
 
 
-        static void send(Email email) throws MessagingException {
+        static void send(Email email) {
 
             try {
                 final StringBuffer content = new StringBuffer();

@@ -242,9 +242,6 @@ public class JPABase implements Serializable, play.db.Model {
             Throwable cause = e;
             int it = 0;
             while ((cause = cause.getCause()) != null && it++ < 10) {
-                if (cause == null) {
-                    break;
-                }
                 if (cause instanceof ClassCastException) {
                     best = cause;
                     break;

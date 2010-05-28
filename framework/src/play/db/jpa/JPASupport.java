@@ -299,9 +299,6 @@ public class JPASupport extends JPABase {
             Throwable cause = e;
             int it = 0;
             while ((cause = cause.getCause()) != null && it++ < 10) {
-                if (cause == null) {
-                    break;
-                }
                 if (cause instanceof ClassCastException) {
                     best = cause;
                     break;
@@ -339,7 +336,7 @@ public class JPASupport extends JPABase {
                 if (results.size() == 0) {
                     return null;
                 }
-                return (T) results.get(0);
+                return results.get(0);
             } catch (Exception e) {
                 throw new JPAQueryException("Error while executing query <strong>" + sq + "</strong>", JPAQueryException.findBestCause(e));
             }

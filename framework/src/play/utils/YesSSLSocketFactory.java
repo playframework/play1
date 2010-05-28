@@ -35,7 +35,7 @@ public class YesSSLSocketFactory extends SSLSocketFactory {
         try {
             SSLContext sslcontext = SSLContext.getInstance("TLS");
             sslcontext.init(null, new TrustManager[]{new YesTrustManager()}, null);
-            factory = (SSLSocketFactory) sslcontext.getSocketFactory();
+            factory = sslcontext.getSocketFactory();
         } catch (Exception ex) {
         }
     }

@@ -64,9 +64,8 @@ public class BytecodeCache {
                 fis.read(byteCode);
                 fis.close();
                 return byteCode;
-            } else {
-                Logger.trace("Cache MISS for %s", name);
             }
+            Logger.trace("Cache MISS for %s", name);
             return null;
         } catch (Exception e) {
             throw new RuntimeException(e);
