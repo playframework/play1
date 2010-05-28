@@ -1180,20 +1180,13 @@ try:
 	# ~~~~~~~~~~~~~~~~~~~~~~ [start] Start the application
 	if play_command == 'start':
 		force = False
-		try:
-			optlist, args = getopt.getopt(remaining_args, '', ['force'])
-			for o, a in optlist:
-				if o in ('--force'):
-					force = True
-		except getopt.GetoptError, err:
-			print "~ %s" % str(err)
-			print "~ "
-			sys.exit(-1)
+		for a in remaining_args:
+			if a.find('--force') == 0:
+				force = True
+				remaining_args.remove(a)
 		check_application()
 		load_modules(not force)
 		do_classpath()
-		if remaining_args.count('--force') == 1:
-			remaining_args.remove('--force')
 		do_java()
 		if os.path.exists(pid_path):
 			print "~ Oops. %s is already started! (or delete %s)" % (os.path.normpath(application_path), os.path.normpath(pid_path))
