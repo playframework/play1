@@ -159,6 +159,9 @@ public class Fixtures {
                             throw new RuntimeException("Cannot load fixture " + name + ", duplicate id '" + id + "' for type " + type);
                         }
                         Map<String, String[]> params = new HashMap<String, String[]>();
+                        if (objects.get(key) == null) {
+                            objects.put(key, new HashMap<Object, Object>());
+                        }
                         serialize(objects.get(key), "object", params);
                         Class<?> cType = Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
