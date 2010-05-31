@@ -8,7 +8,7 @@ public interface Model {
     public void _save();
     public void _delete();
     public Object _getKey();
-    public Class _getKeyType();
+    public Class<?> _getKeyType();
 
     public void _loader();
 
@@ -27,7 +27,7 @@ public interface Model {
     public static class Property {
 
         public String name;
-        public Class type;
+        public Class<?> type;
         public Field field;
         public boolean isRelation;
         public boolean isMultiple;

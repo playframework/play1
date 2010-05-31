@@ -62,7 +62,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 iv.append("new String[0];");
             } else {
                 iv.append("new String[] {");
-                for (Iterator i = names.iterator(); i.hasNext();) {
+                for (Iterator<String> i = names.iterator(); i.hasNext();) {
                     iv.append("\"");
                     iv.append(i.next());
                     iv.append("\"");
@@ -216,10 +216,10 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             return computeMethodHash(names);
         }
 
-        public static Integer computeMethodHash(Class[] parameters) {
+        public static Integer computeMethodHash(Class<?>[] parameters) {
             String[] names = new String[parameters.length];
             for (int i = 0; i < parameters.length; i++) {
-                Class param = parameters[i];
+                Class<?> param = parameters[i];
                 names[i] = "";
                 if (param.isArray()) {
                     int level = 1;

@@ -113,7 +113,7 @@ public abstract class Enhancer {
     /**
      * Create a new annotation to be dynamically inserted in the byte code.
      */
-    protected static void createAnnotation(AnnotationsAttribute attribute, Class annotationType, Map<String, MemberValue> members) {
+    protected static void createAnnotation(AnnotationsAttribute attribute, Class<? extends Annotation> annotationType, Map<String, MemberValue> members) {
         javassist.bytecode.annotation.Annotation annotation = new javassist.bytecode.annotation.Annotation(annotationType.getName(), attribute.getConstPool());
         for (Map.Entry<String, MemberValue> member : members.entrySet()) {
             annotation.addMemberValue(member.getKey(), member.getValue());
@@ -124,7 +124,7 @@ public abstract class Enhancer {
     /**
      * Create a new annotation to be dynamically inserted in the byte code.
      */    
-    protected static void createAnnotation(AnnotationsAttribute attribute, Class annotationType) {
+    protected static void createAnnotation(AnnotationsAttribute attribute, Class<? extends Annotation> annotationType) {
         createAnnotation(attribute, annotationType, new HashMap<String, MemberValue>());
     }
 

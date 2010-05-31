@@ -27,7 +27,7 @@ public class Messages {
     static public Properties defaults;
 
     static public Map<String, Properties> locales = new HashMap<String, Properties>();
-    
+
     static Pattern recursive = Pattern.compile("&\\{(.*?)\\}");
 
     /**
@@ -61,13 +61,14 @@ public class Messages {
         matcher.appendTail(sb);
         return sb.toString();
     }
-    
+
     static Pattern formatterPattern = Pattern.compile("%((\\d+)\\$)?([-#+ 0,(]+)?(\\d+)?([.]\\d+)?([bBhHsScCdoxXeEfgGaAtT])");
-    
+
+    @SuppressWarnings("unchecked")
     static Object[] coolStuff(String pattern, Object[] args) {
-        
-        Class[] conversions = new Class[args.length];
-        
+
+        Class<? extends Number>[] conversions = new Class[args.length];
+
         Matcher matcher = formatterPattern.matcher(pattern);
         int incrementalPosition = 1;
         while(matcher.find()) {
@@ -85,7 +86,7 @@ public class Messages {
                 conversions[position-1] = Double.class;
             }
         }
-        
+
         Object[] result = new Object[args.length];
         for(int i=0; i<args.length; i++) {
             if(args[i] == null) {
