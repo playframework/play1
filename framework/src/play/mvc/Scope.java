@@ -24,7 +24,7 @@ import play.utils.Utils;
 public class Scope {
 
     public static String COOKIE_PREFIX = Play.configuration.getProperty("application.session.cookie", "PLAY");
-    public static boolean COOKIE_SECURE = Play.configuration.getProperty("application.session.cookie", "false").toLowerCase().equals("true");
+    public static boolean COOKIE_SECURE = Play.configuration.getProperty("application.session.secure", "false").toLowerCase().equals("true");
 
     /**
      * Flash scope
