@@ -15,9 +15,9 @@ public @interface As {
     String[] value();
     String[] lang() default {"*"};
     String[] format() default {"html"};
-    Class<? extends SupportedType> binder() default DEFAULT.class;
+    Class<? extends SupportedType<?>> binder() default DEFAULT.class;
 
-    public static final class DEFAULT implements SupportedType {
+    public static final class DEFAULT implements SupportedType<Object> {
         public Object bind(Annotation[] annotations, String value) throws Exception {
             throw new UnsupportedOperationException("Not supported.");
         }

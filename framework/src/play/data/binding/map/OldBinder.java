@@ -31,7 +31,7 @@ import play.data.binding.types.FileBinder;
  */
 public class OldBinder {
 
-    static Map<Class, SupportedType> supportedTypes = new HashMap<Class, SupportedType>();
+    static Map<Class<?>, SupportedType<?>> supportedTypes = new HashMap<Class<?>, SupportedType<?>>();
 
     static {
         supportedTypes.put(Date.class, new DateBinder());
@@ -40,9 +40,9 @@ public class OldBinder {
         supportedTypes.put(File.class, new FileBinder());
     }
 
-    static Map<Class, BeanWrapper> beanwrappers = new HashMap<Class, BeanWrapper>();
+    static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<Class<?>, BeanWrapper>();
 
-    static BeanWrapper getBeanWrapper(Class clazz) {
+    static BeanWrapper getBeanWrapper(Class<?> clazz) {
         if (!beanwrappers.containsKey(clazz)) {
             BeanWrapper beanwrapper = new BeanWrapper(clazz);
             beanwrappers.put(clazz, beanwrapper);
@@ -56,14 +56,12 @@ public class OldBinder {
     // TODO move me to Utils
 
     private static String toString(String[] values) {
-        String toReturn = "";
-        if (values != null) {
-            for (String value : values) {
-                toReturn = "," + value;
-            }
+        if (values == null) {
+            return "";
         }
-        if (toReturn.equals("")) {
-            return toReturn;
+        StringBuffer toReturn = new StringBuffer();
+        for (String value: values) {
+            toReturn.append("," + value);
         }
         return toReturn.substring(1);
     }
@@ -257,11 +255,11 @@ public class OldBinder {
         return false;
     }
 
-    public static Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params) {
+    public static Object bind(String name, Class<?> clazz, Type type, Annotation[] annotations, Map<String, String[]> params) {
         return bind(name, clazz, type, annotations, params, null, null, 0);
     }
 
-    public static Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, Object o, Method method, int parameterIndex) {
+    public static Object bind(String name, Class<?> clazz, Type type, Annotation[] annotations, Map<String, String[]> params, Object o, Method method, int parameterIndex) {
         Logger.trace("bind: name [" + name + "] annotation [" + Utils.toString(annotations) + "] ");
 
         Object result = null;
@@ -335,11 +333,11 @@ public class OldBinder {
     }
 
 
-    public static Object directBind(String value, Class clazz) throws Exception {
+    public static Object directBind(String value, Class<?> clazz) throws Exception {
         return directBind(null, value, clazz);
     }
 
-    public static Object directBind(Annotation[] annotations, String value, Class clazz) throws Exception {
+    public static Object directBind(Annotation[] annotations, String value, Class<?> clazz) throws Exception {
         Logger.trace("directBind: value [" + value + "] annotation [" + Utils.toString(annotations) + "] Class [" + clazz + "]");
 
         if (clazz.equals(String.class)) {
@@ -349,10 +347,10 @@ public class OldBinder {
         if (annotations != null) {
             for (Annotation annotation : annotations) {
                 if (annotation.getClass().equals(As.class)) {
-                    Class<? extends SupportedType> toInstanciate = ((As) annotation).binder();
+                    Class<? extends SupportedType<?>> toInstanciate = ((As) annotation).binder();
                     if (!(toInstanciate.equals(As.DEFAULT.class))) {
                         // Instanciate the binder
-                        SupportedType myInstance = toInstanciate.newInstance();
+                        SupportedType<?> myInstance = toInstanciate.newInstance();
                         return myInstance.bind(annotations, value);
                     }
                 }

@@ -20,7 +20,7 @@ import play.utils.Utils;
  */
 class DirectBinder {
 
-    static Map<Class, SupportedType> supportedTypes = new HashMap<Class, SupportedType>();
+    static Map<Class<?>, SupportedType<?>> supportedTypes = new HashMap<Class<?>, SupportedType<?>>();
 
     static {
         supportedTypes.put(Date.class, new DateBinder());
@@ -28,7 +28,7 @@ class DirectBinder {
         supportedTypes.put(Locale.class, new LocaleBinder());
     }
 
-    public static Object directBind(String value, Class clazz, Annotation[] annotations) throws Exception {
+    public static Object directBind(String value, Class<?> clazz, Annotation[] annotations) throws Exception {
         Logger.trace("directBind: value [" + value + "] annotation [" + Utils.toString(annotations) + "] Class [" + clazz + "]");
 
         if (clazz.equals(String.class)) {

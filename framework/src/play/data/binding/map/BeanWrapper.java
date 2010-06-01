@@ -29,7 +29,7 @@ public class BeanWrapper {
         Logger.trace("Bean wrapper for class %s", forClass.getName());
         this.beanClass = forClass;
         boolean isScala = false;
-        for (Class intf : forClass.getInterfaces()) {
+        for (Class<?> intf : forClass.getInterfaces()) {
             if ("scala.ScalaObject".equals(intf.getName())) {
                 isScala = true;
                 break;
