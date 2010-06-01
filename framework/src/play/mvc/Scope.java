@@ -24,6 +24,7 @@ import play.utils.Utils;
 public class Scope {
 
     public static String COOKIE_PREFIX = Play.configuration.getProperty("application.session.cookie", "PLAY");
+    public static boolean COOKIE_SECURE = Play.configuration.getProperty("application.session.cookie", "false").toLowerCase().equals("true");
 
     /**
      * Flash scope
@@ -62,7 +63,7 @@ public class Scope {
                     flash.append("\u0000");
                 }
                 String flashData = URLEncoder.encode(flash.toString(), "utf-8");
-                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", flashData);
+                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", flashData, COOKIE_SECURE);
             } catch (Exception e) {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
@@ -193,8 +194,6 @@ public class Scope {
         }
 
         void save() {
-            String secureProperty = Play.configuration.getProperty("application.session.secure");
-            boolean secure = (secureProperty != null && secureProperty.equals("true"));
             try {
                 StringBuilder session = new StringBuilder();
                 for (String key : data.keySet()) {
@@ -207,9 +206,9 @@ public class Scope {
                 String sessionData = URLEncoder.encode(session.toString(), "utf-8");
                 String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
                 if (Play.configuration.getProperty("application.session.maxAge") == null) {
-                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, secure);
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, COOKIE_SECURE);
                 } else {
-                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, Play.configuration.getProperty("application.session.maxAge"), secure);
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, Play.configuration.getProperty("application.session.maxAge"), COOKIE_SECURE);
                 }
             } catch (Exception e) {
                 throw new UnexpectedException("Session serializationProblem", e);
