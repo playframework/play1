@@ -211,7 +211,7 @@ public class ApplicationClasses {
          */
         public byte[] enhance() {
             this.enhancedByteCode = this.javaByteCode;
-            for (Class enhancer : enhancers) {
+            for (Class<?> enhancer : enhancers) {
                 try {
                     long start = System.currentTimeMillis();
                     ((Enhancer) enhancer.newInstance()).enhanceThisClass(this);

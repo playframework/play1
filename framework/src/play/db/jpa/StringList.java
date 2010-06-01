@@ -24,7 +24,7 @@ public class StringList extends ArrayList<String> implements UserType {
         return new int[]{Types.VARCHAR};
     }
 
-    public Class returnedClass() {
+    public Class<?> returnedClass() {
         return StringList.class;
     }
 

@@ -64,14 +64,13 @@ public class ApplicationClassloader extends ClassLoader {
      */
     @Override
     protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-
-        Class c = findLoadedClass(name);
+        Class<?> c = findLoadedClass(name);
         if (c != null) {
             return c;
         }
 
         // First check if it's an application Class
-        Class applicationClass = loadApplicationClass(name);
+        Class<?> applicationClass = loadApplicationClass(name);
         if (applicationClass != null) {
             if (resolve) {
                 resolveClass(applicationClass);
@@ -84,7 +83,7 @@ public class ApplicationClassloader extends ClassLoader {
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~
-    protected Class loadApplicationClass(String name) {
+    protected Class<?> loadApplicationClass(String name) {
 
         if (Play.usePrecompiled) {
             try {
@@ -93,7 +92,7 @@ public class ApplicationClassloader extends ClassLoader {
                     return null;
                 }
                 byte[] code = IO.readContent(file);
-                Class clazz = findLoadedClass(name);
+                Class<?> clazz = findLoadedClass(name);
                 if (clazz == null) {
                     clazz = defineClass(name, code, 0, code.length, protectionDomain);
                 }
