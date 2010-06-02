@@ -499,7 +499,7 @@ public class ApacheMultipartParser extends DataParser {
         protected File getTempFile() {
             File tempDir = repository;
             if (tempDir == null) {
-                tempDir = new File(System.getProperty("java.io.tmpdir"));
+                tempDir = Play.tmpDir;
             }
 
             String fileName = "upload_" + getUniqueId() + ".tmp";
