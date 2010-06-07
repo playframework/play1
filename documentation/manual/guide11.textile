@@ -64,9 +64,11 @@ bc. %server01.XForwardedSupport=127.0.0.1
 h2. <a>This is just the beginning</a>
 
 p(note). If you have read and followed this tutorial, you’re now a seasoned Play developer. You know most of the concepts that drive Play application development.
+ 
+At this stage, you may want to continue the tutorial with "internationalisation and localisation":guide12.
 
 There are still more features we haven’t explored yet, especially related to Web services, like JSON or XML. Also Play comes with more modules that provide more features. And Play itself still evolves every day.
 
 If you are convinced that Play will help you save time for your next Java web application, you’re now ready to start. And don’t hesitate to ask us any question on the "Play Google Group":http://groups.google.com/group/play-framework.
  
-**Thanks a lot!**
+**Thank you!**
