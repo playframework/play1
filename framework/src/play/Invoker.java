@@ -178,6 +178,7 @@ public class Invoker {
                 }
             } catch (Suspend e) {
                 suspend(((Suspend) e));
+                after();
             } catch (Throwable e) {
                 onException(e);
             } finally {

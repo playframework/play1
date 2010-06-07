@@ -76,6 +76,7 @@ public class HttpHandler implements IoHandler {
         IoBuffer buffer = (IoBuffer) minaRequest.getContent();
 
         request.remoteAddress = ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
+        request.isLoopback = ((InetSocketAddress) session.getRemoteAddress()).getAddress().isLoopbackAddress();
         request.method = minaRequest.getMethod().toString().intern();
         request.path = URLDecoder.decode(uri.getRawPath(), "utf-8");
         request.querystring = uri.getQuery() == null ? "" : uri.getRawQuery();

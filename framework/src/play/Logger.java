@@ -27,26 +27,22 @@ public class Logger {
      * Will force use of java.util.logging (default to try log4j first).
      */
     public static boolean forceJuli = false;
-    
     /**
      * Will redirect all log from java.util.logging to log4j.
      */
     public static boolean redirectJuli = false;
-    
     /**
      * Will record and display the caller method.
      */
     public static boolean recordCaller = false;
-    
     /**
      * The application logger (play).
      */
     public static org.apache.log4j.Logger log4j;
-    
     /**
      * When using java.util.logging.
      */
-    public static java.util.logging.Logger juli = java.util.logging.Logger.getLogger("play");    
+    public static java.util.logging.Logger juli = java.util.logging.Logger.getLogger("play");
 
     /**
      * Try to init stuff.
@@ -62,7 +58,7 @@ public class Logger {
             Properties shutUp = new Properties();
             shutUp.setProperty("log4j.rootLogger", "OFF");
             PropertyConfigurator.configure(shutUp);
-        } else {
+        } else if (Logger.log4j == null) {
             PropertyConfigurator.configure(log4jConf);
             Logger.log4j = org.apache.log4j.Logger.getLogger("play");
             // In test mode, append logs to test-result/application.log
@@ -443,10 +439,10 @@ public class Logger {
             }
         }
     }
-    
+
     /**
      * If e is a PlayException -> a very clean report
-     */ 
+     */
     static boolean niceThrowable(Priority priority, Throwable e, String message, Object... args) {
         if (e instanceof PlayException) {
 
@@ -571,10 +567,10 @@ public class Logger {
                 Object parameters[] = record.getParameters();
                 if (parameters != null && parameters.length != 0) {
                     // Check for the first few parameters ?
-                    if (message.indexOf("{0}") >= 0 ||
-                            message.indexOf("{1}") >= 0 ||
-                            message.indexOf("{2}") >= 0 ||
-                            message.indexOf("{3}") >= 0) {
+                    if (message.indexOf("{0}") >= 0
+                            || message.indexOf("{1}") >= 0
+                            || message.indexOf("{2}") >= 0
+                            || message.indexOf("{3}") >= 0) {
                         message = MessageFormat.format(message, parameters);
                     }
                 }

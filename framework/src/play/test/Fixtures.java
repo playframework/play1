@@ -174,6 +174,9 @@ public class Fixtures {
                                     }
                                 }
                             }
+                            if (f.getType().isAssignableFrom(Map.class)) {
+                                f.set(model, objects.get(key).get(f.getName()));
+                            }
 
                         }
                         model.save();
@@ -206,7 +209,7 @@ public class Fixtures {
             if (value instanceof Map<?, ?>) {
                 serialize((Map<?, ?>) value, prefix + "." + key, serialized);
             } else if (value instanceof Date) {
-                serialized.put(prefix + "." + key.toString(), new String[]{new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss").format(((Date) value))});
+                serialized.put(prefix + "." + key.toString(), new String[]{new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(((Date) value))});
             } else if (value instanceof List<?>) {
                 List<?> l = (List<?>) value;
                 String[] r = new String[l.size()];

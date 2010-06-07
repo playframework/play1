@@ -1,4 +1,7 @@
 #{set title:'Your application is ready !' /}
+
+#{if play.mode.toString() == 'DEV'}
+    
 #{set 'moreStyles'}
 	<link rel="stylesheet" href="@{'/public/playmanual/manual.css'}" type="text/css" media="screen" charset="utf-8">
 #{/set}
@@ -16,7 +19,7 @@
                     Click here to get more informations about your application environment
                 </a>.
             </p>
-            <pre><code id="env" style="display:none; background: rgb(255, 254, 178); border-bottom: 1px solid rgb(255, 179, 32); border-top: 1px solid rgb(255, 179, 32)">${play.CorePlugin.computeApplicationStatus()}</code></pre>
+            <pre><code id="env" style="display:none; background: rgb(255, 254, 178); border-bottom: 1px solid rgb(255, 179, 32); border-top: 1px solid rgb(255, 179, 32)">${play.CorePlugin.computeApplicationStatus(false)}</code></pre>
             <h2><a name="why">Why do you see this page ?</a></h2>
             <p>
                 The <strong>conf/routes</strong> file defines a route that tell play to invoke the <strong>Application.index</strong> action
@@ -86,3 +89,8 @@ db.pass=secret</code></pre>
         </div>
     </div>
 </div>
+
+#{/if}
+#{else}
+    <h1>Your application is ready!</h1>
+#{/else}

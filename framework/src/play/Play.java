@@ -528,7 +528,7 @@ public class Play {
     }
 
     /**
-     * Allow some code to run very eraly in Play! - Use with caution !
+     * Allow some code to run very early in Play! - Use with caution !
      */
     public static void initStaticStuff() {
         // Play! plugings

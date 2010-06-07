@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Play command line script www.playframework.org/
 
@@ -309,6 +309,8 @@ try:
 	for a in remaining_args:
 		if a.find('--%') == 0:
 			play_id = a[3:]
+	if remaining_args.count('--%%%s' % play_id) == 1:
+		remaining_args.remove('--%%%s' % play_id)
 			
 	
 	if play_command == 'test' or play_command == 'auto-test':
@@ -332,7 +334,7 @@ try:
 
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ Modules list
-	def load_modules():
+	def load_modules(failOnMissing=True):
 		global modules
 		if os.environ.has_key('MODULES'):
 			if os.name == 'nt':
@@ -349,7 +351,7 @@ try:
 			if not m[0] == '/':
 				m = os.path.normpath(os.path.join(application_path, m))
 
-			if not os.path.exists(m):
+			if not os.path.exists(m) and failOnMissing:
 				print "~ Oops,"
 				print "~ Module not found: %s" % (m)
 				print "~"
@@ -414,7 +416,7 @@ try:
 			jpda_port = 0
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~~ Build java path
-	def do_java(className='play.server.Server'):
+	def do_java(className='play.server.Server',args=[]):
 		global java_cmd
 		global java_path
 		global pid_path
@@ -434,7 +436,9 @@ try:
 			if a.find('--%') == 0:
 				remaining_args.remove(a)
 		# ~~~~~~~~~~~~~~~~~~~~~~ Read some configuration from conf/application.conf
-		java_args = remaining_args[:]
+		java_args = []
+		if (args == []):
+		    java_args = remaining_args[:]
 		
 		memory_in_args=False
 		for arg in java_args:
@@ -463,7 +467,7 @@ try:
 				java_args.append('-Djava.security.policy==%s' % policyFile)
 		
 		# The Java stuff
-		java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, className]
+		java_cmd = [java_path, '-javaagent:%s' % agent_path] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % application_path, '-Dplay.id=%s' % play_id, className] + args
 
 		if not os.environ.has_key('PLAY_PID_PATH'):
 			pid_path = os.path.join(application_path, 'server.pid');
@@ -929,7 +933,10 @@ try:
 			zip.close()
 
 	if play_command == 'war':
-		remaining_args.remove('--%%%s' % play_id)
+		try:
+			remaining_args.remove('--%%%s' % play_id)
+		except:
+			pass
 		war_path = None
 		war_zip_path = None
 		try:
@@ -1172,8 +1179,13 @@ try:
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [start] Start the application
 	if play_command == 'start':
+		force = False
+		for a in remaining_args:
+			if a.find('--force') == 0:
+				force = True
+				remaining_args.remove(a)
 		check_application()
-		load_modules()
+		load_modules(not force)
 		do_classpath()
 		do_java()
 		if os.path.exists(pid_path):
@@ -1200,7 +1212,6 @@ try:
 		print "~ pid is %s" % pid
 		print "~"
 		sys.exit(0)
-
 	
 	# ~~~~~~~~~~~~~~~~~~~~~~ [stop] Stop the application
 	if play_command == 'stop':
