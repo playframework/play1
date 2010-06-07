@@ -1,18 +1,14 @@
 package play.libs;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.Cipher;
+import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.bouncycastle.crypto.Digest;
-import org.bouncycastle.crypto.digests.SHA1Digest;
-import org.bouncycastle.crypto.macs.HMac;
-import org.bouncycastle.crypto.params.KeyParameter;
 import play.Play;
 import play.exceptions.UnexpectedException;
 
@@ -43,16 +39,13 @@ public class Crypto {
             return message;
         }
 
-        byte[] messageBytes;
-        KeyParameter secretKey = new KeyParameter(key);
-        Digest digest = new SHA1Digest();
-        HMac hmac = new HMac(digest);
         try {
-            messageBytes = message.getBytes("utf-8");
-            hmac.init(secretKey);
-            hmac.update(messageBytes, 0, messageBytes.length);
-            byte[] result = new byte[1000];
-            int len = hmac.doFinal(result, 0);
+            Mac mac = Mac.getInstance("HmacSHA1");
+            SecretKeySpec signingKey = new SecretKeySpec(key, "HmacSHA1");
+            mac.init(signingKey);
+            byte[] messageBytes = message.getBytes("utf-8");
+            byte[] result = mac.doFinal(messageBytes);
+            int len = result.length;
             char[] hexChars = new char[len * 2];
 
 
@@ -62,7 +55,7 @@ public class Crypto {
                 hexChars[charIndex++] = HEX_CHARS[bite & 0xf];
             }
             return new String(hexChars);
-        } catch (UnsupportedEncodingException ex) {
+        } catch (Exception ex) {
             throw new UnexpectedException(ex);
         }       
 

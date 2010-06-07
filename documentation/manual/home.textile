@@ -36,6 +36,7 @@ Learn Play by coding **‘Yet Another Blog Engine’**, from start to finish. Ea
 # "Creating a custom editor area":guide9
 # "Completing the application tests":guide10
 # "Preparing for production":guide11
+# "Internationalisation and localisation":guide12
 
 h2. <a name="manual">The essential documentation</a>
 
