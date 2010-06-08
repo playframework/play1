@@ -9,39 +9,37 @@
         currentObject = _caller.object
         currentType = _caller.type
     }
-    
-	// Eval fields tags
-	def fieldsHandler = [:]
-	if(_body) {
-		_body.setProperty('fieldsHandler', fieldsHandler);
-		_body.toString(); // we skeep the real result ...
-	}
+
+    // Eval fields tags
+    def fieldsHandler = [:]
+    if(_body) {
+        _body.setProperty('fieldsHandler', fieldsHandler);
+        _body.toString(); // we skeep the real result ...
+    }
 }%
 
 #{list items:_fields ?: currentType.fields*.name, as:'fieldName'}
 
-	%{
-	   am = ''
-	   def field = currentType.getField(fieldName)
+    %{
+       am = ''
+       def field = currentType.getField(fieldName)
        def showField = true
      }%
 
-
-
-	%{ if(fieldsHandler[fieldName]) { }%
+    %{ if(fieldsHandler[fieldName]) { }%
         <div class="crudField crud_${field.type}">
-		%{
-			def handler = fieldsHandler[fieldName]
-			handler.setProperty('fieldName', 'object.' + field?.name + (field?.type == 'relation' ? '@id' : ''))
+        %{
+            def handler = fieldsHandler[fieldName]
+            handler.setProperty('fieldName', 'object.' + field?.name + (field?.type == 'relation' ? '@id' : ''))
             def oldObject = handler.getProperty('object')
-			handler.setProperty('object', currentObject)
-			out.println(handler.toString())
-			handler.setProperty('object', oldObject)
-			handler.setProperty('fieldName', null)
-		}%
+            handler.setProperty('object', currentObject)
+            out.println(handler.toString())
+            handler.setProperty('object', oldObject)
+            handler.setProperty('fieldName', null)
+        }%
         </div>
-	%{ } else { }%
-	    #{if field.type != 'unknown'}
+    %{ } else { }%
+        #{if field.type != 'unknown'}
             %{ showField = false }%
 
             <div class="crudField crud_${field.type}">
@@ -139,6 +137,6 @@
                 </span>
             </div>
         #{/}
-	%{ } }%
+    %{ } }%
 
 #{/list}

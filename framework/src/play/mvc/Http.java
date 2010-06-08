@@ -7,10 +7,15 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import play.Logger;
 import play.exceptions.UnexpectedException;
@@ -277,6 +282,32 @@ public class Http {
         @Override
         public String toString() {
             return method + " " + path + (querystring != null && querystring.length() > 0 ? "?" + querystring : "");
+        }
+
+        /**
+         * Return the languages requested by the browser, ordered by preference (preferred first).
+         * If no Accept-Language header is present, an empty list is returned.
+         */
+        public List<String> acceptLanguage() {
+            final Pattern qpattern = Pattern.compile("q=([0-9\\.]+)");
+            if (!headers.containsKey("accept-language")) return new ArrayList<String>();
+            String acceptLanguage = headers.get("accept-language").value();
+            List<String> languages = Arrays.asList(acceptLanguage.split(","));
+            Collections.sort(languages, new Comparator<String>(){
+                public int compare(String lang1, String lang2) {
+                    double q1 = 1.0;
+                    double q2 = 1.0;
+                    Matcher m1 = qpattern.matcher(lang1);
+                    Matcher m2 = qpattern.matcher(lang2);
+                    if (m1.find()) q1 = Double.parseDouble(m1.group(1));
+                    if (m2.find()) q2 = Double.parseDouble(m2.group(1));
+                    return (int)(q2 - q1);
+                }});
+            List<String> result = new ArrayList<String>();
+            for (String lang: languages) {
+                result.add(lang.split(";")[0]);
+            }
+            return result;
         }
 
         public boolean isModified(String etag, long last) {
