@@ -65,21 +65,14 @@ public class Lang {
             return;
         }
         // Try from accept-language
-        if (request.headers.containsKey("accept-language")) {
-            String al = request.headers.get("accept-language").value();
-            for (String a : al.split(",")) {
-                if (a.indexOf(";") > 0) {
-                    a = a.substring(0, a.indexOf(";"));
-                }
-                if (a.indexOf("-") > 0) {
-                    a = a.substring(0, a.indexOf("-"));
-                }
-                for (String locale : Play.langs) {
-                    if (locale.equals(a)) {
-                        set(locale);
-                        return;
-                    }
-
+        for (String a: request.acceptLanguage()) {
+            if (a.indexOf("-") > 0) {
+                a = a.substring(0, a.indexOf("-"));
+            }
+            for (String locale: Play.langs) {
+                if (locale.equals(a)) {
+                    set(locale);
+                    return;
                 }
             }
         }
