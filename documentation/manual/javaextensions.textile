@@ -19,7 +19,7 @@ red/green/blue
 
 h3. <a>pluralize()</a>
 
-Returns an ‘s’ when the collection size, or number, is not 1. Returns: **String**.
+Returns an ‘s’ when the collection’s size is not 1. Returns: **String**.
 
 bc. colour${['red', 'green', 'blue'].pluralize()} 
 colours
@@ -27,7 +27,7 @@ colours
 
 h3. <a>pluralize(plural)</a>
 
-Returns the given plural when the collection size, or number, is not 1. Returns: **String**.
+Returns the given plural when the collection’s size is not 1. Returns: **String**.
 
 bc. box${['red', 'green', 'blue'].pluralize('es')}
 boxes
@@ -35,7 +35,7 @@ boxes
 
 h3. <a>pluralize(singular, plural)</a>
 
-Returns the given plural form when the collection size, or number, is not 1; returns the given singular form when it is 1. Returns: **String**.
+Returns the given plural form when the collection’s size is not 1; returns the given singular form when it is 1. Returns: **String**.
 
 bc. journ${['red'].pluralize('al', 'aux')}
 journal
@@ -71,7 +71,7 @@ Formats the date as a relative time, compared to now, e.g. **3 minutes ago**. Re
 bc. ${new Date(new Date().getTime() - 1000000).since()}
 16 minutes ago
 
-You can customise the output using the following messages: **since.seconds**, **since.minutes**, **since.hours**, **since.days**, **since.months** and **since.years**,  
+You can customise the output using the following messages: **since.seconds**, **since.minutes**, **since.hours**, **since.days**, **since.months** and **since.years**.  
 
 
 h3. <a>since(condition)</a>
@@ -158,7 +158,7 @@ bc. ${42.format('000.00')}
 
 h3. <a>formatCurrency(currencyCode)</a>
 
-Formats the number as the given currency code, e.g. **EUR**. Returns: **String**.
+Formats the number as a currency for the given currency code, e.g. **EUR**. Returns: **String**.
 
 bc. ${42.formatCurrency('EUR').raw()}
 &euro; 42.00
@@ -166,7 +166,7 @@ bc. ${42.formatCurrency('EUR').raw()}
 
 h3. <a>page(pageSize)</a>
 
-Returns the index’s page number, for the given page size. Returns: **Integer**.
+Returns the page number, for the given page size, from interpreting the number as an index. Returns: **Integer**.
 
 bc. ${42.page(10)}
 5
@@ -174,7 +174,7 @@ bc. ${42.page(10)}
 
 h3. <a>pluralize()</a>
 
-Returns an ‘s’ when the collection size, or number, is not 1. Returns: **String**.
+Returns an ‘s’ when the number is not 1. Returns: **String**.
 
 bc. colour${['red', 'green', 'blue'].pluralize()} - colour${3.pluralize()} 
 colours - colours
@@ -182,7 +182,7 @@ colours - colours
 
 h3. <a>pluralize(plural)</a>
 
-Returns the given plural when the collection size, or number, is not 1. Returns: **String**.
+Returns the given plural when the number is not 1. Returns: **String**.
 
 bc. box${3.pluralize('es')}
 boxes
@@ -190,7 +190,7 @@ boxes
 
 h3. <a>pluralize(singular, plural)</a>
 
-Returns the given plural form when the collection size, or number, is not 1; returns the given singular form when it is 1. Returns: **String**.
+Returns the given plural form when the number is not 1; returns the given singular form when it is 1. Returns: **String**.
 
 bc. journ${1.pluralize('al', 'aux')}
 journal
@@ -205,10 +205,10 @@ h2. <a>Object extensions</a>
 
 h3. <a>addSlashes()</a>
 
-Backslash-escapes single and double quotes in the object’s **String** representation. Returns: **String**.
+Backslash-escapes Java-escaped single and double quotes in the object’s **String** representation. Returns: **String**.
 
 bc. ${"single quote (') double quote (\")".addSlashes().raw()}
-single quote (\') double quote (\")
+single quote (\\') double quote (\\\")
 
 
 h3. <a>capAll()</a>
@@ -221,7 +221,7 @@ Lorum Ipsum Dolor
 
 h3. <a>capFirst()</a>
 
-Capitalises the first word in the object’s **String** representation Returns: **String**.
+Capitalises the first word in the object’s **String** representation. Returns: **String**.
 
 bc. ${"lorum ipsum dolor".capFirst()}
 Lorum ipsum dolor
@@ -245,7 +245,7 @@ The &lt;blink&gt;tag&lt;/blink&gt; is evil
 
 h3. <a>nl2br()</a>
 
-Replaces new-line characters with HTML **<br/>** tags. Returns: **String**.
+Replaces new-line characters with HTML **br** tags. Returns: **String**.
 
 bc. ${"one\ntwo".nl2br()}
 one<br/>two
@@ -329,9 +329,8 @@ bc. ${"<>\"&".escape().raw()}
 
 
 h3. <a>last()</a>
- Returns: **Object**.
 
-Returns the last item in the collection.
+Returns the last item in the list. Returns: **Object**.
 
 bc. ${['red', 'green', 'blue'].last()}
 blue
@@ -363,7 +362,7 @@ the-play-framework-s-manual
 
 h3. <a>urlEncode()</a>
 
-URL-encodes the string, for use in URL query strings. Returns: **String**.
+Escapes reserved URL query string characters. Returns: **String**.
 
 bc. ${"!@#\$%^&()".urlEncode()}
 %21%40%23%24%25%5E%26%28%29
