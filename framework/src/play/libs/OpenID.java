@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.w3c.dom.Document;
@@ -71,7 +72,7 @@ public class OpenID {
             String delegate = null;
 
             // Discover
-            HttpResponse response = WS.url(claimedId).get();
+            HttpResponse response = WS.url(claimedId).get().get();
 
             // Try HTML (I know it's bad)
             String html = response.getString();
@@ -85,7 +86,7 @@ public class OpenID {
                 if (response.getContentType().contains("application/xrds+xml")) {
                     xrds = response.getXml();
                 } else if (response.getHeader("X-XRDS-Location") != null) {
-                    xrds = WS.url(response.getHeader("X-XRDS-Location")).get().getXml();
+                    xrds = WS.url(response.getHeader("X-XRDS-Location")).get().get().getXml();
                 } else {
                     return false;
                 }
@@ -242,7 +243,7 @@ public class OpenID {
                 }
 
                 String fields = Request.current().querystring.replace("openid.mode=id_res", "openid.mode=check_authentication");
-                WS.HttpResponse response = WS.url(server).mimeType("application/x-www-form-urlencoded").body(fields).post();
+                WS.HttpResponse response = WS.url(server).mimeType("application/x-www-form-urlencoded").body(fields).post().get();
                 if (response.getStatus() == 200 && response.getString().contains("is_valid:true")) {
                     UserInfo userInfo = new UserInfo();
                     userInfo.id = id;
@@ -267,8 +268,8 @@ public class OpenID {
 
             }
 
-        } catch (PlayException e) {
-            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         return null;
@@ -289,7 +290,11 @@ public class OpenID {
 
     public static String discoverServer(String openid) {
         if (openid.startsWith("http")) {
-            openid = WS.url(openid).get().getString();
+            try {
+                openid = WS.url(openid).get().get().getString();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
         Matcher openid2Provider = Pattern.compile("<link[^>]+openid2[.]provider[^>]+>", Pattern.CASE_INSENSITIVE).matcher(openid);
         Matcher openidServer = Pattern.compile("<link[^>]+openid[.]server[^>]+>", Pattern.CASE_INSENSITIVE).matcher(openid);

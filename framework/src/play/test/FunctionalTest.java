@@ -13,11 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.apache.commons.httpclient.methods.multipart.FilePart;
-import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
-import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
-import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -27,6 +22,11 @@ import play.mvc.ActionInvoker;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
+
+import com.ning.http.multipart.FilePart;
+import com.ning.http.multipart.MultipartRequestEntity;
+import com.ning.http.multipart.Part;
+import com.ning.http.multipart.StringPart;
 
 /**
  * Application tests support
@@ -165,7 +165,7 @@ public abstract class FunctionalTest extends BaseTest {
             parts.add(filePart);
         }
 
-        MultipartRequestEntity requestEntity = new MultipartRequestEntity(parts.toArray(new Part[]{}), new HttpMethodParams());
+        MultipartRequestEntity requestEntity = new MultipartRequestEntity(parts.toArray(new Part[]{}), null); 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             requestEntity.writeRequest(baos);

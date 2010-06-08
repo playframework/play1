@@ -1,16 +1,17 @@
 import com.google.gson.JsonObject;
-import org.apache.commons.httpclient.Header;
 import org.junit.Before;
 import org.junit.Test;
 import play.libs.WS;
 import play.libs.WS.FileParam;
 import play.libs.WS.HttpResponse;
+import play.mvc.Http.Header;
 import play.test.UnitTest;
 
 import java.io.File;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 
 public class RestTest extends UnitTest {
@@ -25,7 +26,7 @@ public class RestTest extends UnitTest {
     }
 
     @Test
-    public void testGet() {
+    public void testGet() throws Exception {
         assertEquals("对!", WS.url("http://localhost:9003/ressource/%s", "ééééééçççççç汉语漢語").get().getString());
     }
 
@@ -42,7 +43,7 @@ public class RestTest extends UnitTest {
     }
 
     @Test
-    public void testHead() {
+    public void testHead() throws Exception {
         HttpResponse headResponse = WS.url("http://localhost:9003/ressource/%s", "ééééééçççççç汉语漢語").head();
         Header[] headResponseHeaders = headResponse.getHeaders();
         assertTrue(headResponse.getStatus() == 200);
@@ -51,8 +52,8 @@ public class RestTest extends UnitTest {
         assertTrue(getResponse.getStatus() == 200);
         Header[] getResponseHeaders = getResponse.getHeaders();
         for (int i = 0; i < getResponseHeaders.length; i++) {
-            if (!"Set-Cookie".equals(getResponseHeaders[i].getName())) {
-                assertEquals(getResponseHeaders[i].getValue(), headResponseHeaders[i].getValue());
+            if (!"Set-Cookie".equals(getResponseHeaders[i].name)) {
+                assertEquals(getResponseHeaders[i].value(), headResponseHeaders[i].value());
             }
         }
     }
