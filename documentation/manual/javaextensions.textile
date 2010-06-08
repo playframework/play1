@@ -5,364 +5,68 @@ Java extensions add convenience methods to objects for use in view templates, ma
 The code examples show an example template expression, with its result on the next line.
 
 
-h2. <a>add(value)</a>
 
-Applies to: **String[]**. Returns: **String[]**.
+h2. <a>Collection extensions</a>
 
-Adds value to the end of the array.
 
-bc. ${(["red", "green", "blue"] as String[]).add('pink').join(' ')}
-red green blue pink
+h3. <a>join(separator)</a>
 
-
-h2. <a>addSlashes()</a>
-
-Applies to: **String**. Returns: **String**.
-
-Backslash-escapes single and double quotes.
-
-bc. ${"single quote (') double quote (\")".addSlashes().raw()}
-single quote (\') double quote (\")
-
-
-h2. <a>asAttr()</a>
-
-Applies to: **Map**. Returns: **play.templates.Template.ExecutableTemplate.RawData**.
-
-Formats the map’s keys and values as HTML attributes.
-
-bc. ${[id:'42', color:'red'].asAttr()}
-id="42" color="red" 
-
-
-h2. <a>asAttr(condition)</a>
-
-Applies to: **Map**. Returns: **play.templates.Template.ExecutableTemplate.RawData**.
-
-Formats the map’s keys and values as HTML attributes, if the condition is true.
-
-bc. ${[id:'42', color:'red'].asAttr(true)}
-id="42" color="red" 
-
-
-h2. <a>asdate(format)</a>
-
-Applies to: **Long** - the number of milliseconds since January 1, 1970, 00:00:00 GMT. Returns: **String** - a formatted date.
-
-Formats a time stamp as a date.
-
-bc. ${1275910970000.asdate('dd MMMM yyyy hh:mm:ss')}
-07 June 2010 01:42:50
-
-
-h2. <a>asdate(format, language)</a>
-
-Applies to: **Long** - the number of milliseconds since January 1, 1970, 00:00:00 GMT. Returns: **String** - a formatted date.
-
-Formats a time stamp as a date, in the given language.
-
-bc. ${1275910970000.asdate('dd MMMM yyyy hh:mm:ss', 'fr')}
-07 juin 2010 01:42:50
-
-
-h2. <a>asXml()</a>
-
-Applies to: **String** - an XML document. Returns: **groovy.util.slurpersupport.GPathResult**.
-
-Parses the given XML string.
-
-
-h2. <a>camelCase()</a>
-
-Applies to: **String**. Returns: **String**.
-
-Formats the string in camel case, as if for a Java class name.
-
-bc. ${"lorum ipsum dolor".camelCase()}
-LorumIpsumDolor
-
-
-h2. <a>capAll()</a>
-
-Applies to: **Object**. Returns: **String**.
-
-Capitalises every word in the object’s **String** representation.
-
-bc. ${"lorum ipsum dolor".capAll()}
-Lorum Ipsum Dolor
-
-
-h2. <a>capFirst()</a>
-
-Applies to: **Object**. Returns: **String**.
-
-Capitalises the first word in the object’s **String** representation
-
-bc. ${"lorum ipsum dolor".capFirst()}
-Lorum ipsum dolor
-
-
-h2. <a>capitalizeWords()</a>
-
-Applies to: **String**. Returns: **String**.
-
-Capitalises every word in the string.
-
-bc. ${"lorum ipsum dolor".capitalizeWords()}
-Lorum Ipsum Dolor
-
-
-h2. <a>contains(string)</a>
-
-Applies to: **String[]**. Returns: **boolean**.
-
-Returns true if the array contains the given string.
-
-bc. ${(['red', 'green', 'blue'] as String[]).contains('green')}
-true
-
-
-h2. <a>cut(substring)</a>
-
-Applies to: **Object**. Returns: **String**.
-
-Removes occurrences of the given sub-string.
-
-bc. ${"lorum ipsum dolor".cut('um')}
-lor ips dolor
-
-
-h2. <a>divisibleBy(divisor)</a>
-
-Applies to: **Number**. Returns: **boolean**.
-
-Returns true if the number is divisible by the given number - the divisor.
-
-bc. ${42.divisibleBy(7)}
-true
-
-
-h2. <a>escape()</a>
-
-Applies to: **Object**. Returns: **String**.
-
-Escapes reserved HTML characters in the object’s **String** representation.
-
-bc. ${"The <blink>tag</blink> is evil".escape().raw()}
-The &lt;blink&gt;tag&lt;/blink&gt; is evil
-
-
-h2. <a>escapeHtml()</a>
-
-Applies to: **String**. Returns: **String**.
-
-Escapes reserved HTML characters.
-
-bc. ${"The <blink>tag</blink> is evil".escape().raw()}
-The &lt;blink&gt;tag&lt;/blink&gt; is evil
-
-
-h2. <a>escapeJavaScript()</a>
-
-Applies to: **String**. Returns: **String**.
-
-Escapes reserved JavaScript characters.
-
-bc. ${"single quote (') double quote (\")".escapeJavaScript().raw()}
-single quote (\') double quote (\")
-
-
-h2. <a>escapeXml()</a>
-
-Applies to: **String**. Returns: **String**.
-
-Escapes reserved XML characters.
-
-bc. ${"<>\"&".escape().raw()}
-&lt;&gt;&quot;&amp;
-
-
-h2. <a>format(format)</a>
-
-Applies to: **java.util.Date**. Returns: **String**.
-
-Formats the date using the given date format pattern.
-
-bc. ${new Date(1275910970000).format('dd MMMM yyyy hh:mm:ss', 'fr')}
-07 June 2010 01:42:50
-
-
-h2. <a>format(format, language)</a>
-
-Applies to: **java.util.Date**. Returns: **String**.
-
-Formats the date using the given date format pattern, in the given language.
-
-bc. ${new Date(1275910970000).format('dd MMMM yyyy hh:mm:ss', 'fr')}
-07 juin 2010 01:42:50
-
-
-h2. <a>format(format)</a>
-
-Applies to: **Number**. Returns: **String**.
-
-Formats the number using the given number format pattern.
-
-bc. ${42.format('000.00')}
-042.00
-
-
-h2. <a>formatCurrency(currencyCode)</a>
-
-Applies to: **Number**. Returns: **String**.
-
-Formats the number as the given currency code, e.g. **EUR**.
-
-bc. ${42.formatCurrency('EUR').raw()}
-&euro; 42.00
-
-
-h2. <a>formatSize()</a>
-
-Applies to: **Long** - a number of bytes.
-
-Formats a number of bytes as a file size, with units, e.g. *123 KB*.
-
-bc. ${726016L.formatSize()}
-709KB
-
-
-h2. <a>join(separator)</a>
-
-Applies to: **java.util.Collection**. Returns: **String**.
-
-Concatenates the collection’s entries, with the given separator between each entry.
+Concatenates the collection’s entries, with the given separator between each entry. Returns: **String**.
 
 bc. ${['red', 'green', 'blue'].join('/')}
 red/green/blue
 
 
-h2. <a>last()</a>
+h3. <a>pluralize()</a>
 
-Applies to: **java.util.Collection**. Returns: **Object**.
+Returns an ‘s’ when the collection size, or number, is not 1. Returns: **String**.
 
-Returns the last item in the collection.
-
-bc. ${['red', 'green', 'blue'].last()}
-blue
+bc. colour${['red', 'green', 'blue'].pluralize()} 
+colours
 
 
-h2. <a>nl2br()</a>
+h3. <a>pluralize(plural)</a>
 
-Applies to: **String**. Returns: **String**.
+Returns the given plural when the collection size, or number, is not 1. Returns: **String**.
 
-Replaces new-line characters with HTML **<br/>** tags.
-
-bc. ${"one\ntwo".nl2br()}
-one<br/>two
+bc. box${['red', 'green', 'blue'].pluralize('es')}
+boxes
 
 
-h2. <a>noAccents()</a>
+h3. <a>pluralize(singular, plural)</a>
 
-Applies to: **String**. Returns: **String**.
+Returns the given plural form when the collection size, or number, is not 1; returns the given singular form when it is 1. Returns: **String**.
 
-Removes accents from the letters in the string.
-
-bc. ${"Stéphane Épardaud".noAccents()}
-Stephane Epardaud
-
-
-h2. <a>pad(length)</a>
-
-Applies to: **String**. Returns: **String**.
-
-Pads the string with **&nbsp;** up to the given length.
-
-bc. ${"x".pad(4).raw()}
-x&nbsp;&nbsp;&nbsp;
-
-
-h2. <a>page(pageSize)</a>
-
-Applies to: **Number** - an index in a collection. Returns: **Integer**.
-
-Returns the index’s page number, for the given page size.
-
-bc. ${42.page(10)}
-5
-
-
-h2. <a>pluralize()</a>
-
-Applies to: *java.util.Collection*, **Number**. Returns: **String**.
-
-Returns an ‘s’ when the collection size, or number, is not 1.
-
-bc. colour${['red', 'green', 'blue'].pluralize()} - colour${3.pluralize()} 
-colours - colours
-
-
-h2. <a>pluralize(plural)</a>
-
-Applies to: *java.util.Collection*, **Number**. Returns: **String**.
-
-Returns the given plural when the collection size, or number, is not 1.
-
-bc. box${['red', 'green', 'blue'].pluralize('es')} - box${3.pluralize('es')}
-boxes - boxes
-
-
-h2. <a>pluralize(singular, plural)</a>
-
-Applies to: *java.util.Collection*, **Number**. Returns: **String**.
-
-Returns the given plural form when the collection size, or number, is not 1; returns the given singular form when it is 1.
-
-bc. journ${['red'].pluralize('al', 'aux')} - journ${1.pluralize('al', 'aux')}
-journal - journal
+bc. journ${['red'].pluralize('al', 'aux')}
+journal
  
-journ${['red', 'green', 'blue'].pluralize('al', 'aux')} - journ${3.pluralize('al', 'aux')}
-journaux - journaux
+journ${['red', 'green', 'blue'].pluralize('al', 'aux')}
+journaux
 
 
-h2. <a>raw()</a>
 
-Applies to: **Object**. Returns: **play.templates.Template.ExecutableTemplate.RawData**.
-
-Returns the object without template escaping.
-
-bc. ${'<'}
-&lt;
- 
-${'<'.raw()}
-<
+h2. <a>Date extensions</a>
 
 
-h2. <a>raw(condition)</a>
+h3. <a>format(format)</a>
 
-Applies to: **Object**. Returns: **play.templates.Template.ExecutableTemplate.RawData**.
+Formats the date using the given date format pattern. Returns: **String**.
 
-Returns the object without template escaping, if the condition is true.
-
-bc. ${'<'.raw(true)}
-<
+bc. ${new Date(1275910970000).format('dd MMMM yyyy hh:mm:ss', 'fr')}
+07 June 2010 01:42:50
 
 
-h2. <a>remove(string)</a>
+h3. <a>format(format, language)</a>
 
-Applies to: **String[]**. Returns: **String[]**.
+Formats the date using the given date format pattern, in the given language. Returns: **String**.
 
-Returns the array, with the given string removed.
-
-bc. ${(['red', 'green', 'blue'] as String[]).remove('green').join(' ')}
-red blue
+bc. ${new Date(1275910970000).format('dd MMMM yyyy hh:mm:ss', 'fr')}
+07 juin 2010 01:42:50
 
 
-h2. <a>since()</a>
+h3. <a>since()</a>
 
-Applies to: **java.util.Date**. Returns: **String**.
-
-Formats the date as a relative time, compared to now, e.g. **3 minutes ago**.
+Formats the date as a relative time, compared to now, e.g. **3 minutes ago**. Returns: **String**.
 
 bc. ${new Date(new Date().getTime() - 1000000).since()}
 16 minutes ago
@@ -370,11 +74,9 @@ bc. ${new Date(new Date().getTime() - 1000000).since()}
 You can customise the output using the following messages: **since.seconds**, **since.minutes**, **since.hours**, **since.days**, **since.months** and **since.years**,  
 
 
-h2. <a>since(condition)</a>
+h3. <a>since(condition)</a>
 
-Applies to: **java.util.Date**. Returns: **String**.
-
-Formats the date as a relative time, compared to now. If the condition is true, dates more than one month ago are formatted as a date.
+Formats the date as a relative time, compared to now. If the condition is true, dates more than one month ago are formatted as a date. Returns: **String**.
 
 You can customise the output using the same messages as for **since()**, as well as **since.format** for dates more than one month ago.  
 
@@ -385,34 +87,312 @@ ${new Date(1262350000000).since(true)}
 Jan 1, 2010
 
 
-h2. <a>slugify()</a>
 
-Applies to: **String**. Returns: **String**.
-
-Formats the string as a ‘slug’ for use in URLs, that avoids reserved URL path characters.
-
-bc. ${"The Play! framework’s manual".slugify()}
-the-play-framework-s-manual
+h2. <a>Long extensions</a>
 
 
-h2. <a>urlEncode()</a>
+h3. <a>asdate(format)</a>
 
-Applies to: **String**. Returns: **String**.
+Formats a time stamp as a date. Returns: **String** - a formatted date.
 
-URL-encodes the string, for use in URL query strings.
-
-bc. ${"!@#\$%^&()".urlEncode()}
-%21%40%23%24%25%5E%26%28%29
+bc. ${1275910970000.asdate('dd MMMM yyyy hh:mm:ss')}
+07 June 2010 01:42:50
 
 
-h2. <a>yesNo('yes', 'no')</a>
+h3. <a>asdate(format, language)</a>
 
-Applies to: **Object**. Returns: **String**.
+Formats a time stamp as a date, in the given language. Returns: **String** - a formatted date.
 
-Returns the first parameter (‘yes’) if the object evaluates to true, or the second parameter (‘no’) otherwise.
+bc. ${1275910970000.asdate('dd MMMM yyyy hh:mm:ss', 'fr')}
+07 juin 2010 01:42:50
+
+
+h3. <a>formatSize()</a>
+
+Formats a number of bytes as a file size, with units.
+
+bc. ${726016L.formatSize()}
+709KB
+
+
+
+
+h2. <a>Map extensions</a>
+
+
+h3. <a>asAttr()</a>
+
+Formats the map’s keys and values as HTML attributes. Returns: **play.templates.Template.ExecutableTemplate.RawData**.
+
+bc. ${[id:'42', color:'red'].asAttr()}
+id="42" color="red" 
+
+
+h3. <a>asAttr(condition)</a>
+
+Formats the map’s keys and values as HTML attributes, if the condition is true. Returns: **play.templates.Template.ExecutableTemplate.RawData**.
+
+bc. ${[id:'42', color:'red'].asAttr(true)}
+id="42" color="red" 
+
+
+
+h2. <a>Number extensions</a>
+
+
+h3. <a>divisibleBy(divisor)</a>
+
+Returns true if the number is divisible by the given number - the divisor. Returns: **boolean**.
+
+bc. ${42.divisibleBy(7)}
+true
+
+
+h3. <a>format(format)</a>
+
+Formats the number using the given number format pattern. Returns: **String**.
+
+bc. ${42.format('000.00')}
+042.00
+
+
+h3. <a>formatCurrency(currencyCode)</a>
+
+Formats the number as the given currency code, e.g. **EUR**. Returns: **String**.
+
+bc. ${42.formatCurrency('EUR').raw()}
+&euro; 42.00
+
+
+h3. <a>page(pageSize)</a>
+
+Returns the index’s page number, for the given page size. Returns: **Integer**.
+
+bc. ${42.page(10)}
+5
+
+
+h3. <a>pluralize()</a>
+
+Returns an ‘s’ when the collection size, or number, is not 1. Returns: **String**.
+
+bc. colour${['red', 'green', 'blue'].pluralize()} - colour${3.pluralize()} 
+colours - colours
+
+
+h3. <a>pluralize(plural)</a>
+
+Returns the given plural when the collection size, or number, is not 1. Returns: **String**.
+
+bc. box${3.pluralize('es')}
+boxes
+
+
+h3. <a>pluralize(singular, plural)</a>
+
+Returns the given plural form when the collection size, or number, is not 1; returns the given singular form when it is 1. Returns: **String**.
+
+bc. journ${1.pluralize('al', 'aux')}
+journal
+ 
+journ${3.pluralize('al', 'aux')}
+journaux
+
+
+
+h2. <a>Object extensions</a>
+
+
+h3. <a>addSlashes()</a>
+
+Backslash-escapes single and double quotes in the object’s **String** representation. Returns: **String**.
+
+bc. ${"single quote (') double quote (\")".addSlashes().raw()}
+single quote (\') double quote (\")
+
+
+h3. <a>capAll()</a>
+
+Capitalises every word in the object’s **String** representation. Returns: **String**.
+
+bc. ${"lorum ipsum dolor".capAll()}
+Lorum Ipsum Dolor
+
+
+h3. <a>capFirst()</a>
+
+Capitalises the first word in the object’s **String** representation Returns: **String**.
+
+bc. ${"lorum ipsum dolor".capFirst()}
+Lorum ipsum dolor
+
+
+h3. <a>cut(substring)</a>
+
+Removes occurrences of the given sub-string. Returns: **String**.
+
+bc. ${"lorum ipsum dolor".cut('um')}
+lor ips dolor
+
+
+h3. <a>escape()</a>
+
+Escapes reserved HTML characters in the object’s **String** representation. Returns: **String**.
+
+bc. ${"The <blink>tag</blink> is evil".escape().raw()}
+The &lt;blink&gt;tag&lt;/blink&gt; is evil
+
+
+h3. <a>nl2br()</a>
+
+Replaces new-line characters with HTML **<br/>** tags. Returns: **String**.
+
+bc. ${"one\ntwo".nl2br()}
+one<br/>two
+
+
+h3. <a>raw()</a>
+
+Returns the object without template escaping. Returns: **play.templates.Template.ExecutableTemplate.RawData**.
+
+bc. ${'<'}
+&lt;
+ 
+${'<'.raw()}
+<
+
+
+h3. <a>raw(condition)</a>
+
+Returns the object without template escaping, if the condition is true. Returns: **play.templates.Template.ExecutableTemplate.RawData**.
+
+bc. ${'<'.raw(true)}
+<
+
+
+h3. <a>yesNo('yes', 'no')</a>
+
+Returns the first parameter (‘yes’) if the object evaluates to true, or the second parameter (‘no’) otherwise. Returns: **String**.
 
 bc. ${"".yesno('yes', 'no')}
 no
  
 ${"not empty".yesno('yes', 'no')}
 yes
+
+
+h2. <a>String extensions</a>
+
+
+h3. <a>asXml()</a>
+
+Parses the given XML string. Returns: **groovy.util.slurpersupport.GPathResult**.
+
+h3. <a>camelCase()</a>
+
+Formats the string in camel case, as if for a Java class name. Returns: **String**.
+
+bc. ${"lorum ipsum dolor".camelCase()}
+LorumIpsumDolor
+
+
+h3. <a>capitalizeWords()</a>
+
+Capitalises every word in the string. Returns: **String**.
+
+bc. ${"lorum ipsum dolor".capitalizeWords()}
+Lorum Ipsum Dolor
+
+
+h3. <a>escapeHtml()</a>
+
+Escapes reserved HTML characters. Returns: **String**.
+
+bc. ${"The <blink>tag</blink> is evil".escape().raw()}
+The &lt;blink&gt;tag&lt;/blink&gt; is evil
+
+
+h3. <a>escapeJavaScript()</a>
+
+Escapes reserved JavaScript characters. Returns: **String**.
+
+bc. ${"single quote (') double quote (\")".escapeJavaScript().raw()}
+single quote (\') double quote (\")
+
+
+h3. <a>escapeXml()</a>
+
+Escapes reserved XML characters. Returns: **String**.
+
+bc. ${"<>\"&".escape().raw()}
+&lt;&gt;&quot;&amp;
+
+
+h3. <a>last()</a>
+ Returns: **Object**.
+
+Returns the last item in the collection.
+
+bc. ${['red', 'green', 'blue'].last()}
+blue
+
+
+h3. <a>noAccents()</a>
+
+Removes accents from the letters in the string. Returns: **String**.
+
+bc. ${"Stéphane Épardaud".noAccents()}
+Stephane Epardaud
+
+
+h3. <a>pad(length)</a>
+
+Pads the string with **&nbsp;** up to the given length. Returns: **String**.
+
+bc. ${"x".pad(4).raw()}
+x&nbsp;&nbsp;&nbsp;
+
+
+h3. <a>slugify()</a>
+
+Formats the string as a ‘slug’ for use in URLs, that avoids reserved URL path characters. Returns: **String**.
+
+bc. ${"The Play! framework’s manual".slugify()}
+the-play-framework-s-manual
+
+
+h3. <a>urlEncode()</a>
+
+URL-encodes the string, for use in URL query strings. Returns: **String**.
+
+bc. ${"!@#\$%^&()".urlEncode()}
+%21%40%23%24%25%5E%26%28%29
+
+
+h2. <a>String array extensions</a>
+
+
+h3. <a>add(value)</a>
+
+Adds value to the end of the array. Returns: **String[]**.
+
+bc. ${(["red", "green", "blue"] as String[]).add('pink').join(' ')}
+red green blue pink
+
+
+h3. <a>contains(string)</a>
+
+Returns true if the array contains the given string. Returns: **boolean**.
+
+bc. ${(['red', 'green', 'blue'] as String[]).contains('green')}
+true
+
+
+h3. <a>remove(string)</a>
+
+Returns the array, with the given string removed. Returns: **String[]**.
+
+bc. ${(['red', 'green', 'blue'] as String[]).remove('green').join(' ')}
+red blue
+
+
