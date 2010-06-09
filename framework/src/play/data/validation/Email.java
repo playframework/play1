@@ -14,6 +14,7 @@ import net.sf.oval.configuration.annotation.Constraint;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Constraint(checkWith = EmailCheck.class)
+
 public @interface Email {
 
     String message() default EmailCheck.mes;
