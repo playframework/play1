@@ -33,10 +33,10 @@ If you need to fully configure Log4j, create a **log4j.properties** file in the 
 The default Log4j configuration is the following:
 
 bc. log4j.rootLogger=ERROR, Console
-
+ 
 log4j.logger.play=INFO
-
-bc. # Console
+ 
+# Console
 log4j.appender.Console=org.apache.log4j.ConsoleAppender
 log4j.appender.Console.layout=org.apache.log4j.PatternLayout
 log4j.appender.Console.layout.ConversionPattern=%d{ABSOLUTE} %-5p ~ %m%n
