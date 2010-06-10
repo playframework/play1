@@ -140,10 +140,10 @@ public class Post extends Model {
     public User author;
     
     @OneToMany(mappedBy="post", cascade=CascadeType.ALL)
-    public List<Comment> comments = new ArrayList();
+    public List<Comment> comments;
     
     @ManyToMany(cascade=CascadeType.ALL)
-    public Set<Tag> tags = new HashSet();
+    public Set<Tag> tags;
         
 ...
 
