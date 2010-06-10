@@ -52,6 +52,11 @@ public class Http {
             this.values.add(value);
         }
 
+        public Header(String name, List<String> values) {
+            this.name = name;
+            this.values = values;
+        }
+
         /**
          * First value
          * @return The first value

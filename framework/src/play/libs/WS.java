@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Future;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,11 +29,13 @@ import com.google.gson.JsonParser;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
+import com.ning.http.client.FilePart;
 import com.ning.http.client.Headers;
 import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Response;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
-import com.ning.http.collection.Pair;
+import com.ning.http.client.Part;
+import com.ning.http.client.StringPart;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -276,7 +281,7 @@ public class WS extends PlayPlugin {
         /** Execute a POST request.*/
         public HttpResponse post() {
             try {
-                return postAsync().get();
+                return new HttpResponse(prepare(httpClient.preparePost(url)).execute().get());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -345,11 +350,7 @@ public class WS extends PlayPlugin {
         }
 
         private BoundRequestBuilder prepare(BoundRequestBuilder builder) {
-            if (this.parameters != null) {
-                for (String key: this.parameters.keySet()) {
-                    builder.addParameter(key, parameters.get(key).toString());
-                }
-            }
+            checkFileBody(builder);
             if (this.headers != null) {
                 for (String key: this.headers.keySet()) {
                     builder.addHeader(key, headers.get(key));
@@ -369,6 +370,70 @@ public class WS extends PlayPlugin {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        private void checkFileBody(BoundRequestBuilder builder) {
+            if (this.fileParams != null) {
+                //could be optimized, we know the size of this array.
+                for (int i = 0; i < this.fileParams.length; i++) {
+                    builder.addBodyPart(new FilePart(this.fileParams[i].paramName,
+                            this.fileParams[i].file,
+                            MimeTypes.getMimeType(this.fileParams[i].file.getName()),
+                            null));
+                }
+                if (this.parameters != null) {
+                    for (String key : this.parameters.keySet()) {
+                        Object value = this.parameters.get(key);
+                        if (value instanceof Collection<?> || value.getClass().isArray()) {
+                            Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
+                            for (Object v : values) {
+                                builder.addBodyPart(new StringPart(key, v.toString()));
+                            }
+                        } else {
+                            builder.addBodyPart(new StringPart(key, value.toString()));
+                        }
+                    }
+                }
+                return;
+            }
+            if (this.parameters != null && !this.parameters.isEmpty()) {
+                builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
+                builder.setBody(createQueryString());
+            }
+            if (this.body != null) {
+                if (this.parameters != null && !this.parameters.isEmpty()) {
+                    throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
+                }
+                builder.setBody(this.body);
+            }
+        }
+
+        private String createQueryString() {
+            StringBuilder sb = new StringBuilder();
+            for (String key : this.parameters.keySet()) {
+                if (sb.length() > 0) {
+                    sb.append("&");
+                }
+                Object value = this.parameters.get(key);
+
+                if (value != null) {
+                    if (value instanceof Collection<?> || value.getClass().isArray()) {
+                        Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
+                        boolean first = true;
+                        for (Object v : values) {
+                            if (!first) {
+                                sb.append("&");
+                            }
+                            first = false;
+                            sb.append(encode(key)).append("=").append(encode(v.toString()));
+                        }
+                    } else {
+                        sb.append(encode(key)).append("=").append(encode(this.parameters.get(key).toString()));
+                    }
+                }
+            }
+            Logger.info("===========> " + sb.toString());
+            return sb.toString();
         }
 
     }
@@ -429,10 +494,10 @@ public class WS extends PlayPlugin {
         public Header[] getHeaders() {
             Headers hdrs = response.getHeaders();
             List<Header> result = new ArrayList<Header>();
-            Iterator<Pair<String, String>> iter = hdrs.iterator();
+            Iterator<Entry<String, List<String>>> iter = hdrs.iterator();
             while (iter.hasNext()) {
-                Pair<String, String> header = iter.next();
-                result.add(new Header(header.getFirst(), header.getSecond()));
+                Entry<String, List<String>> header = iter.next();
+                result.add(new Header(header.getKey(), header.getValue()));
             }
             return (Header[]) result.toArray();
         }
