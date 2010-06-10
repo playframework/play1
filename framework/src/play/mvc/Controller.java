@@ -152,7 +152,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * @param args Args for String.format
      */
     protected static void renderText(CharSequence pattern, Object... args) {
-        throw new RenderText(String.format(pattern.toString(), args));
+        throw new RenderText(pattern == null ? "" : String.format(pattern.toString(), args));
     }
 
     /**

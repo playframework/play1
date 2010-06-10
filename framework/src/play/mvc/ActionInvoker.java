@@ -212,7 +212,7 @@ public class ActionInvoker {
                                 for (Class exception : exceptions) {
                                     if (exception.isInstance(args[0])) {
                                         mCatch.setAccessible(true);
-                                        invokeControllerMethod(mCatch, false);
+                                        Java.invokeStatic(mCatch, args);
                                         break;
                                     }
                                 }
