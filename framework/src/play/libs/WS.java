@@ -33,8 +33,8 @@ import com.ning.http.client.FilePart;
 import com.ning.http.client.Headers;
 import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Response;
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.StringPart;
+import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -493,7 +493,7 @@ public class WS extends PlayPlugin {
             return response.getHeader(key);
         }
 
-        public Header[] getHeaders() {
+        public List<Header> getHeaders() {
             Headers hdrs = response.getHeaders();
             List<Header> result = new ArrayList<Header>();
             Iterator<Entry<String, List<String>>> iter = hdrs.iterator();
@@ -501,7 +501,7 @@ public class WS extends PlayPlugin {
                 Entry<String, List<String>> header = iter.next();
                 result.add(new Header(header.getKey(), header.getValue()));
             }
-            return (Header[]) result.toArray();
+            return result;
         }
 
         /**
