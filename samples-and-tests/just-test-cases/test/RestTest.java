@@ -31,6 +31,11 @@ public class RestTest extends UnitTest {
     }
 
     @Test
+    public void testASCIIGet() throws Exception {
+        assertEquals("toto", WS.url("http://localhost:9003/ressource/%s", "foobar").get().getString());
+    }
+
+    @Test
     public void testPost() throws Exception {
         JsonObject jsonResponse = new JsonObject();
         jsonResponse.addProperty("id", 101);

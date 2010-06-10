@@ -1,17 +1,25 @@
 package controllers;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
+import play.Logger;
 import play.mvc.Controller;
 
 public class Rest extends Controller {
 
+	private static Map<String, String> RESPONSEMAP = new HashMap<String, String>();
+	static {
+		RESPONSEMAP.put("ééééééçççççç汉语漢語", "对!");
+		RESPONSEMAP.put("foobar", "toto");
+	}
+
 	public static void get(String id) {
-		String expectedId = "ééééééçççççç汉语漢語";
-		if (expectedId.equals(id)){
-			renderText("对!");
+		if (RESPONSEMAP.containsKey(id)){
+			renderText(RESPONSEMAP.get(id));
 		} else{
-			error("expected id : "+expectedId+" and is "+id);
+			error("expected id are: " + RESPONSEMAP.keySet());
 		}
 	}
 	//Create a new resource

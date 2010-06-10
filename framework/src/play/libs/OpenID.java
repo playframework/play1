@@ -72,7 +72,7 @@ public class OpenID {
             String delegate = null;
 
             // Discover
-            HttpResponse response = WS.url(claimedId).get().get();
+            HttpResponse response = WS.url(claimedId).get();
 
             // Try HTML (I know it's bad)
             String html = response.getString();
@@ -86,7 +86,7 @@ public class OpenID {
                 if (response.getContentType().contains("application/xrds+xml")) {
                     xrds = response.getXml();
                 } else if (response.getHeader("X-XRDS-Location") != null) {
-                    xrds = WS.url(response.getHeader("X-XRDS-Location")).get().get().getXml();
+                    xrds = WS.url(response.getHeader("X-XRDS-Location")).get().getXml();
                 } else {
                     return false;
                 }
@@ -243,7 +243,7 @@ public class OpenID {
                 }
 
                 String fields = Request.current().querystring.replace("openid.mode=id_res", "openid.mode=check_authentication");
-                WS.HttpResponse response = WS.url(server).mimeType("application/x-www-form-urlencoded").body(fields).post().get();
+                WS.HttpResponse response = WS.url(server).mimeType("application/x-www-form-urlencoded").body(fields).post();
                 if (response.getStatus() == 200 && response.getString().contains("is_valid:true")) {
                     UserInfo userInfo = new UserInfo();
                     userInfo.id = id;
@@ -291,7 +291,7 @@ public class OpenID {
     public static String discoverServer(String openid) {
         if (openid.startsWith("http")) {
             try {
-                openid = WS.url(openid).get().get().getString();
+                openid = WS.url(openid).get().getString();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

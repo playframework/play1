@@ -1,7 +1,6 @@
 package play.libs;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -9,10 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -264,10 +260,10 @@ public class WS extends PlayPlugin {
 
         /** Execute a GET request synchronously. */
         public HttpResponse get() {
-            Logger.info("GET with " + url);
             try {
-                return execute(httpClient.prepareGet(url)).get();
+                return new HttpResponse(prepare(httpClient.prepareGet(url)).execute().get());
             } catch (Exception e) {
+                Logger.error(e.toString());
                 throw new RuntimeException(e);
             }
         }
@@ -348,19 +344,23 @@ public class WS extends PlayPlugin {
             throw new NotImplementedException();
         }
 
+        private BoundRequestBuilder prepare(BoundRequestBuilder builder) {
+            if (this.parameters != null) {
+                for (String key: this.parameters.keySet()) {
+                    builder.addParameter(key, parameters.get(key).toString());
+                }
+            }
+            if (this.headers != null) {
+                for (String key: this.headers.keySet()) {
+                    builder.addHeader(key, headers.get(key));
+                }
+            }
+            return builder;
+        }
+
         private Future<HttpResponse> execute(BoundRequestBuilder builder) {
             try {
-                if (this.parameters != null) {
-                    for (String key: this.parameters.keySet()) {
-                        builder.addParameter(key, parameters.get(key).toString());
-                    }
-                }
-                if (this.headers != null) {
-                    for (String key: this.headers.keySet()) {
-                        builder.addHeader(key, headers.get(key));
-                    }
-                }
-                return builder.execute(new AsyncCompletionHandler<HttpResponse>() {
+                return prepare(builder).execute(new AsyncCompletionHandler<HttpResponse>() {
                     @Override
                     public HttpResponse onCompleted(Response response) throws Exception {
                         return new HttpResponse(response);
