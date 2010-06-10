@@ -34,7 +34,6 @@ import com.ning.http.client.Headers;
 import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Response;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
-import com.ning.http.client.Part;
 import com.ning.http.client.StringPart;
 
 /**
@@ -80,8 +79,8 @@ public class WS extends PlayPlugin {
                 Logger.error("Cannot parse the proxy port property '%s'. Check property http.proxyPort either in System configuration or in Play config file.", proxyPort);
                 throw new IllegalStateException("WS proxy is misconfigured -- check the logs for details");
             }
-            // TODO: Add username/password
-            ProxyServer proxy = new ProxyServer(proxyHost, proxyPortInt);
+            // TODO: username/password is not used in http async, fix it
+            ProxyServer proxy = new ProxyServer(proxyHost, proxyPortInt, proxyUser, proxyPassword);
             AsyncHttpClientConfig cf = new AsyncHttpClientConfig.Builder().setProxyServer(proxy).build();
             httpClient = new AsyncHttpClient(cf);
         } else {
@@ -294,7 +293,7 @@ public class WS extends PlayPlugin {
         /** Execute a PUT request.*/
         public HttpResponse put() {
             try {
-                return putAsync().get();
+                return new HttpResponse(prepare(httpClient.preparePut(url)).execute().get());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -307,7 +306,7 @@ public class WS extends PlayPlugin {
         /** Execute a DELETE request.*/
         public HttpResponse delete() {
             try {
-                return deleteAsync().get();
+                return new HttpResponse(prepare(httpClient.prepareDelete(url)).execute().get());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -329,8 +328,11 @@ public class WS extends PlayPlugin {
 
         /** Execute a HEAD request.*/
         public HttpResponse head() {
-            // TODO
-            throw new NotImplementedException();
+            try {
+                return new HttpResponse(prepare(httpClient.prepareHead(url)).execute().get());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         public void head(AsyncCompletionHandler<HttpResponse> handler) {
