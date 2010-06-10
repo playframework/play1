@@ -2,7 +2,7 @@ h1. Built-in template tags
 
 These are the standard tags built in the template engine.
 
-p(note). If you want to search the standard Play Java extensions, you should look at the "JavaDoc":/@api/play/templates/JavaExtensions.html
+p(note). There is a separate "Java extensions":javaextensions manual page.
 
 
 h2. <a>a</a>
