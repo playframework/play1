@@ -45,7 +45,7 @@ public class ActionInvoker {
     public static void invoke(Http.Request request, Http.Response response) {
         Monitor monitor = null;
         try {
-            if(!Play.started) {
+            if (!Play.started) {
                 return;
             }
 
@@ -58,7 +58,7 @@ public class ActionInvoker {
             Scope.Flash.current.set(Scope.Flash.restore());
 
             // 1. Route and resolve format if not already done
-            if(request.action == null) {
+            if (request.action == null) {
                 for (PlayPlugin plugin : Play.plugins) {
                     plugin.routeRequest(request);
                 }
@@ -109,7 +109,7 @@ public class ActionInvoker {
             }
 
             // Monitoring
-            monitor = MonitorFactory.start(request.action+"()");
+            monitor = MonitorFactory.start(request.action + "()");
 
             // 5. Invoke the action
 
@@ -142,7 +142,7 @@ public class ActionInvoker {
                     }
                     if (!skip) {
                         before.setAccessible(true);
-                        invokeControllerMethod(before, true);
+                        inferResult(invokeControllerMethod(before));
                     }
                 }
 
@@ -152,51 +152,27 @@ public class ActionInvoker {
                 String cacheKey = "actioncache:" + request.action + ":" + request.querystring;
 
                 // Check the cache (only for GET or HEAD)
-                if ((request.method.equals("GET") || request.method.equals("HEAD")) &&
-                    actionMethod.isAnnotationPresent(CacheFor.class))
-                {
-                    actionResult = (Result)play.cache.Cache.get(cacheKey);
+                if ((request.method.equals("GET") || request.method.equals("HEAD")) && actionMethod.isAnnotationPresent(CacheFor.class)) {
+                    actionResult = (Result) play.cache.Cache.get(cacheKey);
                 }
 
                 if (actionResult == null) {
                     ControllerInstrumentation.initActionCall();
                     try {
-                        Object o = invokeControllerMethod(actionMethod, true);
-
-                        // Return type inference
-                        if(o != null) {
-
-                            if(o instanceof InputStream) {
-                                Controller.renderBinary((InputStream)o);
-                            }
-                            if(o instanceof File) {
-                                Controller.renderBinary((File)o);
-                            }
-                            if(o instanceof Map) {
-                                Controller.renderTemplate((Map<String,Object>)o);
-                            }
-                            if(o instanceof Object[]) {
-                                Controller.render(o);
-                            }
-
-                            Controller.renderHtml(o);
-                        }
-
+                        inferResult(invokeControllerMethod(actionMethod));
                     } catch (InvocationTargetException ex) {
                         // It's a Result ? (expected)
                         if (ex.getTargetException() instanceof Result) {
                             actionResult = (Result) ex.getTargetException();
 
                             // Cache it if needed
-                            if ((request.method.equals("GET") || request.method.equals("HEAD")) &&
-                                    actionMethod.isAnnotationPresent(CacheFor.class))
-                            {
+                            if ((request.method.equals("GET") || request.method.equals("HEAD")) && actionMethod.isAnnotationPresent(CacheFor.class)) {
                                 play.cache.Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
                             }
 
                         } else {
                             // @Catch
-                            Object[] args = new Object[] { ex.getTargetException() };
+                            Object[] args = new Object[]{ex.getTargetException()};
                             List<Method> catches = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Catch.class);
                             Collections.sort(catches, new Comparator<Method>() {
 
@@ -209,10 +185,13 @@ public class ActionInvoker {
                             ControllerInstrumentation.stopActionCall();
                             for (Method mCatch : catches) {
                                 Class[] exceptions = mCatch.getAnnotation(Catch.class).value();
+                                if (exceptions.length == 0) {
+                                    exceptions = new Class[]{Exception.class};
+                                }
                                 for (Class exception : exceptions) {
                                     if (exception.isInstance(args[0])) {
                                         mCatch.setAccessible(true);
-                                        Java.invokeStatic(mCatch, args);
+                                        inferResult(invokeControllerMethod(mCatch, args));
                                         break;
                                     }
                                 }
@@ -248,20 +227,20 @@ public class ActionInvoker {
                     }
                     if (!skip) {
                         after.setAccessible(true);
-                        invokeControllerMethod(after, true);
+                        inferResult(invokeControllerMethod(after));
                     }
                 }
-                
+
                 monitor.stop();
                 monitor = null;
-                
+
                 // OK, re-throw the original action result
-                if(actionResult != null) {
+                if (actionResult != null) {
                     throw actionResult;
                 }
-                
+
                 throw new NoResult();
-                
+
             } catch (IllegalAccessException ex) {
                 throw ex;
             } catch (IllegalArgumentException ex) {
@@ -299,9 +278,9 @@ public class ActionInvoker {
             for (PlayPlugin plugin : Play.plugins) {
                 plugin.afterActionInvocation();
             }
-            
+
             // @Finally
-            if(Controller.getControllerClass() != null) {
+            if (Controller.getControllerClass() != null) {
                 try {
                     List<Method> allFinally = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Finally.class);
                     Collections.sort(allFinally, new Comparator<Method>() {
@@ -327,16 +306,16 @@ public class ActionInvoker {
                         }
                         if (!skip) {
                             aFinally.setAccessible(true);
-                            invokeControllerMethod(aFinally, false);
+                            invokeControllerMethod(aFinally, new Object[0]);
                         }
                     }
-                } catch(InvocationTargetException ex) {
+                } catch (InvocationTargetException ex) {
                     StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex.getTargetException());
                     if (element != null) {
                         throw new JavaExecutionException(Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber(), ex.getTargetException());
                     }
                     throw new JavaExecutionException(Http.Request.current().action, ex);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     throw new UnexpectedException("Exception while doing @Finally", e);
                 }
             }
@@ -346,17 +325,42 @@ public class ActionInvoker {
         } catch (Exception e) {
             throw new UnexpectedException(e);
         } finally {
-            if(monitor != null) {
+            if (monitor != null) {
                 monitor.stop();
             }
         }
 
     }
 
-    public static Object invokeControllerMethod(Method method, boolean withBind) throws Exception {
-        if(Modifier.isStatic(method.getModifiers()) && !method.getDeclaringClass().getName().matches("^controllers\\..*\\$class$")) {
+    public static void inferResult(Object o) {
+        // Return type inference
+        if (o != null) {
+
+            if (o instanceof InputStream) {
+                Controller.renderBinary((InputStream) o);
+            }
+            if (o instanceof File) {
+                Controller.renderBinary((File) o);
+            }
+            if (o instanceof Map) {
+                Controller.renderTemplate((Map<String, Object>) o);
+            }
+            if (o instanceof Object[]) {
+                Controller.render(o);
+            }
+
+            Controller.renderHtml(o);
+        }
+    }
+
+    public static Object invokeControllerMethod(Method method) throws Exception {
+        return invokeControllerMethod(method, null);
+    }
+
+    public static Object invokeControllerMethod(Method method, Object[] forceArgs) throws Exception {
+        if (Modifier.isStatic(method.getModifiers()) && !method.getDeclaringClass().getName().matches("^controllers\\..*\\$class$")) {
             return method.invoke(null, getActionMethodArgs(method, null));
-        } else if(Modifier.isStatic(method.getModifiers())) {
+        } else if (Modifier.isStatic(method.getModifiers())) {
             Object[] args = getActionMethodArgs(method, null);
             args[0] = Http.Request.current().controllerClass.getDeclaredField("MODULE$").get(null);
             return method.invoke(null, args);
@@ -364,12 +368,12 @@ public class ActionInvoker {
             Object instance = null;
             try {
                 instance = method.getDeclaringClass().getDeclaredField("MODULE$").get(null);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 throw new ActionNotFoundException(Http.Request.current().action, e);
             }
-            return method.invoke(instance, getActionMethodArgs(method, instance));
+            return method.invoke(instance, forceArgs == null ? getActionMethodArgs(method, instance) : forceArgs);
         }
-        
+
     }
 
     public static Object[] getActionMethod(String fullAction) {
@@ -382,13 +386,13 @@ public class ActionInvoker {
             String controller = fullAction.substring(0, fullAction.lastIndexOf("."));
             String action = fullAction.substring(fullAction.lastIndexOf(".") + 1);
             controllerClass = Play.classloader.getClassIgnoreCase(controller);
-            if(controllerClass == null) {
+            if (controllerClass == null) {
                 throw new ActionNotFoundException(fullAction, new Exception("Controller " + controller + " not found"));
             }
-            if(!ControllerSupport.class.isAssignableFrom(controllerClass)) {
+            if (!ControllerSupport.class.isAssignableFrom(controllerClass)) {
                 // Try the scala way
-                controllerClass = Play.classloader.getClassIgnoreCase(controller+"$");
-                if(!ControllerSupport.class.isAssignableFrom(controllerClass)) {
+                controllerClass = Play.classloader.getClassIgnoreCase(controller + "$");
+                if (!ControllerSupport.class.isAssignableFrom(controllerClass)) {
                     throw new ActionNotFoundException(fullAction, new Exception("class " + controller + " does not extend play.mvc.Controller"));
                 }
             }
@@ -403,9 +407,9 @@ public class ActionInvoker {
         }
         return new Object[]{controllerClass, actionMethod};
     }
-    
+
     public static Object[] getActionMethodArgs(Method method, Object o) throws Exception {
-        String[] paramsNames = Java.parameterNames(method);      
+        String[] paramsNames = Java.parameterNames(method);
         if (paramsNames == null && method.getParameterTypes().length > 0) {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }
@@ -421,10 +425,8 @@ public class ActionInvoker {
             }
             Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.toString(method.getParameterAnnotations()[i]) + "]");
 
-            rArgs[i] = OldBinder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params, o, method, i+1);
+            rArgs[i] = OldBinder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params, o, method, i + 1);
         }
         return rArgs;
     }
-
-
 }
