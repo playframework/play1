@@ -269,9 +269,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
                 nettyResponse = addEtag(request, nettyResponse, file);
 
-                nettyResponse.setHeader(CONTENT_TYPE, (MimeTypes.getContentType(file.getName(), "text/plain")));
-                RandomAccessFile raf;
-                raf = new RandomAccessFile(file, "r");
+                nettyResponse.setHeader(CONTENT_TYPE, MimeTypes.getContentType(file.getName(), "text/plain"));
+                RandomAccessFile raf = new RandomAccessFile(file, "r");
                 long fileLength = raf.length();
 
                 Logger.trace("file length is [" + fileLength + "]");
@@ -336,7 +335,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         ChannelBuffer b = nettyRequest.getContent();
         if (b instanceof FileChannelBuffer) {
             FileChannelBuffer buffer = (FileChannelBuffer) nettyRequest.getContent();
-            // An error occured
+            // An error occurred
             Integer max = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
             if (max == -1 || buffer.getInputStream().available() < max) {
                 request.body = buffer.getInputStream();
