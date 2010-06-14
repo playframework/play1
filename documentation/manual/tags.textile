@@ -68,6 +68,31 @@ bc. #{if tasks.size() > 1}
 As for **else**, you can use it with the **list** tag.
 
 
+h2. <a>errors</a>
+
+Iterates over the current validation errors.
+
+bc. <ul>
+#{errors}
+    <li>${error}</li>
+#{/errors}
+</ul>
+
+The tag defines implicit variables in its body.
+
+* **error_index**, the error’s index, starting at 1
+* **error_isLast**, true for the last element
+* **error_isFirst**, true for the first element
+* **error_parity**, alternates between **odd** and **even**
+
+bc. <table>
+<tr><th>#</th><th>Error</th></tr>
+#{errors}
+    <tr class="${error_parity}"><td>${error_index}</td><td>${error}</td></tr>
+#{/errors}
+</table>
+
+
 h2. <a>extends</a>
 
 Makes the template inherit another template.
@@ -222,7 +247,7 @@ The tag defines implicit variables in its body. The variable names are prefixed 
 * **name_index**, the item’s index, starting at 1
 * **name_isLast**, true for the last element
 * **name_isFirst**, true for the first element
-* **name_parity**, alternate between **odd** and **even** value
+* **name_parity**, alternates between **odd** and **even**
 
 bc. <ul>
 #{list items:products, as:'product'}
