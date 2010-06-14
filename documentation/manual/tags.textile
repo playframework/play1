@@ -287,6 +287,17 @@ bc. #{list users}
 #{/list}
 
 
+h2. <a>script</a>
+
+Inserts a script tag in the template. By convention, the tag refers to a script in **/public/javascripts**
+
+* **src** (required) - script filename, without the leading path "/public/javascripts"
+* **id** (optional) - sets script id attribute
+* **charset** (optional) - sets source encoding - defaults to UTF-8
+
+bc. #{script id:'datepicker' , src:'ui/ui.datepicker.js', charset:'utf-8' /}
+
+
 h2. <a>set</a>
 
 Define a value which can be retrieve in the same template or any layout with the **get** tag.
