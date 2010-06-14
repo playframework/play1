@@ -41,7 +41,6 @@ public class Binder {
         supportedTypes.put(Calendar.class, new CalendarBinder());
         supportedTypes.put(Locale.class, new LocaleBinder());
     }
-
     static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<Class<?>, BeanWrapper>();
 
     static BeanWrapper getBeanWrapper(Class<?> clazz) {
@@ -51,7 +50,6 @@ public class Binder {
         }
         return beanwrappers.get(clazz);
     }
-
     public static Object MISSING = new Object();
 
     @SuppressWarnings("unchecked")
@@ -91,8 +89,10 @@ public class Binder {
 
             // Enums
             if (Enum.class.isAssignableFrom(clazz)) {
-                if (value == null || value.length == 0 || StringUtils.isEmpty(value[0])) {
+                if (value == null || value.length == 0) {
                     return MISSING;
+                } else if (StringUtils.isEmpty(value[0])) {
+                    return null;
                 }
                 return Enum.valueOf(clazz, value[0]);
             }
@@ -111,7 +111,7 @@ public class Binder {
                     Matcher m = p.matcher(param);
                     if (m.matches()) {
                         String key = m.group(1);
-			value = params.get(param);
+                        value = params.get(param);
                         Map<String, String[]> tP = new HashMap<String, String[]>();
                         tP.put("key", new String[]{key});
                         Object oKey = bindInternal("key", keyClass, keyClass, tP, "");
@@ -265,7 +265,7 @@ public class Binder {
         if (clazz.equals(String.class)) {
             return value;
         }
-        
+
         boolean nullOrEmpty = value == null || value.trim().length() == 0;
 
         if (supportedTypes.containsKey(clazz)) {
@@ -278,67 +278,76 @@ public class Binder {
 
         // int or Integer binding
         if (clazz.getName().equals("int") || clazz.equals(Integer.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0 : null;
+            }
 
             return Integer.parseInt(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
 
         // long or Long binding
         if (clazz.getName().equals("long") || clazz.equals(Long.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0l : null;
+            }
 
             return Long.parseLong(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
 
         // byte or Byte binding
         if (clazz.getName().equals("byte") || clazz.equals(Byte.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return clazz.isPrimitive() ? (byte) 0 : null;
+            }
 
             return Byte.parseByte(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
 
         // short or Short binding
         if (clazz.getName().equals("short") || clazz.equals(Short.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return clazz.isPrimitive() ? (short) 0 : null;
+            }
 
             return Short.parseShort(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
 
         // float or Float binding
         if (clazz.getName().equals("float") || clazz.equals(Float.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0f : null;
+            }
 
             return Float.parseFloat(value);
         }
 
         // double or Double binding
         if (clazz.getName().equals("double") || clazz.equals(Double.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0d : null;
+            }
 
             return Double.parseDouble(value);
         }
 
         // BigDecimal binding
         if (clazz.equals(BigDecimal.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return null;
+            }
 
             return new BigDecimal(value);
         }
 
         // boolean or Boolean binding
         if (clazz.getName().equals("boolean") || clazz.equals(Boolean.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return clazz.isPrimitive() ? false : null;
+            }
 
-            if (value.equals("1") || value.toLowerCase().equals("on") || value.toLowerCase().equals("yes"))
+            if (value.equals("1") || value.toLowerCase().equals("on") || value.toLowerCase().equals("yes")) {
                 return true;
+            }
 
             return Boolean.parseBoolean(value);
         }

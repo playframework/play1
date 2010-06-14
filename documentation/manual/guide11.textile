@@ -32,11 +32,15 @@ Edit the database configuration in the **yabe/conf/application.conf** file:
 
 bc. %server01.db=mysql:root:secret@yabe
 
-We will now tweak the way Hibernate manages the database schema for us. It’s very useful when Hibernate automatically updates the database schema as the Java model objects change. However it’s kind of unpredictable, and running magical things on a production database is never a good thing. So we will let Hibernate create the database schema if it doesn’t exist, but it will never update it automatically.
+We will now tweak the way Hibernate manages the database schema for us. It’s very useful when Hibernate automatically updates the database schema as the Java model objects change. 
 
 Change the **jpa.ddl** configuration key:
 
-bc. %server01.jpa.ddl=create
+bc. %server01.jpa.ddl=update
+
+However it’s kind of unpredictable, and running magical things on a production database is never a good thing. So you should always have a backup before a new deployement. If you don't want that hibernate update your database, change the **jpa.ddl** configuration key to validate:
+
+bc. %server01.jpa.ddl=validate
 
 h2. <a>Setting up a frontal HTTP server</a>
 

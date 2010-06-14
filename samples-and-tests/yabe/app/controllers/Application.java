@@ -25,6 +25,7 @@ public class Application extends Controller {
     
     public static void show(Long id) {
         Post post = Post.findById(id);
+        notFoundIfNull(post);
         String randomID = Codec.UUID();
         render(post, randomID);
     }
@@ -37,6 +38,7 @@ public class Application extends Controller {
         String randomID) 
     {
         Post post = Post.findById(postId);
+        notFoundIfNull(post);
         if(!Play.id.equals("test")) {
             validation.equals(code, Cache.get(randomID)).message("Invalid code. Please type it again");
         }

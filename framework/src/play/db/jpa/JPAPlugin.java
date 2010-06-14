@@ -18,7 +18,6 @@ import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
-import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.type.Type;
 import play.Logger;
 import play.Play;
@@ -171,6 +170,11 @@ public class JPAPlugin extends PlayPlugin {
                 } catch (Exception e) {
                     Logger.warn("JPA -> Entity not found: %s", entity);
                 }
+            }
+            /** Support ORM file, rb 24.05.2010 */
+            String mappingFile = Play.configuration.getProperty("jpa.mapping-file", "");
+            if (mappingFile != null && mappingFile.length()>0) {
+                cfg.addResource(mappingFile);
             }
             Logger.trace("Initializing JPA ...");
             try {

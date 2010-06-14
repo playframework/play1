@@ -27,6 +27,10 @@ public class Admin extends Controller {
     public static void form(Long id) {
         if(id != null) {
             Post post = Post.findById(id);
+            notFoundIfNull(post);
+            if (!post.author.email.equals(Security.connected())) {
+                forbidden("You are not the author of this post!");
+            }
             render(post);
         }
         render();
@@ -41,6 +45,10 @@ public class Admin extends Controller {
         } else {
             // Retrieve post
             post = Post.findById(id);
+            notFoundIfNull(post);
+            if (!post.author.email.equals(Security.connected())) {
+                forbidden("You are not the author of this post!");
+            }
             post.title = title;
             post.content = content;
             post.tags.clear();

@@ -652,7 +652,7 @@ try:
 		os.remove(archive)
 		print '~'
 		print '~ Module %s-%s is installed!' % (module, v['version'])
-		print '~ You can now use it by add adding this line to application.conf file:'
+		print '~ You can now use it by adding this line to application.conf file:'
 		print '~'
 		print '~ module.%s=${play.path}/modules/%s-%s' % (module, module, v['version'])
 		print '~'
