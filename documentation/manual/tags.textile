@@ -289,13 +289,16 @@ bc. #{list users}
 
 h2. <a>script</a>
 
-Inserts a script tag in the template. By convention, the tag refers to a script in **/public/javascripts**
+Inserts a **script** tag in the template. By convention, the tag refers to a script in **/public/javascripts**
 
-* **src** (required) - script filename, without the leading path "/public/javascripts"
-* **id** (optional) - sets script id attribute
+* **src** (required) - script file name, without the leading path **/public/javascripts**
+* **id** (optional) - an **id** attribute value for the generated **script** tag
 * **charset** (optional) - sets source encoding - defaults to UTF-8
 
-bc. #{script id:'datepicker' , src:'ui/ui.datepicker.js', charset:'utf-8' /}
+The **src** parameter can be replaced by the default **arg** argument.
+
+bc. #{script 'jquery-1.4.2.min.js' /}
+#{script id:'datepicker' , src:'ui/ui.datepicker.js', charset:'utf-8' /}
 
 
 h2. <a>set</a>
@@ -315,3 +318,17 @@ bc. #{set 'title'}
     Profile of ${user.login}
 #{/set}
 
+
+h2. <a>stylesheet</a>
+
+Inserts a **link** tag in the template. By convention, the tag refers to a CSS file in **/public/javascripts**
+
+* **src** (required) - file name, without the leading path **/public/stylesheets**
+* **id** (optional) - an **id** attribute value for the generated **link** tag
+* **media** (optional) - a **media** attribute value: screen, print, aural, projection…
+* **title** (optional) - **title** atttribute value (or description)
+
+The **src** parameter can be replaced by the default **arg** argument.
+
+bc. #{stylesheet 'default.css' /}
+#{stylesheet id:'main', media:'print', src:'print.css', title:'Print stylesheet' /}
