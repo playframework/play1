@@ -332,3 +332,14 @@ The **src** parameter can be replaced by the default **arg** argument.
 
 bc. #{stylesheet 'default.css' /}
 #{stylesheet id:'main', media:'print', src:'print.css', title:'Print stylesheet' /}
+
+
+h2. <a>verbatim</a>
+
+Disables HTML escaping in template output, like the "raw()":javaextensions#arawa Java extension, but for the whole tag body.
+
+bc. ${'&amp;'}
+#{verbatim}${'&amp;'}#{/verbatim}
+
+In this example, the first line outputs **&amp;** while the second line outputs an ampersand. 
+
