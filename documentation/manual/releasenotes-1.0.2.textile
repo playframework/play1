@@ -1,33 +1,33 @@
 h1. Play 1.0.2 -- Release notes
 
-**Play 1.0.2** is a maintenance release of the Play 1.0 branch. The major new features are the support for the modules repository and built-in protection against CSRF attacks. It also fixes a lot of small bugs.
+**Play 1.0.2** is a maintenance release of the Play 1.0 branch. The major new features are the support for the module repository and built-in protection against CSRF attacks. It also fixes a lot of small bugs.
 
-p(note). **Play 1.0.2** is a maintenance release and is fully compatible with the 1.0 series. If you encounter any problems please ask us on the Google Group.
+p(note). **Play 1.0.2** is a maintenance release and is fully compatible with the 1.0 series. If you encounter any problems please ask us on the "Google Group":http://groups.google.com/group/play-framework.
 
-You can read about the fixed bugs on the "1.0.2 road map page":http://www.playframework.org/roadmap/1.0.2. The most important changes are highlighted on this page:
+You can read about the fixed bugs on the "1.0.2 road map page":http://www.playframework.org/roadmap/1.0.2. The most important changes are highlighted on this page.
 
 h2. <a>Module repository</a>
 
-The module repository’s goal is to centralize all contributed modules for the Play framework, and allow easy installation. The new modules related commands are:
+The module repository’s goal is to centralize all contributed modules for the Play framework, and allow easy installation. The new module-related commands are:
 
 * **play list-modules**, to list the repository’s contents 
 * **play install**, to install a version of a module locally
 * **play new-module**, to create a new module skeleton 
-* **play build-module**, to package a module and publish it to the repository 
+* **play build-module**, to package a module and publish it to the repository.
 
 Also, you will see that almost all modules have been deleted. Only a bunch of ‘core’ modules are directly available: testrunner, docviewer, crud and secure.
 
-Other modules are now optional. So if you want for example to install the gwt support, just type ‘play install gwt’, and you will get the latest version of the module.
+The other modules are now optional. So if you want for example to install the GWT support, just type **play install gwt**, and you will get the latest version of the module.
 
-Why have we moved modules? Because we need to focus on the core framework to have a simple project to manage. Also, as many people wanted to contributed some modules, it is easy to do it this way: each module is a standalone project with a dedicated maintainer. So please, if you want to report a bug on a specific module, just use its project homepage and its dedicated bug tracker.
+Why have we moved modules? Because we need to focus on the core framework to have a simple project to manage. Also, as many people wanted to contributed modules, it is easier to do it this way: each module is a standalone project with a dedicated maintainer. So please, if you want to report a bug on a specific module, just use its project homepage and its dedicated bug tracker.
 
-As an immediate benefit, the lifecycle of modules is no more tied to the framework lifecycle. A module can be released more often than the framework itself. And finally, because the framework does not contain optional modules anymore, the Play distribution size has been divided by two.
+As an immediate benefit, the lifecycle of modules is no more tied to the framework lifecycle. A module can be released more often than the framework itself. And finally, because the framework does not contain optional modules anymore, the Play distribution size has been halved.
 
 Read more about the modules repository on "this dedicated page":modules.
 
 h2. <a>Built-in Cross-Site Request Forgery protection</a>
 
-The CSRF attack can be really problematic in web applications;
+CSRF attacks can be really problematic in web applications.
 
 bq. This attack method works by including malicious code or a link in a page that accesses a web application that the user is believed to have authenticated. If the session for that web application has not timed out, an attacker may execute unauthorized commands.
 
@@ -35,8 +35,8 @@ To prevent this attack, the first thing to do is to use GET and POST method appr
 
 For POST requests, the only way to secure critical actions properly is to issue an authenticity token. Play 1.0.2 now has a built-in helper to handle that:
 
-* a new **checkAuthenticity()** method available in controllers, that checks for a valid authenticity token in the request parameters and sends a forbidden response if something is bad.
-* **session.getAuthenticityToken()** generates an authenticity token that is only valid for the current session.
+* a new **checkAuthenticity()** method available in controllers, that checks for a valid authenticity token in the request parameters and sends a forbidden response if something is bad
+* **session.getAuthenticityToken()** generates an authenticity token that is only valid for the current session
 * **#{authenticityToken /}** creates an hidden input field that you can add to any form.
 
 So for example:
@@ -70,7 +70,7 @@ HEAD    /orders/{id}         Orders.showHead
 
 h2. <a>New sample application, ‘zencontact’</a>
 
-A new sample, that is a port of a "Wicket based contact management application":http://blog.zenika.com/index.php?post/2009/03/10/Concours-Développer-une-application-web-en-Wicket3. There is also a Scala version of this application available in the Scala module package, for those interested.
+A new sample, that is a port of a "Wicket-based contact management application":http://blog.zenika.com/index.php?post/2009/03/10/Concours-Développer-une-application-web-en-Wicket3. There is also a Scala version of this application available in the Scala module package, for those interested.
 
 !images/zencontact!
 
@@ -84,7 +84,7 @@ We have tested the deployment of a Play generated WAR archive on several applica
 
 h2. <a>New features for reversed action in templates</a>
 
-The **@@** syntax, that allow to reverse an action to an **absolute** URL, in now available in tag parameters. For example:
+The **@@** syntax, that allow to reverse an action to an **absolute** URL, is now available in tag parameters. For example:
 
 bc. #{form @@save()}
 ...
@@ -92,7 +92,7 @@ bc. #{form @@save()}
 
 It is very useful if you use the template engine to generate stuff like e-mail, in which you need to express URL in an absolute fashion.
 
-Also the binding of complex objects in now supported. So for example, with this action:
+Also, binding complex objects in now supported. So for example, with this action:
 
 bc. public static void search(SearchParams params) {
     ...
@@ -134,4 +134,4 @@ The Eclipse plugin now has several new features:
 
 !images/eclipse-tests!
 
-To install this plugin, copy the JAR file from PLAY_HOME/support/eclipse to ECLIPSE_HOME/dropins.
+To install this plugin, copy the JAR file from **$PLAY_HOME/support/eclipse** to **$ECLIPSE_HOME/dropins**.
