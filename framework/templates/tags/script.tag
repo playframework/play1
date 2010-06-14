@@ -14,4 +14,4 @@
         throw new play.exceptions.TagInternalException("src attribute cannot be empty for script tag");
     }      
 }%
-<script type="text/javascript" language="javascript"#{if _id} id="${_id}"#{/if}#{if _charset} charset="_charset"#{/if}  src="/public/javascripts/${_src}"></script>
+<script type="text/javascript" language="javascript"#{if _id} id="${_id}"#{/if}#{if _charset} charset="${_charset}"#{/if}  src="/public/javascripts/${_src}"></script>
