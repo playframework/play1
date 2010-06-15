@@ -1,6 +1,6 @@
 h1. Play framework documentation
 
-Welcome to the Play framework documentation. This documentation is intended for the **1.0.2 release** and may significantly differ from previous versions of the framework. Check the "version 1.0.2 release notes":releasenotes-1.0.2.
+Welcome to the Play framework documentation. This documentation is intended for the **1.0.3 release** and may significantly differ from previous versions of the framework. Check the "version 1.0.3 release notes":releasenotes-1.0.3.
 
 p(note). This is a work in progress, feel free to ask any question not covered into these documents or report any errors. You can contribute to the documentation the "same way you can contribute code":faq.
 
@@ -19,6 +19,7 @@ Your first steps with Play and your first 5 minutes of fun.
 # "Your first application — the ‘Hello World’ tutorial":firstapp
 # "Set up your preferred IDE":ide
 # "Sample applications":samples
+# "Live coding script - to practice, and impress your colleagues with":http://www.lunatech-research.fr/archives/2010/06/14/how-demo-play-framework-live-coding-script
 
 
 h2. <a name="guide">Tutorial -- Play guide, a real world app step-by-step</a>
@@ -114,6 +115,7 @@ h2. <a name="references">References</a>
 
 Extended references for day-to-day hacking.
 
+# "The missing cheat sheet":http://download.playframework.org/miscellaneous/play-cheat-sheet.pdf
 # "Browse API documentation":/@api/index.html
 # "Template tags and extensions reference":tags
 # "Java extensions":javaextensions
@@ -123,5 +125,6 @@ h2. <a name="versionnotes">Version notes</a>
 
 New versions of Play include certain changes.
 
+# "Play 1.0.3":releasenotes-1.0.3
 # "Play 1.0.2":releasenotes-1.0.2
 # "Play 1.0.1":releasenotes-1.0.1

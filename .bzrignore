@@ -82,3 +82,5 @@ samples-and-tests/zencontact/logs
 samples-and-tests/zencontact/test-result
 samples-and-tests/zencontact/tmp
 modules/*
+samples-and-tests/validation/logs
+samples-and-tests/validation/tmp

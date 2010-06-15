@@ -1,0 +1,36 @@
+<script type="text/javascript" src="/public/javascripts/jquery-latest.js"></script>
+<script type="text/javascript" src="/public/javascripts/jquery.validate.js"></script>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+  		$("#joinForm").validate({
+			rules: {
+			%{
+				play.data.validation.Validation.getValidators(_class, _key).each() {
+					out.println "'" + it.key + "': {"
+					for(validator in it.value) {
+						switch (validator.annotation.annotationType().name.substring(21)) {
+						    case "Required":
+						        out.println "required: true,"
+								break;
+							case "MinSize":
+						        out.println "minlength: " + validator.annotation.value() + ","
+								break;
+							case "Range":
+						        out.println "range: [" + validator.annotation.min() + "," + validator.annotation.max() + "]," 
+								break;
+							case "Email":
+						        out.println "email: true,"
+								break;
+							case "Equals":
+						        out.println "equalTo: 'input[name=" + validator.params.equalsTo + "]',"
+								break;
+						}
+					}
+					out.println "},"
+				}
+			}%
+			}
+		});	
+	});
+</script>
