@@ -2,8 +2,8 @@ package play.i18n;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Properties;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -65,15 +65,10 @@ public class MessagesPlugin extends PlayPlugin {
     }
 
     static Properties read(VirtualFile vf) {
-        try {
-            if (vf!=null) {
-                return IO.readUtf8Properties(vf.inputstream());
-            }
-            return null;
-        } catch (IOException e) {
-            Logger.error(e, "Error while loading messages %s", vf.getName());
-            return null;
+        if (vf != null) {
+            return IO.readUtf8Properties(vf.inputstream());
         }
+        return null;
     }
 
     @Override

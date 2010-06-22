@@ -27,15 +27,19 @@ public class IO {
      * @return The Properties object
      * @throws java.io.IOException
      */
-    public static Properties readUtf8Properties(InputStream is) throws IOException {
+    public static Properties readUtf8Properties(InputStream is) {
         Properties properties = new Properties();
-        properties.load(is);
-        for (Object key : properties.keySet()) {
-            String value = properties.getProperty(key.toString());
-            String goodValue = new String(value.getBytes("iso8859-1"), "utf-8");
-            properties.setProperty(key.toString(), goodValue);
+        try {
+            properties.load(is);
+            for (Object key : properties.keySet()) {
+                String value = properties.getProperty(key.toString());
+                String goodValue = new String(value.getBytes("iso8859-1"), "utf-8");
+                properties.setProperty(key.toString(), goodValue);
+            }
+            is.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        is.close();
         return properties;
     }
 
@@ -45,9 +49,14 @@ public class IO {
      * @return The String content
      * @throws java.io.IOException
      */
-    public static String readContentAsString(InputStream is) throws IOException {
-        String res = IOUtils.toString(is, "utf-8");
-        is.close();
+    public static String readContentAsString(InputStream is) {
+        String res = null;
+        try {
+            res = IOUtils.toString(is, "utf-8");
+            is.close();
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
         return res;
     }
 

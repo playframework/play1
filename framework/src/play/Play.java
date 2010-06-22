@@ -261,9 +261,11 @@ public class Play {
         conf = appRoot.child("conf/application.conf");
         try {
             configuration = IO.readUtf8Properties(conf.inputstream());
-        } catch (IOException ex) {
-            Logger.fatal("Cannot read application.conf");
-            System.exit(0);
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof IOException) {
+                Logger.fatal("Cannot read application.conf");
+                System.exit(0);
+            }
         }
         // Ok, check for instance specifics configuration
         Properties newConfiguration = new Properties();
@@ -492,9 +494,10 @@ public class Play {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T plugin(Class<T> clazz) {
-        for(PlayPlugin p : plugins) {
-            if(clazz.isInstance(p)) {
+        for (PlayPlugin p: plugins) {
+            if (clazz.isInstance(p)) {
                 return (T)p;
             }
         }
