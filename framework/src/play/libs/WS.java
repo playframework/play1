@@ -318,12 +318,15 @@ public class WS extends PlayPlugin {
 
         /** Execute a OPTIONS request.*/
         public HttpResponse options() {
-            // TODO
-            throw new NotImplementedException();
+            try {
+                return new HttpResponse(prepare(httpClient.prepareOptions(url)).execute().get());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
-        public void options(AsyncCompletionHandler<HttpResponse> handler) {
-            throw new NotImplementedException();
+        public Future<HttpResponse> optionsAsync() {
+            return execute(httpClient.prepareOptions(url));
         }
 
         /** Execute a HEAD request.*/
@@ -335,20 +338,21 @@ public class WS extends PlayPlugin {
             }
         }
 
-        public void head(AsyncCompletionHandler<HttpResponse> handler) {
-            // TODO
-            throw new NotImplementedException();
+        public Future<HttpResponse> headAsync() {
+            return execute(httpClient.prepareHead(url));
         }
 
         /** Execute a TRACE request.*/
         public HttpResponse trace() {
-            // TODO
-            throw new NotImplementedException();
+            try {
+                return new HttpResponse(prepare(httpClient.prepareTrace(url)).execute().get());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
-        public void trace(AsyncCompletionHandler<HttpResponse> handler) {
-            // TODO
-            throw new NotImplementedException();
+        public Future<HttpResponse> traceAsync() {
+            return execute(httpClient.prepareTrace(url));
         }
 
         private BoundRequestBuilder prepare(BoundRequestBuilder builder) {
