@@ -368,6 +368,10 @@ public class WS extends PlayPlugin {
                     public HttpResponse onCompleted(Response response) throws Exception {
                         return new HttpResponse(response);
                     }
+                    @Override
+                    public void onThrowable(Throwable t) {
+                        throw new RuntimeException(t);
+                    }
                 });
             } catch (Exception e) {
                 throw new RuntimeException(e);
