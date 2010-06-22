@@ -492,6 +492,15 @@ public class Play {
         }
     }
 
+    public static <T> T plugin(Class<T> clazz) {
+        for(PlayPlugin p : plugins) {
+            if(clazz.isInstance(p)) {
+                return (T)p;
+            }
+        }
+        return null;
+    }
+
     /**
      * Enable found plugins
      */
