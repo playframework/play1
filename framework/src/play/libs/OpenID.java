@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.w3c.dom.Document;
@@ -290,11 +289,7 @@ public class OpenID {
 
     public static String discoverServer(String openid) {
         if (openid.startsWith("http")) {
-            try {
-                openid = WS.url(openid).get().getString();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            openid = WS.url(openid).get().getString();
         }
         Matcher openid2Provider = Pattern.compile("<link[^>]+openid2[.]provider[^>]+>", Pattern.CASE_INSENSITIVE).matcher(openid);
         Matcher openidServer = Pattern.compile("<link[^>]+openid[.]server[^>]+>", Pattern.CASE_INSENSITIVE).matcher(openid);

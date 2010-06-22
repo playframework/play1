@@ -15,7 +15,6 @@ import java.util.concurrent.Future;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -61,8 +60,9 @@ public class WS extends PlayPlugin {
     private static AsyncHttpClient httpClient;
 
     @Override
-    public void invocationFinally() {
+    public void onApplicationStop() {
         Logger.trace("Releasing http client connections...");
+        httpClient.close();
     }
 
     static {
@@ -79,7 +79,6 @@ public class WS extends PlayPlugin {
                 Logger.error("Cannot parse the proxy port property '%s'. Check property http.proxyPort either in System configuration or in Play config file.", proxyPort);
                 throw new IllegalStateException("WS proxy is misconfigured -- check the logs for details");
             }
-            // TODO: username/password is not used in http async, fix it
             ProxyServer proxy = new ProxyServer(proxyHost, proxyPortInt, proxyUser, proxyPassword);
             AsyncHttpClientConfig cf = new AsyncHttpClientConfig.Builder().setProxyServer(proxy).build();
             httpClient = new AsyncHttpClient(cf);
@@ -87,17 +86,6 @@ public class WS extends PlayPlugin {
             httpClient = new AsyncHttpClient();
         }
 
-    }
-
-    /**
-     * define client authentication for a server host 
-     * provided credentials will be used during the request
-     * @param username
-     * @param password
-     */
-    public static void authenticate(String username, String password) {
-        // TODO
-        throw new NotImplementedException();
     }
 
     /**
@@ -142,6 +130,8 @@ public class WS extends PlayPlugin {
     public static class WSRequest {
 
         public String url;
+        public String username;
+        public String password;
         public String body;
         public FileParam[] fileParams;
         public Map<String, String> headers = new HashMap<String, String>();
@@ -163,13 +153,15 @@ public class WS extends PlayPlugin {
             return this;
         }
 
-        public WSRequest timeout(int to) {
-            this.timeout = to;
-            return this;
-        }
-
-        public WSRequest timeout(String duration) {
-            this.timeout = 1000 + Time.parseDuration(duration);
+        /**
+         * define client authentication for a server host 
+         * provided credentials will be used during the request
+         * @param username
+         * @param password
+         */
+        public WSRequest authenticate(String username, String password) {
+            this.username = username;
+            this.password = password;
             return this;
         }
 
@@ -286,6 +278,7 @@ public class WS extends PlayPlugin {
             }
         }
 
+        /** Execute a POST request asynchronously.*/
         public Future<HttpResponse> postAsync() {
             return execute(httpClient.preparePost(url));
         }
@@ -299,6 +292,7 @@ public class WS extends PlayPlugin {
             }
         }
 
+        /** Execute a PUT request asynchronously.*/
         public Future<HttpResponse> putAsync() {
             return execute(httpClient.preparePut(url));
         }
@@ -312,6 +306,7 @@ public class WS extends PlayPlugin {
             }
         }
 
+        /** Execute a DELETE request asynchronously.*/
         public Future<HttpResponse> deleteAsync() {
             return execute(httpClient.prepareDelete(url));
         }
@@ -325,6 +320,7 @@ public class WS extends PlayPlugin {
             }
         }
 
+        /** Execute a OPTIONS request asynchronously.*/
         public Future<HttpResponse> optionsAsync() {
             return execute(httpClient.prepareOptions(url));
         }
@@ -338,6 +334,7 @@ public class WS extends PlayPlugin {
             }
         }
 
+        /** Execute a HEAD request asynchronously.*/
         public Future<HttpResponse> headAsync() {
             return execute(httpClient.prepareHead(url));
         }
@@ -351,12 +348,18 @@ public class WS extends PlayPlugin {
             }
         }
 
+        /** Execute a TRACE request asynchronously.*/
         public Future<HttpResponse> traceAsync() {
             return execute(httpClient.prepareTrace(url));
         }
 
         private BoundRequestBuilder prepare(BoundRequestBuilder builder) {
             checkFileBody(builder);
+            if (this.username != null && this.password != null) {
+                if (this.headers == null)
+                    this.headers = new HashMap<String, String>();
+                this.headers.put("Authorization", "Basic " + Codec.encodeBASE64(this.username + ":" + this.password));
+            }
             if (this.headers != null) {
                 for (String key: this.headers.keySet()) {
                     builder.addHeader(key, headers.get(key));
@@ -442,7 +445,6 @@ public class WS extends PlayPlugin {
                     }
                 }
             }
-            Logger.info("===========> " + sb.toString());
             return sb.toString();
         }
 
@@ -542,9 +544,7 @@ public class WS extends PlayPlugin {
          */
         public String getString() {
             try {
-                String body = response.getResponseBody();
-                Logger.info("getString ==> " + body);
-                return body;
+                return response.getResponseBody();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
