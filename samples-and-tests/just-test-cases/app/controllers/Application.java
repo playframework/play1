@@ -2,6 +2,7 @@ package controllers;
 
 import java.util.*;
 import java.io.File;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apache.commons.mail.EmailAttachment;
@@ -10,8 +11,6 @@ import org.apache.commons.mail.HtmlEmail;
 import play.*;
 import play.mvc.*;
 import play.libs.*;
-
-import play.modules.spring.*;
 
 import models.*;
 import utils.*;
@@ -24,6 +23,7 @@ public class Application extends Controller {
 
     public static void aa() {
         try {
+            @SuppressWarnings("unused")
             int test = 1;
         } catch (Exception ex) {
         }
@@ -185,7 +185,7 @@ public class Application extends Controller {
         renderText(myTest.yop());
     }
 
-    public static void googleSearch(String word) {
+    public static void googleSearch(String word) throws InterruptedException, ExecutionException {
         WS.HttpResponse response = WS.url("http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=%s", word).get();
         long results = response.getJson().getAsJsonObject().getAsJsonObject("responseData").getAsJsonObject("cursor").getAsJsonPrimitive("estimatedResultCount").getAsLong();
         renderText(results);

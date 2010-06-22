@@ -226,6 +226,7 @@ public class Router {
     }
 
     public static Route route(Http.Request request) {
+        Logger.trace("Route: " + request.path + " - " + request.querystring);
         // request method may be overriden if a x-http-method-override parameter is given
         if (request.querystring != null && methodOverride.matches(request.querystring)) {
             Matcher matcher = methodOverride.matcher(request.querystring);

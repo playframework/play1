@@ -267,8 +267,8 @@ public class OpenID {
 
             }
 
-        } catch (PlayException e) {
-            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         return null;

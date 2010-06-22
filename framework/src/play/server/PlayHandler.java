@@ -308,6 +308,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     public static Request parseRequest(ChannelHandlerContext ctx, HttpRequest nettyRequest) throws Exception {
         Logger.trace("parseRequest: begin");
+        Logger.trace("parseRequest: URI = " + nettyRequest.getUri());
         int index = nettyRequest.getUri().indexOf("?");
         String querystring = "";
         String path = URLDecoder.decode(nettyRequest.getUri(), "UTF-8");

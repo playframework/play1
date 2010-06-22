@@ -1,62 +1,39 @@
 package play.libs;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.URL;
 import java.net.URLEncoder;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.Future;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.httpclient.ConnectTimeoutException;
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpState;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.DeleteMethod;
-import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.HeadMethod;
-import org.apache.commons.httpclient.methods.OptionsMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.PutMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.apache.commons.httpclient.methods.TraceMethod;
-import org.apache.commons.httpclient.methods.multipart.FilePart;
-import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
-import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
-import org.apache.commons.httpclient.params.HttpConnectionParams;
-import org.apache.commons.httpclient.protocol.ControllerThreadSocketFactory;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
+import play.mvc.Http.Header;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.ning.http.client.AsyncCompletionHandler;
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.AsyncHttpClientConfig;
+import com.ning.http.client.FilePart;
+import com.ning.http.client.Headers;
+import com.ning.http.client.ProxyServer;
+import com.ning.http.client.Response;
+import com.ning.http.client.StringPart;
+import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -80,106 +57,15 @@ import play.PlayPlugin;
  */
 public class WS extends PlayPlugin {
 
-    private static HttpClient httpClient;
-    private static ThreadLocal<GetMethod> getMethod = new ThreadLocal<GetMethod>();
-    private static ThreadLocal<PostMethod> postMethod = new ThreadLocal<PostMethod>();
-    private static ThreadLocal<DeleteMethod> deleteMethod = new ThreadLocal<DeleteMethod>();
-    private static ThreadLocal<OptionsMethod> optionsMethod = new ThreadLocal<OptionsMethod>();
-    private static ThreadLocal<TraceMethod> traceMethod = new ThreadLocal<TraceMethod>();
-    private static ThreadLocal<HeadMethod> headMethod = new ThreadLocal<HeadMethod>();
-    private static ThreadLocal<HttpState> states = new ThreadLocal<HttpState>();
-    private static ThreadLocal<HttpMethod> httpMethod = new ThreadLocal<HttpMethod>();
+    private static AsyncHttpClient httpClient;
 
     @Override
-    public void invocationFinally() {
+    public void onApplicationStop() {
         Logger.trace("Releasing http client connections...");
-        if (getMethod.get() != null) {
-            getMethod.get().releaseConnection();
-        }
-        if (postMethod.get() != null) {
-            postMethod.get().releaseConnection();
-        }
-        if (deleteMethod.get() != null) {
-            deleteMethod.get().releaseConnection();
-        }
-        if (optionsMethod.get() != null) {
-            optionsMethod.get().releaseConnection();
-        }
-        if (traceMethod.get() != null) {
-            traceMethod.get().releaseConnection();
-        }
-        if (headMethod.get() != null) {
-            headMethod.get().releaseConnection();
-        }
-        if (states.get() != null) {
-            states.get().clear();
-        }
-        if (httpMethod.get() != null) {
-            httpMethod.get().releaseConnection();
-        }
+        httpClient.close();
     }
 
     static {
-        MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
-        ProtocolSocketFactory factory = new ProtocolSocketFactory() {
-
-            /**
-             * @see #createSocket(java.lang.String,int,java.net.InetAddress,int)
-             */
-            public Socket createSocket(
-                    String host,
-                    int port,
-                    InetAddress localAddress,
-                    int localPort) throws IOException, UnknownHostException {
-
-                // get inetAddresses
-                InetAddress[] inetAddresses = InetAddress.getAllByName(host);
-
-
-                for (int i = 0; i < inetAddresses.length; i++) {
-                    try {
-                        Socket socket = new Socket(inetAddresses[i], port, localAddress,
-                                localPort);
-
-                        return socket;
-                    } catch (SocketException se) {
-                        Logger.error("Socket exception on " + inetAddresses[i] + "; will try another dns record if exists.");
-                    }
-                }
-                // tried all
-                throw new SocketException("Cannot connect to " + host);
-            }
-
-            public Socket createSocket(
-                    final String host,
-                    final int port,
-                    final InetAddress localAddress,
-                    final int localPort,
-                    final HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
-                if (params == null) {
-                    throw new IllegalArgumentException("Parameters may not be null");
-                }
-                int timeout = params.getConnectionTimeout();
-                if (timeout == 0) {
-                    return createSocket(host, port, localAddress, localPort);
-                }
-                return ControllerThreadSocketFactory.createSocket(
-                        this, host, port, localAddress, localPort, timeout);
-            }
-
-            /**
-             * @see ProtocolSocketFactory#createSocket(java.lang.String,int,InetAddress,int)
-            )
-             */
-            public Socket createSocket(String host, int port) throws IOException,
-                    UnknownHostException {
-                return createSocket(host, port, null, 0);
-            }
-        };
-
-        Protocol protocol = new Protocol("http", factory, 80);
-        Protocol.registerProtocol("http", protocol);
-        httpClient = new HttpClient(connectionManager);
         String proxyHost = Play.configuration.getProperty("http.proxyHost", System.getProperty("http.proxyHost"));
         String proxyPort = Play.configuration.getProperty("http.proxyPort", System.getProperty("http.proxyPort"));
         String proxyUser = Play.configuration.getProperty("http.proxyUser", System.getProperty("http.proxyUser"));
@@ -193,431 +79,13 @@ public class WS extends PlayPlugin {
                 Logger.error("Cannot parse the proxy port property '%s'. Check property http.proxyPort either in System configuration or in Play config file.", proxyPort);
                 throw new IllegalStateException("WS proxy is misconfigured -- check the logs for details");
             }
-            httpClient.getHostConfiguration().setProxy(proxyHost, proxyPortInt);
-            if (proxyUser != null) {
-                AuthScope scope = new AuthScope(proxyHost, proxyPortInt);
-                httpClient.getState().setProxyCredentials(scope, new UsernamePasswordCredentials(proxyUser, proxyPassword));
-            }
+            ProxyServer proxy = new ProxyServer(proxyHost, proxyPortInt, proxyUser, proxyPassword);
+            AsyncHttpClientConfig cf = new AsyncHttpClientConfig.Builder().setProxyServer(proxy).build();
+            httpClient = new AsyncHttpClient(cf);
+        } else {
+            httpClient = new AsyncHttpClient();
         }
 
-    }
-
-    /**
-     * define client authentication for a server host 
-     * provided credentials will be used during the request
-     * @param username
-     * @param password
-     * @param url hostname url or null to authenticate on any hosts
-     */
-    public static void authenticate(String username, String password, String url) {
-        Credentials credentials = new UsernamePasswordCredentials(username, password);
-        AuthScope scope = AuthScope.ANY;
-        if (url != null) {
-            try {
-                URL oUrl = new URL(url);
-                scope = new AuthScope(oUrl.getHost(), oUrl.getPort(), AuthScope.ANY_REALM);
-            } catch (MalformedURLException muex) {
-                throw new RuntimeException(muex);
-            }
-        }
-        authenticate(credentials, scope);
-    }
-
-    public static void authenticate(String username, String password) {
-        authenticate(username, password, null);
-    }
-
-    public static void authenticate(Credentials credentials, AuthScope authScope) {
-        if (states.get() == null) {
-            states.set(new HttpState());
-        }
-        states.get().setCredentials(authScope, credentials);
-    }
-
-    /**
-     * Make a GET request using an url template.
-     * If you provide no parameters, the url is left unchanged (no replacements)
-     * @param url an URL template with placeholders for parameters
-     * @param params a variable list of parameters to be replaced in the template using the String.format(...) syntax
-     * @return server response {@link HttpResponse}
-     * @deprecated Use WS.url(url, params...).get() instead.
-     */
-    public static HttpResponse GET(String url, Object... params) {
-        return GET(null, url, params);
-    }
-
-    /**
-     * Make a GET request using an url template.
-     * If you provide no parameters, the url is left unchanged (no replacements)
-     * @param url an URL template with placeholders for parameters
-     * @param params a variable Map
-     * @return server response {@link HttpResponse}
-     * @deprecated Use WS.url(url).params(params).get() instead.
-     */
-    public static HttpResponse GET(String url, Map<String, String> params) {
-        StringBuffer sb = new StringBuffer(10);
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            if (sb.length() > 0) {
-                sb.append("&");
-            }
-            sb.append(entry.getKey() + "=" + encode(entry.getValue()));
-        }
-        return GET(sb.toString());
-    }
-
-    /**
-     * Make a GET request using an url template.
-     * If you provide no parameters, the url is left unchanged (no replacements)
-     * @param headers a map of headers to be appended to the request.
-     * @param url an template with <tt>%s,%d</tt> placeholders for parameters.
-     * @param params parameters to be replaced in the url template using the String.format(...) syntax
-     * @return HTTP response {@link HttpResponse}
-     * @deprecated Use WS.url(url).params().header().get() instead.
-     */
-    public static HttpResponse GET(Map<String, Object> headers, String url, Object... params) {
-        if (params.length > 0) {
-            url = String.format(url, params);
-        }
-        if (getMethod.get() != null) {
-            getMethod.get().releaseConnection();
-        }
-        getMethod.set(new GetMethod(url));
-        getMethod.get().setDoAuthentication(true);
-        try {
-            if (headers != null) {
-                for (Map.Entry<String, Object> entry : headers.entrySet()) {
-                    getMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
-                }
-            }
-            httpClient.executeMethod(null, getMethod.get(), states.get());
-            return new HttpResponse(getMethod.get());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Make a POST request.
-     * @param url resource URL
-     * @param body content to be posted. content-type is guessed from the filename extension.
-     * @return server response {@link HttpResponse}
-     * @deprecated Use WS.url(url).file().post() instead.
-     */
-    public static HttpResponse POST(String url, File body) {
-        String mimeType = MimeTypes.getMimeType(body.getName());
-        return POST(null, url, body, mimeType);
-    }
-
-    /**
-     * Make a POST request
-     * @param url resource URL
-     * @param body content to be posted
-     * @param mimeType the content type as a mimetype
-     * @return server response {@link HttpResponse}
-     * @deprecated Use WS.url(url).file().mimetype().post() instead.
-     */
-    public static HttpResponse POST(String url, File body, String mimeType) {
-        return POST(null, url, body, mimeType);
-    }
-
-    /**
-     * Make a POST request
-     * @param headers a map of headers to be appended to the request.
-     * @param url resource URL
-     * @param body content to be posted. content-type is guessed from the filename extension.
-     * @return server response {@link HttpResponse}
-     * @deprecated Use WS.url(url).header().file().post() instead.
-     */
-    public static HttpResponse POST(Map<String, String> headers, String url, File body) {
-        return POST(headers, url, body, null);
-    }
-
-    private static HttpResponse POST(Map<String, String> headers, String url, File body, String mimeType) {
-        if (postMethod.get() != null) {
-            postMethod.get().releaseConnection();
-        }
-        postMethod.set(new PostMethod(url));
-        postMethod.get().setDoAuthentication(true);
-        try {
-            if (headers != null) {
-                for (Map.Entry<String, String> entry : headers.entrySet()) {
-                    postMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
-                }
-            }
-            if (mimeType != null) {
-                postMethod.get().addRequestHeader("content-type", mimeType);
-            }
-
-            Part[] parts = {
-                new FilePart(body.getName(), body)
-            };
-
-            postMethod.get().setRequestEntity(new MultipartRequestEntity(parts, postMethod.get().getParams()));
-
-            httpClient.executeMethod(null, postMethod.get(), states.get());
-            return new HttpResponse(postMethod.get());
-        } catch (Exception e) {
-            postMethod.get().releaseConnection();
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Make a POST request<p/>
-     * Parameters are encoded using a <tt>application/x-www-form-urlencoded</tt> scheme.
-     * You cannot send <tt>multipart/form-data</tt> for now.
-     * @param url the request URL
-     * @param parameters the parameters to be posted
-     * @return server response {@link HttpResponse}
-     * @deprecated Use WS.url(url).params().post() instead.
-     */
-    public static HttpResponse POST(String url, Map<String, Object> parameters) {
-        return POST(null, url, parameters);
-    }
-
-    /**
-     * Make a POST request<p/>
-     * Parameters are encoded using a <tt>application/x-www-form-urlencoded</tt> scheme.
-     * You cannot send <tt>multipart/form-data</tt> for now.
-     * @param headers the request HTTP headers
-     * @param url the request URL
-     * @param parameters the parameters to be posted
-     * @return server response {@link HttpResponse}
-     * @deprecated Use WS.url(url).params().header().post() instead.
-     */
-    public static HttpResponse POST(Map<String, Object> headers, String url, Map<String, Object> parameters) {
-        if (postMethod.get() != null) {
-            postMethod.get().releaseConnection();
-        }
-        postMethod.set(new PostMethod(url));
-        postMethod.get().setDoAuthentication(true);
-        try {
-            if (headers != null) {
-                for (Map.Entry<String, Object> entry : headers.entrySet()) {
-                    postMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
-                }
-            }
-
-            postMethod.get().addRequestHeader("content-type", "application/x-www-form-urlencoded");
-
-            ArrayList<NameValuePair> nvps = new ArrayList<NameValuePair>();
-            for (Map.Entry<String, Object> entry : parameters.entrySet()) {
-                Object value = entry.getValue();
-                if (value instanceof Collection) {
-                    for (Object v : (Collection) value) {
-                        NameValuePair nvp = new NameValuePair();
-                        nvp.setName(entry.getKey());
-                        nvp.setValue(v.toString());
-                    }
-                } else {
-                    NameValuePair nvp = new NameValuePair();
-                    nvp.setName(entry.getKey());
-                    nvp.setValue(value.toString());
-                }
-            }
-
-            postMethod.get().setRequestBody(nvps.toArray(new NameValuePair[nvps.size()]));
-            httpClient.executeMethod(null, postMethod.get(), states.get());
-            return new HttpResponse(postMethod.get());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * POST some text data
-     * @param url resource URL
-     * @param body text content to be posted "as is", with not encoding
-     * @param mimeType the request content-type
-     * @return server response {@link HttpResponse}
-     * @deprecated Use WS.url(url).params().body().mimetype().post() instead.
-     */
-    public static HttpResponse POST(String url, String body, String mimeType) {
-        return POST((Map<String, Object>) null, url, body);
-    }
-
-    /**
-     * POST some text data
-     * @param headers extra request headers
-     * @param url resource URL
-     * @param body text content to be posted "as is"
-     * @return server response {@link HttpResponse}
-     * @deprecated Use WS.url().headers().body().post() instead
-     */
-    public static HttpResponse POST(Map<String, Object> headers, String url, String body) {
-        if (postMethod.get() != null) {
-            postMethod.get().releaseConnection();
-        }
-        postMethod.set(new PostMethod(url));
-        postMethod.get().setDoAuthentication(true);
-        try {
-            if (headers != null) {
-                for (Map.Entry<String, Object> entry : headers.entrySet()) {
-                    postMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
-                }
-            }
-
-            postMethod.get().setRequestEntity(new StringRequestEntity(body));
-
-            httpClient.executeMethod(null, postMethod.get(), states.get());
-            return new HttpResponse(postMethod.get());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Make a DELETE request
-     * @param url resource URL
-     * @return server response {@link HttpResponse}
-     * @deprecated Use WS.url().delete() instead.
-     */
-    public static HttpResponse DELETE(String url) {
-        return DELETE(null, url);
-    }
-
-    /**
-     * Make a DELETE request
-     * @param headers extra request headers
-     * @param url resource URL
-     * @return server response {@link HttpResponse}
-     * @deprecated Use WS.url().headers().delete() instead.
-     */
-    public static HttpResponse DELETE(Map<String, String> headers, String url) {
-        if (deleteMethod.get() != null) {
-            deleteMethod.get().releaseConnection();
-        }
-        deleteMethod.set(new DeleteMethod(url));
-        deleteMethod.get().setDoAuthentication(true);
-        try {
-            if (headers != null) {
-                for (Map.Entry<String, String> entry : headers.entrySet()) {
-                    deleteMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
-                }
-            }
-
-            httpClient.executeMethod(null, deleteMethod.get(), states.get());
-            return new HttpResponse(deleteMethod.get());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Make a HEAD request
-     * @param url resource URL
-     * @param params query parameters
-     * @return server response {@link HttpResponse}
-     * @deprecated Use WS.url().head() instead.
-     */
-    public static HttpResponse HEAD(String url, Object... params) {
-        return HEAD(null, url, params);
-    }
-
-    /**
-     * Make a HEAD request
-     * @param headers extra request headers
-     * @param url resource URL
-     * @param params query parameters
-     * @return server response {@link HttpResponse}
-     * @deprecated Use WS.url().headers().params().head() instead.
-     */
-    public static HttpResponse HEAD(Map<String, String> headers, String url, Object... params) {
-        url = String.format(url, params);
-        if (headMethod.get() != null) {
-            headMethod.get().releaseConnection();
-        }
-        headMethod.set(new HeadMethod(url));
-        headMethod.get().setDoAuthentication(true);
-        try {
-            if (headers != null) {
-                for (Map.Entry<String, String> entry : headers.entrySet()) {
-                    headMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
-                }
-            }
-            httpClient.executeMethod(null, headMethod.get(), states.get());
-            return new HttpResponse(headMethod.get());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Make a TRACE request
-     * @param url resource URL
-     * @param params query parameters
-     * @return server response {@link HttpResponse}
-     * @deprecated Use WS.url().trace() instead.
-     */
-    public static HttpResponse TRACE(String url, Object... params) {
-        return TRACE(null, url, params);
-    }
-
-    /**
-     * Make a TRACE request
-     * @param headers extra request headers
-     * @param url resource URL
-     * @param params query parameters
-     * @return the response
-     * @deprecated Use WS.url().headers().params().delete() instead.
-     */
-    public static HttpResponse TRACE(Map<String, String> headers, String url, Object... params) {
-        url = String.format(url, params);
-        if (traceMethod.get() != null) {
-            traceMethod.get().releaseConnection();
-        }
-        traceMethod.set(new TraceMethod(url));
-        traceMethod.get().setDoAuthentication(true);
-        try {
-            if (headers != null) {
-                for (Map.Entry<String, String> entry : headers.entrySet()) {
-                    traceMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
-                }
-            }
-            httpClient.executeMethod(null, traceMethod.get(), states.get());
-            return new HttpResponse(traceMethod.get());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Make a OPTIONS request
-     * @param url resource URL
-     * @param params query parameters
-     * @return the OPTIONS response
-     * @deprecated Use WS.url().options() instead.
-     */
-    public static HttpResponse OPTIONS(String url, Object... params) {
-        return OPTIONS(null, url, params);
-    }
-
-    /**
-     * Make a OPTIONS request
-     * @param headers extra request headers
-     * @param url resource URL
-     * @param params query parameters
-     * @return the OPTIONS response
-     * @deprecated Use WS.url().headers().params().options() instead.
-     */
-    public static HttpResponse OPTIONS(Map<String, String> headers, String url, Object... params) {
-        url = String.format(url, params);
-        if (optionsMethod.get() != null) {
-            optionsMethod.get().releaseConnection();
-        }
-        optionsMethod.set(new OptionsMethod(url));
-        optionsMethod.get().setDoAuthentication(true);
-        try {
-            if (headers != null) {
-                for (Map.Entry<String, String> entry : headers.entrySet()) {
-                    optionsMethod.get().addRequestHeader(entry.getKey(), entry.getValue() + "");
-                }
-            }
-            httpClient.executeMethod(null, optionsMethod.get(), states.get());
-            return new HttpResponse(optionsMethod.get());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**
@@ -662,6 +130,8 @@ public class WS extends PlayPlugin {
     public static class WSRequest {
 
         public String url;
+        public String username;
+        public String password;
         public String body;
         public FileParam[] fileParams;
         public Map<String, String> headers = new HashMap<String, String>();
@@ -671,52 +141,6 @@ public class WS extends PlayPlugin {
 
         private WSRequest(String url) {
             this.url = url;
-        }
-
-        private void checkRelease() {
-            if (httpMethod.get() != null) {
-                httpMethod.get().releaseConnection();
-            }
-        }
-
-        private void checkFileBody(EntityEnclosingMethod method) throws FileNotFoundException, UnsupportedEncodingException {
-            EntityEnclosingMethod putOrPost = method;
-            if (this.fileParams != null) {
-                //could be optimized, we know the size of this array.
-                List<Part> parts = new ArrayList<Part>();
-                for (int i = 0; i < this.fileParams.length; i++) {
-                    parts.add(new FilePart(this.fileParams[i].paramName, this.fileParams[i].file, MimeTypes.getMimeType(this.fileParams[i].file.getName()), null));
-                }
-                if (this.parameters != null) {
-                    for (String key : this.parameters.keySet()) {
-                        Object value = this.parameters.get(key);
-                        if (value instanceof Collection || value.getClass().isArray()) {
-                            Collection values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection) value;
-                            for (Object v : values) {
-                                parts.add(new StringPart(key, v.toString(), "utf-8"));
-                            }
-                        } else {
-                            parts.add(new StringPart(key, value.toString(), "utf-8"));
-                        }
-                    }
-                }
-                if (this.body != null) {
-                    throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
-                }
-                putOrPost.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[parts.size()]), putOrPost.getParams()));
-                return;
-            }
-            if (this.parameters != null && !this.parameters.isEmpty()) {
-                method.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                putOrPost.setRequestEntity(new StringRequestEntity(createQueryString(), "application/x-www-form-urlencoded", null));
-            }
-            if (this.body != null) {
-                if (this.parameters != null && !this.parameters.isEmpty()) {
-                    throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
-                }
-                putOrPost.setRequestEntity(new StringRequestEntity(this.body, null, null));
-            }
-
         }
 
         /**
@@ -729,13 +153,15 @@ public class WS extends PlayPlugin {
             return this;
         }
 
-        public WSRequest timeout(int to) {
-            this.timeout = to;
-            return this;
-        }
-
-        public WSRequest timeout(String duration) {
-            this.timeout = 1000 + Time.parseDuration(duration);
+        /**
+         * define client authentication for a server host 
+         * provided credentials will be used during the request
+         * @param username
+         * @param password
+         */
+        public WSRequest authenticate(String username, String password) {
+            this.username = username;
+            this.password = password;
             return this;
         }
 
@@ -828,70 +254,170 @@ public class WS extends PlayPlugin {
             return this;
         }
 
-        /** Execute a GET request.*/
+        /** Execute a GET request synchronously. */
         public HttpResponse get() {
-            return this.executeRequest(new GetMethod(this.url));
+            try {
+                return new HttpResponse(prepare(httpClient.prepareGet(url)).execute().get());
+            } catch (Exception e) {
+                Logger.error(e.toString());
+                throw new RuntimeException(e);
+            }
+        }
+
+        /** Execute a GET request asynchronously. */
+        public Future<HttpResponse> getAsync() {
+            return execute(httpClient.prepareGet(url));
         }
 
         /** Execute a POST request.*/
         public HttpResponse post() {
-            return this.executeRequest(new PostMethod(this.url));
+            try {
+                return new HttpResponse(prepare(httpClient.preparePost(url)).execute().get());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /** Execute a POST request asynchronously.*/
+        public Future<HttpResponse> postAsync() {
+            return execute(httpClient.preparePost(url));
         }
 
         /** Execute a PUT request.*/
         public HttpResponse put() {
-            return this.executeRequest(new PutMethod(this.url));
+            try {
+                return new HttpResponse(prepare(httpClient.preparePut(url)).execute().get());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /** Execute a PUT request asynchronously.*/
+        public Future<HttpResponse> putAsync() {
+            return execute(httpClient.preparePut(url));
         }
 
         /** Execute a DELETE request.*/
         public HttpResponse delete() {
-            return this.executeRequest(new DeleteMethod(this.url));
+            try {
+                return new HttpResponse(prepare(httpClient.prepareDelete(url)).execute().get());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /** Execute a DELETE request asynchronously.*/
+        public Future<HttpResponse> deleteAsync() {
+            return execute(httpClient.prepareDelete(url));
         }
 
         /** Execute a OPTIONS request.*/
         public HttpResponse options() {
-            return this.executeRequest(new OptionsMethod(this.url));
+            try {
+                return new HttpResponse(prepare(httpClient.prepareOptions(url)).execute().get());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /** Execute a OPTIONS request asynchronously.*/
+        public Future<HttpResponse> optionsAsync() {
+            return execute(httpClient.prepareOptions(url));
         }
 
         /** Execute a HEAD request.*/
         public HttpResponse head() {
-            return this.executeRequest(new HeadMethod(this.url));
+            try {
+                return new HttpResponse(prepare(httpClient.prepareHead(url)).execute().get());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /** Execute a HEAD request asynchronously.*/
+        public Future<HttpResponse> headAsync() {
+            return execute(httpClient.prepareHead(url));
         }
 
         /** Execute a TRACE request.*/
         public HttpResponse trace() {
-            return this.executeRequest(new TraceMethod(this.url));
+            try {
+                return new HttpResponse(prepare(httpClient.prepareTrace(url)).execute().get());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
-        private HttpResponse executeRequest(HttpMethod method) {
-            this.checkRelease();
-            httpMethod.set(method);
-            if (this.timeout != null) {
-                httpMethod.get().getParams().setSoTimeout(this.timeout);
+        /** Execute a TRACE request asynchronously.*/
+        public Future<HttpResponse> traceAsync() {
+            return execute(httpClient.prepareTrace(url));
+        }
+
+        private BoundRequestBuilder prepare(BoundRequestBuilder builder) {
+            checkFileBody(builder);
+            if (this.username != null && this.password != null) {
+                if (this.headers == null)
+                    this.headers = new HashMap<String, String>();
+                this.headers.put("Authorization", "Basic " + Codec.encodeBASE64(this.username + ":" + this.password));
             }
-            httpMethod.get().setDoAuthentication(true);
+            if (this.headers != null) {
+                for (String key: this.headers.keySet()) {
+                    builder.addHeader(key, headers.get(key));
+                }
+            }
+            return builder;
+        }
+
+        private Future<HttpResponse> execute(BoundRequestBuilder builder) {
             try {
-                if (this.headers != null) {
-                    for (String key : headers.keySet()) {
-                        httpMethod.get().addRequestHeader(key, headers.get(key) + "");
+                return prepare(builder).execute(new AsyncCompletionHandler<HttpResponse>() {
+                    @Override
+                    public HttpResponse onCompleted(Response response) throws Exception {
+                        return new HttpResponse(response);
+                    }
+                    @Override
+                    public void onThrowable(Throwable t) {
+                        throw new RuntimeException(t);
+                    }
+                });
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private void checkFileBody(BoundRequestBuilder builder) {
+            if (this.fileParams != null) {
+                //could be optimized, we know the size of this array.
+                for (int i = 0; i < this.fileParams.length; i++) {
+                    builder.addBodyPart(new FilePart(this.fileParams[i].paramName,
+                            this.fileParams[i].file,
+                            MimeTypes.getMimeType(this.fileParams[i].file.getName()),
+                            null));
+                }
+                if (this.parameters != null) {
+                    for (String key : this.parameters.keySet()) {
+                        Object value = this.parameters.get(key);
+                        if (value instanceof Collection<?> || value.getClass().isArray()) {
+                            Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
+                            for (Object v : values) {
+                                builder.addBodyPart(new StringPart(key, v.toString()));
+                            }
+                        } else {
+                            builder.addBodyPart(new StringPart(key, value.toString()));
+                        }
                     }
                 }
-                if (httpMethod.get() instanceof EntityEnclosingMethod) {
-                    this.checkFileBody((EntityEnclosingMethod) httpMethod.get());
-                } else if (this.fileParams != null) {
-                    throw new RuntimeException("Method " + httpMethod.get().getName() + " with file is not an option.");
-                } else if (this.parameters != null && !this.parameters.isEmpty()) {
-                    httpMethod.get().setQueryString(createQueryString());
+                return;
+            }
+            if (this.parameters != null && !this.parameters.isEmpty()) {
+                builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
+                builder.setBody(createQueryString());
+            }
+            if (this.body != null) {
+                if (this.parameters != null && !this.parameters.isEmpty()) {
+                    throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
                 }
-                if (mimeType != null) {
-                    httpMethod.get().setRequestHeader("Content-Type", mimeType);
-                }
-
-                httpClient.executeMethod(null, httpMethod.get(), states.get());
-                return new HttpResponse(httpMethod.get());
-            } catch (Exception e) {
-                httpMethod.get().releaseConnection();
-                throw new RuntimeException(e);
+                builder.setBody(this.body);
             }
         }
 
@@ -904,8 +430,8 @@ public class WS extends PlayPlugin {
                 Object value = this.parameters.get(key);
 
                 if (value != null) {
-                    if (value instanceof Collection || value.getClass().isArray()) {
-                        Collection values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection) value;
+                    if (value instanceof Collection<?> || value.getClass().isArray()) {
+                        Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
                         boolean first = true;
                         for (Object v : values) {
                             if (!first) {
@@ -921,10 +447,10 @@ public class WS extends PlayPlugin {
             }
             return sb.toString();
         }
+
     }
 
     public static class FileParam {
-
         File file;
         String paramName;
 
@@ -947,14 +473,14 @@ public class WS extends PlayPlugin {
      */
     public static class HttpResponse {
 
-        private HttpMethod method;
+        private Response response;
 
         /**
          * you shouldnt have to create an HttpResponse yourself
          * @param method
          */
-        public HttpResponse(HttpMethod method) {
-            this.method = method;
+        public HttpResponse(Response response) {
+            this.response = response;
         }
 
         /**
@@ -962,7 +488,7 @@ public class WS extends PlayPlugin {
          * @return the status code of the http response
          */
         public Integer getStatus() {
-            return this.method.getStatusCode();
+            return this.response.getStatusCode();
         }
 
         /**
@@ -970,15 +496,22 @@ public class WS extends PlayPlugin {
          * @return the content type of the http response
          */
         public String getContentType() {
-            return method.getResponseHeader("content-type").getValue();
+            return getHeader("content-type");
         }
 
         public String getHeader(String key) {
-            return method.getResponseHeader(key).getValue();
+            return response.getHeader(key);
         }
 
-        public Header[] getHeaders() {
-            return method.getResponseHeaders();
+        public List<Header> getHeaders() {
+            Headers hdrs = response.getHeaders();
+            List<Header> result = new ArrayList<Header>();
+            Iterator<Entry<String, List<String>>> iter = hdrs.iterator();
+            while (iter.hasNext()) {
+                Entry<String, List<String>> header = iter.next();
+                result.add(new Header(header.getKey(), header.getValue()));
+            }
+            return result;
         }
 
         /**
@@ -986,15 +519,7 @@ public class WS extends PlayPlugin {
          * @return a DOM document
          */
         public Document getXml() {
-            try {
-                String xml = method.getResponseBodyAsString();
-                StringReader reader = new StringReader(xml);
-                return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(reader));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } finally {
-                method.releaseConnection();
-            }
+            return getXml("UTF-8");
         }
 
         /**
@@ -1004,14 +529,12 @@ public class WS extends PlayPlugin {
          */
         public Document getXml(String encoding) {
             try {
-                InputSource source = new InputSource(method.getResponseBodyAsStream());
+                InputSource source = new InputSource(response.getResponseBodyAsStream());
                 source.setEncoding(encoding);
                 Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(source);
                 return doc;
             } catch (Exception e) {
                 throw new RuntimeException(e);
-            } finally {
-                method.releaseConnection();
             }
         }
 
@@ -1021,11 +544,9 @@ public class WS extends PlayPlugin {
          */
         public String getString() {
             try {
-                return method.getResponseBodyAsString();
+                return response.getResponseBody();
             } catch (Exception e) {
                 throw new RuntimeException(e);
-            } finally {
-                method.releaseConnection();
             }
         }
 
@@ -1035,7 +556,7 @@ public class WS extends PlayPlugin {
          */
         public InputStream getStream() {
             try {
-                return new ConnectionReleaserStream(method.getResponseBodyAsStream(), method);
+                return response.getResponseBodyAsStream();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -1048,78 +569,11 @@ public class WS extends PlayPlugin {
         public JsonElement getJson() {
             String json = "";
             try {
-                json = method.getResponseBodyAsString();
+                json = response.getResponseBody();
                 return new JsonParser().parse(json);
             } catch (Exception e) {
                 Logger.error("Bad JSON: \n%s", json);
                 throw new RuntimeException("Cannot parse JSON (check logs)", e);
-            } finally {
-                method.releaseConnection();
-            }
-        }
-
-        class ConnectionReleaserStream extends InputStream {
-
-            private InputStream wrapped;
-            private HttpMethod method;
-
-            public ConnectionReleaserStream(InputStream wrapped, HttpMethod method) {
-                this.wrapped = wrapped;
-                this.method = method;
-            }
-
-            @Override
-            public int read() throws IOException {
-                return this.wrapped.read();
-            }
-
-            @Override
-            public int read(byte[] arg0) throws IOException {
-                return this.wrapped.read(arg0);
-            }
-
-            @Override
-            public synchronized void mark(int arg0) {
-                this.wrapped.mark(arg0);
-            }
-
-            @Override
-            public int read(byte[] arg0, int arg1, int arg2) throws IOException {
-                return this.wrapped.read(arg0, arg1, arg2);
-            }
-
-            @Override
-            public synchronized void reset() throws IOException {
-                this.wrapped.reset();
-            }
-
-            @Override
-            public long skip(long arg0) throws IOException {
-                return this.wrapped.skip(arg0);
-            }
-
-            @Override
-            public int available() throws IOException {
-                return this.wrapped.available();
-            }
-
-            @Override
-            public boolean markSupported() {
-                return this.wrapped.markSupported();
-            }
-
-            @Override
-            public void close() throws IOException {
-                try {
-                    this.wrapped.close();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    if (method != null) {
-                        method.releaseConnection();
-                    }
-                }
-
             }
         }
     }
