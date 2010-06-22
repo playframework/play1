@@ -82,8 +82,18 @@ public class RestTest extends UnitTest {
     public void testParallelCalls() throws Exception {
         Future<HttpResponse> response = WS.url("http://localhost:9003/ressource/%s", "ééééééçççççç汉语漢語").getAsync();
         Future<HttpResponse> response2 = WS.url("http://localhost:9003/ressource/%s", "foobar").getAsync();
-        assertEquals("toto", response2.get().getString());
-        assertEquals("对!", response.get().getString());
+        int success = 0;
+        while (success < 2) {
+            if (response.isDone()) {
+                assertEquals("对!", response.get().getString());
+                success++;
+            }
+            if (response2.isDone()) {
+                assertEquals("toto", response2.get().getString());
+                success++;
+            }
+            Thread.sleep(1000);
+        }
     }
 
 }
