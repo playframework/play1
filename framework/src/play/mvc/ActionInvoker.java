@@ -41,7 +41,6 @@ import com.jamonapi.MonitorFactory;
  */
 public class ActionInvoker {
 
-    @SuppressWarnings("unchecked")
     public static void invoke(Http.Request request, Http.Response response) {
         Monitor monitor = null;
         try {
@@ -332,6 +331,7 @@ public class ActionInvoker {
 
     }
 
+    @SuppressWarnings("unchecked")
     public static void inferResult(Object o) {
         // Return type inference
         if (o != null) {

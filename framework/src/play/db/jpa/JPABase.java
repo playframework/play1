@@ -319,7 +319,7 @@ public class JPABase implements Serializable, play.db.Model {
         return findKey(this);
     }
 
-    public static Class findKeyType(Class c) {
+    public static Class<?> findKeyType(Class<?> c) {
         try {
             while (!c.equals(Object.class)) {
                 for (Field field : c.getDeclaredFields()) {
@@ -336,7 +336,7 @@ public class JPABase implements Serializable, play.db.Model {
         return null;
     }
 
-    public Class _getKeyType() {
+    public Class<?> _getKeyType() {
         return findKeyType(this.getClass());
     }
 
