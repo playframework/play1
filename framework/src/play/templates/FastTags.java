@@ -261,10 +261,11 @@ public class FastTags {
 
     public static String serialize(Map<?, ?> args, String... unless) {
         StringBuffer attrs = new StringBuffer();
-        for(Object o : args.keySet()) {
+        Arrays.sort(unless);
+        for (Object o: args.keySet()) {
             String attr = o.toString();
             String value = args.get(o) == null ? "" : args.get(o).toString();
-            if(Arrays.binarySearch(unless, attr) < 0 && !attr.equals("arg")) {
+            if (Arrays.binarySearch(unless, attr) < 0 && !attr.equals("arg")) {
                 attrs.append(attr);
                 attrs.append("=\"");
                 attrs.append(value);
