@@ -677,7 +677,7 @@ public class WS extends PlayPlugin {
         }
 
         public WSRequest timeout(String duration) {
-            this.timeout = 1000 + Time.parseDuration(duration);
+            this.timeout = 1000 * Time.parseDuration(duration);
             return this;
         }
 
