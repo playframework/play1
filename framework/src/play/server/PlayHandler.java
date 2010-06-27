@@ -335,12 +335,12 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         ChannelBuffer b = nettyRequest.getContent();
         if (b instanceof FileChannelBuffer) {
-            FileChannelBuffer buffer = (FileChannelBuffer) nettyRequest.getContent();
+            FileChannelBuffer buffer = (FileChannelBuffer) b;
             // An error occurred
             Integer max = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
-            if (max == -1 || buffer.getInputStream().available() < max) {
-                request.body = buffer.getInputStream();
-            } else {
+
+            request.body = buffer.getInputStream();
+            if (!(max == -1 || request.body.available() < max)) {
                 request.body = new ByteArrayInputStream(new byte[0]);
             }
 
@@ -353,7 +353,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         request.url = nettyRequest.getUri();
         request.host = nettyRequest.getHeader(HOST);
-
+        
         if (request.host.contains(":")) {
             final String[] host = request.host.split(":");
             request.port = Integer.parseInt(host[1]);
