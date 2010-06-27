@@ -378,13 +378,13 @@ public class Play {
             // Routes
             Router.detectChanges(NO_PREFIX);
 
+            // Cache
+            Cache.init();
+
             // Plugins
             for (PlayPlugin plugin : plugins) {
                 plugin.onApplicationStart();
             }
-
-            // Cache
-            Cache.init();
 
             if (firstStart) {
                 Logger.info("Application '%s' is now started !", configuration.getProperty("application.name", ""));
