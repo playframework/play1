@@ -27,6 +27,11 @@ public class JPA {
 
     static void createContext(EntityManager entityManager, boolean readonly) {
         if (local.get() != null) {
+            try {
+                local.get().entityManager.close();
+            } catch(Exception e) {
+                // Let's it fail
+            }
             local.remove();
         }
         JPA context = new JPA();
@@ -40,24 +45,8 @@ public class JPA {
     /*
      * Retrieve the current entityManager
      */ 
-    @Deprecated
-    public static EntityManager getEntityManager() {
-        return get().entityManager;
-    }
-    
-    /*
-     * Retrieve the current entityManager
-     */ 
     public static EntityManager em() {
         return get().entityManager;
-    }
-    
-    /*
-     * Tell to JPA do not commit the current transaction
-     */ 
-    @Deprecated
-    public static void abort() {
-        em().getTransaction().setRollbackOnly();
     }
     
     /*
