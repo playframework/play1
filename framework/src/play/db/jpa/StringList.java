@@ -21,7 +21,7 @@ public class StringList extends ArrayList<String> implements UserType {
     }
 
     public int[] sqlTypes() {
-        return new int[]{Types.VARCHAR};
+        return new int[] { Types.VARCHAR };
     }
 
     public Class<?> returnedClass() {
@@ -38,9 +38,12 @@ public class StringList extends ArrayList<String> implements UserType {
 
     public Object nullSafeGet(ResultSet inResultSet, String[] names, Object o) throws HibernateException, SQLException {
         char separator = getSeparator();
+        // TODO: Hibernate deprecated it without providing an alternative... Kinda silly.
+        // When we switch to 3.6, we should replace Hibernate.STRING to StringType.INSTANCE.
+        @SuppressWarnings("deprecation")
         String val = (String) Hibernate.STRING.nullSafeGet(inResultSet, names[0]);
         StringList stringList = new StringList();
-        for(String s : val.split(""+separator)) {
+        for(String s: val.split("" + separator)) {
             if(s.length() > 0) {
                 stringList.add(s);
             }
