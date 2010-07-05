@@ -2,6 +2,10 @@ from play.utils import *
 
 COMMANDS = ['secret']
 
+HELP = {
+    'secret': 'Generate a new secret key'
+}
+
 def execute(**kargs):
     app = kargs.get("app")
 

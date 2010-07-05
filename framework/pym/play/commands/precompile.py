@@ -6,6 +6,10 @@ from play.utils import *
 
 COMMANDS = ['precompile']
 
+HELP = {
+    'precompile': 'Precompile all Java sources and templates to speed up application start-up'
+}
+
 def execute(**kargs):
     command = kargs.get("command")
     app = kargs.get("app")

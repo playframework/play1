@@ -2,6 +2,10 @@
 
 COMMANDS = ['cp', 'classpath']
 
+HELP = {
+    'classpath': 'Display the computed classpath'
+}
+
 def execute(**kargs):
     command = kargs.get("command")
     app = kargs.get("app")

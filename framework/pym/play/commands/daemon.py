@@ -4,6 +4,14 @@ from play.utils import *
 
 COMMANDS = ['start', 'stop', 'restart', 'pid', 'out']
 
+HELP = {
+    'start': 'Start the application in the background',
+    'stop': 'Stop the running application',
+    'restart': 'Restart the running application',
+    'pid': 'Show the PID of the running application',
+    'out': 'Follow logs/system.out file'
+}
+
 def execute(**kargs):
     command = kargs.get("command")
     app = kargs.get("app")

@@ -8,6 +8,10 @@ from play.utils import *
 
 COMMANDS = ["war"]
 
+HELP = {
+    'war': 'Export the application as a standalone WAR archive'
+}
+
 def execute(**kargs):
     command = kargs.get("command")
     app = kargs.get("app")

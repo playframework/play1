@@ -19,6 +19,12 @@ IM = ['install']
 
 COMMANDS = NM + LM + BM + IM + AM
 
+HELP = {
+    'build-module': "Build and package a module",
+    'list-modules': "List modules available from the central modules repository",
+    'install': "Install a module"
+}
+
 DEFAULT_REPO = 'http://www.playframework.org'
 
 def load_module(name):

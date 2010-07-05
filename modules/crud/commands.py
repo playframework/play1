@@ -5,6 +5,10 @@ from play.utils import *
 
 COMMANDS = ['crud:ov', 'crud:override']
 
+HELP = {
+    'crud:override': 'Override a view'
+}
+
 # ~~~~~~~~~~~~~~~~~~~~~~ [crud:ov] Override a view
 def execute(**kargs):
     app = kargs.get("app")

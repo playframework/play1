@@ -6,6 +6,10 @@ from play.utils import *
 
 COMMANDS = ['javadoc', 'jd']
 
+HELP = {
+    'javadoc': 'Generate your application Javadoc'
+}
+
 def execute(**kargs):
     command = kargs.get("command")
     app = kargs.get("app")

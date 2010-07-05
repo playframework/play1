@@ -7,6 +7,11 @@ MODULE = "secure"
 
 COMMANDS = ["secure:", "secure:ov", "secure:override"]
 
+HELP = {
+    "secure:": "Show help for the secure module",
+    "secure:override": "Override the CSS, login or layout"
+}
+
 def execute(**kargs):
     command = kargs.get("command")
     app = kargs.get("app")

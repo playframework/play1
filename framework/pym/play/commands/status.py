@@ -9,6 +9,10 @@ from play.utils import *
 
 COMMANDS = ['status', 'st']
 
+HELP = {
+    'status': 'Display the running application\'s status'
+}
+
 def execute(**kargs):
     app = kargs.get("app")
     args = kargs.get("args")

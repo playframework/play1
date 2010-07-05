@@ -101,7 +101,7 @@ try:
             module = cmdloader.modules[name]
             if 'before' in dir(module):
                 module.before(command=play_command, app=play_app, args=remaining_args, env=play_env)
-        cmdloader.commands[play_command].execute(command=play_command, app=play_app, args=remaining_args, env=play_env)
+        cmdloader.commands[play_command].execute(command=play_command, app=play_app, args=remaining_args, env=play_env, cmdloader=cmdloader)
         for name in cmdloader.modules:
             module = cmdloader.modules[name]
             if 'after' in dir(module):

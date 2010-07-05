@@ -11,7 +11,16 @@ import time
 
 from play.utils import *
 
-COMMANDS = ['run', 'new', 'new,run', 'clean', 'clean,run', 'test', 'auto-test', 'id']
+COMMANDS = ['run', 'new', 'clean', 'test', 'auto-test', 'id', 'new,run', 'clean,run']
+
+HELP = {
+    'id': "Define the framework ID",
+    'new': "Create a new application",
+    'clean': "Delete temporary files (including the bytecode cache)",
+    'run': "Run the application in the current shell",
+    'test': "Run the application in test mode in the current shell",
+    'auto-test': "Automatically run all application tests"
+}
 
 def execute(**kargs):
     command = kargs.get("command")

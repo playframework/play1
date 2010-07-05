@@ -5,6 +5,10 @@ from play.utils import *
 
 COMMANDS = ['idealize', 'idea']
 
+HELP = {
+    'idealize': 'Create all IntelliJ Idea configuration files'
+}
+
 def execute(**kargs):
     command = kargs.get("command")
     app = kargs.get("app")

@@ -5,6 +5,10 @@ from play.utils import *
 
 COMMANDS = ['eclipsify', 'ec']
 
+HELP = {
+    'eclipsify': 'Create all Eclipse configuration files'
+}
+
 def execute(**kargs):
     app = kargs.get("app")
     args = kargs.get("args")

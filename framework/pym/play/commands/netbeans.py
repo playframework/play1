@@ -5,6 +5,10 @@ from play.utils import *
 
 COMMANDS = ['netbeansify', 'nb']
 
+HELP = {
+    'netbeansify': 'Create all NetBeans configuration files'
+}
+
 def execute(**kargs):
     command = kargs.get("command")
     app = kargs.get("app")
