@@ -72,7 +72,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
-     * Let a chance to this plugin to fully manage this request
+     * Give a chance to this plugin to fully manage this request
      * @param request The Play request
      * @param response The Play response
      * @return true if this plugin has managed this request
