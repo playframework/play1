@@ -31,6 +31,7 @@ import play.utils.Utils;
 import play.vfs.VirtualFile;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.ParseException;
@@ -51,10 +52,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         final Object msg = e.getMessage();
         if (msg instanceof HttpRequest) {
             final HttpRequest nettyRequest = (HttpRequest) msg;
-            final Request request = parseRequest(ctx, nettyRequest);
-            final Response response = new Response();
-
             try {
+            	final Request request = parseRequest(ctx, nettyRequest);
+            	final Response response = new Response();
+
                 Http.Response.current.set(response);
                 response.out = new ByteArrayOutputStream();
                 boolean raw = false;
@@ -318,7 +319,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
 
         final Request request = new Request();
-        request.remoteAddress = ctx.getChannel().getRemoteAddress().toString();
+        request.remoteAddress = ((InetSocketAddress)ctx.getChannel().getRemoteAddress()).getAddress().getHostAddress();
         request.method = nettyRequest.getMethod().getName();
         request.path = path;
         request.querystring = querystring;
@@ -365,7 +366,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         if (Play.configuration.containsKey("XForwardedSupport") && nettyRequest.getHeader("X-Forwarded-For") != null) {
             if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(",")).contains(request.remoteAddress)) {
-                throw new RuntimeException("This proxy request is not authorized");
+                throw new RuntimeException("This proxy request is not authorized: "+ request.remoteAddress);
             } else {
                 request.secure = ("https".equals(Play.configuration.get("XForwardedProto")) || "https".equals(nettyRequest.getHeader("X-Forwarded-Proto")) || "on".equals(nettyRequest.getHeader("X-Forwarded-Ssl")));
                 if (Play.configuration.containsKey("XForwardedHost")) {
