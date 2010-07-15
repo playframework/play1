@@ -20,6 +20,7 @@ import org.hibernate.type.Type;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
+import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.DB;
 import play.exceptions.JPAException;
 import play.utils.Utils;
@@ -167,6 +168,13 @@ public class JPAPlugin extends PlayPlugin {
                 } catch(Exception e) {
                     Logger.warn("JPA -> Entity not found: %s", entity);
                 }
+            }
+            for(ApplicationClass applicationClass : Play.classes.all()){
+            	if(applicationClass.isClass() || applicationClass.javaPackage == null)
+            		continue;
+            	Package p = applicationClass.javaPackage;
+                Logger.info("JPA -> Adding package: %s", p.getName());
+            	cfg.addPackage(p.getName());
             }
             Logger.trace("Initializing JPA ...");
             try {

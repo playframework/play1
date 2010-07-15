@@ -1,5 +1,6 @@
 package play.classloading;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -64,7 +65,7 @@ public class ApplicationClassloader extends ClassLoader {
      */
     @Override
     protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-        Class<?> c = findLoadedClass(name);
+    	Class<?> c = findLoadedClass(name);
         if (c != null) {
             return c;
         }
@@ -94,11 +95,17 @@ public class ApplicationClassloader extends ClassLoader {
                 byte[] code = IO.readContent(file);
                 Class<?> clazz = findLoadedClass(name);
                 if (clazz == null) {
+                	if(name.endsWith("package-info"))
+                		definePackage(getPackageName(name), null, null, null, null, null, null, null);
+                	else
+                		loadPackage(name);
                     clazz = defineClass(name, code, 0, code.length, protectionDomain);
                 }
                 ApplicationClass applicationClass = Play.classes.getApplicationClass(name);
                 if (applicationClass != null) {
                     applicationClass.javaClass = clazz;
+                    if(!applicationClass.isClass())
+                    	applicationClass.javaPackage = applicationClass.javaClass.getPackage();
                 }
                 return clazz;
             } catch (Exception e) {
@@ -113,10 +120,17 @@ public class ApplicationClassloader extends ClassLoader {
                 return applicationClass.javaClass;
             }
             byte[] bc = BytecodeCache.getBytecode(name, applicationClass.javaSource);
+            Logger.trace("Compiling code for %s", name);
+            if(!applicationClass.isClass())
+                definePackage(applicationClass.getPackage(), null, null, null, null, null, null, null);
+            else
+                loadPackage(name);
             if (bc != null) {
                 applicationClass.enhancedByteCode = bc;
                 applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
                 resolveClass(applicationClass.javaClass);
+                if(!applicationClass.isClass())
+                	applicationClass.javaPackage = applicationClass.javaClass.getPackage();
                 Logger.trace("%sms to load class %s from cache", System.currentTimeMillis() - start, name);
                 return applicationClass.javaClass;
             }
@@ -125,6 +139,8 @@ public class ApplicationClassloader extends ClassLoader {
                 applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
                 BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, name, applicationClass.javaSource);
                 resolveClass(applicationClass.javaClass);
+                if(!applicationClass.isClass())
+                	applicationClass.javaPackage = applicationClass.javaClass.getPackage();
                 Logger.trace("%sms to load class %s", System.currentTimeMillis() - start, name);
                 return applicationClass.javaClass;
             }
@@ -133,6 +149,27 @@ public class ApplicationClassloader extends ClassLoader {
         return null;
     }
 
+    private String getPackageName(String name) {
+    	int dot = name.lastIndexOf('.');
+    	return dot > -1 ? name.substring(0, dot) : "";
+	}
+
+	private void loadPackage(String className){
+    	// find the package class name
+    	int symbol = className.indexOf("$");
+        if (symbol > -1) {
+            className = className.substring(0, symbol);
+        }
+    	symbol = className.lastIndexOf(".");
+        if (symbol > -1) {
+            className = className.substring(0, symbol) + ".package-info";
+        }else{
+        	className = "package-info";
+        }
+        if(findLoadedClass(className) == null)
+        	loadApplicationClass(className);
+    }
+    
     /**
      * Search for the byte code of the given class.
      */
@@ -301,6 +338,7 @@ public class ApplicationClassloader extends ClassLoader {
             throw new RuntimeException("Path has changed");
         }
     }
+
     /**
      * Used to track change of the application sources path
      */
