@@ -147,7 +147,7 @@ Where we have tags, we need a tag cloud. Let’s add a method to the **Tag** cla
 
 bc. public static List<Map> getCloud() {
     List<Map> result = Tag.find(
-        "select new map(t.name as tag, count(p.id) as pound) from Post p join p.tags as t group by t.name"
+        "select new map(t.name as tag, count(p.id) as pound) from Post p join p.tags as t group by t.name order by t.name"
     ).fetch();
     return result;
 }
@@ -159,7 +159,7 @@ Let’s test it by adding one more check to our tags test:
 bc. ...
 List<Map> cloud = Tag.getCloud();
 assertEquals(
-    "[{tag=Red, pound=2}, {tag=Blue, pound=1}, {tag=Green, pound=1}]", 
+    "[{tag=Blue, pound=1}, {tag=Green, pound=1}, {tag=Red, pound=2}]", 
     cloud.toString()
 );
 
@@ -204,7 +204,7 @@ You need to restart your application to force loading of the new initial data se
 
 !images/guide6-1!
 
-Then modify the **#{display /}** tag to show the tag set on the **full** post view. Edit the **/yabe/app/views/tags/display/html** file:
+Then modify the **#{display /}** tag to show the tag set on the **full** post view. Edit the **/yabe/app/views/tags/display.html** file:
 
 bc. ...
 #{if _as != 'full'}

@@ -76,7 +76,6 @@ public class HttpHandler implements IoHandler {
         IoBuffer buffer = (IoBuffer) minaRequest.getContent();
 
         request.remoteAddress = ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
-        request.isLoopback = ((InetSocketAddress) session.getRemoteAddress()).getAddress().isLoopbackAddress();
         request.method = minaRequest.getMethod().toString().intern();
         request.path = URLDecoder.decode(uri.getRawPath(), "utf-8");
         request.querystring = uri.getQuery() == null ? "" : uri.getRawQuery();
@@ -123,6 +122,7 @@ public class HttpHandler implements IoHandler {
                 }
             }
         }
+        request.isLoopback = ((InetSocketAddress) session.getRemoteAddress()).getAddress().isLoopbackAddress() && request.host.matches("^127\\.0\\.0\\.1:?[0-9]*$");
 
         for (String key : minaRequest.getHeaders().keySet()) {
             Http.Header hd = new Http.Header();

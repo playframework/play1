@@ -50,7 +50,6 @@ You can get more help on any specific command using *play help any-command-name-
 
 bc. # play help run
 
-
 h2. <a>Creating a new application</a>
 
 Use the **new** command to create a new application. You must give a non-existent path where the application will be created.
