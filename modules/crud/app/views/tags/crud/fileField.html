@@ -1,13 +1,13 @@
 #{field 'object.' + _name}
-	<label for="${field.id}">
-		&{_name}
-	</label>
-	<input id="${field.id}" class="${field.errorClass}" type="file" name="${field.name}" />
-	#{ifError field.name}
-		<span class="error">${field.error}</span>
-	#{/ifError}
-	#{if _value && _value.get()}
-		<a class="currentAttachment" href="@{attachment(_id, _name)}">${_value.filename} (${_value.get().size().formatSize()})</a>
+    <label for="${field.id}">
+        &{_name}
+    </label>
+    <input id="${field.id}" class="${field.errorClass}" type="file" name="${field.name}" />
+    #{ifError field.name}
+        <span class="error">${field.error}</span>
+    #{/ifError}
+    #{if _value && _value.get()}
+        <a class="currentAttachment" href="@{attachment(_id, _name)}">${_value.filename} (${_value.get().size().formatSize()})</a>
         <span class="removeAttachment"><input type="checkbox" name="${field.name}_delete_" value="true" /> (delete)</span>
-	#{/if}
+    #{/if}
 #{/field}

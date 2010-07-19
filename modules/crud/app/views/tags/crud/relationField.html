@@ -1,51 +1,51 @@
 #{field 'object.' + _name}
-	<label for="${field.id}">
-		&{_name}
-	</label>
-	
-	#{if _field.multiple}
-		<input type="hidden" name="${field.name}@id" value="" />
-		<select id="${field.id}" name="${field.name}@id" multiple="yes">
-			%{ play.db.jpa.JPA.em().createQuery("from " + _field.relation).getResultList().sort{ it.toString() }.each() { }%
-			%{
-				selected = false;
-				if(field.error?.message != 'validation.required') {
-					if(params[field.name+'@id']) {
-						selected = params.getAll(field.name+'@id').contains(it.id.toString())
-					} else {
-						selected = _value?.contains(it)
-					}
-				}
-			}%
-			<option value="${it.id}" ${selected ? 'selected="true"'.raw() : ''}>${it}</option>
-			%{ } }%
-		</select>
-	#{/if}
-	#{else}
-		<select id="${field.id}" name="${field.name}@id">
-		    #{ifnot _field.required}
-                <option value="">&{'crud.none'}</option>              
-		    #{/ifnot}
-		    #{else}
+    <label for="${field.id}">
+        &{_name}
+    </label>
+
+    #{if _field.multiple}
+        <input type="hidden" name="${field.name}@id" value="" />
+        <select id="${field.id}" name="${field.name}@id" multiple="yes">
+            %{ play.db.jpa.JPA.em().createQuery("from " + _field.relation).getResultList().sort{ it.toString() }.each() { }%
+            %{
+                selected = false;
+                if(field.error?.message != 'validation.required') {
+                    if(params[field.name+'@id']) {
+                        selected = params.getAll(field.name+'@id').contains(it.id.toString())
+                    } else {
+                        selected = _value?.contains(it)
+                    }
+                }
+            }%
+            <option value="${it.id}" ${selected ? 'selected="true"'.raw() : ''}>${it}</option>
+            %{ } }%
+        </select>
+    #{/if}
+    #{else}
+        <select id="${field.id}" name="${field.name}@id">
+            #{ifnot _field.required}
+                <option value="">&{'crud.none'}</option>
+            #{/ifnot}
+            #{else}
                 <option value="">&{'crud.selectValue'}</option>
-		    #{/else}
-			%{ play.db.jpa.JPA.em().createQuery("from " + _field.relation).getResultList().sort{ it.toString() }.each() { }%
-			%{
-				selected = false
-				if(field.error?.message != 'validation.required') {
-					if(params[field.name+'@id']) {
-						selected = (it.id.toString() == params[field.name+'@id'])
-					} else {
-						selected = it.id == _value?.id
-					}
-				}
-			}%
-			<option value="${it.id}" ${selected ? 'selected="true"'.raw() : ''}>${it}</option>
-			%{ } }%
-		</select>
-	#{/else}
-	
-	#{ifError field.name}
-		<span class="error">${field.error}</span>
-	#{/ifError}
+            #{/else}
+            %{ play.db.jpa.JPA.em().createQuery("from " + _field.relation).getResultList().sort{ it.toString() }.each() { }%
+            %{
+                selected = false
+                if(field.error?.message != 'validation.required') {
+                    if(params[field.name+'@id']) {
+                        selected = (it.id.toString() == params[field.name+'@id'])
+                    } else {
+                        selected = it.id == _value?.id
+                    }
+                }
+            }%
+            <option value="${it.id}" ${selected ? 'selected="true"'.raw() : ''}>${it}</option>
+            %{ } }%
+        </select>
+    #{/else}
+
+    #{ifError field.name}
+        <span class="error">${field.error}</span>
+    #{/ifError}
 #{/field}
