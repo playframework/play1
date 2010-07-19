@@ -66,7 +66,8 @@ public class DBPlugin extends PlayPlugin {
                 ds.setBreakAfterAcquireFailure(true);
                 ds.setMaxPoolSize(Integer.parseInt(p.getProperty("db.pool.maxSize", "30")));
                 ds.setMinPoolSize(Integer.parseInt(p.getProperty("db.pool.minSize", "1")));
-                ds.setTestConnectionOnCheckout(true);
+                ds.setIdleConnectionTestPeriod(10);
+                ds.setTestConnectionOnCheckin(true);
                 DB.datasource = ds;
                 url = ds.getJdbcUrl();
                 Connection c = null;
