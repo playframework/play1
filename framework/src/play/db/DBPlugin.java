@@ -60,10 +60,9 @@ public class DBPlugin extends PlayPlugin {
                 ds.setJdbcUrl(p.getProperty("db.url"));
                 ds.setUser(p.getProperty("db.user"));
                 ds.setPassword(p.getProperty("db.pass"));
-                ds.setAcquireRetryAttempts(1);
-                ds.setAcquireRetryDelay(0);
+                ds.setAcquireRetryAttempts(10);
                 ds.setCheckoutTimeout(Integer.parseInt(p.getProperty("db.pool.timeout", "5000")));
-                ds.setBreakAfterAcquireFailure(true);
+                ds.setBreakAfterAcquireFailure(false);
                 ds.setMaxPoolSize(Integer.parseInt(p.getProperty("db.pool.maxSize", "30")));
                 ds.setMinPoolSize(Integer.parseInt(p.getProperty("db.pool.minSize", "1")));
                 ds.setIdleConnectionTestPeriod(10);
