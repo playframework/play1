@@ -12,6 +12,6 @@ def execute(**kargs):
     app.check()
     print "~ Generating the secret key..."
     sk = secretKey()
-    replaceAll(os.path.join(app.path, 'conf', 'application.conf'), r'application.secret=.*', 'application.secret=%s' % sk)
+    replaceAll(os.path.join(app.path, 'conf', 'application.conf'), r'application.secret=.*', 'application.secret=%s' % sk, True)
     print "~ Keep the secret : %s" % sk
     print "~"

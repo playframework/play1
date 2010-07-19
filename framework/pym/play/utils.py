@@ -7,12 +7,13 @@ import getopt
 import shutil
 
 
-def replaceAll(file, searchExp, replaceExp):
-    replaceExp = replaceExp.replace('\\', '\\\\')
-    searchExp = searchExp.replace('$', '\\$')
-    searchExp = searchExp.replace('{', '\\{')
-    searchExp = searchExp.replace('}', '\\}')
-    searchExp = searchExp.replace('.', '\\.')
+def replaceAll(file, searchExp, replaceExp, regexp=False):
+    if not regexp:
+        replaceExp = replaceExp.replace('\\', '\\\\')
+        searchExp = searchExp.replace('$', '\\$')
+        searchExp = searchExp.replace('{', '\\{')
+        searchExp = searchExp.replace('}', '\\}')
+        searchExp = searchExp.replace('.', '\\.')
     for line in fileinput.input(file, inplace=1):
         line = re.sub(searchExp, replaceExp, line)
         sys.stdout.write(line)

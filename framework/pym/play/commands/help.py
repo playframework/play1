@@ -51,7 +51,5 @@ def main_help(commands):
     print "~ Also refer to documentation at http://www.playframework.org/documentation"
     print "~"
 
-playdir = sys.argv[0][:(len(sys.argv[0]) - 5)] + "/framework/pym/play/commands"
-print playdir
 def isCode(mod):
     return mod.__file__.find(playdir) == 0
