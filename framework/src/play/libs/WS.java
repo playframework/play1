@@ -65,7 +65,8 @@ public class WS extends PlayPlugin {
         httpClient.close();
     }
 
-    static {
+    @Override
+    public void onApplicationStart() {
         String proxyHost = Play.configuration.getProperty("http.proxyHost", System.getProperty("http.proxyHost"));
         String proxyPort = Play.configuration.getProperty("http.proxyPort", System.getProperty("http.proxyPort"));
         String proxyUser = Play.configuration.getProperty("http.proxyUser", System.getProperty("http.proxyUser"));
@@ -190,8 +191,8 @@ public class WS extends PlayPlugin {
          * @param body
          * @return the WSRequest for chaining.
          */
-        public WSRequest body(String body) {
-            this.body = body;
+        public WSRequest body(Object body) {
+            this.body = body == null ? "" : body.toString();
             return this;
         }
 

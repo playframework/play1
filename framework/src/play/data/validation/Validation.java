@@ -118,6 +118,10 @@ public class Validation {
     public static boolean hasError(String field) {
         return error(field) != null;
     }
+
+    public static void clear() {
+        current.get().clear();;
+    }
     
     // ~~~~ Integration helper
     

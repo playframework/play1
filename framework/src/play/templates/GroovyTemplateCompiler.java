@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import play.Play;
+import play.PlayPlugin;
 import play.exceptions.TemplateCompilationException;
 import play.templates.GroovyInlineTags.CALL;
 
@@ -25,6 +26,9 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     public Template compile(Template template) {
         try {
             extensionsClassnames.clear();
+            for(PlayPlugin p : Play.plugins) {
+                extensionsClassnames.addAll(p.addTemplateExtensions());
+            }
             List<Class> extensionsClasses = Play.classloader.getAssignableClasses(JavaExtensions.class);
             for (Class extensionsClass : extensionsClasses) {
                 extensionsClassnames.add(extensionsClass.getName());

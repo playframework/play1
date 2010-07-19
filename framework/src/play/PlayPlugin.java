@@ -3,6 +3,7 @@ package play;
 import java.lang.annotation.Annotation;
 import com.google.gson.JsonObject;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import play.classloading.ApplicationClasses.ApplicationClass;
@@ -199,6 +200,10 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     public void onClassesChange(List<ApplicationClass> modified) {
+    }
+
+    public List<String> addTemplateExtensions() {
+        return new ArrayList<String>();
     }
 
     /**
