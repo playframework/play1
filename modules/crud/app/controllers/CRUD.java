@@ -103,7 +103,7 @@ public abstract class CRUD extends Controller {
     public static void create() throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
-        Constructor constructor = type.entityClass.getDeclaredConstructor();
+        Constructor<?> constructor = type.entityClass.getDeclaredConstructor();
         constructor.setAccessible(true);
         Model object = (Model) constructor.newInstance();
         play.db.jpa.JPASupport.edit(object, "object", params.all(), null);
@@ -145,7 +145,7 @@ public abstract class CRUD extends Controller {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
     public @interface For {
-        Class value();
+        Class<? extends Model> value();
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -159,27 +159,28 @@ public abstract class CRUD extends Controller {
 
     public static class ObjectType implements Comparable<ObjectType> {
 
-        public Class<? extends CRUD> controllerClass;
+        public Class<? extends Controller> controllerClass;
         public Class<? extends Model> entityClass;
         public String name;
         public String modelName;
         public String controllerName;
 
-        public ObjectType(Class modelClass) {
+        public ObjectType(Class<? extends Model> modelClass) {
             this.modelName = modelClass.getSimpleName();
             this.entityClass = modelClass;
         }
 
+        @SuppressWarnings("unchecked")
         public ObjectType(String modelClass) throws ClassNotFoundException {
-            this(Play.classloader.loadClass(modelClass));
+            this((Class<? extends Model>) Play.classloader.loadClass(modelClass));
         }
 
         public static ObjectType forClass(String modelClass) throws ClassNotFoundException {
             return new ObjectType(modelClass);
         }
 
-        public static ObjectType get(Class controllerClass) {
-            Class entityClass = getEntityClassForController(controllerClass);
+        public static ObjectType get(Class<? extends Controller> controllerClass) {
+            Class<? extends Model> entityClass = getEntityClassForController(controllerClass);
             if (entityClass == null || !Model.class.isAssignableFrom(entityClass)) {
                 return null;
             }
@@ -190,22 +191,23 @@ public abstract class CRUD extends Controller {
             return type;
         }
 
-        public static Class getEntityClassForController(Class controllerClass) {
+        @SuppressWarnings("unchecked")
+        public static Class<? extends Model> getEntityClassForController(Class<? extends Controller> controllerClass) {
             if (controllerClass.isAnnotationPresent(For.class)) {
                 return ((For) (controllerClass.getAnnotation(For.class))).value();
             }
             for(Type it : controllerClass.getGenericInterfaces()) {
                 if(it instanceof ParameterizedType) {
                     ParameterizedType type = (ParameterizedType)it;
-                    if(((Class)type.getRawType()).getSimpleName().equals("CRUDWrapper")) {
-                        return (Class)type.getActualTypeArguments()[0];
+                    if (((Class<?>)type.getRawType()).getSimpleName().equals("CRUDWrapper")) {
+                        return (Class<? extends Model>)type.getActualTypeArguments()[0];
                     }
-                }                
+                }
             }
             String name = controllerClass.getSimpleName().replace("$", "");
             name = "models." + name.substring(0, name.length() - 1);
             try {
-                return Play.classloader.loadClass(name);
+                return (Class<? extends Model>) Play.classloader.loadClass(name);
             } catch (ClassNotFoundException e) {
                 return null;
             }
@@ -237,7 +239,8 @@ public abstract class CRUD extends Controller {
             return Long.decode(query.getSingleResult().toString());
         }
 
-        public List findPage(int page, String search, String searchFields, String orderBy, String order, String where) {
+        @SuppressWarnings("unchecked")
+        public List<Model> findPage(int page, String search, String searchFields, String orderBy, String order, String where) {
             int pageLength = getPageSize();
             String q = "from " + entityClass.getName();
             if (search != null && !search.equals("")) {
@@ -298,7 +301,7 @@ public abstract class CRUD extends Controller {
         }
 
         public List<ObjectField> getFields() {
-            List fields = new ArrayList();
+            List<ObjectField> fields = new ArrayList<ObjectField>();
             for (Field f : entityClass.getDeclaredFields()) {
                 if (Modifier.isTransient(f.getModifiers())) {
                     continue;
@@ -381,7 +384,7 @@ public abstract class CRUD extends Controller {
                     }
                 }
                 if (Collection.class.isAssignableFrom(field.getType())) {
-                    Class fieldType = (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                    Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                     if (field.isAnnotationPresent(OneToMany.class)) {
                         if (field.getAnnotation(OneToMany.class).mappedBy().equals("")) {
                             type = "relation";

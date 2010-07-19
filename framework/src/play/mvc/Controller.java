@@ -660,7 +660,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      * Retrieve the controller class
      * @return Annotation object or null if not found
      */
-    protected static Class<?> getControllerClass() {
+    protected static Class<? extends Controller> getControllerClass() {
         return Http.Request.current().controllerClass;
     }
 

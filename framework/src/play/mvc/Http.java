@@ -189,7 +189,7 @@ public class Http {
         /**
          * The invoked controller class
          */
-        public transient Class<?> controllerClass;
+        public transient Class<? extends Controller> controllerClass;
         /**
          * Free space to store your request specific data
          */
