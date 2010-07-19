@@ -145,9 +145,12 @@ public abstract class CRUD extends Controller {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
     public @interface For {
-
         Class value();
     }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface Exclude {}
 
     // ~~~~~~~~~~~~~
     static int getPageSize() {
@@ -298,6 +301,9 @@ public abstract class CRUD extends Controller {
             List fields = new ArrayList();
             for (Field f : entityClass.getDeclaredFields()) {
                 if (Modifier.isTransient(f.getModifiers())) {
+                    continue;
+                }
+                if (f.isAnnotationPresent(Exclude.class)) {
                     continue;
                 }
                 ObjectField of = new ObjectField(f);
