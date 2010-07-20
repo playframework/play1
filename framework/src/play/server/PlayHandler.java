@@ -149,7 +149,14 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         @Override
         public void execute() throws Exception {
-            Logger.trace("execute: begin");
+            if (!ctx.getChannel().isConnected()) {
+                try {
+                    ctx.getChannel().close();
+                } catch (Throwable e) {
+                    // Ignore
+                }
+                return;
+            }
             ActionInvoker.invoke(request, response);
             saveExceededSizeError(nettyRequest, response);
             copyResponse(ctx, request, response, nettyRequest);
