@@ -5,7 +5,6 @@
 
         <select id="${field.id}" name="${field.name}">
                 %{ _property.choices.each() { }%
-                name=${it.name()} ord=${it.ordinal()}
                 %{
                         selected = false;
                         if(field.error?.message != 'validation.required') {
@@ -14,7 +13,7 @@
                         label = messages.get( _property.relation +'.' + it );
 
                 }%
-                <option value="${it}" ${selected ? 'selected="true"'.raw() : ''}>${label}</option>
+                <option name="${it.name()}" ord="${it.ordinal()}" value="${it.name()}" ${selected ? 'selected="true"'.raw() : ''}>${label}</option>
                 %{ } }%
         </select>
 

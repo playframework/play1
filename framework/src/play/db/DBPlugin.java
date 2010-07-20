@@ -33,10 +33,10 @@ public class DBPlugin extends PlayPlugin {
 
                 Properties p = Play.configuration;
 
-                if(p.getProperty("db", "").startsWith("java:")) {
+                if (p.getProperty("db", "").startsWith("java:")) {
 
                     Context ctx = new InitialContext();
-                    DB.datasource = (DataSource)ctx.lookup(p.getProperty("db"));
+                    DB.datasource = (DataSource) ctx.lookup(p.getProperty("db"));
 
                 } else {
 
@@ -70,13 +70,13 @@ public class DBPlugin extends PlayPlugin {
                     ds.setJdbcUrl(p.getProperty("db.url"));
                     ds.setUser(p.getProperty("db.user"));
                     ds.setPassword(p.getProperty("db.pass"));
-                    ds.setAcquireRetryAttempts(1);
-                    ds.setAcquireRetryDelay(0);
+                    ds.setAcquireRetryAttempts(10);
                     ds.setCheckoutTimeout(Integer.parseInt(p.getProperty("db.pool.timeout", "5000")));
-                    ds.setBreakAfterAcquireFailure(true);
+                    ds.setBreakAfterAcquireFailure(false);
                     ds.setMaxPoolSize(Integer.parseInt(p.getProperty("db.pool.maxSize", "30")));
                     ds.setMinPoolSize(Integer.parseInt(p.getProperty("db.pool.minSize", "1")));
-                    ds.setTestConnectionOnCheckout(true);
+                    ds.setIdleConnectionTestPeriod(10);
+                    ds.setTestConnectionOnCheckin(true);
                     DB.datasource = ds;
                     url = ds.getJdbcUrl();
                     Connection c = null;
@@ -148,7 +148,7 @@ public class DBPlugin extends PlayPlugin {
             p.put("db.pass", "");
         }
 
-        if(p.getProperty("db","").startsWith("java:")) {
+        if (p.getProperty("db", "").startsWith("java:")) {
             if (DB.datasource == null) {
                 return true;
             }
@@ -160,9 +160,13 @@ public class DBPlugin extends PlayPlugin {
             String password = m.group("pwd");
             String name = m.group("name");
             p.put("db.driver", "com.mysql.jdbc.Driver");
-            p.put("db.url", "jdbc:mysql://localhost/"+name+"?useUnicode=yes&characterEncoding=UTF-8&connectionCollation=utf8_general_ci");
-            if(user != null) p.put("db.user", user);
-            if(password != null) p.put("db.pass", password);
+            p.put("db.url", "jdbc:mysql://localhost/" + name + "?useUnicode=yes&characterEncoding=UTF-8&connectionCollation=utf8_general_ci");
+            if (user != null) {
+                p.put("db.user", user);
+            }
+            if (password != null) {
+                p.put("db.pass", password);
+            }
         }
 
         if ((p.getProperty("db.driver") == null) || (p.getProperty("db.url") == null)) {

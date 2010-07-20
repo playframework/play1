@@ -53,6 +53,7 @@ import play.utils.Java;
 import play.mvc.ActionInvoker;
 import play.mvc.Http.Request;
 import play.mvc.Router;
+import play.utils.HTML;
 
 /**
  * A template
@@ -351,7 +352,7 @@ public class GroovyTemplate extends Template {
             if (!template.name.endsWith(".html") || TagContext.hasParentTag("verbatim")) {
                 return val.toString();
             }
-            return StringEscapeUtils.escapeHtml(val.toString());
+            return HTML.htmlEscape(val.toString());
         }
 
         public Object get(String key) {

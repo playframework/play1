@@ -36,16 +36,16 @@ public class JPAPlugin extends PlayPlugin {
     @Override
     public Object bind(String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations, Map<String, String[]> params) {
         // TODO need to be more generic in order to work with JPASupport
-        if(JPABase.class.isAssignableFrom(clazz)) {
-            String idKey = name + ".id"; 
-            if(params.containsKey(idKey) && params.get(idKey).length > 0 && params.get(idKey)[0] != null && params.get(idKey)[0].trim().length() > 0) {
+        if (JPABase.class.isAssignableFrom(clazz)) {
+            String idKey = name + ".id";
+            if (params.containsKey(idKey) && params.get(idKey).length > 0 && params.get(idKey)[0] != null && params.get(idKey)[0].trim().length() > 0) {
                 String id = params.get(idKey)[0];
                 try {
                     Query query = JPA.em().createQuery("from " + clazz.getName() + " o where o.id = ?");
                     query.setParameter(1, play.data.binding.map.OldBinder.directBind(annotations, id + "", play.db.jpa.JPASupport.findKeyType(clazz)));
                     Object o = query.getSingleResult();
                     return JPASupport.edit(o, name, params, annotations);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     return null;
                 }
             }
@@ -62,7 +62,7 @@ public class JPAPlugin extends PlayPlugin {
                 return;
             }
 
- 	    final String dataSource = Play.configuration.getProperty("hibernate.connection.datasource");
+            final String dataSource = Play.configuration.getProperty("hibernate.connection.datasource");
             if (StringUtils.isEmpty(dataSource) && DB.datasource == null) {
                 throw new JPAException("Cannot start a JPA manager without a properly configured database", new NullPointerException("No datasource configured"));
             }
@@ -161,20 +161,27 @@ public class JPAPlugin extends PlayPlugin {
                 }
             }
             String[] moreEntities = Play.configuration.getProperty("jpa.entities", "").split(", ");
-            for(String entity : moreEntities) {
-                if(entity.trim().equals("")) continue;
+            for (String entity : moreEntities) {
+                if (entity.trim().equals("")) {
+                    continue;
+                }
                 try {
                     cfg.addAnnotatedClass(Play.classloader.loadClass(entity));
-                } catch(Exception e) {
+                } catch (Exception e) {
                     Logger.warn("JPA -> Entity not found: %s", entity);
                 }
             }
-            for(ApplicationClass applicationClass : Play.classes.all()){
-            	if(applicationClass.isClass() || applicationClass.javaPackage == null)
-            		continue;
-            	Package p = applicationClass.javaPackage;
+            for (ApplicationClass applicationClass : Play.classes.all()) {
+                if (applicationClass.isClass() || applicationClass.javaPackage == null) {
+                    continue;
+                }
+                Package p = applicationClass.javaPackage;
                 Logger.info("JPA -> Adding package: %s", p.getName());
-            	cfg.addPackage(p.getName());
+                cfg.addPackage(p.getName());
+            }
+            String mappingFile = Play.configuration.getProperty("jpa.mapping-file", "");
+            if (mappingFile != null && mappingFile.length() > 0) {
+                cfg.addResource(mappingFile);
             }
             Logger.trace("Initializing JPA ...");
             try {
@@ -227,11 +234,10 @@ public class JPAPlugin extends PlayPlugin {
         } else if ("org.firebirdsql.jdbc.FBDriver".equals(driver)) {
             return "org.hibernate.dialect.FirebirdDialect";
         } else {
-            throw new UnsupportedOperationException("I do not know which hibernate dialect to use with " +
-                    driver + " and I cannot guess it, use the property jpa.dialect in config file");
+            throw new UnsupportedOperationException("I do not know which hibernate dialect to use with "
+                    + driver + " and I cannot guess it, use the property jpa.dialect in config file");
         }
     }
-
 
     @Override
     public void onApplicationStop() {
@@ -277,7 +283,7 @@ public class JPAPlugin extends PlayPlugin {
         }
         EntityManager manager = JPA.entityManagerFactory.createEntityManager();
         //if(Play.configuration.getProperty("future.bindJPAObjects", "false").equals("true")) {
-            manager.setFlushMode(FlushModeType.COMMIT);
+        manager.setFlushMode(FlushModeType.COMMIT);
         //}
         if (autoTxs) {
             manager.getTransaction().begin();
@@ -315,7 +321,7 @@ public class JPAPlugin extends PlayPlugin {
                                     break;
                                 }
                             }
-                           throw new JPAException("Cannot commit", e);
+                            throw new JPAException("Cannot commit", e);
                         }
                     }
                 }
