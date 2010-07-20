@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.codehaus.groovy.control.CompilationUnit;
 import org.codehaus.groovy.control.CompilationUnit.GroovyClassOperation;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -56,6 +55,7 @@ import play.utils.Java;
 import play.mvc.ActionInvoker;
 import play.mvc.Http.Request;
 import play.mvc.Router;
+import play.utils.HTML;
 
 /**
  * A template
@@ -414,7 +414,7 @@ public class Template {
             if (!template.name.endsWith(".html") || TagContext.hasParentTag("verbatim")) {
                 return val.toString();
             }
-            return StringEscapeUtils.escapeHtml(val.toString());
+            return HTML.htmlEscape(val.toString());
         }
 
         public Object get(String key) {
