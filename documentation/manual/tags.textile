@@ -201,7 +201,7 @@ Cleaner alternative to #{if !condition}
 
 bc. #{ifnot tasks}
     No tasks today
-#{/if}
+#{/ifnot}
 
 
 h2. <a>include</a>
