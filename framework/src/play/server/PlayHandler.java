@@ -26,6 +26,7 @@ import play.mvc.Router;
 import play.mvc.Scope;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
+import play.templates.JavaExtensions;
 import play.templates.TemplateLoader;
 import play.utils.Utils;
 import play.vfs.VirtualFile;
@@ -158,13 +159,13 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 return;
             }
             ActionInvoker.invoke(request, response);
-            saveExceededSizeError(nettyRequest, response);
+            saveExceededSizeError(nettyRequest, request, response);
             copyResponse(ctx, request, response, nettyRequest);
             Logger.trace("execute: end");
         }
     }
 
-    void saveExceededSizeError(HttpRequest nettyRequest, Response response) {
+    void saveExceededSizeError(HttpRequest nettyRequest, Request request, Response response) {
 
         String warning = nettyRequest.getHeader(HttpHeaders.Names.WARNING);
         String length = nettyRequest.getHeader(HttpHeaders.Names.CONTENT_LENGTH);
@@ -172,23 +173,34 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             try {
                 StringBuilder error = new StringBuilder();
                 error.append("\u0000");
-                error.append(warning);
+                // Cannot put warning which is play.netty.content.length.exceeded
+                // as Key as it will result error when printing error
+                error.append("play.netty.maxContentLength");
                 error.append(":");
-                error.append(Messages.get(warning, length));
+                String size = null;
+                try {
+                    size = JavaExtensions.formatSize(Long.parseLong(length));
+                } catch (Exception e) {
+                    size = length + " bytes";
+                }
+                error.append(Messages.get(warning, size));
+                error.append("\u0001");
+                error.append(size);
                 error.append("\u0000");
-                if (response.cookies.get(Scope.COOKIE_PREFIX + "_ERRORS") != null && response.cookies.get(Scope.COOKIE_PREFIX + "_ERRORS").value != null) {
-                    error.append(response.cookies.get(Scope.COOKIE_PREFIX + "_ERRORS").value);
+                if (request.cookies.get(Scope.COOKIE_PREFIX + "_ERRORS") != null && request.cookies.get(Scope.COOKIE_PREFIX + "_ERRORS").value != null) {
+                    error.append(request.cookies.get(Scope.COOKIE_PREFIX + "_ERRORS").value);
                 }
                 String errorData = URLEncoder.encode(error.toString(), "utf-8");
                 Http.Cookie c = new Http.Cookie();
                 c.value = errorData;
                 c.name = Scope.COOKIE_PREFIX + "_ERRORS";
-                response.cookies.put(Scope.COOKIE_PREFIX + "_ERRORS", c);
+                request.cookies.put(Scope.COOKIE_PREFIX + "_ERRORS", c);
             } catch (Exception e) {
                 throw new UnexpectedException("Error serialization problem", e);
             }
         }
     }
+
 
     protected static void addToResponse(Response response, HttpResponse nettyResponse) {
         Map<String, Http.Header> headers = response.headers;
