@@ -249,8 +249,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
-            Logger.trace("writeResponse: content length [" + content.length + "]");
-            setContentLength(nettyResponse, content.length);
+            Logger.trace("writeResponse: content length [" + response.out.size() + "]");
+            setContentLength(nettyResponse, response.out.size());
         }
 
         ChannelFuture f = ctx.getChannel().write(nettyResponse);
@@ -730,7 +730,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         long last = file.lastModified();
         final String etag = "\"" + last + "-" + file.hashCode() + "\"";
         if (!isModified(etag, last, nettyRequest)) {
-            httpResponse.setStatus(HttpResponseStatus.NOT_MODIFIED);
+            if (nettyRequest.getMethod().equals(HttpMethod.GET)) {
+                httpResponse.setStatus(HttpResponseStatus.NOT_MODIFIED);
+            }
             if (useEtag) {
                 httpResponse.setHeader(ETAG, etag);
             }
