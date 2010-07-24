@@ -167,7 +167,7 @@ public class Http {
          */
         public transient InputStream body;
         /**
-         * Additinal HTTP params extracted from route
+         * Additional HTTP params extracted from route
          */
         public Map<String, String> routeArgs;
         /**
