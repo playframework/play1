@@ -4,7 +4,7 @@ Creating automatic test suites for your application is a good way to make it rob
 
 Play tests are built using "JUnit 4":http://www.junit.org/ or "Selenium":http://seleniumhq.org/ depending what you want to test. 
 
-h2. <a>Writing tests</a>
+h2. <a name="writing">Writing tests</a>
 
 The tests must be created in the **test/** directory. This folder will only be added to sources path when the application is run in **test** mode. You can write 3 differents kind of test.
 
@@ -75,7 +75,7 @@ bc. #{selenium 'Test security'}
  
 #{/selenium}
 
-h2. <a>Fixtures</a>
+h2. <a name="fixtures">Fixtures</a>
 
 When you run tests, you need to have stable data for your application. The simplest way is to reset your database before each test.
 
@@ -118,7 +118,7 @@ bc. #{fixture delete:'all', load:'data.yml' /}
  
 #{/selenium}
 
-h2. <a>Running the tests</a>
+h2. <a name="running">Running the tests</a>
 
 To run the tests, you must run your application in **test** mode using the **play test** command.
 
@@ -139,7 +139,7 @@ For example:
 bc. %test.db=mem
 %test.jpa.ddl=create-drop
 
-h2. <a>Continuous integration, and running the tests automatically</a>
+h2. <a name="continuous">Continuous integration, and running the tests automatically</a>
 
 The **auto-test** command do the same than the **test** command, but it automatically launch a browser, run all the tests, and stop.
 

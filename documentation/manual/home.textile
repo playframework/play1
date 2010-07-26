@@ -56,8 +56,8 @@ Everything you need to know about Play.
 # "Controllers":controllers
 ## "A Controller overview":controllers#overview
 ## "Retrieve HTTP parameters":controllers#params
+## "Advanced HTTP to Java binding":controllers#binding
 ## "Return a result":controllers#result
-## "Action chaining":controllers#chaining
 ## "Interceptions":controllers#interceptions
 ## "Session and Flash scopes":controllers#session
 # "The template engine":templates
@@ -77,14 +77,14 @@ Everything you need to know about Play.
 ## "Suspendable requests":jobs#suspendable
 # "Testing the application":test
 ## "Writing tests":test#writing
-## "Running the tests":test#running
 ## "Fixtures":test#fixtures
-## "Continuous integration":test#continus
+## "Running the tests":test#running
+## "Continuous integration":test#continuous
 # "Deployment options":deployment
-## "Standalone Play application":deployment#aStandalonePlayapplicationa
-## "Running on JEE application servers":deployment#aApplicationserversa
-## "Google Application Engine":deployment#aGoogleApplicationEngineGAEa
-## "Stax cloud hosting platform":deployment#aStaxcloudhostingplatforma"
+## "Standalone Play application":deployment#standalone
+## "Running on JEE application servers":deployment#appservers
+## "Google Application Engine":deployment#gae
+## "Stax cloud hosting platform":deployment#stax
 
 
 h2. <a name="cook">Cookbook</a>

@@ -131,7 +131,7 @@ bc. <h1>Client ${client.name}</h1>
 
 Bear in mind that a template is not a place to do complex things. So, use a tag when you can, or move the computations into the controller or the model object.
 
-h2. <a>Template inheritance</a>
+h2. <a name="inheritance">Template inheritance</a>
 
 A template can inherit another template, i.e. it can be included as a part of an other template.
 
@@ -149,7 +149,7 @@ bc. <h1>Main template</h1>
     #{doLayout /}
 </div>
 
-h2. <a>Create tags</a>
+h2. <a name="tags">Create tags</a>
 
 You can easily create specifics tags for your application. A tag is a simple template file, stored in the **app/views/tags** directory. The template’s file name is used as the tag name.
 
@@ -198,7 +198,7 @@ bc. #{hello}
 #{/hello}
 
 
-h2. <a>Java object extensions in templates</a>
+h2. <a name="extensions">Java object extensions in templates</a>
 
 When you use your Java object within the template engine, new methods are added to it. These methods don’t exist in the original Java class and are dynamically added by the template engine.
 
@@ -243,7 +243,7 @@ bc. <em>Price: ${123456.324234.ccyAmount()}</em>
 
 Template extension classes are automatically detected by Play at start-up. You just have to restart your application to make them available.
 
-h2. <a>Implicit objects available from a template</a>
+h2. <a name="implicits">Implicit objects available from a template</a>
 
 All objects added to the **renderArgs** scope are directly injected as template variables. 
 
