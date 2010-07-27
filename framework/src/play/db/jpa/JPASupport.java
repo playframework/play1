@@ -81,13 +81,9 @@ public class JPASupport extends JPABase {
                         if (Set.class.isAssignableFrom(field.getType())) {
                             l = new HashSet();
                         }
-                        String[] ids = params.get(name + "." + field.getName() + "@id");
-                        if (ids == null) {
-                            ids = params.get(name + "." + field.getName() + ".id");
-                        }
+                        String[] ids = params.get(name + "." + field.getName() + ".id");
                         if (ids != null) {
                             params.remove(name + "." + field.getName() + ".id");
-                            params.remove(name + "." + field.getName() + "@id");
                             for (String _id : ids) {
                                 if (_id.equals("")) {
                                     continue;
@@ -105,13 +101,9 @@ public class JPASupport extends JPABase {
                             bw.set(field.getName(), o, l);
                         }
                     } else {
-                        String[] ids = params.get(name + "." + field.getName() + "@id");
-                        if (ids == null) {
-                            ids = params.get(name + "." + field.getName() + ".id");
-                        }
+                        String[] ids = params.get(name + "." + field.getName() + ".id");
                         if (ids != null && ids.length > 0 && !ids[0].equals("")) {
                             params.remove(name + "." + field.getName() + ".id");
-                            params.remove(name + "." + field.getName() + "@id");
                             Query q = JPA.em().createQuery("from " + relation + " where id = ?");
                             // TODO: I think we need two type of direct bind -> primitive and object binder
                             q.setParameter(1, OldBinder.directBind(null, ids[0], findKeyType(Play.classloader.loadClass(relation))));
@@ -124,7 +116,6 @@ public class JPASupport extends JPABase {
                         } else if (ids != null && ids.length > 0 && ids[0].equals("")) {
                             bw.set(field.getName(), o, null);
                             params.remove(name + "." + field.getName() + ".id");
-                            params.remove(name + "." + field.getName() + "@id");
                         }
                     }
                 }

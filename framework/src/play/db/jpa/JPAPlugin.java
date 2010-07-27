@@ -389,7 +389,7 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         public void deleteAll() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            JPA.em().createQuery("delete from " + clazz.getName());
         }
 
         public Class<?> _getKeyType() {
