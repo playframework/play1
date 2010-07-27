@@ -53,6 +53,8 @@ Everything you need to know about Play.
 ## "Routes priority":routes#priority
 ## "Serving static resources":routes#static
 ## "Reverse routing: generate some URL":routes#reverse
+## "Setting content types":routes#content-types
+## "Content negotiation":routes#content-negotiation
 # "Controllers":controllers
 ## "A Controller overview":controllers#overview
 ## "Retrieve HTTP parameters":controllers#params
