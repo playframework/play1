@@ -1,9 +1,8 @@
 package play.test;
 
-import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,14 +14,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 
 import org.apache.commons.io.FileUtils;
 import org.yaml.snakeyaml.Yaml;
@@ -30,13 +24,15 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 
 import play.Logger;
 import play.Play;
+import play.PlayPlugin;
 import play.classloading.ApplicationClasses;
 import play.data.binding.map.OldBinder;
 import play.db.DB;
 import play.db.DBPlugin;
 import play.db.Model;
-import play.db.jpa.FileAttachment;
-import play.db.jpa.JPA;
+import play.db.ModelManager;
+import play.db.ModelProperty;
+import play.exceptions.UnexpectedException;
 import play.exceptions.YAMLException;
 import play.vfs.VirtualFile;
 
@@ -44,32 +40,30 @@ public class Fixtures {
 
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
 
-    public static void delete(Class<?>... types) {
+    public static void delete(Class<Model>... types) {
         if (getForeignKeyToggleStmt(false) != null) {
             DB.execute(getForeignKeyToggleStmt(false));
         }
-        for (Class<?> type : types) {
-            JPA.em().createQuery("delete from " + type.getName()).executeUpdate();
+        for (Class<Model> type : types) {
+            ModelManager.loaderFor(type).deleteAll();
         }
         if (getForeignKeyToggleStmt(true) != null) {
             DB.execute(getForeignKeyToggleStmt(true));
         }
-        JPA.em().clear();
     }
 
-    public static void delete(List<Class<?>> classes) {
-        Class<?>[] types = new Class[classes.size()];
+    public static void delete(List<Class<Model>> classes) {
+        Class<Model>[] types = new Class[classes.size()];
         for (int i = 0; i < types.length; i++) {
             types[i] = classes.get(i);
         }
         delete(types);
     }
 
-    public static void deleteAllEntities() {
-        List<Class<?>> classes = new ArrayList<Class<?>>();
-        for (ApplicationClasses.ApplicationClass c :
-                Play.classes.getAnnotatedClasses(Entity.class)) {
-            classes.add(c.javaClass);
+    public static void deleteAllModels() {
+        List<Class<Model>> classes = new ArrayList<Class<Model>>();
+        for (ApplicationClasses.ApplicationClass c : Play.classes.getAssignableClasses(Model.class)) {
+            classes.add((Class<Model>)c.javaClass);
         }
         Fixtures.delete(classes);
     }
@@ -121,9 +115,6 @@ public class Fixtures {
             if (enableConstraints != null) {
                 DB.execute(enableConstraints);
             }
-            if (JPA.isEnabled()) {
-                JPA.em().clear();
-            }
         } catch (Exception e) {
             throw new RuntimeException("Cannot delete all table data : " + e.getMessage(), e);
         }
@@ -163,36 +154,28 @@ public class Fixtures {
                             objects.put(key, new HashMap<Object, Object>());
                         }
                         serialize(objects.get(key), "object", params);
-                        Class<?> cType = Play.classloader.loadClass(type);
+                        Class<Model> cType = (Class<Model>)Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
                         Model model = (Model)OldBinder.bind("object", cType, cType, null, params);
                         for(Field f : model.getClass().getFields()) {
-                            if(f.getType().isAssignableFrom(FileAttachment.class)) {
-                                String[] value = params.get("object."+f.getName());
-                                if(value != null && value.length > 0) {
-                                    VirtualFile vf = Play.getVirtualFile(value[0]);
-                                    if (vf != null && vf.exists()) {
-                                        FileAttachment fa = new FileAttachment();
-                                        fa.set(vf.getRealFile());
-                                        f.set(model, fa);
-                                    }
-                                }
-                            }
+                            // TODO: handle something like FileAttachment
                             if (f.getType().isAssignableFrom(Map.class)) {
                                 f.set(model, objects.get(key).get(f.getName()));
                             }
 
                         }
                         model._save();
-                        while (!cType.equals(Object.class)) {
-                            idCache.put(cType.getName() + "-" + id, model._getKey());
-                            cType = cType.getSuperclass();
+                        Class<?> tType = cType;
+                        while (!tType.equals(Object.class)) {
+                            idCache.put(tType.getName() + "-" + id, model._getKey());
+                            tType = tType.getSuperclass();
                         }
-                        // Not very good for performance but will avoid outOfMemory
-                        JPA.em().flush();
-                        JPA.em().clear();
                     }
                 }
+            }
+            // Most persistence engine will need to clear their state
+            for(PlayPlugin plugin : Play.plugins) {
+                plugin.afterFixtureLoad(yamlFile.getRealFile());
             }
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Class " + e.getMessage() + " was not found", e);
@@ -235,51 +218,38 @@ public class Fixtures {
         }
     }
 
-    static void resolveDependencies(Class<?> type, Map<String, String[]> serialized, Map<String, Object> idCache) {
+    static void resolveDependencies(Class<Model> type, Map<String, String[]> serialized, Map<String, Object> idCache) {
         Set<Field> fields = new HashSet<Field>();
         Class<?> clazz = type;
         while (!clazz.equals(Object.class)) {
             Collections.addAll(fields, clazz.getDeclaredFields());
             clazz = clazz.getSuperclass();
         }
-        for (Field field : fields) {
-            boolean isEntity = false;
-            String relation = null;
-            if (field.isAnnotationPresent(OneToOne.class) || field.isAnnotationPresent(ManyToOne.class)) {
-                isEntity = true;
-                relation = field.getType().getName();
-            }
-            if (field.isAnnotationPresent(OneToMany.class) || field.isAnnotationPresent(ManyToMany.class)) {
-                Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                isEntity = true;
-                relation = fieldType.getName();
-            }
-            if (isEntity) {
-                String[] ids = serialized.get("object." + field.getName());
+        for (ModelProperty field : ModelManager.loaderFor(type).listProperties()) {
+            if (field.isRelation) {
+                String[] ids = serialized.get("object." + field.name);
                 if (ids != null) {
                     for (int i = 0; i < ids.length; i++) {
                         String id = ids[i];
-                        id = relation + "-" + id;
+                        id = field.relation + "-" + id;
                         if (!idCache.containsKey(id)) {
-                            throw new RuntimeException("No previous reference found for object of type " + relation + " with id " + ids[i]);
+                            throw new RuntimeException("No previous reference found for object of type " + field.relation + " with id " + ids[i]);
                         }
                         ids[i] = idCache.get(id).toString();
                     }
                 }
-                serialized.remove("object." + field.getName());
-                serialized.put("object." + field.getName() + "@id", ids);
+                serialized.remove("object." + field.name);
+                serialized.put("object." + field.name + "@id", ids);
             }
         }
     }
 
-    public static void deleteAttachmentsDir() {
-        File atttachmentsDir = FileAttachment.getStore();
+    public static void deleteDirectory(String path) {
         try {
-            if (atttachmentsDir.exists()) {
-                FileUtils.deleteDirectory(atttachmentsDir);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            FileUtils.deleteDirectory(Play.getFile(path));
+        } catch (IOException ex) {
+            throw new UnexpectedException(ex);
         }
     }
+
 }

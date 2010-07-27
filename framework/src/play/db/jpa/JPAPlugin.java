@@ -1,14 +1,26 @@
 package play.db.jpa;
 
+import java.io.File;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import org.apache.log4j.Level;
@@ -22,6 +34,9 @@ import play.Play;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.DB;
+import play.db.Model;
+import play.db.ModelLoader;
+import play.db.ModelProperty;
 import play.exceptions.JPAException;
 import play.utils.Utils;
 import org.apache.commons.lang.StringUtils;
@@ -329,6 +344,112 @@ public class JPAPlugin extends PlayPlugin {
         } finally {
             manager.close();
             JPA.clearContext();
+        }
+    }
+
+    @Override
+    public ModelLoader modelLoader(Class<Model> modelClass) {
+        if (modelClass.isAnnotationPresent(Entity.class)) {
+            return new JPAModelLoader(modelClass);
+        }
+        return null;
+    }
+
+    @Override
+    public void afterFixtureLoad(File fixtureFile) {
+        JPA.em().clear();
+    }
+
+    public static class JPAModelLoader implements ModelLoader {
+
+        private Class<Model> clazz;
+
+        public JPAModelLoader(Class<Model> clazz) {
+            this.clazz = clazz;
+        }
+
+        public Model findById(Object id) {
+            return (Model) JPA.em().find(clazz, id);
+        }
+
+        public List<Model> fetch(int offset, int size, String orderBy, String orderDirection) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public Long count() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public List<Model> search(List<String> properties, String keywords, int offset, int size, String orderBy, String orderDirection) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public Long countSearch(List<String> properties, String keywords) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public void deleteAll() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public Class<?> _getKeyType() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public List<ModelProperty> listProperties() {
+            List<ModelProperty> properties = new ArrayList<ModelProperty>();
+            Set<Field> fields = new HashSet<Field>();
+            Class<?> tclazz = clazz;
+            while (!tclazz.equals(Object.class)) {
+                Collections.addAll(fields, tclazz.getDeclaredFields());
+                tclazz = tclazz.getSuperclass();
+            }
+            for (Field f : fields) {
+                if (Modifier.isTransient(f.getModifiers())) {
+                    continue;
+                }
+                ModelProperty mp = buildProperty(f);
+                if (mp != null) {
+                    properties.add(mp);
+                }
+            }
+            return properties;
+        }
+
+        ModelProperty buildProperty(Field field) {
+            ModelProperty modelProperty = new ModelProperty();
+            modelProperty.type = field.getType();
+            if (Model.class.isAssignableFrom(field.getType())) {
+                if (field.isAnnotationPresent(OneToOne.class)) {
+                    if (field.getAnnotation(OneToOne.class).mappedBy().equals("")) {
+                        modelProperty.isRelation = true;
+                        modelProperty.relation = field.getType().getName();
+                    }
+                }
+                if (field.isAnnotationPresent(ManyToOne.class)) {
+                    modelProperty.isRelation = true;
+                    modelProperty.relation = field.getType().getName();
+                }
+            }
+            if (Collection.class.isAssignableFrom(field.getType())) {
+                Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                if (field.isAnnotationPresent(OneToMany.class)) {
+                    if (field.getAnnotation(OneToMany.class).mappedBy().equals("")) {
+                        modelProperty.isRelation = true;
+                        modelProperty.relation = fieldType.getName();
+                        modelProperty.isMultiple = true;
+                    }
+                }
+                if (field.isAnnotationPresent(ManyToMany.class)) {
+                    if (field.getAnnotation(ManyToMany.class).mappedBy().equals("")) {
+                        modelProperty.isRelation = true;
+                        modelProperty.relation = fieldType.getName();
+                        modelProperty.isMultiple = true;
+                    }
+                }
+            }
+            modelProperty.name = field.getName();
+            return modelProperty;
         }
     }
 }

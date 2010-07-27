@@ -2,11 +2,14 @@ package play;
 
 import java.lang.annotation.Annotation;
 import com.google.gson.JsonObject;
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.db.Model;
+import play.db.ModelLoader;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Router.Route;
@@ -35,7 +38,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public TestResults runTest(Class<BaseTest> clazz) {
         return null;
     }
-    
+
     /**
      * Called when play need to bind a Java object from HTTP params
      */
@@ -64,12 +67,12 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      */
     public void enhance(ApplicationClass applicationClass) throws Exception {
     }
-    
+
     /**
      * Let the plugin to modify the parsed template.
      * @param template
      */
-    public void onTemplateCompilation(Template template) {	
+    public void onTemplateCompilation(Template template) {
     }
 
     /**
@@ -165,7 +168,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      */
     public void onActionInvocationResult(Result result) {
     }
-    
+
     /**
      * Called when the request has been routed.
      * @param route The route selected.
@@ -220,6 +223,13 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public void routeRequest(Request request) {
     }
 
+    public ModelLoader modelLoader(Class<Model> modelClass) {
+        return null;
+    }
+
+    public void afterFixtureLoad(File fixtureFile) {
+    }
+
     /**
      * Inter-plugin communication.
      */
@@ -229,10 +239,9 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
             playPlugin.onEvent(message, context);
         }
     }
-    
+
     // ~~~~~
-    
     public int compareTo(PlayPlugin o) {
         return (index < o.index ? -1 : (index == o.index ? 0 : 1));
-    }       
+    }
 }

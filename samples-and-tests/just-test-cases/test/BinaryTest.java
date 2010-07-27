@@ -18,7 +18,7 @@ public class BinaryTest extends FunctionalTest {
 
 	@Before
 	public void setUp() {
-		Fixtures.deleteAttachmentsDir();
+		Fixtures.deleteDirectory("attachments");
 		// Fixtures.deleteAll(); // see Bug #491403
 		String deleteURL=null;
 		try{

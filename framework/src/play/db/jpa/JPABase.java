@@ -349,12 +349,4 @@ public class JPABase implements Serializable, play.db.Model {
         return key;
     }
 
-    public void _loader() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public List<Property> _properties() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
 }
