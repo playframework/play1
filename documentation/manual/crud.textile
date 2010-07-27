@@ -157,7 +157,6 @@ bc. #{extends 'CRUD/layout.html' /}
 	<p id="crudListAdd">
 		<a href="@{blank()}">&{'crud.add', type.modelName}</a>
 	</p>
- 
 </div>
 
 and refresh the list.
@@ -188,7 +187,7 @@ bc. #{crud.table fields:['name', 'company', 'edit']}
    #{/crud.custom}
  
    #{crud.custom 'edit'}
-       <a href="@{Persons.edit(object.id)}">Edit</a>
+       <a href="@{Users.edit(object.id)}">Edit</a>
    #{/crud.custom}
  
 #{/crud.table}
@@ -200,14 +199,13 @@ For example:
 
 bc. @Entity
 public class Account extends Model {
-
+ 
         @CollectionOfElements
         public Set<ContentType> contentTypes;
-
+ 
         @CollectionOfElements
         public Set<String> usernames;
-
-
+ 
         public Account(Set<String> usernames {
                 super();
                 this.usernames = usernames;
@@ -215,7 +213,7 @@ public class Account extends Model {
 }
 ~
 
-is showned as:
+is showed as:
 
 "myEnumId1","myEnumId2" for the contentTypes and "string1","string2" for the usernames. Per definition, this is what you should first customize in your CRUD module.
 
