@@ -356,7 +356,7 @@ public class JPAPlugin extends PlayPlugin {
     }
 
     @Override
-    public void afterFixtureLoad(File fixtureFile) {
+    public void afterFixtureLoad() {
         JPA.em().clear();
     }
 

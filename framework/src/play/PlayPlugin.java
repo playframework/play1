@@ -227,7 +227,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
         return null;
     }
 
-    public void afterFixtureLoad(File fixtureFile) {
+    public void afterFixtureLoad() {
     }
 
     /**

@@ -40,15 +40,11 @@ public class Fixtures {
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
 
     public static void delete(Class<Model>... types) {
-        if (getForeignKeyToggleStmt(false) != null) {
-            DB.execute(getForeignKeyToggleStmt(false));
-        }
+        disableForeignKeyConstraints();
         for (Class<Model> type : types) {
             ModelManager.loaderFor(type).deleteAll();
         }
-        if (getForeignKeyToggleStmt(true) != null) {
-            DB.execute(getForeignKeyToggleStmt(true));
-        }
+        enableForeignKeyConstraints();
     }
 
     public static void delete(List<Class<Model>> classes) {
@@ -67,21 +63,56 @@ public class Fixtures {
         Fixtures.delete(classes);
     }
 
-    static String getForeignKeyToggleStmt(boolean enable) {
-        if (DBPlugin.url.startsWith("jdbc:hsqldb:")) {
-            return "SET REFERENTIAL_INTEGRITY " + (enable ? "TRUE" : "FALSE");
-        }
-        if (DBPlugin.url.startsWith("jdbc:mysql:")) {
-            return "SET foreign_key_checks = " + (enable ? "1" : "0") + ";";
-        }
+    private static void disableForeignKeyConstraints() {
         if (DBPlugin.url.startsWith("jdbc:oracle:")) {
-            return "'ALTER TABLE '||substr(c.table_name,1,35)|| \n" +
-                    "' " + (enable ? "ENABLE" : "DISABLE") + " CONSTRAINT '||constraint_name||' ;' \n" +
-                    "from user_constraints c, user_tables u \n" +
-                    "where c.table_name = u.table_name; ";
+            DB.execute("begin\n" +
+                    "for i in (select constraint_name, table_name from user_constraints where constraint_type ='R'\n" +
+                    "and status = 'ENABLED') LOOP\n" +
+                    "execute immediate 'alter table '||i.table_name||' disable constraint '||i.constraint_name||'';\n" +
+                    "end loop;\n" +
+                    "end;");
+            return;
         }
-        return null;
+
+        if (DBPlugin.url.startsWith("jdbc:hsqldb:")) {
+            DB.execute("SET REFERENTIAL_INTEGRITY FALSE");
+            return;
+        }
+
+        if (DBPlugin.url.startsWith("jdbc:mysql:")) {
+            DB.execute("SET foreign_key_checks = 0;");
+            return;
+        }
+
+        // Maybe Log a WARN for unsupported DB ?
+        Logger.warn("Fixtures : unable to disable constraints, unsupported database : " + DBPlugin.url);
     }
+
+    private static void enableForeignKeyConstraints() {
+        if (DBPlugin.url.startsWith("jdbc:oracle:")) {
+             DB.execute("begin\n" +
+                     "for i in (select constraint_name, table_name from user_constraints where constraint_type ='R'\n" +
+                     "and status = 'DISABLED') LOOP\n" +
+                     "execute immediate 'alter table '||i.table_name||' enable constraint '||i.constraint_name||'';\n" +
+                     "end loop;\n" +
+                     "end;");
+            return;
+        }
+
+        if (DBPlugin.url.startsWith("jdbc:hsqldb:")) {
+            DB.execute("SET REFERENTIAL_INTEGRITY TRUE");
+            return;
+        }
+
+        if (DBPlugin.url.startsWith("jdbc:mysql:")) {
+            DB.execute("SET foreign_key_checks = 1;");
+            return;
+        }
+
+        // Maybe Log a WARN for unsupported DB ?
+        Logger.warn("Fixtures : unable to enable constraints, unsupported database : " + DBPlugin.url);
+    }
+
 
     static String getDeleteTableStmt(String name) {
         if (DBPlugin.url.startsWith("jdbc:mysql:") ) {
@@ -102,17 +133,14 @@ public class Fixtures {
                 String name = rs.getString("TABLE_NAME");
                 names.add(name);
             }
-            final String disableConstraints = getForeignKeyToggleStmt(false);
-            if (disableConstraints != null) {
-                DB.execute(disableConstraints);
-            }
+            disableForeignKeyConstraints();
             for (String name : names) {
                 Logger.trace("Dropping content of table %s", name);
                 DB.execute(getDeleteTableStmt(name) + ";");
             }
-            final String enableConstraints = getForeignKeyToggleStmt(true);
-            if (enableConstraints != null) {
-                DB.execute(enableConstraints);
+            enableForeignKeyConstraints();
+            for(PlayPlugin plugin : Play.plugins) {
+                plugin.afterFixtureLoad();
             }
         } catch (Exception e) {
             throw new RuntimeException("Cannot delete all table data : " + e.getMessage(), e);
@@ -174,7 +202,7 @@ public class Fixtures {
             }
             // Most persistence engine will need to clear their state
             for(PlayPlugin plugin : Play.plugins) {
-                plugin.afterFixtureLoad(yamlFile.getRealFile());
+                plugin.afterFixtureLoad();
             }
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Class " + e.getMessage() + " was not found", e);
