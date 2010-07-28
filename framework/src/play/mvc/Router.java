@@ -1,5 +1,7 @@
 package play.mvc;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ import play.Play.Mode;
 import play.PlayPlugin;
 import play.vfs.VirtualFile;
 import play.exceptions.NoRouteFoundException;
+import play.mvc.results.Forbidden;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 import play.templates.TemplateLoader;
@@ -481,7 +484,17 @@ public class Router {
                 if (matcher.matches()) {
                     // Static dir
                     if (staticDir != null) {
-                        throw new RenderStatic(staticDir + "/" + matcher.group("resource"));
+                        String resource = matcher.group("resource");
+                        try{
+                            String root = new File(staticDir).getCanonicalPath();
+                            String child = new File(staticDir + "/" + resource).getCanonicalPath();
+                            if(child.startsWith(root)) {
+                                throw new RenderStatic(staticDir + "/" + resource);
+                            }
+                        } catch(IOException e) {
+                            Logger.error("Oops", e);
+                        }
+                        throw new NotFound(resource);
                     } else {
                         Map<String, String> localArgs = new HashMap<String, String>();
                         for (Arg arg : args) {
