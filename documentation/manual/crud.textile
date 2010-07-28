@@ -198,7 +198,7 @@ h2. List of String and List of enumeration
 The CRUD module is showing them as a text field. In this text field, the list is represented by a comma separated list of String.
 For example:
 
-bc. @Entity
+bc.. @Entity
 public class Account extends Model {
 
         @CollectionOfElements
@@ -213,12 +213,11 @@ public class Account extends Model {
                 this.usernames = usernames;
         }
 }
-~
 
-is showned as:
+p. is showned as:
 
 "myEnumId1","myEnumId2" for the contentTypes and "string1","string2" for the usernames. Per definition, this is what you should first customize in your CRUD module.
 
 h2. <a>Limitation</a>
 
-The crud module will show the relations that are unidirectional in one entity: the one that  does not have the mappedBy attribute.
+The CRUD module will show the relationships that are unidirectional in one entity: the one that  does not have the mappedBy attribute.

@@ -52,7 +52,7 @@ h3. <a>format(format)</a>
 
 Formats the date using the given date format pattern. Returns: **String**.
 
-bc. ${new Date(1275910970000).format('dd MMMM yyyy hh:mm:ss', 'fr')}
+bc. ${new Date(1275910970000).format('dd MMMM yyyy hh:mm:ss')}
 07 June 2010 01:42:50
 
 
@@ -208,7 +208,7 @@ h3. <a>addSlashes()</a>
 Backslash-escapes Java-escaped single and double quotes in the object’s **String** representation. Returns: **String**.
 
 bc. ${"single quote (') double quote (\")".addSlashes().raw()}
-single quote (\\') double quote (\\\")
+single quote (\') double quote (\") 
 
 
 h3. <a>capAll()</a>

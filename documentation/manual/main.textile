@@ -10,7 +10,7 @@ This pattern splits the application into separate layers: the Presentation layer
 
 * The **View** renders the model into a form suitable for interactions, typically a user interface. Multiple views can exist for a single model, for different purposes. In a Web application the view is usually rendered in a ‘web format’ like HTML, XML or JSON. However there are some cases where the view can be expressed in a binary form, e.g. dynamically rendered chart diagrams.
 
-* The **Controller** responds to events (typically user actions) and processes them, and may also invoke changes on the model. In a Web application, events are typically HTTP requests: a Controller listens for HTTP requests, extracts relevant data from the ‘event’, such as query string parameters, request headers... And applies changes on the underlying model objects.
+* The **Controller** responds to events (typically user actions) and processes them, and may also invoke changes on the model. In a Web application, events are typically HTTP requests: a Controller listens for HTTP requests, extracts relevant data from the ‘event’, such as query string parameters, request headers... and applies changes on the underlying model objects.
 
 !images/diagrams_mvc!
 
@@ -18,15 +18,15 @@ In a Play application these three layers are defined in the **app** directory, e
 
 h3. app/controllers
 
-A Controller is a Java class where each public, static, method is an **action**. An action is a Java entry point invoked when a HTTP Request is received. The Java code from the Controller class isn’t really object oriented: it’s mainly procedural code. The action method extracts relevant data from the HTTP request, reads or updates the model objects, and sends back a result which is wrapped into an HTTP Response. 
+A Controller is a Java class where each public, static, method is an **action**. An action is a Java entry point invoked when an HTTP Request is received. The Java code from the Controller class isn’t really object oriented: it’s mainly procedural code. The action method extracts relevant data from the HTTP Request, reads or updates the model objects, and sends back a result which is wrapped into an HTTP Response. 
 
 h3. app/models
 
-The domain model object layer is a set a Java classes using all the object oriented features available from the Java language. It contains data structures and operations on which the application operates. Whenever model objects need to be saved into a persistent storage, they may contain some glue artifacts like JPA annotations or SQL statements.
+The domain model object layer is a set of Java classes using all the object oriented features available from the Java language. It contains data structures and operations on which the application operates. Whenever model objects need to be saved into a persistent storage, they may contain some glue artifacts like JPA annotations or SQL statements.
 
 h3. app/views
 
-Most of the application views are generated using an efficient templating system provided by Play. The Controller gets some interesting data from the model layer, and then applies a template to decorate these objects. This packages contains HTML, XML, JSON... template files with special directives used to dynamically generate the model representation.
+Most of the application views are generated using an efficient templating system provided by Play. The Controller gets some interesting data from the model layer, and then applies a template to decorate these objects. This package contains HTML, XML, JSON... template files with special directives used to dynamically generate the model representation.
 
 
 h2. <a name="request">The request life cycle</a>
@@ -57,7 +57,7 @@ p(note). **Where are my .class files??**
  
 Don’t look for compiled Java classes. The framework compiles the Java source code at runtime and only keeps compiled classes in a bytecode cache under the tmp directory. The main executable artifacts in a Play application are the *.java* source files, not the compiled classes.
 
-There are three standard packages in the app directory, one for each layer of the MVC architectural pattern. You can of course add your own packages like for example a *utils* packages.
+There are three standard packages in the app directory, one for each layer of the MVC architectural pattern. You can of course add your own packages like for example a *utils* package.
 
 In addition, the views package is further organized into sub-packages:
 
@@ -91,7 +91,7 @@ If you need to add some configuration options specific to your application, it�
 
 h3. The lib directory
 
-This directory contains all standard Java libraries needed by your application. There are automatically added to the Java classpath.
+This directory contains all standard Java libraries needed by your application. They are automatically added to the Java classpath.
 
 
 h2. <a name="lifecycle">Development life cycle</a>

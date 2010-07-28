@@ -24,7 +24,7 @@ The cache API is provided by the **play.cache.Cache** class. This class contains
 Some examples:
 
 bc. public static void showProduct(String id) {
-    Product product = Cache.get(id, Product.class);
+    Product product = Cache.get("product_"+id, Product.class);
     if(product == null) {
         product = Product.findById(id);
         Cache.set("product_"+id, product, "30mn");
@@ -90,7 +90,7 @@ bc. Cache.put(session.getId(), products);
 // and then in subsequent requests
 List<Product> products = Cache.get(session.getId(), List.class)
 
-Here we have used a unique UUID to keep unique information in the Cache for each user. Remember that, unlike a session object, the cache in not bound to any particular User!
+Here we have used a unique UUID to keep unique information in the Cache for each user. Remember that, unlike a session object, the cache is not bound to any particular User!
 
 h2. <a>Configure memcached</a>
 

@@ -15,12 +15,12 @@ Rendered as:
 
 bc. <a href="/application/logout">Disconnect</a>
 
-If the action you try call does not have any route able to invoke it using a GET method, Play will automatically generate a hidden form that will be submitted on link click using JavaScript.
+If the action you try to call does not have any route able to invoke it using a GET method, Play will automatically generate a hidden form that will be submitted on link click using JavaScript.
 
 
 h2. <a>doLayout</a>
 
-Used with template inheritance, this tag insert the evaluated sub-template’s contents.
+Used with template inheritance, this tag inserts the evaluated sub-template’s contents.
 
 bc. <!-- common header here -->
 <div id="content">
@@ -40,7 +40,7 @@ bc. #{if user}
     Please log in
 #{/else}
 
-However, you can also use it with the **list** tag and it will be executed if the list was empty.
+However, you can also use it with the **list** tag and it will be executed if the list is empty.
 
 bc. #{list items:task, as:'task'}
     <li>${task}</li>
@@ -102,7 +102,7 @@ bc. #{extends 'main.html' /}
 
 h2. <a>field</a>
 
-The field tag is an helper, based on the spirit of the Don’t Repeat Yourself. It works this way:
+The field tag is a helper, based on the spirit of the Don’t Repeat Yourself. It works this way:
 
 Instead of writing this:
 
@@ -201,7 +201,7 @@ Cleaner alternative to #{if !condition}
 
 bc. #{ifnot tasks}
     No tasks today
-#{/if}
+#{/ifnot}
 
 
 h2. <a>include</a>
@@ -303,7 +303,7 @@ bc. #{script 'jquery-1.4.2.min.js' /}
 
 h2. <a>set</a>
 
-Define a value which can be retrieve in the same template or any layout with the **get** tag.
+Define a value which can be retrieved in the same template or any layout with the **get** tag.
 
 bc. #{set title:'Admin' /}
 #{set style:'2columns' /}
@@ -312,7 +312,7 @@ You can also use variables:
 
 bc. #{set title:'Profile of ' + user.login /}
 
-You can define variables value in the body:
+You can define the value of variables in the body:
 
 bc. #{set 'title'}
     Profile of ${user.login}
@@ -321,12 +321,12 @@ bc. #{set 'title'}
 
 h2. <a>stylesheet</a>
 
-Inserts a **link** tag in the template. By convention, the tag refers to a CSS file in **/public/javascripts**
+Inserts a **link** tag in the template. By convention, the tag refers to a CSS file in **/public/stylesheets**
 
 * **src** (required) - file name, without the leading path **/public/stylesheets**
 * **id** (optional) - an **id** attribute value for the generated **link** tag
 * **media** (optional) - a **media** attribute value: screen, print, aural, projection…
-* **title** (optional) - **title** atttribute value (or description)
+* **title** (optional) - **title** attribute value (or description)
 
 The **src** parameter can be replaced by the default **arg** argument.
 

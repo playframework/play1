@@ -77,7 +77,7 @@ bc. List<Post> posts = Post.all().from(50).fetch(100); // 100 max posts start at
 
 h3. Find using a simplified query
 
-That allow you to create very expressive finders, but will only work for simple queries.
+That allows you to create very expressive finders, but will only work for simple queries.
 
 bc. Post.find("byTitle", "My first post").fetch();
 Post.find("byTitleLike", "%hello%").fetch();
@@ -118,8 +118,7 @@ h2. <a>Explicit save</a>
 
 Hibernate maintains a cache of Objects that have been queried from the database. These Objects are referred to as persistent Objects as long as the EntityManager that was used to fetch them is still active. That means that any changes to these Objects within the bounds of a transaction are automatically persisted when the transaction is committed. In standard JPA, these updates are implicit within the transaction’s boundary; you don’t have to explicitly call any method to persist the values.
 
-The main downside is that we must manage all of our Objects manually. Instead of telling the EntityManager to update an Object (which would be far
-more intuitive), we must tell the EntityManager which Objects NOT to update. We do this by calling refresh(), which essentially rolls back a single entity. We do this just prior to calling commit on the transaction or when we realize the Object shouldn’t be updated.
+The main downside is that we must manage all of our Objects manually. Instead of telling the EntityManager to update an Object (which would be far more intuitive), we must tell the EntityManager which Objects NOT to update. We do this by calling refresh(), which essentially rolls back a single entity. We do this just prior to calling commit on the transaction or when we realize the Object shouldn’t be updated.
 
 Here is a common use case, when editing a persistent object after a form submit:
 

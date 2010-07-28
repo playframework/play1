@@ -10,7 +10,7 @@ You can also send complex, dynamic e-mail using the standard templates mechanism
 
 First,  define a **Mailer notifier** in your application. Your mailer notifier must subclass **play.mvc.Mailer** and be part of the **notifiers** package. 
 
-Each public static method will be an e-mail sender, in a similar manner as actions for a MVC controller.
+Each public static method will be an e-mail sender, in a similar manner as actions for an MVC controller.
 
 For example:
 
@@ -104,7 +104,7 @@ There are two ways to send the e-mail over an encrypted channel. If your server 
 
 bc. mail.smtp.channel=starttls
 
-Your server may also provide a SMTP-over-SSL (SMTPS) connector, that is a SSL socket listening on port 465. In that case, you tell Play to use this setup using the configuration option:
+Your server may also provide a SMTP-over-SSL (SMTPS) connector, that is an SSL socket listening on port 465. In that case, you tell Play to use this setup using the configuration option:
 
 bc. mail.smtp.channel=ssl
 

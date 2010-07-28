@@ -2,7 +2,7 @@ h1. Controllers
 
 Business logic is managed in the domain model layer. As a client (typically a web browser) cannot directly invoke this code, the functionality of a domain object is exposed as resources represented by URIs.
 
-A client uses the uniform API provided by the HTTP protocol to manipulate these resources, and by implication the underlying business logic. However, this mapping of resources to domain objects is not a bijection: the granularity can be expressed at different levels, some resources may be virtuals, for some resources aliases may be defined…
+A client uses the uniform API provided by the HTTP protocol to manipulate these resources, and by implication the underlying business logic. However, this mapping of resources to domain objects is not a bijection: the granularity can be expressed at different levels, some resources may be virtual, for some resources aliases may be defined…
 
 This is precisely the role played by the Controller layer: providing a **glue** between the domain model objects and transport layer events. As the Model layer, controllers are written in pure Java, making it easy to access or modify Model objects. Like the HTTP interface, Controllers are procedural and Request/Response oriented.
 
@@ -54,7 +54,7 @@ h2. <a name="params">Retrieving HTTP parameters</a>
 
 An HTTP request contains data. This data can be extracted from:
 
-* The URI path: in **/clients/1541**, 1541 is dynamic part of the URI Pattern.
+* The URI path: in **/clients/1541**, 1541 is the dynamic part of the URI Pattern.
 * The Query String: **/clients?id=1541.**
 * The request body: if the request was sent from an HTML form, the request body contains the form data encoded as **x-www-urlform-encoded**.
 
@@ -127,11 +127,11 @@ h2. <a name="binding">Advanced HTTP to Java binding</a>
 
 h3. Simple types
 
-All the native and common Java type are automatically bound:
+All the native and common Java types are automatically bound:
 
-**int**, **long**, **boolean**, **char**, **byte**, **float**, **double**, **Integer**, **Long**, **Boolean**, **Char**, **String**, **Float**, **Double**.
+**int**, **long**, **boolean**, **char**, **byte**, **float**, **double**, **Integer**, **Long**, **Boolean**, **Char**, **String**, **Byte**, **Float**, **Double**.
 
-Note that if the parameter is missing in the HTTP Request, or if automatic conversion fails, Object type will be set to null and native types will be set to their default value.
+Note that if the parameter is missing in the HTTP Request, or if automatic conversion fails, Object types will be set to null and native types will be set to their default value.
 
 h3. Date
 
@@ -205,7 +205,7 @@ A query string to create a client using this action would look like:
 
 bc. ?client.name=Zenexity&client.email=contact@zenexity.fr
 
-Play creates a Client instance and resolves HTTP parameters name to properties on the Client object. Unresolved parameters are safely ignored. Types mismatches are also safely ignored.
+Play creates a Client instance and resolves HTTP parameter names to properties on the Client object. Unresolved parameters are safely ignored. Type mismatches are also safely ignored.
 
 Parameter binding is done recursively, which means you can address complete object graphs:
 
@@ -225,7 +225,7 @@ h2. <a>JPA object binding</a>
 
 You can automatically bind a JPA object using the HTTP to Java binding.
 
-You can provide the **user.id** field yourself in the HTTP parameters. When Play find the **id** field, it loads the matching instance from the database before editing it. The other parameters provided by the HTTP request are then applied. So you can save it directly.
+You can provide the **user.id** field yourself in the HTTP parameters. When Play finds the **id** field, it loads the matching instance from the database before editing it. The other parameters provided by the HTTP request are then applied. So you can save it directly.
 
 bc. public static void save(User user) {
     user.save(); // ok with 1.0.1
@@ -374,7 +374,7 @@ POST   /clients                 Clients.create
 
 * The browser sends a POST to the **/clients** URL.
 * The Router invokes the **Clients** controller’s **create** action.
-* The action method call the **show** action method directly.
+* The action method calls the **show** action method directly.
 * The Java call is intercepted and the Router reverse route generation creates the URL needed to invoke Clients.show with an id parameter.
 * The HTTP Response is **302 Location:/clients/3132**.
 * The browser then issues **GET /clients/3132**.
@@ -500,7 +500,7 @@ h2. <a name="session">Session and Flash scope</a>
 
 If you have to keep data across multiple HTTP Requests, you can save them in the Session or the Flash scope. Data stored in the Session are available during the whole user session, and data stored in the flash scope are available to the next request only.
 
-It’s important to understand that Session and Flash data are not stored in the server but are added to each subsequent HTTP Request, using the Cookie mechanism. So the data size is very limited (up to 4Ko) and you can only store String values.
+It’s important to understand that Session and Flash data are not stored in the server but are added to each subsequent HTTP Request, using the Cookie mechanism. So the data size is very limited (up to 4 KB) and you can only store String values.
 
 Of course, cookies are signed with a secret key so the client can’t modify the cookie data (or it will be invalidated). The Play session is not aimed to be used as a cache. If you need to cache some data related to a specific session, you can use the Play built-in cache mechanism and use the *session.getId()* key to keep them related to a specific user session. 
 
