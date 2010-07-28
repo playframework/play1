@@ -1,5 +1,7 @@
 package play.mvc;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -641,7 +643,16 @@ public class Router {
                 if (matcher.matches() && contains(accept) && hostMatches) {
                     // Static dir
                     if (staticDir != null) {
-                        throw new RenderStatic(staticDir + "/" + matcher.group("resource"));
+                        String resource = matcher.group("resource");
+                        try{
+                            String root = new File(staticDir).getCanonicalPath();
+                            String child = new File(staticDir + "/" + resource).getCanonicalPath();
+                            if(child.startsWith(root)) {
+                                throw new RenderStatic(staticDir + "/" + resource);
+                            }
+                        } catch(IOException e) {
+                        }
+                        throw new NotFound(resource);
                     } else {
                         Map<String, String> localArgs = new HashMap<String, String>();
                         for (Arg arg : args) {
