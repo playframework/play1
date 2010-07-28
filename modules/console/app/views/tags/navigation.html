@@ -1,0 +1,7 @@
+#{if play.Play.configuration.getProperty("module.scala") != null}
+<a href="@{InfoConsole.index}">Jobs/JVM Console</a> | <a href="@{DbConsole.index}">DBConsole</a> | <a href="@{ScalaConsole.index}">Scala Consoe</a> 
+#{/if}
+#{if play.Play.configuration.getProperty("module.scala") == null}
+<a href="@{InfoConsole.index}">Jobs/JVM Console</a> | <a href="@{DbConsole.index}">DBConsole</a> | <a href="@{JavaConsole.index}">Java Console</a>
+#{/if}
+

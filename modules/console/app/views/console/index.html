@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>#{get 'title' /}</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/console_main.css'}">
+        <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+        <script src="@{'/public/javascripts/jquery-1.4.2.min.js'}" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        
+        <h1>Console</h1>
+	<h2>-Info</h2>
+	#{navigation /}
+        <div id="results">
+            #{list results}
+                <div class="print ${_parity}">
+                    ${_}
+                </div>
+            #{/list}
+        </div>
+        
+        #{if error}
+            <div id="error">
+		<h3>Oops, ${error.message}</h3>
+		%{if (script.split('\n').size()>=2) {  if (action == "/beanshell") {  %}	
+                		<div class="print">${script.split('\n')[error.getErrorLineNumber()-2]}</div>
+			%{ } else{   }%
+                		<div class="print">${script.split('\n')[error.line-2]}</div>
+			%{ } }%
+		%{ } else{   }%
+                	<div class="print">${script}</div>
+		%{ } }%
+            </div>
+        #{/if}
+        
+        <h3>JVM Parameters</h3>
+	<h4>total memory:</h4> ${totalmem} 
+	<h4>available free memory:</h4> ${freemem} 
+	<h4>number of processors:</h4> ${processors} 
+	<h4>number of threads:</h4> ${threads} 
+	
+	<br>
+	<br>
+	%{ if (jobs.size >0) { }% <h3>Jobs</h3> %{ } }%
+	%{
+	for(job in jobs) {
+                out.print("<h4>"+job.getClass().getName()+"</h4>");
+                if(job.getClass().isAnnotationPresent(play.jobs.OnApplicationStart.class)) {
+                    out.print(" run at application start.");
+                }
+                if(job.getClass().isAnnotationPresent(play.jobs.On.class)) {
+                    out.print(" run with cron expression " + job.getClass().getAnnotation(play.jobs.On.class).value() + ".");
+                }
+                if(job.getClass().isAnnotationPresent(play.jobs.Every.class)) {
+                    out.print(" run every " + job.getClass().getAnnotation(play.jobs.Every.class).value() + ".");
+                }
+                if(job.lastRun > 0) {
+                    out.print(" (last run at " + df.format(new Date(job.lastRun)));
+                    if(job.wasError) {
+                        out.print(" with error)");
+                    } else {
+                        out.print(")");
+                    }
+                } else {
+                    out.print(" (has never run)");
+                }
+                out.print("<br>");
+            }
+	}%
+	<h3>Scheduler parameters</h3>	
+	<h4>Pool size</h4>  ${executor.getPoolSize()}
+	<h4>Active count</h4> ${executor.getActiveCount()}
+	<h4>Scheduled task count</h4> ${executor.getTaskCount()}
+	<h4>Queue size</h4> ${executor.getQueue().size()}
+
+        
+        
+        
+    </body>
+</html>

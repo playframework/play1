@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>#{get 'title' /}</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/console_main.css'}">
+        <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+        <script src="@{'/public/javascripts/jquery-1.4.2.min.js'}" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        
+        <h1>Console</h1>
+        <h2>-DB</h2>
+	#{navigation /}
+	<p>
+	%{ if (connection != null) { }%
+	<form action="${action}" method="POST">
+		  <textarea rows="5" cols="70" name="query">${query}</textarea> 
+		  <br>
+		<input type="submit" value="Submit" />	
+	  </form>	  
+        </p> 
+        
+        <div id="results">
+            #{list results}
+                <div class="print ${_parity}">
+                    ${_}
+                </div>
+            #{/list}
+        </div>
+        
+        #{if error}
+            <div id="error">
+		    <h3>Oops, ${error.message}</h3>
+            </div>
+        #{/if}
+        
+	<h3>Connection parameters</h3>
+	<h4>Holdability</h4>
+	${connection.getHoldability()}
+	<h4>AutoCommit</h4>
+	${connection.getAutoCommit()}
+	<h4>Db product name</h4>
+	${connection.getMetaData().getDatabaseProductName()}
+	<h4>Db driver</h4>
+	${connection.getMetaData().getURL()}
+	<h4>Db version</h4>
+	${connection.getMetaData().getDatabaseMajorVersion()}.${connection.getMetaData().getDatabaseMinorVersion()}
+	%{ } else { }%
+	No Database was configured
+	%{ } }%
+    </body>
+</html>

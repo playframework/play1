@@ -1,0 +1,40 @@
+h1. Console
+
+This module allows you to execute commands in SQL, Java (or Scala) against your running application. It also gives you information about your jobs and the JVM.
+
+h2.How to install
+
+in conf/application.conf:
+module.secure=${play.path}/modules/secure
+module.console=${play.path}/modules/console
+
+p(note). Please note, the Scala console will be available only if you enable the scala module as well
+
+in conf/routes:
+bc. *       /console                                module:console
+*      /console                module:secure
+
+if you have not configure your security module yet, here is a simple example: create a file called *Security.java* in your *packages* folder with the following content:
+
+bc.package controllers;
+public class Security extends Secure.Security {
+   static boolean authenticate(String username, String password) {
+           return username.equals("peter") && password.equals("secret");
+   }
+   static boolean check(String profile) {
+	   //console controllers are marked with isAdmin checks
+           return true;
+   }
+}
+
+After that *http://yourdomain/console/* should be available.
+
+h2. Screenshots
+
+!images/jvm!
+
+!images/db!
+
+!images/java!
+
+!images/scala!

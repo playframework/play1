@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>#{get 'title' /}</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/console_main.css'}">
+        <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+        <script src="@{'/public/javascripts/jquery-1.4.2.min.js'}" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        
+        <h1>REPL</h1>
+	%{if (action.contains("java")) {  %}
+	<h2>-Java</h2>
+        %{ } else{   }%
+        <h2>-Scala</h2>
+        %{ } }%
+
+	#{navigation /}
+	#{if (action.contains("java"))}
+	<ul>
+	<li>Beanshell does not like generics</li>
+	<li>JPA ehanced code is not visible, therefore<br/>
+	use findAll(User.class) instead of User.findAll()<br/>
+	find(User.class) instead of User.find() etc.</li>
+	</ul>
+	#{/if}
+	<p>
+	<form action="${action}" method="POST">
+		  <textarea rows="20" cols="90" name="script">${script}</textarea> 
+		  <br>
+		<input type="submit" value="Submit" />	
+	  </form>	  
+        </p> 
+        
+        <div id="results">
+            #{list results}
+                <div class="print ${_parity}">
+                    ${_}
+                </div>
+            #{/list}
+        </div>
+        
+        #{if error}
+            <div id="error">
+		<h3>Oops, ${error.message}</h3>
+		%{if (script.split('\n').size()>=2) {  
+			if (action.contains("java")) { 
+				try { %} 
+					<div class="print">${script.split('\n')[error.getErrorLineNumber()-2]}</div>
+				%{ } catch (NullPointerException ex)  { %}
+                			<div class="print">${trace}</div>
+				%{ } }%
+				%{ } else{  try { }%
+                			<div class="print">${script.split('\n')[error.line-3]}</div>
+				%{ } catch (Exception ex) { }%
+					<div class="print">${trace}</div>
+				%{ } }%
+			%{ } }%
+		%{ } else{   }%
+                	<div class="print">${script}</div>
+		%{ } }%
+            </div>
+        #{/if}
+        
+        
+    </body>
+</html>
