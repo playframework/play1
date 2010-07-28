@@ -492,7 +492,6 @@ public class Router {
                                 throw new RenderStatic(staticDir + "/" + resource);
                             }
                         } catch(IOException e) {
-                            Logger.error("Oops", e);
                         }
                         throw new NotFound(resource);
                     } else {

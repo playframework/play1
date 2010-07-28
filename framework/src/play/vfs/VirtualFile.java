@@ -147,16 +147,7 @@ public class VirtualFile {
     }
 
     public VirtualFile child(String name) {
-        File child = new File(realFile, name);
-        if(child.getAbsolutePath().startsWith(realFile.getAbsolutePath())) {
-            return new VirtualFile(child);
-        }
-        return new VirtualFile(realFile) {
-            @Override
-            public boolean exists() {
-                return false;
-            }
-        };
+        return new VirtualFile(new File(realFile, name));
     }
 
     public Channel channel() {
