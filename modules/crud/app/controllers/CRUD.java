@@ -50,6 +50,7 @@ public abstract class CRUD extends Controller {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         Model object = type.findById(id);
+        notFoundIfNull(object);
         try {
             render(type, object);
         } catch (TemplateNotFoundException e) {
@@ -61,6 +62,7 @@ public abstract class CRUD extends Controller {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         Model object = type.findById(id);
+        notFoundIfNull(object);
         FileAttachment attachment = (FileAttachment) object.getClass().getField(field).get(object);
         if (attachment == null) {
             notFound();
@@ -131,6 +133,7 @@ public abstract class CRUD extends Controller {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         Model object = type.findById(id);
+        notFoundIfNull(object);
         try {
             object._delete();
         } catch (Exception e) {
@@ -297,7 +300,11 @@ public abstract class CRUD extends Controller {
             } catch (Exception e) {
                 throw new RuntimeException("Something bad with id type ?", e);
             }
-            return (Model) query.getSingleResult();
+            try {
+                return (Model) query.getSingleResult();
+            } catch(NoResultException ex) {
+                return null;
+            }
         }
 
         public List<ObjectField> getFields() {
