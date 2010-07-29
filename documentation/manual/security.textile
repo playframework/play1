@@ -1,12 +1,12 @@
 h1. Security Guide
 
-The Play framework is designed with security in mind - but it is impossible to prevent developers using the framework to mess up and open holes. The guide describes the common security issues in web applications and how avoid them in Play applications.
+The Play framework is designed with security in mind - but it is impossible to prevent developers using the framework to mess up and open holes. The guide describes the common security issues in web applications and how to avoid them in Play applications.
 
 h2. <a name="sessions">Sessions</a>
 
 Often you need to keep information associated with a user, in particular the logged-in status. Without a session, the user would need to pass credentials with each request.
 
-That’s what sessions are for: a set of cookies stored in the user’s browser that identify him to the web site, and provide other information your web application may choose to store there rather than in the data layer; for example the language.
+That’s what sessions are for: a set of cookies stored in the user’s browser that identify him or her to the web site, and provide other information your web application may choose to store there rather than in the data layer; for example the language.
 
 h3. Keep your secret… secret
 
@@ -43,7 +43,7 @@ When sanitizing user inputs, always prefer whitelisting (only allow a list of sa
 
 h2. <a name="sql">SQL Injection</a>
 
-SQL injection is an exploit consisting in using user input to execute an SQL query that was not intended by the developer. This can be used to destroy data, or to get access to data that shouldn’t be visible to the current user.
+SQL injection is an exploit consisting in using user input to execute a SQL query that was not intended by the developer. This can be used to destroy data, or to get access to data that shouldn’t be visible to the current user.
 
 !http://imgs.xkcd.com/comics/exploits_of_a_mom.png!
 
@@ -59,17 +59,17 @@ bc. createQuery("SELECT * from Stuff WHERE type=" + theType;
 
 h2. <a name="csrf">Cross-Site Request Forgery</a>
 
-The CSRF attack can be really problematic in web applications;
+The CSRF attack can be really problematic in web applications:
 
 bq. This attack method works by including malicious code or a link in a page that accesses a web application that the user is believed to have authenticated. If the session for that web application has not timed out, an attacker may execute unauthorized commands.
 
-To prevent this attack, the first thing to do is to use GET and POST methods appropriately. That means that only POST method should be used to change the application’s state.
+To prevent this attack, the first thing to do is to use GET and POST methods appropriately. That means that only the POST method should be used to change the application’s state.
 
 For POST requests the only way to secure critical actions properly is to issue an authenticity token. Play 1.0.2 now has a built-in helper to handle that:
 
-* a new **checkAuthenticity()** method available in controllers, that checks for a valid authenticity token in the request parameters and send a forbidden response if something is bad.
+* a new **checkAuthenticity()** method available in controllers, that checks for a valid authenticity token in the request parameters and sends a forbidden response if something is bad.
 * **session.getAuthenticityToken()** generates an authenticity token only valid for the current session.
-* **#{authenticityToken /}** creates an hidden input field that you can add to any form.
+* **#{authenticityToken /}** creates a hidden input field that you can add to any form.
 
 So for example:
 

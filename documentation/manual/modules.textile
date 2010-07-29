@@ -1,6 +1,6 @@
 h1. Using Play modules
 
-A Play application can be assembled from several application modules. This allows you to reuse application components across several application or split a large application into several smaller applications.
+A Play application can be assembled from several application modules. This allows you to reuse application components across several applications or split a large application into several smaller applications.
 
 h2. <a>What is a module?</a>
 

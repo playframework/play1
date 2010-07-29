@@ -6,7 +6,7 @@ Play tests are built using "JUnit 4":http://www.junit.org/ or "Selenium":http://
 
 h2. <a name="writing">Writing tests</a>
 
-The tests must be created in the **test/** directory. This folder will only be added to sources path when the application is run in **test** mode. You can write 3 differents kind of test.
+The tests must be created in the **test/** directory. This folder will only be added to the sources path when the application is run in **test** mode. You can write 3 different kinds of tests.
 
 h3. Unit test
 
@@ -141,7 +141,7 @@ bc. %test.db=mem
 
 h2. <a name="continuous">Continuous integration, and running the tests automatically</a>
 
-The **auto-test** command do the same than the **test** command, but it automatically launch a browser, run all the tests, and stop.
+The **auto-test** command does the same as the **test** command, but it automatically launches a browser, runs all the tests, and stops.
 
 This is a useful command if you want to set up a continuous integration system; 
 

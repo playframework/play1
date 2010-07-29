@@ -211,12 +211,11 @@ public class Account extends Model {
                 this.usernames = usernames;
         }
 }
-~
 
-is showed as:
+This is shown as:
 
 "myEnumId1","myEnumId2" for the contentTypes and "string1","string2" for the usernames. Per definition, this is what you should first customize in your CRUD module.
 
 h2. <a>Limitation</a>
 
-The crud module will show the relations that are unidirectional in one entity: the one that  does not have the mappedBy attribute.
+The CRUD module will show the relationships that are unidirectional in one entity: the one that does not have the **mappedBy** attribute.

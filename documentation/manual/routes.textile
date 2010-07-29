@@ -14,7 +14,7 @@ Representational state transfer (REST) is a style of software architecture for d
 REST states a few key design principles:
 
 * Application functionality is divided into resources
-* Every resource is uniquely addressable using an URI
+* Every resource is uniquely addressable using a URI
 * All resources share a uniform interface for the transfer of state between client and resource. 
 
 If you’re using HTTP, these interfaces are defined by the set of available HTTP methods. The protocol used to access the resource state is:
@@ -24,7 +24,7 @@ If you’re using HTTP, these interfaces are defined by the set of available HTT
 * Cacheable
 * Layered
 
-If an application follows the main REST design principles, the application is RESTFul. The Play framework makes it easy to build RESTFul applications:
+If an application follows the main REST design principles, the application is RESTful. The Play framework makes it easy to build RESTful applications:
 
 * The Play router interprets both URI and HTTP methods to route a request to a Java call. Regular expressions-based URI patterns give you even more flexibility. 
 * The protocol is stateless. This means you can’t save any state on the server between two successive requests.
@@ -47,7 +47,7 @@ GET    /clients/{id}             Clients.show
 
 h3. The HTTP method
 
-The HTTP method can be any one of the any valid methods supported by HTTP:
+The HTTP method can be any of the valid methods supported by HTTP:
 
 * **GET**
 * **POST**
@@ -59,7 +59,7 @@ If you specify * as method, this route will match the HTTP Request for any metho
 
 bc. *   /clients/{id}             Clients.show           
 
-This route will accept independently:
+This route will accept both of:
 
 bc. GET /clients/1541
 PUT /clients/1212
@@ -67,7 +67,7 @@ PUT /clients/1212
 
 h3. The URI Pattern
 
-The URI pattern defines the request path needed by the route Some parts of the route can be dynamic. Any dynamic part must be specified within braces {…}.
+The URI pattern defines the route’s request path. Some parts of the request path can be dynamic. Any dynamic part must be specified within braces {…}.
 
 bc. /clients/all
 
@@ -79,7 +79,7 @@ but…
 
 bc. /clients/{id}
 
-independently matches:
+matches both:
 
 bc. /clients/12121
 /clients/toto
@@ -108,7 +108,7 @@ By default Play considers the trailing URL slash as important. For example, this
 
 bc. GET     /clients         Clients.index
 
-will match the */clients* URL but not */clients/*. You can tell Play that you want to match both URL adding a question mark after the trailing slash. For example:
+will match the */clients* URL but not */clients/*. You can tell Play that you want to match both URLs by adding a question mark after the trailing slash. For example:
 
 bc. GET     /clients/?       Clients.index
 
@@ -158,7 +158,7 @@ With these definitions, the URI:
 
 bc. /client/all
 
-will be intercepted by the first route and will call Clients.listAll. (even if the second route matched the request too).
+will be intercepted by the first route and will call Clients.listAll (even if the second route matched the request too).
 
 
 h2. <a name="static">Serving static resources</a>
@@ -185,7 +185,7 @@ bc. GET    /clients/{id}      Clients.show
 From your code, you can generate the URL able to invoke Clients.show:
 
 bc. map.put("id", 1541);
-String url = Router.reverse("Clients.show", map).url;  GET /clients/1541
+String url = Router.reverse("Clients.show", map).url;  // GET /clients/1541
 
 p(note). The URL generation is integrated into many of the framework’s components. You never should use the Router.reverse operation directly.
 
@@ -193,7 +193,7 @@ If you add parameters that are not included in the URI pattern, these parameters
 
 bc. map.put("id", 1541);
 map.put("display", "full");
-String url = Router.reverse("Clients.show", map).url; GET /clients/1541?display=full
+String url = Router.reverse("Clients.show", map).url; // GET /clients/1541?display=full
 
 The priority order is again used to find the most specific Route able to generate the URL.
 

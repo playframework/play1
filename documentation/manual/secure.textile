@@ -1,6 +1,6 @@
 h1. Secure module
 
-The simple **Secure** module help you to set up basic authentication and authorization management to your application. It provides a simple **controllers.Secure** controller that defines a set of interceptors that you can easily add to your own controllers using the **@With** annotation.
+The simple **Secure** module helps you to set-up basic authentication and authorization management in your application. It provides a simple **controllers.Secure** controller that defines a set of interceptors that you can easily add to your own controllers using the **@With** annotation.
 
 h2. <a>Enable the Secure module for the application</a>
 
@@ -48,11 +48,11 @@ public class Security extends Secure.Security {
     
 }
 
-p(note). **Note** that you can override other methods as well to customize how the application should react to authentication events (onAuthenticated, onDisconnected).
+p(note). **Note** that you can also override other methods to customize how the application should react to authentication events (onAuthenticated, onDisconnected).
 
 h2. <a>Retrieving the connected user</a>
 
-From your application code, your can reuse the Security helper that you’ve just created to retrieve the connected user.
+From your application code, you can reuse the Security helper that you’ve just created to retrieve the connected user.
 
 bc. @With(Secure.class)
 public class Application extends Controller {
@@ -66,7 +66,7 @@ public class Application extends Controller {
 
 h2. <a>Adding authorization check</a>
 
-You can use the **@Check** annotation either on controller classes or action methods to tell the Secure module to check that the connected user has required authorization to call this action.
+You can use the **@Check** annotation either on controller classes or action methods to tell the Secure module to check that the connected user has the required authorization to call this action.
 
 For example:
 

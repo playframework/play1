@@ -24,10 +24,10 @@ The cache API is provided by the **play.cache.Cache** class. This class contains
 Some examples:
 
 bc. public static void showProduct(String id) {
-    Product product = Cache.get(id, Product.class);
+    Product product = Cache.get("product_" + id, Product.class);
     if(product == null) {
         product = Product.findById(id);
-        Cache.set("product_"+id, product, "30mn");
+        Cache.set("product_" + id, product, "30mn");
     }
     render(product);
 }
@@ -42,30 +42,30 @@ public static void editProduct(String id, String name, int price) {
     Product product = Product.findById(id);
     product.name = name;
     product.price = price;
-    Cache.set("product_"+id, product, "30mn");
+    Cache.set("product_" + id, product, "30mn");
     showProduct(id);
 }
  
 public static void deleteProduct(String id) {
     Product product = Product.findById(id);
     product.delete();
-    Cache.delete("product_"+id);
+    Cache.delete("product_" + id);
     allProducts();
 }
 
 Some methods start with the **safe** prefix - e.g. **safeDelete**, **safeSet**. The standard methods are non-blocking. That means that when you issue the call:
 
-bc. Cache.delete("product_"+id);
+bc. Cache.delete("product_" + id);
 
 The **delete** method will return immediately and will not wait until the cached object is actually deleted. So if an error occurs - e.g. an IO error - the object may still be present.
 
 When you need to make sure that the object is deleted before continuing, you can use the **safeDelete** method:
 
-bc. Cache.safeDelete("product_"+id);
+bc. Cache.safeDelete("product_" + id);
 
 This method is blocking and returns a boolean value indicating whether the object has been deleted or not. So the full pattern that ensures an item is deleted from the cache is:
 
-bc. if(!Cache.safeDelete("product_"+id)) {
+bc. if(!Cache.safeDelete("product_" + id)) {
     throw new Exception("Oops, the product has not been removed from the cache");
 }
 ...
@@ -90,7 +90,7 @@ bc. Cache.put(session.getId(), products);
 // and then in subsequent requests
 List<Product> products = Cache.get(session.getId(), List.class)
 
-Here we have used a unique UUID to keep unique information in the Cache for each user. Remember that, unlike a session object, the cache in not bound to any particular User!
+Here we have used a unique UUID to keep unique information in the Cache for each user. Remember that, unlike a session object, the cache is not bound to any particular User!
 
 h2. <a>Configure memcached</a>
 

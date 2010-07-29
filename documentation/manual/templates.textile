@@ -151,7 +151,7 @@ bc. <h1>Main template</h1>
 
 h2. <a name="tags">Create tags</a>
 
-You can easily create specifics tags for your application. A tag is a simple template file, stored in the **app/views/tags** directory. The template’s file name is used as the tag name.
+You can easily create specific tags for your application. A tag is a simple template file, stored in the **app/views/tags** directory. The template’s file name is used as the tag name.
 
 To create a **hello** tag, just create the **app/views/tags/hello.html** file.
 
