@@ -60,6 +60,7 @@ public abstract class CRUD extends Controller {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         JPASupport object = type.findById(id);
+        notFoundIfNull(object);
         try {
             render(type, object);
         } catch (TemplateNotFoundException e) {
@@ -71,6 +72,7 @@ public abstract class CRUD extends Controller {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         JPASupport object = type.findById(id);
+        notFoundIfNull(object);
         FileAttachment attachment = (FileAttachment) object.getClass().getField(field).get(object);
         if (attachment == null) {
             notFound();
@@ -82,6 +84,7 @@ public abstract class CRUD extends Controller {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         JPASupport object = type.findById(id);
+        notFoundIfNull(object);
         object = object.edit("object", params);
         // Look if we need to deserialize
         for (ObjectType.ObjectField field : type.getFields()) {
@@ -146,6 +149,7 @@ public abstract class CRUD extends Controller {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         JPASupport object = type.findById(id);
+        notFoundIfNull(object);
         try {
             object.delete();
         } catch (Exception e) {
@@ -297,7 +301,11 @@ public abstract class CRUD extends Controller {
             } catch (Exception e) {
                 throw new RuntimeException("Something bad with id type ?", e);
             }
-            return (JPASupport) query.getSingleResult();
+            try {
+                return (JPASupport) query.getSingleResult();
+            } catch(NoResultException ex) {
+                return null;
+            }
         }
 
         public List<ObjectField> getFields() {
