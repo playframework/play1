@@ -25,9 +25,9 @@ def execute(**kargs):
             print '~'
             sys.exit(-1)
     else:
-        main_help(cmdloader.commands)
+        main_help(cmdloader.commands, play_env)
 
-def main_help(commands):
+def main_help(commands, play_env):
     modules_commands = []
     print "~ For all commands, if the application is not specified, the current directory is used"
     print "~ Use 'play help cmd' to get more help on a specific command"
@@ -35,7 +35,7 @@ def main_help(commands):
     print "~ Core commands:"
     print "~ ~~~~~~~~~~~~~~"
     for cmd in sorted(commands):
-        if not isCode(commands[cmd]):
+        if not isCore(commands[cmd], play_env):
             modules_commands.append(cmd)
             continue
         if 'HELP' in dir(commands[cmd]) and cmd in commands[cmd].HELP:
@@ -51,5 +51,5 @@ def main_help(commands):
     print "~ Also refer to documentation at http://www.playframework.org/documentation"
     print "~"
 
-def isCode(mod):
-    return mod.__file__.find(playdir) == 0
+def isCore(mod, play_env):
+    return mod.__file__.find(play_env["basedir"]) == 0

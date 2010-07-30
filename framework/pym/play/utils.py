@@ -6,6 +6,9 @@ import fileinput
 import getopt
 import shutil
 
+def playVersion(play_env):
+    play_version_file = os.path.join(play_env["basedir"], 'framework', 'src', 'play', 'version')
+    return open(play_version_file).readline().strip()
 
 def replaceAll(file, searchExp, replaceExp, regexp=False):
     if not regexp:
