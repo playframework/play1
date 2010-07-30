@@ -22,12 +22,11 @@ def execute(**kargs):
 
     series = getSeries(version)
     if series is None:
-        print"~ Unable to determine series for version " + version
+        print "~ Error: unable to determine series for version " + version + "."
+        print "~"
         sys.exit(-1)
 
-    launchpad = Launchpad.login_anonymously('just testing', 'production', None)
-    landmarks = launchpad.projects["play"].getSeries(name=series).get_timeline()["landmarks"]
-    releases = filter(lambda x: x["type"] == "release", landmarks)
+    releases = filter(lambda x: x["type"] == "release", series.get_timeline()["landmarks"])
 
     if len(releases) == 0:
         print "~ No release for the requested series. Are you on a development branch?"
@@ -48,7 +47,8 @@ def execute(**kargs):
 def getSeries(version):
     if len(version) < 3:
         return None
-    return version[0:3]
+    launchpad = Launchpad.login_anonymously('just testing', 'production', None)
+    return launchpad.projects["play"].getSeries(name=version[0:3])
 
 def isRelease(version, releases):
     for release in releases:
