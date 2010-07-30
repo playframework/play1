@@ -1,6 +1,5 @@
 package play.db.jpa;
 
-import java.io.File;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -369,7 +368,7 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         public Model findById(Object id) {
-            return (Model) JPA.em().find(clazz, id);
+            return JPA.em().find(clazz, id);
         }
 
         public List<Model> fetch(int offset, int size, String orderBy, String orderDirection) {

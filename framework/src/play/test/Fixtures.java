@@ -48,6 +48,7 @@ public class Fixtures {
     }
 
     public static void delete(List<Class<Model>> classes) {
+        @SuppressWarnings("unchecked")
         Class<Model>[] types = new Class[classes.size()];
         for (int i = 0; i < types.length; i++) {
             types[i] = classes.get(i);
@@ -55,6 +56,7 @@ public class Fixtures {
         delete(types);
     }
 
+    @SuppressWarnings("unchecked")
     public static void deleteAllModels() {
         List<Class<Model>> classes = new ArrayList<Class<Model>>();
         for (ApplicationClasses.ApplicationClass c : Play.classes.getAssignableClasses(Model.class)) {
@@ -181,6 +183,7 @@ public class Fixtures {
                             objects.put(key, new HashMap<Object, Object>());
                         }
                         serialize(objects.get(key), "object", params);
+                        @SuppressWarnings("unchecked")
                         Class<Model> cType = (Class<Model>)Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
                         Model model = (Model)OldBinder.bind("object", cType, cType, null, params);
