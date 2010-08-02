@@ -31,7 +31,7 @@ import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.AsyncHttpClientConfig.Builder;
 import com.ning.http.client.FilePart;
-import com.ning.http.client.FluentCaseInsensitiveStringsMap;
+import com.ning.http.client.Headers;
 import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Response;
 import com.ning.http.client.StringPart;
@@ -501,7 +501,7 @@ public class WS extends PlayPlugin {
         }
 
         public List<Header> getHeaders() {
-            FluentCaseInsensitiveStringsMap hdrs = response.getHeaders();
+            Headers hdrs = response.getHeaders();
             List<Header> result = new ArrayList<Header>();
             Iterator<Entry<String, List<String>>> iter = hdrs.iterator();
             while (iter.hasNext()) {
