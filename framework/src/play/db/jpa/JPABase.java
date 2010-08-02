@@ -258,4 +258,11 @@ public class JPABase implements Serializable, play.db.Model {
         }
     }
 
+    //
+
+    @Deprecated
+    public Object getEntityId() {
+        return _key();
+    }
+
 }
