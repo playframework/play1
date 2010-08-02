@@ -88,7 +88,7 @@ public abstract class CRUD extends Controller {
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
         }
-        redirect(request.controller + ".show");
+        redirect(request.controller + ".show", object._key());
     }
 
     public static void blank() {
@@ -125,7 +125,7 @@ public abstract class CRUD extends Controller {
         if (params.get("_saveAndAddAnother") != null) {
             redirect(request.controller + ".blank");
         }
-        redirect(request.controller + ".show");
+        redirect(request.controller + ".show", object._key());
     }
 
     public static void delete(String id) {
@@ -137,7 +137,7 @@ public abstract class CRUD extends Controller {
             object._delete();
         } catch (Exception e) {
             flash.error(Messages.get("crud.delete.error", type.modelName));
-            redirect(request.controller + ".show");
+            redirect(request.controller + ".show", object._key());
         }
         flash.success(Messages.get("crud.deleted", type.modelName));
         redirect(request.controller + ".list");
@@ -235,6 +235,7 @@ public abstract class CRUD extends Controller {
         }
 
         public Model findById(Object id) {
+            if (id == null) return null;
             return Model.Manager.factoryFor(entityClass).findById(id);
         }
 

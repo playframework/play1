@@ -378,10 +378,12 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         public Model findById(Object id) {
+            if (id == null) return null;
             try {
-                return (Model) JPA.em().find(clazz, Binder.directBind(id + "", Model.Manager.factoryFor(clazz).keyType()));
+                return JPA.em().find(clazz, Binder.directBind(id.toString(), Model.Manager.factoryFor(clazz).keyType()));
             } catch(Exception e) {
-                throw new UnexpectedException(e);
+                // Key is invalid, thus nothing was found
+                return null;
             }
         }
 
@@ -391,7 +393,7 @@ public class JPAPlugin extends PlayPlugin {
                 String searchQuery = getSearchQuery(searchFields);
                 if (!searchQuery.equals("")) {
                     q += " where (" + searchQuery + ")";
-                }                
+                }
             }
             if (orderBy == null && order == null) {
                 orderBy = "id";
