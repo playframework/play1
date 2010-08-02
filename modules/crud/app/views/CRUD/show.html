@@ -5,7 +5,7 @@
 	<h2 id="crudShowTitle">&{'crud.show.title', type.modelName}</h2>
 	
 	<div class="objectForm">
-	#{form action:@save(object.id), enctype:'multipart/form-data'}
+	#{form action:@save(object._key()), enctype:'multipart/form-data'}
 		#{crud.form /}
 		<p class="crudButtons">
 			<input type="submit" name="_save" value="&{'crud.save', type.modelName}" />
@@ -14,7 +14,7 @@
 	#{/form}
 	</div>
 	
-	#{form @delete(object.id)}
+	#{form @delete(object._key())}
 		<p class="crudDelete">
 			<input type="submit" value="&{'crud.delete', type.modelName}" />
 		</p>

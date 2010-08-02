@@ -35,7 +35,7 @@ import play.Play;
 import play.Play.Mode;
 import play.classloading.BytecodeCache;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
-import play.data.binding.map.Unbinder;
+import play.data.binding.Unbinder;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;

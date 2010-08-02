@@ -1,4 +1,4 @@
-package play.data.binding.urlencoded;
+package play.data.parsing;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

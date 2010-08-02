@@ -29,14 +29,7 @@ public class FileAttachment {
     }
     
     public File get() {
-        if(f != null) {
-            return f;
-        }
-        File file = new File(getStore(), model.getClass().getName()+"."+name+"_"+JPASupport.findKey(model));
-        if(file.exists()) {
-            f = file;
-        }
-        return f;
+        return null;
     }
     
     public void set(File file) {
@@ -44,18 +37,11 @@ public class FileAttachment {
     }
     
     void save() {
-        if(f != null) {
-            File to = new File(getStore(), model.getClass().getName()+"."+name+"_"+JPASupport.findKey(model));
-            Files.copy(f, to);
-        }
+        
     }
 
     void delete() {
-        File to = new File(getStore(), model.getClass().getName()+"."+name+"_"+JPASupport.findKey(model));
-        if(to.exists()) {
-            to.delete();
-        }
-        name = null;
+        
     }
     
     public boolean isSet() {

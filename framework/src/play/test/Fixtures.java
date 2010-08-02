@@ -25,12 +25,10 @@ import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses;
-import play.data.binding.map.OldBinder;
+import play.data.binding.Binder;
 import play.db.DB;
 import play.db.DBPlugin;
 import play.db.Model;
-import play.db.ModelManager;
-import play.db.ModelProperty;
 import play.exceptions.UnexpectedException;
 import play.exceptions.YAMLException;
 import play.vfs.VirtualFile;
@@ -42,7 +40,7 @@ public class Fixtures {
     public static void delete(Class<Model>... types) {
         disableForeignKeyConstraints();
         for (Class<Model> type : types) {
-            ModelManager.loaderFor(type).deleteAll();
+            Model.Manager.factoryFor(type).deleteAll();
         }
         enableForeignKeyConstraints();
     }
@@ -186,7 +184,7 @@ public class Fixtures {
                         @SuppressWarnings("unchecked")
                         Class<Model> cType = (Class<Model>)Play.classloader.loadClass(type);
                         resolveDependencies(cType, params, idCache);
-                        Model model = (Model)OldBinder.bind("object", cType, cType, null, params);
+                        Model model = (Model)Binder.bind("object", cType, cType, null, params);
                         for(Field f : model.getClass().getFields()) {
                             // TODO: handle something like FileAttachment
                             if (f.getType().isAssignableFrom(Map.class)) {
@@ -197,7 +195,7 @@ public class Fixtures {
                         model._save();
                         Class<?> tType = cType;
                         while (!tType.equals(Object.class)) {
-                            idCache.put(tType.getName() + "-" + id, model._getKey());
+                            idCache.put(tType.getName() + "-" + id, Model.Manager.factoryFor(cType).keyValue(model));
                             tType = tType.getSuperclass();
                         }
                     }
@@ -251,25 +249,26 @@ public class Fixtures {
     static void resolveDependencies(Class<Model> type, Map<String, String[]> serialized, Map<String, Object> idCache) {
         Set<Field> fields = new HashSet<Field>();
         Class<?> clazz = type;
+        String keyName = Model.Manager.factoryFor(type).keyName();
         while (!clazz.equals(Object.class)) {
             Collections.addAll(fields, clazz.getDeclaredFields());
             clazz = clazz.getSuperclass();
         }
-        for (ModelProperty field : ModelManager.loaderFor(type).listProperties()) {
+        for (Model.Property field : Model.Manager.factoryFor(type).listProperties()) {
             if (field.isRelation) {
                 String[] ids = serialized.get("object." + field.name);
                 if (ids != null) {
                     for (int i = 0; i < ids.length; i++) {
                         String id = ids[i];
-                        id = field.relation + "-" + id;
+                        id = field.relationType.getName() + "-" + id;
                         if (!idCache.containsKey(id)) {
-                            throw new RuntimeException("No previous reference found for object of type " + field.relation + " with id " + ids[i]);
+                            throw new RuntimeException("No previous reference found for object of type " + field.name + " with key " + ids[i]);
                         }
                         ids[i] = idCache.get(id).toString();
                     }
                 }
                 serialized.remove("object." + field.name);
-                serialized.put("object." + field.name + ".id", ids);
+                serialized.put("object." + field.name + "." + keyName, ids);
             }
         }
     }

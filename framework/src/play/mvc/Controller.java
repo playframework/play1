@@ -19,7 +19,7 @@ import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSupport;
-import play.data.binding.map.Unbinder;
+import play.data.binding.Unbinder;
 import play.data.validation.Validation;
 import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;

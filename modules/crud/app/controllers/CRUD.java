@@ -6,10 +6,9 @@ import java.lang.annotation.*;
 import javax.persistence.*;
 
 import play.*;
+import play.data.binding.*;
 import play.mvc.*;
 import play.db.Model;
-import play.db.jpa.FileAttachment;
-import play.db.jpa.JPA;
 import play.data.validation.*;
 import play.exceptions.*;
 import play.i18n.*;
@@ -59,7 +58,7 @@ public abstract class CRUD extends Controller {
     }
 
     public static void attachment(String id, String field) throws Exception {
-        ObjectType type = ObjectType.get(getControllerClass());
+        /*ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         Model object = type.findById(id);
         notFoundIfNull(object);
@@ -67,14 +66,14 @@ public abstract class CRUD extends Controller {
         if (attachment == null) {
             notFound();
         }
-        renderBinary(attachment.get(), attachment.filename);
+        renderBinary(attachment.get(), attachment.filename);*/
     }
 
     public static void save(String id) throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         Model object = type.findById(id);
-        play.db.jpa.JPASupport.edit(object, "object", params.all(), null);
+        Binder.bind(object, "object", params.all());
         validation.valid(object);
         if (validation.hasErrors()) {
             renderArgs.put("error", Messages.get("crud.hasErrors"));
@@ -85,11 +84,11 @@ public abstract class CRUD extends Controller {
             }
         }
         object._save();
-        flash.success(Messages.get("crud.saved", type.modelName, object._getKey()));
+        flash.success(Messages.get("crud.saved", type.modelName));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
         }
-        redirect(request.controller + ".show", object._getKey());
+        redirect(request.controller + ".show");
     }
 
     public static void blank() {
@@ -108,7 +107,7 @@ public abstract class CRUD extends Controller {
         Constructor<?> constructor = type.entityClass.getDeclaredConstructor();
         constructor.setAccessible(true);
         Model object = (Model) constructor.newInstance();
-        play.db.jpa.JPASupport.edit(object, "object", params.all(), null);
+        Binder.bind(object, "object", params.all());
         validation.valid(object);
         if (validation.hasErrors()) {
             renderArgs.put("error", Messages.get("crud.hasErrors"));
@@ -119,14 +118,14 @@ public abstract class CRUD extends Controller {
             }
         }
         object._save();
-        flash.success(Messages.get("crud.created", type.modelName, object._getKey()));
+        flash.success(Messages.get("crud.created", type.modelName));
         if (params.get("_save") != null) {
             redirect(request.controller + ".list");
         }
         if (params.get("_saveAndAddAnother") != null) {
             redirect(request.controller + ".blank");
         }
-        redirect(request.controller + ".show", object._getKey());
+        redirect(request.controller + ".show");
     }
 
     public static void delete(String id) {
@@ -137,10 +136,10 @@ public abstract class CRUD extends Controller {
         try {
             object._delete();
         } catch (Exception e) {
-            flash.error(Messages.get("crud.delete.error", type.modelName, object._getKey()));
-            redirect(request.controller + ".show", object._getKey());
+            flash.error(Messages.get("crud.delete.error", type.modelName));
+            redirect(request.controller + ".show");
         }
-        flash.success(Messages.get("crud.deleted", type.modelName, object._getKey()));
+        flash.success(Messages.get("crud.deleted", type.modelName));
         redirect(request.controller + ".list");
     }
 
@@ -167,10 +166,12 @@ public abstract class CRUD extends Controller {
         public String name;
         public String modelName;
         public String controllerName;
+        public String keyName;
 
         public ObjectType(Class<? extends Model> modelClass) {
             this.modelName = modelClass.getSimpleName();
             this.entityClass = modelClass;
+            this.keyName = Model.Manager.factoryFor(entityClass).keyName();
         }
 
         @SuppressWarnings("unchecked")
@@ -225,95 +226,22 @@ public abstract class CRUD extends Controller {
         }
 
         public Long count(String search, String searchFields, String where) {
-            String q = "select count(e) from " + entityClass.getName() + " e";
-            if (search != null && !search.equals("")) {
-                String searchQuery = getSearchQuery(searchFields);
-                if (!searchQuery.equals("")) {
-                    q += " where (" + searchQuery + ")";
-                }
-                q += (where != null ? " and " + where : "");
-            } else {
-                q += (where != null ? " where " + where : "");
-            }
-            Query query = JPA.em().createQuery(q);
-            if (search != null && !search.equals("") && q.indexOf("?1") != -1) {
-                query.setParameter(1, "%" + search.toLowerCase() + "%");
-            }
-            return Long.decode(query.getSingleResult().toString());
+            return Model.Manager.factoryFor(entityClass).count(searchFields == null ? new ArrayList<String>() : Arrays.asList(searchFields.split("[ ]")), search);
         }
 
         @SuppressWarnings("unchecked")
         public List<Model> findPage(int page, String search, String searchFields, String orderBy, String order, String where) {
-            int pageLength = getPageSize();
-            String q = "from " + entityClass.getName();
-            if (search != null && !search.equals("")) {
-                String searchQuery = getSearchQuery(searchFields);
-                if (!searchQuery.equals("")) {
-                    q += " where (" + searchQuery + ")";
-                }
-                q += (where != null ? " and " + where : "");
-            } else {
-                q += (where != null ? " where " + where : "");
-            }
-            if (orderBy == null && order == null) {
-                orderBy = "id";
-                order = "ASC";
-            }
-            if (orderBy == null && order != null) {
-                orderBy = "id";
-            }
-            if (order == null || (!order.equals("ASC") && !order.equals("DESC"))) {
-                order = "ASC";
-            }
-            q += " order by " + orderBy + " " + order;
-            Query query = JPA.em().createQuery(q);
-            if (search != null && !search.equals("") && q.indexOf("?1") != -1) {
-                query.setParameter(1, "%" + search.toLowerCase() + "%");
-            }
-            query.setFirstResult((page - 1) * pageLength);
-            query.setMaxResults(pageLength);
-            return query.getResultList();
-        }
-
-        public String getSearchQuery(String searchFields) {
-            List<String> fields = null;
-            if (searchFields != null && !searchFields.equals("")) {
-                fields = Arrays.asList(searchFields.split("[ ]"));
-            }
-            String q = "";
-            for (ObjectField field : getFields()) {
-                if (field.searchable && (fields == null ? true : fields.contains(field.name))) {
-                    if (!q.equals("")) {
-                        q += " or ";
-                    }
-                    q += "lower(" + field.name + ") like ?1";
-                }
-            }
-            return q;
+            return Model.Manager.factoryFor(entityClass).fetch((page - 1) * getPageSize(), getPageSize(), orderBy, order, searchFields == null ? new ArrayList<String>() : Arrays.asList(searchFields.split("[ ]")), search);
         }
 
         public Model findById(Object id) {
-            Query query = JPA.em().createQuery("from " + entityClass.getName() + " where id = ?");
-            try {
-                // TODO: I think we need to type of direct bind -> primitive and object binder
-                query.setParameter(1, play.data.binding.map.Binder.directBind(id + "", play.db.jpa.JPASupport.findKeyType(entityClass)));
-            } catch (Exception e) {
-                throw new RuntimeException("Something bad with id type ?", e);
-            }
-            try {
-                return (Model) query.getSingleResult();
-            } catch(NoResultException ex) {
-                return null;
-            }
+            return Model.Manager.factoryFor(entityClass).findById(id);
         }
 
         public List<ObjectField> getFields() {
             List<ObjectField> fields = new ArrayList<ObjectField>();
-            for (Field f : entityClass.getDeclaredFields()) {
-                if (Modifier.isTransient(f.getModifiers())) {
-                    continue;
-                }
-                if (f.isAnnotationPresent(Exclude.class)) {
+            for (Model.Property f : Model.Manager.factoryFor(entityClass).listProperties()) {
+                if (f.field.isAnnotationPresent(Exclude.class)) {
                     continue;
                 }
                 ObjectField of = new ObjectField(f);
@@ -344,18 +272,19 @@ public abstract class CRUD extends Controller {
 
         public static class ObjectField {
 
+            private Model.Property property;
             public String type = "unknown";
             public String name;
             public String relation;
             public boolean multiple;
-            public boolean searchable;
             public Object[] choices;
             public boolean required;
             
-            public ObjectField(Field field) {
+            public ObjectField(Model.Property property) {
+                Field field = property.field;
+                this.property = property;
                 if (CharSequence.class.isAssignableFrom(field.getType())) {
                     type = "text";
-                    searchable = true;
                     if (field.isAnnotationPresent(MaxSize.class)) {
                         int maxSize = field.getAnnotation(MaxSize.class).value();
                         if (maxSize > 100) {
@@ -374,9 +303,6 @@ public abstract class CRUD extends Controller {
                 }
                 if (Date.class.isAssignableFrom(field.getType())) {
                     type = "date";
-                }
-                if (FileAttachment.class.isAssignableFrom(field.getType())) {
-                    type = "file";
                 }
                 if (Model.class.isAssignableFrom(field.getType())) {
                     if (field.isAnnotationPresent(OneToOne.class)) {
@@ -424,8 +350,8 @@ public abstract class CRUD extends Controller {
                 name = field.getName();
             }
 
-            public Object[] getChoices() {
-                return choices;
+            public List<Model> getChoices() {
+                return property.choices.list();
             }
         }
     }

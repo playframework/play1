@@ -1,4 +1,4 @@
-package play.data.binding.map;
+package play.data.binding;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;

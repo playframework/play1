@@ -9,7 +9,7 @@ import javax.persistence.MappedSuperclass;
  * Automatically provide a @Id Long id field
  */
 @MappedSuperclass
-public class Model extends JPASupport {
+public class Model extends GenericModel {
 
     @Id
     @GeneratedValue

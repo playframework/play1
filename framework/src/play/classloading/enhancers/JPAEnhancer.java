@@ -9,7 +9,7 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
 
 /**
- * Enhance JPASupport entities classes
+ * Enhance JPABase entities classes
  */
 public class JPAEnhancer extends Enhancer {
 
@@ -66,15 +66,15 @@ public class JPAEnhancer extends Enhancer {
         ctClass.addMethod(findBy);
         
         // find        
-        CtMethod find = CtMethod.make("public static play.db.jpa.JPASupport.JPAQuery find(String query, Object[] params) { return play.db.jpa.JPQL.instance.find(\"" + entityName + "\", query, params); }", ctClass);
+        CtMethod find = CtMethod.make("public static play.db.jpa.GenericModel.JPAQuery find(String query, Object[] params) { return play.db.jpa.JPQL.instance.find(\"" + entityName + "\", query, params); }", ctClass);
         ctClass.addMethod(find);
         
         // find        
-        CtMethod find2 = CtMethod.make("public static play.db.jpa.JPASupport.JPAQuery find() { return play.db.jpa.JPQL.instance.find(\"" + entityName + "\"); }", ctClass);
+        CtMethod find2 = CtMethod.make("public static play.db.jpa.GenericModel.JPAQuery find() { return play.db.jpa.JPQL.instance.find(\"" + entityName + "\"); }", ctClass);
         ctClass.addMethod(find2);
         
         // all        
-        CtMethod all = CtMethod.make("public static play.db.jpa.JPASupport.JPAQuery all() { return play.db.jpa.JPQL.instance.all(\"" + entityName + "\"); }", ctClass);
+        CtMethod all = CtMethod.make("public static play.db.jpa.GenericModel.JPAQuery all() { return play.db.jpa.JPQL.instance.all(\"" + entityName + "\"); }", ctClass);
         ctClass.addMethod(all);
         
         // delete        

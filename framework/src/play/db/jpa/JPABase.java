@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
-import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
@@ -91,6 +90,10 @@ public class JPABase implements Serializable, play.db.Model {
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Object _key() {
+        return Model.Manager.factoryFor(this.getClass()).keyValue(this);
     }
 
     // ~~~ SAVING
@@ -208,23 +211,23 @@ public class JPABase implements Serializable, play.db.Model {
         if (!(this.getClass().equals(other.getClass()))) {
             return false;
         }
-        if (this.getEntityId() == null) {
+        if (this._key() == null) {
             return false;
         }
-        return this.getEntityId().equals(((JPABase) other).getEntityId());
+        return this._key().equals(((JPABase) other)._key());
     }
 
     @Override
     public int hashCode() {
-        if (this.getEntityId() == null) {
+        if (this._key() == null) {
             return 0;
         }
-        return this.getEntityId().hashCode();
+        return this._key().hashCode();
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "[" + getEntityId() + "]";
+        return getClass().getSimpleName() + "[" + _key() + "]";
     }
 
     public static class JPAQueryException extends RuntimeException {
@@ -253,100 +256,6 @@ public class JPABase implements Serializable, play.db.Model {
             }
             return best;
         }
-    }
-
-    // File attachments
-    void setupAttachment() {
-        for (Field field : getClass().getDeclaredFields()) {
-            if (FileAttachment.class.isAssignableFrom(field.getType())) {
-                try {
-                    field.setAccessible(true);
-                    FileAttachment attachment = (FileAttachment) field.get(this);
-                    if (attachment != null) {
-                        attachment.model = this;
-                        attachment.name = field.getName();
-                    } else {
-                        attachment = new FileAttachment();
-                        attachment.model = this;
-                        attachment.name = field.getName();
-                        field.set(this, attachment);
-                    }
-                } catch (Exception ex) {
-                    throw new UnexpectedException(ex);
-                }
-            }
-        }
-    }
-
-    void saveAttachment() {
-        for (Field field : getClass().getDeclaredFields()) {
-            if (field.getType().equals(FileAttachment.class)) {
-                try {
-                    field.setAccessible(true);
-                    FileAttachment attachment = (FileAttachment) field.get(this);
-                    if (attachment != null) {
-                        attachment.model = this;
-                        attachment.name = field.getName();
-                        attachment.save();
-                    }
-                } catch (Exception ex) {
-                    throw new UnexpectedException(ex);
-                }
-            }
-        }
-    }
-
-    // More utils
-    public static Object findKey(Object entity) {
-        try {
-            Class c = entity.getClass();
-            while (!c.equals(Object.class)) {
-                for (Field field : c.getDeclaredFields()) {
-                    if (field.isAnnotationPresent(Id.class)) {
-                        field.setAccessible(true);
-                        return field.get(entity);
-                    }
-                }
-                c = c.getSuperclass();
-            }
-        } catch (Exception e) {
-            throw new UnexpectedException("Error while determining the object @Id for an object of type " + entity.getClass());
-        }
-        return null;
-    }
-
-    public Object _getKey() {
-        return findKey(this);
-    }
-
-    public static Class<?> findKeyType(Class<?> c) {
-        try {
-            while (!c.equals(Object.class)) {
-                for (Field field : c.getDeclaredFields()) {
-                    if (field.isAnnotationPresent(Id.class)) {
-                        field.setAccessible(true);
-                        return field.getType();
-                    }
-                }
-                c = c.getSuperclass();
-            }
-        } catch (Exception e) {
-            throw new UnexpectedException("Error while determining the object @Id for an object of type " + c);
-        }
-        return null;
-    }
-
-    public Class<?> _getKeyType() {
-        return findKeyType(this.getClass());
-    }
-
-    private transient Object key;
-
-    public Object getEntityId() {
-        if (key == null) {
-            key = findKey(this);
-        }
-        return key;
     }
 
 }

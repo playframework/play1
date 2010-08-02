@@ -4,7 +4,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import play.Play;
-import play.db.jpa.JPASupport.JPAQuery;
+import play.db.jpa.GenericModel.JPAQuery;
 import play.mvc.Scope.Params;
 
 public class JPQL {
@@ -82,7 +82,7 @@ public class JPQL {
 
     public JPABase create(String entity, String name, Params params) throws Exception {
         Object o = Play.classloader.loadClass(entity).newInstance();
-        return ((JPASupport) o).edit(name, params.all());
+        return ((GenericModel) o).edit(name, params.all());
     }
 
     public String createFindByQuery(String entityName, String entityClass, String query, Object... params) {

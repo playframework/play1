@@ -19,7 +19,7 @@ import javassist.CtClass;
 import javassist.bytecode.SourceFileAttribute;
 import play.Play;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
-import play.data.binding.map.OldBinder;
+import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
 import play.mvc.After;
 import play.mvc.Before;
@@ -157,7 +157,7 @@ public class Java {
         }
         Object[] rArgs = new Object[method.getParameterTypes().length];
         for (int i = 0; i < method.getParameterTypes().length; i++) {
-            rArgs[i] = OldBinder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], args);
+            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], args);
         }
         return rArgs;
     }

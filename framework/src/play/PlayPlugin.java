@@ -3,12 +3,12 @@ package play;
 import java.lang.annotation.Annotation;
 import com.google.gson.JsonObject;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.Model;
-import play.db.ModelLoader;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Router.Route;
@@ -41,7 +41,11 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     /**
      * Called when play need to bind a Java object from HTTP params
      */
-    public Object bind(String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations, Map<String, String[]> params) {
+    public Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params) {
+        return null;
+    }
+
+    public Object bind(String name, Object o, Map<String, String[]> params) {
         return null;
     }
 
@@ -222,7 +226,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public void routeRequest(Request request) {
     }
 
-    public ModelLoader modelLoader(Class<Model> modelClass) {
+    public Model.Factory modelFactory(Class<? extends Model> modelClass) {
         return null;
     }
 

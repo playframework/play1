@@ -1,4 +1,4 @@
-package play.data.binding.multipart;
+package play.data.parsing;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

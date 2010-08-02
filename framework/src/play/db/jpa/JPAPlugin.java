@@ -16,6 +16,7 @@ import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
+import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -34,11 +35,11 @@ import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.DB;
 import play.db.Model;
-import play.db.ModelLoader;
-import play.db.ModelProperty;
 import play.exceptions.JPAException;
 import play.utils.Utils;
 import org.apache.commons.lang.StringUtils;
+import play.data.binding.Binder;
+import play.exceptions.UnexpectedException;
 
 /**
  * JPA Plugin
@@ -51,21 +52,30 @@ public class JPAPlugin extends PlayPlugin {
     public Object bind(String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations, Map<String, String[]> params) {
         // TODO need to be more generic in order to work with JPASupport
         if (JPABase.class.isAssignableFrom(clazz)) {
-            String idKey = name + ".id";
+            String keyName = Model.Manager.factoryFor(clazz).keyName();
+            String idKey = name + "." + keyName;
             if (params.containsKey(idKey) && params.get(idKey).length > 0 && params.get(idKey)[0] != null && params.get(idKey)[0].trim().length() > 0) {
                 String id = params.get(idKey)[0];
                 try {
-                    Query query = JPA.em().createQuery("from " + clazz.getName() + " o where o.id = ?");
-                    query.setParameter(1, play.data.binding.map.OldBinder.directBind(annotations, id + "", play.db.jpa.JPASupport.findKeyType(clazz)));
+                    Query query = JPA.em().createQuery("from " + clazz.getName() + " o where o." + keyName + " = ?");
+                    query.setParameter(1, play.data.binding.Binder.directBind(annotations, id + "", Model.Manager.factoryFor(clazz).keyType()));
                     Object o = query.getSingleResult();
-                    return JPASupport.edit(o, name, params, annotations);
+                    return GenericModel.edit(o, name, params, annotations);
                 } catch (Exception e) {
                     return null;
                 }
             }
-            return JPASupport.create(clazz, name, params, annotations);
+            return GenericModel.create(clazz, name, params, annotations);
         }
         return super.bind(name, clazz, type, annotations, params);
+    }
+
+    @Override
+    public Object bind(String name, Object o, Map<String, String[]> params) {
+        if (o instanceof JPABase) {
+            return GenericModel.edit(o, name, params, null);
+        }
+        return null;
     }
 
     @Override
@@ -347,7 +357,7 @@ public class JPAPlugin extends PlayPlugin {
     }
 
     @Override
-    public ModelLoader modelLoader(Class<Model> modelClass) {
+    public Model.Factory modelFactory(Class<? extends Model> modelClass) {
         if (modelClass.isAnnotationPresent(Entity.class)) {
             return new JPAModelLoader(modelClass);
         }
@@ -359,44 +369,71 @@ public class JPAPlugin extends PlayPlugin {
         JPA.em().clear();
     }
 
-    public static class JPAModelLoader implements ModelLoader {
+    public static class JPAModelLoader implements Model.Factory {
 
-        private Class<Model> clazz;
+        private Class<? extends Model> clazz;
 
-        public JPAModelLoader(Class<Model> clazz) {
+        public JPAModelLoader(Class<? extends Model> clazz) {
             this.clazz = clazz;
         }
 
         public Model findById(Object id) {
-            return JPA.em().find(clazz, id);
+            try {
+                return (Model) JPA.em().find(clazz, Binder.directBind(id + "", Model.Manager.factoryFor(clazz).keyType()));
+            } catch(Exception e) {
+                throw new UnexpectedException(e);
+            }
         }
 
-        public List<Model> fetch(int offset, int size, String orderBy, String orderDirection) {
-            throw new UnsupportedOperationException("Not supported yet.");
+        public List<Model> fetch(int offset, int size, String orderBy, String order, List<String> searchFields, String keywords) {
+            String q = "from " + clazz.getName();
+            if (keywords != null && !keywords.equals("")) {
+                String searchQuery = getSearchQuery(searchFields);
+                if (!searchQuery.equals("")) {
+                    q += " where (" + searchQuery + ")";
+                }                
+            }
+            if (orderBy == null && order == null) {
+                orderBy = "id";
+                order = "ASC";
+            }
+            if (orderBy == null && order != null) {
+                orderBy = "id";
+            }
+            if (order == null || (!order.equals("ASC") && !order.equals("DESC"))) {
+                order = "ASC";
+            }
+            q += " order by " + orderBy + " " + order;
+            Query query = JPA.em().createQuery(q);
+            if (keywords != null && !keywords.equals("") && q.indexOf("?1") != -1) {
+                query.setParameter(1, "%" + keywords.toLowerCase() + "%");
+            }
+            query.setFirstResult(offset);
+            query.setMaxResults(size);
+            return query.getResultList();
         }
 
-        public Long count() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public List<Model> search(List<String> properties, String keywords, int offset, int size, String orderBy, String orderDirection) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public Long countSearch(List<String> properties, String keywords) {
-            throw new UnsupportedOperationException("Not supported yet.");
+        public Long count(List<String> searchFields, String keywords) {
+            String q = "select count(e) from " + clazz.getName() + " e";
+            if (keywords != null && !keywords.equals("")) {
+                String searchQuery = getSearchQuery(searchFields);
+                if (!searchQuery.equals("")) {
+                    q += " where (" + searchQuery + ")";
+                }
+            }
+            Query query = JPA.em().createQuery(q);
+            if (keywords != null && !keywords.equals("") && q.indexOf("?1") != -1) {
+                query.setParameter(1, "%" + keywords.toLowerCase() + "%");
+            }
+            return Long.decode(query.getSingleResult().toString());
         }
 
         public void deleteAll() {
             JPA.em().createQuery("delete from " + clazz.getName());
         }
 
-        public Class<?> _getKeyType() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public List<ModelProperty> listProperties() {
-            List<ModelProperty> properties = new ArrayList<ModelProperty>();
+        public List<Model.Property> listProperties() {
+            List<Model.Property> properties = new ArrayList<Model.Property>();
             Set<Field> fields = new HashSet<Field>();
             Class<?> tclazz = clazz;
             while (!tclazz.equals(Object.class)) {
@@ -407,7 +444,7 @@ public class JPAPlugin extends PlayPlugin {
                 if (Modifier.isTransient(f.getModifiers())) {
                     continue;
                 }
-                ModelProperty mp = buildProperty(f);
+                Model.Property mp = buildProperty(f);
                 if (mp != null) {
                     properties.add(mp);
                 }
@@ -415,39 +452,112 @@ public class JPAPlugin extends PlayPlugin {
             return properties;
         }
 
-        ModelProperty buildProperty(Field field) {
-            ModelProperty modelProperty = new ModelProperty();
+        public String keyName() {
+            return keyField().getName();
+        }
+
+        public Class keyType() {
+            return keyField().getType();
+        }
+
+        public Object keyValue(Model m) {
+            try {
+                return keyField().get(m);
+            } catch (Exception ex) {
+                throw new UnexpectedException(ex);
+            }
+        }
+
+        //
+
+        Field keyField() {
+            Class c = clazz;
+            try {
+                while (!c.equals(Object.class)) {
+                    for (Field field : c.getDeclaredFields()) {
+                        if (field.isAnnotationPresent(Id.class)) {
+                            field.setAccessible(true);
+                            return field;
+                        }
+                    }
+                    c = c.getSuperclass();
+                }
+            } catch (Exception e) {
+                throw new UnexpectedException("Error while determining the object @Id for an object of type " + c);
+            }
+            return null;
+        }
+
+        String getSearchQuery(List<String> searchFields) {
+            String q = "";
+            for (Model.Property property : listProperties()) {
+                if(property.isSearchable && (searchFields == null || searchFields.isEmpty() ? true : searchFields.contains(property.name))) {
+                    if (!q.equals("")) {
+                        q += " or ";
+                    }
+                    q += "lower(" + property.name + ") like ?1";
+                }
+            }
+            return q;
+        }
+
+        Model.Property buildProperty(final Field field) {
+            Model.Property modelProperty = new Model.Property();
             modelProperty.type = field.getType();
+            modelProperty.field = field;
             if (Model.class.isAssignableFrom(field.getType())) {
                 if (field.isAnnotationPresent(OneToOne.class)) {
                     if (field.getAnnotation(OneToOne.class).mappedBy().equals("")) {
                         modelProperty.isRelation = true;
-                        modelProperty.relation = field.getType().getName();
+                        modelProperty.relationType = field.getType();
+                        modelProperty.choices = new Model.Choices() {
+                            public List<Model> list() {
+                                return JPA.em().createQuery("from " + field.getType().getName()).getResultList();
+                            }
+                        };
                     }
                 }
                 if (field.isAnnotationPresent(ManyToOne.class)) {
                     modelProperty.isRelation = true;
-                    modelProperty.relation = field.getType().getName();
+                    modelProperty.relationType = field.getType();
+                    modelProperty.choices = new Model.Choices() {
+                        public List<Model> list() {
+                            return JPA.em().createQuery("from " + field.getType().getName()).getResultList();
+                        }
+                    };
                 }
             }
             if (Collection.class.isAssignableFrom(field.getType())) {
-                Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                final Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                 if (field.isAnnotationPresent(OneToMany.class)) {
                     if (field.getAnnotation(OneToMany.class).mappedBy().equals("")) {
                         modelProperty.isRelation = true;
-                        modelProperty.relation = fieldType.getName();
                         modelProperty.isMultiple = true;
+                        modelProperty.relationType = fieldType;
+                        modelProperty.choices = new Model.Choices() {
+                            public List<Model> list() {
+                                return JPA.em().createQuery("from " + fieldType.getName()).getResultList();
+                            }
+                        };
                     }
                 }
                 if (field.isAnnotationPresent(ManyToMany.class)) {
                     if (field.getAnnotation(ManyToMany.class).mappedBy().equals("")) {
                         modelProperty.isRelation = true;
-                        modelProperty.relation = fieldType.getName();
                         modelProperty.isMultiple = true;
+                        modelProperty.relationType = fieldType;
+                        modelProperty.choices = new Model.Choices() {
+                            public List<Model> list() {
+                                return JPA.em().createQuery("from " + fieldType.getName()).getResultList();
+                            }
+                        };
                     }
                 }
             }
             modelProperty.name = field.getName();
+            if(field.getType().equals(String.class)) {
+                modelProperty.isSearchable = true;
+            }
             return modelProperty;
         }
     }

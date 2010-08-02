@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import play.data.binding.map.OldBinder;
+import play.data.binding.Binder;
 
 /**
  * I18n Helper
@@ -97,7 +97,7 @@ public class Messages {
             } else {
                 try {
                     // TODO: I think we need to type of direct bind -> primitive and object binder
-                    result[i] = OldBinder.directBind(null, args[i] + "", conversions[i]);
+                    result[i] = Binder.directBind(null, args[i] + "", conversions[i]);
                 } catch(Exception e) {
                     result[i] = null;
                 }

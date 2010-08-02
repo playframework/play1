@@ -9,7 +9,7 @@ import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import net.sf.oval.context.FieldContext;
 import net.sf.oval.context.MethodParameterContext;
 import net.sf.oval.context.OValContext;
-import play.data.binding.map.OldBinder;
+import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
 import play.utils.Java;
 import play.mvc.Scope;
@@ -48,7 +48,7 @@ public class EqualsCheck extends AbstractAnnotationCheck<Equals> {
                         return false;
                     }
                     otherKey = to;
-                    otherValue = OldBinder.bind(to, method.getParameterTypes()[index], method.getGenericParameterTypes()[index], method.getParameterAnnotations()[index], Scope.Params.current().all());
+                    otherValue = Binder.bind(to, method.getParameterTypes()[index], method.getGenericParameterTypes()[index], method.getParameterAnnotations()[index], Scope.Params.current().all());
                 }
                 if (context instanceof FieldContext) {
                     FieldContext ctx = (FieldContext) context;

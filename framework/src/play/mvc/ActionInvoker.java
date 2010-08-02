@@ -18,8 +18,8 @@ import play.PlayPlugin;
 import play.cache.CacheFor;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
-import play.data.binding.map.OldBinder;
-import play.data.binding.urlencoded.UrlEncodedParser;
+import play.data.binding.Binder;
+import play.data.parsing.UrlEncodedParser;
 import play.data.validation.Validation;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.JavaExecutionException;
@@ -426,7 +426,7 @@ public class ActionInvoker {
             }
             Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.toString(method.getParameterAnnotations()[i]) + "]");
 
-            rArgs[i] = OldBinder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params, o, method, i + 1);
+            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params, o, method, i + 1);
         }
         return rArgs;
     }
