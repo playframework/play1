@@ -4,7 +4,6 @@ import java.io.File;
 import javax.persistence.Embeddable;
 import javax.persistence.Transient;
 import play.Play;
-import play.libs.Files;
 
 @Embeddable
 public class FileAttachment {

@@ -49,6 +49,7 @@ public class JPAPlugin extends PlayPlugin {
     public static boolean autoTxs = true;
 
     @Override
+    @SuppressWarnings("unchecked")
     public Object bind(String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations, Map<String, String[]> params) {
         // TODO need to be more generic in order to work with JPASupport
         if (JPABase.class.isAssignableFrom(clazz)) {
@@ -387,6 +388,7 @@ public class JPAPlugin extends PlayPlugin {
             }
         }
 
+        @SuppressWarnings("unchecked")
         public List<Model> fetch(int offset, int size, String orderBy, String order, List<String> searchFields, String keywords) {
             String q = "from " + clazz.getName();
             if (keywords != null && !keywords.equals("")) {
@@ -513,6 +515,7 @@ public class JPAPlugin extends PlayPlugin {
                         modelProperty.isRelation = true;
                         modelProperty.relationType = field.getType();
                         modelProperty.choices = new Model.Choices() {
+                            @SuppressWarnings("unchecked")
                             public List<Model> list() {
                                 return JPA.em().createQuery("from " + field.getType().getName()).getResultList();
                             }
@@ -523,6 +526,7 @@ public class JPAPlugin extends PlayPlugin {
                     modelProperty.isRelation = true;
                     modelProperty.relationType = field.getType();
                     modelProperty.choices = new Model.Choices() {
+                        @SuppressWarnings("unchecked")
                         public List<Model> list() {
                             return JPA.em().createQuery("from " + field.getType().getName()).getResultList();
                         }
@@ -537,6 +541,7 @@ public class JPAPlugin extends PlayPlugin {
                         modelProperty.isMultiple = true;
                         modelProperty.relationType = fieldType;
                         modelProperty.choices = new Model.Choices() {
+                            @SuppressWarnings("unchecked")
                             public List<Model> list() {
                                 return JPA.em().createQuery("from " + fieldType.getName()).getResultList();
                             }
@@ -549,6 +554,7 @@ public class JPAPlugin extends PlayPlugin {
                         modelProperty.isMultiple = true;
                         modelProperty.relationType = fieldType;
                         modelProperty.choices = new Model.Choices() {
+                            @SuppressWarnings("unchecked")
                             public List<Model> list() {
                                 return JPA.em().createQuery("from " + fieldType.getName()).getResultList();
                             }
