@@ -27,13 +27,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.AsyncHttpClientConfig;
+import com.ning.http.client.AsyncHttpClientConfig.Builder;
 import com.ning.http.client.FilePart;
 import com.ning.http.client.Headers;
 import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Response;
 import com.ning.http.client.StringPart;
-import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -72,6 +73,7 @@ public class WS extends PlayPlugin {
         String proxyUser = Play.configuration.getProperty("http.proxyUser", System.getProperty("http.proxyUser"));
         String proxyPassword = Play.configuration.getProperty("http.proxyPassword", System.getProperty("http.proxyPassword"));
 
+        Builder confBuilder = new AsyncHttpClientConfig.Builder();
         if (proxyHost != null) {
             int proxyPortInt = 0;
             try {
@@ -81,12 +83,10 @@ public class WS extends PlayPlugin {
                 throw new IllegalStateException("WS proxy is misconfigured -- check the logs for details");
             }
             ProxyServer proxy = new ProxyServer(proxyHost, proxyPortInt, proxyUser, proxyPassword);
-            AsyncHttpClientConfig cf = new AsyncHttpClientConfig.Builder().setProxyServer(proxy).build();
-            httpClient = new AsyncHttpClient(cf);
-        } else {
-            httpClient = new AsyncHttpClient();
+            confBuilder.setProxyServer(proxy);
         }
-
+        confBuilder.setFollowRedirects(true);
+        httpClient = new AsyncHttpClient(confBuilder.build());
     }
 
     /**
@@ -357,14 +357,10 @@ public class WS extends PlayPlugin {
         private BoundRequestBuilder prepare(BoundRequestBuilder builder) {
             checkFileBody(builder);
             if (this.username != null && this.password != null) {
-                if (this.headers == null)
-                    this.headers = new HashMap<String, String>();
                 this.headers.put("Authorization", "Basic " + Codec.encodeBASE64(this.username + ":" + this.password));
             }
-            if (this.headers != null) {
-                for (String key: this.headers.keySet()) {
-                    builder.addHeader(key, headers.get(key));
-                }
+            for (String key: this.headers.keySet()) {
+                builder.addHeader(key, headers.get(key));
             }
             return builder;
         }
