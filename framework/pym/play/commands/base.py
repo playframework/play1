@@ -82,7 +82,9 @@ def new(app, args, env):
 
     print "~ The new application will be created in %s" % os.path.normpath(app.path)
     if application_name is None:
-        application_name = raw_input("~ What is the application name? ")
+        application_name = raw_input("~ What is the application name? [%s] " % os.path.basename(app.path))
+    if application_name == "":
+        application_name = os.path.basename(app.path)
     shutil.copytree(os.path.join(env["basedir"], 'resources/application-skel'), app.path)
     app.check()
     replaceAll(os.path.join(app.path, 'conf/application.conf'), r'%APPLICATION_NAME%', application_name)
