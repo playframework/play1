@@ -12,7 +12,7 @@ import play.libs.I18N;
  */
 public class DateBinder implements SupportedType<Date> {
 
-    public Date bind(Annotation[] annotations, String value) throws Exception {
+    public Date bind(Annotation[] annotations, String value, Class actualClass) throws Exception {
 
         Date date = AnnotationHelper.getDateAs(annotations, value);
         if (date != null) {

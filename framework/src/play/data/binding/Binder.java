@@ -24,7 +24,9 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import play.data.binding.types.BinaryBinder;
 import play.data.binding.types.FileBinder;
+import play.db.Model;
 
 /**
  * The binder try to convert String values to Java objects.
@@ -38,6 +40,7 @@ public class Binder {
         supportedTypes.put(Calendar.class, new CalendarBinder());
         supportedTypes.put(Locale.class, new LocaleBinder());
         supportedTypes.put(File.class, new FileBinder());
+        supportedTypes.put(Model.BinaryField.class, new BinaryBinder());
     }
 
     static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<Class<?>, BeanWrapper>();
@@ -361,15 +364,18 @@ public class Binder {
                     if (!(toInstanciate.equals(As.DEFAULT.class))) {
                         // Instanciate the binder
                         SupportedType<?> myInstance = toInstanciate.newInstance();
-                        return myInstance.bind(annotations, value);
+                        return myInstance.bind(annotations, value, clazz);
                     }
                 }
             }
         }
         boolean nullOrEmpty = value == null || value.trim().length() == 0;
 
-        if (supportedTypes.containsKey(clazz)) {
-            return nullOrEmpty ? null : supportedTypes.get(clazz).bind(annotations, value);
+        // custom types
+        for(Class c : supportedTypes.keySet()) {
+            if(c.isAssignableFrom(clazz)) {
+                return nullOrEmpty ? null : supportedTypes.get(c).bind(annotations, value, clazz);
+            }
         }
 
         // int or Integer binding

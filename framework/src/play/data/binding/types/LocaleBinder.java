@@ -8,7 +8,7 @@ import java.util.Locale;
  */
 public class LocaleBinder implements SupportedType<Locale> {
 
-    public Locale bind(Annotation[] annotations, String value) {
+    public Locale bind(Annotation[] annotations, String value, Class actualClass) {
         if( value == null )
             return null;
         if (value.length() == 2) {

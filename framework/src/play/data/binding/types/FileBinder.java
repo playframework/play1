@@ -12,7 +12,7 @@ import play.mvc.Http.Request;
 public class FileBinder implements SupportedType<File> {
 
     @SuppressWarnings("unchecked")
-    public File bind(Annotation[] annotations, String value) {
+    public File bind(Annotation[] annotations, String value, Class actualClass) {
         List<Upload> uploads = (List<Upload>)Request.current().args.get("__UPLOADS");
         for(Upload upload : uploads) {
             if(upload.getFieldName().equals(value)) {

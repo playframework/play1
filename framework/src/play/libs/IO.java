@@ -15,6 +15,7 @@ import java.io.StringWriter;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
+import play.exceptions.UnexpectedException;
 
 /**
  * IO utils
@@ -66,17 +67,21 @@ public class IO {
      * @return The String content
      * @throws java.io.IOException
      */
-    public static String readContentAsString(File file) throws IOException {
-        InputStream is = new FileInputStream(file);
-        StringWriter result = new StringWriter();
-        PrintWriter out = new PrintWriter(result);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is, "utf-8"));
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-            out.println(line);
+    public static String readContentAsString(File file) {
+        try {
+            InputStream is = new FileInputStream(file);
+            StringWriter result = new StringWriter();
+            PrintWriter out = new PrintWriter(result);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is, "utf-8"));
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                out.println(line);
+            }
+            is.close();
+            return result.toString();
+        } catch(IOException e) {
+            throw new UnexpectedException(e);
         }
-        is.close();
-        return result.toString();
     }
 
     /**
@@ -85,12 +90,16 @@ public class IO {
      * @return The binary data
      * @throws java.io.IOException
      */
-    public static byte[] readContent(File file) throws IOException {
-        InputStream is = new FileInputStream(file);
-        byte[] result = new byte[(int) file.length()];
-        is.read(result);
-        is.close();
-        return result;
+    public static byte[] readContent(File file) {
+        try {
+            InputStream is = new FileInputStream(file);
+            byte[] result = new byte[(int) file.length()];
+            is.read(result);
+            is.close();
+            return result;
+        } catch(IOException e) {
+            throw new UnexpectedException(e);
+        }
     }
 
     /**
@@ -99,14 +108,18 @@ public class IO {
      * @return The binary data
      * @throws java.io.IOException
      */
-    public static byte[] readContent(InputStream is) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int read = 0;
-        byte[] buffer = new byte[8096];
-        while ((read = is.read(buffer)) > 0) {
-            baos.write(buffer, 0, read);
+    public static byte[] readContent(InputStream is) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            int read = 0;
+            byte[] buffer = new byte[8096];
+            while ((read = is.read(buffer)) > 0) {
+                baos.write(buffer, 0, read);
+            }
+            return baos.toByteArray();
+        } catch(IOException e) {
+            throw new UnexpectedException(e);
         }
-        return baos.toByteArray();
     }
 
     /**
@@ -115,12 +128,16 @@ public class IO {
      * @param os The stream to write
      * @throws java.io.IOException
      */
-    public static void writeContent(CharSequence content, OutputStream os) throws IOException {
-        PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, "utf-8"));
-        printWriter.println(content);
-        printWriter.flush();
-        os.flush();
-        os.close();
+    public static void writeContent(CharSequence content, OutputStream os) {
+        try {
+            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, "utf-8"));
+            printWriter.println(content);
+            printWriter.flush();
+            os.flush();
+            os.close();
+        } catch(IOException e) {
+            throw new UnexpectedException(e);
+        }
     }
 
     /**
@@ -129,13 +146,17 @@ public class IO {
      * @param file The file to write
      * @throws java.io.IOException
      */
-    public static void writeContent(CharSequence content, File file) throws IOException {
-        OutputStream os = new FileOutputStream(file);
-        PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, "utf-8"));
-        printWriter.println(content);
-        printWriter.flush();
-        os.flush();
-        os.close();
+    public static void writeContent(CharSequence content, File file) {
+        try {
+            OutputStream os = new FileOutputStream(file);
+            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, "utf-8"));
+            printWriter.println(content);
+            printWriter.flush();
+            os.flush();
+            os.close();
+        } catch(IOException e) {
+            throw new UnexpectedException(e);
+        }
     }
 
     /**
@@ -144,23 +165,68 @@ public class IO {
      * @param file The file to write
      * @throws java.io.IOException
      */
-    public static void write(byte[] data, File file) throws IOException {
-        OutputStream os = new FileOutputStream(file);
-        os.write(data);
-        os.flush();
-        os.close();
+    public static void write(byte[] data, File file) {
+        try {
+            OutputStream os = new FileOutputStream(file);
+            os.write(data);
+            os.flush();
+            os.close();
+        } catch(IOException e) {
+            throw new UnexpectedException(e);
+        }
     }
 
     /**
      * Copy an stream to another one.
      * @throws java.io.IOException
      */
-    public static void write(InputStream is, OutputStream os) throws IOException {
-        int read = 0;
-        byte[] buffer = new byte[8096];
-        while ((read = is.read(buffer)) > 0) {
-            os.write(buffer, 0, read);
+    public static void copy(InputStream is, OutputStream os) {
+        try {
+            int read = 0;
+            byte[] buffer = new byte[8096];
+            while ((read = is.read(buffer)) > 0) {
+                os.write(buffer, 0, read);
+            }
+            is.close();
+        } catch(IOException e) {
+            throw new UnexpectedException(e);
         }
-        is.close();
+    }
+
+    /**
+     * Copy an stream to another one.
+     * @throws java.io.IOException
+     */
+    public static void write(InputStream is, OutputStream os) {
+        try {
+            int read = 0;
+            byte[] buffer = new byte[8096];
+            while ((read = is.read(buffer)) > 0) {
+                os.write(buffer, 0, read);
+            }
+            is.close();
+            os.close();
+        } catch(IOException e) {
+            throw new UnexpectedException(e);
+        }
+    }
+
+   /**
+     * Copy an stream to another one.
+     * @throws java.io.IOException
+     */
+    public static void write(InputStream is, File f) {
+        try {
+            OutputStream os = new FileOutputStream(f);
+            int read = 0;
+            byte[] buffer = new byte[8096];
+            while ((read = is.read(buffer)) > 0) {
+                os.write(buffer, 0, read);
+            }
+            is.close();
+            os.close();
+        } catch(IOException e) {
+            throw new UnexpectedException(e);
+        }
     }
 }

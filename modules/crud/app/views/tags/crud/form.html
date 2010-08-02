@@ -52,7 +52,7 @@
             #{crud.passwordField name:field.name, value:(currentObject ? currentObject[field.name] : null) /}
         #{/if}
 
-        #{if field.type == 'file'}
+        #{if field.type == 'binary'}
             #{crud.fileField name:field.name, value:(currentObject ? currentObject[field.name] : null), id:currentObject?.id /}
         #{/if}
 

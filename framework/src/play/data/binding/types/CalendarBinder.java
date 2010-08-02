@@ -15,7 +15,7 @@ import play.libs.I18N;
  */
 public class CalendarBinder implements SupportedType<Calendar> {
 
-    public Calendar bind(Annotation[] annotations, String value) throws Exception {
+    public Calendar bind(Annotation[] annotations, String value, Class actualClass) throws Exception {
         Calendar cal = Calendar.getInstance(Lang.getLocale());
         try {
             Date date = AnnotationHelper.getDateAs(annotations, value);

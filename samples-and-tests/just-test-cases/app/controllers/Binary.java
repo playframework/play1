@@ -30,7 +30,7 @@ public class Binary extends Controller {
 
 	public static void showAvatar(Long id) {
 		UserWithAvatar user = UserWithAvatar.findById(id);
-		if (user != null && user.avatar.isSet()) {
+		if (user != null && user.avatar.exists()) {
 			renderBinary(user.avatar.get());
 		}
 		notFound();

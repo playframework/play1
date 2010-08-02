@@ -18,8 +18,9 @@ public @interface As {
     Class<? extends SupportedType<?>> binder() default DEFAULT.class;
 
     public static final class DEFAULT implements SupportedType<Object> {
-        public Object bind(Annotation[] annotations, String value) throws Exception {
+        public Object bind(Annotation[] annotations, String value, Class actualClass) throws Exception {
             throw new UnsupportedOperationException("Not supported.");
         }
     }
+    
 }

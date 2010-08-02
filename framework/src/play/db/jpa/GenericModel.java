@@ -1,6 +1,5 @@
 package play.db.jpa;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
@@ -86,9 +85,7 @@ public class GenericModel extends JPABase {
                                     continue;
                                 }
                                 Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");
-                                // TODO: I think we need two type of direct bind -> primitive and object binder
                                 q.setParameter(1, Binder.directBind(null, _id, Model.Manager.factoryFor((Class<Model>)Play.classloader.loadClass(relation)).keyType()));
-
                                 try {
                                     l.add(q.getSingleResult());
                                 } catch (NoResultException e) {
@@ -102,7 +99,6 @@ public class GenericModel extends JPABase {
                         if (ids != null && ids.length > 0 && !ids[0].equals("")) {
                             params.remove(name + "." + field.getName() + "." + keyName);
                             Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");
-                            // TODO: I think we need two type of direct bind -> primitive and object binder
                             q.setParameter(1, Binder.directBind(null, ids[0], Model.Manager.factoryFor((Class<Model>)Play.classloader.loadClass(relation)).keyType()));
                             try {
                                 Object to = q.getSingleResult();
@@ -116,32 +112,8 @@ public class GenericModel extends JPABase {
                         }
                     }
                 }
-                if (field.getType().equals(FileAttachment.class) && Params.current() != null) {
-                    FileAttachment fileAttachment = ((FileAttachment) field.get(o));
-                    if (fileAttachment == null) {
-                        fileAttachment = new FileAttachment(o, field.getName());
-                        bw.set(field.getName(), o, fileAttachment);
-                    }
-                    // TODO: I think we need to type of direct bind -> primitive and object binder
-                    File file = Params.current().get(null, name + "." + field.getName(), File.class);
-                    if (file != null && file.exists() && file.length() > 0) {
-                        params.remove(name + "." + field.getName());
-                        fileAttachment.set(Params.current().get(null, name + "." + field.getName(), File.class));
-                        fileAttachment.filename = file.getName();
-                    } else {
-                        // TODO: I think we need to type of direct bind -> primitive and object binder
-                        String df = Params.current().get(null, name + "." + field.getName() + "_delete_", String.class);
-                        if (df != null && df.equals("true")) {
-                            fileAttachment.delete();
-                            bw.set(field.getName(), o, null);
-                        }
-                    }
-                    params.remove(name + "." + field.getName());
-                }
             }
-            // Then bind
             bw.bind(name, o.getClass(), params, "", o, annotations);
-
             return (T) o;
         } catch (Exception e) {
             throw new UnexpectedException(e);

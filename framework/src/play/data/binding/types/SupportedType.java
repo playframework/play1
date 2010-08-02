@@ -7,6 +7,6 @@ import java.lang.annotation.Annotation;
  */
 public interface SupportedType<T> {
     
-    T bind(Annotation[] annotations, String value) throws Exception;
+    Object bind(Annotation[] annotations, String value, Class actualClass) throws Exception;
 
 }

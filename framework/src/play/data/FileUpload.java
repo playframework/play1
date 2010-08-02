@@ -48,11 +48,7 @@ public class FileUpload implements Upload {
     }
 
     public byte[] asBytes() {
-        try {
-            return IO.readContent(defaultFile);
-        } catch (IOException e) {
-            throw new UnexpectedException(e);
-        }
+        return IO.readContent(defaultFile);
     }
 
     public InputStream asStream() {
@@ -76,7 +72,7 @@ public class FileUpload implements Upload {
     }
 
     public Long getSize() {
-        return fileItem.getSize();
+        return defaultFile.length();
     }
     
     public boolean isInMemory() {

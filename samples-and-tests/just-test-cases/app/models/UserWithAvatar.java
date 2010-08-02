@@ -10,9 +10,7 @@ import java.util.*;
 public class UserWithAvatar extends Model {
     
     public String username;
-    
-    @Embedded
-    public FileAttachment avatar;
+    public Blob avatar;
     
 }
 

@@ -58,15 +58,16 @@ public abstract class CRUD extends Controller {
     }
 
     public static void attachment(String id, String field) throws Exception {
-        /*ObjectType type = ObjectType.get(getControllerClass());
+        ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         Model object = type.findById(id);
         notFoundIfNull(object);
-        FileAttachment attachment = (FileAttachment) object.getClass().getField(field).get(object);
-        if (attachment == null) {
+        Model.BinaryField attachment = (Model.BinaryField) object.getClass().getField(field).get(object);
+        if (attachment == null || !attachment.exists()) {
             notFound();
         }
-        renderBinary(attachment.get(), attachment.filename);*/
+        response.contentType = attachment.type();
+        renderBinary(attachment.get(), attachment.length());
     }
 
     public static void save(String id) throws Exception {
@@ -276,9 +277,7 @@ public abstract class CRUD extends Controller {
             private Model.Property property;
             public String type = "unknown";
             public String name;
-            public String relation;
             public boolean multiple;
-            public Object[] choices;
             public boolean required;
             
             public ObjectField(Model.Property property) {
@@ -309,12 +308,10 @@ public abstract class CRUD extends Controller {
                     if (field.isAnnotationPresent(OneToOne.class)) {
                         if (field.getAnnotation(OneToOne.class).mappedBy().equals("")) {
                             type = "relation";
-                            relation = field.getType().getName();
                         }
                     }
                     if (field.isAnnotationPresent(ManyToOne.class)) {
                         type = "relation";
-                        relation = field.getType().getName();
                     }
                 }
                 if (Collection.class.isAssignableFrom(field.getType())) {
@@ -322,22 +319,21 @@ public abstract class CRUD extends Controller {
                     if (field.isAnnotationPresent(OneToMany.class)) {
                         if (field.getAnnotation(OneToMany.class).mappedBy().equals("")) {
                             type = "relation";
-                            relation = fieldType.getName();
                             multiple = true;
                         }
                     }
                     if (field.isAnnotationPresent(ManyToMany.class)) {
                         if (field.getAnnotation(ManyToMany.class).mappedBy().equals("")) {
                             type = "relation";
-                            relation = fieldType.getName();
                             multiple = true;
                         }
                     }
                 }
+                if(Model.BinaryField.class.isAssignableFrom(field.getType())) {
+                    type = "binary";
+                }
                 if (field.getType().isEnum()) {
                     type = "enum";
-                    relation = field.getType().getSimpleName();
-                    choices = field.getType().getEnumConstants();
                 }
                 if (field.isAnnotationPresent(Id.class)) {
                     type = null;

@@ -1,5 +1,7 @@
 package play.db;
 
+import java.io.File;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.List;
 import play.Play;
@@ -57,6 +59,16 @@ public interface Model {
             }
             throw new UnexpectedException("Model " + clazz.getName() + " is not managed by any plugin");
         }
+
+    }
+
+    public static interface BinaryField {
+
+        public InputStream get();
+        public void set(InputStream is, String type);
+        public long length();
+        public String type();
+        public boolean exists();
 
     }
 
