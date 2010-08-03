@@ -1,7 +1,7 @@
 package utils;
 import java.util.List;
 import play.db.jpa.*;
-import play.db.jpa.JPASupport.JPAQuery;
+import play.db.jpa.GenericModel.JPAQuery;
 
 
 public class InterpreterHelper {
