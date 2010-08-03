@@ -232,7 +232,7 @@ bc. ?client.name=Zenexity
 &client.address.zip=75009
 &client.address.country=France
 
-In order to update a list of model objects, use array notation and reference the object’s ID. For example imagine the Client model has a list of Customer models declared as **List<Customer> customers**. To update the list of Customers you would provide a query string like the following:
+In order to update a list of model objects, use array notation and reference the object’s ID. For example imagine the Client model has a list of Customer models declared as **List Customer customers**. To update the list of Customers you would provide a query string like the following:
 
 bc. ?client.customers[0].id=123
 &client.customers[1].id=456
