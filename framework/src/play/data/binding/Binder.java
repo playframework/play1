@@ -372,7 +372,7 @@ public class Binder {
         boolean nullOrEmpty = value == null || value.trim().length() == 0;
 
         // custom types
-        for(Class c : supportedTypes.keySet()) {
+        for(Class<?> c : supportedTypes.keySet()) {
             if(c.isAssignableFrom(clazz)) {
                 return nullOrEmpty ? null : supportedTypes.get(c).bind(annotations, value, clazz);
             }
