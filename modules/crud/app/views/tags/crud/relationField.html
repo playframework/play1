@@ -12,7 +12,7 @@
             %{
                 selected = false;
                 if(field.error?.message != 'validation.required') {
-                    if(params[${pName}]) {
+                    if(params[pName]) {
                         selected = params.getAll(${pName}).contains(it._key().toString())
                     } else {
                         selected = _value?.contains(it)
