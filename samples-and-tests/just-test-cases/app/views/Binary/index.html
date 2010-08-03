@@ -1,5 +1,11 @@
 #{form @save(), enctype:'multipart/form-data'}
 	<input type="text" id="username" name="user.username">
 	<input type="file" id="avatar" name="user.avatar" value="/Users/guillaume/Desktop/play/1.0/samples-and-tests/just-test-cases/test/fond1.png">
+
 	<input type="submit">
+#{/form}
+
+#{form @upload(), enctype:'multipart/form-data'}
+        <input type="file" id="file" name="file" value="/Users/nicolasleroux/Projects/Personal/1.1/samples-and-tests/just-test-cases/test/winie.png">
+        <input type="submit">
 #{/form}

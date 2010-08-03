@@ -4,9 +4,11 @@ import play.*;
 import play.mvc.*;
 import play.test.Fixtures;
 
+import java.io.File;
 import java.util.*;
 
 import models.*;
+import play.vfs.VirtualFile;
 
 public class Binary extends Controller {
 	
@@ -36,4 +38,9 @@ public class Binary extends Controller {
 		notFound();
 	}
 
+     public static void upload(File file) {
+        
+        Http.Response.current().headers.put("Content-Length", new Http.Header("Content-Length", String.valueOf(file.length())));
+        renderBinary(file);
+    }
 }

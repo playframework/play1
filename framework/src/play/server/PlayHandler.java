@@ -329,14 +329,14 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                         // Close the connection when the whole content is written out.
                         writeFuture.addListener(ChannelFutureListener.CLOSE);
                     }
-                    raf.close();
+                    
                 }
             } catch (Exception e) {
                 throw e;
             }
         } else if (is != null) {
             ChannelFuture writeFuture = ctx.getChannel().write(nettyResponse);
-            if (!nettyRequest.getMethod().equals(HttpMethod.HEAD)) {
+            if (!nettyRequest.getMethod().equals(HttpMethod.HEAD) && !nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
                 writeFuture = ctx.getChannel().write(new ChunkedStream(is));
             }
             if (!keepAlive) {

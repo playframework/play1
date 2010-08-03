@@ -5,7 +5,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import play.Logger;
 import play.Play;
+import play.mvc.Http;
 import play.mvc.Http.Response;
 import play.mvc.results.Redirect;
 import play.test.Fixtures;
@@ -64,6 +66,24 @@ public class BinaryTest extends FunctionalTest {
 		}
 		getResponse = GET(imageURL);
 		assertStatus(200, getResponse);
+	}
+
+    @Test
+	public void testUploadBigFile() {
+
+		Map<String,String> parameters= new HashMap<String,String>();
+
+		Map<String, File> files= new HashMap<String, File>();
+		File file = Play.getFile("test/winie.jpg");
+		assertTrue(file.exists());
+		files.put("file", file);
+		Response uploadResponse = POST("/Binary/upload", parameters, files);
+
+        assertStatus(200, uploadResponse);
+
+        String size = uploadResponse.getHeader("Content-Length");
+
+	    assertEquals("Size does not match", "1366949", size);
 	}
 
 }
