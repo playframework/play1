@@ -10,6 +10,7 @@ import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import play.*;
 import play.mvc.*;
+import play.i18n.Lang;
 import play.libs.*;
 
 import models.*;
@@ -69,10 +70,6 @@ public class Application extends Controller {
         render();
     }
 
-    public static void tags() {
-        render();
-    }
-    
     public static void escapeData() {
         String oops = "&nbsp;<i>Yop <!-- Coucou --></i>&nbsp;";
         render(oops);
@@ -94,11 +91,11 @@ public class Application extends Controller {
     public static void reverserouting() {
         render("Application/reverse.html");
     }
-    
+
     public static void reverserouting2() {
         render("Application/reverse2.html");
     }
-    
+
     public static void reverserouting3() {
         Object def = reverse(); {
             JPABinding.save(new Project("COLCOZ"));
@@ -122,7 +119,7 @@ public class Application extends Controller {
     }
 
     public static void mail4() {
-	    notifiers.Welcome.welcome3();
+        notifiers.Welcome.welcome3();
         renderText("OK4");
     }
 
@@ -192,9 +189,9 @@ public class Application extends Controller {
     }
 
     public static void selectTag(){
-      List<User> users = new ArrayList<User>(10);
-      for(long i = 0; i < 10; i++)
-        users.add(new User("User-" + i));
-      render(users);
+        List<User> users = new ArrayList<User>(10);
+        for(long i = 0; i < 10; i++)
+            users.add(new User("User-" + i));
+        render(users);
     }
 }

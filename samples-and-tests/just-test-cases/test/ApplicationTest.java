@@ -13,12 +13,12 @@ public class ApplicationTest extends FunctionalTest {
         assertContentType("text/html", response);
         assertCharset("utf-8", response);
     }
-    
+
     @Test
     public void testSimpleStatusCode() {
         Response response = GET("/application/simplestatuscode");
         assertStatus(204, response);
     }
-    
+
 }
 
