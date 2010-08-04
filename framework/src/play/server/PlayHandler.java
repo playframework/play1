@@ -668,7 +668,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                             // Close the connection when the whole content is written out.
                             writeFuture.addListener(ChannelFutureListener.CLOSE);
                         }
-                        raf.close();
                     }
                 }
 
