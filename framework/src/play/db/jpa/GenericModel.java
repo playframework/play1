@@ -47,7 +47,6 @@ public class GenericModel extends JPABase {
     public static <T extends JPABase> T edit(Object o, String name, Map<String, String[]> params, Annotation[] annotations) {
         try {
             BeanWrapper bw = new BeanWrapper(o.getClass());
-            String keyName = Model.Manager.factoryFor((Class<Model>)o.getClass()).keyName();
             // Start with relations
             Set<Field> fields = new HashSet<Field>();
             Class clazz = o.getClass();
@@ -72,43 +71,47 @@ public class GenericModel extends JPABase {
                 }
 
                 if (isEntity) {
-                    if (multiple && Collection.class.isAssignableFrom(field.getType())) {
-                        Collection l = new ArrayList();
-                        if (Set.class.isAssignableFrom(field.getType())) {
-                            l = new HashSet();
-                        }
-                        String[] ids = params.get(name + "." + field.getName() + "." + keyName);
-                        if (ids != null) {
-                            params.remove(name + "." + field.getName() + "." + keyName);
-                            for (String _id : ids) {
-                                if (_id.equals("")) {
-                                    continue;
+                    Class<Model> c = (Class<Model>) Play.classloader.loadClass(relation);
+                    if (JPABase.class.isAssignableFrom(c)) {
+                        String keyName = Model.Manager.factoryFor(c).keyName();
+                        if (multiple && Collection.class.isAssignableFrom(field.getType())) {
+                            Collection l = new ArrayList();
+                            if (Set.class.isAssignableFrom(field.getType())) {
+                                l = new HashSet();
+                            }
+                            String[] ids = params.get(name + "." + field.getName() + "." + keyName);
+                            if (ids != null) {
+                                params.remove(name + "." + field.getName() + "." + keyName);
+                                for (String _id : ids) {
+                                    if (_id.equals("")) {
+                                        continue;
+                                    }
+                                    Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");
+                                    q.setParameter(1, Binder.directBind(null, _id, Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType()));
+                                    try {
+                                        l.add(q.getSingleResult());
+                                    } catch (NoResultException e) {
+                                        Validation.addError(name + "." + field.getName(), "validation.notFound", _id);
+                                    }
                                 }
+                                bw.set(field.getName(), o, l);
+                            }
+                        } else {
+                            String[] ids = params.get(name + "." + field.getName() + "." + keyName);
+                            if (ids != null && ids.length > 0 && !ids[0].equals("")) {
+                                params.remove(name + "." + field.getName() + "." + keyName);
                                 Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");
-                                q.setParameter(1, Binder.directBind(null, _id, Model.Manager.factoryFor((Class<Model>)Play.classloader.loadClass(relation)).keyType()));
+                                q.setParameter(1, Binder.directBind(null, ids[0], Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType()));
                                 try {
-                                    l.add(q.getSingleResult());
+                                    Object to = q.getSingleResult();
+                                    bw.set(field.getName(), o, to);
                                 } catch (NoResultException e) {
-                                    Validation.addError(name + "." + field.getName(), "validation.notFound", _id);
+                                    Validation.addError(name + "." + field.getName(), "validation.notFound", ids[0]);
                                 }
+                            } else {
+                                bw.set(field.getName(), o, null);
+                                params.remove(name + "." + field.getName() + "." + keyName);
                             }
-                            bw.set(field.getName(), o, l);
-                        }
-                    } else {
-                        String[] ids = params.get(name + "." + field.getName() + "." + keyName);
-                        if (ids != null && ids.length > 0 && !ids[0].equals("")) {
-                            params.remove(name + "." + field.getName() + "." + keyName);
-                            Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");
-                            q.setParameter(1, Binder.directBind(null, ids[0], Model.Manager.factoryFor((Class<Model>)Play.classloader.loadClass(relation)).keyType()));
-                            try {
-                                Object to = q.getSingleResult();
-                                bw.set(field.getName(), o, to);
-                            } catch (NoResultException e) {
-                                Validation.addError(name + "." + field.getName(), "validation.notFound", ids[0]);
-                            }
-                        } else if (ids != null && ids.length > 0 && ids[0].equals("")) {
-                            bw.set(field.getName(), o, null);
-                            params.remove(name + "." + field.getName() + "." + keyName);
                         }
                     }
                 }
@@ -340,5 +343,4 @@ public class GenericModel extends JPABase {
             }
         }
     }
-
 }

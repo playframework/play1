@@ -11,6 +11,10 @@ import play.i18n.Lang;
 import play.mvc.Controller;
 
 public class DataBinding extends Controller {
+    
+    @play.mvc.Before static void lang(String lang) {
+        System.out.println(lang);
+    }
 
     public static void showDefaultDateFormat(Date date) {
         renderText(date);

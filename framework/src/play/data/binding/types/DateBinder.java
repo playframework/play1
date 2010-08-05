@@ -12,6 +12,8 @@ import play.libs.I18N;
  */
 public class DateBinder implements SupportedType<Date> {
 
+    public static final String ISO = "'ISO8086'yyyy-MM-dd'T'HH:mm:ss";
+
     public Date bind(Annotation[] annotations, String value, Class actualClass) throws Exception {
 
         Date date = AnnotationHelper.getDateAs(annotations, value);
@@ -22,9 +24,13 @@ public class DateBinder implements SupportedType<Date> {
         try {
             return new SimpleDateFormat(I18N.getDateFormat()).parse(value);
         } catch (ParseException e) {
-             throw new IllegalArgumentException("Cannot convert [" + value + "] to a Date: " + e.toString());
-            // Left empty. 
-            // return Utils.AlternativeDateFormat.getDefaultFormatter().parse(value);
+             //
+        }
+
+        try {
+            return new SimpleDateFormat(ISO).parse(value);
+        } catch(Exception e) {
+            throw new IllegalArgumentException("Cannot convert [" + value + "] to a Date: " + e.toString());
         }
         
     }

@@ -43,7 +43,7 @@ public class I18N {
             return globalDateFormat;
         }
         // Default value. It's completely arbitrary.
-        return "yyyy-MM-dd";
+        return "yyyy-MM-dd HH:mm:ss";
     }
     
 }

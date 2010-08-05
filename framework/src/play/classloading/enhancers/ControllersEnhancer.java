@@ -83,7 +83,7 @@ public class ControllersEnhancer extends Enhancer {
                     ctMethod.insertBefore(
                             "if(!play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.isActionCallAllowed()) {"
                             + "play.mvc.Controller.redirect(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\", $args);"
-                            + (ctMethod.getReturnType().equals(CtClass.voidType) ? "return;}" : "return null;}")
+                            + generateValidReturnStatement(ctMethod.getReturnType()) +  "}"
                             + "play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.stopActionCall();");
                 } catch (Exception e) {
                     Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (autoredirect).", applicationClass.name, ctMethod.getName());
@@ -160,5 +160,21 @@ public class ControllersEnhancer extends Enhancer {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
     public @interface ByPass {
+    }
+
+    static String generateValidReturnStatement(CtClass type) {
+        if(type.equals(CtClass.voidType)) {
+            return "return;";
+        }
+        if(type.equals(CtClass.booleanType)) {
+            return "return false;";
+        }
+        if(type.equals(CtClass.charType)) {
+            return "return '';";
+        }
+        if(type.equals(CtClass.byteType) || type.equals(CtClass.doubleType) || type.equals(CtClass.floatType) || type.equals(CtClass.intType) || type.equals(CtClass.longType) || type.equals(CtClass.shortType)) {
+            return "return 0;";
+        }
+        return "return null;";
     }
 }

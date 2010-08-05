@@ -49,7 +49,7 @@ def isParentOf(path1, path2):
 def getWithModules(args, env):
     withModules = []
     try:
-        optlist, newargs = getopt.getopt(args, '', ['with='])
+        optlist, newargs = getopt.getopt(args, '', ['with=', 'name='])
         for o, a in optlist:
             if o in ('--with='):
                 withModules = a.split(',')

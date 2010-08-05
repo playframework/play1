@@ -97,13 +97,6 @@ def new(app, args, env):
             mn = mn[:mn.find('-')]
         replaceAll(os.path.join(app.path, 'conf/application.conf'), r'# ---- MODULES ----', '# ---- MODULES ----\nmodule.%s=${play.path}/modules/%s' % (mn, m) )
 
-    # modules
-    app.check()
-    for module in app.modules():
-        commands = os.path.join(module, 'commands.py')
-        if os.path.exists(commands):
-            execfile(commands)
-
     print "~ OK, the application is created."
     print "~ Start it with : play run %s" % sys.argv[2]
     print "~ Have fun!"

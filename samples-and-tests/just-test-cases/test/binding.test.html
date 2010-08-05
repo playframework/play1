@@ -1,9 +1,9 @@
 #{selenium 'Just test the simple scenario'}
 
         open('/databinding/changeLanguage/fr/')
-        open('/databinding/showLocaleDateFormat/1902-24-01/')
+        open('/databinding/showLocaleDateFormat/24-01-1902/')
         assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
-        open('/databinding/showLocaleDateFormat?date=1902-24-01')
+        open('/databinding/showLocaleDateFormat?date=24-01-1902')
         assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
 
         <!-- No locale is defined for ch, so it uses the default locale date format from application.conf -->

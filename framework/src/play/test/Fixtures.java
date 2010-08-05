@@ -26,6 +26,7 @@ import play.Play;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses;
 import play.data.binding.Binder;
+import play.data.binding.types.DateBinder;
 import play.db.DB;
 import play.db.DBPlugin;
 import play.db.Model;
@@ -223,7 +224,7 @@ public class Fixtures {
             if (value instanceof Map<?, ?>) {
                 serialize((Map<?, ?>) value, prefix + "." + key, serialized);
             } else if (value instanceof Date) {
-                serialized.put(prefix + "." + key.toString(), new String[]{new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(((Date) value))});
+                serialized.put(prefix + "." + key.toString(), new String[]{new SimpleDateFormat(DateBinder.ISO).format(((Date) value))});
             } else if (value instanceof List<?>) {
                 List<?> l = (List<?>) value;
                 String[] r = new String[l.size()];

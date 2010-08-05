@@ -336,7 +336,11 @@ public abstract class CRUD extends Controller {
                     type = "enum";
                 }
                 if (field.isAnnotationPresent(Id.class)) {
-                    type = null;
+                    if(field.isAnnotationPresent(GeneratedValue.class)) {
+                        type = null;
+                    } else {
+                        required = true;
+                    }                    
                 }
                 if (field.isAnnotationPresent(Transient.class)) {
                     type = null;

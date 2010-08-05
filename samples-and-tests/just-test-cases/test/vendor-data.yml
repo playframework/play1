@@ -22,7 +22,7 @@ vendor.VenueVendor(venue2):
 # Bloc
 Bloc(b):
     name:            Yop
-    created:         2005-06-18
+    created:         2001-11-23 15:03:17 -5
     criterias:
         ? key1
         : value1

@@ -46,7 +46,7 @@ public class FixturesTest extends UnitTest {
         assertEquals("value2", b.criterias.get("key2"));
 
         try {
-            assertEquals(new SimpleDateFormat("yyyy/MM/dd").parse("2005/06/18"), b.created);
+            assertEquals(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse("2001/11/23 21:03:17"), b.created);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }

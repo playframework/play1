@@ -73,7 +73,7 @@
                 #{doBody body:handler /}
             %{ } else { }%
                 <td>
-                    <a href="@{show(object.id)}">${object.toString()?.escape()?.raw() ?: '(no value)'}</a>
+                    <a href="@{show(object._key())}">${object.toString()?.escape()?.raw() ?: '(no value)'}</a>
                 </td>
             %{ } }%
         %{ } }%
