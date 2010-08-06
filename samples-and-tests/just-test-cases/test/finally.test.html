@@ -8,4 +8,9 @@
 	assertTextNotPresent('Youhou')
 	assertTextPresent('Yop')
 
+        // Now the @Finally only param
+        open('@{UsingFinally.onlytest('waxzce')}')
+	assertTextNotPresent('onlynotwork')
+	assertTextPresent('onlywork')
+
 #{/selenium}
