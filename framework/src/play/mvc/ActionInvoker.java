@@ -318,7 +318,19 @@ public class ActionInvoker {
                     ControllerInstrumentation.stopActionCall();
                     for (Method aFinally : allFinally) {
                         String[] unless = aFinally.getAnnotation(Finally.class).unless();
+                        String[] only = aFinally.getAnnotation(After.class).only();
                         boolean skip = false;
+                        for (String un : only) {
+                            if (!un.contains(".")) {
+                                un = aFinally.getDeclaringClass().getName().substring(12) + "." + un;
+                            }
+                            if (un.equals(request.action)) {
+                                skip = false;
+                                break;
+                            } else {
+                                skip = true;
+                            }
+                        }
                         for (String un : unless) {
                             if (!un.contains(".")) {
                                 un = aFinally.getDeclaringClass().getName().substring(12) + "." + un;
