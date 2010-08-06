@@ -105,3 +105,5 @@ samples-and-tests/zencontact/test-result
 samples-and-tests/zencontact/tmp
 modules/scala
 modules/*
+build.classes
+modules/crud/nbproject
