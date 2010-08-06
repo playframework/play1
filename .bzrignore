@@ -107,3 +107,4 @@ modules/scala
 modules/*
 build.classes
 modules/crud/nbproject
+nbproject
