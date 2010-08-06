@@ -445,6 +445,20 @@ bc. public class Admin extends Application {
  
 }
 
+Or if you want the @Before method to intercept a list of action calls, you can specify a only param :
+
+bc. public class Admin extends Application {
+ 
+    @Before(only={"login","logout"})
+    static void doSomething() {  
+		...  
+	}
+	
+   	...
+}
+
+unless and only params are available for @After @Before and @Finally
+
 h3. @After
 
 Methods annotated with the **@After** annotation are executed after each action call for this Controller.
