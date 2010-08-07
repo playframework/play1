@@ -20,13 +20,10 @@ public class BinaryTest extends FunctionalTest {
 
 	@Before
 	public void setUp() {
-		Fixtures.deleteDirectory("attachments");
-		// Fixtures.deleteAll(); // see Bug #491403
-		String deleteURL=null;
-		try{
+		Fixtures.deleteAll(); // see Bug #491403
+        Fixtures.deleteDirectory("attachments");
+		URL deleteURL = reverse(); {
 			Binary.deleteAll();
-		}catch(Redirect redirect){
-			deleteURL=redirect.url;
 		}		
 		Response deletedResponse = GET(deleteURL);
 		assertStatus(200, deletedResponse);
@@ -34,20 +31,14 @@ public class BinaryTest extends FunctionalTest {
 	
 	@Test
 	public void testUploadSomething() {
-		String imageURL=null;
-		try{
+		URL imageURL = reverse(); {
 			Binary.showAvatar(1l);
-		}catch(Redirect redirect){
-			imageURL=redirect.url;
 		}
 		Response getResponse = GET(imageURL);
 		assertStatus(404, getResponse);
 		
-		String url=null;
-		try{
+		URL url = reverse(); {
 			Binary.save(null);
-		}catch(Redirect redirect){
-			url = redirect.url;
 		}
 		Map<String,String> parameters= new HashMap<String,String>();
 		parameters.put("user.username", "username");
@@ -58,11 +49,8 @@ public class BinaryTest extends FunctionalTest {
 		Response uploadResponse = POST(url, parameters, files);
 		assertStatus(302, uploadResponse);
 		String id = uploadResponse.getHeader("Location").split("=")[1];
-		imageURL = null;
-		try{
+		imageURL = reverse(); {
 			Binary.showAvatar(new Long(id));
-		}catch(Redirect redirect){
-			imageURL = redirect.url;
 		}
 		getResponse = GET(imageURL);
 		assertStatus(200, getResponse);

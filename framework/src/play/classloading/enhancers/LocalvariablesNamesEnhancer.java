@@ -64,7 +64,11 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 iv.append("new String[] {");
                 for (Iterator<String> i = names.iterator(); i.hasNext();) {
                     iv.append("\"");
-                    iv.append(i.next());
+                    String aliasedName = i.next();
+                    if (aliasedName.contains("$")) {
+                        aliasedName = aliasedName.substring(0, aliasedName.indexOf("$"));
+                    }
+                    iv.append(aliasedName);
                     iv.append("\"");
                     if (i.hasNext()) {
                         iv.append(",");

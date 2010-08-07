@@ -16,6 +16,7 @@ import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -23,6 +24,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
+import javax.persistence.Transient;
 import org.apache.log4j.Level;
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
@@ -283,11 +285,6 @@ public class JPAPlugin extends PlayPlugin {
     }
 
     @Override
-    public void afterActionInvocation() {
-        closeTx(false);
-    }
-
-    @Override
     public void onInvocationException(Throwable e) {
         closeTx(true);
     }
@@ -448,6 +445,9 @@ public class JPAPlugin extends PlayPlugin {
                 if (Modifier.isTransient(f.getModifiers())) {
                     continue;
                 }
+                if (f.isAnnotationPresent(Transient.class)) {
+                    continue;
+                }
                 Model.Property mp = buildProperty(f);
                 if (mp != null) {
                     properties.add(mp);
@@ -565,6 +565,9 @@ public class JPAPlugin extends PlayPlugin {
             modelProperty.name = field.getName();
             if(field.getType().equals(String.class)) {
                 modelProperty.isSearchable = true;
+            }
+            if(field.isAnnotationPresent(GeneratedValue.class)) {
+                modelProperty.isGenerated = true;
             }
             return modelProperty;
         }

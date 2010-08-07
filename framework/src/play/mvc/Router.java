@@ -396,9 +396,9 @@ public class Router {
                             if (inPathArgs.contains(key) && value != null) {
                                 if (List.class.isAssignableFrom(value.getClass())) {
                                     @SuppressWarnings("unchecked") List<Object> vals = (List<Object>) value;
-                                    path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", vals.get(0) + "");
+                                    path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", vals.get(0).toString().replace("$", "\\$") + "");
                                 } else {
-                                    path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value + "");
+                                    path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value.toString().replace("$", "\\$") + "");
                                 }
                             } else if (route.staticArgs.containsKey(key)) {
                                 // Do nothing -> The key is static

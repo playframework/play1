@@ -1,6 +1,8 @@
 package controllers;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.*;
 
 import play.Logger;
@@ -20,6 +22,23 @@ public class TestRunner extends Controller {
         List<Class> functionalTests = TestEngine.allFunctionalTests();
         List<String> seleniumTests = TestEngine.allSeleniumTests();
         render(unitTests, functionalTests, seleniumTests);
+    }
+
+    public static void list() {
+        StringWriter list = new StringWriter();
+        PrintWriter p = new PrintWriter(list);
+        p.println("---");
+        p.println(Play.getFile("test-result").getAbsolutePath());
+        for(Class c : TestEngine.allUnitTests()) {
+            p.println(c.getName() + ".class");
+        }
+        for(Class c : TestEngine.allFunctionalTests()) {
+            p.println(c.getName() + ".class");
+        }
+        for(String c : TestEngine.allSeleniumTests()) {
+            p.println(c);
+        }
+        renderText(list);
     }
 
     public static void run(String test) throws Exception {
@@ -50,7 +69,7 @@ public class TestRunner extends Controller {
             options.put("test", test);
             options.put("results", results);
             String result = resultTemplate.render(options);
-            File testResults = Play.getFile("test-result/" + test.replace(".class", ".java") + (results.passed ? ".passed" : ".failed") + ".html");
+            File testResults = Play.getFile("test-result/" + test + (results.passed ? ".passed" : ".failed") + ".html");
             IO.writeContent(result, testResults);
             response.contentType = "text/html";
             renderText(result);

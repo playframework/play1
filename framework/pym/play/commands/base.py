@@ -170,10 +170,22 @@ def autotest(app, args):
     print "~ Running in test mode"
     print "~ Ctrl+C to stop"
     print "~ "
+    
     print "~ Deleting %s" % os.path.normpath(os.path.join(app.path, 'tmp'))
     if os.path.exists(os.path.join(app.path, 'tmp')):
         shutil.rmtree(os.path.join(app.path, 'tmp'))
     print "~"
+    
+    # Kill if exists
+    http_port = app.readConf('http.port')
+    try:
+        proxy_handler = urllib2.ProxyHandler({})
+        opener = urllib2.build_opener(proxy_handler)
+        opener.open('http://localhost:%s/@kill' % http_port);
+    except Exception, e:
+        pass
+    
+    # Run app
     test_result = os.path.join(app.path, 'test-result')
     if os.path.exists(test_result):
         shutil.rmtree(test_result)
@@ -197,36 +209,35 @@ def autotest(app, args):
             if line.find('Listening for HTTP') > -1:
                 soutint.close()
                 break
-    # Launch the browser
-    http_port = app.readConf('http.port')
+    
+    # Run FirePhoque
     print "~"
-    print "~ Loading the test runner at %s ..." % ('http://localhost:%s/@tests' % http_port)
+    
+    fpcp = [os.path.join(app.play_env["basedir"], 'modules/testrunner/lib/play-testrunner.jar')]
+    fpcp_libs = os.path.join(app.play_env["basedir"], 'modules/testrunner/firephoque')
+    for jar in os.listdir(fpcp_libs):
+        if jar.endswith('.jar'):
+           fpcp.append(os.path.normpath(os.path.join(fpcp_libs, jar)))
+    cp_args = ':'.join(fpcp)
+    if os.name == 'nt':
+        cp_args = ';'.join(fpcp)    
+    java_cmd = [app.java_path(), '-classpath', cp_args, '-Dapplication.url=http://localhost:%s' % http_port, 'play.modules.testrunner.FirePhoque']    
     try:
-        proxy_handler = urllib2.ProxyHandler({})
-        opener = urllib2.build_opener(proxy_handler)
-        opener.open('http://localhost:%s/@tests' % http_port);
-    except urllib2.HTTPError, e:
-        print "~"
-        print "~ There are compilation errors... (%s)" % (e.code)
-        print "~"
-        kill(play_process.pid)
+        subprocess.call(java_cmd, env=os.environ)
+    except OSError:
+        print "Could not execute the headless browser. "
         sys.exit(-1)
-    print "~ Launching a web browser at http://localhost:%s/@tests?select=all&auto=yes ..." % http_port
-    webbrowser.open('http://localhost:%s/@tests?select=all&auto=yes' % http_port)
-    while True:
-        time.sleep(1)
-        if os.path.exists(os.path.join(app.path, 'test-result/result.passed')):
-            print "~"
-            print "~ All tests passed"
-            print "~"
-            kill(play_process.pid)
-            break
-        if os.path.exists(os.path.join(app.path, 'test-result/result.failed')):
-            print "~"
-            print "~ Some tests have failed. See file://%s for results" % test_result
-            print "~"
-            kill(play_process.pid)
-            break
+
+    print "~"
+    time.sleep(1)
+    if os.path.exists(os.path.join(app.path, 'test-result/result.passed')):
+        print "~ All tests passed"
+        print "~"
+    if os.path.exists(os.path.join(app.path, 'test-result/result.failed')):
+        print "~ Some tests have failed. See file://%s for results" % test_result
+        print "~"
+    
+    kill(play_process.pid)
 
 def id(play_env):
     if not play_env["id"]:

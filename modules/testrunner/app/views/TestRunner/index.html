@@ -274,7 +274,7 @@
         <script type="text/javascript">
             $(function() {
 	
-				var title = window.top.document.title;
+		var title = window.top.document.title;
                 
                 $('#loading').ajaxStart(function() {
                     $(this).show();
@@ -283,7 +283,7 @@
                 });
                 
                 var testError = function(msg) {
-                    alert('An unexpected error occured. Check server logs !\n\n'+msg);
+                    window.location = bookmark()
                     stop();
                     updateSelected();
                 }
@@ -549,7 +549,7 @@
                 #{list items:unitTests, as:'test'}
                 <li>
                     <div class="test" id="${test.name}.class">
-                        <span class="touch">+</span><a href="@{TestRunner.run(test.name+'.class')}">${test.name.replace('.','/')}.java</a>
+                        <span class="touch">+</span><a href="@{TestRunner.run(test.name+'.class')}">${test.name.replace('.','/').replace('$','.')}</a>
                         <div class="testResult"></div>
                     </div>
                 </li>
@@ -564,7 +564,7 @@
                 #{list items:functionalTests, as:'test'}
                 <li>
                     <div class="test" id="${test.name}.class">
-                        <span class="touch">+</span><a href="@{TestRunner.run(test.name+'.class')}">${test.name.replace('.','/')}.java</a>
+                        <span class="touch">+</span><a href="@{TestRunner.run(test.name+'.class')}">${test.name.replace('.','/').replace('$','.')}</a>
                         <div class="testResult"></div>
                     </div>
                 </li>
@@ -579,7 +579,7 @@
                 #{list items:seleniumTests, as:'test'}
                 <li>
                     <div class="test" id="${test}">
-                        <span class="touch">+</span><a href="@{'/public/test-runner/selenium/TestRunner.html'}?baseUrl=http://localhost:${play.configuration['http.port'] ?: '9000'}&test=/@tests/${test}.suite">${test}</a>
+                        <span class="touch">+</span><a href="@{'/public/test-runner/selenium/TestRunner.html'}?baseUrl=http://localhost:${play.configuration['http.port'] ?: '9000'}&test=/@tests/${test}.suite">${test.replace('.test.html','')}</a>
                         <div class="testResult"></div>
                     </div>
                 </li>
@@ -594,7 +594,7 @@
         </div>
         <div id="selenium-mask"></div>
         <div id="selenium">
-			Play is running a selenium test... <span id="stopSelenium">Stop it</span>
+            Play is running a selenium test... <span id="stopSelenium">Stop it</span>
             <iframe id="selenium-runner" width="100%" height="100%" src="about:blank"></iframe>
         </div>
     </body>

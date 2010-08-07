@@ -18,7 +18,7 @@ public class Users extends Controller {
        
     }
 
-    	public static void edit() {
+    public static void edit() {
 		User u = fresh();
 		render(u);
 	}
@@ -44,6 +44,13 @@ public class Users extends Controller {
 	
 	public static void wbyte(byte a, Byte b) {
 	    renderText(a+","+b);
+	}
+	
+	public static void newUser(String name) {
+	   User u = new User();
+	   u.name = name;
+	   u.save();
+	   renderText("Created user with name %s", u.name);
 	}
     
 }

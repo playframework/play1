@@ -16,6 +16,7 @@ import javassist.expr.FieldAccess;
 import javassist.expr.Handler;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.exceptions.CompilationException;
 import play.exceptions.UnexpectedException;
 
 /**

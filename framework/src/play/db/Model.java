@@ -21,6 +21,7 @@ public interface Model {
         public boolean isSearchable;
         public boolean isMultiple;
         public boolean isRelation;
+        public boolean isGenerated;
         public Class<?> relationType;
         public Choices choices;
 

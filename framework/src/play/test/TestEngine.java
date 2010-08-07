@@ -5,19 +5,19 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.junit.Assert;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
-import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
+import play.Invoker.Invocation;
 import play.Play;
 import play.Logger;
 import play.PlayPlugin;
+import play.db.jpa.JPA;
 import play.vfs.VirtualFile;
 
 /**
@@ -25,7 +25,7 @@ import play.vfs.VirtualFile;
  */
 public class TestEngine {
 
-    static ExecutorService executor = Executors.newCachedThreadPool();
+    static ExecutorService functionalTestsExecutor = Executors.newSingleThreadExecutor();
 
     public static List<Class> allUnitTests() {
         List<Class> classes = Play.classloader.getAssignableClasses(Assert.class);
@@ -101,12 +101,16 @@ public class TestEngine {
 
             // VirtualClient test
             if(FunctionalTest.class.isAssignableFrom(testClass)) {
-                Future<Result> futureResult = executor.submit(new Callable<Result>() {
-                    public Result call() throws Exception {
+                Future futureResult = functionalTestsExecutor.submit(new Invocation() {
+
+                    @Override
+                    public void execute() throws Exception {
+                        JPA.em();
                         JUnitCore junit = new JUnitCore();
                         junit.addListener(new Listener(testClass.getName(), testResults));
-                        return junit.run(testClass);
+                        junit.run(testClass);
                     }
+                    
                 });
                 try {
                     futureResult.get();

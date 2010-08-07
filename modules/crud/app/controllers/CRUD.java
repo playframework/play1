@@ -3,7 +3,6 @@ package controllers;
 import java.util.*;
 import java.lang.reflect.*;
 import java.lang.annotation.*;
-import javax.persistence.*;
 
 import play.*;
 import play.data.binding.*;
@@ -155,6 +154,10 @@ public abstract class CRUD extends Controller {
     @Target(ElementType.FIELD)
     public @interface Exclude {}
 
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface Hidden {}
+
     // ~~~~~~~~~~~~~
     static int getPageSize() {
         return Integer.parseInt(Play.configuration.getProperty("crud.pageSize", "30"));
@@ -243,9 +246,6 @@ public abstract class CRUD extends Controller {
         public List<ObjectField> getFields() {
             List<ObjectField> fields = new ArrayList<ObjectField>();
             for (Model.Property f : Model.Manager.factoryFor(entityClass).listProperties()) {
-                if (f.field.isAnnotationPresent(Exclude.class)) {
-                    continue;
-                }
                 ObjectField of = new ObjectField(f);
                 if (of.type != null) {
                     fields.add(of);
@@ -304,30 +304,11 @@ public abstract class CRUD extends Controller {
                 if (Date.class.isAssignableFrom(field.getType())) {
                     type = "date";
                 }
-                if (Model.class.isAssignableFrom(field.getType())) {
-                    if (field.isAnnotationPresent(OneToOne.class)) {
-                        if (field.getAnnotation(OneToOne.class).mappedBy().equals("")) {
-                            type = "relation";
-                        }
-                    }
-                    if (field.isAnnotationPresent(ManyToOne.class)) {
-                        type = "relation";
-                    }
+                if (property.isRelation) {
+                    type = "relation";
                 }
-                if (Collection.class.isAssignableFrom(field.getType())) {
-                    Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                    if (field.isAnnotationPresent(OneToMany.class)) {
-                        if (field.getAnnotation(OneToMany.class).mappedBy().equals("")) {
-                            type = "relation";
-                            multiple = true;
-                        }
-                    }
-                    if (field.isAnnotationPresent(ManyToMany.class)) {
-                        if (field.getAnnotation(ManyToMany.class).mappedBy().equals("")) {
-                            type = "relation";
-                            multiple = true;
-                        }
-                    }
+                if (property.isMultiple) {
+                    multiple = true;
                 }
                 if(Model.BinaryField.class.isAssignableFrom(field.getType())) {
                     type = "binary";
@@ -335,18 +316,14 @@ public abstract class CRUD extends Controller {
                 if (field.getType().isEnum()) {
                     type = "enum";
                 }
-                if (field.isAnnotationPresent(Id.class)) {
-                    if(field.isAnnotationPresent(GeneratedValue.class)) {
-                        type = null;
-                    } else {
-                        required = true;
-                    }                    
-                }
-                if (field.isAnnotationPresent(Transient.class)) {
-                    type = null;
+                if (property.isGenerated) {
+                    type = null;                   
                 }
                 if (field.isAnnotationPresent(Required.class)) {
                     required = true;
+                }
+                if (field.isAnnotationPresent(Exclude.class)) {
+                    type = "hidden";
                 }
                 name = field.getName();
             }

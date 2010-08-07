@@ -7,6 +7,9 @@
         <fileset dir="../../framework/lib">
             <include name="*.jar"/>
         </fileset>
+        <fileset dir="firephoque">
+            <include name="*.jar"/>
+        </fileset>
     </path>
 
     <target name="build">

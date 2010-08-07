@@ -14,9 +14,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 
-import play.Invoker.Invocation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.mvc.ActionInvoker;
 import play.mvc.Http;
@@ -27,6 +25,8 @@ import com.ning.http.multipart.FilePart;
 import com.ning.http.multipart.MultipartRequestEntity;
 import com.ning.http.multipart.Part;
 import com.ning.http.multipart.StringPart;
+import play.mvc.Controller;
+import play.mvc.Router.ActionDefinition;
 
 /**
  * Application tests support
@@ -43,25 +43,8 @@ public abstract class FunctionalTest extends BaseTest {
         savedCookies = null;
     }
 
-    /**
-     * Triggers Redirect when calling controller.action directly.
-     */
-    @BeforeClass
-    public static void redirectInsteadOfCall() {
-        ControllerInstrumentation.stopActionCall();
-    }
-
-    static void before() {
-        new FakeInvocation().before();
-    }
-
-    static void after() {
-        new FakeInvocation().after();
-        new FakeInvocation()._finally();
-    }
-
     // Requests
-    public static Response GET(String url) {
+    public static Response GET(Object url) {
         return GET(newRequest(), url);
     }
 
@@ -71,17 +54,18 @@ public abstract class FunctionalTest extends BaseTest {
      * @param url relative url such as <em>"/products/1234"</em>
      * @return the response
      */
-    public static Response GET(Request request, String url) {
+    public static Response GET(Request request, Object url) {
         String path = "";
         String queryString = "";
-        if (url.contains("?")) {
-            path = url.substring(0, url.indexOf("?"));
-            queryString = url.substring(url.indexOf("?") + 1);
+        String turl = url.toString();
+        if (turl.contains("?")) {
+            path = turl.substring(0, turl.indexOf("?"));
+            queryString = turl.substring(turl.indexOf("?") + 1);
         } else {
-            path = url;
+            path = turl;
         }
         request.method = "GET";
-        request.url = url;
+        request.url = turl;
         request.path = path;
         request.querystring = queryString;
         request.body = new ByteArrayInputStream(new byte[0]);
@@ -90,23 +74,23 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     // convenience methods
-    public static Response POST(String url) {
+    public static Response POST(Object url) {
         return POST(url, APPLICATION_X_WWW_FORM_URLENCODED, "");
     }
 
-    public static Response POST(Request request, String url) {
+    public static Response POST(Request request, Object url) {
         return POST(request, url, APPLICATION_X_WWW_FORM_URLENCODED, "");
     }
 
-    public static Response POST(String url, String contenttype, String body) {
+    public static Response POST(Object url, String contenttype, String body) {
         return POST(newRequest(), url, contenttype, body);
     }
 
-    public static Response POST(Request request, String url, String contenttype, String body) {
+    public static Response POST(Request request, Object url, String contenttype, String body) {
         return POST(request, url, contenttype, new ByteArrayInputStream(body.getBytes()));
     }
 
-    public static Response POST(String url, String contenttype, InputStream body) {
+    public static Response POST(Object url, String contenttype, InputStream body) {
         return POST(newRequest(), url, contenttype, body);
     }
 
@@ -118,18 +102,19 @@ public abstract class FunctionalTest extends BaseTest {
      * @param body posted data
      * @return the response
      */
-    public static Response POST(Request request, String url, String contenttype, InputStream body) {
+    public static Response POST(Request request, Object url, String contenttype, InputStream body) {
         String path = "";
         String queryString = "";
-        if (url.contains("?")) {
-            path = url.substring(0, url.indexOf("?"));
-            queryString = url.substring(url.indexOf("?") + 1);
+        String turl = url.toString();
+        if (turl.contains("?")) {
+            path = turl.substring(0, turl.indexOf("?"));
+            queryString = turl.substring(turl.indexOf("?") + 1);
         } else {
-            path = url;
+            path = turl;
         }
         request.method = "POST";
         request.contentType = contenttype;
-        request.url = url;
+        request.url = turl;
         request.path = path;
         request.querystring = queryString;
         request.body = body;
@@ -144,11 +129,11 @@ public abstract class FunctionalTest extends BaseTest {
      * @param files map containing files to be uploaded
      * @return the response
      */
-    public static Response POST(String url, Map<String, String> parameters, Map<String, File> files) {
+    public static Response POST(Object url, Map<String, String> parameters, Map<String, File> files) {
         return POST(newRequest(), url, parameters, files);
     }
 
-    public static Response POST(Request request, String url, Map<String, String> parameters, Map<String, File> files) {
+    public static Response POST(Request request, Object url, Map<String, String> parameters, Map<String, File> files) {
         List<Part> parts = new ArrayList<Part>();
 
         for (String key : parameters.keySet()) {
@@ -181,7 +166,7 @@ public abstract class FunctionalTest extends BaseTest {
         return POST(request, url, MULTIPART_FORM_DATA, body);
     }
 
-    public static Response PUT(String url, String contenttype, String body) {
+    public static Response PUT(Object url, String contenttype, String body) {
         return PUT(newRequest(), url, contenttype, body);
     }
 
@@ -193,18 +178,19 @@ public abstract class FunctionalTest extends BaseTest {
      * @param body data to send
      * @return the response
      */
-    public static Response PUT(Request request, String url, String contenttype, String body) {
+    public static Response PUT(Request request, Object url, String contenttype, String body) {
         String path = "";
         String queryString = "";
-        if (url.contains("?")) {
-            path = url.substring(0, url.indexOf("?"));
-            queryString = url.substring(url.indexOf("?") + 1);
+        String turl = url.toString();
+        if (turl.contains("?")) {
+            path = turl.substring(0, turl.indexOf("?"));
+            queryString = turl.substring(turl.indexOf("?") + 1);
         } else {
-            path = url;
+            path = turl;
         }
         request.method = "PUT";
         request.contentType = contenttype;
-        request.url = url;
+        request.url = turl;
         request.path = path;
         request.querystring = queryString;
         request.body = new ByteArrayInputStream(body.getBytes());
@@ -221,17 +207,18 @@ public abstract class FunctionalTest extends BaseTest {
      * @param url relative url eg. <em>"/products/1234"</em>
      * @return the response
      */
-    public static Response DELETE(Request request, String url) {
+    public static Response DELETE(Request request, Object url) {
         String path = "";
         String queryString = "";
-        if (url.contains("?")) {
-            path = url.substring(0, url.indexOf("?"));
-            queryString = url.substring(url.indexOf("?") + 1);
+        String turl = url.toString();
+        if (turl.contains("?")) {
+            path = turl.substring(0, turl.indexOf("?"));
+            queryString = turl.substring(turl.indexOf("?") + 1);
         } else {
-            path = url;
+            path = turl;
         }
         request.method = "DELETE";
-        request.url = url;
+        request.url = turl;
         request.path = path;
         request.querystring = queryString;
         if (savedCookies != null) request.cookies = savedCookies;
@@ -240,15 +227,12 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     public static void makeRequest(final Request request, final Response response) {
-        before();
         ActionInvoker.invoke(request, response);
         savedCookies = response.cookies;
         try {
             response.out.flush();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
-        } finally {
-            after();
         }
     }
 
@@ -353,15 +337,6 @@ public abstract class FunctionalTest extends BaseTest {
         assertEquals("Response header " + headerName + " mismatch", value, response.headers.get(headerName).value());
     }
 
-    /* TODO : check json syntax
-    public static void assertValidJSON( Response response) {
-    try {
-    JSON.verify( getContent(response));
-    } catch( JSONException jsEx ) {
-    fail("invalid json response "+ jsEx.getMessage() );
-    }
-    }
-     */
     /**
      * obtains the response body as a string
      * @param response server response
@@ -377,10 +352,7 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     // Utils
-    /**
-     * pause execution
-     * @param seconds seconds to sleep
-     */
+
     public void sleep(int seconds) {
         try {
             Thread.sleep(seconds * 1000);
@@ -389,10 +361,26 @@ public abstract class FunctionalTest extends BaseTest {
         }
     }
 
-    public static class FakeInvocation extends Invocation {
+    protected static URL reverse() {
+        ControllerInstrumentation.stopActionCall();
+        ActionDefinition actionDefinition = new ActionDefinition();
+        Controller._currentReverse.set(actionDefinition);
+        return new URL(actionDefinition);
+    }
+
+    public static class URL {
+
+        ActionDefinition actionDefinition;
+
+        URL(ActionDefinition actionDefinition) {
+            this.actionDefinition = actionDefinition;
+        }
 
         @Override
-        public void execute() throws Exception {
+        public String toString() {
+            return actionDefinition.url;
         }
+
     }
+
 }

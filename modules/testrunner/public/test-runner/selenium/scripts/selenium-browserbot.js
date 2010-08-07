@@ -1516,13 +1516,14 @@ BrowserBot.prototype.replaceText = function(element, stringValue) {
     triggerEvent(element, 'select', true);
     var maxLengthAttr = element.getAttribute("maxLength");
     var actualValue = stringValue;
-    if (maxLengthAttr != null) {
+    
+    if (maxLengthAttr != null && maxLengthAttr != -1) {
         var maxLength = parseInt(maxLengthAttr);
         if (stringValue.length > maxLength) {
             actualValue = stringValue.substr(0, maxLength);
         }
     }
-
+    
     if (getTagName(element) == "body") {
         if (element.ownerDocument && element.ownerDocument.designMode) {
             var designMode = new String(element.ownerDocument.designMode).toLowerCase();
