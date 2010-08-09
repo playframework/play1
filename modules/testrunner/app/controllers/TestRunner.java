@@ -29,6 +29,7 @@ public class TestRunner extends Controller {
         PrintWriter p = new PrintWriter(list);
         p.println("---");
         p.println(Play.getFile("test-result").getAbsolutePath());
+        p.println(Router.reverse(Play.modules.get("_testrunner").child("/public/test-runner/selenium/TestRunner.html")));
         for(Class c : TestEngine.allUnitTests()) {
             p.println(c.getName() + ".class");
         }

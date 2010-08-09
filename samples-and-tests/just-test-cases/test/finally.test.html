@@ -2,10 +2,15 @@
 
 	open('@{UsingFinally.a()}')
 	assertTextPresent('Youhou')
-	
+
 	// Now the @Finally
 	open('@{UsingFinally.b()}')
 	assertTextNotPresent('Youhou')
 	assertTextPresent('Yop')
+
+        // Now the @Finally only param
+        open('@{UsingFinally.onlytest('waxzce')}')
+	assertTextNotPresent('onlynotwork')
+	assertTextPresent('onlywork')
 
 #{/selenium}

@@ -71,7 +71,7 @@ public class Application extends Controller {
     }
 
     public static void escapeData() {
-        String oops = "&nbsp;<i>Yop <!-- Coucou --></i>&nbsp;";
+        String oops = "&nbsp;<i>Yop</i>&nbsp;";
         render(oops);
     }
 

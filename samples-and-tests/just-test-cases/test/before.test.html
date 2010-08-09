@@ -20,4 +20,9 @@
 	open('/usingbeforewithpriority/index')
 	assertTextPresent('yupyopyipyapdone')
 
+        // Try the only param of @before
+        open('@{UsingBefore.onlytest('waxzce')}')
+	assertTextNotPresent('onlynotwork')
+	assertTextPresent('onlywork')
+
 #{/selenium}

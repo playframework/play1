@@ -15,9 +15,9 @@
             def parts = play.test.Helpers.seleniumCommand(command); }%
             %{ if(parts && parts[0]) { }%
               <tr>
-                <td width="33%">${parts[0] ?: '&nbsp;'}</td>
-                <td width="33%">${parts[1] ?: '&nbsp;'}</td>
-                <td>${parts[2] ?: '&nbsp;'}</td>
+                <td width="33%">${parts[0] ?: ''}</td>
+                <td width="33%">${parts[1] ?: ''}</td>
+                <td>${parts[2] ?: ''}</td>
               </tr>
             %{ } }%
       %{ } }%

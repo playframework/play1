@@ -27,6 +27,14 @@ Selenium.prototype.assertNotEquals = function(a, b) {
     }
 };
 
+Selenium.prototype.assertTextLike = function(a, b) {
+    a = a.replace(/\n/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ')
+    b = b.replace(/\n/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ')
+    if(a == b) {
+        Assert.fail(a+' == '+b);
+    }
+};
+
 Selenium.prototype.assertPath = function(expectedPath) {
     var path = window.document.location.path;
     if(path == expectedPath) {

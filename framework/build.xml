@@ -213,7 +213,7 @@
         </antcall>
         
         <antcall target="play-test">
-            <param name="testAppPath" value="${basedir}/../samples-and-tests/chat"/>
+            <param name="testAppPath" value="${basedir}/../samples-and-tests/zencontact"/>
         </antcall>
         
         <antcall target="play-test">

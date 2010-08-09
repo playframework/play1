@@ -25,6 +25,7 @@ public class FirePhoque {
 
         // Tests description
         File root = null;
+        String selenium = null;
         List<String> tests = null;
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(new URL(app + "/@tests.list").openStream(), "utf-8"));
@@ -33,6 +34,7 @@ public class FirePhoque {
                 throw new RuntimeException("Oops");
             }
             root = new File(in.readLine());
+            selenium = in.readLine();
             tests = new ArrayList();
             String line;
             while ((line = in.readLine()) != null) {
@@ -79,7 +81,7 @@ public class FirePhoque {
             if (test.endsWith(".class")) {
                 url = new URL(app + "/@tests/" + test);
             } else {
-                url = new URL(app + "/public/test-runner/selenium/TestRunner.html?baseUrl=" + app + "&test=/@tests/" + test + ".suite&auto=true&resultsUrl=/@tests/" + test);
+                url = new URL(app + "" + selenium + "?baseUrl=" + app + "&test=/@tests/" + test + ".suite&auto=true&resultsUrl=/@tests/" + test);
             }
             firephoque.openWindow(url, "headless");
             firephoque.waitForBackgroundJavaScript(5 * 60 * 1000);

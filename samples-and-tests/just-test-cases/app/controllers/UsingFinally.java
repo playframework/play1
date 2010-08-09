@@ -22,6 +22,17 @@ public class UsingFinally extends Controller {
     public static void b() {
         renderText("Youhou");
     }
-    
+
+    @Finally(only = {"onlytest"})
+    static void beforeonlytest(String name) {
+        response.reset();
+        response.print("onlywork");
+        response.contentType = "text/plain";
+    }
+
+    public static void onlytest(String name) {
+        renderText("onlynotwork :  " + name);
+    }
+  
 }
 
