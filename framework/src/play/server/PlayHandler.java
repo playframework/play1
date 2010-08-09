@@ -42,7 +42,6 @@ import play.data.validation.Validation;
 
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
 
-
 public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
@@ -79,11 +78,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
         Logger.trace("messageReceived: end");
     }
-
     private static Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
 
     public class NettyInvocation extends Invoker.Invocation {
-
 
         private final ChannelHandlerContext ctx;
         private final Request request;
@@ -200,7 +197,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             }
         }
     }
-
 
     protected static void addToResponse(Response response, HttpResponse nettyResponse) {
         Map<String, Http.Header> headers = response.headers;
@@ -329,7 +325,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                         // Close the connection when the whole content is written out.
                         writeFuture.addListener(ChannelFutureListener.CLOSE);
                     }
-                    
+
                 }
             } catch (Exception e) {
                 throw e;
@@ -396,13 +392,19 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         request.url = nettyRequest.getUri();
         request.host = nettyRequest.getHeader(HOST);
 
-        if (request.host.contains(":")) {
-            final String[] host = request.host.split(":");
-            request.port = Integer.parseInt(host[1]);
-            request.domain = host[0];
-        } else {
+        if (request.host == null) {
+            request.host = "";
             request.port = 80;
-            request.domain = request.host;
+            request.domain = "";
+        } else {
+            if (request.host.contains(":")) {
+                final String[] host = request.host.split(":");
+                request.port = Integer.parseInt(host[1]);
+                request.domain = host[0];
+            } else {
+                request.port = 80;
+                request.domain = request.host;
+            }
         }
 
         if (Play.configuration.containsKey("XForwardedSupport") && nettyRequest.getHeader("X-Forwarded-For") != null) {
@@ -459,7 +461,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             }
         }
     }
-
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
@@ -752,5 +753,4 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     public static void setContentLength(HttpMessage message, long contentLength) {
         message.setHeader(HttpHeaders.Names.CONTENT_LENGTH, String.valueOf(contentLength));
     }
-
 }
