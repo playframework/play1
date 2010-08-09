@@ -208,7 +208,7 @@ public class JPABase implements Serializable, play.db.Model {
         if ((this == other)) {
             return true;
         }
-        if (!(this.getClass().equals(other.getClass()))) {
+        if (!this.getClass().isAssignableFrom(other.getClass())) {
             return false;
         }
         if (this._key() == null) {

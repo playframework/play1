@@ -18,8 +18,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import play.Logger;
@@ -277,14 +279,16 @@ public class ApplicationClassloader extends ClassLoader {
                 modifieds.add(applicationClass);
             }
         }
+        Set<ApplicationClass> modifiedWithDependencies = new HashSet<ApplicationClass>();
+        modifiedWithDependencies.addAll(modifieds);
         if(modifieds.size() > 0) {
             for(PlayPlugin plugin : Play.plugins) {
-                plugin.onClassesChange(modifieds);
+                modifiedWithDependencies.addAll(plugin.onClassesChange(modifieds));
             }
         }
         List<ClassDefinition> newDefinitions = new ArrayList<ClassDefinition>();
         boolean dirtySig = false;
-        for (ApplicationClass applicationClass : modifieds) {
+        for (ApplicationClass applicationClass : modifiedWithDependencies) {
             if (applicationClass.compile() == null) {
                 Play.classes.classes.remove(applicationClass.name);
             } else {
