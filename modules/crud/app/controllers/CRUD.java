@@ -325,6 +325,9 @@ public abstract class CRUD extends Controller {
                 if (field.isAnnotationPresent(Exclude.class)) {
                     type = "hidden";
                 }
+                if (java.lang.reflect.Modifier.isFinal(field.getModifiers())) {
+                    type = null;
+                }
                 name = field.getName();
             }
 

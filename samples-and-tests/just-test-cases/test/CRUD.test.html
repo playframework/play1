@@ -71,6 +71,7 @@
 	clickAndWait('link=Home')
 	clickAndWait('link=Items')
 	clickAndWait('link=Add Item')
+	assertTextNotPresent('PI')
 	type('object_name', '607')
     type('object_sku', '607')
     clickAndWait('css=input[name=_save]')
