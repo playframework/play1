@@ -99,12 +99,18 @@ public class HttpHandler implements IoHandler {
         request.url = minaRequest.getRequestUri().toString();
         request.host = minaRequest.getHeader("host");
 
-        if (request.host.contains(":")) {
-            request.port = Integer.parseInt(request.host.split(":")[1]);
-            request.domain = request.host.split(":")[0];
-        } else {
+        if(request.host == null) {
+            request.host = "";
             request.port = 80;
-            request.domain = request.host;
+            request.domain = "";
+        } else {
+            if (request.host.contains(":")) {
+                request.port = Integer.parseInt(request.host.split(":")[1]);
+                request.domain = request.host.split(":")[0];
+            } else {
+                request.port = 80;
+                request.domain = request.host;
+            }
         }
 
         if (Play.configuration.containsKey("XForwardedSupport") && minaRequest.containsHeader("X-Forwarded-For")) {
