@@ -76,6 +76,7 @@ public class FastTags {
             actionDef.method = "POST";
         }
         out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toUpperCase() + "\" accept-charset=\"utf-8\" enctype=\"" + enctype + "\" "+serialize(args, "action", "method", "accept-charset", "enctype")+">");
+        _authenticityToken(args, body, out, template, fromLine);
         out.println(JavaExtensions.toString(body));
         out.print("</form>");
     }
@@ -100,7 +101,9 @@ public class FastTags {
                 actionDef.method = "POST";
             }
             String id = Codec.UUID();
-            out.print("<form method=\"POST\" id=\"" + id + "\" style=\"display:none\" action=\"" + actionDef.url + "\"></form>");
+            out.print("<form method=\"POST\" id=\"" + id + "\" style=\"display:none\" action=\"" + actionDef.url + "\">");
+            _authenticityToken(args, body, out, template, fromLine);
+            out.print("</form>"); 
             out.print("<a href=\"javascript:document.getElementById('" + id + "').submit();\" "+serialize(args, "href")+">");
             out.print(JavaExtensions.toString(body));
             out.print("</a>");

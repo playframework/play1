@@ -1,0 +1,16 @@
+<a href="@{WithAuthenticity.needAuthenticity()}">Should fail 1</a>
+
+#{a @WithAuthenticity.needAuthenticity()}Should pass 1#{/a}
+
+<form action="@{WithAuthenticity.needAuthenticity()}" method="POST">
+    <input type="submit" id="f2">
+</form>
+
+<form action="@{WithAuthenticity.needAuthenticity()}" method="POST">
+    #{authenticityToken /}
+    <input type="submit" id="p2">
+</form>
+
+#{form @WithAuthenticity.needAuthenticity()}
+    <input type="submit" id="p3">
+#{/form}

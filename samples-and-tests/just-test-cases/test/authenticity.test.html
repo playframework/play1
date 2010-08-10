@@ -1,0 +1,28 @@
+#{selenium 'Authenticity token'}
+
+	open('@{WithAuthenticity.index()}')	
+	clickAndWait('link=Should fail 1')
+	assertTextPresent('Bad authenticity token')
+	assertTextNotPresent('OK')
+
+	open('@{WithAuthenticity.index()}')	
+	clickAndWait('link=Should pass 1')
+	assertTextNotPresent('Bad authenticity token')
+	assertTextPresent('OK') 
+	
+	open('@{WithAuthenticity.index()}')	
+	clickAndWait('f2')
+	assertTextPresent('Bad authenticity token')
+	assertTextNotPresent('OK')
+	
+	open('@{WithAuthenticity.index()}')	
+	clickAndWait('p2')
+	assertTextNotPresent('Bad authenticity token')
+	assertTextPresent('OK')
+	
+	open('@{WithAuthenticity.index()}')	
+	clickAndWait('p3')
+	assertTextNotPresent('Bad authenticity token')
+	assertTextPresent('OK')
+
+#{/selenium}

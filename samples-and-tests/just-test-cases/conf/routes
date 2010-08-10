@@ -20,6 +20,9 @@ PUT			/ressource/{id}					Rest.postOrPut
 DELETE		/ressource/{id}					Rest.delete
 OPTIONS		/ressource/{id}					Rest.options
 
+POST        /needAuthenticity               WithAuthenticity.needAuthenticity
+GET         /needAuthenticity               WithAuthenticity.needAuthenticity
+
 # Import the default CRUD routes
 *			/admin						     module:crud
 
