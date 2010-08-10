@@ -25,6 +25,8 @@ import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * A super class for JPA entities 
@@ -76,7 +78,9 @@ public class GenericModel extends JPABase {
                         String keyName = Model.Manager.factoryFor(c).keyName();
                         if (multiple && Collection.class.isAssignableFrom(field.getType())) {
                             Collection l = new ArrayList();
-                            if (Set.class.isAssignableFrom(field.getType())) {
+                            if (SortedSet.class.isAssignableFrom(field.getType())) {
+                                l = new TreeSet();
+                            } else if (Set.class.isAssignableFrom(field.getType())) {
                                 l = new HashSet();
                             }
                             String[] ids = params.get(name + "." + field.getName() + "." + keyName);
@@ -108,7 +112,7 @@ public class GenericModel extends JPABase {
                                 } catch (NoResultException e) {
                                     Validation.addError(name + "." + field.getName(), "validation.notFound", ids[0]);
                                 }
-                            } else if(ids != null && ids.length > 0 && ids[0].equals("")) {
+                            } else if (ids != null && ids.length > 0 && ids[0].equals("")) {
                                 bw.set(field.getName(), o, null);
                                 params.remove(name + "." + field.getName() + "." + keyName);
                             }
