@@ -35,14 +35,14 @@ public class FastTags {
     }
 
     public static void _authenticityToken(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        out.println("<input type=\"hidden\" name=\"authenticityToken\" value=\"" + Session.current().getAuthenticityToken()+"\">");
+        out.println("<input type=\"hidden\" name=\"authenticityToken\" value=\"" + Session.current().getAuthenticityToken() + "\">");
     }
 
     public static void _option(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         Object value = args.get("arg");
         Object selectedValue = TagContext.parent("select").data.get("selected");
         boolean selected = selectedValue != null && value != null && selectedValue.equals(value);
-        out.print("<option value=\""+(value == null ? "" : value)+"\" "+(selected ? "selected=\"selected\"" : "")+""+serialize(args, "selected", "value")+">");
+        out.print("<option value=\"" + (value == null ? "" : value) + "\" " + (selected ? "selected=\"selected\"" : "") + "" + serialize(args, "selected", "value") + ">");
         out.println(JavaExtensions.toString(body));
         out.print("</option>");
     }
@@ -75,8 +75,10 @@ public class FastTags {
             actionDef.url += separator + "x-http-method-override=" + actionDef.method.toUpperCase();
             actionDef.method = "POST";
         }
-        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toUpperCase() + "\" accept-charset=\"utf-8\" enctype=\"" + enctype + "\" "+serialize(args, "action", "method", "accept-charset", "enctype")+">");
-        _authenticityToken(args, body, out, template, fromLine);
+        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toUpperCase() + "\" accept-charset=\"utf-8\" enctype=\"" + enctype + "\" " + serialize(args, "action", "method", "accept-charset", "enctype") + ">");
+        if (!("GET".equals(actionDef.method))) {
+            _authenticityToken(args, body, out, template, fromLine);
+        }
         out.println(JavaExtensions.toString(body));
         out.print("</form>");
     }
@@ -103,12 +105,12 @@ public class FastTags {
             String id = Codec.UUID();
             out.print("<form method=\"POST\" id=\"" + id + "\" style=\"display:none\" action=\"" + actionDef.url + "\">");
             _authenticityToken(args, body, out, template, fromLine);
-            out.print("</form>"); 
-            out.print("<a href=\"javascript:document.getElementById('" + id + "').submit();\" "+serialize(args, "href")+">");
+            out.print("</form>");
+            out.print("<a href=\"javascript:document.getElementById('" + id + "').submit();\" " + serialize(args, "href") + ">");
             out.print(JavaExtensions.toString(body));
             out.print("</a>");
         } else {
-            out.print("<a href=\"" + actionDef.url + "\" "+serialize(args, "href")+">");
+            out.print("<a href=\"" + actionDef.url + "\" " + serialize(args, "href") + ">");
             out.print(JavaExtensions.toString(body));
             out.print("</a>");
         }
@@ -261,11 +263,10 @@ public class FastTags {
         }
     }
 
-
     public static String serialize(Map<?, ?> args, String... unless) {
         StringBuffer attrs = new StringBuffer();
         Arrays.sort(unless);
-        for (Object o: args.keySet()) {
+        for (Object o : args.keySet()) {
             String attr = o.toString();
             String value = args.get(o) == null ? "" : args.get(o).toString();
             if (Arrays.binarySearch(unless, attr) < 0 && !attr.equals("arg")) {
@@ -283,7 +284,5 @@ public class FastTags {
     public static @interface Namespace {
 
         String value() default "";
-
     }
-
 }
