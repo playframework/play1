@@ -80,6 +80,11 @@
     open('@{JPABinding.create()}?project.name=Sematic&project.company.name=CG77')
 	assertValue('name', 'Sematic')
 	assertTextPresent('CG77')
+	
+	open('@{Errors.index()}')
+    type('tf', 'Youpi')
+    clickAndWait('go')
+    assertTextPresent('it works now: Youpi')
     
 
 #{/selenium}
