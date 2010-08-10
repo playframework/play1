@@ -108,7 +108,7 @@ public class GenericModel extends JPABase {
                                 } catch (NoResultException e) {
                                     Validation.addError(name + "." + field.getName(), "validation.notFound", ids[0]);
                                 }
-                            } else {
+                            } else if(ids != null && ids.length > 0 && ids[0].equals("")) {
                                 bw.set(field.getName(), o, null);
                                 params.remove(name + "." + field.getName() + "." + keyName);
                             }
