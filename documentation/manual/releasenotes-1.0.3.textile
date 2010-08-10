@@ -1,0 +1,25 @@
+h1. Play 1.0.3 -- Release notes
+
+**Play 1.0.3** is a maintenance release of the Play 1.0 branch. There is no new major feature in this version, as the development focus is now set to the 1.1 version. The documentation has been updated with missing references, the yabe tutorial now includes a new chapter about **i18n**, and a new sample application has been added.
+
+p(note). **Play 1.0.3** is a maintenance release and is fully compatible with the 1.0 series. If you encounter any problems please ask us on the "Google Group":http://groups.google.com/group/play-framework.
+
+You can read about the fixed bugs on the "1.0.3 road map page":http://www.playframework.org/roadmap/1.0.3. The most important changes are highlighted on this page.
+
+h2. <a>New sample application: validation</a>
+
+A new sample application has been added. It demonstrates the different ways to create a form with the Play validation support.
+
+!images/validation!
+
+h2. <a>New yabe tutorial chapter: i18n</a>
+
+This complete the existing yabe tutorial with application internationalization and language localisation. Although we could have done this from the start, it is more realistic to build the first version of an application in a single language, and add multiple languages later.
+
+"Read the new chapter":guide12
+
+h2. <a>playapps.net support</a>
+
+The 1.0.3 release is the first one to be officially supported by the new "http://www.playapps.net":http://www.playapps.net on the could hosting platform.
+
+!images/dashboard_preview!

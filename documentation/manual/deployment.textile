@@ -2,7 +2,7 @@ h1. Deployment options
 
 Play applications can be deployed virtually anywhere: inside Servlet containers, as standalone servers, in Google Application Engine, Stack, a Cloud, etc...
 
-h2. <a>Standalone Play application</a>
+h2. <a name="standalone">Standalone Play application</a>
 
 The simplest and the more robust way is to simply run your Play application without any container. You can use a frontal HTTP server like Lighttpd or Apache if you need more advanced HTTP features like virtual hosting.
 
@@ -14,7 +14,7 @@ You will have less problems running your application this way, as you will use t
 
 Please refer to the "'Put your application in production' page":production for more information.
 
-h2. <a>Application servers</a>
+h2. <a name="appservers">Application servers</a>
 
 Your Play application can also run inside your favorite application server. Most application servers are supported out of the box.
 
@@ -53,7 +53,7 @@ bc.
 
 Replace com.example:archive=unique-archive-name with whatever you wish as long as it is unique.            
 
-h2. <a>Google Application Engine (GAE)</a>
+h2. <a name="gae">Google Application Engine (GAE)</a>
 
 A Play application can very easily be deployed to the GAE. It is a matter of installing the relevant "GAE module.":http://playframework.org/modules/gae
 
@@ -65,7 +65,7 @@ bc. play gae:deploy myapp
 
 Refer to the "module documentation":http://playframework.org/modules/gae-1.0.2/home for more information.
 
-h2. <a>Stax cloud hosting platform</a>
+h2. <a name="stax">Stax cloud hosting platform</a>
 
 Easy deployment to the "Stax cloud hosting platform":http://www.stax.net: again nothing could be easier. Install the Stax module and deploy within seconds.
 

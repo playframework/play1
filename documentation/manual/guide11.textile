@@ -32,11 +32,15 @@ Edit the database configuration in the **yabe/conf/application.conf** file:
 
 bc. %server01.db=mysql:root:secret@yabe
 
-We will now tweak the way Hibernate manages the database schema for us. It’s very useful when Hibernate automatically updates the database schema as the Java model objects change. However it’s kind of unpredictable, and running magical things on a production database is never a good thing. So we will let Hibernate create the database schema if it doesn’t exist, but it will never update it automatically.
+We will now tweak the way Hibernate manages the database schema for us. It’s very useful when Hibernate automatically updates the database schema as the Java model objects change. 
 
 Change the **jpa.ddl** configuration key:
 
-bc. %server01.jpa.ddl=create
+bc. %server01.jpa.ddl=update
+
+However it’s kind of unpredictable, and running magical things on a production database is never a good thing. So you should always have a backup before a new deployement. If you don't want that hibernate update your database, change the **jpa.ddl** configuration key to validate:
+
+bc. %server01.jpa.ddl=validate
 
 h2. <a>Setting up a frontal HTTP server</a>
 
@@ -64,9 +68,11 @@ bc. %server01.XForwardedSupport=127.0.0.1
 h2. <a>This is just the beginning</a>
 
 p(note). If you have read and followed this tutorial, you’re now a seasoned Play developer. You know most of the concepts that drive Play application development.
+ 
+At this stage, you may want to continue the tutorial with "internationalisation and localisation":guide12.
 
 There are still more features we haven’t explored yet, especially related to Web services, like JSON or XML. Also Play comes with more modules that provide more features. And Play itself still evolves every day.
 
 If you are convinced that Play will help you save time for your next Java web application, you’re now ready to start. And don’t hesitate to ask us any question on the "Play Google Group":http://groups.google.com/group/play-framework.
  
-**Thanks a lot!**
+**Thank you!**

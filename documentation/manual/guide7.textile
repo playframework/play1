@@ -140,10 +140,10 @@ public class Post extends Model {
     public User author;
     
     @OneToMany(mappedBy="post", cascade=CascadeType.ALL)
-    public List<Comment> comments = new ArrayList();
+    public List<Comment> comments;
     
-    @ManyToMany(cascade=CascadeType.ALL)
-    public Set<Tag> tags = new HashSet();
+    @ManyToMany(cascade=CascadeType.PERSIST)
+    public Set<Tag> tags;
         
 ...
 
@@ -203,7 +203,7 @@ h2. <a>Better form labels</a>
 
 As you can see the form labels are a little rough. Play uses the Java field name as form label. To customize it, we just have to provide better labels in the **/yabe/conf/messages** file.
 
-p(note). In fact, you can have a separate **messages** file for each language supported by your application. For example, you could put French messages in the **/yabe/conf/messages.fr** file.
+p(note). In fact, you can have a separate **messages** file for each language supported by your application. For example, you could put French messages in the **/yabe/conf/messages.fr** file. You will see how to add language localisation in part 12: "Internationalisation and localisation":guide12.
 
 Add these labels to the **messages** file:
 

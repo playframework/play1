@@ -35,7 +35,7 @@ public class MyJob extends Job<String> {
 
 Here the use of **String** is just for the example, of course a job can return any object type.
 
-h2. <a>Bootstrap job</a>
+h2. <a name="concepts">Bootstrap job</a>
 
 Bootstrap jobs are executed by Play at application start time. To mark your job as a bootstrap job you just need to add the **@OnApplicationStart** annotation.
 
@@ -61,7 +61,7 @@ When you run the application in DEV mode, the application waits for the first HT
  
 When you run in PROD mode, the application will start synchronously with the server start.
 
-h2. <a>Scheduled job</a>
+h2. <a name="scheduling">Scheduled job</a>
 
 Scheduled jobs are run periodically by the framework. You can ask Play to run a job at a specific interval using the **@Every** annotation.
 
@@ -100,7 +100,7 @@ We use the CRON expression parser from the "Quartz library":http://www.opensymph
 
 You don’t need to return a result. Even if you do it, the result will be lost.
 
-h2. <a>Suspendable requests</a>
+h2. <a name="suspendable">Suspendable requests</a>
 
 Play is intended to work with very short requests. It uses a fixed thread pool to process requests queued by the HTTP connector. To get optimum results, the thread pool should be as small as possible. We typically use the optimum value of **nb of processors + 1** to set the default pool size.
 
@@ -126,7 +126,7 @@ bc. public static void generatePDF(Long reportId) {
     renderBinary((Future<InputStream>)request.args.get("task").get());
 }
 
-This action will be called twice. The first one the **request.isNew** tag is set to true. So the action will create a Job and start it immediately. Then it tells Play to wait for the task completion before trying the action again. After the task is completed, Play will call the action again. This time the **request.isNew** tag is set to false. The action will retrieve the job result and send it as the HTTP response.
+This action will be called twice. On the first call the **request.isNew** tag is set to **true**, so the action will create a Job and start it immediately. Then it tells Play to wait for the task completion before trying the action again. After the task is completed, Play will call the action a second time. This time the **request.isNew** tag is set to false. The action will retrieve the job result and send it as the HTTP response.
 
 p(note). **Continuing the discussion**
  

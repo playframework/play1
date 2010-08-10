@@ -10,15 +10,15 @@ A common Java anti-pattern is to keep the model as a set of simple Java Beans an
 
 Martin fowler again has named this anti-pattern "Anemic object model":http://www.martinfowler.com/bliki/AnemicDomainModel.html: 
 
-bq. The basic symptom of an Anemic Domain Model is that at first blush it looks like the real thing. There are objects, many named after the nouns in the domain space, and these objects are connected with the rich relationships and structure that true domain models have. The catch comes when you look at the behavior, and you realize that there is hardly any behavior on these objects, making them little more than bags of getters and setters. Indeed often these models come with design rules that say that you are not to put any domain logic in the the domain objects. Instead there are a set of service objects which capture all the domain logic. These services live on top of the domain model and use the domain model for data.
+bq. The basic symptom of an Anemic Domain Model is that at first blush it looks like the real thing. There are objects, many named after the nouns in the domain space, and these objects are connected with the rich relationships and structure that true domain models have. The catch comes when you look at the behavior, and you realize that there is hardly any behavior on these objects, making them little more than bags of getters and setters. Indeed often these models come with design rules that say that you are not to put any domain logic in the domain objects. Instead there are a set of service objects which capture all the domain logic. These services live on top of the domain model and use the domain model for data.
  
-The fundamental horror of this anti-pattern is that it’s so contrary to the basic idea of object-oriented design; which is to combine data and process together. The anemic domain model is really just a procedural style design, exactly the kind of thing that object bigots like me (and Eric) have been fighting since our early days in Smalltalk. What’s worse, many people think that anemic objects are real objects, and thus completely miss the point of what object-oriented design is all about.
+The fundamental horror of this anti-pattern is that it’s so contrary to the basic idea of object-oriented design, which is to combine data and process together. The anemic domain model is really just a procedural style design, exactly the kind of thing that object bigots like me (and Eric) have been fighting since our early days in Smalltalk. What’s worse, many people think that anemic objects are real objects, and thus completely miss the point of what object-oriented design is all about.
 
-h2. <a>Properties simulation</a>
+h2. <a name="properties">Properties simulation</a>
 
 If you take a look at Play sample applications, you will often see that classes declare public variables. Now if you’re a Java developer with any experience at all, warning sirens are probably clanging like mad at the sight of a public variable. In Java (as in other object-oriented languages), best practice says to make all fields private and provide accessors and mutators. This is to promote encapsulation, a concept critical to object oriented design.
 
-Java has no truly built-in property definition system. It use a convention named Java Beans: a property on a Java object is defined by a couple of getXxx/setXxx methods. If the property is read-only there is only a getter.
+Java has no truly built-in property definition system. It uses a convention named Java Beans: a property on a Java object is defined by a couple of getXxx/setXxx methods. If the property is read-only there is only a getter.
 
 Although the system works well, it’s very tedious to write. For each property you have to declare a private variable and write two methods. Thus, most of time the getter and setter implementation is always the same:
 
@@ -104,7 +104,7 @@ Then if you try to set a property to a negative value an exception will be throw
 
 bc. product.price = -10: // Oops! IllegalArgumentException
 
-Play will always use the defined getter or setter if exists. Look at this code:
+Play will always use the defined getter or setter if it exists. Look at this code:
 
 bc. @Entity
 public class Data extends Model {
@@ -142,10 +142,10 @@ assert data.anotherValue == 0;
 data.anotherValue = 4
 assert data.anotherValue == 8;
 
-Yes it works. And because the enhanced class follow Java Beans convention, when you use your object with a library that expects a JavaBean it will work perfectly!
+Yes it works. And because the enhanced class follows the Java Beans convention, when you use your object with a library that expects a JavaBean it will work perfectly!
 
 
-h2. <a>Setup a database to persist your model objects</a>
+h2. <a name="database">Setup a database to persist your model objects</a>
 
 Most of the time you will need to save the model object data permanently. The most natural way is to save this data into a database. 
 
@@ -174,12 +174,12 @@ You can also specify a JPA dialect with the configuration option:
 
 bc. jpa.dialect=<dialect>
 
-From your code, your can then obtain a **java.sql.Connection** from the **play.db.DB** and use it in the standard way.
+From your code, you can then obtain a **java.sql.Connection** from the **play.db.DB** and use it in the standard way.
 
 bc. Connection conn = DB.getConnection();
 conn.createStatement().execute("select * from products");
 
-h2. <a>Persist your object model with Hibernate</a>
+h2. <a name="hibernate">Persist your object model with Hibernate</a>
 
 You can use Hibernate (through JPA) to persist your Java objects in the Database automatically.
 
@@ -206,7 +206,7 @@ em.createQuery("from Product where price > 50").getResultList();
 Play provides a nice support class to help you to deal with JPA. Just extend **play.db.jpa.Model**.
 
 bc. @Entity
-public class Product extends JPAModel {
+public class Product extends Model {
  
     public String name;
     public Integer price;
@@ -220,7 +220,7 @@ Product product = Product.findById(2L);
 product.save();
 product.delete();
 
-h2. <a>Keep the model stateless</a>
+h2. <a name="stateless">Keep the model stateless</a>
 
 Play is designed to operate in a ‘share nothing’ architecture. The idea is to keep the application completely stateless. By doing this you will allow your application to run on as many server nodes as needed at the same time.
 
@@ -228,9 +228,9 @@ What are the common traps you should avoid to keep the model stateless? **Do not
 
 h4. When you want to keep data across multiple requests you have several choices:
 
-1. If data is small and simple enough, store it into the flash or the session scope. However these scopes are limited to about 4Ko each, and allow only String data.
+1. If data is small and simple enough, store it into the flash or the session scope. However these scopes are limited to about 4 KB each, and allow only String data.
 
-2. Save the data permanently into a durable storage (like a database). For example if you need to create an object with a "wizard" that spans multiple requests:
+2. Save the data permanently into persistent storage (like a database). For example if you need to create an object with a "wizard" that spans multiple requests:
 
 * Initialize and persist the object into the database at the first request.
 * Save the newly-created object’s ID into the flash scope.

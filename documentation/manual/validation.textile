@@ -40,7 +40,7 @@ bc. public static void hello(String name, Integer age) {
      validation.min(age, 0);
      
      if(validation.hasErrors()) {
-         for(Error error : validation.errors) {
+         for(Error error : validation.errors()) {
              System.out.println(error.message());
          }
      }

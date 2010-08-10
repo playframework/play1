@@ -1,16 +1,10 @@
 h1. Play framework documentation
 
-Welcome to the play framework documentation. This documentation is intended for the *1.1 release* and may significantly differs from previous versions of the framework. 
+Welcome to the play framework documentation. This documentation is intended for the *1.1 release* and may significantly differs from previous versions of the framework. Check the "version 1.1 release notes":releasenotes-1.1.
 
 p(note). The 1.1 branch is in active development.
 
 <div id="searchBox"><form action="http://www.google.com/cse" id="cse-search-box"><div><input type="hidden" name="cx" value="002614023023983855063:jn1mu_7bof0" /><input type="hidden" name="ie" value="UTF-8" /><input type="text" name="q" size="31" style="font-size:14px"/> <input type="submit" name="sa" value="Search with google" style="font-size:14px"/></div></form><script type="text/javascript" src="http://www.google.com/coop/cse/brand?form=cse-search-box&lang=en"></script></div>
-
-h2. <a name="a">Hot stuff</a>
-
-We will describe here the new features progress
-
-# "Now the future - supporting Scala":http://www.playframework.org/modules/scala
 
 h2. <a name="started">Getting started</a>
 
@@ -25,6 +19,7 @@ Your first steps with Play and your first 5 minutes of fun.
 # "Your first application — the ‘Hello World’ tutorial":firstapp
 # "Set up your preferred IDE":ide
 # "Sample applications":samples
+# "Live coding script - to practice, and impress your colleagues with":http://www.lunatech-research.fr/archives/2010/06/14/how-demo-play-framework-live-coding-script
 
 
 h2. <a name="guide">Tutorial -- Play guide, a real world app step-by-step</a>
@@ -42,6 +37,7 @@ Learn Play by coding **‘Yet Another Blog Engine’**, from start to finish. Ea
 # "Creating a custom editor area":guide9
 # "Completing the application tests":guide10
 # "Preparing for production":guide11
+# "Internationalisation and localisation":guide12
 
 h2. <a name="manual">The essential documentation</a>
 
@@ -57,11 +53,13 @@ Everything you need to know about Play.
 ## "Routes priority":routes#priority
 ## "Serving static resources":routes#static
 ## "Reverse routing: generate some URL":routes#reverse
+## "Setting content types":routes#content-types
+## "Content negotiation":routes#content-negotiation
 # "Controllers":controllers
 ## "A Controller overview":controllers#overview
 ## "Retrieve HTTP parameters":controllers#params
+## "Advanced HTTP to Java binding":controllers#binding
 ## "Return a result":controllers#result
-## "Action chaining":controllers#chaining
 ## "Interceptions":controllers#interceptions
 ## "Session and Flash scopes":controllers#session
 # "The template engine":templates
@@ -81,14 +79,14 @@ Everything you need to know about Play.
 ## "Suspendable requests":jobs#suspendable
 # "Testing the application":test
 ## "Writing tests":test#writing
-## "Running the tests":test#running
 ## "Fixtures":test#fixtures
-## "Continuous integration":test#continus
+## "Running the tests":test#running
+## "Continuous integration":test#continuous
 # "Deployment options":deployment
-## "Standalone Play application":deployment#aStandalonePlayapplicationa
-## "Running on JEE application servers":deployment#aApplicationserversa
-## "Google Application Engine":deployment#aGoogleApplicationEngineGAEa
-## "Stax cloud hosting platform":deployment#aStaxcloudhostingplatforma"
+## "Standalone Play application":deployment#standalone
+## "Running on JEE application servers":deployment#appservers
+## "Google Application Engine":deployment#gae
+## "Stax cloud hosting platform":deployment#stax
 
 
 h2. <a name="cook">Cookbook</a>
@@ -119,13 +117,17 @@ h2. <a name="references">References</a>
 
 Extended references for day-to-day hacking.
 
+# "The missing cheat sheet":http://download.playframework.org/miscellaneous/play-cheat-sheet.pdf
 # "Browse API documentation":/@api/index.html
 # "Template tags and extensions reference":tags
+# "Java extensions":javaextensions
 
 
 h2. <a name="versionnotes">Version notes</a>
 
 New versions of Play include certain changes.
 
+# "Play 1.1":releasenotes-1.1
+# "Play 1.0.3":releasenotes-1.0.3
 # "Play 1.0.2":releasenotes-1.0.2
 # "Play 1.0.1":releasenotes-1.0.1

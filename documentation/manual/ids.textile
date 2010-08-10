@@ -36,7 +36,7 @@ You can specify the framework ID to use for a particular command directly from t
 
 bc. play run --%production
 
-with these line defined in the **application.conf** file:
+with these lines defined in the **application.conf** file:
 
 bc. application.mode=dev
 %production.application.mode=prod
