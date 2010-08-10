@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import play.Logger;
-import play.Play;
 import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
 import play.exceptions.UnexpectedException;
 

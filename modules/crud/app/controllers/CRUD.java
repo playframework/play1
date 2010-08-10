@@ -33,11 +33,10 @@ public abstract class CRUD extends Controller {
     }
 
     public static void index() {
-        try {
-            render();
-        } catch (TemplateNotFoundException e) {
-            render("CRUD/index.html");
+        if (getControllerClass() == CRUD.class) {
+            forbidden();
         }
+        render("CRUD/index.html");
     }
 
     public static void list(int page, String search, String searchFields, String orderBy, String order) {

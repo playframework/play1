@@ -12,4 +12,3 @@ POST		/${type.controllerName}							${type.controllerClass.name.substring(12)}.c
 POST		/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12)}.save
 DELETE		/${type.controllerName}/{<\d+>id}				${type.controllerClass.name.substring(12)}.delete 
 #{/crud.types}
-GET			/?												CRUD.index
