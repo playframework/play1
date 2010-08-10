@@ -1,10 +1,10 @@
 #{fixture delete:'all' /}
 
 #{selenium 'Test the CRUD module'}
-	
+
 	open('@{CRUD.index()}')
 	assertPath('/admin')
-	
+
 	// Create a company
 	clickAndWait('link=AdminCompany')
 	assertTextPresent('0 AdminCompany')
@@ -18,7 +18,7 @@
 	assertPath('/admin/admincompany')
 	clickAndWait('link=Zenexity')
 	assertTextPresent('Edit Company')
-	
+
 	// Create a project
 	clickAndWait('link=Home')
 	assertPath('/admin')
@@ -34,6 +34,5 @@
 	assertTextPresent('Play belongs to Zenexity')
 	clickAndWait('link=Play belongs to Zenexity')
 	assertTextPresent('Edit Project')
-	
-		
+
 #{/selenium}
