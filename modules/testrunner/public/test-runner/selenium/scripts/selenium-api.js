@@ -1639,6 +1639,7 @@ Selenium.prototype.isTextPresent = function(pattern) {
    * @return boolean true if the pattern matches the text, false otherwise
    */
     var allText = this.browserbot.bodyText();
+    allText = allText.replace(/\s+/g, ' ') // Optimization
 
     var patternMatcher = new PatternMatcher(pattern);
     if (patternMatcher.strategy == PatternMatcher.strategies.glob) {

@@ -1,0 +1,28 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Import the default CRUD routes
+GET			/admin/?					Administration.index
+*			/admin						module:crud
+
+# Login
+GET			/login						Administration.login
+POST		/login						Administration.authenticate
+GET			/logout						Administration.logout 
+
+# RSS
+GET			/all.xml					Application.index(category:'all',format:'xml')
+GET			/{category}/{tagCodes}.xml	Application.index(format:'xml')
+GET			/{category}.xml				Application.index(format:'xml')
+
+# Main
+GET			/search						Application.search
+GET			/jobs/{jobid}				Application.jobdetails
+GET			/{category}/{tagCodes}		Application.index
+GET			/{category}					Application.index
+GET			/							Application.index
+GET			/company/{id}/logo			Application.companyLogo
+
+# Map static resources from the /app/public folder to the /public path
+GET			/public/					staticDir:public

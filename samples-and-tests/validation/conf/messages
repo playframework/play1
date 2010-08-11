@@ -1,0 +1,34 @@
+# Validation messages
+validation.required=%s is required
+validation.minSize=%s length must be longer than %d
+validation.range=%s value must be between %d and %d
+validation.equals=%s must be equals to %s
+validation.email=%s is not a correct email
+validation.isTrue=%s must be checked
+
+# Field names
+username=the username
+firstname=first name
+lastname=last name
+age=age
+password=the password
+passwordConfirm=the password confirmation
+email=email
+emailConfirm=email confirmation
+termsOfUse=terms of use
+
+# Field names for Sample 4
+user.username=the username
+user.firstname=first name
+user.lastname=last name
+user.age=age
+user.password=the password
+user.passwordConfirm=the password confirmation
+user.email=email
+user.emailConfirm=email confirmation
+user.termsOfUse=terms of use
+
+# Field names for Sample 5
+user.information.firstname=first name
+user.information.lastname=last name
+user.information.age=age

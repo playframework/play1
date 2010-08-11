@@ -1,0 +1,25 @@
+#{extends './main.html' /}
+
+<div id="content">
+
+	<div id="joblist">
+		<p id="searchResults">
+			#{if jobs}
+				${jobs.size()} job${jobs.size().pluralize()} match your request.
+			#{/if}
+			#{else}
+				No jobs found.
+			#{/else}
+			&nbsp; <a href="@{Application.index(category, null)}">(Cancel)</a>
+		</p>
+		
+		#{if jobs}
+			#{include 'Application/joblist.html' /}
+		#{/if}
+	</div>
+
+</div>
+
+
+
+

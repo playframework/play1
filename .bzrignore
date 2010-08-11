@@ -108,3 +108,8 @@ modules/*
 build.classes
 modules/crud/nbproject
 nbproject
+samples-and-tests/jobboard/attachments
+samples-and-tests/jobboard/logs
+samples-and-tests/jobboard/test-result
+samples-and-tests/jobboard/tmp
+samples-and-tests/validation/logs

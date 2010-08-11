@@ -1,0 +1,109 @@
+#{extends 'main.html' /}
+
+<h1>Validation sample 7</h1>
+
+#{ifErrors}
+<div class="error">
+    <h2>Oops, please correct these errors</h2>
+</div>
+#{/ifErrors}
+
+#{jQueryValidate class:models.ComplicatedUser.class, key:'user' /}
+
+#{form id:'joinForm', action:@Sample7.handleSubmit()}
+    <fieldset>              
+        <legend>User informations</legend>  
+        
+        #{field 'user.username'}
+        <div class="field">         
+            <label for="${field.id}">Desired username : </label>
+            <input id="${field.id}" type="text" name="${field.name}" value="${field.value}" class="${field.errorClass}" />
+            <span class="error">${field.error}</span>
+        </div>
+        #{/field}
+    
+        #{field 'user.information.firstname'}
+        <div class="field">     
+            <label for="${field.id}">First name : </label>                  
+            <input id="${field.id}" type="text" name="${field.name}" size="30" value="${field.value}" class="${field.errorClass}" />
+            <span class="error">${field.error}</span>
+        </div>
+        #{/field}               
+    
+        #{field 'user.information.lastname'}
+        <div class="field">     
+            <label for="${field.id}">Last name : </label>                   
+            <input id="${field.id}" type="text" name="${field.name}" size="30" value="${field.value}" class="${field.errorClass}" />
+            <span class="error">${field.error}</span>
+        </div>
+        #{/field}           
+    
+        #{field 'user.information.age'}
+        <div class="field">     
+            <label for="${field.id}">Age : </label>                     
+            <input id="${field.id}" type="text" name="${field.name}" size="3" value="${field.value}" class="${field.errorClass}" />
+            <span class="error">${field.error}</span>
+        </div>  
+        #{/field}           
+            
+    </fieldset>
+    <fieldset>              
+        <legend>Password</legend>               
+        
+        #{field 'user.password'}
+        <div class="field">     
+            <label for="${field.id}">Password : </label>                    
+            <input id="${field.id}" type="password" name="${field.name}" value="${field.value}" class="${field.errorClass}" />
+            <span class="error">${field.error}</span>
+        </div>      
+        #{/field}       
+        
+        #{field 'user.passwordConfirm'}
+        <div class="field">     
+            <label for="${field.id}">Confirm password : </label>                    
+            <input id="${field.id}" type="password" name="${field.name}" value="${field.value}" class="${field.errorClass}" />
+            <span class="error">${field.error}</span>
+        </div>
+        #{/field}   
+                    
+    </fieldset>                         
+    <fieldset>              
+        <legend>Email</legend>      
+        
+        #{field 'user.email'}
+        <div class="field">             
+            <label for="${field.id}">Email address : </label>                   
+            <input id="${field.id}" type="text" name="${field.name}" size="30" value="${field.value}" class="${field.errorClass}" />
+            <span class="error">${field.error}</span>
+        </div>
+        #{/field}                   
+        
+        #{field 'user.emailConfirm'}
+        <div class="field">     
+            <label for="${field.id}">Confirm email address : </label>                   
+            <input id="${field.id}" type="text" name="${field.name}" size="30" value="${field.value}" class="${field.errorClass}" />
+            <span class="error">${field.error}</span>
+        </div>
+        #{/field}
+        
+    </fieldset>                         
+    <fieldset>              
+        <legend>Conditions</legend>
+        
+        <div class="infos">
+            Checking this box indicates that you accept terms of use. 
+            If you do not accept these terms, do not use this website : 
+        </div>
+        
+        #{field 'user.termsOfUse'}
+        <div class="field"> 
+            <label for="${field.id}">I accept terms of use : </label>
+            <input id="${field.id}" type="checkbox" value="true" name="user.termsOfUse" #{if field.value}checked="true"#{/if}  class="${field.errorClass}" />
+            <span class="error">#{if field.error}Please accept terms of use#{/if}</span>
+        </div>
+        #{/field}
+        
+    </fieldset>             
+    
+    <input type="submit" class="submit" value="Join !" />
+#{/form}

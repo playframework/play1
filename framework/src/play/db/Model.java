@@ -39,8 +39,8 @@ public interface Model {
         public Class keyType();
         public Object keyValue(Model m);
         public Model findById(Object id);
-        public List<Model> fetch(int offset, int length, String orderBy, String orderDirection, List<String> properties, String keywords);
-        public Long count(List<String> properties, String keywords);
+        public List<Model> fetch(int offset, int length, String orderBy, String orderDirection, List<String> properties, String keywords, String where);
+        public Long count(List<String> properties, String keywords, String where);
         public void deleteAll();
         public List<Model.Property> listProperties();
 

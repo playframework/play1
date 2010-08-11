@@ -386,13 +386,16 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         @SuppressWarnings("unchecked")
-        public List<Model> fetch(int offset, int size, String orderBy, String order, List<String> searchFields, String keywords) {
+        public List<Model> fetch(int offset, int size, String orderBy, String order, List<String> searchFields, String keywords, String where) {
             String q = "from " + clazz.getName();
             if (keywords != null && !keywords.equals("")) {
                 String searchQuery = getSearchQuery(searchFields);
                 if (!searchQuery.equals("")) {
                     q += " where (" + searchQuery + ")";
                 }
+                q += (where != null ? " and " + where : "");
+            } else {
+                q += (where != null ? " where " + where : "");
             }
             if (orderBy == null && order == null) {
                 orderBy = "id";
@@ -414,13 +417,16 @@ public class JPAPlugin extends PlayPlugin {
             return query.getResultList();
         }
 
-        public Long count(List<String> searchFields, String keywords) {
+        public Long count(List<String> searchFields, String keywords, String where) {
             String q = "select count(e) from " + clazz.getName() + " e";
             if (keywords != null && !keywords.equals("")) {
                 String searchQuery = getSearchQuery(searchFields);
                 if (!searchQuery.equals("")) {
                     q += " where (" + searchQuery + ")";
                 }
+                q += (where != null ? " and " + where : "");
+            } else {
+                q += (where != null ? " where " + where : "");
             }
             Query query = JPA.em().createQuery(q);
             if (keywords != null && !keywords.equals("") && q.indexOf("?1") != -1) {

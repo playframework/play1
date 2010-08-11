@@ -1,0 +1,17 @@
+# Entities
+# ~~~~~~~~~~~~~~~~~~~
+title=Title
+company=Company
+postedAt=Creation date
+name=Name
+email=Email address
+password=Password
+website=Website
+label=Label
+code=Code 
+place=Place
+detail=Job description
+category=Category
+tags=Tags list
+online=Job is online
+logo=Logo

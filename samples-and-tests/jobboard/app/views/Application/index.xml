@@ -1,0 +1,22 @@
+<rss version="2.0">
+    <channel>
+        <title>Play, jobs</title>
+        <description>All jobs</description>
+        <link>@@{Application.index()}</link>
+		
+		#{list items:jobs, as:'job'}
+        <item>
+            <title>${job.title}</title>
+            <description>
+				${job.title} at ${job.company} 
+				#{if job.place}
+					- ${job.place}
+				#{/if}
+			</description>
+            <pubDate>${job.postedAt}</pubDate>
+            <link>@@{Application.jobdetails(job.id)}</link>
+        </item>
+		#{/list}
+		
+    </channel>
+</rss>

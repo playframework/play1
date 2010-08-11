@@ -1,0 +1,19 @@
+#{extends 'CRUD/layout.html' /}
+
+<div id="crudBlank" class="${type.name}">
+	
+	<h2 id="crudBlankTitle">&{'crud.blank.title', type.modelName}</h2>
+	
+	<div class="objectForm">
+	#{form @create()}
+		#{crud.form fields:superadmin ? ['title', 'place', 'detail', 'category', 'company', 'tags'] : ['title', 'place', 'detail', 'category', 'tags']}	
+		#{/crud.form}
+		<p class="crudButtons">
+			<input type="submit" name="_save" value="&{'crud.save', type.modelName}" />
+			<input type="submit" name="_saveAndContinue" value="&{'crud.saveAndContinue', type.modelName}" />
+			<input type="submit" name="_saveAndAddAnother" value="&{'crud.saveAndAddAnother', type.modelName}" />
+		</p>
+	#{/form}
+	</div>
+
+</div>

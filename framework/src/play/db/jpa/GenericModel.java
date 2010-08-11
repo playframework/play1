@@ -1,5 +1,6 @@
 package play.db.jpa;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
@@ -27,6 +28,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
+import javax.persistence.PostUpdate;
 
 /**
  * A super class for JPA entities 
@@ -119,6 +123,27 @@ public class GenericModel extends JPABase {
                         }
                     }
                 }
+                // ----- THIS CODE IS DEPRECATED AND WILL BE REMOVED IN NEXT VERSION -----
+                if (field.getType().equals(FileAttachment.class) && Params.current() != null) {
+                    FileAttachment fileAttachment = ((FileAttachment) field.get(o));
+                    if (fileAttachment == null) {
+                        fileAttachment = new FileAttachment(o, field.getName());
+                        bw.set(field.getName(), o, fileAttachment);
+                    }
+                    File file = Params.current().get(name + "." + field.getName(), File.class);
+                    if (file != null && file.exists() && file.length() > 0) {
+                        fileAttachment.set(Params.current().get(name + "." + field.getName(), File.class));
+                        fileAttachment.filename = file.getName();
+                    } else {
+                        String df = Params.current().get(name + "." + field.getName() + "_delete_", String.class);
+                        if (df != null && df.equals("true")) {
+                            fileAttachment.delete();
+                            bw.set(field.getName(), o, null);
+                        }
+                    }
+                    params.remove(name + "." + field.getName());
+                }
+                // -----
             }
             bw.bind(name, o.getClass(), params, "", o, annotations);
             return (T) o;
@@ -347,4 +372,55 @@ public class GenericModel extends JPABase {
             }
         }
     }
+
+    // ----- THIS CODE IS DEPRECATED AND WILL BE REMOVED IN NEXT VERSIONs
+    @PostLoad
+    public void _setupAttachment() {
+        Class c = this.getClass();
+        while (!c.equals(Object.class)) {
+            for (Field field : c.getDeclaredFields()) {
+                if (FileAttachment.class.isAssignableFrom(field.getType())) {
+                    try {
+                        field.setAccessible(true);
+                        FileAttachment attachment = (FileAttachment) field.get(this);
+                        if (attachment != null) {
+                            attachment.model = this;
+                            attachment.name = field.getName();
+                        } else {
+                            attachment = new FileAttachment();
+                            attachment.model = this;
+                            attachment.name = field.getName();
+                            field.set(this, attachment);
+                        }
+                    } catch (Exception ex) {
+                        throw new UnexpectedException(ex);
+                    }
+                }
+            }
+        }
+    }
+
+    @PostPersist
+    @PostUpdate
+    public void _saveAttachment() {
+        Class c = this.getClass();
+        while (!c.equals(Object.class)) {
+            for (Field field : c.getDeclaredFields()) {
+                if (field.getType().equals(FileAttachment.class)) {
+                    try {
+                        field.setAccessible(true);
+                        FileAttachment attachment = (FileAttachment) field.get(this);
+                        if (attachment != null) {
+                            attachment.model = this;
+                            attachment.name = field.getName();
+                            attachment.save();
+                        }
+                    } catch (Exception ex) {
+                        throw new UnexpectedException(ex);
+                    }
+                }
+            }
+        }
+    }
+    // -----
 }

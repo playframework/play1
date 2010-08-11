@@ -1,5 +1,6 @@
 package play.modules.testrunner;
 
+import com.gargoylesoftware.htmlunit.AlertHandler;
 import com.gargoylesoftware.htmlunit.DefaultPageCreator;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -56,6 +57,11 @@ public class FirePhoque {
             }
         });
         firephoque.setThrowExceptionOnFailingStatusCode(false);
+        firephoque.setAlertHandler(new AlertHandler() {
+            public void handleAlert(Page page, String string) {
+                System.out.println(" --> alert: " + string);
+            }
+        });
 
         // Go!
         int maxLength = 0;

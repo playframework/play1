@@ -60,12 +60,24 @@ public abstract class CRUD extends Controller {
         notFoundIfNull(type);
         Model object = type.findById(id);
         notFoundIfNull(object);
-        Model.BinaryField attachment = (Model.BinaryField) object.getClass().getField(field).get(object);
-        if (attachment == null || !attachment.exists()) {
-            notFound();
+        Object att = object.getClass().getField(field).get(object);
+        if(att instanceof Model.BinaryField) {
+            Model.BinaryField attachment = (Model.BinaryField)att;
+            if (attachment == null || !attachment.exists()) {
+                notFound();
+            }
+            response.contentType = attachment.type();
+            renderBinary(attachment.get(), attachment.length());
         }
-        response.contentType = attachment.type();
-        renderBinary(attachment.get(), attachment.length());
+        // DEPRECATED
+        if(att instanceof play.db.jpa.FileAttachment) {
+            play.db.jpa.FileAttachment attachment = (play.db.jpa.FileAttachment)att;
+            if (attachment == null || !attachment.exists()) {
+                notFound();
+            }
+            renderBinary(attachment.get(), attachment.filename);
+        }
+        notFound();
     }
 
     public static void save(String id) throws Exception {
@@ -90,13 +102,16 @@ public abstract class CRUD extends Controller {
         redirect(request.controller + ".show", object._key());
     }
 
-    public static void blank() {
+    public static void blank() throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
+        Constructor<?> constructor = type.entityClass.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        Model object = (Model) constructor.newInstance();
         try {
-            render(type);
+            render(type, object);
         } catch (TemplateNotFoundException e) {
-            render("CRUD/blank.html", type);
+            render("CRUD/blank.html", type, object);
         }
     }
 
@@ -111,9 +126,9 @@ public abstract class CRUD extends Controller {
         if (validation.hasErrors()) {
             renderArgs.put("error", Messages.get("crud.hasErrors"));
             try {
-                render(request.controller.replace(".", "/") + "/blank.html", type);
+                render(request.controller.replace(".", "/") + "/blank.html", type, object);
             } catch (TemplateNotFoundException e) {
-                render("CRUD/blank.html", type);
+                render("CRUD/blank.html", type, object);
             }
         }
         object._save();
@@ -229,12 +244,12 @@ public abstract class CRUD extends Controller {
         }
 
         public Long count(String search, String searchFields, String where) {
-            return Model.Manager.factoryFor(entityClass).count(searchFields == null ? new ArrayList<String>() : Arrays.asList(searchFields.split("[ ]")), search);
+            return Model.Manager.factoryFor(entityClass).count(searchFields == null ? new ArrayList<String>() : Arrays.asList(searchFields.split("[ ]")), search, where);
         }
 
         @SuppressWarnings("unchecked")
         public List<Model> findPage(int page, String search, String searchFields, String orderBy, String order, String where) {
-            return Model.Manager.factoryFor(entityClass).fetch((page - 1) * getPageSize(), getPageSize(), orderBy, order, searchFields == null ? new ArrayList<String>() : Arrays.asList(searchFields.split("[ ]")), search);
+            return Model.Manager.factoryFor(entityClass).fetch((page - 1) * getPageSize(), getPageSize(), orderBy, order, searchFields == null ? new ArrayList<String>() : Arrays.asList(searchFields.split("[ ]")), search, where);
         }
 
         public Model findById(Object id) {
@@ -309,7 +324,7 @@ public abstract class CRUD extends Controller {
                 if (property.isMultiple) {
                     multiple = true;
                 }
-                if(Model.BinaryField.class.isAssignableFrom(field.getType())) {
+                if(Model.BinaryField.class.isAssignableFrom(field.getType()) || /** DEPRECATED **/ play.db.jpa.FileAttachment.class.isAssignableFrom(field.getType())) {
                     type = "binary";
                 }
                 if (field.getType().isEnum()) {

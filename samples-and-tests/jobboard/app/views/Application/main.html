@@ -1,0 +1,14 @@
+#{extends 'main.html' /}
+
+#{if request.actionMethod != 'jobdetails'}
+	<div id="search">
+		<form action="@{Application.search()}" method="GET" accept-charset="utf-8">
+			<label for="keywords">Find a job</label>
+			<input type="text" name="by" value="${by}" id="keywords" />
+			&nbsp;
+			<input type="submit" value="Search" id="searchButton" />
+		</form>
+	</div>	
+#{/if}
+
+#{doLayout /}

@@ -1,0 +1,38 @@
+#{extends 'Application/main.html' /}
+<div id="detail">
+	
+	<h2>
+		${job.title}
+		#{if job.place}
+			- <span class="place">${job.place}</span>
+		#{/if}
+	</h2>
+	
+	#{if job.company.logo?.get()}
+		<div id="companyLogo">
+			<img src="@{Application.companyLogo(job.company.id)}" />
+		</div>
+	#{/if}
+	#{if job.company.website}
+		<p>
+			<a href="${job.company.website}">${job.company.website}</a>
+		</p>
+	#{/if}
+	
+	#{if job.tags}
+		<div id="taglist">
+			Tagged 
+			#{list items:job.tags, as:'tag'}
+				<span class="tag">${tag}${tag_isLast ? '' : ','}</span>
+			#{/list}
+		</div>
+	#{/if}
+	
+	<div id="annonce">
+		${new net.sf.textile4j.Textile().process(job.detail)}
+	</div>
+	
+	<a href="@{Application.index()}">Back to jobs list</a>
+
+</div>
+
