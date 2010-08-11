@@ -108,10 +108,9 @@ def override(f, t):
 def load_module_list():
 	try:
 		url = '%s/modules' % modules_server
-		proxy_handler = urllib2.ProxyHandler({})
 		req = urllib2.Request(url)
 		req.add_header('Accept', 'application/json')
-		opener = urllib2.build_opener(proxy_handler)
+		opener = urllib2.build_opener()
 		result = opener.open(req)
 		return json.loads(result.read())
 	except urllib2.HTTPError, e:

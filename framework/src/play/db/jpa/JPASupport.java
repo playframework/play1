@@ -94,7 +94,7 @@ public class JPASupport implements Serializable {
                             l = new HashSet();
                         }
                         String[] ids = params.get(name + "." + field.getName() + "@id");
-                        if(ids == null) {
+                        if (ids == null) {
                             ids = params.get(name + "." + field.getName() + ".id");
                         }
                         if (ids != null) {
@@ -108,15 +108,15 @@ public class JPASupport implements Serializable {
                                 q.setParameter(1, Binder.directBind(_id, findKeyType(Play.classloader.loadClass(relation))));
                                 try {
                                     l.add(q.getSingleResult());
-                                } catch(NoResultException e) {
-                                    Validation.addError(name+"."+field.getName(), "validation.notFound", _id);
+                                } catch (NoResultException e) {
+                                    Validation.addError(name + "." + field.getName(), "validation.notFound", _id);
                                 }
                             }
                             bw.set(field.getName(), o, l);
-                        }                        
+                        }
                     } else {
                         String[] ids = params.get(name + "." + field.getName() + "@id");
-                        if(ids == null) {
+                        if (ids == null) {
                             ids = params.get(name + "." + field.getName() + ".id");
                         }
                         if (ids != null && ids.length > 0 && !ids[0].equals("")) {
@@ -127,11 +127,11 @@ public class JPASupport implements Serializable {
                             try {
                                 Object to = q.getSingleResult();
                                 bw.set(field.getName(), o, to);
-                            } catch(NoResultException e) {
-                                Validation.addError(name+"."+field.getName(), "validation.notFound", ids[0]);
-                            }                            
-                        } else if(ids != null && ids.length > 0 && ids[0].equals("")) {
-                            bw.set(field.getName(), o , null);
+                            } catch (NoResultException e) {
+                                Validation.addError(name + "." + field.getName(), "validation.notFound", ids[0]);
+                            }
+                        } else if (ids != null && ids.length > 0 && ids[0].equals("")) {
+                            bw.set(field.getName(), o, null);
                             params.remove(name + "." + field.getName() + ".id");
                             params.remove(name + "." + field.getName() + "@id");
                         }
@@ -159,7 +159,7 @@ public class JPASupport implements Serializable {
             }
             // Then bind
             bw.bind(name, o.getClass(), params, "", o);
-            
+
             return (T) o;
         } catch (Exception e) {
             throw new UnexpectedException(e);
@@ -167,7 +167,7 @@ public class JPASupport implements Serializable {
     }
 
     public boolean validateAndSave() {
-        if(Validation.current().valid(this).ok) {
+        if (Validation.current().valid(this).ok) {
             save();
             return true;
         }
@@ -213,7 +213,7 @@ public class JPASupport implements Serializable {
             return;
         } else {
             avoidCascadeSaveLoops.get().add(this);
-            if(willBeSaved) {
+            if (willBeSaved) {
                 PlayPlugin.postEvent("JPASupport.objectUpdated", this);
             }
         }
@@ -518,22 +518,21 @@ public class JPASupport implements Serializable {
             Throwable best = e;
             Throwable cause = e;
             int it = 0;
-            while((cause = cause.getCause()) != null && it++ < 10) {
-                if(cause == null) {
+            while ((cause = cause.getCause()) != null && it++ < 10) {
+                if (cause == null) {
                     break;
                 }
-                if(cause instanceof ClassCastException) {
+                if (cause instanceof ClassCastException) {
                     best = cause;
                     break;
                 }
-                if(cause instanceof SQLException) {
+                if (cause instanceof SQLException) {
                     best = cause;
                     break;
                 }
             }
             return best;
         }
-
     }
 
     /**
@@ -662,40 +661,46 @@ public class JPASupport implements Serializable {
 
     // File attachments
     public void setupAttachment() {
-        for (Field field : getClass().getDeclaredFields()) {
-            if (FileAttachment.class.isAssignableFrom(field.getType())) {
-                try {
-                	field.setAccessible(true);
-                    FileAttachment attachment = (FileAttachment) field.get(this);
-                    if (attachment != null) {
-                        attachment.model = this;
-                        attachment.name = field.getName();
-                    } else {
-                        attachment = new FileAttachment();
-                        attachment.model = this;
-                        attachment.name = field.getName();
-                        field.set(this, attachment);
+        Class c = this.getClass();
+        while (!c.equals(Object.class)) {
+            for (Field field : c.getDeclaredFields()) {
+                if (FileAttachment.class.isAssignableFrom(field.getType())) {
+                    try {
+                        field.setAccessible(true);
+                        FileAttachment attachment = (FileAttachment) field.get(this);
+                        if (attachment != null) {
+                            attachment.model = this;
+                            attachment.name = field.getName();
+                        } else {
+                            attachment = new FileAttachment();
+                            attachment.model = this;
+                            attachment.name = field.getName();
+                            field.set(this, attachment);
+                        }
+                    } catch (Exception ex) {
+                        throw new UnexpectedException(ex);
                     }
-                } catch (Exception ex) {
-                    throw new UnexpectedException(ex);
                 }
             }
         }
     }
 
     public void saveAttachment() {
-        for (Field field : getClass().getDeclaredFields()) {
-            if (field.getType().equals(FileAttachment.class)) {
-                try {
-                	field.setAccessible(true);
-                    FileAttachment attachment = (FileAttachment) field.get(this);
-                    if (attachment != null) {
-                        attachment.model = this;
-                        attachment.name = field.getName();
-                        attachment.save();
+        Class c = this.getClass();
+        while (!c.equals(Object.class)) {
+            for (Field field : c.getDeclaredFields()) {
+                if (field.getType().equals(FileAttachment.class)) {
+                    try {
+                        field.setAccessible(true);
+                        FileAttachment attachment = (FileAttachment) field.get(this);
+                        if (attachment != null) {
+                            attachment.model = this;
+                            attachment.name = field.getName();
+                            attachment.save();
+                        }
+                    } catch (Exception ex) {
+                        throw new UnexpectedException(ex);
                     }
-                } catch (Exception ex) {
-                    throw new UnexpectedException(ex);
                 }
             }
         }
@@ -745,6 +750,7 @@ public class JPASupport implements Serializable {
         return key;
     }
     // Events
+
     @PostLoad
     public void afterLoad() {
         setupAttachment();
@@ -755,5 +761,4 @@ public class JPASupport implements Serializable {
     public void afterSave() {
         saveAttachment();
     }
-
 }
