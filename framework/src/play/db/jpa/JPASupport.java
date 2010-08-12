@@ -682,6 +682,7 @@ public class JPASupport implements Serializable {
                     }
                 }
             }
+            c = c.getSuperclass();
         }
     }
 
@@ -703,6 +704,7 @@ public class JPASupport implements Serializable {
                     }
                 }
             }
+            c = c.getSuperclass();
         }
     }
 
