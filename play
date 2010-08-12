@@ -74,6 +74,9 @@ try:
     for a in remaining_args:
         if a.find('--%') == 0:
             play_env["id"] = a[3:]
+            print "Found id: " + play_env["id"]
+    if remaining_args.count('--%%%s' % play_env["id"]) == 1:
+        remaining_args.remove('--%%%s' % play_env["id"])
 
     if play_command == 'test' or play_command == 'auto-test':
         play_env["id"] = 'test'

@@ -164,18 +164,17 @@ def test(app, args):
         sys.exit(-1)
     print
 
-
 def autotest(app, args):
     app.check()
     print "~ Running in test mode"
     print "~ Ctrl+C to stop"
     print "~ "
-    
+
     print "~ Deleting %s" % os.path.normpath(os.path.join(app.path, 'tmp'))
     if os.path.exists(os.path.join(app.path, 'tmp')):
         shutil.rmtree(os.path.join(app.path, 'tmp'))
     print "~"
-    
+
     # Kill if exists
     http_port = app.readConf('http.port')
     try:
@@ -184,7 +183,7 @@ def autotest(app, args):
         opener.open('http://localhost:%s/@kill' % http_port);
     except Exception, e:
         pass
-    
+
     # Run app
     test_result = os.path.join(app.path, 'test-result')
     if os.path.exists(test_result):
@@ -209,10 +208,10 @@ def autotest(app, args):
             if line.find('Listening for HTTP') > -1:
                 soutint.close()
                 break
-    
+
     # Run FirePhoque
     print "~"
-    
+
     fpcp = [os.path.join(app.play_env["basedir"], 'modules/testrunner/lib/play-testrunner.jar')]
     fpcp_libs = os.path.join(app.play_env["basedir"], 'modules/testrunner/firephoque')
     for jar in os.listdir(fpcp_libs):
