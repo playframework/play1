@@ -15,7 +15,6 @@ import java.util.concurrent.Executors;
 
 public class Server {
 
-
     public Server() {
         final Properties p = Play.configuration;
         int httpPort = Integer.parseInt(p.getProperty("http.port", "9000"));
@@ -37,12 +36,12 @@ public class Server {
 
         // Setup the http server for netty
         ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
-                    Executors.newCachedThreadPool(), Executors.newCachedThreadPool()));
+            Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
+        );
 
         bootstrap.setPipelineFactory(new HttpServerPipelineFactory());
         bootstrap.bind(new InetSocketAddress(address, httpPort));
         bootstrap.setOption("child.tcpNoDelay", true);
-        bootstrap.setOption("child.keepAlive", false);
 
         try {
             if (Play.mode == Mode.DEV) {
@@ -66,7 +65,6 @@ public class Server {
 
     }
 
-
     public static void main(String[] args) throws Exception {
         File root = new File(System.getProperty("application.path"));
         Play.init(root, System.getProperty("play.id", ""));
@@ -76,5 +74,4 @@ public class Server {
             Logger.info("Done.");
         }
     }
-
 }

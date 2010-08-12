@@ -120,7 +120,7 @@ public class Validation {
     }
 
     public static void clear() {
-        current.get().clear();;
+        current.get().errors.clear();;
     }
     
     // ~~~~ Integration helper

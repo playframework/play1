@@ -397,6 +397,7 @@ public class GenericModel extends JPABase {
                     }
                 }
             }
+            c = c.getSuperclass();
         }
     }
 
@@ -420,6 +421,7 @@ public class GenericModel extends JPABase {
                     }
                 }
             }
+            c = c.getSuperclass();
         }
     }
     // -----
