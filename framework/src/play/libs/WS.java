@@ -415,6 +415,9 @@ public class WS extends PlayPlugin {
                     throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
                 }
                 builder.setBody(this.body);
+                if(this.mimeType != null) {
+                    builder.setHeader("Content-Type", this.mimeType);
+                }
             }
         }
 
