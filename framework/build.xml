@@ -15,8 +15,11 @@
         <delete dir="tests-results" />
         <delete dir="tests-tmp" />
         <delete file="play.jar" /> 
-        <delete file="src/play/version" /> 
+        <delete file="src/play/version" />  
         <delete includeemptydirs="true">
+            <fileset dir="pym">
+                <include name="**/*.pyc"/> 
+            </fileset>
             <fileset dir="../samples-and-tests">
                 <include name="**/test-result/**"/> 
                 <include name="**/tmp/**"/> 
@@ -291,7 +294,7 @@
     <target name="package" depends="clean,version,jar,javadoc">
         <mkdir dir="dist" /> 
         <zip destfile="dist/play-${version}.zip" comment="Play! ${version}" update="false">
-            <zipfileset prefix="play-${version}" dir=".." includes="**/*" excludes="hs_err*,.*,.*/*,framework/dist/**,id,play,nbproject/**,**/.bzr/**,*.bzrignore,support/textmate/**,framework/classes/**,framework/tests-results/**,samples-and-tests/**/test-result,samples-and-tests/**/tmp,samples-and-tests/**/db,samples-and-tests/**/attachments" />   
+            <zipfileset prefix="play-${version}" dir=".." includes="**/*" excludes="**/*.pyc,hs_err*,.*,.*/*,framework/dist/**,id,play,nbproject/**,**/.bzr/**,*.bzrignore,support/textmate/**,framework/classes/**,framework/tests-results/**,samples-and-tests/**/test-result,samples-and-tests/**/tmp,samples-and-tests/**/db,samples-and-tests/**/attachments" />   
             <zipfileset prefix="play-${version}" dir=".." includes="play" filemode="777" />
         </zip>
     </target>
