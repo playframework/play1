@@ -189,6 +189,10 @@ public class Scope {
             return data.get("___ID");
         }
 
+        public Map<String, String> all() {
+            return data;
+        }
+
         public String getAuthenticityToken() {
             return Crypto.sign(getId());
         }
