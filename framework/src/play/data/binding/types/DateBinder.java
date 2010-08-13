@@ -22,13 +22,17 @@ public class DateBinder implements SupportedType<Date> {
         }
 
         try {
-            return new SimpleDateFormat(I18N.getDateFormat()).parse(value);
+            SimpleDateFormat sdf = new SimpleDateFormat(I18N.getDateFormat());
+            sdf.setLenient(false);
+            return sdf.parse(value);
         } catch (ParseException e) {
              //
         }
 
         try {
-            return new SimpleDateFormat(ISO).parse(value);
+            SimpleDateFormat sdf = new SimpleDateFormat(ISO);
+            sdf.setLenient(false);
+            return sdf.parse(value);
         } catch(Exception e) {
             throw new IllegalArgumentException("Cannot convert [" + value + "] to a Date: " + e.toString());
         }
