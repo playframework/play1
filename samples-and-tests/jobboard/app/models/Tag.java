@@ -23,7 +23,7 @@ public class Tag extends Model {
     }
 
     public static Tag findByCode(String code) {
-        return Tag.find("byCode", code).one();
+        return Tag.find("byCode", code).first();
     }
 
     public String toString() {
