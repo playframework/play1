@@ -72,9 +72,9 @@ public class Binder {
     @SuppressWarnings("unchecked")
     static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String prefix, String[] profiles) {
         try {
-            Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.toString(annotations) + "] isComposite [" + isComposite(name + prefix, params.keySet()) + "]");
+            Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.toString(annotations) + "] isComposite [" + isComposite(name + prefix, params) + "]");
 
-            if (isComposite(name + prefix, params.keySet())) {
+            if (isComposite(name + prefix, params)) {
                 BeanWrapper beanWrapper = getBeanWrapper(clazz);
                 return beanWrapper.bind(name, type, params, prefix, annotations);
             }
@@ -151,7 +151,7 @@ public class Binder {
                         tP.put("key", new String[]{key});
                         Object oKey = bindInternal("key", keyClass, keyClass, annotations, tP, "", value);
                         if (oKey != MISSING) {
-                            if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
+                            if (isComposite(name + prefix + "[" + key + "]", params)) {
                                 BeanWrapper beanWrapper = getBeanWrapper(valueClass);
                                 Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]", annotations);
                                 r.put(oKey, oValue);
@@ -199,7 +199,7 @@ public class Binder {
                                 while (((List<?>) r).size() <= key) {
                                     ((List<?>) r).add(null);
                                 }
-                                if (isComposite(name + prefix + "[" + key + "]", params.keySet())) {
+                                if (isComposite(name + prefix + "[" + key + "]", params)) {
                                     BeanWrapper beanWrapper = getBeanWrapper(componentClass);
                                     Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]", annotations);
                                     ((List) r).set(key, oValue);
@@ -336,9 +336,9 @@ public class Binder {
         return result;
     }
 
-    static boolean isComposite(String name, Set<String> pNames) {
-        for (String pName : pNames) {
-            if (pName.startsWith(name + ".")) {
+    static boolean isComposite(String name, Map<String, String[]> params) {
+        for (String pName : params.keySet()) {
+            if (pName.startsWith(name + ".") && params.get(pName) != null && params.get(pName).length > 0) {
                 return true;
             }
         }

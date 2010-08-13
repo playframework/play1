@@ -1,0 +1,9 @@
+Referenced(r1):
+  name: Test1
+
+Base(b1):
+  name: Base1
+  ref: r1
+
+Base(b2):
+  name: Base2

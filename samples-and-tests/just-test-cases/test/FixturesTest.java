@@ -8,6 +8,8 @@ import models.vendor.Vendor;
 import models.vendor.tag.AreaTag;
 import models.vendor.tag.FunctionTag;
 import models.vendor.tag.Tag;
+import models.Base;
+import models.Referenced;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +53,22 @@ public class FixturesTest extends UnitTest {
             throw new RuntimeException(e);
         }
 
+    }
+    
+    @Test
+    public void checkEmptyReferences() {
+        Fixtures.load("refs.yml");        
+        assertEquals(1, Referenced.count());
+        assertEquals(2, Base.count());
+        
+        Base b1 = Base.find("byName", "Base1").first();
+        Referenced r = Referenced.all().first();
+        assertNotNull(b1);
+        assertNotNull(b1.ref);
+        assertEquals(r, b1.ref);
+        Base b2 = Base.find("byName", "Base2").first();
+        assertNotNull(b2);
+        assertNull(b2.ref);
     }
 
 }

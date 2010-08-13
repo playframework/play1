@@ -221,5 +221,12 @@ public class BeanWrapper {
         Annotation[] getAnnotations() {
             return annotations;
         }
+
+        @Override
+        public String toString() {
+            return type + "." + name;
+        }
+
+
     }
 }
