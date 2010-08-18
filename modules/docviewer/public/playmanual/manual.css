@@ -386,15 +386,15 @@ table {
 }
 
 td, th {
-    padding: 10px;
-       margin-left: auto;
+    padding: 10px 5px;
+    margin-left: auto;
     margin-right: auto;
     border: 1px solid silver;
-    text-align: center;
 }
 
 th {
     font-weight: bold;
+    text-align: center;
 }
 
 
