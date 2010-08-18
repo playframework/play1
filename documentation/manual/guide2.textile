@@ -402,6 +402,8 @@ public void fullTest() {
     assertEquals(4, Comment.count());
 }
 
+p(note). You can read more about Play and YAML in the "YAML manual page":yaml.
+
 h2. <a>Save your work</a>
 
 We have now finished a huge part of the blog engine. Now that we have created and tested all these things, we can start to develop the web application itself.

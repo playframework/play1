@@ -108,6 +108,8 @@ public void setUp() {
     Fixtures.load("data.yml");
 }
 
+p(note). You can read more about Play and YAML in the "YAML manual page":yaml.
+
 For Selenium tests, you can use the **#{fixture /}** tag:
 
 bc. #{fixture delete:'all', load:'data.yml' /}
