@@ -105,6 +105,7 @@ Tips about everything and anything.
 # "Sending e-mail":emails
 # "OpenID integration":openid
 # "Doing Ajax with JQuery":ajax
+# "YAML":yaml
 
 h2. <a name="modules">Distribution Modules</a>
 
