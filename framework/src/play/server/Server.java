@@ -34,16 +34,14 @@ public class Server {
             System.exit(-1);
         }
 
-        // Setup the http server for netty
         ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
             Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
         );
+	try {
+             bootstrap.setPipelineFactory(new HttpServerPipelineFactory());
+             bootstrap.bind(new InetSocketAddress(address, httpPort));
+             bootstrap.setOption("child.tcpNoDelay", true);
 
-        bootstrap.setPipelineFactory(new HttpServerPipelineFactory());
-        bootstrap.bind(new InetSocketAddress(address, httpPort));
-        bootstrap.setOption("child.tcpNoDelay", true);
-
-        try {
             if (Play.mode == Mode.DEV) {
                 if (address == null) {
                     Logger.info("Listening for HTTP on port %s (Waiting a first request to start) ...", httpPort);

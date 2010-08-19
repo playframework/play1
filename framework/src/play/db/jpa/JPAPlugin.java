@@ -493,9 +493,9 @@ public class JPAPlugin extends PlayPlugin {
                     c = c.getSuperclass();
                 }
             } catch (Exception e) {
-                throw new UnexpectedException("Error while determining the object @Id for an object of type " + c);
+                throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz);
             }
-            return null;
+            throw new UnexpectedException("Cannot get the object @Id for an object of type " + clazz);
         }
 
         String getSearchQuery(List<String> searchFields) {
