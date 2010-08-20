@@ -38,6 +38,14 @@ public class Utils {
         return (values == null) ? "" : join((List<Annotation>)Arrays.asList(values), separator);
     }
 
+    /**
+     * @deprecated Use Utils.join(values, " ");
+     */
+    @Deprecated
+    public static String toString(Annotation[] values) {
+        return join(values, " ");
+    }
+
     public static String open(String file, Integer line) {
         if (Play.configuration.containsKey("play.editor")) {
             return String.format(Play.configuration.getProperty("play.editor"), Play.getFile(file).getAbsolutePath(), line);
