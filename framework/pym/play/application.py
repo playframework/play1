@@ -250,13 +250,13 @@ class PlayConfParser:
     def getAllKeys(self, query):
         result = []
         for (key, value) in self.entries.items():
-            if key.startswith(query) or key.startswith('%' + self.id + '.' + key):
+            if key.startswith(query) or key.startswith('%' + self.id + '.' + query):
                 result.append(key)
         return result
 
     def getAll(self, query):
         result = []
         for (key, value) in self.entries.items():
-            if key.startswith(query) or key.startswith('%' + self.id + '.' + key):
+            if key.startswith(query) or key.startswith('%' + self.id + '.' + query):
                 result.append(value)
         return result
