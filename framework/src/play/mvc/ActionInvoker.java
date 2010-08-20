@@ -453,14 +453,14 @@ public class ActionInvoker {
         Object[] rArgs = new Object[method.getParameterTypes().length];
         for (int i = 0; i < method.getParameterTypes().length; i++) {
 
-            Class type = method.getParameterTypes()[i];
+            Class<?> type = method.getParameterTypes()[i];
             Map<String, String[]> params = new HashMap<String, String[]>();
             if (type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {
                 params.put(paramsNames[i], Scope.Params.current().getAll(paramsNames[i]));
             } else {
                 params.putAll(Scope.Params.current().all());
             }
-            Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.toString(method.getParameterAnnotations()[i]) + "]");
+            Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.join(method.getParameterAnnotations()[i], " ") + "]");
 
             rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params, o, method, i + 1);
         }

@@ -4,11 +4,14 @@ import java.lang.annotation.Annotation;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+
 import play.Play;
 
 /**
@@ -16,14 +19,23 @@ import play.Play;
  */
 public class Utils {
 
-    public static String toString(Annotation[] annotations) {
-        String toReturn = "";
-        if (annotations != null) {
-            for (Annotation annotation : annotations) {
-                toReturn += annotation.toString() + " ";
-            }
+    public static <T> String join(Iterable<T> values, String separator) {
+        if (values == null) return "";
+        Iterator<T> iter = values.iterator();
+        if (!iter.hasNext()) return "";
+        StringBuffer toReturn = new StringBuffer(String.valueOf(iter.next()));
+        while (iter.hasNext()) {
+            toReturn.append(separator + String.valueOf(iter.next()));
         }
-        return toReturn;
+        return toReturn.toString();
+    }
+
+    public static String join(String[] values, String separator) {
+        return (values == null) ? "" : join((List<String>)Arrays.asList(values), separator);
+    }
+
+    public static String join(Annotation[] values, String separator) {
+        return (values == null) ? "" : join((List<Annotation>)Arrays.asList(values), separator);
     }
 
     public static String open(String file, Integer line) {

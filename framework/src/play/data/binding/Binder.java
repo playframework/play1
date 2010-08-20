@@ -56,23 +56,10 @@ public class Binder {
     public final static Object MISSING = new Object();
     public final static Object NO_BINDING = new Object();
 
-    // TODO move me to Utils
-
-    private static String toString(String[] values) {
-        if (values == null) {
-            return "";
-        }
-        StringBuffer toReturn = new StringBuffer();
-        for (String value: values) {
-            toReturn.append("," + value);
-        }
-        return toReturn.substring(1);
-    }
-
     @SuppressWarnings("unchecked")
     static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String prefix, String[] profiles) {
         try {
-            Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.toString(annotations) + "] isComposite [" + isComposite(name + prefix, params) + "]");
+            Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] isComposite [" + isComposite(name + prefix, params) + "]");
 
             if (isComposite(name + prefix, params)) {
                 BeanWrapper beanWrapper = getBeanWrapper(clazz);
@@ -82,7 +69,7 @@ public class Binder {
 
             String[] value = params.get(name + prefix);
             Logger.trace("bindInternal: value [" + value + "]");
-            Logger.trace("bindInternal: profile [" + toString(profiles) + "]");
+            Logger.trace("bindInternal: profile [" + Utils.join(profiles, ",") + "]");
             // Let see if we have a BindAs annotation and a separator. If so, we need to split the values
             // Look up for the BindAs annotation. Extract the profile if there is any.
             // TODO: Move me somewhere else?
@@ -96,7 +83,7 @@ public class Binder {
                     if (annotation.annotationType().equals(NoBinding.class)) {
                         NoBinding bind = ((NoBinding) annotation);
                         String[] localUnbindProfiles = bind.value();
-                        Logger.trace("bindInternal: localUnbindProfiles [" + toString(localUnbindProfiles) + "]");
+                        Logger.trace("bindInternal: localUnbindProfiles [" + Utils.join(localUnbindProfiles, ",") + "]");
 
                         if (localUnbindProfiles != null && contains(profiles, localUnbindProfiles)) {
                             return NO_BINDING;
@@ -273,7 +260,7 @@ public class Binder {
     }
 
     public static Object bind(String name, Class<?> clazz, Type type, Annotation[] annotations, Map<String, String[]> params, Object o, Method method, int parameterIndex) {
-        Logger.trace("bind: name [" + name + "] annotation [" + Utils.toString(annotations) + "] ");
+        Logger.trace("bind: name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] ");
 
         Object result = null;
         // Let a chance to plugins to bind this object
@@ -351,7 +338,7 @@ public class Binder {
     }
 
     public static Object directBind(Annotation[] annotations, String value, Class<?> clazz) throws Exception {
-        Logger.trace("directBind: value [" + value + "] annotation [" + Utils.toString(annotations) + "] Class [" + clazz + "]");
+        Logger.trace("directBind: value [" + value + "] annotation [" + Utils.join(annotations, " ") + "] Class [" + clazz + "]");
 
         if (clazz.equals(String.class)) {
             return value;
