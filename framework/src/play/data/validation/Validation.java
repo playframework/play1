@@ -120,7 +120,8 @@ public class Validation {
     }
 
     public static void clear() {
-        current.get().errors.clear();;
+        current.get().errors.clear();
+        ValidationPlugin.keys.get().clear();
     }
     
     // ~~~~ Integration helper
