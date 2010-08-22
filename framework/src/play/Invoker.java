@@ -5,6 +5,7 @@ import com.jamonapi.MonitorFactory;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -260,7 +261,7 @@ public class Invoker {
         static WaitForTasksCompletion instance;
 
         public WaitForTasksCompletion() {
-            queue = new HashMap<Future<?>, Invocation>();
+            queue = new ConcurrentHashMap<Future<?>, Invocation>();
             setName("WaitForTasksCompletion");
             setDaemon(true);
             start();

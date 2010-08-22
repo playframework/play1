@@ -1,7 +1,7 @@
 package models;
 
-import play.data.binding.annotations.As;
-import play.data.binding.annotations.NoBinding;
+import play.data.binding.As;
+import play.data.binding.NoBinding;
 import play.data.validation.*;
 import play.db.jpa.*;
 

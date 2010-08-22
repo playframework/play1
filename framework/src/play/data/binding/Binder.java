@@ -1,6 +1,5 @@
 package play.data.binding;
 
-import play.data.binding.types.SupportedType;
 import play.data.binding.types.DateBinder;
 import play.data.binding.types.CalendarBinder;
 import play.data.binding.types.LocaleBinder;
@@ -8,8 +7,6 @@ import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.data.Upload;
-import play.data.binding.annotations.As;
-import play.data.binding.annotations.NoBinding;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
 import play.utils.Utils;
@@ -33,7 +30,7 @@ import play.db.Model;
  */
 public class Binder {
 
-    static Map<Class<?>, SupportedType<?>> supportedTypes = new HashMap<Class<?>, SupportedType<?>>();
+    static Map<Class<?>, TypeBinder<?>> supportedTypes = new HashMap<Class<?>, TypeBinder<?>>();
 
     static {
         supportedTypes.put(Date.class, new DateBinder());
@@ -42,7 +39,6 @@ public class Binder {
         supportedTypes.put(File.class, new FileBinder());
         supportedTypes.put(Model.BinaryField.class, new BinaryBinder());
     }
-
     static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<Class<?>, BeanWrapper>();
 
     static BeanWrapper getBeanWrapper(Class<?> clazz) {
@@ -52,7 +48,6 @@ public class Binder {
         }
         return beanwrappers.get(clazz);
     }
-
     public final static Object MISSING = new Object();
     public final static Object NO_BINDING = new Object();
 
@@ -104,7 +99,7 @@ public class Binder {
                 Object r = Array.newInstance(clazz.getComponentType(), value.length);
                 for (int i = 0; i <= value.length; i++) {
                     try {
-                        Array.set(r, i, directBind(annotations, value[i], clazz.getComponentType()));
+                        Array.set(r, i, directBind(name, annotations, value[i], clazz.getComponentType()));
                     } catch (Exception e) {
                         // ?? One item was bad
                     }
@@ -179,7 +174,7 @@ public class Binder {
                     value = params.get(name + prefix + "[]");
                     if (value == null && r instanceof List) {
                         for (String param : params.keySet()) {
-                            Pattern p = Pattern.compile("^" + name + prefix + "\\[([0-9]+)\\](.*)$");
+                            Pattern p = Pattern.compile("^" + escape(name + prefix) + "\\[([0-9]+)\\](.*)$");
                             Matcher m = p.matcher(param);
                             if (m.matches()) {
                                 int key = Integer.parseInt(m.group(1));
@@ -208,7 +203,7 @@ public class Binder {
                 }
                 for (String v : value) {
                     try {
-                        r.add(directBind(annotations, v, componentClass));
+                        r.add(directBind(name, annotations, v, componentClass));
                     } catch (Exception e) {
                         // ?? One item was bad
                         Logger.debug(e, "error:");
@@ -220,11 +215,18 @@ public class Binder {
             if (value == null || value.length == 0) {
                 return MISSING;
             }
-            return directBind(annotations, value[0], clazz);
+            return directBind(name, annotations, value[0], clazz);
         } catch (Exception e) {
             Validation.addError(name + prefix, "validation.invalid");
             return MISSING;
         }
+    }
+
+    private static String escape(String s) {
+        s = s.replace(".", "\\.");
+        s = s.replace("[", "\\[");
+        s = s.replace("]", "\\]");
+        return s;
     }
 
     public static boolean contains(String[] profiles, String[] localProfiles) {
@@ -332,102 +334,122 @@ public class Binder {
         return false;
     }
 
-
     public static Object directBind(String value, Class<?> clazz) throws Exception {
-        return directBind(null, value, clazz);
+        return directBind(null, null, value, clazz);
     }
 
-    public static Object directBind(Annotation[] annotations, String value, Class<?> clazz) throws Exception {
+    public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz) throws Exception {
         Logger.trace("directBind: value [" + value + "] annotation [" + Utils.join(annotations, " ") + "] Class [" + clazz + "]");
 
-        if (clazz.equals(String.class)) {
-            return value;
-        }
+        boolean nullOrEmpty = value == null || value.trim().length() == 0;
 
         if (annotations != null) {
             for (Annotation annotation : annotations) {
-                if (annotation.getClass().equals(As.class)) {
-                    Class<? extends SupportedType<?>> toInstanciate = ((As) annotation).binder();
+                if (annotation.annotationType().equals(As.class)) {
+                    Class<? extends TypeBinder<?>> toInstanciate = ((As) annotation).binder();
                     if (!(toInstanciate.equals(As.DEFAULT.class))) {
                         // Instanciate the binder
-                        SupportedType<?> myInstance = toInstanciate.newInstance();
-                        return myInstance.bind(annotations, value, clazz);
+                        TypeBinder<?> myInstance = toInstanciate.newInstance();
+                        return myInstance.bind(name, annotations, value, clazz);
                     }
                 }
             }
         }
-        boolean nullOrEmpty = value == null || value.trim().length() == 0;
 
         // custom types
-        for(Class<?> c : supportedTypes.keySet()) {
-            if(c.isAssignableFrom(clazz)) {
-                return nullOrEmpty ? null : supportedTypes.get(c).bind(annotations, value, clazz);
+        for (Class<?> c : supportedTypes.keySet()) {
+            if (c.isAssignableFrom(clazz)) {
+                return nullOrEmpty ? null : supportedTypes.get(c).bind(name, annotations, value, clazz);
             }
+        }
+
+        // application custom types
+        for (Class<TypeBinder<?>> c : Play.classloader.getAssignableClasses(TypeBinder.class)) {
+            if (c.isAnnotationPresent(Global.class)) {
+                Class forType = (Class) ((ParameterizedType) c.getGenericInterfaces()[0]).getActualTypeArguments()[0];
+                if (forType.isAssignableFrom(clazz)) {
+                    return c.newInstance().bind(name, annotations, value, clazz);
+                }
+            }
+        }
+
+        // raw String
+        if (clazz.equals(String.class)) {
+            return value;
         }
 
         // int or Integer binding
         if (clazz.getName().equals("int") || clazz.equals(Integer.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0 : null;
+            }
 
             return Integer.parseInt(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
 
         // long or Long binding
         if (clazz.getName().equals("long") || clazz.equals(Long.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0l : null;
+            }
 
             return Long.parseLong(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
 
         // byte or Byte binding
         if (clazz.getName().equals("byte") || clazz.equals(Byte.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return clazz.isPrimitive() ? (byte) 0 : null;
+            }
 
             return Byte.parseByte(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
 
         // short or Short binding
         if (clazz.getName().equals("short") || clazz.equals(Short.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return clazz.isPrimitive() ? (short) 0 : null;
+            }
 
             return Short.parseShort(value.contains(".") ? value.substring(0, value.indexOf(".")) : value);
         }
 
         // float or Float binding
         if (clazz.getName().equals("float") || clazz.equals(Float.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0f : null;
+            }
 
             return Float.parseFloat(value);
         }
 
         // double or Double binding
         if (clazz.getName().equals("double") || clazz.equals(Double.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return clazz.isPrimitive() ? 0d : null;
+            }
 
             return Double.parseDouble(value);
         }
 
         // BigDecimal binding
         if (clazz.equals(BigDecimal.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return null;
+            }
 
             return new BigDecimal(value);
         }
 
         // boolean or Boolean binding
         if (clazz.getName().equals("boolean") || clazz.equals(Boolean.class)) {
-            if (nullOrEmpty)
+            if (nullOrEmpty) {
                 return clazz.isPrimitive() ? false : null;
+            }
 
-            if (value.equals("1") || value.toLowerCase().equals("on") || value.toLowerCase().equals("yes"))
+            if (value.equals("1") || value.toLowerCase().equals("on") || value.toLowerCase().equals("yes")) {
                 return true;
+            }
 
             return Boolean.parseBoolean(value);
         }

@@ -6,7 +6,7 @@ import java.util.List;
 
 import models.Person;
 import play.Logger;
-import play.data.binding.annotations.As;
+import play.data.binding.As;
 import play.i18n.Lang;
 import play.mvc.Controller;
 
@@ -46,6 +46,17 @@ public class DataBinding extends Controller {
 
     public static void signinPage() {
         render();
+    }
+    
+    public static void customeBinding(@As(binder=utils.TestBinder.class) String yop) {
+        renderText(yop);
+    }
+    
+    public static void globalBinder(java.awt.Point p) {
+        if(validation.hasErrors()) {
+            renderText(validation.errors());
+        }
+        renderText(p.x + "|" + p.y);
     }
 
     public static void signin(@As("secure") Person person) {

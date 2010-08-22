@@ -1,20 +1,21 @@
 package play.data.binding.types;
 
+import play.data.binding.TypeBinder;
 import java.lang.annotation.Annotation;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import play.data.binding.annotations.AnnotationHelper;
+import play.data.binding.AnnotationHelper;
 import play.libs.I18N;
 
 /**
  * Binder that support Date class.
  */
-public class DateBinder implements SupportedType<Date> {
+public class DateBinder implements TypeBinder<Date> {
 
     public static final String ISO = "'ISO8086'yyyy-MM-dd'T'HH:mm:ss";
 
-    public Date bind(Annotation[] annotations, String value, Class actualClass) throws Exception {
+    public Date bind(String name, Annotation[] annotations, String value, Class actualClass) throws Exception {
 
         Date date = AnnotationHelper.getDateAs(annotations, value);
         if (date != null) {

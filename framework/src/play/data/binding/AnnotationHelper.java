@@ -1,4 +1,4 @@
-package play.data.binding.annotations;
+package play.data.binding;
 
 import java.lang.annotation.Annotation;
 import java.text.ParseException;

@@ -321,7 +321,7 @@ public class Scope {
         public <T> T get(String key, Class<T> type) {
             try {
                 // TODO: This is used by the test, but this is not the most convenient.
-                return (T) Binder.directBind(null, get(key), type);
+                return (T) Binder.directBind(key, null, get(key), type);
             } catch (Exception e) {
                 Validation.addError(key, "validation.invalid");
                 return null;
@@ -331,7 +331,7 @@ public class Scope {
         @SuppressWarnings("unchecked")
         public <T> T get(Annotation[] annotations, String key, Class<T> type) {
             try {
-                return (T) Binder.directBind(annotations, get(key), type);
+                return (T) Binder.directBind(key, annotations, get(key), type);
             } catch (Exception e) {
                 Validation.addError(key, "validation.invalid");
                 return null;

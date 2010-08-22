@@ -1,14 +1,15 @@
 package play.data.binding.types;
 
+import play.data.binding.TypeBinder;
 import java.lang.annotation.Annotation;
 import java.util.Locale;
 
 /**
  * Binder that support Locale class.
  */
-public class LocaleBinder implements SupportedType<Locale> {
+public class LocaleBinder implements TypeBinder<Locale> {
 
-    public Locale bind(Annotation[] annotations, String value, Class actualClass) {
+    public Locale bind(String name, Annotation[] annotations, String value, Class actualClass) {
         if( value == null )
             return null;
         if (value.length() == 2) {

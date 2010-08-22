@@ -1,21 +1,22 @@
 package play.data.binding.types;
 
+import play.data.binding.TypeBinder;
 import java.lang.annotation.Annotation;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import play.data.binding.annotations.AnnotationHelper;
+import play.data.binding.AnnotationHelper;
 import play.i18n.Lang;
 import play.libs.I18N;
 
 /**
  * Binder that support Calendar class.
  */
-public class CalendarBinder implements SupportedType<Calendar> {
+public class CalendarBinder implements TypeBinder<Calendar> {
 
-    public Calendar bind(Annotation[] annotations, String value, Class actualClass) throws Exception {
+    public Calendar bind(String name, Annotation[] annotations, String value, Class actualClass) throws Exception {
         Calendar cal = Calendar.getInstance(Lang.getLocale());
         try {
             Date date = AnnotationHelper.getDateAs(annotations, value);

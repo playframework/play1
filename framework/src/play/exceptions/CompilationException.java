@@ -32,7 +32,7 @@ public class CompilationException extends PlayException implements SourceAttachm
 
     @Override
     public String getErrorDescription() {
-        return String.format("The file <strong>%s</strong> could not be compiled.\nError raised is : <strong>%s</strong>", isSourceAvailable() ? source.relativePath() : "", problem);
+        return String.format("The file <strong>%s</strong> could not be compiled.\nError raised is : <strong>%s</strong>", isSourceAvailable() ? source.relativePath() : "", problem.toString().replace("<", "&lt;"));
     }
     
     public String getMessage() {

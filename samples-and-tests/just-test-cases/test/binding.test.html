@@ -48,5 +48,16 @@
         assertText('userNameResult', 'nicolas')
         assertText('passwordResult', 'nicolas')
         assertText('roleResult', '')
+        
+        <!-- Custom binder -->
+        open('@{DataBinding.customeBinding('kiki')}')
+        assertTextPresent('--kiki--')
+        
+        <!-- Global binder -->
+        open('@{DataBinding.globalBinder('9,5')}')
+        assertTextPresent('9|5')
+        
+        open('@{DataBinding.globalBinder('8')}')
+        assertTextPresent('Incorrect value')
 
 #{/selenium}	

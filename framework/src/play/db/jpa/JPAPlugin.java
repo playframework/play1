@@ -61,7 +61,7 @@ public class JPAPlugin extends PlayPlugin {
                 String id = params.get(idKey)[0];
                 try {
                     Query query = JPA.em().createQuery("from " + clazz.getName() + " o where o." + keyName + " = ?");
-                    query.setParameter(1, play.data.binding.Binder.directBind(annotations, id + "", Model.Manager.factoryFor(clazz).keyType()));
+                    query.setParameter(1, play.data.binding.Binder.directBind(name, annotations, id + "", Model.Manager.factoryFor(clazz).keyType()));
                     Object o = query.getSingleResult();
                     return GenericModel.edit(o, name, params, annotations);
                 } catch (Exception e) {

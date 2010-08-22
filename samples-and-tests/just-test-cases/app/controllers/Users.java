@@ -2,7 +2,7 @@ package controllers;
 
 import models.*;
 import play.*;
-import play.data.binding.annotations.As;
+import play.data.binding.As;
 import play.mvc.*;
 import java.text.*;
 

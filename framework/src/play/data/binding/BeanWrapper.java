@@ -6,7 +6,6 @@ import java.util.*;
 
 import play.Logger;
 import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
-import play.data.binding.annotations.NoBinding;
 import play.exceptions.UnexpectedException;
 import play.utils.Utils;
 

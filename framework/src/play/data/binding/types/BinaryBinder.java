@@ -1,5 +1,6 @@
 package play.data.binding.types;
 
+import play.data.binding.TypeBinder;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import play.data.Upload;
@@ -9,10 +10,10 @@ import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;
 import play.mvc.Scope.Params;
 
-public class BinaryBinder implements SupportedType<Model.BinaryField> {
+public class BinaryBinder implements TypeBinder<Model.BinaryField> {
 
     @SuppressWarnings("unchecked")
-    public Object bind(Annotation[] annotations, String value, Class actualClass) {
+    public Object bind(String name, Annotation[] annotations, String value, Class actualClass) {
         try{
             Model.BinaryField b = (Model.BinaryField)actualClass.newInstance();
             List<Upload> uploads = (List<Upload>)Request.current().args.get("__UPLOADS");
