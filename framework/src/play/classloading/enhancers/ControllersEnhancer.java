@@ -98,7 +98,7 @@ public class ControllersEnhancer extends Enhancer {
                 public void edit(Handler handler) throws CannotCompileException {
                     StringBuffer code = new StringBuffer();
                     try {
-                        code.append("if($1 instanceof play.mvc.results.Result) throw $1;");
+                        code.append("if($1 instanceof play.mvc.results.Result || $1 instanceof play.Invoker.Suspend) throw $1;");
                         handler.insertBefore(code.toString());
                     } catch (NullPointerException e) {
                         // TODO: finally clause ?

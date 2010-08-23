@@ -749,9 +749,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     /**
      * Suspend this request and wait for the task completion
      */
-    protected static void waitFor(Future<?> task) {
+    protected static void waitFor(Future<?>... tasks) {
         Request.current().isNew = false;
-        throw new Suspend(task);
+        throw new Suspend(tasks);
     }
 
     /**
@@ -759,6 +759,16 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     public static ThreadLocal<ActionDefinition> _currentReverse = new ThreadLocal<ActionDefinition>();
 
+    /**
+     * Usage:
+     * ------
+     * 
+     * ActionDefinition action = reverse(); {
+     *     Application.anyAction(anyParam, "toto");
+     * }
+     * String url = action.url;
+     * 
+     */
     protected static ActionDefinition reverse() {
         ActionDefinition actionDefinition = new ActionDefinition();
         _currentReverse.set(actionDefinition);
