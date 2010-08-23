@@ -326,13 +326,13 @@ You can only pass **local variables** in this way.
 
 h4. Specify another template
 
-If you don’t want to use the default template, you can specify your own template file during the **render(…)** call. Just pass it as the render method’s first parameter:
+If you don’t want to use the default template, you can specify your own template file using the **renderTemplate(…)** method, by passing the template name as the first parameter:
 
 Example:
 
 bc. public static void show(Long id) {
     Client client = Client.findById(id);
-    render("Clients/showClient.html", id, client);    
+    renderTemplate("Clients/showClient.html", id, client);    
 }
 
 h3. Redirect to another URL
