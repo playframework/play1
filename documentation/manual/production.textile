@@ -44,7 +44,7 @@ h2. <a>Configure logging</a>
 
 For production it’s a good idea to use rolling log files. Do not send logging to the Console, since it will be written to the **logs/system.out** file and it will grow without bound!
 
-Create a custom **log4j.properties** in the **conf/**, directory:
+Create a custom **log4j.properties** in the **conf/** directory:
 
 bc. log4j.rootLogger=ERROR, Rolling
  
