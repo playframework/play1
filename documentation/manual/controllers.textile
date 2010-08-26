@@ -17,7 +17,7 @@ Some technologies like SOAP try to give access to the model object domain throug
 The web’s principles are not fundamentally object-oriented. So a layer is needed to adapt HTTP to your favorite language. 
 
 
-h2. <a name="overview">A controller overview</a>
+h2. <a name="overview">Controller overview</a>
 
 A Controller is a Java class, hosted by the **controllers** package, and subclassing **play.mvc.Controller**.
 
@@ -221,7 +221,7 @@ bc. ?client.customers[0].id=123
 &client.customers[2].id=789
 
 
-h2. <a>JPA object binding</a>
+h2. <a name="objectbinding">JPA object binding</a>
 
 You can automatically bind a JPA object using the HTTP to Java binding.
 
@@ -496,7 +496,7 @@ public class Admin extends Application {
      
 }
 
-h2. <a name="session">Session and Flash scope</a>
+h2. <a name="session">Session and Flash scopes</a>
 
 If you have to keep data across multiple HTTP Requests, you can save them in the Session or the Flash scope. Data stored in the Session are available during the whole user session, and data stored in the flash scope are available to the next request only.
 

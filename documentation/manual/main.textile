@@ -29,7 +29,7 @@ h3. app/views
 Most of the application views are generated using an efficient templating system provided by Play. The Controller gets some interesting data from the model layer, and then applies a template to decorate these objects. This package contains HTML, XML, JSON or other template files with special directives used to dynamically generate the model representation.
 
 
-h2. <a name="request">The request life-cycle</a>
+h2. <a name="request">The request life cycle</a>
 
 The Play framework is fully stateless and only request/response-oriented. All HTTP Requests follow the same path:
 

@@ -149,7 +149,7 @@ bc. <h1>Main template</h1>
     #{doLayout /}
 </div>
 
-h2. <a name="tags">Create tags</a>
+h2. <a name="tags">Custom tags</a>
 
 You can easily create specific tags for your application. A tag is a simple template file, stored in the **app/views/tags** directory. The template’s file name is used as the tag name.
 
@@ -161,7 +161,7 @@ No need to configure anything. You can use the tag directly:
 
 bc. #{hello /}
 
-h3. Retrieve tags parameters
+h3. Retrieve tag parameters
 
 Tag parameters are exposed as template variables. The variable names are constructed with the ‘_’ character prepended to the parameter name. 
 
@@ -243,7 +243,7 @@ bc. <em>Price: ${123456.324234.ccyAmount()}</em>
 
 Template extension classes are automatically detected by Play at start-up. You just have to restart your application to make them available.
 
-h2. <a name="implicits">Implicit objects available from a template</a>
+h2. <a name="implicits">Implicit objects available in a template</a>
 
 All objects added to the **renderArgs** scope are directly injected as template variables. 
 

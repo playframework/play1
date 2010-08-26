@@ -1,6 +1,6 @@
 h1. Play framework documentation
 
-Welcome to the Play framework documentation. This documentation is intended for the **1.0.3 release** and may significantly differ from previous versions of the framework. Check the "version 1.0.3 release notes":releasenotes-1.0.3.
+Welcome to the Play framework documentation. This documentaion is for the **1.0.3 release**, which differs from previous versions of the framework. Check the "version 1.0.3 release notes":releasenotes-1.0.3 for details.
 
 p(note). This is a work in progress, feel free to ask any question not covered into these documents or report any errors. You can contribute to the documentation the "same way you can contribute code":faq.
 
@@ -47,8 +47,9 @@ Everything you need to know about Play.
 ## "The MVC application model":main#mvc
 ## "A request life cycle":main#request
 ## "Application layout & organization":main#application
-## "Development lifecycle":main#lifecycle
+## "Development life cycle":main#lifecycle
 # "HTTP routing":routes
+## "About REST":routes#rest
 ## "The routes file syntax":routes#syntax
 ## "Routes priority":routes#priority
 ## "Serving static resources":routes#static
@@ -56,24 +57,25 @@ Everything you need to know about Play.
 ## "Setting content types":routes#content-types
 ## "Content negotiation":routes#content-negotiation
 # "Controllers":controllers
-## "A Controller overview":controllers#overview
-## "Retrieve HTTP parameters":controllers#params
+## "Controller overview":controllers#overview
+## "Retrieving HTTP parameters":controllers#params
 ## "Advanced HTTP to Java binding":controllers#binding
-## "Return a result":controllers#result
+## "JPA object binding":controllers#objectbinding
+## "Result types":controllers#result
 ## "Interceptions":controllers#interceptions
 ## "Session and Flash scopes":controllers#session
 # "The template engine":templates
 ## "Template syntax":templates#syntax
 ## "Template inheritance":templates#inheritance
-## "Create tags":templates#tags
-## "Extending the templates language":templates#extensions
-## "Implicit objects":templates#implicits
+## "Custom tags":templates#tags
+## "Java template extensions":templates#extensions
+## "Implicit objects available in a template":templates#implicits
 # "The domain object model":model
 ## "Properties simulation":model#properties
-## "Setup a database to persist your model objects":model#database
+## "Set-up a database to persist your model objects":model#database
 ## "Persist your object model with Hibernate":model#hibernate
 ## "The stateless model":model#stateless
-# "A little of asynchronism using jobs":jobs
+# "A little asynchronism using jobs":jobs
 ## "Bootstrap jobs":jobs#concepts
 ## "Scheduled jobs":jobs#scheduling
 ## "Suspendable requests":jobs#suspendable
@@ -85,7 +87,7 @@ Everything you need to know about Play.
 # "Deployment options":deployment
 ## "Standalone Play application":deployment#standalone
 ## "Running on JEE application servers":deployment#appservers
-## "Google Application Engine":deployment#gae
+## "Google Application Engine (GAE)":deployment#gae
 ## "Stax cloud hosting platform":deployment#stax
 
 
@@ -93,35 +95,35 @@ h2. <a name="cook">Cookbook</a>
 
 Tips about everything and anything.
 
-# "Using Play modules, and the modules repository":modules
-# "Security Guide":security
-# "More about the JPA support":jpa
-# "Using data validation":validation
-# "How to configure logs":logs
+# "Play modules, and the modules repository":modules
+# "Security guide":security
+# "JPA support":jpa
+# "Validating HTTP data":validation
+# "Logging configuration":logs
 # "Manage application.conf in several environments":ids
-# "Setting up i18n":i18n
-# "Use cache and configure Memcached":cache
-# "Put your application in production":production
+# "Internationalisation guide":i18n
+# "Cache and Memcached configuration":cache
+# "Putting your application in production":production
 # "Sending e-mail":emails
 # "OpenID integration":openid
-# "Doing Ajax with JQuery":ajax
+# "Ajax with JQuery":ajax
 # "YAML":yaml
 
-h2. <a name="modules">Distribution Modules</a>
+h2. <a name="modules">Standard modules</a>
 
 These optional modules are included with the standard distribution. "More modules":http://www.playframework.org/modules.
 
 # "CRUD":crud
 # "Secure":secure
 
-h2. <a name="references">References</a>
+h2. <a name="references">Reference documentation</a>
 
 Extended references for day-to-day hacking.
 
-# "The missing cheat sheet":http://download.playframework.org/miscellaneous/play-cheat-sheet.pdf
-# "Browse API documentation":/@api/index.html
-# "Template tags and extensions reference":tags
+# "API documentation (Javadoc)":/@api/index.html
+# "Template tags":tags
 # "Java extensions":javaextensions
+# "The missing cheat sheet":http://download.playframework.org/miscellaneous/play-cheat-sheet.pdf
 
 
 h2. <a name="versionnotes">Version notes</a>

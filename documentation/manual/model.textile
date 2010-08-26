@@ -145,7 +145,7 @@ assert data.anotherValue == 8;
 Yes it works. And because the enhanced class follows the Java Beans convention, when you use your object with a library that expects a JavaBean it will work perfectly!
 
 
-h2. <a name="database">Setup a database to persist your model objects</a>
+h2. <a name="database">Set-up a database to persist your model objects</a>
 
 Most of the time you will need to save the model object data permanently. The most natural way is to save this data into a database. 
 
