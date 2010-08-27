@@ -64,6 +64,12 @@ public class Http {
         public String value() {
             return values.get(0);
         }
+
+        @Override
+        public String toString() {
+            return values.toString();
+        }
+
     }
 
     /**

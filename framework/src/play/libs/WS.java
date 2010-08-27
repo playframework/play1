@@ -35,6 +35,8 @@ import com.ning.http.client.Headers;
 import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Response;
 import com.ning.http.client.StringPart;
+import javax.xml.parsers.DocumentBuilder;
+import play.utils.NoOpEntityResolver;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -531,8 +533,9 @@ public class WS extends PlayPlugin {
             try {
                 InputSource source = new InputSource(response.getResponseBodyAsStream());
                 source.setEncoding(encoding);
-                Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(source);
-                return doc;
+                DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                builder.setEntityResolver(new NoOpEntityResolver());
+                return builder.parse(source);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

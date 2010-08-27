@@ -34,7 +34,16 @@ public class Play {
      */
     public enum Mode {
 
-        DEV, PROD
+        DEV, PROD;
+
+        public boolean isDev() {
+            return this == DEV;
+        }
+
+        public boolean isProd() {
+            return this == PROD;
+        }
+        
     }
 
     /**
