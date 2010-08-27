@@ -1,6 +1,10 @@
 h1. Frequently Asked Questions
 
 
+h2. <a>Where do I ask questions that are not answered here?</a>
+
+The "Community":http://www.playframework.org/community page links to various places where you can read and post about Play. In general, the best place to ask questions is the "play-framework Google Group":http://groups.google.com/group/play-framework.
+
 h2. <a>How does Play compare to framework X?</a>
 
 Nowadays, you have a very large number of choices for developing web applications. Play being a Java web application framework, let’s compare it to other Java frameworks. Play is built for a ‘share nothing’ architecture (think about it as a stateless framework), so it’s very different from all these Java stateful and components based frameworks like Seam, Tapestry or Wicket. It’s closer to Spring MVC or Struts (or Struts 2), but way more opinionated.
