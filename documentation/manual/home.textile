@@ -70,6 +70,13 @@ Everything you need to know about Play.
 ## "Custom tags":templates#tags
 ## "Java template extensions":templates#extensions
 ## "Implicit objects available in a template":templates#implicits
+# "Validating HTTP data (form validation)":validation
+## "How validation works in Play":validation#how
+## "Retrieving validation error messages":validation#messages
+## "Displaying validation errors in the template":validation#display
+## "Validation annotations":validation#annotations
+## "Validating complex objects":validation#objects
+## "Custom validation":validation#custom
 # "The domain object model":model
 ## "Properties simulation":model#properties
 ## "Set-up a database to persist your model objects":model#database
@@ -98,7 +105,6 @@ Tips about everything and anything.
 # "Play modules, and the modules repository":modules
 # "Security guide":security
 # "JPA support":jpa
-# "Validating HTTP data":validation
 # "Logging configuration":logs
 # "Manage application.conf in several environments":ids
 # "Internationalisation guide":i18n
