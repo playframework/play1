@@ -373,6 +373,13 @@ public class ActionInvoker {
         // Return type inference
         if (o != null) {
 
+            if (o instanceof NoResult) {
+                return;
+            }
+            if (o instanceof Result) {
+                // Of course
+                throw (Result)o;
+            }
             if (o instanceof InputStream) {
                 Controller.renderBinary((InputStream) o);
             }
