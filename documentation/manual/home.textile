@@ -123,6 +123,7 @@ Extended references for day-to-day hacking.
 # "API documentation (Javadoc)":/@api/index.html
 # "Template tags":tags
 # "Java extensions":javaextensions
+# "Built-in validations":validation-builtin
 # "The missing cheat sheet":http://download.playframework.org/miscellaneous/play-cheat-sheet.pdf
 
 
