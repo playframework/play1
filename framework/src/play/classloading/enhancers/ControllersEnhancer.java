@@ -15,6 +15,7 @@ import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
 import javassist.expr.Handler;
 import play.Logger;
+import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
 
@@ -78,18 +79,38 @@ public class ControllersEnhancer extends Enhancer {
                 }
             }
 
-            if (Modifier.isPublic(ctMethod.getModifiers()) && ((ctClass.getName().endsWith("$") && !ctMethod.getName().contains("$default$")) || (Modifier.isStatic(ctMethod.getModifiers()) && ctMethod.getReturnType().equals(CtClass.voidType))) && !isHandler) {
+            // Patch for new scala module -->
+            if(Play.configuration.getProperty("scala.enableAutoRedirect", "true").equals("false") && Modifier.isPublic(ctMethod.getModifiers()) && ((ctClass.getName().endsWith("$") && !ctMethod.getName().contains("$default$"))) && !isHandler) {
+
                 try {
                     ctMethod.insertBefore(
-                            "if(!play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.isActionCallAllowed()) {"
-                            + "play.mvc.Controller.redirect(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\", $args);"
-                            + generateValidReturnStatement(ctMethod.getReturnType()) +  "}"
-                            + "play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.stopActionCall();");
+                        "if(play.mvc.Controller._currentReverse.get() != null) {"
+                        + "play.mvc.Controller.redirect(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\", $args);"
+                        + generateValidReturnStatement(ctMethod.getReturnType())
+                    + "}");
                 } catch (Exception e) {
                     Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (autoredirect).", applicationClass.name, ctMethod.getName());
                     throw new UnexpectedException(e);
                 }
+
+            } else {
+
+                if (Modifier.isPublic(ctMethod.getModifiers()) && ((ctClass.getName().endsWith("$") && !ctMethod.getName().contains("$default$")) || (Modifier.isStatic(ctMethod.getModifiers()) && ctMethod.getReturnType().equals(CtClass.voidType))) && !isHandler) {
+                    try {
+                        ctMethod.insertBefore(
+                                "if(!play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.isActionCallAllowed()) {"
+                                + "play.mvc.Controller.redirect(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\", $args);"
+                                + generateValidReturnStatement(ctMethod.getReturnType()) +  "}"
+                                + "play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.stopActionCall();");
+                    } catch (Exception e) {
+                        Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (autoredirect).", applicationClass.name, ctMethod.getName());
+                        throw new UnexpectedException(e);
+                    }
+                }
+
             }
+
+            
 
             // Enhance global catch to avoid potential unwanted catching of play.mvc.results.Result
             ctMethod.instrument(new ExprEditor() {
