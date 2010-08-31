@@ -345,7 +345,7 @@ public abstract class CRUD extends Controller {
                 name = field.getName();
             }
 
-            public List<Model> getChoices() {
+            public List<Object> getChoices() {
                 return property.choices.list();
             }
         }

@@ -29,7 +29,7 @@ public interface Model {
 
     public static interface Choices {
 
-        public List<Model> list();
+        public List<Object> list();
 
     }
 

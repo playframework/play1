@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -376,10 +377,12 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         public Model findById(Object id) {
-            if (id == null) return null;
+            if (id == null) {
+                return null;
+            }
             try {
                 return JPA.em().find(clazz, Binder.directBind(id.toString(), Model.Manager.factoryFor(clazz).keyType()));
-            } catch(Exception e) {
+            } catch (Exception e) {
                 // Key is invalid, thus nothing was found
                 return null;
             }
@@ -479,7 +482,6 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         //
-
         Field keyField() {
             Class c = clazz;
             try {
@@ -501,7 +503,7 @@ public class JPAPlugin extends PlayPlugin {
         String getSearchQuery(List<String> searchFields) {
             String q = "";
             for (Model.Property property : listProperties()) {
-                if(property.isSearchable && (searchFields == null || searchFields.isEmpty() ? true : searchFields.contains(property.name))) {
+                if (property.isSearchable && (searchFields == null || searchFields.isEmpty() ? true : searchFields.contains(property.name))) {
                     if (!q.equals("")) {
                         q += " or ";
                     }
@@ -521,8 +523,9 @@ public class JPAPlugin extends PlayPlugin {
                         modelProperty.isRelation = true;
                         modelProperty.relationType = field.getType();
                         modelProperty.choices = new Model.Choices() {
+
                             @SuppressWarnings("unchecked")
-                            public List<Model> list() {
+                            public List<Object> list() {
                                 return JPA.em().createQuery("from " + field.getType().getName()).getResultList();
                             }
                         };
@@ -532,8 +535,9 @@ public class JPAPlugin extends PlayPlugin {
                     modelProperty.isRelation = true;
                     modelProperty.relationType = field.getType();
                     modelProperty.choices = new Model.Choices() {
+
                         @SuppressWarnings("unchecked")
-                        public List<Model> list() {
+                        public List<Object> list() {
                             return JPA.em().createQuery("from " + field.getType().getName()).getResultList();
                         }
                     };
@@ -547,8 +551,9 @@ public class JPAPlugin extends PlayPlugin {
                         modelProperty.isMultiple = true;
                         modelProperty.relationType = fieldType;
                         modelProperty.choices = new Model.Choices() {
+
                             @SuppressWarnings("unchecked")
-                            public List<Model> list() {
+                            public List<Object> list() {
                                 return JPA.em().createQuery("from " + fieldType.getName()).getResultList();
                             }
                         };
@@ -560,19 +565,28 @@ public class JPAPlugin extends PlayPlugin {
                         modelProperty.isMultiple = true;
                         modelProperty.relationType = fieldType;
                         modelProperty.choices = new Model.Choices() {
+
                             @SuppressWarnings("unchecked")
-                            public List<Model> list() {
+                            public List<Object> list() {
                                 return JPA.em().createQuery("from " + fieldType.getName()).getResultList();
                             }
                         };
                     }
                 }
             }
+            if (field.getType().isEnum()) {
+                modelProperty.choices = new Model.Choices() {
+                    @SuppressWarnings("unchecked")
+                    public List<Object> list() {
+                        return Arrays.asList(field.getType().getEnumConstants());
+                    }
+                };
+            }
             modelProperty.name = field.getName();
-            if(field.getType().equals(String.class)) {
+            if (field.getType().equals(String.class)) {
                 modelProperty.isSearchable = true;
             }
-            if(field.isAnnotationPresent(GeneratedValue.class)) {
+            if (field.isAnnotationPresent(GeneratedValue.class)) {
                 modelProperty.isGenerated = true;
             }
             return modelProperty;

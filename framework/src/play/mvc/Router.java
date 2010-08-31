@@ -29,7 +29,6 @@ import play.utils.Default;
 public class Router {
 
     static Pattern routePattern = new Pattern("^({method}GET|POST|PUT|DELETE|OPTIONS|HEAD|\\*)[(]?({headers}[^)]*)(\\))?\\s+({path}.*/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?(\\s*)$");
-
     /**
      * Pattern used to locate a method override instruction in request.querystring
      */
@@ -59,7 +58,6 @@ public class Router {
     public static void prependRoute(String method, String path, String action) {
         prependRoute(method, path, action, null, null);
     }
-
 
     /**
      * Add a route at the given position
@@ -152,7 +150,7 @@ public class Router {
         String fileAbsolutePath = routeFile.getRealFile().getAbsolutePath();
         int lineNumber = 0;
         String content = routeFile.contentAsString();
-        if(content.indexOf("${") > -1 || content.indexOf("#{") > -1) {
+        if (content.indexOf("${") > -1 || content.indexOf("#{") > -1) {
             content = TemplateLoader.load(routeFile).render(new HashMap<String, Object>());
         }
         for (String line : content.split("\n")) {
@@ -208,7 +206,6 @@ public class Router {
             }
         }
     }
-
     public static List<Route> routes = new ArrayList<Route>(500);
 
     public static void routeOnlyStatic(Http.Request request) {
@@ -275,7 +272,6 @@ public class Router {
         return route(method, path, headers, null);
     }
 
-
     public static Map<String, String> route(String method, String path, String headers, String host) {
         for (Route route : routes) {
             Map<String, String> args = route.matches(method, path, headers, host);
@@ -339,7 +335,9 @@ public class Router {
         }
         Map<String, Object> argsbackup = args;
         // Add routeArgs
-        argsbackup.putAll(Scope.RouteArgs.current().data);
+        if (Scope.RouteArgs.current() != null) {
+            argsbackup.putAll(Scope.RouteArgs.current().data);
+        }
         for (Route route : routes) {
             args = new HashMap<String, Object>(argsbackup);
             if (route.actionPattern != null) {
@@ -363,7 +361,8 @@ public class Router {
                             break;
                         } else {
                             if (value instanceof List<?>) {
-                                @SuppressWarnings("unchecked") List<Object> l = (List<Object>) value;
+                                @SuppressWarnings("unchecked")
+                                List<Object> l = (List<Object>) value;
                                 value = l.get(0);
                             }
                             if (!value.toString().startsWith(":") && !arg.constraint.matches(value.toString())) {
@@ -397,7 +396,8 @@ public class Router {
                             Object value = entry.getValue();
                             if (inPathArgs.contains(key) && value != null) {
                                 if (List.class.isAssignableFrom(value.getClass())) {
-                                    @SuppressWarnings("unchecked") List<Object> vals = (List<Object>) value;
+                                    @SuppressWarnings("unchecked")
+                                    List<Object> vals = (List<Object>) value;
                                     path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", vals.get(0).toString().replace("$", "\\$") + "");
                                 } else {
                                     path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value.toString().replace("$", "\\$") + "");
@@ -406,7 +406,8 @@ public class Router {
                                 // Do nothing -> The key is static
                             } else if (value != null) {
                                 if (List.class.isAssignableFrom(value.getClass())) {
-                                    @SuppressWarnings("unchecked") List<Object> vals = (List<Object>) value;
+                                    @SuppressWarnings("unchecked")
+                                    List<Object> vals = (List<Object>) value;
                                     for (Object object : vals) {
                                         try {
                                             queryString.append(URLEncoder.encode(key, "utf-8"));
@@ -484,11 +485,11 @@ public class Router {
         }
 
         public void absolute() {
-            url  = Http.Request.current().getBase() + url;
+            url = Http.Request.current().getBase() + url;
         }
 
         public ActionDefinition secure() {
-            if(url.contains("http://")) {
+            if (url.contains("http://")) {
                 url = url.replace("http:", "https:");
                 return this;
             }
@@ -512,10 +513,8 @@ public class Router {
         List<String> formats = new ArrayList<String>();
         String host;
         Arg hostArg = null;
-
         public int routesFileLine;
         public String routesFile;
-
         static Pattern customRegexPattern = new Pattern("\\{([a-zA-Z_0-9]+)\\}");
         static Pattern argsPattern = new Pattern("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}");
         static Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'");
@@ -594,7 +593,6 @@ public class Router {
         }
 
         // TODO: Add args names
-
         public void addFormat(String params) {
             if (params == null || params.length() < 1) {
                 return;
@@ -625,7 +623,6 @@ public class Router {
             return matches(method, path, null, null);
         }
 
-
         public Map<String, String> matches(String method, String path, String accept) {
             return matches(method, path, accept, null);
         }
@@ -646,13 +643,13 @@ public class Router {
                     // Static dir
                     if (staticDir != null) {
                         String resource = matcher.group("resource");
-                        try{
+                        try {
                             String root = new File(staticDir).getCanonicalPath();
                             String child = new File(staticDir + "/" + resource).getCanonicalPath();
-                            if(child.startsWith(root)) {
+                            if (child.startsWith(root)) {
                                 throw new RenderStatic(staticDir + "/" + resource);
                             }
-                        } catch(IOException e) {
+                        } catch (IOException e) {
                         }
                         throw new NotFound(resource);
                     } else {
