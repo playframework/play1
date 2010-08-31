@@ -338,6 +338,8 @@ public class Router {
             action = action.substring(12);
         }
         Map<String, Object> argsbackup = args;
+        // Add routeArgs
+        argsbackup.putAll(Scope.RouteArgs.current().data);
         for (Route route : routes) {
             args = new HashMap<String, Object>(argsbackup);
             if (route.actionPattern != null) {

@@ -54,6 +54,7 @@ public class ActionInvoker {
 
             Scope.Params.current.set(new Scope.Params());
             Scope.RenderArgs.current.set(new Scope.RenderArgs());
+            Scope.RouteArgs.current.set(new Scope.RouteArgs());
             Scope.Session.current.set(Scope.Session.restore());
             Scope.Flash.current.set(Scope.Flash.restore());
 
@@ -100,6 +101,7 @@ public class ActionInvoker {
                 Controller.class.getDeclaredField("session").set(null, Scope.Session.current());
                 Controller.class.getDeclaredField("flash").set(null, Scope.Flash.current());
                 Controller.class.getDeclaredField("renderArgs").set(null, Scope.RenderArgs.current());
+                Controller.class.getDeclaredField("routeArgs").set(null, Scope.RouteArgs.current());
                 Controller.class.getDeclaredField("validation").set(null, Validation.current());
             }
 

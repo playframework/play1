@@ -123,6 +123,15 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     protected static Scope.RenderArgs renderArgs = null;
     /**
+     * The current routeArgs scope: This is a hash map that is accessible during the reverse routing phase.
+     * Any variable added to this scope will be used for reverse routing. Useful when you have a param that you want
+     * to add to any route without add it expicitely to every action method.
+     *
+     * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.
+     * ie : controller.routeArgs - controller.routeArgs.current()
+     */
+    protected static Scope.RouteArgs routeArgs = null;
+    /**
      * The current Validation object. It allows you to validate objects and to retrieve potential validations errors for those objects.
      *
      * Note: The ControllersEnhancer makes sure that an appropriate thread local version is applied.

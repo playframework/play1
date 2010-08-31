@@ -477,4 +477,32 @@ public class Scope {
         }
 
     }
+
+    /**
+     * Routes args (used in reserve routing)
+     */
+    public static class RouteArgs {
+
+        public Map<String, Object> data = new HashMap<String, Object>();        // ThreadLocal access
+        public static ThreadLocal<RouteArgs> current = new ThreadLocal<RouteArgs>();
+
+        public static RouteArgs current() {
+            return current.get();
+        }
+
+        public void put(String key, Object arg) {
+            this.data.put(key, arg);
+        }
+
+        public Object get(String key) {
+            return data.get(key);
+        }
+
+        @Override
+        public String toString() {
+            return data.toString();
+        }
+
+    }
+
 }
