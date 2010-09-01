@@ -254,7 +254,12 @@ public class Binder {
                 return result;
             }
         }
-        return bind(name, o.getClass(), null, null, params, o, null, 0);
+        try {
+            return new BeanWrapper(o.getClass()).bind(name, null, params, "", o, null);
+        } catch(Exception e) {
+            Validation.addError(name, "validation.invalid");
+            return null;
+        }
     }
 
     public static Object bind(String name, Class<?> clazz, Type type, Annotation[] annotations, Map<String, String[]> params) {
