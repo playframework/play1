@@ -84,7 +84,7 @@ public abstract class Enhancer {
      * @throws java.lang.ClassNotFoundException
      */
     protected boolean hasAnnotation(CtClass ctClass, String annotation) throws ClassNotFoundException {
-        for (Object object : ctClass.getAnnotations()) {
+        for (Object object : ctClass.getAvailableAnnotations()) {
             Annotation ann = (Annotation) object;
             if (ann.annotationType().getName().equals(annotation)) {
                 return true;
@@ -101,7 +101,7 @@ public abstract class Enhancer {
      * @throws java.lang.ClassNotFoundException
      */    
     protected boolean hasAnnotation(CtField ctField, String annotation) throws ClassNotFoundException {
-        for (Object object : ctField.getAnnotations()) {
+        for (Object object : ctField.getAvailableAnnotations()) {
             Annotation ann = (Annotation) object;
             if (ann.annotationType().getName().equals(annotation)) {
                 return true;
