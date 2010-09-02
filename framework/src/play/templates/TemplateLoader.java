@@ -7,6 +7,7 @@ import java.util.Map;
 
 import play.Logger;
 import play.Play;
+import play.PlayPlugin;
 import play.vfs.VirtualFile;
 import play.exceptions.TemplateCompilationException;
 import play.exceptions.TemplateNotFoundException;
@@ -16,7 +17,7 @@ import play.exceptions.TemplateNotFoundException;
  */
 public class TemplateLoader {
 
-    protected static Map<String, Template> templates = new HashMap<String, Template>();
+    protected static Map<String, BaseTemplate> templates = new HashMap<String, BaseTemplate>();
 
     /**
      * Load a template from a virtual file
@@ -24,22 +25,30 @@ public class TemplateLoader {
      * @return The executable template
      */
     public static Template load(VirtualFile file) {
+        // Try with plugin
+        for(PlayPlugin plugin : Play.plugins) {
+            Template pluginProvided = plugin.loadTemplate(file);
+            if(pluginProvided != null) {
+                return pluginProvided;
+            }
+        }
+        // Use default engine
         String key = (file.relativePath().hashCode() + "").replace("-", "M");
         if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {
             if (Play.usePrecompiled) {
-                Template template = new GroovyTemplate(file.relativePath().replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"), file.contentAsString());
+                BaseTemplate template = new GroovyTemplate(file.relativePath().replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"), file.contentAsString());
                 template.loadPrecompiled();
                 templates.put(key, template);
                 return template;
             }
-            Template template = new GroovyTemplate(file.relativePath(), file.contentAsString());
+            BaseTemplate template = new GroovyTemplate(file.relativePath(), file.contentAsString());
             if (template.loadFromCache()) {
                 templates.put(key, template);
             } else {
                 templates.put(key, new GroovyTemplateCompiler().compile(file));
             }
         } else {
-            Template template = templates.get(key);
+            BaseTemplate template = templates.get(key);
             if (Play.mode == Play.Mode.DEV && template.timestamp < file.lastModified()) {
                 templates.put(key, new GroovyTemplateCompiler().compile(file));
             }
@@ -56,16 +65,16 @@ public class TemplateLoader {
      * @param source The template source
      * @return A Template
      */
-    public static Template load(String key, String source) {
+    public static BaseTemplate load(String key, String source) {
         if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {
-            Template template = new GroovyTemplate(key, source);
+            BaseTemplate template = new GroovyTemplate(key, source);
             if (template.loadFromCache()) {
                 templates.put(key, template);
             } else {
                 templates.put(key, new GroovyTemplateCompiler().compile(template));
             }
         } else {
-            Template template = new GroovyTemplate(key, source);
+            BaseTemplate template = new GroovyTemplate(key, source);
             if (Play.mode == Play.Mode.DEV) {
                 templates.put(key, new GroovyTemplateCompiler().compile(template));
             }
@@ -83,7 +92,7 @@ public class TemplateLoader {
      * @param source The template source
      * @return A Template
      */
-    public static Template load(String key, String source, boolean reload) {
+    public static BaseTemplate load(String key, String source, boolean reload) {
         cleanCompiledCache(key);
         return load(key, source);
     }
@@ -93,8 +102,8 @@ public class TemplateLoader {
      * @param source The template source
      * @return A Template
      */
-    public static Template loadString(String source) {
-        Template template = new GroovyTemplate(source);
+    public static BaseTemplate loadString(String source) {
+        BaseTemplate template = new GroovyTemplate(source);
         return new GroovyTemplateCompiler().compile(template);
     }
 
@@ -158,7 +167,9 @@ public class TemplateLoader {
             VirtualFile vf = root.child("conf/routes");
             if (vf != null && vf.exists()) {
                 Template template = load(vf);
-                template.compile();
+                if(template != null) {
+                    template.compile();
+                }
             }
         }
         return res;
@@ -168,14 +179,16 @@ public class TemplateLoader {
         if (!current.isDirectory() && !current.getName().startsWith(".")) {
             long start = System.currentTimeMillis();
             Template template = load(current);
-            try {
-                template.compile();
-                Logger.trace("%sms to load %s", System.currentTimeMillis() - start, current.getName());
-            } catch (TemplateCompilationException e) {
-                Logger.error("Template %s does not compile at line %d", e.getTemplate().name, e.getLineNumber());
-                throw e;
+            if(template != null) {
+                try {
+                    template.compile();
+                    Logger.trace("%sms to load %s", System.currentTimeMillis() - start, current.getName());
+                } catch (TemplateCompilationException e) {
+                    Logger.error("Template %s does not compile at line %d", e.getTemplate().name, e.getLineNumber());
+                    throw e;
+                }
+                templates.add(template);
             }
-            templates.add(template);
         } else if (!current.getName().startsWith(".")) {
             for (VirtualFile virtualFile : current.list()) {
                 scan(templates, virtualFile);

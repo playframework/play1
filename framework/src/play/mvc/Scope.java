@@ -223,7 +223,11 @@ public class Scope {
             if (key.contains(":")) {
                 throw new IllegalArgumentException("Character ':' is invalid in a session key.");
             }
-            data.put(key, value);
+            if(value == null) {
+                data.remove(key);
+            } else {
+                data.put(key, value);
+            }
         }
 
         public void put(String key, Object value) {

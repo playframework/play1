@@ -57,7 +57,7 @@ import play.utils.HTML;
 /**
  * A template
  */
-public class GroovyTemplate extends Template {
+public class GroovyTemplate extends BaseTemplate {
 
     public GroovyTemplate(String name, String source) {
         super(name, source);
@@ -294,12 +294,12 @@ public class GroovyTemplate extends Template {
             if (template.name.indexOf(".") > 0) {
                 callerExtension = template.name.substring(template.name.lastIndexOf(".") + 1);
             }
-            Template tagTemplate = null;
+            BaseTemplate tagTemplate = null;
             try {
-                tagTemplate = TemplateLoader.load("tags/" + templateName + "." + callerExtension);
+                tagTemplate = (BaseTemplate)TemplateLoader.load("tags/" + templateName + "." + callerExtension);
             } catch (TemplateNotFoundException e) {
                 try {
-                    tagTemplate = TemplateLoader.load("tags/" + templateName + ".tag");
+                    tagTemplate = (BaseTemplate)TemplateLoader.load("tags/" + templateName + ".tag");
                 } catch (TemplateNotFoundException ex) {
                     if (callerExtension.equals("tag")) {
                         throw new TemplateNotFoundException("tags/" + templateName + ".tag", template, fromLine);

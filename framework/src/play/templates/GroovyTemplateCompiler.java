@@ -23,7 +23,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     public static List<String> extensionsClassnames = new ArrayList<String>();
 
     @Override
-    public Template compile(Template template) {
+    public BaseTemplate compile(BaseTemplate template) {
         try {
             extensionsClassnames.clear();
             for(PlayPlugin p : Play.plugins) {

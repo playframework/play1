@@ -28,7 +28,7 @@ import play.Logger;
 import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.I18N;
-import play.templates.Template.RawData;
+import play.templates.BaseTemplate.RawData;
 import play.utils.HTML;
 
 /**

@@ -101,6 +101,10 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public void beforeDetectingChanges() {
     }
 
+    public Template loadTemplate(VirtualFile file) {
+        return null;
+    }
+
     /**
      * It's time for the plugin to detect changes.
      * Throw an exception is the application must be reloaded.

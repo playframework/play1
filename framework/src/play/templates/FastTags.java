@@ -187,7 +187,7 @@ public class FastTags {
         if (name == null) {
             throw new TemplateExecutionException(template.template, fromLine, "Specify a variable name", new TagInternalException("Specify a variable name"));
         }
-        Object value = Template.layoutData.get().get(name);
+        Object value = BaseTemplate.layoutData.get().get(name);
         if (value != null) {
             out.print(value);
         } else {
@@ -202,7 +202,7 @@ public class FastTags {
         for (Map.Entry<?, ?> entry : args.entrySet()) {
             Object key = entry.getKey();
             if (!key.toString().equals("arg")) {
-                Template.layoutData.get().put(key, entry.getValue());
+                BaseTemplate.layoutData.get().put(key, entry.getValue());
                 return;
             }
         }
@@ -213,7 +213,7 @@ public class FastTags {
             StringWriter sw = new StringWriter();
             body.setProperty("out", new PrintWriter(sw));
             body.call();
-            Template.layoutData.get().put(name, sw.toString());
+            BaseTemplate.layoutData.get().put(name, sw.toString());
             body.setProperty("out", oldOut);
         }
     }
@@ -225,14 +225,14 @@ public class FastTags {
             }
             String name = args.get("arg").toString();
             if (name.startsWith("./")) {
-                String ct = Template.currentTemplate.get().name;
+                String ct = BaseTemplate.currentTemplate.get().name;
                 if (ct.matches("^/lib/[^/]+/app/views/.*")) {
                     ct = ct.substring(ct.indexOf("/", 5));
                 }
                 ct = ct.substring(0, ct.lastIndexOf("/"));
                 name = ct + name.substring(1);
             }
-            Template.layout.set(TemplateLoader.load(name));
+            BaseTemplate.layout.set((BaseTemplate)TemplateLoader.load(name));
         } catch (TemplateNotFoundException e) {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
         }
@@ -246,14 +246,14 @@ public class FastTags {
             }
             String name = args.get("arg").toString();
             if (name.startsWith("./")) {
-                String ct = Template.currentTemplate.get().name;
+                String ct = BaseTemplate.currentTemplate.get().name;
                 if (ct.matches("^/lib/[^/]+/app/views/.*")) {
                     ct = ct.substring(ct.indexOf("/", 5));
                 }
                 ct = ct.substring(0, ct.lastIndexOf("/"));
                 name = ct + name.substring(1);
             }
-            Template t = TemplateLoader.load(name);
+            BaseTemplate t = (BaseTemplate)TemplateLoader.load(name);
             Map<String, Object> newArgs = new HashMap<String, Object>();
             newArgs.putAll(template.getBinding().getVariables());
             newArgs.put("_isInclude", true);

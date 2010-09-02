@@ -9,7 +9,7 @@ import play.exceptions.UnexpectedException;
 
 public abstract class TemplateCompiler {
 
-    public Template compile(Template template) {
+    public BaseTemplate compile(BaseTemplate template) {
         try {
             long start = System.currentTimeMillis();
             generate(template);
@@ -22,12 +22,12 @@ public abstract class TemplateCompiler {
         }
     }
 
-    public Template compile(VirtualFile file) {
+    public BaseTemplate compile(VirtualFile file) {
         return compile(new GroovyTemplate(file.relativePath(), file.contentAsString()));
     }
     
     StringBuilder compiledSource = new StringBuilder();
-    Template template;
+    BaseTemplate template;
     TemplateParser parser;
     boolean doNextScan = true;
     TemplateParser.Token state;
@@ -43,7 +43,7 @@ public abstract class TemplateCompiler {
         boolean hasBody;
     }
 
-    void generate(Template template) {
+    void generate(BaseTemplate template) {
         this.template = template;
         String source = source();
         this.parser = new TemplateParser(source);
