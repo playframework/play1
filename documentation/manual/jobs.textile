@@ -35,7 +35,7 @@ public class MyJob extends Job<String> {
 
 Here the use of **String** is just for the example, of course a job can return any object type.
 
-h2. <a name="concepts">Bootstrap job</a>
+h2. <a name="concepts">Bootstrap jobs</a>
 
 Bootstrap jobs are executed by Play at application start time. To mark your job as a bootstrap job you just need to add the **@OnApplicationStart** annotation.
 
@@ -61,7 +61,7 @@ When you run the application in DEV mode, the application waits for the first HT
  
 When you run in PROD mode, the application will start synchronously with the server start.
 
-h2. <a name="scheduling">Scheduled job</a>
+h2. <a name="scheduling">Scheduled jobs</a>
 
 Scheduled jobs are run periodically by the framework. You can ask Play to run a job at a specific interval using the **@Every** annotation.
 

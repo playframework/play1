@@ -7,7 +7,7 @@ An HTTP request is seen as an event by the MVC framework. The event contains two
 * The Request path (such as /clients/1542, /photos/list), including the query string.
 * The HTTP method (GET, POST, PUT, DELETE)
 
-h2. <a>About REST</a>
+h2. <a name="rest">About REST</a>
 
 Representational state transfer (REST) is a style of software architecture for distributed hypermedia systems such as the World Wide Web.
 

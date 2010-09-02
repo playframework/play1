@@ -146,7 +146,7 @@ bc. views.Application.listTagged.title = Posts tagged with %s
 
 and in the template, add the parameter like this: 
 
-bc. **&{'views.Application.listTagged.title', tag**} 
+bc. &{'views.Application.listTagged.title', tag} 
 
 When a message contains multiple parameters, add an index to the format string to allow for different word order in another language: 
 
@@ -154,7 +154,7 @@ bc. views.Admin.index.welcome = Welcome %1s, <span>you have written %2s posts so
 
 … with a list in the template: 
 
-bc. **&{'views.Admin.index.welcome', user, posts.size()**} 
+bc. &{'views.Admin.index.welcome', user, posts.size()} 
 
 In this example, we would also like to use the correct plural form for the word 'post', so make that word a parameter too: 
 
@@ -162,7 +162,7 @@ bc. views.Admin.index.welcome = Welcome %1s, <span>you have written %2s %3s so f
 
 … and use the **pluralize** extension in the template 
 
-bc. **&{'views.Admin.index.welcome', user, posts.size(), posts.pluralize(messages.get('post'), messages.get('posts'))**} 
+bc. &{'views.Admin.index.welcome', user, posts.size(), posts.pluralize(messages.get('post'), messages.get('posts'))} 
 
 Note that we have to use **messages.get** to look up the localised singular and plural. 
 

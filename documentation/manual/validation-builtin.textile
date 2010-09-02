@@ -1,0 +1,161 @@
+h1. Built-in validations
+
+Play defines several built-in validations, each of which is used as described in the "validation":validation chapter.
+
+Each validation has an associated error message, defined in **$PLAY_HOME/resources/messages**, whose key is **validation.** followed by the validation name. You can override this message by using the same key in your application's **conf/messages** file, and localise it using message files for other languages.
+
+<h2><a name="email">email</a></h2>
+
+Checks that the value is a valid e-mail address.
+
+bc. validation.email(address);
+
+Annotation syntax:
+
+bc. @Email String address
+
+Message key: **validation.email**
+
+<h2><a name="equals">equals</a></h2>
+
+Checks that the value is equal to another parameter's value, using the value's **equals** method, e.g. for checking for a password confirmation field.
+
+bc. validation.equals(password, passwordConfirmation);
+
+Annotation syntax:
+
+bc. @Equals("passwordConfirmation") String password
+
+Message key: **validation.equals**
+
+<h2><a name="future">future</a></h2>
+
+Checks that the value is a date in the future. If a second date is specified as a reference, then the value must be in the future with respect to the reference date - i.e. after it.
+
+bc. validation.future(dueDate);
+validation.future(dueDate, shipmentDate);
+
+Annotation syntax:
+
+bc. @InFuture String dueDate
+@InFuture("1979-12-31") String birthDate
+
+Message key: **validation.future**
+
+<h2><a name="isTrue">isTrue</a></h2>
+
+Checks that the value is a **String** or **Boolean** that evaluates to **true**, e.g. for an 'I agree to the terms' checkbox that must be checked, or a non-zero **Number**. Null values are considered false/invalid.
+
+bc. validation.isTrue(agree);
+
+Annotation syntax:
+
+bc. @IsTrue String agree
+
+Message key: **validation.isTrue**
+
+<h2><a name="match">match</a></h2>
+
+Checks that the value is a string that matches the given regular expression. Empty strings are considered valid.
+
+bc. validation.match(abbreviation, "[A-Z]{3}"); // TLA
+
+Annotation syntax:
+
+bc. @Match("[A-Z]{3}") String abbreviation
+
+Message key: **validation.match**
+
+<h2><a name="max">max</a></h2>
+
+Checks that the value is a **String** or **Number** that is no greater than the given number. Null values are considered valid.
+
+bc. validation.max(wordCount, 7500); // Short story
+
+Annotation syntax:
+
+bc. @Max(7500) String wordCount
+
+Message key: **validation.max**
+
+<h2><a name="maxSize">maxSize</a></h2>
+
+Checks that the value is a **String** whose length is no greater than the given length. Empty strings are considered valid.
+
+bc. validation.maxSize(url, 2083); // IE 4.0 - 8
+
+Annotation syntax:
+
+bc. @MaxSize(2083) String value
+
+Message key: **validation.maxSize**
+
+<h2><a name="min">min</a></h2>
+
+Checks that the value is a **String** or **Number** that is no less than the given number. Null values are considered valid.
+
+bc. validation.min(age, 18); // Adult
+
+Annotation syntax:
+
+bc. @Min(18) Long age
+
+Message key: **validation.min**
+
+<h2><a name="minSize">minSize</a></h2>
+
+Checks that the value is a **String** whose length is no less than the given length. Empty strings are considered valid.
+
+bc. validation.minSize(value, 42);
+
+Annotation syntax:
+
+bc. @MinSize(42) String value
+
+Message key: **validation.minSize**
+
+<h2><a name="past">past</a></h2>
+
+Checks that the value is a date in the future. If a second date is specified as a reference, then the value must be in the past with respect to the reference date - i.e. before it.
+
+bc. validation.past(actualDepartureDate);
+validation.past(expectedDepartureDate, expectedArrivalDate);
+
+Annotation syntax:
+
+bc. @Past String actualDepartureDate
+@Past("1980-01-01") String birthDate
+
+Message key: **validation.past**
+
+<h2><a name="range">range</a></h2>
+
+Checks that the value is a number within the range (inclusive) specified by the two given numbers.
+
+bc. validation.range(wordCount, 17500, 40000); // Novella
+
+Annotation syntax:
+
+bc. @Range(min = 17500, max = 40000) String wordCount
+
+Message key: **validation.past**
+
+<h2><a name="required">required</a></h2>
+
+Checks that the value is a non-empty **String**, **Collection**, **File** or array.
+
+bc. validation.required(value);
+
+Annotation syntax:
+
+bc. @Required String value
+
+Message key: **validation.required**
+
+<h2><a name="url">url</a></h2>
+
+Checks that the value is a valid URL; empty strings are considered valid. There is no <a href="http://www.playframework.org/@api/play/data/validation/Validation.html">play.data.validation.Validation</a> method for this validation.
+
+bc. @URL String address
+
+Message key: **validation.url**

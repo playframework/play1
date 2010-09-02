@@ -2,7 +2,7 @@ h1. Deployment options
 
 Play applications can be deployed virtually anywhere: inside Servlet containers, as standalone servers, in Google Application Engine, Stack, a Cloud, etc...
 
-h2. <a name="standalone">Standalone Play application</a>
+h2. <a name="standalone">Standalone Play applications</a>
 
 The simplest and the more robust way is to simply run your Play application without any container. You can use a frontal HTTP server like Lighttpd or Apache if you need more advanced HTTP features like virtual hosting.
 
@@ -14,14 +14,14 @@ You will have less problems running your application this way, as you will use t
 
 Please refer to the "'Put your application in production' page":production for more information.
 
-h2. <a name="appservers">Application servers</a>
+h2. <a name="appservers">Java EE application servers</a>
 
 Your Play application can also run inside your favorite application server. Most application servers are supported out of the box.
 
 h3. Application server compatibility matrix
 
 || JBoss 4.2.x || JBoss 5.x || JBoss 6M2 || Glasshfish v3 || IBM Websphere 6.1 ||IBM Websphere 7 || Geronimo 2.x || Tomcat 6.x || Jetty 7.x || Resin 4.0.5 ||
-| ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  ✓ | ✓  |                                                                                                                                                            
+|| ✓ || ✓ || ✓ || ✓ || ✓ || ✓ || ✓ || ✓ ||  ✓ || ✓  ||                                                                                                                                                            
 
 These application server are known to work with Play 1.0.2; but feel free to report any other working deployment.
 
