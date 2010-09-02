@@ -165,7 +165,7 @@ public class TemplateLoader {
     }
 
     private static void scan(List<Template> templates, VirtualFile current) {
-        if (!current.isDirectory()) {
+        if (!current.isDirectory() && !current.getName().startsWith(".")) {
             long start = System.currentTimeMillis();
             Template template = load(current);
             try {
