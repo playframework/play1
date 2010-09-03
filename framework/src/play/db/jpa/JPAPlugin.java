@@ -365,7 +365,9 @@ public class JPAPlugin extends PlayPlugin {
 
     @Override
     public void afterFixtureLoad() {
-        JPA.em().clear();
+        if(JPA.isEnabled()) {
+            JPA.em().clear();
+        }
     }
 
     public static class JPAModelLoader implements Model.Factory {
