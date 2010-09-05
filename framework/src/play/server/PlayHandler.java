@@ -78,6 +78,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
         Logger.trace("messageReceived: end");
     }
+
     private static Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
 
     public class NettyInvocation extends Invoker.Invocation {
@@ -348,6 +349,19 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         Logger.trace("copyResponse: end");
     }
 
+    static String getRemoteIPAddress(ChannelHandlerContext ctx) {
+        String fullAddress = ((InetSocketAddress) ctx.getChannel().getRemoteAddress()).getAddress().getHostAddress();
+        // Address resolves to /x.x.x.x:zzzz we only want x.x.x.x
+        if (fullAddress.startsWith("/")) {
+            fullAddress = fullAddress.substring(1);
+        }
+        int i = fullAddress.indexOf(":");
+        if (i != -1) {
+            fullAddress = fullAddress.substring(0, i);
+        }
+        return fullAddress;
+    }
+
     public static Request parseRequest(ChannelHandlerContext ctx, HttpRequest nettyRequest) throws Exception {
         Logger.trace("parseRequest: begin");
         Logger.trace("parseRequest: URI = " + nettyRequest.getUri());
@@ -360,7 +374,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
 
         final Request request = new Request();
-        request.remoteAddress = ((InetSocketAddress) ctx.getChannel().getRemoteAddress()).getAddress().getHostAddress();
+
+        request.remoteAddress = getRemoteIPAddress(ctx);
         request.method = nettyRequest.getMethod().getName();
         request.path = path;
         request.querystring = querystring;
