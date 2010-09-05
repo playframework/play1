@@ -59,6 +59,7 @@ public class Http {
 
         /**
          * First value
+         *
          * @return The first value
          */
         public String value() {
@@ -223,7 +224,7 @@ public class Http {
 
         public void _init() {
             Header header = headers.get("authorization");
-            if(header != null && header.value().startsWith("Basic ")) {
+            if (header != null && header.value().startsWith("Basic ")) {
                 String data = header.value().substring(6);
                 String[] decodedData = new String(Codec.decodeBASE64(data)).split(":");
                 user = decodedData.length > 0 ? decodedData[0] : null;
@@ -276,18 +277,19 @@ public class Http {
 
         /**
          * Retrieve the current request
+         *
          * @return the current request
          */
         public static Request current() {
             return current.get();
         }
-        
+
         /**
          * This request was sent by an Ajax framework.
          * (rely on the X-Requested-With header).
          */
         public boolean isAjax() {
-            if(!headers.containsKey("x-requested-with")) {
+            if (!headers.containsKey("x-requested-with")) {
                 return false;
             }
             return "XMLHttpRequest".equals(headers.get("x-requested-with").value());
@@ -295,6 +297,7 @@ public class Http {
 
         /**
          * Get the request base (ex: http://localhost:9000
+         *
          * @return the request base of the url (protocol, host and port)
          */
         public String getBase() {
@@ -318,7 +321,7 @@ public class Http {
             if (!headers.containsKey("accept-language")) return new ArrayList<String>();
             String acceptLanguage = headers.get("accept-language").value();
             List<String> languages = Arrays.asList(acceptLanguage.split(","));
-            Collections.sort(languages, new Comparator<String>(){
+            Collections.sort(languages, new Comparator<String>() {
                 public int compare(String lang1, String lang2) {
                     double q1 = 1.0;
                     double q2 = 1.0;
@@ -326,10 +329,11 @@ public class Http {
                     Matcher m2 = qpattern.matcher(lang2);
                     if (m1.find()) q1 = Double.parseDouble(m1.group(1));
                     if (m2.find()) q2 = Double.parseDouble(m2.group(1));
-                    return (int)(q2 - q1);
-                }});
+                    return (int) (q2 - q1);
+                }
+            });
             List<String> result = new ArrayList<String>();
-            for (String lang: languages) {
+            for (String lang : languages) {
                 result.add(lang.split(";")[0]);
             }
             return result;
@@ -393,6 +397,7 @@ public class Http {
 
         /**
          * Retrieve the current response
+         *
          * @return the current response
          */
         public static Response current() {
@@ -401,13 +406,14 @@ public class Http {
 
         /**
          * Get a response header
+         *
          * @param name Header name case-insensitive
          * @return the header value as a String
          */
         public String getHeader(String name) {
-            for(String key : headers.keySet()) {
-                if(key.toLowerCase().equals(name.toLowerCase())) {
-                    if(headers.get(key) != null) {
+            for (String key : headers.keySet()) {
+                if (key.toLowerCase().equals(name.toLowerCase())) {
+                    if (headers.get(key) != null) {
                         return headers.get(key).value();
                     }
                 }
@@ -417,7 +423,8 @@ public class Http {
 
         /**
          * Set a response header
-         * @param name Header name
+         *
+         * @param name  Header name
          * @param value Header value
          */
         public void setHeader(String name, String value) {
@@ -429,14 +436,15 @@ public class Http {
         }
 
         public void setContentTypeIfNotSet(String contentType) {
-            if(this.contentType == null) {
+            if (this.contentType == null) {
                 this.contentType = contentType;
             }
         }
 
         /**
          * Set a new cookie
-         * @param name Cookie name
+         *
+         * @param name  Cookie name
          * @param value Cookie value
          */
         public void setCookie(String name, String value) {
@@ -453,6 +461,7 @@ public class Http {
 
         /**
          * Set a new cookie that will expire in (current) + duration
+         *
          * @param name
          * @param value
          * @param duration Ex: 3d
@@ -474,7 +483,7 @@ public class Http {
             setCookie(name, value, null, "/", maxAge, secure);
         }
 
-            public void setCookie(String name, String value, String domain, String path, String duration) {
+        public void setCookie(String name, String value, String domain, String path, String duration) {
             setCookie(name, value, domain, path, duration, false);
         }
 
@@ -511,7 +520,8 @@ public class Http {
         }
 
         /**
-         * Add a cache-control header 
+         * Add a cache-control header
+         *
          * @param duration Ex: 3h
          */
         public void cacheFor(String duration) {
@@ -521,6 +531,7 @@ public class Http {
 
         /**
          * Add cache-control headers
+         *
          * @param duration Ex: 3h
          */
         public void cacheFor(String etag, String duration, long lastModified) {
@@ -529,10 +540,12 @@ public class Http {
             setHeader("Last-Modified", Utils.getHttpDateFormatter().format(new Date(lastModified)));
             setHeader("Etag", etag);
         }
+
         /**
          * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support
          * these features and will ignore the headers. Refer to the browsers' documentation to
          * know what versions support them.
+         *
          * @param allowOrigin a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
          */
         public void accessControl(String allowOrigin) {
@@ -543,7 +556,8 @@ public class Http {
          * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support
          * these features and will ignore the headers. Refer to the browsers' documentation to
          * know what versions support them.
-         * @param allowOrigin a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
+         *
+         * @param allowOrigin      a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
          * @param allowCredentials Let the browser send the cookies when doing a x-domain request. Only respected by the browser if allowOrigin != "*"
          */
         public void accessControl(String allowOrigin, boolean allowCredentials) {
@@ -554,8 +568,9 @@ public class Http {
          * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support
          * these features and will ignore the headers. Refer to the browsers' documentation to
          * know what versions support them.
-         * @param allowOrigin a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
-         * @param allowMethods a comma separated list of HTTP methods allowed, or null for all.
+         *
+         * @param allowOrigin      a comma separated list of domains allowed to perform the x-domain call, or "*" for all.
+         * @param allowMethods     a comma separated list of HTTP methods allowed, or null for all.
          * @param allowCredentials Let the browser send the cookies when doing a x-domain request. Only respected by the browser if allowOrigin != "*"
          */
         public void accessControl(String allowOrigin, String allowMethods, boolean allowCredentials) {

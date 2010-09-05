@@ -155,8 +155,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 }
                 return;
             }
-            ActionInvoker.invoke(request, response);
+
+            // Check the exceeded size before re rendering so we can render the error if the size is exceeded
             saveExceededSizeError(nettyRequest, request, response);
+            ActionInvoker.invoke(request, response);
             copyResponse(ctx, request, response, nettyRequest);
             Logger.trace("execute: end");
         }
@@ -167,6 +169,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         String warning = nettyRequest.getHeader(HttpHeaders.Names.WARNING);
         String length = nettyRequest.getHeader(HttpHeaders.Names.CONTENT_LENGTH);
         if (warning != null) {
+            Logger.trace("saveExceededSizeError: begin");
             try {
                 StringBuilder error = new StringBuilder();
                 error.append("\u0000");
@@ -191,7 +194,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 Http.Cookie c = new Http.Cookie();
                 c.value = errorData;
                 c.name = Scope.COOKIE_PREFIX + "_ERRORS";
-                response.cookies.put(Scope.COOKIE_PREFIX + "_ERRORS", c);
+                request.cookies.put(Scope.COOKIE_PREFIX + "_ERRORS", c);
+                Logger.trace("saveExceededSizeError: end");
             } catch (Exception e) {
                 throw new UnexpectedException("Error serialization problem", e);
             }
