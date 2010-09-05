@@ -1,6 +1,7 @@
 package controllers;
 
 import play.*;
+import play.data.Upload;
 import play.mvc.*;
 import play.test.Fixtures;
 
@@ -38,9 +39,15 @@ public class Binary extends Controller {
 		notFound();
 	}
 
-     public static void upload(File file) {
+     public static void uploadFile(File file) {
         
         Http.Response.current().headers.put("Content-Length", new Http.Header("Content-Length", String.valueOf(file.length())));
         renderBinary(file);
+    }
+
+    public static void upload(Upload upload) {
+
+        Http.Response.current().headers.put("Content-Length", new Http.Header("Content-Length", String.valueOf(upload.asBytes().length)));
+        renderBinary(upload.asFile());
     }
 }

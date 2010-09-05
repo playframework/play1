@@ -191,7 +191,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 Http.Cookie c = new Http.Cookie();
                 c.value = errorData;
                 c.name = Scope.COOKIE_PREFIX + "_ERRORS";
-                request.cookies.put(Scope.COOKIE_PREFIX + "_ERRORS", c);
+                response.cookies.put(Scope.COOKIE_PREFIX + "_ERRORS", c);
             } catch (Exception e) {
                 throw new UnexpectedException("Error serialization problem", e);
             }
@@ -465,7 +465,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
             throws Exception {
-        //e.getCause().printStackTrace();
         e.getChannel().close();
     }
 

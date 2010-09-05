@@ -7,6 +7,8 @@ import org.junit.Test;
 
 import play.Logger;
 import play.Play;
+import play.data.MemoryUpload;
+import play.data.Upload;
 import play.mvc.Http;
 import play.mvc.Http.Response;
 import play.mvc.results.Redirect;
@@ -65,6 +67,27 @@ public class BinaryTest extends FunctionalTest {
 		File file = Play.getFile("test/winie.jpg");
 		assertTrue(file.exists());
 		files.put("file", file);
+		Response uploadResponse = POST("/Binary/uploadFile", parameters, files);
+
+        assertStatus(200, uploadResponse);
+
+        String size = uploadResponse.getHeader("Content-Length");
+
+	    assertEquals("Size does not match", "1366949", size);
+	}
+
+
+
+    @Test
+	public void testUploadBigFile2() {
+
+		Map<String,String> parameters= new HashMap<String,String>();
+
+		Map<String, File> files= new HashMap<String, File>();
+		File file = Play.getFile("test/winie.jpg");
+		assertTrue(file.exists());
+
+		files.put("upload", file);
 		Response uploadResponse = POST("/Binary/upload", parameters, files);
 
         assertStatus(200, uploadResponse);

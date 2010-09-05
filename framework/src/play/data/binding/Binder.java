@@ -1,8 +1,6 @@
 package play.data.binding;
 
-import play.data.binding.types.DateBinder;
-import play.data.binding.types.CalendarBinder;
-import play.data.binding.types.LocaleBinder;
+import play.data.binding.types.*;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -21,8 +19,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import play.data.binding.types.BinaryBinder;
-import play.data.binding.types.FileBinder;
+
 import play.db.Model;
 
 /**
@@ -38,6 +35,7 @@ public class Binder {
         supportedTypes.put(Locale.class, new LocaleBinder());
         supportedTypes.put(File.class, new FileBinder());
         supportedTypes.put(Model.BinaryField.class, new BinaryBinder());
+        supportedTypes.put(Upload.class, new UploadBinder());
     }
     static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<Class<?>, BeanWrapper>();
 
@@ -363,7 +361,9 @@ public class Binder {
 
         // custom types
         for (Class<?> c : supportedTypes.keySet()) {
+            Logger.trace("directBind: value [" + value + "] c [" + c + "] Class [" + clazz + "]");
             if (c.isAssignableFrom(clazz)) {
+                 Logger.trace("directBind: isAssignableFrom is true");
                 return nullOrEmpty ? null : supportedTypes.get(c).bind(name, annotations, value, clazz);
             }
         }
