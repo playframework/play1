@@ -231,7 +231,6 @@ public class Play {
         // Build basic templates path
         templatesPath = new ArrayList<VirtualFile>();
         templatesPath.add(appRoot.child("app/views"));
-        templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework/templates")));
 
         // Main route file
         routes = appRoot.child("conf/routes");
@@ -241,6 +240,10 @@ public class Play {
 
         // Load modules
         loadModules();
+
+        // Load the templates from the framework after the one from the modules
+        templatesPath.add(VirtualFile.open(new File(frameworkPath, "framework/templates")));
+
 
         // Enable a first classloader
         classloader = new ApplicationClassloader();
