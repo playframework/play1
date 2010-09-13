@@ -92,6 +92,26 @@ bc. <table>
 #{/errors}
 </table>
 
+h2. <a>ifErrors</a>
+
+If there's any validation error, tag's content will be rendered
+
+bc. #{ifErrors}
+  <p>Error(s) found!</p>
+#{/ifErrors}
+
+h2. <a>ifError</a>
+
+If corresponding input as error, tag's content will be rendered
+
+* **arg** (required) - input's name
+
+bc. #{ifError 'user.name'}
+  <p>
+    User name is invalid: 
+    #{error 'user.name' /}
+  <p>
+#{/ifError}
 
 h2. <a>extends</a>
 
@@ -343,3 +363,60 @@ bc. ${'&amp;'}
 
 In this example, the first line outputs **&amp;** while the second line outputs an ampersand. 
 
+
+h2. <a>select</a>
+
+Insert a **select** tag in the template.
+
+* **name** (required) - attribute sets a name to the select element.
+
+Any unknow attribute will be considered as an HTML attribute, and rendered "as is"
+
+bc. #{select 'booking.beds', value:2, id:'select1'}
+	#{option 1}One king-size bed#{/option}
+	#{option 2}Two double beds#{/option}
+	#{option 3}Three beds#{/option}
+#{/select}
+
+Will output:
+
+bc. <select name="booking.beds" size="1" id="select1" >
+  <option value="1">One king-size bed</option>
+  <option value="2" selected="selected">Two double beds</option>
+  <option value="3">Three beds</option>
+</select>
+
+
+This tag can generate options using **items** attribute.
+
+* **items** (optional) - list of objects, used to create **options**
+* **value** (optional) - selected element in **items**
+* **labelProperty** (optional) - for each item, attribute used as option's label 
+* **valueProperty** (optional) - for each item, attribute used as option's value. **id** is used by default.
+
+For example, giving a list of User, each having a name attribute:
+
+bc. #{select 'users', items:users, valueProperty:'id', labelProperty:'name', value:'User-5', class:"test", id:'select2' /}
+
+Will output:
+
+bc. <select name="users" size="1" class="test" id="select2" >
+  <option value="0" >User-0</option>
+  <option value="1" >User-1</option>            
+  <option value="2" >User-2</option>            
+  <option value="3" >User-3</option>
+  <option value="4" >User-4</option>
+  <option value="5" selected="selected">User-5</option>
+</select>
+
+h2. <a>option</a>
+
+Insert an **option** tag in the template.
+
+* **value** - option's value
+
+bc. #{option user.id} ${user.name} #{/option}
+
+Will output:
+
+bc. <option value="42">jto</option>
