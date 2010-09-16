@@ -11,7 +11,7 @@ import time
 
 from play.utils import *
 
-COMMANDS = ['run', 'new', 'clean', 'test', 'auto-test', 'id', 'new,run', 'clean,run']
+COMMANDS = ['run', 'new', 'clean', 'test', 'autotest', 'auto-test', 'id', 'new,run', 'clean,run']
 
 HELP = {
     'id': "Define the framework ID",
@@ -38,7 +38,7 @@ def execute(**kargs):
         run(app, args)
     if command == 'test':
         test(app, args)
-    if command == 'auto-test':
+    if command == 'auto-test' or command == 'autotest':
         autotest(app, args)
 
 def new(app, args, env):
