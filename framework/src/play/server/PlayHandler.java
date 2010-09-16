@@ -160,9 +160,16 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             // Check the exceeded size before re rendering so we can render the error if the size is exceeded
             saveExceededSizeError(nettyRequest, request, response);
             ActionInvoker.invoke(request, response);
+        }
+
+        @Override
+        public void onSuccess() throws Exception {
+            super.onSuccess();
             copyResponse(ctx, request, response, nettyRequest);
             Logger.trace("execute: end");
         }
+
+
     }
 
     void saveExceededSizeError(HttpRequest nettyRequest, Request request, Response response) {

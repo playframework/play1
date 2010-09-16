@@ -129,6 +129,12 @@ public class Invoker {
         }
 
         /**
+         * Things to do when the whole invocation has succeeded (before + execute + after)
+         */
+        public void onSuccess() throws Exception {
+        }
+
+        /**
          * Things to do if the Invocation code thrown an exception
          */
         public void onException(Throwable e) {
@@ -177,6 +183,7 @@ public class Invoker {
                     before();
                     execute();
                     after();
+                    onSuccess();
                 }
             } catch (Suspend e) {
                 suspend(e);
