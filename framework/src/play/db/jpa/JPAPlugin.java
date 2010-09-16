@@ -583,7 +583,7 @@ public class JPAPlugin extends PlayPlugin {
                 modelProperty.choices = new Model.Choices() {
                     @SuppressWarnings("unchecked")
                     public List<Object> list() {
-                        return Arrays.asList(field.getType().getEnumConstants());
+                        return (List<Object>) Arrays.asList(field.getType().getEnumConstants());
                     }
                 };
             }
