@@ -6,6 +6,7 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
+import play.server.ssl.SslHttpServerPipelineFactory;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -18,6 +19,7 @@ public class Server {
     public Server() {
         final Properties p = Play.configuration;
         int httpPort = Integer.parseInt(p.getProperty("http.port", "9000"));
+        boolean isSecure = Boolean.parseBoolean(p.getProperty("http.secure", "false"));
         InetAddress address = null;
         if (System.getProperties().containsKey("http.port")) {
             httpPort = Integer.parseInt(System.getProperty("http.port"));
@@ -35,12 +37,16 @@ public class Server {
         }
 
         ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
-            Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
+                Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
         );
-	try {
-             bootstrap.setPipelineFactory(new HttpServerPipelineFactory());
-             bootstrap.bind(new InetSocketAddress(address, httpPort));
-             bootstrap.setOption("child.tcpNoDelay", true);
+        try {
+            if (isSecure) {
+                bootstrap.setPipelineFactory(new SslHttpServerPipelineFactory());
+            } else {
+                bootstrap.setPipelineFactory(new HttpServerPipelineFactory());
+            }
+            bootstrap.bind(new InetSocketAddress(address, httpPort));
+            bootstrap.setOption("child.tcpNoDelay", true);
 
             if (Play.mode == Mode.DEV) {
                 if (address == null) {

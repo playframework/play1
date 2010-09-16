@@ -7,6 +7,7 @@ import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
+import org.jboss.netty.handler.ssl.SslHandler;
 import org.jboss.netty.handler.stream.ChunkedFile;
 import org.jboss.netty.handler.stream.ChunkedStream;
 import play.Invoker;
@@ -32,6 +33,7 @@ import play.utils.Utils;
 import play.vfs.VirtualFile;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -40,11 +42,51 @@ import java.util.*;
 
 import play.data.validation.Validation;
 
+import javax.net.ssl.SSLException;
+
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
 
 public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
+    private boolean isSecure = false;
+
+    public PlayHandler(boolean isSecure) {
+        this.isSecure = isSecure;
+    }
+
+    @Override
+    public void channelConnected(
+            ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+        if (isSecure) {
+            ctx.setAttachment(e.getValue());
+            // Get the SslHandler in the current pipeline.
+            final SslHandler sslHandler = ctx.getPipeline().get(SslHandler.class);
+            sslHandler.setEnableRenegotiation(false);
+            // Get notified when SSL handshake is done.
+            ChannelFuture handshakeFuture = sslHandler.handshake();
+            handshakeFuture.addListener(new SslListener(sslHandler));
+        }
+    }
+
+    private static final class SslListener implements ChannelFutureListener {
+
+        private final SslHandler sslHandler;
+
+        SslListener(SslHandler sslHandler) {
+            this.sslHandler = sslHandler;
+        }
+
+        public void operationComplete(ChannelFuture future) throws Exception {
+            if (!future.isSuccess()) {
+                Logger.warn(future.getCause(), "Invalid certificate ");
+
+                if (future.getChannel().isOpen()) {
+                    future.getChannel().close();
+                }
+            }
+        }
+    }
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
@@ -491,7 +533,20 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
             throws Exception {
-        e.getChannel().close();
+        Logger.error(e.getCause(), "");
+        // We have to redirect to https://, as it was targeting http://
+        // Redirect to the root as we don't know the url at that point
+        if (e.getCause() instanceof javax.net.ssl.SSLException) {
+            InetSocketAddress inet = ((InetSocketAddress) ctx.getAttachment());
+            ctx.getPipeline().remove("ssl");
+            HttpResponse nettyResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT);
+            nettyResponse.setHeader(LOCATION, "https://" + inet.getHostName() + ":" + Play.configuration.getProperty("http.port") + "/");
+            nettyResponse.setHeader(SERVER, signature);
+            ChannelFuture writeFuture = ctx.getChannel().write(nettyResponse);
+            writeFuture.addListener(ChannelFutureListener.CLOSE);
+        } else {
+            e.getChannel().close();
+        }
     }
 
     public static void serve404(NotFound e, ChannelHandlerContext ctx, Request request, HttpRequest nettyRequest) {
