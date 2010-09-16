@@ -7,12 +7,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.Future;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
@@ -22,6 +21,7 @@ import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.mvc.Http.Header;
+import play.utils.NoOpEntityResolver;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -31,12 +31,9 @@ import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.AsyncHttpClientConfig.Builder;
 import com.ning.http.client.FilePart;
-import com.ning.http.client.Headers;
 import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Response;
 import com.ning.http.client.StringPart;
-import javax.xml.parsers.DocumentBuilder;
-import play.utils.NoOpEntityResolver;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -506,12 +503,10 @@ public class WS extends PlayPlugin {
         }
 
         public List<Header> getHeaders() {
-            Headers hdrs = response.getHeaders();
+            Map<String, List<String>> hdrs = response.getHeaders();
             List<Header> result = new ArrayList<Header>();
-            Iterator<Entry<String, List<String>>> iter = hdrs.iterator();
-            while (iter.hasNext()) {
-                Entry<String, List<String>> header = iter.next();
-                result.add(new Header(header.getKey(), header.getValue()));
+            for (String key: hdrs.keySet()) {
+                result.add(new Header(key, hdrs.get(key)));
             }
             return result;
         }
