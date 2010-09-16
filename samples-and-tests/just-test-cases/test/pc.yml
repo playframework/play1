@@ -1,0 +1,8 @@
+Child(c1):
+    name: child
+
+Parent(P1):
+    id: parent
+    name: parent
+    children:
+        - c1

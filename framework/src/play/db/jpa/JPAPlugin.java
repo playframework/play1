@@ -21,6 +21,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
@@ -65,8 +66,10 @@ public class JPAPlugin extends PlayPlugin {
                     query.setParameter(1, play.data.binding.Binder.directBind(name, annotations, id + "", Model.Manager.factoryFor(clazz).keyType()));
                     Object o = query.getSingleResult();
                     return GenericModel.edit(o, name, params, annotations);
+                } catch (NoResultException e) {
+                    // ok
                 } catch (Exception e) {
-                    return null;
+                    throw new UnexpectedException(e);
                 }
             }
             return GenericModel.create(clazz, name, params, annotations);

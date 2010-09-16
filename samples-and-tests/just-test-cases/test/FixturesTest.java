@@ -9,7 +9,7 @@ import models.vendor.tag.AreaTag;
 import models.vendor.tag.FunctionTag;
 import models.vendor.tag.Tag;
 import models.Base;
-import models.Referenced;
+import models.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -70,5 +70,14 @@ public class FixturesTest extends UnitTest {
         assertNotNull(b2);
         assertNull(b2.ref);
     }
+
+	@Test
+    public void withGenericModel() {
+		Fixtures.load("pc.yml");
+		Parent parent = Parent.all().first();
+		assertNotNull(parent);
+		assertNotNull(parent.children);
+		assertFalse(parent.children.isEmpty());
+	}
 
 }
