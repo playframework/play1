@@ -1,6 +1,5 @@
 package play.data.binding.types;
 
-import play.Logger;
 import play.data.binding.TypeBinder;
 import java.lang.annotation.Annotation;
 import java.util.List;

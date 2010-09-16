@@ -22,7 +22,6 @@ public class Blob implements BinaryField, UserType {
     private String UUID;
     private String type;
     private File file;
-    private String oldUUID;
 
     public Blob() {}
 
@@ -43,7 +42,6 @@ public class Blob implements BinaryField, UserType {
     }
     
     public void set(InputStream is, String type) {
-        this.oldUUID = this.UUID;
         this.UUID = Codec.UUID();
         this.type = type;
         IO.write(is, getFile());

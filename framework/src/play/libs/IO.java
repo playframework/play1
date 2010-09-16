@@ -26,7 +26,6 @@ public class IO {
      * Read a properties file with the utf-8 encoding
      * @param is Stream to properties file
      * @return The Properties object
-     * @throws java.io.IOException
      */
     public static Properties readUtf8Properties(InputStream is) {
         Properties properties = new Properties();
@@ -48,7 +47,6 @@ public class IO {
      * Read the Stream content as a string (always use utf-8)
      * @param is The stream to read
      * @return The String content
-     * @throws java.io.IOException
      */
     public static String readContentAsString(InputStream is) {
         String res = null;
@@ -65,7 +63,6 @@ public class IO {
      * Read file content to a String (always use utf-8)
      * @param file The file to read
      * @return The String content
-     * @throws java.io.IOException
      */
     public static String readContentAsString(File file) {
         try {
@@ -88,7 +85,6 @@ public class IO {
      * Read binary content of a file (warning does not use on large file !)
      * @param file The file te read
      * @return The binary data
-     * @throws java.io.IOException
      */
     public static byte[] readContent(File file) {
         try {
@@ -106,7 +102,6 @@ public class IO {
      * Read binary content of a stream (warning does not use on large file !)
      * @param is The stream to read
      * @return The binary data
-     * @throws java.io.IOException
      */
     public static byte[] readContent(InputStream is) {
         try {
@@ -126,7 +121,6 @@ public class IO {
      * Write String content to a stream (always use utf-8)
      * @param content The content to write
      * @param os The stream to write
-     * @throws java.io.IOException
      */
     public static void writeContent(CharSequence content, OutputStream os) {
         try {
@@ -144,7 +138,6 @@ public class IO {
      * Write String content to a file (always use utf-8)
      * @param content The content to write
      * @param file The file to write
-     * @throws java.io.IOException
      */
     public static void writeContent(CharSequence content, File file) {
         try {
@@ -163,7 +156,6 @@ public class IO {
      * Write binay data to a file
      * @param data The binary data to write
      * @param file The file to write
-     * @throws java.io.IOException
      */
     public static void write(byte[] data, File file) {
         try {
@@ -178,7 +170,6 @@ public class IO {
 
     /**
      * Copy an stream to another one.
-     * @throws java.io.IOException
      */
     public static void copy(InputStream is, OutputStream os) {
         try {
@@ -195,7 +186,6 @@ public class IO {
 
     /**
      * Copy an stream to another one.
-     * @throws java.io.IOException
      */
     public static void write(InputStream is, OutputStream os) {
         try {
@@ -213,7 +203,6 @@ public class IO {
 
    /**
      * Copy an stream to another one.
-     * @throws java.io.IOException
      */
     public static void write(InputStream is, File f) {
         try {

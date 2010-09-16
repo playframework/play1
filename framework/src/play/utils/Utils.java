@@ -31,11 +31,11 @@ public class Utils {
     }
 
     public static String join(String[] values, String separator) {
-        return (values == null) ? "" : join((List<String>)Arrays.asList(values), separator);
+        return (values == null) ? "" : join(Arrays.asList(values), separator);
     }
 
     public static String join(Annotation[] values, String separator) {
-        return (values == null) ? "" : join((List<Annotation>)Arrays.asList(values), separator);
+        return (values == null) ? "" : join(Arrays.asList(values), separator);
     }
 
     /**
