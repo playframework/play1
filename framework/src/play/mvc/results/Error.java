@@ -20,7 +20,7 @@ public class Error extends Result {
 
     public Error(String reason) {
         super(reason);
-        this.status = 500;
+        this.status = Http.StatusCode.INTERNAL_ERROR;
     }
 
     public Error(int status, String reason) {

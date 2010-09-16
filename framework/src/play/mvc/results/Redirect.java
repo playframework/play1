@@ -1,6 +1,7 @@
 package play.mvc.results;
 
 import play.exceptions.UnexpectedException;
+import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
@@ -10,8 +11,8 @@ import play.mvc.Http.Response;
 public class Redirect extends Result {
 
     public String url;
-    public int code=302;
-    
+    public int code = Http.StatusCode.FOUND;
+
     public Redirect(String url) {
         this.url = url;
     }
@@ -19,14 +20,14 @@ public class Redirect extends Result {
     public Redirect(String url,boolean permanent) {
         this.url = url;
         if (permanent)
-            this.code=301;
+            this.code = Http.StatusCode.MOVED;
     }
-    
+
     public Redirect(String url,int code) {
         this.url = url;
         this.code=code;
     }
-    
+
     public void apply(Request request, Response response) {
         try {
             if (url.startsWith("http")) {

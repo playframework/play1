@@ -21,7 +21,7 @@ public class Forbidden extends Result {
     }
 
     public void apply(Request request, Response response) {
-        response.status = 403;
+        response.status = Http.StatusCode.FORBIDDEN;
         String format = request.format;
         if(request.isAjax() && "html".equals(format)) {
             format = "txt";

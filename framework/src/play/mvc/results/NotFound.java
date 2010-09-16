@@ -32,7 +32,7 @@ public class NotFound extends Result {
     }
 
     public void apply(Request request, Response response) {
-        response.status = 404;
+        response.status = Http.StatusCode.NOT_FOUND;
         String format = request.format;
         if(request.isAjax() && "html".equals(format)) {
             format = "txt";

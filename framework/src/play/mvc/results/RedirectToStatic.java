@@ -1,6 +1,7 @@
 package play.mvc.results;
 
 import play.exceptions.UnexpectedException;
+import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
@@ -17,7 +18,7 @@ public class RedirectToStatic extends Result {
     
     public void apply(Request request, Response response) {
         try {
-            response.status = 302;
+            response.status = Http.StatusCode.FOUND;
             response.setHeader("Location", file);
         } catch (Exception e) {
             throw new UnexpectedException(e);
