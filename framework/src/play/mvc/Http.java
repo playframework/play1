@@ -141,6 +141,11 @@ public class Http {
          * Don't use
          */
         public boolean sendOnError = false;
+        /**
+         * See http://www.owasp.org/index.php/HttpOnly
+         */
+        public boolean httpOnly = false;
+
     }
 
     /**

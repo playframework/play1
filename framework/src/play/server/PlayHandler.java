@@ -231,6 +231,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             if (cookie.maxAge != null) {
                 c.setMaxAge(cookie.maxAge);
             }
+            c.setHttpOnly(cookie.httpOnly);
             encoder.addCookie(c);
             nettyResponse.addHeader(SET_COOKIE, encoder.encode());
         }
@@ -482,6 +483,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                     playCookie.domain = cookie.getDomain();
                     playCookie.secure = cookie.isSecure();
                     playCookie.value = cookie.getValue();
+                    playCookie.httpOnly = cookie.isHttpOnly();
                     request.cookies.put(playCookie.name, playCookie);
                 }
             }
@@ -572,9 +574,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                     if (cookie.maxAge != null) {
                         c.setMaxAge(cookie.maxAge);
                     }
+                    c.setHttpOnly(cookie.httpOnly);
                     encoder.addCookie(c);
                     nettyResponse.addHeader(SET_COOKIE, encoder.encode());
-                    //nettyResponse.setHeader("Cookie", encoder.encode());
                 }
 
             } catch (Exception exx) {
