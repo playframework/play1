@@ -220,6 +220,9 @@ public class Play {
 
         // Mode
         mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
+        if(usePrecompiled) {
+            mode = Mode.PROD;
+        }
 
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);

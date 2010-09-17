@@ -51,6 +51,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         }
         // This is really important as we know this parameter already (we are running in a servlet container)
         Play.frameworkPath = root.getParentFile();
+        Play.usePrecompiled = true;
         Play.init(root, playId);
         
         // Servlet 2.4 does not allow you to get the context path from the servletcontext...
