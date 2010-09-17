@@ -15,12 +15,14 @@ import java.util.concurrent.Executors;
 
 public class Server {
 
+    public static int port;
+
     public Server() {
         final Properties p = Play.configuration;
-        int httpPort = Integer.parseInt(p.getProperty("http.port", "9000"));
+        port = Integer.parseInt(p.getProperty("http.port", "9000"));
         InetAddress address = null;
         if (System.getProperties().containsKey("http.port")) {
-            httpPort = Integer.parseInt(System.getProperty("http.port"));
+            port = Integer.parseInt(System.getProperty("http.port"));
         }
         try {
             if (p.getProperty("http.address") != null) {
@@ -39,24 +41,24 @@ public class Server {
         );
 	try {
              bootstrap.setPipelineFactory(new HttpServerPipelineFactory());
-             bootstrap.bind(new InetSocketAddress(address, httpPort));
+             bootstrap.bind(new InetSocketAddress(address, port));
              bootstrap.setOption("child.tcpNoDelay", true);
 
             if (Play.mode == Mode.DEV) {
                 if (address == null) {
-                    Logger.info("Listening for HTTP on port %s (Waiting a first request to start) ...", httpPort);
+                    Logger.info("Listening for HTTP on port %s (Waiting a first request to start) ...", port);
                 } else {
-                    Logger.info("Listening for HTTP at %2$s:%1$s (Waiting a first request to start) ...", httpPort, address);
+                    Logger.info("Listening for HTTP at %2$s:%1$s (Waiting a first request to start) ...", port, address);
                 }
             } else {
                 if (address == null) {
-                    Logger.info("Listening for HTTP on port %s ...", httpPort);
+                    Logger.info("Listening for HTTP on port %s ...", port);
                 } else {
-                    Logger.info("Listening for HTTP at %2$s:%1$s  ...", httpPort, address);
+                    Logger.info("Listening for HTTP at %2$s:%1$s  ...", port, address);
                 }
             }
         } catch (ChannelException e) {
-            Logger.error("Could not bind on port " + httpPort, e);
+            Logger.error("Could not bind on port " + port, e);
             System.exit(-1);
         }
 
