@@ -248,15 +248,31 @@ class PlayConfParser:
         return ''
 
     def getAllKeys(self, query):
+        # We need to take both naked and with id,
+        # BUT an entry with id should override the naked one
+        # Ex:
+        #   module.foo = "foo"
+        #   module.bar = "bar"
+        #   %dev.module.bar = "bar2"
+        #     => ["module.foo", "%dev.module.bar"]
         result = []
         for (key, value) in self.entries.items():
-            if key.startswith(query) or key.startswith('%' + self.id + '.' + query):
+            if key.startswith('%' + self.id + '.' + query):
+                result.append(key)
+        for (key, value) in self.entries.items():
+            if key.startswith(query) and not hasKey(result, '%' + self.id + "." + key):
                 result.append(key)
         return result
 
     def getAll(self, query):
         result = []
-        for (key, value) in self.entries.items():
-            if key.startswith(query) or key.startswith('%' + self.id + '.' + query):
-                result.append(value)
+        for key in self.getAllKeys(query):
+            result.append(self.entries.get(key))
         return result
+
+def hasKey(arr, elt):
+    try:
+        i = arr.index(elt)
+        return True;
+    except:
+        return False;
