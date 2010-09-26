@@ -51,6 +51,11 @@ public class ApplicationCompiler {
         this.settings.put(CompilerOptions.OPTION_Encoding, "UTF-8");
         this.settings.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.GENERATE);
         String javaVersion = CompilerOptions.VERSION_1_5;
+        if(System.getProperty("java.version").startsWith("1.6")) {
+            javaVersion = CompilerOptions.VERSION_1_6;
+        } else if (System.getProperty("java.version").startsWith("1.7")) {
+            javaVersion = CompilerOptions.VERSION_1_7;
+        }
         if("1.5".equals(Play.configuration.get("java.source"))) {
             javaVersion = CompilerOptions.VERSION_1_5;
         } else if("1.6".equals(Play.configuration.get("java.source"))) {
