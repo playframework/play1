@@ -69,7 +69,7 @@ public class EhCacheImpl implements CacheImpl {
         return result;
     }
 
-    public long incr(String key, int by) {
+    public synchronized long incr(String key, int by) {
         Element e = cache.get(key);
         if (e == null) {
             return -1;
