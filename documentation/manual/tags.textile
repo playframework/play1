@@ -1,6 +1,6 @@
 h1. Built-in template tags 
 
-These are the standard tags built in the template engine.
+These are the built-in tags that are available in addition to the core "template engine syntax":templates#syntax.
 
 p(note). There is a separate "Java extensions":javaextensions manual page.
 
