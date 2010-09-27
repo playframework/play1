@@ -10,13 +10,6 @@ import java.util.Map;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
-import play.classloading.enhancers.ControllersEnhancer;
-import play.classloading.enhancers.Enhancer;
-import play.classloading.enhancers.JPAEnhancer;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer;
-import play.classloading.enhancers.MailerEnhancer;
-import play.classloading.enhancers.PropertiesEnhancer;
-import play.classloading.enhancers.SigEnhancer;
 import play.exceptions.UnexpectedException;
 import play.vfs.VirtualFile;
 
@@ -62,8 +55,9 @@ public class ApplicationClasses {
         List<ApplicationClass> results = new ArrayList<ApplicationClass>();
         if (clazz != null) {
             for (ApplicationClass applicationClass : classes.values()) {
-            	if(!applicationClass.isClass())
-            		continue;
+                if (!applicationClass.isClass()) {
+                    continue;
+                }
                 try {
                     Play.classloader.loadClass(applicationClass.name);
                 } catch (ClassNotFoundException ex) {
@@ -88,8 +82,9 @@ public class ApplicationClasses {
     public List<ApplicationClass> getAnnotatedClasses(Class<? extends Annotation> clazz) {
         List<ApplicationClass> results = new ArrayList<ApplicationClass>();
         for (ApplicationClass applicationClass : classes.values()) {
-        	if(!applicationClass.isClass())
-        		continue;
+            if (!applicationClass.isClass()) {
+                continue;
+            }
             try {
                 Play.classloader.loadClass(applicationClass.name);
             } catch (ClassNotFoundException ex) {
@@ -135,15 +130,6 @@ public class ApplicationClasses {
     public boolean hasClass(String name) {
         return classes.containsKey(name);
     }
-    // Enhancers
-    static Class[] enhancers = new Class[]{
-        SigEnhancer.class,
-        ControllersEnhancer.class,
-        MailerEnhancer.class,
-        PropertiesEnhancer.class,
-        JPAEnhancer.class,
-        LocalvariablesNamesEnhancer.class
-    };
 
     /**
      * Represent a application class
@@ -219,25 +205,16 @@ public class ApplicationClasses {
          */
         public byte[] enhance() {
             this.enhancedByteCode = this.javaByteCode;
-            if(isClass()){
-            	for (Class<?> enhancer : enhancers) {
-            		try {
-            			long start = System.currentTimeMillis();
-            			((Enhancer) enhancer.newInstance()).enhanceThisClass(this);
-            			Logger.trace("%sms to apply %s to %s", System.currentTimeMillis() - start, enhancer.getSimpleName(), name);
-            		} catch (Exception e) {
-            			throw new UnexpectedException("While applying " + enhancer + " on " + name, e);
-            		}
-            	}
-            	for (PlayPlugin plugin : Play.plugins) {
-            		try {
-            			long start = System.currentTimeMillis();
-            			plugin.enhance(this);
-            			Logger.trace("%sms to apply %s to %s", System.currentTimeMillis() - start, plugin, name);
-            		} catch (Exception e) {
-            			throw new UnexpectedException("While applying " + plugin + " on " + name, e);
-            		}
-            	}
+            if (isClass()) {
+                for (PlayPlugin plugin : Play.plugins) {
+                    try {
+                        long start = System.currentTimeMillis();
+                        plugin.enhance(this);
+                        Logger.trace("%sms to apply %s to %s", System.currentTimeMillis() - start, plugin, name);
+                    } catch (Exception e) {
+                        throw new UnexpectedException("While applying " + plugin + " on " + name, e);
+                    }
+                }
             }
             if (System.getProperty("precompile") != null) {
                 try {
@@ -262,16 +239,16 @@ public class ApplicationClasses {
         public boolean isDefinable() {
             return compiled && javaClass != null;
         }
-        
-        public boolean isClass(){
-        	return !name.endsWith("package-info");
+
+        public boolean isClass() {
+            return !name.endsWith("package-info");
         }
 
-        public String getPackage(){
-        	int dot = name.lastIndexOf('.');
-        	return dot > -1 ? name.substring(0, dot) : "";
+        public String getPackage() {
+            int dot = name.lastIndexOf('.');
+            return dot > -1 ? name.substring(0, dot) : "";
         }
-        
+
         /**
          * Compile the class from Java source
          * @return the bytes that comprise the class file

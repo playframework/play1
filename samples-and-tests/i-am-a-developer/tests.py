@@ -100,7 +100,7 @@ class IamADeveloper(unittest.TestCase):
         # Make a mistake in Application.java and refresh
         step('Make a mistake in Application.java')
         
-        edit(app, 'app/controllers/Application.java', 8, '        render()')        
+        edit(app, 'app/controllers/Application.java', 13, '        render()')        
         try:
             browser.reload()
             self.fail()
@@ -108,12 +108,13 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(browser.viewing_html())
             self.assert_(browser.title() == 'Application error')
             html = ''.join(error.readlines())
+            print html
             self.assert_(html.count('Compilation error'))
             self.assert_(html.count('insert ";" to complete BlockStatements'))
-            self.assert_(html.count('In /app/controllers/Application.java (around line 8)'))
+            self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
             self.assert_(html.count('       render()'))            
             self.assert_(waitFor(self.play, 'ERROR ~'))
-            self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 8)'))
+            self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
             self.assert_(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
 
@@ -129,17 +130,17 @@ class IamADeveloper(unittest.TestCase):
             html = ''.join(error.readlines())
             self.assert_(html.count('Compilation error'))
             self.assert_(html.count('insert ";" to complete BlockStatements'))
-            self.assert_(html.count('In /app/controllers/Application.java (around line 8)'))
+            self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
             self.assert_(html.count('       render()'))            
             self.assert_(waitFor(self.play, 'ERROR ~'))
-            self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 8)'))
+            self.assert_(waitFor(self.play, 'Compilation error (In /app/controllers/Application.java around line 13)'))
             self.assert_(waitFor(self.play, 'Syntax error, insert ";" to complete BlockStatements'))
             self.assert_(waitFor(self.play, 'at Invocation.HTTP Request(Play!)'))
         
         # Correct the error
         step('Correct the error')
         
-        edit(app, 'app/controllers/Application.java', 8, '        render();')
+        edit(app, 'app/controllers/Application.java', 13, '        render();')
         response = browser.reload()
         self.assert_(browser.viewing_html())
         self.assert_(browser.title() == 'Your application is ready !')        
@@ -159,8 +160,8 @@ class IamADeveloper(unittest.TestCase):
         step('Let\'s code hello world')
         time.sleep(1)
         
-        edit(app, 'app/controllers/Application.java', 7, '  public static void index(String name) {')
-        edit(app, 'app/controllers/Application.java', 8, '        render(name);')
+        edit(app, 'app/controllers/Application.java', 12, '  public static void index(String name) {')
+        edit(app, 'app/controllers/Application.java', 13, '        render(name);')
         edit(app, 'app/views/Application/index.html', 2, "#{set title:'Hello world app' /}")
         edit(app, 'app/views/Application/index.html', 4, "Hello ${name} !!")
         response = browser.reload()
@@ -265,7 +266,7 @@ class IamADeveloper(unittest.TestCase):
         # Make a Java runtime exception
         step('Make a Java runtime exception')  
         
-        insert(app, 'app/controllers/Application.java', 8, '        int a = 9/0;')     
+        insert(app, 'app/controllers/Application.java', 13, '        int a = 9/0;')     
         try:
             response = browser.reload()
             self.fail()
@@ -275,11 +276,11 @@ class IamADeveloper(unittest.TestCase):
             html = ''.join(error.readlines())
             self.assert_(html.count('Execution exception'))
             self.assert_(html.count('/ by zero'))
-            self.assert_(html.count('In /app/controllers/Application.java (around line 8)'))
+            self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
             self.assert_(waitFor(self.play, 'ERROR ~'))
-            self.assert_(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 8)'))
+            self.assert_(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
             self.assert_(waitFor(self.play, 'ArithmeticException occured : / by zero'))
-            self.assert_(waitFor(self.play, 'at controllers.Application.index(Application.java:8)'))
+            self.assert_(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
             self.assert_(waitFor(self.play, '...'))
 
         # Refresh again
@@ -294,18 +295,18 @@ class IamADeveloper(unittest.TestCase):
             html = ''.join(error.readlines())
             self.assert_(html.count('Execution exception'))
             self.assert_(html.count('/ by zero'))
-            self.assert_(html.count('In /app/controllers/Application.java (around line 8)'))
+            self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))
             self.assert_(waitFor(self.play, 'ERROR ~'))
-            self.assert_(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 8)'))
+            self.assert_(waitFor(self.play, 'Execution exception (In /app/controllers/Application.java around line 13)'))
             self.assert_(waitFor(self.play, 'ArithmeticException occured : / by zero'))
-            self.assert_(waitFor(self.play, 'at controllers.Application.index(Application.java:8)'))
+            self.assert_(waitFor(self.play, 'at controllers.Application.index(Application.java:13)'))
             self.assert_(waitFor(self.play, '...'))
 
         # Fix it
         step('Fix it')        
         time.sleep(1)
         
-        delete(app, 'app/controllers/Application.java', 8)    
+        delete(app, 'app/controllers/Application.java', 13)    
         response = browser.reload()
         self.assert_(browser.viewing_html())
         self.assert_(browser.title() == 'Hello world app')        

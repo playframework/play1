@@ -1,4 +1,4 @@
-package play.classloading.enhancers;
+package play.db.jpa;
 
 import javassist.CtClass;
 import javassist.CtConstructor;
@@ -6,6 +6,7 @@ import javassist.CtMethod;
 import javassist.CtNewConstructor;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.classloading.enhancers.Enhancer;
 import play.exceptions.UnexpectedException;
 
 /**

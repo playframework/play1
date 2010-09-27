@@ -54,8 +54,10 @@ public class WS extends PlayPlugin {
 
     @Override
     public void onApplicationStop() {
-        wsImpl.stop();
-        wsImpl = null;
+        if(wsImpl != null) {
+            wsImpl.stop();
+            wsImpl = null;
+        }
     }
 
     static void init() {
