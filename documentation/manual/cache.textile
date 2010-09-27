@@ -17,7 +17,7 @@ bc. public static void allProducts() {
     render(products);
 }
 
-h2. <a>The cache API</a>
+h2. <a name="api">The cache API</a>
 
 The cache API is provided by the **play.cache.Cache** class. This class contains the set of methods to set, replace, and get data from the cache. Refer to the memcached documentation to understand the exact behavior of each method.
 
@@ -72,7 +72,7 @@ bc. if(!Cache.safeDelete("product_" + id)) {
 
 Note that those being blocking calls, **safe** methods will slow down your application. So use them only when needed.
 
-h2. <a>Don’t use the Session as a cache!</a>
+h2. <a name="session">Don’t use the Session as a cache!</a>
 
 If you come from a framework that uses an in-memory Session implementation, you may be frustrated to see that Play allows only a small set of String data to be saved in the HTTP Session. But this is much better because a session is not the place to cache your application data! 
 
@@ -92,7 +92,7 @@ List<Product> products = Cache.get(session.getId(), List.class)
 
 Here we have used a unique UUID to keep unique information in the Cache for each user. Remember that, unlike a session object, the cache is not bound to any particular User!
 
-h2. <a>Configure memcached</a>
+h2. <a name="memcached">Configure memcached</a>
 
 When you want to enable a real memcached implementation, enable memcached and define the daemon address in your **application.conf**:
 

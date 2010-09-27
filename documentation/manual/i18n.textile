@@ -1,8 +1,8 @@
-h1. Setting up i18n
+h1. Internationalization
 
 Internationalization is a means of adapting your application to different languages to allow for regional differences. Follow these steps to enable internationalization in your application.
 
-h2. <a>Only use UTF-8!</a>
+h2. <a name="utf">Only use UTF-8!</a>
 
 Play supports only one encoding: UTF-8. Since encoding problems can be weird and difficult to deal with, we made the choice to support only one encoding. UTF-8 allows you to display all characters for all languages.
 
@@ -17,7 +17,7 @@ p(note). **Note**
  
 The UTF-8 encoding issue is the reason why most of the Play configuration files, even though they are Java properties files, are not named *.properties. Java imposes the requirement that properties files must be encoded with **iso-8859-1**. Play configuration files must be UTF-8 encoded. Need we say more?
 
-h2. <a>Externalize your messages</a>
+h2. <a name="messages">Externalize your messages</a>
 
 To support i18n you have to externalize all messages in your application. 
 
@@ -33,7 +33,7 @@ For example, the message file containing the corresponding French translations i
 bc. hello=Bonjour!
 back=Retour
 
-h2. <a>Define languages supported by the application</a>
+h2. <a name="languages">Define languages supported by the application</a>
 
 In the **conf/application.conf** file, define a list of supported languages:
 
@@ -51,7 +51,7 @@ bc. Lang.change("ja");
 
 The new value will be saved back to the user’s language cookie.
 
-h2. <a>Define date format according to your locale</a>
+h2. <a name="dates">Define date format according to your locale</a>
 
 To set the default date format to use, edit your application.conf and set the following property:
 
@@ -64,7 +64,7 @@ bc. application.langs=fr,en
 This property affects how the dates are rendered in the templates using the ${date.format()}.
 It also set the default date format when binding a date parameter.
 
-h2. <a>Retrieve localized messages</a>
+h2. <a name="retrieve">Retrieve localized messages</a>
 
 From the application code, you can retrieve messages defined in message files. From Java, use the **play.i18n.Messages** object.
 

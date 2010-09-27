@@ -1,8 +1,8 @@
-h1. Using Play modules
+h1. Play modules
 
 A Play application can be assembled from several application modules. This allows you to reuse application components across several applications or split a large application into several smaller applications.
 
-h2. <a>What is a module?</a>
+h2. <a name="what">What is a module?</a>
 
 A module is just another Play application; however some differences exist in the way resources are loaded for an application module:
 
@@ -14,7 +14,7 @@ A module is just another Play application; however some differences exist in the
 
 You can create a module with the **play new-module** command.
 
-h2. <a>How to load a module from an application</a>
+h2. <a name="loading">How to load a module from an application</a>
 
 The default modules installation path is in the **$PLAY_HOME/modules** directory. This way all modules are automatically available to all applications run with the framework.
 
@@ -54,7 +54,7 @@ When you run the main application (using **play run my-project/main**) it will l
 
 p(note). If module paths are relative, they are resolved from the main application root.
 
-h2. <a>Load default routes from modules</a>
+h2. <a name="routes">Load default routes from modules</a>
 
 A module can provide a default routes file. You can load it in the main application routes file, using a special route declaration:
 
@@ -65,7 +65,7 @@ You can even load routes from all available modules:
 
 bc. GET     /	     module:*
 
-h2. <a>Using the module repository</a>
+h2. <a name="repository">Using the module repository</a>
 
 The "module repository":http://www.playframework.org/modules identifies all modules contributed by the community. A module can have several versions. You have to check the module’s documentation for which version you need to use for your framework version.
 
@@ -105,7 +105,7 @@ Modules installed this way are downloaded to the **/modules** directory of your 
 
 bc. play install gwt --path=my-project
 
-h2. <a>Contributing a new module to the module repository</a>
+h2. <a name="contributing">Contributing a new module to the module repository</a>
 
 First you need to have an OpenID. It will help us to authenticate you as author of your modules. Then send us a module registration request on the Google Group.
 

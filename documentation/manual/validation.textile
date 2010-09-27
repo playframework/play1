@@ -2,7 +2,7 @@ h1. Validating HTTP data with Play
 
 Validations ensure that the data has certain values or meets specific requirements. You can use validation to verify that your models are correct before saving them to the database, or use them directly on HTTP parameters to validate a simple form.
 
-h2. <a>How does it work?</a>
+h2. <a name="how">How does it work?</a>
 
 Each request has it own **Validation** object which collects errors. From a controller, you access it directly using the **validation** variable. You can still access a subset of the API using the **play.data.validation.Validation** class’ static methods.
 
@@ -30,7 +30,7 @@ bc. public static void hello(String name, Integer age) {
      ...
 }
 
-h2. <a>Retrieving error messages</a>
+h2. <a name="messages">Retrieving error messages</a>
 
 At the end of the validation you can check if any errors have been created and display them:
 
@@ -71,7 +71,7 @@ if(error != null) {
     System.out.println(error.message());
 }
 
-h2. <a>Displaying errors in the template</a>
+h2. <a name="displaying">Displaying errors in the template</a>
 
 In most cases you want to display the error messages in the view template. You can access them in the template using the **errors** object. Some tags help you to display the errors:
 
@@ -170,7 +170,7 @@ bc. #{ifErrors}
 #{/form}
 
 
-h2. <a>Using annotations</a>
+h2. <a name="annotations">Using annotations</a>
 
 You can use annotations to do the same thing:
 
@@ -183,7 +183,7 @@ bc. public static void hello(@Required String name, @Required @Min(0) Integer ag
    render(name, age);
 }
 
-h2. <a>Validating objects</a>
+h2. <a name="objects">Validating objects</a>
 
 Using annotations you can easily add constraints to your model objects. Let’s rewrite the previous example using a User class.
 
@@ -233,7 +233,7 @@ bc. #{ifErrors}
    </div>
 #{/form}
 
-h2. <a>Custom validation</a>
+h2. <a name="custom">Custom validation</a>
 
 Can’t find the validator you need in the **play.data.validation** package? Write your own. You can use the generic **@CheckWith** annotation to bind your own **Check** implementation.
 
