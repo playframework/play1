@@ -1,8 +1,8 @@
-h1. Configure logs
+h1. Logging configuration
 
 The Play logger is built on "Log4j":http://logging.apache.org/log4j/1.2/index.html. Since most Java libraries use Log4j or a wrapper able to use Log4j as a backend, you can easily configure logging that is well-suited to your application.
 
-h2. <a>Logging from your application</a>
+h2. <a name="logging">Logging from your application</a>
 
 Play provides a default logger with the class **play.Logger**. This class uses Log4j to write messages and exceptions to a logger named "play".
 
@@ -20,7 +20,7 @@ You can still use Log4j directly to create alternative loggers for specific need
 
 bc. org.apache.log4j.Logger.getLogger("another.logger");
 
-h2. <a>Configure log levels</a>
+h2. <a name="levels">Configure log levels</a>
 
 You can configure the **play** logger’s log level. Just define this key in the **application.conf** file:
 

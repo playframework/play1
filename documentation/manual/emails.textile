@@ -1,4 +1,4 @@
-h1. Sending e-mail with Play
+h1. Sending e-mail
 
 Email are using the "jakarta commons email":http://commons.apache.org/email/userguide.html library under the hoot. You can use the play.libs.Mail utility to send emails very easily:
 
@@ -27,7 +27,7 @@ email.setTextMsg("Your email client does not support HTML messages, too bad :(")
 
 More information about the commons email "here":http://commons.apache.org/email/userguide.html
 
-h2. <a>Mail and MVC integration</a>
+h2. <a name="mvc">Mail and MVC integration</a>
 
 You can also send complex, dynamic e-mail using the standard templates mechanism and syntax.
 
@@ -113,7 +113,7 @@ app/views/Mails/lostPassword.txt
 
 are defined, then the e-mail will be sent in text/html as defined in lostPassword.html with an alternative part as defined in lostPassword.txt. So you can send nice HMTL e-mail to your friends and still please those geeky friends that still use mutt ;)
 
-h2. <a>SMTP configuration</a>
+h2. <a name="smtp">SMTP configuration</a>
 
 First of all, you need to define the SMTP server to use:
 
@@ -134,7 +134,7 @@ Your server may also provide a SMTP-over-SSL (SMTPS) connector, that is an SSL s
 
 bc. mail.smtp.channel=ssl
 
-h2. <a>More about configuration</a>
+h2. <a name="configuration">More about configuration</a>
 
 Under the hood, Play uses JavaMail to perform the actual SMTP transactions. If you need to see what’s going on, try:
 
@@ -148,7 +148,7 @@ If you need to connect to servers using non-standard ports, the following proper
 
 bc. mail.smtp.port=2500
 
-h2. <a>Using Gmail</a>
+h2. <a name="gmail">Using Gmail</a>
 
 To use Gmail’s servers, use this configuration: 
 

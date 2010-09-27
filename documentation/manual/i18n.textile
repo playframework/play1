@@ -1,4 +1,4 @@
-h1. Setting-up internationalisation
+h1. Internationalization
 
 Internationalisation (I18N) is a means of adapting your application to different languages to allow for regional differences. Follow these steps to enable internationalisation in your application.
 
@@ -51,7 +51,7 @@ bc. Lang.change("ja");
 
 The new value will be saved back to the user’s language cookie.
 
-h2. <a name="dateformat">Define date format according to your locale</a>
+h2. <a name="dates">Define date format according to your locale</a>
 
 To set the default date format to use, edit your application.conf and set the following property:
 
@@ -64,7 +64,7 @@ bc. application.langs=fr,en
 This property affects how the dates are rendered in the templates using the ${date.format()}.
 It also set the default date format when binding a date parameter.
 
-h2. <a name="output">Retrieve localized messages</a>
+h2. <a name="retrieve">Retrieve localized messages</a>
 
 From the application code, you can retrieve messages defined in message files. From Java, use the **play.i18n.Messages** object.
 
