@@ -44,32 +44,49 @@ public class IO {
     }
 
     /**
-     * Read the Stream content as a string (always use utf-8)
+     * Read the Stream content as a string (use utf-8)
      * @param is The stream to read
      * @return The String content
      */
     public static String readContentAsString(InputStream is) {
+        return readContentAsString(is, "utf-8");
+    }
+
+    /**
+     * Read the Stream content as a string
+     * @param is The stream to read
+     * @return The String content
+     */
+    public static String readContentAsString(InputStream is, String encoding) {
         String res = null;
         try {
-            res = IOUtils.toString(is, "utf-8");
+            res = IOUtils.toString(is, encoding);
             is.close();
         } catch(Exception e) {
             throw new RuntimeException(e);
         }
         return res;
     }
-
     /**
      * Read file content to a String (always use utf-8)
      * @param file The file to read
      * @return The String content
      */
     public static String readContentAsString(File file) {
+        return readContentAsString(file, "utf-8");
+    }
+
+    /**
+     * Read file content to a String
+     * @param file The file to read
+     * @return The String content
+     */
+    public static String readContentAsString(File file, String encoding) {
         try {
             InputStream is = new FileInputStream(file);
             StringWriter result = new StringWriter();
             PrintWriter out = new PrintWriter(result);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is, "utf-8"));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is, encoding));
             String line = null;
             while ((line = reader.readLine()) != null) {
                 out.println(line);
@@ -123,8 +140,17 @@ public class IO {
      * @param os The stream to write
      */
     public static void writeContent(CharSequence content, OutputStream os) {
+        writeContent(content, os, "utf-8");
+    }
+
+    /**
+     * Write String content to a stream (always use utf-8)
+     * @param content The content to write
+     * @param os The stream to write
+     */
+    public static void writeContent(CharSequence content, OutputStream os, String encoding) {
         try {
-            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, "utf-8"));
+            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, encoding));
             printWriter.println(content);
             printWriter.flush();
             os.flush();
@@ -140,9 +166,18 @@ public class IO {
      * @param file The file to write
      */
     public static void writeContent(CharSequence content, File file) {
+        writeContent(content, file, "utf-8");
+    }
+
+    /**
+     * Write String content to a file (always use utf-8)
+     * @param content The content to write
+     * @param file The file to write
+     */
+    public static void writeContent(CharSequence content, File file, String encoding) {
         try {
             OutputStream os = new FileOutputStream(file);
-            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, "utf-8"));
+            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, encoding));
             printWriter.println(content);
             printWriter.flush();
             os.flush();

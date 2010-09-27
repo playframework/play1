@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -23,7 +24,6 @@ import play.libs.ws.WSAsync;
 import play.libs.ws.WSUrlFetch;
 import play.mvc.Http.Header;
 import play.utils.NoOpEntityResolver;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -54,7 +54,7 @@ public class WS extends PlayPlugin {
 
     @Override
     public void onApplicationStop() {
-        if(wsImpl != null) {
+        if (wsImpl != null) {
             wsImpl.stop();
             wsImpl = null;
         }
