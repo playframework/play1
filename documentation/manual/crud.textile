@@ -194,8 +194,7 @@ bc. #{crud.table fields:['name', 'company', 'edit']}
 
 h2. List of String and List of enumeration
 
-The CRUD module is showing them as a text field. In this text field, the list is represented by a comma separated list of String.
-For example:
+The CRUD module is showing them as a text field. In this text field, the list is represented by a comma separated list of String. For example:
 
 bc. @Entity
 public class Account extends Model {
@@ -212,9 +211,7 @@ public class Account extends Model {
         }
 }
 
-This is shown as:
-
-"myEnumId1","myEnumId2" for the contentTypes and "string1","string2" for the usernames. Per definition, this is what you should first customize in your CRUD module.
+This is shown as: "myEnumId1","myEnumId2" for the contentTypes and "string1","string2" for the user names. Per definition, this is what you should first customize in your CRUD module.
 
 h2. <a>Limitation</a>
 
