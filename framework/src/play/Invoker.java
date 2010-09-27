@@ -132,6 +132,9 @@ public class Invoker {
          * Things to do when the whole invocation has succeeded (before + execute + after)
          */
         public void onSuccess() throws Exception {
+            for (PlayPlugin plugin : Play.plugins) {
+                plugin.onInvocationSuccess();
+            }
         }
 
         /**

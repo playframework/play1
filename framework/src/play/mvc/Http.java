@@ -261,6 +261,10 @@ public class Http {
          * Request comes from loopback interface
          */
         public boolean isLoopback;
+        /**
+         * Params
+         */
+        public final Scope.Params params = new Scope.Params();
 
         public void _init() {
             Header header = headers.get("authorization");

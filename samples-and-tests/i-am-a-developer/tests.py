@@ -108,7 +108,6 @@ class IamADeveloper(unittest.TestCase):
             self.assert_(browser.viewing_html())
             self.assert_(browser.title() == 'Application error')
             html = ''.join(error.readlines())
-            print html
             self.assert_(html.count('Compilation error'))
             self.assert_(html.count('insert ";" to complete BlockStatements'))
             self.assert_(html.count('In /app/controllers/Application.java (around line 13)'))

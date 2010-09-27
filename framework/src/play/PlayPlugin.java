@@ -177,6 +177,9 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public void onActionInvocationResult(Result result) {
     }
 
+    public void onInvocationSuccess() {
+    }
+
     /**
      * Called when the request has been routed.
      * @param route The route selected.
