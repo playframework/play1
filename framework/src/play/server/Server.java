@@ -18,6 +18,7 @@ public class Server {
     public static int port;
 
     public Server() {
+        System.setProperty("file.encoding", "utf-8");
         final Properties p = Play.configuration;
         port = Integer.parseInt(p.getProperty("http.port", "9000"));
         InetAddress address = null;

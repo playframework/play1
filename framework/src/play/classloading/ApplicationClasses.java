@@ -54,7 +54,7 @@ public class ApplicationClasses {
     public List<ApplicationClass> getAssignableClasses(Class<?> clazz) {
         List<ApplicationClass> results = new ArrayList<ApplicationClass>();
         if (clazz != null) {
-            for (ApplicationClass applicationClass : classes.values()) {
+            for (ApplicationClass applicationClass : new ArrayList<ApplicationClass>(classes.values())) {
                 if (!applicationClass.isClass()) {
                     continue;
                 }
