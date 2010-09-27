@@ -195,6 +195,10 @@ public class JPABase implements Serializable, play.db.Model {
         return JPA.em();
     }
 
+    public boolean isPersistent() {
+        return JPA.em().contains(this);
+    }
+
     /**
      * JPASupport instances a and b are equals if either <strong>a == b</strong> or a and b have same </strong>{@link #key key} and class</strong>
      * @param other 

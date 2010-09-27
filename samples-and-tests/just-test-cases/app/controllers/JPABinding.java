@@ -25,6 +25,7 @@ public class JPABinding extends Controller {
     }
     
     public static void save(Project project) {
+        System.out.println("---> " + project.isPersistent());
         project.save();
         validation.keep();
         show(project.id);
