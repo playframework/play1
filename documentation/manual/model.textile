@@ -163,7 +163,9 @@ If you want to connect to an existing **MySQL5 server**, use the following:
 
 bc. db=mysql:user:pwd@database_name
 
-You can also connect to any JDBC compliant database. Just add the driver library to your **lib/** directory and define JDBC properties in the application.conf:
+The Play distribution includes JDBC drivers for HSQLDB and MySQL in the **$PLAY_HOME/framework/lib/** directory. If you are using a PostgreSQL or Oracle database, for example, then you should add the JDBC driver library there, or in your application’s **lib/** directory.
+
+To connect to any JDBC compliant database. Just add the driver library to and define JDBC properties in the application.conf:
 
 bc. db.url=jdbc:mysql://localhost/test
 db.driver=com.mysql.jdbc.Driver
