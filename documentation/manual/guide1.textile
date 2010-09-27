@@ -177,7 +177,7 @@ bc. #{extends 'main.html' /}
 
 Like for Java code changes, just refresh the page in the browser to see the modification.
 
-p(note). We will now start to code the blog application. You can either continue to work with a text editor or open the project in a Java IDE like Eclipse or NetBeans. If you want to set-up a Java IDE, please check "this page":ide. 
+p(note). We will now start to code the blog application. You can either continue to work with a text editor or open the project in a Java IDE like Eclipse or NetBeans. If you want to set-up a Java IDE, see "Setting-up your preferred IDE":ide. 
 
 h2. <a>Setting-up the database</a>
 

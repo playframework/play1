@@ -17,7 +17,7 @@ Your first steps with Play and your first 5 minutes of fun.
 # "Frequently Asked Questions":faq
 # "Installation guide":install
 # "Your first application — the ‘Hello World’ tutorial":firstapp
-# "Set up your preferred IDE":ide
+# "Setting-up your preferred IDE":ide
 # "Sample applications":samples
 # "Live coding script - to practice, and impress your colleagues with":http://www.lunatech-research.fr/archives/2010/06/14/how-demo-play-framework-live-coding-script
 
