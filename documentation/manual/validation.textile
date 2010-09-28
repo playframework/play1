@@ -4,7 +4,11 @@ Validations ensure that the data has certain values or meets specific requiremen
 
 h2. <a name="how">How validation works in Play</a>
 
-Each request has it own **Validation** object which collects errors. From a controller, you access it directly using the **validation** variable. You can still access a subset of the API using the **play.data.validation.Validation** class’ static methods.
+Each request has it own **Validation** object which collects errors. There are three ways to define validations.
+
+# <span>In a controller method, call methods on the controller's **validation** field directly. You can also access a subset of the API using the **play.data.validation.Validation** class’ static methods.</span> 
+# <span>Add validation annotations to the controller method's parameter declarations.</span>
+# <span>Add the **@Valid** annotation to action methods’ POJO parameters, and add validation annotations to the POJO properties.</span> 
 
 The validation object maintains a collection of **play.data.validation.Error** objects. Each error has two properties:
 
@@ -12,11 +16,11 @@ The validation object maintains a collection of **play.data.validation.Error** o
 
 * The **message**. This contains the error’s textual description. The message can be a plain message or refer to a key from a message bundle (typically for internationalization support).
 
-Let’s see how to validate a simple HTTP parameter:
+Using the first approach, let’s see how to validate a simple HTTP parameter:
 
 bc. public static void hello(String name) {
      validation.required(name);
-     ...
+     …
 }
 
 This code checks that the name variable is correctly set. If not, the corresponding error is added to the current errors collection.
@@ -27,10 +31,10 @@ bc. public static void hello(String name, Integer age) {
      validation.required(name);
      validation.required(age);
      validation.min(age, 0);
-     ...
+     …
 }
 
-h2. <a name="messages">Retrieving validation error messages</a>
+h2. <a name="messages">Validation error messages</a>
 
 At the end of the validation you can check if any errors have been created and display them:
 
@@ -46,30 +50,123 @@ bc. public static void hello(String name, Integer age) {
      }
 }
 
-Assuming that name and age are null, this would display:
+Assuming that name and age are **null**, this would display:
+
+bc. Required
+Required
+
+This is because the default message, defined in **$PLAY_HOME/resources/messages**, is:
+
+bc. validation.required=Required
+
+There are three ways to customise the validation message. 
+
+# <span>Override the default message, by redefining the message in your application’s **messages** file.</span> 
+# <span>Provide a custom message as an additional validation parameter.</span>
+# <span>Provide a message key for a localised message as an additional validation parameter.</span> 
+
+h3. Localised validation messages 
+
+The simplest way to override these messages is to use the same message key for a message in your application’s **conf/messages** file. For example:
+
+bc. validation.required = Please enter a value 
+
+You can also provide localisations in other languages, as described in "Internationalization":i18n. 
+
+h3. Validation message parameters 
+
+You can use a placeholder in the message for the error key: 
+
+bc. validation.required=%s is required
+
+This changes the output to:
 
 bc. name is required
 age is required
 
-Default messages are keys that refer to the message bundle. So in the **conf/messages** file you will have:
+This error key defaults to the parameter name, and is itself used to look up a message. For example, the **name** parameter in the **hello** action method above could be localised with: 
 
-bc. validation.required=%s is required
+bc. name = Customer name
 
-You can change this default message and override it for each application language. The **%s** placeholder will be replaced by the error key. You can override using the **error.message(String field)** method.
+This would result in the output:
 
-For example:
+bc. Customer name is required
+age is required
+
+You can change also override the error key using the **error.message(String key)** method. For example:
 
 bc. Error error = validation.required(name).error;
 if(error != null) {
-    System.out.println(error.message("The name"));
+    System.out.println(error.message("Customer name"));
 }
 
-You can also specify a different message for each check:
+Several of the built-in validations define additional message parameters that correspond to the validation parameters. For example, the 'match' validation defines a second **String** parameter for the specified regular expression, which differs from the **%s** placeholder above in that it specifies the parameter index ‘2’: 
 
-bc. Error error = validation.required(name).message("Fill the name!").error;
-if(error != null) {
-    System.out.println(error.message());
+bc. validation.match=Must match %2$s 
+
+Similarly, the 'range' validation defines two additional numeric parameters, with indices 2 and 3: 
+
+bc. validation.range=Not in the range %2$d through %3$d 
+
+Look in the file **$PLAY_HOME/resources/messages** to see which other validations have parameters. 
+
+h3. Custom localised validation messages 
+
+The validation messages in **$PLAY_HOME/resources/messages** use the default message key for each of Play’s "built-in validations":validation-builtin. You can specify a different message key. For example: 
+
+bc. validation.required.em = You must enter the %s! 
+
+
+Use this new message key for the message, for manual validation in the action method: 
+
+bc. validation.required(manualKey).message("validation.required.em"); 
+
+
+Alternatively, use the key in the annotation’s **message** parameter: 
+
+bc. public static void hello(@Required(message="validation.required.em") String name) { 
+   …
+} 
+
+
+You can use the same technique with validation annotations on JavaBean properties: 
+
+bc. public static void hello(@Valid Person person) { 
+   …
+} 
+ 
+public class Person extends Model { 
+   @Required(message = "validation.required.emphasis")
+   public String name; 
+   … 
+} 
+
+h3. Custom literal (non-localised) validation messages 
+
+The Play message look-up just returns the message key if there is no message defined for the key, which means you can also just use a literal message instead of the message key if you prefer. Using the same examples as above, for manual validation: 
+
+bc. validation.required(manualKey).message("Give us a name!"); 
+
+For action method parameter annotations: 
+
+bc. public static void save(@Required(message = "Give us a name!") String name) { 
+   …
+} 
+
+For JavaBean property annotations: 
+
+bc. public static void save(@Valid Person person) { 
+   …
 }
+ 
+public class Person extends Model {
+   @Required(message = "Give us a name!")
+   public String name; 
+   … 
+} 
+
+
+
 
 h2. <a name="display">Displaying validation errors in the template</a>
 
@@ -78,17 +175,17 @@ In most cases you want to display the error messages in the view template. You c
 Let’s see a sample:
 
 bc. public static void hello(String name, Integer age) {
-     validation.required(name);
-     validation.required(age);
-     validation.min(age, 0);
-     render(name, age);
+   validation.required(name);
+   validation.required(age);
+   validation.min(age, 0);
+   render(name, age);
 }
 
 and now the template:
 
 bc. #{ifErrors}
  
-   <h1>Oops...</h1>
+   <h1>Oops…</h1>
  
    #{errors}
        <li>${error}</li>
@@ -130,7 +227,7 @@ bc. public class Application extends Controller {
 And the **view/Application/index.html** template:
 
 bc. #{ifErrors}
-   <h1>Oops...</h1>
+   <h1>Oops…</h1>
  
    #{errors}
        <li>${error}</li>
@@ -152,7 +249,7 @@ bc. #{ifErrors}
 You can create a better user experience by displaying each error message next to the field that generated the error:
 
 bc. #{ifErrors}
-   <h1>Oops...</h1>
+   <h1>Oops…</h1>
 #{/ifErrors}
  
 #{form @Application.hello()}
@@ -215,7 +312,7 @@ bc. public static void hello(@Valid User user) {
 And finally the modified form:
 
 bc. #{ifErrors}
-   <h1>Oops...</h1>
+   <h1>Oops…</h1>
 #{/ifErrors}
  
 #{form @Application.hello()}
