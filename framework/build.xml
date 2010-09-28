@@ -106,6 +106,7 @@
     <target name="modules">
         <property name="play.path" value="../.."/>
         <ant antfile="build.xml" target="build" dir="../modules/testrunner" />
+        <ant antfile="build.xml" target="build" dir="../modules/grizzly" />
     </target>
     
     <!-- Netbeans support -->

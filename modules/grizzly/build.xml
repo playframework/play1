@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="Grizzly" default="build" basedir=".">
+
+    <path id="project.classpath">
+        <pathelement path="${play.path}/framework/classes"/>
+        <fileset dir="${play.path}/framework/lib">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="lib">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="build" depends="compile">
+
+        <copy todir="tmp/classes">
+            <fileset dir="src">
+                <include name="**/*.properties"/>
+                <include name="**/*.xml"/>
+                <include name="**/play.plugins"/>
+                <include name="**/play.static"/>
+            </fileset>
+        </copy>
+        <jar destfile="lib/play-grizzly.jar" basedir="tmp/classes">
+            <manifest>
+                <section name="Play">
+                    <attribute name="Specification-Title" value="Grizzly"/>
+                </section>
+            </manifest>
+        </jar>
+        <delete dir="tmp" />
+    </target>
+
+    <target name="compile">
+        <mkdir dir="tmp/classes" />
+        <javac srcdir="src" destdir="tmp/classes" target="1.5" debug="true">
+            <classpath refid="project.classpath" />
+        </javac>
+    </target>
+
+</project>

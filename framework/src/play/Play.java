@@ -134,14 +134,18 @@ public class Play {
      * Framework version
      */
     public static String version = null;
+    /**
+     * Context path (when several application are deployed on the same host)
+     */
+    public static String ctxPath = "";
     // pv
     static boolean firstStart = true;
     public static boolean usePrecompiled = false;
+    public static boolean forceProd = false;
     /**
      * Lazy load the templates on demand
      */
     public static boolean lazyLoadTemplates = false;
-    private final static String NO_PREFIX = "";
 
     /**
      * Init the framework
@@ -181,9 +185,6 @@ public class Play {
             throw new UnexpectedException("Where is the framework ?", e);
         }
 
-        System.setProperty("play.path", frameworkPath.getAbsolutePath());
-        System.setProperty("application.path", applicationPath.getAbsolutePath());
-
         // Read the configuration file
         readConfiguration();
 
@@ -220,7 +221,7 @@ public class Play {
 
         // Mode
         mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
-        if(usePrecompiled) {
+        if(usePrecompiled || forceProd) {
             mode = Mode.PROD;
         }
 
@@ -309,12 +310,19 @@ public class Play {
             StringBuffer newValue = new StringBuffer();
             while (matcher.find()) {
                 String jp = matcher.group(1);
-                String r = System.getProperty(jp);
-                if (r == null) {
-                    Logger.warn("Cannot replace %s in configuration (%s=%s)", jp, key, value);
-                    continue;
+                String r;
+                if(jp.equals("application.path")) {
+                    r = Play.applicationPath.getAbsolutePath();
+                } else if(jp.equals("play.path")) {
+                    r = Play.frameworkPath.getAbsolutePath();
+                } else {
+                    r = System.getProperty(jp);
+                    if (r == null) {
+                        Logger.warn("Cannot replace %s in configuration (%s=%s)", jp, key, value);
+                        continue;
+                    }
                 }
-                matcher.appendReplacement(newValue, System.getProperty(jp).replaceAll("\\\\", "\\\\\\\\"));
+                matcher.appendReplacement(newValue, r.replaceAll("\\\\", "\\\\\\\\"));
             }
             matcher.appendTail(newValue);
             configuration.setProperty(key.toString(), newValue.toString());
@@ -391,7 +399,7 @@ public class Play {
             Play.classloader.getAllClasses();
 
             // Routes
-            Router.detectChanges(NO_PREFIX);
+            Router.detectChanges(ctxPath);
 
             // Cache
             Cache.init();
@@ -490,7 +498,7 @@ public class Play {
                 plugin.beforeDetectingChanges();
             }
             classloader.detectChanges();
-            Router.detectChanges(NO_PREFIX);
+            Router.detectChanges(ctxPath);
             if (conf.lastModified() > startedAt) {
                 start();
                 return;

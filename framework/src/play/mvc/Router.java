@@ -628,6 +628,10 @@ public class Router {
         }
 
         public Map<String, String> matches(String method, String path, String accept, String host) {
+            // Normalize
+            if(path.equals(Play.ctxPath)) {
+                path = path + "/";
+            }
             // If method is HEAD and we have a GET
             if (method == null || this.method.equals("*") || method.equalsIgnoreCase(this.method) || (method.equalsIgnoreCase("head") && ("get").equalsIgnoreCase(this.method))) {
 

@@ -71,10 +71,10 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     }
 
     private void loadRouter(String contextPath) {
+        Play.ctxPath = contextPath;
         Router.load(contextPath);
         routerInitializedWithContext = true;
     }
-
 
     public static boolean isGreaterThan(ServletContext context, int majorVersion, int minorVersion) {
         int contextMajorVersion = context.getMajorVersion();
