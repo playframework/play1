@@ -292,11 +292,8 @@ public class WSAsync implements WSImpl {
                 return;
             }
             if (this.parameters != null && !this.parameters.isEmpty()) {
-                // builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
-                for (String key: this.parameters.keySet()) {
-                    builder.addQueryParameter(key, this.parameters.get(key).toString());
-                }
-//                builder.setBody(createQueryString());
+                builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
+                builder.setBody(createQueryString());
             }
             if (this.body != null) {
                 if (this.parameters != null && !this.parameters.isEmpty()) {

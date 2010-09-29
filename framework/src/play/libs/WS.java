@@ -56,8 +56,10 @@ public class WS extends PlayPlugin {
 
     @Override
     public void onApplicationStop() {
-        wsImpl.stop();
-        wsImpl = null;
+        if (wsImpl != null) {
+            wsImpl.stop();
+            wsImpl = null;
+        }
     }
 
     static void init() {
@@ -129,8 +131,8 @@ public class WS extends PlayPlugin {
         public String mimeType;
         public Integer timeout;
 
-        public ServiceInfo oauthInfo;
-        public TokenPair oauthTokens;
+        public ServiceInfo oauthInfo = null;
+        public TokenPair oauthTokens = null;
 
         public WSRequest() {}
 
