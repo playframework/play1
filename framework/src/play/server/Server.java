@@ -68,6 +68,9 @@ public class Server {
 
     public static void main(String[] args) throws Exception {
         File root = new File(System.getProperty("application.path"));
+        if(System.getProperty("precompiled", "false").equals("true")) {
+            Play.usePrecompiled = true;
+        }
         Play.init(root, System.getProperty("play.id", ""));
         if (System.getProperty("precompile") == null) {
             new Server();
