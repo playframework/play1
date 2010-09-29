@@ -1,0 +1,15 @@
+html {
+    background-color: #1196FC;
+    font-family: sans-serif;
+}
+
+body {
+    background-color: #77D9F9;
+    -moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+    padding: 20px 30px 20px 30px;
+}
+
+h1, h2, h3 {
+    color: #154E84;
+}

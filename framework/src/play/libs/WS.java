@@ -20,6 +20,8 @@ import org.xml.sax.InputSource;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
+import play.libs.OAuth.ServiceInfo;
+import play.libs.OAuth.TokenPair;
 import play.libs.ws.WSAsync;
 import play.libs.ws.WSUrlFetch;
 import play.mvc.Http.Header;
@@ -54,10 +56,8 @@ public class WS extends PlayPlugin {
 
     @Override
     public void onApplicationStop() {
-        if (wsImpl != null) {
-            wsImpl.stop();
-            wsImpl = null;
-        }
+        wsImpl.stop();
+        wsImpl = null;
     }
 
     static void init() {
@@ -129,6 +129,9 @@ public class WS extends PlayPlugin {
         public String mimeType;
         public Integer timeout;
 
+        public ServiceInfo oauthInfo;
+        public TokenPair oauthTokens;
+
         public WSRequest() {}
 
         public WSRequest(String url) {
@@ -154,6 +157,16 @@ public class WS extends PlayPlugin {
         public WSRequest authenticate(String username, String password) {
             this.username = username;
             this.password = password;
+            return this;
+        }
+
+        /**
+         * Sign the request for do a call to a server protected by oauth
+         * @return
+         */
+        public WSRequest oauth(ServiceInfo oauthInfo, TokenPair oauthTokens) {
+            this.oauthInfo = oauthInfo;
+            this.oauthTokens = oauthTokens;
             return this;
         }
 

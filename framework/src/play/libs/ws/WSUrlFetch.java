@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import oauth.signpost.OAuthConsumer;
+import oauth.signpost.basic.DefaultOAuthConsumer;
 import play.Logger;
 import play.libs.Codec;
 import play.libs.IO;
@@ -127,6 +129,12 @@ public class WSUrlFetch implements WSImpl {
                 for (String key: this.headers.keySet()) {
                     connection.setRequestProperty(key, headers.get(key));
                 }
+                connection.setDoInput(true);
+                if (this.oauthTokens != null) {
+                    OAuthConsumer consumer = new DefaultOAuthConsumer(oauthInfo.consumerKey, oauthInfo.consumerSecret);
+                    consumer.setTokenWithSecret(oauthTokens.token, oauthTokens.secret);
+                    consumer.sign(connection);
+                }
                 return connection;
             } catch(Exception e) {
                 throw new RuntimeException(e);
@@ -193,7 +201,6 @@ public class WSUrlFetch implements WSImpl {
          */
         public HttpUrlfetchResponse(HttpURLConnection connection) {
             this.connection = connection;
-            connection.setDoInput(true);
         }
 
         /**

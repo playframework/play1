@@ -1,5 +1,6 @@
 package play.libs.ws;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,10 +9,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import oauth.signpost.AbstractOAuthConsumer;
+import oauth.signpost.exception.OAuthCommunicationException;
+import oauth.signpost.exception.OAuthExpectationFailedException;
+import oauth.signpost.exception.OAuthMessageSignerException;
+import oauth.signpost.http.HttpRequest;
 import play.Logger;
 import play.Play;
 import play.libs.Codec;
 import play.libs.MimeTypes;
+import play.libs.OAuth.ServiceInfo;
+import play.libs.OAuth.TokenPair;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSImpl;
 import play.libs.WS.WSRequest;
@@ -103,7 +111,9 @@ public class WSAsync implements WSImpl {
         }
 
         /** Execute a GET request synchronously. */
+        @Override
         public HttpResponse get() {
+            sign("GET");
             try {
                 return new HttpAsyncResponse(prepare(httpClient.prepareGet(url)).execute().get());
             } catch (Exception e) {
@@ -113,12 +123,16 @@ public class WSAsync implements WSImpl {
         }
 
         /** Execute a GET request asynchronously. */
+        @Override
         public Future<HttpResponse> getAsync() {
+            sign("GET");
             return execute(httpClient.prepareGet(url));
         }
 
         /** Execute a POST request.*/
+        @Override
         public HttpResponse post() {
+            sign("POST");
             try {
                 return new HttpAsyncResponse(prepare(httpClient.preparePost(url)).execute().get());
             } catch (Exception e) {
@@ -127,11 +141,14 @@ public class WSAsync implements WSImpl {
         }
 
         /** Execute a POST request asynchronously.*/
+        @Override
         public Future<HttpResponse> postAsync() {
+            sign("POST");
             return execute(httpClient.preparePost(url));
         }
 
         /** Execute a PUT request.*/
+        @Override
         public HttpResponse put() {
             try {
                 return new HttpAsyncResponse(prepare(httpClient.preparePut(url)).execute().get());
@@ -141,11 +158,13 @@ public class WSAsync implements WSImpl {
         }
 
         /** Execute a PUT request asynchronously.*/
+        @Override
         public Future<HttpResponse> putAsync() {
             return execute(httpClient.preparePut(url));
         }
 
         /** Execute a DELETE request.*/
+        @Override
         public HttpResponse delete() {
             try {
                 return new HttpAsyncResponse(prepare(httpClient.prepareDelete(url)).execute().get());
@@ -155,11 +174,13 @@ public class WSAsync implements WSImpl {
         }
 
         /** Execute a DELETE request asynchronously.*/
+        @Override
         public Future<HttpResponse> deleteAsync() {
             return execute(httpClient.prepareDelete(url));
         }
 
         /** Execute a OPTIONS request.*/
+        @Override
         public HttpResponse options() {
             try {
                 return new HttpAsyncResponse(prepare(httpClient.prepareOptions(url)).execute().get());
@@ -169,11 +190,13 @@ public class WSAsync implements WSImpl {
         }
 
         /** Execute a OPTIONS request asynchronously.*/
+        @Override
         public Future<HttpResponse> optionsAsync() {
             return execute(httpClient.prepareOptions(url));
         }
 
         /** Execute a HEAD request.*/
+        @Override
         public HttpResponse head() {
             try {
                 return new HttpAsyncResponse(prepare(httpClient.prepareHead(url)).execute().get());
@@ -183,11 +206,13 @@ public class WSAsync implements WSImpl {
         }
 
         /** Execute a HEAD request asynchronously.*/
+        @Override
         public Future<HttpResponse> headAsync() {
             return execute(httpClient.prepareHead(url));
         }
 
         /** Execute a TRACE request.*/
+        @Override
         public HttpResponse trace() {
             try {
                 return new HttpAsyncResponse(prepare(httpClient.prepareTrace(url)).execute().get());
@@ -197,8 +222,21 @@ public class WSAsync implements WSImpl {
         }
 
         /** Execute a TRACE request asynchronously.*/
+        @Override
         public Future<HttpResponse> traceAsync() {
             return execute(httpClient.prepareTrace(url));
+        }
+
+        private WSRequest sign(String method) {
+            if (this.oauthTokens != null) {
+                WSOAuthConsumer consumer = new WSOAuthConsumer(oauthInfo, oauthTokens);
+                try {
+                    consumer.sign(this, method);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            return this;
         }
 
         private BoundRequestBuilder prepare(BoundRequestBuilder builder) {
@@ -254,8 +292,11 @@ public class WSAsync implements WSImpl {
                 return;
             }
             if (this.parameters != null && !this.parameters.isEmpty()) {
-                builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
-                builder.setBody(createQueryString());
+                // builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
+                for (String key: this.parameters.keySet()) {
+                    builder.addQueryParameter(key, this.parameters.get(key).toString());
+                }
+//                builder.setBody(createQueryString());
             }
             if (this.body != null) {
                 if (this.parameters != null && !this.parameters.isEmpty()) {
@@ -328,6 +369,81 @@ public class WSAsync implements WSImpl {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        }
+
+    }
+
+    private static class WSOAuthConsumer extends AbstractOAuthConsumer {
+
+        public WSOAuthConsumer(String consumerKey, String consumerSecret) {
+            super(consumerKey, consumerSecret);
+        }
+
+        public WSOAuthConsumer(ServiceInfo info, TokenPair tokens) {
+            super(info.consumerKey, info.consumerSecret);
+            setTokenWithSecret(tokens.token, tokens.secret);
+        }
+
+        @Override
+        protected HttpRequest wrap(Object request) {
+            if (!(request instanceof WSRequest)) {
+                throw new IllegalArgumentException("WSOAuthConsumer expects requests of type play.libs.WS.WSRequest");
+            }
+            return new WSRequestAdapter((WSRequest)request);
+        }
+
+        public WSRequest sign(WSRequest request, String method) throws OAuthMessageSignerException, OAuthExpectationFailedException, OAuthCommunicationException {
+            WSRequestAdapter req = (WSRequestAdapter)wrap(request);
+            req.setMethod(method);
+            sign(req);
+            return request;
+        }
+
+        public class WSRequestAdapter implements HttpRequest {
+
+            private WSRequest request;
+            private String method;
+
+            public WSRequestAdapter(WSRequest request) {
+                this.request = request;
+            }
+
+            public Map<String, String> getAllHeaders() {
+                return request.headers;
+            }
+
+            public String getContentType() {
+                return request.mimeType;
+            }
+
+            public String getHeader(String name) {
+                return request.headers.get(name);
+            }
+
+            public InputStream getMessagePayload() throws IOException {
+                return null;
+            }
+
+            public String getMethod() {
+                return this.method;
+            }
+
+            private void setMethod(String method) {
+                this.method = method;
+            }
+
+            public String getRequestUrl() {
+                return request.url;
+            }
+
+            public void setHeader(String name, String value) {
+                request.setHeader(name, value);
+            }
+
+            public void setRequestUrl(String url) {
+                request.url = url;
+            }
+
         }
 
     }
