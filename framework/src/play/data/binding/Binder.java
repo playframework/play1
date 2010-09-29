@@ -29,14 +29,20 @@ public class Binder {
 
     static Map<Class<?>, TypeBinder<?>> supportedTypes = new HashMap<Class<?>, TypeBinder<?>>();
 
+    // TODO: something a bit more dynamic? The As annotation allows you to inject your own binder
     static {
         supportedTypes.put(Date.class, new DateBinder());
-        supportedTypes.put(Calendar.class, new CalendarBinder());
-        supportedTypes.put(Locale.class, new LocaleBinder());
         supportedTypes.put(File.class, new FileBinder());
+        supportedTypes.put(File[].class, new FileArrayBinder());
         supportedTypes.put(Model.BinaryField.class, new BinaryBinder());
         supportedTypes.put(Upload.class, new UploadBinder());
+        supportedTypes.put(Upload[].class, new UploadArrayBinder());
+        supportedTypes.put(Calendar.class, new CalendarBinder());
+        supportedTypes.put(Locale.class, new LocaleBinder());
+        supportedTypes.put(byte[].class, new ByteArrayBinder());
+        supportedTypes.put(byte[][].class, new ByteArrayArrayBinder());
     }
+
     static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<Class<?>, BeanWrapper>();
 
     static BeanWrapper getBeanWrapper(Class<?> clazz) {
@@ -351,7 +357,7 @@ public class Binder {
                 if (annotation.annotationType().equals(As.class)) {
                     Class<? extends TypeBinder<?>> toInstanciate = ((As) annotation).binder();
                     if (!(toInstanciate.equals(As.DEFAULT.class))) {
-                        // Instanciate the binder
+                        // Instantiate the binder
                         TypeBinder<?> myInstance = toInstanciate.newInstance();
                         return myInstance.bind(name, annotations, value, clazz);
                     }
