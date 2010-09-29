@@ -490,15 +490,11 @@ public class Http {
          * @param value Cookie value
          */
         public void setCookie(String name, String value) {
-            setCookie(name, value, false);
-        }
-
-        public void setCookie(String name, String value, boolean secure) {
-            setCookie(name, value, (Integer) null, secure);
+            setCookie(name, value, null, "/", null, false);
         }
 
         public void removeCookie(String name) {
-            setCookie(name, "", 0);
+            setCookie(name, "", null, "/", 0, false);
         }
 
         /**
@@ -508,36 +504,11 @@ public class Http {
          * @param duration Ex: 3d
          */
         public void setCookie(String name, String value, String duration) {
-            setCookie(name, value, duration, false);
-        }
-
-        public void setCookie(String name, String value, Integer maxAge) {
-            setCookie(name, value, maxAge, false);
-        }
-
-        public void setCookie(String name, String value, String duration, boolean secure) {
-            int expire = Time.parseDuration(duration);
-            setCookie(name, value, Integer.valueOf(expire), secure);
-        }
-
-        public void setCookie(String name, String value, Integer maxAge, boolean secure) {
-            setCookie(name, value, null, Play.ctxPath + "/", maxAge, secure);
-        }
-
-        public void setCookie(String name, String value, String domain, String path, String duration) {
-            setCookie(name, value, domain, path, duration, false);
-        }
-
-        public void setCookie(String name, String value, String domain, String path, String duration, boolean secure) {
-            int expire = Time.parseDuration(duration);
-            setCookie(name, value, domain, path, Integer.valueOf(expire), secure);
-        }
-
-        public void setCookie(String name, String value, String domain, String path, Integer maxAge) {
-            setCookie(name, value, domain, path, maxAge, false);
+            setCookie(name, value, null, "/", Time.parseDuration(duration), false);
         }
 
         public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure) {
+            path = Play.ctxPath + path;
             if (cookies.containsKey(name) && cookies.get(name).path.equals(path) && ((cookies.get(name).domain == null && domain == null) || (cookies.get(name).domain.equals(domain)))) {
                 cookies.get(name).value = value;
                 if (maxAge != null) {
