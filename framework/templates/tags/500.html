@@ -73,6 +73,15 @@
     #source a:hover pre {
         background: #FAFFCF !important;
     }
+	#source em {
+		font-style: normal;
+		text-decoration: underline;
+		font-weight: bold;
+	}
+	#source strong {
+		font-style: normal;
+		font-weight: bold;
+	}
 </style>
 
 #{if exception instanceof play.exceptions.PlayException}
@@ -102,7 +111,7 @@
             ${play.utils.Utils.open(exception.sourceFile, line_index+from) ? ('<a href="' + play.utils.Utils.open(exception.sourceFile, line_index+from) + '">').raw() : ''}
                 <div class="line ${exception.lineNumber == line_index+from ? 'error':''}">
                     <span class="lineNumber">${line_index+from}:</span>
-                    <pre>&nbsp;${line.escape().raw()}</pre>
+                    <pre>&nbsp;${line.escape().toString().replace('&darr;', '<strong>&darr;</strong>').replace('\000', '<em>').replace('\001', '</em>').raw()}</pre>
                 </div>
             ${play.utils.Utils.open(exception.sourceFile, line_index+from) ? '</a>'.raw() : ''}
          #{/list}
