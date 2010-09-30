@@ -22,6 +22,8 @@ ${'Coucou'.up()}
 	<input id="yopGet" value="GET Yop" type="submit" />
 #{/form}
 
+#{render 'Application/kiki.html', a:'Hello', b:9 /}
+
 <p>
     <a id="wp1" href="@{sample.Photo.index()}">with package</a>, <a id="wp2" href="@{admin.Test.index()}">with package 2</a>, #{a @@admin.Test.index(), id:'wp3'}with package 3#{/a}
 </p>

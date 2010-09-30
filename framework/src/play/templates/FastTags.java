@@ -263,6 +263,31 @@ public class FastTags {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static void _render(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        try {
+            if (!args.containsKey("arg") || args.get("arg") == null) {
+                throw new TemplateExecutionException(template.template, fromLine, "Specify a template name", new TagInternalException("Specify a template name"));
+            }
+            String name = args.get("arg").toString();
+            if (name.startsWith("./")) {
+                String ct = BaseTemplate.currentTemplate.get().name;
+                if (ct.matches("^/lib/[^/]+/app/views/.*")) {
+                    ct = ct.substring(ct.indexOf("/", 5));
+                }
+                ct = ct.substring(0, ct.lastIndexOf("/"));
+                name = ct + name.substring(1);
+            }
+            args.remove("arg");
+            BaseTemplate t = (BaseTemplate)TemplateLoader.load(name);
+            Map<String, Object> newArgs = new HashMap<String, Object>();
+            newArgs.putAll((Map<? extends String, ? extends Object>) args);
+            out.println(t.render(newArgs));
+        } catch (TemplateNotFoundException e) {
+            throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
+        }
+    }
+
     public static String serialize(Map<?, ?> args, String... unless) {
         StringBuffer attrs = new StringBuffer();
         Arrays.sort(unless);
