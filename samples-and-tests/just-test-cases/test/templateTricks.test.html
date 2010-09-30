@@ -8,5 +8,12 @@
 	assertTextPresent('In /app/views/Application/dynamicClassBinding.html (around line 4)')
 	assertTextPresent('Could not find matching constructor for: models.Bottle')
 	assertTextPresent('(java.lang.Integer, java.lang.String)')
+	
+	open('/')
+	
+	// Check #render
+	assertTextPresent('Inner template with:')
+	assertTextPresent('b=9')
+	assertTextPresent('a=Hello')
 
 #{/selenium}

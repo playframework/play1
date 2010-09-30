@@ -171,16 +171,16 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         String action = parser.getToken().trim();
         if (action.trim().matches("^'.*'$")) {
             if (absolute) {
-                print("\tout.print(play.mvc.Http.Request.current().getBase() + play.mvc.Router.reverseWithCheck(" + action + ", play.Play.getVirtualFile(" + action + ")));");
+                print("\tout.print(play.mvc.Router.reverseWithCheck(" + action + ", play.Play.getVirtualFile(" + action + "), true));");
             } else {
-                print("\tout.print(play.mvc.Router.reverseWithCheck(" + action + ", play.Play.getVirtualFile(" + action + ")));");
+                print("\tout.print(play.mvc.Router.reverseWithCheck(" + action + ", play.Play.getVirtualFile(" + action + "), false));");
             }
         } else {
             if (!action.endsWith(")")) {
                 action = action + "()";
             }
             if (absolute) {
-                print("\tout.print(play.mvc.Http.Request.current().getBase() + actionBridge." + action + ");");
+                print("\tout.print(actionBridge._abs()." + action + ");");
             } else {
                 print("\tout.print(actionBridge." + action + ");");
             }

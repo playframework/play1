@@ -22,6 +22,21 @@ ${'Coucou'.up()}
 	<input id="yopGet" value="GET Yop" type="submit" />
 #{/form}
 
+#{render 'Application/kiki.html', a:'Hello', b:9 /}
+
 <p>
     <a id="wp1" href="@{sample.Photo.index()}">with package</a>, <a id="wp2" href="@{admin.Test.index()}">with package 2</a>, #{a @@admin.Test.index(), id:'wp3'}with package 3#{/a}
 </p>
+
+<h2>1: @@{'/public2/assets1/hello.html'}</h2>
+<h2>2: @{'/public2/assets1/hello.html'}</h2>
+<h2>3: @@{'/public2/assets2/hello.html'}</h2>
+<h2>4: @{'/public2/assets2/hello.html'}</h2>
+<h2>5: @@{'/public/image.gif'}</h2>
+<h2>6: @{'/public/image.gif'}</h2>
+<h2>7: @{Application.helloZen()}</h2>
+<h2>8: @@{Application.helloZen()}</h2>
+<h2>9: @{Application.index()}</h2>
+<h2>10: @@{Application.index()}</h2>
+<h2>11: @{Application.myHomePage('bob')}</h2>
+<h2>12: @@{Application.myHomePage('bob')}</h2>

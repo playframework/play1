@@ -46,15 +46,15 @@ public class Application extends Controller {
     public static void authenticate() {
         if (OAuth.isVerifierResponse()) {
             // We got the verifier; now get the access token, store it and back to index
-            TokenPair tokens = OAuth.service(TWITTER).tokens(getUser().getTokenPair()).requestAccessToken();
+            TokenPair tokens = OAuth.service(TWITTER).requestAccessToken(getUser().getTokenPair());
             getUser().setTokenPair(tokens);
             index();
         }
         OAuth twitt = OAuth.service(TWITTER);
-        String url = twitt.requestUnauthorizedToken();
+        TokenPair tokens = twitt.requestUnauthorizedToken();
         // We received the unauthorized tokens in the OAuth object - store it before we proceed
-        getUser().setTokenPair(twitt.getTokens());
-        redirect(url);
+        getUser().setTokenPair(tokens);
+        redirect(twitt.redirectUrl(tokens));
     }
 
     private static User getUser() {

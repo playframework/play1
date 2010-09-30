@@ -296,6 +296,10 @@ public class Router {
     }
 
     public static String reverse(VirtualFile file) {
+        return reverse(file, false);
+    }
+
+    public static String reverse(VirtualFile file, boolean absolute) {
         if (file == null || !file.exists()) {
             throw new NoRouteFoundException("File not found (" + file + ")");
         }
@@ -315,6 +319,13 @@ public class Router {
                     if (to.endsWith("/index.html")) {
                         to = to.substring(0, to.length() - "/index.html".length() + 1);
                     }
+                    if(absolute) {
+                        if(route.host != null && !route.host.equals(".*")) {
+                            to = "http://" + route.host + to;
+                        } else {
+                            to = Http.Request.current().getBase() + to;
+                        }
+                    }
                     return to;
                 }
             }
@@ -322,11 +333,11 @@ public class Router {
         throw new NoRouteFoundException(file.relativePath());
     }
 
-    public static String reverseWithCheck(String name, VirtualFile file) {
+    public static String reverseWithCheck(String name, VirtualFile file, boolean absolute) {
         if (file == null || !file.exists()) {
             throw new NoRouteFoundException(name + " (file not found)");
         }
-        return reverse(file);
+        return reverse(file, absolute);
     }
 
     public static ActionDefinition reverse(String action, Map<String, Object> args) {
@@ -388,6 +399,7 @@ public class Router {
                     if (allRequiredArgsAreHere) {
                         StringBuilder queryString = new StringBuilder();
                         String path = route.path;
+                        String host = route.host;
                         if (path.endsWith("/?")) {
                             path = path.substring(0, path.length() - 2);
                         }
@@ -401,6 +413,7 @@ public class Router {
                                     path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", vals.get(0).toString().replace("$", "\\$") + "");
                                 } else {
                                     path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value.toString().replace("$", "\\$") + "");
+                                    host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value.toString().replace("$", "\\$") + "");
                                 }
                             } else if (route.staticArgs.containsKey(key)) {
                                 // Do nothing -> The key is static
@@ -448,6 +461,7 @@ public class Router {
                         actionDefinition.star = "*".equals(route.method);
                         actionDefinition.action = action;
                         actionDefinition.args = args;
+                        actionDefinition.host = host;
                         return actionDefinition;
                     }
                 }
@@ -458,6 +472,7 @@ public class Router {
 
     public static class ActionDefinition {
 
+        public String host;
         public String method;
         public String url;
         public boolean star;
@@ -485,15 +500,18 @@ public class Router {
         }
 
         public void absolute() {
-            url = Http.Request.current().getBase() + url;
+            if(host == null || host.equals(".*")) {
+                url = Http.Request.current().getBase() + url;
+            } else {
+                url = "http://" + host + url;
+            }
         }
 
         public ActionDefinition secure() {
-            if (url.contains("http://")) {
-                url = url.replace("http:", "https:");
-                return this;
+            if (!url.contains("http://") && !url.contains("https://")) {
+                absolute();
             }
-            url = "https://" + Http.Request.current().host + url;
+            url = url.replace("http:", "https:");
             return this;
         }
     }
@@ -524,6 +542,16 @@ public class Router {
             this.hostPattern = new Pattern(host);
             // staticDir
             if (action.startsWith("staticDir:")) {
+                // Is there is a host argument, append it.
+                if (!path.startsWith("/")) {
+                    String p = this.path;
+                    this.path = p.substring(p.indexOf("/"));
+                    this.host = p.substring(0, p.indexOf("/"));
+                    if(this.host.contains("{")) {
+                        Logger.warn("Static route cannot have a dynamic host name");
+                        return;
+                    }
+                }
                 if (!method.equalsIgnoreCase("*") && !method.equalsIgnoreCase("GET")) {
                     Logger.warn("Static route only support GET method");
                     return;
@@ -548,9 +576,10 @@ public class Router {
                         String name = m.group("name");
                         hostArg = new Arg();
                         hostArg.name = name;
+                        hostArg.constraint = new Pattern(".*");
+                        args.add(hostArg);
                     }
-                    this.host = this.host.replaceFirst("\\{.*\\}", "");
-                    this.hostPattern = new Pattern(host);
+                    this.hostPattern = new Pattern(this.host.replaceFirst("\\{.*\\}", ""));
                 }
                 String patternString = path;
                 patternString = customRegexPattern.replacer("\\{<[^/]+>$1\\}").replace(patternString);

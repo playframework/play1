@@ -251,7 +251,7 @@ public abstract class Cache {
      * Utility that check that an object is serializable.
      */
     static void checkSerializable(Object value) {
-        if(!(value instanceof Serializable)) {
+        if(value != null && !(value instanceof Serializable)) {
             throw new CacheException("Cannot cache a non-serializable value of type " + value.getClass().getName(), new NotSerializableException(value.getClass().getName()));
         }
     }

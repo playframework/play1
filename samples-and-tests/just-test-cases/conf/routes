@@ -9,6 +9,9 @@ GET         /aGetForm/                      Application.aGetForm2
 GET         /optionalSlash/?                Application.optional 
 GET         /index                          Application.index
 
+GET         www.zenexity.com/hello          Application.helloZen
+GET         {clientName}.myApp.com/home     Application.myHomePage
+
 POST		/ressource/file/{id}			Rest.postOrPutFile
 PUT			/ressource/file/{id}			Rest.postOrPutFile
 POST		/ressource/fileAndParams/{id}	Rest.postOrPutFileAndParams
@@ -28,10 +31,12 @@ GET         /needAuthenticity               WithAuthenticity.needAuthenticity
 
 # Map static resources from the /app/public folder to the /public path
 GET			/public/					     staticDir:public
+GET         static.foo.com/assets/           staticDir:public2/assets1
+GET         static2.foo.com/x                staticDir:public2/assets2
 
 #bug in router.reverse
-GET     /notmatch/{name}/{action}                         Application.{action}
-GET     /index2                                           Application.index2
+GET         /notmatch/{name}/{action}        Application.{action}
+GET         /index2                          Application.index2
 
 # Catch all
 *           /sample/{controller}/{action}    sample.{controller}.{action}

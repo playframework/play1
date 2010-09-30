@@ -20,7 +20,7 @@ public class SslHttpServerContextFactory {
     private static final SSLContext SERVER_CONTEXT;
 
     static {
-        
+
         String algorithm = Security.getProperty("ssl.KeyManagerFactory.algorithm");
         if (algorithm == null) {
             algorithm = "SunX509";
@@ -33,6 +33,14 @@ public class SslHttpServerContextFactory {
             // Look if we have key and cert files. If we do, we use our own keymanager
             if (Play.getFile(System.getProperty("certificate.file", "conf/host.key")).exists() && Play.getFile(System.getProperty("certificate.file", "conf/host.cert")).exists()) {
                 Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
+                // Initialize the SSLContext to work with our key managers.
+                serverContext = SSLContext.getInstance(PROTOCOL);
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(algorithm);
+                tmf.init(KeyStore.getInstance(System.getProperty("certificate.algorithm", "JKS")));
+
+                serverContext.init(new KeyManager[]{PEMKeyManager.instance}, tmf.getTrustManagers(), null);
+
             } else {
                 // Try to load it from the keystore
                 ks = KeyStore.getInstance(System.getProperty("certificate.algorithm", "JKS"));
@@ -46,12 +54,16 @@ public class SslHttpServerContextFactory {
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
                 char[] keyStorePassword = System.getProperty("keystore.password", "secret").toCharArray();
 
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(algorithm);
+                tmf.init(ks);
+
                 kmf.init(ks, keyStorePassword);
+                // Initialize the SSLContext to work with our key managers.
+                serverContext = SSLContext.getInstance(PROTOCOL);
+                serverContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
 
             }
-            // Initialize the SSLContext to work with our key managers.
-            serverContext = SSLContext.getInstance(PROTOCOL);
-            serverContext.init(new KeyManager[]{PEMKeyManager.instance}, null, null);
 
         } catch (Exception e) {
             throw new Error(

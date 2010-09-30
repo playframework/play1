@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import play.cache.Cache;
 import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.exceptions.TagInternalException;
@@ -25,6 +26,22 @@ import play.templates.GroovyTemplate.ExecutableTemplate;
  * Fast tags implementation
  */
 public class FastTags {
+
+    public static void _cache(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        String key = args.get("arg").toString();
+        String duration = null;
+        if(args.containsKey("for")) {
+            duration = args.get("for").toString();
+        }
+        Object cached = Cache.get(key);
+        if(cached != null) {
+            out.print(cached);
+            return;
+        }
+        String result = JavaExtensions.toString(body);
+        Cache.set(key, result, duration);
+        out.print(result);
+    }
 
     public static void _verbatim(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         out.println(JavaExtensions.toString(body));
@@ -258,6 +275,32 @@ public class FastTags {
             newArgs.putAll(template.getBinding().getVariables());
             newArgs.put("_isInclude", true);
             t.render(newArgs);
+        } catch (TemplateNotFoundException e) {
+            throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void _render(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        try {
+            if (!args.containsKey("arg") || args.get("arg") == null) {
+                throw new TemplateExecutionException(template.template, fromLine, "Specify a template name", new TagInternalException("Specify a template name"));
+            }
+            String name = args.get("arg").toString();
+            if (name.startsWith("./")) {
+                String ct = BaseTemplate.currentTemplate.get().name;
+                if (ct.matches("^/lib/[^/]+/app/views/.*")) {
+                    ct = ct.substring(ct.indexOf("/", 5));
+                }
+                ct = ct.substring(0, ct.lastIndexOf("/"));
+                name = ct + name.substring(1);
+            }
+            args.remove("arg");
+            BaseTemplate t = (BaseTemplate)TemplateLoader.load(name);
+            Map<String, Object> newArgs = new HashMap<String, Object>();
+            newArgs.putAll((Map<? extends String, ? extends Object>) args);
+            newArgs.put("_isInclude", true);
+            out.println(t.render(newArgs));
         } catch (TemplateNotFoundException e) {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
         }

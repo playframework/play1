@@ -16,6 +16,7 @@ import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
 import play.libs.Codec;
 import play.libs.Crypto;
+import play.libs.Time;
 import play.utils.Utils;
 
 /**
@@ -63,7 +64,7 @@ public class Scope {
                     flash.append("\u0000");
                 }
                 String flashData = URLEncoder.encode(flash.toString(), "utf-8");
-                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", flashData, COOKIE_SECURE);
+                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", flashData, null, "/", null, COOKIE_SECURE);
             } catch (Exception e) {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
@@ -210,9 +211,9 @@ public class Scope {
                 String sessionData = URLEncoder.encode(session.toString(), "utf-8");
                 String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
                 if (Play.configuration.getProperty("application.session.maxAge") == null) {
-                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, COOKIE_SECURE);
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, null, "/", null, COOKIE_SECURE);
                 } else {
-                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, Play.configuration.getProperty("application.session.maxAge"), COOKIE_SECURE);
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, null, "/", Time.parseDuration(Play.configuration.getProperty("application.session.maxAge")), COOKIE_SECURE);
                 }
             } catch (Exception e) {
                 throw new UnexpectedException("Session serializationProblem", e);

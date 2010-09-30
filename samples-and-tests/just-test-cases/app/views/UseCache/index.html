@@ -1,0 +1,17 @@
+<h1>Try cache</h1>
+
+<p id="yop">
+#{cache 'yop', for:'2s'}
+	${new java.util.Date()}
+#{/cache}
+</p>
+
+<p id="kiki">
+#{cache 'kiki'}
+	${new java.util.Date()}
+#{/cache}
+</p>
+
+#{cache 'p'}
+	#{render 'Application/a.html' /}
+#{/cache}

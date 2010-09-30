@@ -40,7 +40,7 @@ import java.util.*;
  */
 public class ServletWrapper extends HttpServlet implements ServletContextListener {
 
-    private boolean routerInitializedWithContext = false;
+    private volatile boolean routerInitializedWithContext = false;
 
     public void contextInitialized(ServletContextEvent e) {
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
