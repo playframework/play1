@@ -12,6 +12,8 @@
 	open('/')
 	
 	// Check #render
-	assertTextPresent('Inner template with: {b=9, a=Hello')
+	assertTextPresent('Inner template with:')
+	assertTextPresent('b=9')
+	assertTextPresent('a=Hello')
 
 #{/selenium}
