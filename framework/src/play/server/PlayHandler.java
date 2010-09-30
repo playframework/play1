@@ -40,6 +40,7 @@ import java.util.*;
 
 import play.data.validation.Validation;
 
+
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
 
 public class PlayHandler extends SimpleChannelUpstreamHandler {
@@ -493,6 +494,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
             throws Exception {
+        Logger.error(e.getCause(), "");
         e.getChannel().close();
     }
 

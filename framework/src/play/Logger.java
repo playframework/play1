@@ -459,6 +459,10 @@ public class Logger {
                         cleanTrace.add(new StackTraceElement("Invocation", "HTTP Request", "Play!", -1));
                         break;
                     }
+                    if (se.getClassName().startsWith("play.server.PlayHandler$SslNettyInvocation")) {
+                        cleanTrace.add(new StackTraceElement("Invocation", "HTTP Request", "Play!", -1));
+                        break;
+                    }
                     if (se.getClassName().startsWith("play.jobs.Job") && se.getMethodName().equals("run")) {
                         cleanTrace.add(new StackTraceElement("Invocation", "Job", "Play!", -1));
                         break;
