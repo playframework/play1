@@ -1,0 +1,29 @@
+#{selenium 'Test the cache tag'}
+
+	open('@{UseCache.index()}')
+	
+	storeText('yop', 'firstDate')
+	storeText('kiki', 'secondDate')
+	
+	open('@{UseCache.index()}')
+	assertText('yop', '$[firstDate]')
+	assertText('kiki', '$[secondDate]')
+	
+	pause(3000)
+	
+	open('@{UseCache.index()}')
+	assertNotText('yop', '$[firstDate]')
+	assertText('kiki', '$[secondDate]')
+	
+	open('@{UseCache.getDate()}')
+	storeText('a', 'aDate')
+	
+	open('@{UseCache.getDate()}')
+	assertText('a', '$[aDate]')
+	
+	pause(3000)
+	
+	open('@{UseCache.getDate()}')
+	assertNotText('a', '$[aDate]')
+
+#{/selenium}

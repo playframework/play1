@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import play.cache.Cache;
 import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.exceptions.TagInternalException;
@@ -25,6 +26,22 @@ import play.templates.GroovyTemplate.ExecutableTemplate;
  * Fast tags implementation
  */
 public class FastTags {
+
+    public static void _cache(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        String key = args.get("arg").toString();
+        String duration = null;
+        if(args.containsKey("for")) {
+            duration = args.get("for").toString();
+        }
+        Object cached = Cache.get(key);
+        if(cached != null) {
+            out.print(cached);
+            return;
+        }
+        String result = JavaExtensions.toString(body);
+        Cache.set(key, result, duration);
+        out.print(result);
+    }
 
     public static void _verbatim(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         out.println(JavaExtensions.toString(body));
