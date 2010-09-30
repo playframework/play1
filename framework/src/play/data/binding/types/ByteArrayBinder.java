@@ -12,6 +12,7 @@ import java.util.List;
  */
 public class ByteArrayBinder implements TypeBinder<byte[]> {
 
+    @SuppressWarnings("unchecked")
     public byte[] bind(String name, Annotation[] annotations, String value, Class actualClass) {
         List<Upload> uploads = (List<Upload>) Request.current().args.get("__UPLOADS");
         for(Upload upload : uploads) {

@@ -71,13 +71,14 @@ public class OAuth {
      * Request the unauthorized token and secret. They can then be read with getTokens()
      * @return the url to redirect the user to get the verifier and continue the process
      */
-    public String requestUnauthorizedToken() {
+    public TokenPair requestUnauthorizedToken() {
         String callbackURL = Request.current().getBase() + Request.current().url;
         try {
-            return provider.retrieveRequestToken(consumer, callbackURL);
+            provider.retrieveRequestToken(consumer, callbackURL);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        return new TokenPair(consumer.getToken(), consumer.getTokenSecret());
     }
 
     public TokenPair requestAccessToken() {
@@ -88,6 +89,11 @@ public class OAuth {
             throw new RuntimeException(e);
         }
         return new TokenPair(consumer.getToken(), consumer.getTokenSecret());
+    }
+
+    public String redirectUrl(TokenPair tokens) {
+        return oauth.signpost.OAuth.addQueryParameters(provider.getAuthorizationWebsiteUrl(),
+                oauth.signpost.OAuth.OAUTH_TOKEN, consumer.getToken());
     }
 
     public static class ServiceInfo {

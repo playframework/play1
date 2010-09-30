@@ -51,10 +51,10 @@ public class Application extends Controller {
             index();
         }
         OAuth twitt = OAuth.service(TWITTER);
-        String url = twitt.requestUnauthorizedToken();
+        TokenPair tokens = twitt.requestUnauthorizedToken();
         // We received the unauthorized tokens in the OAuth object - store it before we proceed
-        getUser().setTokenPair(twitt.getTokens());
-        redirect(url);
+        getUser().setTokenPair(tokens);
+        redirect(twitt.redirectUrl(tokens));
     }
 
     private static User getUser() {
