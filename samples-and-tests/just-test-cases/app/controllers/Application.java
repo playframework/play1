@@ -29,6 +29,14 @@ public class Application extends Controller {
         } catch (Exception ex) {
         }
     }
+    
+    public static void helloZen() {
+        renderText("Hello");
+    }
+    
+    public static void myHomePage(String clientName) {
+        renderText(clientName);
+    }
 
     // bug
 
