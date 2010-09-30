@@ -9,11 +9,11 @@ import play.mvc.Scope.Params;
 
 public class OAuth {
 
-    private OAuthConsumer consumer;
+    private ServiceInfo info;
     private OAuthProvider provider;
 
     private OAuth(ServiceInfo info) {
-        consumer = new DefaultOAuthConsumer(info.consumerKey, info.consumerSecret);
+        this.info = info;
         provider = new DefaultOAuthProvider(info.requestTokenURL, info.accessTokenURL, info.authorizationURL);
         provider.setOAuth10a(true);
     }
@@ -27,44 +27,8 @@ public class OAuth {
         return new OAuth(info);
     }
 
-    /**
-     * Set the token and secret of the current user
-     * @param tokens the TokenPair
-     * @return the OAuth object for chaining
-     */
-    public OAuth tokens(TokenPair tokens) {
-        consumer.setTokenWithSecret(tokens.token, tokens.secret);
-        return this;
-    }
-
-    /**
-     * Set the token and secret of the current user
-     * @return the OAuth object for chaining
-     */
-    public OAuth tokens(String token, String secret) {
-        consumer.setTokenWithSecret(token, secret);
-        return this;
-    }
-
-    /**
-     * Return the token and secret stored - this is usefull after calling requestUnauthorizedToken
-     * because the value will be updated with information we got from the server
-     * @return the TokenPair
-     */
-    public TokenPair getTokens() {
-        return new TokenPair(consumer.getToken(), consumer.getTokenSecret());
-    }
-
     public static boolean isVerifierResponse() {
         return Params.current().get("oauth_verifier") != null;
-    }
-
-    public static String getResponseToken() {
-        return Params.current().get("oauth_token");
-    }
-
-    public static String getResponseSecret() {
-        return Params.current().get("oauth_token_secret");
     }
 
     /**
@@ -72,6 +36,7 @@ public class OAuth {
      * @return the url to redirect the user to get the verifier and continue the process
      */
     public TokenPair requestUnauthorizedToken() {
+        OAuthConsumer consumer = new DefaultOAuthConsumer(info.consumerKey, info.consumerSecret);
         String callbackURL = Request.current().getBase() + Request.current().url;
         try {
             provider.retrieveRequestToken(consumer, callbackURL);
@@ -81,7 +46,9 @@ public class OAuth {
         return new TokenPair(consumer.getToken(), consumer.getTokenSecret());
     }
 
-    public TokenPair requestAccessToken() {
+    public TokenPair requestAccessToken(TokenPair tokenPair) {
+        OAuthConsumer consumer = new DefaultOAuthConsumer(info.consumerKey, info.consumerSecret);
+        consumer.setTokenWithSecret(tokenPair.token, tokenPair.secret);
         String verifier = Params.current().get("oauth_verifier");
         try {
             provider.retrieveAccessToken(consumer, verifier);
@@ -91,9 +58,9 @@ public class OAuth {
         return new TokenPair(consumer.getToken(), consumer.getTokenSecret());
     }
 
-    public String redirectUrl(TokenPair tokens) {
+    public String redirectUrl(TokenPair tokenPair) {
         return oauth.signpost.OAuth.addQueryParameters(provider.getAuthorizationWebsiteUrl(),
-                oauth.signpost.OAuth.OAUTH_TOKEN, consumer.getToken());
+                oauth.signpost.OAuth.OAUTH_TOKEN, tokenPair.token);
     }
 
     public static class ServiceInfo {

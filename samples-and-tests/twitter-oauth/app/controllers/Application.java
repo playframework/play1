@@ -46,7 +46,7 @@ public class Application extends Controller {
     public static void authenticate() {
         if (OAuth.isVerifierResponse()) {
             // We got the verifier; now get the access token, store it and back to index
-            TokenPair tokens = OAuth.service(TWITTER).tokens(getUser().getTokenPair()).requestAccessToken();
+            TokenPair tokens = OAuth.service(TWITTER).requestAccessToken(getUser().getTokenPair());
             getUser().setTokenPair(tokens);
             index();
         }
