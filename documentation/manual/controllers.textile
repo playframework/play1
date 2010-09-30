@@ -149,7 +149,7 @@ A date object can be automatically bound if the date’s string representation m
 * MM-dd-yy
 * MM'/'dd'/'yy
 
-Using the @Bind annotation, you can specify the date format.
+Using the **@Bind** annotation, you can specify the date format.
 
 For example:
 
@@ -167,14 +167,15 @@ bc. date.format=yyy-MM-dd
     date.format.fr=dd/MM/yyyy
 
 Please note that the language fr in the application.conf must be enabled as well:
+
 bc. application.langs=fr
 
-This property also affects how the dates are rendered in the templates using the ${date.format()}.
+This property also affects how the dates are rendered in the templates using **${date.format()}**.
 
 
 h3. Calendar
 
-The calendar binding works exactly as with the date, except that Play! is choosing the Calendar object according to your locale. The @Bind annotation can also be used.
+The calendar binding works exactly as with the date, except that Play is choosing the Calendar object according to your locale. The **@Bind** annotation can also be used.
 
 h3. Files
 

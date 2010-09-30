@@ -4,6 +4,7 @@ import getopt
 import shutil
 import zipfile
 
+import play.commands.precompile
 from play.utils import *
 
 COMMANDS = ["war"]
@@ -13,11 +14,12 @@ HELP = {
 }
 
 def execute(**kargs):
+    
     command = kargs.get("command")
     app = kargs.get("app")
     args = kargs.get("args")
     env = kargs.get("env")
-
+    
     war_path = None
     war_zip_path = None
     try:
@@ -34,6 +36,25 @@ def execute(**kargs):
         print "~ "
         sys.exit(-1)
         
+    if not war_path:
+        print "~ Oops. Please specify a path where to generate the WAR, using the -o or --output option"
+        print "~"
+        sys.exit(-1)
+
+    if os.path.exists(war_path) and not os.path.exists(os.path.join(war_path, 'WEB-INF')):
+        print "~ Oops. The destination path already exists but does not seem to host a valid WAR structure"
+        print "~"
+        sys.exit(-1)
+
+    if isParentOf(app.path, war_path):
+        print "~ Oops. Please specify a destination directory outside of the application"
+        print "~"
+        sys.exit(-1)
+    
+    # Precompile first
+    play.commands.precompile.execute(command=command, app=app, args=args, env=env)
+       
+    # Package 
     package_as_war(app, env, war_path, war_zip_path)
     
     print "~ Done !"

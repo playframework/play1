@@ -1,8 +1,8 @@
-h1. Sending e-mail with Play
+h1. Sending e-mail
 
-Email are using the "jakarta commons email":http://commons.apache.org/email/userguide.html library under the hoot. You can use the play.libs.Mail utility to send emails very easily:
+E-mail functionality uses the "Apache Commons Email":http://commons.apache.org/email/userguide.html library under the hoot. You can use the **play.libs.Mail** utility class to send e-mail very easily.
 
-A simple email:
+A simple e-mail:
 
 bc. SimpleEmail email = new SimpleEmail();
 email.setFrom("sender@zenexity.fr");
@@ -11,7 +11,7 @@ email.setSubject("subject");
 email.setMsg("Message");
 Mail.send(email); 
 
-An html email:
+An HTML e-mail:
 
 bc. HtmlEmail email = new HtmlEmail();
 email.addTo("info@lunatech.com");
@@ -25,17 +25,15 @@ email.setHtmlMsg("<html>Zenexity logo - <img src=\"cid:"+cid+"\"></html>");
 // set the alternative message
 email.setTextMsg("Your email client does not support HTML messages, too bad :(");
 
-More information about the commons email "here":http://commons.apache.org/email/userguide.html
+For more information see the "Commons Email documentation":http://commons.apache.org/email/userguide.html.
 
-h2. <a>Mail and MVC integration</a>
+h2. <a name="mvc">Mail and MVC integration</a>
 
 You can also send complex, dynamic e-mail using the standard templates mechanism and syntax.
 
 First,  define a **Mailer notifier** in your application. Your mailer notifier must subclass **play.mvc.Mailer** and be part of the **notifiers** package. 
 
-Each public static method will be an e-mail sender, in a similar manner as actions for an MVC controller.
-
-For example:
+Each public static method will be an e-mail sender, in a similar manner as actions for an MVC controller. For example:
 
 bc. package notifiers;
  
@@ -68,7 +66,7 @@ public class Mails extends Mailer {
 
 h3. text/html e-mail 
 
-The send call will render the app/views/Mails/welcome.html template as the e-mail message body.
+The **send** method call will render the **app/views/Mails/welcome.html** template as the e-mail message body.
 
 bc. <html><body><p>Welcome <b>${user.name}</b>, </p>
 ...
@@ -76,7 +74,7 @@ bc. <html><body><p>Welcome <b>${user.name}</b>, </p>
 
 The template for the lostPassword method could look like this:
 
-app/views/Mails/lostPassword.html
+**app/views/Mails/lostPassword.html**
 
 bc. <html><body><head>...</head><body><img src="mycompany.com/images"/><p>Hello ${user.name},<br/>
 Your new password is <b>${newpassword}</b>.
@@ -88,14 +86,14 @@ h3. text/plain e-mail
 
 If no HTML template is defined, then a text/plain e-mail is sent using the text template.
 
-The send call will render the app/views/Mails/welcome.txt template as the e-mail message body.
+The **send** method call will render the **app/views/Mails/welcome.txt** template as the e-mail message body.
 
 bc. Welcome ${user.name},
 ...
 
 The template for the lostPassword method could look like this:
 
-app/views/Mails/lostPassword.txt
+**app/views/Mails/lostPassword.txt**
 
 bc. Hello ${user.name},
  
@@ -103,19 +101,11 @@ Your new password is ${newpassword}.
 
 h3. text/html e-mail with text/plain alternative
 
-If an HTML template is defined and a text template exists, then the text template will be used as an alternative message. In our previous example, if both 
+If an HTML template is defined and a text template exists, then the text template will be used as an alternative message. In our previous example, if both **app/views/Mails/lostPassword.html** and **app/views/Mails/lostPassword.txt** are defined, then the e-mail will be sent in text/html as defined in lostPassword.html with an alternative part as defined in lostPassword.txt. So you can send nice HMTL e-mail to your friends and still please those geeky friends that still use mutt ;)
 
-app/views/Mails/lostPassword.html 
+h2. <a name="smtp">SMTP configuration</a>
 
-and 
-
-app/views/Mails/lostPassword.txt
-
-are defined, then the e-mail will be sent in text/html as defined in lostPassword.html with an alternative part as defined in lostPassword.txt. So you can send nice HMTL e-mail to your friends and still please those geeky friends that still use mutt ;)
-
-h2. <a>SMTP configuration</a>
-
-First of all, you need to define the SMTP server to use:
+E-mail functionality is configured in your application’s **conf/application.conf** file. First of all, you need to define the SMTP server to use:
 
 bc. mail.smtp.host=smtp.taldius.net
 
@@ -126,7 +116,7 @@ mail.smtp.pass=topsecret
 
 h3. Channel & ports
 
-There are two ways to send the e-mail over an encrypted channel. If your server supports the **starttls** command (see: RFC 2487), you can use a clear connection on port 25 that will switch to SSL/TLS. You can do so by adding this configuration option:
+There are two ways to send the e-mail over an encrypted channel. If your server supports the **starttls** command (see: "RFC 2487":http://www.apps.ietf.org/rfc/rfc2487.html), you can use a clear connection on port 25 that will switch to SSL/TLS. You can do so by adding this configuration option:
 
 bc. mail.smtp.channel=starttls
 
@@ -134,7 +124,7 @@ Your server may also provide a SMTP-over-SSL (SMTPS) connector, that is an SSL s
 
 bc. mail.smtp.channel=ssl
 
-h2. <a>More about configuration</a>
+h2. <a name="configuration">More about configuration</a>
 
 Under the hood, Play uses JavaMail to perform the actual SMTP transactions. If you need to see what’s going on, try:
 
@@ -148,7 +138,7 @@ If you need to connect to servers using non-standard ports, the following proper
 
 bc. mail.smtp.port=2500
 
-h2. <a>Using Gmail</a>
+h2. <a name="gmail">Using Gmail</a>
 
 To use Gmail’s servers, use this configuration: 
 

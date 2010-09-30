@@ -171,6 +171,10 @@ label {
 	position: relative;
 }
 
+.crud_hidden {
+    display: none;
+}
+
 .crudButtons {
 	background: #efefef;
 	text-align: right;

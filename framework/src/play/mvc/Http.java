@@ -18,6 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import play.Logger;
+import play.Play;
 import play.exceptions.UnexpectedException;
 import play.libs.Codec;
 import play.libs.Time;
@@ -29,23 +30,21 @@ import play.utils.Utils;
 public class Http {
 
     public static class StatusCode {
+
         public static final int OK = 200;
         public static final int CREATED = 201;
         public static final int ACCEPTED = 202;
         public static final int PARTIAL_INFO = 203;
         public static final int NO_RESPONSE = 204;
-
         public static final int MOVED = 301;
         public static final int FOUND = 302;
         public static final int METHOD = 303;
         public static final int NOT_MODIFIED = 304;
-
         public static final int BAD_REQUEST = 400;
         public static final int UNAUTHORIZED = 401;
         public static final int PAYMENT_REQUIERED = 402;
         public static final int FORBIDDEN = 403;
         public static final int NOT_FOUND = 404;
-
         public static final int INTERNAL_ERROR = 500;
         public static final int NOT_IMPLEMENTED = 501;
         public static final int OVERLOADED = 502;
@@ -105,7 +104,6 @@ public class Http {
         public String toString() {
             return values.toString();
         }
-
     }
 
     /**
@@ -124,7 +122,7 @@ public class Http {
         /**
          * Cookie path
          */
-        public String path = "/";
+        public String path = Play.ctxPath + "/";
         /**
          * for HTTPS ?
          */
@@ -145,7 +143,6 @@ public class Http {
          * See http://www.owasp.org/index.php/HttpOnly
          */
         public boolean httpOnly = false;
-
     }
 
     /**
@@ -261,10 +258,14 @@ public class Http {
          * Request comes from loopback interface
          */
         public boolean isLoopback;
+        /**
+         * Params
+         */
+        public final Scope.Params params = new Scope.Params();
 
         public void _init() {
             Header header = headers.get("authorization");
-            if(header != null && header.value().startsWith("Basic ")) {
+            if (header != null && header.value().startsWith("Basic ")) {
                 String data = header.value().substring(6);
                 String[] decodedData = new String(Codec.decodeBASE64(data)).split(":");
                 user = decodedData.length > 0 ? decodedData[0] : null;
@@ -328,7 +329,7 @@ public class Http {
          * (rely on the X-Requested-With header).
          */
         public boolean isAjax() {
-            if(!headers.containsKey("x-requested-with")) {
+            if (!headers.containsKey("x-requested-with")) {
                 return false;
             }
             return "XMLHttpRequest".equals(headers.get("x-requested-with").value());
@@ -356,21 +357,29 @@ public class Http {
          */
         public List<String> acceptLanguage() {
             final Pattern qpattern = Pattern.compile("q=([0-9\\.]+)");
-            if (!headers.containsKey("accept-language")) return new ArrayList<String>();
+            if (!headers.containsKey("accept-language")) {
+                return new ArrayList<String>();
+            }
             String acceptLanguage = headers.get("accept-language").value();
             List<String> languages = Arrays.asList(acceptLanguage.split(","));
-            Collections.sort(languages, new Comparator<String>(){
+            Collections.sort(languages, new Comparator<String>() {
+
                 public int compare(String lang1, String lang2) {
                     double q1 = 1.0;
                     double q2 = 1.0;
                     Matcher m1 = qpattern.matcher(lang1);
                     Matcher m2 = qpattern.matcher(lang2);
-                    if (m1.find()) q1 = Double.parseDouble(m1.group(1));
-                    if (m2.find()) q2 = Double.parseDouble(m2.group(1));
-                    return (int)(q2 - q1);
-                }});
+                    if (m1.find()) {
+                        q1 = Double.parseDouble(m1.group(1));
+                    }
+                    if (m2.find()) {
+                        q2 = Double.parseDouble(m2.group(1));
+                    }
+                    return (int) (q2 - q1);
+                }
+            });
             List<String> result = new ArrayList<String>();
-            for (String lang: languages) {
+            for (String lang : languages) {
                 result.add(lang.split(";")[0]);
             }
             return result;
@@ -446,9 +455,9 @@ public class Http {
          * @return the header value as a String
          */
         public String getHeader(String name) {
-            for(String key : headers.keySet()) {
-                if(key.toLowerCase().equals(name.toLowerCase())) {
-                    if(headers.get(key) != null) {
+            for (String key : headers.keySet()) {
+                if (key.toLowerCase().equals(name.toLowerCase())) {
+                    if (headers.get(key) != null) {
                         return headers.get(key).value();
                     }
                 }
@@ -470,7 +479,7 @@ public class Http {
         }
 
         public void setContentTypeIfNotSet(String contentType) {
-            if(this.contentType == null) {
+            if (this.contentType == null) {
                 this.contentType = contentType;
             }
         }
@@ -512,10 +521,10 @@ public class Http {
         }
 
         public void setCookie(String name, String value, Integer maxAge, boolean secure) {
-            setCookie(name, value, null, "/", maxAge, secure);
+            setCookie(name, value, null, Play.ctxPath + "/", maxAge, secure);
         }
 
-            public void setCookie(String name, String value, String domain, String path, String duration) {
+        public void setCookie(String name, String value, String domain, String path, String duration) {
             setCookie(name, value, domain, path, duration, false);
         }
 
@@ -570,6 +579,7 @@ public class Http {
             setHeader("Last-Modified", Utils.getHttpDateFormatter().format(new Date(lastModified)));
             setHeader("Etag", etag);
         }
+
         /**
          * Add headers to allow cross-domain requests. Be careful, a lot of browsers don't support
          * these features and will ignore the headers. Refer to the browsers' documentation to

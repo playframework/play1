@@ -1,0 +1,3 @@
+#{field 'object.' + _name}
+    <input id="${field.id}" class="${field.errorClass}" type="hidden" name="${field.name}" value="${params[field.name]?.escape()?.raw() ?: field.error?.message == 'validation.required' ? '' : _value?.escape()?.raw()}" size="50" />
+#{/field}

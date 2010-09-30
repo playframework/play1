@@ -84,6 +84,7 @@ public abstract class CRUD extends Controller {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
         Model object = type.findById(id);
+        notFoundIfNull(object);
         Binder.bind(object, "object", params.all());
         validation.valid(object);
         if (validation.hasErrors()) {
@@ -336,8 +337,11 @@ public abstract class CRUD extends Controller {
                 if (field.isAnnotationPresent(Required.class)) {
                     required = true;
                 }
-                if (field.isAnnotationPresent(Exclude.class)) {
+                if (field.isAnnotationPresent(Hidden.class)) {
                     type = "hidden";
+                }
+                if (field.isAnnotationPresent(Exclude.class)) {
+                    type = null;
                 }
                 if (java.lang.reflect.Modifier.isFinal(field.getModifiers())) {
                     type = null;

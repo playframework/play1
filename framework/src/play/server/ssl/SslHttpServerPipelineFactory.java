@@ -37,7 +37,7 @@ public class SslHttpServerPipelineFactory implements ChannelPipelineFactory {
         pipeline.addLast("encoder", new HttpResponseEncoder());
         pipeline.addLast("chunkedWriter", new ChunkedWriteHandler());
 
-        pipeline.addLast("handler", new PlayHandler(true));
+        pipeline.addLast("handler", new SslPlayHandler());
 
         return pipeline;
     }

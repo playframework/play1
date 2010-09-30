@@ -52,7 +52,7 @@ public class ActionInvoker {
             Http.Request.current.set(request);
             Http.Response.current.set(response);
 
-            Scope.Params.current.set(new Scope.Params());
+            Scope.Params.current.set(request.params);
             Scope.RenderArgs.current.set(new Scope.RenderArgs());
             Scope.RouteArgs.current.set(new Scope.RouteArgs());
             Scope.Session.current.set(Scope.Session.restore());

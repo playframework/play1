@@ -106,6 +106,7 @@
     <target name="modules">
         <property name="play.path" value="../.."/>
         <ant antfile="build.xml" target="build" dir="../modules/testrunner" />
+        <ant antfile="build.xml" target="build" dir="../modules/grizzly" />
     </target>
     
     <!-- Netbeans support -->
@@ -205,7 +206,7 @@
         
         <echo message="Testing development lifecycle (wait ...)" />
 
-        <exec executable="python" failonerror="false">
+        <exec executable="python" failonerror="true">
             <arg value="${basedir}/../samples-and-tests/i-am-a-developer/tests.py" />
         </exec>
         

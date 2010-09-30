@@ -116,7 +116,7 @@ p(note). The URI pattern cannot have any optional part except for that trailing 
 
 h3. Java call definition
 
-The last part of a route definition is the Java call. This part is defined by the fully-qualified name of an action method. The action method must be a static, public method of a Controller class. A Controller class must be defined in the **controllers** package and must be a subclass of **play.mvc.Controller**.
+The last part of a route definition is the Java call. This part is defined by the fully-qualified name of an action method. The action method must be a **public static void** method of a Controller class. A Controller class must be defined in the **controllers** package and must be a subclass of **play.mvc.Controller**.
 
 You can add a Java package before the Controller class name if it isn’t defined directly under the controllers package. The **controllers** package itself is implicit, so you don’t need to specify it. 
 

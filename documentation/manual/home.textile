@@ -4,7 +4,7 @@ Welcome to the play framework documentation. This documentation is intended for 
 
 p(note). The 1.1 branch is in active development.
 
-<div id="searchBox"><form action="http://www.google.com/cse" id="cse-search-box"><div><input type="hidden" name="cx" value="002614023023983855063:jn1mu_7bof0" /><input type="hidden" name="ie" value="UTF-8" /><input type="text" name="q" size="31" style="font-size:14px"/> <input type="submit" name="sa" value="Search with google" style="font-size:14px"/></div></form><script type="text/javascript" src="http://www.google.com/coop/cse/brand?form=cse-search-box&lang=en"></script></div>
+<div id="searchBox"><form action="http://www.google.com/cse" id="cse-search-box"><div><input type="hidden" name="cx" value="002614023023983855063:jn1mu_7bof0" /><input type="hidden" name="ie" value="UTF-8" /><input type="text" name="q" size="31" style="font-size:14px"/> <input type="submit" name="sa" value="Search with google" style="font-size:14px"/> Hint: add **playframework** to your search terms.</div></form><script type="text/javascript" src="http://www.google.com/coop/cse/brand?form=cse-search-box&lang=en"></script></div>
 
 h2. <a name="started">Getting started</a>
 
@@ -17,7 +17,7 @@ Your first steps with Play and your first 5 minutes of fun.
 # "Frequently Asked Questions":faq
 # "Installation guide":install
 # "Your first application — the ‘Hello World’ tutorial":firstapp
-# "Set up your preferred IDE":ide
+# "Setting-up your preferred IDE":ide
 # "Sample applications":samples
 # "Live coding script - to practice, and impress your colleagues with":http://www.lunatech-research.fr/archives/2010/06/14/how-demo-play-framework-live-coding-script
 
@@ -68,15 +68,33 @@ Everything you need to know about Play.
 ## "Create tags":templates#tags
 ## "Extending the templates language":templates#extensions
 ## "Implicit objects":templates#implicits
+# "HTTP form data validation":validation
+## "How does it work?":validation#how
+## "Retrieving error messages":validation#messages
+## "Displaying errors in the template":validation#display
+## "Using annotations":validation#annotations
+## "Validating objects":validation#objects
+## "Custom validation":validation#custom
 # "The domain object model":model
 ## "Properties simulation":model#properties
 ## "Setup a database to persist your model objects":model#database
 ## "Persist your object model with Hibernate":model#hibernate
 ## "The stateless model":model#stateless
-# "A little of asynchronism using jobs":jobs
-## "Bootstrap jobs":jobs#concepts
-## "Scheduled jobs":jobs#scheduling
-## "Suspendable requests":jobs#suspendable
+# "JPA persistence":jpa
+## "Starting the JPA entity manager":jpa#starting
+## "Obtaining the JPA entity manager":jpa#obtaining
+## "Transaction management":jpa#transactions
+## "The play.db.jpa.Model support class":jpa#support
+## "Finding objects":jpa#finding
+## "Counting objects":jpa#counting
+## "Explicit save":jpa#save
+## "More about generic typing problems":jpa#typing
+# "Logging configuration":logs
+## "Logging from your application":logs#logging
+## "Configure log levels":logs#levels
+# "Configuration in several environments":ids
+## "The framework ID":ids#id
+## "Setting the framework ID from the command line":ids#command
 # "Testing the application":test
 ## "Writing tests":test#writing
 ## "Fixtures":test#fixtures
@@ -87,24 +105,43 @@ Everything you need to know about Play.
 ## "Running on JEE application servers":deployment#appservers
 ## "Google Application Engine":deployment#gae
 ## "Stax cloud hosting platform":deployment#stax
-
-
-h2. <a name="cook">Cookbook</a>
-
-Tips about everything and anything.
-
-# "Using Play modules, and the modules repository":modules
-# "Security Guide":security
-# "More about the JPA support":jpa
-# "Using data validation":validation
-# "How to configure logs":logs
-# "Manage application.conf in several environments":ids
-# "Setting up i18n":i18n
-# "Use cache and configure Memcached":cache
-# "Put your application in production":production
+# "Production deployment":production
+## "Configure your application.conf":production#application
+## "Configure logging":production#logging
+## "Set-up a front-end HTTP server":production#server
+# "Modules and the module repository":modules
+## "What is a module?":modules#what
+## "How to load a module from an application":modules#loading
+## "Load default routes from modules":modules#routes
+## "Using the module repository":modules#repository
+## "Contributing a new module to the module repository":modules#contributing
+# "Internationalization":i18n
+## "Only use UTF-8":i18n#utf8
+## "Externalize your messages":i18n#messages
+## "Define languages supported by the application":i18n#languages
+## "Define date format according to your locale":i18n#dates
+## "Retrieve localized messages":i18n#retrieve
+# "Cache":cache
+## "The cache API":cache#api
+## "Don’t use the Session as a cache":cache#session
+## "Configure memcached":cache#memcached
+# "Asynchronous execution using jobs":jobs
+## "Bootstrap jobs":jobs#concepts
+## "Scheduled jobs":jobs#scheduling
+## "Suspendable requests":jobs#suspendable
 # "Sending e-mail":emails
+## "Mail and MVC integration":emails#mvc
+## "SMTP configuration":emails#smtp
+## "More about configuration":emails#configuration
+## "Using Gmail":emails#gmail
+# "Security Guide":security
+## "Sessions":security#sessions
+## "Cross-Site Scripting":security#xss
+## "SQL Injection":security#sql
+## "Cross-Site Request Forgery":security#csrf
+# "Ajax with JQuery":ajax
 # "OpenID integration":openid
-# "Doing Ajax with JQuery":ajax
+
 
 h2. <a name="modules">Distribution Modules</a>
 

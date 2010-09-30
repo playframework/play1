@@ -1,4 +1,4 @@
-h1. Setting up your preferred IDE
+h1. Setting-up your preferred IDE
 
 Working with Play is easy. You don’t even need a sophisticated IDE as Play compiles and refreshes the modifications you make to your source files automatically. So you can easily work using a simple text editor.
 

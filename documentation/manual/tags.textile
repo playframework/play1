@@ -1,11 +1,11 @@
 h1. Built-in template tags 
 
-These are the standard tags built in the template engine.
+These are the built-in tags that are available in addition to the core "template engine syntax":templates#syntax.
 
 p(note). There is a separate "Java extensions":javaextensions manual page.
 
 
-h2. <a>a</a>
+h2. <a name="a">a</a>
 
 The **a** tag inserts an HTML link to a controller action.
 
@@ -18,7 +18,7 @@ bc. <a href="/application/logout">Disconnect</a>
 If the action you try to call does not have any route able to invoke it using a GET method, Play will automatically generate a hidden form that will be submitted on link click using JavaScript.
 
 
-h2. <a>doLayout</a>
+h2. <a name="dolayout">doLayout</a>
 
 Used with template inheritance, this tag inserts the evaluated sub-template’s contents.
 
@@ -29,7 +29,7 @@ bc. <!-- common header here -->
 <!-- common footer here -->
 
 
-h2. <a>else</a>
+h2. <a name="else">else</a>
 
 Of course used with the **if** tag.
 
@@ -51,7 +51,7 @@ bc. #{list items:task, as:'task'}
 #{/else}
 
 
-h2. <a>elseif</a>
+h2. <a name="elseif">elseif</a>
 
 bc. #{if tasks.size() > 1}
     Busy tasklist
@@ -68,7 +68,7 @@ bc. #{if tasks.size() > 1}
 As for **else**, you can use it with the **list** tag.
 
 
-h2. <a>errors</a>
+h2. <a name="errors">errors</a>
 
 Iterates over the current validation errors.
 
@@ -92,7 +92,7 @@ bc. <table>
 #{/errors}
 </table>
 
-h2. <a>ifErrors</a>
+h2. <a name="iferrors">ifErrors</a>
 
 If there's any validation error, tag's content will be rendered
 
@@ -100,7 +100,7 @@ bc. #{ifErrors}
   <p>Error(s) found!</p>
 #{/ifErrors}
 
-h2. <a>ifError</a>
+h2. <a name="iferror">ifError</a>
 
 If corresponding input as error, tag's content will be rendered
 
@@ -113,14 +113,14 @@ bc. #{ifError 'user.name'}
   <p>
 #{/ifError}
 
-h2. <a>extends</a>
+h2. <a name="extends">extends</a>
 
 Makes the template inherit another template.
 
 bc. #{extends 'main.html' /}
 
 
-h2. <a>field</a>
+h2. <a name="field">field</a>
 
 The field tag is a helper, based on the spirit of the Don’t Repeat Yourself. It works this way:
 
@@ -145,7 +145,7 @@ bc. #{field 'user.name'}
 So you don’t repeat **user.name** again and again.
 
 
-h2. <a>form</a>
+h2. <a name="form">form</a>
 
 Inserts a **form** tag. The HTTP method is guessed from the route, and defaults to POST. If there are both GET and POST routes configured for the URL, the tag will default to using the first route defined in routes.  
 
@@ -158,15 +158,14 @@ bc. #{form @Client.create() , id:'creationForm' enctype:'multipart/form-data' }
    ...
 #{/form}
 
-
 Rendered as:
 
-bc. <form action="/client/create" id="frm" method="POST" accept-charset="utf-8" enctype="multipart/form-data">
+bc. <form action="/client/create" id="creationForm" method="POST" accept-charset="utf-8" enctype="multipart/form-data">
  ...
 </form>
 
 
-h2. <a>get</a>
+h2. <a name="get">get</a>
 
 Retrieves a value defined with a **set** tag. You may use  the get/set mechanism to exchange values between templates, layouts and sub-templates.
 
@@ -181,7 +180,7 @@ bc. <head>
 </head>
 
 
-h2. <a>i18n</a>
+h2. <a name="i18n">i18n</a>
 
 Exports localized messages in JavaScript. Localized messages are available from your JavaScript code using the **i18n()** function.
 
@@ -200,7 +199,7 @@ bc. alert(i18n('hello_world'));
 alert(i18n('hello_someone', 'John'));
 
 
-h2. <a>if</a>
+h2. <a name="if">if</a>
 
 Evaluates the given test, and if true, evaluates the tag body.
 
@@ -215,7 +214,7 @@ bc. #{if ( request.actionMethod == 'administer'  && user.isAdmin() ) }
 #{/if}
 
 
-h2. <a>ifnot</a>
+h2. <a name="ifnot">ifnot</a>
 
 Cleaner alternative to #{if !condition}
 
@@ -224,7 +223,7 @@ bc. #{ifnot tasks}
 #{/ifnot}
 
 
-h2. <a>include</a>
+h2. <a name="include">include</a>
 
 Includes another template. All of the current template’s variables are directly available in the included template.
 
@@ -233,7 +232,7 @@ bc. <div id="tree">
 </div>
 
 
-h2. <a>jsAction</a>
+h2. <a name="jsaction">jsAction</a>
 
 The #{jsAction /} tag returns a JavaScript function which constructs a URL based on a server action and free variables. It does not perform an AJAX request; these have to be done by hand using the returned URL.
 
@@ -252,7 +251,7 @@ bc. <script type="text/javascript">
 </script>
 
 
-h2. <a>list</a>
+h2. <a name="list">list</a>
 
 Iterates over an object collection.
 
@@ -307,7 +306,7 @@ bc. #{list users}
 #{/list}
 
 
-h2. <a>script</a>
+h2. <a name="script">script</a>
 
 Inserts a **script** tag in the template. By convention, the tag refers to a script in **/public/javascripts**
 
@@ -321,7 +320,7 @@ bc. #{script 'jquery-1.4.2.min.js' /}
 #{script id:'datepicker' , src:'ui/ui.datepicker.js', charset:'utf-8' /}
 
 
-h2. <a>set</a>
+h2. <a name="set">set</a>
 
 Define a value which can be retrieved in the same template or any layout with the **get** tag.
 
@@ -339,7 +338,7 @@ bc. #{set 'title'}
 #{/set}
 
 
-h2. <a>stylesheet</a>
+h2. <a name="stylesheet">stylesheet</a>
 
 Inserts a **link** tag in the template. By convention, the tag refers to a CSS file in **/public/stylesheets**
 
@@ -354,7 +353,7 @@ bc. #{stylesheet 'default.css' /}
 #{stylesheet id:'main', media:'print', src:'print.css', title:'Print stylesheet' /}
 
 
-h2. <a>verbatim</a>
+h2. <a name="verbatim">verbatim</a>
 
 Disables HTML escaping in template output, like the "raw()":javaextensions#arawa Java extension, but for the whole tag body.
 
@@ -364,7 +363,7 @@ bc. ${'&amp;'}
 In this example, the first line outputs **&amp;** while the second line outputs an ampersand. 
 
 
-h2. <a>select</a>
+h2. <a name="select">select</a>
 
 Insert a **select** tag in the template.
 
@@ -409,7 +408,7 @@ bc. <select name="users" size="1" class="test" id="select2" >
   <option value="5" selected="selected">User-5</option>
 </select>
 
-h2. <a>option</a>
+h2. <a name="option">option</a>
 
 Insert an **option** tag in the template.
 

@@ -86,6 +86,11 @@ public class JPAPlugin extends PlayPlugin {
     }
 
     @Override
+    public void enhance(ApplicationClass applicationClass) throws Exception {
+        new JPAEnhancer().enhanceThisClass(applicationClass);
+    }
+
+    @Override
     public void onApplicationStart() {
         if (JPA.entityManagerFactory == null) {
             List<Class> classes = Play.classloader.getAnnotatedClasses(Entity.class);
@@ -368,7 +373,7 @@ public class JPAPlugin extends PlayPlugin {
 
     @Override
     public void afterFixtureLoad() {
-        if(JPA.isEnabled()) {
+        if (JPA.isEnabled()) {
             JPA.em().clear();
         }
     }
@@ -581,6 +586,7 @@ public class JPAPlugin extends PlayPlugin {
             }
             if (field.getType().isEnum()) {
                 modelProperty.choices = new Model.Choices() {
+
                     @SuppressWarnings("unchecked")
                     public List<Object> list() {
                         return (List<Object>) Arrays.asList(field.getType().getEnumConstants());

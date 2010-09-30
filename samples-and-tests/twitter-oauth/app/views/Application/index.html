@@ -1,0 +1,35 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+%{
+doc = mentions ? mentions.asXml() : []
+}%
+
+<h1>Useless Twitter Mashup</h1>
+
+Status: <input id="statusupdate" size="140" /> <input id="sendstatus" type="button" value="Publish" />
+
+<h2>Mentions</h2>
+
+<ul>
+#{list doc.status}
+<li>
+    ${_.text.text()}
+</li>
+#{/list}
+</ul>
+
+<script>
+$(document).ready(function(){
+    $("#sendstatus").keypress(function(e){
+        if (e.keyCode == 13) {
+            $.post("@{Application.setStatus()}?status=" + $("#statusupdate").val(),
+                null,
+                function(result){
+                    alert("Status published");
+                },
+                "json");
+        }
+    });
+});
+</script>

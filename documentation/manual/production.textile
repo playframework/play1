@@ -2,7 +2,7 @@ h1. Put your application in production
 
 Here some simple tips to optimize your application for production.
 
-h2. <a>Configure your application.conf for production</a>
+h2. <a name="application">Configure your application.conf</a>
 
 First off, the best way to specify production mode is to give a specific ID to your production framework. Let’s pick **production** as an example. Refer "manage application.conf in several environments":ids to see how.
 
@@ -40,7 +40,7 @@ bc. %production.application.secret=c12d1c59af499d20f4955d07255ed8ea333
 You can use the **play secret** command to generate a new secure and random key (at least on a ‘real’ OS). If you plan to distribute your application to several servers, remember to use the **same key** for all application instances!
 
 
-h2. <a>Configure logging</a>
+h2. <a name="logging">Configure logging</a>
 
 For production it’s a good idea to use rolling log files. Do not send logging to the Console, since it will be written to the **logs/system.out** file and it will grow without bound!
 
@@ -58,7 +58,7 @@ log4j.appender.Rolling.MaxBackupIndex=100
 log4j.appender.Rolling.layout=org.apache.log4j.PatternLayout
 log4j.appender.Rolling.layout.ConversionPattern=%d{ABSOLUTE} %-5p ~ %m%n
 
-h2. <a>Set-up a front-end HTTP server</a>
+h2. <a name="server">Set-up a front-end HTTP server</a>
 
 You can easily deploy your application as a stand-alone server by setting the application HTTP port to **80**:
 

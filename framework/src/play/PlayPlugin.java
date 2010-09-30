@@ -72,9 +72,10 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
-     * Let the plugin to modify the parsed template.
+     * This hook is not plugged, don't implement it
      * @param template
      */
+    @Deprecated
     public void onTemplateCompilation(Template template) {
     }
 
@@ -174,6 +175,9 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * @param result The result object for the request.
      */
     public void onActionInvocationResult(Result result) {
+    }
+
+    public void onInvocationSuccess() {
     }
 
     /**

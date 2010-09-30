@@ -10,6 +10,14 @@ import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import play.Play.Mode;
+import play.classloading.ApplicationClasses.ApplicationClass;
+import play.classloading.enhancers.ControllersEnhancer;
+import play.classloading.enhancers.Enhancer;
+import play.classloading.enhancers.LocalvariablesNamesEnhancer;
+import play.classloading.enhancers.MailerEnhancer;
+import play.classloading.enhancers.PropertiesEnhancer;
+import play.classloading.enhancers.SigEnhancer;
+import play.exceptions.UnexpectedException;
 import play.libs.Crypto;
 import play.mvc.Http.Header;
 import play.mvc.Http.Request;
@@ -24,7 +32,7 @@ public class CorePlugin extends PlayPlugin {
      * Get the appication status
      */
     public static String computeApplicationStatus(boolean json) {
-        if(json) {
+        if (json) {
             JsonObject o = new JsonObject();
             for (PlayPlugin plugin : Play.plugins) {
                 try {
@@ -62,7 +70,7 @@ public class CorePlugin extends PlayPlugin {
     @Override
     public boolean rawInvocation(Request request, Response response) throws Exception {
         // Really I don't like this stuff
-        if(request.path.equals("/favicon.ico")) {
+        if (request.path.equals("/favicon.ico")) {
             response.status = 404;
             return true;
         }
@@ -79,7 +87,7 @@ public class CorePlugin extends PlayPlugin {
                 return true;
             }
             response.status = 401;
-            if(response.contentType.equals("application/json")) {
+            if (response.contentType.equals("application/json")) {
                 response.print("{\"error\": \"Not authorized\"}");
             } else {
                 response.print("Not authorized");
@@ -163,11 +171,11 @@ public class CorePlugin extends PlayPlugin {
                 }
             }
             for (Object[] row : data) {
-                if(((Double)row[1])>0) {
+                if (((Double) row[1]) > 0) {
                     out.println(String.format("%-" + (lm) + "s -> %8.0f hits; %8.1f avg; %8.1f min; %8.1f max;", row[0], row[1], row[2], row[6], row[7]));
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             out.println("No monitors found");
         }
         return sw.toString();
@@ -212,17 +220,17 @@ public class CorePlugin extends PlayPlugin {
             try {
                 Object[][] data = Misc.sort(MonitorFactory.getRootMonitor().getBasicData(), 3, "desc");
                 for (Object[] row : data) {
-                    if(((Double)row[1])>0) {
+                    if (((Double) row[1]) > 0) {
                         JsonObject o = new JsonObject();
                         o.addProperty("name", row[0].toString());
-                        o.addProperty("hits", (Double)row[1]);
-                        o.addProperty("avg", (Double)row[2]);
-                        o.addProperty("min", (Double)row[6]);
-                        o.addProperty("max", (Double)row[7]);
+                        o.addProperty("hits", (Double) row[1]);
+                        o.addProperty("avg", (Double) row[2]);
+                        o.addProperty("min", (Double) row[6]);
+                        o.addProperty("max", (Double) row[7]);
                         monitors.add(o);
                     }
                 }
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             status.add("monitors", monitors);
@@ -267,5 +275,25 @@ public class CorePlugin extends PlayPlugin {
             root = root.getParent();
         }
         return root;
+    }
+
+    @Override
+    public void enhance(ApplicationClass applicationClass) throws Exception {
+        Class[] enhancers = new Class[]{
+            SigEnhancer.class,
+            ControllersEnhancer.class,
+            MailerEnhancer.class,
+            PropertiesEnhancer.class,
+            LocalvariablesNamesEnhancer.class
+        };
+        for (Class<?> enhancer : enhancers) {
+            try {
+                long start = System.currentTimeMillis();
+                ((Enhancer) enhancer.newInstance()).enhanceThisClass(applicationClass);
+                Logger.trace("%sms to apply %s to %s", System.currentTimeMillis() - start, enhancer.getSimpleName(), applicationClass.name);
+            } catch (Exception e) {
+                throw new UnexpectedException("While applying " + enhancer + " on " + applicationClass.name, e);
+            }
+        }
     }
 }

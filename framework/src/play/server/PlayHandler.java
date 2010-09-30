@@ -49,24 +49,8 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
 public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
-    private boolean isSecure = false;
 
-    public PlayHandler(boolean isSecure) {
-        this.isSecure = isSecure;
-    }
-
-    @Override
-    public void channelConnected(
-            ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        if (isSecure) {
-            ctx.setAttachment(e.getValue());
-            // Get the SslHandler in the current pipeline.
-            final SslHandler sslHandler = ctx.getPipeline().get(SslHandler.class);
-            sslHandler.setEnableRenegotiation(false);
-            // Get notified when SSL handshake is done.
-            ChannelFuture handshakeFuture = sslHandler.handshake();
-            handshakeFuture.addListener(new SslListener(sslHandler));
-        }
+    public PlayHandler() {
     }
 
     private static final class SslListener implements ChannelFutureListener {
@@ -536,19 +520,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
             throws Exception {
         Logger.error(e.getCause(), "");
-        // We have to redirect to https://, as it was targeting http://
-        // Redirect to the root as we don't know the url at that point
-        if (e.getCause() instanceof javax.net.ssl.SSLException) {
-            InetSocketAddress inet = ((InetSocketAddress) ctx.getAttachment());
-            ctx.getPipeline().remove("ssl");
-            HttpResponse nettyResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT);
-            nettyResponse.setHeader(LOCATION, "https://" + inet.getHostName() + ":" + Play.configuration.getProperty("http.port") + "/");
-            nettyResponse.setHeader(SERVER, signature);
-            ChannelFuture writeFuture = ctx.getChannel().write(nettyResponse);
-            writeFuture.addListener(ChannelFutureListener.CLOSE);
-        } else {
-            e.getChannel().close();
-        }
+        e.getChannel().close();
     }
 
     public static void serve404(NotFound e, ChannelHandlerContext ctx, Request request, HttpRequest nettyRequest) {
