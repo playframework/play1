@@ -46,7 +46,7 @@ blockquote, q {
 }
 
 html, body {
-	background: #444444;
+    background: #e1e1e1;
 	font-family: "Helvetica Neue", Helvetica, Arial, Sans-Serif;
 	line-height: 1.2em;
 	text-align: center;
@@ -64,12 +64,61 @@ p {
 	margin-bottom: 15px;
 }
 
+#body {
+	margin: 22px 0 0 0;
+	background: #fff url(menu.png) top right repeat-y;
+	padding: 20px;
+	padding-top: 30px;
+	-webkit-box-shadow: #999 0px 2px 3px;
+	border-radius: 3px;
+}
+
+#sidebar {
+    float: right;
+    width: 200px;
+}
+
+#sidebar {
+    font-size: 80%;
+}
+
+#sidebar h2 {
+    font-weight: normal;
+    color: #333;
+    font-size: 120%;
+    margin-bottom: 5px;
+    margin-top: 20px;
+}
+
+#sidebar h2:first-child {
+    margin-top: 0;
+}
+
+#sidebar ul, #sidebar ol {
+    list-style: square;
+    color: #888;
+    padding-left: 20px;
+}
+
+#sidebar ol {
+    list-style-position: outside;
+    list-style-type: decimal;
+}
+
+#sidebar ul .selected {
+    font-weight: bold !important;
+}
+
 #main {
-	width: 735px;
+	width: 960px;
 	text-align: left;
 	margin: 20px auto;
 	font-weight: lighter;
 	position: relative;
+}
+
+#page {
+    width: 690px;
 }
 
 #main #header #menu {
@@ -104,7 +153,6 @@ p {
 
 #main #body {
 	margin: 10px 0;
-	background: #fff;
 	padding: 20px;
 	padding-top: 30px;
 }

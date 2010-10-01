@@ -9,10 +9,8 @@ import java.security.cert.X509Certificate;
 import javax.net.ssl.*;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.IOException;
 import java.net.Socket;
 import java.security.*;
-import java.util.Enumeration;
 
 public class SslHttpServerContextFactory {
 

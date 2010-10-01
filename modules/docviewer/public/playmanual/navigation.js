@@ -4,7 +4,7 @@ $(document).ready(function(){
 	var navigation = '<ol class="navigation">';
 	var h2index = 0;
 	var h3index = 0;
-	$('h2, h3').each(function(index) {
+	$('#page h2, #page h3').each(function(index) {
 
 		// In each heading, construct an in-page link from its id, or the nested a[name]
 		if ($(this).find('a[name]').length == 0) {
@@ -48,5 +48,11 @@ $(document).ready(function(){
 	
 	// Close the LI for the last H2, and close the outer list.
 	navigation += '</li></ol>';
-	$('h1:first').after(navigation);
+	$('#toc').html(navigation);
+	
+	// Next link
+	var nextLink = $('.next a')
+    if(nextLink && nextLink.size()) {
+        $('#gotoc').after('<li><a href="' + $(nextLink).attr('href') + '">Next: ' + $(nextLink).text() + '</a></li>')
+    }
 });

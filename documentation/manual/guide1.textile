@@ -215,5 +215,5 @@ $ bzr commit -m "YABE inital version"
 
 Version 1 is committed and we now have a solid foundation for our project. 
 
-p(note). Go to the "next part":guide2. 
+p(note). Go to the %(next)"A first iteration of the data model":guide2%. 
 

@@ -424,4 +424,4 @@ You can now commit your project.
 
 bc. $ bzr commit -m "The model layer is ready"
 
-p(note). Go to the "next part":guide3. 
+p(note). Go to the %(next)"Building the first screen":guide3%. 
