@@ -2,7 +2,6 @@ import sys
 import os
 import getopt
 import shutil
-import zipfile
 
 import play.commands.precompile
 from play.utils import *

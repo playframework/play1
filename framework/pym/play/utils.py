@@ -5,6 +5,7 @@ import random
 import fileinput
 import getopt
 import shutil
+import zipfile
 
 def playVersion(play_env):
     play_version_file = os.path.join(play_env["basedir"], 'framework', 'src', 'play', 'version')
