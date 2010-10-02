@@ -1,7 +1,5 @@
 h1. Play 1.1 -- Release notes
 
-**Play 1.1** is an important release for Play framework. 
-
 You can read about the fixed bugs on the "1.1 road map page":http://www.playframework.org/roadmap/1.1. The most important changes are highlighted in this page:
 
 h2. <a name="migrating">Migrating from Play 1.0.x</a>
