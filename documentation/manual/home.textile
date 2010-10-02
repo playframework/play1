@@ -160,9 +160,4 @@ Extended references for day-to-day hacking.
 
 h2. <a name="versionnotes">Version notes</a>
 
-New versions of Play include certain changes.
-
-# "Play 1.1":releasenotes-1.1
-# "Play 1.0.3":releasenotes-1.0.3
-# "Play 1.0.2":releasenotes-1.0.2
-# "Play 1.0.1":releasenotes-1.0.1
+New versions of Play include certain changes. Check release notes for "Play 1.1":releasenotes-1.1, "Play 1.0.3":releasenotes-1.0.3, "Play 1.0.2":releasenotes-1.0.2, and "Play 1.0.1":releasenotes-1.0.1.

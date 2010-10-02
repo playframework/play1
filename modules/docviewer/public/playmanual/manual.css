@@ -73,6 +73,11 @@ p {
 	border-radius: 3px;
 }
 
+#sidebar h2#version {
+    font-size: 90%;
+    color: #666;
+}
+
 #sidebar {
     float: right;
     width: 200px;

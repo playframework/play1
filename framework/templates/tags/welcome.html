@@ -8,11 +8,24 @@
 	
 <div id="main">
     <div id="body">
+        <div id="sidebar">
+			<h2 id="version">Play ${play.version}</h2>
+            <h2>Browse</h2>
+            <ul>
+                <li id="gotoc"><a href="/@documentation/home">Documentation home</a></li>
+                <li id="gotoc"><a href="/@api/index.html">Browse Java API</a></li>
+            </ul>
+
+            <h2>Contents</h2>
+            <div id="toc"></div>
+
+            <h2>Search</h2>
+            <p>In all Play framework websites.</p>
+            <p id="searchBox"><form action="http://www.google.com/cse" id="cse-search-box"><div><input type="hidden" name="cx" value="002614023023983855063:jn1mu_7bof0" /><input type="hidden" name="ie" value="UTF-8" /><input type="text" name="q" size="28" style="font-size:14px"/></div></form><script type="text/javascript" src="http://www.google.com/coop/cse/brand?form=cse-search-box&lang=en"></script></p>
+            
+        </div>
         <div id="page">
-            <div id="bc">
-                Play framework, ${play.version} - <a href="/@documentation">Documentation</a> - <a href="/@api/index.html">Browse API</a>  
-            </div>
-            <h1>Your application is ready !</h1>
+            <h1>Your application is ready!</h1>
             <p>
                 Congratulation, you've just created a new play application. This page will help you in the few next steps.
                 <a href="#" onclick="var env = document.getElementById('env'); env.style.display=(env.style.display == 'none' ? 'block' : 'none'); if(event && event.preventDefault) event.preventDefault()">
@@ -20,7 +33,7 @@
                 </a>.
             </p>
             <pre><code id="env" style="display:none; background: rgb(255, 254, 178); border-bottom: 1px solid rgb(255, 179, 32); border-top: 1px solid rgb(255, 179, 32)">${play.CorePlugin.computeApplicationStatus(false)}</code></pre>
-            <h2><a name="why">Why do you see this page ?</a></h2>
+            <h2><a name="why">Why do you see this page?</a></h2>
             <p>
                 The <strong>conf/routes</strong> file defines a route that tell play to invoke the <strong>Application.index</strong> action
                 when a browser requests the <strong>/</strong> URI using the <strong>GET</strong> method:
@@ -45,7 +58,7 @@ GET     /         Application.index</code></pre>
                 This template extends the <strong>app/views/main.html</strong>, and uses the <strong>&#35;{welcome /}</strong> tag to display this
                 welcome page.
             </p>
-            <h2><a name="ide">Need to set up a Java IDE ?</a></h2>
+            <h2><a name="ide">Need to set up a Java IDE?</a></h2>
             <p>
                 You can start right now to hack your application using any text editor. Any changes will be automatically realoaded at the
                 next page refresh, including modifications made to Java sources files.
@@ -54,7 +67,7 @@ GET     /         Application.index</code></pre>
                 If you want to set up your application in <strong>Eclipse</strong>, <strong>Netbeans</strong> or any other Java IDE, check
                 the <a href="/@documentation/ide">Setting up your preferred IDE</a> page.
             </p>
-            <h2><a name="db">Need to connect to a database ?</a></h2>
+            <h2><a name="db">Need to connect to a database?</a></h2>
             <p>
                 You can quickly set up a developement database (either in memory or written to the filesystem), by adding one of these
                 lines to the <strong>conf/application.conf</strong> file:
@@ -76,19 +89,22 @@ db=fs</code></pre>
 db.driver=org.postgresql.Driver
 db.user=root
 db.pass=secret</code></pre>      
-            <h2><a name="doc">Need more help ?</a></h2>
+            <h2><a name="doc">Need more help?</a></h2>
             <p>
                 When your application run in <strong>DEV</strong> mode, you can access directly the current documentation at the
                 <a href="/@documentation">/@documentation</a> URL or go to <a href="http://www.playframework.org">http://www.playframework.org</a>.
             </p>
             <p>
-                The <a href="#">Play Google Group</a> is where Play users come to seek help, announce projects, and discuss. 
+                The <a href="http://groups.google.com/group/play-framework">Play Google Group</a> is where Play users come to seek help, announce projects, and discuss. 
                 If you don't have any google account, you can still join the mailing list sending an email to
                 <br/><strong>play-framework+subscribe@googlegroups.com</strong>.
             </p>
         </div>
     </div>
 </div>
+
+<script type="text/javascript" src="@{'/public/playmanual/jquery-1.3.2.min.js'}"></script>
+<script type="text/javascript" src="@{'/public/playmanual/navigation.js'}"></script>
 
 #{/if}
 #{else}
