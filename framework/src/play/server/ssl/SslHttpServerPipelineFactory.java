@@ -6,9 +6,7 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.ssl.SslHandler;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
-import play.Logger;
 import play.Play;
-import play.server.PlayHandler;
 import play.server.StreamChunkAggregator;
 
 import javax.net.ssl.SSLEngine;
