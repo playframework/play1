@@ -239,11 +239,10 @@ bc. <ul>
 #{/list}
 </ul>
 
-<<<<<<< TREE
 The same applies to **java.util.Date**.
-=======
-You can find a list of available methods within the "API documentation":/@api/play/templates/JavaExtensions.html.
->>>>>>> MERGE-SOURCE
+
+The "Java extensions":javaextensions manual page lists the available methods, by type.
+
 
 h3. Create custom extensions
 
