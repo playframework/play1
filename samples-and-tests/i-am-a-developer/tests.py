@@ -74,9 +74,9 @@ class IamADeveloper(unittest.TestCase):
         # Open the documentation
         step('Open the documentation')
         
-        response = browser.follow_link(text_regex='Documentation')
+        response = browser.open('http://localhost:9000/@documentation')
         self.assert_(browser.viewing_html())
-        self.assert_(browser.title() == 'Play manual - Play framework documentation')
+        self.assert_(browser.title() == 'Play manual - Documentation')
         
         html = response.get_data()
         self.assert_(html.count('Getting started'))

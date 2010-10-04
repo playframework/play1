@@ -1,6 +1,10 @@
 package play;
 
-import java.io.*;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.LineNumberReader;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
@@ -43,9 +47,7 @@ public class Play {
         public boolean isProd() {
             return this == PROD;
         }
-        
     }
-
     /**
      * Is the application started
      */
@@ -221,7 +223,7 @@ public class Play {
 
         // Mode
         mode = Mode.valueOf(configuration.getProperty("application.mode", "DEV").toUpperCase());
-        if(usePrecompiled || forceProd) {
+        if (usePrecompiled || forceProd) {
             mode = Mode.PROD;
         }
 
@@ -252,7 +254,7 @@ public class Play {
         classloader = new ApplicationClassloader();
 
         // Fix ctxPath
-        if("/".equals(Play.ctxPath)) {
+        if ("/".equals(Play.ctxPath)) {
             Play.ctxPath = "";
         }
 
@@ -269,6 +271,11 @@ public class Play {
             }
         } else {
             Logger.warn("You're running Play! in DEV mode");
+        }
+
+        // Plugins
+        for (PlayPlugin plugin : plugins) {
+            plugin.onApplicationReady();
         }
     }
 
@@ -315,9 +322,9 @@ public class Play {
             while (matcher.find()) {
                 String jp = matcher.group(1);
                 String r;
-                if(jp.equals("application.path")) {
+                if (jp.equals("application.path")) {
                     r = Play.applicationPath.getAbsolutePath();
-                } else if(jp.equals("play.path")) {
+                } else if (jp.equals("play.path")) {
                     r = Play.frameworkPath.getAbsolutePath();
                 } else {
                     r = System.getProperty(jp);
@@ -523,9 +530,9 @@ public class Play {
 
     @SuppressWarnings("unchecked")
     public static <T> T plugin(Class<T> clazz) {
-        for (PlayPlugin p: plugins) {
+        for (PlayPlugin p : plugins) {
             if (clazz.isInstance(p)) {
-                return (T)p;
+                return (T) p;
             }
         }
         return null;

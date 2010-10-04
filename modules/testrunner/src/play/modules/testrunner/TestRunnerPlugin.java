@@ -20,9 +20,6 @@ public class TestRunnerPlugin extends PlayPlugin {
                 Play.javaPath.add(module.child("test"));
             }
         }
-        Logger.info("");
-        Logger.info("Go to http://localhost:" + Play.configuration.getProperty("http.port", "9000") + "/@tests to run the tests");
-        Logger.info("");
     }
 
     @Override
@@ -33,4 +30,12 @@ public class TestRunnerPlugin extends PlayPlugin {
         Router.addRoute("POST", "/@tests/{<.*>test}", "TestRunner.saveResult");
         Router.addRoute("GET", "/@tests/emails", "TestRunner.mockEmail");
     }
+
+    @Override
+    public void onApplicationReady() {
+        System.out.println("~");
+        System.out.println("~ Go to http://localhost:" + Play.configuration.getProperty("http.port", "9000") + "/@tests to run the tests");
+        System.out.println("~");
+    }
+    
 }
