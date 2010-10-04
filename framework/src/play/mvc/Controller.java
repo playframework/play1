@@ -676,6 +676,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     /**
      * Call the parent action adding this objects to the params scope
      */
+    @Deprecated
     protected static void parent(Object... args) {
         Map<String, Object> map = new HashMap<String, Object>();
         for (Object o : args) {
@@ -690,6 +691,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     /**
      * Call the parent method
      */
+    @Deprecated
     protected static void parent() {
         parent(new HashMap<String, Object>());
     }
@@ -697,6 +699,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     /**
      * Call the parent action adding this objects to the params scope
      */
+    @Deprecated
     protected static void parent(Map<String, Object> map) {
         try {
             Method method = Http.Request.current().invokedMethod;

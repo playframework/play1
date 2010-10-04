@@ -109,7 +109,7 @@ public class JPAPlugin extends PlayPlugin {
                 cfg.setDataSource(DB.datasource);
             }
 
-            if (!Play.configuration.getProperty("jpa.ddl", "update").equals("none")) {
+            if (!Play.configuration.getProperty("jpa.ddl", Play.mode.isDev() ? "update" : "none").equals("none")) {
                 cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty("jpa.ddl", "update"));
             }
 
