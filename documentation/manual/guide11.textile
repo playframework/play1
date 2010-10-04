@@ -69,7 +69,7 @@ h2. <a>This is just the beginning</a>
 
 p(note). If you have read and followed this tutorial, you’re now a seasoned Play developer. You know most of the concepts that drive Play application development.
  
-At this stage, you may want to continue the tutorial with "internationalisation and localisation":guide12.
+At this stage, you may want to continue the tutorial with %(next)"internationalisation and localisation":guide12%.
 
 There are still more features we haven’t explored yet, especially related to Web services, like JSON or XML. Also Play comes with more modules that provide more features. And Play itself still evolves every day.
 

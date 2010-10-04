@@ -89,3 +89,7 @@ bc. <h1>&{'hello'}</h1>
 or using dynamic content:
 
 bc. <h1>&{'hello', params.user}</h1>
+
+p(note). **Continuing the discussion**
+ 
+Next: %(next)"Cache":cache%.

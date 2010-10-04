@@ -225,3 +225,5 @@ bc. # play idealize myApp
 !images/intellij!
 
 You can use the Run and Debug using the context menu.
+
+p(note). Next release: %(next)"Play 1.0.2 release notes":releasenotes-1.0.2%

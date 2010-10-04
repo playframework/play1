@@ -249,4 +249,4 @@ The Cache is not a reliable storage but if you put an object in the cache you sh
 
 p(note). **Continuing the discussion**
  
-Now we’ll check how to perform operations outside any HTTP request using the "jobs system":jobs.
+Now we’ll check how to persist the model using %(next)"JPA persistence":jpa%.

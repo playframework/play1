@@ -239,5 +239,5 @@ bc. POST    /posts/{postId}/comments                Application.postComment
 
 That’s done. As always, commit the version to bazaar.
 
-p(note). Go to the "next part":guide5. 
+p(note). Next: %(next)"Setting up a Captcha":guide5%. 
 

@@ -121,3 +121,8 @@ Please tell us:
 To release your module, simply use the play build-module command. Then connect to the module repository and upload the generated package.
 
 You can of course use the offical Google Group to provide help and share information about your work.
+
+
+p(note). **Continuing the discussion**
+ 
+Next: %(next)"Internationalization":i18n%.

@@ -2,7 +2,7 @@ h1. Built-in template tags
 
 These are the built-in tags that are available in addition to the core "template engine syntax":templates#syntax.
 
-p(note). There is a separate "Java extensions":javaextensions manual page.
+p(note). There is a separate %(next)"Java extensions":javaextensions% manual page.
 
 
 h2. <a name="a">a</a>

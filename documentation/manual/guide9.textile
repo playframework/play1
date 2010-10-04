@@ -267,4 +267,4 @@ POST    /admin/new                          Admin.save
 
 That’s done! Now we’re using the same action for both creating new blog posts and editing old ones, and the administration area is finished!
 
-p(note). Go to the "next part":guide10. 
+p(note). Next: %(next)"Completing the application tests":guide10%. 

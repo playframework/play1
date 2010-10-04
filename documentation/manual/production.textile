@@ -176,3 +176,8 @@ However, the host header is untouched, it’ll remain issued by the proxy. If yo
 bc. ProxyPreserveHost on
 
 The host: header will be the original host request header issued by the client. By combining theses two techniques, your app will appear to be directly exposed.
+
+
+p(note). **Continuing the discussion**
+ 
+Next: %(next)"Play modules":modules%.

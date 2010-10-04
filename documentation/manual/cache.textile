@@ -104,3 +104,7 @@ You can connect to a distributed cache by specifying multiple daemon addresses:
 bc. memcached=enabled
 memcached.1.host=127.0.0.1:11211
 memcached.2.host=127.0.0.1:11212
+
+p(note). **Continuing the discussion**
+ 
+Now we’ll check how to perform operations outside any HTTP request using %(next)"Jobs":jobs%.

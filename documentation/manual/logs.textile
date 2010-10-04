@@ -42,3 +42,7 @@ log4j.appender.Console.layout=org.apache.log4j.PatternLayout
 log4j.appender.Console.layout.ConversionPattern=%d{ABSOLUTE} %-5p ~ %m%n
 
 Copy this file and update it for your specifics needs!
+
+p(note). **Continuing the discussion**
+ 
+Next, we continue configuration with %(next)"Configuration in several environments":ids%.

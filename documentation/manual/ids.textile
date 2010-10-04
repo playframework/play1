@@ -47,3 +47,6 @@ By the way, **play test** is then equivalent to:
 
 bc. play run --%test
 
+p(note). **Continuing the discussion**
+ 
+Now we shall move on to %(next)"Testing the application":test%.

@@ -289,4 +289,4 @@ bc. #{extends 'main.html' /}
 
 !images/guide6-3!
 
-p(note). Go to the "next part":guide7. 
+p(note). Next: %(next)"A basic admin area using CRUD":guide7%.

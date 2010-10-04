@@ -354,3 +354,6 @@ bc. public class User {
     }
 }
 
+p(note). **Continuing the discussion**
+ 
+The last layer of a Play application: %(next)"Domain object model":model%.

@@ -311,4 +311,4 @@ secure.signin=Log in now
 
 !images/guide8-8!
 
-p(note). Go to the "next part":guide9. 
+p(note). Next: %(next)"Creating a custom editor area":guide9%. 

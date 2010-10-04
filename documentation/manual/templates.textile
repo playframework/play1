@@ -294,8 +294,4 @@ When you render a template from an action, the framework also adds implicit obje
 | **request** | The current HTTP request | "play.mvc.Http.Request":/@api/play/mvc/Http.Request.html  |  |
 | **session** | Session scope | "play.mvc.Scope.Session":/@api/play/mvc/Scope.Session.html  | "Controllers - Session & Flash Scope":controllers#session |
 
-p(note). **Continuing the discussion**
- 
-The last layer of a Play application is the "domain object model":model.
-
- 
+p(note). Next: %(next)"Form data validation":validation%

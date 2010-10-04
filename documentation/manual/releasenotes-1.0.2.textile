@@ -135,3 +135,5 @@ The Eclipse plugin now has several new features:
 !images/eclipse-tests!
 
 To install this plugin, copy the JAR file from **$PLAY_HOME/support/eclipse** to **$ECLIPSE_HOME/dropins**.
+
+p(note). Next release: %(next)"Play 1.0.3 release notes":releasenotes-1.0.3%

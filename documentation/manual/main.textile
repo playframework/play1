@@ -122,5 +122,5 @@ For example, using the NetBeans debugger:
 
 p(note). **Continuing the discussion**
  
-Now that you’ve seen what a Play application is, let’s see how "the Router":routes works. The Router is in charge of translating incoming HTTP Requests into actions.
+Now that you’ve seen what a Play application is, let’s see how %(next)"HTTP routing":routes% works. The Router is in charge of translating incoming HTTP Requests into actions.
 

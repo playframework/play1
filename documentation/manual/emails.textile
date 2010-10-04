@@ -147,3 +147,7 @@ mail.smtp.user=yourGmailLogin
 mail.smtp.pass=yourGmailPassword
 mail.smtp.channel=ssl
 
+
+p(note). **Continuing the discussion**
+ 
+Next: %(next)"Security guide":security%.

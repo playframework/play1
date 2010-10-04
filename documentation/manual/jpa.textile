@@ -183,3 +183,7 @@ But wait, there is a better way. You can use a practical but somewhat unknown Ja
 bc. for(Post p : Post.<Post>findAll()) {
     p.delete();
 }
+
+p(note). **Continuing the discussion**
+ 
+Now we’ll check how to configure %(next)"Logging":logs%.

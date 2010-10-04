@@ -300,5 +300,5 @@ END:VCARD
 
 p(note). **Continuing the discussion**
  
-When the Router has determined which Java call to invoke for the received HTTP Request, the Play framework then invokes that Java call. "Let’s see how the Controller works":controllers.
+When the Router has determined which Java call to invoke for the received HTTP Request, the Play framework then invokes that Java call. Let’s see how %(next)"Controllers":controllers% work.
 

@@ -157,3 +157,7 @@ So setting up a continuous integration system to test your application, could be
 * Check for the marker file **result.passed** or **result.failed** in the **/test-result** directory
 
 Run these steps in a CRON tab, and you’re done!
+
+p(note). **Continuing the discussion**
+ 
+Next: %(next)"Deployment options":deployment%.

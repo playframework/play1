@@ -553,4 +553,4 @@ The cache has different semantics than the classic Servlet HTTP session object. 
 
 p(note). **Continuing the discussion**
  
-The next important layer of the MVC model is the View layer, for which Play provides an efficient "templating system":templates.
+The next important layer of the MVC model is the View layer, for which Play provides an efficient templating system with its %(next)"Template engine":templates%.

@@ -325,4 +325,6 @@ The 'Yet Another Blog Engine' admin interface in Dutch (above) and French (below
 
 !images/guide12-4! 
 
+p(note). Next: Now you have finished the tutorial, move on to The Essential Documentation - %(next)"Main concepts":main%. 
+
 p(note). By "Peter Hilton":http://hilton.org.uk/about_ph.phtml, originally published on the "Lunatech Research":http://www.lunatech-research.com/archives/2010/04/12/how-localise-play-framework-web-application blog.

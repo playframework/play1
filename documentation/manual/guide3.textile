@@ -326,5 +326,5 @@ bc. $ bzr st
 $ bzr add
 $ bzr commit -m 'Home page'
 
-p(note). Go to the "next part":guide4. 
+p(note). Next: %(next)"The comments page":guide4%. 
 

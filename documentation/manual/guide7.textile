@@ -361,4 +361,4 @@ This is a little hacky and we could do better here, but we have now a simpler ta
 
 This is a good start for the administration area!
 
-p(note). Go to the "next part":guide8. 
+p(note). Next: %(next)"Adding authentication":guide8%.

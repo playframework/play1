@@ -23,3 +23,5 @@ h2. <a>playapps.net support</a>
 The 1.0.3 release is the first one to be officially supported by the new "http://www.playapps.net":http://www.playapps.net on the cloud-hosting platform.
 
 !images/dashboard_preview!
+
+p(note). Next release: %(next)"Play 1.1 release notes":releasenotes-1.1%

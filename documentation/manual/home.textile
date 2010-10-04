@@ -14,8 +14,8 @@ Your first steps with Play and your first 5 minutes of fun.
 # "Usability - details matter as much as features":usability
 # "Frequently Asked Questions":faq
 # %(next)"Installation guide":install%
-# "Your first application — the ‘Hello World’ tutorial":firstapp
 # "Setting-up your preferred IDE":ide
+# "Your first application — the ‘Hello World’ tutorial":firstapp
 # "Sample applications":samples
 # "Live coding script - to practice, and impress your colleagues with":http://www.lunatech-research.fr/archives/2010/06/14/how-demo-play-framework-live-coding-script
 

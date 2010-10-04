@@ -327,4 +327,4 @@ We have fully tested the application. Just select this test in the test runner a
 
 h2. <a>Learn more</a>
 
-This was a very simple tutorial about a very dumb application. If you want to learn more about Play, you can now check out the "Play guide":guide1.
+This was a very simple tutorial about a very dumb application. If you want to learn more about Play, you can now check out the %(next)"Play tutorial":guide1%.

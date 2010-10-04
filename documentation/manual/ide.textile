@@ -117,3 +117,4 @@ So the correct workflow for debugging is:
 
 By using this work-flow you will always have a debugger synchronized with the code loaded in the JVM.
 
+p(note). Next: %(next)"‘Hello World’ tutorial":firstapp%.

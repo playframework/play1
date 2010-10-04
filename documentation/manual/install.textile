@@ -68,4 +68,4 @@ You can then open a browser at "http://localhost:9000":http://localhost:9000 and
 
 p(note). **Your Play environnement is ready**
  
-See how to "set-up your preferred IDE":ide.
+Next: %(next)"Set-up your preferred IDE":ide%.
