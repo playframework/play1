@@ -6,30 +6,40 @@ Learn more on the "http://www.playframework.org":http://www.playframework.org we
 
 h2. Getting started
 
-# Install the latest version of Play framework and unzip it anywhere you want:
+1. Install the latest version of Play framework and unzip it anywhere you want:
 
 bc. unzip play-1.1.zip -d /opt/play-1.1
 
-# Add the **play** script to your PATH:
+2. Add the **play** script to your PATH:
 
 bc. export PATH=$PATH:/opt/play-1.1
 
-# Create a new Play application:
+3. Create a new Play application:
 
 bc. play new /opt/myFirstApp
 
-# Run the created application:
+4. Run the created application:
 
 bc. play run /opt/myFirstApp
 
-# Go to "localhost:9000/":http://localhost:9000 and you’ll see the welcome page.
+5. Go to "localhost:9000/":http://localhost:9000 and you’ll see the welcome page.
 
-# Start developing your new application:
+6. Start developing your new application:
 
 * "Your first application — the ‘Hello World’ tutorial":http://www.playframework.org/documentation/1.1/firstapp
 * "Tutorial — Play guide, a real world app step-by-step":http://www.playframework.org/documentation/1.1/guide1
 * "The essential documentation":http://www.playframework.org/documentation/1.0.3/main
 * "Java API":http://www.playframework.org/@api/index.html
+
+h2. Get the source
+
+Fork the project source code on "Github":http://github.com/playframework/play
+
+bc. git clone git://github.com/playframework/play.git
+
+The project history is pretty big. You can pull only a shallow clone by specifying the number of commits you want with **--depth**:
+
+bc.  git clone git://github.com/playframework/play.git --depth 10
 
 h2. Reporting bugs
 
