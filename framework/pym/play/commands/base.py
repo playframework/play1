@@ -11,7 +11,7 @@ import time
 
 from play.utils import *
 
-COMMANDS = ['run', 'new', 'clean', 'test', 'autotest', 'auto-test', 'id', 'new,run', 'clean,run']
+COMMANDS = ['run', 'new', 'clean', 'test', 'autotest', 'auto-test', 'id', 'new,run', 'clean,run', 'modules']
 
 HELP = {
     'id': "Define the framework ID",
@@ -19,7 +19,8 @@ HELP = {
     'clean': "Delete temporary files (including the bytecode cache)",
     'run': "Run the application in the current shell",
     'test': "Run the application in test mode in the current shell",
-    'auto-test': "Automatically run all application tests"
+    'auto-test': "Automatically run all application tests",
+    'modules': "Display the computed modules list"
 }
 
 def execute(**kargs):
@@ -40,6 +41,8 @@ def execute(**kargs):
         test(app, args)
     if command == 'auto-test' or command == 'autotest':
         autotest(app, args)
+    if command == 'modules':
+        show_modules(app, args)
 
 def new(app, args, env):
     withModules = []
@@ -132,8 +135,8 @@ def clean(app):
         shutil.rmtree(os.path.join(app.path, 'tmp'))
     print "~"
 
-def show_modules(args):
-    check_application()
+def show_modules(app, args):
+    app.check()
     modules = app.modules()
     if len(modules):
         print "~ Application modules are:"
