@@ -84,7 +84,7 @@ public class Router {
     }
 
     /**
-     * Add a new route. Will be first in the route list 
+     * Add a new route. Will be first in the route list
      */
     public static void addRoute(String method, String path, String action) {
         prependRoute(method, path, action);
@@ -206,6 +206,7 @@ public class Router {
             }
         }
     }
+
     public static List<Route> routes = new ArrayList<Route>(500);
 
     public static void routeOnlyStatic(Http.Request request) {
@@ -319,8 +320,8 @@ public class Router {
                     if (to.endsWith("/index.html")) {
                         to = to.substring(0, to.length() - "/index.html".length() + 1);
                     }
-                    if(absolute) {
-                        if(route.host != null && !route.host.equals(".*")) {
+                    if (absolute) {
+                        if (route.host != null && !route.host.equals(".*")) {
                             to = "http://" + route.host + to;
                         } else {
                             to = Http.Request.current().getBase() + to;
@@ -500,7 +501,7 @@ public class Router {
         }
 
         public void absolute() {
-            if(host == null || host.equals(".*")) {
+            if (host == null || host.equals(".*")) {
                 url = Http.Request.current().getBase() + url;
             } else {
                 url = "http://" + host + url;
@@ -547,7 +548,7 @@ public class Router {
                     String p = this.path;
                     this.path = p.substring(p.indexOf("/"));
                     this.host = p.substring(0, p.indexOf("/"));
-                    if(this.host.contains("{")) {
+                    if (this.host.contains("{")) {
                         Logger.warn("Static route cannot have a dynamic host name");
                         return;
                     }
@@ -569,18 +570,22 @@ public class Router {
                     String p = this.path;
                     this.path = p.substring(p.indexOf("/"));
                     this.host = p.substring(0, p.indexOf("/"));
-
+                    Logger.trace("host [" + host + "]");
                     Matcher m = new Pattern(".*\\{({name}.*)\\}.*").matcher(host);
 
                     if (m.matches()) {
                         String name = m.group("name");
                         hostArg = new Arg();
                         hostArg.name = name;
+                        // The default value contains the route version of the host ie {client}.bla.com
+                        // It is temporary and it indicates it is an url route.
+                        // TODO Check that default value is actually used for other cases.
+                        hostArg.defaultValue = host;
                         hostArg.constraint = new Pattern(".*");
                         args.add(hostArg);
                     }
-                    this.hostPattern = new Pattern(this.host.replaceFirst("\\{.*\\}", ""));
-                }
+
+               }
                 String patternString = path;
                 patternString = customRegexPattern.replacer("\\{<[^/]+>$1\\}").replace(patternString);
                 Matcher matcher = argsPattern.matcher(patternString);
@@ -622,6 +627,7 @@ public class Router {
         }
 
         // TODO: Add args names
+
         public void addFormat(String params) {
             if (params == null || params.length() < 1) {
                 return;
@@ -658,7 +664,7 @@ public class Router {
 
         public Map<String, String> matches(String method, String path, String accept, String host) {
             // Normalize
-            if(path.equals(Play.ctxPath)) {
+            if (path.equals(Play.ctxPath)) {
                 path = path + "/";
             }
             // If method is HEAD and we have a GET
@@ -688,9 +694,16 @@ public class Router {
                     } else {
                         Map<String, String> localArgs = new HashMap<String, String>();
                         for (Arg arg : args) {
-                            localArgs.put(arg.name, matcher.group(arg.name));
+                            // FIXME: Careful with the arguments that are not matching as they are part of the hostname
+                            // Defaultvalue indicates it is a one of these urls. This is a trick and should be changed.
+                            if (arg.defaultValue == null) {
+                                localArgs.put(arg.name, matcher.group(arg.name));
+                            }
                         }
                         if (hostArg != null && host != null) {
+                            // Parse the hostname and get only the part we are interested in
+                            String routeValue = hostArg.defaultValue.replaceAll("\\{.*}", "");
+                            host = host.replace(routeValue, "");
                             localArgs.put(hostArg.name, host);
                         }
                         localArgs.putAll(staticArgs);
