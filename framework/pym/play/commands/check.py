@@ -1,14 +1,18 @@
 import os, os.path
 import shutil
+import urllib, urllib2
+import simplejson as json
 
 from play.utils import *
-import play.launchpad as launchpad
 
 COMMANDS = ['check']
 
 HELP = {
     'check': 'Check for a release newer than the current one'
 }
+
+TAGS_URL = "http://github.com/api/v2/json/repos/show/playframework/play/tags"
+
 
 def execute(**kargs):
     args = kargs.get("args")
@@ -19,37 +23,81 @@ def execute(**kargs):
     else:
         version = playVersion(play_env)
 
-    lpPlay = launchpad.Project("play")
-
-    if len(version) > 2:
-        series = lpPlay.getSeries(name=version[0:3])
-    if series is None:
-        print "~ Error: unable to determine series for version " + version + "."
-        print "~"
-        sys.exit(-1)
-
-    lpSeries = launchpad.Entry(series["self_link"])
-    releases = filter(lambda x: x["type"] == "release", lpSeries.get_timeline()["landmarks"])
+    current = Release(version)
+    releases = allreleases()
 
     if len(releases) == 0:
-        print "~ No release for the requested series. Are you on a development branch?"
-    elif isRelease(version, releases):
-        if releases[0]["name"] == version:
-            print "~ You are using the latest version of the serie (" + version + ")."
-        else:
-            print "~  ***** NEW RELEASE: " + releases[0]["name"] + " *****"
-            print "~      released on " + releases[0]["date"]
-            print "~"
-            print "~ Please upgrade: https://launchpad.net" + releases[0]["uri"]
+        print "~ No release found."
+    elif current == max(releases):
+        print "~ You are using the latest version."
     else:
-        print "~ You don't seem to be using an official release."
-        print "~ Latest release is " + releases[0]["name"] + ", released on " + releases[0]["date"]
+        print "~  ***** Latest version  : " + str(max(releases))
+        print "~  ***** Your version    : " + str(current)
+        print "~"
+        print "~ Latest version download: " + max(releases).url()
 
     print "~"
 
-def isRelease(version, releases):
-    for release in releases:
-        if release["name"] == version:
-            return True
-    return False
 
+def allreleases():
+    try:
+        req = urllib2.Request(TAGS_URL)
+        req.add_header('Accept', 'application/json')
+        opener = urllib2.build_opener()
+        result = opener.open(req)
+        return map(lambda x: Release(x), json.loads(result.read())["tags"])
+    except urllib2.HTTPError, e:
+        print "~ Oops,"
+        print "~ Cannot contact github..."
+        print "~"
+        sys.exit(-1)
+    except urllib2.URLError, e:
+        print "~ Oops,"
+        print "~ Cannot contact github..."
+        print "~"
+        sys.exit(-1)
+
+class Release:
+
+    # TODO: Be smarter at analysing the rest (ex: RC1 vs RC2)
+    def __init__(self, strversion):
+        self.strversion = strversion
+        self.numpart = re.findall(r"\d+[\.\d+]+", strversion)[0]
+        self.rest = strversion.replace(self.numpart, "")
+        self.versions = map(lambda x: int(x), self.numpart.split("."))
+
+    def url(self):
+        return "http://download.playframework.org/releases/play-" + self.strversion + ".zip"
+
+    def __eq__(self, other):
+        return self.strversion == other.strversion
+    def __lt__(self, other):
+        for i in range(self.versions):
+            if self.versions[i] < other.versions[i]:
+                return True # ex: 1.1 vs 1.2
+            if self.versions[i] > other.versions[i]:
+                return False
+        if len(self.versions) < len(other.versions):
+            return True
+        if len(self.versions) > len(other.versions):
+            return False
+        # From here, numeric part is the same - now having a rest means older version
+        if len(other.numpart) > 0:
+            return False
+        if len(self.numpart) > 0:
+            return True
+        return False # self == other (thus strict comparison is false)
+    def __le__(self, other):
+        return self == other or self < other
+    def __gt__(self, other):
+        return not (self <= other)
+    def __ge__(self, other):
+        return not (self < other)
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __repr__(self):
+        return self.strversion
+
+    def __str__(self):
+        return self.strversion
