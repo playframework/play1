@@ -31,10 +31,10 @@ def execute(**kargs):
     elif current == max(releases):
         print "~ You are using the latest version."
     else:
-        print "~  ***** Latest version  : " + str(max(releases))
-        print "~  ***** Your version    : " + str(current)
+        print "~  ***** Latest release: " + str(max(releases))
+        print "~  ***** Your version  : " + str(current)
         print "~"
-        print "~ Latest version download: " + max(releases).url()
+        print "~ Latest release download: " + max(releases).url()
 
     print "~"
 
