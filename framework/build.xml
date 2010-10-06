@@ -34,11 +34,12 @@
     </target>
     
     <target name="version" unless="version">
-        <exec executable="bzr" outputproperty="bzrversion" errorproperty="bzrerror" failonerror="false" failifexecutionfails="false">
-            <arg value="revno" />
+        <exec executable="git" outputproperty="gitversion" errorproperty="giterror" failonerror="false" failifexecutionfails="false">
+            <arg value="describe" />
+            <arg value="--tags" />
         </exec>
-        <condition property="version" value="1.1-unstable-r${bzrversion}" else="1.1-unstable-localbuild">
-            <equals arg1="" arg2="${bzrerror}" trim="true" />
+        <condition property="version" value="${gitversion}" else="1.1-localbuild">
+            <equals arg1="" arg2="${giterror}" trim="true" />
         </condition> 
         <echo message="Version ${version}"></echo>
     </target>
