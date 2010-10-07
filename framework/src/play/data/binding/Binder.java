@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang.StringUtils;
 
 import play.db.Model;
 
@@ -27,7 +28,7 @@ import play.db.Model;
  */
 public class Binder {
 
-    static Map<Class<?>, TypeBinder<?>> supportedTypes = new HashMap<Class<?>, TypeBinder<?>>();
+    static final Map<Class<?>, TypeBinder<?>> supportedTypes = new HashMap<Class<?>, TypeBinder<?>>();
 
     // TODO: something a bit more dynamic? The As annotation allows you to inject your own binder
     static {
@@ -42,7 +43,6 @@ public class Binder {
         supportedTypes.put(byte[].class, new ByteArrayBinder());
         supportedTypes.put(byte[][].class, new ByteArrayArrayBinder());
     }
-
     static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<Class<?>, BeanWrapper>();
 
     static BeanWrapper getBeanWrapper(Class<?> clazz) {
@@ -114,6 +114,8 @@ public class Binder {
             if (Enum.class.isAssignableFrom(clazz)) {
                 if (value == null || value.length == 0) {
                     return MISSING;
+                } else if (StringUtils.isEmpty(value[0])) {
+                    return null;
                 }
                 return Enum.valueOf(clazz, value[0]);
             }
@@ -260,7 +262,7 @@ public class Binder {
         }
         try {
             return new BeanWrapper(o.getClass()).bind(name, null, params, "", o, null);
-        } catch(Exception e) {
+        } catch (Exception e) {
             Validation.addError(name, "validation.invalid");
             return null;
         }
@@ -369,7 +371,7 @@ public class Binder {
         for (Class<?> c : supportedTypes.keySet()) {
             Logger.trace("directBind: value [" + value + "] c [" + c + "] Class [" + clazz + "]");
             if (c.isAssignableFrom(clazz)) {
-                 Logger.trace("directBind: isAssignableFrom is true");
+                Logger.trace("directBind: isAssignableFrom is true");
                 return nullOrEmpty ? null : supportedTypes.get(c).bind(name, annotations, value, clazz);
             }
         }
@@ -387,6 +389,14 @@ public class Binder {
         // raw String
         if (clazz.equals(String.class)) {
             return value;
+        }
+
+        // Enums
+        if (Enum.class.isAssignableFrom(clazz)) {
+            if (nullOrEmpty) {
+                return null;
+            }
+            return Enum.valueOf((Class<Enum>)clazz, value);
         }
 
         // int or Integer binding

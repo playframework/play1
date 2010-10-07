@@ -5,6 +5,7 @@ import play.*;
 import play.data.binding.As;
 import play.mvc.*;
 import java.text.*;
+import java.util.*;
 
 public class Users extends Controller {
 
@@ -16,6 +17,14 @@ public class Users extends Controller {
         Logger.info("user date [" + u.birth + "]");
         render(u);
        
+    }
+    
+    public static void changeColor(Factory.Color color, String name) {
+        renderText(color + "," + name + ". Errors:" + validation.hasErrors());
+    }
+    
+    public static void changeColors(List<Factory.Color> colors) {
+        renderText(colors + ". Errors:" + validation.hasErrors());
     }
 
     public static void edit() {
