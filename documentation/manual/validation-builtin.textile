@@ -116,7 +116,7 @@ Message key: **validation.minSize**
 
 <h2><a name="past">past</a></h2>
 
-Checks that the value is a date in the future. If a second date is specified as a reference, then the value must be in the past with respect to the reference date - i.e. before it.
+Checks that the value is a date in the past. If a second date is specified as a reference, then the value must be in the past with respect to the reference date - i.e. before it.
 
 bc. validation.past(actualDepartureDate);
 validation.past(expectedDepartureDate, expectedArrivalDate);
@@ -138,7 +138,7 @@ Annotation syntax:
 
 bc. @Range(min = 17500, max = 40000) String wordCount
 
-Message key: **validation.past**
+Message key: **validation.range**
 
 <h2><a name="required">required</a></h2>
 
