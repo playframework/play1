@@ -79,6 +79,11 @@ public class CorePlugin extends PlayPlugin {
             System.exit(0);
         }
         if (request.path.equals("/@status") || request.path.equals("/@status.json")) {
+            if(!Play.started) {
+                response.print("Application is not started");
+                response.status = 503;
+                return true;
+            }
             response.contentType = request.path.contains(".json") ? "application/json" : "text/plain";
             Header authorization = request.headers.get("authorization");
             if (request.isLoopback || (authorization != null && Crypto.sign("@status").equals(authorization.value()))) {
