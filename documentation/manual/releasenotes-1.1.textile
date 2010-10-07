@@ -18,6 +18,8 @@ When you run tests with **play auto-test**, this browser will be used.
 
 !images/auto-test!
 
+Note that the headless browser try to behave like Internet Explorer 8. It's a good thing because as most developers use and test locally on a real browser like Firefox or Webkit, it allows to check obvious JavaScript compatibility issues on the integration platform.
+
 h2. <a name="server">New HTTP server based on JBoss Netty</a>
 
 The Play 1.1 release uses "JBoss Netty":http://www.jboss.org/netty instead of Apache Mina as HTTP server. This should not change anything for your application, and the performance of the HTTP layer be the same as before. However, this fixes some small HTTP bugs that affected Play 1.0.x.
