@@ -62,7 +62,11 @@ try:
             application_path = os.path.normpath(os.path.abspath(sys.argv[2]))
             remaining_args = sys.argv[3:]
 
-    play_app = PlayApplication(application_path, play_env)
+    ignoreMissing = False
+    if remaining_args.count('--force') == 1:
+        remaining_args.remove('--force')
+        ignoreMissing = True
+    play_app = PlayApplication(application_path, play_env, ignoreMissing)
 
     # ~~~~~~~~~~~~~~~~~~~~~~ What is the command?
     if len(sys.argv) > 1:
