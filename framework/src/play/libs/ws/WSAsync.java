@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import org.apache.commons.lang.NotImplementedException;
+
 import oauth.signpost.AbstractOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
@@ -214,17 +216,13 @@ public class WSAsync implements WSImpl {
         /** Execute a TRACE request.*/
         @Override
         public HttpResponse trace() {
-            try {
-                return new HttpAsyncResponse(prepare(httpClient.prepareTrace(url)).execute().get());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            throw new NotImplementedException();
         }
 
         /** Execute a TRACE request asynchronously.*/
         @Override
         public Future<HttpResponse> traceAsync() {
-            return execute(httpClient.prepareTrace(url));
+            throw new NotImplementedException();
         }
 
         private WSRequest sign(String method) {
