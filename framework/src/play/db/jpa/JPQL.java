@@ -1,8 +1,11 @@
 package play.db.jpa;
 
 import java.util.List;
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+
 import play.Play;
 import play.db.jpa.GenericModel.JPAQuery;
 import play.mvc.Scope.Params;
@@ -158,12 +161,25 @@ public class JPQL {
         if (params == null) {
             return q;
         }
+		if (params.length == 1 && params[0] instanceof Map) {
+			return bindParameters(q, (Map<String, Object>) params[0]);
+		}
         for (int i = 0; i < params.length; i++) {
             q.setParameter(i + 1, params[i]);
         }
         return q;
     }
 
+	public Query bindParameters(Query q, Map<String, Object> params) {
+		if (params == null) {
+			return q;
+		}
+		for (String key : params.keySet()) {
+			q.setParameter(key, params.get(key));
+		}
+		return q;
+	}
+    
     public String findByToJPQL(String findBy) {
         findBy = findBy.substring(2);
         StringBuffer jpql = new StringBuffer();
