@@ -6,7 +6,11 @@ h2. <a name="migrating">Migrating from Play 1.0.x</a>
 
 Migrating from Play 1.0.x is pretty straightforward. There are no changes to the application layout, so the same application will run on Play 1.0.3.2 or Play 1.1. However if you use any external modules in your application, you may have to use more recent versions that are compatible with Play 1.1. Check the corresponding module pages.
 
-Some APIs have been removed in Play 1.1, after having been deprecated for a long time, but most of the public API is the same. If you have compilation errors that you don't know how to solve, ask on the Google group.
+* Some APIs have been removed in Play 1.1, after having been deprecated for a long time, but most of the public API is the same. If you have compilation errors that you don't know how to solve, ask on the Google group.
+* In play.libs.IO, a lot of methods that used to throw checked exceptions are now throwing runtime exceptions. If you were catching the exception you may need to change the exception class or stop catching it.
+* In production mode, the database is no longer automatically updated when the model changes. If you want this behavior, add this line to your your application.conf:
+
+bc. jpa.ddl = update
 
 h2. <a name="headless">New headless test runner</a>
 
