@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import play.Play;
-import play.PlayConfiguration;
 import play.i18n.Lang;
 
 /**
@@ -12,7 +11,7 @@ import play.i18n.Lang;
  */
 public class I18N {
 
-    static Map<String, String> symbols = new HashMap<String, String>();
+    static final Map<String, String> symbols = new HashMap<String, String>();
 
     static {
         symbols.put("JPY", "&yen;");
@@ -34,11 +33,11 @@ public class I18N {
     }
 
     public static String getDateFormat() {
-        final String localizedDateFormat = Play.configuration.getProperty(PlayConfiguration.DATE_FORMAT + "." + Lang.get());
+        final String localizedDateFormat = Play.configuration.getProperty("date.format." + Lang.get());
         if (!StringUtils.isEmpty(localizedDateFormat)) {
             return localizedDateFormat;
         }
-        final String globalDateFormat = Play.configuration.getProperty(PlayConfiguration.DATE_FORMAT);
+        final String globalDateFormat = Play.configuration.getProperty("date.format");
         if (!StringUtils.isEmpty(globalDateFormat)) {
             return globalDateFormat;
         }
