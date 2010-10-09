@@ -34,6 +34,12 @@ public class DirectBindingTest extends UnitTest {
     }
     
     @Test
+    public void testEnum() throws Exception  {
+        assertNull(directBind("", Factory.Color.class));
+        assertTrue(directBind("RED", Factory.Color.class).equals(Factory.Color.RED));
+    }
+    
+    @Test
     public void testLong() throws Exception  {
         assertTrue(directBind("", long.class).equals(0l));
         assertTrue(directBind(null, long.class).equals(0l));

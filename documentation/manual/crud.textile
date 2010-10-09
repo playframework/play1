@@ -59,6 +59,8 @@ The controller's class name has to be the model class name with a final 's'. If 
 
 bc. package controllers;
  
+import models.User;
+ 
 @CRUD.For(User.class)
 public class AdminUsers extends CRUD {
    

@@ -11,6 +11,8 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
+import java.io.ByteArrayInputStream;
+import org.xml.sax.InputSource;
 import play.Logger;
 
 /**
@@ -51,5 +53,23 @@ public class XML {
         }
         return null;
     }
-    
+
+    /**
+     * Parse an XML string content to DOM
+     * @return null if an error occurs during parsing.
+     */
+    public static Document getDocument(String xml) {
+        InputSource source = new InputSource(new ByteArrayInputStream(xml.getBytes()));
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        try {
+            return dbf.newDocumentBuilder().parse(source);
+        } catch (SAXException e) {
+            Logger.warn("Parsing error when building Document object from xml data.", e);
+        } catch (IOException e) {
+            Logger.warn("Reading error when building Document object from xml data.", e);
+        } catch (ParserConfigurationException e) {
+            Logger.warn("Parsing error when building Document object from xml data.", e);
+        }
+        return null;
+    }
 }

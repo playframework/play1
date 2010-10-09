@@ -26,25 +26,20 @@ public class SslPlayHandler extends PlayHandler {
             sslHandler.setEnableRenegotiation(false);
             // Get notified when SSL handshake is done.
             ChannelFuture handshakeFuture = sslHandler.handshake();
-            handshakeFuture.addListener(new SslListener(sslHandler));
+            handshakeFuture.addListener(new SslListener());
     }
 
     private static final class SslListener implements ChannelFutureListener {
 
-        private final SslHandler sslHandler;
-
-        SslListener(SslHandler sslHandler) {
-            this.sslHandler = sslHandler;
+        SslListener() {
         }
 
         public void operationComplete(ChannelFuture future) throws Exception {
             if (!future.isSuccess()) {
                 Logger.warn(future.getCause(), "Invalid certificate ");
-//                if (future.getChannel().isOpen()) {
-//                    future.getChannel().close();
-//                }
             }
         }
+
     }
 
     @Override

@@ -1,6 +1,7 @@
 package play.modules.testrunner;
 
 import com.gargoylesoftware.htmlunit.AlertHandler;
+import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.DefaultPageCreator;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -48,12 +49,13 @@ public class FirePhoque {
         }
 
         // Let's tweak WebClient
-        WebClient firephoque = new WebClient();
+        WebClient firephoque = new WebClient(BrowserVersion.INTERNET_EXPLORER_8);
         firephoque.setPageCreator(new DefaultPageCreator() {
 
             @Override
             public Page createPage(WebResponse wr, WebWindow ww) throws IOException {
-                return createHtmlPage(wr, ww);
+                Page page = createHtmlPage(wr, ww);
+                return page;
             }
         });
         firephoque.setThrowExceptionOnFailingStatusCode(false);
@@ -62,6 +64,8 @@ public class FirePhoque {
                 System.out.println(" --> alert: " + string);
             }
         });
+        firephoque.setThrowExceptionOnScriptError(false);
+
 
         // Go!
         int maxLength = 0;

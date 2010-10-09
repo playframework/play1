@@ -34,11 +34,12 @@
     </target>
     
     <target name="version" unless="version">
-        <exec executable="bzr" outputproperty="bzrversion" errorproperty="bzrerror" failonerror="false" failifexecutionfails="false">
-            <arg value="revno" />
+        <exec executable="git" outputproperty="gitversion" errorproperty="giterror" failonerror="false" failifexecutionfails="false">
+            <arg value="describe" />
+            <arg value="--tags" />
         </exec>
-        <condition property="version" value="1.1-unstable-r${bzrversion}" else="1.1-unstable-localbuild">
-            <equals arg1="" arg2="${bzrerror}" trim="true" />
+        <condition property="version" value="${gitversion}" else="1.1-localbuild">
+            <equals arg1="" arg2="${giterror}" trim="true" />
         </condition> 
         <echo message="Version ${version}"></echo>
     </target>
@@ -299,7 +300,7 @@
     <target name="package" depends="clean,version,jar,javadoc">
         <mkdir dir="dist" /> 
         <zip destfile="dist/play-${version}.zip" comment="Play! ${version}" update="false">
-            <zipfileset prefix="play-${version}" dir=".." includes="**/*" excludes="**/cobertura.ser,**/*.pyc,hs_err*,.*,.*/*,framework/dist/**,id,play,nbproject/**,**/.bzr/**,*.bzrignore,support/textmate/**,framework/classes/**,framework/tests-results/**,samples-and-tests/**/test-result,samples-and-tests/**/i-am-working-here,samples-and-tests/**/data,samples-and-tests/**/logs,samples-and-tests/**/tmp,samples-and-tests/**/db,samples-and-tests/**/attachments,modules/**" />   
+            <zipfileset prefix="play-${version}" dir=".." includes="**/*" excludes="**/cobertura.ser,**/*.pyc,hs_err*,.*,.*/*,framework/dist/**,id,play,nbproject/**,**/.bzr/**,**/.git/**,*.bzrignore,support/textmate/**,framework/classes/**,framework/tests-results/**,samples-and-tests/**/test-result,samples-and-tests/**/i-am-working-here,samples-and-tests/**/data,samples-and-tests/**/logs,samples-and-tests/**/tmp,samples-and-tests/**/db,samples-and-tests/**/attachments,modules/**" />   
             <zipfileset prefix="play-${version}" dir=".." includes="play" filemode="777" />
             <zipfileset prefix="play-${version}" dir=".." includes="modules/grizzly/**,modules/crud/**,modules/secure/**,modules/docviewer/**,modules/testrunner/**" excludes="**/*.pyc" />
         </zip>

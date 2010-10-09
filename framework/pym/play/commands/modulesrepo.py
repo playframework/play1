@@ -11,7 +11,7 @@ import urllib
 
 from play.utils import *
 
-NM = ['new-module']
+NM = ['new-module', 'nm']
 LM = ['list-modules', 'lm']
 BM = ['build-module', 'bm']
 AM = ['add']
@@ -20,6 +20,7 @@ IM = ['install']
 COMMANDS = NM + LM + BM + IM + AM
 
 HELP = {
+    'new-module': "Create a module",
     'build-module': "Build and package a module",
     'list-modules': "List modules available from the central modules repository",
     'install': "Install a module"
@@ -187,10 +188,17 @@ def new(app, args, play_env):
     replaceAll(os.path.join(app.path, 'conf/messages'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE_LOWERCASE%', string.lower(application_name))
+    os.mkdir(os.path.join(app.path, 'app'))
+    os.mkdir(os.path.join(app.path, 'app/controllers'))
     os.mkdir(os.path.join(app.path, 'app/controllers/%s' % application_name))
+    os.mkdir(os.path.join(app.path, 'app/models'))
     os.mkdir(os.path.join(app.path, 'app/models/%s' % application_name))
+    os.mkdir(os.path.join(app.path, 'app/views'))
     os.mkdir(os.path.join(app.path, 'app/views/%s' % application_name))
+    os.mkdir(os.path.join(app.path, 'app/views/tags'))
     os.mkdir(os.path.join(app.path, 'app/views/tags/%s' % application_name))
+    os.mkdir(os.path.join(app.path, 'src/play'))
+    os.mkdir(os.path.join(app.path, 'src/play/modules'))
     os.mkdir(os.path.join(app.path, 'src/play/modules/%s' % application_name))
 
     print "~ OK, the module is created."

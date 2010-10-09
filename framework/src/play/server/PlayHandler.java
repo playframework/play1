@@ -33,10 +33,12 @@ import play.vfs.VirtualFile;
 
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.*;
+import javax.mail.internet.InternetAddress;
 
 import play.data.validation.Validation;
 
@@ -79,7 +81,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
         Logger.trace("messageReceived: end");
     }
-
     private static Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
 
     public class NettyInvocation extends Invoker.Invocation {
@@ -169,8 +170,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             copyResponse(ctx, request, response, nettyRequest);
             Logger.trace("execute: end");
         }
-
-
     }
 
     void saveExceededSizeError(HttpRequest nettyRequest, Request request, Response response) {
@@ -419,6 +418,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         request.url = nettyRequest.getUri();
         request.host = nettyRequest.getHeader(HOST);
+        request.isLoopback = ((InetSocketAddress) ctx.getChannel().getRemoteAddress()).getAddress().isLoopbackAddress() && request.host.matches("^127\\.0\\.0\\.1:?[0-9]*$");
 
         if (request.host == null) {
             request.host = "";

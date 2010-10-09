@@ -15,7 +15,7 @@ class PlayApplication:
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Constructor
 
-    def __init__(self, application_path, env):
+    def __init__(self, application_path, env, ignoreMissingModules = False):
         self.path = application_path
         if application_path is not None:
             confpath = os.path.join(application_path, 'conf/application.conf')
@@ -27,6 +27,7 @@ class PlayApplication:
             self.conf = None
         self.play_env = env
         self.jpda_port = self.readConf('jpda_port')
+        self.ignoreMissingModules = ignoreMissingModules
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Configuration File
 
@@ -56,7 +57,7 @@ class PlayApplication:
                 m = m.replace('${play.path}', self.play_env["basedir"])
             if m[0] is not '/':
                 m = os.path.normpath(os.path.join(self.path, m))
-            if not os.path.exists(m):
+            if not os.path.exists(m) and not self.ignoreMissingModules:
                 print "~ Oops,"
                 print "~ Module not found: %s" % (m)
                 print "~"
