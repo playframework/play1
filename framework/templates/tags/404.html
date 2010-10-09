@@ -59,7 +59,7 @@
     <h2>These routes have been tried, in this order :</h2>
     <ol>
         #{list items:play.mvc.Router.routes, as:'route'}
-            <li>${route.method.pad(10).raw()}${route.path.pad(50).raw()}${route.action}</li>
+            <li>${route.method.pad(10).raw()}${(route.host + route.path).pad(50).raw()}${route.action}</li>
         #{/list}
     </ol>
 </div>
