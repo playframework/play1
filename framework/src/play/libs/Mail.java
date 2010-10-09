@@ -92,7 +92,8 @@ public class Mail {
     public static Session getSession() {
         if (session == null) {
             Properties props = new Properties();
-            props.put("mail.smtp.host", Play.configuration.getProperty("mail.smtp.host"));
+            // Put a bogus value even if we are on dev mode, otherwise JavaMail will complain
+            props.put("mail.smtp.host", Play.configuration.getProperty("mail.smtp.host", "localhost"));
 
             String channelEncryption;
             if (Play.configuration.containsKey("mail.smtp.protocol") && Play.configuration.getProperty("mail.smtp.protocol", "smtp").equals("smtps")) {
