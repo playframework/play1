@@ -27,7 +27,7 @@ public class DateBinder implements TypeBinder<Date> {
             sdf.setLenient(false);
             return sdf.parse(value);
         } catch (ParseException e) {
-             //
+             // Ignore
         }
 
         try {
