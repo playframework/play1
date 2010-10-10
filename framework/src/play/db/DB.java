@@ -27,7 +27,7 @@ public class DB {
                 localConnection.set(null);
                 connection.close();
             } catch (Exception e) {
-                throw new DatabaseException("It's possible than the connection was not propertly closed !", e);
+                throw new DatabaseException("It's possible than the connection was not properly closed !", e);
             }
         }
     }
