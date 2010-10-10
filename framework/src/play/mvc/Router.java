@@ -12,6 +12,7 @@ import java.util.Map;
 import jregex.Matcher;
 import jregex.Pattern;
 import jregex.REFlags;
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
@@ -321,7 +322,7 @@ public class Router {
                         to = to.substring(0, to.length() - "/index.html".length() + 1);
                     }
                     if (absolute) {
-                        if (route.host != null && !route.host.equals(".*")) {
+                        if (!StringUtils.isEmpty(route.host)) {
                             to = "http://" + route.host + to;
                         } else {
                             to = Http.Request.current().getBase() + to;
@@ -501,7 +502,7 @@ public class Router {
         }
 
         public void absolute() {
-            if (host == null || host.equals(".*")) {
+            if (StringUtils.isEmpty(host)) {
                 url = Http.Request.current().getBase() + url;
             } else {
                 url = "http://" + host + url;
@@ -539,8 +540,8 @@ public class Router {
         static Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'");
 
         public void compute() {
-            this.host = ".*";
-            this.hostPattern = new Pattern(host);
+            this.host = "";
+            this.hostPattern = new Pattern(".*");
             // staticDir
             if (action.startsWith("staticDir:")) {
                 // Is there is a host argument, append it.
@@ -570,22 +571,32 @@ public class Router {
                     String p = this.path;
                     this.path = p.substring(p.indexOf("/"));
                     this.host = p.substring(0, p.indexOf("/"));
+                    String pattern = host.replaceAll("\\.","\\\\.").replaceFirst("\\{.*\\}", "(.*)");
+                    Logger.trace("pattern [" + pattern + "]");
                     Logger.trace("host [" + host + "]");
-                    Matcher m = new Pattern(".*\\{({name}.*)\\}.*").matcher(host);
+
+                    Matcher m = new Pattern(pattern).matcher(host);
+                    this.hostPattern = new Pattern(pattern);
 
                     if (m.matches()) {
-                        String name = m.group("name");
-                        hostArg = new Arg();
-                        hostArg.name = name;
-                        // The default value contains the route version of the host ie {client}.bla.com
-                        // It is temporary and it indicates it is an url route.
-                        // TODO Check that default value is actually used for other cases.
-                        hostArg.defaultValue = host;
-                        hostArg.constraint = new Pattern(".*");
-                        args.add(hostArg);
+                        if (this.host.contains("{")) {
+                            String name = m.group(1).replace("{", "").replace("}","");
+                            hostArg = new Arg();
+                            hostArg.name = name;
+                            Logger.trace("hostArg name [" + name + "]");
+                            // The default value contains the route version of the host ie {client}.bla.com
+                            // It is temporary and it indicates it is an url route.
+                            // TODO Check that default value is actually used for other cases.
+                            hostArg.defaultValue = host;
+                            hostArg.constraint = new Pattern(".*");
+                            Logger.trace("adding hostArg [" + hostArg + "]");
+
+                            args.add(hostArg);
+                        }
                     }
 
-               }
+
+                }
                 String patternString = path;
                 patternString = customRegexPattern.replacer("\\{<[^/]+>$1\\}").replace(patternString);
                 Matcher matcher = argsPattern.matcher(patternString);
@@ -674,8 +685,10 @@ public class Router {
 
                 boolean hostMatches = (host == null);
                 if (host != null) {
+
                     Matcher hostMatcher = hostPattern.matcher(host);
                     hostMatches = hostMatcher.matches();
+                    Logger.trace("Host is [" + host + "] hostPattern is [" + hostPattern.toString() + "] matches? [" + hostMatches + "]");
                 }
                 // Extract the host variable
                 if (matcher.matches() && contains(accept) && hostMatches) {
