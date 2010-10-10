@@ -7,11 +7,13 @@ import java.lang.annotation.*;
 import play.*;
 import play.data.binding.*;
 import play.mvc.*;
+import play.utils.Java;
 import play.db.Model;
 import play.data.validation.*;
 import play.exceptions.*;
 import play.i18n.*;
 
+@CRUD.WithObjectType(CRUD.ObjectType.class)
 public abstract class CRUD extends Controller {
 
     @Before
@@ -164,6 +166,13 @@ public abstract class CRUD extends Controller {
     public @interface For {
         Class<? extends Model> value();
     }
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    @Inherited
+    public @interface WithObjectType {
+        Class<? extends ObjectType> value();
+    }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
@@ -202,12 +211,25 @@ public abstract class CRUD extends Controller {
             return new ObjectType(modelClass);
         }
 
+        /**
+         * Returns the object-type which is declared by {@linkplain WithObjectType}.
+         * @param controllerClass the Controller-Class
+         * @return the specific {@linkplain ObjectType}.
+         */
         public static ObjectType get(Class<? extends Controller> controllerClass) {
             Class<? extends Model> entityClass = getEntityClassForController(controllerClass);
             if (entityClass == null || !Model.class.isAssignableFrom(entityClass)) {
                 return null;
             }
-            ObjectType type = new ObjectType(entityClass);
+            final Class<? extends ObjectType> objectTypeClass = 
+                    controllerClass.getAnnotation(WithObjectType.class).value();
+            ObjectType type;
+            try  {
+                type = (ObjectType)Java.instantiateObject(objectTypeClass, entityClass);
+            } catch (Exception e) {
+                Logger.error(e, "Couldn't create an object of type ObjectType. Use default one.");
+                type = new ObjectType(entityClass);
+            }
             type.name = controllerClass.getSimpleName().replace("$", "");
             type.controllerName = controllerClass.getSimpleName().toLowerCase().replace("$", "");
             type.controllerClass = controllerClass;
