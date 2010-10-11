@@ -69,11 +69,6 @@ public class CorePlugin extends PlayPlugin {
      */
     @Override
     public boolean rawInvocation(Request request, Response response) throws Exception {
-        // Really I don't like this stuff
-        if (request.path.equals("/favicon.ico")) {
-            response.status = 404;
-            return true;
-        }
         if (Play.mode == Mode.DEV && request.path.equals("/@kill")) {
             System.out.println("@KILLED");
             System.exit(0);
