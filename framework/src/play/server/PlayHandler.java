@@ -104,10 +104,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Logger.trace("init: begin");
             Request.current.set(request);
             Response.current.set(response);
-            // Patch favicon.ico
-            if (!request.path.equals("/favicon.ico")) {
-                super.init();
-            }
+            super.init();
             if (Play.mode == Play.Mode.PROD && staticPathsCache.containsKey(request.path)) {
                 RenderStatic rs = null;
                 synchronized (staticPathsCache) {
