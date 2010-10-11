@@ -59,21 +59,9 @@ import com.ning.http.client.StringPart;
  */
 public class WSAsync implements WSImpl {
 
-    private static AsyncHttpClient httpClient;
+    private AsyncHttpClient httpClient;
 
-    private static WSAsync uniqueInstance;
-
-    private WSAsync() {}
-
-    public static WSAsync getInstance() {
-        if (uniqueInstance == null) {
-            uniqueInstance = new WSAsync();
-        }
-        return uniqueInstance;
-    }
-
-    @Override
-    public void init() {
+    public WSAsync() {
         String proxyHost = Play.configuration.getProperty("http.proxyHost", System.getProperty("http.proxyHost"));
         String proxyPort = Play.configuration.getProperty("http.proxyPort", System.getProperty("http.proxyPort"));
         String proxyUser = Play.configuration.getProperty("http.proxyUser", System.getProperty("http.proxyUser"));
@@ -95,18 +83,16 @@ public class WSAsync implements WSImpl {
         httpClient = new AsyncHttpClient(confBuilder.build());
     }
 
-    @Override
     public void stop() {
         Logger.trace("Releasing http client connections...");
         httpClient.close();
     }
 
-    @Override
     public WSRequest newRequest(String url) {
         return new WSAsyncRequest(url);
     }
 
-    public static class WSAsyncRequest extends WSRequest {
+    public class WSAsyncRequest extends WSRequest {
 
         private WSAsyncRequest(String url) {
             this.url = url;
