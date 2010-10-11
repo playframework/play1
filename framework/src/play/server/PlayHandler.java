@@ -33,12 +33,10 @@ import play.vfs.VirtualFile;
 
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.*;
-import javax.mail.internet.InternetAddress;
 
 import play.data.validation.Validation;
 

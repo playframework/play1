@@ -36,7 +36,7 @@ public interface Model {
     public static interface Factory {
 
         public String keyName();
-        public Class keyType();
+        public Class<?> keyType();
         public Object keyValue(Model m);
         public Model findById(Object id);
         public List<Model> fetch(int offset, int length, String orderBy, String orderDirection, List<String> properties, String keywords, String where);
