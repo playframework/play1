@@ -185,8 +185,7 @@ public class GenericModel extends JPABase {
      * Merge this object to obtain a managed entity (usefull when the object comes from the Cache).
      */
     public <T extends JPABase> T merge() {
-        em().merge(this);
-        return (T) this;
+        return (T)em().merge(this);
     }
 
     /**
