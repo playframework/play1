@@ -36,7 +36,7 @@ public class WSUrlFetch implements WSImpl {
 
     public class WSUrlfetchRequest extends WSRequest {
 
-        private WSUrlfetchRequest(String url) {
+        protected WSUrlfetchRequest(String url) {
             this.url = url;
         }
 

@@ -94,7 +94,7 @@ public class WSAsync implements WSImpl {
 
     public class WSAsyncRequest extends WSRequest {
 
-        private WSAsyncRequest(String url) {
+        protected WSAsyncRequest(String url) {
             this.url = url;
         }
 
