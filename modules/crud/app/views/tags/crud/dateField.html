@@ -4,6 +4,6 @@
     </label>
     <input id="${field.id}" class="${field.errorClass}" type="text" name="${field.name}" value="${_value?.format('yyyy-MM-dd')}" size="10" />
     #{ifError field.name}
-        <span class="error">${field.error}</span>
+        <span class="error">${field.error.raw()}</span>
     #{/ifError}
 #{/field}
