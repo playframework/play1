@@ -38,17 +38,17 @@ public class Fixtures {
 
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
 
-    public static void delete(Class<Model>... types) {
+    public static void delete(Class<? extends Model>... types) {
         disableForeignKeyConstraints();
-        for (Class<Model> type : types) {
+        for (Class<? extends Model> type : types) {
             Model.Manager.factoryFor(type).deleteAll();
         }
         enableForeignKeyConstraints();
     }
 
-    public static void delete(List<Class<Model>> classes) {
+    public static void delete(List<Class<? extends Model>> classes) {
         @SuppressWarnings("unchecked")
-        Class<Model>[] types = new Class[classes.size()];
+        Class<? extends Model>[] types = new Class[classes.size()];
         for (int i = 0; i < types.length; i++) {
             types[i] = classes.get(i);
         }
@@ -57,9 +57,9 @@ public class Fixtures {
 
     @SuppressWarnings("unchecked")
     public static void deleteAllModels() {
-        List<Class<Model>> classes = new ArrayList<Class<Model>>();
+        List<Class<? extends Model>> classes = new ArrayList<Class<? extends Model>>();
         for (ApplicationClasses.ApplicationClass c : Play.classes.getAssignableClasses(Model.class)) {
-            classes.add((Class<Model>)c.javaClass);
+            classes.add((Class<? extends Model>)c.javaClass);
         }
         Fixtures.delete(classes);
     }
