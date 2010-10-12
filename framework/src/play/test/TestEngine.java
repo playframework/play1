@@ -121,7 +121,7 @@ public class TestEngine {
                 try {
                     futureResult.get();
                 } catch(Exception e) {
-                    Logger.error("VirtualClient test has failed", e);
+                    Logger.error(e, "VirtualClient test has failed");
                 }
             } else {
                 // Simple test
