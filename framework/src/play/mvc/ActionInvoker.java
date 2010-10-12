@@ -405,7 +405,7 @@ public class ActionInvoker {
 
     public static Object invokeControllerMethod(Method method, Object[] forceArgs) throws Exception {
         if (Modifier.isStatic(method.getModifiers()) && !method.getDeclaringClass().getName().matches("^controllers\\..*\\$class$")) {
-            return method.invoke(null, getActionMethodArgs(method, null));
+            return method.invoke(null, forceArgs == null ? getActionMethodArgs(method, null) : forceArgs);
         } else if (Modifier.isStatic(method.getModifiers())) {
             Object[] args = getActionMethodArgs(method, null);
             args[0] = Http.Request.current().controllerClass.getDeclaredField("MODULE$").get(null);
