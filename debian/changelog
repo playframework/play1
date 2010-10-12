@@ -1,3 +1,10 @@
+play-1.1rc1-20-g2b079e4 (play-1.1rc1-20-g2b079e4-2) maverick; urgency=low
+
+  * New async http client that eases the tests
+  * Incorporate Play! patch to old hibernate core
+
+ -- Stephane Epardaud <stephane@epardaud.fr>  Tue, 12 Oct 2010 16:45:47 +0200
+
 play-1.1rc1-20-g2b079e4 (play-1.1rc1-20-g2b079e4-1) maverick; urgency=low
 
   * Moved to upstream git
