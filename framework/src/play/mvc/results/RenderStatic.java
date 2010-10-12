@@ -4,9 +4,6 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.vfs.VirtualFile;
 
-/**
- * @author guillaume
- */
 public class RenderStatic extends Result {
 
     public String file;
@@ -19,5 +16,5 @@ public class RenderStatic extends Result {
     @Override
     public void apply(Request request, Response response) {
     }
-    
+
 }
