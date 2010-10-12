@@ -1,8 +1,9 @@
 package play.data.validation;
 
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
+
 import net.sf.oval.Validator;
 import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import net.sf.oval.context.OValContext;
@@ -13,7 +14,7 @@ public class CheckWithCheck extends AbstractAnnotationCheck<CheckWith> {
 
     final static String mes = "validation.invalid";
 
-    Map<String, String> variables = new HashMap<String, String>();
+    Map<String, String> variables = new TreeMap<String, String>();
     Check check;
 
     @Override
