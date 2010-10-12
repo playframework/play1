@@ -15,16 +15,22 @@ def execute(**kargs):
     args = kargs.get("args")
     play_env = kargs.get("env")
 
+    is_application = os.path.exists(os.path.join(app.path, 'conf', 'application.conf'))
     app.check()
-    app.check_jpda()
+    if is_application:
+        app.check_jpda()
     modules = app.modules()
     classpath = app.getClasspath()
 
+    # determine the name of the project
+    # if this is an application, the name of the project is in the application.conf file
+    # if this is a module, we infer the name from the path
     application_name = app.readConf('application.name')
     if application_name:
         application_name = application_name.replace("/", " ")
     else:
-        application_name = os.path.dirname(app.path)
+        application_name = os.path.basename(app.path)
+    
     dotProject = os.path.join(app.path, '.project')
     dotClasspath = os.path.join(app.path, '.classpath')
     dotSettings = os.path.join(app.path, '.settings')
@@ -68,6 +74,12 @@ def execute(**kargs):
 
     replaceAll(dotClasspath, r'%PROJECTCLASSPATH%', cpXML)
 
+    # generate source path for test folder if one exists
+    cpTEST = ""
+    if os.path.exists(os.path.join(app.path, 'test')):
+        cpTEST += '<classpathentry kind="src" path="test"/>'
+    replaceAll(dotClasspath, r'%TESTCLASSPATH%', cpTEST)
+
     if len(modules):
         lXML = ""
         cXML = ""
@@ -84,22 +96,23 @@ def execute(**kargs):
         replaceAll(dotProject, r'%LINKS%', '')
         replaceAll(dotClasspath, r'%MODULES%', '')
 
-    replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PROJECT_NAME%', application_name)
-    replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PLAY_BASE%', play_env["basedir"])
-    replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PLAY_ID%', play_env["id"])
-    replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%JPDA_PORT%', str(app.jpda_port))
-
-    replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PROJECT_NAME%', application_name)
-    replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_BASE%', play_env["basedir"])
-    replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_ID%', play_env["id"])
-    replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%JPDA_PORT%', str(app.jpda_port))
-
-    replaceAll(os.path.join(app.path, 'eclipse/connect.launch'), r'%PROJECT_NAME%', application_name)
-    replaceAll(os.path.join(app.path, 'eclipse/connect.launch'), r'%JPDA_PORT%', str(app.jpda_port))
-
-    os.rename(os.path.join(app.path, 'eclipse/connect.launch'), os.path.join(app.path, 'eclipse/Connect JPDA to %s.launch' % application_name))
-    os.rename(os.path.join(app.path, 'eclipse/test.launch'), os.path.join(app.path, 'eclipse/Test %s.launch' % application_name))
-    os.rename(os.path.join(app.path, 'eclipse/debug.launch'), os.path.join(app.path, 'eclipse/%s.launch' % application_name))
+    if is_application:
+        replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PROJECT_NAME%', application_name)
+        replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PLAY_BASE%', play_env["basedir"])
+        replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PLAY_ID%', play_env["id"])
+        replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%JPDA_PORT%', str(app.jpda_port))
+    
+        replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PROJECT_NAME%', application_name)
+        replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_BASE%', play_env["basedir"])
+        replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_ID%', play_env["id"])
+        replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%JPDA_PORT%', str(app.jpda_port))
+    
+        replaceAll(os.path.join(app.path, 'eclipse/connect.launch'), r'%PROJECT_NAME%', application_name)
+        replaceAll(os.path.join(app.path, 'eclipse/connect.launch'), r'%JPDA_PORT%', str(app.jpda_port))
+    
+        os.rename(os.path.join(app.path, 'eclipse/connect.launch'), os.path.join(app.path, 'eclipse/Connect JPDA to %s.launch' % application_name))
+        os.rename(os.path.join(app.path, 'eclipse/test.launch'), os.path.join(app.path, 'eclipse/Test %s.launch' % application_name))
+        os.rename(os.path.join(app.path, 'eclipse/debug.launch'), os.path.join(app.path, 'eclipse/%s.launch' % application_name))
 
     # Module-specific modifications
     for module in modules:
