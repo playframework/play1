@@ -344,7 +344,7 @@ public class ActionInvoker {
                         }
                         if (!skip) {
                             aFinally.setAccessible(true);
-                            invokeControllerMethod(aFinally, new Object[0]);
+                            invokeControllerMethod(aFinally, null);
                         }
                     }
                 } catch (InvocationTargetException ex) {
