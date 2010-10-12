@@ -1,0 +1,9 @@
+#{selenium 'Test the @Catch'}
+
+	open('@{UsingBefore.fight("bob")}')
+	assertTextPresent('Oops, got java.lang.ArithmeticException')
+	
+	open('@{UsingBefore.fight()}')
+	assertTextPresent('Hey!, got java.lang.NullPointerException')
+	
+#{/selenium}
