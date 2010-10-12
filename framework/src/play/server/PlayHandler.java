@@ -33,12 +33,10 @@ import play.vfs.VirtualFile;
 
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.*;
-import javax.mail.internet.InternetAddress;
 
 import play.data.validation.Validation;
 
@@ -104,10 +102,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Logger.trace("init: begin");
             Request.current.set(request);
             Response.current.set(response);
-            // Patch favicon.ico
-            if (!request.path.equals("/favicon.ico")) {
-                super.init();
-            }
+            super.init();
             if (Play.mode == Play.Mode.PROD && staticPathsCache.containsKey(request.path)) {
                 RenderStatic rs = null;
                 synchronized (staticPathsCache) {

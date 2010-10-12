@@ -8,11 +8,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.Normalizer;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
@@ -154,7 +150,7 @@ public class JavaExtensions {
     }
 
     public static String format(Number number, String pattern) {
-    	DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale(Lang.get()));
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale(Lang.get()));
         return new DecimalFormat(pattern, symbols).format(number);
     }
 

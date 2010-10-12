@@ -353,6 +353,17 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
+     * Send a 404 Not Found response if object is null
+     * @param o The object to check
+     * @param what The Not Found resource name
+     */
+    protected static void notFoundIfNull(Object o, String what) {
+        if (o == null) {
+            notFound(what);
+        }
+    }
+
+    /**
      * Send a 404 Not Found reponse
      */
     protected static void notFound() {

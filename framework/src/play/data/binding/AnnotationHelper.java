@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.apache.commons.lang.StringUtils;
+
 import play.i18n.Lang;
 
 public class AnnotationHelper {
@@ -30,10 +31,14 @@ public class AnnotationHelper {
                             // if one of the lang matches
                             Locale locale = getLocale(as.lang());
                             if (locale != null) {
-                                return new SimpleDateFormat(format, locale).parse(value);
+                                SimpleDateFormat sdf = new SimpleDateFormat(format, locale);
+                                sdf.setLenient(false);
+                                return sdf.parse(value);
                             }
                         }
-                        return new SimpleDateFormat(format, Lang.getLocale()).parse(value);
+                        SimpleDateFormat sdf = new SimpleDateFormat(format, Lang.getLocale());
+                        sdf.setLenient(false);
+                        return sdf.parse(value);
                     }
                 }
             }

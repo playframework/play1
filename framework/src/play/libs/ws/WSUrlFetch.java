@@ -26,31 +26,17 @@ import play.mvc.Http.Header;
  */
 public class WSUrlFetch implements WSImpl {
 
-    private static WSUrlFetch uniqueInstance;
+    public WSUrlFetch() {}
 
-    private WSUrlFetch() {}
-
-    public static WSUrlFetch getInstance() {
-        if (uniqueInstance == null) {
-            uniqueInstance = new WSUrlFetch();
-        }
-        return uniqueInstance;
-    }
-
-    @Override
-    public void init() {}
-
-    @Override
     public void stop() {}
 
-    @Override
     public play.libs.WS.WSRequest newRequest(String url) {
         return new WSUrlfetchRequest(url);
     }
 
-    public static class WSUrlfetchRequest extends WSRequest {
+    public class WSUrlfetchRequest extends WSRequest {
 
-        private WSUrlfetchRequest(String url) {
+        protected WSUrlfetchRequest(String url) {
             this.url = url;
         }
 
