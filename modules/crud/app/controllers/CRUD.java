@@ -278,6 +278,7 @@ public abstract class CRUD extends Controller {
                     fields.add(of);
                 }
             }
+            //TODO niels hiddenfields sollten vorne stehen.
             return fields;
         }
 
