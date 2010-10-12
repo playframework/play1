@@ -37,7 +37,12 @@ public class OptimisticLockingModel extends GenericModel {
     
     public void setVersion(Long newVersion) {
         if (initialVersion == null)  {
-            initialVersion = newVersion;
+            //If the model loaded via hibernate the setVersion-Method isn't called! 
+            if (version != null) {
+                initialVersion = version;
+            } else {
+                initialVersion = newVersion;
+            }
         }
         version = newVersion;
     }
@@ -51,7 +56,9 @@ public class OptimisticLockingModel extends GenericModel {
      * Check with proof if the version of the current edited object is lesser
      * than the version in db.
      * Messagecode: optimisticLocking.modelHasChanged
-     * Parameter: 1 the request URL.
+     * Parameter: 2 the version of the edited model.
+     * Parameter: 3 the version in the database.
+     * Parameter: 4 the request URL.
      * Example-Message: The object was changed. <a href="%2$s">Reload</a> and do your changes again.
      *
      */
@@ -61,7 +68,7 @@ public class OptimisticLockingModel extends GenericModel {
          * {@inheritDoc}
          */
         @Override
-        public boolean isSatisfied(Object model, Object value) {
+        public boolean isSatisfied(Object model, Object value) {            
             OptimisticLockingModel optimisticLockingModel = (OptimisticLockingModel) model;
             if ((optimisticLockingModel.initialVersion != null && 
                     optimisticLockingModel.version != null) && 
@@ -70,8 +77,9 @@ public class OptimisticLockingModel extends GenericModel {
                 final Request request = Request.current();
                 //The following doesn't work see https://bugs.launchpad.net/play/+bug/634719
                 //http://play.lighthouseapp.com/projects/57987-play-framework/tickets/116
-                setMessage(checkWithCheck.getMessage(), request != null ? request.url : "");
-                //setMessage("optimisticLocking.modelHasChanged", request != null ? request.url : ""); 
+                //setMessage(checkWithCheck.getMessage(), request != null ? request.url : "");
+                setMessage("optimisticLocking.modelHasChanged", optimisticLockingModel.version.toString(), 
+                        optimisticLockingModel.initialVersion.toString(), request != null ? request.url : ""); 
                 return false;
             } 
             return true;
