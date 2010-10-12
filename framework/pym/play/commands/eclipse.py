@@ -71,7 +71,8 @@ def execute(**kargs):
                     cpXML += '<classpathentry kind="lib" path="%s" sourcepath="%s"/>\n\t' % (os.path.normpath(el), cpJarToSource[el])
                 else:
                     cpXML += '<classpathentry kind="lib" path="%s"/>\n\t' % os.path.normpath(el)
-
+    if not is_application:
+        cpXML += '<classpathentry kind="src" path="src"/>'
     replaceAll(dotClasspath, r'%PROJECTCLASSPATH%', cpXML)
 
     # generate source path for test folder if one exists
