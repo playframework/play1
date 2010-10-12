@@ -47,7 +47,8 @@ def execute(**kargs):
 
     shutil.copyfile(os.path.join(play_env["basedir"], 'resources/eclipse/.project'), dotProject)
     shutil.copyfile(os.path.join(play_env["basedir"], 'resources/eclipse/.classpath'), dotClasspath)
-    shutil.copytree(os.path.join(play_env["basedir"], 'resources/eclipse'), eclipse)
+    if is_application:
+	    shutil.copytree(os.path.join(play_env["basedir"], 'resources/eclipse'), eclipse)
     shutil.copytree(os.path.join(play_env["basedir"], 'resources/eclipse/.settings'), dotSettings)
     replaceAll(dotProject, r'%PROJECT_NAME%', application_name)
 
