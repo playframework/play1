@@ -8,14 +8,18 @@ import java.util.ListIterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import javax.persistence.Entity;
+
 import org.junit.Assert;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
+
 import play.Invoker.Invocation;
-import play.Play;
 import play.Logger;
+import play.Play;
 import play.PlayPlugin;
 import play.db.jpa.JPA;
 import play.vfs.VirtualFile;
@@ -105,7 +109,9 @@ public class TestEngine {
 
                     @Override
                     public void execute() throws Exception {
-                        JPA.em();
+                        if (!Play.classloader.getAnnotatedClasses(Entity.class).isEmpty()) {
+                            JPA.em();
+                        }
                         JUnitCore junit = new JUnitCore();
                         junit.addListener(new Listener(testClass.getName(), testResults));
                         junit.run(testClass);

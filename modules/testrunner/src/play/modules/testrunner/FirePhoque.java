@@ -37,7 +37,7 @@ public class FirePhoque {
             }
             root = new File(in.readLine());
             selenium = in.readLine();
-            tests = new ArrayList();
+            tests = new ArrayList<String>();
             String line;
             while ((line = in.readLine()) != null) {
                 tests.add(line);

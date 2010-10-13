@@ -2,7 +2,6 @@ package play.modules.testrunner;
 
 import java.io.File;
 
-import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.mvc.Router;
