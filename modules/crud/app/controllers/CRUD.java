@@ -272,14 +272,20 @@ public abstract class CRUD extends Controller {
 
         public List<ObjectField> getFields() {
             List<ObjectField> fields = new ArrayList<ObjectField>();
+            List<ObjectField> hiddenFields = new ArrayList<ObjectField>();
             for (Model.Property f : Model.Manager.factoryFor(entityClass).listProperties()) {
-                ObjectField of = new ObjectField(f);
+                ObjectField of = new ObjectField(f);                
                 if (of.type != null) {
-                    fields.add(of);
+                    if (of.type.equals("hidden")) {
+                        hiddenFields.add(of);
+                    } else {
+                        fields.add(of);
+                    }
                 }
             }
-            //TODO niels hiddenfields sollten vorne stehen.
-            return fields;
+
+            hiddenFields.addAll(fields);
+            return hiddenFields;
         }
 
         public ObjectField getField(String name) {
