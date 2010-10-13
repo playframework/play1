@@ -1,4 +1,7 @@
 #{extends 'main.html' /}
 #{set title:'Home' /}
-
-#{welcome /}
+<ul>
+#{list items:testEntries, as:'entry'}
+    <li>#{a @Application.edit(entry.id)}${entry.text}#{/a}</li>
+#{/list}
+</ul>

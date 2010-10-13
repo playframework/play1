@@ -1,0 +1,9 @@
+# Test data
+
+Book(1):
+    text:          A first Text
+
+Book(2):
+    text:          A second Text
+    
+    

@@ -1,3 +1,4 @@
 # You can specialize this file for each language.
 # For example, for French create a messages.fr file
 #
+optimisticLocking.modelHasChanged=The object was changed. <a href="%4$s">Reload</a> and do your changes again.

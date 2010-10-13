@@ -38,6 +38,11 @@ public class OptimisticLockingModelPlayTest extends UnitTest {
         assertFalse(check.isSatisfied(testModel, ""));
     }
     
+    @Test
+    public void testNothing(){
+        
+    }
+    
     public static class TestModel extends OptimisticLockingModel {
         public String text;
     }
