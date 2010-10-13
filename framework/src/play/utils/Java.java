@@ -87,23 +87,6 @@ public class Java {
 
 
     /**
-     * Instantiate an object with the given args.
-     * @param clazz The type which should be instantiate.
-     * @param args Arguments of the constructor.
-     * @return The new Object
-     * @throws java.lang.Exception
-     */
-    public static Object instantiateObject(Class<?> clazz, Object... args) throws Exception {
-        Class[] types = new Class[args.length];
-        for (int i = 0; i < args.length; i++) {
-            types[i] = args[i].getClass();
-        }
-        Constructor<?> constructor = clazz.getConstructor(types);
-        constructor.setAccessible(true);
-        return constructor.newInstance(args);
-    }
-    
-    /**
      * Invoke a static method
      * @param clazz The class
      * @param method The method name

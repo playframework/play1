@@ -13,7 +13,6 @@ import play.data.validation.*;
 import play.exceptions.*;
 import play.i18n.*;
 
-@CRUD.WithObjectType(CRUD.ObjectType.class)
 public abstract class CRUD extends Controller {
 
     @Before
@@ -159,6 +158,10 @@ public abstract class CRUD extends Controller {
         flash.success(Messages.get("crud.deleted", type.modelName));
         redirect(request.controller + ".list");
     }
+    
+    public static ObjectType createObjectType(Class<? extends Model> entityClass) {
+        return new ObjectType(entityClass);
+    }
 
     // ~~~~~~~~~~~~~
     @Retention(RetentionPolicy.RUNTIME)
@@ -167,13 +170,6 @@ public abstract class CRUD extends Controller {
         Class<? extends Model> value();
     }
     
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
-    @Inherited
-    public @interface WithObjectType {
-        Class<? extends ObjectType> value();
-    }
-
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface Exclude {}
@@ -211,23 +207,16 @@ public abstract class CRUD extends Controller {
             return new ObjectType(modelClass);
         }
 
-        /**
-         * Returns the object-type which is declared by {@linkplain WithObjectType}.
-         * @param controllerClass the Controller-Class
-         * @return the specific {@linkplain ObjectType}.
-         */
         public static ObjectType get(Class<? extends Controller> controllerClass) {
             Class<? extends Model> entityClass = getEntityClassForController(controllerClass);
             if (entityClass == null || !Model.class.isAssignableFrom(entityClass)) {
                 return null;
             }
-            final Class<? extends ObjectType> objectTypeClass = 
-                    controllerClass.getAnnotation(WithObjectType.class).value();
             ObjectType type;
-            try  {
-                type = (ObjectType)Java.instantiateObject(objectTypeClass, entityClass);
+            try {
+                type = (ObjectType) Java.invokeStaticOrParent(controllerClass, "createObjectType", entityClass);
             } catch (Exception e) {
-                Logger.error(e, "Couldn't create an object of type ObjectType. Use default one.");
+                Logger.error(e, "Couldn't create an ObjectType. Use default one.");
                 type = new ObjectType(entityClass);
             }
             type.name = controllerClass.getSimpleName().replace("$", "");
@@ -288,7 +277,6 @@ public abstract class CRUD extends Controller {
                     fields.add(of);
                 }
             }
-            //TODO niels hiddenfields sollten vorne stehen.
             return fields;
         }
 
