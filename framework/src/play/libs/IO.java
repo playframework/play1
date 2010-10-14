@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
@@ -96,6 +97,34 @@ public class IO {
         } catch(IOException e) {
             throw new UnexpectedException(e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<String> readLines(InputStream is) {
+        List<String> lines = null;
+        try {
+            lines = IOUtils.readLines(is);
+        } catch (IOException ex) {
+            throw new UnexpectedException(ex);
+        }
+        return lines;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<String> readLines(File file, String encoding) {
+        List<String> lines = null;
+        try {
+            InputStream is = new FileInputStream(file);
+            lines = IOUtils.readLines(is, encoding);
+            is.close();
+        } catch (IOException ex) {
+            throw new UnexpectedException(ex);
+        }
+        return lines;
+    }
+
+    public static List<String> readLines(File file) {
+        return readLines(file, "utf-8");
     }
 
     /**
