@@ -250,7 +250,6 @@ public class Fixtures {
     static void resolveDependencies(Class<Model> type, Map<String, String[]> serialized, Map<String, Object> idCache) {
         Set<Field> fields = new HashSet<Field>();
         Class<?> clazz = type;
-        String keyName = Model.Manager.factoryFor(type).keyName();
         while (!clazz.equals(Object.class)) {
             Collections.addAll(fields, clazz.getDeclaredFields());
             clazz = clazz.getSuperclass();
@@ -269,7 +268,7 @@ public class Fixtures {
                     }
                 }
                 serialized.remove("object." + field.name);
-                serialized.put("object." + field.name + "." + keyName, ids);
+                serialized.put("object." + field.name + "." + Model.Manager.factoryFor((Class<? extends Model>)field.relationType).keyName(), ids);
             }
         }
     }

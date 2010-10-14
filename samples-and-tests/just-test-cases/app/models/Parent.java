@@ -9,7 +9,7 @@ import java.util.*;
 public class Parent extends GenericModel {
 
        @Id
-       public String id;
+       public String code;
 
        public String name;
 
