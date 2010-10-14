@@ -508,6 +508,10 @@ public class Http {
         }
 
         public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure) {
+            setCookie(name, value, domain, path, maxAge, secure, false);
+        }
+
+        public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure, boolean httpOnly) {
             path = Play.ctxPath + path;
             if (cookies.containsKey(name) && cookies.get(name).path.equals(path) && ((cookies.get(name).domain == null && domain == null) || (cookies.get(name).domain.equals(domain)))) {
                 cookies.get(name).value = value;
@@ -521,6 +525,7 @@ public class Http {
                 cookie.value = value;
                 cookie.path = path;
                 cookie.secure = secure;
+                cookie.httpOnly = httpOnly;
                 if (domain != null) {
                     cookie.domain = domain;
                 }
