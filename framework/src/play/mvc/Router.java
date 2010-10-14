@@ -688,7 +688,6 @@ public class Router {
 
                     Matcher hostMatcher = hostPattern.matcher(host);
                     hostMatches = hostMatcher.matches();
-                    Logger.trace("Host is [" + host + "] hostPattern is [" + hostPattern.toString() + "] matches? [" + hostMatches + "]");
                 }
                 // Extract the host variable
                 if (matcher.matches() && contains(accept) && hostMatches) {
