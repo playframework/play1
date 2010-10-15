@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
@@ -27,23 +28,27 @@ import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.Transient;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.hibernate.type.Type;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.data.binding.Binder;
 import play.db.DB;
 import play.db.Model;
+import play.db.Transactional;
 import play.exceptions.JPAException;
-import play.utils.Utils;
-import org.apache.commons.lang.StringUtils;
-import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
+import play.mvc.Http.Request;
+import play.utils.Utils;
 
 /**
  * JPA Plugin
@@ -285,7 +290,16 @@ public class JPAPlugin extends PlayPlugin {
 
     @Override
     public void beforeInvocation() {
-        startTx(false);
+        Request request = Request.current();
+        boolean readOnly = false;
+        Transactional tx = request.invokedMethod.getAnnotation(Transactional.class);
+        if (tx == null) {
+            tx = request.controllerClass.getAnnotation(Transactional.class);
+        }
+        if (tx != null) {
+            readOnly = tx.readOnly();
+        }
+        startTx(readOnly);
     }
 
     @Override
@@ -315,6 +329,7 @@ public class JPAPlugin extends PlayPlugin {
         EntityManager manager = JPA.entityManagerFactory.createEntityManager();
         //if(Play.configuration.getProperty("future.bindJPAObjects", "false").equals("true")) {
         manager.setFlushMode(FlushModeType.COMMIT);
+        manager.setProperty("org.hibernate.readOnly", readonly);
         //}
         if (autoTxs) {
             manager.getTransaction().begin();

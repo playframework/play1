@@ -259,6 +259,10 @@ public class Http {
          */
         public boolean isLoopback;
         /**
+         * ActionInvoker.resolvedRoutes was called?
+         */
+        boolean resolvedRoutes;
+        /**
          * Params
          */
         public final Scope.Params params = new Scope.Params();
