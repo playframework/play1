@@ -292,12 +292,14 @@ public class JPAPlugin extends PlayPlugin {
     public void beforeInvocation() {
         Request request = Request.current();
         boolean readOnly = false;
-        Transactional tx = request.invokedMethod.getAnnotation(Transactional.class);
-        if (tx == null) {
-            tx = request.controllerClass.getAnnotation(Transactional.class);
-        }
-        if (tx != null) {
-            readOnly = tx.readOnly();
+        if (request.invokedMethod != null && request.controllerClass != null) {
+            Transactional tx = request.invokedMethod.getAnnotation(Transactional.class);
+            if (tx == null) {
+                tx = request.controllerClass.getAnnotation(Transactional.class);
+            }
+            if (tx != null) {
+                readOnly = tx.readOnly();
+            }
         }
         startTx(readOnly);
     }
