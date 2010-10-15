@@ -157,12 +157,13 @@ public class JPQL {
         return "select count(e) from " + entityName + " e where " + query;
     }
 
+    @SuppressWarnings("unchecked")
     public Query bindParameters(Query q, Object... params) {
         if (params == null) {
             return q;
         }
         if (params.length == 1 && params[0] instanceof Map) {
-        	return bindParameters(q, (Map<String,Object>) params[0]);
+            return bindParameters(q, (Map<String, Object>) params[0]);
         }
         for (int i = 0; i < params.length; i++) {
             q.setParameter(i + 1, params[i]);

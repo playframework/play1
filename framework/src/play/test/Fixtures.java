@@ -247,6 +247,7 @@ public class Fixtures {
         }
     }
 
+    @SuppressWarnings("unchecked")
     static void resolveDependencies(Class<Model> type, Map<String, String[]> serialized, Map<String, Object> idCache) {
         Set<Field> fields = new HashSet<Field>();
         Class<?> clazz = type;

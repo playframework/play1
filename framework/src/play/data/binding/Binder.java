@@ -349,6 +349,7 @@ public class Binder {
         return directBind(null, null, value, clazz);
     }
 
+    @SuppressWarnings("unchecked")
     public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz) throws Exception {
         Logger.trace("directBind: value [" + value + "] annotation [" + Utils.join(annotations, " ") + "] Class [" + clazz + "]");
 

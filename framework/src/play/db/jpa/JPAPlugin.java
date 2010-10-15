@@ -479,7 +479,7 @@ public class JPAPlugin extends PlayPlugin {
             return keyField().getName();
         }
 
-        public Class keyType() {
+        public Class<?> keyType() {
             return keyField().getType();
         }
 
