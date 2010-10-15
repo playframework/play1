@@ -12,11 +12,11 @@ public class Transactional extends Controller {
     @play.db.Transactional(readOnly=true)
     public static void readOnlyTest() {
         Post post = new Post();
-        post.name = "TransactionalFailed";
+        post.name = "TransactionalTest";
         Tag tag1 = new Tag();
-        tag1.name = "TransactionalFailed";
+        tag1.name = "TransactionalTest";
         Tag tag2 = new Tag();
-        tag2.name = "TransactionalFailed";
+        tag2.name = "TransactionalTest";
         post.tags.add(tag1);
         post.tags.add(tag2);
         post.save();
@@ -29,11 +29,11 @@ public class Transactional extends Controller {
     // is annotated with
     public static void writingTest() {
         Post post = new Post();
-        post.name = "TransactionalFailed";
+        post.name = "TransactionalTest";
         Tag tag1 = new Tag();
-        tag1.name = "TransactionalFailed";
+        tag1.name = "TransactionalTest";
         Tag tag2 = new Tag();
-        tag2.name = "TransactionalFailed";
+        tag2.name = "TransactionalTest";
         post.tags.add(tag1);
         post.tags.add(tag2);
         post.save();
