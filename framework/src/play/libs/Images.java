@@ -42,7 +42,7 @@ public class Images {
      * @param w The new width (or -1 to proportionally resize)
      * @param h The new height (or -1 to proportionally resize)
      */
-    public static void resize(File originalImage, File to, Integer w, Integer h) {
+    public static void resize(File originalImage, File to, int w, int h) {
         try {
             BufferedImage source = ImageIO.read(originalImage);
             int owidth = source.getWidth();
@@ -99,7 +99,7 @@ public class Images {
      * @param x2 The new x end
      * @param y2 The new y end
      */
-    public static void crop(File originalImage, File to, Integer x1, Integer y1, Integer x2, Integer y2) {
+    public static void crop(File originalImage, File to, int x1, int y1, int x2, int y2) {
         try {
             BufferedImage source = ImageIO.read(originalImage);
 
@@ -165,8 +165,8 @@ public class Images {
         public BackgroundProducer background = new TransparentBackgroundProducer();
         public GimpyRenderer gimpy = new RippleGimpyRenderer();
         public Color textColor = Color.BLACK;
-        public List<Font> fonts = new ArrayList<Font>();
-        public  int w,   h;
+        public List<Font> fonts = new ArrayList<Font>(2);
+        public int w, h;
         public Color noise = null;
 
         public Captcha(int w, int h) {
@@ -209,7 +209,7 @@ public class Images {
         public String getText(int length, String chars) {
             char[] charsArray = chars.toCharArray();
             Random random = new Random(System.currentTimeMillis());
-            StringBuffer sb = new StringBuffer();
+            StringBuffer sb = new StringBuffer(length);
             for (int i = 0; i < length; i++) {
                 sb.append(charsArray[random.nextInt(charsArray.length)]);
             }
