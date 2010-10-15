@@ -2,16 +2,26 @@ package play.cache;
 
 import java.util.HashMap;
 import java.util.Map;
-import play.Logger;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import play.Logger;
 
 /**
- * EhCache implementation
+ * EhCache implementation.
+ *
+ * <p>Ehcache is an open source, standards-based cache used to boost performance,
+ * offload the database and simplify scalability. Ehcache is robust, proven and
+ * full-featured and this has made it the most widely-used Java-based cache.</p>
+ *
+ * @see http://ehcache.org/
  */
 public class EhCacheImpl implements CacheImpl {
 
     private static EhCacheImpl uniqueInstance;
+
+    CacheManager cacheManager;
+
+    net.sf.ehcache.Cache cache;
 
     private EhCacheImpl() {
         this.cacheManager = CacheManager.create();
@@ -25,8 +35,6 @@ public class EhCacheImpl implements CacheImpl {
         }
         return uniqueInstance;
     }
-    CacheManager cacheManager;
-    net.sf.ehcache.Cache cache;
 
     public void add(String key, Object value, int expiration) {
         if (cache.get(key) != null) {
@@ -62,7 +70,7 @@ public class EhCacheImpl implements CacheImpl {
     }
 
     public Map<String, Object> get(String[] keys) {
-        Map<String, Object> result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<String, Object>(keys.length);
         for (String key : keys) {
             result.put(key, get(key));
         }

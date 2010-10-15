@@ -209,47 +209,55 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     protected static void renderBinary(InputStream is) {
         throw new RenderBinary(is, null, true);
     }
-    
+
     /**
-     * Return a 200 OK application/binary response. Content is streamed
+     * Return a 200 OK application/binary response. Content is streamed.
+     *
      * @param is The stream to copy
+     * @param length Stream's size in bytes.
      */
     protected static void renderBinary(InputStream is, long length) {
         throw new RenderBinary(is, null, length, true);
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition attachment
+     * Return a 200 OK application/binary response with content-disposition attachment.
+     *
      * @param is The stream to copy
-     * @param name The attachment name
+     * @param name Name of file user is downloading.
      */
     protected static void renderBinary(InputStream is, String name) {
         throw new RenderBinary(is, name, false);
     }
-    
+
     /**
-     * Return a 200 OK application/binary response with content-disposition attachment
-     * @param is The stream to copy. COntent is streamed
-     * @param name The attachment name
+     * Return a 200 OK application/binary response with content-disposition attachment.
+     *
+     * @param is The stream to copy. Content is streamed.
+     * @param name Name of file user is downloading.
+     * @param length Stream's size in bytes.
      */
     protected static void renderBinary(InputStream is, String name, long length) {
         throw new RenderBinary(is, name, length, false);
     }
 
     /**
-     * Return a 200 OK application/binary response with content-disposition attachment
+     * Return a 200 OK application/binary response with content-disposition attachment.
+     *
      * @param is The stream to copy
-     * @param name The attachment name
+     * @param name Name of file user is downloading.
      * @param inline true to set the response Content-Disposition to inline
      */
     protected static void renderBinary(InputStream is, String name, boolean inline) {
         throw new RenderBinary(is, name, inline);
     }
-    
+
     /**
-     * Return a 200 OK application/binary response with content-disposition attachment
+     * Return a 200 OK application/binary response with content-disposition attachment.
+     *
      * @param is The stream to copy
      * @param name The attachment name
+     * @param length Stream's size in bytes.
      * @param inline true to set the response Content-Disposition to inline
      */
     protected static void renderBinary(InputStream is, String name, long length, boolean inline) {
@@ -266,11 +274,13 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     protected static void renderBinary(InputStream is, String name, String contentType, boolean inline) {
         throw new RenderBinary(is, name, contentType, inline);
     }
-    
+
     /**
-     * Return a 200 OK application/binary response with content-disposition attachment
+     * Return a 200 OK application/binary response with content-disposition attachment.
+     *
      * @param is The stream to copy
      * @param name The attachment name
+     * @param length Content's byte size.
      * @param contentType The content type of the attachment
      * @param inline true to set the response Content-Disposition to inline
      */
@@ -310,9 +320,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     protected static void renderJSON(Object o) {
         throw new RenderJson(o);
     }
-    
-        /**
-     * Render a 200 OK application/json response
+
+    /**
+     * Render a 200 OK application/json response.
      * @param o The Java object to serialize
      * @param adapters A set of GSON serializers/deserializers/instance creator to use
      */
@@ -392,6 +402,11 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         throw new NotFound("");
     }
 
+    /**
+     * Check that the token submitted from a form is valid.
+     *
+     * @see play.templates.FastTags._authenticityToken()
+     */
     protected static void checkAuthenticity() {
         if(Scope.Params.current().get("authenticityToken") == null || !Scope.Params.current().get("authenticityToken").equals(Scope.Session.current().getAuthenticityToken())) {
             forbidden("Bad authenticity token");
@@ -513,34 +528,34 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     protected static void redirect(String action, boolean permanent, Object... args) {
         try {
-            Map<String, Object> r = new HashMap<String, Object>();
+            Map<String, Object> newArgs = new HashMap<String, Object>(args.length);
             Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
             String[] names = (String[]) actionMethod.getDeclaringClass().getDeclaredField("$" + actionMethod.getName() + LocalVariablesNamesTracer.computeMethodHash(actionMethod.getParameterTypes())).get(null);
-            for (int i = 0; i < names.length && i< args.length; i++) {
+            for (int i = 0; i < names.length && i < args.length; i++) {
                 boolean isDefault = false;
                 try {
-                    Method defaultMethod = actionMethod.getDeclaringClass().getDeclaredMethod(actionMethod.getName()+"$default$"+(i+1));
+                    Method defaultMethod = actionMethod.getDeclaringClass().getDeclaredMethod(actionMethod.getName() + "$default$" + (i + 1));
                     // Patch for scala defaults
-                    if(!Modifier.isStatic(actionMethod.getModifiers()) && actionMethod.getDeclaringClass().getSimpleName().endsWith("$")) {
+                    if (!Modifier.isStatic(actionMethod.getModifiers()) && actionMethod.getDeclaringClass().getSimpleName().endsWith("$")) {
                         Object instance = actionMethod.getDeclaringClass().getDeclaredField("MODULE$").get(null);
-                        if(defaultMethod.invoke(instance).equals(args[i])) {
+                        if (defaultMethod.invoke(instance).equals(args[i])) {
                             isDefault = true;
                         }
-                    }                    
-                } catch(NoSuchMethodException e) {
+                    }
+                } catch (NoSuchMethodException e) {
                     //
                 }
-                if(isDefault) {
-                    r.put(names[i], new Default(args[i]));
+                if (isDefault) {
+                    newArgs.put(names[i], new Default(args[i]));
                 } else {
-                    Unbinder.unBind(r, args[i], names[i]);
+                    Unbinder.unBind(newArgs, args[i], names[i]);
                 }
             }
             try {
 
-                ActionDefinition actionDefinition = Router.reverse(action, r);
-                if(_currentReverse.get() != null) {
-                    ActionDefinition currentActionDefinition =  _currentReverse.get();
+                ActionDefinition actionDefinition = Router.reverse(action, newArgs);
+                if (_currentReverse.get() != null) {
+                    ActionDefinition currentActionDefinition = _currentReverse.get();
                     currentActionDefinition.action = actionDefinition.action;
                     currentActionDefinition.url = actionDefinition.url;
                     currentActionDefinition.method = actionDefinition.method;
@@ -553,7 +568,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             } catch (NoRouteFoundException e) {
                 StackTraceElement element = PlayException.getInterestingStrackTraceElement(e);
                 if (element != null) {
-                    throw new NoRouteFoundException(action, r, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
+                    throw new NoRouteFoundException(action, newArgs, Play.classes.getApplicationClass(element.getClassName()), element.getLineNumber());
                 } else {
                     throw e;
                 }
@@ -576,7 +591,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     protected static void renderTemplate(String templateName, Object... args) {
         // Template datas
-        Map<String,Object> templateBinding = new HashMap<String,Object>();
+        Map<String, Object> templateBinding = new HashMap<String, Object>(16);
         for (Object o : args) {
             List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
             for (String name : names) {
@@ -584,9 +599,14 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             }
         }
         renderTemplate(templateName, templateBinding);
-        
     }
 
+    /**
+     * Render a specific template.
+     *
+     * @param templateName The template name.
+     * @param args The template data.
+     */
     protected static void renderTemplate(String templateName, Map<String,Object> args) {
         // Template datas
         Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
@@ -600,7 +620,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             Template template = TemplateLoader.load(template(templateName));
             throw new RenderTemplate(template, templateBinding.data);
         } catch (TemplateNotFoundException ex) {
-            if(ex.isSourceAvailable()) {
+            if (ex.isSourceAvailable()) {
                 throw ex;
             }
             StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex);
@@ -612,12 +632,18 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         }
     }
 
+    /**
+     * Render the template corresponding to the action's package-class-method name (@see <code>template()</code>).
+     *
+     * @param args The template data.
+     */
     protected static void renderTemplate(Map<String,Object> args) {
         renderTemplate(template(), args);
     }
 
     /**
-     * Render the corresponding template
+     * Render the corresponding template (@see <code>template()</code>).
+     *
      * @param args The template data
      */
     protected static void render(Object... args) {
@@ -630,27 +656,35 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         renderTemplate(templateName, args);
     }
 
+    /**
+     * Work out the default template to load for the invoked action.
+     * E.g. "controllers.Pages.index" returns "views/Pages/index.html".
+     */
     protected static String template() {
-        final Request request = Request.current();
-        final String format = request.format;
-        String templateName = request.action.replace(".", "/") + "." + (format == null ? "html" : format);
-        if(templateName.startsWith("@")) {
+        final Request theRequest = Request.current();
+        final String format = theRequest.format;
+        String templateName = theRequest.action.replace(".", "/") + "." + (format == null ? "html" : format);
+        if (templateName.startsWith("@")) {
             templateName = templateName.substring(1);
-            if(!templateName.contains(".")) {
-                templateName = request.controller + "." + templateName;
+            if (!templateName.contains(".")) {
+                templateName = theRequest.controller + "." + templateName;
             }
             templateName = templateName.replace(".", "/") + "." + (format == null ? "html" : format);
         }
         return templateName;
     }
 
+    /**
+     * Work out the default template to load for the action.
+     * E.g. "controllers.Pages.index" returns "views/Pages/index.html".
+     */
     protected static String template(String templateName) {
-        final Request request = Request.current();
-        final String format = request.format;
-        if(templateName.startsWith("@")) {
+        final Request theRequest = Request.current();
+        final String format = theRequest.format;
+        if (templateName.startsWith("@")) {
             templateName = templateName.substring(1);
-            if(!templateName.contains(".")) {
-                templateName = request.controller + "." + templateName;
+            if (!templateName.contains(".")) {
+                templateName = theRequest.controller + "." + templateName;
             }
             templateName = templateName.replace(".", "/") + "." + (format == null ? "html" : format);
         }
@@ -689,7 +723,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     protected static <T extends Annotation> T getControllerInheritedAnnotation(Class<T> clazz) {
         Class<?> c = getControllerClass();
-        while(!c.equals(Object.class)) {
+        while (!c.equals(Object.class)) {
             if (c.isAnnotationPresent(clazz)) {
                 return c.getAnnotation(clazz);
             }
@@ -711,7 +745,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     @Deprecated
     protected static void parent(Object... args) {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<String, Object>(16);
         for (Object o : args) {
             List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
             for (String name : names) {
@@ -726,7 +760,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     @Deprecated
     protected static void parent() {
-        parent(new HashMap<String, Object>());
+        parent(new HashMap<String, Object>(0));
     }
 
     /**
@@ -754,10 +788,10 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             if (superMethod == null) {
                 throw new RuntimeException("PAF");
             }
-            Map<String, String> mapss = new HashMap<String, String>();
+            Map<String, String> mapss = new HashMap<String, String>(map.size());
             for (Map.Entry<String, Object> entry : map.entrySet()) {
-            	Object value = entry.getValue();
-                mapss.put(entry.getKey(),value == null ? null : value.toString());
+                Object value = entry.getValue();
+                mapss.put(entry.getKey(), value == null ? null : value.toString());
             }
             Scope.Params.current().__mergeWith(mapss);
             ControllerInstrumentation.initActionCall();
@@ -777,14 +811,24 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
-     * Suspend the current request for a specified amount of time
+     * Suspend the current request for a specified amount of time.
+     *
+     * <p><b>Important:</b> The method will not resume on the line after you call this. The method will
+     * be called again as if there was a new HTTP request.
+     *
+     * @param timeout Period of time to wait, e.g. "1h" means 1 hour.
      */
     protected static void suspend(String timeout) {
-    	suspend(1000 * Time.parseDuration(timeout));
+        suspend(1000 * Time.parseDuration(timeout));
     }
 
     /**
-     * Suspend the current request for a specified amount of time (in milliseconds)
+     * Suspend the current request for a specified amount of time (in milliseconds).
+     *
+     * <p><b>Important:</b> The method will not resume on the line after you call this. The method will
+     * be called again as if there was a new HTTP request.
+     *
+     * @param millis Number of milliseconds to wait until trying again.
      */
     protected static void suspend(int millis) {
         Request.current().isNew = false;
@@ -793,6 +837,11 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     /**
      * Suspend this request and wait for the task completion
+     *
+     * <p><b>Important:</b> The method will not resume on the line after you call this. The method will
+     * be called again as if there was a new HTTP request.
+     *
+     * @param tasks
      */
     protected static void waitFor(Future<?>... tasks) {
         Request.current().isNew = false;
@@ -805,19 +854,20 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     public static ThreadLocal<ActionDefinition> _currentReverse = new ThreadLocal<ActionDefinition>();
 
     /**
+     * @todo - this "Usage" example below doesn't make sense.
+     *
      * Usage:
-     * ------
-     * 
+     *
+     * <code>
      * ActionDefinition action = reverse(); {
      *     Application.anyAction(anyParam, "toto");
      * }
      * String url = action.url;
-     * 
+     * </code>
      */
     protected static ActionDefinition reverse() {
         ActionDefinition actionDefinition = new ActionDefinition();
         _currentReverse.set(actionDefinition);
         return actionDefinition;
     }
-    
 }

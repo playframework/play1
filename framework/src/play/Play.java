@@ -40,7 +40,14 @@ public class Play {
      */
     public enum Mode {
 
-        DEV, PROD;
+        /**
+         * Enable development-specific features, e.g. view the documentation at the URL {@literal "/@documentation"}.
+         */
+        DEV,
+        /**
+         * Disable development-specific features.
+         */
+        PROD;
 
         public boolean isDev() {
             return this == DEV;
@@ -89,7 +96,7 @@ public class Play {
     /**
      * All paths to search for files
      */
-    public static List<VirtualFile> roots = new ArrayList<VirtualFile>();
+    public static List<VirtualFile> roots = new ArrayList<VirtualFile>(16);
     /**
      * All paths to search for Java files
      */
@@ -121,7 +128,7 @@ public class Play {
     /**
      * The list of supported locales
      */
-    public static List<String> langs = new ArrayList<String>();
+    public static List<String> langs = new ArrayList<String>(16);
     /**
      * The very secret key
      */
@@ -129,11 +136,11 @@ public class Play {
     /**
      * Play plugins
      */
-    public static List<PlayPlugin> plugins = new ArrayList<PlayPlugin>();
+    public static List<PlayPlugin> plugins = new ArrayList<PlayPlugin>(16);
     /**
      * Modules
      */
-    public static Map<String, VirtualFile> modules = new HashMap<String, VirtualFile>();
+    public static Map<String, VirtualFile> modules = new HashMap<String, VirtualFile>(16);
     /**
      * Framework version
      */
@@ -142,7 +149,6 @@ public class Play {
      * Context path (when several application are deployed on the same host)
      */
     public static String ctxPath = "";
-    // pv
     static boolean firstStart = true;
     public static boolean usePrecompiled = false;
     public static boolean forceProd = false;
@@ -232,19 +238,19 @@ public class Play {
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         roots.add(appRoot);
-        javaPath = new ArrayList<VirtualFile>();
+        javaPath = new ArrayList<VirtualFile>(2);
         javaPath.add(appRoot.child("app"));
         javaPath.add(appRoot.child("conf"));
 
         // Build basic templates path
-        templatesPath = new ArrayList<VirtualFile>();
+        templatesPath = new ArrayList<VirtualFile>(2);
         templatesPath.add(appRoot.child("app/views"));
 
         // Main route file
         routes = appRoot.child("conf/routes");
 
         // Plugin route files
-        modulesRoutes = new HashMap<String, VirtualFile>();
+        modulesRoutes = new HashMap<String, VirtualFile>(16);
 
         // Load modules
         loadModules();
@@ -320,7 +326,7 @@ public class Play {
         for (Object key : configuration.keySet()) {
             String value = configuration.getProperty(key.toString());
             Matcher matcher = pattern.matcher(value);
-            StringBuffer newValue = new StringBuffer();
+            StringBuffer newValue = new StringBuffer(100);
             while (matcher.find()) {
                 String jp = matcher.group(1);
                 String r;
@@ -341,7 +347,7 @@ public class Play {
             configuration.setProperty(key.toString(), newValue.toString());
         }
         // Include
-        Map toInclude = new HashMap();
+        Map toInclude = new HashMap(16);
         for (Object key : configuration.keySet()) {
             if (key.toString().startsWith("@include.")) {
                 try {
@@ -373,7 +379,7 @@ public class Play {
                 // Need a new classloader
                 classloader = new ApplicationClassloader();
                 // Reload plugins
-                List<PlayPlugin> newPlugins = new ArrayList<PlayPlugin>();
+                List<PlayPlugin> newPlugins = new ArrayList<PlayPlugin>(16);
                 for (PlayPlugin plugin : plugins) {
                     if (plugin.getClass().getClassLoader().getClass().equals(ApplicationClassloader.class)) {
                         PlayPlugin newPlugin = (PlayPlugin) classloader.loadClass(plugin.getClass().getName()).getConstructors()[0].newInstance();
@@ -395,8 +401,8 @@ public class Play {
 
             // Locales
             langs = Arrays.asList(configuration.getProperty("application.langs", "").split(","));
-            if (langs.size() == 1 && langs.get(0).trim().equals("")) {
-                langs = new ArrayList<String>();
+            if (langs.size() == 1 && langs.get(0).trim().length() == 0) {
+                langs = new ArrayList<String>(16);
             }
 
             // Clean templates
@@ -404,7 +410,7 @@ public class Play {
 
             // SecretKey
             secretKey = configuration.getProperty("application.secret", "").trim();
-            if (secretKey.equals("")) {
+            if (secretKey.length() == 0) {
                 Logger.warn("No secret key defined. Sessions will not be encrypted");
             }
 
