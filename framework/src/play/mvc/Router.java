@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import jregex.Matcher;
 import jregex.Pattern;
 import jregex.REFlags;
@@ -34,8 +35,17 @@ public class Router {
      * Pattern used to locate a method override instruction in request.querystring
      */
     static Pattern methodOverride = new Pattern("^.*x-http-method-override=({method}GET|PUT|POST|DELETE).*$");
+
+    /**
+     * Timestamp the routes file was last loaded at.
+     */
     public static long lastLoading = -1;
 
+    /**
+     * Parse the routes file. This is called at startup.
+     *
+     * @param prefix The prefix that the path of all routes in this route file start with. This prefix should not end with a '/' character.
+     */
     public static void load(String prefix) {
         routes.clear();
         parse(Play.routes, prefix);
@@ -152,7 +162,8 @@ public class Router {
         int lineNumber = 0;
         String content = routeFile.contentAsString();
         if (content.indexOf("${") > -1 || content.indexOf("#{") > -1) {
-            content = TemplateLoader.load(routeFile).render(new HashMap<String, Object>());
+            // Mutable map needs to be passed in.
+            content = TemplateLoader.load(routeFile).render(new HashMap<String, Object>(16));
         }
         for (String line : content.split("\n")) {
             lineNumber++;
@@ -192,6 +203,13 @@ public class Router {
         }
     }
 
+    /**
+     * In PROD mode and if the routes are already loaded, this does nothing.
+     *
+     * <p>In DEV mode, this checks each routes file's "last modified" time to see if the routes need updated.
+     *
+     * @param prefix The prefix that the path of all routes in this route file start with. This prefix should not end with a '/' character.
+     */
     public static void detectChanges(String prefix) {
         if (Play.mode == Mode.PROD && lastLoading > 0) {
             return;
@@ -208,6 +226,9 @@ public class Router {
         }
     }
 
+    /**
+     * All the loaded routes.
+     */
     public static List<Route> routes = new ArrayList<Route>(500);
 
     public static void routeOnlyStatic(Http.Request request) {
@@ -282,11 +303,12 @@ public class Router {
                 return args;
             }
         }
-        return new HashMap<String, String>();
+        return new HashMap<String, String>(16);
     }
 
     public static ActionDefinition reverse(String action) {
-        return reverse(action, new HashMap<String, Object>());
+        // Note the map is not <code>Collections.EMPTY_MAP</code> because it will be copied and changed.
+        return reverse(action, new HashMap<String, Object>(16));
     }
 
     public static String getFullUrl(String action, Map<String, Object> args) {
@@ -294,7 +316,8 @@ public class Router {
     }
 
     public static String getFullUrl(String action) {
-        return getFullUrl(action, new HashMap<String, Object>());
+        // Note the map is not <code>Collections.EMPTY_MAP</code> because it will be copied and changed.
+        return getFullUrl(action, new HashMap<String, Object>(16));
     }
 
     public static String reverse(VirtualFile file) {
@@ -363,7 +386,7 @@ public class Router {
                         }
                         args.put(group, v.toLowerCase());
                     }
-                    List<String> inPathArgs = new ArrayList<String>();
+                    List<String> inPathArgs = new ArrayList<String>(16);
                     boolean allRequiredArgsAreHere = true;
                     // les noms de parametres matchent ils ?
                     for (Route.Arg arg : route.args) {
@@ -393,7 +416,8 @@ public class Router {
                             }
                             continue; // format is a special key
                         }
-                        if (!args.containsKey(staticKey) || args.get(staticKey) == null || !args.get(staticKey).toString().equals(route.staticArgs.get(staticKey))) {
+                        if (!args.containsKey(staticKey) || (args.get(staticKey) == null)
+                                        || !args.get(staticKey).toString().equals(route.staticArgs.get(staticKey))) {
                             allRequiredArgsAreHere = false;
                             break;
                         }
@@ -428,7 +452,7 @@ public class Router {
                                             queryString.append(URLEncoder.encode(key, "utf-8"));
                                             queryString.append("=");
                                             if (object.toString().startsWith(":")) {
-                                                queryString.append(object.toString() + "");
+                                                queryString.append(object.toString());
                                             } else {
                                                 queryString.append(URLEncoder.encode(object.toString() + "", "utf-8"));
                                             }
@@ -443,7 +467,7 @@ public class Router {
                                         queryString.append(URLEncoder.encode(key, "utf-8"));
                                         queryString.append("=");
                                         if (value.toString().startsWith(":")) {
-                                            queryString.append(value.toString() + "");
+                                            queryString.append(value.toString());
                                         } else {
                                             queryString.append(URLEncoder.encode(value.toString() + "", "utf-8"));
                                         }
@@ -473,12 +497,34 @@ public class Router {
     }
 
     public static class ActionDefinition {
-
+        /**
+         * The domain/host name.
+         */
         public String host;
+
+        /**
+         * The HTTP method, e.g. "GET".
+         */
         public String method;
+
+        /**
+         * @todo - what is this? does it include the domain?
+         */
         public String url;
+
+        /**
+         * Whether the route contains an astericks *.
+         */
         public boolean star;
+
+        /**
+         * @todo - what is this? does it include the class and package?
+         */
         public String action;
+
+        /**
+         * @todo - are these the required args in the routing file, or the query string in a request?
+         */
         public Map<String, Object> args;
 
         public ActionDefinition add(String key, Object value) {
@@ -522,17 +568,23 @@ public class Router {
 
     public static class Route {
 
+        /**
+         * HTTP method, e.g. "GET".
+         */
         public String method;
         public String path;
+        /**
+         * @todo - what is this?
+         */
         public String action;
         Pattern actionPattern;
-        List<String> actionArgs = new ArrayList<String>();
+        List<String> actionArgs = new ArrayList<String>(3);
         String staticDir;
         Pattern pattern;
         Pattern hostPattern;
-        List<Arg> args = new ArrayList<Arg>();
-        Map<String, String> staticArgs = new HashMap<String, String>();
-        List<String> formats = new ArrayList<String>();
+        List<Arg> args = new ArrayList<Arg>(3);
+        Map<String, String> staticArgs = new HashMap<String, String>(3);
+        List<String> formats = new ArrayList<String>(1);
         String host;
         Arg hostArg = null;
         public int routesFileLine;
@@ -646,9 +698,7 @@ public class Router {
                 return;
             }
             params = params.trim();
-            for (String param : params.split(",")) {
-                formats.add(param);
-            }
+            formats.addAll(Arrays.asList(params.split(",")));
         }
 
         private boolean contains(String accept) {
@@ -675,6 +725,15 @@ public class Router {
             return matches(method, path, accept, null);
         }
 
+        /**
+         * Check if the parts of a HTTP request equal this Route.
+         *
+         * @param method GET/POST/etc.
+         * @param path Part after domain and before query-string. Starts with a "/".
+         * @param accept Format, e.g. html.
+         * @param host AKA the domain.
+         * @return ???
+         */
         public Map<String, String> matches(String method, String path, String accept, String host) {
             // Normalize
             if (path.equals(Play.ctxPath)) {

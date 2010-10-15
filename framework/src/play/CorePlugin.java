@@ -48,7 +48,7 @@ public class CorePlugin extends PlayPlugin {
             }
             return o.toString();
         }
-        StringBuffer dump = new StringBuffer();
+        StringBuffer dump = new StringBuffer(16);
         for (PlayPlugin plugin : Play.plugins) {
             try {
                 String status = plugin.getStatus();
@@ -57,7 +57,7 @@ public class CorePlugin extends PlayPlugin {
                     dump.append("\n");
                 }
             } catch (Throwable e) {
-                dump.append(plugin.getClass().getName() + ".getStatus() has failed (" + e.getMessage() + ")");
+                dump.append(plugin.getClass().getName()).append(".getStatus() has failed (").append(e.getMessage()).append(")");
             }
         }
         return dump.toString();
@@ -117,7 +117,7 @@ public class CorePlugin extends PlayPlugin {
         out.println("~~~~~~~~~~~~~~~");
         out.println("Version: " + Play.version);
         out.println("Path: " + Play.frameworkPath);
-        out.println("ID: " + (Play.id == null || Play.id.equals("") ? "(not set)" : Play.id));
+        out.println("ID: " + (Play.id == null || Play.id.isEmpty() ? "(not set)" : Play.id));
         out.println("Mode: " + Play.mode);
         out.println("Tmp dir: " + (Play.tmpDir == null ? "(no tmp dir)" : Play.tmpDir));
         out.println();
