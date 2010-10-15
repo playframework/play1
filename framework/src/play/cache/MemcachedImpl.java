@@ -6,11 +6,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
 import net.spy.memcached.AddrUtil;
 import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.transcoders.SerializingTranscoder;
@@ -25,14 +24,16 @@ public class MemcachedImpl implements CacheImpl {
 
     private static MemcachedImpl uniqueInstance;
 
+    MemcachedClient client;
+
+    SerializingTranscoder tc;
+
     public static MemcachedImpl getInstance() throws IOException {
         if (uniqueInstance == null) {
             uniqueInstance = new MemcachedImpl();
         }
         return uniqueInstance;
     }
-    MemcachedClient client;
-    SerializingTranscoder tc;
 
     private MemcachedImpl() throws IOException {
         tc = new SerializingTranscoder() {
@@ -112,7 +113,7 @@ public class MemcachedImpl implements CacheImpl {
         } catch (Exception e) {
             future.cancel(false);
         }
-        return new HashMap<String, Object>();
+        return Collections.<String, Object>emptyMap();
     }
 
     public long incr(String key, int by) {
