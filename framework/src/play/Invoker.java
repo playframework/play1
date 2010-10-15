@@ -1,8 +1,9 @@
 package play;
 
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -10,12 +11,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
-
 import java.util.concurrent.TimeUnit;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
+
 import play.Play.Mode;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
+import play.mvc.ActionInvoker;
+import play.mvc.Http.Request;
 
 /**
  * Run some code in a Play! context
@@ -75,6 +81,63 @@ public class Invoker {
             }
         }
     }
+    
+    /**
+     * The class/method that will be invoked by the current operation
+     */
+    public static class InvocationContext {
+        /**
+         * Bind to thread
+         */
+        public static ThreadLocal<InvocationContext> current = new ThreadLocal<InvocationContext>();
+        public static InvocationContext current() { return current.get(); }
+        
+        public Class<?> invokedClass;
+        public Method invokedMethod;
+
+        @SuppressWarnings("rawtypes")
+        private Map annotations;
+        
+        @SuppressWarnings("rawtypes")
+        public InvocationContext() {
+            annotations = new HashMap();
+        }
+        
+        public InvocationContext(Class<?> invokedClass, Method invokedMethod) {
+            this();
+            this.invokedClass = invokedClass;
+            this.invokedMethod = invokedMethod;
+            loadAnnotationsFromTargetMethod(invokedClass, invokedMethod);
+        }
+        
+        /**
+         * Helper methods
+         */
+        @SuppressWarnings("unchecked")
+        public <T extends Annotation> T getAnnotation(Class<T> clazz) {
+            return (T) annotations.get(clazz);
+        }
+        
+        @SuppressWarnings("unchecked")
+        private <T extends Annotation> void addAnnotation(T ann) {
+            annotations.put(ann.annotationType(), ann);
+        }
+        
+        private <T> void loadAnnotationsFromTargetMethod(Class<?> clazz, Method method) {
+            if (clazz != null)
+                loadAnnotations(clazz.getAnnotations());
+            if (method != null)
+                loadAnnotations(method.getAnnotations());
+        }
+        
+        private void loadAnnotations(Annotation[] anns) {
+            if (anns == null) 
+                return;
+            for (Annotation ann : anns) {
+                addAnnotation(ann);
+            }
+        }
+    }
 
     /**
      * An Invocation in something to run in a Play! context
@@ -104,9 +167,27 @@ public class Invoker {
                 }
                 Play.start();
             }
+            
+            // resolve routes and determine the controller and action method we need to 
+            // invoke, if possible
+            InvocationContext.current.set(getInvocationContext());
             return true;
         }
 
+        public InvocationContext getInvocationContext() {
+            try {
+                ActionInvoker.resolveRoutes(Request.current());
+            } catch (Throwable t) {
+                // could not resolve routes
+                // sometimes this is expected, such as if the route is for a
+                // static file (we will receive RouteStatic)
+            }
+            Class<?> invokedClass = Request.current().controllerClass;
+            Method invokedMethod = Request.current().invokedMethod;
+            InvocationContext context = new InvocationContext(invokedClass, invokedMethod);
+            return context;
+        }
+        
         /**
          * Things to do before an Invocation
          */

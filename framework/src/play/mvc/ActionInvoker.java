@@ -41,6 +41,42 @@ import com.jamonapi.MonitorFactory;
  */
 public class ActionInvoker {
 
+    public static void resolveRoutes(Http.Request request) {
+        if (!Play.started) {
+            return;
+        }
+        if (request.resolvedRoutes)
+            return;
+        
+        // Route and resolve format if not already done
+        if (request.action == null) {
+            for (PlayPlugin plugin : Play.plugins) {
+                plugin.routeRequest(request);
+            }
+            Route route = Router.route(request);
+            for (PlayPlugin plugin : Play.plugins) {
+                plugin.onRequestRouting(route);
+            }
+        }
+        request.resolveFormat();
+        
+        // Find the action method
+        Method actionMethod = null;
+        Object[] ca = getActionMethod(request.action);
+        actionMethod = (Method) ca[1];
+        request.controller = ((Class) ca[0]).getName().substring(12)
+                .replace("$", "");
+        request.controllerClass = ((Class) ca[0]);
+        request.actionMethod = actionMethod.getName();
+        request.action = request.controller + "."
+                + request.actionMethod;
+        request.invokedMethod = actionMethod;
+
+        Logger.trace("------- %s", actionMethod);
+        request.resolvedRoutes = true;
+        Http.Request.current.set(request);
+    }
+    
     @SuppressWarnings("unchecked")
     public static void invoke(Http.Request request, Http.Response response) {
         Monitor monitor = null;
@@ -58,42 +94,16 @@ public class ActionInvoker {
             Scope.Session.current.set(Scope.Session.restore());
             Scope.Flash.current.set(Scope.Flash.restore());
 
-            // 1. Route and resolve format if not already done
-            if (request.action == null) {
-                for (PlayPlugin plugin : Play.plugins) {
-                    plugin.routeRequest(request);
-                }
-                Route route = Router.route(request);
-                for (PlayPlugin plugin : Play.plugins) {
-                    plugin.onRequestRouting(route);
-                }
-            }
-            request.resolveFormat();
-
-            // 2. Find the action method
-            Method actionMethod = null;
-            try {
-                Object[] ca = getActionMethod(request.action);
-                actionMethod = (Method) ca[1];
-                request.controller = ((Class) ca[0]).getName().substring(12).replace("$", "");
-                request.controllerClass = ((Class) ca[0]);
-                request.actionMethod = actionMethod.getName();
-                request.action = request.controller + "." + request.actionMethod;
-                request.invokedMethod = actionMethod;
-            } catch (ActionNotFoundException e) {
-                Logger.error(e, "%s action not found", e.getAction());
-                throw new NotFound(String.format("%s action not found", e.getAction()));
-            }
-
-            Logger.trace("------- %s", actionMethod);
-
-            // 3. Prepare request params
+            resolveRoutes(request);
+            Method actionMethod = request.invokedMethod;
+            
+            // 1. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);
             // add parameters from the URI query string 
             Scope.Params.current()._mergeWith(UrlEncodedParser.parseQueryString(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
             Lang.resolvefrom(request);
 
-            // 4. Easy debugging ...
+            // 2. Easy debugging ...
             if (Play.mode == Play.Mode.DEV) {
                 Controller.class.getDeclaredField("params").set(null, Scope.Params.current());
                 Controller.class.getDeclaredField("request").set(null, Http.Request.current());
@@ -113,7 +123,7 @@ public class ActionInvoker {
             // Monitoring
             monitor = MonitorFactory.start(request.action + "()");
 
-            // 5. Invoke the action
+            // 3. Invoke the action
 
             // There is a difference between a get and a post when binding data. The get does not care about validation while
             // the post does.

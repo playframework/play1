@@ -1,16 +1,21 @@
 package play.jobs;
 
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
+import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import play.Play;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
+
 import play.Invoker;
+import play.Invoker.InvocationContext;
 import play.Logger;
+import play.Play;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
+import play.exceptions.UnexpectedException;
 import play.libs.Time;
 
 /**
@@ -24,6 +29,21 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     protected boolean wasError = false;
     protected Throwable lastException = null;
 
+    @Override
+    public InvocationContext getInvocationContext() {
+        try {
+            Class<?> invokedClass = this.getClass();
+            Method invokedMethod;
+            invokedMethod = this.getClass().getDeclaredMethod("doJob");
+            InvocationContext context = new InvocationContext(invokedClass, invokedMethod);
+            return context;
+        } catch (SecurityException e) {
+            throw new UnexpectedException("Reflection exception finding annotations on doJob", e);
+        } catch (NoSuchMethodException e) {
+            throw new UnexpectedException("Reflection exception finding annotations on doJob", e);
+        }
+    }
+    
     /**
      * Here you do the job
      */

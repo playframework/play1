@@ -19,8 +19,10 @@ import java.util.regex.Pattern;
 import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
+import play.jobs.Job;
 import play.libs.Codec;
 import play.libs.Time;
+import play.mvc.results.RenderStatic;
 import play.utils.Utils;
 
 /**
@@ -257,6 +259,10 @@ public class Http {
          * Request comes from loopback interface
          */
         public boolean isLoopback;
+        /**
+         * ActionInvoker.resolvedRoutes was called?
+         */
+        boolean resolvedRoutes;
         /**
          * Params
          */

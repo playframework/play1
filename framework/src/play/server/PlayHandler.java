@@ -136,6 +136,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 Logger.trace("init: end false");
                 return false;
             }
+            
             Logger.trace("init: end true");
             return true;
         }
