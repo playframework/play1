@@ -1,0 +1,19 @@
+#{selenium 'Test the Selenium Extensions'}
+
+// Test we can access String cache entries
+	open('@{SeleniumExtensions.cacheAccess()}')
+	assertTextPresent('OK')
+	storeCacheEntry('magicKey', 'stringCacheValue')
+	assertEquals('magicValue', '$[stringCacheValue]')
+
+	storeCacheEntry('complex', 'complexCacheValue')
+	assertNotEquals('true,false', '$[complexCacheValue]')
+
+// Test we can access past emails
+	open('@{SeleniumExtensions.emailAccess()}')
+	assertTextPresent('OK')
+	storeLastReceivedEmailBy('boron@localhost', 'email')
+	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email"])[1]}', 'subject')
+	assertEquals('Berillium Subject', '$[subject]')
+
+#{/selenium}
