@@ -584,7 +584,6 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             }
         }
         renderTemplate(templateName, templateBinding);
-        
     }
 
     protected static void renderTemplate(String templateName, Map<String,Object> args) {
@@ -609,10 +608,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             }
             if(respondTo != null){
                 String[] responseTypes = respondTo.value();
-                java.util.Arrays.sort(responseTypes);
-                if(request.format.equals("json") && java.util.Arrays.binarySearch(responseTypes, "json") >= 0){
+                if(request.format.equals("json") && java.util.Arrays.asList(responseTypes).contains("json")){
                     renderJSON(args);
-                }else if(request.format.equals("xml") && java.util.Arrays.binarySearch(responseTypes, "xml") >= 0){
+                }else if(request.format.equals("xml") && java.util.Arrays.asList(responseTypes).contains("xml")){
                     renderXml(args);
                 }
             }
