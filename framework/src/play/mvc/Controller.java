@@ -1,6 +1,5 @@
 package play.mvc;
 
-import com.google.gson.JsonSerializer;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -11,7 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
+
 import org.w3c.dom.Document;
+
 import play.Invoker.Suspend;
 import play.Logger;
 import play.Play;
@@ -25,7 +26,6 @@ import play.exceptions.NoRouteFoundException;
 import play.exceptions.PlayException;
 import play.exceptions.TemplateNotFoundException;
 import play.exceptions.UnexpectedException;
-import play.utils.Java;
 import play.libs.Time;
 import play.mvc.Http.Request;
 import play.mvc.Router.ActionDefinition;
@@ -39,16 +39,20 @@ import play.mvc.results.Redirect;
 import play.mvc.results.RedirectToStatic;
 import play.mvc.results.RenderBinary;
 import play.mvc.results.RenderHtml;
+import play.mvc.results.RenderJson;
 import play.mvc.results.RenderTemplate;
 import play.mvc.results.RenderText;
-import play.mvc.results.RenderJson;
 import play.mvc.results.RenderXml;
 import play.mvc.results.Result;
 import play.mvc.results.Unauthorized;
 import play.templates.Template;
 import play.templates.TemplateLoader;
 import play.utils.Default;
+import play.utils.Java;
 import play.vfs.VirtualFile;
+
+import com.google.gson.JsonSerializer;
+import com.thoughtworks.xstream.XStream;
 
 /**
  * Application controller support: The controller receives input and initiates a response by making calls on model objects.
@@ -178,6 +182,24 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     protected static void renderXml(Document xml) {
         throw new RenderXml(xml);
+    }
+
+    /**
+     * Return a 200 OK text/xml response. Use renderXml(Object, XStream) to customize the result.
+     * @param o the object to serialize
+     */
+    protected static void renderXml(Object o) {
+        throw new RenderXml(o);
+    }
+
+    /**
+     * Return a 200 OK text/xml response
+     * @param o the object to serialize
+     * @param xstream the XStream object to use for serialization. See XStream's documentation
+     *      for details about customizing the output.
+     */
+    protected static void renderXml(Object o, XStream xstream) {
+        throw new RenderXml(o, xstream);
     }
 
     /**
@@ -349,6 +371,17 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     protected static void notFoundIfNull(Object o) {
         if (o == null) {
             notFound();
+        }
+    }
+
+    /**
+     * Send a 404 Not Found response if object is null
+     * @param o The object to check
+     * @param what The Not Found resource name
+     */
+    protected static void notFoundIfNull(Object o, String what) {
+        if (o == null) {
+            notFound(what);
         }
     }
 
