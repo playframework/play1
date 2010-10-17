@@ -77,6 +77,10 @@ public class Application extends Controller {
     public static void tagContexts() {
         render();
     }
+    
+    public static void book(Date at) {
+        renderText("Booked at %1$tm %1$te,%1$tY !!", at);
+    }
 
     public static void escapeData() {
         String oops = "&nbsp;<i>Yop</i>&nbsp;";
