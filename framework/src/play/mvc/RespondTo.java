@@ -6,11 +6,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Mark this method as @Before interceptor
+ * Annotation used to specify which formats a Controller or Action should respond to automatically
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RespondTo { 
     
+    /**
+     * Responds to these formats automatically
+     */
     String[] value();
     
 }
