@@ -4,6 +4,7 @@ import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 import org.jboss.netty.handler.ssl.SslHandler;
 import play.Logger;
+import play.mvc.Http;
 import play.server.PlayHandler;
 import play.server.Server;
 
@@ -18,15 +19,22 @@ public class SslPlayHandler extends PlayHandler {
     }
 
     @Override
+    public Http.Request processRequest(Http.Request request) {
+        request.secure = true;
+        return request;
+    }
+
+
+    @Override
     public void channelConnected(
             ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-            ctx.setAttachment(e.getValue());
-            // Get the SslHandler in the current pipeline.
-            final SslHandler sslHandler = ctx.getPipeline().get(SslHandler.class);
-            sslHandler.setEnableRenegotiation(false);
-            // Get notified when SSL handshake is done.
-            ChannelFuture handshakeFuture = sslHandler.handshake();
-            handshakeFuture.addListener(new SslListener());
+        ctx.setAttachment(e.getValue());
+        // Get the SslHandler in the current pipeline.
+        final SslHandler sslHandler = ctx.getPipeline().get(SslHandler.class);
+        sslHandler.setEnableRenegotiation(false);
+        // Get notified when SSL handshake is done.
+        ChannelFuture handshakeFuture = sslHandler.handshake();
+        handshakeFuture.addListener(new SslListener());
     }
 
     private static final class SslListener implements ChannelFutureListener {
