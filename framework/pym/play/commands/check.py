@@ -72,7 +72,9 @@ class Release:
     def __eq__(self, other):
         return self.strversion == other.strversion
     def __lt__(self, other):
-        for i in range(self.versions):
+        if self == other:
+            return False
+        for i in range(len(self.versions)):
             if self.versions[i] < other.versions[i]:
                 return True # ex: 1.1 vs 1.2
             if self.versions[i] > other.versions[i]:
@@ -82,11 +84,13 @@ class Release:
         if len(self.versions) > len(other.versions):
             return False
         # From here, numeric part is the same - now having a rest means older version
-        if len(other.numpart) > 0:
+        if len(other.numpart) > 0 and len(self.numpart) == 0:
             return False
-        if len(self.numpart) > 0:
+        if len(self.numpart) > 0 and len(other.numpart) == 0:
             return True
-        return False # self == other (thus strict comparison is false)
+        # Both have a rest, use a string comparison
+        # alpha1 < beta1 < rc1 < rc2...
+        return self.rest < other.rest
     def __le__(self, other):
         return self == other or self < other
     def __gt__(self, other):
