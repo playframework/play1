@@ -49,6 +49,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
 
+    public Request processRequest(Request request) {
+        return request;
+    }
+
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
         Logger.trace("messageReceived: begin");
@@ -57,7 +61,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         if (msg instanceof HttpRequest) {
             final HttpRequest nettyRequest = (HttpRequest) msg;
             try {
-                final Request request = parseRequest(ctx, nettyRequest);
+                Request request = parseRequest(ctx, nettyRequest);
+                request = processRequest(request);
                 final Response response = new Response();
 
                 Http.Response.current.set(response);
@@ -81,6 +86,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
         Logger.trace("messageReceived: end");
     }
+
     private static Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
 
     public class NettyInvocation extends Invoker.Invocation {
@@ -367,6 +373,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         return fullAddress;
     }
 
+   
     public static Request parseRequest(ChannelHandlerContext ctx, HttpRequest nettyRequest) throws Exception {
         Logger.trace("parseRequest: begin");
         Logger.trace("parseRequest: URI = " + nettyRequest.getUri());
@@ -378,10 +385,11 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             querystring = nettyRequest.getUri().substring(index + 1);
         }
 
-        final Request request = new Request();
+        final Http.Request request = new Http.Request();
 
         request.remoteAddress = getRemoteIPAddress(ctx);
         request.method = nettyRequest.getMethod().getName();
+                      
         request.path = path;
         request.querystring = querystring;
         final String contentType = nettyRequest.getHeader(CONTENT_TYPE);
@@ -487,6 +495,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             }
         }
     }
+
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
