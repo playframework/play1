@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.net.Socket;
 import java.security.*;
+import java.util.Properties;
 
 public class SslHttpServerContextFactory {
 
@@ -28,38 +29,39 @@ public class SslHttpServerContextFactory {
         KeyStore ks = null;
         try {
 
+            final Properties p = Play.configuration;
+
+            // Made sure play reads the properties
             // Look if we have key and cert files. If we do, we use our own keymanager
-            if (Play.getFile(System.getProperty("certificate.file", "conf/host.key")).exists() && Play.getFile(System.getProperty("certificate.file", "conf/host.cert")).exists()) {
+            if (Play.getFile(p.getProperty("certificate.key.file", "conf/host.key")).exists() && Play.getFile(p.getProperty("certificate.file", "conf/host.cert")).exists()) {
                 Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
                 // Initialize the SSLContext to work with our key managers.
                 serverContext = SSLContext.getInstance(PROTOCOL);
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance(algorithm);
-                tmf.init(KeyStore.getInstance(System.getProperty("certificate.algorithm", "JKS")));
+                tmf.init(KeyStore.getInstance(p.getProperty("trustmanager.algorithm", "JKS")));
 
                 serverContext.init(new KeyManager[]{PEMKeyManager.instance}, tmf.getTrustManagers(), null);
 
             } else {
                 // Try to load it from the keystore
-                ks = KeyStore.getInstance(System.getProperty("certificate.algorithm", "JKS"));
+                ks = KeyStore.getInstance(p.getProperty("keystore.algorithm", "JKS"));
                 // Load the file from the conf
-                char[] certificatePassword = System.getProperty("certificate.password", "secret").toCharArray();
+                char[] certificatePassword = p.getProperty("keystore.password", "secret").toCharArray();
+                
 
-                ks.load(new FileInputStream(Play.getFile(System.getProperty("certificate.file", "conf/certificate.jks"))),
+                ks.load(new FileInputStream(Play.getFile(p.getProperty("keystore.file", "conf/certificate.jks"))),
                         certificatePassword);
 
                 // Set up key manager factory to use our key store
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
-                char[] keyStorePassword = System.getProperty("keystore.password", "secret").toCharArray();
 
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance(algorithm);
                 tmf.init(ks);
 
-                kmf.init(ks, keyStorePassword);
                 // Initialize the SSLContext to work with our key managers.
                 serverContext = SSLContext.getInstance(PROTOCOL);
                 serverContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-
 
             }
 
@@ -83,14 +85,16 @@ public class SslHttpServerContextFactory {
 
         public PEMKeyManager() {
             try {
-                PEMReader keyReader = new PEMReader(new FileReader(Play.getFile(System.getProperty("certificate.file", "conf/host.key"))), new PasswordFinder() {
+                final Properties p = Play.configuration;
+
+                PEMReader keyReader = new PEMReader(new FileReader(Play.getFile(p.getProperty("certificate.key.file", "conf/host.key"))), new PasswordFinder() {
                     public char[] getPassword() {
-                        return System.getProperty("certificate.password", "secret").toCharArray();
+                        return p.getProperty("certificate.password", "secret").toCharArray();
                     }
                 });
                 key = ((KeyPair) keyReader.readObject()).getPrivate();
 
-                PEMReader reader = new PEMReader(new FileReader(Play.getFile(System.getProperty("certificate.file", "conf/host.cert"))));
+                PEMReader reader = new PEMReader(new FileReader(Play.getFile(p.getProperty("certificate.file", "conf/host.cert"))));
                 cert = (X509Certificate) reader.readObject();
             } catch (Exception e) {
                 e.printStackTrace();
