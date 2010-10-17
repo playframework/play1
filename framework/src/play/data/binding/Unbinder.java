@@ -3,10 +3,13 @@ package play.data.binding;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import play.data.binding.types.DateBinder;
 
 /**
  * Try to unbind an object to a Map<String,String>
@@ -47,6 +50,8 @@ public class Unbinder {
                     unBind(result, object, object.getClass(), name);
                 }
             }
+        } else if (Date.class.isAssignableFrom(src.getClass())) {
+            result.put(name, src != null ? new SimpleDateFormat(DateBinder.ISO).format((Date)src) : null);
         } else {
             Field[] fields = src.getClass().getDeclaredFields();
             for (Field field : fields) {

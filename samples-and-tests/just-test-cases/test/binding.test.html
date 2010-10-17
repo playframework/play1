@@ -60,4 +60,8 @@
         open('@{DataBinding.globalBinder('8')}')
         assertTextPresent('Incorrect value')
 
+		<!-- Now unbind dates -->
+		open('@{Application.book(new java.util.Date(2879877856556))}')
+		assertTextPresent('Booked at 04 5,2061 !!')
+
 #{/selenium}	
