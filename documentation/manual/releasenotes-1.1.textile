@@ -209,6 +209,34 @@ The built-in server now supports the HTTPS protocol. You can of course use it in
 bc. http.port=9000
 https.port=9443
 
+You need to put your certificates in the conf directory. Play supports X509 certificates and keystore certificates. The X509 certificates must be named as follow:
+*host.cert* for the certificate and *host.key* for the key. If you are using keystore, then, by default it should be named *keystore.jks*.
+
+If you are using X509 certificates, then the following parameters can be configured though your *application.conf*:
+
+bc. # X509 certificates
+certificate.key.file=host.key
+certificate.file=host.cert
+# In case your key file is password protected
+certificate.password=secret
+
+Note that the values above are the default values.
+
+You can generate self signed certificates using *openssl*: 
+
+bc. openssl genrsa 1024 > host.key
+openssl req -new -x509 -nodes -sha1 -days 365 -key host.key > host.cert
+
+If you are using the java keystore mechanism, then the following properties can be configured in your *application.conf*:
+
+bc. # Keystore 
+ssl.KeyManagerFactory.algorithm=SunX509
+trustmanager.algorithm=JKS
+keystore.password=secret
+keystore.file=certificate.jks
+
+The values above are the default values.
+
 h2. <a name="cache">New Cache features</a>
 
 There are two new features that enable easier cache integration for actions and templates. First you can easily cache the result of an action by adding the **@play.cache.CacheFor** annotation. This is very useful for pseudo static pages.
