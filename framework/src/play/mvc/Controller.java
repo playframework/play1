@@ -386,7 +386,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
-     * Send a 404 Not Found reponse
+     * Send a 404 Not Found response
      */
     protected static void notFound() {
         throw new NotFound("");
@@ -600,6 +600,22 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             Template template = TemplateLoader.load(template(templateName));
             throw new RenderTemplate(template, templateBinding.data);
         } catch (TemplateNotFoundException ex) {
+            RespondTo respondTo = getActionAnnotation(RespondTo.class);
+            if(respondTo == null){
+                respondTo = getControllerAnnotation(RespondTo.class);
+            }
+            if(respondTo == null){
+                respondTo = getControllerInheritedAnnotation(RespondTo.class);
+            }
+            if(respondTo != null){
+                String[] responseTypes = respondTo.value();
+                java.util.Arrays.sort(responseTypes);
+                if(request.format.equals("json") && java.util.Arrays.binarySearch(responseTypes, "json") >= 0){
+                    renderJSON(args);
+                }else if(request.format.equals("xml") && java.util.Arrays.binarySearch(responseTypes, "xml") >= 0){
+                    renderXml(args);
+                }
+            }
             if(ex.isSourceAvailable()) {
                 throw ex;
             }
@@ -628,6 +644,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             templateName = template();
         }
         renderTemplate(templateName, args);
+        
     }
 
     protected static String template() {

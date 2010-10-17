@@ -7,6 +7,7 @@ nbproject/nbjdk.properties
 nbproject/nbjdk.xml
 nbproject/private
 framework/tests-results
+framework/bin
 framework/src/version
 framework/src/play/version
 framework/src/play/version
@@ -114,3 +115,4 @@ samples-and-tests/jobboard/test-result
 samples-and-tests/jobboard/tmp
 samples-and-tests/validation/logs
 samples-and-tests/zencontact/precompiled
+*.class
