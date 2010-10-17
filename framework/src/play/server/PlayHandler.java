@@ -49,6 +49,11 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
 
+    public Request processRequest(Request request) {
+        return request;
+    }
+
+
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
         Logger.trace("messageReceived: begin");
@@ -57,7 +62,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         if (msg instanceof HttpRequest) {
             final HttpRequest nettyRequest = (HttpRequest) msg;
             try {
-                final Request request = parseRequest(ctx, nettyRequest);
+                Request request = parseRequest(ctx, nettyRequest);
+                request = processRequest(request);
+
                 final Response response = new Response();
 
                 Http.Response.current.set(response);
@@ -81,6 +88,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
         Logger.trace("messageReceived: end");
     }
+
     private static Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
 
     public class NettyInvocation extends Invoker.Invocation {

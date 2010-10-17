@@ -323,7 +323,7 @@ public class Router {
                     }
                     if (absolute) {
                         if (!StringUtils.isEmpty(route.host)) {
-                            to = "http://" + route.host + to;
+                            to = (Http.Request.current().secure ? "https://" : "http://") + route.host + to;
                         } else {
                             to = Http.Request.current().getBase() + to;
                         }
@@ -502,10 +502,12 @@ public class Router {
         }
 
         public void absolute() {
-            if (StringUtils.isEmpty(host)) {
-                url = Http.Request.current().getBase() + url;
-            } else {
-                url = "http://" + host + url;
+            if (!url.startsWith("http")) {
+                if (StringUtils.isEmpty(host)) {
+                    url = Http.Request.current().getBase() + url;
+                } else {
+                    url = (Http.Request.current().secure ? "https://" : "http://") + host + url;
+                }
             }
         }
 
@@ -571,7 +573,7 @@ public class Router {
                     String p = this.path;
                     this.path = p.substring(p.indexOf("/"));
                     this.host = p.substring(0, p.indexOf("/"));
-                    String pattern = host.replaceAll("\\.","\\\\.").replaceFirst("\\{.*\\}", "(.*)");
+                    String pattern = host.replaceAll("\\.", "\\\\.").replaceFirst("\\{.*\\}", "(.*)");
                     Logger.trace("pattern [" + pattern + "]");
                     Logger.trace("host [" + host + "]");
 
@@ -580,7 +582,7 @@ public class Router {
 
                     if (m.matches()) {
                         if (this.host.contains("{")) {
-                            String name = m.group(1).replace("{", "").replace("}","");
+                            String name = m.group(1).replace("{", "").replace("}", "");
                             hostArg = new Arg();
                             hostArg.name = name;
                             Logger.trace("hostArg name [" + name + "]");
