@@ -67,14 +67,14 @@ public class WS extends PlayPlugin {
         String implementation = Play.configuration.getProperty("webservice", "async");
         if (implementation.equals("urlfetch")) {
             wsImpl = new WSUrlFetch();
-            Logger.info("Using URLFetch for web service");
+            Logger.trace("Using URLFetch for web service");
         } else if (implementation.equals("async")) {
-            Logger.info("Using Async for web service");
+            Logger.trace("Using Async for web service");
             wsImpl = new WSAsync();
         } else {
             try {
                 wsImpl = (WSImpl)Play.classloader.loadClass(implementation).newInstance();
-                Logger.info("Using the class:" + implementation + " for web service");
+                Logger.trace("Using the class:" + implementation + " for web service");
             } catch (Exception e) {
                 Logger.error("Cannot load class " + implementation + ", using async instead");
                 wsImpl = new WSAsync();
