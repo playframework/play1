@@ -37,6 +37,7 @@ import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.hibernate.type.Type;
 
+import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -290,19 +291,10 @@ public class JPAPlugin extends PlayPlugin {
 
     @Override
     public void beforeInvocation() {
-        Request request = Request.current();
         boolean readOnly = false;
-        if (request.invokedMethod != null && (request.controllerClass != null || request.jobClass != null)) {
-            Transactional tx = request.invokedMethod.getAnnotation(Transactional.class);
-            if (tx == null && request.controllerClass != null) {
-                tx = request.controllerClass.getAnnotation(Transactional.class);
-            }
-            if (tx == null && request.jobClass != null) {
-                tx = request.jobClass.getAnnotation(Transactional.class);
-            }
-            if (tx != null) {
-                readOnly = tx.readOnly();
-            }
+        Transactional tx = InvocationContext.current().getAnnotation(Transactional.class);
+        if (tx != null) {
+            readOnly = tx.readOnly();
         }
         startTx(readOnly);
     }

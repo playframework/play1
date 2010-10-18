@@ -237,10 +237,6 @@ public class Http {
          */
         public transient Class<? extends Controller> controllerClass;
         /**
-         * The invoked controller class
-         */
-        public transient Class<? extends Job> jobClass;
-        /**
          * Free space to store your request specific data
          */
         public Map<String, Object> args = new HashMap<String, Object>();
@@ -280,15 +276,6 @@ public class Http {
                 String[] decodedData = new String(Codec.decodeBASE64(data)).split(":");
                 user = decodedData.length > 0 ? decodedData[0] : null;
                 password = decodedData.length > 1 ? decodedData[1] : null;
-            }
-            
-            // resolve routes and determine the controller and action method we need to 
-            // invoke, if possible
-            try {
-                ActionInvoker.resolveRoutes(this);
-            } catch (Throwable ignore) {
-                // if an exception is thrown, that means no controller and action
-                // will be invoked, such as for static routes
             }
         }
 

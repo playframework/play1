@@ -1,7 +1,7 @@
 package play;
 
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -10,12 +10,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
-
 import java.util.concurrent.TimeUnit;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
+
 import play.Play.Mode;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
+import play.jobs.Job;
+import play.mvc.ActionInvoker;
+import play.mvc.Controller;
+import play.mvc.Http.Request;
 
 /**
  * Run some code in a Play! context
@@ -75,6 +82,53 @@ public class Invoker {
             }
         }
     }
+    
+    /**
+     * The class/method that will be invoked by the current operation
+     */
+    public static class InvocationContext {
+        /**
+         * The really invoker Java methid
+         */
+        public Method invokedMethod;
+        /**
+         * The invoked controller class
+         */
+        public Class<?> invokedClass;
+        /**
+         * Bind to thread
+         */
+        public static ThreadLocal<InvocationContext> current = new ThreadLocal<InvocationContext>();
+        public static InvocationContext current() { return current.get(); } 
+        /**
+         * Helper methods
+         */
+        public <T extends Annotation> T getAnnotation(Class<T> clazz) {
+            if (invokedMethod == null || invokedClass == null)
+                return null;
+            T ann = invokedMethod.getAnnotation(clazz);
+            if (ann == null) {
+                ann = findAnnotation(invokedClass, clazz);
+            }
+            return ann;
+        }
+        
+        private static <T extends Annotation> T findAnnotation(Class<?> clazz,
+                Class<T> annClazz) {
+            Class<?> currentClazz = clazz;
+            if (currentClazz == null)
+                return null;
+            do {
+                if (currentClazz != null) {
+                    T ann = currentClazz.getAnnotation(annClazz);
+                    if (ann != null)
+                        return ann;
+                }
+                currentClazz = currentClazz.getSuperclass();
+            } while (currentClazz != null);
+            return null;
+        }
+    }
 
     /**
      * An Invocation in something to run in a Play! context
@@ -103,6 +157,31 @@ public class Invoker {
                     throw new UnexpectedException("Application is not started");
                 }
                 Play.start();
+            }
+            
+            // resolve routes and determine the controller and action method we need to 
+            // invoke, if possible
+            InvocationContext context = new InvocationContext();
+            try {
+                if (Job.class.isAssignableFrom(this.getClass())) {
+                    Class<?> invokedClass = this.getClass();
+                    Method invokedMethod = this.getClass().getDeclaredMethod("doJob");
+                    context.invokedClass = invokedClass;
+                    context.invokedMethod = invokedMethod;
+                } else {
+                    try {
+                        ActionInvoker.resolveRoutes(Request.current());
+                        context.invokedClass = Request.current().controllerClass;
+                        context.invokedMethod = Request.current().invokedMethod;
+                    } catch (Throwable ignore) {
+                        // if an exception is thrown, that means no controller and action
+                        // will be invoked, such as for static routes
+                    }
+                }
+            } catch (Throwable t) {
+                throw new UnexpectedException(t);
+            } finally {
+                InvocationContext.current.set(context);
             }
             return true;
         }
