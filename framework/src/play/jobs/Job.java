@@ -12,6 +12,7 @@ import play.Logger;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.libs.Time;
+import play.mvc.Http.Request;
 
 /**
  * A job is an asynchronously executed unit of work
@@ -101,6 +102,11 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
         Monitor monitor = null;
         try {
             if (init()) {
+                if (Request.current() == null) {
+                    Request.current.set(new Request());
+                }
+                Request.current().jobClass = this.getClass();
+                Request.current().invokedMethod = this.getClass().getDeclaredMethod("doJob");
                 before();
                 V result = null;
                 try {

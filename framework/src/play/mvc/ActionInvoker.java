@@ -62,21 +62,16 @@ public class ActionInvoker {
         
         // Find the action method
         Method actionMethod = null;
-        try {
-            Object[] ca = getActionMethod(request.action);
-            actionMethod = (Method) ca[1];
-            request.controller = ((Class) ca[0]).getName().substring(12)
-                    .replace("$", "");
-            request.controllerClass = ((Class) ca[0]);
-            request.actionMethod = actionMethod.getName();
-            request.action = request.controller + "."
-                    + request.actionMethod;
-            request.invokedMethod = actionMethod;
-        } catch (ActionNotFoundException e) {
-            Logger.error(e, "%s action not found", e.getAction());
-            throw new NotFound(String.format("%s action not found",
-                    e.getAction()));
-        }
+        Object[] ca = getActionMethod(request.action);
+        actionMethod = (Method) ca[1];
+        request.controller = ((Class) ca[0]).getName().substring(12)
+                .replace("$", "");
+        request.controllerClass = ((Class) ca[0]);
+        request.actionMethod = actionMethod.getName();
+        request.action = request.controller + "."
+                + request.actionMethod;
+        request.invokedMethod = actionMethod;
+
         Logger.trace("------- %s", actionMethod);
         request.resolvedRoutes = true;
         Http.Request.current.set(request);

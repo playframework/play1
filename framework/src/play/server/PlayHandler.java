@@ -129,9 +129,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 return false;
             }
             
-            // resolve routes and determine the controller and action method we need to invoke
-            ActionInvoker.resolveRoutes(request);
-            
             Logger.trace("init: end true");
             return true;
         }
