@@ -17,6 +17,7 @@ import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import play.exceptions.UnexpectedException;
+import play.utils.OrderSafeProperties;
 
 /**
  * IO utils
@@ -29,7 +30,7 @@ public class IO {
      * @return The Properties object
      */
     public static Properties readUtf8Properties(InputStream is) {
-        Properties properties = new Properties();
+        Properties properties = new OrderSafeProperties();
         try {
             properties.load(is);
             for (Object key : properties.keySet()) {

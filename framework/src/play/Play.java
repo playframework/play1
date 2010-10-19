@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -26,6 +27,7 @@ import play.exceptions.UnexpectedException;
 import play.libs.IO;
 import play.mvc.Router;
 import play.templates.TemplateLoader;
+import play.utils.OrderSafeProperties;
 import play.vfs.VirtualFile;
 
 /**
@@ -287,7 +289,7 @@ public class Play {
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         conf = appRoot.child("conf/application.conf");
         try {
-            configuration = IO.readUtf8Properties(conf.inputstream());
+            configuration = IO.readUtf8Properties(conf.inputstream());        
         } catch (RuntimeException e) {
             if (e.getCause() instanceof IOException) {
                 Logger.fatal("Cannot read application.conf");
@@ -295,7 +297,7 @@ public class Play {
             }
         }
         // Ok, check for instance specifics configuration
-        Properties newConfiguration = new Properties();
+        Properties newConfiguration = new OrderSafeProperties();
         Pattern pattern = Pattern.compile("^%([a-zA-Z0-9_\\-]+)\\.(.*)$");
         for (Object key : configuration.keySet()) {
             Matcher matcher = pattern.matcher(key + "");
@@ -618,8 +620,8 @@ public class Play {
                 }
             }
         }
-        for (Enumeration<?> e = configuration.propertyNames(); e.hasMoreElements();) {
-            String pName = e.nextElement().toString();
+        for (Iterator<?> e = configuration.keySet().iterator(); e.hasNext();) {
+            String pName = e.next().toString();
             if (pName.startsWith("module.")) {
                 String moduleName = pName.substring(7);
                 File modulePath = new File(configuration.getProperty(pName));
