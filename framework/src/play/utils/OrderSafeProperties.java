@@ -16,8 +16,8 @@
  */
 package play.utils;
 
-import java.io.BufferedReader;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -55,6 +55,7 @@ public class OrderSafeProperties extends java.util.Properties {
         defaults = properties;
     }
 
+    @SuppressWarnings("unused")
     private void dumpString(StringBuilder buffer, String string, boolean key) {
         int i = 0;
         if (!key && i < string.length() && string.charAt(i) == ' ') {
@@ -394,6 +395,7 @@ public class OrderSafeProperties extends java.util.Properties {
         return Collections.unmodifiableSet(stringProperties.keySet());
     }
 
+    @SuppressWarnings("unchecked")
     private void selectProperties(Hashtable selectProperties, final boolean isStringOnly) {
         if (defaults != null) {
             defaults.selectProperties(selectProperties, isStringOnly);
@@ -475,7 +477,7 @@ public class OrderSafeProperties extends java.util.Properties {
     }
 
     @Override
-    public Set entrySet() {
+    public Set<Map.Entry<Object, Object>> entrySet() {
         return _data.entrySet();
     }
 
@@ -485,12 +487,12 @@ public class OrderSafeProperties extends java.util.Properties {
     }
 
     @Override
-    public Enumeration keys() {
+    public Enumeration<Object> keys() {
         return new Hashtable<Object, Object>(_data).keys();
     }
 
     @Override
-    public Set keySet() {
+    public Set<Object> keySet() {
         return _data.keySet();
     }
 
@@ -505,6 +507,7 @@ public class OrderSafeProperties extends java.util.Properties {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void putAll(Map t) {
         _data.putAll(t);
     }
@@ -515,7 +518,7 @@ public class OrderSafeProperties extends java.util.Properties {
     }
 
     @Override
-    public Collection values() {
+    public Collection<Object> values() {
         return _data.values();
     }
 }
