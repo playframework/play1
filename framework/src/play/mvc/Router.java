@@ -162,7 +162,8 @@ public class Router {
         int lineNumber = 0;
         String content = routeFile.contentAsString();
         if (content.indexOf("${") > -1 || content.indexOf("#{") > -1) {
-            content = TemplateLoader.load(routeFile).render(Collections.<String, Object>emptyMap());
+            // Mutable map needs to be passed in.
+            content = TemplateLoader.load(routeFile).render(new HashMap<String, Object>(16));
         }
         for (String line : content.split("\n")) {
             lineNumber++;
