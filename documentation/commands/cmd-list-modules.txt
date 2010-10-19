@@ -1,0 +1,19 @@
+~ Name:
+~ ~~~~~
+~ list-modules -- List the modules available for install from the repository
+~
+~ Alias:
+~ ~~~~~
+~ lm
+~
+~ Synopsis:
+~ ~~~~~~~~~
+~ play list-modules
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ List modules available for install. By default only the official repository
+~ is used, but you can add other repositories (for example your ozn internal
+~ repository) by editing the "repositories" file located in the top level
+~ directory where the framework is installed.
+~
