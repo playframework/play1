@@ -76,8 +76,7 @@ public class WS extends PlayPlugin {
                 wsImpl = (WSImpl)Play.classloader.loadClass(implementation).newInstance();
                 Logger.trace("Using the class:" + implementation + " for web service");
             } catch (Exception e) {
-                Logger.error("Cannot load class " + implementation + ", using async instead");
-                wsImpl = new WSAsync();
+                throw new RuntimeException("Unable to load the class: " + implementation + " for web service");
             }
         }
     }
