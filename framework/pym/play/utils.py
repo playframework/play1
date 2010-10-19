@@ -95,7 +95,7 @@ def package_as_war(app, env, war_path, war_zip_path):
     if os.path.exists(os.path.join(app.path, 'war')):
         copy_directory(os.path.join(app.path, 'war'), war_path)
     else:
-        os.mkdir(war_path)
+        os.makedirs(war_path)
     if not os.path.exists(os.path.join(war_path, 'WEB-INF')): os.mkdir(os.path.join(war_path, 'WEB-INF'))
     if not os.path.exists(os.path.join(war_path, 'WEB-INF/web.xml')):
         shutil.copyfile(os.path.join(env["basedir"], 'resources/war/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
