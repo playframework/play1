@@ -5,7 +5,7 @@
 ~ Alias:
 ~ ~~~~~
 ~ ec
-~ 
+~
 ~ Synopsis:
 ~ ~~~~~~~~~
 ~ play eclipsify [app_path]
@@ -13,12 +13,12 @@
 ~ Description:
 ~ ~~~~~~~~~~~~
 ~ Create all needed configuration file to make the application hosted at the app_path directory an Eclipse project.
-~ If app_path is omitted, the current directory is used. 
+~ If app_path is omitted, the current directory is used.
 ~
 ~ All needed configuration files including .project and .classpath are created.
-~ Several launchers for the application are created as well. The main launcher in usable either with the Run and 
-~ Debug Eclipse command. The JPDA launcher is only usable with the Run command since it already starts a JPDA agent. 
-~ You can then use the Connect JPDA launcher to start a debugging session at any time. Stopping the debugging session 
+~ Several launchers for the application are created as well. The main launcher in usable either with the Run and
+~ Debug Eclipse command. The JPDA launcher is only usable with the Run command since it already starts a JPDA agent.
+~ You can then use the Connect JPDA launcher to start a debugging session at any time. Stopping the debugging session
 ~ will not stop the server.
 ~
 ~ Use File/Import/General/Existing project to import the project into Eclipse.

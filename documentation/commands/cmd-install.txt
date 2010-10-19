@@ -12,6 +12,11 @@
 ~ Available modules are listed with the play list-modules command,
 ~ or online at http://www.playframework.org/modules
 ~
+~ By default only the official repository is used, but you can add
+~ other repositories (for example your ozn internal repository) by
+~ editing the "repositories" file located in the top level
+~ directory where the framework is installed.
+~
 ~ Once installed, Play modules can be included in any Play application
 ~ by adding the correct line to conf/application.conf.
 ~

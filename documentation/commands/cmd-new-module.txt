@@ -1,0 +1,19 @@
+~ Name:
+~ ~~~~~
+~ new-module -- Create a new module
+~
+~ Alias:
+~ ~~~~~
+~ nm
+~
+~ Synopsis:
+~ ~~~~~~~~~
+~ play new-module module_path
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Create a new module in the module_path directory.
+~ The module_path directory will be automatically created and must not already exist.
+~
+~ The created module is then ready to be built using the 'build-module' command.
+~
