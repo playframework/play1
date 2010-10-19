@@ -63,5 +63,15 @@
 		<!-- Now unbind dates -->
 		open('@{Application.book(new java.util.Date(2879877856556))}')
 		assertTextPresent('Booked at 04 5,2061 !!')
+		
+		<!-- Binding internal enum with empty string -->
+		open('/databinding/createFactory?factory.number=457&factory.name=Nestle&factory.color=RED')
+		assertTextPresent('false -> Nestle,Color RED')
+		
+		open('/databinding/createFactory?factory.number=457&factory.name=Nestle&factory.color=REDX')
+		assertTextPresent('true -> Nestle,null')
+		
+		open('/databinding/createFactory?factory.number=457&factory.name=Nestle&factory.color=')
+		assertTextPresent('false -> Nestle,null')
 
 #{/selenium}	

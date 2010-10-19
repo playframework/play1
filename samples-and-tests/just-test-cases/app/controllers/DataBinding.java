@@ -76,5 +76,9 @@ public class DataBinding extends Controller {
         person.password = "nicolas";
         return person;
     }
+    
+    public static void createFactory(@play.data.validation.Valid models.Factory factory) {
+        renderText(validation.hasErrors() + " -> " + factory.name + "," + factory.color);
+    }
 }
 
