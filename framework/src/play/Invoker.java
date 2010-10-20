@@ -3,6 +3,7 @@ package play;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +20,7 @@ import play.Play.Mode;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
-import play.jobs.Job;
 import play.mvc.ActionInvoker;
-import play.mvc.Controller;
 import play.mvc.Http.Request;
 
 /**
@@ -88,45 +87,55 @@ public class Invoker {
      */
     public static class InvocationContext {
         /**
-         * The really invoker Java methid
-         */
-        public Method invokedMethod;
-        /**
-         * The invoked controller class
-         */
-        public Class<?> invokedClass;
-        /**
          * Bind to thread
          */
         public static ThreadLocal<InvocationContext> current = new ThreadLocal<InvocationContext>();
-        public static InvocationContext current() { return current.get(); } 
+        public static InvocationContext current() { return current.get(); }
+        
+        public Class<?> invokedClass;
+        public Method invokedMethod;
+
+        @SuppressWarnings("rawtypes")
+        private Map annotations;
+        
+        @SuppressWarnings("rawtypes")
+        public InvocationContext() {
+            annotations = new HashMap();
+        }
+        
+        public InvocationContext(Class<?> invokedClass, Method invokedMethod) {
+            this();
+            this.invokedClass = invokedClass;
+            this.invokedMethod = invokedMethod;
+            loadAnnotationsFromTargetMethod(invokedClass, invokedMethod);
+        }
+        
         /**
          * Helper methods
          */
+        @SuppressWarnings("unchecked")
         public <T extends Annotation> T getAnnotation(Class<T> clazz) {
-            if (invokedMethod == null || invokedClass == null)
-                return null;
-            T ann = invokedMethod.getAnnotation(clazz);
-            if (ann == null) {
-                ann = findAnnotation(invokedClass, clazz);
-            }
-            return ann;
+            return (T) annotations.get(clazz);
         }
         
-        private static <T extends Annotation> T findAnnotation(Class<?> clazz,
-                Class<T> annClazz) {
-            Class<?> currentClazz = clazz;
-            if (currentClazz == null)
-                return null;
-            do {
-                if (currentClazz != null) {
-                    T ann = currentClazz.getAnnotation(annClazz);
-                    if (ann != null)
-                        return ann;
-                }
-                currentClazz = currentClazz.getSuperclass();
-            } while (currentClazz != null);
-            return null;
+        @SuppressWarnings("unchecked")
+        private <T extends Annotation> void addAnnotation(T ann) {
+            annotations.put(ann.annotationType(), ann);
+        }
+        
+        private <T> void loadAnnotationsFromTargetMethod(Class<?> clazz, Method method) {
+            if (clazz != null)
+                loadAnnotations(clazz.getAnnotations());
+            if (method != null)
+                loadAnnotations(method.getAnnotations());
+        }
+        
+        private void loadAnnotations(Annotation[] anns) {
+            if (anns == null) 
+                return;
+            for (Annotation ann : anns) {
+                addAnnotation(ann);
+            }
         }
     }
 
@@ -161,31 +170,24 @@ public class Invoker {
             
             // resolve routes and determine the controller and action method we need to 
             // invoke, if possible
-            InvocationContext context = new InvocationContext();
-            try {
-                if (Job.class.isAssignableFrom(this.getClass())) {
-                    Class<?> invokedClass = this.getClass();
-                    Method invokedMethod = this.getClass().getDeclaredMethod("doJob");
-                    context.invokedClass = invokedClass;
-                    context.invokedMethod = invokedMethod;
-                } else {
-                    try {
-                        ActionInvoker.resolveRoutes(Request.current());
-                        context.invokedClass = Request.current().controllerClass;
-                        context.invokedMethod = Request.current().invokedMethod;
-                    } catch (Throwable ignore) {
-                        // if an exception is thrown, that means no controller and action
-                        // will be invoked, such as for static routes
-                    }
-                }
-            } catch (Throwable t) {
-                throw new UnexpectedException(t);
-            } finally {
-                InvocationContext.current.set(context);
-            }
+            InvocationContext.current.set(setInvocationContext());
             return true;
         }
 
+        public InvocationContext setInvocationContext() {
+            try {
+                ActionInvoker.resolveRoutes(Request.current());
+            } catch (Throwable t) {
+                // could not resolve routes
+                // sometimes this is expected, such as if the route is for a
+                // static file (we will receive RouteStatic)
+            }
+            Class<?> invokedClass = Request.current().controllerClass;
+            Method invokedMethod = Request.current().invokedMethod;
+            InvocationContext context = new InvocationContext(invokedClass, invokedMethod);
+            return context;
+        }
+        
         /**
          * Things to do before an Invocation
          */
