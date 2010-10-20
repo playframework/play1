@@ -38,6 +38,6 @@ public abstract class JavaException extends PlayException implements SourceAttac
 
     @Override
     public boolean isSourceAvailable() {
-        return applicationClass != null && lineNumber != null;
+        return applicationClass != null && applicationClass.javaFile != null && lineNumber != null;
     }
 }
