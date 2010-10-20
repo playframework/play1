@@ -5,7 +5,6 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 
 import play.*;
-import play.classloading.enhancers.ControllersEnhancer.ByPass;
 import play.data.binding.*;
 import play.mvc.*;
 import play.utils.Java;
@@ -160,8 +159,7 @@ public abstract class CRUD extends Controller {
         redirect(request.controller + ".list");
     }
     
-    @ByPass
-    public static ObjectType createObjectType(Class<? extends Model> entityClass) {
+    protected static ObjectType createObjectType(Class<? extends Model> entityClass) {
         return new ObjectType(entityClass);
     }
 
