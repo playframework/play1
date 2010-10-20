@@ -62,7 +62,7 @@ public class WS extends PlayPlugin {
         }
     }
 
-    static void init() {
+    private synchronized static void init() {
         if (wsImpl != null) return;
         String implementation = Play.configuration.getProperty("webservice", "async");
         if (implementation.equals("urlfetch")) {
