@@ -25,7 +25,6 @@ public class OptimisticLockingModelTest {
         final TestModel testModel = new TestModel();
         final OptimisticLockingCheck check = new OptimisticLockingCheckWithoutMessage();
         
-        //You must disable setMessage in the check for this test:-/
         testModel.setVersion(Long.valueOf(2));        
         assertTrue(check.isSatisfied(testModel, ""));
         testModel.setVersion(Long.valueOf(2));

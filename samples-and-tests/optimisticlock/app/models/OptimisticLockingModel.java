@@ -77,11 +77,14 @@ public class OptimisticLockingModel extends GenericModel {
                     (optimisticLockingModel.initialVersion.longValue() > 
                      optimisticLockingModel.version.longValue())) {
                 final Request request = Request.current();
+                Long version = optimisticLockingModel.version;
+                Long initialVersion = optimisticLockingModel.initialVersion ;
                 //The following doesn't work see https://bugs.launchpad.net/play/+bug/634719
                 //http://play.lighthouseapp.com/projects/57987-play-framework/tickets/116
-                //setMessage(checkWithCheck.getMessage(), request != null ? request.url : "");
-                setMessage("optimisticLocking.modelHasChanged", optimisticLockingModel.version.toString(), 
-                        optimisticLockingModel.initialVersion.toString(), request != null ? request.url : ""); 
+//                setMessage(checkWithCheck.getMessage(), version != null ? version.toString() : "", 
+//                        initialVersion != null ? initialVersion.toString() : "", request != null ? request.url : "");
+                setMessage("optimisticLocking.modelHasChanged", version != null ? version.toString() : "", 
+                        initialVersion != null ? initialVersion.toString() : "", request != null ? request.url : ""); 
                 return false;
             } 
             return true;
