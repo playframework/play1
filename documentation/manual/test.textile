@@ -141,6 +141,27 @@ For example:
 bc. %test.db=mem
 %test.jpa.ddl=create-drop
 
+h2. <a name="running_outside">Running tests outside the web based runner</a>
+
+Out of the box, tests written for Play cannot be run with your favorite IDE. This is because Play context needs to be loaded in order for tests to succeed. To overcome this limitation, Play test framework provides you with a JUnit4 Rule that initializes Play before running tests. Tests annotated this way can be run **both** inside web based runner **and** inside an IDE.
+
+For example:
+
+bc. import play.test.*;
+import org.junit.*;
+ 
+public class MyTest extends UnitTest {
+    
+    @Rule
+    public StartPlay startPlayBeforeTests = StartPlay.rule();
+    
+    @Test
+    public void aTest() {
+        assertEquals(2, 1 + 1); // A really important thing to test
+    }
+
+}
+
 h2. <a name="continuous">Continuous integration, and running the tests automatically</a>
 
 The **auto-test** command does the same as the **test** command, but it automatically launches a browser, runs all the tests, and stops.
