@@ -341,36 +341,11 @@ public class Router {
 
     public static String reverseWithCheck(String name, VirtualFile file, boolean absolute) {
         if (file == null || !file.exists()) {
-            //throw new NoRouteFoundException(name + " (file not found)");
-            return reverseStaticFile(name, absolute);
+            throw new NoRouteFoundException(name + " (file not found)");
         }
         return reverse(file, absolute);
     }
     
-    // see if this is a staticFile: route
-    private static String reverseStaticFile(String name, boolean absolute) {
-        for (Route route : routes) {
-            String staticDir = route.staticDir;
-            if (staticDir != null) {
-                if (name.equals(route.path)) {
-                    String to = route.staticDir;
-                    if (!to.startsWith("/")) {
-                        to = "/" + to;
-                    }
-                    if (absolute) {
-                        if (!StringUtils.isEmpty(route.host)) {
-                            to = (Http.Request.current().secure ? "https://" : "http://") + route.host + to;
-                        } else {
-                            to = Http.Request.current().getBase() + to;
-                        }
-                    }
-                    return to;
-                }
-            }
-        }
-        throw new NoRouteFoundException(name);
-    }
-
     public static ActionDefinition reverse(String action, Map<String, Object> args) {
         if (action.startsWith("controllers.")) {
             action = action.substring(12);
