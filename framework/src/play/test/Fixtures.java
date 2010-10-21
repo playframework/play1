@@ -44,6 +44,9 @@ public class Fixtures {
             Model.Manager.factoryFor(type).deleteAll();
         }
         enableForeignKeyConstraints();
+        for(PlayPlugin plugin : Play.plugins) {
+            plugin.afterFixtureLoad();
+        }
     }
 
     public static void delete(List<Class<? extends Model>> classes) {
@@ -85,6 +88,11 @@ public class Fixtures {
             return;
         }
 
+        if (DBPlugin.url.startsWith("jdbc:postgresql:")) {
+            DB.execute("SET CONSTRAINTS ALL DEFERRED");
+            return;
+        }
+
         // Maybe Log a WARN for unsupported DB ?
         Logger.warn("Fixtures : unable to disable constraints, unsupported database : " + DBPlugin.url);
     }
@@ -107,6 +115,10 @@ public class Fixtures {
 
         if (DBPlugin.url.startsWith("jdbc:mysql:")) {
             DB.execute("SET foreign_key_checks = 1;");
+            return;
+        }
+
+        if (DBPlugin.url.startsWith("jdbc:postgresql:")) {
             return;
         }
 
