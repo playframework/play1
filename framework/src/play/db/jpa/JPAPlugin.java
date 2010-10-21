@@ -449,7 +449,7 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         public void deleteAll() {
-            JPA.em().createQuery("delete from " + clazz.getName());
+            JPA.em().createQuery("delete from " + clazz.getName()).executeUpdate();
         }
 
         public List<Model.Property> listProperties() {
