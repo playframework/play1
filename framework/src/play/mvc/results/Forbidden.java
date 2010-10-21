@@ -34,7 +34,11 @@ public class Forbidden extends Result {
         binding.put("flash", Scope.Flash.current());
         binding.put("params", Scope.Params.current());
         binding.put("play", new Play());
-        String errorHtml = TemplateLoader.load("errors/403."+format).render(binding);
+        String errorHtml = getMessage();
+        try {
+            errorHtml = TemplateLoader.load("errors/403."+(format == null ? "html" : format)).render(binding);
+        } catch(Exception e) {
+        }
         try {
             response.out.write(errorHtml.getBytes("utf-8"));
         } catch (Exception e) {

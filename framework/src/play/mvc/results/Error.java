@@ -3,6 +3,7 @@ package play.mvc.results;
 import java.util.Map;
 
 import play.Play;
+import play.exceptions.TemplateNotFoundException;
 import play.exceptions.UnexpectedException;
 import play.libs.MimeTypes;
 import play.mvc.Http;
@@ -31,10 +32,10 @@ public class Error extends Result {
     public void apply(Request request, Response response) {
         response.status = status;
         String format = request.format;
-        if(request.isAjax() && "html".equals(format)) {
+        if (request.isAjax() && "html".equals(format)) {
             format = "txt";
         }
-        response.contentType = MimeTypes.getContentType("xx."+format);
+        response.contentType = MimeTypes.getContentType("xx." + format);
         Map<String, Object> binding = Scope.RenderArgs.current().data;
         binding.put("exception", this);
         binding.put("result", this);
@@ -43,7 +44,11 @@ public class Error extends Result {
         binding.put("flash", Scope.Flash.current());
         binding.put("params", Scope.Params.current());
         binding.put("play", new Play());
-        String errorHtml = TemplateLoader.load("errors/" + this.status + "."+format).render(binding);
+        String errorHtml = getMessage();
+        try {
+            errorHtml = TemplateLoader.load("errors/" + this.status + "." + (format == null ? "html" : format)).render(binding);
+        } catch (Exception e) {
+        }
         try {
             response.out.write(errorHtml.getBytes("utf-8"));
         } catch (Exception e) {
