@@ -25,7 +25,7 @@ public abstract class TemplateCompiler {
     public BaseTemplate compile(VirtualFile file) {
         return compile(new GroovyTemplate(file.relativePath(), file.contentAsString()));
     }
-    
+
     StringBuilder compiledSource = new StringBuilder();
     BaseTemplate template;
     TemplateParser parser;
@@ -37,7 +37,6 @@ public abstract class TemplateCompiler {
     int currentLine = 1;
 
     static class Tag {
-
         String name;
         int startLine;
         boolean hasBody;
