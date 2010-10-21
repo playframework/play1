@@ -51,7 +51,7 @@ public class Unbinder {
                 }
             }
         } else if (Date.class.isAssignableFrom(src.getClass())) {
-            result.put(name, new SimpleDateFormat(DateBinder.ISO).format((Date)src));
+            result.put(name, new SimpleDateFormat(DateBinder.ISO8601).format((Date)src));
         } else {
             Field[] fields = src.getClass().getDeclaredFields();
             for (Field field : fields) {

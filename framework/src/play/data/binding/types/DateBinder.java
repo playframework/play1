@@ -13,7 +13,7 @@ import play.libs.I18N;
  */
 public class DateBinder implements TypeBinder<Date> {
 
-    public static final String ISO = "'ISO8086'yyyy-MM-dd'T'HH:mm:ss";
+    public static final String ISO8601 = "'ISO8601:'yyyy-MM-dd'T'HH:mm:ssZ";
 
     public Date bind(String name, Annotation[] annotations, String value, Class actualClass) throws Exception {
 
@@ -31,7 +31,7 @@ public class DateBinder implements TypeBinder<Date> {
         }
 
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat(ISO);
+            SimpleDateFormat sdf = new SimpleDateFormat(ISO8601);
             sdf.setLenient(false);
             return sdf.parse(value);
         } catch(Exception e) {
