@@ -29,7 +29,8 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     protected boolean wasError = false;
     protected Throwable lastException = null;
 
-    public InvocationContext setInvocationContext() {
+    @Override
+    public InvocationContext getInvocationContext() {
         try {
             Class<?> invokedClass = this.getClass();
             Method invokedMethod;

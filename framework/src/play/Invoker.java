@@ -170,11 +170,11 @@ public class Invoker {
             
             // resolve routes and determine the controller and action method we need to 
             // invoke, if possible
-            InvocationContext.current.set(setInvocationContext());
+            InvocationContext.current.set(getInvocationContext());
             return true;
         }
 
-        public InvocationContext setInvocationContext() {
+        public InvocationContext getInvocationContext() {
             try {
                 ActionInvoker.resolveRoutes(Request.current());
             } catch (Throwable t) {
