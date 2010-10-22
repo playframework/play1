@@ -18,4 +18,9 @@ public abstract class Check {
         }
         checkWithCheck.setVariables();
     }
+
+    public CheckWithCheck getCheckWithCheck() {
+        return this.checkWithCheck;
+    }
+
 }
