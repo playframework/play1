@@ -11,16 +11,23 @@ var i18nMessages = ${js_messages};
 var i18n = function(code) {
     var message;
     if (arguments.length > 1) {
-        var message = i18nMessages[code] || "";
-        for(var i=1; i< arguments.length; i++) {
-            message = message.replace(/%\w/, arguments[i]); 
+        message = i18nMessages[code] || "";
+        // Explicit ordered parameters
+        for (var i=1; i<arguments.length; i++) {
+            var r = new RegExp("%" + i + "\\$\\w", "g");
+            message = message.replace(r, arguments[i]);
+        }
+        // Standard ordered parameters
+        for (var i=1; i<arguments.length; i++) {
+            message = message.replace(/%\w/, arguments[i]);
         }
     } else {
+        // No parameters
         message = i18nMessages && i18nMessages[code] || code;
     }
     // Imbricated messages
-    var imbricated = message.match( /&\{.*?\}/g );
-    for( var i=0; i<imbricated.length; i++ ) {
+    var imbricated = message.match(/&\{.*?\}/g);
+    for (var i=0; i<imbricated.length; i++) {
         var imbricated_code = imbricated[i].substring(2, imbricated[i].length-1).replace(/^\s*(.*?)\s*$/, "$1");
         message = message.replace(imbricated[i], i18nMessages[imbricated_code] || "");
     }
