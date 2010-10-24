@@ -14,10 +14,10 @@ public class I18N {
     static final Map<String, String> symbols = new HashMap<String, String>();
 
     static {
-        symbols.put("JPY", "&yen;");
+        symbols.put("JPY", "¥");
         symbols.put("USD", "$");
-        symbols.put("EUR", "&euro;");
-        symbols.put("GBP", "&pound;");
+        symbols.put("EUR", "€");
+        symbols.put("GBP", "£");
     }
 
     /**
