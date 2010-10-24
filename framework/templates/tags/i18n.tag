@@ -20,7 +20,6 @@ var i18n = function(code) {
     }
     // Imbricated messages
     var imbricated = message.match( /&\{.*?\}/g );
-    alert(imbricated);
     for( var i=0; i<imbricated.length; i++ ) {
         var imbricated_code = imbricated[i].substring(2, imbricated[i].length-1).replace(/^\s*(.*?)\s*$/, "$1");
         message = message.replace(imbricated[i], i18nMessages[imbricated_code] || "");
