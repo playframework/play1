@@ -37,8 +37,10 @@ import play.vfs.VirtualFile;
 public class Fixtures {
 
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
+    static Map<String, Object> idCache = new HashMap<String, Object>();
 
     public static void delete(Class<? extends Model>... types) {
+        idCache.clear();
         disableForeignKeyConstraints();
         for (Class<? extends Model> type : types) {
             Model.Manager.factoryFor(type).deleteAll();
@@ -128,6 +130,7 @@ public class Fixtures {
 
     public static void deleteAll() {
         try {
+            idCache.clear();
             List<String> names = new ArrayList<String>();
             ResultSet rs = DB.getConnection().getMetaData().getTables(null, null, null, new String[]{"TABLE"});
             while (rs.next()) {
@@ -165,7 +168,6 @@ public class Fixtures {
             Object o = yaml.load(is);
             if (o instanceof LinkedHashMap<?, ?>) {
                 @SuppressWarnings("unchecked") LinkedHashMap<Object, Map<?, ?>> objects = (LinkedHashMap<Object, Map<?, ?>>) o;
-                Map<String, Object> idCache = new HashMap<String, Object>();
                 for (Object key : objects.keySet()) {
                     Matcher matcher = keyPattern.matcher(key.toString().trim());
                     if (matcher.matches()) {
@@ -184,7 +186,7 @@ public class Fixtures {
                         serialize(objects.get(key), "object", params);
                         @SuppressWarnings("unchecked")
                         Class<Model> cType = (Class<Model>)Play.classloader.loadClass(type);
-                        resolveDependencies(cType, params, idCache);
+                        resolveDependencies(cType, params);
                         Model model = (Model)Binder.bind("object", cType, cType, null, params);
                         for(Field f : model.getClass().getFields()) {
                             // TODO: handle something like FileAttachment
@@ -213,6 +215,20 @@ public class Fixtures {
         } catch (Throwable e) {
             throw new RuntimeException("Cannot load fixture " + name + ": " + e.getMessage(), e);
         }
+    }
+
+    public static void load(String... names) {
+        for (String name : names) {
+            load(name);
+        }
+    }
+
+    public static void load(List<String> names) {
+        String[] tNames = new String[names.size()];
+        for (int i = 0; i < tNames.length; i++) {
+            tNames[i] = names.get(i);
+        }
+        load(tNames);
     }
 
     static void serialize(Map<?, ?> values, String prefix, Map<String, String[]> serialized) {
@@ -248,7 +264,7 @@ public class Fixtures {
     }
 
     @SuppressWarnings("unchecked")
-    static void resolveDependencies(Class<Model> type, Map<String, String[]> serialized, Map<String, Object> idCache) {
+    static void resolveDependencies(Class<Model> type, Map<String, String[]> serialized) {
         Set<Field> fields = new HashSet<Field>();
         Class<?> clazz = type;
         while (!clazz.equals(Object.class)) {
