@@ -37,6 +37,7 @@ public class Bottle extends Model {
     static class BottleCheck extends Check {
         
         public boolean isSatisfied(Object validatedObject, Object value) {
+            System.out.println(checkWithCheck.getMessage());
             Bottle bottle = (Bottle)validatedObject;
             if(bottle == null || bottle.name1 == null || bottle.name2 == null) {
                 return true;
