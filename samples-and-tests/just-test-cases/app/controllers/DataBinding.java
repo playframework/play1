@@ -44,6 +44,11 @@ public class DataBinding extends Controller {
         renderText(cal.getTime());
     }
 
+
+    public static void showCalendar2(@As(lang={"fr,de","*"}, value={"dd-MM-yyyy","MM-dd-yyyy"}) Calendar cal) {
+        renderText(cal.getTime());
+    }
+
     public static void signinPage() {
         render();
     }

@@ -149,18 +149,27 @@ A date object can be automatically bound if the date’s string representation m
 * MM-dd-yy
 * MM'/'dd'/'yy
 
-Using the **@Bind** annotation, you can specify the date format.
+Using the **@As** annotation, you can specify the date format.
 
 For example:
 
 bc. archives?from=21/12/1980
 
-bc. public static void articlesSince(@Bind("dd/MM/yyyy") Date from) {
+bc. public static void articlesSince(@As("dd/MM/yyyy") Date from) {
     List<Article> articles = Article.findBy("date >= ?", from);
     render(articles);
 }
 
-If no **@Bind** annotation is specified, then Play! uses the default date format according to your locale.
+You can of course refine the date format according to the language. For example:
+
+bc.  public static void articlesSince(@As(lang={"fr,de","*"}, value={"dd-MM-yyyy","MM-dd-yyyy"}) Date from) {
+    List<Article> articles = Article.findBy("date >= ?", from);
+    render(articles);
+}
+
+In this example, we specified that for the French and German languages the date format is **dd-MM-yyyy** and for all the other languages it's **MM-dd-yyyy**. Please note that the lang value can be comma separated. The important thing is that the number of parameters for lang matches the number of parameters for value. 
+
+If no **@As** annotation is specified, then Play! uses the default date format according to your locale.
 To set the default date format to use, edit your application.conf and set the following property:
 
 bc. date.format=yyy-MM-dd
