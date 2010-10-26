@@ -105,8 +105,7 @@ bc. public static void update(@As("dd/MM/yyyy") Date updatedAt) {
 The **@As** annotation as also support for internationalization. It means that you can provide a specific annotation for each locale:
 
 bc. public static void update(
-		@As(value="dd/MM/yyyy", lang="fr") 
-		@As(value="MM-dd-yy", lang="en") 
+		@As(lang={"fr,de","en","*"}, value={"dd/MM/yyyy","dd-MM-yyyy","MM-dd-yy"})
 		Date updatedAt
 	) {
 	...
