@@ -507,6 +507,19 @@
                 }
                         
             });
+            function toggle_trace(link){
+            	var $link = jQuery(link);
+            	var $trace = jQuery("pre[data-role=trace]", $link.parent());
+            	if($trace.attr('data-shown') == "true"){
+            		$trace.hide();
+            		$link.text("Show trace");
+            		$trace.attr('data-shown', false);
+            	}else{
+            		$trace.show();
+            		$link.text("Hide trace");
+            		$trace.attr('data-shown', true);
+            	}
+            }
         </script>
     </head>
     <body>
