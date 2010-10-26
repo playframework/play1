@@ -1,3 +1,9 @@
+play-1.1rc1-20-g2b079e4 (play-1.1rc1-20-g2b079e4-3) maverick; urgency=low
+
+  * Added a way to show the tests traces.
+
+ -- Stephane Epardaud <stephane@epardaud.fr>  Tue, 26 Oct 2010 17:04:32 +0200
+
 play-1.1rc1-20-g2b079e4 (play-1.1rc1-20-g2b079e4-2) maverick; urgency=low
 
   * New async http client that eases the tests
