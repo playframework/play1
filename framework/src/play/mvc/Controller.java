@@ -62,6 +62,7 @@ import com.thoughtworks.xstream.XStream;
  */
 public class Controller implements ControllerSupport, LocalVariablesSupport {
 
+    
     /**
      * The current HTTP request: the message sent by the client to the server.
      *
@@ -655,15 +656,28 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         }
         renderTemplate(templateName, args);
     }
-
+    protected static void setViewPrefixPath(String viewPrefixPath)
+    {
+        Request.current().args.put("viewPrefixPath",viewPrefixPath);
+     }
     /**
      * Work out the default template to load for the invoked action.
      * E.g. "controllers.Pages.index" returns "views/Pages/index.html".
      */
     protected static String template() {
         final Request theRequest = Request.current();
-        final String format = theRequest.format;
+        final String format = theRequest.format; 
         String templateName = theRequest.action.replace(".", "/") + "." + (format == null ? "html" : format);
+        
+        //add view Prefix Path
+        //such as i want to build a site,Pc,iphone,ipad,android,nokia...visit this site.
+        //some common controller,but diffrent view template.so but the view template in diffent directory
+        //E.g. views/pc/Pages/index.html,views/iphone/Pages/index.html,views/ipad/Pages/index.html
+        //views/oldphone/Pages/index.wml
+        
+        if (Http.Request.current().args.containsKey("viewPrefixPath")) {
+		templateName = theRequest.args.get("viewPrefixPath")+ "/"+ templateName;
+	}
         if (templateName.startsWith("@")) {
             templateName = templateName.substring(1);
             if (!templateName.contains(".")) {
