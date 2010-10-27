@@ -114,3 +114,8 @@ samples-and-tests/jobboard/test-result
 samples-and-tests/jobboard/tmp
 samples-and-tests/validation/logs
 samples-and-tests/zencontact/precompiled
+!modules/docviewer
+!modules/crud
+!modules/console
+!modules/grizzly
+!modules/secure
