@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -454,7 +455,7 @@ public class JPAPlugin extends PlayPlugin {
 
         public List<Model.Property> listProperties() {
             List<Model.Property> properties = new ArrayList<Model.Property>();
-            Set<Field> fields = new HashSet<Field>();
+            Set<Field> fields = new LinkedHashSet<Field>();
             Class<?> tclazz = clazz;
             while (!tclazz.equals(Object.class)) {
                 Collections.addAll(fields, tclazz.getDeclaredFields());
