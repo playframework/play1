@@ -61,10 +61,6 @@ public class Scope {
                         flash.data.put(matcher.group(1), matcher.group(2));
                     }
                 }
-				else {
-				
-					
-				}
 				
                 return flash;
             } catch (Exception e) {
