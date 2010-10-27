@@ -324,14 +324,24 @@ public class JavaExtensions {
     }
 
     public static String slugify(String string) {
+        return slugify(string, Boolean.TRUE);
+    }
+
+    public static String slugify(String string, Boolean lowercase) {
         string = noAccents(string);
-        return string.replaceAll("[^\\w]", "-").replaceAll("-{2,}", "-").replaceAll("-$", "").toLowerCase();
+        // Apostrophes.
+        string = string.replaceAll("([a-z])'s([^a-z])", "$1s$2");
+        string = string.replaceAll("[^\\w]", "-").replaceAll("-{2,}", "-");
+        // Get rid of any - at the start and end.
+        string.replaceAll("-+$", "").replaceAll("^-+", "");
+
+        return (lowercase ? string.toLowerCase() : string);
     }
 
     public static String camelCase(String string) {
         string = noAccents(string);
         string = string.replaceAll("[^\\w ]", "");
-        StringBuilder result = new StringBuilder();
+        StringBuilder result = new StringBuilder(string.length());
         for (String part : string.split(" ")) {
             result.append(capFirst(part));
         }
