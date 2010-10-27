@@ -6,7 +6,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -731,10 +730,15 @@ public class Router {
          * @param method GET/POST/etc.
          * @param path Part after domain and before query-string. Starts with a "/".
          * @param accept Format, e.g. html.
-         * @param host AKA the domain.
+         * @param host Domain name. If there is a port number, that is removed.
          * @return ???
          */
         public Map<String, String> matches(String method, String path, String accept, String host) {
+            // Remove the port from host.
+            if (host.lastIndexOf(':') != -1) {
+                host = host.substring(0, host.lastIndexOf(':'));
+            }
+
             // Normalize
             if (path.equals(Play.ctxPath)) {
                 path = path + "/";
