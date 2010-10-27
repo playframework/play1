@@ -29,7 +29,12 @@ import play.utils.Default;
  * The router matches HTTP requests to action invocations
  */
 public class Router {
-
+	
+	/**
+     * add some params to all url 
+     */
+	public static final String GlobalUrlParams = "GlobalUrlParams";
+	
     static Pattern routePattern = new Pattern("^({method}GET|POST|PUT|DELETE|OPTIONS|HEAD|\\*)[(]?({headers}[^)]*)(\\))?\\s+({path}.*/[^\\s]*)\\s+({action}[^\\s(]+)({params}.+)?(\\s*)$");
     /**
      * Pattern used to locate a method override instruction in request.querystring
@@ -369,6 +374,11 @@ public class Router {
         if (action.startsWith("controllers.")) {
             action = action.substring(12);
         }
+		if(play.mvc.Http.Request.current()!=null && play.mvc.Http.Request.current().args!=null && play.mvc.Http.Request.current().args.containsKey(Router.GlobalUrlParams))
+		{
+			if(args==null)args = new HashMap<String,Object>();
+			args.putAll((Map)play.mvc.Http.Request.current().args.get(Router.GlobalUrlParams));
+		}
         Map<String, Object> argsbackup = args;
         // Add routeArgs
         if (Scope.RouteArgs.current() != null) {
