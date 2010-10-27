@@ -263,7 +263,17 @@ public class Scope {
                 }
                 String sessionData = URLEncoder.encode(session.toString(), "utf-8");
                 String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
-				Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_SESSION");
+				final Http.Request theRequest = Http.Request.current();
+				Http.Cookie cookie = theRequest.cookies.get(COOKIE_PREFIX + "_SESSION");
+				
+				//add  psessionid to GlobalUrlParams
+				theRequest.args.put("psessionid",getId());
+				if(!theRequest.args.containsKey(play.mvc.Router.GlobalUrlParams))
+				{
+					theRequest.args.put(play.mvc.Router.GlobalUrlParams,new HashMap<String,Object>());
+				}
+				((Map) theRequest.args.get(Router.GlobalUrlParams)).put("psessionid", getId());
+			
                 if (COOKIE_EXPIRE == null) {
                     Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, null, "/", null, COOKIE_SECURE, SESSION_HTTPONLY);
 					//donot support cookie
