@@ -59,6 +59,26 @@ import play.utils.HTML;
  */
 public class GroovyTemplate extends BaseTemplate {
 
+    /**
+     * Customize the directory to find tags in with the config option "play.tagsDirectory". If tags should be
+     * found in "views/" instead of "views/tags/", put in application.conf: "play.tagsDirectory="
+     */
+    private static final String tagsDirectory;
+
+    static
+    {
+        String tagsDirConf = Play.configuration.getProperty("play.tagsDirectory");
+        if (tagsDirConf == null)
+        {
+            tagsDirConf = "tags/";
+        }
+        else if (!tagsDirConf.endsWith("/"))
+        {
+            tagsDirConf = tagsDirConf + "/";
+        }
+        tagsDirectory = tagsDirConf;
+    }
+
     public GroovyTemplate(String name, String source) {
         super(name, source);
     }
@@ -119,7 +139,6 @@ public class GroovyTemplate extends BaseTemplate {
                     }
                 });
                 compilationUnit.compile();
-                // ouf 
 
                 // Define script classes
                 StringBuilder sb = new StringBuilder();
@@ -296,19 +315,38 @@ public class GroovyTemplate extends BaseTemplate {
             }
             BaseTemplate tagTemplate = null;
             try {
-                tagTemplate = (BaseTemplate)TemplateLoader.load("tags/" + templateName + "." + callerExtension);
+                tagTemplate = (BaseTemplate)TemplateLoader.load(tagsDirectory + templateName + "." + callerExtension);
             } catch (TemplateNotFoundException e) {
                 try {
-                    tagTemplate = (BaseTemplate)TemplateLoader.load("tags/" + templateName + ".tag");
+                    tagTemplate = (BaseTemplate)TemplateLoader.load(tagsDirectory + templateName + ".tag");
                 } catch (TemplateNotFoundException ex) {
-                    if (callerExtension.equals("tag")) {
-                        throw new TemplateNotFoundException("tags/" + templateName + ".tag", template, fromLine);
+                    // If the tag directory has been customized in application.conf, the framework's core tags
+                    // won't be found above because they are still in the framework's own "tags/" directory.
+                    if (!tagsDirectory.equals("tags/")) {
+                        try {
+                            tagTemplate = (BaseTemplate) TemplateLoader.load("tags/" + templateName + "." + callerExtension);
+                        } catch (TemplateNotFoundException e3) {
+                            try {
+                                tagTemplate = (BaseTemplate) TemplateLoader.load("tags/" + templateName + ".tag");
+                            } catch (TemplateNotFoundException e4) {
+                                if (callerExtension.equals("tag")) {
+                                    throw new TemplateNotFoundException("tags/" + templateName + ".tag", template, fromLine);
+                                }
+                                throw new TemplateNotFoundException("tags/" + templateName + "." + callerExtension + " or tags/" + templateName + ".tag", template, fromLine);
+                            }
+                        }
+                    } else {
+                        if (callerExtension.equals("tag")) {
+                            throw new TemplateNotFoundException(tagsDirectory + templateName + ".tag", template, fromLine);
+                        }
+                        throw new TemplateNotFoundException(tagsDirectory + templateName + "." + callerExtension + " or " + tagsDirectory + templateName + ".tag", template, fromLine);
                     }
-                    throw new TemplateNotFoundException("tags/" + templateName + "." + callerExtension + " or tags/" + templateName + ".tag", template, fromLine);
                 }
             }
+
             TagContext.enterTag(tag);
-            Map<String, Object> args = new HashMap<String, Object>();
+
+            Map<String, Object> args = new HashMap<String, Object>(11 + attrs.size());
             args.put("session", getBinding().getVariables().get("session"));
             args.put("flash", getBinding().getVariables().get("flash"));
             args.put("request", getBinding().getVariables().get("request"));
