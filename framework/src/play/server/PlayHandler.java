@@ -46,6 +46,18 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
 
+    /**
+     * If true (the default), Play will send the HTTP header "Server: Play! Framework; ....".
+     * This could be a security problem (old versions having publicly known security bugs), so you can
+     * disable the header in application.conf: <code>http.exposePlayServer = false</code>
+     */
+    private final static boolean exposePlayServer;
+
+    static
+    {
+        exposePlayServer = !"false".equals(Play.configuration.getProperty("http.exposePlayServer"));
+    }
+
     public Request processRequest(Request request) {
         return request;
     }
@@ -286,7 +298,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         // Decide whether to close the connection or not.
 
         HttpResponse nettyResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.status));
-        nettyResponse.setHeader(SERVER, signature);
+        if (exposePlayServer) {
+            nettyResponse.setHeader(SERVER, signature);
+        }
 
         if (response.contentType != null) {
             nettyResponse.setHeader(CONTENT_TYPE, response.contentType + (response.contentType.startsWith("text/") && !response.contentType.contains("charset") ? "; charset=utf-8" : ""));
@@ -567,7 +581,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     public static void serve500(Exception e, ChannelHandlerContext ctx, HttpRequest nettyRequest) {
         Logger.trace("serve500: begin");
         HttpResponse nettyResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
-        nettyResponse.setHeader(SERVER, signature);
+        if (exposePlayServer) {
+            nettyResponse.setHeader(SERVER, signature);
+        }
 
         Request request = Request.current();
         Response response = Response.current();
@@ -649,7 +665,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     public static void serveStatic(RenderStatic renderStatic, ChannelHandlerContext ctx, Request request, Response response, HttpRequest nettyRequest, MessageEvent e) {
         Logger.trace("serveStatic: begin");
         HttpResponse nettyResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.status));
-        nettyResponse.setHeader("Server", signature);
+        if (exposePlayServer) {
+            nettyResponse.setHeader(SERVER, signature);
+        }
         try {
             VirtualFile file = Play.getVirtualFile(renderStatic.file);
             if (file != null && file.exists() && file.isDirectory()) {
