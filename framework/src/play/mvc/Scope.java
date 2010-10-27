@@ -42,13 +42,30 @@ public class Scope {
             try {
                 Flash flash = new Flash();
                 Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_FLASH");
+				String value = null;
                 if (cookie != null) {
-                    String flashData = URLDecoder.decode(cookie.value, "utf-8");
+					value = cookie.value;
+				}
+				else {
+					String psessionid = Scope.Params.current().get("psessionid");
+					if(psessionid != null && !psessionid.trim().equals(""))
+					{
+						value =(String) play.cache.Cache.get(Scope.COOKIE_PREFIX + "_FLASH_"+psessionid);
+					}
+				
+				}
+				if(value != null) {
+                    String flashData = URLDecoder.decode(value, "utf-8");
                     Matcher matcher = flashParser.matcher(flashData);
                     while (matcher.find()) {
                         flash.data.put(matcher.group(1), matcher.group(2));
                     }
                 }
+				else {
+				
+					
+				}
+				
                 return flash;
             } catch (Exception e) {
                 throw new UnexpectedException("Flash corrupted", e);
@@ -67,6 +84,22 @@ public class Scope {
                 }
                 String flashData = URLEncoder.encode(flash.toString(), "utf-8");
                 Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", flashData, null, "/", null, COOKIE_SECURE);
+				Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_FLASH");
+				if(cookie == null)
+				{
+					if(flashData==null || flashData.trim().equals(""))
+					{
+						play.cache.Cache.delete(COOKIE_PREFIX + "_FLASH_"+Scope.Session.current().getId());
+					}
+					else
+					{
+						play.cache.Cache.set(COOKIE_PREFIX + "_FLASH_"+Scope.Session.current().getId(),flashData);
+					}
+					
+					
+				}
+
+				
             } catch (Exception e) {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
@@ -158,8 +191,19 @@ public class Scope {
             try {
                 Session session = new Session();
                 Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_SESSION");
+				String value = null;
                 if (cookie != null && Play.started) {
-                    String value = cookie.value;
+					value = cookie.value;
+				}
+				//donot support cookie
+				else if(cookie == null && Play.started) {
+					String psessionid = Scope.Params.current().get("psessionid");
+					if(psessionid != null && !psessionid.trim().equals(""))
+					{
+						value =(String) play.cache.Cache.get(Scope.COOKIE_PREFIX + "_SESSION_"+psessionid);
+					}
+				}
+				if(value != null){
                     String sign = value.substring(0, value.indexOf("-"));
                     String data = value.substring(value.indexOf("-") + 1);
                     if (sign.equals(Crypto.sign(data, Play.secretKey.getBytes()))) {
@@ -182,6 +226,7 @@ public class Scope {
                         session.put("___TS", System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
                     }
                 }
+				
                 if (!session.contains("___ID")) {
                     session.put("___ID", Codec.UUID());
                 }
@@ -222,11 +267,22 @@ public class Scope {
                 }
                 String sessionData = URLEncoder.encode(session.toString(), "utf-8");
                 String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
+				Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_SESSION");
                 if (COOKIE_EXPIRE == null) {
                     Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, null, "/", null, COOKIE_SECURE, SESSION_HTTPONLY);
+					//donot support cookie
+					if(cookie == null) {
+						play.cache.Cache.set(COOKIE_PREFIX + "_SESSION_"+getId(), sign + "-" + sessionData);
+					}
+				
                 } else {
                     Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, null, "/", Time.parseDuration(COOKIE_EXPIRE), COOKIE_SECURE, SESSION_HTTPONLY);
+					//donot support cookie
+					if(cookie == null) {
+						play.cache.Cache.set(COOKIE_PREFIX + "_SESSION_"+getId(), sign + "-" + sessionData,COOKIE_EXPIRE);
+					}
                 }
+				
             } catch (Exception e) {
                 throw new UnexpectedException("Session serializationProblem", e);
             }
