@@ -48,6 +48,6 @@ Play is standard Java, so any standard Java library can easily be used. However 
 
 h2. <a>How can I help/contribute?</a>
 
-We use "launchpad":https://launchpad.net/ as our main development tool, and launchpad itself is very open. You can just register a launchpad account and start to contribute. You can assign any open bug to yourself, fork any Play official branch to your own branch, and propose a merge to us if you have fixed something.
+We use "GitHub":http://github.com/playframework/play as our main development tool, and launchpad itself is very open. You can just register a GitHub account and fork the code base. Check the "contributor guide":http://play.lighthouseapp.com/projects/57987/contributor-guide.
 
-The documentation itself is kept as "Textile":http://en.wikipedia.org/wiki/Textile_(markup_language%29 files in the framework "source repository":http://bazaar.launchpad.net/~play-developers/play/1.1-unstable/files/head%3A/documentation/manual, so you can edit it and contribute just as you do with code.
+The documentation itself is kept as "Textile":http://en.wikipedia.org/wiki/Textile_(markup_language%29 files in the framework source repository, so you can edit it and contribute just as you do with code.

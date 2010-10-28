@@ -106,7 +106,10 @@ bc. public static void update(@As("dd/MM/yyyy") Date updatedAt) {
 The **@As** annotation as also support for internationalization. It means that you can provide a specific annotation for each locale:
 
 bc. public static void update(
-		@As(lang={"fr,de","en","*"}, value={"dd/MM/yyyy","dd-MM-yyyy","MM-dd-yy"})
+		@As(
+			lang={"fr,de","en","*"}, 
+			value={"dd/MM/yyyy","dd-MM-yyyy","MM-dd-yy"}
+		)
 		Date updatedAt
 	) {
 	...
@@ -279,7 +282,7 @@ You can omit the **lang** parameter for each action, and manage it in a single *
 bc. @Before
 static setLang(String lang) {
     Lang.set(lang);
-    routeArgs("lang", lang);
+    routeArgs.put("lang", lang);
 }
 
 By adding the **lang** argument to the **routeArgs** scope, it will automatically be used for reverse routing, even if not specified:
