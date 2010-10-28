@@ -676,8 +676,8 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         
         //add view Prefix Path
         if (theRequest.args.containsKey("viewPrefixPath")) {
-		templateName = theRequest.args.get("viewPrefixPath")+ "/"+ templateName;
-	}
+        	templateName = theRequest.args.get("viewPrefixPath")+ "/"+ templateName;
+        }
         if (templateName.startsWith("@")) {
             templateName = templateName.substring(1);
             if (!templateName.contains(".")) {
