@@ -10,6 +10,10 @@ html, body {
     line-height: 1.5em !important;
 }
 
+html {
+    border-top: 5px solid #67A927;    
+}
+
 a {
     color: #000;
 }
