@@ -656,7 +656,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         renderTemplate(templateName, args);
     }
     /**
-      * to build a website,the client includes Pc,iphone,ipad,android,nokia...
+      * to build a website,the client includes Pc,iphone,ipad,android,nokia..
       * use the same controller,but diffrent view template.so can put the view template in diffent directory
       * E.g. views/pc/Pages/index.html,views/iphone/Pages/index.html,views/ipad/Pages/index.html
       * views/oldphone/Pages/index.wml
