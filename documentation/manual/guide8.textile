@@ -123,9 +123,8 @@ Now, go to the blog home page, click the ‘Log in to write something’ link an
 
 Good start! But since we will have several pages in this administration area, we need a super-template. Let’s create it in the **yabe/app/views/admin.html** file:
 
-bc. <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
- 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+bc. <!DOCTYPE html>
+<html>
     <head>
         <title>Administration</title>		
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>

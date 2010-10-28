@@ -27,13 +27,11 @@ To benefit from the latest improvements and bug fixes, you may want to compile P
 
 From the command line:
 
-bc. # bzr checkout lp:play
+bc. # git clone git://github.com/playframework/play.git
 # cd play/framework
 # ant
 
 The Play framework is ready to use.
-
-p(note). **lp:play** currently aliases to **http:bazaar.launchpad.net/%7Eplay-developers/play/1.0/**
 
 
 h2. <a>Using the play command</a>
