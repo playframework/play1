@@ -29,7 +29,7 @@ public class IO {
      * @param is Stream to properties file
      * @return The Properties object
      */
-    public static Properties readUtf8Properties(InputStream is) {
+    public static Properties readUtf8Properties1(InputStream is) {
         Properties properties = new OrderSafeProperties();
         try {
             properties.load(is);
@@ -39,6 +39,28 @@ public class IO {
                 properties.setProperty(key.toString(), goodValue);
             }
             is.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return properties;
+    }
+    
+    /**
+     * Read a properties file with the utf-8 encoding
+     * @param is Stream to properties file
+     * @return The Properties object
+     * @throws java.io.IOException
+     */
+    public static Properties readUtf8Properties(InputStream is){
+        Properties properties = new Properties();
+        try {
+        properties.load(is);
+        for (Object key : properties.keySet()) {
+            String value = properties.getProperty(key.toString());
+            String goodValue = new String(value.getBytes("iso8859-1"), "utf-8");
+            properties.setProperty(key.toString(), goodValue);
+        }
+        is.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
