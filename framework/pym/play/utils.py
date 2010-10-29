@@ -189,7 +189,7 @@ def copy_directory(source, target):
         os.makedirs(target)
     for root, dirs, files in os.walk(source):         
         for file in files:
-            if root.find('/.') > -1:
+            if root.find('/.') > -1 or root.find('\\.') > -1:
                 continue
             if file.find('~') == 0 or file.startswith('.'):
                 continue
