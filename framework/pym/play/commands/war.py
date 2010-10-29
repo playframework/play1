@@ -37,12 +37,14 @@ def execute(**kargs):
                   print "~  %s" %excluded
     except getopt.GetoptError, err:
         print "~ %s" % str(err)
-        print "~ Please specify a path where to generate the WAR, using the -o or --output option"
+        print "~ Please specify a path where to generate the WAR, using the -o or --output option."
+        print "~ To exclude some directories, use the --exclude option and ':'-separator (eg: --exclude .svn:target:logs:tmp)."
         print "~ "
         sys.exit(-1)
         
     if not war_path:
         print "~ Oops. Please specify a path where to generate the WAR, using the -o or --output option"
+        print "~ To exclude some directories, use the --exclude option and ':'-separator (eg: --exclude .svn:target:logs:tmp)."
         print "~"
         sys.exit(-1)
 
