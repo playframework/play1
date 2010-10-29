@@ -65,7 +65,6 @@ class Release:
         self.numpart = re.findall(r"\d+[\.\d+]+", strversion)[0]
         self.rest = strversion.replace(self.numpart, "")
         self.versions = map(lambda x: int(x), self.numpart.split("."))
-        if not self.rest: self.rest = "Z" # Hack for final release
 
     def url(self):
         return "http://download.playframework.org/releases/play-" + self.strversion + ".zip"
