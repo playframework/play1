@@ -21,22 +21,30 @@ def execute(**kargs):
     
     war_path = None
     war_zip_path = None
+    war_exclusion_list = None
     try:
-        optlist, args = getopt.getopt(args, 'o:', ['output=', 'zip'])
+        optlist, args = getopt.getopt(args, 'o:', ['output=', 'zip','exclude='])
         for o, a in optlist:
             if o in ('-o', '--output'):
                 war_path = os.path.normpath(os.path.abspath(a))
         for o, a in optlist:
             if o in ('--zip'):
                 war_zip_path = war_path + '.war'
+            if o in ('--exclude'):
+                war_exclusion_list = a.split(':')
+                print "~ Excluding these directories :"
+                for excluded in war_exclusion_list:
+                  print "~  %s" %excluded
     except getopt.GetoptError, err:
         print "~ %s" % str(err)
-        print "~ Please specify a path where to generate the WAR, using the -o or --output option"
+        print "~ Please specify a path where to generate the WAR, using the -o or --output option."
+        print "~ To exclude some directories, use the --exclude option and ':'-separator (eg: --exclude .svn:target:logs:tmp)."
         print "~ "
         sys.exit(-1)
         
     if not war_path:
         print "~ Oops. Please specify a path where to generate the WAR, using the -o or --output option"
+        print "~ To exclude some directories, use the --exclude option and ':'-separator (eg: --exclude .svn:target:logs:tmp)."
         print "~"
         sys.exit(-1)
 
@@ -54,7 +62,7 @@ def execute(**kargs):
     play.commands.precompile.execute(command=command, app=app, args=args, env=env)
        
     # Package 
-    package_as_war(app, env, war_path, war_zip_path)
+    package_as_war(app, env, war_path, war_zip_path, war_exclusion_list)
     
     print "~ Done !"
     print "~"
