@@ -55,8 +55,10 @@ public class SslHttpServerContextFactory {
 
                 // Set up key manager factory to use our key store
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
+                kmf.init(ks, certificatePassword);
 
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance(algorithm);
+
                 tmf.init(ks);
 
                 // Initialize the SSLContext to work with our key managers.

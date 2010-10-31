@@ -395,8 +395,10 @@ public class Router {
                         inPathArgs.add(arg.name);
                         Object value = args.get(arg.name);
                         if (value == null) {
+                            // This is a hack for reverting on hostname that are a regex expression.
+                            // See [#344] for more into. This is not optimal and should retough. However,
+                            // it allows us to do things like {(.*}}.domain.com
                             String host = route.host.replaceAll("\\{", "").replaceAll("\\}", "");
-                            Logger.trace("arg.name " + arg.name + " host " + host);
                             if (host.equals(arg.name) || host.matches(arg.name)) {
                                 args.remove(arg.name);
                                 route.host = Http.Request.current().domain;
