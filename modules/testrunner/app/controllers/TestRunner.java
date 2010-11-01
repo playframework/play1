@@ -99,6 +99,7 @@ public class TestRunner extends Controller {
             }
         }
         if (test.endsWith(".test.html.result")) {
+            flash.keep();
             test = test.substring(0, test.length() - 7);
             File testResults = Play.getFile("test-result/" + test.replace("/", ".") + ".passed.html");
             if (testResults.exists()) {
