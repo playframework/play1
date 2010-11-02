@@ -6,7 +6,6 @@
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
-#export DH_COMPAT=3
 
 VERSION=$(shell git describe --tags refs/heads/master | tr '[A-Z]' '[a-z]')
 
@@ -19,38 +18,19 @@ ETC_PATH_HH=/etc/play/$(VERSION)-hh
 DOC_PATH=/usr/share/doc/play-$(VERSION)
 DOC_PATH_HH=/usr/share/doc/play-$(VERSION)-hh
 
-test:
-	-echo "INSTALL: $(INSTALL_PATH)"
+%:
+	dh  $@
 
-configure: configure-stamp
-configure-stamp:
-	dh_testdir
-	touch configure-stamp
-
-
-build: configure-stamp build-stamp
-build-stamp:
-	dh_testdir
+override_dh_auto_build: 
 	cd framework; \
 	ant
 	./play help > /dev/null
-	touch build-stamp
 
-
-clean:
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp configure-stamp
+override_dh_auto_clean: 
 	cd framework; \
 	ant clean
-	dh_clean
 
-
-install: 
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	dh_installdirs
+override_dh_auto_install: 
 	# New hibernate
 	install -d $(DEB_PATH)$(INSTALL_PATH) $(DEB_PATH)$(INSTALL_PATH)/modules $(DEB_PATH)$(ETC_PATH) $(DEB_PATH)$(DOC_PATH)
 	cp -r framework play resources support $(DEB_PATH)$(INSTALL_PATH)
@@ -79,32 +59,3 @@ install:
 	cp -r debian/id repositories $(DEB_PATH_HH)$(ETC_PATH_HH)
 	ln -s $(ETC_PATH_HH)/repositories $(DEB_PATH_HH)$(INSTALL_PATH_HH)
 	ln -s $(ETC_PATH_HH) $(DEB_PATH_HH)$(INSTALL_PATH_HH)/etc
-
-
-# Build architecture-dependent files here.
-binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_installdocs
-	dh_installexamples
-	dh_installmenu
-	dh_installinit
-	dh_installcron
-#	dh_installmanpages
-	dh_installchangelogs 
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-	dh_perl 
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-source diff:                                                                  
-	@echo >&2 'source and diff are obsolete - use dpkg-source -b'; false
-
-binary: binary-arch
-.PHONY: build clean binary-indep binary-arch binary
