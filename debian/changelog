@@ -1,3 +1,9 @@
+play-1.1rc1-20-g2b079e4 (play-1.1rc1-20-g2b079e4-4) maverick; urgency=low
+
+  * Fix for packages
+
+ -- Stephane Epardaud <stephane@epardaud.fr>  Tue, 02 Nov 2010 09:54:41 +0100
+
 play-1.1rc1-20-g2b079e4 (play-1.1rc1-20-g2b079e4-3) maverick; urgency=low
 
   * Added a way to show the tests traces.
