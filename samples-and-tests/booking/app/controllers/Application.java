@@ -45,7 +45,7 @@ public class Application extends Controller {
         if(validation.hasErrors()) {
             render("@register", user, verifyPassword);
         }
-        user.save();
+        user.create();
         session.put("user", user.username);
         flash.success("Welcome, " + user.name);
         Hotels.index();
