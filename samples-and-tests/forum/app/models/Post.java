@@ -28,7 +28,7 @@ public class Post extends Model {
         this.postedBy = postedBy;
         this.content = content;
         this.postedAt = new Date();
-        save();
+        create();
     }
     
 }

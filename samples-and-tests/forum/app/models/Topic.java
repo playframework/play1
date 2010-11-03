@@ -25,7 +25,7 @@ public class Topic extends Model {
     public Topic(Forum forum, User by, String subject, String content) {
         this.forum = forum;
         this.subject = subject;
-        save();
+        create();
         new Post(this, by, content);
     }
     

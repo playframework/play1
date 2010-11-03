@@ -20,7 +20,7 @@ public class Forum extends Model {
     public Forum(String name, String description) {
         this.name = name;
         this.description = description;
-        save();
+        create();
     }
     
     // ~~~~~~~~~~~~ 

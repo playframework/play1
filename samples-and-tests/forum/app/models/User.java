@@ -30,7 +30,7 @@ public class User extends Model {
         this.passwordHash = Codec.hexMD5(password);
         this.name = name;
         this.needConfirmation = Codec.UUID();
-        save();
+        create();
     }
     
     // ~~~~~~~~~~~~ 
