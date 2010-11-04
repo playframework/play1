@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import jregex.Matcher;
 import jregex.Pattern;
 import jregex.REFlags;
@@ -205,7 +206,7 @@ public class Router {
 
     /**
      * In PROD mode and if the routes are already loaded, this does nothing.
-     *
+     * <p/>
      * <p>In DEV mode, this checks each routes file's "last modified" time to see if the routes need updated.
      *
      * @param prefix The prefix that the path of all routes in this route file start with. This prefix should not end with a '/' character.
@@ -346,6 +347,7 @@ public class Router {
                     }
                     if (absolute) {
                         if (!StringUtils.isEmpty(route.host)) {
+                            // Compute the host
                             to = (Http.Request.current().secure ? "https://" : "http://") + route.host + to;
                         } else {
                             to = Http.Request.current().getBase() + to;
@@ -393,8 +395,18 @@ public class Router {
                         inPathArgs.add(arg.name);
                         Object value = args.get(arg.name);
                         if (value == null) {
-                            allRequiredArgsAreHere = false;
-                            break;
+                            // This is a hack for reverting on hostname that are a regex expression.
+                            // See [#344] for more into. This is not optimal and should retough. However,
+                            // it allows us to do things like {(.*}}.domain.com
+                            String host = route.host.replaceAll("\\{", "").replaceAll("\\}", "");
+                            if (host.equals(arg.name) || host.matches(arg.name)) {
+                                args.remove(arg.name);
+                                route.host = Http.Request.current().domain;
+                                break;
+                            } else {
+                                allRequiredArgsAreHere = false;
+                                break;
+                            }
                         } else {
                             if (value instanceof List<?>) {
                                 @SuppressWarnings("unchecked")
@@ -417,7 +429,7 @@ public class Router {
                             continue; // format is a special key
                         }
                         if (!args.containsKey(staticKey) || (args.get(staticKey) == null)
-                                        || !args.get(staticKey).toString().equals(route.staticArgs.get(staticKey))) {
+                                || !args.get(staticKey).toString().equals(route.staticArgs.get(staticKey))) {
                             allRequiredArgsAreHere = false;
                             break;
                         }
@@ -625,7 +637,8 @@ public class Router {
                     String p = this.path;
                     this.path = p.substring(p.indexOf("/"));
                     this.host = p.substring(0, p.indexOf("/"));
-                    String pattern = host.replaceAll("\\.", "\\\\.").replaceFirst("\\{.*\\}", "(.*)");
+                    String pattern = host.replaceAll("\\.", "\\\\.").replaceAll("\\{.*\\}", "(.*)");
+
                     Logger.trace("pattern [" + pattern + "]");
                     Logger.trace("host [" + host + "]");
 
@@ -729,9 +742,9 @@ public class Router {
          * Check if the parts of a HTTP request equal this Route.
          *
          * @param method GET/POST/etc.
-         * @param path Part after domain and before query-string. Starts with a "/".
+         * @param path   Part after domain and before query-string. Starts with a "/".
          * @param accept Format, e.g. html.
-         * @param host AKA the domain.
+         * @param host   AKA the domain.
          * @return ???
          */
         public Map<String, String> matches(String method, String path, String accept, String host) {

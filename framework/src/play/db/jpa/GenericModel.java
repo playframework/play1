@@ -174,6 +174,13 @@ public class GenericModel extends JPABase {
     }
 
     /**
+     * store (ie insert) the entity.
+     */
+    public boolean create() {
+        return _create();
+    }
+
+    /**
      * Refresh the entity state.
      */
     public <T extends JPABase> T refresh() {
