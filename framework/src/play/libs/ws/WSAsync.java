@@ -66,6 +66,7 @@ public class WSAsync implements WSImpl {
         String proxyPort = Play.configuration.getProperty("http.proxyPort", System.getProperty("http.proxyPort"));
         String proxyUser = Play.configuration.getProperty("http.proxyUser", System.getProperty("http.proxyUser"));
         String proxyPassword = Play.configuration.getProperty("http.proxyPassword", System.getProperty("http.proxyPassword"));
+        String userAgent = Play.configuration.getProperty("http.userAgent");
 
         Builder confBuilder = new AsyncHttpClientConfig.Builder();
         if (proxyHost != null) {
@@ -78,6 +79,9 @@ public class WSAsync implements WSImpl {
             }
             ProxyServer proxy = new ProxyServer(proxyHost, proxyPortInt, proxyUser, proxyPassword);
             confBuilder.setProxyServer(proxy);
+        }
+        if (userAgent != null) {
+            confBuilder.setUserAgent(userAgent);
         }
         confBuilder.setFollowRedirects(true);
         httpClient = new AsyncHttpClient(confBuilder.build());
