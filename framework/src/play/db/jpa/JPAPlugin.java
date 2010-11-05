@@ -3,47 +3,38 @@ package play.db.jpa;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NoResultException;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.PersistenceException;
-import javax.persistence.Query;
-import javax.persistence.Transient;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.hibernate.type.Type;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.DB;
 import play.db.Model;
+import play.db.Model.Factory;
 import play.exceptions.JPAException;
-import play.utils.Utils;
-import org.apache.commons.lang.StringUtils;
-import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
+import play.utils.Utils;
 
 /**
  * JPA Plugin
@@ -57,21 +48,27 @@ public class JPAPlugin extends PlayPlugin {
     public Object bind(String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations, Map<String, String[]> params) {
         // TODO need to be more generic in order to work with JPASupport
         if (JPABase.class.isAssignableFrom(clazz)) {
-            String keyName = Model.Manager.factoryFor(clazz).keyName();
-            String idKey = name + "." + keyName;
-            if (params.containsKey(idKey) && params.get(idKey).length > 0 && params.get(idKey)[0] != null && params.get(idKey)[0].trim().length() > 0) {
-                String id = params.get(idKey)[0];
-                try {
-                    Query query = JPA.em().createQuery("from " + clazz.getName() + " o where o." + keyName + " = ?");
-                    query.setParameter(1, play.data.binding.Binder.directBind(name, annotations, id + "", Model.Manager.factoryFor(clazz).keyType()));
-                    Object o = query.getSingleResult();
-                    return GenericModel.edit(o, name, params, annotations);
-                } catch (NoResultException e) {
-                    // ok
-                } catch (Exception e) {
-                    throw new UnexpectedException(e);
-                }
-            }
+        	Factory factory = Model.Manager.factoryFor(clazz);
+        	try {
+        		// what happens here is that we're going to try to find an entity based on its ID, and this removes
+        		// all the entity's IDs from params. This is OK if we do find the entity, but for entities that we
+        		// cannot find, and whose ID is not generated, we should create the entity with the specified IDs
+        		// (those that were removed during find), so we have to save them and restore them.
+        		Map<String, String[]> backupParams = null;
+        		if(!factory.isGeneratedKey()){
+        			backupParams = new HashMap<String, String[]>();
+        			backupParams.putAll(params);
+        		}
+				List<JPABase> entities = GenericModel.findEntities(name, params, false, clazz, factory);
+				// ignore it if we have no id specified or if the id is null
+				if(!entities.isEmpty() && entities.get(0) != null)
+					return GenericModel.edit(entities.get(0), name, params, annotations);
+				// let's fall-through and create the entity, but if its IDs are not generated, let's restore them
+				if(backupParams != null)
+					params = backupParams;
+			} catch (Exception e) {
+				throw new UnexpectedException(e);
+			}
             return GenericModel.create(clazz, name, params, annotations);
         }
         return super.bind(name, clazz, type, annotations, params);
@@ -378,4 +375,16 @@ public class JPAPlugin extends PlayPlugin {
         }
     }
 
+    public static Set<Field> getModelFields(Class<?> clazz){
+    	Set<Field> fields = new LinkedHashSet<Field>();
+    	Class<?> tclazz = clazz;
+    	while (!tclazz.equals(Object.class)) {
+    		// Only add fields for mapped types
+    		if(tclazz.isAnnotationPresent(Entity.class)
+    				|| tclazz.isAnnotationPresent(MappedSuperclass.class))
+    			Collections.addAll(fields, tclazz.getDeclaredFields());
+    		tclazz = tclazz.getSuperclass();
+    	}
+    	return fields;
+    }
 }
