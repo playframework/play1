@@ -23,7 +23,7 @@ try:
     play_env["basedir"] = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
 
     # ~~~~~~~~~~~~~~~~~~~~~~ What is the framework id?
-    play_env["id_file"] = os.path.join(play_env['basedir'], 'id')
+    play_env["id_file"] = os.path.join(play_env['basedir'], 'etc', 'id')
     if os.path.exists(play_env["id_file"]):
         play_env["id"] = open(play_env["id_file"]).readline().strip()
     else:

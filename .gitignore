@@ -15,7 +15,7 @@ framework/tests/test-application/db
 .classpath
 .project
 framework/tests/tmp
-id
+./id
 framework/tests-tmp
 framework/docs
 dist
@@ -119,3 +119,10 @@ samples-and-tests/zencontact/precompiled
 !modules/console
 !modules/grizzly
 !modules/secure
+debian/files
+build-stamp
+configure-stamp
+./etc
+debian/play-*/
+debian/play-*.debhelper.log
+debian/play-*.substvars
