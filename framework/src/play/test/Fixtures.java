@@ -11,14 +11,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.io.FileUtils;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
@@ -33,6 +32,7 @@ import play.data.binding.types.DateBinder;
 import play.db.DB;
 import play.db.DBPlugin;
 import play.db.Model;
+import play.db.Model.Property;
 import play.exceptions.UnexpectedException;
 import play.exceptions.YAMLException;
 import play.libs.IO;
@@ -192,7 +192,7 @@ public class Fixtures {
                         serialize(objects.get(key), "object", params);
                         @SuppressWarnings("unchecked")
                         Class<Model> cType = (Class<Model>)Play.classloader.loadClass(type);
-                        resolveDependencies(cType, params);
+                        resolveDependencies(cType, params, idCache);
                         Model model = (Model)Binder.bind("object", cType, cType, null, params);
                         for(Field f : model.getClass().getFields()) {
                             if (f.getType().isAssignableFrom(Map.class)) {	 	
@@ -202,8 +202,14 @@ public class Fixtures {
                                 f.set(model, objects.get(key).get(f.getName()));
                             }
                         }
-                        model._save();
+                        try{
+                        	model._save();
+                        }catch(Exception x){
+                        	throw new UnexpectedException("Failed to load fixture "+name+": problem while saving object "+id, x);
+                        }
                         Class<?> tType = cType;
+                        // FIXME: this is most probably wrong since superclasses might share IDs implemented by disjoint
+                        // subclasses. Besides why create the key for each if it's supposed to be the same value???
                         while (!tType.equals(Object.class)) {
                             idCache.put(tType.getName() + "-" + id, Model.Manager.factoryFor(cType).keyValue(model));
                             tType = tType.getSuperclass();
@@ -213,6 +219,8 @@ public class Fixtures {
             }
             // Most persistence engine will need to clear their state
             Play.pluginCollection.afterFixtureLoad();
+        }catch (UnexpectedException x){
+        	throw x;
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Class " + e.getMessage() + " was not found", e);
         } catch (ScannerException e) {
@@ -356,33 +364,54 @@ public class Fixtures {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    static void resolveDependencies(Class<Model> type, Map<String, String[]> serialized) {
-        Set<Field> fields = new HashSet<Field>();
-        Class<?> clazz = type;
-        while (!clazz.equals(Object.class)) {
-            Collections.addAll(fields, clazz.getDeclaredFields());
-            clazz = clazz.getSuperclass();
-        }
+    protected static void resolveDependencies(Class<? extends Model> type, Map<String, String[]> serialized, Map<String, Object> idCache) throws Exception {
         for (Model.Property field : Model.Manager.factoryFor(type).listProperties()) {
             if (field.isRelation) {
-                String[] ids = serialized.get("object." + field.name);
+            	String prefix = "object." + field.name;
+                String[] ids = serialized.get(prefix);
+                Object[] persistedIds = null;
                 if (ids != null) {
+                	persistedIds = new Object[ids.length];
                     for (int i = 0; i < ids.length; i++) {
                         String id = ids[i];
                         id = field.relationType.getName() + "-" + id;
                         if (!idCache.containsKey(id)) {
                             throw new RuntimeException("No previous reference found for object of type " + field.name + " with key " + ids[i]);
                         }
-                        ids[i] = idCache.get(id).toString();
+                        persistedIds[i] = idCache.get(id);
                     }
                 }
-                serialized.remove("object." + field.name);
-                serialized.put("object." + field.name + "." + Model.Manager.factoryFor((Class<? extends Model>)field.relationType).keyName(), ids);
-            }
+                serialized.remove(prefix);
+                if(persistedIds != null)
+                	serializeKey(prefix, field.relationType, persistedIds, serialized, idCache);
+             }
         }
     }
 
+    private static void serializeKey(String prefix,
+    		Class<?> relationType, Object[] persistedIds, Map<String, String[]> serialized, Map<String, Object> idCache) throws Exception {
+        @SuppressWarnings("unchecked")
+		List<Model.Property> keys = Model.Manager.factoryFor((Class<? extends Model>) relationType).listKeys();
+        // serialise each ID into as many keys
+        for(Property key : keys){
+        	String fieldName = prefix + "." + key.name; 
+        	if(key.isRelation){
+        		// get that part of the key
+        		Object[] idParts = new Object[persistedIds.length];
+        		for (int i = 0; i < idParts.length; i++) {
+        			idParts[i] = PropertyUtils.getSimpleProperty(persistedIds[i], key.name);
+        		}
+        		serializeKey(fieldName, key.relationType, idParts, serialized, idCache);
+        	}else{
+        		// not composite so it must be serialisable as string
+        		String[] ids= new String[persistedIds.length];
+        		for (int i = 0; i < ids.length; i++) {
+        			ids[i] = persistedIds[i].toString();
+        		}
+        		serialized.put(fieldName, ids);
+        	}
+        }
+	}
 
     private static void disableForeignKeyConstraints() {
         if (DBPlugin.url.startsWith("jdbc:oracle:")) {
@@ -464,5 +493,4 @@ public class Fixtures {
         }
         return "DELETE FROM " + name;
     }
-
 }
