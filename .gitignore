@@ -35,7 +35,6 @@ test-result
 logs
 logs
 tmp
-db
 *.pyc
 test-result
 samples-and-tests/with-gwt/nbproject
