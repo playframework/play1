@@ -1,11 +1,13 @@
 import models.CompositeIdEntity;
 import models.CompositeIdForeignA;
 import models.CompositeIdForeignB;
+import models.CompositeIdPk;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import play.db.jpa.JPA;
+import play.db.jpa.JPABase;
 import play.test.Fixtures;
 import play.test.UnitTest;
 
@@ -22,20 +24,34 @@ public class CompositeIdJPATest extends UnitTest {
         assertEquals(2, CompositeIdForeignA.count());
         assertEquals(4, CompositeIdForeignB.count());
         assertEquals(4, CompositeIdEntity.count());
-        CompositeIdForeignA a1 = CompositeIdForeignA.find("testId", "a1").first();
-        CompositeIdForeignA a2 = CompositeIdForeignA.find("testId", "a2").first();
-        CompositeIdForeignB b1 = CompositeIdForeignB.find("testId", "b1").first();
-        CompositeIdForeignB b2 = CompositeIdForeignB.find("testId", "b2").first();
-        CompositeIdForeignB b3 = CompositeIdForeignB.find("testId", "b3").first();
-        CompositeIdForeignB b4 = CompositeIdForeignB.find("testId", "b4").first();
-        assertNotNull(a1);
-    	assertEquals(2, a1.a2Bs.size());
         for(CompositeIdForeignA a : CompositeIdForeignA.<CompositeIdForeignA>findAll()){
         	assertEquals(2, a.a2Bs.size());
         }
         for(CompositeIdForeignB b : CompositeIdForeignB.<CompositeIdForeignB>findAll()){
         	assertEquals(1, b.a2Bs.size());
         }
+    }
+    
+    @Test
+    public void testAllAndDelete(){
+    	assertEquals(4, CompositeIdEntity.all().fetch().size());
+    	CompositeIdEntity.deleteAll();
+    	assertEquals(0, CompositeIdEntity.all().fetch().size());
+    }
+
+    @Test
+    public void testFind(){
+    	CompositeIdForeignA a = (CompositeIdForeignA) CompositeIdForeignA.findAll().get(0);
+    	CompositeIdEntity e = a.a2Bs.iterator().next();
+    	CompositeIdForeignB b = e.compositeIdForeignB;
+    	
+    	CompositeIdPk id = new CompositeIdPk();
+    	id.setCompositeIdForeignA(a.id);
+    	id.setCompositeIdForeignB(b.id);
+    	
+		CompositeIdEntity eDB = CompositeIdEntity.findById(id);
+		assertNotNull(eDB);
+		assertTrue(eDB == e);
     }
 }
 
