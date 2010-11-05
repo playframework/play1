@@ -23,7 +23,7 @@
     type('id', '89776')
     clickAndWait('go')
     
-    assertTextPresent('detached entity passed to persist: models.Project')
+    assertTextPresent('Object not found for id 89776')
     
     open('@{JPABinding.createCompany()}?company.name=zenexity')
     assertValue('name', 'zenexity')
