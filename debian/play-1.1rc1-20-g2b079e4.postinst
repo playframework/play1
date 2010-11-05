@@ -1,0 +1,10 @@
+#!/bin/sh
+
+VERSION=1.1rc1-20-g2b079e4
+
+set -e
+
+case "$1" in
+configure)
+	update-alternatives --install /usr/bin/play-1.1 play-1.1 /usr/share/play/$VERSION/play 1101000020
+esac

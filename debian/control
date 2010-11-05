@@ -1,0 +1,24 @@
+Source: play-1.1rc1-20-g2b079e4
+Section: unknown
+Priority: extra
+Maintainer: Stephane Epardaud <stephane@lunatech.com>
+Build-Depends: debhelper (>= 7), ant
+Standards-Version: 3.8.3
+Homepage: http://www.playframework.org
+
+Package: play-1.1rc1-20-g2b079e4
+Provides: play-1.1
+Architecture: all
+Depends: ${misc:Depends}
+Recommends: play-1.1-debian
+Description: Play! Framework
+ This is the Play! Framework packaged for Debian
+
+Package: play-1.1rc1-20-g2b079e4-hh
+Provides: play-1.1-hh
+Architecture: all
+Depends: ${misc:Depends}
+Recommends: play-1.1-debian
+Description: Play! Framework
+ This is the Play! Framework packaged for Debian
+ Uses the old Hibernate version

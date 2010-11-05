@@ -1,0 +1,23 @@
+#!/bin/sh
+
+tmpfile=`mktemp`
+
+dialog --menu "Select a hibernate version" 10 40 2 old "Old hibernate (3.1)" new "New hibernate 3.6" 2> $tmpfile
+
+result=`cat $tmpfile`
+rm $tmpfile
+clear
+echo "Result: $result"
+
+rm -f framework/lib/ejb* framework/lib/hibernate* 
+
+case $result in
+old)
+	echo "Setting it up for old Hibernate"
+	cp debian/lib-old-hh/*.jar framework/lib/
+	;;
+new)
+	echo "Setting it up for new Hibernate"
+	cp debian/lib-new-hh/*.jar framework/lib/
+	;;
+esac

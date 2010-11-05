@@ -1,0 +1,38 @@
+play-1.1rc1-20-g2b079e4 (play-1.1rc1-20-g2b079e4-1) maverick; urgency=low
+
+  * Moved to upstream git
+  * Start off with a prod id
+
+ -- Stephane Epardaud <stephane@epardaud.fr>  Fri, 08 Oct 2010 12:01:34 +0200
+
+play-1.1-unstable-r1003 (1.1-unstable-r1003-1ubuntu4) maverick; urgency=low
+
+  * Moved PDF out
+
+ -- Stephane Epardaud <stephane@epardaud.fr>  Fri, 08 Oct 2010 09:39:17 +0200
+
+play-1.1-unstable-r1003 (1.1-unstable-r1003-1ubuntu3) lucid; urgency=low
+
+  * Made multi-module
+  * Recommends play-1.1-debian
+  * Split the debian module out
+
+ -- Stephane Epardaud <stephane@epardaud.net>  Tue, 17 Aug 2010 11:51:00 +0200
+
+play-1.1-unstable-r1003 (1.1-unstable-r1003-1ubuntu2) lucid; urgency=low
+
+  * Fixed "play --%id" parameter
+
+ -- Stephane Epardaud <stephane@epardaud.net>  Fri, 13 Aug 2010 17:02:23 +0200
+
+play-1.1-unstable-r1003 (1.1-unstable-r1003-1ubuntu1) lucid; urgency=low
+
+  * New upstream
+
+ -- Stephane Epardaud <stephane@epardaud.net>  Wed, 11 Aug 2010 10:26:46 +0200
+
+play-1.1-unstable-r944 (1.1-unstable-r944-1) unstable; urgency=low
+
+  * Initial release 
+
+ -- Stephane Epardaud <stephane@lunatech.com>  Fri, 16 Jul 2010 12:11:18 +0200
