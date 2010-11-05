@@ -3,7 +3,6 @@ package play.mvc.results;
 import java.util.Map;
 
 import play.Play;
-import play.exceptions.TemplateNotFoundException;
 import play.exceptions.UnexpectedException;
 import play.libs.MimeTypes;
 import play.mvc.Http;
