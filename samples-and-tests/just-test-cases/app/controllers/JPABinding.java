@@ -15,7 +15,7 @@ public class JPABinding extends Controller {
     
     public static void create(Project project) {
         System.out.println(project);
-        project.save();
+        project.create();
         show(project.id);
     }
     
@@ -26,13 +26,14 @@ public class JPABinding extends Controller {
     
     public static void save(Project project) {
         System.out.println("---> " + project.isPersistent());
+        Logger.warn("Next warning is intended!");
         project.save();
         validation.keep();
         show(project.id);
     }
     
     public static void createCompany(Company company) {
-        company.save();
+        company.create();
         render(company);
     }
     
@@ -41,7 +42,7 @@ public class JPABinding extends Controller {
         Project project = new Project();
         project.companies = new HashMap();
         project.companies.put(company.name, company);
-        project.save();
+        project.create();
         render("@show", project);
     }
     

@@ -32,15 +32,6 @@ import play.exceptions.UnexpectedException;
 @MappedSuperclass
 public class JPABase implements Serializable, play.db.Model {
 
-    public boolean _create() {
-        if (!em().contains(this)) {
-            em().persist(this);
-            PlayPlugin.postEvent("JPASupport.objectPersisted", this);
-            return true;
-        }
-        return false;
-    }
-
     public void _save() {
         if (!em().contains(this)) {
             em().persist(this);
