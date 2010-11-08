@@ -120,6 +120,14 @@ bc. #{fixture delete:'all', load:'data.yml' /}
  
 #{/selenium}
 
+Sometimes it is convenient to split data into several YAML files. You can load fixtures from multiple files at once:
+
+bc. Fixtures.load("users.yml", "roles.yml", "permissions.yml");
+
+and for Selenium tests:
+
+bc. #{fixture delete:'all', load:['users.yml', 'roles.yml', 'permissions.yml'] /}
+
 h2. <a name="running">Running the tests</a>
 
 To run the tests, you must run your application in **test** mode using the **play test** command.
