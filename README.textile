@@ -1,3 +1,18 @@
+h1. IMPORTANT: READ ME
+
+This is the Debian branch of a fork of Play! Framework. It is intended to be used to build Debian packages for Play! Framework
+in two fashions:
+
+- Normal Play! Framework
+- Play! Framework with an older release of Hibernate to support JDBC < 4 (the @-hh@ package)
+
+As this branch will be kept up-to-date with the latest Play! Framework from upstream, it will be _rebased_ often, so be away that
+if you intend to _pull_ from it, you will have history rewrites.
+
+Once you have checked out this branch, you can build the debian packages with:
+
+bc. fakeroot ./debian/rules clean binary
+
 h1. Welcome to Play framework
 
 Play framework makes it easier to build Web applications with Java. It is a clean alternative to bloated Enterprise Java stacks. It focuses on developer productivity and targets RESTful architectures. Play is a perfect companion to agile software development.
