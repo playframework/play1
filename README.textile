@@ -1,3 +1,16 @@
+h1. IMPORTANT: READ ME
+
+This is a special branch of a fork of the Play! Framework with fixes that haven't been merged upstream yet. The following fixes
+are included:
+
+- Support for composite keys in JPA
+- Show stack traces in test output
+- Bug fix for test stack traces
+- Bug fix for packages-info.java
+
+Since this branch intends to be kept in sync with upstream, it will frequently be _rebased_ so if you intend to _pull_ from it,
+be warned that history will be rewritten. 
+
 h1. Welcome to Play framework
 
 Play framework makes it easier to build Web applications with Java. It is a clean alternative to bloated Enterprise Java stacks. It focuses on developer productivity and targets RESTful architectures. Play is a perfect companion to agile software development.
