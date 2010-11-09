@@ -368,22 +368,22 @@ public class Binder {
             }
         }
 
-        // custom types
-        for (Class<?> c : supportedTypes.keySet()) {
-            Logger.trace("directBind: value [" + value + "] c [" + c + "] Class [" + clazz + "]");
-            if (c.isAssignableFrom(clazz)) {
-                Logger.trace("directBind: isAssignableFrom is true");
-                return nullOrEmpty ? null : supportedTypes.get(c).bind(name, annotations, value, clazz);
-            }
-        }
-
-        // application custom types
+        // application custom types have higher priority
         for (Class<TypeBinder<?>> c : Play.classloader.getAssignableClasses(TypeBinder.class)) {
             if (c.isAnnotationPresent(Global.class)) {
                 Class<?> forType = (Class) ((ParameterizedType) c.getGenericInterfaces()[0]).getActualTypeArguments()[0];
                 if (forType.isAssignableFrom(clazz)) {
                     return c.newInstance().bind(name, annotations, value, clazz);
                 }
+            }
+        }
+
+        // custom types
+        for (Class<?> c : supportedTypes.keySet()) {
+            Logger.trace("directBind: value [" + value + "] c [" + c + "] Class [" + clazz + "]");
+            if (c.isAssignableFrom(clazz)) {
+                Logger.trace("directBind: isAssignableFrom is true");
+                return nullOrEmpty ? null : supportedTypes.get(c).bind(name, annotations, value, clazz);
             }
         }
 
