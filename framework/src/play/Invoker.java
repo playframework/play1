@@ -42,6 +42,9 @@ public class Invoker {
         Monitor monitor = MonitorFactory.getMonitor("Invoker queue size", "elmts.");
         monitor.add(executor.getQueue().size());
         invocation.waitInQueue = MonitorFactory.start("Waiting for execution");
+        if(executor.getActiveCount() >= executor.getCorePoolSize()){
+        	Logger.warn("Reached maximum number of workers, queuing the next one");
+        }
         return executor.submit(invocation);
     }
 
@@ -308,6 +311,7 @@ public class Invoker {
      */
     static {
         int core = Integer.parseInt(Play.configuration.getProperty("play.pool", Play.mode == Mode.DEV ? "1" : ((Runtime.getRuntime().availableProcessors() + 1) + "")));
+        Logger.warn("Using %s workers", core);
         executor = new ScheduledThreadPoolExecutor(core, new PThreadFactory("play"), new ThreadPoolExecutor.AbortPolicy());
     }
 
