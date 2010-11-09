@@ -53,6 +53,7 @@ import com.google.gson.JsonParser;
 public class WS extends PlayPlugin {
 
     private static WSImpl wsImpl = null;
+    private static String mockUrl = null;
 
     @Override
     public void onApplicationStop() {
@@ -102,7 +103,11 @@ public class WS extends PlayPlugin {
      */
     public static WSRequest url(String url) {
         init();
-        return wsImpl.newRequest(url);
+        if (mockUrl != null) {
+            return wsImpl.newRequest(mockUrl);
+        } else {
+            return wsImpl.newRequest(url);
+        }
     }
 
     /**
@@ -119,6 +124,14 @@ public class WS extends PlayPlugin {
             encodedParams[i] = encode(params[i]);
         }
         return url(String.format(url, encodedParams));
+    }
+
+    /**
+     * Set URL to use instead of original for future requests.
+     * @param url to mock to
+     */
+    public static void mock(String url) {
+        mockUrl = url;
     }
 
     public interface WSImpl {
