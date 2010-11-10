@@ -274,7 +274,8 @@ public class GroovyTemplate extends BaseTemplate {
      */
     public static abstract class ExecutableTemplate extends Script {
 
-        GroovyTemplate template;
+        // Leave this field public to allow custom creation of TemplateExecutionException from different pkg
+        public GroovyTemplate template;
 
         @Override
         public Object getProperty(String property) {
