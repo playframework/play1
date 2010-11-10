@@ -123,6 +123,6 @@ debian/files
 build-stamp
 configure-stamp
 ./etc
-debian/play-*/
+debian/play-*/*
 debian/play-*.debhelper.log
 debian/play-*.substvars
