@@ -119,3 +119,4 @@ samples-and-tests/zencontact/precompiled
 !modules/console
 !modules/grizzly
 !modules/secure
+!framework/src/play/db

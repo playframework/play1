@@ -2,6 +2,7 @@
 100:play.data.parsing.TempFilePlugin
 200:play.data.validation.ValidationPlugin
 300:play.db.DBPlugin
+350:play.db.Evolutions
 400:play.db.jpa.JPAPlugin
 500:play.i18n.MessagesPlugin
 600:play.libs.WS
