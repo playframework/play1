@@ -1,3 +1,12 @@
+play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-1) maverick; urgency=low
+
+  * Added a way to reset Mail.Mock
+  * Make user TypeBinders higher-priority than default ones
+  * Display worker count on startup and warn when workers are depleted
+  * Support composite keys
+
+ -- Stephane Epardaud <stephane@epardaud.fr>  Wed, 10 Nov 2010 13:49:08 +0100
+
 play-1.1rc1-20-g2b079e4 (play-1.1rc1-20-g2b079e4-4) maverick; urgency=low
 
   * Fix for packages
