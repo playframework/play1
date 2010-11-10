@@ -247,6 +247,9 @@ public class Router {
                 if (t instanceof RenderStatic) {
                     throw (RenderStatic) t;
                 }
+                if (t instanceof NotFound) {
+                    throw (NotFound) t;
+                }
             }
         }
     }
@@ -275,6 +278,9 @@ public class Router {
                     for (String arg : request.routeArgs.keySet()) {
                         request.action = request.action.replace("{" + arg + "}", request.routeArgs.get(arg));
                     }
+                }
+                if (request.action.equals("404")) {
+                    throw new NotFound(route.path);
                 }
                 return route;
             }
@@ -775,6 +781,10 @@ public class Router {
                 }
                 // Extract the host variable
                 if (matcher.matches() && contains(accept) && hostMatches) {
+                    // 404
+                    if (action.equals("404")) {
+                        throw new NotFound(method, path);
+                    }
                     // Static dir
                     if (staticDir != null) {
                         String resource = null;
