@@ -166,6 +166,13 @@ public class GenericModel extends JPABase {
         return false;
     }
 
+    public boolean validateAndCreate() {
+        if (Validation.current().valid(this).ok) {
+            return create();
+        }
+        return false;
+    }
+
     /**
      * store (ie insert) the entity.
      */
