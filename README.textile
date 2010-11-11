@@ -7,6 +7,11 @@ are included:
 - Show stack traces in test output
 - Bug fix for test stack traces
 - Bug fix for packages-info.java
+- Made test-runner menu fixed at the top (for easier scrolling)
+- Made user TypeBinders higher priority than the default ones (so they can be overridden)
+- Added possibility to reset the Mail.Mock (so each test can start with a fresh mock)
+- Display worker count on startup
+- Display warning when workers are exhausted and jobs are pooled
 
 Since this branch intends to be kept in sync with upstream, it will frequently be _rebased_ so if you intend to _pull_ from it,
 be warned that history will be rewritten. 
