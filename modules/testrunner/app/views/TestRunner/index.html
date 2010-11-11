@@ -21,7 +21,9 @@
                 border-bottom: 1px solid #aaa;
             }
             #header {
-                position: relative;
+                position: fixed;
+                height: 60px;
+                width: 100%;
             }
             #header h1 {
                 font-weight: normal;
@@ -36,6 +38,10 @@
             }
             #results {
                 background: #f6f6f6;
+                position: fixed;
+                height: 20px;
+                width: 100%;
+                top: 100px;
             }
             label {
                 font-weight: bold;
@@ -49,6 +55,9 @@
                 font-size: 80%;
                 position: relative;
                 top: -3px;
+            }
+            #tests {
+            	padding-top: 12em;
             }
             #tests h2 {
                 color: #333;
@@ -334,7 +343,9 @@
                        data: {result: areFailedTests ? 'failed' : 'passed'}
                     });
                     if(areFailedTests) {
-                        $.scrollTo($('.test.failed'), 500);
+                        var skip = $("#header").outerHeight();
+                        skip += $("#results").outerHeight();
+                        $.scrollTo($('.test.failed').offset().top - skip, 500);
                     }
                 };
                                 
