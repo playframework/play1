@@ -132,7 +132,7 @@ public class Evolutions extends PlayPlugin {
     }
 
     public void checkEvolutionsState() {
-        if (DB.datasource != null) {
+        if (DB.datasource != null && evolutionsDirectory.exists()) {
             List<Evolution> evolutionScript = getEvolutionScript();
             Connection connection = null;
             try {
