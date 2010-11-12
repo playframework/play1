@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -20,9 +21,13 @@ import play.Play;
 public class Utils {
 
     public static <T> String join(Iterable<T> values, String separator) {
-        if (values == null) return "";
+        if (values == null) {
+            return "";
+        }
         Iterator<T> iter = values.iterator();
-        if (!iter.hasNext()) return "";
+        if (!iter.hasNext()) {
+            return "";
+        }
         StringBuffer toReturn = new StringBuffer(String.valueOf(iter.next()));
         while (iter.hasNext()) {
             toReturn.append(separator + String.valueOf(iter.next()));
@@ -78,9 +83,10 @@ public class Utils {
             }
         }
 
-        public static <K,V> Map<K,V> filterMap(Map<K,V> map, String keypattern) {
+        public static <K, V> Map<K, V> filterMap(Map<K, V> map, String keypattern) {
             try {
-                @SuppressWarnings("unchecked") Map<K, V> filtered = map.getClass().newInstance();
+                @SuppressWarnings("unchecked")
+                Map<K, V> filtered = map.getClass().newInstance();
                 for (Map.Entry<K, V> entry : map.entrySet()) {
                     K key = entry.getKey();
                     if (key.toString().matches(keypattern)) {
@@ -101,6 +107,16 @@ public class Utils {
             httpFormatter.get().setTimeZone(TimeZone.getTimeZone("GMT"));
         }
         return httpFormatter.get();
+    }
+
+    public static Map<String, String[]> filterMap(Map<String, String[]> map, String prefix) {
+        Map<String, String[]> newMap = new HashMap<String, String[]>();
+        for (String key : map.keySet()) {
+            if (!key.startsWith(prefix + ".")) {
+                newMap.put(key, map.get(key));
+            }
+        }
+        return newMap;
     }
 
     public static class AlternativeDateFormat {

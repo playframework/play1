@@ -1,6 +1,14 @@
 #{fixture delete:'all' /}
 
 #{selenium 'Test that JPA.abort() works'}
+	
+	// Three levels
+	open('@{JPAController.with3Levels()}')
+	assertTextPresent('Guillaume 06 Paris')
+	clickAndWait('dontSave')
+	assertTextPresent('Guillaume 06 Paris')
+	clickAndWait('save')
+	assertTextPresent('Bob 07 Berlin')
 
     // Init
     open('@{JPAController.init()}')

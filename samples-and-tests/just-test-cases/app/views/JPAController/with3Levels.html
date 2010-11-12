@@ -1,0 +1,22 @@
+${acc?.name} ${acc?.contactData?.phone} ${acc?.contactData?.address?.streetName}
+
+<form action="@{dontSave3Level()}">
+    <input type="hidden" name="acc.id" value="${acc.id}"></input>
+    <input type="text" name="acc.name" value="Bob"></input>
+    <input type="hidden" name="acc.contactData.id" value="${acc.contactData?.id}"></input>
+    <input type="text" name="acc.contactData.phone" value="07"></input>
+    <input type="hidden" name="acc.contactData.address.id" value="${acc.contactData?.address?.id}"></input>
+    <input type="text" name="acc.contactData.address.streetName" value="Berlin"></input>
+    <input type="submit" value="Don't save" id="dontSave"></input>
+</form>
+
+<form action="@{save3Level()}">
+    <input type="hidden" name="acc.id" value="${acc.id}"></input>
+    <input type="text" name="acc.name" value="Bob"></input>
+    <input type="hidden" name="acc.contactData.id" value="${acc.contactData?.id}"></input>
+    <input type="text" name="acc.contactData.phone" value="07"></input>
+    <input type="hidden" name="acc.contactData.address.id" value="${acc.contactData?.address?.id}"></input>
+    <input type="text" name="acc.contactData.address.streetName" value="Berlin"></input>
+    <input type="submit" value="Save" id="save"></input>
+</form>
+
