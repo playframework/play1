@@ -16,4 +16,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface CacheFor {
     String value() default "1h";
+    String id() default "";
 }
