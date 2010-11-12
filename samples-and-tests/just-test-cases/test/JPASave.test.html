@@ -9,6 +9,14 @@
 	clickAndWait('saveAll')
 	assertTextPresent('A: 0')
 	assertTextPresent('B: 0')
+	
+	// Three levels
+	open('@{JPAController.with3Levels()}')
+	assertTextPresent('Guillaume 06 Paris')
+	clickAndWait('dontSave')
+	assertTextPresent('Guillaume 06 Paris')
+	clickAndWait('save')
+	assertTextPresent('Bob 07 Berlin')
 
     // Init
     open('@{JPAController.init()}')

@@ -26,12 +26,16 @@ import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostUpdate;
+import org.apache.commons.collections.MapUtils;
 import play.Logger;
+import play.utils.Java;
+import play.utils.Utils;
 
 /**
  * A super class for JPA entities 
@@ -112,7 +116,10 @@ public class GenericModel extends JPABase {
                                 Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");
                                 q.setParameter(1, Binder.directBind(ids[0], Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType()));
                                 try {
+                                    String localName = name + "." + field.getName();
                                     Object to = q.getSingleResult();
+                                    edit(to, localName, params, field.getAnnotations());                                    
+                                    params = Utils.filterMap(params, localName);
                                     bw.set(field.getName(), o, to);
                                 } catch (NoResultException e) {
                                     Validation.addError(name + "." + field.getName(), "validation.notFound", ids[0]);

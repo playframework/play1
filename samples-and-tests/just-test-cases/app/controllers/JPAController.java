@@ -7,6 +7,7 @@ import play.db.jpa.JPA;
 import java.util.*;
 
 import models.*;
+import models.threeLevels.*;
 
 
 public class JPAController extends Controller {
@@ -136,6 +137,37 @@ public class JPAController extends Controller {
 		u.name = newName;
 		u.save();
 		list(); 
+    }
+    
+    public static void with3Levels() {
+      
+        Account acc = Account.findById(1L);
+        
+        if(acc == null) {
+            acc = new Account();
+            ContactData cd = new ContactData();
+            models.threeLevels.Address ad = new models.threeLevels.Address();
+            ad.id = 1L;
+            ad.streetName = "Paris";
+            cd.id = 1L;
+            cd.address = ad;
+            cd.phone = "06";
+            acc.id = 1L;
+            acc.name = "Guillaume";
+            acc.contactData = cd;
+            acc.create();
+        }
+
+        render(acc);
+    }
+    
+    public static void dontSave3Level(Account acc) {
+        with3Levels();
+    }
+    
+    public static void save3Level(Account acc) {
+        acc.save();
+        with3Levels();
     }
 }
 

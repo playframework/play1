@@ -35,7 +35,7 @@ public class Java {
         try {
             CtClass ctClass = ClassPool.getDefault().makeClass(new ByteArrayInputStream(code));
             String sourceName = ((SourceFileAttribute) ctClass.getClassFile().getAttribute("SourceFile")).getFileName();
-            return new String[] {ctClass.getName(), sourceName};
+            return new String[]{ctClass.getName(), sourceName};
         } catch (Exception e) {
             throw new UnexpectedException("Cannot read a scala generated class using javassist", e);
         }
@@ -132,7 +132,7 @@ public class Java {
         }
         if (m != null) {
             m.setAccessible(true);
-            if(Modifier.isStatic(m.getModifiers())) {
+            if (Modifier.isStatic(m.getModifiers())) {
                 return m.invoke(null, args);
             } else {
                 Object instance = m.getDeclaringClass().getDeclaredField("MODULE$").get(null);
@@ -246,7 +246,7 @@ public class Java {
         return methods;
     }
 
-   /**
+    /**
      * Find all annotated method from a class
      * @param classes The classes
      * @param annotationType The annotation class
@@ -270,8 +270,6 @@ public class Java {
             findAllFields(sClazz, found);
         }
     }
-
-     
     /** cache */
     private static Map<Field, FieldWrapper> wrappers = new HashMap<Field, FieldWrapper>();
 
