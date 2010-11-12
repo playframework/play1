@@ -27,61 +27,139 @@ public class Evolutions extends PlayPlugin {
 
     @Override
     public boolean rawInvocation(Request request, Response response) throws Exception {
+
+        // Mark an evolution as resolved
+        if (Play.mode.isDev() && request.method.equals("POST") && request.url.matches("^/@evolutions/force/[0-9]+$")) {
+            int revision = Integer.parseInt(request.url.substring(request.url.lastIndexOf("/") + 1));
+            execute("update play_evolutions set state = 'applied' where state = 'applying_up' and id = " +revision);
+            execute("delete from play_evolutions where state = 'applying_down' and id = " +revision);
+            new Redirect("/").apply(request, response);
+            return true;
+        }
+
+        // Apply the current evolution script
         if (Play.mode.isDev() && request.method.equals("POST") && request.url.equals("/@evolutions/apply")) {
-            Connection connection = DB.datasource.getConnection();
+            Connection connection = getNewConnection();
+            int applying = -1;
             try {
                 for (Evolution evolution : getEvolutionScript()) {
+                    applying = evolution.revision;
+
                     // Insert into logs
                     if (evolution.applyUp) {
-                        PreparedStatement ps = connection.prepareStatement("insert into play_evolutions values(?, ?, ?, ?, ?, ?)");
+                        PreparedStatement ps = connection.prepareStatement("insert into play_evolutions values(?, ?, ?, ?, ?, ?, ?)");
                         ps.setInt(1, evolution.revision);
                         ps.setString(2, evolution.hash);
                         ps.setDate(3, new Date(System.currentTimeMillis()));
                         ps.setString(4, evolution.sql_up);
                         ps.setString(5, evolution.sql_down);
                         ps.setString(6, "applying_up");
+                        ps.setString(7, "");
                         ps.execute();
                     } else {
-                        connection.createStatement().execute("update play_evolutions set state = 'applying_down' where id = " + evolution.revision);
+                        execute("update play_evolutions set state = 'applying_down' where id = " + evolution.revision);
                     }
                     // Execute script
                     for (String sql : (evolution.applyUp ? evolution.sql_up : evolution.sql_down).split(";")) {
                         if (sql.trim().isEmpty()) {
                             continue;
                         }
-                        connection.createStatement().execute(sql);
+                        execute(sql);
                     }
                     // Insert into logs
                     if (evolution.applyUp) {
-                        connection.createStatement().execute("update play_evolutions set state = 'applied' where id = " + evolution.revision);
+                        execute("update play_evolutions set state = 'applied' where id = " + evolution.revision);
                     } else {
-                        connection.createStatement().execute("delete from play_evolutions where id = " + evolution.revision);
+                        execute("delete from play_evolutions where id = " + evolution.revision);
                     }
                 }
-                new Redirect("/").apply(request, response);
-                return true;
+
             } catch (Exception e) {
-                e.printStackTrace();
-                throw new UnexpectedException(e);
+                String message = e.getMessage();
+                if (e instanceof SQLException) {
+                    SQLException ex = (SQLException) e;
+                    message += " [ERROR:" + ex.getErrorCode() + ", SQLSTATE:" + ex.getSQLState() + "]";
+                }
+                PreparedStatement ps = connection.prepareStatement("update play_evolutions set last_problem = ? where id = ?");
+                ps.setString(1, message);
+                ps.setInt(2, applying);
+                ps.execute();
+                closeConnection(connection);
+                Logger.error(e, "Can't apply evolution");
             }
+            new Redirect("/").apply(request, response);
+            return true;
         }
         return super.rawInvocation(request, response);
     }
 
     @Override
     public void beforeInvocation() {
+        checkEvolutionsState();
+    }
+
+    @Override
+    public void onApplicationStart() {
+        if (Play.mode.isProd()) {
+            try {
+                checkEvolutionsState();
+            } catch (InvalidDatabaseRevision e) {
+                Logger.warn("*** Your database needs evolution! You must run this script on your database: \n\n" + toHumanReadableScript(getEvolutionScript()) + "\n\n");
+                throw e;
+            }
+        }
+    }
+
+    public String toHumanReadableScript(List<Evolution> evolutionScript) {
+        // Construct the script
+        StringBuilder sql = new StringBuilder();
+        boolean containsDown = false;
+        for (Evolution evolution : evolutionScript) {
+            if(!evolution.applyUp) {
+                containsDown = true;
+            }
+            sql.append("# --- Rev:").append(evolution.revision).append(",").append(evolution.applyUp ? "Ups" : "Downs").append(" - ").append(evolution.hash.substring(0, 7)).append("\n");
+            sql.append("\n");
+            sql.append(evolution.applyUp ? evolution.sql_up : evolution.sql_down);
+            sql.append("\n\n");
+        }
+
+        if(containsDown) {
+            sql.insert(0, "# !!! WARNING! This script contains DOWNS evolutions that are likely destructives\n\n");
+        }
+
+        return sql.toString().trim();
+    }
+
+    public void checkEvolutionsState() {
         if (DB.datasource != null) {
             List<Evolution> evolutionScript = getEvolutionScript();
-            if (!evolutionScript.isEmpty()) {
-                // Construct the script
-                StringBuilder sql = new StringBuilder();
-                for (Evolution evolution : evolutionScript) {
-                    sql.append("# --- Rev:").append(evolution.revision).append(",").append(evolution.applyUp ? "UPS" : "DOWNS").append(" - ").append(evolution.hash.substring(0, 7)).append("\n");
-                    sql.append("\n");
-                    sql.append(evolution.applyUp ? evolution.sql_up : evolution.sql_down);
-                    sql.append("\n\n");
+            Connection connection = null;
+            try {
+                connection = getNewConnection();
+                ResultSet rs = connection.createStatement().executeQuery("select id, hash, apply_script, revert_script, state, last_problem from play_evolutions where state like 'applying_%'");
+                if(rs.next()) {
+                    int revision = rs.getInt("id");
+                    String state= rs.getString("state");
+                    String hash = rs.getString("hash").substring(0, 7);
+                    String script = "";
+                    if(state.equals("applying_up")) {
+                        script = rs.getString("apply_script");
+                    } else {
+                        script = rs.getString("revert_script");
+                    }
+                    script = "# --- Rev:"+revision + "," + (state.equals("applying_up") ? "Ups" : "Downs") + " - " + hash + "\n\n" +script;
+                    String error = rs.getString("last_problem");
+                    throw new InconsistentDatabase(script, error, revision);
                 }
-                throw new InvalidDatabaseRevision(sql.toString());
+            } catch(SQLException e) {
+                throw new UnexpectedException(e);
+            } finally {
+                closeConnection(connection);
+            }
+
+            if (!evolutionScript.isEmpty()) {
+                throw new InvalidDatabaseRevision(toHumanReadableScript(evolutionScript));
             }
         }
     }
@@ -151,19 +229,23 @@ public class Evolutions extends PlayPlugin {
     public static Stack<Evolution> listDatabaseEvolutions() {
         Stack<Evolution> evolutions = new Stack<Evolution>();
         evolutions.add(new Evolution(0, "", "", false));
+        Connection connection = null;
         try {
-            ResultSet rs = DB.getConnection().getMetaData().getTables(null, null, "play_evolutions", null);
+            connection = getNewConnection();
+            ResultSet rs = connection.getMetaData().getTables(null, null, "play_evolutions", null);
             if (rs.next()) {
-                ResultSet databaseEvolutions = DB.executeQuery("select id, hash, apply_script, revert_script from play_evolutions");
+                ResultSet databaseEvolutions = connection.createStatement().executeQuery("select id, hash, apply_script, revert_script from play_evolutions");
                 while (databaseEvolutions.next()) {
                     Evolution evolution = new Evolution(databaseEvolutions.getInt(1), databaseEvolutions.getString(3), databaseEvolutions.getString(4), false);
                     evolutions.add(evolution);
                 }
             } else {
-                DB.execute("create table play_evolutions (id int not null primary key, hash varchar(255) not null, applied_at timestamp not null, apply_script longtext, revert_script longtext, state varchar(255))");
+                execute("create table play_evolutions (id int not null primary key, hash varchar(255) not null, applied_at timestamp not null, apply_script text, revert_script text, state varchar(255), last_problem text)");
             }
         } catch (SQLException e) {
             Logger.error(e, "SQL error while checking play evolutions");
+        } finally {
+            closeConnection(connection);
         }
         Collections.sort(evolutions);
         return evolutions;
@@ -200,6 +282,36 @@ public class Evolutions extends PlayPlugin {
         }
     }
 
+    // JDBC Utils
+
+    static void execute(String sql) throws SQLException {
+        Connection connection = null;
+        try {
+            connection = getNewConnection();
+            connection.createStatement().execute(sql);
+        } catch(SQLException e) {
+            throw e;
+        } finally {
+            closeConnection(connection);
+        }
+    }
+
+    static Connection getNewConnection() throws SQLException {
+        Connection connection = DB.datasource.getConnection();
+        connection.setAutoCommit(true); // Yes we want auto-commit
+        return connection;
+    }
+
+    static void closeConnection(Connection connection) {
+        try {
+            if(connection != null) connection.close();
+        } catch(Exception e) {
+            throw new UnexpectedException(e);
+        }
+    }
+
+    // Exceptions
+
     public static class InvalidDatabaseRevision extends PlayException {
 
         String evolutionScript;
@@ -221,6 +333,34 @@ public class Evolutions extends PlayPlugin {
         @Override
         public String getMoreHTML() {
             return "<h3>This SQL script must be run:</h3><pre style=\"background:#fff; border:1px solid #ccc; padding: 5px\">" + evolutionScript + "</pre><form action='/@evolutions/apply' method='POST'><input type='submit' value='Apply evolutions'></form>";
+        }
+    }
+
+    public static class InconsistentDatabase extends PlayException {
+
+        String evolutionScript;
+        String error;
+        int revision;
+
+        public InconsistentDatabase(String evolutionScript, String error, int revision) {
+            this.evolutionScript = evolutionScript;
+            this.error = error;
+            this.revision = revision;
+        }
+
+        @Override
+        public String getErrorTitle() {
+            return "Your database is an inconsistent state!";
+        }
+
+        @Override
+        public String getErrorDescription() {
+            return "An evolution has not been applied properly. Please check the problem and resolve it manually before making it as resolved.";
+        }
+
+        @Override
+        public String getMoreHTML() {
+            return "<h3>This SQL script has been run, and there was a problem:</h3><pre style=\"background:#fff; border:1px solid #ccc; padding: 5px\">" + evolutionScript + "</pre><h4>This error has been thrown:</h4><pre style=\"background:#fff; border:1px solid #ccc; color: #c00; padding: 5px\">" + error + "</pre><form action='/@evolutions/force/"+revision+"' method='POST'><input type='submit' value='Mark it resolved'></form>";
         }
     }
 }
