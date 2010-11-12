@@ -1,6 +1,6 @@
 h1. Sending e-mail
 
-E-mail functionality uses the "Apache Commons Email":http://commons.apache.org/email/userguide.html library under the hoot. You can use the **play.libs.Mail** utility class to send e-mail very easily.
+E-mail functionality uses the "Apache Commons Email":http://commons.apache.org/email/userguide.html library under the hood. You can use the **play.libs.Mail** utility class to send e-mail very easily.
 
 A simple e-mail:
 
