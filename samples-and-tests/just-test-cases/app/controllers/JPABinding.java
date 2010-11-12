@@ -2,6 +2,7 @@ package controllers;
 
 import play.*;
 import play.mvc.*;
+import play.data.validation.*;
 
 import java.util.*;
 
@@ -57,6 +58,20 @@ public class JPABinding extends Controller {
         project.companies.get("zenexity").name = "Coucou";
         project.save();
         show(id);
+    }
+    
+    public static void aSaveForm() {
+        long a = A.count();
+        long b = B.count();
+        render(a, b);
+    }
+    
+    public static void aSubmitForm(@Valid A a) {
+        System.out.println(a.id);
+        System.out.println(a.b);
+        System.out.println(a.b.id);
+        System.out.println(a.b.name);
+        aSaveForm();
     }
     
 }

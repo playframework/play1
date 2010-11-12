@@ -2,6 +2,14 @@
 
 #{selenium 'Test that JPA.abort() works'}
 
+	// A simple test case
+	open('@{JPABinding.aSaveForm()}')
+	assertTextPresent('A: 0')
+	assertTextPresent('B: 0')
+	clickAndWait('saveAll')
+	assertTextPresent('A: 0')
+	assertTextPresent('B: 0')
+
     // Init
     open('@{JPAController.init()}')
     assertTextPresent('Post1')
