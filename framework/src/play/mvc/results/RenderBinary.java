@@ -2,6 +2,9 @@ package play.mvc.results;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+
 import org.apache.commons.codec.net.URLCodec;
 import play.exceptions.UnexpectedException;
 import play.libs.MimeTypes;
@@ -12,6 +15,9 @@ import play.mvc.Http.Response;
  * 200 OK with application/octet-stream
  */
 public class RenderBinary extends Result {
+
+    private static final String INLINE_DISPOSITION_TYPE = "inline";
+    private static final String ATTACHMENT_DISPOSITION_TYPE = "attachment";
 
     private static URLCodec encoder = new URLCodec();
     boolean inline = false;
@@ -117,17 +123,23 @@ public class RenderBinary extends Result {
             if (contentType != null) {
                 response.contentType = contentType;
             }
+            String dispositionType;
+            if(inline) {
+                dispositionType = INLINE_DISPOSITION_TYPE;
+            } else {
+                dispositionType = ATTACHMENT_DISPOSITION_TYPE;
+            }
             if (!response.headers.containsKey("Content-Disposition")) {
-                if (inline) {
-                    if (name == null) {
-                        response.setHeader("Content-Disposition", "inline");
-                    } else {
-                        response.setHeader("Content-Disposition", "inline; filename*=utf-8''" + encoder.encode(name, "utf-8") + "; filename=\"" + encoder.encode(name, "utf-8") + "\"");
-                    }
-                } else if (name == null) {
-                    response.setHeader("Content-Disposition", "attachment");
+                if(name == null) {
+                    response.setHeader("Content-Disposition", dispositionType);
                 } else {
-                    response.setHeader("Content-Disposition", "attachment; filename*=utf-8''" + encoder.encode(name, "utf-8") + "; filename=\"" + encoder.encode(name, "utf-8") + "\"");
+                    if(canAsciiEncode(name)) {
+                        String contentDisposition = "%s; filename=\"%s\"";
+                        response.setHeader("Content-Disposition", String.format(contentDisposition, dispositionType, name));
+                    } else {
+                        String contentDisposition = "%1$s; filename*=utf-8''%2$s; filename=\"%2$s\"";
+                        response.setHeader("Content-Disposition", String.format(contentDisposition, dispositionType, encoder.encode(name, "utf-8")));
+                    }
                 }
             }
             if (file != null) {
@@ -161,5 +173,10 @@ public class RenderBinary extends Result {
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
+    }
+
+    private boolean canAsciiEncode(String string) {
+        CharsetEncoder asciiEncoder = Charset.forName("US-ASCII").newEncoder();
+        return asciiEncoder.canEncode(string);
     }
 }
