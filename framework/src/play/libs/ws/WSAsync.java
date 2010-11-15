@@ -43,7 +43,7 @@ import com.ning.http.client.StringPart;
  * <p/>
  * Get latest BBC World news as a RSS content
  * <pre>
- *    response = WS.GET("http://newsrss.bbc.co.uk/rss/newsonline_world_edition/front_page/rss.xml");
+ *    HttpResponse response = WS.url("http://newsrss.bbc.co.uk/rss/newsonline_world_edition/front_page/rss.xml").get();
  *    Document xmldoc = response.getXml();
  *    // the real pain begins here...
  * </pre>
@@ -51,7 +51,7 @@ import com.ning.http.client.StringPart;
  * 
  * Search what Yahoo! thinks of google (starting from the 30th result).
  * <pre>
- *    response = WS.GET("http://search.yahoo.com/search?p=<em>%s</em>&pstart=1&b=<em>%d</em>", "Google killed me", 30 );
+ *    HttpResponse response = WS.url("http://search.yahoo.com/search?p=<em>%s</em>&pstart=1&b=<em>%s</em>", "Google killed me", "30").get();
  *    if( response.getStatus() == 200 ) {
  *       html = response.getString();
  *    }
@@ -66,6 +66,7 @@ public class WSAsync implements WSImpl {
         String proxyPort = Play.configuration.getProperty("http.proxyPort", System.getProperty("http.proxyPort"));
         String proxyUser = Play.configuration.getProperty("http.proxyUser", System.getProperty("http.proxyUser"));
         String proxyPassword = Play.configuration.getProperty("http.proxyPassword", System.getProperty("http.proxyPassword"));
+        String userAgent = Play.configuration.getProperty("http.userAgent");
 
         Builder confBuilder = new AsyncHttpClientConfig.Builder();
         if (proxyHost != null) {
@@ -78,6 +79,9 @@ public class WSAsync implements WSImpl {
             }
             ProxyServer proxy = new ProxyServer(proxyHost, proxyPortInt, proxyUser, proxyPassword);
             confBuilder.setProxyServer(proxy);
+        }
+        if (userAgent != null) {
+            confBuilder.setUserAgent(userAgent);
         }
         confBuilder.setFollowRedirects(true);
         httpClient = new AsyncHttpClient(confBuilder.build());

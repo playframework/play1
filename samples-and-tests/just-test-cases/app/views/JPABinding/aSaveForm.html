@@ -1,0 +1,16 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+<h1>Number of A: ${a}, Number of B: ${b}</h1>
+
+#{form @aSubmitForm()}
+	
+	<input type="text" name="a.id" value="1">
+	<input type="text" name="a.b.id" value="1">
+	<input type="text" name="a.b.name" value="yop">
+	
+	<br>
+	
+	<input type="submit" id="saveAll">
+	
+#{/form}

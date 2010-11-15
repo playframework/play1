@@ -75,6 +75,48 @@ bc. #{selenium 'Test security'}
  
 #{/selenium}
 
+Because Selenium tests are run within your browser access to emails sent by the mock email and to String values placed in the Play Cache must be made using extensions to Selenium.
+
+Here is an example of accessing the most recent email sent to a specific email account:
+
+bc. #{selenium 'Test email sending'}
+ 
+    // Open email form and send an email to boron@localhost
+    open('/sendEmail')
+    assertTextPresent('Email form')
+    type('To', 'boron@localhost')
+    type('Subject', 'Berillium Subject')
+    clickAndWait('send')
+ 	
+	// Extract the last email sent to boron@localhost into a javascript variable called email
+	storeLastReceivedEmailBy('boron@localhost', 'email')
+	// Extract the subject line from the email variable into a variable called subject
+	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email"])[1]}', 'subject')
+	// Test the contents of the subject variable
+	assertEquals('Berillium Subject', '$[subject]')
+ 
+#{/selenium}
+
+Here is an example of accessing a String stored in the Play Cache (for example the correct answer to a CAPTCHA):
+
+bc. #{selenium 'Get string from cache'}
+ 
+	open('/register')
+	assertTextPresent('Registration form')
+	type('Email', 'my@email.com')
+	type('Password', 'secretpass')
+	type('Password2', 'secretpass')
+	// .. Fill in the registration form ..
+
+	// Get the value of the magicKey variable from the cache (set to the CAPTCHA answer in the application)
+	storeCacheEntry('magicKey', 'captchaAnswer')
+	// Type it into the form
+	type('Answer', '$[captchaAnswer]')
+
+    clickAndWait('register')
+
+#{/selenium}
+
 h2. <a name="fixtures">Fixtures</a>
 
 When you run tests, you need to have stable data for your application. The simplest way is to reset your database before each test.
@@ -119,6 +161,14 @@ bc. #{fixture delete:'all', load:'data.yml' /}
     // Write your test here
  
 #{/selenium}
+
+Sometimes it is convenient to split data into several YAML files. You can load fixtures from multiple files at once:
+
+bc. Fixtures.load("users.yml", "roles.yml", "permissions.yml");
+
+and for Selenium tests:
+
+bc. #{fixture delete:'all', load:['users.yml', 'roles.yml', 'permissions.yml'] /}
 
 h2. <a name="running">Running the tests</a>
 

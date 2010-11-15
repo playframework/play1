@@ -425,7 +425,17 @@ public class Play {
 
             // Plugins
             for (PlayPlugin plugin : plugins) {
-                plugin.onApplicationStart();
+                try {
+                    plugin.onApplicationStart();
+                } catch(Exception e) {
+                    if(Play.mode.isProd()) {
+                        Logger.error(e, "Can't start in PROD mode with errors");
+                    }
+                    if(e instanceof RuntimeException) {
+                        throw (RuntimeException)e;
+                    }
+                    throw new UnexpectedException(e);
+                }
             }
 
             if (firstStart) {

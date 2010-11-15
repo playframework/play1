@@ -22,16 +22,22 @@ Status: <input id="statusupdate" size="140" /> <input id="sendstatus" type="butt
 </ul>
 
 <script>
+function sendstatus() {
+    $.post("@{Application.setStatus()}?status=" + $("#statusupdate").val(),
+        null,
+        function(result){
+            alert("Status published");
+        },
+       "json");
+}
 $(document).ready(function(){
-    $("#sendstatus").keypress(function(e){
+    $("#statusupdate").keypress(function(e){
         if (e.keyCode == 13) {
-            $.post("@{Application.setStatus()}?status=" + $("#statusupdate").val(),
-                null,
-                function(result){
-                    alert("Status published");
-                },
-                "json");
+            sendstatus();
         }
+    });
+    $("#sendstatus").click(function(){
+        sendstatus();
     });
 });
 </script>

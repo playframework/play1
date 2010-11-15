@@ -8,7 +8,6 @@ import java.util.Locale;
 
 import org.apache.commons.lang.StringUtils;
 
-import play.Logger;
 import play.i18n.Lang;
 import play.libs.I18N;
 

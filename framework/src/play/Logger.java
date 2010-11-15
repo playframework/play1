@@ -448,7 +448,7 @@ public class Logger {
      * If e is a PlayException -> a very clean report
      */ 
     static boolean niceThrowable(org.apache.log4j.Level level, Throwable e, String message, Object... args) {
-        if (e instanceof PlayException) {
+        if (e instanceof Exception) {
 
             Throwable toClean = e;
             for (int i = 0; i < 5; i++) {
@@ -467,10 +467,17 @@ public class Logger {
                         cleanTrace.add(new StackTraceElement("Invocation", "Job", "Play!", -1));
                         break;
                     }
+                    if(se.getClassName().startsWith("play.server.PlayHandler") && se.getMethodName().equals("messageReceived")) {
+                       cleanTrace.add(new StackTraceElement("Invocation", "Message Received", "Play!", -1));
+                        break;
+                    }
                     if (se.getClassName().startsWith("sun.reflect.")) {
                         continue; // not very interesting
                     }
                     if (se.getClassName().startsWith("java.lang.reflect.")) {
+                        continue; // not very interesting
+                    }
+                    if (se.getClassName().startsWith("com.mchange.v2.c3p0.")) {
                         continue; // not very interesting
                     }
                     if (se.getClassName().startsWith("scala.tools.")) {
@@ -488,20 +495,25 @@ public class Logger {
                 }
             }
 
-            PlayException playException = (PlayException) e;
             StringWriter sw = new StringWriter();
-            PrintWriter errorOut = new PrintWriter(sw);
-            errorOut.println("");
-            errorOut.println("");
-            errorOut.println("@" + playException.getId());
-            errorOut.println(format(message, args));
-            errorOut.println("");
-            if (playException.isSourceAvailable()) {
-                errorOut.println(playException.getErrorTitle() + " (In " + playException.getSourceFile() + " around line " + playException.getLineNumber() + ")");
-            } else {
-                errorOut.println(playException.getErrorTitle());
+            
+            // Better format for Play exceptions
+            if(e instanceof PlayException) {
+                PlayException playException = (PlayException) e;
+                PrintWriter errorOut = new PrintWriter(sw);
+                errorOut.println("");
+                errorOut.println("");
+                errorOut.println("@" + playException.getId());
+                errorOut.println(format(message, args));
+                errorOut.println("");
+                if (playException.isSourceAvailable()) {
+                    errorOut.println(playException.getErrorTitle() + " (In " + playException.getSourceFile() + " around line " + playException.getLineNumber() + ")");
+                } else {
+                    errorOut.println(playException.getErrorTitle());
+                }
+                errorOut.println(playException.getErrorDescription().replaceAll("</?\\w+/?>", "").replace("\n", " "));
             }
-            errorOut.println(playException.getErrorDescription().replaceAll("</?\\w+/?>", "").replace("\n", " "));
+
             if (forceJuli || log4j == null) {
                 juli.log(toJuliLevel(level.toString()), sw.toString(), e);
             } else {

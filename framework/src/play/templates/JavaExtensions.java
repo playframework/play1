@@ -251,6 +251,16 @@ public class JavaExtensions {
         return s;
     }
 
+    public static String formatCurrency(Number number, Locale locale) {
+        Currency currency = Currency.getInstance(locale);
+        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(locale);
+        numberFormat.setCurrency(currency);
+        numberFormat.setMaximumFractionDigits(currency.getDefaultFractionDigits());
+        String s = numberFormat.format(number);
+        s = s.replace(currency.getCurrencyCode(), currency.getSymbol(locale));
+        return s;
+    }
+
     public static String addSlashes(Object o) {
         String string = o.toString();
         return string.replace("\"", "\\\"").replace("'", "\\'");

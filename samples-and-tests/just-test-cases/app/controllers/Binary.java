@@ -22,7 +22,7 @@ public class Binary extends Controller {
 	}
 
 	public static void save(UserWithAvatar user) {
-		user.save();
+		user.create();
 		show(user.id);
 	}
 

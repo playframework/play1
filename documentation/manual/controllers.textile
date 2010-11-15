@@ -107,7 +107,7 @@ If the parameter is multivalued, you can declare an Array argument:
 
 bc. public static void show(Long[] id) {
     for(String anId : id) {
-        System.out.println(id); 
+        System.out.println(anid); 
     }
 }
 
@@ -115,7 +115,7 @@ or even a collection type:
 
 bc. public static void show(List<Long> id) {
     for(String anId : id) {
-        System.out.println(id); 
+        System.out.println(anid); 
     }
 }
 

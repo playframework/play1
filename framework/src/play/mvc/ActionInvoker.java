@@ -163,10 +163,14 @@ public class ActionInvoker {
                 // Action
 
                 Result actionResult = null;
-                String cacheKey = "actioncache:" + request.action + ":" + request.querystring;
+                String cacheKey = null;
 
                 // Check the cache (only for GET or HEAD)
                 if ((request.method.equals("GET") || request.method.equals("HEAD")) && actionMethod.isAnnotationPresent(CacheFor.class)) {
+                    cacheKey = actionMethod.getAnnotation(CacheFor.class).id();
+                    if ("".equals(cacheKey)) {
+                        cacheKey = "urlcache:" + request.url + request.querystring;
+                    }
                     actionResult = (Result) play.cache.Cache.get(cacheKey);
                 }
 
@@ -178,9 +182,8 @@ public class ActionInvoker {
                         // It's a Result ? (expected)
                         if (ex.getTargetException() instanceof Result) {
                             actionResult = (Result) ex.getTargetException();
-
                             // Cache it if needed
-                            if ((request.method.equals("GET") || request.method.equals("HEAD")) && actionMethod.isAnnotationPresent(CacheFor.class)) {
+                            if (cacheKey != null) {
                                 play.cache.Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
                             }
 

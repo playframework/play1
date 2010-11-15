@@ -2,6 +2,7 @@ package controllers;
 
 import play.*;
 import play.mvc.*;
+import play.data.validation.*;
 
 import java.util.*;
 
@@ -15,7 +16,7 @@ public class JPABinding extends Controller {
     
     public static void create(Project project) {
         System.out.println(project);
-        project.save();
+        project.create();
         show(project.id);
     }
     
@@ -26,13 +27,14 @@ public class JPABinding extends Controller {
     
     public static void save(Project project) {
         System.out.println("---> " + project.isPersistent());
+        Logger.warn("Next warning is intended!");
         project.save();
         validation.keep();
         show(project.id);
     }
     
     public static void createCompany(Company company) {
-        company.save();
+        company.create();
         render(company);
     }
     
@@ -41,7 +43,7 @@ public class JPABinding extends Controller {
         Project project = new Project();
         project.companies = new HashMap();
         project.companies.put(company.name, company);
-        project.save();
+        project.create();
         render("@show", project);
     }
     
@@ -56,6 +58,20 @@ public class JPABinding extends Controller {
         project.companies.get("zenexity").name = "Coucou";
         project.save();
         show(id);
+    }
+    
+    public static void aSaveForm() {
+        long a = A.count();
+        long b = B.count();
+        render(a, b);
+    }
+    
+    public static void aSubmitForm(@Valid A a) {
+        System.out.println(a.id);
+        System.out.println(a.b);
+        System.out.println(a.b.id);
+        System.out.println(a.b.name);
+        aSaveForm();
     }
     
 }

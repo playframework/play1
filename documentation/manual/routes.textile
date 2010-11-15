@@ -156,7 +156,7 @@ GET    /clients/{id}      Clients.show
 
 With these definitions, the URI:
 
-bc. /client/all
+bc. /clients/all
 
 will be intercepted by the first route and will call Clients.listAll (even if the second route matched the request too).
 

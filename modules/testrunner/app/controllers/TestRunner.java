@@ -7,6 +7,7 @@ import java.util.*;
 
 import play.Logger;
 import play.Play;
+import play.cache.Cache;
 import play.libs.IO;
 import play.libs.Mail;
 import play.mvc.*;
@@ -99,6 +100,7 @@ public class TestRunner extends Controller {
             }
         }
         if (test.endsWith(".test.html.result")) {
+            flash.keep();
             test = test.substring(0, test.length() - 7);
             File testResults = Play.getFile("test-result/" + test.replace("/", ".") + ".passed.html");
             if (testResults.exists()) {
@@ -138,5 +140,13 @@ public class TestRunner extends Controller {
         renderText(email);
     }
 
+	public static void cacheEntry(String key){
+    	String value = Cache.get(key,String.class);
+    	if(value == null){
+    		notFound();
+    	}
+    	renderText(value);
+    }
+	
 }
 

@@ -6,7 +6,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -160,12 +159,16 @@ public class Router {
      */
     static void parse(VirtualFile routeFile, String prefix) {
         String fileAbsolutePath = routeFile.getRealFile().getAbsolutePath();
-        int lineNumber = 0;
         String content = routeFile.contentAsString();
         if (content.indexOf("${") > -1 || content.indexOf("#{") > -1) {
             // Mutable map needs to be passed in.
             content = TemplateLoader.load(routeFile).render(new HashMap<String, Object>(16));
         }
+        parse(content, prefix, fileAbsolutePath);
+    }
+    
+    static void parse(String content, String prefix, String fileAbsolutePath) {
+        int lineNumber = 0;
         for (String line : content.split("\n")) {
             lineNumber++;
             line = line.trim().replaceAll("\\s+", " ");
@@ -244,6 +247,9 @@ public class Router {
                 if (t instanceof RenderStatic) {
                     throw (RenderStatic) t;
                 }
+                if (t instanceof NotFound) {
+                    throw (NotFound) t;
+                }
             }
         }
     }
@@ -272,6 +278,9 @@ public class Router {
                     for (String arg : request.routeArgs.keySet()) {
                         request.action = request.action.replace("{" + arg + "}", request.routeArgs.get(arg));
                     }
+                }
+                if (request.action.equals("404")) {
+                    throw new NotFound(route.path);
                 }
                 return route;
             }
@@ -366,7 +375,7 @@ public class Router {
         }
         return reverse(file, absolute);
     }
-
+    
     public static ActionDefinition reverse(String action, Map<String, Object> args) {
         if (action.startsWith("controllers.")) {
             action = action.substring(12);
@@ -592,6 +601,7 @@ public class Router {
         Pattern actionPattern;
         List<String> actionArgs = new ArrayList<String>(3);
         String staticDir;
+        boolean staticFile;
         Pattern pattern;
         Pattern hostPattern;
         List<Arg> args = new ArrayList<Arg>(3);
@@ -608,8 +618,7 @@ public class Router {
         public void compute() {
             this.host = "";
             this.hostPattern = new Pattern(".*");
-            // staticDir
-            if (action.startsWith("staticDir:")) {
+            if (action.startsWith("staticDir:") || action.startsWith("staticFile:")) {
                 // Is there is a host argument, append it.
                 if (!path.startsWith("/")) {
                     String p = this.path;
@@ -624,12 +633,19 @@ public class Router {
                     Logger.warn("Static route only support GET method");
                     return;
                 }
+            }
+            // staticDir
+            if (action.startsWith("staticDir:")) {
                 if (!this.path.endsWith("/") && !this.path.equals("/")) {
                     Logger.warn("The path for a staticDir route must end with / (%s)", this);
                     this.path += "/";
                 }
                 this.pattern = new Pattern("^" + path + "({resource}.*)$");
                 this.staticDir = action.substring("staticDir:".length());
+            } else if (action.startsWith("staticFile:")) {
+                this.pattern = new Pattern("^" + path + "$");
+                this.staticFile = true;
+                this.staticDir = action.substring("staticFile:".length());
             } else {
                 // URL pattern
                 // Is there is a host argument, append it.
@@ -765,14 +781,22 @@ public class Router {
                 }
                 // Extract the host variable
                 if (matcher.matches() && contains(accept) && hostMatches) {
+                    // 404
+                    if (action.equals("404")) {
+                        throw new NotFound(method, path);
+                    }
                     // Static dir
                     if (staticDir != null) {
-                        String resource = matcher.group("resource");
+                        String resource = null;
+                        if (!staticFile) {
+                            resource = matcher.group("resource");
+                        }
                         try {
                             String root = new File(staticDir).getCanonicalPath();
-                            String child = new File(staticDir + "/" + resource).getCanonicalPath();
+                            String childResourceName = staticDir + (staticFile ? "" : "/" + resource);
+                            String child = new File(childResourceName).getCanonicalPath();
                             if (child.startsWith(root)) {
-                                throw new RenderStatic(staticDir + "/" + resource);
+                                throw new RenderStatic(childResourceName);
                             }
                         } catch (IOException e) {
                         }
