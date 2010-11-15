@@ -26,8 +26,7 @@ public class SslPlayHandler extends PlayHandler {
 
 
     @Override
-    public void channelConnected(
-            ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
         ctx.setAttachment(e.getValue());
         // Get the SslHandler in the current pipeline.
         final SslHandler sslHandler = ctx.getPipeline().get(SslHandler.class);
@@ -44,15 +43,14 @@ public class SslPlayHandler extends PlayHandler {
 
         public void operationComplete(ChannelFuture future) throws Exception {
             if (!future.isSuccess()) {
-                Logger.warn(future.getCause(), "Invalid certificate ");
+                Logger.warn(future.getCause(), "Invalid certificate");
             }
         }
 
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
-            throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
         Logger.error(e.getCause(), "");
         // We have to redirect to https://, as it was targeting http://
         // Redirect to the root as we don't know the url at that point

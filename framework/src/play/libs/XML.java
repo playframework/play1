@@ -6,11 +6,26 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.security.Key;
 import java.security.Provider;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Collections;
 
 import javax.xml.crypto.KeySelector;
+import javax.xml.crypto.dsig.CanonicalizationMethod;
+import javax.xml.crypto.dsig.DigestMethod;
+import javax.xml.crypto.dsig.Reference;
+import javax.xml.crypto.dsig.SignatureMethod;
+import javax.xml.crypto.dsig.SignedInfo;
+import javax.xml.crypto.dsig.Transform;
 import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
+import javax.xml.crypto.dsig.dom.DOMSignContext;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
+import javax.xml.crypto.dsig.keyinfo.KeyInfo;
+import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
+import javax.xml.crypto.dsig.keyinfo.KeyValue;
+import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
+import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -82,7 +97,7 @@ public class XML {
     }
 
     /**
-     * Check the xmldsig signature of the XML document
+     * Check the xmldsig signature of the XML document.
      * @param document the document to test
      * @param publicKey the public key corresponding to the key pair the document was signed with
      * @return true if a correct signature is present, false otherwise
@@ -99,9 +114,40 @@ public class XML {
             XMLSignature signature = fac.unmarshalXMLSignature(valContext);
             return signature.validate(valContext);
         } catch (Exception e) {
-            Logger.warn("Exception checking the signature: ", e);
+            Logger.warn("Error validating an XML signature.", e);
             return false;
         }
+    }
+
+    /**
+     * Sign the XML document using xmldsig. The input document will be modified, it is returned
+     * only for convience so you can chain a call if needed.
+     */
+    public static Document sign(Document document, RSAPublicKey publicKey, RSAPrivateKey privateKey) {
+        XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
+        KeyInfoFactory keyInfoFactory = fac.getKeyInfoFactory();
+
+        try {
+            Reference ref =fac.newReference(
+                    "",
+                    fac.newDigestMethod(DigestMethod.SHA1, null),
+                    Collections.singletonList(fac.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null)),
+                    null,
+                    null);
+            SignedInfo si = fac.newSignedInfo(fac.newCanonicalizationMethod(CanonicalizationMethod.INCLUSIVE,
+                                                                            (C14NMethodParameterSpec) null),
+                                              fac.newSignatureMethod(SignatureMethod.RSA_SHA1, null),
+                                              Collections.singletonList(ref));
+            DOMSignContext dsc = new DOMSignContext(privateKey, document.getDocumentElement());
+            KeyValue keyValue = keyInfoFactory.newKeyValue(publicKey);
+            KeyInfo ki = keyInfoFactory.newKeyInfo(Collections.singletonList(keyValue));
+            XMLSignature signature = fac.newXMLSignature(si, ki);
+            signature.sign(dsc);
+        } catch (Exception e) {
+            Logger.warn("Error while signing an XML document.", e);
+        }
+
+        return document;
     }
 
 }

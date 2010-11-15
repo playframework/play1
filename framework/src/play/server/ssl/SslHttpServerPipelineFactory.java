@@ -18,17 +18,16 @@ public class SslHttpServerPipelineFactory implements ChannelPipelineFactory {
     public ChannelPipeline getPipeline() throws Exception {
 
         Integer max = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
-           
+
         ChannelPipeline pipeline = pipeline();
 
         // Add SSL handler first to encrypt and decrypt everything.
-        SSLEngine engine =
-            SslHttpServerContextFactory.getServerContext().createSSLEngine();
+        SSLEngine engine = SslHttpServerContextFactory.getServerContext().createSSLEngine();
         engine.setUseClientMode(false);
         engine.setNeedClientAuth(true);
         engine.setWantClientAuth(true);
         engine.setEnableSessionCreation(true);
-     
+
         pipeline.addLast("ssl", new SslHandler(engine));
         pipeline.addLast("decoder", new HttpRequestDecoder());
         pipeline.addLast("aggregator", new StreamChunkAggregator(max));

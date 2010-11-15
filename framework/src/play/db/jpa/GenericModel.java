@@ -26,15 +26,12 @@ import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostUpdate;
-import org.apache.commons.collections.MapUtils;
 import play.Logger;
-import play.utils.Java;
 import play.utils.Utils;
 
 /**
@@ -55,6 +52,7 @@ public class GenericModel extends JPABase {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public static <T extends JPABase> T edit(Object o, String name, Map<String, String[]> params, Annotation[] annotations) {
         try {
             BeanWrapper bw = new BeanWrapper(o.getClass());
@@ -405,6 +403,7 @@ public class GenericModel extends JPABase {
 
     // ----- THIS CODE IS DEPRECATED AND WILL BE REMOVED IN NEXT VERSIONs
     @PostLoad
+    @SuppressWarnings("deprecation")
     public void _setupAttachment() {
         Class c = this.getClass();
         while (!c.equals(Object.class)) {
@@ -433,6 +432,7 @@ public class GenericModel extends JPABase {
 
     @PostPersist
     @PostUpdate
+    @SuppressWarnings("deprecation")
     public void _saveAttachment() {
         Class c = this.getClass();
         while (!c.equals(Object.class)) {
