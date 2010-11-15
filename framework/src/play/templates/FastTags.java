@@ -7,6 +7,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import play.exceptions.TemplateExecutionException;
 import play.exceptions.TemplateNotFoundException;
 import play.libs.Codec;
 import play.mvc.Router.ActionDefinition;
+import play.mvc.Scope.Flash;
 import play.mvc.Scope.Session;
 import play.templates.GroovyTemplate.ExecutableTemplate;
 
@@ -98,6 +100,28 @@ public class FastTags {
         }
         out.println(JavaExtensions.toString(body));
         out.print("</form>");
+    }
+    
+    public static void _field(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        Map<String,Object> field = new HashMap<String,Object>();
+        String _arg = args.get("arg").toString();
+        field.put("name", _arg);
+        field.put("id", _arg.replace('.','_'));
+        field.put("flash", Flash.current().get(_arg));
+        field.put("flashArray", field.get("flash") != null && !field.get("flash").toString().isEmpty() ? field.get("flash").toString().split(",") : new String[0]);
+        field.put("error", Validation.error(_arg));
+        field.put("errorClass", field.get("error") != null ? "hasError" : "");
+        String[] c = _arg.split("\\.");
+        Object obj = body.getProperty(c[0]);
+        if(obj != null){
+            try{
+                Field f = obj.getClass().getField(c[1]);
+                field.put("value", f.get(obj).toString());
+            }catch(Exception e){
+            }
+        }
+        body.setProperty("field", field);
+        body.call();
     }
 
     /**
