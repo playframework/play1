@@ -398,7 +398,7 @@ public class Play {
             Logger.setUp(logLevel);
 
             // Locales
-            langs = Arrays.asList(configuration.getProperty("application.langs", "").split(","));
+            langs = new ArrayList(Arrays.asList(configuration.getProperty("application.langs", "").split(",")));
             if (langs.size() == 1 && langs.get(0).trim().length() == 0) {
                 langs = new ArrayList<String>(16);
             }
