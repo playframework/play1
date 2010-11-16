@@ -154,7 +154,7 @@ public class DBPlugin extends PlayPlugin {
             }
         }
 
-        Matcher m = new jregex.Pattern("^mysql:(({user}[\\w]+)(:({pwd}[\\w]+))?@)?({name}[\\w]+)$").matcher(p.getProperty("db", ""));
+        Matcher m = new jregex.Pattern("^mysql:(({user}[\\w]+)(:({pwd}[^@]+))?@)?({name}[\\w]+)$").matcher(p.getProperty("db", ""));
         if (m.matches()) {
             String user = m.group("user");
             String password = m.group("pwd");
