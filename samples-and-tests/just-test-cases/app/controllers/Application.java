@@ -15,9 +15,11 @@ import play.libs.*;
 
 import models.*;
 import utils.*;
+import jobs.*;
 
 import javax.mail.internet.InternetAddress;
 
+@play.db.jpa.Transactional
 public class Application extends Controller {
 
     // bug
@@ -37,6 +39,23 @@ public class Application extends Controller {
     public static void myHomePage(String clientName) {
         renderText(clientName);
     }
+    
+    public static void some1() {
+        renderText(Invoker.InvocationContext.current());
+    }
+    
+    @Youhou
+    public static void some2() {
+        renderText(Invoker.InvocationContext.current());
+    }
+    
+    @Youhou
+    public static void some3() throws Exception {
+        JobWithContext job = new JobWithContext();
+        Future<String> future = job.now();
+        renderText(future.get());
+    }
+    
 
     // bug
 

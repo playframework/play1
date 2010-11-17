@@ -2,6 +2,7 @@ package play.server;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -9,11 +10,13 @@ import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 import org.jboss.netty.handler.stream.ChunkedFile;
 import org.jboss.netty.handler.stream.ChunkedStream;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
+
 import play.Invoker;
+import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
-
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Messages;
@@ -30,6 +33,7 @@ import play.templates.JavaExtensions;
 import play.templates.TemplateLoader;
 import play.utils.Utils;
 import play.vfs.VirtualFile;
+import play.data.validation.Validation;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -38,11 +42,6 @@ import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.*;
 
-import play.data.validation.Validation;
-
-
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
-
 public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
@@ -50,7 +49,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     public Request processRequest(Request request) {
         return request;
     }
-
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
@@ -86,8 +84,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
         Logger.trace("messageReceived: end");
     }
-
-    private static Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
+    private static final Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
 
     public class NettyInvocation extends Invoker.Invocation {
 
@@ -95,14 +92,14 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         private final Request request;
         private final Response response;
         private final HttpRequest nettyRequest;
-        private final MessageEvent e;
+        private final MessageEvent event;
 
         public NettyInvocation(Request request, Response response, ChannelHandlerContext ctx, HttpRequest nettyRequest, MessageEvent e) {
             this.ctx = ctx;
             this.request = request;
             this.response = response;
             this.nettyRequest = nettyRequest;
-            this.e = e;
+            this.event = e;
         }
 
         @Override
@@ -110,35 +107,41 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Logger.trace("init: begin");
             Request.current.set(request);
             Response.current.set(response);
-            super.init();
-            if (Play.mode == Play.Mode.PROD && staticPathsCache.containsKey(request.path)) {
-                RenderStatic rs = null;
-                synchronized (staticPathsCache) {
-                    rs = staticPathsCache.get(request.path);
-                }
-                serveStatic(rs, ctx, request, response, nettyRequest, e);
-                Logger.trace("init: end false");
-                return false;
-            }
             try {
+                super.init();
+                if (Play.mode == Play.Mode.PROD && staticPathsCache.containsKey(request.path)) {
+                    RenderStatic rs = null;
+                    synchronized (staticPathsCache) {
+                        rs = staticPathsCache.get(request.path);
+                    }
+                    serveStatic(rs, ctx, request, response, nettyRequest, event);
+                    Logger.trace("init: end false");
+                    return false;
+                }
                 Router.routeOnlyStatic(request);
-            } catch (NotFound e) {
-                serve404(e, ctx, request, nettyRequest);
+            } catch (NotFound nf) {
+                serve404(nf, ctx, request, nettyRequest);
                 Logger.trace("init: end false");
                 return false;
-            } catch (RenderStatic e) {
+            } catch (RenderStatic rs) {
                 if (Play.mode == Play.Mode.PROD) {
                     synchronized (staticPathsCache) {
-                        staticPathsCache.put(request.path, e);
+                        staticPathsCache.put(request.path, rs);
                     }
                 }
-                serveStatic(e, ctx, request, response, nettyRequest, this.e);
+                serveStatic(rs, ctx, request, response, nettyRequest, this.event);
                 Logger.trace("init: end false");
                 return false;
             }
-            
+
             Logger.trace("init: end true");
             return true;
+        }
+
+        @Override
+        public InvocationContext getInvocationContext() {
+            ActionInvoker.resolve(request, response);
+            return new InvocationContext(request.invokedMethod.getAnnotations(), request.invokedMethod.getDeclaringClass().getAnnotations());
         }
 
         @Override
@@ -509,7 +512,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         Map<String, Object> binding = getBindingForErrors(e, false);
 
         String format = Request.current().format;
-        if (format == null || ("XMLHttpRequest".equals(request.headers.get("x-requested-with")) && "html".equals(format))) {
+        if (format == null) {
             format = "txt";
         }
         nettyResponse.setHeader(CONTENT_TYPE, (MimeTypes.getContentType("404." + format, "text/plain")));
@@ -590,7 +593,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Map<String, Object> binding = getBindingForErrors(e, true);
 
             String format = request.format;
-            if (format == null || ("XMLHttpRequest".equals(request.headers.get("x-requested-with")) && "html".equals(format))) {
+            if (format == null) {
                 format = "txt";
             }
 

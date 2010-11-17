@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.junit.Before;
+import play.Invoker.InvocationContext;
 
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.mvc.ActionInvoker;
@@ -25,6 +26,9 @@ import com.ning.http.multipart.FilePart;
 import com.ning.http.multipart.MultipartRequestEntity;
 import com.ning.http.multipart.Part;
 import com.ning.http.multipart.StringPart;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import play.Invoker;
 import play.mvc.Controller;
 import play.mvc.Router.ActionDefinition;
 
@@ -227,11 +231,25 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     public static void makeRequest(final Request request, final Response response) {
-        ActionInvoker.invoke(request, response);
-        savedCookies = response.cookies;
+        final Future invocationResult = TestEngine.functionalTestsExecutor.submit(new Invoker.Invocation() {
+
+            @Override
+            public void execute() throws Exception {                
+                ActionInvoker.invoke(request, response);
+            }
+
+            @Override
+            public InvocationContext getInvocationContext() {
+                ActionInvoker.resolve(request, response);
+                return new InvocationContext(request.invokedMethod.getAnnotations(), request.invokedMethod.getDeclaringClass().getAnnotations());
+            }
+
+        });
         try {
+            invocationResult.get(30, TimeUnit.SECONDS);
+            savedCookies = response.cookies;
             response.out.flush();
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }

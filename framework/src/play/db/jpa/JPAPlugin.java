@@ -45,7 +45,6 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 import play.data.binding.Binder;
 import play.db.DB;
 import play.db.Model;
-import play.db.Transactional;
 import play.exceptions.JPAException;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;

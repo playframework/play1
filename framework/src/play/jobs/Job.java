@@ -31,17 +31,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
 
     @Override
     public InvocationContext getInvocationContext() {
-        try {
-            Class<?> invokedClass = this.getClass();
-            Method invokedMethod;
-            invokedMethod = this.getClass().getDeclaredMethod("doJob");
-            InvocationContext context = new InvocationContext(invokedClass, invokedMethod);
-            return context;
-        } catch (SecurityException e) {
-            throw new UnexpectedException("Reflection exception finding annotations on doJob", e);
-        } catch (NoSuchMethodException e) {
-            throw new UnexpectedException("Reflection exception finding annotations on doJob", e);
-        }
+        return new InvocationContext(this.getClass().getAnnotations());
     }
     
     /**

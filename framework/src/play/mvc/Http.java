@@ -262,7 +262,7 @@ public class Http {
         /**
          * ActionInvoker.resolvedRoutes was called?
          */
-        boolean resolvedRoutes;
+        boolean resolved;
         /**
          * Params
          */

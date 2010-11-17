@@ -28,26 +28,38 @@ import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.mvc.Router.Route;
 import play.mvc.results.NoResult;
-import play.mvc.results.NotFound;
 import play.mvc.results.Result;
 import play.utils.Java;
 import play.utils.Utils;
 
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
+import play.mvc.results.NotFound;
 
 /**
  * Invoke an action after an HTTP request.
  */
 public class ActionInvoker {
 
-    public static void resolveRoutes(Http.Request request) {
+    public static void resolve(Http.Request request, Http.Response response) {
+
         if (!Play.started) {
             return;
         }
-        if (request.resolvedRoutes)
+
+        if (request.resolved) {
             return;
-        
+        }
+
+        Http.Request.current.set(request);
+        Http.Response.current.set(response);
+
+        Scope.Params.current.set(request.params);
+        Scope.RenderArgs.current.set(new Scope.RenderArgs());
+        Scope.RouteArgs.current.set(new Scope.RouteArgs());
+        Scope.Session.current.set(Scope.Session.restore());
+        Scope.Flash.current.set(Scope.Flash.restore());
+
         // Route and resolve format if not already done
         if (request.action == null) {
             for (PlayPlugin plugin : Play.plugins) {
@@ -59,46 +71,39 @@ public class ActionInvoker {
             }
         }
         request.resolveFormat();
-        
-        // Find the action method
-        Method actionMethod = null;
-        Object[] ca = getActionMethod(request.action);
-        actionMethod = (Method) ca[1];
-        request.controller = ((Class) ca[0]).getName().substring(12)
-                .replace("$", "");
-        request.controllerClass = ((Class) ca[0]);
-        request.actionMethod = actionMethod.getName();
-        request.action = request.controller + "."
-                + request.actionMethod;
-        request.invokedMethod = actionMethod;
 
-        Logger.trace("------- %s", actionMethod);
-        request.resolvedRoutes = true;
-        Http.Request.current.set(request);
+        // Find the action method
+        try {
+            Method actionMethod = null;
+            Object[] ca = getActionMethod(request.action);
+            actionMethod = (Method) ca[1];
+            request.controller = ((Class) ca[0]).getName().substring(12).replace("$", "");
+            request.controllerClass = ((Class) ca[0]);
+            request.actionMethod = actionMethod.getName();
+            request.action = request.controller + "." + request.actionMethod;
+            request.invokedMethod = actionMethod;
+
+            Logger.trace("------- %s", actionMethod);
+            request.resolved = true;
+
+        } catch (ActionNotFoundException e) {
+            Logger.error(e, "%s action not found", e.getAction());
+            throw new NotFound(String.format("%s action not found", e.getAction()));
+        }
+
     }
-    
+
     @SuppressWarnings("unchecked")
     public static void invoke(Http.Request request, Http.Response response) {
         Monitor monitor = null;
         try {
-            if (!Play.started) {
-                return;
-            }
 
-            Http.Request.current.set(request);
-            Http.Response.current.set(response);
-
-            Scope.Params.current.set(request.params);
-            Scope.RenderArgs.current.set(new Scope.RenderArgs());
-            Scope.RouteArgs.current.set(new Scope.RouteArgs());
-            Scope.Session.current.set(Scope.Session.restore());
-            Scope.Flash.current.set(Scope.Flash.restore());
-
-            resolveRoutes(request);
+            resolve(request, response);
             Method actionMethod = request.invokedMethod;
-            
+
             // 1. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);
+
             // add parameters from the URI query string 
             Scope.Params.current()._mergeWith(UrlEncodedParser.parseQueryString(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
             Lang.resolvefrom(request);
@@ -124,9 +129,6 @@ public class ActionInvoker {
             monitor = MonitorFactory.start(request.action + "()");
 
             // 3. Invoke the action
-
-            // There is a difference between a get and a post when binding data. The get does not care about validation while
-            // the post does.
             try {
 
                 // @Before
@@ -393,7 +395,7 @@ public class ActionInvoker {
             }
             if (o instanceof Result) {
                 // Of course
-                throw (Result)o;
+                throw (Result) o;
             }
             if (o instanceof InputStream) {
                 Controller.renderBinary((InputStream) o);

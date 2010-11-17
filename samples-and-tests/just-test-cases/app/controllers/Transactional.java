@@ -1,15 +1,14 @@
 package controllers;
 
-import models.Post;
-import models.Tag;
-import play.mvc.Controller;
+import play.mvc.*;
+import play.db.jpa.*;
 
+import models.*;
 
-@play.db.Transactional(readOnly=false)
 public class Transactional extends Controller {
 
     // whatever we write here will not be committed
-    @play.db.Transactional(readOnly=true)
+    @play.db.jpa.Transactional(readOnly=true)
     public static void readOnlyTest() {
         Post post = new Post();
         post.name = "TransactionalTest";

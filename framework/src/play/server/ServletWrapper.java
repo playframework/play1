@@ -2,6 +2,7 @@ package play.server;
 
 import org.apache.commons.lang.StringUtils;
 import play.Invoker;
+import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -472,5 +473,12 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             ActionInvoker.invoke(request, response);
             copyResponse(request, response, httpServletRequest, httpServletResponse);
         }
+
+        @Override
+        public InvocationContext getInvocationContext() {
+            ActionInvoker.resolve(request, response);
+            return new InvocationContext(request.invokedMethod.getAnnotations(), request.invokedMethod.getDeclaringClass().getAnnotations());
+        }
+        
     }
 }
