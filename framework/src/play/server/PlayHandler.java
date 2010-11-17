@@ -391,10 +391,18 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         Logger.trace("parseRequest: URI = " + nettyRequest.getUri());
         int index = nettyRequest.getUri().indexOf("?");
         String querystring = "";
-        String path = URLDecoder.decode(nettyRequest.getUri(), "UTF-8");
+        
+        String uri = nettyRequest.getUri();
+        // Remove domain and port from URI if it's present.
+        if (uri.startsWith("http://") || uri.startsWith("https://")) {
+            // Begins searching / after 9th character (last / of https://)
+            uri = uri.substring(uri.indexOf("/", 9));
+        }
+        
+        String path = URLDecoder.decode(uri, "UTF-8");
         if (index != -1) {
-            path = URLDecoder.decode(nettyRequest.getUri().substring(0, index), "UTF-8");
-            querystring = nettyRequest.getUri().substring(index + 1);
+            path = URLDecoder.decode(uri.substring(0, index), "UTF-8");
+            querystring = uri.substring(index + 1);
         }
 
         final Request request = new Request();
@@ -432,7 +440,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             request.body = new ByteArrayInputStream(n);
         }
 
-        request.url = nettyRequest.getUri();
+        request.url = uri;
         request.host = nettyRequest.getHeader(HOST);
         request.isLoopback = ((InetSocketAddress) ctx.getChannel().getRemoteAddress()).getAddress().isLoopbackAddress() && request.host.matches("^127\\.0\\.0\\.1:?[0-9]*$");
 
