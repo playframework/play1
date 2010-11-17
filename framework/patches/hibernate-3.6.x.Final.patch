@@ -40,6 +40,39 @@
 
 --- project/core/src/main/java/org/hibernate/event/def/AbstractFlushingEventListener.java	2010-03-10 03:25:04.000000000 +0100
 +++ project/core/src/main/java/org/hibernate/event/def/AbstractFlushingEventListener.java	2010-04-08 21:06:14.000000000 +0200
+@@ -140,7 +140,28 @@
+ 		for ( int i=0; i<size; i++ ) {
+ 			Map.Entry me = list[i];
+ 			EntityEntry entry = (EntityEntry) me.getValue();
+-			Status status = entry.getStatus();			
++			Status status = entry.getStatus();		
++			
++			// This entity will be saved?
++			boolean willBeSaved = true;
++            try {
++			    Object o = me.getKey();
++			    Class c = o.getClass();
++			    Class jpaBase = Class.forName("play.db.jpa.JPABase");
++			    while(!c.equals(Object.class)) {
++			        if(c.equals(jpaBase)) {
++			            willBeSaved = (Boolean)(jpaBase.getDeclaredField("willBeSaved").get(o));
++			            break;			        
++			        }
++			        c = c.getSuperclass();
++			    }
++			    if(!willBeSaved) {
++			        continue;
++			    }
++			} catch(Exception e) {
++	            e.printStackTrace();
++	        }
++				
+ 			if ( status == Status.MANAGED || status == Status.SAVING || status == Status.READ_ONLY ) {
+ 				cascadeOnFlush( session, entry.getPersister(), me.getKey(), anything );
+ 			}
+
+--- project/core/src/main/java/org/hibernate/event/def/AbstractFlushingEventListener.java	2010-03-10 03:25:04.000000000 +0100
++++ project/core/src/main/java/org/hibernate/event/def/AbstractFlushingEventListener.java	2010-04-08 21:06:14.000000000 +0200
 @@ -255,39 +255,42 @@
  			CollectionEntry ce = (CollectionEntry) me.getValue();
  
