@@ -6,14 +6,16 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>	
     </head>
     <body>
-		#{if play.mode.name() == 'DEV'}
-			#{500 exception /}
-		#{/if}
+        #{if play.mode.name() == 'DEV'}
+            #{500 exception /}
+        #{/if}
         #{else}
-        	<h1>Oops, an error occured</h1>
-			<p>
-				This exception has been logged with id <strong>${exception.id}</strong>.
-			</p>
+            <h1>Oops, an error occured</h1>
+            #{if exception instanceof play.exceptions.PlayException}
+                <p>
+                    This exception has been logged with id <strong>${exception.id}</strong>.
+                </p>
+            #{/if}
         #{/else}
     </body>
 </html>
