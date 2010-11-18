@@ -111,13 +111,19 @@ public class FastTags {
         field.put("flashArray", field.get("flash") != null && !field.get("flash").toString().isEmpty() ? field.get("flash").toString().split(",") : new String[0]);
         field.put("error", Validation.error(_arg));
         field.put("errorClass", field.get("error") != null ? "hasError" : "");
-        String[] c = _arg.split("\\.");
-        Object obj = body.getProperty(c[0]);
-        if(obj != null){
-            try{
-                Field f = obj.getClass().getField(c[1]);
-                field.put("value", f.get(obj).toString());
-            }catch(Exception e){
+        String[] pieces = _arg.split("\\.");
+        Object obj = body.getProperty(pieces[0]);
+        if(obj != null && pieces.length >= 2){
+            for(int i = 1; i < pieces.length; i++){
+                try{
+                    Field f = obj.getClass().getField(pieces[i]);
+                    if(i == (pieces.length-1)){
+                        field.put("value", f.get(obj).toString());
+                    }else{
+                        obj = f.get(obj);
+                    }
+                }catch(Exception e){
+                }
             }
         }
         body.setProperty("field", field);
