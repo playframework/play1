@@ -20,6 +20,7 @@ import play.Play.Mode;
 import play.PlayPlugin;
 import play.vfs.VirtualFile;
 import play.exceptions.NoRouteFoundException;
+import play.exceptions.UnexpectedException;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 import play.templates.TemplateLoader;
@@ -436,10 +437,18 @@ public class Router {
                                 if (List.class.isAssignableFrom(value.getClass())) {
                                     @SuppressWarnings("unchecked")
                                     List<Object> vals = (List<Object>) value;
-                                    path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", vals.get(0).toString().replace("$", "\\$") + "");
+                                    try {
+                                        path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(vals.get(0).toString().replace("$", "\\$"), "utf-8"));
+                                    } catch(UnsupportedEncodingException e) {
+                                        throw new UnexpectedException(e);
+                                    }
                                 } else {
-                                    path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value.toString().replace("$", "\\$") + "");
-                                    host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", value.toString().replace("$", "\\$") + "");
+                                    try {
+                                    path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString().replace("$", "\\$"), "utf-8"));
+                                    host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString().replace("$", "\\$"), "utf-8"));
+                                    } catch(UnsupportedEncodingException e) {
+                                        throw new UnexpectedException(e);
+                                    }
                                 }
                             } else if (route.staticArgs.containsKey(key)) {
                                 // Do nothing -> The key is static

@@ -20,7 +20,9 @@ import play.exceptions.TemplateNotFoundException;
 import play.libs.Codec;
 import play.mvc.Router.ActionDefinition;
 import play.mvc.Scope.Session;
+import play.templates.BaseTemplate.RawData;
 import play.templates.GroovyTemplate.ExecutableTemplate;
+import play.utils.HTML;
 
 /**
  * Fast tags implementation
@@ -30,11 +32,11 @@ public class FastTags {
     public static void _cache(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         String key = args.get("arg").toString();
         String duration = null;
-        if(args.containsKey("for")) {
+        if (args.containsKey("for")) {
             duration = args.get("for").toString();
         }
         Object cached = Cache.get(key);
-        if(cached != null) {
+        if (cached != null) {
             out.print(cached);
             return;
         }
@@ -187,12 +189,22 @@ public class FastTags {
             } else if (test instanceof Number) {
                 return ((Number) test).intValue() != 0;
             } else if (test instanceof Collection) {
-                return ((Collection) test).size() != 0;
+                return !((Collection) test).isEmpty();
             } else {
                 return true;
             }
         }
         return false;
+    }
+
+    static String __safe(Template template, Object val) {
+        if (val instanceof RawData) {
+            return ((RawData) val).data;
+        }
+        if (!template.name.endsWith(".html") || TagContext.hasParentTag("verbatim")) {
+            return val.toString();
+        }
+        return HTML.htmlEscape(val.toString());
     }
 
     public static void _doLayout(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
@@ -206,7 +218,11 @@ public class FastTags {
         }
         Object value = BaseTemplate.layoutData.get().get(name);
         if (value != null) {
-            out.print(value);
+            if (_evaluateCondition(args.get("raw"))) {
+                out.print(value);
+            } else {
+                out.print(__safe(template.template, value));
+            }
         } else {
             if (body != null) {
                 out.print(JavaExtensions.toString(body));
@@ -249,7 +265,7 @@ public class FastTags {
                 ct = ct.substring(0, ct.lastIndexOf("/"));
                 name = ct + name.substring(1);
             }
-            BaseTemplate.layout.set((BaseTemplate)TemplateLoader.load(name));
+            BaseTemplate.layout.set((BaseTemplate) TemplateLoader.load(name));
         } catch (TemplateNotFoundException e) {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
         }
@@ -270,7 +286,7 @@ public class FastTags {
                 ct = ct.substring(0, ct.lastIndexOf("/"));
                 name = ct + name.substring(1);
             }
-            BaseTemplate t = (BaseTemplate)TemplateLoader.load(name);
+            BaseTemplate t = (BaseTemplate) TemplateLoader.load(name);
             Map<String, Object> newArgs = new HashMap<String, Object>();
             newArgs.putAll(template.getBinding().getVariables());
             newArgs.put("_isInclude", true);
@@ -296,7 +312,7 @@ public class FastTags {
                 name = ct + name.substring(1);
             }
             args.remove("arg");
-            BaseTemplate t = (BaseTemplate)TemplateLoader.load(name);
+            BaseTemplate t = (BaseTemplate) TemplateLoader.load(name);
             Map<String, Object> newArgs = new HashMap<String, Object>();
             newArgs.putAll((Map<? extends String, ? extends Object>) args);
             newArgs.put("_isInclude", true);
