@@ -102,6 +102,14 @@ public class FastTags {
         out.print("</form>");
     }
     
+    /**
+     * The field tag is a helper, based on the spirit of Don't Repeat Yourself. 
+     * @param args tag attributes
+     * @param body tag inner body
+     * @param out the output writer
+     * @param template enclosing template
+     * @param fromLine template line number where the tag is defined
+     */
     public static void _field(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         Map<String,Object> field = new HashMap<String,Object>();
         String _arg = args.get("arg").toString();
