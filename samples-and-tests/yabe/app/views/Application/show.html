@@ -60,7 +60,7 @@
         // If there is an error, focus to form
         if($('form .error').size()) {
             $('form').expose({api: true, loadSpeed: 0}).load(); 
-            $('form input').get(0).focus();
+            $('form input[type=text]').get(0).focus();
         }
     });
 </script>
