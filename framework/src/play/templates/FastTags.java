@@ -135,7 +135,6 @@ public class FastTags {
                             }catch(NoSuchMethodException e){
                                 field.put("value",f.get(obj).toString());
                             }
-                            field.put("value", f.get(obj).toString());
                         }else{
                             obj = f.get(obj);
                         }
