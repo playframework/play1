@@ -128,11 +128,16 @@ public class FastTags {
                 for(int i = 1; i < pieces.length; i++){
                     try{
                         Field f = obj.getClass().getField(pieces[i]);
-                        try{
-                            Method getter = obj.getClass().getMethod("get"+JavaExtensions.capFirst(f.getName()));
-                            field.put("value", getter.invoke(obj, new Object[0]));
-                        }catch(NoSuchMethodException e){
-                            field.put("value",f.get(obj).toString());
+                        if(i == (pieces.length-1)){
+                            try{
+                                Method getter = obj.getClass().getMethod("get"+JavaExtensions.capFirst(f.getName()));
+                                field.put("value", getter.invoke(obj, new Object[0]));
+                            }catch(NoSuchMethodException e){
+                                field.put("value",f.get(obj).toString());
+                            }
+                            field.put("value", f.get(obj).toString());
+                        }else{
+                            obj = f.get(obj);
                         }
                     }catch(Exception e){
                         // if there is a problem reading the field we dont set any value
