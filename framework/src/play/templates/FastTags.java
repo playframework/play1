@@ -8,10 +8,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Error;
 import play.data.validation.Validation;
@@ -121,17 +124,23 @@ public class FastTags {
         field.put("errorClass", field.get("error") != null ? "hasError" : "");
         String[] pieces = _arg.split("\\.");
         Object obj = body.getProperty(pieces[0]);
-        if(obj != null && pieces.length >= 2){
-            for(int i = 1; i < pieces.length; i++){
-                try{
-                    Field f = obj.getClass().getField(pieces[i]);
-                    if(i == (pieces.length-1)){
-                        field.put("value", f.get(obj).toString());
-                    }else{
-                        obj = f.get(obj);
+        if(obj != null){
+            if(pieces.length > 1){
+                for(int i = 1; i < pieces.length; i++){
+                    try{
+                        Field f = obj.getClass().getField(pieces[i]);
+                        try{
+                            Method getter = obj.getClass().getMethod("get"+JavaExtensions.capFirst(f.getName()));
+                            field.put("value", getter.invoke(obj, new Object[0]));
+                        }catch(NoSuchMethodException e){
+                            field.put("value",f.get(obj).toString());
+                        }
+                    }catch(Exception e){
+                        // if there is a problem reading the field we dont set any value
                     }
-                }catch(Exception e){
                 }
+            }else{
+                field.put("value", obj);
             }
         }
         body.setProperty("field", field);
