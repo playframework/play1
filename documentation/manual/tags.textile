@@ -179,12 +179,6 @@ bc. <head>
     <title>#{get 'title'}Homepage #{/} 
 </head>
 
-Note that the output will be escaped to prevent XSS issues. If you really want to display the raw data, specify the **raw** attribute:
-
-bc. #{get 'someData', raw:true /} 
-
-Or include the **get** call into a **#{verbatim /}** tag.
-
 h2. <a name="i18n">i18n</a>
 
 Exports localized messages in JavaScript. Localized messages are available from your JavaScript code using the **i18n()** function.

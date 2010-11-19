@@ -40,7 +40,6 @@ public class Error extends Result {
         Map<String, Object> binding = Scope.RenderArgs.current().data;
         binding.put("exception", this);
         binding.put("result", this);
-        binding.put("errorMessage", "xxx" + getMessage());
         binding.put("session", Scope.Session.current());
         binding.put("request", Http.Request.current());
         binding.put("flash", Scope.Flash.current());
