@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Error;
 import play.data.validation.Validation;
