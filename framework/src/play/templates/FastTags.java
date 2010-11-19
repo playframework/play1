@@ -218,11 +218,7 @@ public class FastTags {
         }
         Object value = BaseTemplate.layoutData.get().get(name);
         if (value != null) {
-            if (_evaluateCondition(args.get("raw"))) {
-                out.print(value);
-            } else {
-                out.print(__safe(template.template, value));
-            }
+            out.print(value);
         } else {
             if (body != null) {
                 out.print(JavaExtensions.toString(body));
@@ -235,7 +231,7 @@ public class FastTags {
         for (Map.Entry<?, ?> entry : args.entrySet()) {
             Object key = entry.getKey();
             if (!key.toString().equals("arg")) {
-                BaseTemplate.layoutData.get().put(key, entry.getValue());
+                BaseTemplate.layoutData.get().put(key, __safe(template.template, entry.getValue()));
                 return;
             }
         }
