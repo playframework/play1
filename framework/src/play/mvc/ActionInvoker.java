@@ -47,10 +47,6 @@ public class ActionInvoker {
             return;
         }
 
-        if (request.resolved) {
-            return;
-        }
-
         Http.Request.current.set(request);
         Http.Response.current.set(response);
 
@@ -59,6 +55,10 @@ public class ActionInvoker {
         Scope.RouteArgs.current.set(new Scope.RouteArgs());
         Scope.Session.current.set(Scope.Session.restore());
         Scope.Flash.current.set(Scope.Flash.restore());
+
+        if (request.resolved) {
+            return;
+        }
 
         // Route and resolve format if not already done
         if (request.action == null) {

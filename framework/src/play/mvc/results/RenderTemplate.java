@@ -18,6 +18,9 @@ public class RenderTemplate extends Result {
 
     public RenderTemplate(Template template, Map<String, Object> args) {
         this.name = template.name;
+        if (args.containsKey("out")) {
+            throw new RuntimeException("Assertion failed! args shouldn't contain out");
+        }
         this.content = template.render(args);
     }
 
@@ -36,4 +39,3 @@ public class RenderTemplate extends Result {
     }
 
 }
-
