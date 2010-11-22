@@ -66,7 +66,7 @@ public class ApplicationClassloader extends ClassLoader {
      */
     @Override
     protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-    	Class<?> c = findLoadedClass(name);
+        Class<?> c = findLoadedClass(name);
         if (c != null) {
             return c;
         }
@@ -85,8 +85,7 @@ public class ApplicationClassloader extends ClassLoader {
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~
-    protected Class<?> loadApplicationClass(String name) {
-
+    public Class<?> loadApplicationClass(String name) {
         if (Play.usePrecompiled) {
             try {
                 File file = Play.getFile("precompiled/java/" + name.replace(".", "/") + ".class");
@@ -96,17 +95,19 @@ public class ApplicationClassloader extends ClassLoader {
                 byte[] code = IO.readContent(file);
                 Class<?> clazz = findLoadedClass(name);
                 if (clazz == null) {
-                	if(name.endsWith("package-info"))
-                		definePackage(getPackageName(name), null, null, null, null, null, null, null);
-                	else
-                		loadPackage(name);
+                    if (name.endsWith("package-info")) {
+                        definePackage(getPackageName(name), null, null, null, null, null, null, null);
+                    } else {
+                        loadPackage(name);
+                    }
                     clazz = defineClass(name, code, 0, code.length, protectionDomain);
                 }
                 ApplicationClass applicationClass = Play.classes.getApplicationClass(name);
                 if (applicationClass != null) {
                     applicationClass.javaClass = clazz;
-                    if(!applicationClass.isClass())
-                    	applicationClass.javaPackage = applicationClass.javaClass.getPackage();
+                    if (!applicationClass.isClass()) {
+                        applicationClass.javaPackage = applicationClass.javaClass.getPackage();
+                    }
                 }
                 return clazz;
             } catch (Exception e) {
@@ -122,16 +123,18 @@ public class ApplicationClassloader extends ClassLoader {
             }
             byte[] bc = BytecodeCache.getBytecode(name, applicationClass.javaSource);
             Logger.trace("Compiling code for %s", name);
-            if(!applicationClass.isClass())
+            if (!applicationClass.isClass()) {
                 definePackage(applicationClass.getPackage(), null, null, null, null, null, null, null);
-            else
+            } else {
                 loadPackage(name);
+            }
             if (bc != null) {
                 applicationClass.enhancedByteCode = bc;
                 applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
                 resolveClass(applicationClass.javaClass);
-                if(!applicationClass.isClass())
-                	applicationClass.javaPackage = applicationClass.javaClass.getPackage();
+                if (!applicationClass.isClass()) {
+                    applicationClass.javaPackage = applicationClass.javaClass.getPackage();
+                }
                 Logger.trace("%sms to load class %s from cache", System.currentTimeMillis() - start, name);
                 return applicationClass.javaClass;
             }
@@ -140,8 +143,9 @@ public class ApplicationClassloader extends ClassLoader {
                 applicationClass.javaClass = defineClass(applicationClass.name, applicationClass.enhancedByteCode, 0, applicationClass.enhancedByteCode.length, protectionDomain);
                 BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, name, applicationClass.javaSource);
                 resolveClass(applicationClass.javaClass);
-                if(!applicationClass.isClass())
-                	applicationClass.javaPackage = applicationClass.javaClass.getPackage();
+                if (!applicationClass.isClass()) {
+                    applicationClass.javaPackage = applicationClass.javaClass.getPackage();
+                }
                 Logger.trace("%sms to load class %s", System.currentTimeMillis() - start, name);
                 return applicationClass.javaClass;
             }
@@ -151,26 +155,27 @@ public class ApplicationClassloader extends ClassLoader {
     }
 
     private String getPackageName(String name) {
-    	int dot = name.lastIndexOf('.');
-    	return dot > -1 ? name.substring(0, dot) : "";
-	}
+        int dot = name.lastIndexOf('.');
+        return dot > -1 ? name.substring(0, dot) : "";
+    }
 
-	private void loadPackage(String className){
-    	// find the package class name
-    	int symbol = className.indexOf("$");
+    private void loadPackage(String className) {
+        // find the package class name
+        int symbol = className.indexOf("$");
         if (symbol > -1) {
             className = className.substring(0, symbol);
         }
-    	symbol = className.lastIndexOf(".");
+        symbol = className.lastIndexOf(".");
         if (symbol > -1) {
             className = className.substring(0, symbol) + ".package-info";
-        }else{
-        	className = "package-info";
+        } else {
+            className = "package-info";
         }
-        if(findLoadedClass(className) == null)
-        	loadApplicationClass(className);
+        if (findLoadedClass(className) == null) {
+            loadApplicationClass(className);
+        }
     }
-    
+
     /**
      * Search for the byte code of the given class.
      */
@@ -281,8 +286,8 @@ public class ApplicationClassloader extends ClassLoader {
         }
         Set<ApplicationClass> modifiedWithDependencies = new HashSet<ApplicationClass>();
         modifiedWithDependencies.addAll(modifieds);
-        if(modifieds.size() > 0) {
-            for(PlayPlugin plugin : Play.plugins) {
+        if (modifieds.size() > 0) {
+            for (PlayPlugin plugin : Play.plugins) {
                 modifiedWithDependencies.addAll(plugin.onClassesChange(modifieds));
             }
         }
@@ -341,7 +346,6 @@ public class ApplicationClassloader extends ClassLoader {
             throw new RuntimeException("Path has changed");
         }
     }
-
     /**
      * Used to track change of the application sources path
      */
@@ -383,7 +387,7 @@ public class ApplicationClassloader extends ClassLoader {
             allClasses = new ArrayList<Class>();
 
             if (Play.usePrecompiled) {
-                
+
                 List<ApplicationClass> applicationClasses = new ArrayList<ApplicationClass>();
                 scanPrecompiled(applicationClasses, "", Play.getVirtualFile("precompiled/java"));
                 Play.classes.clear();
