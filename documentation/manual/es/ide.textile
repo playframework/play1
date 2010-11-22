@@ -1,0 +1,114 @@
+h1. Configurando su IDE favorito
+
+Trabajar con Play es fácil. Ni siquiera necesita un IDE (Entorno Integrado de Desarrollo) sofisticado, ya que Play compila y vuelve a cargar automáticamente las modificaciones que usted efectúa en el código fuente. Incluso puede trabajar utilizando un simple editor de texto.
+
+Sin embargo, utilizar un IDE para Java provee poderosas herramientas que aumentarán su productividad, como autocompletado de código, compilación al vuelo, asistentes para hacer refactoring de código y soporte para depurar aplicaciones. Play brinda soporte para "NetBeans":http://www.netbeans.org, "IntelliJ IDEA":http://www.jetbrains.com/idea/index.html y "Eclipse":http://www.eclipse.org.
+
+h2(#eclipse). <a>Generando los archivos de configuración para Eclipse</a>
+
+Play provee un comando para simplificar la configuración de Eclipse. Para transformar una aplicación de Play en un proyecto de Eclipse, use el comando **eclipsify**:
+
+bc. # play eclipsify myApp
+
+Necesitará importar a aplicación a su Workspace mediante la opción de menú **File/Import/General/Existing project…**.
+
+!images/eclipse!
+
+El comando **eclipsify** genera varios lanzadores para la aplicación. El principal lanzador tan sólo puede ser utilizado con el comando **Run As** de Eclipse. Puede entonces usar el lanzador **Connect JPDA launcher** utilizando **Debug As** para iniciar una sesión de depuración en cualquier momento. Tenga en cuenta que al detener la sesión de depuración no detendrá el servidor.
+
+Si efectúa cualquier cambio importante en su aplicación, tal como cambiar el classpath, use nuevamente el comando **eclipsify** para volver a generar los archivos de configuración.
+
+Adicionalmente, un plugin de Eclipse está disponible en su ditribución de Play, en el directorio **support/eclipse/**. Para instalarlo, simplemente copie el archivo JAR a la carpeta **dropins** de su instalación de Eclipse.
+
+p(note). *¡No comitee sus archivos de configuración de eclipse cuando trabaja en equipo!*
+ 
+Los archivos de configuración generados contienen referencias absolutas a la instalación de su framework. Son específicos a su propia instalación. Cuando trabaja en equipo, cada desarrollador debe mantener sus archivos de configuración de Eclipse fuera del control de código fuente.
+
+h2(#netbeans). <a>Generando archivos de configuración para Netbeans</a>
+
+Play provee un comando para simplificar la configuración de Netbeans. Para transformar una aplicación de Play en un proyecto de Netbeans, use el comando **netbeansify**:
+
+bc. # play netbeansify myApp
+
+Podrá entonces abrir la aplicación como un proyecto de Netbeans.
+
+!images/netbeans!
+
+Use el botón **Run** para iniciar la aplicación. Una vez que se haya iniciado la aplicación, puede conectar una sesión de depuración en cualquier momento con el botón **Debug**. Tenga en cuenta que al detener la sesión de depuración no detendrá el servidor.
+
+Si efectúa cualquier cambio importante en su aplicación, tal como cambiar el classpath, use nuevamente el comando **netbeansify** para volver a generar los archivos de configuración.
+
+p(note). **¡No comitee el directorio nbproject cuando trabaja en equipo!**
+ 
+Los archivos de configuración generados contienen referencias absolutas a la instalación de su framework. Son específicos a su propia instalación. Cuando trabaja en equipo, cada desarrollador debe mantener sus archivos de configuración de Netbeans fuera del control de código fuente.
+
+h2(#intellij). <a>Generando archivos de configuración para IntelliJ IDEA</a>
+
+Play provee un comando para simplificar la configuración de IntelliJ IDEA. Para transformar una aplicación de Play en un proyecto o módulo de IntelliJ IDEA, use el comando **idealize**:
+
+bc. # play idealize myApp
+
+Podrá entonces importar la aplicación en IntelliJ utilizando la funcionalidad de importación de módulos.
+
+!images/intellij!
+
+Puede utilizar la opción **Run** y **Debug** del menú contextual 
+
+p(note). **¡No comitee el el archivo .iml cuando trabaja en equipo!**
+ 
+Los archivos de configuración generados contienen referencias absolutas a la instalación de su framework. Son específicos a su propia instalación. Cuando trabaja en equipo, cada desarrollador debe mantener sus archivos de configuración de IntelliJ IDEA fuera del control de código fuente.
+
+h2(#textmate). <a>Textmate</a>
+
+Descargue e instale el módulo para "Textmate":http://macromates.com/ para habilitar el resaltado de sintaxis y el auto completado. El módulo también facilita la navegación entre los controladores y las vistas.
+
+!images/editor!
+
+h2(#custom). <a>Configure manualmente su editor preferido.</a>
+
+Dado que las aplicaciones de Play son aplicaciones Java estándares, no necesita ningún plug-in específico para trabajar con su editor preferido. Esto, de todas maneras, requiere algo de conocimiento acerca del funcionamiento de Play.
+
+h3. Configuración del Classpath
+
+El classpath de una aplicación play es construido de la siguiente manera (y según el siguiente orden):
+
+* El directorio **conf/** de la aplicación
+* El archivo **$PLAY_PATH/framework/play.jar**
+* Todos los archivos JAR que se encuentran en el directorio **lib/** de su aplicación
+* Todos los archivos JAR que se encuentran en el directorio **$PLAY_PATH/framework/lib/**
+
+p(note). *Consejo*
+ 
+Si ha habilitado cualquier módulo, también necesitará agregar todas las librerías requeridas por el módulo (del directorio **$module/lib/**) al classpath.
+
+h3. La clase de inicio
+
+Para iniciar una aplicación Play, simplemente ejecute la clase. Play utiliza la propiedad del sistema **"application.path"** para localizar la aplicación a ejecutar. Típicamente esta variable es pasada de la siguiente manera:
+
+bc. java -Dapplication.path="/app/path"...
+
+h3. Agente de Java
+
+Para habilitar la recarga dinámica de código (HotSwap reloading) deberá carga un agente de Java que se encuentra empquetado en la librería **play.jar**. Cómunmente se hace de la siguiente manera:
+
+bc. java -javaagent:"$PLAY_PATH/framework/play.jar" ...
+
+No es obligatorio, pero acelerará la recarga de las clases cuando sea posible.
+
+h2. <a>Problemas al depurar</a>
+
+Play automáticamente vuelve a cargar las clases de Java cuando el código fuente es modificado. Sin embargo, Java no brinda soporte completo para la recarga dinámica de clases, razón por la cual el depurador JPDA puede confundirse fácilmente: algunos puntos de ruptura pueden ser ignorados o el depurador puede detenerse en la línea de código equivocada.
+
+Para evitar este comportamiento, lo mejor es iniciar una nueva sesión de depuración luego de cada modificación del código. Afortunadamente JPDA tiene la capacidad de conectar y deconectar el depurador en cualquier momento sin necesidad de reiniciar la JVM.
+
+Así que la manera correcta de utilizar el depurador es la siguiente:
+
+# <span>Hacer cambios al código fuente de su aplicación.</span>
+# <span>Actualizar el explorador web para ver el resultado. (En este momento Play volverá a cargar las modificación de su código y redefinirá las clases en la JVM.)</span>
+# <span>Si algo sale mal y precisa depurar la aplicación, inicie una nueva sesión de depuración.</span>
+# <span>Depure y corrija el código.</span>
+# <span>Desconecte el depurador.</span>
+
+Siguiendo estos pasos, siempre dispondrá de una sesión de depuración en sintonía con el código cargado en la JVM.
+
+p(note). Próximo: %(next)"Su primera aplicación — ‘Hola mundo’ con play":firstapp%.

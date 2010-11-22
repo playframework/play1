@@ -1,0 +1,332 @@
+h1. Desarrollando la primera pantalla
+
+Ahora que ya contamos con una primera versión de nuestro modelo de datos, es hora de comenzar a desarrollar la primera paǵina de nuestra aplicación. Esta página simplemente mostrará la lista con los mensajes más recientes, así como una lista con mensajes más antiguos.
+
+Aquí tenemos un prototipo de lo que queremos conseguir:
+
+!images/guide-mock1!
+
+h2. <a>Iniciando el framework con datos de prueba</a>
+
+Antes de desarrollar nuestra primera pantalla tenemos que hacer una cosa más. Trabajar con una aplicación web sin contar con datos de prueba es bastante arduo. Ni siquiera puede verificar lo que está haciendo. Pero dado que todavía no hemos desarrollado las pantallas para enviar mensajes, no podemos cargar mensajes a nuestro sistema de blogs.
+
+Una manera de cargar información de prueba en el blog es mediante un archivo de **fixtures** a ser cargado cuando iniciamos la aplicación. Para ello crearemos una tarea de inicia (Bootstrap Job). Una terea de Play es algo que se ejecuta a sí misma sin depender de ninguna llamada HTTP, por ejemplo cuando la aplicación se inicia o a intervalos específicos de tiempo utilizando una tarea CRON.
+
+
+Creemos la tarea **/yabe/app/Bootstrap.java** el cual se encargará de cargar un conjunto de datos de prueba usando la clase **Fixtures**:
+
+bc. import play.*;
+import play.jobs.*;
+import play.test.*;
+ 
+import models.*;
+ 
+@OnApplicationStart
+public class Bootstrap extends Job {
+ 
+    public void doJob() {
+        // Check if the database is empty
+        if(User.count() == 0) {
+            Fixtures.load("initial-data.yml");
+        }
+    }
+ 
+}
+
+Hemos anotado esta tarea con la anotación **@OnApplicationStart** para indicarle a Play que queremos ejecutar esta tarea asincrónicamente al inicio de la aplicación.
+
+p(note). De hecho esta tarea será ejecutada de manera diferente dependiendo de que estemos en modo DEV (desarrollo) or PROD (producción). En modo desarrollo Play espera al primer pedido HTTP para iniciar la aplicación. De manera que esta tarea será ejecutada sincrónicamente al recibir el primer pedido. De esa manera, si la tarea produce algún error, obtendrá el mensaje correspondiente al error en su browser. Sin embargo, en modo producción, la tarea se ejecutará al iniciar la aplicación (en el momento en que ejecutamos el comando **play run**) y evitará que la aplicación se inicie en caso de detectar algún error.
+
+Debe crear un archivo **initial-data.yml** en la carpeta **yabe/conf/**. Puede reutilizar los contenidos del archivo **data.yml** que acabamos de usar en el paso anterior.
+
+Ahora inicie la aplicación mediante el comando **play run** y navegue a la página "http://localhost:9000/":http://localhost:9000/.
+
+h2. <a>La paǵina principal de nuestros sistema de blogs</a>
+
+Ahora sí podemos comenzar a codificar la página principal.
+
+¿Recuerda cómo hacía Play para mostrar la página de bienvenida? En primer lugar el el archivo **routes** especifica que un pedido al URL **/** invocará al método de acción definido en **controllers.Application.index()**. Este método llama al **render()** que ejecutará el template **/yabe/app/views/Application/index.html**. 
+
+Mantendremos estos componentes, pero a su vez agregaremos código para cargar la lista de mensajes y desplegarlos en pantalla.
+
+Abra el controlador **/yabe/app/controllers/Application.java** y modifique la acción **index()** para cargar la lista de mensajes de la siguiente manera:
+
+bc. package controllers;
+ 
+import java.util.*;
+ 
+import play.*;
+import play.mvc.*;
+ 
+import models.*;
+ 
+public class Application extends Controller {
+ 
+    public static void index() {
+        Post frontPost = Post.find("order by postedAt desc").first();
+        List<Post> olderPosts = Post.find(
+            "order by postedAt desc"
+        ).from(1).fetch(10);
+        render(frontPost, olderPosts);
+    }
+ 
+}
+
+¿Ha notado como pasamos objetos al método **render()**? No permitirá acceder a ellos desde el template utilizando los mismos nombres. EN este caso, las varaibles **frontPost** y **olderPosts** estará disponibles en el template.
+
+Abra el template **/yabe/app/views/Application/index.html** y modifíquelo para mostrar estos objetos:
+
+bc. #{extends 'main.html' /}
+#{set title:'Home' /}
+ 
+#{if frontPost}
+    <div class="post">
+        <h2 class="post-title">
+            <a href="#">${frontPost.title}</a>
+        </h2>
+        <div class="post-metadata">
+            <span class="post-author">by ${frontPost.author.fullname}</span>
+            <span class="post-date">${frontPost.postedAt.format('MMM dd')}</span>
+            <span class="post-comments">
+                &nbsp;|&nbsp; 
+                ${frontPost.comments.size() ?: 'no'} 
+                comment${frontPost.comments.size().pluralize()}</a>
+                #{if frontPost.comments}
+                    , latest by ${frontPost.comments[0].author}
+                #{/if}
+            </span>
+        </div>
+        <div class="post-content">
+            ${frontPost.content.nl2br()}
+        </div>
+    </div>
+    
+    #{if olderPosts.size() > 1}
+        <div class="older-posts">    
+            <h3>Older posts <span class="from">from this blog</span></h3>
+        
+            #{list items:olderPosts, as:'oldPost'}
+                <div class="post">
+                    <h2 class="post-title">
+                        <a href="#">${oldPost.title}</a>
+                    </h2>
+                    <div class="post-metadata">
+                        <span class="post-author">
+                            by ${oldPost.author.fullname}
+                        </span>
+                        <span class="post-date">
+                            ${oldPost.postedAt.format('dd MMM yy')}
+                        </span>
+                        <div class="post-comments">
+                            ${oldPost.comments.size() ?: 'no'} 
+                            comment${oldPost.comments.size().pluralize()}
+                            #{if oldPost.comments}
+                                - latest by ${oldPost.comments[0].author}
+                            #{/if}
+                        </div>
+                    </div>
+                </div>
+            #{/list}
+        </div>
+        
+    #{/if}
+    
+#{/if}
+ 
+#{else}
+    <div class="empty">
+        There is currently nothing to read here.
+    </div>
+#{/else}
+
+Puede aprender más acerca del funcionamiento de los templates en "El motor de templates":templates. Básicamente, le permite acceder a sus objetos de Java dinámicamente. Internamete utilizamos Groovy. La mayor parte de los prácticos comandos que ve (como el operador **?:**) vienen del lenguaje Groovy. Pero no necesita aprender Groovy para escribir templates de Play. Si ya ha trabajado con algún otro lenguaje de tempalte, como JSP con JSTL, no se sentirá perdido en absoluto.
+
+Bien, ahora refresque la página principal de nuestra aplicación.
+
+!images/guide3-0!
+
+No muy atractivo... ¡pero funciona!
+
+Sin embargo, habrá notado que ya comenzamos a duplicar código. Dado que mostraremos mensajes de muchas maneras distintas, deberíamos crear algo similar a una función que podamos llamar desde distintos templates. Esto es exactamente lo que un 'tag' de Play hace.
+
+Para crear un tag, simplemente cree un archivo **/yabe/app/views/tags/display.html**. Un tag no es más que otro template que acepta parámetros, como una función. El tag **#{display /}** tendrá dos parámetros: el objeto Post a mostrar y en modo en que lo queremos desplegar: 'home', 'teaser' o 'full'.
+
+bc. *{ Display a post in one of these modes: 'full', 'home' or 'teaser' }*
+ 
+<div class="post ${_as == 'teaser' ? 'teaser' : ''}">
+    <h2 class="post-title">
+        <a href="#">${_post.title}</a>
+    </h2>
+    <div class="post-metadata">
+        <span class="post-author">by ${_post.author.fullname}</span>,
+        <span class="post-date">${_post.postedAt.format('dd MMM yy')}</span>
+        #{if _as != 'full'}
+            <span class="post-comments">
+                &nbsp;|&nbsp; ${_post.comments.size() ?: 'no'} 
+                comment${_post.comments.size().pluralize()}
+                #{if _post.comments}
+                    , latest by ${_post.comments[0].author}
+                #{/if}
+            </span>
+        #{/if}
+    </div>
+    #{if _as != 'teaser'}
+        <div class="post-content">
+            <div class="about">Detail: </div>
+            ${_post.content.nl2br()}
+        </div>
+    #{/if}
+</div>
+ 
+#{if _as == 'full'}
+    <div class="comments">
+        <h3>
+            ${_post.comments.size() ?: 'no'} 
+            comment${_post.comments.size().pluralize()}
+        </h3>
+        
+        #{list items:_post.comments, as:'comment'}
+            <div class="comment">
+                <div class="comment-metadata">
+                    <span class="comment-author">by ${comment.author},</span>
+                    <span class="comment-date">
+                        ${comment.postedAt.format('dd MMM yy')}
+                    </span>
+                </div>
+                <div class="comment-content">
+                    <div class="about">Detail: </div>
+                    ${comment.content.escape().nl2br()}
+                </div>
+            </div>
+        #{/list}
+        
+    </div>
+#{/if}
+
+Ahora usando este tag podemos reescribir la página principal sin duplicar código:
+
+bc. #{extends 'main.html' /}
+#{set title:'Home' /}
+ 
+#{if frontPost}
+    
+    #{display post:frontPost, as:'home' /}
+    
+    #{if olderPosts.size()}
+    
+        <div class="older-posts">
+            <h3>Older posts <span class="from">from this blog</span></h3>
+        
+            #{list items:olderPosts, as:'oldPost'}
+                #{display post:oldPost, as:'teaser' /}
+            #{/list}
+        </div>
+        
+    #{/if}
+    
+#{/if}
+ 
+#{else}
+    <div class="empty">
+        There is currently nothing to read here.
+    </div>
+#{/else}
+
+Refresque la página y verifique que todo funciona según lo esperado.
+
+h2. <a>Mejorando el layout de la página</a>
+
+Como puede ver, el template **index.html** extiende el template **main.html**. Dado que queremos brindar un layout común a todas las páginas de nuestra aplicación, con el título del mensaje y los links de autenticación, necesitamos modificar este archivo.
+
+Edite el archivo **/yabe/app/views/main.html**:
+
+bc. <!DOCTYPE html >
+<html>
+    <head>
+        <title>#{get 'title' /}</title>		
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <link rel="stylesheet" type="text/css" media="screen" 
+            href="@{'/public/stylesheets/main.css'}" />
+        <link rel="shortcut icon" type="image/png" 
+            href="@{'/public/images/favicon.png'}" />
+    </head>
+    <body>
+        
+        <div id="header">
+            <div id="logo">
+                yabe.
+            </div>
+            <ul id="tools">
+                <li>
+                    <a href="#">Log in to write something</a>
+                </li>
+            </ul>
+            <div id="title">
+                <span class="about">About this blog</span>
+                <h1><a href="#">${blogTitle}</a></h1>
+                <h2>${blogBaseline}</h2>
+            </div>
+        </div>
+        
+        <div id="main">
+            #{doLayout /} 
+        </div>
+        
+        <p id="footer">
+            Yabe is a (not that) powerful blog engine built with the 
+            <a href="http://www.playframework.org">Play framework</a>
+            as a tutorial application.
+        </p>
+        
+    </body>
+</html>
+
+Refresque y verifique el resultado. Parece que todo funcionar, excepto que las varaibles **blogTitle** y **blogBaseLine** no aparecen en pantalla. Esto es debido a que no las hemos pasado a la llamada al método **render(...)**. Por supuesto que puede agregarlas a la llamada a **render()** en la acción **index**. Pero dado que el archivo **main.html** será utilizado como template base para todas las acciones de nuestra aplicación, no queremos tener que agregarlo manualmente cada vez.
+
+Una manera de ejecutar el mismo código para cada acción de un controlador (o una jerarquía de controladores) es definiendo un interceptor **@Before**.
+
+Agreguemos el método **addDefaults()** al controlador Application:
+
+bc. @Before
+static void addDefaults() {
+    renderArgs.put("blogTitle", Play.configuration.getProperty("blog.title"));
+    renderArgs.put("blogBaseline", Play.configuration.getProperty("blog.baseline"));
+}
+
+p(note). Necesitará importar **play.Play** en el archivo **Application.java**.
+
+p(note). You will need to import **play.Play** in the **Application.java** file.
+
+Todas las varaibles agregadas a la colección **renderArgs** estarán disponibles desde los templates. Note que el método lee los valores de las variables del objeto **Play.configuration**. Este objeto permite acceder a la configuración del archivo **/yabe/conf/application.conf**.
+
+Agregue estas dos claves al archivo de configuración:
+
+bc. # Blog engine configuration
+# ~~~~~
+blog.title=Yet another blog
+blog.baseline=We won't write about anything
+
+Refresque la página principal y verifique que todo haya salido bien.
+
+!images/guide3-1!
+
+h2. <a>Agregando estilo a las páginas</a>
+
+La página principal de nuestro sistema de blogs está casi lista, pero no se ve muy bien que digamos. Le agregaremos algunas plantillas de estilo para hacerla más atractiva. Como habrá nota, nuestro template principal **main.html** incluye la hoja de estilos **/public/stylesheets/main.css**. Nos quedaremos con ella pero le agregaremos nuevas reglas de estilo.
+
+Puede "descargar la hoja de estilos":files/main.css, y copiarla al archivo **/public/stylesheets/main.css**.
+
+Refresque la página y debería ver ahora una página con los estilos aplicados.
+
+!images/guide3-2!
+
+h2. <a>Guarde su trabajo</a>
+
+La página principal está terminada. Como de costumbre, grabamos los cambios efectuados en bazaar:
+
+bc. $ bzr st
+$ bzr add
+$ bzr commit -m 'Home page'
+
+p(note). Vaya a %(next)"La página de comentarios":guide4%. 
+

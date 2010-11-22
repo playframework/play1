@@ -1,0 +1,65 @@
+h1. Guía de instalación
+
+h2. <a>Prerequisitos</a>
+
+Para ejecutar el framework Play necesita "Java 5 o superior":http://java.sun.com. Si desea compilar el framework a partir de su código fuente, necesitará el "Cliente de control de código de Git":http://git-scm.com/ a fin de obtener el código fuente y "Ant":http://ant.apache.org/ para compilarlo.
+
+p(note). Si utiliza MacOS, Java viene incluido. Si utiliza Linux, asegúrese de tener instalado el JDK de Sun u OpenJDK (y no gcj que es el que se instala por defecto en varias distribuciones de Linux). Si utiliza Windows, simplemente descargue e instale la última versión del JDK.
+
+Asegúrese de tener al directorio de Java en el path (ingrese **java -version** para verificarlo). Play utiliza el Java que se encuentra or defecto, o el que esté disponible en el camino indicado por la variable **$JAVA_HOME** si es que se encuentra definida.
+
+La utilidad de línea de comandos *play* utiliza Python. Así que debería funcionar sin problemas en cualquier sistema UNIX (si bien requiere por lo menos la versión 2.5 de Python). Si está ejecutando Windows, no se preocupte, hemos incluido un runtime de Python junto con el framework.
+
+h2. <a>Descargue el paquete binario</a>
+
+Descargue el último "paquete binario de Play":http://download.playframework.org/ y extraiga el contenido del archivo. Para mayor comodidad, debería agregar el directorio de instalación del framework al PATH de su sistema. Si está trabajando en UNIX, asegúrese de que el script *play* está marcado como ejecutable (caso contrario, simplemente ejecute **chmod +x play**). Eso es todo.
+
+p(note). *Consejo*
+ 
+Si precisa recompilar el framework por alguna razón, ejecute **ant** en el directorio **$PLAY_HOME/framework/**.
+
+h2. <a>Compilando el framework desde su código fuente más reciente</a>
+
+Para aprovechar las más recientes mejoras y arreglos de errores, puede compilar Play a partir del código fuente. Precisará un "Cliente Git":http://git-scm.com/ para obtener los fuentes y "Ant":http://ant.apache.org/ para compilar el framework.
+
+En la línea de comandos ejecute:
+
+bc. # git clone git://github.com/playframework/play.git
+# cd play/framework
+# ant
+
+El framework Play estará listo para ser usado.
+
+h2. <a>Usando el comando play</a>
+
+Una vez que el framework haya sido correctamente instalado, abra una consola y ejecute *play*.
+
+bc. $ play
+
+Debería ver el mensaje por defecto de Play:
+
+!images/help!
+
+Puede obtener más ayuda sobre cualquier comando específico usando *play help tipee-cualquier-comando-aquí*. Por ejemplo, intente con:
+
+bc. # play help run
+
+h2. <a>Creando una nueva aplicación</a>
+
+Use el comando **new** para crear una nueva aplicación. Debe ingresar una camino de directorios que no exista para que la aplicación sea creada allí.
+
+bc. # play new myApp
+
+!images/guide1-1!
+
+Creará una nueva aplicación. Ejecútela con:
+
+bc. # play run myApp
+
+Puede entonces abrir un explorador web en "http://localhost:9000":http://localhost:9000 y ver la página por defecto de la aplicación.
+
+!images/guide1-2!
+
+p(note). **Su instalación de Play está lista**
+ 
+Próximo: %(next)"Configurando tu IDE favorito":ide%.

@@ -1,0 +1,275 @@
+h1. Cómo hacer una demo del framework Play
+
+Por "Peter Hilton":http://www.lunatech-research.fr/users/peter-hilton 2010-06-14, traducción de "Lunatech research blog":http://www.lunatech-research.fr/archives/2010/06/14/how-demo-play-framework-live-coding-script
+
+Si quiere hacerle comprender a alguien cuán rápido y fácil es desarrollar aplicaciones web con el "framework Play":http://www.playframework.org/ entonces muéstreselo, no se lo diga. La manera más convincente de hacerlo es descargando Play y desarrollando una aplicación web desde cero, mientras miran cómo lo hace. Este artículo es una guía para hacer una demo de cinco minutos con el framework Play.
+
+Esta guía está basada en una demo que Guillaume Bort, el creador de Play, dio frente a una pequeña audiencia. En el video de la página principal de "http://www.playframework.org/":http://www.playframework.org/ pueden ver más o menos la mismo demo, pero con Ajax. Es una manera especialmente efectiva de mostrar el funcionamiento de Play a un grupo reducido de personas, si usted tiene cierta práctica con el uso del framework, ya que le permite responder preguntas acerca de cómo se hace cada cosa simplemente escribiendo el código y mostrándolo en funcionamiento de una manera mucho más rápida de lo que podría hacerlo con otros frameworks.
+
+h2. <a>Sumario</a>
+
+# Descargue el framework Play.
+# Cree y ejecute la aplicación.
+# Muestre la página de bienvenida generada por defecto.
+# Remplace la página de bienvenida por un template dinámico.
+# Genere un error de compilación de Java.
+# Obtenga parámetros del pedido HTTP.
+# Muestre contenido del archivo message en el template.
+# Agregue el proyecto a Eclipse.
+# Agregue una entidad JPA.
+# Agregue un formulario HTML para crear instacias de la entidad JPA.
+# Agregue un link para borrar esas instancias.
+# Utilice alguna extensión de Java en el tramplate.
+# Agregue validaciones al formulario.
+
+h2. <a>Cree y ejecute la aplicación</a>
+
+Vaya a la página "http://www.playframework.org":http://www.playframework.org y descargue el framework.
+
+There is no need to install Play as such, although you might want to add the download's directory to your PATH, so you can execute the $PLAY_HOME/play commmand directly. On my machine, though, it's just as easy to just type ~/Downloads/play-1.0.2.1/play for this kind of demo.
+
+p(note). No hay necesidad de "instalar" Play, aunque resulta conveniente agregar al PATH el directorio donde descargó el framework para que pueda ejecutar el comando $PLAY_HOME/play directamente. En mi máquina, sin embargo, simplemente tipeo ~/Downloads/play-1.0.2.1/play para este tipo de demostraciones.
+
+Ejecute
+
+bc. play new tareas
+~ What is the application name? tareas
+
+p(note). Una lista de tareas es una aplicación que las personas pueden comprender fácilmente, pero es más divertido elegir un ejemplo que sea más familiar y relevante para su auditorio, como puede ser 'clientes' o 'recetas'.
+
+Ejecute
+
+bc. find tareas 
+
+Para mostrar la lista de los archivos generados.
+
+p(note). Es importante mostar que Play no genera mucho código; an sólo se trata de código mínimo al cual luego le agregaremos funcionalidad, y no grandes porciones de código auto-generado que luego tendremos que eliminar.
+
+Ejecute
+
+bc. play run tareas
+
+Para iniciar el servidor http que viene incluido con Play.
+
+p(note). Dependiendo de cuál es su experiencia en lo que respecta al desarrollo de aplicaciones web con Java, el tiempo que tarda play en arrancar puede parecer extremadamente corto.
+
+Navegue a "http://localhost:9000/":http://localhost:9000/ para mostrar la página de bienvenida.
+
+p(note). La página de bienvenida describe cómo funciona la aplicación básica generada por play.
+
+Abra un editor de textos, como gedit en linux o notepad en Windows.
+
+p(note). También puede también utilizar un IDE como Eclipse, sin embargo es una buena idea comenzar con un simple editor de texto para dejar en claro que Play se hace cargo de compilar el código Java por usted.
+
+Edite el archivo **conf/routes**. Muestre la ruta corredpondiente al mensaje GET en el recurso / de su sitio.
+
+p(note). Dado que Play está fuertemente basado en el protocolo HTTP, un pedido HTTP es un excelente punto de partida para explicar cómo funciona el framework. El archivo routes, es de suma importancia, ya que define el mapeo recíproco en los pedidos HTTP y los métodos de Java.
+
+Edite el archivo **app/controllers/Application.java**. Muestre el método **index()**.
+
+Edite el archivo **app/controllers/Application.java**. Muestre el método **index()**.
+
+
+Edite el archivo **app/views/main.html**.  Muestre el template por defecto: HTML 5, CSS y jQuery.
+
+Edite el archivo **app/views/Application/index.html**. Muestre el tag **#{welcome /}** y remplácelo por 
+
+bc. <h1>Tareas</h1>
+
+Navegue a "http://localhost:9000/":http://localhost:9000/ para mostrar el nuevo mensaje.
+
+h2. <a>Muestre información dinámica en el template</a>
+
+Edite el archivo **app/views/Application/index.html**. Cambie el encabezamiento por 
+
+bc. <h1>${items}</h1>
+
+Edite el archivo **app/controllers/Application.java**. Cambie el método **index()** por el siguiente contenido, omitiendo el punto y coma final para generar un error de compilación.
+
+bc. final String items = "Cosas para hacer"
+render(items);
+
+Navegue a "http://localhost:9000/":http://localhost:9000/ para mostrar el mensaje de error de compilación de Java.
+
+Edite el archivo **app/controllers/Application.java**. Agregue el punto y coma faltante.
+
+Navegue a "http://localhost:9000/":http://localhost:9000/ para mostrar los cambios efectuados sin necesidad de recompilar ni instalar la aplicación.
+
+Edite el archivo **app/controllers/Application.java**. Remplace la declaración de la variable items por un parámetro del método **index()**.
+
+bc. public static void index(String items) {
+  render(items);
+}
+
+Navegue a "http://localhost:9000/?items=Cosas":http://localhost:9000/?items=Cosas
+
+Edite el archivo **app/controllers/Application.java**. Deshaga los cambios, saque el parámetro items y vuelva a poner la declaración.
+
+h2. <a>Muestre contenido del archivo message en el template</a>
+
+Edite el archivo app/views/Application/index.html. Cambie el encabezamiento a
+
+bc. <h1>&{'model.tareas'}</h1>
+
+Navegue a "http://localhost:9000/":http://localhost:9000/ para mostrar el error indicándole que el mensaje "model.tareas" no ha sido definido.
+
+Edite el archivo **conf/messages**. Agregue la línea 
+
+bc. model.tareas = Tareas
+
+Navegue a "http://localhost:9000/":http://localhost:9000/ para mostrar cómo el mensaje es obtenido a partir del contenido del archivo conf/messages.
+
+h2. <a>Eclipse</a>
+
+Vaya a la consola y tipee Control+C. Aproveche para mostrar qué poca información de despliega Play en la consola por defecto.
+
+Ejecute:
+
+bc. play eclipsify tareas
+
+Para generar el proyecto de eclipse y la configuación del path de Java.
+
+Abra Eclipse, File » Import… » Existing projects into workspace. Muestre la estructura del proyecto.
+
+En eclipse ejecute eclipse/tasks.launch » Run » Run configuratios » tareas, para iniciar el servidor HTTP de Play desde Eclipse.
+
+Navegue a "http://localhost:9000/":http://localhost:9000/ para mostrar la aplicación ejecutándose.
+
+h2. <a>Entidades JPA</a>
+
+Cree la clase **Tarea** en **app/models**:
+
+bc. @Entity
+public class Tarea extends Model {
+    public String titulo;
+}
+
+p(note). En este momento sería conveniente explicar que **Tarea** será un Java Bean en tiempo de corrda, ya que Play automáticamente agrega los setter y getters necesarios para acceder a los campos públicos, transformándolos en propiedades del Java Bean.
+
+Edite el archivo **app/controllers/Application.java**. Cambie al método **index()** a 
+bc. List tareas = Tarea.findAll();
+render(tareas);
+
+Edite el archivo **app/views/Application/index.html*. Luego del encabezamiento agregue:
+
+bc. <ul>
+#{list tareas, as:'tarea'}
+   <li>${tarea.titulo}</li>
+#{/list}
+</ul>
+
+Navegue a "http://localhost:9000/":http://localhost:9000/ para mostrar el error de JPA.
+
+Edite el archivo **conf/application.conf**. Descomento la línea **# db=mem**
+
+Open http://localhost:9000/ - Show the JPA error.
+
+Navegue a "http://localhost:9000/":http://localhost:9000/. Muestre la página. No hay ninguna tarea.
+
+h2. <a>Formulario HTML</a>
+
+Edite el archivo **app/views/Application/index.html**. Luego de la lista agregue:
+
+bc. #{form @add()}
+  <p><input name="tarea.titulo"> <input type="submit" value="Agregar tarea"></p>
+#{/form}
+
+Edite el archivo **app/controllers/Application.java**. Agregue el método:
+
+bc. public static void add(final Tarea tarea) {
+   tarea.save();
+   index();
+}
+
+Navegue a "http://localhost:9000/":http://localhost:9000/. Agregue varias tareas.
+
+h2. <a>Borrando una tarea</a>
+
+Edite el archivo **app/views/Application/index.html**. Agregue el siguiente link:
+
+bc. <ul>
+#{list tareas, as:'tarea'}
+   <li>${tarea.titulo} <a href="@{delete(tarea.id)}">eliminar</a></li>
+#{/list}
+</ul>
+
+p(note). En lo que respecta a los formularios HTML hay un tag que general el link completo. De esta manera, generamos el link manualmente, tan sólo utilizamos la @ para generar la URL correspondiente al método **delete()* del controlador **Application**.
+
+Edite el archivo conf/routes. Agregue:
+
+bc. GET    /delete         Application.delete
+
+Edite el archivo **app/controllers/Application.java**. Agregue el método delete(). Note el parámetro id que será pasado desde el link:
+
+bc. public static void delete(final Long id) {
+   Tarea.findById(id).delete();
+   index();
+}
+
+Navegue a "http://localhost:9000/":http://localhost:9000/. Eliminar varias tareas, muestre la URL del link.
+
+h2. <a>Extensiones de Java</a>
+
+Edite el archivo **app/views/Application/index.html**. Cambie el encabezamiento por:
+
+bc. <h1>${tareas.size()} Tarea${tareas.pluralize()}</h1>
+
+Navegue a "http://localhost:9000/":http://localhost:9000/. Agregue y elimine varias tareas para mostrar la diferencia entre la forma singular y plural.
+
+Con un poco de suerte, alguien en la audiencia será lo suficientemente astuto como para hacer notar que algunas formas plurales no se forman simplemente agregando una 's', entonces usted puede cambiar el ejemplo y mostrar el uso del método **pluralize** con uno o más parámetros, por ejemplo **${tareas.pluralize (message.get('tarea'), messages.get('tareas'))}**
+
+h2. <a>Validaciones</a>
+
+Edite el archivo **models/Task.java**. Agregue la anotación **@Required** al campo titulo.
+
+Edite el archivo **app/controllers/Application.java**. Agregue la anotación **@Valid** al método **add()** del controlador Tarea, remplace la primera línea del metodo con:
+
+bc. if (validation.hasErrors()) {
+   validation.keep();
+}
+else {
+   task.save();        
+}
+
+Edite el archivo **app/views/Application/index.html**, antes del tag form agregue:
+
+bc. #{errors}
+    <p style="color:red">${error}</p>
+#{/errors}
+
+Navegue a "http://localhost:9000/":http://localhost:9000/. Muestre el error de validación al agregar un titulo vacío.
+
+El error de validación está  en inglés, pero lo podemos cambiar.
+
+Edite el archivo **conf/messages**, agregue la línea
+
+bc. validation.required = %s es un campo requerido
+
+Navegue a "http://localhost:9000/":http://localhost:9000/. Muestre el nuevo mensaje de error.
+
+Ahora tenemos el error con el nombre del campo, pero no está formateado.
+
+Edite el archivo **conf/messages**. Agregue la línea:
+
+bc. tarea.titulo = Título de la tarea
+
+Navegue a "http://localhost:9000/":http://localhost:9000/. Muestre el nuevo mensaje de error.
+
+Esto muestra los errores al principio del formulario. Una mejor manera de hacerlo es mostrar los errores junto a cada campo.
+
+Edite el archivo **app/views/Application/index.html**. Remplace el tag de error con:
+
+bc. #{ifErrors}
+    <p style="color:red">Validation failed</p>
+#{/ifErrors}
+
+… y luego del input de texto, antes del tag de cierre del párrafo agregue:
+
+bc. <strong style="color:red">#{error 'tarea.titulo' /}</strong>
+
+Navegue a "http://localhost:9000/":http://localhost:9000/. Muestre el nuevo mensaje de error.
+
+"Peter Hilton":http://hilton.org.uk/about_ph.phtml es un desarrollador de software Senior en Lunatech Research y colabora con el framework Play.
+Envie comentarios sobre este artículo (en inglés) a "editorial@lunatech.com":http://www.lunatech-research.fr/archives/2010/06/14/editorial@lunatech.com.
+
+

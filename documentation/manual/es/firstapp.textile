@@ -1,0 +1,328 @@
+h1. Su primera aplicación — ‘Hola mundo’ con Play
+
+Le presentamos aquí un tutorial muy simple, que le ayudará a descubrir el framework Play con el famoso ejemplo 'Hola Mundo'.
+
+h2. <a>Prerequisitos</a>
+
+En primer lugar, asegúrese de contar con una instalación de Java en funcionamiento. Play requiere **Java 5 o superior**.
+
+Dado que vamos a utilizar la línea de comandos asiduamente, será mejor utilizar un sistema operativo similar a Unix. Si está ejecutando un sistema windows, no se preocupe, tan sólo tendrá que tipear algunos comandos en la consola del sistema.
+
+Por supuesto que precisará un editor de texto. Si está acostumbrado a utilizar un IDE de Java, como Eclipse o Netbeans por supuesto que puede usarlo. Sin embargo con play usted puede divertirse trabajando con un simple editor de texto como Textmate, Emacs o Vi. Esto es posible gracias a que el framework se encarga automáticamente del proceso de compilación e instalación. En breve veremos esto...
+
+h2. <a>Instalando el framework Play</a>
+
+La instalación del framework es muy simple. Tan sólo tiene que descargar la ultima versión del paquete binaria y descomprimirlo en cualquier carpeta.
+
+p(note). Si está utilizando windows, es una buena idea evitar espacios en el nombre de la carpeta de instalación, de manera que, por ejemplo, es recomendable instalar el framework en una carpeta como **c:\Play** antes que **c:\Documents And Settings\user\play**.
+
+Para trabajar con comodidad, precisará agregar el directorio de Play al path de sus sistema. Esto le permitirá simplemente tipear **play** en la línea de comandos para usar la utilidad Play. Para verificar que la instación se finalizacó correctamente, simplemente abra una nueva consola y tipee **play**; debería ver en pantalla la ayuda de uso básico del comando Play.
+
+h2. <a>Creando un proyecto</a>
+
+Ahora que Play ha sido instalado correctamente, es hora de crear a aplicación Hola Mundo. Crear una aplicación con Play es muy fácil ya que la utilidad de línea de comandos de Plat se encarga de todo. Esto permite a su vez compartir ua estructura estándar de directorios entre todas las aplicaciones Play.
+
+Abra una nueva consola y tipee:
+
+bc. ~$ play new helloworld
+
+Le preguntará por el nombre completo de la aplicación. Escriba **Hello world**.
+
+!images/firstapp-1!
+
+El comando **play new** crea un nuevo directorio **helloworld/** y graba en él una serie de archivos y directorios, siendo los más importantes:
+
+**app/** contiene el núcleo de a aplicación, separado en directorios para los modelos (models), controladores (controllers) y vistas (views). Puede contener a su vez otros paquetes de Java. Este es el directorio donde residen los archivos fuente **.java**.
+
+**conf/** contiene todos los archivos de configuración de la aplicación, en especial el archivo **application.conf** , el archivo **routes** con la definición del enrutamiento de los URLs y mensajes HTTP, y el archivo **messages** utilizado para internacionalizar la aplicación.
+
+**lib/** contiene todas las librerías opcionales de Java empaquetadas como archivos .jar.
+
+**public/** contiene todos los recursos disponibles públicamente, lo cual típicamente que incluye archivos javasript, hojas de estilo (CSS), y directorios con archivos de imágenes.
+
+**test/** contiene todas las pruebas de la aplicación. Las pruebas son escritas como pruebas JUnit o bien como pruebas de Selenium.
+
+p(note). Dado que **Play usa UTF-8*** como única codificación, es sumamente importante que todos los archivos que se encuentren en estos directorios sean codificados utilizando este juego de caracteres. Asegúrese de configurar su editor de textos para utilizar esta codificación.
+
+Ahora si usted cuanta con alguna experiencia en el desarrollo de aplicaciones Java se estará preguntando a dónde van los archivos .class. La respuesta es a ningún lado: Play no usa ningún archivo .class, sino que lee los fuentes de código Java directamente. En realidad, lo que hace es utilizar el compilar de Eclipse para compilar los fuentes de Java al vuelo.
+
+Esto permite dos cosas sumamente importante en el proceso de desarrollo. La primera es que Play detectará cualquier cambio que efectúe a cualquier archivo fuente de Java y automáticamente recargará el código en tiempo de ejecución, La segunda, es que cuando ocurra alguna excepción, Play podrá crear un reporte del error detallado mostrando exactamente la línea de código que generó el error.
+
+h2. <a>Ejecutando la aplicación</a>
+
+Ahora podemos probar la nueva aplicación. Vuelva a la consola, diríjase a la carpeta **helloworld/** y tipee **play run**. Play cargará la aplicación e iniciará un servidor web en el puerto 9000.
+
+Podrá ver la nueva aplicación abriendo un explorador en "http://localhost:9000":http://localhost:9000. La nueva aplicación lo recibirá con una página de bienvenida en la que le anunciará que la aplicación fue creada con éxito.
+
+!images/guide1-2!
+
+Veamos cómo hace la aplicación para mostrar esta página.
+
+El punto de entrada principal para su aplicación es el archivo **conf/routes**. En este archivo se definen todos los URLs acesibles para la aplicación. Si abre el archivo de enrutamiento generado por el comando **play new** verá la primera ‘ruta’:
+
+bc. GET		/			Application.index
+
+Esta línea simplemente le dice a Play que cuando el servidor web reciba un pedido HTTP con el método **GET** para el recurso **/**, deberá llamar al método Java **Application.index**. En este caso, **Application.index** es una manera abreviada de referirnos a **controllers.Application.index**, ya que el paquete controllers está implícito.
+
+Cuando usted crea una aplicación Java independiente, generalmente utiliza un único punto de entrada definido por un método de la siguiente manera:
+
+bc. public static void main(String[] args) {
+  ... 
+}
+
+Una aplicación Play, en cambio, tiene múltiples puntos de entrada, uno por cada URL. Llamamos a estos métodos **action** métodos o métodos de acción. Los métodos de acción son definidos en clases especiales a las que llamamos **controllers** o controladores.
+
+Veamos qué aspecto tiene el controlador **controllers.Application**. Abra el archivo **helloworld/app/controllers/Application.java**:
+
+bc. package controllers;
+ 
+import play.mvc.*;
+ 
+public class Application extends Controller {
+ 
+	public static void index() {
+		render();
+	}
+ 
+}
+
+La clase del controlador extiende la clase **play.mvc.Controller**. Esta clase provee métodos que son súmamente útiles para los contraladores, como el método **render()** que utilizamos en esta acción.
+
+La acción index es definida como un método **public static void**. Esta es la manera en que se definen los métodos de acción. Los métodos de acción son estáticos, porque la clase del controlador nunca es instanciada. Están marcados como públicos, para que el framework pueda ejecutarlos en respuesta a un URL. Y siempre retornan void.
+
+La acción por defecto index es simple: llama al método **render()** el cual le indica a Play que despliegue un template. Usar un template es la manera más común (si bien no la única) de generar una respuesta HTTP.
+
+Los templates son simples archivos de texto que residen en el directorio **/app/views**. Dado que no especificamos ningún template en particular, el framework tomará el template por defecto para esta acción: **Application/index.html**
+
+Para ver cómo es un template, abra el archivo **helloworld/app/views/Application/index.html**:
+
+bc. #{extends 'main.html' /}
+#{set title:'Home' /}
+ 
+#{welcome /}
+
+El contenido del template parece bastante liviano. De hecho, lo único que se ve son tags de Play. Los tags de play son muy similares a los de la librería de tags de JSP. El último de ellos es el tag #{welcome /} que genera el mensaje de bienvenida que acaba de ver en el explorador web.
+
+El tag **#{extends /}** le indica a Play que este tag hereda de otro tag llamado **main.html**. La herencia de templates es un concepto poderoso que le permite crear páginas web complejas reutilizando partes comunes a todas ellas.
+
+Abra el template **helloworld/app/views/main.html**:
+
+bc. <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+ 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <title>#{get 'title' /}</title>		
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <link rel="stylesheet" type="text/css" media="screen" 
+            href="@{'/public/stylesheets/main.css'}" />
+        <link rel="shortcut icon" type="image/png" 
+            href="@{'/public/images/favicon.png'}" />
+    </head>
+    <body>
+        #{doLayout /} 
+    </body>
+</html>
+
+¿Ha notado el tag **#{doLayout /}**? Indica que allí es donde el contenido de **Application/index.html** será insertado.
+
+h2. <a>Creando el fomulario HTML</a>
+
+Iniciaremos la aplicación ‘Hola Mundo’ con un formulario HTML en el que pueda ingresar su nombre.
+
+Edite el template **helloworld/app/views/Application/index.html**:
+
+bc. #{extends 'main.html' /}
+#{set title:'Home' /}
+ 
+<form action="@{Application.sayHello()}" method="GET">
+    <input type="text" name="myName" /> 
+    <input type="submit" value="Say hello!" />
+</form> 
+
+p(note). Note que utilizamos el método GET para enviar el formulario porque el mismo no tiene ningún efecto colateral, se trata de una operación idempotente.
+
+Utilizamos la notación **@{…}** para pedirle a Play que automáticamente genere la URL necesaria para invocar la acción **Application.sayHello**. Ahora, refresque la página principal en el explorador web.
+
+!images/firstapp-2!
+
+Oops, un error. Esto es porque acaba de referenciar la acción **Application.sayHello**, que todavía no existe. Vamos a crearla en el archivo **helloworld/app/controllers/Application.java**:
+
+bc. package controllers;
+ 
+import play.mvc.*;
+ 
+public class Application extends Controller {
+ 
+    public static void index() {
+        render();
+    }
+    
+    public static void sayHello(String myName) {
+        render(myName);
+    }
+ 
+}
+
+Declaramos el parámetro **myName** en la firma del método sayHello, de manera que automáticamente será cargado con el valor del parámetro HTTP **myName**, que viene al ser enviado el formulario. Y luego llamamos el método render para desplegar un template; como le pasamos la variable **myName** al método **render()**, esta varaible estará disponible en el template.
+
+!images/firstapp-3!
+
+Ahora, si intenta ingresar su nombre y enviar el formulario, recibirá otro error:
+
+!images/firstapp3!
+
+El error es bastante claro. Play intenta desplegar el template por defecto para esta acción, pero el mismo aún no existe. Para solucionar esto creamos el archivo **helloworld/app/views/Application/sayHello.html**:
+
+bc. #{extends 'main.html' /}
+#{set title:'Home' /}
+ 
+<h1>Hello ${myName ?: 'guest'}!</h1>
+ 
+<a href="@{Application.index()}">Back to form</a>
+
+Puede refrescar la página.
+
+!images/firstapp-4!
+
+Fíjese cómo usamos el operador de Groovy **?:**. Asigna un valor por defecto si la variable **myName** no ha sido asignada. Así que si intenta enviar el formulario sin ingresar ningún nombre, desplegará el texto ‘Hello guest’.
+
+h2. <a>Exponiendo un URL más elegante</a>
+
+Si echa una mirada al URL que es enviado por el formulario, verá lo siguiente:
+
+bc. http://localhost:9000/application/sayhello?myName=guillaume
+
+No es muy prolijo que digamos. Esto es porque Play utilizó la ruta por defecto, aquélla destinada a capturar cualquier pedido.
+
+bc. *       /{controller}/{action}                  {controller}.{action}
+
+Pero podemos tener un URL más elegante si especificamos un camino personalizado para la acción **Application.sayHello**. Modifique el archivo **helloworld/conf/routes** y agregue la siguiente línea a continuación de la primera ruta:
+
+bc. GET     /hello                                  Application.sayHello
+
+Ahora vuelva al formulario, y reenvíelo para verificar que ahora utilizar el nuevo patrón URL.
+
+h2. <a>Personalizando el layout de la página</a>
+
+Dado que ambos templates que nuestra aplicación está utilizando heredan del template **main.html**, podemos fácilmente agregar un layout personalizado. Edite el archivo **helloworld/app/views/main.html**:
+
+bc. ...
+<body>
+    The Hello world app.
+    <hr/>
+    
+    #{doLayout /}
+</body>
+...
+
+Ahora tenemos un encabezamiento común a ambas páginas.
+
+!images/firstapp-5!
+
+h2. <a>Agregando validaciones</a>
+
+Agregaremos una pequeña validación al formulario, para indicar que el campo nombre es requerido. Podemos usar el framework de validaciones de Play para hacer eso.
+
+Edite el controlador **helloworld/app/controllers/Application.java**, y la acción **sayHello**:
+
+bc. ...
+public static void sayHello(@Required String myName) {
+    if(validation.hasErrors()) {
+        flash.error("Oops, please enter your name!");
+        index();
+    }
+    render(myName);
+}
+...
+
+No olvide importar el paquete **play.data.validation.*** para poder hacer referencia a la anotación **@Required**. Play automáticamente verificará que el campo myName haya sido completado, o agregará un objeto error a la colección **errors*. Entonces, si hay algún error agregamos un mensaje a la colección *flash** y redireccionamos a la accion **index**.
+
+La colección flash permite mantener mensajes durante un redirect.
+
+Ahora tan sólo tenemos que mostrar el mensaje de **error** si es que hay alguno. Edite el archivo **helloworld/app/views/Application/index.html**:
+
+bc. #{extends 'main.html' /}
+#{set title:'Home' /}
+ 
+#{if flash.error}
+    <p style="color:#c00">
+        ${flash.error}
+    </p>
+#{/if}
+ 
+<form action="@{Application.sayHello()}" method="GET">
+    <input type="text" name="myName" /> 
+    <input type="submit" value="Say hello!" />
+</form>
+
+Y verifique que funcione:
+
+!images/firstapp-6!
+
+h2. <a>Escribiendo una batería de tests automáticos</a>
+
+Para finalizar, escribiremos una serie de pruebas para la aplicación. Dado que no hay ninguna lógica Java para probar, deberemos probar la propia aplicación web. Así que primero escribiremos una prueba de Selenium.
+
+Antes que nada tiene que ejecutar su aplicación en modo prueba, o *test mode*. Detenga la aplicación y vuelva a iniciarla con el comando *test*:
+
+bc. $ play test
+
+El comanto **play test** es casi idéntico a **play run**, excepto que carga un módulo que ejecuta pruebas y que le permite ejecutar la batería de pruebas directamente desde un explorador web.
+
+Abra un browser y navegue a "http://localhost:9000/@tests":http://localhost:9000/@tests para ver el ejecutador de pruebas. Intente seleccionar todas las pruebas por defecto y ejecútelas; todo debería dar verde... Pero estas pruebas por defecto que genera automáticamente el framework no prueban gran cosa.
+
+!images/guide2-1!
+
+Una batería de pruebas selenium es típicamente escrita en un archivo HTML. La sintaxis html requerida por selenium es un tanto engorrosa (formateada usando una tabla HTML) para escribir. La buena noticia es que Play le ayudará a generarlo utilizando el sistema de templates y un conjunto de tags que le permite especificar las pruebas con una sintaxis mucho más simple.
+
+La batería de pruebas que Play genera automáticamente cada vez que se crea un proyecto ya contiene una prueba de Selenium. Abra el arhivo **helloworld/test/Application.test.html**:
+
+bc. *{ You can use plain selenium command using the selenium tag }*
+ 
+#{selenium}
+    // Open the home page, and check that no error occurred
+    open('/')
+    waitForPageToLoad(1000)
+    assertNotTitle('Application error')
+#{/selenium}
+
+Esta prueba debería ejecutarse sin problemas por ahora. Lo único que hace es abrir la página principal y verificar que en el contenido de la página no aparece el texto ‘Application error’.
+
+Escribamos un test para nuestra aplicación. Edite el contenido del test:
+
+bc. #{selenium}
+    // Open the home page, and check that no error occurred
+    open('/')
+    assertNotTitle('Application error')
+    
+    // Check that it is the form
+    assertTextPresent('The Hello world app.')
+    
+    // Submit the form
+    clickAndWait('css=input[type=submit]')
+    
+    // Check the error
+    assertTextPresent('Oops, please enter your name!')
+    
+    // Type the name and submit
+    type('css=input[type=text]', 'bob')
+    clickAndWait('css=input[type=submit]')
+    
+    // Check the result
+    assertTextPresent('Hello bob!')
+    assertTextPresent('The Hello world app.')
+    
+    // Check the back link
+    clickAndWait('link=Back to form')
+    
+    // Home page?
+    assertTextNotPresent('Hello bob!')
+#{/selenium}
+
+Acabamos de testear nuestra aplicación. Simplemente seleccione este test desde el ejecutador y haga click en "Start". ¡Todo debería dar verde!
+
+!images/firstapp-7!
+
+h2. <a>Aprenda más</a>
+
+Este fue un tutorial sumamente simple sobre una aplicación bastante trivial. Si quiere aprender más acerca de Play, ahora puede ver el %(next)"Tutorial de Play":guide1%.

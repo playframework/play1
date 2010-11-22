@@ -1,0 +1,426 @@
+h1. Una primera iteración con el modelo de datos
+
+Aquí comenzaremos a diseñar el modelo de datos para nuestros sistema de blogs.
+
+h2. <a>Introducción a JPA</a>
+
+La capa de datos tiene un rol central en una aplicación de Play (y de hecho en cualquier aplicación bien diseñada). Es la representación de la información específica del dominio sobre la cual operará la aplicación. Dado que nos proponemos desarrollar un sistema de blogs, nuestra capa de datos seguramente contedrá clases como User (usuario), Post (una entrada en el blog) y Comment (comentario).
+
+Debido a que la mayor parte de los objetos de modelos de datos necesitan sobrevivir más a allá de las veces que reiniciemos nuestra aplicacion, debemos guardarlos en una base de datos persistente. Una elección bastante habitual es la de elegir una base de datos relaciones. Pero dado que Java es un lenguaje orientado a objetos, utilizaremos un "mapeo de objeto-relacional":http://es.wikipedia.org/wiki/ORM para procurar minimizar las diferencias entre ambos tipos de datos.
+
+La "API de Persistencia de JAVA":http://en.wikipedia.org/wiki/Java_Persistence_API (JPA) es una especificación de JAVA que define una API estandar para el mapeo objeto-relacional. Play utiliza el framework "Hibernate":http://www.hibernate.org, una de las más conocidas implementaciones de JPA. Una de las ventajas de utilizar JPA en vez de la API estandar de Hibernate, es que el todo 'mapeo' es decalrado directamente en los objetos de Java.
+
+Si ya ha utilizado Hibernate o JPA con anterioridad, se sorprenderá de los fácil que resulta hacerlo con Play. No hay neceisdad de configurar nada; JPA simplemente funciona tal como viene con Play.
+
+Si no conoce JPA, puede leer "algunas de estas presentaciones":http://java.sun.com/javaee/5/docs/tutorial/doc/bnbpz.html antes de continuar con este tutorial.
+
+h2. <a>La clase Usuario</a>
+
+Comenzaremos a desarrollar nuestro sistema de blogs creando una clase para modelar la información de los usuarios. Cree un nuevo archivo  **/yabe/app/models/User.java**, y declare la primera implementación de la clase User:
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.db.jpa.*;
+ 
+@Entity
+public class User extends Model {
+ 
+    public String email;
+    public String password;
+    public String fullname;
+    public boolean isAdmin;
+    
+    public User(String email, String password, String fullname) {
+        this.email = email;
+        this.password = password;
+        this.fullname = fullname;
+    }
+ 
+}
+
+La anotación **@Entity** indica que se trata de una entidad de JPA manejada, y la superclase **Model** automáticamente provee un conjunto de métodos que complementan la funcionalidad de JPA. Todos los campos de esta clase serán automáticamente persistidos en la base de datos.
+
+p(note). No es obligatorio que sus clases hereden la clase **play.db.jpa.Model**. Puede simplemente utilizar JPA. Pero extender esta clase es una buena opción en la mayoría de los casos, ya que le permitirá usar muchas de las prestaciones de JPA con mayor facilidad.
+
+Si alguna vez ha utilizado JPA, sabrá que cada entidad debe proveer una propiedad **@Id**. En este caso la superclase Model provee un ID numérico automáticamente generado, lo cual en la mayoría de los casos es suficiente.
+
+p(note). No considere este campo **id** como un **identificador funcional** relacionado con sus reglas de negocio, piénselo más bien como un **identificador técnico**. Es una buena idea tener estos dos conceptos bien separados y mantener un ID numérico automáticamente generado cono identificador técnico.
+
+Si usted tiene alguna experiencia en el desarrollo de aplicaiciones con Java, seguramente estará horrorizado al ver que utilizamos variables públicas. En Java (y en la mayor parte de los lenguajes orientados a objetos), las buenas prácticas nos recomiendan declarar todos los campos como privados y proveer métodos para acceder y modificar estos campos, a fin de promover el encapsulamiento, uno de los conceptos fundamentales del diseño orientado a objetos. De hecho, Play se encarga de esto automáticamente, generando los métodos para acceder y modificar el valor de los campos preservando así el encapsulamiento de la clase, en breve veremos como funciona esto.
+
+Puede ahora refrescar la página principal para ver los cambios. De hecho, a menos que haya cometido algún error, no debería ver ningún cambio: Play ha automáticamente compilada y cargado la clase User, pero esto todavía no agrega ninguna funcionalidad a nuestra aplicación.
+
+h2. <a>Escribiendo la primera prueba unitaria</a>
+
+Una buena manera de probar la clase User recientemente creada es escribiendo un caso de prueba de JUnit. Le permitirá ir completando incrementalmente el modelo de datos de la aplicación asegurándose de que todo está bien.
+
+Para ejecutar un caso de prueba, tendrá que iniciar la aplicación en un modo especial de prueba, el modo 'test'. Detenga la aplicación que actualmente se está ejecutando, abra una consola de comandos y tipee:
+
+bc. ~$ play test
+
+!images/guide2-0!
+
+El comando **play test** es casi idéntico a **play run**, excepto que carga un módulo ejecutador de pruebas que le permite correr una batería de pruebas directamente desde el browser.
+
+p(note). Cuando ejecuta una aplicación play en **modo test**, Play automáticamente cambiará la ID de framework **test**  y cargará los correspondientes valores del archivo **application.conf**. Consulte la "documentación de los IDs de framework":ids para más información.
+
+Abra un explorador en "http://localhost:9000/@tests":http://localhost:9000/@tests para ver el ejecutador de pruebas. Seleccione todas las pruebas por defecto haciendo click en 'Select all' y ejecútelas haciendo click en 'Start'; todos deberían dar verde, lo que significa que no hubo errores... Pero en realidad estas pruebas, por el momento, en realidad no prueban nada.
+
+!images/guide2-1!
+
+Para probar la capa de datos de nuestra aplicación utilizaremos una prueba de JUnit. Como puede ver, Play ya ha creado un archivo con pruebas básicas: **BasicTests.java**. Así que abrámoslo (**/yabe/test/BasicTest.java**):
+
+bc. import org.junit.*;
+import play.test.*;
+import models.*;
+ 
+public class BasicTest extends UnitTest {
+ 
+    @Test
+    public void aVeryImportantThingToTest() {
+        assertEquals(2, 1 + 1);
+    }
+ 
+}
+
+Elimine la prueba por defecto (**aVeryImportantThingToTest**) y cree una prueba que intente crear un nuevo usuario y recuperarlo:
+
+bc. @Test
+public void createAndRetrieveUser() {
+    // Create a new user and save it
+    new User("bob@gmail.com", "secret", "Bob").save();
+    
+    // Retrieve the user with e-mail address bob@gmail.com
+    User bob = User.find("byEmail", "bob@gmail.com").first();
+    
+    // Test 
+    assertNotNull(bob);
+    assertEquals("Bob", bob.fullname);
+}
+
+Como puede ver, la superclase Model nos brinda dos métodos sumamente útiles: **save()** y **find()**.
+
+p(note). Puede leer más acerca de los métodos de la clase Model en la sección "Soporte para JPA":jps del manual de Play.
+
+Seleccione **BasicTests.java** en el ejecutador de pruebas, haga click en 'Start' y verificque que todo siga dando verde.
+
+Necesitaremos un métodos en la clase User que verifique si un usuario con un específico nombre de usuario y clave existe. Escribamos dicho método y probémoslo.
+
+En el arcvhio **User.java**, agregue el método **connect()**:
+
+bc. public static User connect(String email, String password) {
+    return find("byEmailAndPassword", email, password).first();
+}
+
+Y ahora el caso de prueba:
+
+bc. @Test
+public void tryConnectAsUser() {
+    // Create a new user and save it
+    new User("bob@gmail.com", "secret", "Bob").save();
+    
+    // Test 
+    assertNotNull(User.connect("bob@gmail.com", "secret"));
+    assertNull(User.connect("bob@gmail.com", "badpassword"));
+    assertNull(User.connect("tom@gmail.com", "secret"));
+}
+
+Cada vez que haga una modificación, puede ejecutar todos los tests utilizando el ejecutador de Prueas provisto por Play para asegurarse de que no ha roto nada.
+
+h2. <a>La clase entrada</a>
+
+La clase **Post** representará entradas en el blog. Escribamos una primera implementación de la misma:
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.db.jpa.*;
+ 
+@Entity
+public class Post extends Model {
+ 
+    public String title;
+    public Date postedAt;
+    
+    @Lob
+    public String content;
+    
+    @ManyToOne
+    public User author;
+    
+    public Post(User author, String title, String content) {
+        this.author = author;
+        this.title = title;
+        this.content = content;
+        this.postedAt = new Date();
+    }
+ 
+}
+
+Aquí utilizamos la anotación **@Lob** para indicarle a JPA que utilice un campo de texto largo para almacenar el contenido de la entrada en el blog. Declaramos además la relación con la clase **User** con la anotacion **@ManyToOne** (Muchos a uno). Eso singifica que cada **Post** es publicado por un único **User**, su autor, y que cada **User** puede escribir muchos **Posts**.
+
+Vamos a escribir ahora un caso de prueba para verificar que la clase **Post** funciona según lo planeado. Pero antes de escribir más tests debemos hacer algo en la clase de pruebas de JUnit. En el test que acabamos de hacer, el contenido de la base de datos nunca es borrado, de manera que cada corrida crea más y más objetos. Esto pronto se transformará en un problema, cuando pruebas más avanzadas tengan que contar la cantidad de objetos para verificar que todo esté funcionando correctamente.
+
+Así que escribiremos un método **setup()** de JUnit para borrar todos los registros de la base de datos antes de cada prueba:
+
+bc. public class BasicTest extends UnitTest {
+ 
+    @Before
+    public void setup() {
+        Fixtures.deleteAll();
+    }
+    
+    ...
+ 
+}
+
+p(note). El concepto **@Before** (antes) es un concepto central del framework de testeo JUnit.
+
+Como puede ver, la clase **Fixtures** provee métodos que le facilitan preparar la base de datos para las pruebas. Ejecute nuebamente las pruebas para verificar que no ha roto nada, y comience a escribir las siguientes pruebas:
+
+bc. @Test
+public void createPost() {
+    // Create a new user and save it
+    User bob = new User("bob@gmail.com", "secret", "Bob").save();
+    
+    // Create a new post
+    new Post(bob, "My first post", "Hello world").save();
+    
+    // Test that the post has been created
+    assertEquals(1, Post.count());
+    
+    // Retrieve all posts created by Bob
+    List<Post> bobPosts = Post.find("byAuthor", bob).fetch();
+    
+    // Tests
+    assertEquals(1, bobPosts.size());
+    Post firstPost = bobPosts.get(0);
+    assertNotNull(firstPost);
+    assertEquals(bob, firstPost.author);
+    assertEquals("My first post", firstPost.title);
+    assertEquals("Hello world", firstPost.content);
+    assertNotNull(firstPost.postedAt);
+}
+
+p(note). **Recuerde** importar la librería **java.util.List** para evitar obtener un error de compilación.
+
+h2. <a>Agregando los comentarios</a>
+
+Lo último que precisamos agregar a este primer modelo de datos es la posibilidad de agregar comentarios a los mensajes.
+
+Crear la clase **Comment** es muy simple.
+
+bc. package models;
+ 
+import java.util.*;
+import javax.persistence.*;
+ 
+import play.db.jpa.*;
+ 
+@Entity
+public class Comment extends Model {
+ 
+    public String author;
+    public Date postedAt;
+     
+    @Lob
+    public String content;
+    
+    @ManyToOne
+    public Post post;
+    
+    public Comment(Post post, String author, String content) {
+        this.post = post;
+        this.author = author;
+        this.content = content;
+        this.postedAt = new Date();
+    }
+ 
+}
+
+Escribamos nuestro primer caso de prueba:
+
+bc. @Test
+public void postComments() {
+    // Create a new user and save it
+    User bob = new User("bob@gmail.com", "secret", "Bob").save();
+ 
+    // Create a new post
+    Post bobPost = new Post(bob, "My first post", "Hello world").save();
+ 
+    // Post a first comment
+    new Comment(bobPost, "Jeff", "Nice post").save();
+    new Comment(bobPost, "Tom", "I knew that !").save();
+ 
+    // Retrieve all comments
+    List<Comment> bobPostComments = Comment.find("byPost", bobPost).fetch();
+ 
+    // Tests
+    assertEquals(2, bobPostComments.size());
+ 
+    Comment firstComment = bobPostComments.get(0);
+    assertNotNull(firstComment);
+    assertEquals("Jeff", firstComment.author);
+    assertEquals("Nice post", firstComment.content);
+    assertNotNull(firstComment.postedAt);
+ 
+    Comment secondComment = bobPostComments.get(1);
+    assertNotNull(secondComment);
+    assertEquals("Tom", secondComment.author);
+    assertEquals("I knew that !", secondComment.content);
+    assertNotNull(secondComment.postedAt);
+}
+
+La navegabilidad entre la clase **Post** y **Comments** no es tan simple: necesitamos una consulta para traer todos los comentarios que han surgido de un mensaje. Para ello deberemos definir la otra parte de la relación con la clase **Post**.
+
+Agregue el campo **coments** a la clase **Post**:
+
+bc. ...
+@OneToMany(mappedBy="post", cascade=CascadeType.ALL)
+public List<Comment> comments;
+ 
+public Post(User author, String title, String content) { 
+    this.comments = new ArrayList<Comment>();
+    this.author = author;
+    this.title = title;
+    this.content = content;
+    this.postedAt = new Date();
+}
+...
+
+Hemos utilizado el atributo **mappedBy** para decirle a JPA que el campo post de la clase **Comments** es el encargado de mantener la relación. Cuando define una relación bidireccional con JPA es importante definir qué lado mantendrá la relación. En este caso, dado que que los comentarios pertenecen a un mensaje, lo mejor será que la clase **Comments** sea la encargada de mantener la relación.
+
+La propiedad **cascade** le indica a JPA que al eliminar un **Post** deberá eliminar 'en cascada' todos los comentarios relacionados a ese mensaje.
+
+Con esta nueva relación, agragaremos un método a la clase **Post** que nos permita agregar comentarios de una manera más simple:
+
+bc. public Post addComment(String author, String content) {
+    Comment newComment = new Comment(this, author, content).save();
+    this.comments.add(newComment);
+    this.save();
+    return this;
+}
+
+Escribamos ahora un caso de prueba para verificar que funcione:
+
+bc. @Test
+public void useTheCommentsRelation() {
+    // Create a new user and save it
+    User bob = new User("bob@gmail.com", "secret", "Bob").save();
+ 
+    // Create a new post
+    Post bobPost = new Post(bob, "My first post", "Hello world").save();
+ 
+    // Post a first comment
+    bobPost.addComment("Jeff", "Nice post");
+    bobPost.addComment("Tom", "I knew that !");
+ 
+    // Count things
+    assertEquals(1, User.count());
+    assertEquals(1, Post.count());
+    assertEquals(2, Comment.count());
+ 
+    // Retrieve Bob's post
+    bobPost = Post.find("byAuthor", bob).first();
+    assertNotNull(bobPost);
+ 
+    // Navigate to comments
+    assertEquals(2, bobPost.comments.size());
+    assertEquals("Jeff", bobPost.comments.get(0).author);
+    
+    // Delete the post
+    bobPost.delete();
+    
+    // Check that all comments have been deleted
+    assertEquals(1, User.count());
+    assertEquals(0, Post.count());
+    assertEquals(0, Comment.count());
+}
+
+Como de costrumbre, verificaremos que dé todo verde.
+
+!images/guide2-2!
+
+h2. <a>Utilizando 'Fixtures' para escribir pruebas más complicadas</a>
+
+Cuando comienza a escribir pruebas más complicadas, necesitará contar con un conjunto de datos sobre los cuales efectuar las pruebas. Los **Fixtures** le permiten describir los contenidos de sus modelos en un archivo "YAML":http://en.wikipedia.org/wiki/Yaml y cargarlos antes de ejecutar las pruebas.
+
+Edite el archivo **/yabe/test/data.yml** y comience a describir un usuario:
+
+bc. 
+User(bob):
+    email: bob@gmail.com
+    password: secret
+    fullname: Bob
+ 
+...
+
+Dado que el archivo **data.yml** es bastante grande, puede "descargarlo desde aquí":files/data.yml.
+
+Ahora creamos una prueba que cargue esta información y ejecute varias verificaciones (assertions, en la jerga de las pruebas unitarias) sobre estos datos:
+
+bc. @Test
+public void fullTest() {
+    Fixtures.load("data.yml");
+ 
+    // Count things
+    assertEquals(2, User.count());
+    assertEquals(3, Post.count());
+    assertEquals(3, Comment.count());
+ 
+    // Try to connect as users
+    assertNotNull(User.connect("bob@gmail.com", "secret"));
+    assertNotNull(User.connect("jeff@gmail.com", "secret"));
+    assertNull(User.connect("jeff@gmail.com", "badpassword"));
+    assertNull(User.connect("tom@gmail.com", "secret"));
+ 
+    // Find all of Bob's posts
+    List<Post> bobPosts = Post.find("author.email", "bob@gmail.com").fetch();
+    assertEquals(2, bobPosts.size());
+ 
+    // Find all comments related to Bob's posts
+    List<Comment> bobComments = Comment.find("post.author.email", "bob@gmail.com").fetch();
+    assertEquals(3, bobComments.size());
+ 
+    // Find the most recent post
+    Post frontPost = Post.find("order by postedAt desc").first();
+    assertNotNull(frontPost);
+    assertEquals("About the model layer", frontPost.title);
+ 
+    // Check that this post has two comments
+    assertEquals(2, frontPost.comments.size());
+ 
+    // Post a new comment
+    frontPost.addComment("Jim", "Hello guys");
+    assertEquals(3, frontPost.comments.size());
+    assertEquals(4, Comment.count());
+}
+
+p(note). Puede leer más acerca de Play y el formato YAML en la "página del manual de YAML":yaml.
+
+h2. <a>Guarde su trabajo</a>
+
+Hemos concluido una parte sumamente importante de nuestro sistema de blogs. Ahora que ya hemos creado y probado todas estas cosas, podemos comenzar a desarrollar la interface web de la aplicación.
+
+Pero antes de continuar, es hora de guardar su trabajo utilizando Bazaar. Abra una línea de comando y tipee **bzr st** para ver las modificaciones que ha efectuado desde la última vez que guardó los cambios en Bazaar:
+
+bc. $ bzr st
+
+Como puede ver, algunos archivos no están bajo control de código fuente. La carpeta **test-result** no precisa ser versionada, así que vamos a ignorarla:
+
+bc. $ bzr ignore test-result
+
+Y agregaremos el resto de los archivo al control de código fuente utilizando **bzr add**.
+
+bc. $ bzr add
+
+Ahora puede guardar los cambios de su proyecto.
+
+bc. $ bzr commit -m "The model layer is ready"
+
+p(note). Vaya a %(next)"Desarrollando la primera pantalla":guide3%. 

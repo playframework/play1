@@ -1,0 +1,45 @@
+h1. Aplicaciones de ejemplo
+
+Play trae un conjunto de aplicaciones de ejemplo en el directorio **samples-and-test/** que puede encontrar en el directorio de instalación del framework. Los utilizamos para correr nuestra batería de pruebas automáticas, y puede estudiarlas para descubrir algunos usos típicos de Play.
+
+h2. <a>Yet Another Blog Engine (Otro sistema de blogs más)</a>
+
+La aplicación final de "la guía de Play":guide1.
+
+!images/yabe!
+
+h2. <a>Zencontact</a>
+
+Una simple aplicación de administración de contactos.
+
+!images/zencontact!
+
+h2. <a>Booking</a>
+
+Una versión de la aplicación 'booking' del framework Seam de JBoss hecha con Play.
+
+!images/booking!
+
+h2. <a>Forum</a>
+
+Una simple aplicación de foros que usa JPA.
+
+!images/forum!
+
+h2. <a>Jobboard</a>
+
+Una completa bolsa de trabajo que utiliza el módulo CRUD para generar automáticamente las páginas de administración.
+
+!images/jobboard!
+
+h2. <a>Chat</a>
+
+Una aplicación de chat basada en HTTP. Utiliza el modelo de pedidos asincrónicos a fin de poder manejar múltiples conexiones simultáneas sin desperdiciar recursos.
+
+!images/chat!
+
+h2. <a>Validaciones</a>
+
+Demuestra el uso de diferentes maneras de crear un formulario con soporte de validaciones.
+
+!images/validation!

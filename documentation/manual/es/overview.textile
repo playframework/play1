@@ -1,0 +1,121 @@
+h1. Introducción al framework Play!
+
+El framework play es una simple alternativa a la sobrecargada plataforma para desarrollo de aplicaciones empresariales de Java. Se concentra en la productividad del desarrollar y apunta a arquitecuras de aplicaciones RESTful. Play es el complemento perfecto para las *metodologías de desarrollo ágiles*.
+
+El objetivo del framework Play es facilitar el desarrollo de apliaciones web sin renunciar al uso de Java. Veamos cómo esto es posible.
+
+p(note). **¿Quiere ver ejemplos de código?** 
+ 
+Consulte "Cinco cosas en las que play le facilita la vida":5things, o comience directamente con el "tutorial de Hola mundo":firstapp.
+
+h2. <a name="java">Un framework java sin dolor</a>
+
+Play es un framework de desarrollo web desarrollado enteramente en Java, y por lo tanto le permite mantener sus herramientas y librerías preferidas. Si usted ya utiliza Java como una plataforma de desarrollo no necesita cambiar a otro lenguaje, otro IDE y otras liberías. **¡Simplemente cambie a un entorno de desarrollo en Java que sea más productivo!**.
+
+h2. <a name="reload">Arregle el error y apriete F5</a>
+
+La plataforma de desarrollo Java es tristemente famosa por su baja productividad, debido principalmente al tedioso cliclo de compilar-empaquetar-deployar que llena de tedio la vida de los programadores.
+
+Es por eso que le dimos una vuelta de tuerca al ciclo de desarrollo para transformar el desarrollo con Play en un proceso eficiente.
+
+El framework compila su código fuente de Java directamente y lo vuelve a cargar dinámicamente en la JVM sin necesidad de reinicar el servidor. Usted puede editar, refrescar la página y ver inmediatamente sus modificaciones, tal como sucede en un entorno LAMP o cuando trabaja con el framework Rails.
+
+Es tan simple que incluso puede trabajar con un simple editor de textos y obviar el uso de un IDE Java, si lo desea.
+
+!images/editor!
+
+Cada vez que ocurre un error, el framework hace su mejor esfuerzo para identificar y mostrarle el problema.
+
+!images/guide1-3!
+
+Incluso las pilas de llamadas son reducidas y optimizadas para facilitarle la resolución de problemas. Note como hasta la ejecución de los templates han sido integrados a la pila de llamadas de Java.
+
+
+!images/stacktrace!
+
+h2. <a>Arquitectura MVC sin estado</a>
+
+Teniendo una base de datos de un lado y un explorador web del otro ¿por qué habría de tener un "estado" en el medio?
+
+Los frameworks de aplicaciones web de Java con manejo de estado (stateful) le permiten guardar el estado de una página, pero eso trae una cantidad importante de problemas: ¿qué pasa si el usuario abre una segunda ventana? ¿y si el usuario aprieta el botón "volver" del explorador?
+
+La arquitectura "nada compartido (share nothing)":http://zef.me/883/the-share-nothing-architecture es hoy alentada por numerosos frameworks de aplicaciones web, desde PHP hasta Ruby on Rails o Django. A medida que los exploradores se tornan más poderosos, resulta más fácil utilizar llamadas Ajax o almacenamiento de datos fuera de línea para resolver el problema del estado del lado del cliente.
+
+Ya no es necesario "meter mano" en el modelo HTTP para simular que podemos guardar el estado de una aplicación web. Otro aspecto del enfoque "nada compartido" es que permite renderizar porciones de la página en paralelo, y hacer actualizaciones parciales (o mejoras progresivas).
+
+
+h2. <a name="http">Vinculación entre HTTP y código java</a>
+
+Si usted ya está utilizando otro framework de desarrollo web en Java, como la API de los Servlet o el framework Struts, entonces usted ya está acostumbrado a trabajar con una vista abstracta del protocolo HTTP con extrañas APIs de Java y conceptos aún más complejos. Nosotros no pensamos así. Un framework de desarrollo de aplicaciones web, debería darle acceso simple y directo al protocolo HTTP, en vez de intentar ocultarlo. Esta es una diferencia fundamental entre Play y otros frameworks de desarrollo de aplicaciones web hechos en Java.
+
+El protocolo HTTP, el patron Request/Response, el estilo de arquitectura REST, la negociación de tipos de contenidos (content-type negotiation), los identificadores uniformes de recursos (URIs), son todos conceptos centrales del framework Play.
+
+Por ejemplo, se precisa tan sólo una línea para vincular un patrón URI a la llamada a una clase de Java:
+
+bc. GET    /clients/{id}        Clients.show
+
+Si cuestiones como Ajax, REST y manejar el movimiento hacia adelante y hacia atrás entre páginas web son algnos de los problemas que enfrenta usted día a día al desarrollar aplicaciones web, déle una oportunidad a Play.
+
+h2. <a name="templates">Un sistema de templates eficiente</a>
+
+Nos agrada la idea que motivó la aparición de JSP y del Lenguaje de Expresiones (Expression Language). ¿Pero por qué habremos de necesitar tantos archivos de configuración para crear una simple librería de tags? JSP tiene muchas limitaciones, y eso es algo que lo torna frustrante. Por eso hemos creado nuestro propio sistema de templates, ¡inspirado en JSP pero sin ninguna de sus limitaciones!
+
+
+Usted, al igual que cualquier otro programador, debería estar harto de escribir cosas como esta:
+
+bc. <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+ 
+<c:choose>
+    <c:when test="${emails.unread != null && fn:size(emails.unread)}">
+        You have ${fn:size(emails.unread)} unread email(s)!
+    </c:when>
+    <c:otherwise>
+        You have no unread emails!
+    </c:otherwise>
+</c:choose>
+
+Nos parece que seguramente preferiría escribirlo así:
+
+bc. You have ${emails.unread ?: 'no'} ${emails.unread?.pluralize('email')} !
+
+El lenguaje de expresiones utilizado por el sistema de templates de Play es "Groovy":http://groovy.codehaus.org/, el cual provee una sintaxis consistente con la de Java. Si bien Play utiliza el sistema de templates para generar las respuestas HTML, usted está en libertad de utilizarlo para generar cualquier otro tipo de documento, como puede ser un e-mail, mensajes JSON, etc.
+
+h2. <a>JPA recargado</a>
+
+La API de persistencia de Java (Java Persistence API - JPA) es la manera más limpia de almacenar objetos en una base de datos relacional disponible para Java. Si usted ya lo conoce, se sorprenderá al ver cuánto más fácil resulta con Play. Sin nada que configurar, Play automáticamente inicializará el Administrador de Entidades de JPA (JPA Entity Manager) y mágicamente se sincronizará con la base de datos cada vez que se vuelva a cargar el código fuente de la aplicación.
+
+Pero eso no es todo. Si utiliza la clase **play.db.jpa.Model** verá cómo lo ayuda a tener el código más limpio. Fíjese:
+
+bc. public void messages(int page) {
+    User connectedUser = User.find("byEmail", connected());
+    List<Message> messages = Message.find(
+        "user = ? and read = false order by date desc",
+        connectedUser
+    ).from(page * 10).fetch(10);
+    render(connectedUser, messages);
+}
+
+h2. <a>Desarrollo guidado por pruebas (si así lo desea)</a>
+
+El ejecutador de pruebas que viene con Play, le permite fácilmente implementar desarrollo guiado por pruebas (test-driven development TDD). Puede escribir toda clase de pruebas, desde simples pruebas unitarias hasta completas pruebas de aceptación, y ejecutarlas directamente en un explorador web utilizando "Selenium":http://seleniumhq.org/. Play también lo ayudará a controlar la cobertura de código del proyecto.
+
+!images/guide2-2!
+
+h2. <a name="full-stack">Un Framework de aplicación completo</a>
+
+Play fue inicialmente inspirado en nuestras propias aplicaciones Java. Trae consigo todas las herarmientas necesarias para crear una aplicación web moderna, incluyendo:
+
+* soporte para bases de datos relacionales a través de JDBC.
+* mapeo de objetos a bases relacionales (object-relational mapping) usando Hibernate (con la API de JPA).
+* soporte integrado de cache, con una simple API para utilizar el sistema distribuido de cache memcached, si lo necesita.
+* consumo de servicios web simple y directo, ya sea en JSON o XML (nos referimos a verdaderos servicios web, nada de SOAP por aquí).
+* soporte para OpenId como sistema distribuido de autenticación.
+* instalación ubicua, su aplicación web podrá ser implementada en donde sea (servidor de aplicaciones, Google App Engine, Cloud, etc.)
+* API para manipulación de imágenes.
+
+La arquitectura modular de Play permite combinar una aplicación web con muchas otras. Gracias a los "módulos de aplicación":modules, puede reutilizar su código Java, templates y recursos estáticos (como archivos de JavaScript y CSS) de una manera simple.
+
+p(note). **Compruébelo usted mismo**
+ 
+"Instale el framework Play":install y comience a desarrollar su primer aplicación.
