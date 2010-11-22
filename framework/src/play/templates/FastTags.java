@@ -231,7 +231,7 @@ public class FastTags {
         for (Map.Entry<?, ?> entry : args.entrySet()) {
             Object key = entry.getKey();
             if (!key.toString().equals("arg")) {
-                BaseTemplate.layoutData.get().put(key, __safe(template.template, entry.getValue()));
+                BaseTemplate.layoutData.get().put(key, (entry.getValue() != null && entry.getValue() instanceof String) ? __safe(template.template, entry.getValue()) : entry.getValue());
                 return;
             }
         }
