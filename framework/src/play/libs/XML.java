@@ -37,6 +37,7 @@ import org.xml.sax.SAXException;
 import play.Logger;
 
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
+import java.io.StringReader;
 
 /**
  * XML utils
@@ -82,7 +83,7 @@ public class XML {
      * @return null if an error occurs during parsing.
      */
     public static Document getDocument(String xml) {
-        InputSource source = new InputSource(new ByteArrayInputStream(xml.getBytes()));
+        InputSource source = new InputSource(new StringReader(xml));
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
             return dbf.newDocumentBuilder().parse(source);
