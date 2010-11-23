@@ -3,16 +3,18 @@ package play.libs;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+import org.xml.sax.InputSource;
 
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
-import java.io.ByteArrayInputStream;
-import org.xml.sax.InputSource;
+
 import play.Logger;
 
 /**
@@ -59,7 +61,7 @@ public class XML {
      * @return null if an error occurs during parsing.
      */
     public static Document getDocument(String xml) {
-        InputSource source = new InputSource(new ByteArrayInputStream(xml.getBytes()));
+        InputSource source = new InputSource(new StringReader(xml));
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
             return dbf.newDocumentBuilder().parse(source);
