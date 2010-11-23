@@ -162,7 +162,9 @@ class PlayApplication:
             return os.path.normpath("%s/bin/java" % os.environ['JAVA_HOME'])
 
     def pid_path(self):
-        if os.environ.has_key('PLAY_PID_PATH'):
+        if self.play_env.has_key('pid_file'):
+            return os.path.join(self.path, self.play_env['pid_file']);
+        elif os.environ.has_key('PLAY_PID_PATH'):
             return os.environ['PLAY_PID_PATH'];
         else:
             return os.path.join(self.path, 'server.pid');
@@ -213,6 +215,13 @@ class PlayApplication:
                 java_args.append('-Djava.security.manager')
                 java_args.append('-Djava.security.policy==%s' % policyFile)
 
+        if self.play_env.has_key('http.port'):
+            args += ["--http.port=%s" % self.play_env['http.port']]
+        if self.play_env.has_key('https.port'):
+            args += ["--https.port=%s" % self.play_env['https.port']]
+        print "args are: "
+        print args
+        
         java_cmd = [self.java_path(), '-javaagent:%s' % self.agent_path()] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % self.path, '-Dplay.id=%s' % self.play_env["id"], className] + args
         return java_cmd
 

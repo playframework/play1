@@ -19,13 +19,13 @@ public class Server {
     public static int httpPort;
     public static int httpsPort;
 
-    public Server() {
+    public Server(String[] args) {
 
         System.setProperty("file.encoding", "utf-8");
         final Properties p = Play.configuration;
 
-        httpPort = Integer.parseInt(p.getProperty("http.port", "-1"));
-        httpsPort = Integer.parseInt(p.getProperty("https.port", "-1"));
+        httpPort = Integer.parseInt(getOpt(args, "http.port", p.getProperty("http.port", "-1")));
+        httpsPort = Integer.parseInt(getOpt(args, "https.port", p.getProperty("https.port", "-1")));
 
         if (httpPort == -1 && httpsPort == -1) {
             httpPort = 9000;
@@ -123,6 +123,16 @@ public class Server {
 
     }
 
+    private String getOpt(String[] args, String arg, String defaultValue) {
+        String s = "--" + arg + "=";
+        for (String a : args) {
+            if (a.startsWith(s)) {
+                return a.substring(s.length());
+            }
+        }
+        return defaultValue; 
+    }
+
     public static void main(String[] args) throws Exception {
         File root = new File(System.getProperty("application.path"));
         if (System.getProperty("precompiled", "false").equals("true")) {
@@ -130,7 +140,7 @@ public class Server {
         }
         Play.init(root, System.getProperty("play.id", ""));
         if (System.getProperty("precompile") == null) {
-            new Server();
+            new Server(args);
         } else {
             Logger.info("Done.");
         }
