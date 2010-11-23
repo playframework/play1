@@ -1,8 +1,10 @@
 package play.libs.ws;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -53,7 +55,8 @@ public class WSUrlFetch implements WSImpl {
         /** Execute a POST request.*/
         public HttpResponse post() {
             try {
-                return new HttpUrlfetchResponse(prepare(new URL(url), "POST"));
+                HttpURLConnection conn = prepare(new URL(url), "POST");
+                return new HttpUrlfetchResponse(conn);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -110,12 +113,12 @@ public class WSUrlFetch implements WSImpl {
             }
             try {
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                checkFileBody(connection);
                 connection.setRequestMethod(method);
+                connection.setDoInput(true);
                 for (String key: this.headers.keySet()) {
                     connection.setRequestProperty(key, headers.get(key));
                 }
-                connection.setDoInput(true);
+                checkFileBody(connection);
                 if (this.oauthTokens != null) {
                     OAuthConsumer consumer = new DefaultOAuthConsumer(oauthInfo.consumerKey, oauthInfo.consumerSecret);
                     consumer.setTokenWithSecret(oauthTokens.token, oauthTokens.secret);
@@ -129,6 +132,7 @@ public class WSUrlFetch implements WSImpl {
 
         private void checkFileBody(HttpURLConnection connection) throws IOException {
 /*            if (this.fileParams != null) {
+                connection.setDoOutput(true);
                 //could be optimized, we know the size of this array.
                 for (int i = 0; i < this.fileParams.length; i++) {
                     builder.addBodyPart(new FilePart(this.fileParams[i].paramName,
@@ -179,37 +183,45 @@ public class WSUrlFetch implements WSImpl {
      */
     public static class HttpUrlfetchResponse extends HttpResponse {
 
-        private HttpURLConnection connection;
+        private String body;
+        private Integer status;
+        private Map<String, List<String>> headersMap;
 
         /**
          * you shouldnt have to create an HttpResponse yourself
          * @param method
          */
         public HttpUrlfetchResponse(HttpURLConnection connection) {
-            this.connection = connection;
+            try {
+                this.status = connection.getResponseCode();
+                this.headersMap = connection.getHeaderFields();
+                this.body = IO.readContentAsString(connection.getInputStream());
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            } finally {
+                connection.disconnect();
+            }
         }
 
         /**
          * the HTTP status code
          * @return the status code of the http response
          */
+        @Override
         public Integer getStatus() {
-            try {
-                return this.connection.getResponseCode();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            return status;
         }
 
+        @Override
         public String getHeader(String key) {
-            return connection.getHeaderField(key);
+            return headersMap.containsKey(key) ? headersMap.get(key).get(0) : null;
         }
 
+        @Override
         public List<Header> getHeaders() {
-            Map<String, List<String>> hdrs = connection.getHeaderFields();
             List<Header> result = new ArrayList<Header>();
-            for (String key: hdrs.keySet()) {
-                result.add(new Header(key, hdrs.get(key)));
+            for (String key: headersMap.keySet()) {
+                result.add(new Header(key, headersMap.get(key)));
             }
             return result;
         }
@@ -218,22 +230,20 @@ public class WSUrlFetch implements WSImpl {
          * get the response body as a string
          * @return the body of the http response
          */
+        @Override
         public String getString() {
-            try {
-                return IO.readContentAsString(connection.getInputStream());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            return body;
         }
 
         /**
          * get the response as a stream
          * @return an inputstream
          */
+        @Override
         public InputStream getStream() {
             try {
-                return connection.getInputStream();
-            } catch (Exception e) {
+                return new ByteArrayInputStream(body.getBytes("UTF-8"));
+            } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
         }

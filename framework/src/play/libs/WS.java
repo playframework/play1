@@ -422,7 +422,9 @@ public class WS extends PlayPlugin {
          * get the response body as a string
          * @return the body of the http response
          */
-        public abstract String getString();
+        public String getString() {
+            return IO.readContentAsString(getStream());
+        }
 
         /**
          * get the response as a stream

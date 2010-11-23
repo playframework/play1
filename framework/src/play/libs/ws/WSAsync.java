@@ -315,14 +315,17 @@ public class WSAsync implements WSImpl {
          * the HTTP status code
          * @return the status code of the http response
          */
+        @Override
         public Integer getStatus() {
             return this.response.getStatusCode();
         }
 
+        @Override
         public String getHeader(String key) {
             return response.getHeader(key);
         }
 
+        @Override
         public List<Header> getHeaders() {
             Map<String, List<String>> hdrs = response.getHeaders();
             List<Header> result = new ArrayList<Header>();
@@ -336,6 +339,7 @@ public class WSAsync implements WSImpl {
          * get the response body as a string
          * @return the body of the http response
          */
+        @Override
         public String getString() {
             try {
                 return response.getResponseBody();
@@ -348,6 +352,7 @@ public class WSAsync implements WSImpl {
          * get the response as a stream
          * @return an inputstream
          */
+        @Override
         public InputStream getStream() {
             try {
                 return response.getResponseBodyAsStream();
