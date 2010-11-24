@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import play.Play;
+import play.PlayPlugin;
 import play.data.binding.Binder;
 
 /**
@@ -32,19 +35,32 @@ public class Messages {
 
     /**
      * Given a message code, translate it using current locale.
-     * Notice that if the message can't be found, the string <em>!code!</em> is returned.
+     * If there is no message in the current locale for the given key, the key
+     * is returned.
      * 
      * @param key the message code
      * @param args optional message format arguments
      * @return translated message
      */
     public static String get(Object key, Object... args) {
+        return getMessage(Lang.get(), key, args);
+    }
+    
+    public static String getMessage(String locale, Object key, Object... args) {
+        // Check if there is a plugin that handles translation
+        for (PlayPlugin plugin : Play.plugins) {
+            String message = plugin.getMessage(locale, key, args);
+            if(message != null) {
+                return message;
+            }
+        }
+        
         String value = null;
         if( key == null ) {
             return "";
         }
-        if (locales.containsKey(Lang.get())) {
-            value = locales.get(Lang.get()).getProperty(key.toString());
+        if (locales.containsKey(locale)) {
+            value = locales.get(locale).getProperty(key.toString());
         }
         if (value == null) {
             value = defaults.getProperty(key.toString());
@@ -52,6 +68,11 @@ public class Messages {
         if (value == null) {
             value = key.toString();
         }
+        
+        return formatString(value, args);
+    }
+
+    public static String formatString(String value, Object... args) {
         String message = String.format(value, coolStuff(value, args));
         Matcher matcher = recursive.matcher(message);
         StringBuffer sb = new StringBuffer();
