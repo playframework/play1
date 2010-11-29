@@ -465,8 +465,8 @@ public class Router {
                                     }
                                 } else {
                                     try {
-                                    path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString().replace("$", "\\$"), "utf-8"));
-                                    host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString().replace("$", "\\$"), "utf-8"));
+                                        path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString().replace("$", "\\$"), "utf-8").replace("%3A", ":").replace("%40", "@"));
+                                        host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString().replace("$", "\\$"), "utf-8").replace("%3A", ":").replace("%40", "@"));
                                     } catch(UnsupportedEncodingException e) {
                                         throw new UnexpectedException(e);
                                     }
