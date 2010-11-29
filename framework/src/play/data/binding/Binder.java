@@ -58,12 +58,6 @@ public class Binder {
     @SuppressWarnings("unchecked")
     static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String prefix, String[] profiles) {
         try {
-            Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] isComposite [" + isComposite(name + prefix, params) + "]");
-
-            if (isComposite(name + prefix, params)) {
-                BeanWrapper beanWrapper = getBeanWrapper(clazz);
-                return beanWrapper.bind(name, type, params, prefix, annotations);
-            }
             Logger.trace("bindInternal: name [" + name + "] prefix [" + prefix + "]");
 
             String[] value = params.get(name + prefix);
@@ -127,6 +121,15 @@ public class Binder {
                     keyClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
                     valueClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[1];
                 }
+                
+                // Special case Map<String, String>
+                // Multivalues composite params are binded to a Map<String, String>
+                // see http://play.lighthouseapp.com/projects/57987/tickets/443
+                if (keyClass==String.class && valueClass==String.class && isComposite(name, params)) {
+                	Map<String, String> stringMap = Utils.filterParams(params, name);
+                	if (stringMap.size()>0) return stringMap;
+                }
+                
                 // Search for all params
                 Map<Object, Object> r = new HashMap<Object, Object>();
                 for (String param : params.keySet()) {
@@ -221,6 +224,14 @@ public class Binder {
             if (value == null || value.length == 0) {
                 return MISSING;
             }
+
+            // Assume a Bean if isComposite
+            Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] isComposite [" + isComposite(name + prefix, params) + "]");
+            if (isComposite(name + prefix, params)) {
+                BeanWrapper beanWrapper = getBeanWrapper(clazz);
+                return beanWrapper.bind(name, type, params, prefix, annotations);
+            }
+
             return directBind(name, annotations, value[0], clazz);
         } catch (Exception e) {
             Validation.addError(name + prefix, "validation.invalid");

@@ -1,0 +1,37 @@
+#{extends 'main.html' /}
+
+#{form @submit()}
+
+<h1>Map binding: Map&lt;String, String>, taking "composite." as identifier (composite value)</h1>
+	composite.name: <input type="text" name="composite.name" id="composite_name" /><br />
+	composite.surname: <input type="text" name="composite.surname" id="composite_surname" /><br />
+	
+	<br />
+	composite.phone1: <input type="text" name="composite.phone" id="composite_phone1" /><br />
+	composite.phone2: <input type="text" name="composite.phone" id="composite_phone2" /><br />
+	composite.phone3: <input type="text" name="composite.phone" id="composite_phone3" /><br />
+
+	<hr />
+
+<h1>Map binding: Map&lt;String, String>, taking "items" as identifier (non composite value)</h1>
+
+	first item: <input type="text" name="items[first]" id="items_first" /><br />
+	second item: <input type="text" name="items[second]" id="items_second" /><br />
+	third item: <input type="text" name="items[third]" id="items_third" /><br />
+
+	<hr />
+
+<h1>Map binding: Map&lt;String, ComplexModel>, taking "models" as identifier</h1>
+
+	first's name: <input type="text" name="models[first].name" id="models_first_name" /><br />
+	first's surname: <input type="text" name="models[first].surname" id="models_first_surname" /><br />
+	first's phone1: <input type="text" name="models[first].phone" id="models_first_phone" /><br />
+	<br />
+
+	second's name: <input type="text" name="models[second].name" id="models_second_name" /><br />
+	second's surname: <input type="text" name="models[second].surname" id="models_second_surname" /><br />
+	second's phone1: <input type="text" name="models[second].phone" id="models_second_phone" /><br />
+	
+	<input type="submit" id="go" />	
+	
+#{/form}
