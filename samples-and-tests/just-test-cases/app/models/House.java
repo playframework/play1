@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.*;
 
 @Entity
-public class House extends JPASupport {
+public class House extends GenericModel {
     
     @Id
     @Column(length=3)
