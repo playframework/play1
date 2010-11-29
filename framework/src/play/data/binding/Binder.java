@@ -220,10 +220,6 @@ public class Binder {
                 }
                 return r;
             }
-            // Simple types
-            if (value == null || value.length == 0) {
-                return MISSING;
-            }
 
             // Assume a Bean if isComposite
             Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] isComposite [" + isComposite(name + prefix, params) + "]");
@@ -232,6 +228,11 @@ public class Binder {
                 return beanWrapper.bind(name, type, params, prefix, annotations);
             }
 
+            // Simple types
+            if (value == null || value.length == 0) {
+                return MISSING;
+            }
+            
             return directBind(name, annotations, value[0], clazz);
         } catch (Exception e) {
             Validation.addError(name + prefix, "validation.invalid");
