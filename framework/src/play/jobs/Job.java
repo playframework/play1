@@ -1,6 +1,5 @@
 package play.jobs;
 
-import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -15,7 +14,6 @@ import play.Logger;
 import play.Play;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
-import play.exceptions.UnexpectedException;
 import play.libs.Time;
 
 /**

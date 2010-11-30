@@ -47,7 +47,6 @@ import play.db.DB;
 import play.db.Model;
 import play.exceptions.JPAException;
 import play.exceptions.UnexpectedException;
-import play.mvc.Http.Request;
 import play.utils.Utils;
 
 /**

@@ -111,6 +111,7 @@ public class Invoker {
             return annotations;
         }
 
+        @SuppressWarnings("unchecked")
         public <T extends Annotation> T getAnnotation(Class<T> clazz) {
             for(Annotation annotation : annotations) {
                 if(annotation.annotationType().isAssignableFrom(clazz)) {
