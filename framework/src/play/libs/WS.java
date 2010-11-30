@@ -135,7 +135,11 @@ public class WS extends PlayPlugin {
         public Map<String, String> headers = new HashMap<String, String>();
         public Map<String, Object> parameters = new HashMap<String, Object>();
         public String mimeType;
-        public Integer timeout;
+        public boolean followRedirects = true;
+        /**
+         * timeout: value in seconds
+         */
+        public Integer timeout = 60;
 
         public ServiceInfo oauthInfo = null;
         public TokenPair oauthTokens = null;
@@ -161,6 +165,7 @@ public class WS extends PlayPlugin {
          * provided credentials will be used during the request
          * @param username
          * @param password
+         * @return the WSRequest for chaining.
          */
         public WSRequest authenticate(String username, String password) {
             this.username = username;
@@ -170,11 +175,20 @@ public class WS extends PlayPlugin {
 
         /**
          * Sign the request for do a call to a server protected by oauth
-         * @return
+         * @return the WSRequest for chaining.
          */
         public WSRequest oauth(ServiceInfo oauthInfo, TokenPair oauthTokens) {
             this.oauthInfo = oauthInfo;
             this.oauthTokens = oauthTokens;
+            return this;
+        }
+
+        /**
+         * Indicate if the WS should continue when hitting a 301 or 302
+         * @return the WSRequest for chaining.
+         */
+        public WSRequest followRedirects(boolean value) {
+            this.followRedirects = value;
             return this;
         }
 

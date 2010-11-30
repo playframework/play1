@@ -115,6 +115,7 @@ public class WSUrlFetch implements WSImpl {
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod(method);
                 connection.setDoInput(true);
+                connection.setInstanceFollowRedirects(this.followRedirects);
                 for (String key: this.headers.keySet()) {
                     connection.setRequestProperty(key, headers.get(key));
                 }

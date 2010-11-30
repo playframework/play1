@@ -235,6 +235,7 @@ public class WSAsync implements WSImpl {
             for (String key: this.headers.keySet()) {
                 builder.addHeader(key, headers.get(key));
             }
+            builder.setFollowRedirects(this.followRedirects);
             return builder;
         }
 
