@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
@@ -167,6 +168,12 @@ public class JavaExtensions {
         return new SimpleDateFormat(pattern, new Locale(lang)).format(date);
     }
 
+    public static String format(Date date, String pattern, String lang, String timezone) {
+        DateFormat df = new SimpleDateFormat(pattern, new Locale(lang));
+        df.setTimeZone(TimeZone.getTimeZone(timezone));
+        return df.format(date);
+    }
+
     public static Integer page(Number number, Integer pageSize) {
         return number.intValue() / pageSize + (number.intValue() % pageSize > 0 ? 1 : 0);
     }
@@ -213,6 +220,10 @@ public class JavaExtensions {
 
     public static String asdate(Long timestamp, String pattern, String lang) {
         return new SimpleDateFormat(pattern, new Locale(lang)).format(new Date(timestamp));
+    }
+
+    public static String asdate(Long timestamp, String pattern, String lang, String timezone) {
+        return format(new Date(timestamp), pattern, lang, timezone);
     }
 
     public static RawData nl2br(Object data) {
