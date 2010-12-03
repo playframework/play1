@@ -131,7 +131,6 @@ public class IO {
         try {
             is = new FileInputStream(file);
             lines = IOUtils.readLines(is, encoding);
-            is.close();
         } catch (IOException ex) {
             throw new UnexpectedException(ex);
         } finally {
@@ -251,7 +250,7 @@ public class IO {
             throw new UnexpectedException(e);
         } finally {
             try {
-                os.close();
+                if(os != null) os.close();
             } catch(Exception e) {
                 //
             }
@@ -273,7 +272,7 @@ public class IO {
             throw new UnexpectedException(e);
         } finally {
             try {
-                os.close();
+                if(os != null) os.close();
             } catch(Exception e) {
                 //
             }
@@ -348,7 +347,7 @@ public class IO {
                 //
             }
             try {
-                os.close();
+                if(os != null) os.close();
             } catch(Exception e) {
                 //
             }
