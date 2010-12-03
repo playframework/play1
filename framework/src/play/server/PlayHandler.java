@@ -637,6 +637,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         Logger.trace("serveStatic: begin");
         HttpResponse nettyResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.status));
         nettyResponse.setHeader("Server", signature);
+        RandomAccessFile raf = null;
         try {
             VirtualFile file = Play.getVirtualFile(renderStatic.file);
             if (file != null && file.exists() && file.isDirectory()) {
@@ -674,7 +675,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                         }
                     } else {
 
-                        RandomAccessFile raf;
                         raf = new RandomAccessFile(localFile, "r");
                         long fileLength = raf.length();
 
@@ -714,6 +714,14 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 future.addListener(ChannelFutureListener.CLOSE);
             } catch (Exception ex) {
                 Logger.error(ez, "serveStatic for request %s", request.method + " " + request.url);
+            }
+        } finally {
+            if(raf != null) {
+                try {
+                    raf.close();
+                } catch(Exception ex) {
+                    //
+                }
             }
         }
         Logger.trace("serveStatic: end");
