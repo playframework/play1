@@ -212,7 +212,7 @@ public class IO {
             throw new UnexpectedException(e);
         } finally {
             try {
-                os.close();
+                if(os != null) os.close();
             } catch(Exception e) {
                 //
             }
@@ -234,7 +234,7 @@ public class IO {
             throw new UnexpectedException(e);
         } finally {
             try {
-                os.close();
+                if(os != null) os.close();
             } catch(Exception e) {
                 //
             }
@@ -309,7 +309,7 @@ public class IO {
                 //
             }
             try {
-                os.close();
+                if(os != null) os.close();
             } catch(Exception e) {
                 //
             }
