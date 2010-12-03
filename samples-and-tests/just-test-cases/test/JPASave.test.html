@@ -18,14 +18,6 @@
 	open('@{Horses.index()}')
 	clickAndWait('save')
 	assertTextPresent('Blups:2')
-
-	// A simple test case
-	open('@{JPABinding.aSaveForm()}')
-	assertTextPresent('A: 0')
-	assertTextPresent('B: 0')
-	clickAndWait('saveAll')
-	assertTextPresent('A: 0')
-	assertTextPresent('B: 0')
 	
 	// Three levels
 	open('@{JPAController.with3Levels()}')
