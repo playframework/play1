@@ -26,3 +26,7 @@ validation.before=Must be before %2$s
 validation.object=Validation failed
 validation.notFound=Object not found for id %2$s
 validation.url=Not a valid URL
+validation.phone=Not a valid phone
+validation.ip=Not a valid IP address
+validation.nospecialchars=Special characters are not allowed
+validation.onlyletters=Only letters allowed
