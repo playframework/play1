@@ -18,6 +18,32 @@ bc. <a href="/application/logout">Disconnect</a>
 If the action you try to call does not have any route able to invoke it using a GET method, Play will automatically generate a hidden form that will be submitted on link click using JavaScript.
 
 
+h2. <a name="authenticityToken">authenticityToken</a>
+
+Renders a hidden input field containing a generated token that you can use in any form. See the "Cross-Site Request Forgery":security#csrf section.
+
+bc. #{authenticityToken /}
+
+Rendered as:
+
+bc. <input type="hidden" name="authenticityToken" value="1c6d92fed96200347f06b7c5e1a3a28fa258ef7c">
+
+
+h2. <a name="cache">cache</a>
+
+Caches the tag body using the **play.cache.Cache** API, for the cache key specified by the tag parameter.
+
+bc. #{cache 'startTime'}
+   ${new java.util.Date()}
+#{/cache}
+
+The body is cached indefinitely by default, but you can specify an expiration duration with the **for** parameter.
+
+bc. #{cache 'currentTime', for:'3s'}
+   ${new java.util.Date()}
+#{/cache}
+
+
 h2. <a name="dolayout">doLayout</a>
 
 Used with template inheritance, this tag inserts the evaluated sub-template’s contents.
@@ -68,6 +94,30 @@ bc. #{if tasks.size() > 1}
 As for **else**, you can use it with the **list** tag.
 
 
+h2. <a name="error">error</a>
+
+Outputs the validation error message, if present, for the field specified by the tag parameter.
+
+bc. #{error 'user.name'/}
+
+You can use the optional **field** parameter to use a different field’s error message. This is useful when you want several fields to share a common error message.
+
+bc. #{error 'contact.street',  field:'contact.address'/}
+#{error 'contact.city',    field:'contact.address'/}
+#{error 'contact.country', field:'contact.address'/}
+
+
+h2. <a name="errorClass">errorClass</a>
+
+Outputs the text **hasError** if there is a validation error for the field specified by the tag parameter. This is useful for setting a CSS class for input fields with errors:
+
+bc. <input name="name" class="#{errorClass 'name'/}">
+
+which is equivalent to:
+
+bc. <input name="name" class="${errors.forKey('name') ? 'hasError' : ''}">
+
+
 h2. <a name="errors">errors</a>
 
 Iterates over the current validation errors.
@@ -91,27 +141,6 @@ bc. <table>
     <tr class="${error_parity}"><td>${error_index}</td><td>${error}</td></tr>
 #{/errors}
 </table>
-
-h2. <a name="iferrors">ifErrors</a>
-
-If there's any validation error, tag's content will be rendered
-
-bc. #{ifErrors}
-  <p>Error(s) found!</p>
-#{/ifErrors}
-
-h2. <a name="iferror">ifError</a>
-
-If corresponding input as error, tag's content will be rendered
-
-* **arg** (required) - input's name
-
-bc. #{ifError 'user.name'}
-  <p>
-    User name is invalid: 
-    #{error 'user.name' /}
-  <p>
-#{/ifError}
 
 h2. <a name="extends">extends</a>
 
@@ -213,6 +242,25 @@ bc. #{if ( request.actionMethod == 'administer'  && user.isAdmin() ) }
 #{/if}
 
 
+h2. <a name="iferror">ifError</a>
+
+Renders the tag body if there is a validation error for the input field field named by the tag parameter.
+
+bc. #{ifError 'user.name'}
+  <p>
+    User name is invalid: 
+    #{error 'user.name' /}
+  <p>
+#{/ifError}
+
+h2. <a name="iferrors">ifErrors</a>
+
+Renders the tag body if any field has a validation error.
+
+bc. #{ifErrors}
+  <p>Error(s) found!</p>
+#{/ifErrors}
+
 h2. <a name="ifnot">ifnot</a>
 
 Cleaner alternative to #{if !condition}
@@ -305,7 +353,17 @@ bc. #{list users}
 #{/list}
 
 
-h2. <a name="script">script</a>
+h2. <a name="option">option</a>
+
+Insert an **option** tag in the template.
+
+* **value** - option's value
+
+bc. #{option user.id} ${user.name} #{/option}
+
+Will output:
+
+bc. <option value="42">jto</option>h2. <a name="script">script</a>
 
 Inserts a **script** tag in the template. By convention, the tag refers to a script in **/public/javascripts**
 
@@ -319,47 +377,11 @@ bc. #{script 'jquery-1.4.2.min.js' /}
 #{script id:'datepicker' , src:'ui/ui.datepicker.js', charset:'utf-8' /}
 
 
-h2. <a name="set">set</a>
+h2. <a name="render">render</a>
 
-Define a value which can be retrieved in the same template or any layout with the **get** tag.
+Renders the template specified by the path in the tag parameter. The path is either absolute, or relative to **/app/views**
 
-bc. #{set title:'Admin' /}
-#{set style:'2columns' /}
-
-You can also use variables:
-
-bc. #{set title:'Profile of ' + user.login /}
-
-You can define the value of variables in the body:
-
-bc. #{set 'title'}
-    Profile of ${user.login}
-#{/set}
-
-
-h2. <a name="stylesheet">stylesheet</a>
-
-Inserts a **link** tag in the template. By convention, the tag refers to a CSS file in **/public/stylesheets**
-
-* **src** (required) - file name, without the leading path **/public/stylesheets**
-* **id** (optional) - an **id** attribute value for the generated **link** tag
-* **media** (optional) - a **media** attribute value: screen, print, aural, projection…
-* **title** (optional) - **title** attribute value (or description)
-
-The **src** parameter can be replaced by the default **arg** argument.
-
-bc. #{stylesheet 'default.css' /}
-#{stylesheet id:'main', media:'print', src:'print.css', title:'Print stylesheet' /}
-
-
-h2. <a name="verbatim">verbatim</a>
-
-Disables HTML escaping in template output, like the "raw()":javaextensions#arawa Java extension, but for the whole tag body.
-
-bc. ${'&amp;'}
-#{verbatim}${'&amp;'}#{/verbatim}
-
-In this example, the first line outputs **&amp;** while the second line outputs an ampersand. 
+bc. #{render 'Application/other.html'/}
 
 
 h2. <a name="select">select</a>
@@ -407,14 +429,46 @@ bc. <select name="users" size="1" class="test" id="select2" >
   <option value="5" selected="selected">User-5</option>
 </select>
 
-h2. <a name="option">option</a>
+h2. <a name="set">set</a>
 
-Insert an **option** tag in the template.
+Define a value which can be retrieved in the same template or any layout with the **get** tag.
 
-* **value** - option's value
+bc. #{set title:'Admin' /}
+#{set style:'2columns' /}
 
-bc. #{option user.id} ${user.name} #{/option}
+You can also use variables:
 
-Will output:
+bc. #{set title:'Profile of ' + user.login /}
 
-bc. <option value="42">jto</option>
+You can define the value of variables in the body:
+
+bc. #{set 'title'}
+    Profile of ${user.login}
+#{/set}
+
+
+h2. <a name="stylesheet">stylesheet</a>
+
+Inserts a **link** tag in the template. By convention, the tag refers to a CSS file in **/public/stylesheets**
+
+* **src** (required) - file name, without the leading path **/public/stylesheets**
+* **id** (optional) - an **id** attribute value for the generated **link** tag
+* **media** (optional) - a **media** attribute value: screen, print, aural, projection…
+* **title** (optional) - **title** attribute value (or description)
+
+The **src** parameter can be replaced by the default **arg** argument.
+
+bc. #{stylesheet 'default.css' /}
+#{stylesheet id:'main', media:'print', src:'print.css', title:'Print stylesheet' /}
+
+
+h2. <a name="verbatim">verbatim</a>
+
+Disables HTML escaping in template output, like the "raw()":javaextensions#arawa Java extension, but for the whole tag body.
+
+bc. ${'&amp;'}
+#{verbatim}${'&amp;'}#{/verbatim}
+
+In this example, the first line outputs **&amp;** while the second line outputs an ampersand. 
+
+
