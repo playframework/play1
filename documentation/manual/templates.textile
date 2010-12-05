@@ -176,7 +176,8 @@ bc. <h1>Main template</h1>
     #{doLayout /}
 </div>
 
-h2. <a name="tags">Custom tags</a>
+
+h2. <a name="tags">Custom template tags</a>
 
 You can easily create specific tags for your application. A tag is a simple template file, stored in the **app/views/tags** directory. The template’s file name is used as the tag name.
 
@@ -223,6 +224,74 @@ And you can then pass the name as tag body:
 bc. #{hello}
    Bob
 #{/hello}
+
+
+h2. <a name="fasttags">Custom Java tags</a>
+
+You can also define custom tags in Java code. Similarly to how JavaExtensions work by extending the **play.templates.JavaExtensions** class, to create a FastTag you need to create a method in a class that extends **play.templates.FastTags**. Each method that you want to execute as a tag must have the following method signature.
+
+bc. public static void _tagName(Map<?, ?> args, Closure body, PrintWriter out, 
+   ExecutableTemplate template, int fromLine)
+
+p(note). Note the underscore before the tag name.
+
+To understand how to build an actual tag, let’s look at two of the built-in tags.
+
+For example, the **verbatim** tag is implemented by a one-line method that simply calls the toString method on the JavaExtensions, and passes in the body of the tag.
+
+bc. public static void _verbatim(Map<?, ?> args, Closure body, PrintWriter out, 
+   ExecutableTemplate template, int fromLine) {
+   
+   out.println(JavaExtensions.toString(body));
+}
+
+The body of the tag would be anything between the open and close tag. So
+
+bc. <verbatim>My verbatim</verbatim>
+
+The body value would be 
+
+bc. My verbatim
+
+The second example is the **option** tag, which is slightly more complex because it relies on a parent tag to function.
+
+bc. public static void _option(Map<?, ?> args, Closure body, PrintWriter out, 
+      ExecutableTemplate template, int fromLine) {
+ 
+   Object value = args.get("arg");
+   Object selection = TagContext.parent("select").data.get("selected");
+   boolean selected = selection != null && value != null 
+      && selection.equals(value);
+ 
+   out.print("<option value=\"" + (value == null ? "" : value) + "\" " 
+      + (selected ? "selected=\"selected\"" : "") 
+      + "" + serialize(args, "selected", "value") + ">");
+   out.println(JavaExtensions.toString(body));
+   out.print("</option>");
+}
+
+This code works by outputting an HTML **option** tag, and sets the selected value by checking which value is selected from the parent tag. The first three lines set variables for use in the output output. Then, the final three lines output the result of the tag.
+
+There are many more examples in the source code for the built in tags, with varying degrees of complexity. See "FastTags.java in github":https://github.com/playframework/play/blob/master/framework/src/play/templates/FastTags.java.
+
+h3. Tag namespaces
+
+To ensure that your tags do not conflict between projects, or with the core Play tags, you can set up namespaces, using the class level annotation **@FastTags.Namespace**.
+
+So, for a **hello** tag, in a **my.tags** namespace, you would do the following
+
+bc. @FastTags.Namespace("my.tags") 
+public class MyFastTag extends FastTags {
+   public static void _hello (Map<?, ?> args, Closure body, PrintWriter out, 
+      ExecutableTemplate template, int fromLine) {
+      ...
+   }
+}
+
+and then in your templates, you would reference the hello tag as
+
+bc. #{my.tags.hello/}
+
 
 
 h2. <a name="extensions">Java object extensions in templates</a>
