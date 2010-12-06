@@ -325,7 +325,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                     final RandomAccessFile raf = new RandomAccessFile(file, "r");
                     try {
                         long fileLength = raf.length();
-                        int a = 9/0;
 
                         if (keepAlive) {
                             // Add 'Content-Length' header only for a keep-alive connection.
@@ -342,6 +341,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                         // If it is not a HEAD
                         if (!nettyRequest.getMethod().equals(HttpMethod.HEAD)) {
                             writeFuture = ch.write(new ChunkedFile(raf, 0, fileLength, 8192));
+                        } else {
+                            raf.close();
                         }
                         if (!keepAlive) {
                             // Close the connection when the whole content is written out.
