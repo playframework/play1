@@ -644,17 +644,19 @@ public class Router {
                     if (m.matches()) {
                         if (this.host.contains("{")) {
                             String name = m.group(1).replace("{", "").replace("}", "");
-                            hostArg = new Arg();
-                            hostArg.name = name;
-                            Logger.trace("hostArg name [" + name + "]");
-                            // The default value contains the route version of the host ie {client}.bla.com
-                            // It is temporary and it indicates it is an url route.
-                            // TODO Check that default value is actually used for other cases.
-                            hostArg.defaultValue = host;
-                            hostArg.constraint = new Pattern(".*");
-                            Logger.trace("adding hostArg [" + hostArg + "]");
+                            if(!name.equals("_")) {
+                                hostArg = new Arg();
+                                hostArg.name = name;
+                                Logger.trace("hostArg name [" + name + "]");
+                                // The default value contains the route version of the host ie {client}.bla.com
+                                // It is temporary and it indicates it is an url route.
+                                // TODO Check that default value is actually used for other cases.
+                                hostArg.defaultValue = host;
+                                hostArg.constraint = new Pattern(".*");
+                                Logger.trace("adding hostArg [" + hostArg + "]");
 
-                            args.add(hostArg);
+                                args.add(hostArg);
+                            }
                         }
                     }
 
