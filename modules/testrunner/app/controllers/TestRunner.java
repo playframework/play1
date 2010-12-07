@@ -71,8 +71,13 @@ public class TestRunner extends Controller {
             options.put("test", test);
             options.put("results", results);
             String result = resultTemplate.render(options);
+            options.remove("out");
+            resultTemplate = TemplateLoader.load("TestRunner/results-xunit.html");
+            String resultXunit = resultTemplate.render(options);
             File testResults = Play.getFile("test-result/" + test + (results.passed ? ".passed" : ".failed") + ".html");
+            File testXunitResults = Play.getFile("test-result/TEST-" + test.substring(0, test.length()-6) + ".xml");
             IO.writeContent(result, testResults);
+            IO.writeContent(resultXunit, testXunitResults);
             response.contentType = "text/html";
             renderText(result);
         }
