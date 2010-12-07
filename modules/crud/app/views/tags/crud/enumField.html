@@ -18,6 +18,6 @@
         </select>
 
     #{ifError field.name}
-        <span class="error">${field.error}</span>
+        <span class="error">${field.error.raw()}</span>
     #{/ifError}
 #{/field}

@@ -48,6 +48,15 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public Object bind(String name, Object o, Map<String, String[]> params) {
         return null;
     }
+    
+    /**
+     * Translate the given key for the given locale and arguments.
+     * If null is returned, Play's normal message translation mechanism will be
+     * used.
+     */
+    public String getMessage(String locale, Object key, Object... args) {
+        return null;
+    }
 
     /**
      * Retun the plugin status
