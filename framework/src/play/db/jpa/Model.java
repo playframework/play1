@@ -18,4 +18,10 @@ public class Model extends GenericModel {
     public Long getId() {
         return id;
     }
+
+	@Override
+    public Long _key() {
+		return getId();
+	}
+
 }
