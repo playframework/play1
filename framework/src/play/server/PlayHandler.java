@@ -509,7 +509,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-        e.getChannel().close();
+        try { e.getChannel().close(); } catch(Exception ex) { } 
     }
 
     public static void serve404(NotFound e, ChannelHandlerContext ctx, Request request, HttpRequest nettyRequest) {
