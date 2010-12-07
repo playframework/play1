@@ -10,6 +10,7 @@ import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 import org.jboss.netty.handler.stream.ChunkedFile;
 import org.jboss.netty.handler.stream.ChunkedStream;
+
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
 
 import play.Invoker;
@@ -84,6 +85,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
         Logger.trace("messageReceived: end");
     }
+
     private static final Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
 
     public class NettyInvocation extends Invoker.Invocation {
@@ -348,13 +350,13 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                             // Close the connection when the whole content is written out.
                             writeFuture.addListener(ChannelFutureListener.CLOSE);
                         }
-                    } catch(Exception e) {
+                    } catch (Throwable exx) {
                         try {
                             raf.close();
+                        } catch (Throwable ex) { /* Left empty */ }
+                        try {
                             ctx.getChannel().close();
-                        } catch(Exception ex) {
-                            //
-                        }
+                        } catch (Throwable ex) { /* Left empty */ }
                     }
 
                 }
@@ -365,6 +367,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             ChannelFuture writeFuture = ctx.getChannel().write(nettyResponse);
             if (!nettyRequest.getMethod().equals(HttpMethod.HEAD) && !nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
                 writeFuture = ctx.getChannel().write(new ChunkedStream(is));
+            } else {
+                is.close();
             }
             if (!keepAlive) {
                 writeFuture.addListener(ChannelFutureListener.CLOSE);
@@ -705,28 +709,32 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                             Channel ch = e.getChannel();
 
                             // Write the initial line and the header.
-                            ch.write(nettyResponse);
+                            ChannelFuture writeFuture = ch.write(nettyResponse);
 
                             // Write the content.
-                            ChannelFuture writeFuture = ch.write(new ChunkedFile(raf, 0, fileLength, 8192));
+                            if (!nettyRequest.getMethod().equals(HttpMethod.HEAD)) {
+                                writeFuture = ch.write(new ChunkedFile(raf, 0, fileLength, 8192));
+                            } else {
+                                raf.close();
+                            }
 
                             if (!keepAlive) {
                                 // Close the connection when the whole content is written out.
                                 writeFuture.addListener(ChannelFutureListener.CLOSE);
                             }
-                        } catch(Exception ee) {
+                        } catch (Throwable exx) {
                             try {
                                 raf.close();
+                            } catch (Throwable ex) { /* Left empty */ }
+                            try {
                                 ctx.getChannel().close();
-                            } catch(Exception ex) {
-                                //
-                            }
+                            } catch (Throwable ex) { /* Left empty */ }
                         }
                     }
                 }
 
             }
-        } catch (Exception ez) {
+        } catch (Throwable ez) {
             Logger.error(ez, "serveStatic for request %s", request.method + " " + request.url);
             try {
                 ChannelBuffer buf = ChannelBuffers.copiedBuffer("Internal Error (check logs)".getBytes("utf-8"));
