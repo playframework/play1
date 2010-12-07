@@ -283,7 +283,7 @@ def build(app, args, env):
     for (dirpath, dirnames, filenames) in os.walk(app.path):
         if dirpath == dist_dir:
             continue
-        if dirpath.find('/.') > -1 or dirpath.find('/tmp/') > -1  or dirpath.find('/test-result/') > -1 or dirpath.find('/logs/') > -1 or dirpath.find('/eclipse/') > -1 or dirpath.endswith('/test-result') or dirpath.endswith('/logs')  or dirpath.endswith('/eclipse') or dirpath.endswith('/nbproject'):
+        if dirpath.find('/.') > -1 or dirpath.find('/tmp/') > -1  or dirpath.find('/test-result/') > -1 or dirpath.find('/logs/') > -1 or dirpath.find('/eclipse/') > -1 or dirpath.endswith('/test-result') or dirpath.endswith('/logs')  or dirpath.endswith('/eclipse') or dirpath.endswith('/nbproject') or dirpath.find('.') > -1:
             continue
         for file in filenames:
             if file.find('~') > -1 or file.endswith('.iml') or file.startswith('.'):
