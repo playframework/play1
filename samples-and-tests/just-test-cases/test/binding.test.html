@@ -28,6 +28,19 @@
         open('/databinding/showCalendar?cal=24-Jan-1902')
         assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
 
+        <!-- Force the locale -->
+        open('/databinding/changeLanguage/en/')
+        open('/databinding/showCalendar2/01-24-1902/')
+        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        open('/databinding/showCalendar2?cal=01-24-1902')
+        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+
+        open('/databinding/changeLanguage/fr/')
+        open('/databinding/showCalendar2/24-01-1902/')
+        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        open('/databinding/showCalendar2?cal=24-01-1902')
+        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+
 
          <!-- As and NoBinding -->
         open('@{DataBinding.signinPage()}')
@@ -59,5 +72,19 @@
         
         open('@{DataBinding.globalBinder('8')}')
         assertTextPresent('Incorrect value')
+
+		<!-- Now unbind dates -->
+		open('@{Application.book(new java.util.Date(2879877856556))}')
+		assertTextPresent('Booked at 04 5,2061 !!')
+		
+		<!-- Binding internal enum with empty string -->
+		open('/databinding/createFactory?factory.number=457&factory.name=Nestle&factory.color=RED')
+		assertTextPresent('false -> Nestle,Color RED')
+		
+		open('/databinding/createFactory?factory.number=457&factory.name=Nestle&factory.color=REDX')
+		assertTextPresent('true -> Nestle,null')
+		
+		open('/databinding/createFactory?factory.number=457&factory.name=Nestle&factory.color=')
+		assertTextPresent('false -> Nestle,null')
 
 #{/selenium}	

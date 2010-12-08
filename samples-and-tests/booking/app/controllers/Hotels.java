@@ -60,7 +60,7 @@ public class Hotels extends Application {
         
         // Confirm
         if(params.get("confirm") != null) {
-            booking.save();
+            booking.create();
             flash.success("Thank you, %s, your confimation number for %s is %s", connected().name, hotel.name, booking.id);
             index();
         }

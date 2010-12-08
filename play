@@ -12,6 +12,19 @@ from play.cmdloader import CommandLoader
 from play.application import PlayApplication
 from play.utils import *
 
+
+# ~~~~~~~~~
+# Little utility to get command line arguments
+def get_opt(args, arg, env):
+    s = "--%s=" % arg
+    for a in args:
+        if a.find(s) == 0:
+            env[arg] = a[len(s):]
+            args.remove(a)
+            # print "~ get_opt: '%s' -> '%s'" % (arg, env[arg])
+            break
+    
+
 # ~~~~~~~~~
 # Main
 
@@ -66,13 +79,19 @@ try:
     if remaining_args.count('--force') == 1:
         remaining_args.remove('--force')
         ignoreMissing = True
-    play_app = PlayApplication(application_path, play_env, ignoreMissing)
 
     # ~~~~~~~~~~~~~~~~~~~~~~ What is the command?
     if len(sys.argv) > 1:
         play_command = sys.argv[1]
     else:
         play_command = 'none'
+
+    # ~~~~~~~~~~~~~~~~~ Override pid_file
+    get_opt(remaining_args, "pid_file", play_env)
+
+    # ~~~~~~~~~~~~~~~~~ Override port
+    get_opt(remaining_args, "http.port", play_env)
+    get_opt(remaining_args, "https.port", play_env)
 
     # ~~~~~~~~~~~~~~~~~ Override id
     for a in remaining_args:
@@ -87,6 +106,8 @@ try:
     if play_env["id"] is not '':
         print "~ framework ID is %s" % play_env["id"]
     print "~"
+
+    play_app = PlayApplication(application_path, play_env, ignoreMissing)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ~~~~~~~~~~~~~~~~~~~~~~ The commands ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -15,6 +15,17 @@ Selenium.prototype.getLastReceivedEmailBy = function(by) {
     return null;
 }
 
+Selenium.prototype.getCacheEntry = function(key) {
+    var request = new Ajax.Request('/@tests/cache?key='+key, {
+        method: 'get',
+        asynchronous: false
+    });
+    if(request.transport.status == 200) {
+        return request.transport.responseText;
+    }
+    return null;
+}
+
 Selenium.prototype.assertEquals = function(a, b) {
     if(a != b) {
         Assert.fail(a+' != '+b);

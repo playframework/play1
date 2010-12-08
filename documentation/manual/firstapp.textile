@@ -108,9 +108,8 @@ The **#{extends /}** tags tells Play that this template inherits another templat
 
 Open the **helloworld/app/views/main.html** template:
 
-bc. <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
- 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+bc. <!DOCTYPE html>
+<html>
     <head>
         <title>#{get 'title' /}</title>		
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -283,7 +282,6 @@ bc. *{ You can use plain selenium command using the selenium tag }*
 #{selenium}
     // Open the home page, and check that no error occurred
     open('/')
-    waitForPageToLoad(1000)
     assertNotTitle('Application error')
 #{/selenium}
 

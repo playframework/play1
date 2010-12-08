@@ -6,13 +6,16 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
 import play.Play;
+import play.mvc.Scope;
 
 /**
  * Generic utils
@@ -20,9 +23,13 @@ import play.Play;
 public class Utils {
 
     public static <T> String join(Iterable<T> values, String separator) {
-        if (values == null) return "";
+        if (values == null) {
+            return "";
+        }
         Iterator<T> iter = values.iterator();
-        if (!iter.hasNext()) return "";
+        if (!iter.hasNext()) {
+            return "";
+        }
         StringBuffer toReturn = new StringBuffer(String.valueOf(iter.next()));
         while (iter.hasNext()) {
             toReturn.append(separator + String.valueOf(iter.next()));
@@ -78,9 +85,10 @@ public class Utils {
             }
         }
 
-        public static <K,V> Map<K,V> filterMap(Map<K,V> map, String keypattern) {
+        public static <K, V> Map<K, V> filterMap(Map<K, V> map, String keypattern) {
             try {
-                @SuppressWarnings("unchecked") Map<K, V> filtered = map.getClass().newInstance();
+                @SuppressWarnings("unchecked")
+                Map<K, V> filtered = map.getClass().newInstance();
                 for (Map.Entry<K, V> entry : map.entrySet()) {
                     K key = entry.getKey();
                     if (key.toString().matches(keypattern)) {
@@ -103,6 +111,37 @@ public class Utils {
         return httpFormatter.get();
     }
 
+    public static Map<String, String[]> filterMap(Map<String, String[]> map, String prefix) {
+        Map<String, String[]> newMap = new HashMap<String, String[]>();
+        for (String key : map.keySet()) {
+            if (!key.startsWith(prefix + ".")) {
+                newMap.put(key, map.get(key));
+            }
+        }
+        return newMap;
+    }
+
+	public static Map<String, String> filterParams(Scope.Params params, String prefix) {
+		return filterParams(params.all(), prefix);
+	}
+    
+	public static Map<String, String> filterParams(Map<String, String[]> params, String prefix, String separator) {
+		Map<String, String> filteredMap = new LinkedHashMap<String, String>();
+		prefix += ".";
+		for(Map.Entry<String, String[]> e: params.entrySet()){
+			if(e.getKey().startsWith(prefix)) {
+				filteredMap.put(
+						e.getKey().substring(prefix.length()), 
+						Utils.join(e.getValue(), separator)
+				);
+			}
+		}
+		return filteredMap;
+	}
+	public static Map<String, String> filterParams(Map<String, String[]> params, String prefix) {
+		return filterParams(params, prefix, ", ");
+	}
+    
     public static class AlternativeDateFormat {
 
         Locale locale;

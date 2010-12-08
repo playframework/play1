@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
@@ -78,12 +77,12 @@ public class Http {
         public List<String> values;
 
         public Header() {
-            this.values = new ArrayList<String>();
+            this.values = new ArrayList<String>(5);
         }
 
         public Header(String name, String value) {
             this.name = name;
-            this.values = new ArrayList<String>();
+            this.values = new ArrayList<String>(5);
             this.values.add(value);
         }
 
@@ -201,11 +200,11 @@ public class Http {
         /**
          * HTTP Headers
          */
-        public Map<String, Http.Header> headers = new HashMap<String, Http.Header>();
+        public Map<String, Http.Header> headers = new HashMap<String, Http.Header>(16);
         /**
          * HTTP Cookies
          */
-        public Map<String, Http.Cookie> cookies = new HashMap<String, Http.Cookie>();
+        public Map<String, Http.Cookie> cookies = new HashMap<String, Http.Cookie>(16);
         /**
          * Body stream
          */
@@ -237,7 +236,7 @@ public class Http {
         /**
          * Free space to store your request specific data
          */
-        public Map<String, Object> args = new HashMap<String, Object>();
+        public Map<String, Object> args = new HashMap<String, Object>(16);
         /**
          * When the request has been received
          */
@@ -258,6 +257,10 @@ public class Http {
          * Request comes from loopback interface
          */
         public boolean isLoopback;
+        /**
+         * ActionInvoker.resolvedRoutes was called?
+         */
+        boolean resolved;
         /**
          * Params
          */
@@ -354,11 +357,13 @@ public class Http {
         /**
          * Return the languages requested by the browser, ordered by preference (preferred first).
          * If no Accept-Language header is present, an empty list is returned.
+         *
+         * @return Language codes in order of preference, e.g. "en-us,en-gb,en,de".
          */
         public List<String> acceptLanguage() {
             final Pattern qpattern = Pattern.compile("q=([0-9\\.]+)");
             if (!headers.containsKey("accept-language")) {
-                return new ArrayList<String>();
+                return Collections.<String>emptyList();
             }
             String acceptLanguage = headers.get("accept-language").value();
             List<String> languages = Arrays.asList(acceptLanguage.split(","));
@@ -378,7 +383,7 @@ public class Http {
                     return (int) (q2 - q1);
                 }
             });
-            List<String> result = new ArrayList<String>();
+            List<String> result = new ArrayList<String>(10);
             for (String lang : languages) {
                 result.add(lang.split(";")[0]);
             }
@@ -423,11 +428,11 @@ public class Http {
         /**
          * Response headers
          */
-        public Map<String, Http.Header> headers = new HashMap<String, Header>();
+        public Map<String, Http.Header> headers = new HashMap<String, Header>(16);
         /**
          * Response cookies
          */
-        public Map<String, Http.Cookie> cookies = new HashMap<String, Cookie>();
+        public Map<String, Http.Cookie> cookies = new HashMap<String, Cookie>(16);
         /**
          * Response body stream
          */
@@ -473,7 +478,7 @@ public class Http {
         public void setHeader(String name, String value) {
             Header h = new Header();
             h.name = name;
-            h.values = new ArrayList<String>();
+            h.values = new ArrayList<String>(1);
             h.values.add(value);
             headers.put(name, h);
         }
@@ -508,6 +513,10 @@ public class Http {
         }
 
         public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure) {
+            setCookie(name, value, domain, path, maxAge, secure, false);
+        }
+
+        public void setCookie(String name, String value, String domain, String path, Integer maxAge, boolean secure, boolean httpOnly) {
             path = Play.ctxPath + path;
             if (cookies.containsKey(name) && cookies.get(name).path.equals(path) && ((cookies.get(name).domain == null && domain == null) || (cookies.get(name).domain.equals(domain)))) {
                 cookies.get(name).value = value;
@@ -521,6 +530,7 @@ public class Http {
                 cookie.value = value;
                 cookie.path = path;
                 cookie.secure = secure;
+                cookie.httpOnly = httpOnly;
                 if (domain != null) {
                     cookie.domain = domain;
                 }

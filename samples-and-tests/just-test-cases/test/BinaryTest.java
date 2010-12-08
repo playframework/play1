@@ -23,7 +23,7 @@ public class BinaryTest extends FunctionalTest {
 	@Before
 	public void setUp() {
 		Fixtures.deleteAll(); // see Bug #491403
-        Fixtures.deleteDirectory("attachments");
+		Fixtures.deleteDirectory("attachments");
 		URL deleteURL = reverse(); {
 			Binary.deleteAll();
 		}		

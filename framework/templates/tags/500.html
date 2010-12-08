@@ -117,13 +117,19 @@
          #{/list}
     </div>
     #{/if}
+	%{ moreHtml = exception.moreHTML }%
+	#{if moreHtml}
+		<div id="specific" class="block">
+			${moreHtml.raw()}
+		</div>
+	#{/if}
     <div id="more" class="block">
         This exception has been logged with id <strong>${exception.id}</strong>
     </div>
 #{/if}
 #{else}
     <div id="header" class="block">
-        <h1>${exception.message.raw()}</h1>
+        <h1>${exception?.message}</h1>
     </div>
 #{/else}
 

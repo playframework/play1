@@ -1,0 +1,30 @@
+*{ You can use plain selenium command using the selenium tag }*
+
+#{selenium}
+    // Open the home page, and check that no error occured
+    open('@{Application.alertConfirmPrompt()}')
+	
+	// Handle alert
+	click('showAlert')
+	assertAlert('Youhou')
+	
+	// Handle confirm
+	chooseOkOnNextConfirmation()
+	click('showConfirm')
+	assertConfirmation('Yes or no*')
+	assertAlert('*true')
+	
+	chooseCancelOnNextConfirmation()
+	click('showConfirm')
+	assertConfirmation('Yes or no*')
+	assertAlert('*false')
+	
+	// Prompt
+	assertTextPresent('Title: yop')
+	answerOnNextPrompt('Guillaume')
+	click('usePrompt')
+	assertPrompt('*name*')
+	assertTextNotPresent('Title: yop')
+	assertTextPresent('Title: Guillaume')
+	
+#{/selenium}

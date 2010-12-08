@@ -28,13 +28,13 @@ import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.mvc.Router.Route;
 import play.mvc.results.NoResult;
-import play.mvc.results.NotFound;
 import play.mvc.results.Result;
 import play.utils.Java;
 import play.utils.Utils;
 
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
+import play.mvc.results.NotFound;
 
 /**
  * Invoke an action after an HTTP request.
@@ -42,58 +42,73 @@ import com.jamonapi.MonitorFactory;
 public class ActionInvoker {
 
     @SuppressWarnings("unchecked")
+    public static void resolve(Http.Request request, Http.Response response) {
+
+        if (!Play.started) {
+            return;
+        }
+
+        Http.Request.current.set(request);
+        Http.Response.current.set(response);
+
+        Scope.Params.current.set(request.params);
+        Scope.RenderArgs.current.set(new Scope.RenderArgs());
+        Scope.RouteArgs.current.set(new Scope.RouteArgs());
+        Scope.Session.current.set(Scope.Session.restore());
+        Scope.Flash.current.set(Scope.Flash.restore());
+
+        if (request.resolved) {
+            return;
+        }
+
+        // Route and resolve format if not already done
+        if (request.action == null) {
+            for (PlayPlugin plugin : Play.plugins) {
+                plugin.routeRequest(request);
+            }
+            Route route = Router.route(request);
+            for (PlayPlugin plugin : Play.plugins) {
+                plugin.onRequestRouting(route);
+            }
+        }
+        request.resolveFormat();
+
+        // Find the action method
+        try {
+            Method actionMethod = null;
+            Object[] ca = getActionMethod(request.action);
+            actionMethod = (Method) ca[1];
+            request.controller = ((Class) ca[0]).getName().substring(12).replace("$", "");
+            request.controllerClass = ((Class) ca[0]);
+            request.actionMethod = actionMethod.getName();
+            request.action = request.controller + "." + request.actionMethod;
+            request.invokedMethod = actionMethod;
+
+            Logger.trace("------- %s", actionMethod);
+            request.resolved = true;
+
+        } catch (ActionNotFoundException e) {
+            Logger.error(e, "%s action not found", e.getAction());
+            throw new NotFound(String.format("%s action not found", e.getAction()));
+        }
+
+    }
+
     public static void invoke(Http.Request request, Http.Response response) {
         Monitor monitor = null;
         try {
-            if (!Play.started) {
-                return;
-            }
 
-            Http.Request.current.set(request);
-            Http.Response.current.set(response);
+            resolve(request, response);
+            Method actionMethod = request.invokedMethod;
 
-            Scope.Params.current.set(request.params);
-            Scope.RenderArgs.current.set(new Scope.RenderArgs());
-            Scope.RouteArgs.current.set(new Scope.RouteArgs());
-            Scope.Session.current.set(Scope.Session.restore());
-            Scope.Flash.current.set(Scope.Flash.restore());
-
-            // 1. Route and resolve format if not already done
-            if (request.action == null) {
-                for (PlayPlugin plugin : Play.plugins) {
-                    plugin.routeRequest(request);
-                }
-                Route route = Router.route(request);
-                for (PlayPlugin plugin : Play.plugins) {
-                    plugin.onRequestRouting(route);
-                }
-            }
-            request.resolveFormat();
-
-            // 2. Find the action method
-            Method actionMethod = null;
-            try {
-                Object[] ca = getActionMethod(request.action);
-                actionMethod = (Method) ca[1];
-                request.controller = ((Class) ca[0]).getName().substring(12).replace("$", "");
-                request.controllerClass = ((Class) ca[0]);
-                request.actionMethod = actionMethod.getName();
-                request.action = request.controller + "." + request.actionMethod;
-                request.invokedMethod = actionMethod;
-            } catch (ActionNotFoundException e) {
-                Logger.error(e, "%s action not found", e.getAction());
-                throw new NotFound(String.format("%s action not found", e.getAction()));
-            }
-
-            Logger.trace("------- %s", actionMethod);
-
-            // 3. Prepare request params
+            // 1. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);
+
             // add parameters from the URI query string 
             Scope.Params.current()._mergeWith(UrlEncodedParser.parseQueryString(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
             Lang.resolvefrom(request);
 
-            // 4. Easy debugging ...
+            // 2. Easy debugging ...
             if (Play.mode == Play.Mode.DEV) {
                 Controller.class.getDeclaredField("params").set(null, Scope.Params.current());
                 Controller.class.getDeclaredField("request").set(null, Http.Request.current());
@@ -113,60 +128,22 @@ public class ActionInvoker {
             // Monitoring
             monitor = MonitorFactory.start(request.action + "()");
 
-            // 5. Invoke the action
-
-            // There is a difference between a get and a post when binding data. The get does not care about validation while
-            // the post does.
+            // 3. Invoke the action
             try {
-
                 // @Before
-                List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);
-                Collections.sort(befores, new Comparator<Method>() {
-
-                    public int compare(Method m1, Method m2) {
-                        Before before1 = m1.getAnnotation(Before.class);
-                        Before before2 = m2.getAnnotation(Before.class);
-                        return before1.priority() - before2.priority();
-                    }
-                });
-                ControllerInstrumentation.stopActionCall();
-                for (Method before : befores) {
-                    String[] unless = before.getAnnotation(Before.class).unless();
-                    String[] only = before.getAnnotation(Before.class).only();
-                    boolean skip = false;
-                    for (String un : only) {
-                        if (!un.contains(".")) {
-                            un = before.getDeclaringClass().getName().substring(12).replace("$", "") + "." + un;
-                        }
-                        if (un.equals(request.action)) {
-                            skip = false;
-                            break;
-                        } else {
-                            skip = true;
-                        }
-                    }
-                    for (String un : unless) {
-                        if (!un.contains(".")) {
-                            un = before.getDeclaringClass().getName().substring(12).replace("$", "") + "." + un;
-                        }
-                        if (un.equals(request.action)) {
-                            skip = true;
-                            break;
-                        }
-                    }
-                    if (!skip) {
-                        before.setAccessible(true);
-                        inferResult(invokeControllerMethod(before));
-                    }
-                }
+                handleBefores(request);
 
                 // Action
 
                 Result actionResult = null;
-                String cacheKey = "actioncache:" + request.action + ":" + request.querystring;
+                String cacheKey = null;
 
                 // Check the cache (only for GET or HEAD)
                 if ((request.method.equals("GET") || request.method.equals("HEAD")) && actionMethod.isAnnotationPresent(CacheFor.class)) {
+                    cacheKey = actionMethod.getAnnotation(CacheFor.class).id();
+                    if ("".equals(cacheKey)) {
+                        cacheKey = "urlcache:" + request.url + request.querystring;
+                    }
                     actionResult = (Result) play.cache.Cache.get(cacheKey);
                 }
 
@@ -178,9 +155,8 @@ public class ActionInvoker {
                         // It's a Result ? (expected)
                         if (ex.getTargetException() instanceof Result) {
                             actionResult = (Result) ex.getTargetException();
-
                             // Cache it if needed
-                            if ((request.method.equals("GET") || request.method.equals("HEAD")) && actionMethod.isAnnotationPresent(CacheFor.class)) {
+                            if (cacheKey != null) {
                                 play.cache.Cache.set(cacheKey, actionResult, actionMethod.getAnnotation(CacheFor.class).value());
                             }
 
@@ -217,45 +193,7 @@ public class ActionInvoker {
                 }
 
                 // @After
-                List<Method> afters = Java.findAllAnnotatedMethods(Controller.getControllerClass(), After.class);
-                Collections.sort(afters, new Comparator<Method>() {
-
-                    public int compare(Method m1, Method m2) {
-                        After after1 = m1.getAnnotation(After.class);
-                        After after2 = m2.getAnnotation(After.class);
-                        return after1.priority() - after2.priority();
-                    }
-                });
-                ControllerInstrumentation.stopActionCall();
-                for (Method after : afters) {
-                    String[] unless = after.getAnnotation(After.class).unless();
-                    String[] only = after.getAnnotation(After.class).only();
-                    boolean skip = false;
-                    for (String un : only) {
-                        if (!un.contains(".")) {
-                            un = after.getDeclaringClass().getName().substring(12) + "." + un;
-                        }
-                        if (un.equals(request.action)) {
-                            skip = false;
-                            break;
-                        } else {
-                            skip = true;
-                        }
-                    }
-                    for (String un : unless) {
-                        if (!un.contains(".")) {
-                            un = after.getDeclaringClass().getName().substring(12) + "." + un;
-                        }
-                        if (un.equals(request.action)) {
-                            skip = true;
-                            break;
-                        }
-                    }
-                    if (!skip) {
-                        after.setAccessible(true);
-                        inferResult(invokeControllerMethod(after));
-                    }
-                }
+                handleAfters(request);
 
                 monitor.stop();
                 monitor = null;
@@ -308,45 +246,7 @@ public class ActionInvoker {
             // @Finally
             if (Controller.getControllerClass() != null) {
                 try {
-                    List<Method> allFinally = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Finally.class);
-                    Collections.sort(allFinally, new Comparator<Method>() {
-
-                        public int compare(Method m1, Method m2) {
-                            Finally finally1 = m1.getAnnotation(Finally.class);
-                            Finally finally2 = m2.getAnnotation(Finally.class);
-                            return finally1.priority() - finally2.priority();
-                        }
-                    });
-                    ControllerInstrumentation.stopActionCall();
-                    for (Method aFinally : allFinally) {
-                        String[] unless = aFinally.getAnnotation(Finally.class).unless();
-                        String[] only = aFinally.getAnnotation(Finally.class).only();
-                        boolean skip = false;
-                        for (String un : only) {
-                            if (!un.contains(".")) {
-                                un = aFinally.getDeclaringClass().getName().substring(12) + "." + un;
-                            }
-                            if (un.equals(request.action)) {
-                                skip = false;
-                                break;
-                            } else {
-                                skip = true;
-                            }
-                        }
-                        for (String un : unless) {
-                            if (!un.contains(".")) {
-                                un = aFinally.getDeclaringClass().getName().substring(12) + "." + un;
-                            }
-                            if (un.equals(request.action)) {
-                                skip = true;
-                                break;
-                            }
-                        }
-                        if (!skip) {
-                            aFinally.setAccessible(true);
-                            invokeControllerMethod(aFinally, new Object[0]);
-                        }
-                    }
+                    handleFinallies(request);
                 } catch (InvocationTargetException ex) {
                     StackTraceElement element = PlayException.getInterestingStrackTraceElement(ex.getTargetException());
                     if (element != null) {
@@ -367,7 +267,129 @@ public class ActionInvoker {
                 monitor.stop();
             }
         }
+    }
 
+    private static void handleBefores(Http.Request request) throws Exception {
+        List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);
+        Collections.sort(befores, new Comparator<Method>() {
+            public int compare(Method m1, Method m2) {
+                Before before1 = m1.getAnnotation(Before.class);
+                Before before2 = m2.getAnnotation(Before.class);
+                return before1.priority() - before2.priority();
+            }
+        });
+        ControllerInstrumentation.stopActionCall();
+        for (Method before : befores) {
+            String[] unless = before.getAnnotation(Before.class).unless();
+            String[] only = before.getAnnotation(Before.class).only();
+            boolean skip = false;
+            for (String un: only) {
+                if (!un.contains(".")) {
+                    un = before.getDeclaringClass().getName().substring(12).replace("$", "") + "." + un;
+                }
+                if (un.equals(request.action)) {
+                    skip = false;
+                    break;
+                } else {
+                    skip = true;
+                }
+            }
+            for (String un: unless) {
+                if (!un.contains(".")) {
+                    un = before.getDeclaringClass().getName().substring(12).replace("$", "") + "." + un;
+                }
+                if (un.equals(request.action)) {
+                    skip = true;
+                    break;
+                }
+            }
+            if (!skip) {
+                before.setAccessible(true);
+                inferResult(invokeControllerMethod(before));
+            }
+        }
+    }
+
+    private static void handleAfters(Http.Request request) throws Exception {
+        List<Method> afters = Java.findAllAnnotatedMethods(Controller.getControllerClass(), After.class);
+        Collections.sort(afters, new Comparator<Method>() {
+            public int compare(Method m1, Method m2) {
+                After after1 = m1.getAnnotation(After.class);
+                After after2 = m2.getAnnotation(After.class);
+                return after1.priority() - after2.priority();
+            }
+        });
+        ControllerInstrumentation.stopActionCall();
+        for (Method after: afters) {
+            String[] unless = after.getAnnotation(After.class).unless();
+            String[] only = after.getAnnotation(After.class).only();
+            boolean skip = false;
+            for (String un : only) {
+                if (!un.contains(".")) {
+                    un = after.getDeclaringClass().getName().substring(12) + "." + un;
+                }
+                if (un.equals(request.action)) {
+                    skip = false;
+                    break;
+                } else {
+                    skip = true;
+                }
+            }
+            for (String un : unless) {
+                if (!un.contains(".")) {
+                    un = after.getDeclaringClass().getName().substring(12) + "." + un;
+                }
+                if (un.equals(request.action)) {
+                    skip = true;
+                    break;
+                }
+            }
+            if (!skip) {
+                after.setAccessible(true);
+                inferResult(invokeControllerMethod(after));
+            }
+        }
+    }
+
+    private static void handleFinallies(Http.Request request) throws Exception {
+        List<Method> allFinally = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Finally.class);
+        Collections.sort(allFinally, new Comparator<Method>() {
+            public int compare(Method m1, Method m2) {
+                Finally finally1 = m1.getAnnotation(Finally.class);
+                Finally finally2 = m2.getAnnotation(Finally.class);
+                return finally1.priority() - finally2.priority();
+            }
+        });
+        ControllerInstrumentation.stopActionCall();
+        for (Method aFinally: allFinally) {
+            String[] unless = aFinally.getAnnotation(Finally.class).unless();
+            String[] only = aFinally.getAnnotation(Finally.class).only();
+            boolean skip = false;
+            for (String un : only) {
+                if (!un.contains(".")) {
+                    un = aFinally.getDeclaringClass().getName().substring(12) + "." + un;
+                }
+                if (un.equals(request.action)) {
+                    skip = false;
+                    break;
+                } else {
+                    skip = true;
+                }
+            }
+            for (String un : unless) {
+                if (!un.contains(".")) {
+                    un = aFinally.getDeclaringClass().getName().substring(12) + "." + un;
+                }
+                if (un.equals(request.action)) {
+                    skip = true;
+                    break;
+                }
+            }
+            if (!skip) {
+                aFinally.setAccessible(true);
+                invokeControllerMethod(aFinally, null);
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -380,7 +402,7 @@ public class ActionInvoker {
             }
             if (o instanceof Result) {
                 // Of course
-                throw (Result)o;
+                throw (Result) o;
             }
             if (o instanceof InputStream) {
                 Controller.renderBinary((InputStream) o);
@@ -405,7 +427,7 @@ public class ActionInvoker {
 
     public static Object invokeControllerMethod(Method method, Object[] forceArgs) throws Exception {
         if (Modifier.isStatic(method.getModifiers()) && !method.getDeclaringClass().getName().matches("^controllers\\..*\\$class$")) {
-            return method.invoke(null, getActionMethodArgs(method, null));
+            return method.invoke(null, forceArgs == null ? getActionMethodArgs(method, null) : forceArgs);
         } else if (Modifier.isStatic(method.getModifiers())) {
             Object[] args = getActionMethodArgs(method, null);
             args[0] = Http.Request.current().controllerClass.getDeclaredField("MODULE$").get(null);

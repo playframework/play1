@@ -24,8 +24,10 @@ import play.utils.Utils;
  */
 public class Scope {
 
-    public static String COOKIE_PREFIX = Play.configuration.getProperty("application.session.cookie", "PLAY");
-    public static boolean COOKIE_SECURE = Play.configuration.getProperty("application.session.secure", "false").toLowerCase().equals("true");
+    public static final String COOKIE_PREFIX = Play.configuration.getProperty("application.session.cookie", "PLAY");
+    public static final boolean COOKIE_SECURE = Play.configuration.getProperty("application.session.secure", "false").toLowerCase().equals("true");
+    public static final String COOKIE_EXPIRE = Play.configuration.getProperty("application.session.maxAge");
+    public static final boolean SESSION_HTTPONLY = Play.configuration.getProperty("application.session.httpOnly", "false").toLowerCase().equals("true");
 
     /**
      * Flash scope
@@ -166,8 +168,18 @@ public class Scope {
                         while (matcher.find()) {
                             session.put(matcher.group(1), matcher.group(2));
                         }
-                    } else {
-                        // SKIP Logger.warn("Corrupted HTTP session from %s", Http.Request.current().remoteAddress);
+                    }
+                    if (COOKIE_EXPIRE != null) {
+                        // Verify that the session contains a timestamp, and that it's not expired
+                        if (!session.contains("___TS")) {
+                            session = new Session();
+                        } else {
+                            if (Long.parseLong(session.get("___TS")) < System.currentTimeMillis()) {
+                                // Session expired
+                                session = new Session();
+                            }
+                        }
+                        session.put("___TS", System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
                     }
                 }
                 if (!session.contains("___ID")) {
@@ -179,7 +191,7 @@ public class Scope {
             }
         }
 
-        Map<String, String> data = new HashMap<String, String>();        // ThreadLocal access
+        Map<String, String> data = new HashMap<String, String>(); // ThreadLocal access
         public static ThreadLocal<Session> current = new ThreadLocal<Session>();
 
         public static Session current() {
@@ -201,7 +213,7 @@ public class Scope {
         void save() {
             try {
                 StringBuilder session = new StringBuilder();
-                for (String key : data.keySet()) {
+                for (String key: data.keySet()) {
                     session.append("\u0000");
                     session.append(key);
                     session.append(":");
@@ -210,10 +222,10 @@ public class Scope {
                 }
                 String sessionData = URLEncoder.encode(session.toString(), "utf-8");
                 String sign = Crypto.sign(sessionData, Play.secretKey.getBytes());
-                if (Play.configuration.getProperty("application.session.maxAge") == null) {
-                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, null, "/", null, COOKIE_SECURE);
+                if (COOKIE_EXPIRE == null) {
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, null, "/", null, COOKIE_SECURE, SESSION_HTTPONLY);
                 } else {
-                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, null, "/", Time.parseDuration(Play.configuration.getProperty("application.session.maxAge")), COOKIE_SECURE);
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", sign + "-" + sessionData, null, "/", Time.parseDuration(COOKIE_EXPIRE), COOKIE_SECURE, SESSION_HTTPONLY);
                 }
             } catch (Exception e) {
                 throw new UnexpectedException("Session serializationProblem", e);

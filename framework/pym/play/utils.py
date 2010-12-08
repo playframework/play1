@@ -93,9 +93,9 @@ def package_as_war(app, env, war_path, war_zip_path):
     print "~ Packaging current version of the framework and the application to %s ..." % (os.path.normpath(war_path))
     if os.path.exists(war_path): shutil.rmtree(war_path)
     if os.path.exists(os.path.join(app.path, 'war')):
-        shutil.copytree(os.path.join(app.path, 'war'), war_path)
+        copy_directory(os.path.join(app.path, 'war'), war_path)
     else:
-        os.mkdir(war_path)
+        os.makedirs(war_path)
     if not os.path.exists(os.path.join(war_path, 'WEB-INF')): os.mkdir(os.path.join(war_path, 'WEB-INF'))
     if not os.path.exists(os.path.join(war_path, 'WEB-INF/web.xml')):
         shutil.copyfile(os.path.join(env["basedir"], 'resources/war/web.xml'), os.path.join(war_path, 'WEB-INF/web.xml'))
@@ -106,12 +106,12 @@ def package_as_war(app, env, war_path, war_zip_path):
     else:
         replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%PLAY_ID%', 'war')
     if os.path.exists(os.path.join(war_path, 'WEB-INF/application')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/application'))
-    shutil.copytree(app.path, os.path.join(war_path, 'WEB-INF/application'))
+    copy_directory(app.path, os.path.join(war_path, 'WEB-INF/application'))
     if os.path.exists(os.path.join(war_path, 'WEB-INF/application/war')):
         shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/war'))
     if os.path.exists(os.path.join(war_path, 'WEB-INF/application/logs')):
         shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/logs'))
-    shutil.copytree(os.path.join(app.path, 'conf'), os.path.join(war_path, 'WEB-INF/classes'))
+    copy_directory(os.path.join(app.path, 'conf'), os.path.join(war_path, 'WEB-INF/classes'))
     if os.path.exists(os.path.join(war_path, 'WEB-INF/lib')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/lib'))
     os.mkdir(os.path.join(war_path, 'WEB-INF/lib'))
     for jar in classpath:
@@ -119,12 +119,12 @@ def package_as_war(app, env, war_path, war_zip_path):
             shutil.copyfile(jar, os.path.join(war_path, 'WEB-INF/lib/%s' % os.path.split(jar)[1]))
     if os.path.exists(os.path.join(war_path, 'WEB-INF/framework')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/framework'))
     os.mkdir(os.path.join(war_path, 'WEB-INF/framework'))
-    shutil.copytree(os.path.join(env["basedir"], 'framework/templates'), os.path.join(war_path, 'WEB-INF/framework/templates'))
+    copy_directory(os.path.join(env["basedir"], 'framework/templates'), os.path.join(war_path, 'WEB-INF/framework/templates'))
     
     # modules
     for module in modules:
         to = os.path.join(war_path, 'WEB-INF/modules/%s' % os.path.basename(module))
-        shutil.copytree(module, to)
+        copy_directory(module, to)
         if os.path.exists(os.path.join(to, 'src')):
             shutil.rmtree(os.path.join(to, 'src'))
         if os.path.exists(os.path.join(to, 'dist')):
@@ -148,8 +148,6 @@ def package_as_war(app, env, war_path, war_zip_path):
 
     if not os.path.exists(os.path.join(war_path, 'WEB-INF/resources')): os.mkdir(os.path.join(war_path, 'WEB-INF/resources'))
     shutil.copyfile(os.path.join(env["basedir"], 'resources/messages'), os.path.join(war_path, 'WEB-INF/resources/messages'))
-
-    deleteFrom(war_path, app.readConf('war.exclude').split("|"))
 
     if war_zip_path:
         print "~ Creating zipped archive to %s ..." % (os.path.normpath(war_zip_path))
@@ -185,3 +183,19 @@ def delete(filename):
         shutil.rmtree(filename)
     else:
         os.remove(filename)
+        
+def copy_directory(source, target):
+    if not os.path.exists(target):
+        os.makedirs(target)
+    for root, dirs, files in os.walk(source):         
+        for file in files:
+            if root.find('/.') > -1:
+                continue
+            if file.find('~') == 0 or file.startswith('.'):
+                continue
+            from_ = os.path.join(root, file)           
+            to_ = from_.replace(source, target, 1)
+            to_directory = os.path.split(to_)[0]
+            if not os.path.exists(to_directory):
+                os.makedirs(to_directory)
+            shutil.copyfile(from_, to_)

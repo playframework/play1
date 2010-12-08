@@ -12,10 +12,12 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import play.exceptions.UnexpectedException;
+import play.utils.OrderSafeProperties;
 
 /**
  * IO utils
@@ -28,7 +30,7 @@ public class IO {
      * @return The Properties object
      */
     public static Properties readUtf8Properties(InputStream is) {
-        Properties properties = new Properties();
+        Properties properties = new OrderSafeProperties();
         try {
             properties.load(is);
             for (Object key : properties.keySet()) {
@@ -61,9 +63,14 @@ public class IO {
         String res = null;
         try {
             res = IOUtils.toString(is, encoding);
-            is.close();
         } catch(Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                is.close();
+            } catch(Exception e) {
+                //
+            }
         }
         return res;
     }
@@ -82,8 +89,9 @@ public class IO {
      * @return The String content
      */
     public static String readContentAsString(File file, String encoding) {
+        InputStream is = null;
         try {
-            InputStream is = new FileInputStream(file);
+            is = new FileInputStream(file);
             StringWriter result = new StringWriter();
             PrintWriter out = new PrintWriter(result);
             BufferedReader reader = new BufferedReader(new InputStreamReader(is, encoding));
@@ -91,11 +99,54 @@ public class IO {
             while ((line = reader.readLine()) != null) {
                 out.println(line);
             }
-            is.close();
             return result.toString();
         } catch(IOException e) {
             throw new UnexpectedException(e);
+        } finally {
+            if(is != null) {
+                try {
+                    is.close();
+                } catch(Exception e) {
+                    //
+                }
+            }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<String> readLines(InputStream is) {
+        List<String> lines = null;
+        try {
+            lines = IOUtils.readLines(is);
+        } catch (IOException ex) {
+            throw new UnexpectedException(ex);
+        }
+        return lines;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<String> readLines(File file, String encoding) {
+        List<String> lines = null;
+        InputStream is = null;
+        try {
+            is = new FileInputStream(file);
+            lines = IOUtils.readLines(is, encoding);
+        } catch (IOException ex) {
+            throw new UnexpectedException(ex);
+        } finally {
+            if(is != null) {
+                try {
+                    is.close();
+                } catch(Exception e) {
+                    //
+                }
+            }
+        }
+        return lines;
+    }
+
+    public static List<String> readLines(File file) {
+        return readLines(file, "utf-8");
     }
 
     /**
@@ -104,14 +155,22 @@ public class IO {
      * @return The binary data
      */
     public static byte[] readContent(File file) {
+        InputStream is = null;
         try {
-            InputStream is = new FileInputStream(file);
+            is = new FileInputStream(file);
             byte[] result = new byte[(int) file.length()];
             is.read(result);
-            is.close();
             return result;
         } catch(IOException e) {
             throw new UnexpectedException(e);
+        } finally {
+            if(is != null) {
+                try {
+                    is.close();
+                } catch(Exception e) {
+                    //
+                }
+            }
         }
     }
 
@@ -154,9 +213,14 @@ public class IO {
             printWriter.println(content);
             printWriter.flush();
             os.flush();
-            os.close();
         } catch(IOException e) {
             throw new UnexpectedException(e);
+        } finally {
+            try {
+                os.close();
+            } catch(Exception e) {
+                //
+            }
         }
     }
 
@@ -175,15 +239,21 @@ public class IO {
      * @param file The file to write
      */
     public static void writeContent(CharSequence content, File file, String encoding) {
+        OutputStream os = null;
         try {
-            OutputStream os = new FileOutputStream(file);
+            os = new FileOutputStream(file);
             PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, encoding));
             printWriter.println(content);
             printWriter.flush();
             os.flush();
-            os.close();
         } catch(IOException e) {
             throw new UnexpectedException(e);
+        } finally {
+            try {
+                if(os != null) os.close();
+            } catch(Exception e) {
+                //
+            }
         }
     }
 
@@ -193,13 +263,19 @@ public class IO {
      * @param file The file to write
      */
     public static void write(byte[] data, File file) {
+        OutputStream os = null;
         try {
-            OutputStream os = new FileOutputStream(file);
+            os = new FileOutputStream(file);
             os.write(data);
             os.flush();
-            os.close();
         } catch(IOException e) {
             throw new UnexpectedException(e);
+        } finally {
+            try {
+                if(os != null) os.close();
+            } catch(Exception e) {
+                //
+            }
         }
     }
 
@@ -213,9 +289,14 @@ public class IO {
             while ((read = is.read(buffer)) > 0) {
                 os.write(buffer, 0, read);
             }
-            is.close();
         } catch(IOException e) {
             throw new UnexpectedException(e);
+        } finally {
+            try {
+                is.close();
+            } catch(Exception e) {
+                //
+            }
         }
     }
 
@@ -229,10 +310,19 @@ public class IO {
             while ((read = is.read(buffer)) > 0) {
                 os.write(buffer, 0, read);
             }
-            is.close();
-            os.close();
         } catch(IOException e) {
             throw new UnexpectedException(e);
+        } finally {
+            try {
+                is.close();
+            } catch(Exception e) {
+                //
+            }
+            try {
+                os.close();
+            } catch(Exception e) {
+                //
+            }
         }
     }
 
@@ -240,17 +330,27 @@ public class IO {
      * Copy an stream to another one.
      */
     public static void write(InputStream is, File f) {
+        OutputStream os = null;
         try {
-            OutputStream os = new FileOutputStream(f);
+            os = new FileOutputStream(f);
             int read = 0;
             byte[] buffer = new byte[8096];
             while ((read = is.read(buffer)) > 0) {
                 os.write(buffer, 0, read);
             }
-            is.close();
-            os.close();
         } catch(IOException e) {
             throw new UnexpectedException(e);
+        } finally {
+            try {
+                is.close();
+            } catch(Exception e) {
+                //
+            }
+            try {
+                if(os != null) os.close();
+            } catch(Exception e) {
+                //
+            }
         }
     }
 }

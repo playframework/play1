@@ -3,7 +3,7 @@ h1. Installation guide
 
 h2. <a>Prerequisites</a>
 
-To run the Play framework, you need "Java 5 or later":http://java.sun.com. If you wish to build Play from source, you will need the "Bazaar source control client":http://bazaar-vcs.org/ to fetch the source code and "Ant":http://ant.apache.org/ to build it.
+To run the Play framework, you need "Java 5 or later":http://java.sun.com. If you wish to build Play from source, you will need the "Git source control client":http://git-scm.com/ to fetch the source code and "Ant":http://ant.apache.org/ to build it.
 
 p(note). If you are using MacOS, Java is just built-in. If you are using Linux, make sure to use either the Sun-JDK or OpenJDK (and not gcj which is the default Java command on many Linux distros). If you are using Windows, just download and install the latest JDK package.
 
@@ -23,17 +23,15 @@ If you need to rebuild the framework for some reason, run **ant** in the **$PLAY
 
 h2. <a>Build from the latest sources</a>
 
-To benefit from the latest improvements and bug fixes, you may want to compile Play from sources. You’ll need a "Bazaar client":http://bazaar-vcs.org/Download to fetch the sources and "Ant":http://ant.apache.org/ to build the framework.
+To benefit from the latest improvements and bug fixes, you may want to compile Play from sources. You’ll need a "Git client":http://git-scm.com/ to fetch the sources and "Ant":http://ant.apache.org/ to build the framework.
 
 From the command line:
 
-bc. # bzr checkout lp:play
+bc. # git clone git://github.com/playframework/play.git
 # cd play/framework
 # ant
 
 The Play framework is ready to use.
-
-p(note). **lp:play** currently aliases to **http:bazaar.launchpad.net/%7Eplay-developers/play/1.0/**
 
 
 h2. <a>Using the play command</a>

@@ -7,10 +7,13 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import play.cache.Cache;
 import play.data.validation.Error;
 import play.data.validation.Validation;
@@ -19,8 +22,11 @@ import play.exceptions.TemplateExecutionException;
 import play.exceptions.TemplateNotFoundException;
 import play.libs.Codec;
 import play.mvc.Router.ActionDefinition;
+import play.mvc.Scope.Flash;
 import play.mvc.Scope.Session;
+import play.templates.BaseTemplate.RawData;
 import play.templates.GroovyTemplate.ExecutableTemplate;
+import play.utils.HTML;
 
 /**
  * Fast tags implementation
@@ -30,11 +36,11 @@ public class FastTags {
     public static void _cache(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         String key = args.get("arg").toString();
         String duration = null;
-        if(args.containsKey("for")) {
+        if (args.containsKey("for")) {
             duration = args.get("for").toString();
         }
         Object cached = Cache.get(key);
-        if(cached != null) {
+        if (cached != null) {
             out.print(cached);
             return;
         }
@@ -98,6 +104,52 @@ public class FastTags {
         }
         out.println(JavaExtensions.toString(body));
         out.print("</form>");
+    }
+    
+    /**
+     * The field tag is a helper, based on the spirit of Don't Repeat Yourself. 
+     * @param args tag attributes
+     * @param body tag inner body
+     * @param out the output writer
+     * @param template enclosing template
+     * @param fromLine template line number where the tag is defined
+     */
+    public static void _field(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        Map<String,Object> field = new HashMap<String,Object>();
+        String _arg = args.get("arg").toString();
+        field.put("name", _arg);
+        field.put("id", _arg.replace('.','_'));
+        field.put("flash", Flash.current().get(_arg));
+        field.put("flashArray", field.get("flash") != null && !field.get("flash").toString().isEmpty() ? field.get("flash").toString().split(",") : new String[0]);
+        field.put("error", Validation.error(_arg));
+        field.put("errorClass", field.get("error") != null ? "hasError" : "");
+        String[] pieces = _arg.split("\\.");
+        Object obj = body.getProperty(pieces[0]);
+        if(obj != null){
+            if(pieces.length > 1){
+                for(int i = 1; i < pieces.length; i++){
+                    try{
+                        Field f = obj.getClass().getField(pieces[i]);
+                        if(i == (pieces.length-1)){
+                            try{
+                                Method getter = obj.getClass().getMethod("get"+JavaExtensions.capFirst(f.getName()));
+                                field.put("value", getter.invoke(obj, new Object[0]));
+                            }catch(NoSuchMethodException e){
+                                field.put("value",f.get(obj).toString());
+                            }
+                        }else{
+                            obj = f.get(obj);
+                        }
+                    }catch(Exception e){
+                        // if there is a problem reading the field we dont set any value
+                    }
+                }
+            }else{
+                field.put("value", obj);
+            }
+        }
+        body.setProperty("field", field);
+        body.call();
     }
 
     /**
@@ -187,12 +239,22 @@ public class FastTags {
             } else if (test instanceof Number) {
                 return ((Number) test).intValue() != 0;
             } else if (test instanceof Collection) {
-                return ((Collection) test).size() != 0;
+                return !((Collection) test).isEmpty();
             } else {
                 return true;
             }
         }
         return false;
+    }
+
+    static String __safe(Template template, Object val) {
+        if (val instanceof RawData) {
+            return ((RawData) val).data;
+        }
+        if (!template.name.endsWith(".html") || TagContext.hasParentTag("verbatim")) {
+            return val.toString();
+        }
+        return HTML.htmlEscape(val.toString());
     }
 
     public static void _doLayout(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
@@ -219,7 +281,7 @@ public class FastTags {
         for (Map.Entry<?, ?> entry : args.entrySet()) {
             Object key = entry.getKey();
             if (!key.toString().equals("arg")) {
-                BaseTemplate.layoutData.get().put(key, entry.getValue());
+                BaseTemplate.layoutData.get().put(key, (entry.getValue() != null && entry.getValue() instanceof String) ? __safe(template.template, entry.getValue()) : entry.getValue());
                 return;
             }
         }
@@ -249,7 +311,7 @@ public class FastTags {
                 ct = ct.substring(0, ct.lastIndexOf("/"));
                 name = ct + name.substring(1);
             }
-            BaseTemplate.layout.set((BaseTemplate)TemplateLoader.load(name));
+            BaseTemplate.layout.set((BaseTemplate) TemplateLoader.load(name));
         } catch (TemplateNotFoundException e) {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
         }
@@ -270,7 +332,7 @@ public class FastTags {
                 ct = ct.substring(0, ct.lastIndexOf("/"));
                 name = ct + name.substring(1);
             }
-            BaseTemplate t = (BaseTemplate)TemplateLoader.load(name);
+            BaseTemplate t = (BaseTemplate) TemplateLoader.load(name);
             Map<String, Object> newArgs = new HashMap<String, Object>();
             newArgs.putAll(template.getBinding().getVariables());
             newArgs.put("_isInclude", true);
@@ -296,7 +358,7 @@ public class FastTags {
                 name = ct + name.substring(1);
             }
             args.remove("arg");
-            BaseTemplate t = (BaseTemplate)TemplateLoader.load(name);
+            BaseTemplate t = (BaseTemplate) TemplateLoader.load(name);
             Map<String, Object> newArgs = new HashMap<String, Object>();
             newArgs.putAll((Map<? extends String, ? extends Object>) args);
             newArgs.put("_isInclude", true);

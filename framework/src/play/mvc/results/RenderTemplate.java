@@ -2,8 +2,8 @@ package play.mvc.results;
 
 import java.util.Map;
 
-import play.libs.MimeTypes;
 import play.exceptions.UnexpectedException;
+import play.libs.MimeTypes;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.templates.Template;
@@ -13,19 +13,20 @@ import play.templates.Template;
  */
 public class RenderTemplate extends Result {
 
-    public Template template;
+    private String name;
     private String content;
-    Map<String, Object> args;
 
     public RenderTemplate(Template template, Map<String, Object> args) {
-        this.template = template;
-        this.args = args;
+        this.name = template.name;
+        if (args.containsKey("out")) {
+            throw new RuntimeException("Assertion failed! args shouldn't contain out");
+        }
         this.content = template.render(args);
     }
 
     public void apply(Request request, Response response) {
         try {
-            final String contentType = MimeTypes.getContentType(template.name, "text/plain");
+            final String contentType = MimeTypes.getContentType(name, "text/plain");
             response.out.write(content.getBytes("utf-8"));
             setContentTypeIfNotSet(response, contentType);
         } catch (Exception e) {
@@ -38,4 +39,3 @@ public class RenderTemplate extends Result {
     }
 
 }
-        

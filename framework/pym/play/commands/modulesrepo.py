@@ -436,11 +436,9 @@ def load_module_list():
 def load_modules_from(modules_server):
     try:
         url = '%s/modules' % modules_server
-        proxy_handler = urllib2.ProxyHandler({})
         req = urllib2.Request(url)
         req.add_header('Accept', 'application/json')
-        opener = urllib2.build_opener(proxy_handler)
-        result = opener.open(req)
+        result = urllib2.urlopen(req)
         return json.loads(result.read())
     except urllib2.HTTPError, e:
         print "~ Oops,"

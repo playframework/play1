@@ -31,6 +31,8 @@ import java.util.TreeSet;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostUpdate;
+import play.Logger;
+import play.utils.Utils;
 
 /**
  * A super class for JPA entities 
@@ -50,6 +52,7 @@ public class GenericModel extends JPABase {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public static <T extends JPABase> T edit(Object o, String name, Map<String, String[]> params, Annotation[] annotations) {
         try {
             BeanWrapper bw = new BeanWrapper(o.getClass());
@@ -111,7 +114,10 @@ public class GenericModel extends JPABase {
                                 Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");
                                 q.setParameter(1, Binder.directBind(ids[0], Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType()));
                                 try {
+                                    String localName = name + "." + field.getName();
                                     Object to = q.getSingleResult();
+                                    edit(to, localName, params, field.getAnnotations());                                    
+                                    params = Utils.filterMap(params, localName);
                                     bw.set(field.getName(), o, to);
                                 } catch (NoResultException e) {
                                     Validation.addError(name + "." + field.getName(), "validation.notFound", ids[0]);
@@ -165,12 +171,35 @@ public class GenericModel extends JPABase {
         return false;
     }
 
+    public boolean validateAndCreate() {
+        if (Validation.current().valid(this).ok) {
+            return create();
+        }
+        return false;
+    }
+
     /**
      * store (ie insert) the entity.
      */
     public <T extends JPABase> T save() {
+        if (!em().contains(this) && Play.mode.isDev()) {
+            StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
+            StackTraceElement caller = callStack[2];
+            Logger.warn("save() has been called to persist a new JPA instance at %s line %s, use create() instead.", caller.getFileName(), caller.getLineNumber());
+        }
         _save();
         return (T) this;
+    }
+
+    /**
+     * store (ie insert) the entity.
+     */
+    public boolean create() {
+        if (!em().contains(this)) {
+            _save();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -185,8 +214,7 @@ public class GenericModel extends JPABase {
      * Merge this object to obtain a managed entity (usefull when the object comes from the Cache).
      */
     public <T extends JPABase> T merge() {
-        em().merge(this);
-        return (T) this;
+        return (T) em().merge(this);
     }
 
     /**
@@ -375,6 +403,7 @@ public class GenericModel extends JPABase {
 
     // ----- THIS CODE IS DEPRECATED AND WILL BE REMOVED IN NEXT VERSIONs
     @PostLoad
+    @SuppressWarnings("deprecation")
     public void _setupAttachment() {
         Class c = this.getClass();
         while (!c.equals(Object.class)) {
@@ -403,6 +432,7 @@ public class GenericModel extends JPABase {
 
     @PostPersist
     @PostUpdate
+    @SuppressWarnings("deprecation")
     public void _saveAttachment() {
         Class c = this.getClass();
         while (!c.equals(Object.class)) {

@@ -157,12 +157,13 @@ public class JPQL {
         return "select count(e) from " + entityName + " e where " + query;
     }
 
+    @SuppressWarnings("unchecked")
     public Query bindParameters(Query q, Object... params) {
         if (params == null) {
             return q;
         }
         if (params.length == 1 && params[0] instanceof Map) {
-        	return bindParameters(q, (Map<String,Object>) params[0]);
+            return bindParameters(q, (Map<String, Object>) params[0]);
         }
         for (int i = 0; i < params.length; i++) {
             q.setParameter(i + 1, params[i]);
@@ -186,7 +187,10 @@ public class JPQL {
         String[] parts = findBy.split("And");
         for (int i = 0; i < parts.length; i++) {
             String part = parts[i];
-            if (part.endsWith("Equal")) {
+            if (part.endsWith("NotEqual")) {
+                String prop = extractProp(part, "NotEqual");
+                jpql.append(prop + " <> ?");
+            } else if (part.endsWith("Equal")) {
                 String prop = extractProp(part, "Equal");
                 jpql.append(prop + " = ?");
             } else if (part.endsWith("IsNotNull")) {
@@ -195,12 +199,30 @@ public class JPQL {
             } else if (part.endsWith("IsNull")) {
                 String prop = extractProp(part, "IsNull");
                 jpql.append(prop + " is null");
+            } else if (part.endsWith("LessThan")) {
+                String prop = extractProp(part, "LessThan");
+                jpql.append(prop + " < ?");
+            } else if (part.endsWith("LessThanEquals")) {
+                String prop = extractProp(part, "LessThanEquals");
+                jpql.append(prop + " <= ?");
+            } else if (part.endsWith("GreaterThan")) {
+                String prop = extractProp(part, "GreaterThan");
+                jpql.append(prop + " > ?");
+            } else if (part.endsWith("GreaterThanEquals")) {
+                String prop = extractProp(part, "GreaterThanEquals");
+                jpql.append(prop + " >= ?");
             } else if (part.endsWith("Between")) {
                 String prop = extractProp(part, "Between");
                 jpql.append(prop + " < ? AND " + prop + " > ?");
             } else if (part.endsWith("Like")) {
                 String prop = extractProp(part, "Like");
                 jpql.append("LOWER(" + prop + ") like ?");
+            } else if (part.endsWith("Ilike")) {
+                String prop = extractProp(part, "Ilike");
+                jpql.append("LOWER(" + prop + ") like LOWER(?)");
+            } else if (part.endsWith("Elike")) {
+                String prop = extractProp(part, "Ilike");
+                jpql.append(prop + " like LOWER(?)");
             } else {
                 String prop = extractProp(part, "");
                 jpql.append(prop + " = ?");

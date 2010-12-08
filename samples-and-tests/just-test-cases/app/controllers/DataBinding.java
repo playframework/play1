@@ -44,6 +44,11 @@ public class DataBinding extends Controller {
         renderText(cal.getTime());
     }
 
+
+    public static void showCalendar2(@As(lang={"fr,de","*"}, value={"dd-MM-yyyy","MM-dd-yyyy"}) Calendar cal) {
+        renderText(cal.getTime());
+    }
+
     public static void signinPage() {
         render();
     }
@@ -75,6 +80,10 @@ public class DataBinding extends Controller {
         person.userName = "nicolas";
         person.password = "nicolas";
         return person;
+    }
+    
+    public static void createFactory(@play.data.validation.Valid models.Factory factory) {
+        renderText(validation.hasErrors() + " -> " + factory.name + "," + factory.color);
     }
 }
 

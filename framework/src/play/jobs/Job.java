@@ -1,14 +1,17 @@
 package play.jobs;
 
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import play.Play;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
+
 import play.Invoker;
+import play.Invoker.InvocationContext;
 import play.Logger;
+import play.Play;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.libs.Time;
@@ -24,6 +27,11 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     protected boolean wasError = false;
     protected Throwable lastException = null;
 
+    @Override
+    public InvocationContext getInvocationContext() {
+        return new InvocationContext(this.getClass().getAnnotations());
+    }
+    
     /**
      * Here you do the job
      */

@@ -1,0 +1,19 @@
+~ Name:
+~ ~~~~~
+~ check -- Look on Play's server to see if the current version is the most recent, or if you should upgrade
+~
+~ Synopsis:
+~ ~~~~~~~~~
+~ play check
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Do a call to Play servers to check which version is the most recent.
+~ You will be provided a link to download the latest version.
+~
+~ A working Internet connection is required, and it may not work behind some
+~ corporate firewalls.
+~
+~ It is recommended to always use the latest version of Play available as it may
+~ include security fixes.
+~

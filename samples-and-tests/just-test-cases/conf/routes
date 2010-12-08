@@ -42,7 +42,7 @@ GET         /index2                          Application.index2
 *           /sample/{controller}/{action}    sample.{controller}.{action}
 *			/{controller}/{action}		     {controller}.{action}
 
-# Data biding
+# Data binding
 
 GET     /databinding/showDefaultDateFormat/{date}/?         DataBinding.showDefaultDateFormat
 GET     /databinding/showLocaleDateFormat/{date}/?          DataBinding.showLocaleDateFormat
@@ -50,4 +50,5 @@ GET     /databinding/showDefaultLocaleDateFormat/{date}/?   DataBinding.showDefa
 GET     /databinding/showDateFormat/{date}/?                DataBinding.showDateFormat
 GET     /databinding/showList/{<.*>mailboxes}/?             DataBinding.showList
 GET     /databinding/showCalendar/{cal}/?               DataBinding.showCalendar
+GET     /databinding/showCalendar2/{cal}/?               DataBinding.showCalendar2
 GET     /databinding/changeLanguage/{lang}/?                DataBinding.changeLanguage

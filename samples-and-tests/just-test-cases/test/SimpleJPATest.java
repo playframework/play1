@@ -5,7 +5,7 @@ import java.util.*;
 import models.*;
 
 public class SimpleJPATest extends UnitTest {
-    
+
     @Before
     public void setup() {
         Fixtures.deleteAll();
@@ -56,6 +56,40 @@ public class SimpleJPATest extends UnitTest {
         assertNull(User.find("byNameLikeAndBAndCAndLAndI", "%b%", false, true, 10000L, 32).first());
         assertEquals(a, User.find("byBIsNull").first());
         assertEquals(b, User.find("byBIsNotNull").first());
+        
+        List<User> usersFounded;
+        //Elike
+        usersFounded = User.find("byNameElikeAndJ", "%A%", 45).fetch();
+        assertEquals(0, usersFounded.size());
+        //Ilike
+        usersFounded = User.find("byNameIlikeAndJ", "%A%", 45).fetch();
+        assertEquals(1, usersFounded.size());
+        assertEquals(a, usersFounded.get(0));
+        //NotEqual
+        usersFounded = User.find("byJNotEqual", 45).fetch();
+        assertEquals(1, usersFounded.size());
+        assertEquals(b, usersFounded.get(0));
+        //LessThan
+        usersFounded = User.find("byILessThan", 34).fetch();
+        assertEquals(0, usersFounded.size());
+        usersFounded = User.find("byILessThan", 35).fetch();
+        assertEquals(b, usersFounded.get(0));
+        //LessThanEquals
+        usersFounded = User.find("byILessThanEquals", 33).fetch();
+        assertEquals(0, usersFounded.size());
+        usersFounded = User.find("byILessThanEquals", 34).fetch();
+        assertEquals(b, usersFounded.get(0));
+        //GreaterThan
+        usersFounded = User.find("byIGreaterThan", 34).fetch();
+        assertEquals(0, usersFounded.size());
+        usersFounded = User.find("byIGreaterThan", 33).fetch();
+        assertEquals(b, usersFounded.get(0));
+        //GreaterThanEquals
+        usersFounded = User.find("byIGreaterThanEquals", 35).fetch();
+        assertEquals(0, usersFounded.size());
+        usersFounded = User.find("byIGreaterThanEquals", 34).fetch();
+        assertEquals(b, usersFounded.get(0));
+        
     }
     
     @Test

@@ -2,7 +2,7 @@ Child(c1):
     name: child
 
 Parent(P1):
-    id: parent
+    code: parent
     name: parent
     children:
         - c1

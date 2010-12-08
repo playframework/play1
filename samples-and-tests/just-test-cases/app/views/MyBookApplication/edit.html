@@ -1,0 +1,31 @@
+#{extends 'main.html' /}
+#{set title:'Edit Test' /}
+#{ifError 'testObj.version'}
+    #{error 'testObj.version'/}
+#{/ifError}
+
+#{ifErrors}
+ 
+   <h1>Oops...</h1>
+ 
+   #{errors}
+       <li>${error.raw()}</li>
+   #{/errors}
+ 
+#{/ifErrors}
+
+
+
+#{form @save(testObj?.id) , id:'creationForm', enctype:'multipart/form-data' }
+       <input type="hidden" name="testObj.id" value="${testObj.id}">
+       <input type="hidden" name="testObj.version" value="${testObj.version}">
+       #{field 'testObj.text'}
+        <p>
+          <label>Text</label>
+          <input type="text" id="${field.id}" name="${field.name}" value="${field.value}" class="${field.errorClass}">
+          <span class="error">${field.error}</span>
+        </p>
+       #{/}
+    <input type="submit" value="Save">    
+#{/form}
+

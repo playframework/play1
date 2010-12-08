@@ -7,10 +7,15 @@
  *    ${stylesheet src:'default.css' media:'screen,print' /}
 }*
 %{
-    ( _arg ) &&  ( _src = _arg);
+    (_arg ) && (_src = _arg);
 
-    if(! _src) {
+    if (!_src) {
         throw new play.exceptions.TagInternalException("src attribute cannot be empty for stylesheet tag");
     }
-}%
-<link rel="stylesheet" type="text/css"#{if _id} id="${_id}"#{/if}#{if _title} title="${_title}"#{/if} href="/public/stylesheets/${_src}"#{if _media} media="${_media}"#{/if} charset="utf-8" ></link>
+    _src = "/public/stylesheets/" + _src
+    try {
+        _abs = play.mvc.Router.reverseWithCheck(_src, play.Play.getVirtualFile(_src), false);
+    } catch (Exception ex) {
+        throw new play.exceptions.TagInternalException("File not found: " + _src);
+    }}%
+<link rel="stylesheet" type="text/css"#{if _id} id="${_id}"#{/if}#{if _title} title="${_title}"#{/if} href="${_abs}"#{if _media} media="${_media}"#{/if} charset="utf-8" ></link>

@@ -43,7 +43,7 @@ import com.ning.http.client.StringPart;
  * <p/>
  * Get latest BBC World news as a RSS content
  * <pre>
- *    response = WS.GET("http://newsrss.bbc.co.uk/rss/newsonline_world_edition/front_page/rss.xml");
+ *    HttpResponse response = WS.url("http://newsrss.bbc.co.uk/rss/newsonline_world_edition/front_page/rss.xml").get();
  *    Document xmldoc = response.getXml();
  *    // the real pain begins here...
  * </pre>
@@ -51,7 +51,7 @@ import com.ning.http.client.StringPart;
  * 
  * Search what Yahoo! thinks of google (starting from the 30th result).
  * <pre>
- *    response = WS.GET("http://search.yahoo.com/search?p=<em>%s</em>&pstart=1&b=<em>%d</em>", "Google killed me", 30 );
+ *    HttpResponse response = WS.url("http://search.yahoo.com/search?p=<em>%s</em>&pstart=1&b=<em>%s</em>", "Google killed me", "30").get();
  *    if( response.getStatus() == 200 ) {
  *       html = response.getString();
  *    }
@@ -59,25 +59,14 @@ import com.ning.http.client.StringPart;
  */
 public class WSAsync implements WSImpl {
 
-    private static AsyncHttpClient httpClient;
+    private AsyncHttpClient httpClient;
 
-    private static WSAsync uniqueInstance;
-
-    private WSAsync() {}
-
-    public static WSAsync getInstance() {
-        if (uniqueInstance == null) {
-            uniqueInstance = new WSAsync();
-        }
-        return uniqueInstance;
-    }
-
-    @Override
-    public void init() {
+    public WSAsync() {
         String proxyHost = Play.configuration.getProperty("http.proxyHost", System.getProperty("http.proxyHost"));
         String proxyPort = Play.configuration.getProperty("http.proxyPort", System.getProperty("http.proxyPort"));
         String proxyUser = Play.configuration.getProperty("http.proxyUser", System.getProperty("http.proxyUser"));
         String proxyPassword = Play.configuration.getProperty("http.proxyPassword", System.getProperty("http.proxyPassword"));
+        String userAgent = Play.configuration.getProperty("http.userAgent");
 
         Builder confBuilder = new AsyncHttpClientConfig.Builder();
         if (proxyHost != null) {
@@ -91,24 +80,25 @@ public class WSAsync implements WSImpl {
             ProxyServer proxy = new ProxyServer(proxyHost, proxyPortInt, proxyUser, proxyPassword);
             confBuilder.setProxyServer(proxy);
         }
+        if (userAgent != null) {
+            confBuilder.setUserAgent(userAgent);
+        }
         confBuilder.setFollowRedirects(true);
         httpClient = new AsyncHttpClient(confBuilder.build());
     }
 
-    @Override
     public void stop() {
         Logger.trace("Releasing http client connections...");
         httpClient.close();
     }
 
-    @Override
     public WSRequest newRequest(String url) {
         return new WSAsyncRequest(url);
     }
 
-    public static class WSAsyncRequest extends WSRequest {
+    public class WSAsyncRequest extends WSRequest {
 
-        private WSAsyncRequest(String url) {
+        protected WSAsyncRequest(String url) {
             this.url = url;
         }
 
@@ -245,6 +235,7 @@ public class WSAsync implements WSImpl {
             for (String key: this.headers.keySet()) {
                 builder.addHeader(key, headers.get(key));
             }
+            builder.setFollowRedirects(this.followRedirects);
             return builder;
         }
 
@@ -325,14 +316,17 @@ public class WSAsync implements WSImpl {
          * the HTTP status code
          * @return the status code of the http response
          */
+        @Override
         public Integer getStatus() {
             return this.response.getStatusCode();
         }
 
+        @Override
         public String getHeader(String key) {
             return response.getHeader(key);
         }
 
+        @Override
         public List<Header> getHeaders() {
             Map<String, List<String>> hdrs = response.getHeaders();
             List<Header> result = new ArrayList<Header>();
@@ -346,6 +340,7 @@ public class WSAsync implements WSImpl {
          * get the response body as a string
          * @return the body of the http response
          */
+        @Override
         public String getString() {
             try {
                 return response.getResponseBody();
@@ -358,6 +353,7 @@ public class WSAsync implements WSImpl {
          * get the response as a stream
          * @return an inputstream
          */
+        @Override
         public InputStream getStream() {
             try {
                 return response.getResponseBodyAsStream();

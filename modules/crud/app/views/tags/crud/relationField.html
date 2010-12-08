@@ -15,7 +15,11 @@
                     if(params[pName]) {
                         selected = params.getAll(${pName}).contains(it._key().toString())
                     } else {
-                        selected = _value?.contains(it)
+                        for (it2 in _value) {
+                            if(it2._key() == it._key()) {
+                                selected = true;
+                            }
+                        }
                     }
                 }
             }%
@@ -48,6 +52,6 @@
     #{/else}
 
     #{ifError field.name}
-        <span class="error">${field.error}</span>
+        <span class="error">${field.error.raw()}</span>
     #{/ifError}
 #{/field}

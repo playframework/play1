@@ -2,6 +2,7 @@ package play.server;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -9,11 +10,14 @@ import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 import org.jboss.netty.handler.stream.ChunkedFile;
 import org.jboss.netty.handler.stream.ChunkedStream;
+
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
+
 import play.Invoker;
+import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
-
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Messages;
@@ -30,24 +34,34 @@ import play.templates.JavaExtensions;
 import play.templates.TemplateLoader;
 import play.utils.Utils;
 import play.vfs.VirtualFile;
+import play.data.validation.Validation;
 
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.*;
-import javax.mail.internet.InternetAddress;
-
-import play.data.validation.Validation;
-
-
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
 
 public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
+
+    /**
+     * If true (the default), Play will send the HTTP header "Server: Play! Framework; ....".
+     * This could be a security problem (old versions having publicly known security bugs), so you can
+     * disable the header in application.conf: <code>http.exposePlayServer = false</code>
+     */
+    private final static boolean exposePlayServer;
+
+    static
+    {
+        exposePlayServer = !"false".equals(Play.configuration.getProperty("http.exposePlayServer"));
+    }
+
+    public Request processRequest(Request request) {
+        return request;
+    }
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
@@ -57,7 +71,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         if (msg instanceof HttpRequest) {
             final HttpRequest nettyRequest = (HttpRequest) msg;
             try {
-                final Request request = parseRequest(ctx, nettyRequest);
+                Request request = parseRequest(ctx, nettyRequest);
+                request = processRequest(request);
+
                 final Response response = new Response();
 
                 Http.Response.current.set(response);
@@ -81,7 +97,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
         Logger.trace("messageReceived: end");
     }
-    private static Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
+
+    private static final Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
 
     public class NettyInvocation extends Invoker.Invocation {
 
@@ -89,14 +106,14 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         private final Request request;
         private final Response response;
         private final HttpRequest nettyRequest;
-        private final MessageEvent e;
+        private final MessageEvent event;
 
         public NettyInvocation(Request request, Response response, ChannelHandlerContext ctx, HttpRequest nettyRequest, MessageEvent e) {
             this.ctx = ctx;
             this.request = request;
             this.response = response;
             this.nettyRequest = nettyRequest;
-            this.e = e;
+            this.event = e;
         }
 
         @Override
@@ -104,37 +121,41 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Logger.trace("init: begin");
             Request.current.set(request);
             Response.current.set(response);
-            // Patch favicon.ico
-            if (!request.path.equals("/favicon.ico")) {
-                super.init();
-            }
-            if (Play.mode == Play.Mode.PROD && staticPathsCache.containsKey(request.path)) {
-                RenderStatic rs = null;
-                synchronized (staticPathsCache) {
-                    rs = staticPathsCache.get(request.path);
-                }
-                serveStatic(rs, ctx, request, response, nettyRequest, e);
-                Logger.trace("init: end false");
-                return false;
-            }
             try {
+                super.init();
+                if (Play.mode == Play.Mode.PROD && staticPathsCache.containsKey(request.path)) {
+                    RenderStatic rs = null;
+                    synchronized (staticPathsCache) {
+                        rs = staticPathsCache.get(request.path);
+                    }
+                    serveStatic(rs, ctx, request, response, nettyRequest, event);
+                    Logger.trace("init: end false");
+                    return false;
+                }
                 Router.routeOnlyStatic(request);
-            } catch (NotFound e) {
-                serve404(e, ctx, request, nettyRequest);
+            } catch (NotFound nf) {
+                serve404(nf, ctx, request, nettyRequest);
                 Logger.trace("init: end false");
                 return false;
-            } catch (RenderStatic e) {
+            } catch (RenderStatic rs) {
                 if (Play.mode == Play.Mode.PROD) {
                     synchronized (staticPathsCache) {
-                        staticPathsCache.put(request.path, e);
+                        staticPathsCache.put(request.path, rs);
                     }
                 }
-                serveStatic(e, ctx, request, response, nettyRequest, this.e);
+                serveStatic(rs, ctx, request, response, nettyRequest, this.event);
                 Logger.trace("init: end false");
                 return false;
             }
+
             Logger.trace("init: end true");
             return true;
+        }
+
+        @Override
+        public InvocationContext getInvocationContext() {
+            ActionInvoker.resolve(request, response);
+            return new InvocationContext(request.invokedMethod.getAnnotations(), request.invokedMethod.getDeclaringClass().getAnnotations());
         }
 
         @Override
@@ -279,7 +300,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         // Decide whether to close the connection or not.
 
         HttpResponse nettyResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.status));
-        nettyResponse.setHeader(SERVER, signature);
+        if (exposePlayServer) {
+            nettyResponse.setHeader(SERVER, signature);
+        }
 
         if (response.contentType != null) {
             nettyResponse.setHeader(CONTENT_TYPE, response.contentType + (response.contentType.startsWith("text/") && !response.contentType.contains("charset") ? "; charset=utf-8" : ""));
@@ -315,28 +338,39 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                     }
                 } else {
                     nettyResponse.setHeader(CONTENT_TYPE, MimeTypes.getContentType(file.getName(), "text/plain"));
-                    RandomAccessFile raf = new RandomAccessFile(file, "r");
-                    long fileLength = raf.length();
+                    final RandomAccessFile raf = new RandomAccessFile(file, "r");
+                    try {
+                        long fileLength = raf.length();
 
-                    if (keepAlive) {
-                        // Add 'Content-Length' header only for a keep-alive connection.
-                        Logger.trace("file length is [" + fileLength + "]");
-                        setContentLength(nettyResponse, fileLength);
-                    }
+                        if (keepAlive) {
+                            // Add 'Content-Length' header only for a keep-alive connection.
+                            Logger.trace("file length is [" + fileLength + "]");
+                            setContentLength(nettyResponse, fileLength);
+                        }
 
-                    Channel ch = ctx.getChannel();
+                        Channel ch = ctx.getChannel();
 
-                    // Write the initial line and the header.
-                    ChannelFuture writeFuture = ch.write(nettyResponse);
+                        // Write the initial line and the header.
+                        ChannelFuture writeFuture = ch.write(nettyResponse);
 
-                    // Write the content.
-                    // If it is not a HEAD
-                    if (!nettyRequest.getMethod().equals(HttpMethod.HEAD)) {
-                        writeFuture = ch.write(new ChunkedFile(raf, 0, fileLength, 8192));
-                    }
-                    if (!keepAlive) {
-                        // Close the connection when the whole content is written out.
-                        writeFuture.addListener(ChannelFutureListener.CLOSE);
+                        // Write the content.
+                        // If it is not a HEAD
+                        if (!nettyRequest.getMethod().equals(HttpMethod.HEAD)) {
+                            writeFuture = ch.write(new ChunkedFile(raf, 0, fileLength, 8192));
+                        } else {
+                            raf.close();
+                        }
+                        if (!keepAlive) {
+                            // Close the connection when the whole content is written out.
+                            writeFuture.addListener(ChannelFutureListener.CLOSE);
+                        }
+                    } catch (Throwable exx) {
+                        try {
+                            raf.close();
+                        } catch (Throwable ex) { /* Left empty */ }
+                        try {
+                            ctx.getChannel().close();
+                        } catch (Throwable ex) { /* Left empty */ }
                     }
 
                 }
@@ -347,6 +381,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             ChannelFuture writeFuture = ctx.getChannel().write(nettyResponse);
             if (!nettyRequest.getMethod().equals(HttpMethod.HEAD) && !nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
                 writeFuture = ctx.getChannel().write(new ChunkedStream(is));
+            } else {
+                is.close();
             }
             if (!keepAlive) {
                 writeFuture.addListener(ChannelFutureListener.CLOSE);
@@ -492,10 +528,8 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
-            throws Exception {
-        Logger.error(e.getCause(), "");
-        e.getChannel().close();
+    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+        try { e.getChannel().close(); } catch(Exception ex) { } 
     }
 
     public static void serve404(NotFound e, ChannelHandlerContext ctx, Request request, HttpRequest nettyRequest) {
@@ -507,7 +541,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         Map<String, Object> binding = getBindingForErrors(e, false);
 
         String format = Request.current().format;
-        if (format == null || ("XMLHttpRequest".equals(request.headers.get("x-requested-with")) && "html".equals(format))) {
+        if (format == null) {
             format = "txt";
         }
         nettyResponse.setHeader(CONTENT_TYPE, (MimeTypes.getContentType("404." + format, "text/plain")));
@@ -551,7 +585,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     public static void serve500(Exception e, ChannelHandlerContext ctx, HttpRequest nettyRequest) {
         Logger.trace("serve500: begin");
         HttpResponse nettyResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
-        nettyResponse.setHeader(SERVER, signature);
+        if (exposePlayServer) {
+            nettyResponse.setHeader(SERVER, signature);
+        }
 
         Request request = Request.current();
         Response response = Response.current();
@@ -588,7 +624,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Map<String, Object> binding = getBindingForErrors(e, true);
 
             String format = request.format;
-            if (format == null || ("XMLHttpRequest".equals(request.headers.get("x-requested-with")) && "html".equals(format))) {
+            if (format == null) {
                 format = "txt";
             }
 
@@ -633,7 +669,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     public static void serveStatic(RenderStatic renderStatic, ChannelHandlerContext ctx, Request request, Response response, HttpRequest nettyRequest, MessageEvent e) {
         Logger.trace("serveStatic: begin");
         HttpResponse nettyResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.status));
-        nettyResponse.setHeader("Server", signature);
+        if (exposePlayServer) {
+            nettyResponse.setHeader(SERVER, signature);
+        }
         try {
             VirtualFile file = Play.getVirtualFile(renderStatic.file);
             if (file != null && file.exists() && file.isDirectory()) {
@@ -671,38 +709,50 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                         }
                     } else {
 
-                        RandomAccessFile raf;
-                        raf = new RandomAccessFile(localFile, "r");
-                        long fileLength = raf.length();
+                        final RandomAccessFile raf = new RandomAccessFile(localFile, "r");
+                        try {
+                            long fileLength = raf.length();
 
-                        Logger.trace("keep alive " + keepAlive);
-                        Logger.trace("content type " + (MimeTypes.getContentType(localFile.getName(), "text/plain")));
+                            Logger.trace("keep alive " + keepAlive);
+                            Logger.trace("content type " + (MimeTypes.getContentType(localFile.getName(), "text/plain")));
 
-                        if (keepAlive && !nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
-                            // Add 'Content-Length' header only for a keep-alive connection.
-                            Logger.trace("file length " + fileLength);
-                            setContentLength(nettyResponse, fileLength);
-                        }
+                            if (keepAlive && !nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
+                                // Add 'Content-Length' header only for a keep-alive connection.
+                                Logger.trace("file length " + fileLength);
+                                setContentLength(nettyResponse, fileLength);
+                            }
 
-                        nettyResponse.setHeader(CONTENT_TYPE, (MimeTypes.getContentType(localFile.getName(), "text/plain")));
+                            nettyResponse.setHeader(CONTENT_TYPE, (MimeTypes.getContentType(localFile.getName(), "text/plain")));
 
-                        Channel ch = e.getChannel();
+                            Channel ch = e.getChannel();
 
-                        // Write the initial line and the header.
-                        ch.write(nettyResponse);
+                            // Write the initial line and the header.
+                            ChannelFuture writeFuture = ch.write(nettyResponse);
 
-                        // Write the content.
-                        ChannelFuture writeFuture = ch.write(new ChunkedFile(raf, 0, fileLength, 8192));
+                            // Write the content.
+                            if (!nettyRequest.getMethod().equals(HttpMethod.HEAD)) {
+                                writeFuture = ch.write(new ChunkedFile(raf, 0, fileLength, 8192));
+                            } else {
+                                raf.close();
+                            }
 
-                        if (!keepAlive) {
-                            // Close the connection when the whole content is written out.
-                            writeFuture.addListener(ChannelFutureListener.CLOSE);
+                            if (!keepAlive) {
+                                // Close the connection when the whole content is written out.
+                                writeFuture.addListener(ChannelFutureListener.CLOSE);
+                            }
+                        } catch (Throwable exx) {
+                            try {
+                                raf.close();
+                            } catch (Throwable ex) { /* Left empty */ }
+                            try {
+                                ctx.getChannel().close();
+                            } catch (Throwable ex) { /* Left empty */ }
                         }
                     }
                 }
 
             }
-        } catch (Exception ez) {
+        } catch (Throwable ez) {
             Logger.error(ez, "serveStatic for request %s", request.method + " " + request.url);
             try {
                 ChannelBuffer buf = ChannelBuffers.copiedBuffer("Internal Error (check logs)".getBytes("utf-8"));

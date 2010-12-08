@@ -37,18 +37,23 @@ import play.vfs.VirtualFile;
 public class Fixtures {
 
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
+    static Map<String, Object> idCache = new HashMap<String, Object>();
 
-    public static void delete(Class<Model>... types) {
+    public static void delete(Class<? extends Model>... types) {
+        idCache.clear();
         disableForeignKeyConstraints();
-        for (Class<Model> type : types) {
+        for (Class<? extends Model> type : types) {
             Model.Manager.factoryFor(type).deleteAll();
         }
         enableForeignKeyConstraints();
+        for(PlayPlugin plugin : Play.plugins) {
+            plugin.afterFixtureLoad();
+        }
     }
 
-    public static void delete(List<Class<Model>> classes) {
+    public static void delete(List<Class<? extends Model>> classes) {
         @SuppressWarnings("unchecked")
-        Class<Model>[] types = new Class[classes.size()];
+        Class<? extends Model>[] types = new Class[classes.size()];
         for (int i = 0; i < types.length; i++) {
             types[i] = classes.get(i);
         }
@@ -57,9 +62,9 @@ public class Fixtures {
 
     @SuppressWarnings("unchecked")
     public static void deleteAllModels() {
-        List<Class<Model>> classes = new ArrayList<Class<Model>>();
+        List<Class<? extends Model>> classes = new ArrayList<Class<? extends Model>>();
         for (ApplicationClasses.ApplicationClass c : Play.classes.getAssignableClasses(Model.class)) {
-            classes.add((Class<Model>)c.javaClass);
+            classes.add((Class<? extends Model>)c.javaClass);
         }
         Fixtures.delete(classes);
     }
@@ -82,6 +87,11 @@ public class Fixtures {
 
         if (DBPlugin.url.startsWith("jdbc:mysql:")) {
             DB.execute("SET foreign_key_checks = 0;");
+            return;
+        }
+
+        if (DBPlugin.url.startsWith("jdbc:postgresql:")) {
+            DB.execute("SET CONSTRAINTS ALL DEFERRED");
             return;
         }
 
@@ -110,6 +120,10 @@ public class Fixtures {
             return;
         }
 
+        if (DBPlugin.url.startsWith("jdbc:postgresql:")) {
+            return;
+        }
+
         // Maybe Log a WARN for unsupported DB ?
         Logger.warn("Fixtures : unable to enable constraints, unsupported database : " + DBPlugin.url);
     }
@@ -128,6 +142,7 @@ public class Fixtures {
 
     public static void deleteAll() {
         try {
+            idCache.clear();
             List<String> names = new ArrayList<String>();
             ResultSet rs = DB.getConnection().getMetaData().getTables(null, null, null, new String[]{"TABLE"});
             while (rs.next()) {
@@ -165,7 +180,6 @@ public class Fixtures {
             Object o = yaml.load(is);
             if (o instanceof LinkedHashMap<?, ?>) {
                 @SuppressWarnings("unchecked") LinkedHashMap<Object, Map<?, ?>> objects = (LinkedHashMap<Object, Map<?, ?>>) o;
-                Map<String, Object> idCache = new HashMap<String, Object>();
                 for (Object key : objects.keySet()) {
                     Matcher matcher = keyPattern.matcher(key.toString().trim());
                     if (matcher.matches()) {
@@ -184,7 +198,7 @@ public class Fixtures {
                         serialize(objects.get(key), "object", params);
                         @SuppressWarnings("unchecked")
                         Class<Model> cType = (Class<Model>)Play.classloader.loadClass(type);
-                        resolveDependencies(cType, params, idCache);
+                        resolveDependencies(cType, params);
                         Model model = (Model)Binder.bind("object", cType, cType, null, params);
                         for(Field f : model.getClass().getFields()) {
                             // TODO: handle something like FileAttachment
@@ -215,6 +229,20 @@ public class Fixtures {
         }
     }
 
+    public static void load(String... names) {
+        for (String name : names) {
+            load(name);
+        }
+    }
+
+    public static void load(List<String> names) {
+        String[] tNames = new String[names.size()];
+        for (int i = 0; i < tNames.length; i++) {
+            tNames[i] = names.get(i);
+        }
+        load(tNames);
+    }
+
     static void serialize(Map<?, ?> values, String prefix, Map<String, String[]> serialized) {
         for (Object key : values.keySet()) {
             Object value = values.get(key);
@@ -224,7 +252,7 @@ public class Fixtures {
             if (value instanceof Map<?, ?>) {
                 serialize((Map<?, ?>) value, prefix + "." + key, serialized);
             } else if (value instanceof Date) {
-                serialized.put(prefix + "." + key.toString(), new String[]{new SimpleDateFormat(DateBinder.ISO).format(((Date) value))});
+                serialized.put(prefix + "." + key.toString(), new String[]{new SimpleDateFormat(DateBinder.ISO8601).format(((Date) value))});
             } else if (value instanceof List<?>) {
                 List<?> l = (List<?>) value;
                 String[] r = new String[l.size()];
@@ -247,10 +275,10 @@ public class Fixtures {
         }
     }
 
-    static void resolveDependencies(Class<Model> type, Map<String, String[]> serialized, Map<String, Object> idCache) {
+    @SuppressWarnings("unchecked")
+    static void resolveDependencies(Class<Model> type, Map<String, String[]> serialized) {
         Set<Field> fields = new HashSet<Field>();
         Class<?> clazz = type;
-        String keyName = Model.Manager.factoryFor(type).keyName();
         while (!clazz.equals(Object.class)) {
             Collections.addAll(fields, clazz.getDeclaredFields());
             clazz = clazz.getSuperclass();
@@ -269,7 +297,7 @@ public class Fixtures {
                     }
                 }
                 serialized.remove("object." + field.name);
-                serialized.put("object." + field.name + "." + keyName, ids);
+                serialized.put("object." + field.name + "." + Model.Manager.factoryFor((Class<? extends Model>)field.relationType).keyName(), ids);
             }
         }
     }

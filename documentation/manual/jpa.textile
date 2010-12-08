@@ -84,6 +84,20 @@ Post.find("byTitleLike", "%hello%").fetch();
 Post.find("byAuthorIsNull").fetch();
 Post.find("byTitleLikeAndAuthor", "%hello%", connectedUser).fetch();
 
+Simple queries follow the following syntax "[Property][Comparator]And?" where Comparator can be the following:
+
+* LessThan - less than the given value
+* LessThanEquals - less than or equal a give value
+* GreaterThan - greater than a given value
+* GreaterThanEquals - greater than or equal a given value
+* Like - Equivalent to a SQL like expression, except that the property will always convert to lower case.
+* Ilike - Similar to a Like, except case insensitive, meaning that your argument will convert to lower case too.
+* Elike - Equivalent to a SQL like expression, no conversion.
+* NotEqual - Negates equality
+* Between - Between two values (requires two arguments)
+* IsNotNull - Not a null value (doesn't require an argument)
+* IsNull - Is a null value (doesn't require an argument)
+
 h3. Find using a JPQL query
 
 You can use a JPQL query:

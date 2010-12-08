@@ -13,9 +13,14 @@ public abstract class Check {
     public void setMessage(String message, String... vars) {
         checkWithCheck.setMessage(message);
         checkWithCheck.variables.clear();
-        for (String variable : vars) {
-            checkWithCheck.variables.put("var" + (variable.length()), variable);
+        for (int i = 0; i < vars.length; i++) {
+            checkWithCheck.variables.put("var" + i, vars[i]);
         }
         checkWithCheck.setVariables();
     }
+
+    public CheckWithCheck getCheckWithCheck() {
+        return this.checkWithCheck;
+    }
+
 }

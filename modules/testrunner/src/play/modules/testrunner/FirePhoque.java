@@ -2,11 +2,14 @@ package play.modules.testrunner;
 
 import com.gargoylesoftware.htmlunit.AlertHandler;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.ConfirmHandler;
 import com.gargoylesoftware.htmlunit.DefaultPageCreator;
 import com.gargoylesoftware.htmlunit.Page;
+import com.gargoylesoftware.htmlunit.PromptHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.WebWindow;
+import com.gargoylesoftware.htmlunit.javascript.host.Window;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sourceforge.htmlunit.corejs.javascript.Scriptable;
 
 public class FirePhoque {
 
@@ -37,7 +41,7 @@ public class FirePhoque {
             }
             root = new File(in.readLine());
             selenium = in.readLine();
-            tests = new ArrayList();
+            tests = new ArrayList<String>();
             String line;
             while ((line = in.readLine()) != null) {
                 tests.add(line);
@@ -61,7 +65,49 @@ public class FirePhoque {
         firephoque.setThrowExceptionOnFailingStatusCode(false);
         firephoque.setAlertHandler(new AlertHandler() {
             public void handleAlert(Page page, String string) {
-                System.out.println(" --> alert: " + string);
+                try {
+                    Window window = (Window)page.getEnclosingWindow().getScriptObject();
+                    window.custom_eval(
+                        "parent.selenium.browserbot.recordedAlerts.push('" + string.replace("'", "\\'")+ "');"
+                    );
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        firephoque.setConfirmHandler(new ConfirmHandler() {
+            public boolean handleConfirm(Page page, String string) {
+                try {
+                    Window window = (Window)page.getEnclosingWindow().getScriptObject();
+                    Object result = window.custom_eval(
+                        "parent.selenium.browserbot.recordedConfirmations.push('" + string.replace("'", "\\'")+ "');" +
+                        "var result = parent.selenium.browserbot.nextConfirmResult;" +
+                        "parent.selenium.browserbot.nextConfirmResult = true;" +
+                        "result"
+                    );
+                    return (Boolean)result;
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+        });
+        firephoque.setPromptHandler(new PromptHandler() {
+            public String handlePrompt(Page page, String string) {
+                try {
+                    Window window = (Window)page.getEnclosingWindow().getScriptObject();
+                    Object result = window.custom_eval(
+                        "parent.selenium.browserbot.recordedPrompts.push('" + string.replace("'", "\\'")+ "');" +
+                        "var result = !parent.selenium.browserbot.nextConfirmResult ? null : parent.selenium.browserbot.nextPromptResult;" +
+                        "parent.selenium.browserbot.nextConfirmResult = true;" +
+                        "parent.selenium.browserbot.nextPromptResult = '';" +
+                        "result"
+                    );
+                    return (String)result;
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    return "";
+                }
             }
         });
         firephoque.setThrowExceptionOnScriptError(false);

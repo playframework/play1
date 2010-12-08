@@ -1,0 +1,20 @@
+#{extends 'main.html' /}
+
+<div id="composite_size">${composite.size()}</div>
+<div id="composite_name">${composite.get("name")}</div>
+<div id="composite_surname">${composite.get("surname")}</div>
+<div id="composite_phone">${composite.get("phone")}</div>
+
+<div id="items_size">${items.size()}</div>
+<div id="items_first">${items.get("first")}</div>
+<div id="items_second">${items.get("second")}</div>
+<div id="items_third">${items.get("third")}</div>
+
+<div id="models_size">${models.size()}</div>
+<div id="models_first_name">${models.get("first").name}</div>
+<div id="models_first_surname">${models.get("first").surname}</div>
+<div id="models_first_phone">${models.get("first").phone}</div>
+
+<div id="models_second_name">${models.get("second").name}</div>
+<div id="models_second_surname">${models.get("second").surname}</div>
+<div id="models_second_phone">${models.get("second").phone}</div>

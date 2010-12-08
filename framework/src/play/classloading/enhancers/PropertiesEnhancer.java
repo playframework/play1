@@ -108,16 +108,18 @@ public class PropertiesEnhancer extends Enhancer {
                 public void edit(FieldAccess fieldAccess) throws CannotCompileException {
                     try {
 
-                        // Accés à une property ?
+                        // Acces à une property ?
                         if (isProperty(fieldAccess.getField())) {
 
                             // TODO : vérifier que c'est bien un champ d'une classe de l'application (fieldAccess.getClassName())
 
                             // Si c'est un getter ou un setter
                             String propertyName = null;
-                            if ((ctMethod.getName().startsWith("get") || ctMethod.getName().startsWith("set")) && ctMethod.getName().length() > 3) {
-                                propertyName = ctMethod.getName().substring(3);
-                                propertyName = propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
+                            if(fieldAccess.getField().getDeclaringClass().equals(ctMethod.getDeclaringClass())) {
+                                if ((ctMethod.getName().startsWith("get") || ctMethod.getName().startsWith("set")) && ctMethod.getName().length() > 3) {
+                                    propertyName = ctMethod.getName().substring(3);
+                                    propertyName = propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
+                                }
                             }
 
                             // On n'intercepte pas le getter de sa propre property

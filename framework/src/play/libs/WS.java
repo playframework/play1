@@ -36,7 +36,7 @@ import com.google.gson.JsonParser;
  * <p/>
  * Get latest BBC World news as a RSS content
  * <pre>
- *    response = WS.GET("http://newsrss.bbc.co.uk/rss/newsonline_world_edition/front_page/rss.xml");
+ *    HttpResponse response = WS.url("http://newsrss.bbc.co.uk/rss/newsonline_world_edition/front_page/rss.xml").get();
  *    Document xmldoc = response.getXml();
  *    // the real pain begins here...
  * </pre>
@@ -44,7 +44,7 @@ import com.google.gson.JsonParser;
  * 
  * Search what Yahoo! thinks of google (starting from the 30th result).
  * <pre>
- *    response = WS.GET("http://search.yahoo.com/search?p=<em>%s</em>&pstart=1&b=<em>%d</em>", "Google killed me", 30 );
+ *    HttpResponse response = WS.url("http://search.yahoo.com/search?p=<em>%s</em>&pstart=1&b=<em>%s</em>", "Google killed me", "30").get();
  *    if( response.getStatus() == 200 ) {
  *       html = response.getString();
  *    }
@@ -62,16 +62,23 @@ public class WS extends PlayPlugin {
         }
     }
 
-    static void init() {
+    private synchronized static void init() {
         if (wsImpl != null) return;
-        if (Play.configuration.getProperty("webservice", "async").equals("urlfetch")) {
-            wsImpl = WSUrlFetch.getInstance();
-            Logger.info("Using URLFetch for web service");
+        String implementation = Play.configuration.getProperty("webservice", "async");
+        if (implementation.equals("urlfetch")) {
+            wsImpl = new WSUrlFetch();
+            Logger.trace("Using URLFetch for web service");
+        } else if (implementation.equals("async")) {
+            Logger.trace("Using Async for web service");
+            wsImpl = new WSAsync();
         } else {
-            Logger.info("Using Async for web service");
-            wsImpl = WSAsync.getInstance();
+            try {
+                wsImpl = (WSImpl)Play.classloader.loadClass(implementation).newInstance();
+                Logger.trace("Using the class:" + implementation + " for web service");
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to load the class: " + implementation + " for web service");
+            }
         }
-        wsImpl.init();
     }
 
     /**
@@ -116,7 +123,6 @@ public class WS extends PlayPlugin {
 
     public interface WSImpl {
         public WSRequest newRequest(String url);
-        public void init();
         public void stop();
     }
 
@@ -129,7 +135,11 @@ public class WS extends PlayPlugin {
         public Map<String, String> headers = new HashMap<String, String>();
         public Map<String, Object> parameters = new HashMap<String, Object>();
         public String mimeType;
-        public Integer timeout;
+        public boolean followRedirects = true;
+        /**
+         * timeout: value in seconds
+         */
+        public Integer timeout = 60;
 
         public ServiceInfo oauthInfo = null;
         public TokenPair oauthTokens = null;
@@ -155,6 +165,7 @@ public class WS extends PlayPlugin {
          * provided credentials will be used during the request
          * @param username
          * @param password
+         * @return the WSRequest for chaining.
          */
         public WSRequest authenticate(String username, String password) {
             this.username = username;
@@ -164,11 +175,20 @@ public class WS extends PlayPlugin {
 
         /**
          * Sign the request for do a call to a server protected by oauth
-         * @return
+         * @return the WSRequest for chaining.
          */
         public WSRequest oauth(ServiceInfo oauthInfo, TokenPair oauthTokens) {
             this.oauthInfo = oauthInfo;
             this.oauthTokens = oauthTokens;
+            return this;
+        }
+
+        /**
+         * Indicate if the WS should continue when hitting a 301 or 302
+         * @return the WSRequest for chaining.
+         */
+        public WSRequest followRedirects(boolean value) {
+            this.followRedirects = value;
             return this;
         }
 
@@ -416,7 +436,9 @@ public class WS extends PlayPlugin {
          * get the response body as a string
          * @return the body of the http response
          */
-        public abstract String getString();
+        public String getString() {
+            return IO.readContentAsString(getStream());
+        }
 
         /**
          * get the response as a stream

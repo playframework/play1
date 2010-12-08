@@ -23,11 +23,12 @@ public class CalendarBinder implements TypeBinder<Calendar> {
             if (date != null) {
                 cal.setTime(date);
             } else {
-                cal.setTime(new SimpleDateFormat(I18N.getDateFormat()).parse(value));
+                SimpleDateFormat sdf = new SimpleDateFormat(I18N.getDateFormat());
+                sdf.setLenient(false);
+                cal.setTime( sdf.parse(value));
             }
         } catch (ParseException e) {
             throw new IllegalArgumentException("Cannot convert [" + value + "] to a Calendar: " + e.toString());
-            //cal.setTime(Utils.AlternativeDateFormat.getDefaultFormatter().parse(value));
         }
 
         return cal;

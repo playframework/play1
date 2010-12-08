@@ -7,6 +7,7 @@ import java.lang.annotation.*;
 import play.*;
 import play.data.binding.*;
 import play.mvc.*;
+import play.utils.Java;
 import play.db.Model;
 import play.data.validation.*;
 import play.exceptions.*;
@@ -55,6 +56,7 @@ public abstract class CRUD extends Controller {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public static void attachment(String id, String field) throws Exception {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
@@ -157,6 +159,10 @@ public abstract class CRUD extends Controller {
         flash.success(Messages.get("crud.deleted", type.modelName));
         redirect(request.controller + ".list");
     }
+    
+    protected static ObjectType createObjectType(Class<? extends Model> entityClass) {
+        return new ObjectType(entityClass);
+    }
 
     // ~~~~~~~~~~~~~
     @Retention(RetentionPolicy.RUNTIME)
@@ -164,7 +170,7 @@ public abstract class CRUD extends Controller {
     public @interface For {
         Class<? extends Model> value();
     }
-
+    
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface Exclude {}
@@ -207,7 +213,13 @@ public abstract class CRUD extends Controller {
             if (entityClass == null || !Model.class.isAssignableFrom(entityClass)) {
                 return null;
             }
-            ObjectType type = new ObjectType(entityClass);
+            ObjectType type;
+            try {
+                type = (ObjectType) Java.invokeStaticOrParent(controllerClass, "createObjectType", entityClass);
+            } catch (Exception e) {
+                Logger.error(e, "Couldn't create an ObjectType. Use default one.");
+                type = new ObjectType(entityClass);
+            }
             type.name = controllerClass.getSimpleName().replace("$", "");
             type.controllerName = controllerClass.getSimpleName().toLowerCase().replace("$", "");
             type.controllerClass = controllerClass;
@@ -260,13 +272,20 @@ public abstract class CRUD extends Controller {
 
         public List<ObjectField> getFields() {
             List<ObjectField> fields = new ArrayList<ObjectField>();
+            List<ObjectField> hiddenFields = new ArrayList<ObjectField>();
             for (Model.Property f : Model.Manager.factoryFor(entityClass).listProperties()) {
-                ObjectField of = new ObjectField(f);
+                ObjectField of = new ObjectField(f);                
                 if (of.type != null) {
-                    fields.add(of);
+                    if (of.type.equals("hidden")) {
+                        hiddenFields.add(of);
+                    } else {
+                        fields.add(of);
+                    }
                 }
             }
-            return fields;
+
+            hiddenFields.addAll(fields);
+            return hiddenFields;
         }
 
         public ObjectField getField(String name) {
@@ -294,7 +313,8 @@ public abstract class CRUD extends Controller {
             public String name;
             public boolean multiple;
             public boolean required;
-            
+
+            @SuppressWarnings("deprecation")
             public ObjectField(Model.Property property) {
                 Field field = property.field;
                 this.property = property;

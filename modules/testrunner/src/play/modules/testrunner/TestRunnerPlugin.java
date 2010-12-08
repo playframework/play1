@@ -2,7 +2,6 @@ package play.modules.testrunner;
 
 import java.io.File;
 
-import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.mvc.Router;
@@ -29,6 +28,7 @@ public class TestRunnerPlugin extends PlayPlugin {
         Router.addRoute("GET", "/@tests/{<.*>test}", "TestRunner.run");
         Router.addRoute("POST", "/@tests/{<.*>test}", "TestRunner.saveResult");
         Router.addRoute("GET", "/@tests/emails", "TestRunner.mockEmail");
+        Router.addRoute("GET", "/@tests/cache", "TestRunner.cacheEntry");
     }
 
     @Override

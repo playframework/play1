@@ -8,10 +8,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.text.DecimalFormat;
-import java.text.Normalizer;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
@@ -21,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
@@ -153,7 +151,8 @@ public class JavaExtensions {
     }
 
     public static String format(Number number, String pattern) {
-        return new DecimalFormat(pattern).format(number);
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale(Lang.get()));
+        return new DecimalFormat(pattern, symbols).format(number);
     }
 
     public static String format(Date date) {
@@ -167,6 +166,12 @@ public class JavaExtensions {
 
     public static String format(Date date, String pattern, String lang) {
         return new SimpleDateFormat(pattern, new Locale(lang)).format(date);
+    }
+
+    public static String format(Date date, String pattern, String lang, String timezone) {
+        DateFormat df = new SimpleDateFormat(pattern, new Locale(lang));
+        df.setTimeZone(TimeZone.getTimeZone(timezone));
+        return df.format(date);
     }
 
     public static Integer page(Number number, Integer pageSize) {
@@ -217,6 +222,10 @@ public class JavaExtensions {
         return new SimpleDateFormat(pattern, new Locale(lang)).format(new Date(timestamp));
     }
 
+    public static String asdate(Long timestamp, String pattern, String lang, String timezone) {
+        return format(new Date(timestamp), pattern, lang, timezone);
+    }
+
     public static RawData nl2br(Object data) {
         return new RawData(data.toString().replace("\n", "<br/>"));
     }
@@ -250,6 +259,16 @@ public class JavaExtensions {
         numberFormat.setMaximumFractionDigits(currency.getDefaultFractionDigits());
         String s = numberFormat.format(number);
         s = s.replace(currencyCode, I18N.getCurrencySymbol(currencyCode));
+        return s;
+    }
+
+    public static String formatCurrency(Number number, Locale locale) {
+        Currency currency = Currency.getInstance(locale);
+        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(locale);
+        numberFormat.setCurrency(currency);
+        numberFormat.setMaximumFractionDigits(currency.getDefaultFractionDigits());
+        String s = numberFormat.format(number);
+        s = s.replace(currency.getCurrencyCode(), currency.getSymbol(locale));
         return s;
     }
 
@@ -326,14 +345,24 @@ public class JavaExtensions {
     }
 
     public static String slugify(String string) {
+        return slugify(string, Boolean.TRUE);
+    }
+
+    public static String slugify(String string, Boolean lowercase) {
         string = noAccents(string);
-        return string.replaceAll("[^\\w]", "-").replaceAll("-{2,}", "-").replaceAll("-$", "").toLowerCase();
+        // Apostrophes.
+        string = string.replaceAll("([a-z])'s([^a-z])", "$1s$2");
+        string = string.replaceAll("[^\\w]", "-").replaceAll("-{2,}", "-");
+        // Get rid of any - at the start and end.
+        string.replaceAll("-+$", "").replaceAll("^-+", "");
+
+        return (lowercase ? string.toLowerCase() : string);
     }
 
     public static String camelCase(String string) {
         string = noAccents(string);
         string = string.replaceAll("[^\\w ]", "");
-        StringBuilder result = new StringBuilder();
+        StringBuilder result = new StringBuilder(string.length());
         for (String part : string.split(" ")) {
             result.append(capFirst(part));
         }
