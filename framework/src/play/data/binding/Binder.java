@@ -176,6 +176,24 @@ public class Binder {
                 if (type instanceof ParameterizedType) {
                     componentClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
                 }
+                // Create a an array of the component class
+                if (value != null) {
+                    Object customArray = Array.newInstance(componentClass, value.length);
+                    // custom types
+                    for (Class<?> c : supportedTypes.keySet()) {
+                        if (c.isAssignableFrom(customArray.getClass())) {
+                            Object[] ar = (Object[]) supportedTypes.get(c).bind("value", annotations, name, customArray.getClass());
+                            List l = Arrays.asList(ar);
+                            if (clazz.equals(HashSet.class)) {
+                                return new HashSet(l);
+                            } else if (clazz.equals(TreeSet.class)) {
+                                return new TreeSet(l);
+                            }
+                            return l;
+
+                        }
+                    }
+                }
                 if (value == null) {
                     value = params.get(name + prefix + "[]");
                     if (value == null && r instanceof List) {

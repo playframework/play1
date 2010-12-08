@@ -136,4 +136,29 @@ public class BinaryTest extends FunctionalTest {
 	    assertEquals("Size does not match", "2440", size);
 	}
 
+
+//  TODO: Missing possibility to upload multiple files at once
+//  See: http://play.lighthouseapp.com/projects/57987-play-framework/tickets/472-functionaltest-and-ws-client-library-dont-allow-upload-of-multiple-file#ticket-472-2 
+//  @Test
+//	public void testMultipleUpload() {
+//
+//		Map<String,String> parameters= new HashMap<String,String>();
+//
+//		Map<String, File[]> files= new HashMap<String, File[]>();
+//		File file1 = Play.getFile("test/angel.gif");
+//		assertTrue(file1.exists());
+//
+//        File file2 = Play.getFile("test/winie   .gif");
+//        assertTrue(file1.exists());
+//
+//		files.put("upload", new File[] {file1, file2 });
+//		Response uploadResponse = POST("/Binary/uploadMultiple", parameters, files);
+//
+//        assertStatus(200, uploadResponse);
+//
+//        String size = uploadResponse.getHeader("Content-Length");
+//
+//	    assertEquals("Size does not match", "2440", size);
+//	}
+
 }
