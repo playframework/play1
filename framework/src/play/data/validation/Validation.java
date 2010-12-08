@@ -329,6 +329,16 @@ public class Validation {
         return Validation.email(key, o);
     }
 
+    public static ValidationResult url(String key, Object o) {
+        URLCheck check = new URLCheck();
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult url(Object o) {
+        String key = getLocalName(o);
+        return Validation.url(key, o);
+    }
+
     public static ValidationResult phone(String key, Object o) {
         PhoneCheck check = new PhoneCheck();
         return applyCheck(check, key, o);
