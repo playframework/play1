@@ -154,7 +154,11 @@ Message key: **validation.required**
 
 <h2><a name="url">url</a></h2>
 
-Checks that the value is a valid URL; empty strings are considered valid. There is no <a href="http://www.playframework.org/@api/play/data/validation/Validation.html">play.data.validation.Validation</a> method for this validation.
+Checks that the value is a valid URL; empty strings are considered valid.
+
+bc. validation.url(value);
+
+Annotation syntax:
 
 bc. @URL String address
 
