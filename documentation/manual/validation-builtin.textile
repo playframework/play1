@@ -192,7 +192,7 @@ _Examples: usa:(305) 613 09 58 ext 101 france:+33 1 47 37 62 24 x3 germany:+49-4
 
 Checks that the value is an IP address that complies with the version 4 protocol; empty strings are considered valid.
 
-bc. validation.ipv4address(value);
+bc. validation.ipv4Address(value);
 
 Annotation syntax:
 
@@ -200,11 +200,11 @@ bc. @IPv4Address String ip
 
 Message key: **validation.ipv4**
 
-<h2><a name="ipv4address">ipv6address</a></h2>
+<h2><a name="ipv4Address">ipv6Address</a></h2>
 
 Checks that the value is an IP address that complies with the version 6 protocol; empty strings are considered valid.
 
-bc. validation.ipv6address(value);
+bc. validation.ipv6Address(value);
 
 Annotation syntax:
 
