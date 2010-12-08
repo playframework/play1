@@ -8,11 +8,11 @@ public class IPValidationTest extends UnitTest {
 
 	@Test
 	public void ipv4() {
-		assertTrue(testv4("0.125.212.5", false));
+		assertTrue(testv4("0.125.212.5", true));
 		assertTrue(testv4("999.524.251.55", false));
 		assertTrue(testv4("192.167.1.2222", false));
 		assertTrue(testv4("1922.167.1.222", false));
-		assertTrue(testv4("092.167.1.222", false));
+		assertTrue(testv4("092.167.1.222", true));
 		assertTrue(testv4("192..1.222", false));
 		assertTrue(testv4("392.3.1.222", false));
 		assertTrue(testv4("127.0.0.1", true));
