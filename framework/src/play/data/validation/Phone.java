@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 import net.sf.oval.configuration.annotation.Constraint;
 
 /**
+<<<<<<< HEAD
  * This field contain a phone number
  * This validation is relaxed and is intented to enforce a basic phone pattern.
  * Please implement your own @Match for country specific
@@ -29,6 +30,9 @@ import net.sf.oval.configuration.annotation.Constraint;
  *  china:+86 (10)69445464
  *  uk:(020) 1234 1234
  *
+=======
+ * This field contain a phone
+>>>>>>> bf3829351cd50bea5e894840523857f6b309801f
  * Message key: validation.phone
  * $1: field name
  */
