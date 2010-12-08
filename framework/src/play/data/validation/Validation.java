@@ -328,7 +328,37 @@ public class Validation {
         String key = getLocalName(o);
         return Validation.email(key, o);
     }
+
+    public static ValidationResult phone(String key, Object o) {
+        PhoneCheck check = new PhoneCheck();
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult phone(Object o) {
+        String key = getLocalName(o);
+        return Validation.phone(key, o);
+    }
     
+    public static ValidationResult ipv4Address(String key, Object o) {
+        IPv4AddressCheck check = new IPv4AddressCheck();
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult ipv4Address(Object o) {
+        String key = getLocalName(o);
+        return Validation.ipv4Address(key, o);
+    }
+    
+    public static ValidationResult ipv6Address(String key, Object o) {
+        IPv6AddressCheck check = new IPv6AddressCheck();
+        return applyCheck(check, key, o);
+    }
+
+    public ValidationResult ipv6Address(Object o) {
+        String key = getLocalName(o);
+        return Validation.ipv6Address(key, o);
+    }
+
     public static ValidationResult isTrue(String key, Object o) {
         IsTrueCheck check = new IsTrueCheck();
         return applyCheck(check, key, o);
