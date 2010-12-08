@@ -353,6 +353,13 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
+     * Send a 401 Unauthorized response
+     */
+    protected static void unauthorized() {
+        throw new Unauthorized("Unauthorized");
+    }
+
+    /**
      * Send a 404 Not Found response
      * @param what The Not Found resource name
      */
