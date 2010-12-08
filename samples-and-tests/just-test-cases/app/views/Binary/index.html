@@ -11,6 +11,12 @@
 #{/form}
 
 #{form @uploadFile(), enctype:'multipart/form-data'}
-        <input type="file" id="file" name="file" value="/Users/nicolasleroux/Projects/Personal/1.1/samples-and-tests/just-test-cases/test/winie.png">
+        <input type="file" id="file" name="file" value="/Users/nicolasleroux/Projects/Personal/1.1/samples-and-tests/just-test-cases/test/winie.png" >
+        <input type="submit">
+#{/form}
+
+
+#{form @uploadMultipleFiles(), enctype:'multipart/form-data'}
+        <input type="file" id="multiple" name="files" value="/Users/nicolasleroux/Projects/Personal/1.1/samples-and-tests/just-test-cases/test/winie.png" multiple>
         <input type="submit">
 #{/form}
