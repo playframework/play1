@@ -458,6 +458,10 @@ public class Scope {
 
         @Override
         public String toString() {
+            if( !requestIsParsed ){
+              checkAndParse();
+            }
+
             return data.toString();
         }
 
