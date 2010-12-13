@@ -84,7 +84,6 @@ public class WSAsync implements WSImpl {
         if (userAgent != null) {
             confBuilder.setUserAgent(userAgent);
         }
-        confBuilder.setFollowRedirects(true);
         httpClient = new AsyncHttpClient(confBuilder.build());
     }
 
