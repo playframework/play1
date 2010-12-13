@@ -193,6 +193,17 @@ public class WS extends PlayPlugin {
         }
 
         /**
+         * Set the value of the request timeout, i.e. the number of seconds before cutting the
+         * connection - default to 60 seconds
+         * @param timeout the timeout value, e.g. "30s", "1min"
+         * @return the WSRequest for chaining
+         */
+        public WSRequest timeout(String timeout) {
+            this.timeout = Time.parseDuration(timeout);
+            return this;
+        }
+
+        /**
          * Add files to request. This will only work with POST or PUT.
          * @param files
          * @return the WSRequest for chaining.

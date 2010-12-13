@@ -33,6 +33,7 @@ import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.AsyncHttpClientConfig.Builder;
 import com.ning.http.client.FilePart;
+import com.ning.http.client.PerRequestConfig;
 import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Response;
 import com.ning.http.client.StringPart;
@@ -236,6 +237,9 @@ public class WSAsync implements WSImpl {
                 builder.addHeader(key, headers.get(key));
             }
             builder.setFollowRedirects(this.followRedirects);
+            PerRequestConfig perRequestConfig = new PerRequestConfig();
+            perRequestConfig.setRequestTimeoutInMs(this.timeout * 1000);
+            builder.setPerRequestConfig(perRequestConfig);
             return builder;
         }
 

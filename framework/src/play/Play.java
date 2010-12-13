@@ -347,7 +347,7 @@ public class Play {
             configuration.setProperty(key.toString(), newValue.toString());
         }
         // Include
-        Map toInclude = new HashMap(16);
+        Map<Object, Object> toInclude = new HashMap<Object, Object>(16);
         for (Object key : configuration.keySet()) {
             if (key.toString().startsWith("@include.")) {
                 try {

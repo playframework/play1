@@ -1,6 +1,5 @@
 package play.libs;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -121,8 +120,11 @@ public class XML {
     }
 
     /**
-     * Sign the XML document using xmldsig. The input document will be modified, it is returned
-     * only for convience so you can chain a call if needed.
+     * Sign the XML document using xmldsig.
+     * @param document the document to sign; it will be modified by the method.
+     * @param publicKey the public key from the key pair to sign the document.
+     * @param privateKey the private key from the key pair to sign the document.
+     * @return the signed document for chaining.
      */
     public static Document sign(Document document, RSAPublicKey publicKey, RSAPrivateKey privateKey) {
         XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");

@@ -116,6 +116,7 @@ public class WSUrlFetch implements WSImpl {
                 connection.setRequestMethod(method);
                 connection.setDoInput(true);
                 connection.setInstanceFollowRedirects(this.followRedirects);
+                connection.setReadTimeout(this.timeout * 1000);
                 for (String key: this.headers.keySet()) {
                     connection.setRequestProperty(key, headers.get(key));
                 }
