@@ -12,6 +12,7 @@ import org.jboss.netty.handler.stream.ChunkedFile;
 import org.jboss.netty.handler.stream.ChunkedStream;
 
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
+import static org.jboss.netty.buffer.ChannelBuffers.*;
 
 import play.Invoker;
 import play.Invoker.InvocationContext;
@@ -42,8 +43,12 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.*;
+import org.jboss.netty.handler.stream.ChunkedWriteHandler;
+import play.mvc.results.Stream.ChunkedInput;
 
 public class PlayHandler extends SimpleChannelUpstreamHandler {
+
+    final ChunkedWriteHandler chunkedWriteHandler = new ChunkedWriteHandler();
 
     private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
 
@@ -293,7 +298,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         Logger.trace("writeResponse: end");
     }
 
-    public static void copyResponse(ChannelHandlerContext ctx, Request request, Response response, HttpRequest nettyRequest) throws Exception {
+    public void copyResponse(ChannelHandlerContext ctx, Request request, Response response, HttpRequest nettyRequest) throws Exception {
         Logger.trace("copyResponse: begin");
         //response.out.flush();
 
@@ -314,11 +319,14 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         final Object obj = response.direct;
         File file = null;
+        ChunkedInput stream = null;
         InputStream is = null;
         if (obj instanceof File) {
             file = (File) obj;
         } else if (obj instanceof InputStream) {
             is = (InputStream) obj;
+        } else if (obj instanceof ChunkedInput) {
+            stream = (ChunkedInput) obj;
         }
 
         final boolean keepAlive = isKeepAlive(nettyRequest);
@@ -383,6 +391,53 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 writeFuture = ctx.getChannel().write(new ChunkedStream(is));
             } else {
                 is.close();
+            }
+            if (!keepAlive) {
+                writeFuture.addListener(ChannelFutureListener.CLOSE);
+            }
+        } else if(stream != null) {
+            ChannelFuture writeFuture = ctx.getChannel().write(nettyResponse);
+            if (!nettyRequest.getMethod().equals(HttpMethod.HEAD) && !nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
+                final ChunkedInput originalStream = stream;
+
+                org.jboss.netty.handler.stream.ChunkedInput nettyChunkedInput = new org.jboss.netty.handler.stream.ChunkedInput() {
+
+                    public boolean hasNextChunk() throws Exception {
+                        return originalStream.hasNextChunk();
+                    }
+
+                    public Object nextChunk() throws Exception {
+                        Object nextChunk = originalStream.nextChunk();
+                        if(nextChunk == null) {
+                            return null;
+                        }
+                        if(nextChunk instanceof String) {
+                            return wrappedBuffer(((String)nextChunk).getBytes());
+                        }
+                        if(nextChunk instanceof byte[]) {
+                            return wrappedBuffer(((byte[])nextChunk));
+                        }
+                        return nextChunk;
+                    }
+
+                    public boolean isEndOfInput() throws Exception {
+                        return originalStream.isEndOfInput();
+                    }
+
+                    public void close() throws Exception {
+                        originalStream.close();
+                    }
+
+                };
+                originalStream.addListener(new ChunkedInput.ChunkedInputListener() {
+                    public void onNewChunks() {
+                        chunkedWriteHandler.resumeTransfer();
+                    }
+                });
+
+                writeFuture = ctx.getChannel().write(nettyChunkedInput);
+            } else {
+                stream.close();
             }
             if (!keepAlive) {
                 writeFuture.addListener(ChannelFutureListener.CLOSE);
@@ -674,7 +729,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         Logger.trace("serve500: end");
     }
 
-    public static void serveStatic(RenderStatic renderStatic, ChannelHandlerContext ctx, Request request, Response response, HttpRequest nettyRequest, MessageEvent e) {
+    public void serveStatic(RenderStatic renderStatic, ChannelHandlerContext ctx, Request request, Response response, HttpRequest nettyRequest, MessageEvent e) {
         Logger.trace("serveStatic: begin");
         HttpResponse nettyResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.status));
         if (exposePlayServer) {

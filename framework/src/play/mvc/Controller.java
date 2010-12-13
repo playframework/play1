@@ -53,6 +53,8 @@ import play.vfs.VirtualFile;
 
 import com.google.gson.JsonSerializer;
 import com.thoughtworks.xstream.XStream;
+import play.mvc.results.Stream;
+import play.mvc.results.Stream.ChunkedInput;
 
 /**
  * Application controller support: The controller receives input and initiates a response by making calls on model objects.
@@ -200,6 +202,10 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     protected static void renderXml(Object o, XStream xstream) {
         throw new RenderXml(o, xstream);
+    }
+
+    protected static void stream(ChunkedInput source) {
+        throw new Stream(source);
     }
 
     /**
