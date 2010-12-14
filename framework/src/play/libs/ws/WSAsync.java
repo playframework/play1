@@ -324,7 +324,13 @@ public class WSAsync implements WSImpl {
                 if (this.parameters != null && !this.parameters.isEmpty()) {
                     throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
                 }
-                builder.setBody(this.body);
+                if(this.body instanceof InputStream) {
+                    builder.setBody((InputStream)this.body);
+                } else {
+                    if(this.body != null) {
+                        builder.setBody(this.body.toString());
+                    }
+                }
                 if(this.mimeType != null) {
                     builder.setHeader("Content-Type", this.mimeType);
                 }

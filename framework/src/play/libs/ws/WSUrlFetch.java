@@ -170,7 +170,7 @@ public class WSUrlFetch implements WSImpl {
                 }
                 connection.setDoOutput(true);
                 OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
-                writer.write(this.body);
+                writer.write(this.body.toString());
                 writer.close();
                 if(this.mimeType != null) {
                     connection.setRequestProperty("Content-Type", this.mimeType);

@@ -130,7 +130,7 @@ public class WS extends PlayPlugin {
         public String url;
         public String username;
         public String password;
-        public String body;
+        public Object body;
         public FileParam[] fileParams;
         public Map<String, String> headers = new HashMap<String, String>();
         public Map<String, Object> parameters = new HashMap<String, Object>();
@@ -229,7 +229,7 @@ public class WS extends PlayPlugin {
          * @return the WSRequest for chaining.
          */
         public WSRequest body(Object body) {
-            this.body = body == null ? "" : body.toString();
+            this.body = body;
             return this;
         }
 
