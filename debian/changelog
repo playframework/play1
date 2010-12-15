@@ -1,3 +1,9 @@
+play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-2) maverick; urgency=low
+
+  * Depend on python >= 2.5
+
+ -- Stephane Epardaud <stephane@epardaud.fr>  Wed, 15 Dec 2010 13:02:05 +0100
+
 play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-1) maverick; urgency=low
 
   * Added a way to reset Mail.Mock
