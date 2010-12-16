@@ -1,8 +1,10 @@
 package play.i18n;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,7 +47,39 @@ public class Messages {
     public static String get(Object key, Object... args) {
         return getMessage(Lang.get(), key, args);
     }
-    
+
+    /**
+     * Return several messages for a locale
+     * @param locale the locale code, e.g. fr, fr_FR
+     * @param keys the keys to get messages from. Wildcards can be used at the end: {'title', 'login.*'}
+     * @returnmessages as a {@link java.util.Properties java.util.Properties}
+     */
+    public static Properties find(String locale, Set<String> keys) {
+        Properties result = new Properties();
+        Properties all = all(locale);
+        // Expand the set for wildcards
+        Set<String> wildcards = new HashSet<String>();
+        for (String key: keys) {
+            if (key.endsWith("*")) wildcards.add(key);
+        }
+        for (String key: wildcards) {
+            keys.remove(key);
+            String start = key.substring(0, key.length() - 1);
+            for (Object key2: all.keySet()) {
+                if (((String)key2).startsWith(start)) {
+                    keys.add((String)key2);
+                }
+            }
+        }
+        // Build the result
+        for (Object key: all.keySet()) {
+            if (keys.contains(key)) {
+                result.put(key, all.get(key));
+            }
+        }
+        return result;
+    }
+
     public static String getMessage(String locale, Object key, Object... args) {
         // Check if there is a plugin that handles translation
         for (PlayPlugin plugin : Play.plugins) {
@@ -54,7 +88,7 @@ public class Messages {
                 return message;
             }
         }
-        
+
         String value = null;
         if( key == null ) {
             return "";
@@ -68,7 +102,7 @@ public class Messages {
         if (value == null) {
             value = key.toString();
         }
-        
+
         return formatString(value, args);
     }
 
@@ -135,4 +169,5 @@ public class Messages {
     public static Properties all(String locale) {
         return locales.get(locale);
     }
+
 }

@@ -226,6 +226,9 @@ And retrieve keys from JavaScript:
 bc. alert(i18n('hello_world'));
 alert(i18n('hello_someone', 'John'));
 
+Optionally, you can restrict the tag to only some messages. The wildcard character is accepted at the end:
+
+bc. #{i18n keys:['title', 'menu.*'] /}
 
 h2. <a name="if">if</a>
 
