@@ -9,7 +9,7 @@ Homepage: http://www.playframework.org
 Package: play-1.1rc2-120-gf92a4ae
 Provides: play-1.1
 Architecture: all
-Depends: ${misc:Depends}, python (>= 2.5)
+Depends: ${misc:Depends}, python (>= 2.5), java-runtime
 Recommends: play-1.1-debian
 Description: Play! Framework
  This is the Play! Framework packaged for Debian
@@ -17,7 +17,7 @@ Description: Play! Framework
 Package: play-1.1rc2-120-gf92a4ae-hh
 Provides: play-1.1-hh
 Architecture: all
-Depends: ${misc:Depends}, python (>= 2.5)
+Depends: ${misc:Depends}, python (>= 2.5), java-runtime
 Recommends: play-1.1-debian
 Description: Play! Framework
  This is the Play! Framework packaged for Debian
