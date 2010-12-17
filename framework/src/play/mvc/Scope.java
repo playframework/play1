@@ -12,6 +12,7 @@ import play.Logger;
 import play.Play;
 import play.data.binding.Binder;
 import play.data.parsing.DataParser;
+import play.data.parsing.TextParser;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
 import play.libs.Codec;
@@ -301,12 +302,16 @@ public class Scope {
                     DataParser dataParser = DataParser.parsers.get(contentType);
                     if (dataParser != null) {
                         _mergeWith(dataParser.parse(request.body));
+                    } else {
+                        if(contentType.startsWith("text/")) {
+                            _mergeWith(new TextParser().parse(request.body));
+                        }
                     }
                 }
                 try {
                     request.body.close();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    //
                 }
                 requestIsParsed = true;
             }
