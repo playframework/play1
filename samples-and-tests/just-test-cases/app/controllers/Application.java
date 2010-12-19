@@ -102,7 +102,9 @@ public class Application extends Controller {
     }
     
     public static void book(Date at) {
-        renderText("Booked at %1$tm %1$te,%1$tY !!", at);
+        java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("dd/MM/yy");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        renderText("Booked at %s !!", df.format(at));
     }
 
     public static void escapeData() {

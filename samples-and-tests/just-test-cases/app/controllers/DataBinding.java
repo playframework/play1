@@ -3,6 +3,7 @@ package controllers;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.text.SimpleDateFormat;
 
 import models.Person;
 import play.Logger;
@@ -17,7 +18,7 @@ public class DataBinding extends Controller {
     }
 
     public static void showDefaultDateFormat(Date date) {
-        renderText(date);
+        renderText(new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(date));
     }
 
     public static void changeLanguage(String lang) {
@@ -25,15 +26,15 @@ public class DataBinding extends Controller {
     }
 
     public static void showLocaleDateFormat(Date date) {
-        renderText(date);
+        renderText(new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(date));
     }
 
     public static void showDefaultLocaleDateFormat(Date date) {
-        renderText(date);
+        renderText(new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(date));
     }
 
     public static void showDateFormat(@As("MM-dd-yyyy'T'HH:mm:ss") Date date) {
-        renderText(date);
+        renderText(new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(date));
     }
 
     public static void showList(@As("/") List<String> mailboxes) {
@@ -41,12 +42,12 @@ public class DataBinding extends Controller {
     }
 
     public static void showCalendar(@As("dd-MMM-yyyy") Calendar cal) {
-        renderText(cal.getTime());
+        renderText(new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(cal.getTime()));
     }
 
 
     public static void showCalendar2(@As(lang={"fr,de","*"}, value={"dd-MM-yyyy","MM-dd-yyyy"}) Calendar cal) {
-        renderText(cal.getTime());
+        renderText(new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(cal.getTime()));
     }
 
     public static void signinPage() {
