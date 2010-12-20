@@ -116,6 +116,7 @@ public class WSUrlFetch implements WSImpl {
                 connection.setRequestMethod(method);
                 connection.setDoInput(true);
                 connection.setInstanceFollowRedirects(this.followRedirects);
+                connection.setReadTimeout(this.timeout * 1000);
                 for (String key: this.headers.keySet()) {
                     connection.setRequestProperty(key, headers.get(key));
                 }
@@ -169,7 +170,7 @@ public class WSUrlFetch implements WSImpl {
                 }
                 connection.setDoOutput(true);
                 OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
-                writer.write(this.body);
+                writer.write(this.body.toString());
                 writer.close();
                 if(this.mimeType != null) {
                     connection.setRequestProperty("Content-Type", this.mimeType);

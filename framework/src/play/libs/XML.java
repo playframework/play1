@@ -1,6 +1,5 @@
 package play.libs;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -37,6 +36,7 @@ import org.xml.sax.SAXException;
 import play.Logger;
 
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
+import java.io.StringReader;
 
 /**
  * XML utils
@@ -82,7 +82,7 @@ public class XML {
      * @return null if an error occurs during parsing.
      */
     public static Document getDocument(String xml) {
-        InputSource source = new InputSource(new ByteArrayInputStream(xml.getBytes()));
+        InputSource source = new InputSource(new StringReader(xml));
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
             return dbf.newDocumentBuilder().parse(source);
@@ -120,8 +120,11 @@ public class XML {
     }
 
     /**
-     * Sign the XML document using xmldsig. The input document will be modified, it is returned
-     * only for convience so you can chain a call if needed.
+     * Sign the XML document using xmldsig.
+     * @param document the document to sign; it will be modified by the method.
+     * @param publicKey the public key from the key pair to sign the document.
+     * @param privateKey the private key from the key pair to sign the document.
+     * @return the signed document for chaining.
      */
     public static Document sign(Document document, RSAPublicKey publicKey, RSAPrivateKey privateKey) {
         XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");

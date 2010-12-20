@@ -44,7 +44,7 @@ public class Java {
     /**
      * Try to discover what is hidden under a FutureTask (hack)
      */
-    public static Object extractUnderlyingCallable(FutureTask futureTask) {
+    public static Object extractUnderlyingCallable(FutureTask<?> futureTask) {
         try {
             Field syncField = FutureTask.class.getDeclaredField("sync");
             syncField.setAccessible(true);
@@ -83,6 +83,7 @@ public class Java {
         }
         return null;
     }
+
 
     /**
      * Invoke a static method

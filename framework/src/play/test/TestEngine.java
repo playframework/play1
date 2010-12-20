@@ -152,7 +152,7 @@ public class TestEngine {
         @Override
         public void testFinished(Description description) throws Exception {
             current.time = System.currentTimeMillis() - current.time;
-            results.results.add(current);
+            results.add(current);
         }
     }
 
@@ -160,9 +160,23 @@ public class TestEngine {
 
         public List<TestResult> results = new ArrayList<TestResult>();
         public boolean passed = true;
+        public int success = 0;
+        public int errors = 0;
+        public int failures = 0;
+        public long time = 0;
 
         public void add(TestResult result) {
+            time = result.time + time;
             this.results.add(result);
+            if (result.passed) {
+              success++;
+            } else {
+              if (result.error.startsWith("Failure")) {
+                failures++;
+              } else {
+                errors++;
+              }
+            }
         }
     }
 

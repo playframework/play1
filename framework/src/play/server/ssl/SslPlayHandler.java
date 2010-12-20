@@ -38,12 +38,9 @@ public class SslPlayHandler extends PlayHandler {
 
     private static final class SslListener implements ChannelFutureListener {
 
-        SslListener() {
-        }
-
         public void operationComplete(ChannelFuture future) throws Exception {
             if (!future.isSuccess()) {
-                Logger.warn(future.getCause(), "Invalid certificate");
+                Logger.debug(future.getCause(), "Invalid certificate");
             }
         }
 
@@ -51,10 +48,10 @@ public class SslPlayHandler extends PlayHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-        Logger.error(e.getCause(), "");
         // We have to redirect to https://, as it was targeting http://
         // Redirect to the root as we don't know the url at that point
         if (e.getCause() instanceof SSLException) {
+            Logger.debug(e.getCause(), "");
             InetSocketAddress inet = ((InetSocketAddress) ctx.getAttachment());
             ctx.getPipeline().remove("ssl");
             HttpResponse nettyResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.TEMPORARY_REDIRECT);
@@ -62,6 +59,7 @@ public class SslPlayHandler extends PlayHandler {
             ChannelFuture writeFuture = ctx.getChannel().write(nettyResponse);
             writeFuture.addListener(ChannelFutureListener.CLOSE);
         } else {
+            Logger.error(e.getCause(), "");
             e.getChannel().close();
         }
     }

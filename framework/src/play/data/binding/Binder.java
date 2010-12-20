@@ -58,12 +58,6 @@ public class Binder {
     @SuppressWarnings("unchecked")
     static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String prefix, String[] profiles) {
         try {
-            Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] isComposite [" + isComposite(name + prefix, params) + "]");
-
-            if (isComposite(name + prefix, params)) {
-                BeanWrapper beanWrapper = getBeanWrapper(clazz);
-                return beanWrapper.bind(name, type, params, prefix, annotations);
-            }
             Logger.trace("bindInternal: name [" + name + "] prefix [" + prefix + "]");
 
             String[] value = params.get(name + prefix);
@@ -127,6 +121,15 @@ public class Binder {
                     keyClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
                     valueClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[1];
                 }
+                
+                // Special case Map<String, String>
+                // Multivalues composite params are binded to a Map<String, String>
+                // see http://play.lighthouseapp.com/projects/57987/tickets/443
+                if (keyClass==String.class && valueClass==String.class && isComposite(name, params)) {
+                	Map<String, String> stringMap = Utils.filterParams(params, name);
+                	if (stringMap.size()>0) return stringMap;
+                }
+                
                 // Search for all params
                 Map<Object, Object> r = new HashMap<Object, Object>();
                 for (String param : params.keySet()) {
@@ -176,6 +179,24 @@ public class Binder {
                 if (type instanceof ParameterizedType) {
                     componentClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
                 }
+                // Create a an array of the component class
+                if (value != null) {
+                    Object customArray = Array.newInstance(componentClass, value.length);
+                    // custom types
+                    for (Class<?> c : supportedTypes.keySet()) {
+                        if (c.isAssignableFrom(customArray.getClass())) {
+                            Object[] ar = (Object[]) supportedTypes.get(c).bind("value", annotations, name, customArray.getClass());
+                            List l = Arrays.asList(ar);
+                            if (clazz.equals(HashSet.class)) {
+                                return new HashSet(l);
+                            } else if (clazz.equals(TreeSet.class)) {
+                                return new TreeSet(l);
+                            }
+                            return l;
+
+                        }
+                    }
+                }
                 if (value == null) {
                     value = params.get(name + prefix + "[]");
                     if (value == null && r instanceof List) {
@@ -217,10 +238,19 @@ public class Binder {
                 }
                 return r;
             }
+
+            // Assume a Bean if isComposite
+            Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] isComposite [" + isComposite(name + prefix, params) + "]");
+            if (isComposite(name + prefix, params)) {
+                BeanWrapper beanWrapper = getBeanWrapper(clazz);
+                return beanWrapper.bind(name, type, params, prefix, annotations);
+            }
+
             // Simple types
             if (value == null || value.length == 0) {
                 return MISSING;
             }
+            
             return directBind(name, annotations, value[0], clazz);
         } catch (Exception e) {
             Validation.addError(name + prefix, "validation.invalid");

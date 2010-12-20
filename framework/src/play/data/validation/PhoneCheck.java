@@ -11,8 +11,7 @@ public class PhoneCheck extends AbstractAnnotationCheck<Phone> {
 
 	final static String mes = "validation.phone";
 
-	static Pattern phonePattern = Pattern
-	.compile("^([\\+][0-9]{1,3}([ \\.\\-]))?([\\(]{1}[0-9]{2,6}[\\)])?([0-9 \\.\\-/]{3,20})((x|ext|extension)[ ]?[0-9]{1,4})?$");
+	static Pattern phonePattern = Pattern.compile("^([\\+][0-9]{1,3}([ \\.\\-]))?([\\(]{1}[0-9]{2,6}[\\)])?([0-9 \\.\\-/]{3,20})((x|ext|extension)[ ]?[0-9]{1,4})?$");
 
 	@Override
 	public void configure(Phone phone) {

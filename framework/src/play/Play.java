@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -174,7 +173,6 @@ public class Play {
 
         // Guess the framework path
         try {
-
             URL versionUrl = Play.class.getResource("/play/version");
             // Read the content of the file
             Play.version = new LineNumberReader(new InputStreamReader(versionUrl.openStream())).readLine();
@@ -243,8 +241,12 @@ public class Play {
         javaPath.add(appRoot.child("conf"));
 
         // Build basic templates path
-        templatesPath = new ArrayList<VirtualFile>(2);
-        templatesPath.add(appRoot.child("app/views"));
+        if (appRoot.child("app/views").exists()) {
+            templatesPath = new ArrayList<VirtualFile>(2);
+            templatesPath.add(appRoot.child("app/views"));
+        } else {
+            templatesPath = new ArrayList<VirtualFile>(1);
+        }
 
         // Main route file
         routes = appRoot.child("conf/routes");
@@ -290,16 +292,15 @@ public class Play {
     /**
      * Read application.conf and resolve overriden key using the play id mechanism.
      */
-    @SuppressWarnings("unchecked")
     static void readConfiguration() {
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         conf = appRoot.child("conf/application.conf");
         try {
-            configuration = IO.readUtf8Properties(conf.inputstream());        
+            configuration = IO.readUtf8Properties(conf.inputstream());
         } catch (RuntimeException e) {
             if (e.getCause() instanceof IOException) {
                 Logger.fatal("Cannot read application.conf");
-                System.exit(0);
+                System.exit(-1);
             }
         }
         // Ok, check for instance specifics configuration
@@ -347,7 +348,7 @@ public class Play {
             configuration.setProperty(key.toString(), newValue.toString());
         }
         // Include
-        Map toInclude = new HashMap(16);
+        Map<Object, Object> toInclude = new HashMap<Object, Object>(16);
         for (Object key : configuration.keySet()) {
             if (key.toString().startsWith("@include.")) {
                 try {
@@ -591,7 +592,7 @@ public class Play {
     }
 
     /**
-     * Allow some code to run very eraly in Play! - Use with caution !
+     * Allow some code to run very early in Play - Use with caution !
      */
     public static void initStaticStuff() {
         // Play! plugings
@@ -609,7 +610,7 @@ public class Play {
                     try {
                         Class.forName(line);
                     } catch (Exception e) {
-                        System.out.println("! Cannot init static : " + line);
+                        Logger.warn("! Cannot init static: " + line);
                     }
                 }
             } catch (Exception ex) {
@@ -636,8 +637,8 @@ public class Play {
                 }
             }
         }
-        for (Iterator<?> e = configuration.keySet().iterator(); e.hasNext();) {
-            String pName = e.next().toString();
+        for (Object key: configuration.keySet()) {
+            String pName = key.toString();
             if (pName.startsWith("module.")) {
                 String moduleName = pName.substring(7);
                 File modulePath = new File(configuration.getProperty(pName));

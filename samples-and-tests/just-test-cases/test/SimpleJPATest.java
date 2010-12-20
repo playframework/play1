@@ -35,7 +35,7 @@ public class SimpleJPATest extends UnitTest {
         assertEquals(0, a.l);
         assertNull(a.k);
         assertNull(b.birth);
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTime(a.birth);
         assertEquals(2009, cal.get(Calendar.YEAR));
         assertEquals(11, cal.get(Calendar.MONTH));
