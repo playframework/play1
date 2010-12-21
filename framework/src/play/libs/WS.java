@@ -459,9 +459,7 @@ public class WS extends PlayPlugin {
         public Map<String, String> getQueryString() {
             Map<String, String> result = new HashMap<String, String>();
             String body = getString();
-            Logger.info("body: " + body);
             for (String entry: body.split("&")) {
-                Logger.info("...look at " + entry + " - " + entry.indexOf("="));
                 if (entry.indexOf("=") > 0) {
                     result.put(entry.split("=")[0], entry.split("=")[1]);
                 }
