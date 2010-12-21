@@ -111,7 +111,6 @@ public class WSAsync implements WSImpl {
         public HttpResponse get() {
             this.type = "GET";
             sign();
-            Logger.info(url);
             try {
                 return new HttpAsyncResponse(prepare(httpClient.prepareGet(url)).execute().get());
             } catch (Exception e) {
@@ -125,7 +124,6 @@ public class WSAsync implements WSImpl {
         public Future<HttpResponse> getAsync() {
             this.type = "GET";
             sign();
-            Logger.info(url);
             return execute(httpClient.prepareGet(url));
         }
 
