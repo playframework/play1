@@ -49,9 +49,7 @@ import play.mvc.results.Stream.ChunkedInput;
 public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     final ChunkedWriteHandler chunkedWriteHandler = new ChunkedWriteHandler();
-
     private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
-
     /**
      * If true (the default), Play will send the HTTP header "Server: Play! Framework; ....".
      * This could be a security problem (old versions having publicly known security bugs), so you can
@@ -59,8 +57,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
      */
     private final static boolean exposePlayServer;
 
-    static
-    {
+    static {
         exposePlayServer = !"false".equals(Play.configuration.getProperty("http.exposePlayServer"));
     }
 
@@ -102,7 +99,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
         Logger.trace("messageReceived: end");
     }
-
     private static final Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
 
     public class NettyInvocation extends Invoker.Invocation {
@@ -395,7 +391,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             if (!keepAlive) {
                 writeFuture.addListener(ChannelFutureListener.CLOSE);
             }
-        } else if(stream != null) {
+        } else if (stream != null) {
             ChannelFuture writeFuture = ctx.getChannel().write(nettyResponse);
             if (!nettyRequest.getMethod().equals(HttpMethod.HEAD) && !nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
                 final ChunkedInput originalStream = stream;
@@ -408,14 +404,14 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
                     public Object nextChunk() throws Exception {
                         Object nextChunk = originalStream.nextChunk();
-                        if(nextChunk == null) {
+                        if (nextChunk == null) {
                             return null;
                         }
-                        if(nextChunk instanceof String) {
-                            return wrappedBuffer(((String)nextChunk).getBytes());
+                        if (nextChunk instanceof String) {
+                            return wrappedBuffer(((String) nextChunk).getBytes());
                         }
-                        if(nextChunk instanceof byte[]) {
-                            return wrappedBuffer(((byte[])nextChunk));
+                        if (nextChunk instanceof byte[]) {
+                            return wrappedBuffer(((byte[]) nextChunk));
                         }
                         return nextChunk;
                     }
@@ -427,9 +423,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                     public void close() throws Exception {
                         originalStream.close();
                     }
-
                 };
                 originalStream.addListener(new ChunkedInput.ChunkedInputListener() {
+
                     public void onNewChunks() {
                         chunkedWriteHandler.resumeTransfer();
                     }
@@ -450,13 +446,11 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     static String getRemoteIPAddress(ChannelHandlerContext ctx) {
         String fullAddress = ((InetSocketAddress) ctx.getChannel().getRemoteAddress()).getAddress().getHostAddress();
-        // Address resolves to /x.x.x.x:zzzz we only want x.x.x.x
-        if (fullAddress.startsWith("/")) {
+        if (fullAddress.matches("/[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+[:][0-9]+")) {
             fullAddress = fullAddress.substring(1);
-        }
-        int i = fullAddress.indexOf(":");
-        if (i != -1) {
-            fullAddress = fullAddress.substring(0, i);
+            fullAddress = fullAddress.substring(0, fullAddress.indexOf(":"));
+        } else if (fullAddress.matches(".*[%].*")) {
+            fullAddress = fullAddress.substring(0, fullAddress.indexOf("%"));
         }
         return fullAddress;
     }
@@ -466,14 +460,14 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         Logger.trace("parseRequest: URI = " + nettyRequest.getUri());
         int index = nettyRequest.getUri().indexOf("?");
         String querystring = "";
-        
+
         String uri = nettyRequest.getUri();
         // Remove domain and port from URI if it's present.
         if (uri.startsWith("http://") || uri.startsWith("https://")) {
             // Begins searching / after 9th character (last / of https://)
             uri = uri.substring(uri.indexOf("/", 9));
         }
-        
+
         String path = URLDecoder.decode(uri, "UTF-8");
         if (index != -1) {
             path = URLDecoder.decode(uri.substring(0, index), "UTF-8");
@@ -592,7 +586,10 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-        try { e.getChannel().close(); } catch(Exception ex) { } 
+        try {
+            e.getChannel().close();
+        } catch (Exception ex) {
+        }
     }
 
     public static void serve404(NotFound e, ChannelHandlerContext ctx, Request request, HttpRequest nettyRequest) {
