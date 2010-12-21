@@ -375,13 +375,11 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     static String getRemoteIPAddress(ChannelHandlerContext ctx) {
         String fullAddress = ((InetSocketAddress) ctx.getChannel().getRemoteAddress()).getAddress().getHostAddress();
-        // Address resolves to /x.x.x.x:zzzz we only want x.x.x.x
-        if (fullAddress.startsWith("/")) {
+        if (fullAddress.matches("/[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+[:][0-9]+")) {
             fullAddress = fullAddress.substring(1);
-        }
-        int i = fullAddress.indexOf(":");
-        if (i != -1) {
-            fullAddress = fullAddress.substring(0, i);
+            fullAddress = fullAddress.substring(0, fullAddress.indexOf(":"));
+        } else if (fullAddress.matches(".*[%].*")) {
+            fullAddress = fullAddress.substring(0, fullAddress.indexOf("%"));
         }
         return fullAddress;
     }
