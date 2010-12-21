@@ -370,13 +370,12 @@ public class Router {
         if (action.startsWith("controllers.")) {
             action = action.substring(12);
         }
-        Map<String, Object> argsbackup = args;
+        Map<String, Object> argsbackup = new HashMap<String, Object>(args);
         // Add routeArgs
         if (Scope.RouteArgs.current() != null) {
-            argsbackup.putAll(Scope.RouteArgs.current().data);
+            args.putAll(Scope.RouteArgs.current().data);
         }
         for (Route route : routes) {
-            args = new HashMap<String, Object>(argsbackup);
             if (route.actionPattern != null) {
                 Matcher matcher = route.actionPattern.matcher(action);
                 if (matcher.matches()) {
@@ -497,7 +496,7 @@ public class Router {
                         actionDefinition.method = route.method == null || route.method.equals("*") ? "GET" : route.method.toUpperCase();
                         actionDefinition.star = "*".equals(route.method);
                         actionDefinition.action = action;
-                        actionDefinition.args = args;
+                        actionDefinition.args = argsbackup;
                         actionDefinition.host = host;
                         return actionDefinition;
                     }
