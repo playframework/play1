@@ -4,23 +4,23 @@ Copyright 2010
     zenexity (http://www.zenexity.fr)
     Play framework contributors (https://github.com/playframework/play/contributors)
 
-Licensed under the Apache License, Version 2.0 (the "License"); 
-you may not use this file except in compliance with the License. 
-You may obtain a copy of the License at 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0 
-	
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" BASIS, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and 
-limitations under the License.  
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
 ----------------------------
 
 This package contains several Open sources libraries that are released under their own licence:
 
-http://www.apache.org/licenses/LICENSE-2.0 
+http://www.apache.org/licenses/LICENSE-2.0
     - Netty
     - Asyncweb
     - Cglib
@@ -35,14 +35,15 @@ http://www.apache.org/licenses/LICENSE-2.0
     - Log4J
     - Snake YAML
     - Geronimo Servlets
-    
+    - Signpost
+
 http://www.gnu.org/licenses/lgpl.html
     - c3p0
     - Hibernate
-    
+
 http://www.antlr.org/license.html
     - antlr
-    
+
 http://www.dom4j.org/license.html
     - Dom4J
 
@@ -64,13 +65,13 @@ http://www.eclipse.org/legal/epl-v10.html
 
 http://www.opensource.org/licenses/cpl1.0.php
     - JUnit
- 
+
 http://www.mozilla.org/MPL/MPL-1.1.html
     - Javassist
 
 http://www.gnu.org/licenses/gpl.html
     - MySQL connector
-    
+
 Public Domain
     - backport-util-concurrent
 
