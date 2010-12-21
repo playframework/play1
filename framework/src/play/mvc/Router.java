@@ -452,6 +452,8 @@ public class Router {
                                 }
                             } else if (route.staticArgs.containsKey(key)) {
                                 // Do nothing -> The key is static
+                            } else if (Scope.RouteArgs.current().data.containsKey(key)) {
+                                // Do nothing -> The key is provided in RouteArgs and not used (see #447)
                             } else if (value != null) {
                                 if (List.class.isAssignableFrom(value.getClass())) {
                                     @SuppressWarnings("unchecked")

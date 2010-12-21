@@ -9,6 +9,8 @@ GET         /aGetForm/                      Application.aGetForm2
 GET         /optionalSlash/?                Application.optional 
 GET         /index                          Application.index
 
+GET         /{lucky}/doIt                   Application.showIt
+
 GET         www.zenexity.com/hello          Application.helloZen
 GET         {clientName}.myApp.com/home     Application.myHomePage
 
