@@ -70,7 +70,12 @@ public class Application extends Controller {
     }
 
     public static void index() {
+        routeArgs.put("lucky", "strike");
         render();
+    }
+    
+    public static void showIt() {
+        renderText("Done");
     }
 
     public static void index2() {
