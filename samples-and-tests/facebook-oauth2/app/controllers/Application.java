@@ -27,10 +27,10 @@ public class Application extends Controller {
         render(me);
     }
 
-    public static void auth(String code) {
-        if (code != null) {
+    public static void auth() {
+        if (OAuth2.isCodeResponse()) {
             User u = connected();
-            u.access_token = FACEBOOK.getAccessToken(code);
+            u.access_token = FACEBOOK.getAccessToken();
             u.save();
             index();
         }

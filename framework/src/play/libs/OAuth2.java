@@ -3,7 +3,6 @@ package play.libs;
 import java.util.HashMap;
 import java.util.Map;
 
-import play.Logger;
 import play.mvc.Http.Request;
 import play.mvc.Scope.Params;
 import play.mvc.results.Redirect;
@@ -29,8 +28,8 @@ public class OAuth2 {
         this.secret = secret;
     }
 
-    public static boolean isVerifierResponse() {
-        return Params.current().get("access_token") != null;
+    public static boolean isCodeResponse() {
+        return Params.current().get("code") != null;
     }
 
     public void requestAccessToken() {
@@ -40,9 +39,9 @@ public class OAuth2 {
                 + "&redirect_uri=" + callbackURL);
     }
 
-    public String getAccessToken(String accessCode) {
+    public String getAccessToken() {
         String callbackURL = Request.current().getBase() + Request.current().path;
-        Logger.info("callback = " + callbackURL);
+        String accessCode = Params.current().get("code");
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("client_id", clientid);
         params.put("client_secret", secret);

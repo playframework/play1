@@ -139,6 +139,7 @@ Everything you need to know about Play.
 ## "Cross-Site Request Forgery":security#csrf
 # "Ajax with JQuery":ajax
 # "OpenID integration":openid
+# "OAuth integration":oauth
 
 
 h2. <a name="modules">Distribution Modules</a>
