@@ -27,24 +27,6 @@ public class JPAEnhancer extends Enhancer {
         }
         
         String entityName = ctClass.getName();
-        
-        // Add a default constructor if needed
-        try {
-            boolean hasDefaultConstructor = false;
-            for (CtConstructor constructor : ctClass.getConstructors()) {
-                if (constructor.getParameterTypes().length == 0) {
-                    hasDefaultConstructor = true;
-                    break;
-                }
-            }
-            if (!hasDefaultConstructor && !ctClass.isInterface()) {
-                CtConstructor defaultConstructor = CtNewConstructor.make("private " + ctClass.getSimpleName() + "() {}", ctClass);
-                ctClass.addConstructor(defaultConstructor);
-            }
-        } catch (Exception e) {
-            Logger.error(e, "Error in JPAEnhancer");
-            throw new UnexpectedException("Error in JPAEnhancer", e);
-        }
 
         // count
         CtMethod count = CtMethod.make("public static long count() { return play.db.jpa.JPQL.instance.count(\"" + entityName + "\"); }", ctClass);
