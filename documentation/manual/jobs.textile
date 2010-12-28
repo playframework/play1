@@ -120,7 +120,7 @@ bc. public static void generatePDF(Long reportId) {
     if(request.isNew) {
         Report report = Report.findById(reportId);
         Future<InputStream> task = new ReportAsPDFJob(report).now();
-        request.args.put("task", task),
+        request.args.put("task", task);
         waitFor(task);
     }
     renderBinary((Future<InputStream>)request.args.get("task").get());
