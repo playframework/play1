@@ -9,22 +9,22 @@ import net.sf.oval.exception.OValException;
 
 public class PhoneCheck extends AbstractAnnotationCheck<Phone> {
 
-	final static String mes = "validation.phone";
+    final static String mes = "validation.phone";
 
-	static Pattern phonePattern = Pattern.compile("^([\\+][0-9]{1,3}([ \\.\\-]))?([\\(]{1}[0-9]{2,6}[\\)])?([0-9 \\.\\-/]{3,20})((x|ext|extension)[ ]?[0-9]{1,4})?$");
+    static Pattern phonePattern = Pattern.compile("^([\\+][0-9]{1,3}([ \\.\\-]))?([\\(]{1}[0-9]{2,6}[\\)])?([0-9 \\.\\-/]{3,20})((x|ext|extension)[ ]?[0-9]{1,4})?$");
 
-	@Override
-	public void configure(Phone phone) {
-		setMessage(phone.message());
-	}
+    @Override
+    public void configure(Phone phone) {
+        setMessage(phone.message());
+    }
 
-	@Override
-	public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator)
-			throws OValException {
-		if (value == null || value.toString().length() == 0) {
-			return true;
-		}
-		return phonePattern.matcher(value.toString()).matches();
-	}
+    @Override
+    public boolean isSatisfied(Object validatedObject, Object value, OValContext context, Validator validator)
+    throws OValException {
+        if (value == null || value.toString().length() == 0) {
+            return true;
+        }
+        return phonePattern.matcher(value.toString()).matches();
+    }
 
 }

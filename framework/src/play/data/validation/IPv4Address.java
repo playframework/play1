@@ -16,5 +16,5 @@ import net.sf.oval.configuration.annotation.Constraint;
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Constraint(checkWith = IPv4AddressCheck.class)
 public @interface IPv4Address {
-	String message() default IPv4AddressCheck.mes;
+    String message() default IPv4AddressCheck.mes;
 }
