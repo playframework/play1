@@ -183,7 +183,7 @@ Inserts a **form** tag. The HTTP method is guessed from the route, and defaults 
 
 Charset encoding is always ‘utf-8’.
 
-bc. #{form @Client.create() , id:'creationForm' enctype:'multipart/form-data' }
+bc. #{form @Client.create() , id:'creationForm', enctype:'multipart/form-data' }
    ...
 #{/form}
 

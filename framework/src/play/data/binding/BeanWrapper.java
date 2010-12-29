@@ -36,7 +36,11 @@ public class BeanWrapper {
         }
 
         registerSetters(forClass, isScala);
-        registerFields(forClass);
+        if(isScala) {
+            registerAllFields(forClass);
+        } else {
+            registerFields(forClass);
+        }
     }
 
     public Collection<Property> getWrappers() {
@@ -99,8 +103,10 @@ public class BeanWrapper {
         return (!method.isAnnotationPresent(PlayPropertyAccessor.class) && method.getName().endsWith("_$eq") && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
     }
 
-    protected Object newBeanInstance() throws InstantiationException, IllegalAccessException {
-        return beanClass.newInstance();
+    protected Object newBeanInstance() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        Constructor constructor = beanClass.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        return constructor.newInstance();
     }
 
     private void registerFields(Class<?> clazz) {
@@ -120,6 +126,26 @@ public class BeanWrapper {
             wrappers.put(field.getName(), w);
         }
         registerFields(clazz.getSuperclass());
+    }
+
+    private void registerAllFields(Class<?> clazz) {
+        // recursive stop condition
+        if (clazz == Object.class) {
+            return;
+        }
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            if (wrappers.containsKey(field.getName())) {
+                continue;
+            }
+            /*if ((field.getModifiers() & notwritableField) != 0) {
+                continue;
+            }*/
+            field.setAccessible(true);
+            Property w = new Property(field);
+            wrappers.put(field.getName(), w);
+        }
+        registerAllFields(clazz.getSuperclass());
     }
 
     private void registerSetters(Class<?> clazz, boolean isScala) {

@@ -459,6 +459,23 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         }
 
         @Override
+        public boolean init() {
+            try {
+                return super.init();
+            } catch(NotFound e) {
+                serve404(httpServletRequest, httpServletResponse, e);
+                return false;
+            } catch(RenderStatic r) {
+                try {
+                    serveStatic(httpServletResponse, httpServletRequest, r);
+                } catch(IOException e) {
+                    throw new UnexpectedException(e);
+                }
+                return false;
+            }
+        }
+
+        @Override
         public void run() {
             try {
                 super.run();

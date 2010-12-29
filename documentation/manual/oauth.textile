@@ -1,0 +1,77 @@
+h1. Integrate with OAuth
+
+"OAuth":http://oauth.net/ is an open protocol to allow secure API authorization in a simple and standard method from desktop and web applications.
+
+Two different specifications exist: OAuth 1.0 and OAuth 2.0. Play provides libraries to connect as a consumer to services proposing either of these specifications.
+
+The general process is the following:
+* Redirect the user to the authorization page of the provider
+* After the user grants authorization, he is redirected back to your server along with an unauthorized token
+* Your server exchanges the unauthorized token with an access token specific to the current user, that needs to be saved in order to perform requests to the service. This step is done as a server-to-server communication.
+
+The Play framework will take care of most of the process.
+
+h2. <a>OAuth 1.0</a>
+
+The OAuth 1.0 functionality is provided by the **play.libs.OAuth** class and is based on "oauth-signpost":http://code.google.com/p/oauth-signpost/. It is used by services such as "Twitter":http://apiwiki.twitter.com/ or "Google":http://code.google.com/apis/accounts/docs/OAuth.html
+
+To connect to a service, you need the create a OAuth.ServiceInfo instance using the
+following information, obtained from the service provider:
+* Request token URL
+* Access token URL
+* Authorize URL
+* Consumer key
+* Consumer secret
+
+The access token can be retrieved this way:
+
+bc. public static void authenticate() {
+    // TWITTER is a OAuth.ServiceInfo object
+    // getUser() is a method returning the current user ()
+    if (OAuth.isVerifierResponse()) {
+        // We got the verifier; now get the access tokens using the unauthorized tokens
+        TokenPair tokens = OAuth.service(TWITTER).requestAccessToken(getUser().getTokenPair());
+        // let's store them and go back to index
+        getUser().setTokenPair(tokens);
+        index();
+    }
+    OAuth twitt = OAuth.service(TWITTER);
+    TokenPair tokens = twitt.requestUnauthorizedToken();
+    // We received the unauthorized tokens - we need to store them before continuing
+    getUser().setTokenPair(tokens);
+    // Redirect the user to the authorization page
+    redirect(twitt.redirectUrl(tokens));
+}
+
+Then, call can be done by signing the requests using the token pair:
+bc. mentions = WS.url(url).oauth(TWITTER, getUser().getTokenPair()).get().getString();
+
+The full example usage is available in **samples-and-tests/twitter-oauth**.
+
+h2. <a>OAuth 2.0</a>
+
+OAuth 2.0 is much simpler that OAuth 1.0 because it doesn't involve signing requests. It is used by "Facebook":http://developers.facebook.com/docs/authentication/ and "37signals":http://37signals.com
+
+Functionality is provided by **play.libs.OAuth2**.
+
+To connect to a service, you need the create a OAuth2 instance using the following information, obtained from the service provider:
+* Access token URL
+* Authorize URL
+* Client ID
+* Secret
+
+bc. public static void auth() {
+    // FACEBOOK is a OAuth2 object
+    if (OAuth2.isCodeResponse()) {
+        String access_token = FACEBOOK.getAccessToken();
+        // Save access_token somewhere, you will need it to request the service
+        index();
+    }
+    FACEBOOK.requestAccessToken(); // This will trigger a redirect
+}
+
+Once you have the access token associated to the current user, you can use it to query the service on behalf of the user:
+
+bc. WS.url("https://graph.facebook.com/me?access_token=%s", access_token).get().getJson();
+
+The full example usage is available in **samples-and-tests/facebook-oauth2**.

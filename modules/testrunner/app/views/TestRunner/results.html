@@ -93,7 +93,8 @@
                         </div>
                         #{/if}
                         #{if result.trace}
-                        <pre>${result.trace.raw()}</pre>
+                        <a href="#" onclick="toggle_trace(this); return false;">Show trace</a>
+                        <pre data-role="trace">${result.trace.raw()}</pre>
                         #{/if}
                         #{/if}
                         #{else}

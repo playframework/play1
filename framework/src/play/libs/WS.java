@@ -452,6 +452,22 @@ public class WS extends PlayPlugin {
         }
 
         /**
+         * Parse the response string as a query string.
+         * @return The parameters as a Map. Return an empty map if the response
+         * is not formed as a query string.
+         */
+        public Map<String, String> getQueryString() {
+            Map<String, String> result = new HashMap<String, String>();
+            String body = getString();
+            for (String entry: body.split("&")) {
+                if (entry.indexOf("=") > 0) {
+                    result.put(entry.split("=")[0], entry.split("=")[1]);
+                }
+            }
+            return result;
+        }
+
+        /**
          * get the response as a stream
          * @return an inputstream
          */

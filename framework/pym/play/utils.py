@@ -70,7 +70,7 @@ def getWithModules(args, env):
         md.append(dirname)
     return md
 
-def package_as_war(app, env, war_path, war_zip_path):
+def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = []):
     app.check()
     modules = app.modules()
     classpath = app.getClasspath()
@@ -106,7 +106,7 @@ def package_as_war(app, env, war_path, war_zip_path):
     else:
         replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%PLAY_ID%', 'war')
     if os.path.exists(os.path.join(war_path, 'WEB-INF/application')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/application'))
-    copy_directory(app.path, os.path.join(war_path, 'WEB-INF/application'))
+    copy_directory(app.path, os.path.join(war_path, 'WEB-INF/application'), war_exclusion_list)
     if os.path.exists(os.path.join(war_path, 'WEB-INF/application/war')):
         shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/war'))
     if os.path.exists(os.path.join(war_path, 'WEB-INF/application/logs')):
@@ -120,7 +120,7 @@ def package_as_war(app, env, war_path, war_zip_path):
     if os.path.exists(os.path.join(war_path, 'WEB-INF/framework')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/framework'))
     os.mkdir(os.path.join(war_path, 'WEB-INF/framework'))
     copy_directory(os.path.join(env["basedir"], 'framework/templates'), os.path.join(war_path, 'WEB-INF/framework/templates'))
-    
+
     # modules
     for module in modules:
         to = os.path.join(war_path, 'WEB-INF/modules/%s' % os.path.basename(module))
@@ -183,17 +183,30 @@ def delete(filename):
         shutil.rmtree(filename)
     else:
         os.remove(filename)
-        
-def copy_directory(source, target):
+
+def copy_directory(source, target, exclude = []):
+    skip = None
+
     if not os.path.exists(target):
         os.makedirs(target)
-    for root, dirs, files in os.walk(source):         
+    for root, dirs, files in os.walk(source):
         for file in files:
-            if root.find('/.') > -1:
+            if root.find('/.') > -1 or root.find('\\.') > -1:
                 continue
             if file.find('~') == 0 or file.startswith('.'):
                 continue
-            from_ = os.path.join(root, file)           
+
+            # Loop to detect files to exclude (coming from exclude list)
+            # Search is done only on path for the moment
+            skip = 0
+            for exclusion in exclude:
+                if root.find(exclusion) > -1:
+                    skip = 1
+            # Skipping the file if exclusion has been found
+            if skip == 1:
+                continue
+
+            from_ = os.path.join(root, file)
             to_ = from_.replace(source, target, 1)
             to_directory = os.path.split(to_)[0]
             if not os.path.exists(to_directory):
