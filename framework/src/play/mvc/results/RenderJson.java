@@ -45,11 +45,15 @@ public class RenderJson extends Result {
     //
     
     static Method getMethod(Class<?> clazz, String name) {
+        Method bestMatch = null;
         for(Method m : clazz.getDeclaredMethods()) {
             if(m.getName().equals(name)) {
-                return m;
+                if (bestMatch == null ||  
+                    !Object.class.equals(m.getParameterTypes()[0])) {
+                    bestMatch = m;
+                }
             }
         }
-        return null;
+        return bestMatch;
     }
 } 
