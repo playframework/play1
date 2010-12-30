@@ -158,7 +158,7 @@ Extended references for day-to-day hacking.
 # "Browse API documentation":/@api/index.html
 # "Template tags and extensions reference":tags
 # "Java extensions":javaextensions
-
+# "Built-in validations":validation-builtin
 
 h2. <a name="versionnotes">Version notes</a>
 
