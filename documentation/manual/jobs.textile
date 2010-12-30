@@ -112,7 +112,7 @@ To resolve these use cases, Play allows you to temporarily suspend a request. Th
 
 p(note). **Tip**
  
-You can take a look at the **chat** sample application to see a real example.
+You can see a real example in **$PLAY_HOME/samples-and-tests/chat/**.
 
 For example, this action will launch a very long job and wait for its completion before returning the result to the HTTP response:
 
