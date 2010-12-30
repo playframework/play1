@@ -70,7 +70,7 @@ def getWithModules(args, env):
         md.append(dirname)
     return md
 
-def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list):
+def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = []):
     app.check()
     modules = app.modules()
     classpath = app.getClasspath()
