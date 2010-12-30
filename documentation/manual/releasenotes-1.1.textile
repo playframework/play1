@@ -77,7 +77,7 @@ When using the **@@{...}** notation (absolute reverse routing) in a template, th
 
 For example, if you want to use a content distribution network to distribute your static assets in production, you could write a **routes** file like this:
 
-bc. #{if Play.mode.isDev()}
+bc. #{if play.Play.mode.isDev()}
     GET     /public/                        staticDir:public
 #{/}
 #{else}
