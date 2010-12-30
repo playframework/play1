@@ -123,7 +123,7 @@ bc. public static void generatePDF(Long reportId) {
         request.args.put("task", task);
         waitFor(task);
     }
-    renderBinary((Future<InputStream>)request.args.get("task").get());
+    renderBinary(((Future<inputstream>) request.args.get("task")).get());
 }
 
 This action will be called twice. On the first call the **request.isNew** tag is set to **true**, so the action will create a Job and start it immediately. Then it tells Play to wait for the task completion before trying the action again. After the task is completed, Play will call the action a second time. This time the **request.isNew** tag is set to false. The action will retrieve the job result and send it as the HTTP response.
