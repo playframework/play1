@@ -56,11 +56,11 @@ public class Binder {
     public final static Object NO_BINDING = new Object();
 
     @SuppressWarnings("unchecked")
-    static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String prefix, String[] profiles) {
+    static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String suffix, String[] profiles) {
         try {
-            Logger.trace("bindInternal: name [" + name + "] prefix [" + prefix + "]");
+            Logger.trace("bindInternal: name [" + name + "] suffix [" + suffix + "]");
 
-            String[] value = params.get(name + prefix);
+            String[] value = params.get(name + suffix);
             Logger.trace("bindInternal: value [" + value + "]");
             Logger.trace("bindInternal: profile [" + Utils.join(profiles, ",") + "]");
             // Let see if we have a BindAs annotation and a separator. If so, we need to split the values
@@ -89,7 +89,7 @@ public class Binder {
             // The array condition is not so nice... We should find another way of doing this....
             if (clazz.isArray() && (clazz != byte[].class && clazz != byte[][].class && clazz != File[].class && clazz != Upload[].class)) {
                 if (value == null) {
-                    value = params.get(name + prefix + "[]");
+                    value = params.get(name + suffix + "[]");
                 }
                 if (value == null) {
                     return MISSING;
@@ -133,7 +133,7 @@ public class Binder {
                 // Search for all params
                 Map<Object, Object> r = new HashMap<Object, Object>();
                 for (String param : params.keySet()) {
-                    Pattern p = Pattern.compile("^" + name + prefix + "\\[([^\\]]+)\\](.*)$");
+                    Pattern p = Pattern.compile("^" + name + suffix + "\\[([^\\]]+)\\](.*)$");
                     Matcher m = p.matcher(param);
                     if (m.matches()) {
                         String key = m.group(1);
@@ -142,13 +142,13 @@ public class Binder {
                         tP.put("key", new String[]{key});
                         Object oKey = bindInternal("key", keyClass, keyClass, annotations, tP, "", value);
                         if (oKey != MISSING) {
-                            if (isComposite(name + prefix + "[" + key + "]", params)) {
+                            if (isComposite(name + suffix + "[" + key + "]", params)) {
                                 BeanWrapper beanWrapper = getBeanWrapper(valueClass);
-                                Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]", annotations);
+                                Object oValue = beanWrapper.bind("", type, params, name + suffix + "[" + key + "]", annotations);
                                 r.put(oKey, oValue);
                             } else {
                                 tP = new HashMap<String, String[]>();
-                                tP.put("value", params.get(name + prefix + "[" + key + "]"));
+                                tP.put("value", params.get(name + suffix + "[" + key + "]"));
                                 Object oValue = bindInternal("value", valueClass, valueClass, annotations, tP, "", value);
                                 if (oValue != MISSING) {
                                     r.put(oKey, oValue);
@@ -198,23 +198,23 @@ public class Binder {
                     }
                 }
                 if (value == null) {
-                    value = params.get(name + prefix + "[]");
+                    value = params.get(name + suffix + "[]");
                     if (value == null && r instanceof List) {
                         for (String param : params.keySet()) {
-                            Pattern p = Pattern.compile("^" + escape(name + prefix) + "\\[([0-9]+)\\](.*)$");
+                            Pattern p = Pattern.compile("^" + escape(name + suffix) + "\\[([0-9]+)\\](.*)$");
                             Matcher m = p.matcher(param);
                             if (m.matches()) {
                                 int key = Integer.parseInt(m.group(1));
                                 while (((List<?>) r).size() <= key) {
                                     ((List<?>) r).add(null);
                                 }
-                                if (isComposite(name + prefix + "[" + key + "]", params)) {
+                                if (isComposite(name + suffix + "[" + key + "]", params)) {
                                     BeanWrapper beanWrapper = getBeanWrapper(componentClass);
-                                    Object oValue = beanWrapper.bind("", type, params, name + prefix + "[" + key + "]", annotations);
+                                    Object oValue = beanWrapper.bind("", type, params, name + suffix + "[" + key + "]", annotations);
                                     ((List) r).set(key, oValue);
                                 } else {
                                     Map<String, String[]> tP = new HashMap<String, String[]>();
-                                    tP.put("value", params.get(name + prefix + "[" + key + "]"));
+                                    tP.put("value", params.get(name + suffix + "[" + key + "]"));
                                     Object oValue = bindInternal("value", componentClass, componentClass, annotations, tP, "", value);
                                     if (oValue != MISSING) {
                                         ((List) r).set(key, oValue);
@@ -240,10 +240,10 @@ public class Binder {
             }
 
             // Assume a Bean if isComposite
-            Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] isComposite [" + isComposite(name + prefix, params) + "]");
-            if (isComposite(name + prefix, params)) {
+            Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] isComposite [" + isComposite(name + suffix, params) + "]");
+            if (isComposite(name + suffix, params)) {
                 BeanWrapper beanWrapper = getBeanWrapper(clazz);
-                return beanWrapper.bind(name, type, params, prefix, annotations);
+                return beanWrapper.bind(name, type, params, suffix, annotations);
             }
 
             // Simple types
@@ -253,7 +253,7 @@ public class Binder {
             
             return directBind(name, annotations, value[0], clazz);
         } catch (Exception e) {
-            Validation.addError(name + prefix, "validation.invalid");
+            Validation.addError(name + suffix, "validation.invalid");
             return MISSING;
         }
     }
