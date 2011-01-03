@@ -3,6 +3,7 @@ package play.mvc;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -426,7 +428,14 @@ public class ActionInvoker {
     }
 
     public static Object invokeControllerMethod(Method method, Object[] forceArgs) throws Exception {
-        if (Modifier.isStatic(method.getModifiers()) && !method.getDeclaringClass().getName().matches("^controllers\\..*\\$class$")) {
+        if (!Modifier.isStatic(method.getModifiers()) && !method.getDeclaringClass().getName().matches("^controllers\\..*\\$class$")) {
+            Annotation[] annotations = method.getDeclaredAnnotations();
+            String annotation = Utils.getSimpleNames(annotations);
+            if (!StringUtils.isEmpty(annotation)) {
+                throw new UnexpectedException("Method public static void " + method.getName() + "() annotated with " + annotation + " in class " + method.getDeclaringClass().getName() + " is not static.");
+            }
+            throw new UnexpectedException("No method public static void " + method.getName() + "() was found in class " + method.getDeclaringClass().getName());
+        } else if (Modifier.isStatic(method.getModifiers()) && !method.getDeclaringClass().getName().matches("^controllers\\..*\\$class$")) {
             return method.invoke(null, forceArgs == null ? getActionMethodArgs(method, null) : forceArgs);
         } else if (Modifier.isStatic(method.getModifiers())) {
             Object[] args = getActionMethodArgs(method, null);
@@ -437,6 +446,7 @@ public class ActionInvoker {
             try {
                 instance = method.getDeclaringClass().getDeclaredField("MODULE$").get(null);
             } catch (Exception e) {
+                // TODO: Find a better error report
                 throw new ActionNotFoundException(Http.Request.current().action, e);
             }
             return method.invoke(instance, forceArgs == null ? getActionMethodArgs(method, instance) : forceArgs);
