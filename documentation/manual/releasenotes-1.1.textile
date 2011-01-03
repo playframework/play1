@@ -214,15 +214,23 @@ bc. http.port=9000
 https.port=9443
 
 You need to put your certificates in the *conf* directory. Play supports X509 certificates and keystore certificates. The X509 certificates must be named as follow:
-*host.cert* for the certificate and *host.key* for the key. If you are using keystore, then, by default it should be named *keystore.jks*.
+*host.cert* for the certificate and *host.key* for the key. If you are using keystore, then, by default it should be named *certificate.jks*.
 
 If you are using X509 certificates, then the following parameters can be configured though your *application.conf*:
 
 bc. # X509 certificates
-certificate.key.file=host.key
-certificate.file=host.cert
+certificate.key.file=conf/host.key
+certificate.file=conf/host.cert
 # In case your key file is password protected
 certificate.password=secret
+trustmanager.algorithm=JKS
+
+In case your are using keystore:
+
+bc. keystore.algorithm=JKS
+keystore.password=secret
+keystore.file=conf/certificate.jks
+
 
 Note that the values above are the default values.
 
