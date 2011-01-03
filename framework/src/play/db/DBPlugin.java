@@ -135,7 +135,7 @@ public class DBPlugin extends PlayPlugin {
     }
 
     private static void check(Properties p, String mode, String property) {
-        if (StringUtils.isEmpty(p.getProperty(property))) {
+        if (!StringUtils.isEmpty(p.getProperty(property))) {
             Logger.warn("Ignoring " + property + " because running the in " + mode + " db.");
         }
     }
