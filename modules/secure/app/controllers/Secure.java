@@ -36,7 +36,7 @@ public class Secure extends Controller {
             }
         }
     }
-    
+
     // ~~~ Login
 
     public static void login() throws Throwable {
@@ -87,9 +87,9 @@ public class Secure extends Controller {
         flash.success("secure.logout");
         login();
     }
-    
+
     // ~~~ Utils
-    
+
     static void redirectToOriginalURL() throws Throwable {
         Security.invoke("onAuthenticated");
         String url = flash.get("url");
