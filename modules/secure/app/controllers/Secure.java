@@ -11,19 +11,28 @@ import play.utils.*;
 public class Secure extends Controller {
 
     @Before(unless={"login", "authenticate", "logout"})
-    static void checkAccess() throws Throwable {
-        // Authent
-        if(!session.contains("username")) {
+    static void checkAccess() throws Throwable {    
+        if (!session.contains("username")) {
+            loadCookieIfPresent();
+            AllowGuest guest = getControllerInheritedAnnotation(AllowGuest.class);
+            if (guest != null) {
+                for (String action : guest.value()) {
+                    if (action.equals(request.actionMethod))
+                        return;
+                }
+            }
+            
             flash.put("url", request.method == "GET" ? request.url : "/"); // seems a good default
             login();
         }
-        // Checks
+        
+        // Check if user is authorized to perform action
         Check check = getActionAnnotation(Check.class);
-        if(check != null) {
+        if (check != null) {
             check(check);
         }
         check = getControllerInheritedAnnotation(Check.class);
-        if(check != null) {
+        if (check != null) {
             check(check);
         }
     }
@@ -90,6 +99,21 @@ public class Secure extends Controller {
     
     // ~~~ Utils
     
+    /**
+    * Loads user data from session cookie if present, but doesn't prompt guest users to log in.
+    */
+    @Util
+    static void loadCookieIfPresent() {
+        Http.Cookie remember = request.cookies.get("rememberme");
+        if (remember != null && remember.value.indexOf("-") > 0) {
+            String sign = remember.value.substring(0, remember.value.indexOf("-"));
+            String username = remember.value.substring(remember.value.indexOf("-") + 1);
+            if (Crypto.sign(username).equals(sign)) {
+                session.put("username", username);
+            }
+        }
+    }
+    
     static void redirectToOriginalURL() throws Throwable {
         Security.invoke("onAuthenticated");
         String url = flash.get("url");
@@ -102,7 +126,7 @@ public class Secure extends Controller {
     public static class Security extends Controller {
 
         /**
-         * @Deprecated
+        * @Deprecated implement @{link authenticate(String,String)} instead.
          * 
          * @param username
          * @param password
