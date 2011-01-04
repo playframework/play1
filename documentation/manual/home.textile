@@ -18,6 +18,12 @@ Your first steps with Play and your first 5 minutes of fun.
 # "Your first application — the ‘Hello World’ tutorial":firstapp
 # "Sample applications":samples
 # "Live coding script - to practice, and impress your colleagues with":http://www.lunatech-research.fr/archives/2010/06/14/how-demo-play-framework-live-coding-script
+# "Play framework cheat sheets - Controllers":cheatsheet/controllers
+# "Play framework cheat sheets - Templates":cheatsheet/templates
+# "Play framework cheat sheets - Model":cheatsheet/model
+# "Play framework cheat sheets - Testing":cheatsheet/tests
+# "Play framework cheat sheets - Multi Environment":cheatsheet/multiEnvironment
+# "Play framework cheat sheets - Command Line":cheatsheet/commandLine
 
 
 h2. <a name="guide">Tutorial -- Play guide, a real world app step-by-step</a>
