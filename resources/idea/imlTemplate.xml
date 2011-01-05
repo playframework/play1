@@ -8,16 +8,19 @@
             <sourceFolder url="file://$MODULE_DIR$/app" isTestSource="false" />
             <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
         </content> 
-        %LINKS% 
+        %LINKS%
+        %MODULE_LINKS%
         <orderEntry type="inheritedJdk" />     
         <orderEntry type="module-library">
             <library name="Project Libraries">
                 <CLASSES>
                     <root url="file://$MODULE_DIR$/lib" />
+                    %MODULE_LIB_CLASSES%
                 </CLASSES>
                 <JAVADOC />
                 <SOURCES />
                 <jarDirectory url="file://$MODULE_DIR$/lib" recursive="false" />
+                %MODULE_LIBRARIES%
             </library>
         </orderEntry>
         <orderEntry type="module-library">

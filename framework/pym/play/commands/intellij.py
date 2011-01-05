@@ -29,11 +29,24 @@ def execute(**kargs):
     if len(modules):
         lXML = ""
         cXML = ""
-        for module in modules:
-            lXML += '    <content url="file://%s">\n      <sourceFolder url="file://%s" isTestSource="false" />\n    </content>\n' % (module, os.path.join(module, 'app').replace('\\', '/'))
-        replaceAll(imlFile, r'%LINKS%', lXML)
+        for i, module in enumerate(modules):
+            commands = os.path.join(module, 'commands.py')
+            if os.path.exists(commands):
+                execfile(commands)
+            else:
+                lXML += '    <content url="file://%s">\n            <sourceFolder url="file://%s" isTestSource="false" />\n        </content>\n' % (module, os.path.join(module, 'app').replace('\\', '/'))
+            if i == (len(modules) -1):
+                replaceAll(imlFile, r'%LINKS%', lXML)
+                replaceAll(imlFile, r'%MODULE_LINKS%', '')
+                replaceAll(imlFile, r'%MODULE_LIB_CLASSES%', '')
+                replaceAll(imlFile, r'%MODULE_LIBRARIES%', '')
+
     else:
         replaceAll(imlFile, r'%LINKS%', '')
+        replaceAll(imlFile, r'%MODULE_LINKS%', '')
+        replaceAll(imlFile, r'%MODULE_LIB_CLASSES%', '')
+        replaceAll(imlFile, r'%MODULE_LIBRARIES%', '')
+
 
     print "~ OK, the application is ready for Intellij Idea"
     print "~ Use File/New Module/Import Existing module"
