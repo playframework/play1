@@ -300,8 +300,8 @@ public class Invoker {
      * Throwable to indicate that the request must be suspended
      */
     public static class Suspend extends PlayException {
-
-        /**
+        private static final long serialVersionUID = 1L;
+				/**
          * Suspend for a timeout (in milliseconds).
          */
         long timeout;
