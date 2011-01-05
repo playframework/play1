@@ -247,7 +247,11 @@ public abstract class FunctionalTest extends BaseTest {
         });
         try {
             invocationResult.get(30, TimeUnit.SECONDS);
-            savedCookies = response.cookies;
+            if (savedCookies == null) {
+                savedCookies = response.cookies;
+            } else {
+                savedCookies.putAll(response.cookies);
+            }
             response.out.flush();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
