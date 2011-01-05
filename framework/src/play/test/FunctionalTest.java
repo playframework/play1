@@ -228,7 +228,11 @@ public abstract class FunctionalTest extends BaseTest {
 
     public static void makeRequest(final Request request, final Response response) {
         ActionInvoker.invoke(request, response);
-        savedCookies = response.cookies;
+		if (savedCookies == null) {
+			savedCookies = response.cookies;
+		} else {
+			savedCookies.putAll(response.cookies);
+		}
         try {
             response.out.flush();
         } catch (IOException ex) {
