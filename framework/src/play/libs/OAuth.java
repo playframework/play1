@@ -32,8 +32,12 @@ public class OAuth {
     }
 
     public static boolean isVerifierResponse() {
-        return Params.current().get("oauth_verifier") != null;
+        return isVerifierResponse("oauth_verifier");
     }
+
+  	public static boolean isVerifierResponse(String verifierName){
+  		return Params.current().get(verifierName) != null;
+  	}
 
     /**
      * Request the unauthorized token and secret. They can then be read with getTokens()
@@ -49,11 +53,15 @@ public class OAuth {
         }
         return new TokenPair(consumer.getToken(), consumer.getTokenSecret());
     }
-
+    
     public TokenPair requestAccessToken(TokenPair tokenPair) {
+    	return requestAccessToken(tokenPair,"oauth_verifier");
+    }
+
+    public TokenPair requestAccessToken(TokenPair tokenPair,String verifierName) {
         OAuthConsumer consumer = new DefaultOAuthConsumer(info.consumerKey, info.consumerSecret);
         consumer.setTokenWithSecret(tokenPair.token, tokenPair.secret);
-        String verifier = Params.current().get("oauth_verifier");
+        String verifier = Params.current().get(verifierName);
         try {
             provider.retrieveAccessToken(consumer, verifier);
         } catch (Exception e) {
