@@ -244,7 +244,9 @@ public abstract class Cache {
      * Stop the cache system.
      */
     public static void stop() {
-        cacheImpl.stop();
+        if (cacheImpl != null) {
+            cacheImpl.stop();
+        }
     }
     
     /**

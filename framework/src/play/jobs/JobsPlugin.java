@@ -184,7 +184,9 @@ public class JobsPlugin extends PlayPlugin {
 
     @Override
     public void onApplicationStop() {
-        executor.shutdownNow();
-        executor.getQueue().clear();
+        if (executor != null) {
+            executor.shutdownNow();
+            executor.getQueue().clear();
+        }
     }
 }

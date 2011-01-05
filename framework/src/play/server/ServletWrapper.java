@@ -52,6 +52,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         }
         // This is really important as we know this parameter already (we are running in a servlet container)
         Play.frameworkPath = root.getParentFile();
+        Play.standalone = false;
         Play.usePrecompiled = true;
         Play.init(root, playId);
         Play.Mode mode = Play.Mode.valueOf(Play.configuration.getProperty("application.mode", "DEV").toUpperCase());

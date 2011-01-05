@@ -151,6 +151,7 @@ public class Play {
     static boolean firstStart = true;
     public static boolean usePrecompiled = false;
     public static boolean forceProd = false;
+    public static boolean standalone = true;
     /**
      * Lazy load the templates on demand
      */
@@ -300,7 +301,11 @@ public class Play {
         } catch (RuntimeException e) {
             if (e.getCause() instanceof IOException) {
                 Logger.fatal("Cannot read application.conf");
-                System.exit(-1);
+                if (standalone) {
+                    System.exit(-1);
+                } else {
+                    throw e;
+                }
             }
         }
         // Ok, check for instance specifics configuration
@@ -487,10 +492,12 @@ public class Play {
                 return true;
             }
             Logger.error("Precompiled classes are missing!!");
-            try {
-                System.exit(-1);
-            } catch (Exception ex) {
-                // Will not work in some application servers
+            if (standalone) {
+                try {
+                    System.exit(-1);
+                } catch (Exception ex) {
+                    // Will not work in some application servers
+                }
             }
             return false;
         }
@@ -507,10 +514,12 @@ public class Play {
             return true;
         } catch (Throwable e) {
             Logger.error(e, "Cannot start in PROD mode with errors");
-            try {
-                System.exit(-1);
-            } catch (Exception ex) {
-                // Will not work in some application servers
+            if (standalone) {
+                try {
+                    System.exit(-1);
+                } catch (Exception ex) {
+                    // Will not work in some application servers
+                }
             }
             return false;
         }
