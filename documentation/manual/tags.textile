@@ -130,6 +130,7 @@ bc. <ul>
 
 The tag defines implicit variables in its body.
 
+* **error**, the error
 * **error_index**, the error’s index, starting at 1
 * **error_isLast**, true for the last element
 * **error_isFirst**, true for the first element
