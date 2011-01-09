@@ -52,6 +52,27 @@ public abstract class FunctionalTest extends BaseTest {
         return GET(newRequest(), url);
     }
 
+     /**
+     * sends a GET request to the application under tests.
+     * @param url relative url such as <em>"/products/1234"</em>
+     * @param followRedirect indicates if request have to follow redirection (status 302)
+     * @return the response
+     */
+    public static Response GET(Object url, boolean followRedirect) {
+        Response response = GET(url);
+        if (Http.StatusCode.FOUND == response.status && followRedirect) {
+            Http.Header redirectedTo = response.headers.get("Location");
+            java.net.URL redirectedUrl = null;
+            try {
+                redirectedUrl = new java.net.URL(redirectedTo.value());
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+            response = GET(redirectedUrl.getPath());
+        }
+        return response;
+    }
+    
     /**
      * sends a GET request to the application under tests.
      * @param request
