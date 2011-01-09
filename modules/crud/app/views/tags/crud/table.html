@@ -73,6 +73,11 @@
                 #{doBody body:handler /}
             %{ } else { }%
                 <td>
+                    #{form @delete(object._key())}
+                        <div class="crudDelete" style="position: relative;">
+                            <input type="submit" value="&{'crud.delete', ''}" />
+                        </div>
+                    #{/form}
                     <a href="@{show(object._key())}">${object.toString()?.escape()?.raw() ?: '(no value)'}</a>
                 </td>
             %{ } }%
