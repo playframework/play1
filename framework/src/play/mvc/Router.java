@@ -161,7 +161,7 @@ public class Router {
     static void parse(VirtualFile routeFile, String prefix) {
         String fileAbsolutePath = routeFile.getRealFile().getAbsolutePath();
         String content = routeFile.contentAsString();
-        if (content.indexOf("${") > -1 || content.indexOf("#{") > -1) {
+        if (content.indexOf("${") > -1 || content.indexOf("#{") > -1 || content.indexOf("%{") > -1) {
             // Mutable map needs to be passed in.
             content = TemplateLoader.load(routeFile).render(new HashMap<String, Object>(16));
         }
@@ -621,7 +621,7 @@ public class Router {
         Arg hostArg = null;
         public int routesFileLine;
         public String routesFile;
-        static Pattern customRegexPattern = new Pattern("\\{([a-zA-Z_0-9]+)\\}");
+        static Pattern customRegexPattern = new Pattern("\\{([a-zA-Z_][a-zA-Z_0-9]*)\\}");
         static Pattern argsPattern = new Pattern("\\{<([^>]+)>([a-zA-Z_0-9]+)\\}");
         static Pattern paramPattern = new Pattern("([a-zA-Z_0-9]+):'(.*)'");
 
@@ -745,7 +745,7 @@ public class Router {
         private boolean contains(String accept) {
             boolean contains = (accept == null);
             if (accept != null) {
-                if (this.formats.size() == 0) {
+                if (this.formats.isEmpty()) {
                     return true;
                 }
                 for (String format : this.formats) {
