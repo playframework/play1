@@ -2,37 +2,41 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET			/							    Application.index
+GET         /                               Application.index
 PUT         /sayHello                       Application.hello
 GET         /aGetForm                       Application.aGetForm
 GET         /aGetForm/                      Application.aGetForm2 
 GET         /optionalSlash/?                Application.optional 
 GET         /index                          Application.index
 
+GET         /re/{<[a-z]+>re}                Application.ok
+GET         /re/{<[0-9]{5}>re}              Application.ok
+GET         /re/{<[A-Z]{2,4}>re}            Application.ok
+
 GET         /{lucky}/doIt                   Application.showIt
 
 GET         www.zenexity.com/hello          Application.helloZen
 GET         {clientName}.myApp.com/home     Application.myHomePage
 
-POST		/ressource/file/{id}			Rest.postOrPutFile
-PUT			/ressource/file/{id}			Rest.postOrPutFile
-POST		/ressource/fileAndParams/{id}	Rest.postOrPutFileAndParams
-PUT			/ressource/fileAndParams/{id}	Rest.postOrPutFileAndParams
+POST        /ressource/file/{id}            Rest.postOrPutFile
+PUT         /ressource/file/{id}            Rest.postOrPutFile
+POST        /ressource/fileAndParams/{id}   Rest.postOrPutFileAndParams
+PUT         /ressource/fileAndParams/{id}   Rest.postOrPutFileAndParams
 
-GET			/ressource/{id}					Rest.get
-POST		/ressource/{id}					Rest.postOrPut
-PUT			/ressource/{id}					Rest.postOrPut
-DELETE		/ressource/{id}					Rest.delete
-OPTIONS		/ressource/{id}					Rest.options
+GET         /ressource/{id}                 Rest.get
+POST        /ressource/{id}                 Rest.postOrPut
+PUT         /ressource/{id}                 Rest.postOrPut
+DELETE      /ressource/{id}                 Rest.delete
+OPTIONS     /ressource/{id}                 Rest.options
 
 POST        /needAuthenticity               WithAuthenticity.needAuthenticity
 GET         /needAuthenticity               WithAuthenticity.needAuthenticity
 
 # Import the default CRUD routes
-*			/admin						     module:crud
+*           /admin                           module:crud
 
 # Map static resources from the /app/public folder to the /public path
-GET			/public/					     staticDir:public
+GET         /public/                         staticDir:public
 GET         static.foo.com/assets/           staticDir:public2/assets1
 GET         static2.foo.com/x                staticDir:public2/assets2
 
@@ -42,7 +46,7 @@ GET         /index2                          Application.index2
 
 # Catch all
 *           /sample/{controller}/{action}    sample.{controller}.{action}
-*			/{controller}/{action}		     {controller}.{action}
+*           /{controller}/{action}           {controller}.{action}
 
 # Data binding
 
