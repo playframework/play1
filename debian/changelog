@@ -1,3 +1,9 @@
+play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-3) maverick; urgency=low
+
+  * Added db.pool.maxIdleTime
+
+ -- Stephane Epardaud <stephane@eden>  Tue, 11 Jan 2011 16:05:58 +0100
+
 play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-2) maverick; urgency=low
 
   * Depend on python >= 2.5
