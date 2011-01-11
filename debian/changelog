@@ -1,6 +1,6 @@
 play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-3) maverick; urgency=low
 
-  * Added db.pool.maxIdleTime
+  * Added db.pool.maxIdleTimeExcessConnections
 
  -- Stephane Epardaud <stephane@eden>  Tue, 11 Jan 2011 16:05:58 +0100
 
