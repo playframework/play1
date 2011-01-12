@@ -347,7 +347,7 @@ bc. public class User {
     
     static class MyPasswordCheck extends Check {
         
-        public abstract boolean isSatisfied(Object user, Object password) {
+        public boolean isSatisfied(Object user, Object password) {
             return notMatchPreviousPasswords(password);
         }
         

@@ -1,6 +1,7 @@
 package play.db;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -13,7 +14,9 @@ import java.util.Properties;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+
 import jregex.Matcher;
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -131,10 +134,20 @@ public class DBPlugin extends PlayPlugin {
         DB.close();
     }
 
+    private static void check(Properties p, String mode, String property) {
+        if (!StringUtils.isEmpty(p.getProperty(property))) {
+            Logger.warn("Ignoring " + property + " because running the in " + mode + " db.");
+        }
+    }
+
     private static boolean changed() {
         Properties p = Play.configuration;
 
         if ("mem".equals(p.getProperty("db"))) {
+            // If db.url or db.user or db.pass or db.driver is set but db=mem warn the user
+            check(p, "memory", "db.driver");
+            check(p, "memory", "db.url");
+
             p.put("db.driver", "org.hsqldb.jdbcDriver");
             p.put("db.url", "jdbc:hsqldb:mem:playembed");
             p.put("db.user", "sa");
@@ -142,6 +155,10 @@ public class DBPlugin extends PlayPlugin {
         }
 
         if ("fs".equals(p.getProperty("db"))) {
+            // If db.url or db.user or db.pass or db.driver is set but db=fs warn the user
+            check(p, "fs", "db.driver");
+            check(p, "fs", "db.url");
+
             p.put("db.driver", "org.hsqldb.jdbcDriver");
             p.put("db.url", "jdbc:hsqldb:file:" + (new File(Play.applicationPath, "db/db").getAbsolutePath()));
             p.put("db.user", "sa");

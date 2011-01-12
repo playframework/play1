@@ -69,6 +69,10 @@ public class Application extends Controller {
         renderText("IT WORKS");
     }
 
+    public static void ok(String re) {
+        renderText("OK: " + re);
+    }
+
     public static void index() {
         routeArgs.put("lucky", "strike");
         render();

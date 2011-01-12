@@ -70,7 +70,7 @@ However, you can also use it with the **list** tag and it will be executed if th
 
 bc. #{list items:task, as:'task'}
     <li>${task}</li>
-#{/li}
+#{/list}
  
 #{else}
     Nothing to do...
@@ -130,6 +130,7 @@ bc. <ul>
 
 The tag defines implicit variables in its body.
 
+* **error**, the error
 * **error_index**, the error’s index, starting at 1
 * **error_isLast**, true for the last element
 * **error_isFirst**, true for the first element

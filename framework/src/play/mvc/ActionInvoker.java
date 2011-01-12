@@ -3,6 +3,7 @@ package play.mvc;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -437,6 +439,12 @@ public class ActionInvoker {
             try {
                 instance = method.getDeclaringClass().getDeclaredField("MODULE$").get(null);
             } catch (Exception e) {
+                 Annotation[] annotations = method.getDeclaredAnnotations();
+                String annotation = Utils.getSimpleNames(annotations);
+                if (!StringUtils.isEmpty(annotation)) {
+                    throw new UnexpectedException("Method public static void " + method.getName() + "() annotated with " + annotation + " in class " + method.getDeclaringClass().getName() + " is not static.");
+                }
+                // TODO: Find a better error report
                 throw new ActionNotFoundException(Http.Request.current().action, e);
             }
             return method.invoke(instance, forceArgs == null ? getActionMethodArgs(method, instance) : forceArgs);
