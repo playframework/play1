@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -17,7 +20,7 @@ public class Files {
      * @param to
      */
     public static void copy(File from, File to) {
-        if(from.getAbsolutePath().equals(to.getAbsolutePath())) {
+        if (from.getAbsolutePath().equals(to.getAbsolutePath())) {
             return;
         }
         FileInputStream is = null;
@@ -31,7 +34,7 @@ public class Files {
                 os.write(buffer, 0, read);
             }
         } catch (Exception e) {
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         } finally {
             try {
                 is.close();
@@ -77,8 +80,28 @@ public class Files {
         try {
             FileUtils.copyDirectory(from, to);
             return true;
-        } catch(IOException e) {
+        } catch (IOException e) {
             return false;
+        }
+    }
+
+    public static void unzip(File from, File to) {
+        try {
+            ZipFile zipFile = new ZipFile(from);
+            Enumeration entries = entries = zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = (ZipEntry) entries.nextElement();
+                if (entry.isDirectory()) {
+                    new File(to, entry.getName()).mkdir();
+                    continue;
+                }
+                File f = new File(to, entry.getName());
+                f.getParentFile().mkdirs();
+                IO.copy(zipFile.getInputStream(entry), new FileOutputStream(f));
+            }
+            zipFile.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
