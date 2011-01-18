@@ -98,6 +98,11 @@ Everything you need to know about Play.
 ## "Fixtures":test#fixtures
 ## "Running the tests":test#running
 ## "Continuous integration":test#continuous
+# "Dependency management":dependency
+## "Dependency format":dependency#format
+## "dependencies.yml":dependency#yml
+## "Conflicts resolution":dependency#conflicts
+## "Adding new repositories":dependency#repositories
 # "Deployment options":deployment
 ## "Standalone Play application":deployment#standalone
 ## "Running on JEE application servers":deployment#appservers

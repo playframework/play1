@@ -114,6 +114,14 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                             throw new Oops("Unknown dependency format -> " + dep);
                         }
 
+                        // Hack
+                        if(depName.matches("play\\s+->\\s+crud") || depName.equals("crud")) {
+                            depName = "play -> crud " + DependenciesManager.version;
+                        }
+                        if(depName.matches("play\\s+->\\s+secure") || depName.equals("secure")) {
+                            depName = "play -> secure " + DependenciesManager.version;
+                        }
+
                         Matcher m = Pattern.compile("([^\\s]+)\\s*[-][>]\\s*([^\\s]+)\\s+([^\\s]+).*").matcher(depName);
                         if (!m.matches()) {
                             m = Pattern.compile("(([^\\s]+))\\s+([^\\s]+).*").matcher(depName);

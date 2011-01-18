@@ -1,0 +1,21 @@
+~ Name:
+~ ~~~~~
+~ dependencies -- Resolve and retrieve project dependencies
+~
+~ Alias:
+~ ~~~~~
+~ deps
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play dependencies [app_path] [--verbose] [--debug] [--sync]
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Compute resolve and retrieve project dependencies and install them either
+~ in lib/ directory for jar artifacts or in modules/ for Play modules artifacts.
+~
+~ By default the command will not delete unrecognized artifacts. Use the --sync option
+~ to keep both lib/ and modules/ directory synchronized with the dependencies management
+~ system.
+~

@@ -20,6 +20,8 @@ import play.libs.IO;
 
 public class DependenciesManager {
 
+    static String version = "1.2";
+
     public static void main(String[] args) throws Exception {
         
         // Paths
@@ -231,6 +233,8 @@ public class DependenciesManager {
             // Check again from origin location
             if (!artifact.getArtifactOrigin().isLocal() && artifact.getArtifactOrigin().getLocation().endsWith(".zip")) {
                 isPlayModule = true;
+            } else if (artifact.getArtifactOrigin().isLocal() && artifact.getLocalFile().isDirectory()) {
+                isPlayModule = true;
             } else if (artifact.getArtifactOrigin().isLocal()) {
                 String frameworkPath = new File(framework, "modules").getCanonicalPath();
                 isPlayModule = artifact.getArtifactOrigin().getLocation().startsWith(frameworkPath);
@@ -270,7 +274,7 @@ public class DependenciesManager {
         HumanReadyLogger humanReadyLogger = new HumanReadyLogger();
 
         IvySettings ivySettings = new IvySettings();
-        new SettingsParser(humanReadyLogger).parse(ivySettings, new File(framework, "framework/dependencies-1.2.yml"));
+        new SettingsParser(humanReadyLogger).parse(ivySettings, new File(framework, "framework/dependencies-" + version + ".yml"));
         new SettingsParser(humanReadyLogger).parse(ivySettings, new File(application, "conf/dependencies.yml"));
         ivySettings.setDefaultResolver("mavenCentral");
         ivySettings.setDefaultUseOrigin(true);

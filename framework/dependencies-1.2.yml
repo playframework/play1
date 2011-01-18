@@ -1,5 +1,5 @@
 
-# Play 1.1
+# Play 1.2
 self: play -> play 1.2
 
 # Don't follow transitive dependencies for this project
@@ -71,7 +71,7 @@ repositories:
 
     - playModules:  
         type:       chain
-        using:
+        using:            
             - playLocalModules:
                 type:       local
                 descriptor: "${play.path}/modules/[module]-[revision]/conf/dependencies.yml"

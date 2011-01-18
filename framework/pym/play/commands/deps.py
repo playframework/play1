@@ -9,7 +9,7 @@ from play.utils import *
 COMMANDS = ['dependencies','deps']
 
 HELP = {
-    'dependencies': 'Check for a release newer than the current one'
+    'dependencies': 'Resolve and retrieve project dependencies'
 }
 
 def execute(**kargs):
