@@ -26,7 +26,7 @@ def execute(**kargs):
     
     debug = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,address=8888,server=y,suspend=n']
     
-    add_options = ['-Dapplication.path=%s' % (app.path), '-Dframework.path=%s' % (play_env['basedir']), '-Dplay.id=%s' % play_env['id']]
+    add_options = ['-Dapplication.path=%s' % (app.path), '-Dframework.path=%s' % (play_env['basedir']), '-Dplay.id=%s' % play_env['id'], '-Dplay.version=%s' % play_env['version']]
     if args.count('--verbose'):
         add_options.append('-Dverbose')
     if args.count('--sync'):

@@ -154,13 +154,13 @@ public class SettingsParser {
                 if (m.matches()) {
                     organisation = m.group(1);
                     module = m.group(2);
-                    revision = m.group(3);
+                    revision = m.group(3).replace("$version", System.getProperty("play.version"));
                 } else {
                     m = Pattern.compile("(([^\\s]+))\\s+([^\\s]+)").matcher(v);
                     if (m.matches()) {
                         organisation = m.group(1);
                         module = m.group(2);
-                        revision = m.group(3);
+                        revision = m.group(3).replace("$version", System.getProperty("play.version"));
                     } else {
                         m = Pattern.compile("([^\\s]+)\\s*[-][>]\\s*([^\\s]+)").matcher(v);
                         if (m.matches()) {

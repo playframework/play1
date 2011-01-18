@@ -68,7 +68,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                     if (m.matches()) {
                         String org = m.group(1);
                         String name = m.group(2);
-                        String rev = m.group(3);
+                        String rev = m.group(3).replace("$version", System.getProperty("play.version"));
                         id = ModuleRevisionId.newInstance(org, name, rev);
                     } else {
                         throw new Oops("Unknown self format -> " + data.get("self"));
@@ -115,11 +115,15 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                         }
 
                         // Hack
+                        depName = depName.replace("$version", System.getProperty("play.version"));
+                        if(depName.matches("play\\s+->\\s+play") || depName.equals("play")) {
+                            depName = "play -> play " + System.getProperty("play.version");
+                        }
                         if(depName.matches("play\\s+->\\s+crud") || depName.equals("crud")) {
-                            depName = "play -> crud " + DependenciesManager.version;
+                            depName = "play -> crud " + System.getProperty("play.version");
                         }
                         if(depName.matches("play\\s+->\\s+secure") || depName.equals("secure")) {
-                            depName = "play -> secure " + DependenciesManager.version;
+                            depName = "play -> secure " + System.getProperty("play.version");
                         }
 
                         Matcher m = Pattern.compile("([^\\s]+)\\s*[-][>]\\s*([^\\s]+)\\s+([^\\s]+).*").matcher(depName);

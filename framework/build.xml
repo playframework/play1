@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="play! framework" default="jar" basedir=".">
+    
+    <property name="baseversion" value="master" />
 
     <path id="project.classpath">
         <pathelement path="play.jar"/>
@@ -36,9 +38,9 @@
     <target name="version" unless="version">
         <exec executable="git" outputproperty="gitversion" errorproperty="giterror" failonerror="false" failifexecutionfails="false">
             <arg value="describe" />
-            <arg value="--tags" />
+            <arg value="--always" />
         </exec>
-        <condition property="version" value="${gitversion}" else="1.1-localbuild">
+        <condition property="version" value="${baseversion}-${gitversion}" else="${baseversion}-localbuild">
             <equals arg1="" arg2="${giterror}" trim="true" />
         </condition> 
         <echo message="Version ${version}"></echo>

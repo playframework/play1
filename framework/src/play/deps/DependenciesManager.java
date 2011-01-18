@@ -20,10 +20,8 @@ import play.libs.IO;
 
 public class DependenciesManager {
 
-    static String version = "1.2";
-
     public static void main(String[] args) throws Exception {
-        
+
         // Paths
         File application = new File(System.getProperty("application.path"));
         File framework = new File(System.getProperty("framework.path"));
@@ -274,7 +272,7 @@ public class DependenciesManager {
         HumanReadyLogger humanReadyLogger = new HumanReadyLogger();
 
         IvySettings ivySettings = new IvySettings();
-        new SettingsParser(humanReadyLogger).parse(ivySettings, new File(framework, "framework/dependencies-" + version + ".yml"));
+        new SettingsParser(humanReadyLogger).parse(ivySettings, new File(framework, "framework/dependencies.yml"));
         new SettingsParser(humanReadyLogger).parse(ivySettings, new File(application, "conf/dependencies.yml"));
         ivySettings.setDefaultResolver("mavenCentral");
         ivySettings.setDefaultUseOrigin(true);

@@ -1,6 +1,6 @@
 
-# Play 1.2
-self: play -> play 1.2
+# Play
+self: play -> play $version
 
 # Don't follow transitive dependencies for this project
 transitiveDependencies: false
@@ -59,15 +59,27 @@ repositories:
 
     - playCore:
         type:       local
-        descriptor: "${play.path}/framework/dependencies-[revision].yml"
+        descriptor: "${play.path}/framework/dependencies.yml"
         artifact:   "${play.path}/framework/play.jar"
         contains:
-            - play -> play 1.2
+            - play -> play $version
 
     - playCoreDependencies:
         type:       local
         artifact:   "${play.path}/framework/lib/[artifact]-[revision].jar"
         contains:   *allDependencies
+        
+    - playCoreCrud:
+        type:       local
+        artifact:   "${play.path}/modules/crud"
+        contains:
+            - play -> crud $version
+
+    - playCoreSecure:
+        type:       local
+        artifact:   "${play.path}/modules/secure"
+        contains:
+            - play -> secure $version
 
     - playModules:  
         type:       chain
