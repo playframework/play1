@@ -72,7 +72,7 @@ class PlayApplication:
                 if os.path.isdir(mf):
                     modules.append(mf)
                 else:
-                    modules.append(open(mf, 'r').read())
+                    modules.append(open(mf, 'r').read().strip())
         if self.play_env["id"] == 'test':
             modules.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'modules/testrunner')))
         return modules

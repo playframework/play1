@@ -8,7 +8,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play dependencies [app_path] [--verbose] [--debug] [--sync]
+~ play dependencies [app_path] [--verbose] [--debug] [--sync] [--%fwk_id]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -18,4 +18,19 @@
 ~ By default the command will not delete unrecognized artifacts. Use the --sync option
 ~ to keep both lib/ and modules/ directory synchronized with the dependencies management
 ~ system.
+~
+~ Options:
+~ ~~~~~~~~
+~ --verbose:
+~ Verbose mode
+~
+~ --debug:
+~ Debug mode (even more informations logged than in verbose mode)
+~
+~ --sync:
+~ Keep lib/ and modules/ directory synced.
+~ Delete unknow dependencies.
+~
+~ --%fwk_id:
+~ Use this ID to run the application (override the default framework ID)
 ~

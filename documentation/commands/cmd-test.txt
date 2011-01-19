@@ -4,7 +4,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play test [app_path] [-f] [--java_options]
+~ play test [app_path] [--deps] [-f] [--java_options]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -27,4 +27,7 @@
 ~ ~~~~~~~~~
 ~ -f: 
 ~ Disable the JPDA port checking and force the jpda.port value.
+~
+~ --deps: 
+~ Resolve and install dependencies before running the command.
 ~

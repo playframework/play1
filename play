@@ -114,6 +114,11 @@ try:
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     cmdloader = CommandLoader(play_env["basedir"])
+    
+    # ~~~~~~~~~~~~~~~~~ Resolve dependencies if needed
+    if remaining_args.count('--deps') == 1:
+        cmdloader.commands['dependencies'].execute(command='dependencies', app=play_app, args=['--sync'], env=play_env, cmdloader=cmdloader)
+        remaining_args.remove('--deps')
 
     # Load module commands
     if play_app:

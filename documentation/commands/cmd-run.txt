@@ -4,7 +4,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play run [app_path] [-f] [--java_options]
+~ play run [app_path] [--deps] [--%fwk_id] [-f] [--java_options]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -30,3 +30,7 @@
 ~
 ~ --%fwk_id:
 ~ Use this ID to run the application (override the default framework ID)
+~
+~ --deps: 
+~ Resolve and install dependencies before running the command.
+~
