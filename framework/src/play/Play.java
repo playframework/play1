@@ -576,7 +576,7 @@ public class Play {
                 String line = null;
                 while ((line = reader.readLine()) != null) {
                     String[] infos = line.split(":");
-                    PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(infos[1]).newInstance();
+                    PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(infos[1].trim()).newInstance();
                     Logger.trace("Loaded plugin %s", plugin);
                     plugin.index = Integer.parseInt(infos[0]);
                     plugins.add(plugin);
