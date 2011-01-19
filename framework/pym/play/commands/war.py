@@ -21,7 +21,7 @@ def execute(**kargs):
 
     war_path = None
     war_zip_path = None
-    war_exclusion_list = None
+    war_exclusion_list = []
     try:
         optlist, args = getopt.getopt(args, 'o:', ['output=', 'zip','exclude='])
         for o, a in optlist:
