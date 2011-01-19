@@ -9,7 +9,7 @@ transitiveDependencies: false
 require:    &allDependencies
     - antlr 2.7.6
     - c3p0 0.9.1.2
-    - cglib 2.2
+    - cglib -> cglib-nodep 2.2
     - com.google.code.gson -> gson 1.4
     - com.jamonapi -> jamon 2.7
     - com.ning -> async-http-client 1.4.0
@@ -23,7 +23,7 @@ require:    &allDependencies
     - commons-logging 1.1.1
     - dom4j 1.6.1
     - hsqldb 1.8.1.2
-    - javassist -> javassist 3.9.0.GA
+    - org.javassist -> javassist 3.9.0.GA
     - javax.activation -> activation 1.1.1
     - javax.mail -> mail 1.4.3
     - javax.transaction -> jta 1.1
