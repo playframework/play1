@@ -1,0 +1,7 @@
+h1. Play 1.1.1 -- Release notes
+
+You can read about the bugs fixed in Play 1.1.1 on the "road map page":http://play.lighthouseapp.com/projects/57987/milestones/89984-111. 
+
+p(note). This version is a maintenance release of **Play 1.1** and is totally compatible. It just fixes "important bugs":http://play.lighthouseapp.com/projects/57987/milestones/89984-111 of the 1.1 release.
+
+If you come from Play 1.0, you probably want to see "Play 1.1 release notes":releasenotes-1.1.

@@ -1,8 +1,8 @@
 h1. Documentation
 
-Welcome to the play framework documentation. This documentation is intended for the *1.1 release* and may significantly differs from previous versions of the framework. 
+Welcome to the play framework documentation. This documentation is intended for the *1.1.1 release* and may significantly differs from previous versions of the framework. 
 
-Check the "version 1.1 release notes":releasenotes-1.1.
+Check the "version 1.1.1 release notes":releasenotes-1.1.1.
 
 h2. <a name="started">Getting started</a>
 
@@ -160,4 +160,4 @@ Extended references for day-to-day hacking.
 
 h2. <a name="versionnotes">Version notes</a>
 
-New versions of Play include certain changes. Check release notes for "Play 1.1":releasenotes-1.1, "Play 1.0.3":releasenotes-1.0.3, "Play 1.0.2":releasenotes-1.0.2, and "Play 1.0.1":releasenotes-1.0.1.
+New versions of Play include certain changes. Check release notes for "Play 1.1.1":releasenotes-1.1.1, "Play 1.1":releasenotes-1.1, "Play 1.0.3":releasenotes-1.0.3, "Play 1.0.2":releasenotes-1.0.2, and "Play 1.0.1":releasenotes-1.0.1.
