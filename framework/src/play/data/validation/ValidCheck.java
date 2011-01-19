@@ -1,5 +1,6 @@
 package play.data.validation;
 
+import java.util.Collection;
 import java.util.List;
 import net.sf.oval.ConstraintViolation;
 import net.sf.oval.Validator;
@@ -39,6 +40,28 @@ public class ValidCheck extends AbstractAnnotationCheck<Required> {
         if (superKey != null) {
             key = superKey + "." + key;
         }
+        if(value instanceof Collection) {
+            Collection valueCollection = (Collection)value;
+            boolean everythingIsValid = true;
+            int index = 0;
+            for(Object item : valueCollection) {
+                if(!validateObject(key + "[" + (index) + "]", item)) {
+                    Validation.current().errors.add(new Error(key + "[" + (index) + "]", mes, new String[0]));
+                    everythingIsValid = false;
+                }
+                index++;
+            }
+            if(!everythingIsValid) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return validateObject(key, value);
+        }
+    }
+
+    boolean validateObject(String key, Object value) {
         ValidationPlugin.keys.get().put(value, key);
         List<ConstraintViolation> violations = new Validator().validate(value);
         //
@@ -56,4 +79,5 @@ public class ValidCheck extends AbstractAnnotationCheck<Required> {
             return false;
         }
     }
+    
 }

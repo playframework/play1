@@ -5,6 +5,8 @@ import play.db.jpa.*;
 import javax.persistence.*;
 import java.util.*;
 
+import play.data.validation.*;
+
 @Entity
 public class Address {
     
@@ -12,6 +14,7 @@ public class Address {
     public String id;
 
     public String street;
+    
     public City city;
     public int number;
     
@@ -19,6 +22,10 @@ public class Address {
     
     @Transient
     public List<Dog> dogs;
+    
+    public String toString() {
+        return street;
+    }
     
 }
 
