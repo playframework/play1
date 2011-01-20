@@ -184,11 +184,6 @@ public class GenericModel extends JPABase {
      * store (ie insert) the entity.
      */
     public <T extends JPABase> T save() {
-        if (!em().contains(this) && Play.mode.isDev()) {
-            StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
-            StackTraceElement caller = callStack[2];
-            Logger.warn("save() has been called to persist a new JPA instance at %s line %s, use create() instead.", caller.getFileName(), caller.getLineNumber());
-        }
         _save();
         return (T) this;
     }
