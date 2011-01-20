@@ -29,9 +29,11 @@ public class DependenciesManager {
         DependenciesManager deps = new DependenciesManager(application, framework);
 
         ResolveReport report = deps.resolve();
-        deps.report();
-        List<File> installed = deps.retrieve(report);
-        deps.sync(installed);
+            if(report != null) {
+            deps.report();
+            List<File> installed = deps.retrieve(report);
+            deps.sync(installed);
+        }
 
         if (deps.problems()) {
             System.out.println("~");
@@ -43,6 +45,7 @@ public class DependenciesManager {
             System.out.println("~");
         }
     }
+
     File application;
     File framework;
     HumanReadyLogger logger;
@@ -246,6 +249,10 @@ public class DependenciesManager {
         // Module
         ModuleDescriptorParserRegistry.getInstance().addParser(new YamlParser());
         File ivyModule = new File(application, "conf/dependencies.yml");
+        if(!ivyModule.exists()) {
+            System.out.println("~ !! " + ivyModule.getAbsolutePath() + " does not exist");
+            return null;
+        }
 
         System.out.println("~ Resolving dependencies using " + ivyModule.getAbsolutePath() + ",");
         System.out.println("~");

@@ -33,6 +33,11 @@ public class SettingsParser {
     }
 
     public void parse(IvySettings settings, File desc) {
+        if(!desc.exists()) {
+            System.out.println("~ !! " + desc.getAbsolutePath() + " does not exist");
+            return;
+        }
+
         try {
             Yaml yaml = new Yaml();
             Object o = null;
@@ -98,6 +103,9 @@ public class SettingsParser {
         if (type.equalsIgnoreCase("iBiblio")) {
             IBiblioResolver iBiblioResolver = new IBiblioResolver();
             iBiblioResolver.setName(repName);
+            if(options.containsKey("root")) {
+                iBiblioResolver.setRoot(get(options, "root", String.class));
+            }
             iBiblioResolver.setM2compatible(get(options, "m2compatible", boolean.class, true));
             iBiblioResolver.getRepository().addTransferListener(logger);
             resolver = iBiblioResolver;
