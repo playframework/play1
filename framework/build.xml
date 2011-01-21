@@ -50,7 +50,7 @@
         </delete>
         <antcall target="clean-unittest"/>
     </target>
-    
+
     <target name="version" unless="version">
         <exec executable="git" outputproperty="gitversion" errorproperty="giterror" failonerror="false" failifexecutionfails="false">
             <arg value="describe" />
