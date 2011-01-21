@@ -1,8 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- General ant build file for play applications. -->
+<!--
+General ant build file for play applications.
+
+Usage example:
+ant -f <play path>/application-build.xml -Dplay.path=<play path> -Dbasedir=<application directory> play-run
+
+Or with PLAY_PATH environment variable:
+ant -f $PLAY_PATH/application-build.xml -Dbasedir=<application directory> play-run
+
+You could also define the project file in the application directory
+
+build.xml:
+<project name="main" basedir=".">
+    <property environment="env"/>
+    <property name="play.path" value="${env.PLAY_PATH}"/>
+    <import file="${play.path}/application-build.xml"/>
+</project>
+
+And then run play just by:
+ant play-run
+
+-->
 <project>
 
+    <property environment="env"/>
+    <property name="play.path" value="${env.PLAY_PATH}"/>
     <property name="play.id" value=""/>
 
     <!-- classpath including play classes and dependencies -->
