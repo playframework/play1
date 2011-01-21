@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- General ant build file for play applications. -->
+<project>
+
+    <property name="play.id" value=""/>
+
+    <!-- classpath including play classes and dependencies -->
+    <path id="play.classpath">
+        <fileset dir="${play.path}/framework/lib">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${play.path}/framework">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- classpath including application dependencies -->
+    <path id="application.classpath">
+        <fileset dir="${basedir}/lib" erroronmissingdir="false">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- additional classpath for running play in test mode -->
+    <path id="test.classpath">
+        <path refid="play.classpath"/>
+        <fileset dir="${play.path}/modules/testrunner/lib">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- classpath for firephoque test runner -->
+    <path id="testrunner.classpath">
+        <fileset dir="${play.path}/modules/testrunner/lib">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${play.path}/modules/testrunner/firephoque">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- macro for the play python script in case you need it
+         usage example:
+            <target name="help">
+                <play-python command="help"/>
+            </target>
+    -->
+    <macrodef name="play-python">
+        <attribute name="command"/>
+        <sequential>
+            <exec executable="cmd.exe" osfamily="winnt">
+                <arg line="/c ${play.path}/play.bat @{command}"/>
+            </exec>
+            <exec executable="python" osfamily="unix">
+                <arg line="${play.path}/play @{command}"/>
+            </exec>
+        </sequential>
+    </macrodef>
+
+    <taskdef classname="play.ant.PlayConfigurationLoadTask" name="playconfload">
+        <classpath>
+            <pathelement location="${play.path}/framework/play.jar"/>
+        </classpath>
+    </taskdef>
+
+
+    <target name="play-run" description="Runs the application">
+        <playconfload applicationDir="${basedir}" playId="${play.id}"/>
+        <java classname="play.server.Server" fork="yes" failonerror="yes">
+            <classpath>
+                <path refid="play.classpath"/>
+                <path refid="modules.classpath"/>
+                <path refid="application.classpath"/>
+            </classpath>
+            <jvmarg line="-javaagent:${play.path}/framework/play.jar -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"/>
+            <sysproperty key="play.id" value="${play.id}"/>
+            <sysproperty key="play.debug" value="true"/>
+            <sysproperty key="application.path" value="${basedir}"/>
+        </java>
+    </target>
+
+    <target name="play-test" description="Run the application in test mode">
+        <playconfload applicationDir="${basedir}" playId="test"/>
+        <java classname="play.server.Server" fork="yes" failonerror="yes">
+            <classpath>
+                <path refid="play.classpath"/>
+                <path refid="modules.classpath"/>
+                <path refid="application.classpath"/>
+                <path refid="test.classpath"/>
+            </classpath>
+            <jvmarg line="-javaagent:${play.path}/framework/play.jar -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"/>
+            <sysproperty key="play.id" value="test"/>
+            <sysproperty key="play.debug" value="true"/>
+            <sysproperty key="application.path" value="${basedir}"/>
+        </java>
+    </target>
+
+    <target name="precompile" description="Compile all java sources and templates">
+        <playconfload applicationDir="${basedir}" playId="${play.id}"/>
+        <java classname="play.server.Server" fork="yes" failonerror="yes">
+            <classpath>
+                <path refid="play.classpath"/>
+                <path refid="modules.classpath"/>
+                <path refid="application.classpath"/>
+            </classpath>
+            <jvmarg line="-javaagent:${play.path}/framework/play.jar"/>
+            <sysproperty key="application.path" value="${basedir}"/>
+            <sysproperty key="play.id" value=""/>
+            <sysproperty key="precompile" value="true"/>
+        </java>
+    </target>
+
+</project>
