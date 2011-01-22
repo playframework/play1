@@ -2,31 +2,33 @@
 
 <!--
 General ant build file for play applications.
+Author: Heikki Uljas
 
 Usage example:
-ant -f <play path>/application-build.xml -Dplay.path=<play path> -Dbasedir=<application directory> play-run
+    ant -f <play path>/application-build.xml -Dplay.path=<play path> -Dbasedir=<application directory> run
 
 Or with PLAY_PATH environment variable:
-ant -f $PLAY_PATH/application-build.xml -Dbasedir=<application directory> play-run
+    ant -f $PLAY_PATH/application-build.xml -Dbasedir=<application directory> run
 
 You could also define the project file in the application directory
 
 build.xml:
-<project name="main" basedir=".">
-    <property environment="env"/>
-    <property name="play.path" value="${env.PLAY_PATH}"/>
-    <import file="${play.path}/application-build.xml"/>
-</project>
+    <project name="main" basedir=".">
+        <property environment="env"/>
+        <property name="play.path" value="${env.PLAY_PATH}"/>
+        <import file="${play.path}/application-build.xml"/>
+    </project>
 
 And then run play just by:
-ant play-run
-
+    ant run
 -->
 <project>
 
     <property environment="env"/>
     <property name="play.path" value="${env.PLAY_PATH}"/>
+    <property name="application.path" value="${basedir}"/>
     <property name="play.id" value=""/>
+    <property name="precompiled" value="false"/>
 
     <!-- classpath including play classes and dependencies -->
     <path id="play.classpath">
@@ -88,7 +90,7 @@ ant play-run
     </taskdef>
 
 
-    <target name="play-run" description="Runs the application">
+    <target name="run" description="Runs the application">
         <playconfload applicationDir="${basedir}" playId="${play.id}"/>
         <java classname="play.server.Server" fork="yes" failonerror="yes">
             <classpath>
@@ -99,18 +101,18 @@ ant play-run
             <jvmarg line="-javaagent:${play.path}/framework/play.jar -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"/>
             <sysproperty key="play.id" value="${play.id}"/>
             <sysproperty key="play.debug" value="true"/>
+            <sysproperty key="precompiled" value="${precompiled}"/>
             <sysproperty key="application.path" value="${basedir}"/>
         </java>
     </target>
 
-    <target name="play-test" description="Run the application in test mode">
+    <target name="test" description="Run the application in test mode">
         <playconfload applicationDir="${basedir}" playId="test"/>
         <java classname="play.server.Server" fork="yes" failonerror="yes">
             <classpath>
-                <path refid="play.classpath"/>
+                <path refid="test.classpath"/>
                 <path refid="modules.classpath"/>
                 <path refid="application.classpath"/>
-                <path refid="test.classpath"/>
             </classpath>
             <jvmarg line="-javaagent:${play.path}/framework/play.jar -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"/>
             <sysproperty key="play.id" value="test"/>
@@ -133,5 +135,58 @@ ant play-run
             <sysproperty key="precompile" value="true"/>
         </java>
     </target>
+
+    <target name="auto-test" description="Automatically run all application tests">
+
+        <playconfload applicationDir="${basedir}" playId="test"/>
+        <property name="application.url" value="http://localhost:${application.conf.http.port}"/>
+        <get verbose="false" ignoreerrors="true" src="${application.url}/@kill" dest="${basedir}/test-result/auto-test-@kill.html"/>
+        <delete dir="${basedir}/tmp"/>
+        <delete dir="${basedir}/test-result"/>
+
+        <property name="server.log" value="${basedir}/logs/auto-test.out"/>
+        <echo message="Starting server and redirecting output to ${server.log}"/>
+
+        <parallel>
+            <java classname="play.server.Server" fork="yes" output="${server.log}" failonerror="true">
+                <classpath>
+                    <path refid="test.classpath"/>
+                    <path refid="modules.classpath"/>
+                    <path refid="application.classpath"/>
+                </classpath>
+                <jvmarg line="-javaagent:${play.path}/framework/play.jar"/>
+                <sysproperty key="play.id" value="test"/>
+                <sysproperty key="application.path" value="${basedir}"/>
+            </java>
+
+            <sequential>
+                <echo message="Waiting for the server to start up at ${application.url}/@tests"/>
+                <get verbose="false" ignoreerrors="false" src="${application.url}/@tests"
+                     dest="${basedir}/test-result/auto-test-@tests.html"/>
+
+                <echo message="Testing server at: ${application.url}"/>
+                <java classname="play.modules.testrunner.FirePhoque" fork="yes" failonerror="yes">
+                    <classpath refid="testrunner.classpath"/>
+                    <sysproperty key="application.url" value="${application.url}"/>
+                </java>
+
+                <echo message="Shutting down server"/>
+                <get verbose="false" ignoreerrors="true" src="${application.url}/@kill"
+                     dest="${basedir}/test-result/auto-test-@kill.html"/>
+            </sequential>
+        </parallel>
+
+        <fail message="There were test failures.">
+            <condition>
+                <not>
+                    <resourcecount count="1">
+                        <fileset dir="${basedir}/test-result" includes="result.passed"/>
+                    </resourcecount>
+                </not>
+            </condition>
+        </fail>
+
+    </target>
+
 
 </project>
