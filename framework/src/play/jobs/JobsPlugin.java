@@ -21,6 +21,7 @@ import play.exceptions.UnexpectedException;
 import play.libs.Expression;
 import play.utils.Java;
 import play.libs.Time;
+import play.utils.PThreadFactory;
 
 public class JobsPlugin extends PlayPlugin {
 
@@ -155,7 +156,7 @@ public class JobsPlugin extends PlayPlugin {
     @Override
     public void onApplicationStart() {
         int core = Integer.parseInt(Play.configuration.getProperty("play.jobs.pool", "10"));
-        executor = new ScheduledThreadPoolExecutor(core, new ThreadPoolExecutor.AbortPolicy());
+        executor = new ScheduledThreadPoolExecutor(core, new PThreadFactory("jobs"), new ThreadPoolExecutor.AbortPolicy());
     }
 
     public static <V> void scheduleForCRON(Job<V> job) {

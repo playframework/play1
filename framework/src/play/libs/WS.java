@@ -296,7 +296,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse get();
 
         /** Execute a GET request asynchronously. */
-        public Future<HttpResponse> getAsync() {
+        public Task<HttpResponse> getAsync() {
             throw new NotImplementedException();
         }
 
@@ -304,7 +304,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse post();
 
         /** Execute a POST request asynchronously.*/
-        public Future<HttpResponse> postAsync() {
+        public Task<HttpResponse> postAsync() {
             throw new NotImplementedException();
         }
 
@@ -312,7 +312,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse put();
 
         /** Execute a PUT request asynchronously.*/
-        public Future<HttpResponse> putAsync() {
+        public Task<HttpResponse> putAsync() {
             throw new NotImplementedException();
         }
 
@@ -320,7 +320,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse delete();
 
         /** Execute a DELETE request asynchronously.*/
-        public Future<HttpResponse> deleteAsync() {
+        public Task<HttpResponse> deleteAsync() {
             throw new NotImplementedException();
         }
 
@@ -328,7 +328,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse options();
 
         /** Execute a OPTIONS request asynchronously.*/
-        public Future<HttpResponse> optionsAsync() {
+        public Task<HttpResponse> optionsAsync() {
             throw new NotImplementedException();
         }
 
@@ -336,7 +336,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse head();
 
         /** Execute a HEAD request asynchronously.*/
-        public Future<HttpResponse> headAsync() {
+        public Task<HttpResponse> headAsync() {
             throw new NotImplementedException();
         }
 
@@ -344,7 +344,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse trace();
 
         /** Execute a TRACE request asynchronously.*/
-        public Future<HttpResponse> traceAsync() {
+        public Task<HttpResponse> traceAsync() {
             throw new NotImplementedException();
         }
 

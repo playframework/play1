@@ -36,6 +36,10 @@ import play.utils.Utils;
 
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
+import java.util.concurrent.Future;
+import org.apache.commons.javaflow.Continuation;
+import org.apache.commons.javaflow.bytecode.StackRecorder;
+import play.Invoker.Suspend;
 import play.mvc.results.NotFound;
 
 /**
@@ -274,6 +278,7 @@ public class ActionInvoker {
     private static void handleBefores(Http.Request request) throws Exception {
         List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);
         Collections.sort(befores, new Comparator<Method>() {
+
             public int compare(Method m1, Method m2) {
                 Before before1 = m1.getAnnotation(Before.class);
                 Before before2 = m2.getAnnotation(Before.class);
@@ -285,7 +290,7 @@ public class ActionInvoker {
             String[] unless = before.getAnnotation(Before.class).unless();
             String[] only = before.getAnnotation(Before.class).only();
             boolean skip = false;
-            for (String un: only) {
+            for (String un : only) {
                 if (!un.contains(".")) {
                     un = before.getDeclaringClass().getName().substring(12).replace("$", "") + "." + un;
                 }
@@ -296,7 +301,7 @@ public class ActionInvoker {
                     skip = true;
                 }
             }
-            for (String un: unless) {
+            for (String un : unless) {
                 if (!un.contains(".")) {
                     un = before.getDeclaringClass().getName().substring(12).replace("$", "") + "." + un;
                 }
@@ -315,6 +320,7 @@ public class ActionInvoker {
     private static void handleAfters(Http.Request request) throws Exception {
         List<Method> afters = Java.findAllAnnotatedMethods(Controller.getControllerClass(), After.class);
         Collections.sort(afters, new Comparator<Method>() {
+
             public int compare(Method m1, Method m2) {
                 After after1 = m1.getAnnotation(After.class);
                 After after2 = m2.getAnnotation(After.class);
@@ -322,7 +328,7 @@ public class ActionInvoker {
             }
         });
         ControllerInstrumentation.stopActionCall();
-        for (Method after: afters) {
+        for (Method after : afters) {
             String[] unless = after.getAnnotation(After.class).unless();
             String[] only = after.getAnnotation(After.class).only();
             boolean skip = false;
@@ -356,6 +362,7 @@ public class ActionInvoker {
     private static void handleFinallies(Http.Request request) throws Exception {
         List<Method> allFinally = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Finally.class);
         Collections.sort(allFinally, new Comparator<Method>() {
+
             public int compare(Method m1, Method m2) {
                 Finally finally1 = m1.getAnnotation(Finally.class);
                 Finally finally2 = m2.getAnnotation(Finally.class);
@@ -363,7 +370,7 @@ public class ActionInvoker {
             }
         });
         ControllerInstrumentation.stopActionCall();
-        for (Method aFinally: allFinally) {
+        for (Method aFinally : allFinally) {
             String[] unless = aFinally.getAnnotation(Finally.class).unless();
             String[] only = aFinally.getAnnotation(Finally.class).only();
             boolean skip = false;
@@ -429,17 +436,17 @@ public class ActionInvoker {
 
     public static Object invokeControllerMethod(Method method, Object[] forceArgs) throws Exception {
         if (Modifier.isStatic(method.getModifiers()) && !method.getDeclaringClass().getName().matches("^controllers\\..*\\$class$")) {
-            return method.invoke(null, forceArgs == null ? getActionMethodArgs(method, null) : forceArgs);
+            return invoke(method, null, forceArgs == null ? getActionMethodArgs(method, null) : forceArgs);
         } else if (Modifier.isStatic(method.getModifiers())) {
             Object[] args = getActionMethodArgs(method, null);
             args[0] = Http.Request.current().controllerClass.getDeclaredField("MODULE$").get(null);
-            return method.invoke(null, args);
+            return invoke(method, null, args);
         } else {
             Object instance = null;
             try {
                 instance = method.getDeclaringClass().getDeclaredField("MODULE$").get(null);
             } catch (Exception e) {
-                 Annotation[] annotations = method.getDeclaredAnnotations();
+                Annotation[] annotations = method.getDeclaredAnnotations();
                 String annotation = Utils.getSimpleNames(annotations);
                 if (!StringUtils.isEmpty(annotation)) {
                     throw new UnexpectedException("Method public static void " + method.getName() + "() annotated with " + annotation + " in class " + method.getDeclaringClass().getName() + " is not static.");
@@ -447,9 +454,63 @@ public class ActionInvoker {
                 // TODO: Find a better error report
                 throw new ActionNotFoundException(Http.Request.current().action, e);
             }
-            return method.invoke(instance, forceArgs == null ? getActionMethodArgs(method, instance) : forceArgs);
+            return invoke(method, instance, forceArgs == null ? getActionMethodArgs(method, instance) : forceArgs);
+        }
+    }
+
+    static Object invoke(Method method, Object instance, Object[] realArgs) throws Exception {
+        if(true) {
+            return invokeWithContinuation(method, instance, realArgs);
+        } else {
+            return method.invoke(instance, realArgs);
+        }
+    }
+
+    static final String C = "__continuation";
+
+        static Object invokeWithContinuation(Method method, Object instance, Object[] realArgs) throws Exception {
+        Continuation continuation = (Continuation)Http.Request.current().args.get(C);
+        if(continuation == null) {
+            continuation = new Continuation(new StackRecorder((Runnable) null));
+        }
+        
+        StackRecorder pStackRecorder = new StackRecorder(continuation.stackRecorder);
+        Object result = null;
+
+        final StackRecorder old = pStackRecorder.registerThread();
+        try {
+            pStackRecorder.isRestoring = !pStackRecorder.isEmpty();
+
+            // Execute code
+            result = method.invoke(instance, realArgs);
+
+            if (pStackRecorder.isCapturing) {
+                if (pStackRecorder.isEmpty()) {
+                    throw new IllegalStateException("stack corruption. Is " + method + " instrumented for javaflow?");
+                }
+                Object trigger = pStackRecorder.value;
+                Continuation nextContinuation = new Continuation(pStackRecorder);                
+                Http.Request.current().args.put(C, nextContinuation);
+
+                if(trigger instanceof Long) {
+                    throw new Suspend((Long)trigger);
+                }
+                if(trigger instanceof Integer) {
+                    throw new Suspend(((Integer)trigger).longValue());
+                }
+                if(trigger instanceof Future) {
+                    throw new Suspend((Future)trigger);
+                }
+
+                throw new UnexpectedException("Unexpected continuation trigger -> " + trigger);
+            } else {
+                Http.Request.current().args.remove(C);
+            }
+        } finally {
+            pStackRecorder.deregisterThread(old);
         }
 
+        return result;
     }
 
     public static Object[] getActionMethod(String fullAction) {

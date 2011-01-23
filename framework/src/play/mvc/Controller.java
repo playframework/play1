@@ -53,6 +53,10 @@ import play.vfs.VirtualFile;
 
 import com.google.gson.JsonSerializer;
 import com.thoughtworks.xstream.XStream;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import org.apache.commons.javaflow.Continuation;
+import org.apache.commons.javaflow.bytecode.StackRecorder;
 import play.mvc.results.Stream;
 import play.mvc.results.Stream.ChunkedInput;
 
@@ -831,6 +835,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      *
      * @param timeout Period of time to wait, e.g. "1h" means 1 hour.
      */
+    @Deprecated
     protected static void suspend(String timeout) {
         suspend(1000 * Time.parseDuration(timeout));
     }
@@ -843,6 +848,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      *
      * @param millis Number of milliseconds to wait until trying again.
      */
+    @Deprecated
     protected static void suspend(int millis) {
         Request.current().isNew = false;
         throw new Suspend(millis);
@@ -856,9 +862,46 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      *
      * @param tasks
      */
+    @Deprecated
     protected static void waitFor(Future<?> task) {
         Request.current().isNew = false;
         throw new Suspend(task);
+    }
+
+    protected static void wait(String timeout) {
+        wait(1000 * Time.parseDuration(timeout));
+    }
+
+    protected static void wait(int millis) {
+        Request.current().isNew = false;
+        Continuation.suspend(millis);
+    }
+
+    protected static <T> T wait(Future<T> future) {
+        if(future != null) {
+            Request.current().args.put("__future", future);
+        } else if(Request.current().args.containsKey("__future")) {
+            // Since the continiation will restart in this code that isn't intstrumented by javaflow,
+            // we need to reset the state manually.
+            StackRecorder.get().isCapturing = false;
+            StackRecorder.get().isRestoring = false;
+            StackRecorder.get().value = null;
+            future = (Future<T>)Request.current().args.get("__future");
+        } else {
+            throw new UnexpectedException("Lost future for " + Http.Request.current() + "!");
+        }
+        
+        if(future.isDone()) {
+            try {
+                return future.get();
+            } catch(Exception e) {
+                throw new UnexpectedException(e);
+            }
+        } else {
+            Request.current().isNew = false;
+            Continuation.suspend(future);
+            return null;
+        }
     }
 
     /**
