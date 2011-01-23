@@ -12,6 +12,8 @@ import models.vendor.tag.Tag;
 import models.Base;
 import models.*;
 
+import org.example.models.NotInModels;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -85,4 +87,11 @@ public class FixturesTest extends UnitTest {
 		assertFalse(parent.children.isEmpty());
 	}
 
+    @Test
+    public void loadDataNotInModels() {
+        Fixtures.load("not-in-models.yml", false);
+        assertEquals(1, NotInModels.findAll().size());
+        NotInModels nim = NotInModels.all().first();
+        assertEquals("Foo", nim.name);
+    }
 }

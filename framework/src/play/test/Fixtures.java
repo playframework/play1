@@ -163,7 +163,13 @@ public class Fixtures {
         }
     }
 
-    public static void load(String name) {
+    /**
+     * Load entities from a yaml file. If implicitModelsPrefix is true,
+     * entities that do not start with models.* will have the models package
+     * name prefixed. Set to false for models not in the top level models.*
+     * package.
+     */
+    public static void load(String name, boolean implicitModelsPrefix) {
         VirtualFile yamlFile = null;
         try {
             for (VirtualFile vf : Play.javaPath) {
@@ -185,8 +191,11 @@ public class Fixtures {
                     if (matcher.matches()) {
                         String type = matcher.group(1);
                         String id = matcher.group(2);
-                        if (!type.startsWith("models.")) {
-                            type = "models." + type;
+                        
+                        if(implicitModelsPrefix) {
+                            if (!type.startsWith("models.")) {
+                                type = "models." + type;
+                            }
                         }
                         if (idCache.containsKey(type + "-" + id)) {
                             throw new RuntimeException("Cannot load fixture " + name + ", duplicate id '" + id + "' for type " + type);
@@ -227,6 +236,14 @@ public class Fixtures {
         } catch (Throwable e) {
             throw new RuntimeException("Cannot load fixture " + name + ": " + e.getMessage(), e);
         }
+    }
+    
+    /**
+     * Default load - uses the implicit models.* package prefix
+     * for entities in the yaml file.
+     */
+    public static void load(String name) {
+        load(name, true);
     }
 
     public static void load(String... names) {

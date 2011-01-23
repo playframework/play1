@@ -1,0 +1,6 @@
+#==============================================================================
+# Test for loading an entity not in the models top level package with
+# Fixtures.load(<filename>, false)
+#==============================================================================
+org.example.models.NotInModels(1):
+    name:            Foo
