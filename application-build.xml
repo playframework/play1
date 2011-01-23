@@ -13,7 +13,7 @@ Or with PLAY_PATH environment variable:
 You could also define the project file in the application directory
 
 build.xml:
-    <project name="main" basedir=".">
+    <project basedir=".">
         <property environment="env"/>
         <property name="play.path" value="${env.PLAY_PATH}"/>
         <import file="${play.path}/application-build.xml"/>
@@ -139,12 +139,14 @@ And then run play just by:
     <target name="auto-test" description="Automatically run all application tests">
 
         <playconfload applicationDir="${basedir}" playId="test"/>
+        <property name="application.conf.http.port" value="9000"/>
         <property name="application.url" value="http://localhost:${application.conf.http.port}"/>
         <get verbose="false" ignoreerrors="true" src="${application.url}/@kill" dest="${basedir}/test-result/auto-test-@kill.html"/>
         <delete dir="${basedir}/tmp"/>
         <delete dir="${basedir}/test-result"/>
 
         <property name="server.log" value="${basedir}/logs/auto-test.out"/>
+        <mkdir dir="${basedir}/logs"/>
         <echo message="Starting server and redirecting output to ${server.log}"/>
 
         <parallel>
