@@ -856,9 +856,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      *
      * @param tasks
      */
-    protected static void waitFor(Future<?>... tasks) {
+    protected static void waitFor(Future<?> task) {
         Request.current().isNew = false;
-        throw new Suspend(tasks);
+        throw new Suspend(task);
     }
 
     /**
