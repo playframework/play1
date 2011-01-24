@@ -27,7 +27,8 @@ require:    &allDependencies
     - javax.activation -> activation 1.1.1
     - javax.mail -> mail 1.4.3
     - javax.transaction -> jta 1.1
-    - jaxen 1.1
+    - javax.inject 1.0
+	- jaxen 1.1
     - joda-time 1.6
     - junit 4.8.1
     - jregex 1.2_01
