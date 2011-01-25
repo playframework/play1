@@ -1,3 +1,9 @@
+play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-4) maverick; urgency=low
+
+  * Fix &{'msg', null} NPE
+
+ -- Stephane Epardaud <stephane@epardaud.fr>  Tue, 25 Jan 2011 16:45:52 +0100
+
 play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-3) maverick; urgency=low
 
   * Added db.pool.maxIdleTimeExcessConnections
