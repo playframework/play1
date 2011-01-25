@@ -31,8 +31,8 @@ def execute(**kargs):
     elif current == max(releases):
         print "~ You are using the latest version."
     else:
-        print "~  ***** Latest release: " + str(max(releases))
-        print "~  ***** Your version  : " + str(current)
+        print "~  \tLatest release: " + str(max(releases))
+        print "~  \tYour version  : " + str(current)
         print "~"
         print "~ Latest release download: " + max(releases).url()
 
@@ -62,9 +62,15 @@ class Release:
     # TODO: Be smarter at analysing the rest (ex: RC1 vs RC2)
     def __init__(self, strversion):
         self.strversion = strversion
-        self.numpart = re.findall(r"\d+[\.\d+]+", strversion)[0]
+        try:
+            self.numpart = re.findall("\d+[\.\d+]+", strversion)[0]
+        except:
+            self.numpart = ''
         self.rest = strversion.replace(self.numpart, "")
-        self.versions = map(lambda x: int(x), self.numpart.split("."))
+        try:
+            self.versions = map(lambda x: int(x), self.numpart.split("."))
+        except:
+            self.versions = [0,0]
         if not self.rest: self.rest = "Z"
 
     def url(self):
@@ -73,25 +79,28 @@ class Release:
     def __eq__(self, other):
         return self.strversion == other.strversion
     def __lt__(self, other):
-        if self == other:
-            return False
-        for i in range(len(self.versions)):
-            if self.versions[i] < other.versions[i]:
-                return True # ex: 1.1 vs 1.2
-            if self.versions[i] > other.versions[i]:
+        try:
+            if self == other:
                 return False
-        if len(self.versions) < len(other.versions):
-            return True
-        if len(self.versions) > len(other.versions):
+            for i in range(len(self.versions)):
+                if self.versions[i] < other.versions[i]:
+                    return True # ex: 1.1 vs 1.2
+                if self.versions[i] > other.versions[i]:
+                    return False
+            if len(self.versions) < len(other.versions):
+                return True
+            if len(self.versions) > len(other.versions):
+                return False
+            # From here, numeric part is the same - now having a rest means older version
+            if len(other.numpart) > 0 and len(self.numpart) == 0:
+                return False
+            if len(self.numpart) > 0 and len(other.numpart) == 0:
+                return True
+            # Both have a rest, use a string comparison
+            # alpha1 < beta1 < rc1 < rc2...
+            return self.rest < other.rest
+        except:
             return False
-        # From here, numeric part is the same - now having a rest means older version
-        if len(other.numpart) > 0 and len(self.numpart) == 0:
-            return False
-        if len(self.numpart) > 0 and len(other.numpart) == 0:
-            return True
-        # Both have a rest, use a string comparison
-        # alpha1 < beta1 < rc1 < rc2...
-        return self.rest < other.rest
     def __le__(self, other):
         return self == other or self < other
     def __gt__(self, other):

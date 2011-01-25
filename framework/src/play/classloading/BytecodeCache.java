@@ -13,9 +13,6 @@ import play.PlayPlugin;
  */
 public class BytecodeCache {
 
-    // Please update the cache version at each release
-    static String version = "1.1RC1";
-
     /**
      * Delete the bytecode
      * @param name Cache name
@@ -116,7 +113,7 @@ public class BytecodeCache {
             }
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             messageDigest.reset();
-            messageDigest.update((BytecodeCache.version + "-" + Play.version + plugins.toString() + text).getBytes("utf-8"));
+            messageDigest.update((Play.version + plugins.toString() + text).getBytes("utf-8"));
             byte[] digest = messageDigest.digest();
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < digest.length; ++i) {

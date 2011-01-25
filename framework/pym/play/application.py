@@ -66,6 +66,13 @@ class PlayApplication:
                     print "~"
                 sys.exit(-1)
             modules.append(m)
+        if self.path and os.path.exists(os.path.join(self.path, 'modules')):
+            for m in os.listdir(os.path.join(self.path, 'modules')):
+                mf = os.path.join(os.path.join(self.path, 'modules'), m)
+                if os.path.isdir(mf):
+                    modules.append(mf)
+                else:
+                    modules.append(open(mf, 'r').read().strip())
         if self.play_env["id"] == 'test':
             modules.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'modules/testrunner')))
         return modules

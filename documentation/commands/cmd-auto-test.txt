@@ -4,7 +4,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play auto-test [app_path]
+~ play auto-test [app_path] [--deps]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -30,4 +30,9 @@
 ~ All the test-results/* content is deleted before running the tests.
 ~
 ~ This script is intended to be used in continuous integration environments.
+~
+~ Options:
+~ ~~~~~~~~~
+~ --deps: 
+~ Resolve and install dependencies before running the command.
 ~

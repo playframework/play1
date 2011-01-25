@@ -428,12 +428,12 @@ public class Play {
             for (PlayPlugin plugin : plugins) {
                 try {
                     plugin.onApplicationStart();
-                } catch(Exception e) {
-                    if(Play.mode.isProd()) {
+                } catch (Exception e) {
+                    if (Play.mode.isProd()) {
                         Logger.error(e, "Can't start in PROD mode with errors");
                     }
-                    if(e instanceof RuntimeException) {
-                        throw (RuntimeException)e;
+                    if (e instanceof RuntimeException) {
+                        throw (RuntimeException) e;
                     }
                     throw new UnexpectedException(e);
                 }
@@ -576,7 +576,7 @@ public class Play {
                 String line = null;
                 while ((line = reader.readLine()) != null) {
                     String[] infos = line.split(":");
-                    PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(infos[1]).newInstance();
+                    PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(infos[1].trim()).newInstance();
                     Logger.trace("Loaded plugin %s", plugin);
                     plugin.index = Integer.parseInt(infos[0]);
                     plugins.add(plugin);
@@ -637,9 +637,10 @@ public class Play {
                 }
             }
         }
-        for (Object key: configuration.keySet()) {
+        for (Object key : configuration.keySet()) {
             String pName = key.toString();
             if (pName.startsWith("module.")) {
+                Logger.warn("Declaring modules in application.conf is deprecated. Use dependencies.yml instead (%s)", pName);
                 String moduleName = pName.substring(7);
                 File modulePath = new File(configuration.getProperty(pName));
                 if (!modulePath.isAbsolute()) {
@@ -652,6 +653,29 @@ public class Play {
                 }
             }
         }
+
+        // Load modules from modules/ directory
+        File localModules = Play.getFile("modules");
+        if (localModules.exists() && localModules.isDirectory()) {
+            for (File module : localModules.listFiles()) {
+                String moduleName = module.getName();
+                if (moduleName.contains("-")) {
+                    moduleName = moduleName.substring(0, moduleName.indexOf("-"));
+                }
+                if (module.isDirectory()) {
+                    addModule(moduleName, module);
+                } else {
+                    File modulePath = new File(IO.readContentAsString(module).trim());
+                    if (!modulePath.exists() || !modulePath.isDirectory()) {
+                        Logger.error("Module %s will not be loaded because %s does not exist", moduleName, modulePath.getAbsolutePath());
+                    } else {
+                        addModule(moduleName, modulePath);
+                    }
+
+                }
+            }
+        }
+        // Auto add special modules
         if (Play.id.equals("test")) {
             addModule("_testrunner", new File(Play.frameworkPath, "modules/testrunner"));
         }

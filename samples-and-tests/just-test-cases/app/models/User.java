@@ -32,6 +32,10 @@ public class User extends Model {
 
     @Email
     public String email;
+    
+    @Valid
+    @Transient
+    public List<MyAddress> addresses;
 
 	public String toString() {
 		return name;
