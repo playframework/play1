@@ -24,7 +24,9 @@ import play.data.binding.Binder;
  */
 public class Messages {
 
-    static public Properties defaults;
+    private static final Object[] NO_ARGS = new Object[]{null};
+
+	static public Properties defaults;
 
     static public Map<String, Properties> locales = new HashMap<String, Properties>();
 
@@ -66,7 +68,9 @@ public class Messages {
 
     @SuppressWarnings("unchecked")
     static Object[] coolStuff(String pattern, Object[] args) {
-
+    	// when invoked with a null argument we get a null args instead of an array with a null value.
+    	if(args == null)
+    		return NO_ARGS;
         Class<? extends Number>[] conversions = new Class[args.length];
 
         Matcher matcher = formatterPattern.matcher(pattern);
