@@ -30,17 +30,15 @@ def execute(**kargs):
         lXML = ""
         cXML = ""
         for i, module in enumerate(modules):
+            lXML += '    <content url="file://%s">\n            <sourceFolder url="file://%s" isTestSource="false" />\n        </content>\n' % (module, os.path.join(module, 'app').replace('\\', '/'))
             commands = os.path.join(module, 'commands.py')
             if os.path.exists(commands):
                 execfile(commands)
-            else:
-                lXML += '    <content url="file://%s">\n            <sourceFolder url="file://%s" isTestSource="false" />\n        </content>\n' % (module, os.path.join(module, 'app').replace('\\', '/'))
             if i == (len(modules) -1):
                 replaceAll(imlFile, r'%LINKS%', lXML)
                 replaceAll(imlFile, r'%MODULE_LINKS%', '')
                 replaceAll(imlFile, r'%MODULE_LIB_CLASSES%', '')
                 replaceAll(imlFile, r'%MODULE_LIBRARIES%', '')
-
     else:
         replaceAll(imlFile, r'%LINKS%', '')
         replaceAll(imlFile, r'%MODULE_LINKS%', '')
