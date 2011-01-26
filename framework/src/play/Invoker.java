@@ -346,10 +346,10 @@ public class Invoker {
             setDaemon(true);
         }
 
-        public static void waitFor(Future<?> task, final Invocation invocation) {
+        public static <V> void waitFor(Future<V> task, final Invocation invocation) {
             if (task instanceof SmartFuture) {
-                SmartFuture smartFuture = (SmartFuture)task;
-                smartFuture.onCompletion(new Action() {
+                SmartFuture<V> smartFuture = (SmartFuture<V>)task;
+                smartFuture.onCompletion(new Action<V>() {
                     public void invoke(Object result) {
                         executor.submit(invocation);
                     }

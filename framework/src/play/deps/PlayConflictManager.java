@@ -17,6 +17,7 @@ public class PlayConflictManager extends AbstractConflictManager {
 
     public LatestConflictManager deleguate = new LatestConflictManager(new LatestRevisionStrategy());
 
+    @Override
     public Collection resolveConflicts(IvyNode in, Collection conflicts) {
 
         // No conflict
@@ -52,13 +53,13 @@ public class PlayConflictManager extends AbstractConflictManager {
          * Choose the artifact version provided in $PLAY/framework/lib
          * Evict other versions
          */
-        List result = new ArrayList();
+        List<IvyNode> result = new ArrayList<IvyNode>();
         for (Iterator iter = conflicts.iterator(); iter.hasNext();) {
             IvyNode node = (IvyNode) iter.next();
             ModuleRevisionId modRev = node.getResolvedId();
             File jar = new File(System.getProperty("play.path") + "/framework/lib/" + modRev.getName() + "-" + modRev.getRevision() + ".jar");
-            if(jar.exists()) {
-               result.add(node);
+            if (jar.exists()) {
+                result.add(node);
             }
         }
 
