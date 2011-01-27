@@ -85,6 +85,11 @@ public class Fixtures {
             return;
         }
 
+        if (DBPlugin.url.startsWith("jdbc:h2:")) {
+            DB.execute("SET REFERENTIAL_INTEGRITY FALSE");
+            return;
+        }
+
         if (DBPlugin.url.startsWith("jdbc:mysql:")) {
             DB.execute("SET foreign_key_checks = 0;");
             return;
@@ -111,6 +116,11 @@ public class Fixtures {
         }
 
         if (DBPlugin.url.startsWith("jdbc:hsqldb:")) {
+            DB.execute("SET REFERENTIAL_INTEGRITY TRUE");
+            return;
+        }
+
+        if (DBPlugin.url.startsWith("jdbc:h2:")) {
             DB.execute("SET REFERENTIAL_INTEGRITY TRUE");
             return;
         }

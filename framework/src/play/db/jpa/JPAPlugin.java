@@ -237,6 +237,8 @@ public class JPAPlugin extends PlayPlugin {
         String dialect = Play.configuration.getProperty("jpa.dialect");
         if (dialect != null) {
             return dialect;
+        } else if (driver.equals("org.h2.Driver")) {
+            return "org.hibernate.dialect.H2Dialect";
         } else if (driver.equals("org.hsqldb.jdbcDriver")) {
             return "org.hibernate.dialect.HSQLDialect";
         } else if (driver.equals("com.mysql.jdbc.Driver")) {
