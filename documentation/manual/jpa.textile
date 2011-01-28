@@ -124,14 +124,14 @@ Here is a common use case, when editing a persistent object after a form submit:
 
 bc. public static void save(Long id) {
     User user = User.findById(id);
-    user.edit(params);
+    user.edit("user", params.all()); // play 1.1
     validation.valid(user);
     if(validation.hasErrors()) {
         // Here we have to explicitly discard the user modifications...
         user.refresh();
-        edit(id);
+        edit(user.id);
     }
-    show(id);
+    show(user.id);
 }
 
 From what I’ve seen, most developers are not aware of this, and forget to discard the object state in case of errors, assuming that the object will not be saved without an explicit call to save().
@@ -140,13 +140,14 @@ So that’s exactly what we’ve changed in Play. All the persistent objects ext
 
 bc. public static void save(Long id) {
     User user = User.findById(id);
-    user.edit(params);
+    user.edit("user", params.all()); // play 1.1 
     validation.valid(user);
     if(validation.hasErrors()) {
-        edit(id);
+        edit(user.id);
+    } else{
+       user.save(); // explicit save here
+       show(user.id);
     }
-    user.save();
-    show(id);
 }
 
 This is far more intuitive. Moreover since it could be tedious to explicitly call save() on a large object graph, the save() call is automatically cascaded to the relationships annotated with the **cascade=CascadeType.ALL** attribute.
