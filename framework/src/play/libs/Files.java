@@ -88,9 +88,9 @@ public class Files {
     public static void unzip(File from, File to) {
         try {
             ZipFile zipFile = new ZipFile(from);
-            Enumeration entries = entries = zipFile.entries();
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
-                ZipEntry entry = (ZipEntry) entries.nextElement();
+                ZipEntry entry = entries.nextElement();
                 if (entry.isDirectory()) {
                     new File(to, entry.getName()).mkdir();
                     continue;

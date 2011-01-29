@@ -211,6 +211,7 @@ public class YamlParser extends AbstractModuleDescriptorParser {
         ((DefaultModuleDescriptor)md).toIvyFile(file);
     }
 
+    @SuppressWarnings("unchecked")
     <T> T get(Map data, String key, Class<T> type) {
         if (data.containsKey(key)) {
             Object o = data.get(key);

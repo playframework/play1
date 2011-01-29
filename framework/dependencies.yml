@@ -22,11 +22,12 @@ require:    &allDependencies
     - commons-lang 2.5
     - commons-logging 1.1.1
     - dom4j 1.6.1
-    - hsqldb 1.8.1.2
+    - com.h2database -> h2 1.3.149
     - org.javassist -> javassist 3.9.0.GA
     - javax.activation -> activation 1.1.1
     - javax.mail -> mail 1.4.3
     - javax.transaction -> jta 1.1
+    - javax.inject 1.0
     - jaxen 1.1
     - joda-time 1.6
     - junit 4.8.1

@@ -48,7 +48,6 @@ http://www.dom4j.org/license.html
     - Dom4J
 
 http://www.opensource.org/licenses/bsd-license.php
-    - HsqlDB
     - Jamon
     - Jaxen
     - JRegex
@@ -60,6 +59,7 @@ http://www.opensource.org/licenses/mit-license.php
     - SLF4J
 
 http://www.eclipse.org/legal/epl-v10.html
+    - H2 Database
     - WikiText
     - Oval
 
