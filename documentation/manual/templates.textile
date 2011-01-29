@@ -225,6 +225,12 @@ bc. #{hello}
    Bob
 #{/hello}
 
+h3. Format-specific tags
+
+You can have different versions of a tag for different "content types":routes#content-types and Play will select the appropriate tag. For example, Play will use the **app/views/tags/hello.html** tag when **request.format** is **html**, and **app/views/tags/hello.xml** when the format is **xml**.
+
+Whatever the content type, Play will fall back to the **.tag** extension if a format-specific tag is not available, e.g. **app/views/tags/hello.tag**.
+
 
 h2. <a name="fasttags">Custom Java tags</a>
 
