@@ -160,7 +160,7 @@ Extended references for day-to-day hacking.
 
 # "The missing cheat sheet":http://download.playframework.org/miscellaneous/play-cheat-sheet.pdf
 # "The ultimate Play cheat sheet":http://www.crionics.com/products/opensource/play/TheUltimatePlayCheatSheet.pdf
-# "Browse API documentation":/@api/index.html
+# "Browse API documentation":/@api/index.html (Javadoc)
 # "Template tags and extensions reference":tags
 # "Java extensions":javaextensions
 # "Built-in validations":validation-builtin
