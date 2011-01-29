@@ -131,7 +131,8 @@ public class GroovyTemplate extends BaseTemplate {
                 sb.append("\n");
                 for (GroovyClass gclass : groovyClassesForThisTemplate) {
                     tClassLoader.defineTemplate(gclass.getName(), gclass.getBytes());
-                    sb.append(gclass.getName() + "\n");
+                    sb.append(gclass.getName());
+                    sb.append("\n");
                     sb.append(Codec.encodeBASE64(gclass.getBytes()).replaceAll("\\s", ""));
                     sb.append("\n");
                 }
@@ -147,7 +148,7 @@ public class GroovyTemplate extends BaseTemplate {
                         fos.write(sb.toString().getBytes("utf-8"));
                         fos.close();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.warn(e, "Unexpected");
                     }
                 }
 

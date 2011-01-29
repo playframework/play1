@@ -13,6 +13,7 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Router.Route;
 import play.mvc.results.Result;
+import play.templates.BaseTemplate;
 import play.templates.Template;
 import play.test.BaseTest;
 import play.test.TestEngine.TestResults;
@@ -268,4 +269,9 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public int compareTo(PlayPlugin o) {
         return (index < o.index ? -1 : (index == o.index ? 0 : 1));
     }
+
+    public String overrideTemplateSource(BaseTemplate template, String source) {
+        return null;
+    }
+    
 }
