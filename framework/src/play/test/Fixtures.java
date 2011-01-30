@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,9 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
-import org.yaml.snakeyaml.JavaBeanLoader;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.scanner.ScannerException;
@@ -93,6 +92,8 @@ public class Fixtures {
         deleteDatabase();
     }
 
+    static String[] dontDeleteTheseTables = new String[] {"play_evolutions"};
+
     /**
      * Flush the entire JDBC database
      */
@@ -107,8 +108,10 @@ public class Fixtures {
             }
             disableForeignKeyConstraints();
             for (String name : names) {
-                Logger.trace("Dropping content of table %s", name);
-                DB.execute(getDeleteTableStmt(name) + ";");
+                if(Arrays.binarySearch(dontDeleteTheseTables, name) == -1) {
+                    Logger.trace("Dropping content of table %s", name);
+                    DB.execute(getDeleteTableStmt(name) + ";");
+                }
             }
             enableForeignKeyConstraints();
             for(PlayPlugin plugin : Play.plugins) {
