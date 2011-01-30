@@ -128,7 +128,7 @@ class PlayApplication:
 
         # The default
         classpath.append(os.path.normpath(os.path.join(self.path, 'conf')))
-        classpath.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'framework/play.jar')))
+        classpath.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'framework/play-%s.jar' % self.play_env['version'])))
 
         # The application
         if os.path.exists(os.path.join(self.path, 'lib')):
@@ -153,7 +153,7 @@ class PlayApplication:
         return classpath
 
     def agent_path(self):
-        return os.path.join(self.play_env["basedir"], 'framework/play.jar')
+        return os.path.join(self.play_env["basedir"], 'framework/play-%s.jar' % self.play_env['version'])
 
     def cp_args(self):
         classpath = self.getClasspath()

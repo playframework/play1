@@ -192,7 +192,7 @@ public class DependenciesManager {
 
     public File install(ArtifactDownloadReport artifact) throws Exception {
         try {
-            File from = artifact.getLocalFile().getCanonicalFile();
+            File from = artifact.getLocalFile();
             if (!isPlayModule(artifact)) {
                 File to = new File(application, "lib" + File.separator + from.getName()).getCanonicalFile();
                 new File(application, "lib").mkdir();

@@ -25,6 +25,7 @@ def execute(**kargs):
     cpXML = ""
 
     replaceAll(imlFile, r'%PLAYHOME%', play_env["basedir"].replace('\\', '/'))
+    replaceAll(imlFile, r'%PLAYVERSION%', play_env["version"].replace('\\', '/'))
 
     if len(modules):
         lXML = ""
