@@ -133,6 +133,40 @@ public class Logger {
         return juliLevel;
     }
 
+
+    /**
+     * @return true if log4j.debug / jul.fine logging is enabled
+     */
+    public static boolean isDebugEnabled(){
+        if (forceJuli || log4j == null) {
+            return juli.isLoggable(java.util.logging.Level.FINE);
+        } else {
+            return log4j.isDebugEnabled();
+        }
+    }
+
+    /**
+     *
+     * @param level string representation of Logging-levels as used in log4j
+     * @return true if specified logging-level is enabled
+     */
+    public static boolean isEnabledFor( String level ){
+        //go from level-string to log4j-level-object
+        org.apache.log4j.Level log4jLevel = org.apache.log4j.Level.toLevel(level);
+
+        if (forceJuli || log4j == null) {
+            //must translate from log4j-level to jul-level
+            java.util.logging.Level julLevel = toJuliLevel( log4jLevel.toString() );
+            //check level against jul
+            return juli.isLoggable( julLevel );
+        } else {
+            //check level against log4j
+            return log4j.isEnabledFor( log4jLevel );
+        }
+
+    }
+
+
     /**
      * Log with TRACE level
      * @param message The message pattern
