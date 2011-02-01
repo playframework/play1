@@ -55,6 +55,15 @@ public class Bootstrap extends Job {
 
 You don’t need to return a result. Even if you do it, the result will be lost.
 
+The default is that all jobs annotated with @OnApplicationStart will be executed in sequence. When all jobs are finished, your application is ready to
+start processing incoming requests.
+
+If you want your jobs to start when your application starts, but you want to start processing incoming requests immediately, you can
+annotate your job like this: @OnApplicationStart(async=true). Then your job will be started in the background when the application starts.
+All async jobs will be started at the same time.
+
+
+
 p(note). **Warning**
  
 When you run the application in DEV mode, the application waits for the first HTTP request to start. Moreover when you are in DEV mode, the application will sometimes automatically restart when needed. 

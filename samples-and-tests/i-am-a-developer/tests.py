@@ -15,12 +15,101 @@ import threading
 
 class IamADeveloper(unittest.TestCase):
 
+
+    def testCreateAndRunForJobProject(self):
+
+        # Testing job developing
+        step('Hello, I am a job-developer')
+
+        self.working_directory = bootstrapWorkingDirectory('i-am-creating-jobs-here')
+    
+        # play new job-app
+        step('Create a new project')
+    
+        self.play = callPlay(self, ['new', '%s/jobapp' % self.working_directory, '--name=JOBAPP'])
+        self.assert_(waitFor(self.play, 'The new application will be created'))
+        self.assert_(waitFor(self.play, 'OK, the application is created'))
+        self.assert_(waitFor(self.play, 'Have fun!'))
+        self.play.wait()
+    
+        app = '%s/jobapp' % self.working_directory
+            
+        #create our first job - which is executed sync on startup with @OnApplicationStart
+    
+        createDir( app, 'app/jobs')
+        create(app, 'app/jobs/Job1.java')
+        insert(app, 'app/jobs/Job1.java', 1, "package jobs;")
+        insert(app, 'app/jobs/Job1.java', 2, "import play.jobs.*;")
+        insert(app, 'app/jobs/Job1.java', 3, "import play.*;")
+        insert(app, 'app/jobs/Job1.java', 4, "@OnApplicationStart")
+        insert(app, 'app/jobs/Job1.java', 5, "public class Job1 extends Job {")
+        insert(app, 'app/jobs/Job1.java', 6, "  public void doJob() throws Exception{")
+        insert(app, 'app/jobs/Job1.java', 7, '      Logger.info("Job starting");')
+        insert(app, 'app/jobs/Job1.java', 8, '      Thread.sleep(1 * 1000);')
+        insert(app, 'app/jobs/Job1.java', 9, '      Logger.info("Job done");')
+        insert(app, 'app/jobs/Job1.java', 10, '  }')
+        insert(app, 'app/jobs/Job1.java', 11, '}')
+    
+        #modify our controller to log when exeuted
+        insert(app, "app/controllers/Application.java", 13, '        Logger.info("Processing request");')
+    
+    
+        # Run the newly created application
+        step('Run the newly created job-application')
+    
+        self.play = callPlay(self, ['run', app])
+        #wait for play to be ready
+        self.assert_(waitFor(self.play, 'Listening for HTTP on port 9000'))
+    
+        step("Send request to start app")
+
+        browser = mechanize.Browser()
+        response = browser.open('http://localhost:9000/')
+
+    
+        step("check that job completed before processing request")
+        self.assert_(waitFor(self.play, 'Job done'))
+        self.assert_(waitFor(self.play, 'Processing request'))
+
+        step("stop play")
+        killPlay()
+        self.play.wait()
+            
+        #now we change the job to be async
+        step("Change job to async")
+    
+        edit(app, 'app/jobs/Job1.java', 4, "@OnApplicationStart(async=true)")        
+
+        # start play again
+        step('Run the job-application again')
+    
+        self.play = callPlay(self, ['run', app])
+        #wait for play to be ready
+        self.assert_(waitFor(self.play, 'Listening for HTTP on port 9000'))
+    
+        step("Send request to start app")
+
+        browser = mechanize.Browser()
+        response = browser.open('http://localhost:9000/')
+
+    
+        step("check that the request is processed before the job finishes")
+        self.assert_(waitFor(self.play, 'Processing request'))
+        self.assert_(waitFor(self.play, 'Job done'))
+
+        step("stop play")
+        killPlay()
+        self.play.wait()
+    
+        step("done testing jobapp")
+    
+
     def testSimpleProjectCreation(self):
-        
+
         # Well
         step('Hello, I\'m a developer')
         
-        self.working_directory = bootstrapWorkingDirectory()
+        self.working_directory = bootstrapWorkingDirectory('i-am-working-here')
         
         # play new yop
         step('Create a new project')
@@ -455,11 +544,14 @@ class IamADeveloper(unittest.TestCase):
         killPlay()
 
 
+
+
+
 # --- UTILS
 
-def bootstrapWorkingDirectory():
+def bootstrapWorkingDirectory( folder ):
     test_base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
-    working_directory = os.path.join(test_base, 'i-am-working-here')
+    working_directory = os.path.join(test_base, folder )
     if(os.path.exists(working_directory)):
         shutil.rmtree(working_directory)
     os.mkdir(working_directory)
@@ -525,6 +617,11 @@ def create(app, file):
     source = open(fname, 'w')
     source.close()
     os.utime(fname, None)
+
+def createDir(app, file):
+    fname = os.path.join(app, file)
+    os.mkdir( fname )
+
 
 def delete(app, file, line):
     fname = os.path.join(app, file)
