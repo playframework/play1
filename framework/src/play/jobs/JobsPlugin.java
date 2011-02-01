@@ -52,7 +52,10 @@ public class JobsPlugin extends PlayPlugin {
                 out.print(job.getClass().getName());
                 if(job.getClass().isAnnotationPresent(OnApplicationStart.class)) {
                     out.print(" run at application start.");
+                }else if(job.getClass().isAnnotationPresent(OnApplicationStartAsync.class)) {
+                    out.print(" run at application start (async).");
                 }
+
                 if(job.getClass().isAnnotationPresent(On.class)) {
                     out.print(" run with cron expression " + job.getClass().getAnnotation(On.class).value() + ".");
                 }
@@ -116,6 +119,18 @@ public class JobsPlugin extends PlayPlugin {
                         throw (PlayException) ex;
                     }
                     throw new UnexpectedException(ex);
+                }
+            }// @OnApplicationStartAsync
+            else if(clazz.isAnnotationPresent(OnApplicationStartAsync.class)){
+                try {
+                    Job<?> job = ((Job<?>) clazz.newInstance());
+                    scheduledJobs.add(job);
+                    //start running job now in the background
+                    executor.submit( (Callable<Job>)job );
+                } catch (InstantiationException ex) {
+                    throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
+                } catch (IllegalAccessException ex) {
+                    throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
                 }
             }
             // @On
