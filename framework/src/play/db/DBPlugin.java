@@ -160,7 +160,7 @@ public class DBPlugin extends PlayPlugin {
             check(p, "fs", "db.url");
 
             p.put("db.driver", "org.h2.Driver");
-            p.put("db.url", "jdbc:h2:" + (new File(Play.applicationPath, "db/db").getAbsolutePath()) + ";MODE=MYSQL");
+            p.put("db.url", "jdbc:h2:" + (new File(Play.applicationPath, "db/h2/play").getAbsolutePath()) + ";MODE=MYSQL");
             p.put("db.user", "sa");
             p.put("db.pass", "");
         }
