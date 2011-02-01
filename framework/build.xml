@@ -5,10 +5,12 @@
     <property name="baseversion" value="master" />
 
     <path id="project.classpath">
-        <pathelement path="play.jar"/>
+        <fileset dir=".">
+            <include name="play-*.jar"/>                        
+        </fileset>
         <fileset dir="lib">
             <include name="*.jar"/>                        
-        </fileset> 
+        </fileset>         
     </path>
 
     <target name="clean" description="clean resources">
@@ -16,9 +18,11 @@
         <delete dir="dist" />
         <delete dir="tests-results" />
         <delete dir="tests-tmp" />
-        <delete file="play.jar" /> 
-        <delete file="src/play/version" />  
+        <delete file="src/play/version" />
         <delete includeemptydirs="true">
+            <fileset dir=".">
+                <include name="play-*.jar" />
+            </fileset>
             <fileset dir="pym">
                 <include name="**/*.pyc"/> 
             </fileset>
@@ -84,10 +88,10 @@
         </javadoc>
     </target>
     
-    <target name="jar" depends="compile,version,modules" description="create play.jar">        
+    <target name="jar" depends="clean,version,compile,modules" description="create play.jar">        
         <echo message="${version}" file="src/play/version" />
         <echo message="${version}" file="classes/play/version" />
-        <jar destfile="play.jar" basedir="classes">
+        <jar destfile="play-${version}.jar" basedir="classes">
             <manifest>
                 <attribute name="Premain-Class" value="play.classloading.HotswapAgent"/>
                 <attribute name="Can-Redefine-Classes" value="true" />
@@ -134,7 +138,7 @@
             <sysproperty key="play.id" value="${play.id}" />
             <sysproperty key="java.endorsed.dirs" value="${basedir}/endorsed" />
             <sysproperty key="play.debug" value="true" />
-            <jvmarg value="-javaagent:${basedir}/play.jar" />
+            <jvmarg value="-javaagent:${basedir}/play-${version}.jar" />
             <jvmarg value="-Xdebug"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.port},server=y,suspend=n"/>
             <jvmarg value="${profiler.info.jvmargs.agent}"/>
@@ -157,7 +161,7 @@
             <sysproperty key="play.id" value="${play.id}" />
             <sysproperty key="java.endorsed.dirs" value="${basedir}/endorsed" />
             <sysproperty key="play.debug" value="true" />
-            <jvmarg value="-javaagent:${basedir}/play.jar" />
+            <jvmarg value="-javaagent:${basedir}/play-${version}.jar" />
             <jvmarg value="-Xdebug"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.port},server=y,suspend=n"/>            
         </java>	
@@ -179,7 +183,7 @@
             <sysproperty key="application.path" value="${application.path}" />
             <sysproperty key="play.id" value="test" />
             <sysproperty key="java.endorsed.dirs" value="${basedir}/endorsed" />
-            <jvmarg value="-javaagent:${basedir}/play.jar" />    
+            <jvmarg value="-javaagent:${basedir}/play-${version}.jar" />
             <jvmarg value="-Xdebug"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.port},server=y,suspend=n"/>
         </java>  
@@ -276,7 +280,7 @@
             <formatter type="brief" usefile="false"/> 
             <formatter type="xml"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>  
-            <jvmarg value="-javaagent:${basedir}/play.jar" />
+            <jvmarg value="-javaagent:${basedir}/play-${version}.jar" />
             <sysproperty key="tests-tmp" value="${basedir}/tests-tmp" />
         </junit>
         <delete dir="${basedir}/tests-tmp" />
@@ -293,7 +297,7 @@
             </classpath>                   
             <formatter type="brief" usefile="false"/> 
             <formatter type="xml"/>
-            <jvmarg value="-javaagent:${basedir}/play.jar" />
+            <jvmarg value="-javaagent:${basedir}/play-${version}.jar" />
             <sysproperty key="tests-tmp" value="${basedir}/tests-tmp" />
         </junit>
         <delete dir="${basedir}/tests-tmp" />

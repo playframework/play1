@@ -43,6 +43,14 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     String source() {
         String source = template.source;
 
+        // If a plugin has something to change in the template before the compilation
+        for(PlayPlugin plugin : Play.plugins) {
+            String newSource = plugin.overrideTemplateSource(template, source);
+            if(newSource != null) {
+                source = newSource;
+            }
+        }
+
         // Static access
         List<String> names = new ArrayList<String>();
         Map<String, String> originalNames = new HashMap<String, String>();

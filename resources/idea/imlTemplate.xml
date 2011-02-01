@@ -33,7 +33,7 @@
         <orderEntry type="module-library">
             <library>
                 <CLASSES>
-                    <root url="jar://%PLAYHOME%/framework/play.jar!/" />
+                    <root url="jar://%PLAYHOME%/framework/play-%PLAYVERSION%.jar!/" />
                 </CLASSES>
                 <JAVADOC />
                 <SOURCES />

@@ -61,9 +61,9 @@ repositories:
     - playCore:
         type:       local
         descriptor: "${play.path}/framework/dependencies.yml"
-        artifact:   "${play.path}/framework/play.jar"
+        artifact:   "${play.path}/framework/play-[revision].jar"
         contains:
-            - play -> play $version
+            - play -> play
 
     - playCoreDependencies:
         type:       local
