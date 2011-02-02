@@ -14,6 +14,95 @@ import threading
 # --- TESTS
 
 class IamADeveloper(unittest.TestCase):
+    
+    def testLogLevelsAndLog4jConfig(self):
+
+        # Testing job developing
+        step('Hello, I am testing loglevels')
+
+        self.working_directory = bootstrapWorkingDirectory('i-am-testing-log-levels-here')
+    
+        # play new job-app
+        step('Create a new project')
+    
+        self.play = callPlay(self, ['new', '%s/loglevelsapp' % self.working_directory, '--name=LOGLEVELSAPP'])
+        self.assert_(waitFor(self.play, 'The new application will be created'))
+        self.assert_(waitFor(self.play, 'OK, the application is created'))
+        self.assert_(waitFor(self.play, 'Have fun!'))
+        self.play.wait()
+    
+        app = '%s/loglevelsapp' % self.working_directory
+            
+        #inserting some log-statements in our controller
+        insert(app, "app/controllers/Application.java", 13, '        Logger.debug("I am a debug message");')
+        insert(app, "app/controllers/Application.java", 14, '        Logger.info("I am an info message");')            
+    
+        # Run the newly created application
+        step('Run our logger-application')
+    
+        self.play = callPlay(self, ['run', app])
+        #wait for play to be ready
+        self.assert_(waitFor(self.play, 'Listening for HTTP on port 9000'))
+    
+        step("Send request to trigger some logging")
+
+        browser = mechanize.Browser()
+        response = browser.open('http://localhost:9000/')
+
+    
+        step("check that only info log message is logged")
+        self.assert_(waitForWithFail(self.play, 'I am an info message', 'I am a debug message'))
+
+        step("stop play")
+        killPlay()
+        self.play.wait()
+
+        #now we're going to manually configure log4j to log debug messages
+        step('Writing log4j config file')
+        
+        create(app, 'conf/log4j.xml')
+        
+        insert(app, "conf/log4j.xml", 1, '<?xml version="1.0" encoding="UTF-8" ?>')
+        insert(app, "conf/log4j.xml", 2, '<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">')
+        insert(app, "conf/log4j.xml", 3, '<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">')
+        insert(app, "conf/log4j.xml", 4, '  <appender name="console" class="org.apache.log4j.ConsoleAppender">')
+        insert(app, "conf/log4j.xml", 5, '      <param name="Target" value="System.out"/>')
+        insert(app, "conf/log4j.xml", 6, '      <layout class="org.apache.log4j.PatternLayout">')
+        insert(app, "conf/log4j.xml", 7, '          <param name="ConversionPattern" value="%m%n"/>')
+        insert(app, "conf/log4j.xml", 8, '      </layout>')
+        insert(app, "conf/log4j.xml", 9, '  </appender>')
+        insert(app, "conf/log4j.xml", 10, ' <logger name="play">')
+        insert(app, "conf/log4j.xml", 11, '     <level value="debug"/>')
+        insert(app, "conf/log4j.xml", 12, ' </logger>')
+        insert(app, "conf/log4j.xml", 13, ' <root>')
+        insert(app, "conf/log4j.xml", 14, '     <priority value="info"/>')
+        insert(app, "conf/log4j.xml", 15, '     <appender-ref ref="console"/>')
+        insert(app, "conf/log4j.xml", 16, ' </root>')
+        insert(app, "conf/log4j.xml", 17, '</log4j:configuration>')
+        
+            
+        # Run the newly created application
+        step('re-run our logger-application')
+    
+        self.play = callPlay(self, ['run', app])
+        #wait for play to be ready
+        self.assert_(waitFor(self.play, 'Listening for HTTP on port 9000'))
+    
+        step("Send request to trigger some logging")
+
+        browser = mechanize.Browser()
+        response = browser.open('http://localhost:9000/')
+
+    
+        step("check that both debug and info message is logged")
+        self.assert_(waitFor(self.play, 'I am a debug message'))        
+        self.assert_(waitFor(self.play, 'I am an info message'))
+
+        step("stop play")
+        killPlay()
+        self.play.wait()
+    
+        step("done testing logging")
 
 
     def testCreateAndRunForJobProject(self):
@@ -563,7 +652,13 @@ def callPlay(self, args):
     play_process = subprocess.Popen(process_args,stdout=subprocess.PIPE)
     return play_process
 
+#returns true when pattern is seen
 def waitFor(process, pattern):
+    return waitForWithFail(process, pattern, "")
+    
+
+#returns true when pattern is seen, but false if failPattern is seen
+def waitForWithFail(process, pattern, failPattern):
     timer = threading.Timer(5, timeout, [process])
     timer.start()
     while True:
@@ -571,6 +666,9 @@ def waitFor(process, pattern):
         if line == '@KILLED':
             return False
         print line
+        if failPattern != "" and line.count(failPattern):
+            timer.cancel()
+            return False
         if line.count(pattern):
             timer.cancel()
             return True
