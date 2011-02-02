@@ -73,7 +73,7 @@ public class PropertiesEnhancer extends Enhancer {
 
                     try {
                         CtMethod ctMethod = ctClass.getDeclaredMethod(getter);
-                        if (ctMethod.getParameterTypes().length > 0) {
+                        if (ctMethod.getParameterTypes().length > 0 || Modifier.isStatic(ctMethod.getModifiers())) {
                             throw new NotFoundException("it's not a getter !");
                         }
                     } catch (NotFoundException noGetter) {
@@ -86,7 +86,7 @@ public class PropertiesEnhancer extends Enhancer {
 
                     try {
                         CtMethod ctMethod = ctClass.getDeclaredMethod(setter);
-                        if (ctMethod.getParameterTypes().length != 1 || !ctMethod.getParameterTypes()[0].equals(ctField.getType())) {
+                        if (ctMethod.getParameterTypes().length != 1 || !ctMethod.getParameterTypes()[0].equals(ctField.getType()) || Modifier.isStatic(ctMethod.getModifiers())) {
                             throw new NotFoundException("it's not a setter !");
                         }
                     } catch (NotFoundException noSetter) {

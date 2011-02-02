@@ -48,11 +48,11 @@ def execute(**kargs):
     shutil.copyfile(os.path.join(play_env["basedir"], 'resources/eclipse/.project'), dotProject)
     shutil.copyfile(os.path.join(play_env["basedir"], 'resources/eclipse/.classpath'), dotClasspath)
     if is_application:
-	    shutil.copytree(os.path.join(play_env["basedir"], 'resources/eclipse'), eclipse)
+        shutil.copytree(os.path.join(play_env["basedir"], 'resources/eclipse'), eclipse)
     shutil.copytree(os.path.join(play_env["basedir"], 'resources/eclipse/.settings'), dotSettings)
     replaceAll(dotProject, r'%PROJECT_NAME%', application_name)
 
-    playJarPath = os.path.join(play_env["basedir"], 'framework', 'framework/play-%s.jar' % self.play_env['version'])
+    playJarPath = os.path.join(play_env["basedir"], 'framework', 'framework/play-%s.jar' % play_env['version'])
     playSourcePath = os.path.dirname(playJarPath)
     if os.name == 'nt':
         playSourcePath=playSourcePath.replace('\\','/').capitalize()

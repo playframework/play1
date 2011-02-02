@@ -261,6 +261,12 @@ public class Fixtures {
     }
 
     public static <T> T loadYaml(String name, Class<T> clazz) {
+        Yaml yaml = new Yaml(new CustomClassLoaderConstructor(clazz, Play.classloader));
+        yaml.setBeanAccess(BeanAccess.FIELD);
+        return (T)loadYaml(name, yaml);
+    }
+
+    public static <T> T loadYaml(String name, Yaml yaml) {
         VirtualFile yamlFile = null;
         try {
             for (VirtualFile vf : Play.javaPath) {
@@ -273,8 +279,6 @@ public class Fixtures {
             if (is == null) {
                 throw new RuntimeException("Cannot load fixture " + name + ", the file was not found");
             }
-            Yaml yaml = new Yaml(new CustomClassLoaderConstructor(clazz, Play.classloader));
-            yaml.setBeanAccess(BeanAccess.FIELD);
             Object o = yaml.load(is);
             return (T)o;
         } catch (ScannerException e) {
