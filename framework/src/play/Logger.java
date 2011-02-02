@@ -49,6 +49,11 @@ public class Logger {
     public static java.util.logging.Logger juli = java.util.logging.Logger.getLogger("play");
 
     /**
+     * true if logger is configured manually (log4j-config file supplied by application)
+     */
+    public static boolean configuredManually = false;
+
+    /**
      * Try to init stuff.
      */
     public static void init() {
@@ -63,6 +68,10 @@ public class Logger {
             shutUp.setProperty("log4j.rootLogger", "OFF");
             PropertyConfigurator.configure(shutUp);
         } else if (Logger.log4j == null) {
+
+            //we're configuring the Logger manually.
+            configuredManually = true;
+
             PropertyConfigurator.configure(log4jConf);
             Logger.log4j = org.apache.log4j.Logger.getLogger("play");
             // In test mode, append logs to test-result/application.log
