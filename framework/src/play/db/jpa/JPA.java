@@ -2,6 +2,8 @@ package play.db.jpa;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+
 import play.exceptions.JPAException;
 
 /**
@@ -76,5 +78,18 @@ public class JPA {
      */ 
     public static EntityManager newEntityManager() {
         return entityManagerFactory.createEntityManager();
+    }
+
+    /**
+     * @return true if current thread is running inside a transaction
+     */
+    public static boolean isInsideTransaction() {
+        try{
+            EntityManager manager = JPA.get().entityManager;
+		    EntityTransaction transaction =  manager.getTransaction();
+            return transaction != null;
+        }catch(JPAException e){
+            return false;
+        }
     }
 }

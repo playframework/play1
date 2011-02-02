@@ -5,6 +5,7 @@ import play.db.jpa.*;
 
 import models.*;
 
+
 public class Transactional extends Controller {
 
     // whatever we write here will not be committed
@@ -43,5 +44,17 @@ public class Transactional extends Controller {
         long cnt = Post.count();
         renderText("There are " + cnt + " posts");
     }
+
+	//This should be excluded from any transactions.
+	@play.db.jpa.NoTransaction
+	public static void disabledTransactionTest() {
+		renderText("isInsideTransaction: " + JPA.isInsideTransaction());
+	}
+	
+	//This should automatically run inside transaction and return true
+	public static void verifyIsInsideTransaction() {
+		renderText("isInsideTransaction: " + JPA.isInsideTransaction());
+	}
+	
 }
 
