@@ -291,6 +291,13 @@ public class JPAPlugin extends PlayPlugin {
 
     @Override
     public void beforeInvocation() {
+
+        if( InvocationContext.current().getAnnotation(NoTransaction.class) != null ) {
+            //Called method is annotated with @NoTransaction telling us that
+            //we should not start a transaction
+            return ;
+        }
+
         boolean readOnly = false;
         Transactional tx = InvocationContext.current().getAnnotation(Transactional.class);
         if (tx != null) {
