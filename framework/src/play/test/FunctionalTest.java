@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -135,6 +136,10 @@ public abstract class FunctionalTest extends BaseTest {
      */
     public static Response POST(Object url, Map<String, String> parameters, Map<String, File> files) {
         return POST(newRequest(), url, parameters, files);
+    }
+
+    public static Response POST(Object url, Map<String, String> parameters) {
+        return POST(newRequest(), url, parameters, new HashMap<String, File>());
     }
 
     public static Response POST(Request request, Object url, Map<String, String> parameters, Map<String, File> files) {
