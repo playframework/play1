@@ -146,8 +146,15 @@ public class Task<V> implements Future<V>, F.Action<V> {
         final Task<T> result = new Task<T>();
 
         final F.Action<T> action = new F.Action<T>() {
+            boolean invoked = false;
 
             public void invoke(T value) {
+                synchronized(this) {
+                    if(invoked) {
+                        return;
+                    }
+                    invoked = true;
+                }
                 result.invoke(value);
             }
             

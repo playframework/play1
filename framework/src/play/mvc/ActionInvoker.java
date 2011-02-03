@@ -40,6 +40,7 @@ import java.util.concurrent.Future;
 import org.apache.commons.javaflow.Continuation;
 import org.apache.commons.javaflow.bytecode.StackRecorder;
 import play.Invoker.Suspend;
+import play.classloading.enhancers.LocalvariablesNamesEnhancer;
 import play.mvc.results.NotFound;
 
 /**
