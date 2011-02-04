@@ -23,7 +23,7 @@ class PlayApplication(object):
         if application_path is not None:
             confpath = os.path.join(application_path, 'conf/application.conf')
             try:
-                self.conf = PlayConfParser(confpath, env["id"])
+                self.conf = PlayConfParser(confpath, env["id"], application_path)
             except:
                 self.conf = None # No app / Invalid app
         else:
@@ -270,22 +270,32 @@ class PlayConfParser:
         'jpda.port': '8000'
     }
 
-    def __init__(self, filepath, frameworkId):
+    def __init__(self, filepath, frameworkId, application_path):
         self.id = frameworkId
-        f = file(filepath)
         self.entries = dict()
-        for line in f:
-            linedef = line.strip()
-            if len(linedef) == 0:
-                continue
-            if linedef[0] in ('!', '#'):
-                continue
-            if linedef.find('=') == -1:
-                continue
-            key = linedef.split('=')[0].strip()
-            value = linedef[(linedef.find('=')+1):].strip()
-            self.entries[key] = value
-        f.close()
+        self.readFile(filepath, application_path)
+
+    def readFile(self, filepath, application_path):
+	try:
+            f = file(filepath)
+            for line in f:
+                linedef = line.strip()
+                if len(linedef) == 0:
+                    continue
+                if linedef[0] in ('!', '#'):
+                    continue
+                if linedef.find('=') == -1:
+                    continue
+                key = linedef.split('=')[0].strip()
+                val = linedef[(linedef.find('=')+1):].strip()
+                if linedef.find('@include.') == 0:
+                    val = os.path.join(application_path, 'conf', val)
+                    self.readFile(val, application_path)
+                else:
+                    self.entries[key] = val
+            f.close()
+        except IOError, x:
+            print "WARNING: Failed to read configuration from %s %s" % (filepath, x)
 
     def get(self, key):
         idkey = '%' + self.id + "." + key
