@@ -111,5 +111,17 @@ public class WithContinuations extends Controller {
         renderText("OK");
     }
     
+    public static void streamedResult() {
+        response.contentType = "text/html";
+        response.writeChunk("<h1>This page should load progressively in about 10 seconds</h1>");
+        long s = System.currentTimeMillis();
+        for(int i=0; i<100; i++) {
+            wait(100);
+            response.writeChunk("<h2>Hello " + i + "</h2>");
+        }
+        long t = System.currentTimeMillis() - s;
+        response.writeChunk("Time: " + t + ", isOk->" + (t > 10000 && t < 20000));
+    }
+    
 }
 

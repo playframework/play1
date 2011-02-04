@@ -5,6 +5,7 @@ import org.jboss.netty.handler.codec.http.*;
 import org.jboss.netty.handler.ssl.SslHandler;
 import play.Logger;
 import play.mvc.Http;
+import play.mvc.Http.Request;
 import play.server.PlayHandler;
 import play.server.Server;
 
@@ -15,15 +16,12 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
 
 public class SslPlayHandler extends PlayHandler {
 
-    public SslPlayHandler() {
-    }
-
     @Override
-    public Http.Request processRequest(Http.Request request) {
+    public Request parseRequest(ChannelHandlerContext ctx, HttpRequest nettyRequest) throws Exception {
+        Request request = super.parseRequest(ctx, nettyRequest);
         request.secure = true;
         return request;
     }
-
 
     @Override
     public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {

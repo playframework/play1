@@ -52,5 +52,11 @@
     
     open('@{WithContinuations.getUserByName('oops1')}')
     assertTextPresent('Users:12 -> null')
+    
+    open('@{WithContinuations.streamedResult()}')
+    assertTextPresent('Hello 1')
+    assertTextPresent('Hello 50')
+    assertTextPresent('Hello 99')
+    assertTextPresent('isOk->true')
 
 #{/selenium}
