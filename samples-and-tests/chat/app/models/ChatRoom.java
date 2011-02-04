@@ -18,21 +18,69 @@ public class ChatRoom {
         return instance;
     }
     
-    // Let's chat!
+    // Let's chat! 
     
-    Queue<Task<Message>> waiting = new ConcurrentLinkedQueue<Task<Message>>();
+    // Here we use a messages buffer to be sure to not lost any message
     
-    public void talk(Message msg) {
-        while(!waiting.isEmpty()) {
-            waiting.poll().invoke(msg);
+    final ArrayBlockingQueue<Message> messagesBuffer = new ArrayBlockingQueue<Message>(100);
+    final List<MessagesFilter> waiting = new ArrayList<MessagesFilter>();
+    
+    public synchronized void talk(Message msg) {
+        if(messagesBuffer.remainingCapacity() == 0) {
+            messagesBuffer.poll();
+        }
+        messagesBuffer.offer(msg);
+        notifyNewMessages();
+    }
+    
+    public synchronized Task<List<Message>> nextMessages(Long lastReceived) {
+        MessagesFilter futureMessages = new MessagesFilter(lastReceived);
+        waiting.add(futureMessages);
+        notifyNewMessages();
+        return futureMessages;        
+    } 
+    
+    public synchronized void notifyNewMessages() {
+        for(ListIterator<MessagesFilter> it = waiting.listIterator(); it.hasNext(); ) {
+            MessagesFilter filter = it.next();
+            for(Message message : messagesBuffer) {
+                filter.propose(message);
+            }
+            if(filter.invoke()) {
+                it.remove();
+            }
         }
     }
     
-    public Task<Message> nextMessage() {
-        Task<Message> futureMessage = new Task<Message>();
-        waiting.offer(futureMessage);
-        return futureMessage;        
-    } 
+    // A custom task that filter only unread messages
+    
+    static class MessagesFilter extends Task<List<Message>> {
+        
+        Long lastReceived;
+        List<Message> messages = new ArrayList<Message>();
+    
+        public MessagesFilter(Long lastReceived) {
+            this.lastReceived = lastReceived;
+        }
+        
+        public void propose(Message message) {
+            if(message.id > lastReceived) {
+                messages.add(message);
+            }
+        }
+        
+        // If the are messages to dispatch
+        // we finish the Task
+        public boolean invoke() {
+            if(messages.isEmpty()) {
+                return false;
+            } else {
+                super.invoke(messages);
+                return true;
+            }            
+        }
+        
+    }
     
 }
 

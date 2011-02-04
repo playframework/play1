@@ -7,7 +7,7 @@ GET     /                                       Application.index
 GET     /room                                   Application.room
 POST    /room                                   Application.join
 POST    /room/messages                          Application.say
-GET     /room/messages                          Application.waitMessage
+GET     /room/messages                          Application.waitMessages
 
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public

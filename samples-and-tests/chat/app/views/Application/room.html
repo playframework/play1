@@ -8,7 +8,7 @@
         <div class="message <%= message.user == '${session.user}' ? 'you' : '' %> <%= message.user == 'notice' ? 'notice' : '' %>">
             <h2><%= message.user %></h2>
             <p>
-                <%= message.text.replace('\n', '<br/>') %>
+                <%= message.text.replace('\n', '<br/>') %>&nbsp;
             </p>
         </div>
     </script>
@@ -21,10 +21,14 @@
 
 <script type="text/javascript">
 
+    var lastReceived = 0
+    var waitMessages = #{jsAction @waitMessages(':lastReceived') /}
+    var say = #{jsAction @say() /}
+
     $('#send').click(function(e) {
-        var message = $('#message').val();
-        $('#message').val('');
-        $.post('@{say()}', {msg: message}); 
+        var message = $('#message').val()
+        $('#message').val('')
+        $.post(say(), {msg: message})
     });
     
     $('#message').keypress(function(e) {
@@ -37,14 +41,13 @@
     // Retrieve new messages
     var getMessages = function() {
         $.ajax({
-            url: '@{waitMessage()}',
+            url: waitMessages({lastReceived: lastReceived}),
             success: function(messages) {
                 $(messages).each(function() {
-                    display(this);
-                });
-            },
-            complete: function() {
-                getMessages();
+                    display(this)
+                    lastReceived = this.id
+                })
+                getMessages()
             },
             dataType: 'json'
         });
@@ -54,6 +57,7 @@
     // Display a message
     var display = function(message) {
         $('#thread').append(tmpl('message_tmpl', {message: message}));
+        $('#thread').scrollTo('max')
     }
     
 </script>

@@ -2,6 +2,7 @@ package controllers;
 
 import play.*;
 import play.mvc.*;
+import play.data.validation.*;
 
 import java.util.*;
 
@@ -13,7 +14,11 @@ public class Application extends Controller {
         render();
     }
     
-    public static void join(String user) {
+    public static void join(@Required String user) {
+        if(validation.hasErrors()) {
+            flash.error("Please choose a nick name…");
+            index();
+        }
         session.put("user", user);
         ChatRoom.get().talk(Message.on("notice", user + " has joined the room"));
         room();
@@ -27,12 +32,14 @@ public class Application extends Controller {
         if(!session.contains("user")) {
             forbidden();
         }
-        ChatRoom.get().talk(Message.on(session.get("user"), msg));
+        if(msg != null && msg.trim().length() > 0) {
+            ChatRoom.get().talk(Message.on(session.get("user"), msg));
+        }        
     }
     
-    public static void waitMessage() {
-        Message msg = wait(ChatRoom.get().nextMessage());
-        renderJSON(msg);
+    public static void waitMessages(Long lastReceived) {
+        List<Message> messages = wait(ChatRoom.get().nextMessages(lastReceived));
+        renderJSON(messages);
     }
 
 }
