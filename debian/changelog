@@ -1,3 +1,9 @@
+play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-5) maverick; urgency=low
+
+  * Fixed configuration includes
+
+ -- Stephane Epardaud <stephane@eden>  Fri, 04 Feb 2011 17:47:36 +0100
+
 play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-4) maverick; urgency=low
 
   * Fix &{'msg', null} NPE
