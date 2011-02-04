@@ -1,3 +1,5 @@
+#{fixture delete:'all' /}
+
 #{selenium 'Test continuations'}
 
     open('@{WithContinuations.loopWithWait()}')
@@ -11,5 +13,44 @@
 
     open('@{WithContinuations.waitAny()}')
     assertTextPresent('0:true[DONE:1000];1:true[DONE:1000]')
+    
+    open('@{WithContinuations.withNaiveJPA()}')
+    assertTextPresent('org.hibernate.PersistentObjectException: detached entity passed to persist: models.User')
+    
+    open('@{WithContinuations.getUserByName('coco')}')
+    assertTextPresent('Users:1 -> null')
+    
+    open('@{WithContinuations.getUserByName('bob')}')
+    assertTextPresent('Users:1 -> bob')
+    
+    open('@{WithContinuations.withJPA()}')
+    assertTextPresent('OK')
+    
+    open('@{WithContinuations.getUserByName('kiki')}')
+    assertTextPresent('Users:2 -> null')
+    
+    open('@{WithContinuations.getUserByName('coco')}')
+    assertTextPresent('Users:2 -> coco')
+    
+    open('@{WithContinuations.rollbackWithoutContinuations()}')
+    assertTextPresent('OK')
+    
+    open('@{WithContinuations.getUserByName('user1')}')
+    assertTextPresent('Users:2 -> null')
+    
+    open('@{WithContinuations.rollbackWithContinuations()}')
+    assertTextPresent('OK')
+    
+    open('@{WithContinuations.getUserByName('user1')}')
+    assertTextPresent('Users:12 -> user1')
+    
+    open('@{WithContinuations.getUserByName('user9')}')
+    assertTextPresent('Users:12 -> user9')
+    
+    open('@{WithContinuations.rollbackWithContinuationsThatWorks()}')
+    assertTextPresent('OK')
+    
+    open('@{WithContinuations.getUserByName('oops1')}')
+    assertTextPresent('Users:12 -> null')
 
 #{/selenium}
