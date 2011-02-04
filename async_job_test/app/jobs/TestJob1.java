@@ -1,11 +1,11 @@
 package jobs;
 
-import play.jobs.OnApplicationStartAsync;
+import play.jobs.OnApplicationStart;
 import play.jobs.Job;
 import java.lang.Exception;
 import play.Logger;
 
-@OnApplicationStartAsync
+@OnApplicationStart(async=false)
 public class TestJob1 extends Job{
 	
 	protected int jobNo = 1;

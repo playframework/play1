@@ -1,8 +1,8 @@
 package jobs;
 
-import play.jobs.OnApplicationStartAsync;
+import play.jobs.OnApplicationStart;
 
-@OnApplicationStartAsync
+@OnApplicationStart(async=true)
 public class TestJob2 extends TestJob1{
 
 	public TestJob2(){

@@ -51,9 +51,8 @@ public class JobsPlugin extends PlayPlugin {
             for(Job job : scheduledJobs) {
                 out.print(job.getClass().getName());
                 if(job.getClass().isAnnotationPresent(OnApplicationStart.class)) {
-                    out.print(" run at application start.");
-                }else if(job.getClass().isAnnotationPresent(OnApplicationStartAsync.class)) {
-                    out.print(" run at application start (async).");
+                    OnApplicationStart appStartAnnotation = job.getClass().getAnnotation(OnApplicationStart.class);
+                    out.print(" run at application start" + (appStartAnnotation.async()?" (async)" : "") + ".");
                 }
 
                 if(job.getClass().isAnnotationPresent(On.class)) {
@@ -100,39 +99,45 @@ public class JobsPlugin extends PlayPlugin {
         for (final Class<?> clazz : jobs) {
             // @OnApplicationStart
             if (clazz.isAnnotationPresent(OnApplicationStart.class)) {
-                try {
-                    Job<?> job = ((Job<?>) clazz.newInstance());
-                    scheduledJobs.add(job);
-                    job.run();
-                    if(job.wasError) {
-                        if(job.lastException != null) {
-                            throw job.lastException;
+                //check if we're going to run the job sync or async
+                OnApplicationStart appStartAnnotation = clazz.getAnnotation(OnApplicationStart.class);
+                if( !appStartAnnotation.async()) {
+                    //run job sync
+                    try {
+                        Job<?> job = ((Job<?>) clazz.newInstance());
+                        scheduledJobs.add(job);
+                        job.run();
+                        if(job.wasError) {
+                            if(job.lastException != null) {
+                                throw job.lastException;
+                            }
+                            throw new RuntimeException("@OnApplicationStart Job has failed");
                         }
-                        throw new RuntimeException("@OnApplicationStart Job has failed");
+                    } catch (InstantiationException e) {
+                        throw new UnexpectedException("Job could not be instantiated", e);
+                    } catch (IllegalAccessException e) {
+                        throw new UnexpectedException("Job could not be instantiated", e);
+                    } catch (Throwable ex) {
+                        if (ex instanceof PlayException) {
+                            throw (PlayException) ex;
+                        }
+                        throw new UnexpectedException(ex);
                     }
-                } catch (InstantiationException e) {
-                    throw new UnexpectedException("Job could not be instantiated", e);
-                } catch (IllegalAccessException e) {
-                    throw new UnexpectedException("Job could not be instantiated", e);
-                } catch (Throwable ex) {
-                    if (ex instanceof PlayException) {
-                        throw (PlayException) ex;
+                } else {
+                    //run job async
+                    try {
+                        Job<?> job = ((Job<?>) clazz.newInstance());
+                        scheduledJobs.add(job);
+                        //start running job now in the background
+                        executor.submit( (Callable<Job>)job );
+                    } catch (InstantiationException ex) {
+                        throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
+                    } catch (IllegalAccessException ex) {
+                        throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
                     }
-                    throw new UnexpectedException(ex);
-                }
-            }// @OnApplicationStartAsync
-            else if(clazz.isAnnotationPresent(OnApplicationStartAsync.class)){
-                try {
-                    Job<?> job = ((Job<?>) clazz.newInstance());
-                    scheduledJobs.add(job);
-                    //start running job now in the background
-                    executor.submit( (Callable<Job>)job );
-                } catch (InstantiationException ex) {
-                    throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
-                } catch (IllegalAccessException ex) {
-                    throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
                 }
             }
+
             // @On
             if (clazz.isAnnotationPresent(On.class)) {
                 try {
