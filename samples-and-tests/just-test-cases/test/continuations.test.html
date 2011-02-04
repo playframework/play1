@@ -1,0 +1,15 @@
+#{selenium 'Test continuations'}
+
+    open('@{WithContinuations.loopWithWait()}')
+    assertTextPresent('0:true;1:true;2:true;3:true;4:true')
+
+    open('@{WithContinuations.waitFuture()}')
+    assertTextPresent('0:true[DONE:1000];1:true[DONE:1000];2:true[DONE:1000];3:true[DONE:1000];4:true[DONE:1000]')
+
+    open('@{WithContinuations.waitAll()}')
+    assertTextPresent('0:true[[DONE:1000, DONE:2000]];1:true[[DONE:1000, DONE:2000]]')
+
+    open('@{WithContinuations.waitAny()}')
+    assertTextPresent('0:true[DONE:1000];1:true[DONE:1000]')
+
+#{/selenium}

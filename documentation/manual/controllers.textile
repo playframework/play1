@@ -219,6 +219,18 @@ bc. public static void show(Set<Long> id) {
     ...
 }
 
+Play also handles the special case of binding a Map<String, String> like this:
+
+bc. public static void show(Map<String, String> client) {
+    ...
+}
+
+
+A query string like the following:
+
+bc. ?user.name=John&user.phone=111-1111&user.phone=222-2222
+
+Would bind the client variable to a map with two elements. The first element with key "name" and value "John", and the second with key "phone" and value "111-1111, 222-2222"
 
 h3. POJO object binding
 

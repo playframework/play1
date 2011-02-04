@@ -14,6 +14,7 @@ import javassist.bytecode.annotation.Annotation;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
 import javassist.expr.Handler;
+import org.apache.commons.javaflow.bytecode.transformation.asm.AsmClassTransformer;
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
@@ -132,6 +133,7 @@ public class ControllersEnhancer extends Enhancer {
 
         // Done.
         applicationClass.enhancedByteCode = ctClass.toBytecode();
+
         ctClass.defrost();
 
     }

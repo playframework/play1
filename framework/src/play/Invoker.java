@@ -19,8 +19,9 @@ import play.Play.Mode;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
-import play.utils.Action;
-import play.utils.SmartFuture;
+import play.libs.F;
+import play.libs.Task;
+import play.utils.PThreadFactory;
 
 /**
  * Run some code in a Play! context
@@ -292,7 +293,7 @@ public class Invoker {
      */
     static {
         int core = Integer.parseInt(Play.configuration.getProperty("play.pool", Play.mode == Mode.DEV ? "1" : ((Runtime.getRuntime().availableProcessors() + 1) + "")));
-        executor = new ScheduledThreadPoolExecutor(core, new ThreadPoolExecutor.AbortPolicy());
+        executor = new ScheduledThreadPoolExecutor(core, new PThreadFactory("play"), new ThreadPoolExecutor.AbortPolicy());
     }
 
     /**
@@ -347,9 +348,9 @@ public class Invoker {
         }
 
         public static <V> void waitFor(Future<V> task, final Invocation invocation) {
-            if (task instanceof SmartFuture) {
-                SmartFuture<V> smartFuture = (SmartFuture<V>)task;
-                smartFuture.onCompletion(new Action<V>() {
+            if (task instanceof Task) {
+                Task smartFuture = (Task)task;
+                smartFuture.onCompletion(new F.Action() {
                     public void invoke(Object result) {
                         executor.submit(invocation);
                     }

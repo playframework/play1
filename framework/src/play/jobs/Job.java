@@ -15,7 +15,7 @@ import play.Play;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.libs.Time;
-import play.utils.SmartFuture;
+import play.libs.Task;
 
 /**
  * A job is an asynchronously executed unit of work
@@ -55,9 +55,8 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * Start this job now (well ASAP)
      * @return the job completion
      */
-    public SmartFuture<V> now() {
-        final SmartFuture<V> smartFuture = new SmartFuture<V>();
-
+    public Task<V> now() {
+        final Task<V> smartFuture = new Task<V>();
         Future<V> realFuture = JobsPlugin.executor.submit(new Callable<V>() {
 
             public V call() throws Exception {
@@ -76,7 +75,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * Start this job in several seconds
      * @return the job completion
      */
-    public Future<V> in(String delay) {
+    public Task<V> in(String delay) {
         return in(Time.parseDuration(delay));
     }
 
@@ -84,8 +83,21 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * Start this job in several seconds
      * @return the job completion
      */
-    public Future<V> in(int seconds) {
-        return JobsPlugin.executor.schedule((Callable<V>) this, seconds, TimeUnit.SECONDS);
+    public Task<V> in(int seconds) {
+        final Task<V> smartFuture = new Task<V>();
+
+        Future<V> realFuture = JobsPlugin.executor.schedule(new Callable<V>() {
+
+            public V call() throws Exception {
+                V result =  Job.this.call();
+                smartFuture.invoke(result);
+                return result;
+            }
+
+        }, seconds, TimeUnit.SECONDS);
+
+        smartFuture.wrap(realFuture);
+        return smartFuture;
     }
 
     /**

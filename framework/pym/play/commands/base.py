@@ -253,7 +253,14 @@ def autotest(app, args):
         print "~ Some tests have failed. See file://%s for results" % test_result
         print "~"
     
-    kill(play_process.pid)
+    # Kill if exists
+    http_port = app.readConf('http.port')
+    try:
+        proxy_handler = urllib2.ProxyHandler({})
+        opener = urllib2.build_opener(proxy_handler)
+        opener.open('http://localhost:%s/@kill' % http_port);
+    except Exception, e:
+        pass
 
 def id(play_env):
     if not play_env["id"]:

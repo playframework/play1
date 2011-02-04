@@ -1,0 +1,26 @@
+h2. Template - Tag grammar
+
+*==${ client.name }==*
+Evaluates and outputs a variable
+
+*==${ client?.name }==*
+Displays client.name only if client not null
+
+*==@{ Controller.action() }==*
+Calculates url relative path to action
+
+*==@@{ Controller.action() }==*
+Calculates url absolute path to action
+
+*==&{ message.key }==*
+Message are maintained in conf/messages, supports i18
+
+*==&lowast;{ this is a comment }&lowast;==*
+What else to say?
+
+*==%{ out.print(“HelloWorld”) }%==*
+Groovy scripts for UI logic
+
+*==#{ my.custom.tag /}==*
+A typical custom tag - page context not shared
+
