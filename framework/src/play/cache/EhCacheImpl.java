@@ -145,5 +145,6 @@ public class EhCacheImpl implements CacheImpl {
 
     public void stop() {
         cache.removeAll();
+        cacheManager.shutdown();
     }
 }
