@@ -76,7 +76,7 @@ h3. Classpath settings
 A Play application classpath is built as follows (in this order): 
 
 * The **conf/** directory for the application
-* The **$PLAY_PATH/framework/play.jar**
+* The **$PLAY_PATH/framework/play-$version.jar**
 * All JAR files found in your application’s **lib/** directory
 * All JAR files found in the **$PLAY_PATH/framework/lib/** directory
 

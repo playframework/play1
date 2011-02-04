@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.htmlunit.corejs.javascript.Scriptable;
 
 public class FirePhoque {
 
@@ -141,14 +140,24 @@ public class FirePhoque {
             }
             firephoque.openWindow(url, "headless");
             firephoque.waitForBackgroundJavaScript(5 * 60 * 1000);
-            if (new File(root, test.replace("/", ".") + ".passed.html").exists()) {
-                System.out.print("PASSED     ");
-            } else if (new File(root, test.replace("/", ".") + ".failed.html").exists()) {
-                System.out.print("FAILED  !  ");
-                ok = false;
-            } else {
-                System.out.print("ERROR   ?  ");
-                ok = false;
+            int retry = 0;
+            while(retry < 5) {
+                if (new File(root, test.replace("/", ".") + ".passed.html").exists()) {
+                    System.out.print("PASSED     ");
+                    break;
+                } else if (new File(root, test.replace("/", ".") + ".failed.html").exists()) {
+                    System.out.print("FAILED  !  ");
+                    ok = false;
+                    break;
+                } else {
+                    if(retry++ == 4) {
+                        System.out.print("ERROR   ?  ");
+                        ok = false;
+                        break;
+                    } else {
+                        Thread.sleep(1000);
+                    }
+                }
             }
 
             //

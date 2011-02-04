@@ -1,15 +1,18 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html>
     <head>
-        <title>#{get 'title' /}</title>		
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/main.css'}" />
-        <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}" />
-        <script type="text/javascript" src="@{'/public/javascripts/jquery-1.3.2.min.js'}"></script>
-		<script type="text/javascript" src="@{'/public/javascripts/ejohn-templating.js'}"></script>
+        <title>#{get 'title' /}</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/stylesheets/main.css'}">
+        #{get 'moreStyles' /}
+        <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+        <script src="@{'/public/javascripts/jquery-1.5.min.js'}" type="text/javascript" charset="utf-8"></script>
+        <script src="@{'/public/javascripts/templating.js'}" type="text/javascript" charset="utf-8"></script>
+        <script src="@{'/public/javascripts/jquery.scrollTo-min.js'}" type="text/javascript" charset="utf-8"></script>
+        #{get 'moreScripts' /}
     </head>
     <body>
-        #{doLayout /} 
+        #{doLayout /}
     </body>
 </html>

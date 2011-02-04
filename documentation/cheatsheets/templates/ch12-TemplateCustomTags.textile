@@ -1,0 +1,9 @@
+h2. Template - Custom Tags
+
+*==@FastTags.Namespace("crionics")==*
+*==public class RecaptchaTag extends FastTags {==*
+public static void _recaptcha(Map<?, ?> args, Closure body,
+PrintWriter out, ExecutableTemplate template, int fromLine)
+
+*==/app/view/tag/domain/mytag.tag==*
+Custom tag can be called as {#domain.mytag/}

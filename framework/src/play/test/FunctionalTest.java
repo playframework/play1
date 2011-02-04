@@ -10,8 +10,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.net.MalformedURLException;
 
 import org.junit.Before;
 import play.Invoker.InvocationContext;
@@ -52,6 +54,27 @@ public abstract class FunctionalTest extends BaseTest {
         return GET(newRequest(), url);
     }
 
+     /**
+     * sends a GET request to the application under tests.
+     * @param url relative url such as <em>"/products/1234"</em>
+     * @param followRedirect indicates if request have to follow redirection (status 302)
+     * @return the response
+     */
+    public static Response GET(Object url, boolean followRedirect) {
+        Response response = GET(url);
+        if (Http.StatusCode.FOUND == response.status && followRedirect) {
+            Http.Header redirectedTo = response.headers.get("Location");
+            java.net.URL redirectedUrl = null;
+            try {
+                redirectedUrl = new java.net.URL(redirectedTo.value());
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+            response = GET(redirectedUrl.getPath());
+        }
+        return response;
+    }
+    
     /**
      * sends a GET request to the application under tests.
      * @param request
@@ -135,6 +158,10 @@ public abstract class FunctionalTest extends BaseTest {
      */
     public static Response POST(Object url, Map<String, String> parameters, Map<String, File> files) {
         return POST(newRequest(), url, parameters, files);
+    }
+
+    public static Response POST(Object url, Map<String, String> parameters) {
+        return POST(newRequest(), url, parameters, new HashMap<String, File>());
     }
 
     public static Response POST(Request request, Object url, Map<String, String> parameters, Map<String, File> files) {
@@ -247,7 +274,11 @@ public abstract class FunctionalTest extends BaseTest {
         });
         try {
             invocationResult.get(30, TimeUnit.SECONDS);
-            savedCookies = response.cookies;
+            if (savedCookies == null) {
+                savedCookies = response.cookies;
+            } else {
+                savedCookies.putAll(response.cookies);
+            }
             response.out.flush();
         } catch (Exception ex) {
             throw new RuntimeException(ex);

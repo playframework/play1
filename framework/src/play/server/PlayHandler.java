@@ -43,43 +43,52 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.*;
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import org.jboss.netty.handler.stream.ChunkedInput;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
-import play.mvc.results.Stream.ChunkedInput;
+import play.libs.F.Action;
 
 public class PlayHandler extends SimpleChannelUpstreamHandler {
 
-    final ChunkedWriteHandler chunkedWriteHandler = new ChunkedWriteHandler();
-    private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
     /**
      * If true (the default), Play will send the HTTP header "Server: Play! Framework; ....".
      * This could be a security problem (old versions having publicly known security bugs), so you can
      * disable the header in application.conf: <code>http.exposePlayServer = false</code>
      */
+    private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
     private final static boolean exposePlayServer;
-
     static {
         exposePlayServer = !"false".equals(Play.configuration.getProperty("http.exposePlayServer"));
     }
 
-    public Request processRequest(Request request) {
-        return request;
-    }
-
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+    public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) throws Exception {
         Logger.trace("messageReceived: begin");
-
         final Object msg = e.getMessage();
         if (msg instanceof HttpRequest) {
             final HttpRequest nettyRequest = (HttpRequest) msg;
             try {
-                Request request = parseRequest(ctx, nettyRequest);
-                request = processRequest(request);
+                final Request request = parseRequest(ctx, nettyRequest);
 
                 final Response response = new Response();
-
                 Http.Response.current.set(response);
+
+                // Buffered in memory output
                 response.out = new ByteArrayOutputStream();
+
+                // Direct output (will be set later)
+                response.direct = null;
+
+                // Streamed output (using response.writeChunk)
+                response.onWriteChunk(new Action<Object>() {
+
+                    public void invoke(Object result) {
+                        writeChunk(request, response, ctx, nettyRequest, result);
+                    }
+                });
+
+
                 boolean raw = false;
                 for (PlayPlugin plugin : Play.plugins) {
                     if (plugin.rawInvocation(request, response)) {
@@ -189,7 +198,11 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         @Override
         public void onSuccess() throws Exception {
             super.onSuccess();
-            copyResponse(ctx, request, response, nettyRequest);
+            if (response.chunked) {
+                closeChunked(request, response, ctx, nettyRequest);
+            } else {
+                copyResponse(ctx, request, response, nettyRequest);
+            }
             Logger.trace("execute: end");
         }
     }
@@ -394,44 +407,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         } else if (stream != null) {
             ChannelFuture writeFuture = ctx.getChannel().write(nettyResponse);
             if (!nettyRequest.getMethod().equals(HttpMethod.HEAD) && !nettyResponse.getStatus().equals(HttpResponseStatus.NOT_MODIFIED)) {
-                final ChunkedInput originalStream = stream;
-
-                org.jboss.netty.handler.stream.ChunkedInput nettyChunkedInput = new org.jboss.netty.handler.stream.ChunkedInput() {
-
-                    public boolean hasNextChunk() throws Exception {
-                        return originalStream.hasNextChunk();
-                    }
-
-                    public Object nextChunk() throws Exception {
-                        Object nextChunk = originalStream.nextChunk();
-                        if (nextChunk == null) {
-                            return null;
-                        }
-                        if (nextChunk instanceof String) {
-                            return wrappedBuffer(((String) nextChunk).getBytes());
-                        }
-                        if (nextChunk instanceof byte[]) {
-                            return wrappedBuffer(((byte[]) nextChunk));
-                        }
-                        return nextChunk;
-                    }
-
-                    public boolean isEndOfInput() throws Exception {
-                        return originalStream.isEndOfInput();
-                    }
-
-                    public void close() throws Exception {
-                        originalStream.close();
-                    }
-                };
-                originalStream.addListener(new ChunkedInput.ChunkedInputListener() {
-
-                    public void onNewChunks() {
-                        chunkedWriteHandler.resumeTransfer();
-                    }
-                });
-
-                writeFuture = ctx.getChannel().write(nettyChunkedInput);
+                writeFuture = ctx.getChannel().write(stream);
             } else {
                 stream.close();
             }
@@ -455,7 +431,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         return fullAddress;
     }
 
-    public static Request parseRequest(ChannelHandlerContext ctx, HttpRequest nettyRequest) throws Exception {
+    public Request parseRequest(ChannelHandlerContext ctx, HttpRequest nettyRequest) throws Exception {
         Logger.trace("parseRequest: begin");
         Logger.trace("parseRequest: URI = " + nettyRequest.getUri());
         int index = nettyRequest.getUri().indexOf("?");
@@ -891,5 +867,66 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
     public static void setContentLength(HttpMessage message, long contentLength) {
         message.setHeader(HttpHeaders.Names.CONTENT_LENGTH, String.valueOf(contentLength));
+    }
+    // Chunked response
+    final ChunkedWriteHandler chunkedWriteHandler = new ChunkedWriteHandler();
+
+    static class LazyChunkedInput implements org.jboss.netty.handler.stream.ChunkedInput {
+
+        private boolean closed = false;
+        private ConcurrentLinkedQueue<Object> nextChunks = new ConcurrentLinkedQueue<Object>();
+
+        public boolean hasNextChunk() throws Exception {
+            return !nextChunks.isEmpty();
+        }
+
+        public Object nextChunk() throws Exception {
+            if (nextChunks.isEmpty()) {
+                return null;
+            }
+            return wrappedBuffer(((String) nextChunks.poll()).getBytes());
+        }
+
+        public boolean isEndOfInput() throws Exception {
+            return closed && nextChunks.isEmpty();
+        }
+
+        public void close() throws Exception {
+            if (!closed) {
+                nextChunks.offer("0\r\n\r\n");
+            }
+            closed = true;
+        }
+
+        public void writeChunk(Object chunk) throws Exception {
+            String message = chunk == null ? "" : chunk.toString();
+            StringWriter writer = new StringWriter();
+            Integer l = message.getBytes("utf-8").length + 2;
+            writer.append(Integer.toHexString(l)).append("\r\n").append(message).append("\r\n\r\n");
+            nextChunks.offer(writer.toString());
+        }
+    }
+
+    public void writeChunk(Request playRequest, Response playResponse, ChannelHandlerContext ctx, HttpRequest nettyRequest, Object chunk) {
+        try {
+            if (playResponse.direct == null) {
+                playResponse.setHeader("Transfer-Encoding", "chunked");
+                playResponse.direct = new LazyChunkedInput();
+                copyResponse(ctx, playRequest, playResponse, nettyRequest);
+            }
+            ((LazyChunkedInput) playResponse.direct).writeChunk(chunk);
+            chunkedWriteHandler.resumeTransfer();
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
+    }
+
+    public void closeChunked(Request playRequest, Response playResponse, ChannelHandlerContext ctx, HttpRequest nettyRequest) {
+        try {
+            ((LazyChunkedInput) playResponse.direct).close();
+            chunkedWriteHandler.resumeTransfer();
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
     }
 }

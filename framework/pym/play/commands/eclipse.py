@@ -48,11 +48,11 @@ def execute(**kargs):
     shutil.copyfile(os.path.join(play_env["basedir"], 'resources/eclipse/.project'), dotProject)
     shutil.copyfile(os.path.join(play_env["basedir"], 'resources/eclipse/.classpath'), dotClasspath)
     if is_application:
-	    shutil.copytree(os.path.join(play_env["basedir"], 'resources/eclipse'), eclipse)
+        shutil.copytree(os.path.join(play_env["basedir"], 'resources/eclipse'), eclipse)
     shutil.copytree(os.path.join(play_env["basedir"], 'resources/eclipse/.settings'), dotSettings)
     replaceAll(dotProject, r'%PROJECT_NAME%', application_name)
 
-    playJarPath = os.path.join(play_env["basedir"], 'framework','play.jar')
+    playJarPath = os.path.join(play_env["basedir"], 'framework', 'framework/play-%s.jar' % play_env['version'])
     playSourcePath = os.path.dirname(playJarPath)
     if os.name == 'nt':
         playSourcePath=playSourcePath.replace('\\','/').capitalize()
@@ -103,11 +103,13 @@ def execute(**kargs):
         replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PLAY_BASE%', play_env["basedir"])
         replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PLAY_ID%', play_env["id"])
         replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%JPDA_PORT%', str(app.jpda_port))
+        replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PLAY_VERSION%', play_env["version"])
     
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PROJECT_NAME%', application_name)
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_BASE%', play_env["basedir"])
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_ID%', play_env["id"])
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%JPDA_PORT%', str(app.jpda_port))
+        replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_VERSION%', play_env["version"])
     
         replaceAll(os.path.join(app.path, 'eclipse/connect.launch'), r'%PROJECT_NAME%', application_name)
         replaceAll(os.path.join(app.path, 'eclipse/connect.launch'), r'%JPDA_PORT%', str(app.jpda_port))

@@ -70,7 +70,7 @@ However, you can also use it with the **list** tag and it will be executed if th
 
 bc. #{list items:task, as:'task'}
     <li>${task}</li>
-#{/li}
+#{/list}
  
 #{else}
     Nothing to do...
@@ -130,6 +130,7 @@ bc. <ul>
 
 The tag defines implicit variables in its body.
 
+* **error**, the error
 * **error_index**, the error’s index, starting at 1
 * **error_isLast**, true for the last element
 * **error_isFirst**, true for the first element
@@ -176,22 +177,47 @@ So you don’t repeat **user.name** again and again.
 
 h2. <a name="form">form</a>
 
-Inserts a **form** tag. The HTTP method is guessed from the route, and defaults to POST. If there are both GET and POST routes configured for the URL, the tag will default to using the first route defined in routes.  
+Inserts a **form** tag. Play will guess the HTTP method from the route, with POST as the default. If there are both GET and POST routes configured for the URL, the tag will default to using the first route defined in routes.
 
-* Optional **id** attribute sets an ID to the form element. 
+* Optional **method** either POST or GET.
+* Optional **id** attribute sets an ID to the form element.
 * Optional **enctype** attribute sets the form’s data encoding. it defaults to ‘application/x-www-form-urlencoded’.
 
-Charset encoding is always ‘utf-8’.
+Charset encoding is always **utf-8**.
 
-bc. #{form @Client.create() , id:'creationForm', enctype:'multipart/form-data' }
+bc. #{form @Client.create(), method:'POST', id:'creationForm',
+       enctype:'multipart/form-data' }
    ...
 #{/form}
 
 Rendered as:
 
-bc. <form action="/client/create" id="creationForm" method="POST" accept-charset="utf-8" enctype="multipart/form-data">
+bc. <form action="/client/create" id="creationForm" method="POST"
+      accept-charset="utf-8" enctype="multipart/form-data">
  ...
 </form>
+
+You can also specify a target entity as part of the action method:
+
+bc. #{form @Client.update(client.id)}
+   ...
+#{/form}
+
+The HTTP parameter name name is detected from what you declared in your action method.
+
+bc. public static void update(String clientId){
+       // ...
+}
+
+Play will create an action URL with clientId:
+
+bc. <form action="/client/update?clientId=3442" method="POST"
+      accept-charset="utf-8" enctype="multipart/form-data">
+ ...
+</form>
+
+If your form updates a resource on the server-side, you _should_ use the **POST** method. If your form is used to filter data and does not update your domain, you can use a GET. Please read about "idempotence":http://en.wikipedia.org/wiki/Idempotence. POST is not idempotent, whereas GET, PUT and DELETE are.
+
 
 
 h2. <a name="get">get</a>

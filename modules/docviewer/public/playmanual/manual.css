@@ -83,8 +83,13 @@ a {
 #docSidebar ul, #docSidebar ol {
     list-style: square;
     color: #888;
-    padding-left: 20px;
     line-height: 1.3em;
+}
+#docSidebar ol {
+    padding-left: 2.4em;
+}
+#docSidebar ul {
+    padding-left: 1.5em;
 }
 
 #docSidebar li {
@@ -101,5 +106,16 @@ a {
 
 #docSidebar a {
     color: #568C00;
+}
+
+#docSidebar ol.keywords {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+#docSidebar ol ol {
+    list-style-type: square;
+    margin-top: 0.5em;
+    padding-left: 1.5em;
 }
 

@@ -5,6 +5,8 @@ import play.mvc.*;
 import play.libs.*;
 import play.vfs.*;
 
+import helpers.CheatSheetHelper;
+
 import java.io.*;
 import java.util.*;
 
@@ -44,6 +46,23 @@ public class PlayDocumentation extends Controller {
         render(id, html, title, modules, apis, module);
     }
     
+    public static void cheatSheet(String category) {
+        File[] sheetFiles = CheatSheetHelper.getSheets(category);
+        if(sheetFiles != null) {
+            List<String> sheets = new ArrayList<String>();
+
+            for (File file : sheetFiles) {
+                sheets.add(toHTML(IO.readContentAsString(file)));
+            }
+
+            String title = CheatSheetHelper.getCategoryTitle(category);
+            Map<String, String> otherCategories = CheatSheetHelper.listCategoriesAndTitles();
+
+            render(title, otherCategories, sheets);
+        }
+        notFound("Cheat sheet directory not found");
+    }
+    
     public static void image(String name, String module) {
         File image = new File(Play.frameworkPath, "documentation/images/"+name+".png");
         if(module != null) {
@@ -62,8 +81,6 @@ public class PlayDocumentation extends Controller {
         }
         renderBinary(file);
     }    
-    
-    //
     
     static String toHTML(String textile) {
         String html = new jj.play.org.eclipse.mylyn.wikitext.core.parser.MarkupParser(new jj.play.org.eclipse.mylyn.wikitext.textile.core.TextileLanguage()).parseToHtml(textile);

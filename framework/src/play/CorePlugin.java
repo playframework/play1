@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import play.Play.Mode;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.classloading.enhancers.ContinuationEnhancer;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.Enhancer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer;
@@ -282,6 +283,7 @@ public class CorePlugin extends PlayPlugin {
         Class<?>[] enhancers = new Class[]{
             SigEnhancer.class,
             ControllersEnhancer.class,
+            ContinuationEnhancer.class,
             MailerEnhancer.class,
             PropertiesEnhancer.class,
             LocalvariablesNamesEnhancer.class

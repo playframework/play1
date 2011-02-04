@@ -73,7 +73,7 @@ public class PropertiesEnhancer extends Enhancer {
 
                     try {
                         CtMethod ctMethod = ctClass.getDeclaredMethod(getter);
-                        if (ctMethod.getParameterTypes().length > 0) {
+                        if (ctMethod.getParameterTypes().length > 0 || Modifier.isStatic(ctMethod.getModifiers())) {
                             throw new NotFoundException("it's not a getter !");
                         }
                     } catch (NotFoundException noGetter) {
@@ -86,7 +86,7 @@ public class PropertiesEnhancer extends Enhancer {
 
                     try {
                         CtMethod ctMethod = ctClass.getDeclaredMethod(setter);
-                        if (ctMethod.getParameterTypes().length != 1 || !ctMethod.getParameterTypes()[0].equals(ctField.getType())) {
+                        if (ctMethod.getParameterTypes().length != 1 || !ctMethod.getParameterTypes()[0].equals(ctField.getType()) || Modifier.isStatic(ctMethod.getModifiers())) {
                             throw new NotFoundException("it's not a setter !");
                         }
                     } catch (NotFoundException noSetter) {
@@ -138,7 +138,8 @@ public class PropertiesEnhancer extends Enhancer {
 
                             // Si c'est un getter ou un setter
                             String propertyName = null;
-                            if (fieldAccess.getField().getDeclaringClass().equals(ctMethod.getDeclaringClass())) {
+                            if (fieldAccess.getField().getDeclaringClass().equals(ctMethod.getDeclaringClass())
+                                || ctMethod.getDeclaringClass().subclassOf(fieldAccess.getField().getDeclaringClass())) {
                                 if ((ctMethod.getName().startsWith("get") || ctMethod.getName().startsWith("set")) && ctMethod.getName().length() > 3) {
                                     propertyName = ctMethod.getName().substring(3);
                                     propertyName = propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);

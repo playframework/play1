@@ -19,6 +19,9 @@ import play.Play.Mode;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
+import play.libs.F;
+import play.libs.Task;
+import play.utils.PThreadFactory;
 
 /**
  * Run some code in a Play! context
@@ -66,10 +69,8 @@ public class Invoker {
                 retry = false;
             } else {
                 try {
-                    if (invocation.retry.tasks != null) {
-                        for (Future<?> f : invocation.retry.tasks) {
-                            f.get();
-                        }
+                    if (invocation.retry.task != null) {
+                        invocation.retry.task.get();
                     } else {
                         Thread.sleep(invocation.retry.timeout);
                     }
@@ -91,8 +92,8 @@ public class Invoker {
 
         public static InvocationContext current() {
             return current.get();
-        }        
-        
+        }
+
         public InvocationContext(List<Annotation> annotations) {
             this.annotations = annotations;
         }
@@ -102,7 +103,7 @@ public class Invoker {
         }
 
         public InvocationContext(Annotation[]... annotations) {
-            for(Annotation[] some : annotations) {
+            for (Annotation[] some : annotations) {
                 this.annotations.addAll(Arrays.asList(some));
             }
         }
@@ -113,17 +114,17 @@ public class Invoker {
 
         @SuppressWarnings("unchecked")
         public <T extends Annotation> T getAnnotation(Class<T> clazz) {
-            for(Annotation annotation : annotations) {
-                if(annotation.annotationType().isAssignableFrom(clazz)) {
-                    return (T)annotation;
+            for (Annotation annotation : annotations) {
+                if (annotation.annotationType().isAssignableFrom(clazz)) {
+                    return (T) annotation;
                 }
             }
             return null;
         }
 
         public <T extends Annotation> boolean isAnnotationPresent(Class<T> clazz) {
-            for(Annotation annotation : annotations) {
-                if(annotation.annotationType().isAssignableFrom(clazz)) {
+            for (Annotation annotation : annotations) {
+                if (annotation.annotationType().isAssignableFrom(clazz)) {
                     return true;
                 }
             }
@@ -133,12 +134,11 @@ public class Invoker {
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            for(Annotation annotation : annotations) {
+            for (Annotation annotation : annotations) {
                 builder.append(annotation.toString()).append(",");
             }
             return builder.toString();
         }
-
     }
 
     /**
@@ -228,8 +228,8 @@ public class Invoker {
          * @param suspendRequest
          */
         public void suspend(Suspend suspendRequest) {
-            if (suspendRequest.tasks != null) {
-                WaitForTasksCompletion.waitFor(suspendRequest.tasks, this);
+            if (suspendRequest.task != null) {
+                WaitForTasksCompletion.waitFor(suspendRequest.task, this);
             } else {
                 Invoker.invoke(this, suspendRequest.timeout);
             }
@@ -293,7 +293,7 @@ public class Invoker {
      */
     static {
         int core = Integer.parseInt(Play.configuration.getProperty("play.pool", Play.mode == Mode.DEV ? "1" : ((Runtime.getRuntime().availableProcessors() + 1) + "")));
-        executor = new ScheduledThreadPoolExecutor(core, new ThreadPoolExecutor.AbortPolicy());
+        executor = new ScheduledThreadPoolExecutor(core, new PThreadFactory("play"), new ThreadPoolExecutor.AbortPolicy());
     }
 
     /**
@@ -305,17 +305,18 @@ public class Invoker {
          * Suspend for a timeout (in milliseconds).
          */
         long timeout;
+        
         /**
          * Wait for task execution.
          */
-        List<Future<?>> tasks;
+        Future<?> task;
 
         public Suspend(long timeout) {
             this.timeout = timeout;
         }
 
-        public Suspend(Future<?>... tasks) {
-            this.tasks = Arrays.asList(tasks);
+        public Suspend(Future<?> task) {
+            this.task = task;
         }
 
         @Override
@@ -325,8 +326,8 @@ public class Invoker {
 
         @Override
         public String getErrorDescription() {
-            if (tasks != null) {
-                return "Wait for " + tasks;
+            if (task != null) {
+                return "Wait for " + task;
             }
             return "Retry in " + timeout + " ms.";
         }
@@ -337,21 +338,33 @@ public class Invoker {
      */
     static class WaitForTasksCompletion extends Thread {
 
-        Map<List<Future<?>>, Invocation> queue;
         static WaitForTasksCompletion instance;
+        Map<Future<?>, Invocation> queue;
 
         public WaitForTasksCompletion() {
-            queue = new ConcurrentHashMap<List<Future<?>>, Invocation>();
+            queue = new ConcurrentHashMap<Future<?>, Invocation>();
             setName("WaitForTasksCompletion");
             setDaemon(true);
-            start();
         }
 
-        public static void waitFor(List<Future<?>> tasks, Invocation invocation) {
-            if (instance == null) {
-                instance = new WaitForTasksCompletion();
+        public static <V> void waitFor(Future<V> task, final Invocation invocation) {
+            if (task instanceof Task) {
+                Task smartFuture = (Task)task;
+                smartFuture.onCompletion(new F.Action() {
+                    public void invoke(Object result) {
+                        executor.submit(invocation);
+                    }
+                });
+            } else {
+                synchronized (WaitForTasksCompletion.class) {
+                    if (instance == null) {
+                        instance = new WaitForTasksCompletion();
+                        Logger.warn("Start WaitForTasksCompletion");
+                        instance.start();
+                    }
+                    instance.queue.put(task, invocation);
+                }
             }
-            instance.queue.put(tasks, invocation);
         }
 
         @Override
@@ -359,22 +372,16 @@ public class Invoker {
             while (true) {
                 try {
                     if (!queue.isEmpty()) {
-                        for (List<Future<?>> tasks : new HashSet<List<Future<?>>>(queue.keySet())) {
-                            boolean allDone = true;
-                            for (Future<?> f : tasks) {
-                                if (!f.isDone()) {
-                                    allDone = false;
-                                }
-                            }
-                            if (allDone) {
-                                executor.submit(queue.get(tasks));
-                                queue.remove(tasks);
+                        for (Future<?> task : new HashSet<Future<?>>(queue.keySet())) {
+                            if (task.isDone()) {
+                                executor.submit(queue.get(task));
+                                queue.remove(task);
                             }
                         }
                     }
                     Thread.sleep(50);
                 } catch (InterruptedException ex) {
-                    Logger.warn(ex, "");
+                    Logger.warn(ex, "While waiting for task completions");
                 }
             }
         }

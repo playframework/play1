@@ -2,13 +2,13 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET			/				        Chat.index
-GET         /messages               Chat.newMessages
-POST        /messages               Chat.postMessage
+# Home page
+GET     /                                       Application.index
+GET     /room                                   Application.room
+POST    /room                                   Application.join
+POST    /room/messages                          Application.say
+GET     /room/messages                          Application.waitMessages
 
-GET         /signin                 Chat.signin
-POST        /signin                 Chat.register
-GET         /logout                 Chat.disconnect
-
-GET			/        		        staticDir:public
+# Map static resources from the /app/public folder to the /public path
+GET     /public/                                staticDir:public
 

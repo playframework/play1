@@ -1,121 +1,144 @@
 #{selenium 'Just test the simple scenario'}
 
-	open('/')
-	
-	// Packages
-	assertAttribute('wp1@href', '/sample/photo/index')
-	assertAttribute('wp2@href', '/admin.test/index')
-    assertAttribute('wp3@href', 'http://localhost:9003/admin.test/index')
-	
-	// Missing name
-	clickAndWait('sayHello')
-	assertTextPresent('Hello !')
+    open('/re/toto')
+    assertTextPresent('OK: toto')
+    
+    open('/re/1234')
+    assertTextPresent('Not found')
+    
+    open('/re/12345')
+    assertTextPresent('OK: 12345')
+    
+    open('/re/T')
+    assertTextPresent('Not found')
 
-	// A name
-	clickAndWait('back')
-	type('name', 'Guillaume')
-	clickAndWait('sayHello')
-	assertTextPresent('Hello Guillaume !')
-	
-	// test utf-8
-	clickAndWait('back')
-	type('name', '日本語')
-	clickAndWait('sayHello')
-	assertTextPresent('Hello 日本語 !')
-	
-	// test escape
-	clickAndWait('back')
-	type('name', '&lt;i>Italic &amp;nbsp; Yop&lt;/i>')
-	clickAndWait('sayHello')
-	assertTextPresent('&lt;i>Italic &amp;nbsp; Yop&lt;/i>')
-	
-	// Check URL
-	assertAttribute('back@href', '/')
-	clickAndWait('back')
-	assertAttribute('form@action', '/sayHello?x-http-method-override=PUT')
-	assertAttribute('form@method', 'regexpi:post')
-	
-	// The yop form
-	assertElementPresent('css=form[action=/application/yop]')
-	assertAttribute('css=form[action=/application/yop]@method', 'regexpi:post')
-	clickAndWait('yop')
-	assertTextPresent('Yop')
-	clickAndWait('back')
-	assertTextPresent('It works !')
-	
-	// A GET form
-	assertElementPresent('css=form[action=/aGetForm]')
-	assertAttribute('css=form[action=/aGetForm]@method', 'regexpi:get')
-	clickAndWait('yopGet')
-	assertTextPresent('Hello !')
-	clickAndWait('back')
-	
-	// ... with a name
-	type('getName', 'Toto')
-	clickAndWait('yopGet')
-	assertTextPresent('Hello Toto !')
-	assertEval('window.document.location', '*/aGetForm?name=Toto')
-	
-	// Direct URL with a trailing slash
-	open('/aGetForm/')
-	assertTextPresent('Hello 2null !')
-	open('/aGetForm')
-	assertTextPresent('Hello !')
-	
-	// Optional slash
-	open('/optionalSlash/')
-	assertTextPresent('OK')
-	open('/optionalSlash')
-	assertTextPresent('OK')
-	open('/optionalSlash//')
-	assertTextPresent('Not found')
-	
-	// Catch all route
-	open('/application/optional')
-	assertTextPresent('OK')
-	open('/Application/optional')
-	assertTextPresent('OK')
-	open('/Application/Optional')
-	assertTextPresent('OK')
-	
-	// Alternative URL
-	open('/index')
-	assertTextPresent('It works !')
-	
-	// Reverse
-	open('@{Application.reverserouting()}')
-	assertText('a', '/')
-	assertText('b', '/sayHello')
-	assertText('c', '/sayHello?name=Guillaume')
-	assertText('d', '/application/yop')
-	assertText('e', '/aGetForm')
-	assertText('f', '/aGetForm/')
-	assertText('g', '/aGetForm?name=Yop')
-	assertText('h', '/aGetForm/?name=Yop')
-	assertText('i', '/optionalSlash')
-	
-	// Reverse
-	open('@{Application.reverserouting2()}')
+    open('/re/TITI')
+    assertTextPresent('OK: TITI')   
+    
+    open('/re/TITITOTO')
+    assertTextPresent('Not found')
+
+    open('/')
+    
+    // Packages
+    assertAttribute('wp1@href', '/sample/photo/index')
+    assertAttribute('wp2@href', '/admin.test/index')
+    assertAttribute('wp3@href', 'http://localhost:9003/admin.test/index')
+    
+    // Missing name
+    clickAndWait('sayHello')
+    assertTextPresent('Hello !')
+
+    // A name
+    clickAndWait('back')
+    type('name', 'Guillaume')
+    clickAndWait('sayHello')
+    assertTextPresent('Hello Guillaume !')
+    
+    // test utf-8
+    clickAndWait('back')
+    type('name', '日本語')
+    clickAndWait('sayHello')
+    assertTextPresent('Hello 日本語 !')
+    
+    // test escape
+    clickAndWait('back')
+    type('name', '&lt;i>Italic &amp;nbsp; Yop&lt;/i>')
+    clickAndWait('sayHello')
+    assertTextPresent('&lt;i>Italic &amp;nbsp; Yop&lt;/i>')
+    
+    // Check URL
+    assertAttribute('back@href', '/')
+    clickAndWait('back')
+    assertAttribute('form@action', '/sayHello?x-http-method-override=PUT')
+    assertAttribute('form@method', 'regexpi:post')
+    
+    // The yop form
+    assertElementPresent('css=form[action=/application/yop]')
+    assertAttribute('css=form[action=/application/yop]@method', 'regexpi:post')
+    clickAndWait('yop')
+    assertTextPresent('Yop')
+    clickAndWait('back')
+    assertTextPresent('It works !')
+    
+    // A GET form
+    assertElementPresent('css=form[action=/aGetForm]')
+    assertAttribute('css=form[action=/aGetForm]@method', 'regexpi:get')
+    clickAndWait('yopGet')
+    assertTextPresent('Hello !')
+    clickAndWait('back')
+    
+    // ... with a name
+    type('getName', 'Toto')
+    clickAndWait('yopGet')
+    assertTextPresent('Hello Toto !')
+    assertEval('window.document.location', '*/aGetForm?name=Toto')
+    
+    // Direct URL with a trailing slash
+    open('/aGetForm/')
+    assertTextPresent('Hello 2null !')
+    open('/aGetForm')
+    assertTextPresent('Hello !')
+    
+    // Optional slash
+    open('/optionalSlash/')
+    assertTextPresent('OK')
+    open('/optionalSlash')
+    assertTextPresent('OK')
+    open('/optionalSlash//')
+    assertTextPresent('Not found')
+    
+    // Catch all route
+    open('/application/optional')
+    assertTextPresent('OK')
+    open('/Application/optional')
+    assertTextPresent('OK')
+    open('/Application/Optional')
+    assertTextPresent('OK')
+    
+    // Alternative URL
+    open('/index')
+    assertTextPresent('It works !')
+    
+    // Reverse
+    open('@{Application.reverserouting()}')
+    assertText('a', '/')
+    assertText('b', '/sayHello')
+    assertText('c', '/sayHello?name=Guillaume')
+    assertText('d', '/application/yop')
+    assertText('e', '/aGetForm')
+    assertText('f', '/aGetForm/')
+    assertText('g', '/aGetForm?name=Yop')
+    assertText('h', '/aGetForm/?name=Yop')
+    assertText('i', '/optionalSlash')
+    
+    // Reverse
+    open('@{Application.reverserouting2()}')
     assertTextPresent('/jpabinding/save?project.name=colcoz')
 
-	// Reverse
-	open('@{Application.reverserouting3()}')
-    assertTextPresent('/jpabinding/save?project.name=COLCOZ')	
+    // Reverse
+    open('@{Application.reverserouting3()}')
+    assertTextPresent('/jpabinding/save?project.name=COLCOZ')   
 
-	// Host
-	open('/')
-	assertTextPresent('1: http://static.foo.com/assets/hello.html')
-	assertTextPresent('2: /assets/hello.html')
-	assertTextPresent('3: http://static2.foo.com/x/hello.html')
-	assertTextPresent('4: /x/hello.html')
-	assertTextPresent('5: http://localhost:9003/public/image.gif')
-	assertTextPresent('6: /public/image.gif')
-	assertTextPresent('7: /hello')
-	assertTextPresent('8: http://www.zenexity.com/hello')
-	assertTextPresent('9: /')
-	assertTextPresent('10: http://localhost:9003/')
-	assertTextPresent('11: /home')
-	assertTextPresent('12: http://bob.myApp.com/home')
-	assertTextPresent('13: http://localhost:9003/strike/doIt')
-	
-#{/selenium}	
+    // Host
+    open('/')
+    assertTextPresent('1: http://static.foo.com/assets/hello.html')
+    assertTextPresent('2: /assets/hello.html')
+    assertTextPresent('3: http://static2.foo.com/x/hello.html')
+    assertTextPresent('4: /x/hello.html')
+    assertTextPresent('5: http://localhost:9003/public/image.gif')
+    assertTextPresent('6: /public/image.gif')
+    assertTextPresent('7: /hello')
+    assertTextPresent('8: http://www.zenexity.com/hello')
+    assertTextPresent('9: /')
+    assertTextPresent('10: http://localhost:9003/')
+    assertTextPresent('11: /home')
+    assertTextPresent('12: http://bob.myApp.com/home')
+    assertTextPresent('13: http://localhost:9003/strike/doIt')
+    assertTextPresent('14: http://localhost:9003/re/titi')
+    assertTextPresent('15: http://localhost:9003/application/ok?re=123')
+    assertTextPresent('16: http://localhost:9003/re/12345')
+    assertTextPresent('17: http://localhost:9003/application/ok?re=A')
+    assertTextPresent('18: http://localhost:9003/re/TITI')
+    
+#{/selenium}    

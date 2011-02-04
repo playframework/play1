@@ -269,8 +269,8 @@ bc.    public class CustomAdminCompany extends CRUD {
     }    
 }
 
-But this isn't the end. You can customize findPage and other. Have simple a look at the source code.
+But this isn’t the end. You can customize findPage and other. Have simple a look at the source code.
 
 h2. <a>Limitation</a>
 
-The CRUD module will show the relationships that are unidirectional in one entity: the one that does not have the **mappedBy** attribute.
+Limitation The CRUD module only shows bi-directional relationships in one of the two entities: the one that does not have the **mappedBy** attribute.

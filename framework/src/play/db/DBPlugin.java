@@ -148,8 +148,8 @@ public class DBPlugin extends PlayPlugin {
             check(p, "memory", "db.driver");
             check(p, "memory", "db.url");
 
-            p.put("db.driver", "org.hsqldb.jdbcDriver");
-            p.put("db.url", "jdbc:hsqldb:mem:playembed");
+            p.put("db.driver", "org.h2.Driver");
+            p.put("db.url", "jdbc:h2:mem:play;MODE=MYSQL");
             p.put("db.user", "sa");
             p.put("db.pass", "");
         }
@@ -159,8 +159,8 @@ public class DBPlugin extends PlayPlugin {
             check(p, "fs", "db.driver");
             check(p, "fs", "db.url");
 
-            p.put("db.driver", "org.hsqldb.jdbcDriver");
-            p.put("db.url", "jdbc:hsqldb:file:" + (new File(Play.applicationPath, "db/db").getAbsolutePath()));
+            p.put("db.driver", "org.h2.Driver");
+            p.put("db.url", "jdbc:h2:" + (new File(Play.applicationPath, "db/h2/play").getAbsolutePath()) + ";MODE=MYSQL");
             p.put("db.user", "sa");
             p.put("db.pass", "");
         }

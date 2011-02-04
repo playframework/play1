@@ -180,7 +180,7 @@ p(note). We will now start to code the blog application. You can either continue
 
 h2. <a>Setting-up the database</a>
 
-One more thing before starting to code. For the blog engine, we will need a database. For development purposes, Play comes with a stand alone SQL database management system called HSQLDB. This is the best way to start a project before switching to a more robust database if needed. You can choose to have either an in-memory database or a filesystem database that will keep your data between application restarts. 
+One more thing before starting to code. For the blog engine, we will need a database. For development purposes, Play comes with a stand alone SQL database management system called H2. This is the best way to start a project before switching to a more robust database if needed. You can choose to have either an in-memory database or a filesystem database that will keep your data between application restarts. 
 
 At the beginning, we will do a lot of testing and changes in the application model. For that reason, it’s better to use an in-memory database so we always start with a fresh data set.
 
@@ -192,7 +192,7 @@ As you can see in the comments, you can easily set-up any JDBC compliant databas
 
 Now, go back to your browser and refresh the welcome page. Play will automatically start the database. Check for this line in the application logs:
 
-bc. INFO  ~ Connected to jdbc:hsqldb:mem:playembed
+bc. INFO  ~ Connected to jdbc:h2:mem:play
 
 h2. <a>Using a version control system 	to track changes</a>
 

@@ -39,6 +39,7 @@ import com.ning.http.client.PerRequestConfig;
 import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Response;
 import com.ning.http.client.StringPart;
+import play.libs.Task;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -121,7 +122,7 @@ public class WSAsync implements WSImpl {
 
         /** Execute a GET request asynchronously. */
         @Override
-        public Future<HttpResponse> getAsync() {
+        public Task<HttpResponse> getAsync() {
             this.type = "GET";
             sign();
             return execute(httpClient.prepareGet(url));
@@ -141,7 +142,7 @@ public class WSAsync implements WSImpl {
 
         /** Execute a POST request asynchronously.*/
         @Override
-        public Future<HttpResponse> postAsync() {
+        public Task<HttpResponse> postAsync() {
             this.type = "POST";
             sign();
             return execute(httpClient.preparePost(url));
@@ -160,7 +161,7 @@ public class WSAsync implements WSImpl {
 
         /** Execute a PUT request asynchronously.*/
         @Override
-        public Future<HttpResponse> putAsync() {
+        public Task<HttpResponse> putAsync() {
             this.type = "PUT";
             return execute(httpClient.preparePut(url));
         }
@@ -178,7 +179,7 @@ public class WSAsync implements WSImpl {
 
         /** Execute a DELETE request asynchronously.*/
         @Override
-        public Future<HttpResponse> deleteAsync() {
+        public Task<HttpResponse> deleteAsync() {
             this.type = "DELETE";
             return execute(httpClient.prepareDelete(url));
         }
@@ -196,7 +197,7 @@ public class WSAsync implements WSImpl {
 
         /** Execute a OPTIONS request asynchronously.*/
         @Override
-        public Future<HttpResponse> optionsAsync() {
+        public Task<HttpResponse> optionsAsync() {
             this.type = "OPTIONS";
             return execute(httpClient.prepareOptions(url));
         }
@@ -214,7 +215,7 @@ public class WSAsync implements WSImpl {
 
         /** Execute a HEAD request asynchronously.*/
         @Override
-        public Future<HttpResponse> headAsync() {
+        public Task<HttpResponse> headAsync() {
             this.type = "HEAD";
             return execute(httpClient.prepareHead(url));
         }
@@ -228,7 +229,7 @@ public class WSAsync implements WSImpl {
 
         /** Execute a TRACE request asynchronously.*/
         @Override
-        public Future<HttpResponse> traceAsync() {
+        public Task<HttpResponse> traceAsync() {
             this.type = "TRACE";
             throw new NotImplementedException();
         }
@@ -260,18 +261,24 @@ public class WSAsync implements WSImpl {
             return builder;
         }
 
-        private Future<HttpResponse> execute(BoundRequestBuilder builder) {
+        private Task<HttpResponse> execute(BoundRequestBuilder builder) {
             try {
-                return prepare(builder).execute(new AsyncCompletionHandler<HttpResponse>() {
+                final Task<HttpResponse> smartFuture = new Task<HttpResponse>();
+                Future<HttpResponse> realFuture =  prepare(builder).execute(new AsyncCompletionHandler<HttpResponse>() {
                     @Override
                     public HttpResponse onCompleted(Response response) throws Exception {
-                        return new HttpAsyncResponse(response);
+                        HttpResponse httpResponse = new HttpAsyncResponse(response);
+                        smartFuture.invoke(httpResponse);
+                        return httpResponse;
                     }
                     @Override
                     public void onThrowable(Throwable t) {
                         throw new RuntimeException(t);
                     }
                 });
+                
+                smartFuture.wrap(realFuture);
+                return smartFuture;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
