@@ -1,0 +1,69 @@
+body {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 10pt;
+	margin:0;
+}
+
+#docTopbar {
+    position: relative;
+    background: #fff;
+    padding: 0;
+    height: 90px;
+}
+#backToToc, #searchBar, .titlebar.links { display:none; }
+
+#docTopbar h1 {
+	font-weight: normal;
+	font-size: 30pt;
+}
+#docTopbar h1:after {
+	color: #67A927;
+	display: block;
+	font-size: 10pt;
+	content: 'Play framework cheat sheet';
+}
+
+#logobar {
+    right: 5px;
+    top: 5px;
+    text-align: center;
+    position: absolute;
+}
+
+#logobar #version {
+    font-size: 8pt;
+    margin-top: 0;
+    font-weight: normal;
+}
+
+div.cs {
+    margin-bottom: 1em !important;
+    font-size: 90%;
+    min-height: 10em;
+    float: left;
+    width: 46%;
+}
+
+div.cs.odd {
+	clear:left;
+	margin-right: 2%;
+}
+div.cs.even {
+	margin-left: 2%;
+}
+
+.wikistyle .cs h2 {
+	color: #67A927;
+	font-size: 10pt !important;
+    margin-top: 0px !important;
+    margin-bottom: 0.5em !important;
+    border-top: none !important;
+    padding-top: 0 !important;
+}
+
+.wikistyle div.cs p {
+    margin: 0 0 0.5em 0 !important;
+    line-height: 1.3 !important;
+    page-break-inside: avoid;
+}
+
