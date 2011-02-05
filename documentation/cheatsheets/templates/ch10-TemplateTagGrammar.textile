@@ -9,8 +9,14 @@ Displays client.name only if client not null
 *==@{ Controller.action() }==*
 Calculates url relative path to action
 
+*==@{ Controller.action().secure() }==*
+Calculates url relative https path to action
+
 *==@@{ Controller.action() }==*
 Calculates url absolute path to action
+
+*==@{'path/to/static_content'}==*
+<img src="@{'/public/images/jpdf.png'}" class="center"/>
 
 *==&{ message.key }==*
 Message are maintained in conf/messages, supports i18

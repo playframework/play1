@@ -6,6 +6,9 @@ HTTP get request to JSON
 *==WS.url(“http://s.com/”).post().toXML();==*
 HTTP post request to XML
 
+*==DB.execute(“raw sql”);==*
+Eval raw sql
+
 *==XML.getDocument(String);==*
 String to XML
 

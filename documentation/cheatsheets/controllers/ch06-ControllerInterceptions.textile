@@ -12,3 +12,6 @@ You get the idea
 *==public class Admin extends Application==*
 Custom interceptors at the controller scope
 
+*==@Catch(value={RuntimeException.class})==*
+public static void onException(RuntimeException e){...} 
+Exception handling at the controller level
