@@ -16,7 +16,7 @@ Calculates url relative https path to action
 Calculates url absolute path to action
 
 *==@{'path/to/static_content'}==*
-<img src="@{'/public/images/jpdf.png'}" class="center"/>
+==&lt;img src="@{'/public/images/jpdf.png'}" class="center"/&gt;==
 
 *==&{ message.key }==*
 Message are maintained in conf/messages, supports i18

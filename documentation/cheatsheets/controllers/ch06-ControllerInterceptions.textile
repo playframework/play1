@@ -13,5 +13,5 @@ You get the idea
 Custom interceptors at the controller scope
 
 *==@Catch(value={RuntimeException.class})==*
-public static void onException(RuntimeException e){...} 
+*public static void onException(RuntimeException e) {…}*
 Exception handling at the controller level
