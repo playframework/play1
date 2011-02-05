@@ -13,13 +13,21 @@ public class Task<V> implements Future<V>, F.Action<V> {
 
     final CountDownLatch taskLock = new CountDownLatch(1);
     Future<V> innerFuture;
+    boolean cancelled = false;
 
     public boolean cancel(boolean mayInterruptIfRunning) {
-        return innerFuture.cancel(mayInterruptIfRunning);
+        if(innerFuture != null) {
+            return innerFuture.cancel(mayInterruptIfRunning);
+        }
+        cancelled = true;
+        return cancelled;
     }
 
     public boolean isCancelled() {
-        return innerFuture.isCancelled();
+        if(innerFuture != null) {
+            return innerFuture.isCancelled();
+        }
+        return cancelled;
     }
 
     public boolean isDone() {
@@ -132,6 +140,7 @@ public class Task<V> implements Future<V>, F.Action<V> {
                 }
             }
 
+            @Override
             public String toString() {
                 return "waitAll.callback(countdown: " + waitAllLock.getCount() + ")";
             }

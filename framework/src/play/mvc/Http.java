@@ -20,6 +20,7 @@ import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
 import play.libs.Codec;
+import play.libs.F;
 import play.libs.Time;
 import play.utils.Utils;
 
@@ -614,6 +615,26 @@ public class Http {
 
         public void reset() {
             out.reset();
+        }
+
+        // Chunked stream
+
+        public boolean chunked = false;
+
+        final List<F.Action<Object>> writeChunkHandlers = new ArrayList<F.Action<Object>>();
+
+        public void writeChunk(Object o) {
+            this.chunked = true;
+            if(writeChunkHandlers.isEmpty()) {
+                throw new UnsupportedOperationException("Your HTTP server doesn't yet support chunked response stream");
+            }
+            for(F.Action<Object> handler : writeChunkHandlers) {
+                handler.invoke(o);
+            }
+        }
+
+        public void onWriteChunk(F.Action<Object> handler) {
+            writeChunkHandlers.add(handler);
         }
     }
 }

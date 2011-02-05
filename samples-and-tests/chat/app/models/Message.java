@@ -1,21 +1,27 @@
 package models;
 
 import java.util.*;
-import javax.persistence.*;
+import java.util.concurrent.atomic.*;
 
-import play.db.jpa.*;
-
-@Entity
-public class Message extends Model {
+public class Message {
     
+    static AtomicLong uid = new AtomicLong(1);
+
     public String user;
-    public Date date;
     public String text;
+    public Long id;
     
-    public Message(String user, String text) {
-        this.user = user;
-        this.text = text;
-        this.date = new Date();
+    public static Message on(String user, String text) {
+        Message m = new Message();
+        m.user = user;
+        m.text = text;
+        m.id = uid.getAndIncrement();
+        return m;
+    }
+    
+    public String toString() {
+        return "[" + id + "] " + user + ": " + text;
     }
     
 }
+
