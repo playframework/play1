@@ -5,7 +5,6 @@
 # Home page
 GET     /                                       Application.index
 GET     /room                                   Application.room
-POST    /room                                   Application.join
 POST    /room/messages                          Application.say
 GET     /room/messages                          Application.waitMessages
 

@@ -14,26 +14,18 @@ public class Application extends Controller {
         render();
     }
     
-    public static void join(@Required String user) {
+    public static void room(@Required String user) {
         if(validation.hasErrors()) {
-            flash.error("Please choose a nick name…");
-            index();
+              flash.error("Please choose a nick name…");
+              index();
         }
-        session.put("user", user);
         ChatRoom.get().talk(Message.on("notice", user + " has joined the room"));
-        room();
+        render(user);
     }
     
-    public static void room() {
-        render();
-    }
-    
-    public static void say(String msg) {
-        if(!session.contains("user")) {
-            forbidden();
-        }
+    public static void say(String user, String msg) {
         if(msg != null && msg.trim().length() > 0) {
-            ChatRoom.get().talk(Message.on(session.get("user"), msg));
+            ChatRoom.get().talk(Message.on(user, msg));
         }        
     }
     

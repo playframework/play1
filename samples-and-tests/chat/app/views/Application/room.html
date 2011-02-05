@@ -1,11 +1,11 @@
 #{extends 'main.html' /}
 #{set title:'Chat room' /}
 
-<h1>You are now chatting as ${session.user} <a href="@{index()}">Leave the chat room</a></h1> 
+<h1>You are now chatting as ${user} <a href="@{index()}">Leave the chat room</a></h1> 
 
 <div id="thread">
     <script type="text/html" id="message_tmpl">
-        <div class="message <%= message.user == '${session.user}' ? 'you' : '' %> <%= message.user == 'notice' ? 'notice' : '' %>">
+        <div class="message <%= message.user == '${user}' ? 'you' : '' %> <%= message.user == 'notice' ? 'notice' : '' %>">
             <h2><%= message.user %></h2>
             <p>
                 <%= message.text.replace('\n', '<br/>') %>&nbsp;
@@ -23,7 +23,7 @@
 
     var lastReceived = 0
     var waitMessages = #{jsAction @waitMessages(':lastReceived') /}
-    var say = #{jsAction @say() /}
+    var say = #{jsAction @say(user) /}
 
     $('#send').click(function(e) {
         var message = $('#message').val()
