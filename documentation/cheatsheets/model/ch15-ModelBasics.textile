@@ -13,4 +13,4 @@ Defines this field as being (part of) the identity for the class, and being embe
 Specifies that the class is persistent embedded in another persistent class
 
 *==@MappedSuperclass==*
-Specifies that this class contains persistent information to be mapped in a child
+Specifies that this class contains persistent information to be mapped in a subclass

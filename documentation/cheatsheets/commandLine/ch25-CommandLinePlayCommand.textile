@@ -4,7 +4,7 @@ h2. Command line - play command
 Display the computed classpath
 
 *id*
-Define the framework ID, used for multi environment config
+Define the framework ID, used for multi-environment configuration
 
 *secret*
 Generate a new secret key, used for encryption
@@ -13,7 +13,7 @@ Generate a new secret key, used for encryption
 Install a module
 
 *list-modules*
-List modules available from the central modules repository
+List modules available in the central module repository
 
 *modules*
 Display the computed modules list
@@ -49,8 +49,7 @@ Delete temporary files (including the bytecode cache)
 Run the application in test mode in the current shell
 
 *precompile*
-Precompile all Java sources and templates to speed up
-application start-up
+Precompile all Java sources and templates to speed up application start-up
 
 *war*
 Export the application as a standalone WAR archive
@@ -68,7 +67,7 @@ Stop the running application
 Restart the running application
 
 *status*
-Display the running application's status
+Display the running application’s status
 
 *out*
 Follow logs/system.out file
@@ -77,9 +76,7 @@ Follow logs/system.out file
 Show the PID of the running application
 
 *check*
-Check for a release newer than the current one
+Check for a Play framework release newer than the current one
 
 *help*
 Display help on a specific command
-
-

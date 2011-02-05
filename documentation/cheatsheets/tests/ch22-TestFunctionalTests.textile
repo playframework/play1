@@ -1,7 +1,7 @@
 h2. Test - Functional Tests
 
 *==public class ApplicationTest extends FunctionalTest==*
-Functional test are unit tests with an http orientation
+Functional test are unit tests with an HTTP orientation
 
 *==newRequest()==*
 *==newResponse()==*
@@ -14,4 +14,3 @@ Functional test are unit tests with an http orientation
 *==assertContentEquals(content, response)==*
 *==assertContentType(type,response)==*
 *==clearCookies()==*
-

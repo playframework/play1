@@ -1,13 +1,13 @@
 h2. Controller - Libraries
 
 *==WS.url("http://s.com/posts").get().toJSON();==*
-HTTP get request to JSON
+HTTP GET request to JSON
 
 *==WS.url("http://s.com/").post().toXML();==*
-HTTP post request to XML
+HTTP POST request to XML
 
 *==DB.execute("raw sql");==*
-Eval raw sql
+Eval raw SQL
 
 *==XML.getDocument(String);==*
 String to XML

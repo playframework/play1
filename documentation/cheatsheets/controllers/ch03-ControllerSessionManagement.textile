@@ -1,21 +1,21 @@
 h2. Controller - Session Management
 
 *WARNING: Play Session is NOT the J2EE session*
-session and flash use cookies! 4kb limit/20 cookies max
+session and flash use cookies! 4KB limit/20 cookies max
 
 *session.getId();*
-Returns the session Id - in most cases: a must have!
+Returns the session ID - in most cases: a must have!
 
 *session.put(String key, String value);*
 *session.get("user_flag");*
-Values are limited to Strings, 4kb max
+Values are limited to Strings, 4KB max
 
 *flash.put(String key, String value);*
 *flash.get(String key);*
-Flash entries are discarded at end of next call
+Flash entries are discarded at end of next request
 
 *Cache.set("key_" + id, product, "30mn");*
-Set cache value for 30 minutes
+Set cache value to 30 minutes
 
 *Cache.get("key_" + id, Product.class);*
 Get cache value, may return null
@@ -25,4 +25,3 @@ Non blocking cache delete
 
 *Cache.safeDelete("key_" + id);*
 Blocking cache delete
-

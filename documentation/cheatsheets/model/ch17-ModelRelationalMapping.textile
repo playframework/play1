@@ -28,4 +28,4 @@ Should only be used on java.util.Date and Calendar fields
 Defines this field as storing an enumerated class
 
 *==@Column(name="sql_column_name")==*
-Should the table column name be different from the field name
+Defines a table column name that is different to the field name

@@ -7,13 +7,13 @@ Evaluates and outputs a variable
 Displays client.name only if client not null
 
 *==@{ Controller.action() }==*
-Calculates url relative path to action
+Calculates URL relative path to action
 
 *==@{ Controller.action().secure() }==*
-Calculates url relative https path to action
+Calculates URL relative HTTPS path to action
 
 *==@@{ Controller.action() }==*
-Calculates url absolute path to action
+Calculates URL absolute path to action
 
 *==@{'path/to/static_content'}==*
 ==&lt;img src="@{'/public/images/jpdf.png'}" class="center"/&gt;==

@@ -75,6 +75,3 @@ the-play-framework-s-manual
 
 *==${ "x".pad(4).raw() }==*
 x&nbsp;&nbsp;&nbsp;
-
-
-

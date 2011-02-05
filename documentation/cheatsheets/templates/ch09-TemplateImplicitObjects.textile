@@ -10,7 +10,7 @@ Flash scope
 The negotiated language
 
 *messages*
-The messages map, i18
+The map of localised messages
 
 *out*
 The output stream writer
@@ -22,7 +22,7 @@ Current parameters
 Main framework class
 
 *request*
-The current http request
+The current HTTP request
 
 *session*
 The session scope

@@ -17,5 +17,5 @@ h2. Multi environment
 *==play run --%prod==*
 *==play run --%dev==*
 *==play test==*
-Will pick the appropriate configurations
+Will pick the appropriate configuration
 

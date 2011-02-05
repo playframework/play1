@@ -24,7 +24,7 @@ Handy tags to create anchors and forms
 Disables HTML escaping
 
 *==#{i18n /}==*
-Exports localized msgs in Javascript
+Exports localized messages in Javascript
 
 *==#{ifErrors} &lt;p&gt;Error(s) found!&lt;/p&gt; #{/ifErrors}==*
 Checks for validation errors
@@ -50,4 +50,3 @@ Tip: Else can be used along with list
 
 *==#{cache ʻkeyʼ, for:ʼ15minʼ}...#{/cache}==*
 Caches content for 15 minutes
-

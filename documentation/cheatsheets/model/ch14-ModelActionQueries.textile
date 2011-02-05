@@ -8,7 +8,7 @@ Access the persistence manager
 Finder methods
 
 *==post.save();==*
-Saves the object to the persistent store
+Save the object to the persistent store
 
 *==boolean post.validateAndSave();==*
 true if object validates and saved, see validation annotations

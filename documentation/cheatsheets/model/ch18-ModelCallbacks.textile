@@ -1,6 +1,6 @@
 h2. Model - Callbacks
 
-Convenient way to implement database independent trigers
+Convenient ways to implement database-independent triggers.
 
 *==@PrePersist==*
 Defines this method as being a callback for pre-persist events
@@ -19,4 +19,3 @@ Defines this method as being a callback for pre-update events
 
 *==@PostLoad==*
 Defines this method as being a callback for post-load events
-

@@ -18,4 +18,4 @@ h2. Controller.action - Validation
 *==@URL String address==*
 
 *==@Valid Person person==*
-Pojo validation - class Person needs validation annotations
+JavaBean (POJO) validation - class Person needs validation annotations

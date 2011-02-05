@@ -5,10 +5,7 @@ h2. Model - Generators
 Used to generate auto indexes
 
 *==@SequenceGenerator==*
-Defines a generator of values using sequences in the
-datastore for use with persistent entities
+Defines a generator of values using sequences in the datastore for use with persistent entities
 
 *==@TableGenerator==*
-Defines a generator of sequences using a table in the
-datastore for use with persistent entities
-
+Defines a generator of sequences using a table in the datastore for use with persistent entities

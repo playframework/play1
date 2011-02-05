@@ -7,8 +7,7 @@ assertTextPresent('Login')
 type('login', 'admin')
 type('password', 'secret')
 clickAndWait('signin')
+
 // Verify that the user in correctly logged in
 assertText('success', 'Welcome admin!')
 *==#{/selenium}==*
-
-

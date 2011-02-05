@@ -6,7 +6,7 @@ h2. Controller.action - Others
 Logging configuration lives in application.conf
 
 *==@CacheFor("1h") public static void index() { ... }==*
-Caches the result of the action for 1h
+Caches the result of the action for 1 hour
 
 *==Play.configuration.getProperty("blog.title");==*
 Access to the configuration file
