@@ -1,6 +1,6 @@
 h2. Model - Relational mapping
 
-*==@Table(name=”sql_tbl”, catalog=””, schema=””)==*
+*==@Table(name="sql_tbl", catalog="", schema="")==*
 Defines the table where this class will be stored
 
 *==@Id==*
@@ -27,7 +27,5 @@ Should only be used on java.util.Date and Calendar fields
 *==@Enumerated(ORDINAL, STRING)==*
 Defines this field as storing an enumerated class
 
-*==@Column(name=”sql_column_name”)==*
+*==@Column(name="sql_column_name")==*
 Should the table column name be different from the field name
-
-

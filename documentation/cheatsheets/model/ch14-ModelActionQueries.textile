@@ -1,6 +1,6 @@
 h2. Model.action - Queries
 
-*==Query query = JPA.em().createQuery(“jpql_query”);==*
+*==Query query = JPA.em().createQuery("jpql_query");==*
 Access the persistence manager
 
 *==Post post = Post.findById(id);==*
@@ -30,4 +30,3 @@ Custom transaction control methods
 
 *==JPA.setRollbackOnly();==*
 Forces a transaction rollback
-

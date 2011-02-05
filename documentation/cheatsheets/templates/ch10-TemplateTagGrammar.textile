@@ -24,9 +24,8 @@ Message are maintained in conf/messages, supports i18
 *==&lowast;{ this is a comment }&lowast;==*
 What else to say?
 
-*==%{ out.print(“HelloWorld”) }%==*
+*==%{ out.print("HelloWorld") }%==*
 Groovy scripts for UI logic
 
 *==#{ my.custom.tag /}==*
 A typical custom tag - page context not shared
-

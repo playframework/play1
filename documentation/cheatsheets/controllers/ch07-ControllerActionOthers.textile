@@ -11,6 +11,5 @@ Caches the result of the action for 1h
 *==Play.configuration.getProperty("blog.title");==*
 Access to the configuration file
 
-*==Query query = JPA.em().createQuery(“query”);==*
+*==Query query = JPA.em().createQuery("query");==*
 Access the persistence manager
-
