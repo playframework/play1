@@ -16,5 +16,6 @@ h2. Controller.action - Validation
 *==@Past("1980-01-01") String birthDate==*
 *==@Range(min = 17500, max = 40000) String wordCount==*
 *==@URL String address==*
+
 *==@Valid Person person==*
 Pojo validation - class Person needs validation annotations

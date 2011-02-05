@@ -16,11 +16,12 @@ h2. Controller.action - Smart binding
 *==(@As(binder=MyCustomStringBinder.class))==*
 Custom parameter binder
 
-*Send File as multipart/form-data encoded post request*
-public static void create(String comment, File attachment)
+*public static void create(String comment, File attachment)*
+Send File as multipart/form-data encoded post request
 
-*==?client.name=paul&client.email=contact@crionics.com==*
-public static void create(Client client) POJO binding
+*==?client.name=paul&client.email=p@example.com==*
+*public static void create(Client client)*
+POJO binding
 
 *@NoBinding*
 Marks a non bindable field

@@ -7,13 +7,10 @@ Specifies that the class is persistent
 Defines this field as being embedded
 
 *==@EmbeddedId==*
-Defines this field as being (part of) the identity for the class,
-and being embedded into this class
+Defines this field as being (part of) the identity for the class, and being embedded into this class
 
 *==@Embeddable==*
-Specifies that the class is persistent embedded in another
-persistent class
+Specifies that the class is persistent embedded in another persistent class
 
 *==@MappedSuperclass==*
-Specifies that this class contains persistent information to be
-mapped in a child
+Specifies that this class contains persistent information to be mapped in a child
