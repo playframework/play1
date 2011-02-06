@@ -1,0 +1,46 @@
+# Default CRUD messages for the german language
+# ~~~~~~
+
+crud.title=Administration
+crud.home=Home
+crud.blank=Neu
+crud.index.title=Wählen sie ein Objekt zur Bearbeitung
+crud.index.objectType=Objektart
+crud.index.action=
+crud.index.add=Hinzufügen
+crud.add=&{%s} hinzufügen
+crud.list.title=&{%s}
+crud.list.size=%d &{%s}
+crud.list.totalSize=insgesamt %d
+crud.pagination.previous=« Vorherige
+crud.pagination.next=Nächste »
+crud.pagination.last=Letzte »»
+crud.pagination.first=«« Erste
+crud.show.title=&{%s} bearbeiten
+crud.save=Speichern
+crud.saveAndContinue=Speichern und weiter bearbeiten
+crud.cancel=Abbrechen
+crud.hasErrors=Bitte beheben Sie die Fehler
+crud.blank.title=&{%s} Hinzufügen
+crud.saveAndAddAnother=Speichern und Weitere hinzufügen
+crud.delete=&{%s} löschen
+crud.created=&{%s} wurde erstellt
+crud.saved=&{%s} wurde gespeichert
+crud.deleted=&{%s} wurde gelöscht
+crud.delete.error=Kann diese Objekt nich löschen
+crud.search=Suchen
+crud.none=(Kein)
+crud.selectValue=(Bitte Option auswählen)
+
+crud.help.required=Pflichtfeld.
+crud.help.minlength=Mindestlänge beträgt %d.
+crud.help.maxlength=Maximallänge beträgt %d.
+crud.help.email=Gültige eMail-Adresse.
+crud.help.dateformat=Im Format &{%s}.
+crud.help.numeric=Numerisch.
+crud.help.min=Muss größer als %d sein.
+crud.help.future=In der Zukunft.
+crud.help.past=In der Vergangenheit.
+crud.help.after=Nach %s.
+crud.help.before=Vor %s.
+crud.help.range=Zwischen %d und %d
