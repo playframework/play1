@@ -655,6 +655,10 @@ bc. public static void index() {
     render(messages);
 }
 
+The session expires when you close your web browser, unless the **application.session.maxAge** configuration property is set. For example:
+
+bc. application.session.maxAge=7d  # Remember for one week.
+
 The cache has different semantics than the classic Servlet HTTP session object. You can’t assume that these objects will be always in the cache. So it forces you to handle the cache miss cases, and keeps your application fully stateless.
 
 p(note). **Continuing the discussion**
