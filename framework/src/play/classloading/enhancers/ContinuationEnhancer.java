@@ -27,7 +27,7 @@ public class ContinuationEnhancer extends Enhancer {
                 @Override
                 public void edit(MethodCall m) throws CannotCompileException {
                     try {
-                        if(m.getMethod().getLongName().startsWith("play.mvc.Controller.wait(")) {
+                        if(m.getMethod().getLongName().startsWith("play.mvc.Controller.waitAndContinue(")) {
                             needsContinuations[0] = true;
                         }
                     } catch(Exception e) {                        

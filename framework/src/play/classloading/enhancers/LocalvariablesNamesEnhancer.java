@@ -74,6 +74,11 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
 
         for (CtMethod method : ctClass.getDeclaredMethods()) {
 
+            if(method.getName().contains("$")) {
+                // Generated method, skip
+                continue;
+            }
+
             // Signatures names
             CodeAttribute codeAttribute = (CodeAttribute) method.getMethodInfo().getAttribute("Code");
             if (codeAttribute == null || javassist.Modifier.isAbstract(method.getModifiers())) {
@@ -90,13 +95,17 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 if (localVariableAttribute == null) {
                     continue;
                 }
-                String name = localVariableAttribute.getConstPool().getUtf8Info(localVariableAttribute.nameIndex(i));
-                if (!name.equals("this")) {
-                    names.add(name);
+                try {
+                    String name = localVariableAttribute.getConstPool().getUtf8Info(localVariableAttribute.nameIndex(i));
+                    if (!name.equals("this")) {
+                        names.add(name);
+                    }
+                } catch(Exception e) {
+                    Logger.warn(e, "While applying localvariables to %s.%s, param %s", ctClass.getName(), method.getName(), i);
                 }
             }
             StringBuilder iv = new StringBuilder();
-            if (names.size() == 0) {
+            if (names.isEmpty()) {
                 iv.append("new String[0];");
             } else {
                 iv.append("new String[] {");
@@ -385,7 +394,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             return getLocalVariables().get(variable);
         }
     }
-    private static Map<Integer, Integer> storeByCode = new HashMap<Integer, Integer>();
+    private final static Map<Integer, Integer> storeByCode = new HashMap<Integer, Integer>();
 
     /**
      * Useful instructions

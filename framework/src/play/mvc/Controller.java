@@ -55,6 +55,7 @@ import com.google.gson.JsonSerializer;
 import com.thoughtworks.xstream.XStream;
 import org.apache.commons.javaflow.Continuation;
 import org.apache.commons.javaflow.bytecode.StackRecorder;
+import play.libs.F;
 
 /**
  * Application controller support: The controller receives input and initiates a response by making calls on model objects.
@@ -860,25 +861,35 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         throw new Suspend(task);
     }
 
-    protected static void wait(String timeout) {
-        wait(1000 * Time.parseDuration(timeout));
+    protected static void waitAndContinue(String timeout) {
+        waitAndContinue(1000 * Time.parseDuration(timeout));
     }
 
-    protected static void wait(int millis) {
+    protected static void waitAndCall(String timeout, F.Action0 callback) {
+        waitAndCall(1000 * Time.parseDuration(timeout), callback);
+    }
+
+    protected static void waitAndContinue(int millis) {
         Request.current().isNew = false;
         Continuation.suspend(millis);
     }
 
-    protected static <T> T wait(Future<T> future) {
+    protected static void waitAndCall(int millis, F.Action0 callback) {
+        Request.current().isNew = false;
+        Request.current().args.put(ActionInvoker.A, callback);
+        throw new Suspend(millis);
+    }
+
+    protected static <T> T waitAndContinue(Future<T> future) {
         if(future != null) {
-            Request.current().args.put("__future", future);
-        } else if(Request.current().args.containsKey("__future")) {
+            Request.current().args.put(ActionInvoker.F, future);
+        } else if(Request.current().args.containsKey(ActionInvoker.F)) {
             // Since the continiation will restart in this code that isn't intstrumented by javaflow,
             // we need to reset the state manually.
             StackRecorder.get().isCapturing = false;
             StackRecorder.get().isRestoring = false;
             StackRecorder.get().value = null;
-            future = (Future<T>)Request.current().args.get("__future");
+            future = (Future<T>)Request.current().args.get(ActionInvoker.F);
         } else {
             throw new UnexpectedException("Lost future for " + Http.Request.current() + "!");
         }
@@ -894,6 +905,13 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             Continuation.suspend(future);
             return null;
         }
+    }
+
+    protected static <T> void waitAndCall(Future<T> future, F.Action<T> callback) {
+        Request.current().isNew = false;
+        Request.current().args.put(ActionInvoker.F, future);
+        Request.current().args.put(ActionInvoker.A, callback);
+        throw new Suspend(future);
     }
 
     /**
