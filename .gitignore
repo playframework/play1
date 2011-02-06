@@ -1,5 +1,8 @@
 bin
 framework/classes
+framework/test-classes
+framework/out
+framework/.idea
 framework/play.jar
 .DS_Store
 nbproject/genfiles.properties
