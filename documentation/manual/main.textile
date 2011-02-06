@@ -86,8 +86,10 @@ There are two required configuration files:
 * **routes**, the routes definition file.
 
 p(note). **Tip**
-	
-If you need to add some configuration options specific to your application, it’s a good idea to add more options to the application.conf file. If any library needs a specific configuration file, try to file it under the conf directory: **this directory is included in the Java ClassPath**.
+ 
+If you need to add some configuration options specific to your application, it’s a good idea to add more options to the **application.conf** file. Configuration options in this file are read programmatically with **Play.configuration.get("propertyName")**.
+ 
+If any library needs a specific configuration file, try to file it under the conf directory: **this directory is included in the Java ClassPath**.
 
 h3. The lib directory
 
