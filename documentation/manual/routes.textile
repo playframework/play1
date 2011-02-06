@@ -144,6 +144,18 @@ GET    /pages/{id}        Application.page
 
 The first route is equivalent to the second one when the page ID is ‘home’. However, since it has higher priority, this route will be used as the default for the call to Application.page with ID ‘home’.
 
+h3. Variables and scripts
+
+You can also use the **${ … }** syntax for variables, and the **%{ … }** syntax for scripts in the **routes** file, as you can in templates. For example:
+
+bc. %{ context = play.configuration.getProperty('context', '') }%
+ 
+# Home page
+GET    ${context}         Secure.login
+GET    ${context}/        Secure.login
+
+Another example is the CRUD module’s **routes** file, which uses the **crud.types** tag to loop over model types to generate controller route definitions for each type.
+
 
 h2. <a name="priority">Routes priority</a>
 
