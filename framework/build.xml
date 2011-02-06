@@ -13,6 +13,14 @@
         </fileset>         
     </path>
 
+    <path id="classpath.test">
+        <pathelement location="classes" />
+        <pathelement location="test-classes" />
+        <fileset dir="lib">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
     <target name="clean" description="clean resources">
         <delete dir="classes" /> 
         <delete dir="dist" />
@@ -37,6 +45,7 @@
                 <include name="**/i-am-working-here/**"/>
             </fileset> 
         </delete>
+        <antcall target="clean-unittest"/>
     </target>
     
     <target name="version" unless="version">
@@ -210,6 +219,10 @@
         <condition property="playExtension" value="">
             <and><os family="unix"/></and>
         </condition>
+
+        <echo message="Testing unittests" />
+
+        <antcall target="unittest" />
         
         <echo message="Testing development lifecycle (wait ...)" />
 
@@ -302,6 +315,31 @@
         </junit>
         <delete dir="${basedir}/tests-tmp" />
     </target>
+
+
+    <target name="compile-unittest" depends="compile">
+        <mkdir dir="test-classes"/>
+        <javac encoding="utf-8" srcdir="test-src" destdir="test-classes" debug="true" target="1.5">
+            <classpath refid="classpath.test" />
+        </javac>
+    </target>
+
+    <target name="clean-unittest">
+        <delete>
+            <fileset dir="test-classes" includes="**/*.class" />
+        </delete>
+    </target>
+
+    <target name="unittest" depends="compile-unittest">
+        <junit>
+            <classpath refid="classpath.test" />
+            <formatter type="brief" usefile="false" />
+            <batchtest>
+                <fileset dir="test-classes" includes="**/*Test.class" />
+            </batchtest>
+        </junit>
+    </target>
+
     
     <target name="package" depends="clean,version,jar,javadoc">
         <mkdir dir="dist" /> 
