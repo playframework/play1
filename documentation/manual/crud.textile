@@ -2,16 +2,18 @@ h1. CRUD: Administration generator
 
 The CRUD (Create, Read, Update, Delete) module generates a fully usable web interface for your JPA Model objects.
 
+h2. <a name="usage">Using the CRUD module</a>
+
 Let's see a simple example.
 
-h2. <a>Enable the CRUD module for the application</a>
+h3. <a name="enable">Enable the CRUD module for the application</a>
 
 In the **/conf/application.conf** file, enable the CRUD module by adding this line:
 
 bc. # The crud module
 module.crud=${play.path}/modules/crud
 
-h2. <a>Import default CRUD routes</a>
+h3. <a name="routes">Import default CRUD routes</a>
 
 In the **conf/routes** file, import the default module routes by adding this line:
 
@@ -20,7 +22,7 @@ bc. # Import CRUD routes
 
 p(note). **Note** that using the default routes file is not required. You can also define your own routes, or mix the two.
 
-h2. <a>Create a User class</a>
+h3. <a name="model">Create a User class</a>
 
 We will start by creating a User class:
 
@@ -41,7 +43,7 @@ public class User extends Model {
  	
 }
 
-h2. <a>Create the Users controller</a>
+h3. <a name="controller">Create the Users controller</a>
 
 Then, we create a simple controller that just inherits the CRUD controller.
 
@@ -66,7 +68,7 @@ public class AdminUsers extends CRUD {
    
 }
 
-h2. <a>The User form</a>
+h3. <a name="view">The User form</a>
 
 Click the **Add** button, and you should see the User form.
 
@@ -110,7 +112,7 @@ Refresh the User form and you will see that the validation is automatically appl
 
 !images/crud3!
 
-h2. <a>Change the form label</a>
+h3. <a name="labels">Change the form label</a>
 
 Add these lines to the **conf/messages** file in your application:
 
@@ -122,7 +124,7 @@ And refresh the User form.
 
 !images/crud4!
 
-h2. <a>Create a User and customize the list view</a>
+h3. <a name="list">Create a User and customize the list view</a>
 
 The default list view uses only one column containing the result of the object's toString() method.
 
@@ -166,7 +168,7 @@ and refresh the list.
 !images/crud6!
 
 
-h2. <a>Custom fields rendering: the crud.custom tag</a>
+h3. <a name="custom">Custom fields rendering: the crud.custom tag</a>
 
 You can go a bit further by customizing the way each field of your ''User'' entity is displayed in the list and form views.
 
@@ -194,7 +196,8 @@ bc. #{crud.table fields:['name', 'company', 'edit']}
  
 #{/crud.table}
 
-h2. List of String and List of enumeration
+
+h2. <a name="collections">List of String and List of enumeration</a>
 
 The CRUD module is showing them as a text field. In this text field, the list is represented by a comma separated list of String. For example:
 
@@ -215,7 +218,7 @@ public class Account extends Model {
 
 This is shown as: "myEnumId1","myEnumId2" for the contentTypes and "string1","string2" for the user names. Per definition, this is what you should first customize in your CRUD module.
 
-h2. <a>Customize the show and the blank view in a generic way<a>
+h2. <a name="objecttype">Customize the show and the blank view in a generic way</a>
 
 A central influence on the behavior of the CRUD-views has the "**ObjectType**". So if you want to 
 take influence on the behavior of CRUD in a generic way (for example make fields with annotation @Version hidden), you can create you own ObjectType-class. 
@@ -271,6 +274,6 @@ bc.    public class CustomAdminCompany extends CRUD {
 
 But this isn’t the end. You can customize findPage and other. Have simple a look at the source code.
 
-h2. <a>Limitation</a>
+h2. <a name="limitation">Limitation</a>
 
 Limitation The CRUD module only shows bi-directional relationships in one of the two entities: the one that does not have the **mappedBy** attribute.
