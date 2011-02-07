@@ -30,7 +30,7 @@ public class Application extends Controller {
     }
     
     public static void waitMessages(Long lastReceived) {
-        List<Message> messages = waitAndContinue(ChatRoom.get().nextMessages(lastReceived));
+        List<Message> messages = await(ChatRoom.get().nextMessages(lastReceived));
         renderJSON(messages);
     }
 

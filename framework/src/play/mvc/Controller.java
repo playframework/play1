@@ -861,26 +861,26 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         throw new Suspend(task);
     }
 
-    protected static void waitAndContinue(String timeout) {
-        waitAndContinue(1000 * Time.parseDuration(timeout));
+    protected static void await(String timeout) {
+        await(1000 * Time.parseDuration(timeout));
     }
 
-    protected static void waitAndCall(String timeout, F.Action0 callback) {
-        waitAndCall(1000 * Time.parseDuration(timeout), callback);
+    protected static void await(String timeout, F.Action0 callback) {
+        await(1000 * Time.parseDuration(timeout), callback);
     }
 
-    protected static void waitAndContinue(int millis) {
+    protected static void await(int millis) {
         Request.current().isNew = false;
         Continuation.suspend(millis);
     }
 
-    protected static void waitAndCall(int millis, F.Action0 callback) {
+    protected static void await(int millis, F.Action0 callback) {
         Request.current().isNew = false;
         Request.current().args.put(ActionInvoker.A, callback);
         throw new Suspend(millis);
     }
 
-    protected static <T> T waitAndContinue(Future<T> future) {
+    protected static <T> T await(Future<T> future) {
         if(future != null) {
             Request.current().args.put(ActionInvoker.F, future);
         } else if(Request.current().args.containsKey(ActionInvoker.F)) {
@@ -907,7 +907,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         }
     }
 
-    protected static <T> void waitAndCall(Future<T> future, F.Action<T> callback) {
+    protected static <T> void await(Future<T> future, F.Action<T> callback) {
         Request.current().isNew = false;
         Request.current().args.put(ActionInvoker.F, future);
         Request.current().args.put(ActionInvoker.A, callback);
