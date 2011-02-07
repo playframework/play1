@@ -24,30 +24,30 @@ public class AnnotationHelper {
      */
     public static Date getDateAs(Annotation[] annotations, String value) throws ParseException {
         // Look up for the BindAs annotation
-        if (annotations != null) {
-            for (Annotation annotation : annotations) {
-                if (annotation.annotationType().equals(As.class)) {
-                    As as = (As) annotation;
-
-                    String format = as.value()[0];
-                    if (!StringUtils.isEmpty(format)) {
-                        // This can be comma separated
-                        Tuple tuple = getLocale(as.lang());
-                        if (tuple != null) {
-                            // Avoid NPE and get the last value if not specified
-                            format = as.value()[tuple.index < as.value().length ? tuple.index : as.value().length - 1];
-                            SimpleDateFormat sdf = new SimpleDateFormat(format, tuple.locale);
-                            sdf.setLenient(false);
-                        }
+        if (annotations == null) {
+            return null;
+        }
+        for (Annotation annotation : annotations) {
+            if (annotation.annotationType().equals(As.class)) {
+                As as = (As) annotation;
+                Locale locale = Lang.getLocale();
+                String format = as.value()[0];
+                if (!StringUtils.isEmpty(format)) {
+                    // This can be comma separated
+                    Tuple tuple = getLocale(as.lang());
+                    if (tuple != null) {
+                        // Avoid NPE and get the last value if not specified
+                        format = as.value()[tuple.index < as.value().length ? tuple.index : as.value().length - 1];
+                        locale = tuple.locale;
                     }
-                    if (StringUtils.isEmpty(format)) {
-                        format = I18N.getDateFormat();
-                    }
-                    SimpleDateFormat sdf = new SimpleDateFormat(format, Lang.getLocale());
-                    sdf.setLenient(false);
-                    return sdf.parse(value);
-
                 }
+                if (StringUtils.isEmpty(format)) {
+                    format = I18N.getDateFormat();
+                }
+                SimpleDateFormat sdf = new SimpleDateFormat(format, locale);
+                sdf.setLenient(false);
+                return sdf.parse(value);
+
             }
         }
         return null;

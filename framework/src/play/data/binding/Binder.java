@@ -1,14 +1,5 @@
 package play.data.binding;
 
-import play.data.binding.types.*;
-import play.Logger;
-import play.Play;
-import play.PlayPlugin;
-import play.data.Upload;
-import play.data.validation.Validation;
-import play.exceptions.UnexpectedException;
-import play.utils.Utils;
-
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -17,11 +8,20 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.apache.commons.lang.StringUtils;
+import java.util.regex.*;
 
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+
+import play.Logger;
+import play.Play;
+import play.PlayPlugin;
+import play.data.Upload;
+import play.data.binding.types.*;
+import play.data.validation.Validation;
 import play.db.Model;
+import play.exceptions.UnexpectedException;
+import play.utils.Utils;
 
 /**
  * The binder try to convert String values to Java objects.
@@ -33,6 +33,7 @@ public class Binder {
     // TODO: something a bit more dynamic? The As annotation allows you to inject your own binder
     static {
         supportedTypes.put(Date.class, new DateBinder());
+        supportedTypes.put(DateTime.class, new DateTimeBinder());
         supportedTypes.put(File.class, new FileBinder());
         supportedTypes.put(File[].class, new FileArrayBinder());
         supportedTypes.put(Model.BinaryField.class, new BinaryBinder());
@@ -121,15 +122,15 @@ public class Binder {
                     keyClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
                     valueClass = (Class) ((ParameterizedType) type).getActualTypeArguments()[1];
                 }
-                
+
                 // Special case Map<String, String>
                 // Multivalues composite params are binded to a Map<String, String>
                 // see http://play.lighthouseapp.com/projects/57987/tickets/443
                 if (keyClass==String.class && valueClass==String.class && isComposite(name, params)) {
-                	Map<String, String> stringMap = Utils.filterParams(params, name);
-                	if (stringMap.size()>0) return stringMap;
+                    Map<String, String> stringMap = Utils.filterParams(params, name);
+                    if (stringMap.size()>0) return stringMap;
                 }
-                
+
                 // Search for all params
                 Map<Object, Object> r = new HashMap<Object, Object>();
                 for (String param : params.keySet()) {
@@ -250,7 +251,7 @@ public class Binder {
             if (value == null || value.length == 0) {
                 return MISSING;
             }
-            
+
             return directBind(name, annotations, value[0], clazz);
         } catch (Exception e) {
             Validation.addError(name + suffix, "validation.invalid");
