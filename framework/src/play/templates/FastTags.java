@@ -369,7 +369,7 @@ public class FastTags {
     }
 
     public static String serialize(Map<?, ?> args, String... unless) {
-        StringBuffer attrs = new StringBuffer();
+        StringBuilder attrs = new StringBuilder();
         Arrays.sort(unless);
         for (Object o : args.keySet()) {
             String attr = o.toString();

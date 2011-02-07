@@ -7,10 +7,10 @@ public class GroovyInlineTags {
     }
     
     public static String _if(int index, CALL f) {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         switch(f) {
             case START:
-                s.append("if(attrs"+index+"['arg']) {");
+                s.append("if(attrs").append(index).append("['arg']) {");
                 break;
             case END:
                 s.append("play.templates.TagContext.parent().data.put('_executeNextElse', false);");
@@ -23,10 +23,10 @@ public class GroovyInlineTags {
     }
     
     public static String _ifnot(int index, CALL f) {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         switch(f) {
             case START:
-                s.append("if(!attrs"+index+"['arg']) {");
+                s.append("if(!attrs").append(index).append("['arg']) {");
                 break;
             case END:
                 s.append("play.templates.TagContext.parent().data.put('_executeNextElse', false);");
@@ -39,7 +39,7 @@ public class GroovyInlineTags {
     }
     
     public static String _else(int index, CALL f) {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         switch(f) {
             case START:
                 s.append("if(play.templates.TagContext.parent().data.get('_executeNextElse')) {");
@@ -53,10 +53,10 @@ public class GroovyInlineTags {
     }
     
     public static String _elseif(int index, CALL f) {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         switch(f) {
             case START:
-                s.append("if(play.templates.TagContext.parent().data.get('_executeNextElse') && attrs"+index+"['arg']) {");
+                s.append("if(play.templates.TagContext.parent().data.get('_executeNextElse') && attrs").append(index).append("['arg']) {");
                 break;
             case END:
                 s.append("play.templates.TagContext.parent().data.put('_executeNextElse', false);");
@@ -67,20 +67,20 @@ public class GroovyInlineTags {
     }
    
     public static String _list(int index, CALL f) {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         switch(f) {
             case START:
-                s.append("if(!attrs"+index+"['as']) {attrs"+index+"['as'] = '';};");
-                s.append("if(!attrs"+index+"['items']) {attrs"+index+"['items'] = attrs"+index+"['arg'];};");
-                s.append("if(attrs"+index+"['items']) { play.templates.TagContext.parent().data.put('_executeNextElse', false);");
-                s.append("_iter"+index+" = attrs"+index+"['items'].iterator();");
-                s.append("for (_"+index+"_i = 1; _iter"+index+".hasNext(); _"+index+"_i++) {");
-                s.append("_item"+index+" = _iter"+index+".next();");
-                s.append("setProperty(attrs"+index+"['as'] ?: '_', _item"+index+");");
-                s.append("setProperty(attrs"+index+"['as']+'_index', _"+index+"_i);");
-                s.append("setProperty(attrs"+index+"['as']+'_isLast', !_iter"+index+".hasNext());");
-                s.append("setProperty(attrs"+index+"['as']+'_isFirst', _"+index+"_i == 1);");
-                s.append("setProperty(attrs"+index+"['as']+'_parity', _"+index+"_i%2==0?'even':'odd');");
+                s.append("if(!attrs").append(index).append("['as']) {attrs").append(index).append("['as'] = '';};");
+                s.append("if(!attrs").append(index).append("['items']) {attrs").append(index).append("['items'] = attrs").append(index).append("['arg'];};");
+                s.append("if(attrs").append(index).append("['items']) { play.templates.TagContext.parent().data.put('_executeNextElse', false);");
+                s.append("_iter").append(index).append(" = attrs").append(index).append("['items'].iterator();");
+                s.append("for (_").append(index).append("_i = 1; _iter").append(index).append(".hasNext(); _").append(index).append("_i++) {");
+                s.append("_item").append(index).append(" = _iter").append(index).append(".next();");
+                s.append("setProperty(attrs").append(index).append("['as'] ?: '_', _item").append(index).append(");");
+                s.append("setProperty(attrs").append(index).append("['as']+'_index', _").append(index).append("_i);");
+                s.append("setProperty(attrs").append(index).append("['as']+'_isLast', !_iter").append(index).append(".hasNext());");
+                s.append("setProperty(attrs").append(index).append("['as']+'_isFirst', _").append(index).append("_i == 1);");
+                s.append("setProperty(attrs").append(index).append("['as']+'_parity', _").append(index).append("_i%2==0?'even':'odd');");
                 break;
             case END:
                 s.append("};");
