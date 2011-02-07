@@ -10,6 +10,7 @@ A module is just another Play application; however some differences exist in the
 * A module can have a **conf/routes** file, but these routes will not be  loaded automatically.
 * All files are first searched for in the main application path, then in all loaded modules.
 * A module can contain plain Java code packaged as a JAR file in the module/lib directory.
+* A module can include a documentation page.
 * Everything in a module is optional.
 
 You can create a module with the **play new-module** command.
@@ -64,6 +65,12 @@ GET     /admin	     module:crud
 You can even load routes from all available modules:
 
 bc. GET     /	     module:*
+
+h2. <a name="documentation">Add documentation to a module</a>
+
+You can add a documentation page to a module simply by adding a the file **documentation/manual/home.textile** to the module. Use the same Textile syntax as the Play documentation itself, in **${play.path}/documentation/manual/**.
+
+If you are running a Play application that uses one or more modules with documentation, then the local Play documentation at "http://localhost:9000/@documentation":http://localhost:9000/@documentation will include links to their documentation pages under *Installed Modules* in the side bar.
 
 h2. <a name="repository">Using the module repository</a>
 
