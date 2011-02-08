@@ -29,3 +29,7 @@
 ~ --deps: 
 ~ Resolve and install dependencies before running the command.
 ~
+~ --exclude:
+~ Excludes a list of diretories (separator is ':'').
+~ Example : --exclude .svn:tmp:logs:target
+~
