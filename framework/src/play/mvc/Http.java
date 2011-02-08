@@ -21,6 +21,9 @@ import play.Play;
 import play.exceptions.UnexpectedException;
 import play.libs.Codec;
 import play.libs.F;
+import play.libs.F.Option;
+import play.libs.F.Promise;
+import play.libs.F.EventStream;
 import play.libs.Time;
 import play.utils.Utils;
 
@@ -411,7 +414,6 @@ public class Http {
                 }
             }
         }
-
     }
 
     /**
@@ -616,19 +618,16 @@ public class Http {
         public void reset() {
             out.reset();
         }
-
         // Chunked stream
-
         public boolean chunked = false;
-
         final List<F.Action<Object>> writeChunkHandlers = new ArrayList<F.Action<Object>>();
 
         public void writeChunk(Object o) {
             this.chunked = true;
-            if(writeChunkHandlers.isEmpty()) {
+            if (writeChunkHandlers.isEmpty()) {
                 throw new UnsupportedOperationException("Your HTTP server doesn't yet support chunked response stream");
             }
-            for(F.Action<Object> handler : writeChunkHandlers) {
+            for (F.Action<Object> handler : writeChunkHandlers) {
                 handler.invoke(o);
             }
         }
@@ -636,5 +635,124 @@ public class Http {
         public void onWriteChunk(F.Action<Object> handler) {
             writeChunkHandlers.add(handler);
         }
+    }
+
+    /**
+     * A Websocket Inbound channel
+     */
+    public abstract static class Inbound {
+
+        public final static ThreadLocal<Inbound> current = new ThreadLocal<Inbound>();
+
+        public static Inbound current() {
+            return current.get();
+        }
+        final EventStream<WebSocketEvent> stream = new EventStream<WebSocketEvent>();
+
+        public void _received(WebSocketFrame frame) {
+            stream.publish(frame);
+        }
+
+        public Promise<WebSocketEvent> nextEvent() {
+            if (!isOpen()) {
+                throw new IllegalStateException("The inbound channel is closed");
+            }
+            return stream.nextEvent();
+        }
+
+        public void close() {
+            stream.publish(new WebSocketClose());
+        }
+
+        public abstract boolean isOpen();
+
+    }
+
+    /**
+     * A Websocket Outbound channel
+     */
+    public static abstract class Outbound {
+
+        public static ThreadLocal<Outbound> current = new ThreadLocal<Outbound>();
+
+        public static Outbound current() {
+            return current.get();
+        }
+
+        public abstract void send(String data);
+
+        public abstract void send(byte opcode, byte[] data, int offset, int length);
+
+        public abstract boolean isOpen();
+
+        public abstract void close();
+
+        public void send(byte opcode, byte[] data) {
+            send(opcode, data, 0, data.length);
+        }
+
+        public void send(String pattern, Object... args) {
+            send(String.format(pattern, args));
+        }
+    }
+
+    public static class WebSocketEvent {
+
+        public static F.Matcher<WebSocketEvent, WebSocketClose> SocketClosed = new F.Matcher<WebSocketEvent, WebSocketClose>() {
+
+            @Override
+            public Option<WebSocketClose> match(WebSocketEvent o) {
+                if (o instanceof WebSocketClose) {
+                    return F.Option.Some((WebSocketClose) o);
+                }
+                return F.Option.None();
+            }
+        };
+
+        static class TextMatcher extends F.Matcher<WebSocketEvent, String> {
+
+            @Override
+            public Option<String> match(WebSocketEvent o) {
+                if (o instanceof WebSocketFrame) {
+                    WebSocketFrame frame = (WebSocketFrame) o;
+                    if (!frame.isBinary && match(frame.textData)) {
+                        return F.Option.Some(frame.textData);
+                    }
+                }
+                return F.Option.None();
+            }
+
+            public boolean match(String text) {
+                return true;
+            }
+        }
+        
+        public static F.Matcher<WebSocketEvent, String> TextFrame = new TextMatcher();
+
+    }
+
+    /**
+     * A Websocket frame
+     */
+    public static class WebSocketFrame extends WebSocketEvent {
+
+        final public boolean isBinary;
+        final public String textData;
+        final public byte[] binaryData;
+
+        public WebSocketFrame(String data) {
+            this.isBinary = false;
+            this.textData = data;
+            this.binaryData = null;
+        }
+
+        public WebSocketFrame(byte[] data) {
+            this.isBinary = true;
+            this.binaryData = data;
+            this.textData = null;
+        }
+    }
+
+    public static class WebSocketClose extends WebSocketEvent {
     }
 }

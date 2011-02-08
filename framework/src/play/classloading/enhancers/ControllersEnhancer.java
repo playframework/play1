@@ -148,7 +148,7 @@ public class ControllersEnhancer extends Enhancer {
      * Check if a field must be translated to a 'thread safe field'
      */
     static boolean isThreadedFieldAccess(CtField field) {
-        if (field.getDeclaringClass().getName().equals("play.mvc.Controller")) {
+        if (field.getDeclaringClass().getName().equals("play.mvc.Controller") || field.getDeclaringClass().getName().equals("play.mvc.WebSocket")) {
             return field.getName().equals("params")
                     || field.getName().equals("request")
                     || field.getName().equals("response")
@@ -157,6 +157,8 @@ public class ControllersEnhancer extends Enhancer {
                     || field.getName().equals("renderArgs")
                     || field.getName().equals("routeArgs")
                     || field.getName().equals("validation")
+                    || field.getName().equals("inbound")
+                    || field.getName().equals("outbound")
                     || field.getName().equals("flash");
         }
         return false;

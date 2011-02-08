@@ -52,7 +52,9 @@ import play.utils.Java;
 import play.vfs.VirtualFile;
 
 import com.google.gson.JsonSerializer;
+import com.google.gson.reflect.TypeToken;
 import com.thoughtworks.xstream.XStream;
+import java.lang.reflect.Type;
 import org.apache.commons.javaflow.Continuation;
 import org.apache.commons.javaflow.bytecode.StackRecorder;
 import play.libs.F;
@@ -322,6 +324,15 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     protected static void renderJSON(Object o) {
         throw new RenderJson(o);
+    }
+
+    /**
+     * Render a 200 OK application/json response
+     * @param o The Java object to serialize
+     * @param type The Type informations for complex generic types
+     */
+    protected static void renderJSON(Object o, Type type) {
+        throw new RenderJson(o, type);
     }
 
     /**

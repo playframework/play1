@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,6 +23,7 @@ import play.libs.OAuth.ServiceInfo;
 import play.libs.OAuth.TokenPair;
 import play.libs.ws.WSAsync;
 import play.libs.ws.WSUrlFetch;
+import play.libs.F.Promise;
 import play.mvc.Http.Header;
 import play.utils.NoOpEntityResolver;
 
@@ -296,7 +296,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse get();
 
         /** Execute a GET request asynchronously. */
-        public Task<HttpResponse> getAsync() {
+        public Promise<HttpResponse> getAsync() {
             throw new NotImplementedException();
         }
 
@@ -304,7 +304,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse post();
 
         /** Execute a POST request asynchronously.*/
-        public Task<HttpResponse> postAsync() {
+        public Promise<HttpResponse> postAsync() {
             throw new NotImplementedException();
         }
 
@@ -312,7 +312,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse put();
 
         /** Execute a PUT request asynchronously.*/
-        public Task<HttpResponse> putAsync() {
+        public Promise<HttpResponse> putAsync() {
             throw new NotImplementedException();
         }
 
@@ -320,7 +320,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse delete();
 
         /** Execute a DELETE request asynchronously.*/
-        public Task<HttpResponse> deleteAsync() {
+        public Promise<HttpResponse> deleteAsync() {
             throw new NotImplementedException();
         }
 
@@ -328,7 +328,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse options();
 
         /** Execute a OPTIONS request asynchronously.*/
-        public Task<HttpResponse> optionsAsync() {
+        public Promise<HttpResponse> optionsAsync() {
             throw new NotImplementedException();
         }
 
@@ -336,7 +336,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse head();
 
         /** Execute a HEAD request asynchronously.*/
-        public Task<HttpResponse> headAsync() {
+        public Promise<HttpResponse> headAsync() {
             throw new NotImplementedException();
         }
 
@@ -344,7 +344,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse trace();
 
         /** Execute a TRACE request asynchronously.*/
-        public Task<HttpResponse> traceAsync() {
+        public Promise<HttpResponse> traceAsync() {
             throw new NotImplementedException();
         }
 

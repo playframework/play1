@@ -10,7 +10,7 @@ require:    &allDependencies
     - antlr 2.7.6
     - c3p0 0.9.1.2
     - cglib -> cglib-nodep 2.2
-    - com.google.code.gson -> gson 1.4
+    - com.google.code.gson -> gson 1.6
     - com.jamonapi -> jamon 2.7
     - com.ning -> async-http-client 1.4.0
     - commons-beanutils 1.8.3  

@@ -14,24 +14,22 @@ public class Application extends Controller {
         render();
     }
     
-    public static void room(@Required String user) {
+    public static void enterDemo(@Required String user, @Required String demo) {        
         if(validation.hasErrors()) {
-              flash.error("Please choose a nick name…");
-              index();
+            flash.error("Please choose a nick name and the demonstration type…");
+            index();
         }
-        ChatRoom.get().talk(Message.on("notice", user + " has joined the room"));
-        render(user);
-    }
-    
-    public static void say(String user, String msg) {
-        if(msg != null && msg.trim().length() > 0) {
-            ChatRoom.get().talk(Message.on(user, msg));
+        
+        // Dispatch to the demonstration        
+        if(demo.equals("refresh")) {
+            Refresh.index(user);
+        }
+        if(demo.equals("longpolling")) {
+            LongPolling.room(user);
+        }
+        if(demo.equals("websocket")) {
+            WebSocket.room(user);
         }        
-    }
-    
-    public static void waitMessages(Long lastReceived) {
-        List<Message> messages = await(ChatRoom.get().nextMessages(lastReceived));
-        renderJSON(messages);
     }
 
 }

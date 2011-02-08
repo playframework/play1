@@ -71,13 +71,18 @@ public class TestRunner extends Controller {
             options.put("test", test);
             options.put("results", results);
             String result = resultTemplate.render(options);
-            options.remove("out");
-            resultTemplate = TemplateLoader.load("TestRunner/results-xunit.xml");
-            String resultXunit = resultTemplate.render(options);
             File testResults = Play.getFile("test-result/" + test + (results.passed ? ".passed" : ".failed") + ".html");
-            File testXunitResults = Play.getFile("test-result/TEST-" + test.substring(0, test.length()-6) + ".xml");
             IO.writeContent(result, testResults);
-            IO.writeContent(resultXunit, testXunitResults);
+            try {
+                // Write xml output
+                options.remove("out");
+                resultTemplate = TemplateLoader.load("TestRunner/results-xunit.xml");
+                String resultXunit = resultTemplate.render(options);
+                File testXunitResults = Play.getFile("test-result/TEST-" + test.substring(0, test.length()-6) + ".xml");
+                IO.writeContent(resultXunit, testXunitResults);
+            } catch(Exception e) {
+                Logger.error(e, "Cannot ouput XML unit output");
+            }            
             response.contentType = "text/html";
             renderText(result);
         }

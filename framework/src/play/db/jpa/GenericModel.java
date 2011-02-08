@@ -322,7 +322,7 @@ public class GenericModel extends JPABase {
         public <T> T first() {
             try {
                 List<T> results = query.setMaxResults(1).getResultList();
-                if (results.size() == 0) {
+                if (results.isEmpty()) {
                     return null;
                 }
                 return results.get(0);

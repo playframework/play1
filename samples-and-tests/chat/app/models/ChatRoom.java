@@ -1,85 +1,48 @@
 package models;
 
 import java.util.*;
-import java.util.concurrent.*;
 
 import play.libs.*;
+import play.libs.F.*;
 
 public class ChatRoom {
+    
+    // Let's chat! 
+    
+    final ArchivedEventStream<Message> messages = new ArchivedEventStream<Message>(100);
+    
+    public EventStream<Message> join(String user) {
+        messages.publish(Message.on("notice", "%s has joined the room", user));
+        return messages.eventStream();
+    }
+    
+    public void leave(String user) {
+        messages.publish(Message.on("notice", "%s has left the room", user));
+    }
+    
+    public void say(String user, String message) {
+        if(message == null || message.trim().equals("")) {
+            return;
+        }
+        messages.publish(Message.on(user, message));
+    }
+    
+    public Promise<List<Event<Message>>> nextMessages(long lastReceived) {
+        return messages.nextEvents(lastReceived);
+    }
+    
+    public List<Message> archive() {
+        return messages.archive();
+    }
     
     // Factory
 
     static ChatRoom instance = null;
-    static {
-        instance = new ChatRoom();
-    }
-    
     public static ChatRoom get() {
+        if(instance == null) {
+            instance = new ChatRoom();
+        }
         return instance;
-    }
-    
-    // Let's chat! 
-    
-    // Here we use a messages buffer to be sure to not lost any message
-    
-    final ArrayBlockingQueue<Message> messagesBuffer = new ArrayBlockingQueue<Message>(100);
-    final List<MessagesFilter> waiting = new ArrayList<MessagesFilter>();
-    
-    public synchronized void talk(Message msg) {
-        if(messagesBuffer.remainingCapacity() == 0) {
-            messagesBuffer.poll();
-        }
-        messagesBuffer.offer(msg);
-        notifyNewMessages();
-    }
-    
-    public synchronized Task<List<Message>> nextMessages(Long lastReceived) {
-        MessagesFilter futureMessages = new MessagesFilter(lastReceived);
-        waiting.add(futureMessages);
-        notifyNewMessages();
-        return futureMessages;        
-    } 
-    
-    public synchronized void notifyNewMessages() {
-        for(ListIterator<MessagesFilter> it = waiting.listIterator(); it.hasNext(); ) {
-            MessagesFilter filter = it.next();
-            for(Message message : messagesBuffer) {
-                filter.propose(message);
-            }
-            if(filter.invoke()) {
-                it.remove();
-            }
-        }
-    }
-    
-    // A custom task that filter only unread messages
-    
-    static class MessagesFilter extends Task<List<Message>> {
-        
-        Long lastReceived;
-        List<Message> messages = new ArrayList<Message>();
-    
-        public MessagesFilter(Long lastReceived) {
-            this.lastReceived = lastReceived;
-        }
-        
-        public void propose(Message message) {
-            if(message.id > lastReceived) {
-                messages.add(message);
-            }
-        }
-        
-        // If the are messages to dispatch
-        // we finish the Task
-        public boolean invoke() {
-            if(messages.isEmpty()) {
-                return false;
-            } else {
-                super.invoke(messages);
-                return true;
-            }            
-        }
-        
     }
     
 }

@@ -125,6 +125,10 @@ public class ValidationPlugin extends PlayPlugin {
     }
 
     static void save() {
+        if(Http.Response.current() == null) {
+            // Some request like WebSocket don't have any response
+            return;
+        }
         try {
             StringBuilder errors = new StringBuilder();
             if(Validation.current() != null && Validation.current().keep) {

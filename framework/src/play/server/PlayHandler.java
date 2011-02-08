@@ -1,5 +1,29 @@
 package play.server;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -8,8 +32,14 @@ import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
+import org.jboss.netty.handler.codec.http.websocket.DefaultWebSocketFrame;
+import org.jboss.netty.handler.codec.http.websocket.WebSocketFrame;
+import org.jboss.netty.handler.codec.http.websocket.WebSocketFrameDecoder;
+import org.jboss.netty.handler.codec.http.websocket.WebSocketFrameEncoder;
 import org.jboss.netty.handler.stream.ChunkedFile;
 import org.jboss.netty.handler.stream.ChunkedStream;
+import org.jboss.netty.handler.stream.ChunkedInput;
+import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
 import static org.jboss.netty.buffer.ChannelBuffers.*;
@@ -36,18 +66,9 @@ import play.templates.TemplateLoader;
 import play.utils.Utils;
 import play.vfs.VirtualFile;
 import play.data.validation.Validation;
-
-import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.text.ParseException;
-import java.util.*;
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import org.jboss.netty.handler.stream.ChunkedInput;
-import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 import play.libs.F.Action;
+import play.libs.F.Promise;
+import play.mvc.WebSocketInvoker;
 
 public class PlayHandler extends SimpleChannelUpstreamHandler {
 
@@ -58,6 +79,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
      */
     private final static String signature = "Play! Framework;" + Play.version + ";" + Play.mode.name().toLowerCase();
     private final static boolean exposePlayServer;
+
     static {
         exposePlayServer = !"false".equals(Play.configuration.getProperty("http.exposePlayServer"));
     }
@@ -66,8 +88,19 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) throws Exception {
         Logger.trace("messageReceived: begin");
         final Object msg = e.getMessage();
+
+        // Http request
         if (msg instanceof HttpRequest) {
+
             final HttpRequest nettyRequest = (HttpRequest) msg;
+
+            // Websocket upgrade
+            if (HttpHeaders.Values.UPGRADE.equalsIgnoreCase(nettyRequest.getHeader(CONNECTION)) && HttpHeaders.Values.WEBSOCKET.equalsIgnoreCase(nettyRequest.getHeader(HttpHeaders.Names.UPGRADE))) {
+                websocketHandshake(ctx, nettyRequest, e);
+                return;
+            }
+
+            // Plain old HttpRequest
             try {
                 final Request request = parseRequest(ctx, nettyRequest);
 
@@ -88,7 +121,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                     }
                 });
 
-
+                // Raw invocation
                 boolean raw = false;
                 for (PlayPlugin plugin : Play.plugins) {
                     if (plugin.rawInvocation(request, response)) {
@@ -99,13 +132,23 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 if (raw) {
                     copyResponse(ctx, request, response, nettyRequest);
                 } else {
+
+                    // Deleguate to Play framework
                     Invoker.invoke(new NettyInvocation(request, response, ctx, nettyRequest, e));
+
                 }
 
             } catch (Exception ex) {
                 serve500(ex, ctx, nettyRequest);
             }
         }
+
+        // Websocket frame
+        if (msg instanceof WebSocketFrame) {
+            WebSocketFrame frame = (WebSocketFrame) msg;
+            websocketFrameReceived(ctx, frame);
+        }
+
         Logger.trace("messageReceived: end");
     }
     private static final Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
@@ -868,7 +911,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     public static void setContentLength(HttpMessage message, long contentLength) {
         message.setHeader(HttpHeaders.Names.CONTENT_LENGTH, String.valueOf(contentLength));
     }
-    // Chunked response
+    // ~~~~~~~~~~~ Chunked response
     final ChunkedWriteHandler chunkedWriteHandler = new ChunkedWriteHandler();
 
     static class LazyChunkedInput implements org.jboss.netty.handler.stream.ChunkedInput {
@@ -927,6 +970,217 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             chunkedWriteHandler.resumeTransfer();
         } catch (Exception e) {
             throw new UnexpectedException(e);
+        }
+    }
+    // ~~~~~~~~~~~ Websocket
+    final static Map<ChannelHandlerContext, Http.Inbound> channels = new ConcurrentHashMap<ChannelHandlerContext, Http.Inbound>();
+
+    private void websocketFrameReceived(final ChannelHandlerContext ctx, WebSocketFrame webSocketFrame) {
+        Http.Inbound inbound = channels.get(ctx);
+        if (webSocketFrame.isBinary()) {
+            inbound._received(new Http.WebSocketFrame(webSocketFrame.getBinaryData().array()));
+        } else {
+            inbound._received(new Http.WebSocketFrame(webSocketFrame.getTextData()));
+        }
+    }
+
+    private void websocketHandshake(final ChannelHandlerContext ctx, HttpRequest req, MessageEvent e) throws Exception {
+
+        // Create the WebSocket handshake response.
+        HttpResponse res = new DefaultHttpResponse(HttpVersion.HTTP_1_1, new HttpResponseStatus(101, "Web Socket Protocol Handshake"));
+        res.addHeader(HttpHeaders.Names.UPGRADE, HttpHeaders.Values.WEBSOCKET);
+        res.addHeader(CONNECTION, HttpHeaders.Values.UPGRADE);
+
+        // Fill in the headers and contents depending on handshake method.
+        if (req.containsHeader(SEC_WEBSOCKET_KEY1) && req.containsHeader(SEC_WEBSOCKET_KEY2)) {
+            // New handshake method with a challenge:
+            res.addHeader(SEC_WEBSOCKET_ORIGIN, req.getHeader(ORIGIN));
+            res.addHeader(SEC_WEBSOCKET_LOCATION, "ws://" + req.getHeader(HttpHeaders.Names.HOST) + req.getUri());
+            String protocol = req.getHeader(SEC_WEBSOCKET_PROTOCOL);
+            if (protocol != null) {
+                res.addHeader(SEC_WEBSOCKET_PROTOCOL, protocol);
+            }
+
+            // Calculate the answer of the challenge.
+            String key1 = req.getHeader(SEC_WEBSOCKET_KEY1);
+            String key2 = req.getHeader(SEC_WEBSOCKET_KEY2);
+            int a = (int) (Long.parseLong(key1.replaceAll("[^0-9]", "")) / key1.replaceAll("[^ ]", "").length());
+            int b = (int) (Long.parseLong(key2.replaceAll("[^0-9]", "")) / key2.replaceAll("[^ ]", "").length());
+            long c = req.getContent().readLong();
+            ChannelBuffer input = ChannelBuffers.buffer(16);
+            input.writeInt(a);
+            input.writeInt(b);
+            input.writeLong(c);
+            try {
+                ChannelBuffer output = ChannelBuffers.wrappedBuffer(MessageDigest.getInstance("MD5").digest(input.array()));
+                res.setContent(output);
+            } catch (NoSuchAlgorithmException ex) {
+                throw new UnexpectedException(ex);
+            }
+        } else {
+            // Old handshake method with no challenge:
+            res.addHeader(WEBSOCKET_ORIGIN, req.getHeader(ORIGIN));
+            res.addHeader(WEBSOCKET_LOCATION, "ws://" + req.getHeader(HttpHeaders.Names.HOST) + req.getUri());
+            String protocol = req.getHeader(WEBSOCKET_PROTOCOL);
+            if (protocol != null) {
+                res.addHeader(WEBSOCKET_PROTOCOL, protocol);
+            }
+        }
+
+        // Keep the original request
+        Http.Request request = parseRequest(ctx, req);
+
+        // Route the websocket request
+        request.method = "WS";
+        Map<String, String> route = Router.route(request.method, request.path);
+        if (!route.containsKey("action")) {
+            // No route found to handle this websocket connection
+            ctx.getChannel().write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND));
+            return;
+        }
+
+        // Upgrade the connection and send the handshake response.
+        ChannelPipeline p = ctx.getChannel().getPipeline();
+        p.remove("aggregator");
+        p.replace("decoder", "wsdecoder", new WebSocketFrameDecoder());
+
+        // Connect
+        ctx.getChannel().write(res);
+
+        p.replace("encoder", "wsencoder", new WebSocketFrameEncoder());
+        req.setMethod(new HttpMethod("WEBSOCKET"));
+
+        // Inbound
+        Http.Inbound inbound = new Http.Inbound() {
+
+            @Override
+            public boolean isOpen() {
+                return ctx.getChannel().isOpen();
+            }
+        };
+        channels.put(ctx, inbound);
+
+        // Outbound
+        Http.Outbound outbound = new Http.Outbound() {
+
+            final List<ChannelFuture> writeFutures = Collections.synchronizedList(new ArrayList<ChannelFuture>());
+            Promise<Void> closeTask;
+
+            synchronized void writeAndClose(ChannelFuture writeFuture) {
+                if (!writeFuture.isDone()) {
+                    writeFutures.add(writeFuture);
+                    writeFuture.addListener(new ChannelFutureListener() {
+
+                        public void operationComplete(ChannelFuture cf) throws Exception {
+                            writeFutures.remove(cf);
+                            futureClose();
+                        }
+                    });
+                }
+            }
+
+            void futureClose() {
+                if (closeTask != null && writeFutures.isEmpty()) {
+                    closeTask.invoke(null);
+                }
+            }
+
+            @Override
+            public void send(String data) {
+                if (!isOpen()) {
+                    throw new IllegalStateException("The outbound channel is closed");
+                }
+                writeAndClose(ctx.getChannel().write(new DefaultWebSocketFrame(data)));
+            }
+
+            @Override
+            public void send(byte opcode, byte[] data, int offset, int length) {
+                if (!isOpen()) {
+                    throw new IllegalStateException("The outbound channel is closed");
+                }
+                writeAndClose(ctx.getChannel().write(new DefaultWebSocketFrame(opcode, wrappedBuffer(data, offset, length))));
+            }
+
+            @Override
+            public synchronized boolean isOpen() {
+                return ctx.getChannel().isOpen() && closeTask == null;
+            }
+
+            @Override
+            public synchronized void close() {
+                closeTask = new Promise<Void>();
+                closeTask.onRedeem(new Action<Promise<Void>>() {
+
+                    public void invoke(Promise<Void> completed) {
+                        writeFutures.clear();
+                        ctx.getChannel().disconnect();
+                        closeTask = null;
+                    }
+                });
+                futureClose();
+            }
+        };
+
+        Invoker.invoke(new WebSocketInvocation(route, request, inbound, outbound, ctx, e));
+    }
+
+    @Override
+    public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+        Http.Inbound inbound = channels.get(ctx);
+        if (inbound != null) {
+            inbound.close();
+        }
+        channels.remove(ctx);
+    }
+
+    public static class WebSocketInvocation extends Invoker.Invocation {
+
+        Map<String, String> route;
+        Http.Request request;
+        Http.Inbound inbound;
+        Http.Outbound outbound;
+        ChannelHandlerContext ctx;
+        MessageEvent e;
+
+        public WebSocketInvocation(Map<String, String> route, Http.Request request, Http.Inbound inbound, Http.Outbound outbound, ChannelHandlerContext ctx, MessageEvent e) {
+            this.route = route;
+            this.request = request;
+            this.inbound = inbound;
+            this.outbound = outbound;
+            this.ctx = ctx;
+            this.e = e;
+        }
+
+        @Override
+        public boolean init() {
+            Http.Request.current.set(request);
+            Http.Inbound.current.set(inbound);
+            Http.Outbound.current.set(outbound);
+            return super.init();
+        }
+
+        @Override
+        public InvocationContext getInvocationContext() {
+            WebSocketInvoker.resolve(request);
+            return new InvocationContext(request.invokedMethod.getAnnotations(), request.invokedMethod.getDeclaringClass().getAnnotations());
+        }
+
+        @Override
+        public void execute() throws Exception {
+            WebSocketInvoker.invoke(request, inbound, outbound);
+        }
+
+        @Override
+        public void onException(Throwable e) {
+            Logger.error(e, "Internal Server Error in WebSocket (closing the socket) for request %s", request.method + " " + request.url);
+            ctx.getChannel().close();
+            super.onException(e);
+        }
+
+        @Override
+        public void onSuccess() throws Exception {
+            outbound.close();
+            super.onSuccess();
         }
     }
 }

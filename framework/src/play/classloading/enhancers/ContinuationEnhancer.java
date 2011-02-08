@@ -17,6 +17,9 @@ public class ContinuationEnhancer extends Enhancer {
         continuationMethods.add("play.mvc.Controller.await(java.lang.String)");
         continuationMethods.add("play.mvc.Controller.await(int)");
         continuationMethods.add("play.mvc.Controller.await(java.util.concurrent.Future)");
+        continuationMethods.add("play.mvc.WebSocketController.await(java.lang.String)");
+        continuationMethods.add("play.mvc.WebSocketController.await(int)");
+        continuationMethods.add("play.mvc.WebSocketController.await(java.util.concurrent.Future)");
     }
 
     @Override

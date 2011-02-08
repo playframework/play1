@@ -1,0 +1,43 @@
+#{extends 'main.html' /}
+#{set title:'Basic Chat room' /}
+
+<h1>Ajax, using active refresh — You are now chatting as ${user} <a href="@{leave(user)}">Leave the chat room</a></h1> 
+
+<div id="thread">
+    #{list events}
+        <div class="message ${_.user == user ? 'you' : ''} ${_.user == 'notice' ? 'notice' : ''}">
+            <h2>${_.user}</h2>
+            <p>
+                ${_.text}
+            </p>
+        </div>
+    #{/list}
+</div>
+
+<div id="newMessage">
+    #{form @say(user)}
+        <input type="text" id="message" name="message" autocomplete="off">
+        <input type="submit" value="send" id="send">
+    #{/}
+</div>
+
+<script type="text/javascript" charset="utf-8">
+
+    // Scroll the messages panel to the end
+    var scrollDown = function() {
+        $('#thread').scrollTo('max')
+    }
+
+    // Reload the whole messages panel
+    var refresh = function() {
+        $('#thread').load('@{room(user)} #thread .message', function() {
+            scrollDown()
+        })
+    }
+    
+    // Call refresh every 5 seconds
+    setInterval(refresh, 5000)
+    
+    scrollDown()
+    
+</script>

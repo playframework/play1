@@ -40,7 +40,6 @@ import java.util.concurrent.Future;
 import org.apache.commons.javaflow.Continuation;
 import org.apache.commons.javaflow.bytecode.StackRecorder;
 import play.Invoker.Suspend;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer;
 import play.mvc.results.NotFound;
 
 /**
@@ -360,7 +359,7 @@ public class ActionInvoker {
         }
     }
 
-    private static void handleFinallies(Http.Request request) throws Exception {
+    static void handleFinallies(Http.Request request) throws Exception {
         List<Method> allFinally = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Finally.class);
         Collections.sort(allFinally, new Comparator<Method>() {
 

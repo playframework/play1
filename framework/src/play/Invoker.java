@@ -20,7 +20,7 @@ import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNam
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.F;
-import play.libs.Task;
+import play.libs.F.Promise;
 import play.utils.PThreadFactory;
 
 /**
@@ -348,9 +348,9 @@ public class Invoker {
         }
 
         public static <V> void waitFor(Future<V> task, final Invocation invocation) {
-            if (task instanceof Task) {
-                Task smartFuture = (Task)task;
-                smartFuture.onCompletion(new F.Action() {
+            if (task instanceof Promise) {
+                Promise smartFuture = (Promise)task;
+                smartFuture.onRedeem(new F.Action() {
                     public void invoke(Object result) {
                         executor.submit(invocation);
                     }

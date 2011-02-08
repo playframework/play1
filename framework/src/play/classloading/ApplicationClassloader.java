@@ -311,10 +311,8 @@ public class ApplicationClassloader extends ClassLoader {
             if (HotswapAgent.enabled) {
                 try {
                     HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
-                } catch (ClassNotFoundException e) {
-                    throw new UnexpectedException(e);
-                } catch (UnmodifiableClassException e) {
-                    throw new UnexpectedException(e);
+                } catch (Throwable e) {
+                    throw new RuntimeException("Need reload");
                 }
             } else {
                 throw new RuntimeException("Need reload");
@@ -460,7 +458,7 @@ public class ApplicationClassloader extends ClassLoader {
     public Class getClassIgnoreCase(String name) {
         getAllClasses();
         for (ApplicationClass c : Play.classes.all()) {
-            if (c.name.equalsIgnoreCase(name)) {
+            if (c.name.equalsIgnoreCase(name) || c.name.replace("$", ".").equalsIgnoreCase(name)) {
                 if (Play.usePrecompiled) {
                     return c.javaClass;
                 }

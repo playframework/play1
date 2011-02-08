@@ -2,11 +2,25 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
+# Login
 GET     /                                       Application.index
-GET     /room                                   Application.room
-POST    /room/messages                          Application.say
-GET     /room/messages                          Application.waitMessages
+GET     /demo                                   Application.enterDemo
+
+# Refresh demo
+GET     /refresh                                Refresh.index
+GET     /refresh/room                           Refresh.room
+POST    /refresh/room                           Refresh.say
+GET     /refresh/room/leave                     Refresh.leave          
+
+# Long polling demo
+GET     /longpolling/room                       LongPolling.room
+GET     /longpolling/room/messages              LongPolling.waitMessages
+POST    /longpolling/room/messages              LongPolling.say  
+GET     /longpolling/room/leave                 LongPolling.leave    
+
+# WebSocket demo
+GET     /websocket/room                         WebSocket.room
+WS      /websocket/room/socket                  WebSocket.ChatRoomSocket.join    
 
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public

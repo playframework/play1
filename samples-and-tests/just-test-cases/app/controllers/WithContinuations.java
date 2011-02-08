@@ -4,6 +4,7 @@ import play.*;
 import play.mvc.*;
 import play.db.jpa.*;
 import play.libs.*;
+import play.libs.F.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.*;
@@ -17,8 +18,8 @@ public class WithContinuations extends Controller {
         for(int i=0; i<5; i++) {
             if(i>0) sb.append(";");
             long s = System.currentTimeMillis();
-            await("1s");
-            boolean delay = System.currentTimeMillis() - s > 1000 && System.currentTimeMillis() - s < 1500;
+            await(100);
+            boolean delay = System.currentTimeMillis() - s > 100 && System.currentTimeMillis() - s < 200;
             sb.append(i + ":" + delay);
         }
         renderText(sb);
@@ -29,8 +30,8 @@ public class WithContinuations extends Controller {
         for(int i=0; i<5; i++) {
             if(i>0) sb.append(";");
             long s = System.currentTimeMillis();
-            String r = await(new jobs.DoSomething(1000).now());
-            boolean delay = System.currentTimeMillis() - s > 1000 && System.currentTimeMillis() - s < 1500;
+            String r = await(new jobs.DoSomething(100).now());
+            boolean delay = System.currentTimeMillis() - s > 100 && System.currentTimeMillis() - s < 200;
             sb.append(i + ":" + delay + "[" + r + "]");
         }
         renderText(sb);
@@ -41,8 +42,8 @@ public class WithContinuations extends Controller {
         for(int i=0; i<2; i++) {
             if(i>0) sb.append(";");
             long s = System.currentTimeMillis();
-            List<String> r = await(Task.waitAll(new jobs.DoSomething(1000).now(), new jobs.DoSomething(2000).now()));
-            boolean delay = System.currentTimeMillis() - s > 2000 && System.currentTimeMillis() - s < 2500;
+            List<String> r = await(Promise.waitAll(new jobs.DoSomething(100).now(), new jobs.DoSomething(200).now()));
+            boolean delay = System.currentTimeMillis() - s > 200 && System.currentTimeMillis() - s < 400;
             sb.append(i + ":" + delay + "[" + r + "]");
         }
         renderText(sb);
@@ -53,8 +54,8 @@ public class WithContinuations extends Controller {
         for(int i=0; i<2; i++) {
             if(i>0) sb.append(";");
             long s = System.currentTimeMillis();
-            String r = await(Task.waitAny(new jobs.DoSomething(1000).now(), new jobs.DoSomething(2000).now()));
-            boolean delay = System.currentTimeMillis() - s > 1000 && System.currentTimeMillis() - s < 2000;
+            String r = await(Promise.waitAny(new jobs.DoSomething(100).now(), new jobs.DoSomething(200).now()));
+            boolean delay = System.currentTimeMillis() - s > 100 && System.currentTimeMillis() - s < 200;
             sb.append(i + ":" + delay + "[" + r + "]");
         }
         renderText(sb);
@@ -62,7 +63,7 @@ public class WithContinuations extends Controller {
     
     public static void withNaiveJPA() {
         User bob = new User("bob").save();
-        await("1s");
+        await(100);
         // We are now in a new transaction! So it should fail
         bob.name = "coco";
         bob.save();
@@ -75,7 +76,7 @@ public class WithContinuations extends Controller {
     
     public static void withJPA() {
         User bob = new User("kiki").save();
-        await("1s");
+        await(100);
         // We are now in a new transaction! So we need to merge previous JPA instances
         bob = bob.merge();
         bob.name = "coco";
@@ -95,7 +96,7 @@ public class WithContinuations extends Controller {
     public static void rollbackWithContinuations() {
         for(int i=0; i<10; i++) {
             new User("user" + i).save();
-            await(100);
+            await(10);
         }
         // Too late! Each continuation uses its own transaction... we can't rollback them anymore
         JPA.setRollbackOnly();
@@ -107,21 +108,21 @@ public class WithContinuations extends Controller {
             new User("oops" + i).save();
             // Rollback before triggering the continuation, so we'll properly rollback the current transaction
             JPA.setRollbackOnly();
-            await(100);
+            await(10);
         }
         renderText("OK");
     }
     
     public static void streamedResult() {
         response.contentType = "text/html";
-        response.writeChunk("<h1>This page should load progressively in about 10 seconds</h1>");
+        response.writeChunk("<h1>This page should load progressively in about 3 second</h1>");
         long s = System.currentTimeMillis();
         for(int i=0; i<100; i++) {
-            await(100);
+            await(10);
             response.writeChunk("<h2>Hello " + i + "</h2>");
         }
         long t = System.currentTimeMillis() - s;
-        response.writeChunk("Time: " + t + ", isOk->" + (t > 10000 && t < 20000));
+        response.writeChunk("Time: " + t + ", isOk->" + (t > 1000 && t < 10000));
     }
     
     public static void loopWithCallback() {
@@ -134,14 +135,14 @@ public class WithContinuations extends Controller {
                 if(i.get() > 5) {
                     renderText(sb);
                 } else {
-                    boolean delay = System.currentTimeMillis() - s.get() > 1000 && System.currentTimeMillis() - s.get() < 1500;
+                    boolean delay = System.currentTimeMillis() - s.get() > 100 && System.currentTimeMillis() - s.get() < 150;
                     sb.append(i + ":" + delay);
                     s.set(System.currentTimeMillis());
-                    await("1s", this);
+                    await(100, this);
                 }
             }
         };
-        await("1s", f);
+        await(100, f);
     }
     
     public static void streamedCallback() {
@@ -154,15 +155,15 @@ public class WithContinuations extends Controller {
                 System.out.println(sb);
                 if(sb.length() < 100) {
                     response.writeChunk("<h1>Hello " + sb.length() + "</h1>");
-                    await(100, this);
+                    await(10, this);
                 } else {
                     long t = System.currentTimeMillis() - s.get();
-                    response.writeChunk("Time: " + t + ", isOk->" + (t > 10000 && t < 20000));
+                    response.writeChunk("Time: " + t + ", isOk->" + (t > 1000 && t < 10000));
                 }                
             }
         };
         response.writeChunk("<h1>Begin</h1>");
-        await(100, callback);
+        await(10, callback);
     }
     
     public static void jpaAndCallback() {
@@ -178,7 +179,7 @@ public class WithContinuations extends Controller {
     }
     
     public static void callbackWithResult() {
-        await(Task.waitAny(new jobs.DoSomething(1000).now(), new jobs.DoSomething(2000).now()), new F.Action<String>() {
+        await(Promise.waitAny(new jobs.DoSomething(100).now(), new jobs.DoSomething(200).now()), new F.Action<String>() {
             public void invoke(String result) {
                 renderText("yep -> %s", result);
             }
@@ -186,7 +187,7 @@ public class WithContinuations extends Controller {
     }
     
     public static void callbackWithResults() {
-        await(Task.waitAll(new jobs.DoSomething(1000).now(), new jobs.DoSomething(2000).now()), new F.Action<List<String>>() {
+        await(Promise.waitAll(new jobs.DoSomething(100).now(), new jobs.DoSomething(200).now()), new F.Action<List<String>>() {
             public void invoke(List<String> result) {
                 renderText("yep -> %s", result);
             }
