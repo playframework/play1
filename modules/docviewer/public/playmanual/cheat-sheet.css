@@ -23,6 +23,10 @@ div.cs {
     min-height: 6.5em;
 }
 
+div.cs:hover {
+	background-color:white;
+}
+
 .wikistyle .cs h2 {
 	position: relative;
 	top: -5px;
