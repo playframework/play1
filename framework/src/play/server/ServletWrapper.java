@@ -460,6 +460,8 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             this.httpServletResponse = httpServletResponse;
             this.request = request;
             this.response = response;
+            request.args.put("__SERVLET_REQ", httpServletRequest);
+            request.args.put("__SERVLET_RES", httpServletResponse);
         }
 
         @Override
