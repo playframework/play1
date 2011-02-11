@@ -187,7 +187,7 @@ public class Promises extends UnitTest {
         
         for(int i=0; i<10; i++) {
             
-            F.Either<List<Event<String>>,String> eventReceived = Promise.waitEither(stream.nextEvents(lastSeen), new DoSomething2(100).now()).get();
+            F.Either<List<UniqueEvent<String>>,String> eventReceived = Promise.waitEither(stream.nextEvents(lastSeen), new DoSomething2(100).now()).get();
             System.out.println(i + " -> " + eventReceived);
             
             switch(i) {
