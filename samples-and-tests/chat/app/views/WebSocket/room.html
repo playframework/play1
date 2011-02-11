@@ -5,12 +5,38 @@
 
 <div id="thread">
     <script type="text/html" id="message_tmpl">
-        <div class="message <%= message.user == '${user}' ? 'you' : '' %> <%= message.user == 'notice' ? 'notice' : '' %>">
-            <h2><%= message.user %></h2>
-            <p>
-                <%= message.text.replace('\n', '<br/>') %>&nbsp;
-            </p>
-        </div>
+        <% if(event.type == 'message') { %>
+            <div class="message <%= event.user == '${user}' ? 'you' : '' %>">
+                <h2><%= event.user %></h2>
+                <p>
+                    <%= event.text %>
+                </p>
+            </div>
+        <% } %>
+        <% if(event.type == 'join') { %>
+            <div class="message notice">
+                <h2></h2>
+                <p>
+                    <%= event.user %> joined the room
+                </p>
+            </div>
+        <% } %>
+        <% if(event.type == 'leave') { %>
+            <div class="message notice">
+                <h2></h2>
+                <p>
+                    <%= event.user %> left the room
+                </p>
+            </div>
+        <% } %>
+        <% if(event.type == 'quit') { %>
+            <div class="message important">
+                <h2></h2>
+                <p>
+                    You are now disconnected!
+                </p>
+            </div>
+        <% } %>
     </script>
 </div>
 
@@ -25,17 +51,18 @@
     var socket = new WebSocket('@@{WebSocket.ChatRoomSocket.join(user)}')
     
     // Display a message
-    var display = function(message) {
-        $('#thread').append(tmpl('message_tmpl', {message: message}));
+    var display = function(event) {
+        $('#thread').append(tmpl('message_tmpl', {event: event}));
         $('#thread').scrollTo('max')
     }
     
     // Message received on the socket
     socket.onmessage = function(event) {
-        var parts = /^([^:]+):(.*)$/.exec(event.data)
+        var parts = /^([^:]+):([^:]+)(:(.*))?$/.exec(event.data)
         display({
-            user: parts[1],
-            text: parts[2]
+            type: parts[1],
+            user: parts[2],
+            text: parts[4]
         })
     }
     

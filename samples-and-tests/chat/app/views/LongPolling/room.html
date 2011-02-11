@@ -5,12 +5,30 @@
 
 <div id="thread">
     <script type="text/html" id="message_tmpl">
-        <div class="message <%= message.user == '${user}' ? 'you' : '' %> <%= message.user == 'notice' ? 'notice' : '' %>">
-            <h2><%= message.user %></h2>
-            <p>
-                <%= message.text.replace('\n', '<br/>') %>&nbsp;
-            </p>
-        </div>
+        <% if(event.type == 'message') { %>
+            <div class="message <%= event.user == '${user}' ? 'you' : '' %>">
+                <h2><%= event.user %></h2>
+                <p>
+                    <%= event.text %>
+                </p>
+            </div>
+        <% } %>
+        <% if(event.type == 'join') { %>
+            <div class="message notice">
+                <h2></h2>
+                <p>
+                    <%= event.user %> joined the room
+                </p>
+            </div>
+        <% } %>
+        <% if(event.type == 'leave') { %>
+            <div class="message notice">
+                <h2></h2>
+                <p>
+                    <%= event.user %> left the room
+                </p>
+            </div>
+        <% } %>
     </script>
 </div>
 
@@ -55,8 +73,8 @@
     getMessages();
     
     // Display a message
-    var display = function(message) {
-        $('#thread').append(tmpl('message_tmpl', {message: message}));
+    var display = function(event) {
+        $('#thread').append(tmpl('message_tmpl', {event: event}));
         $('#thread').scrollTo('max')
     }
     

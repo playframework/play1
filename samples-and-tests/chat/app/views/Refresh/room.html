@@ -5,12 +5,30 @@
 
 <div id="thread">
     #{list events}
-        <div class="message ${_.user == user ? 'you' : ''} ${_.user == 'notice' ? 'notice' : ''}">
-            <h2>${_.user}</h2>
-            <p>
-                ${_.text}
-            </p>
-        </div>
+        #{if _.type == 'message'}
+            <div class="message ${_.user == user ? 'you' : ''}">
+                <h2>${_.user}</h2>
+                <p>
+                    ${_.text}
+                </p>
+            </div>
+        #{/if}
+        #{if _.type == 'join'}
+            <div class="message notice">
+                <h2></h2>
+                <p>
+                    ${_.user} joined the room
+                </p>
+            </div>
+        #{/if}
+        #{if _.type == 'leave'}
+            <div class="message notice">
+                <h2></h2>
+                <p>
+                    ${_.user} left the room
+                </p>
+            </div>
+        #{/if}
     #{/list}
 </div>
 

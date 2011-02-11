@@ -114,6 +114,11 @@ h1 a {
     background: #D9E7FB;
 }
 
+.message.important * {
+    background: #c00;
+    color: #fff;
+}
+
 .message.notice h2 {
     visibility: hidden;
 }

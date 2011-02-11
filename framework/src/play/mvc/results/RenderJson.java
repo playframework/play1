@@ -28,7 +28,6 @@ public class RenderJson extends Result {
         GsonBuilder gson = new GsonBuilder();
         for (Object adapter : adapters) {
             Type t = getMethod(adapter.getClass(), "serialize").getParameterTypes()[0];
-            ;
             gson.registerTypeAdapter(t, adapter);
         }
         json = gson.create().toJson(o);

@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -47,7 +49,6 @@ public class F {
             taskLock.await(timeout, unit);
             return result;
         }
-        // Callbacks
         List<F.Action<Promise<V>>> callbacks = new ArrayList<F.Action<Promise<V>>>();
         boolean invoked = false;
         V result = null;
@@ -78,15 +79,14 @@ public class F {
             }
         }
 
-        //
-        public static <T> Promise<List<T>> waitAll(final Promise<T>... futures) {
-            final CountDownLatch waitAllLock = new CountDownLatch(futures.length);
+        public static <T> Promise<List<T>> waitAll(final Promise<T>... promises) {
+            final CountDownLatch waitAllLock = new CountDownLatch(promises.length);
             final Promise<List<T>> result = new Promise<List<T>>() {
 
                 @Override
                 public boolean cancel(boolean mayInterruptIfRunning) {
                     boolean r = true;
-                    for (Promise<T> f : futures) {
+                    for (Promise<T> f : promises) {
                         r = r & f.cancel(mayInterruptIfRunning);
                     }
                     return r;
@@ -95,7 +95,7 @@ public class F {
                 @Override
                 public boolean isCancelled() {
                     boolean r = true;
-                    for (Promise<T> f : futures) {
+                    for (Promise<T> f : promises) {
                         r = r & f.isCancelled();
                     }
                     return r;
@@ -104,7 +104,7 @@ public class F {
                 @Override
                 public boolean isDone() {
                     boolean r = true;
-                    for (Promise<T> f : futures) {
+                    for (Promise<T> f : promises) {
                         r = r & f.isDone();
                     }
                     return r;
@@ -114,7 +114,7 @@ public class F {
                 public List<T> get() throws InterruptedException, ExecutionException {
                     waitAllLock.await();
                     List<T> r = new ArrayList<T>();
-                    for (Promise<T> f : futures) {
+                    for (Promise<T> f : promises) {
                         r.add(f.get());
                     }
                     return r;
@@ -138,13 +138,8 @@ public class F {
                         }
                     }
                 }
-
-                @Override
-                public String toString() {
-                    return "waitAll.callback(countdown: " + waitAllLock.getCount() + ")";
-                }
             };
-            for (Promise<T> f : futures) {
+            for (Promise<T> f : promises) {
                 f.onRedeem(action);
             }
             return result;
@@ -262,6 +257,52 @@ public class F {
         }
     }
 
+    public static class Timeout extends Promise<Timeout> {
+
+        static Timer timer = new Timer("F.Timeout", true);
+        final public String token;
+
+        public Timeout(String delay) {
+            this(Time.parseDuration(delay) * 1000);
+        }
+
+        public Timeout(String token, String delay) {
+            this(token, Time.parseDuration(delay) * 1000);
+        }
+
+        public Timeout(long delay) {
+            this("timeout", delay);
+        }
+
+        public Timeout(String token, long delay) {
+            this.token = token;
+            final Timeout timeout = this;
+            timer.schedule(new TimerTask() {
+
+                @Override
+                public void run() {
+                    timeout.invoke(timeout);
+                }
+            }, delay);
+        }
+    }
+
+    public static Timeout Timeout(String delay) {
+        return new Timeout(delay);
+    }
+
+    public static Timeout Timeout(String token, String delay) {
+        return new Timeout(token, delay);
+    }
+
+    public static Timeout Timeout(long delay) {
+        return new Timeout(delay);
+    }
+
+    public static Timeout Timeout(String token, long delay) {
+        return new Timeout(token, delay);
+    }
+
     public static class EventStream<T> {
 
         final int bufferSize;
@@ -331,13 +372,13 @@ public class F {
         }
     }
 
-    public static class Event<M> {
+    public static class UniqueEvent<M> {
 
         private static final AtomicLong idGenerator = new AtomicLong(1);
         final public M data;
         final public Long id;
 
-        public Event(M data) {
+        public UniqueEvent(M data) {
             this.data = data;
             this.id = idGenerator.getAndIncrement();
         }
@@ -355,7 +396,7 @@ public class F {
     public static class ArchivedEventStream<T> {
 
         final int archiveSize;
-        final ConcurrentLinkedQueue<Event<T>> events = new ConcurrentLinkedQueue<Event<T>>();
+        final ConcurrentLinkedQueue<UniqueEvent<T>> events = new ConcurrentLinkedQueue<UniqueEvent<T>>();
         final List<FilterTask<T>> waiting = Collections.synchronizedList(new ArrayList<FilterTask<T>>());
         final List<EventStream<T>> pipedStreams = new ArrayList<EventStream<T>>();
 
@@ -365,23 +406,23 @@ public class F {
 
         public synchronized EventStream<T> eventStream() {
             final EventStream<T> stream = new EventStream<T>(archiveSize);
-            for (Event<T> event : events) {
+            for (UniqueEvent<T> event : events) {
                 stream.publish(event.data);
             }
             pipedStreams.add(stream);
             return stream;
         }
 
-        public synchronized Promise<List<Event<T>>> nextEvents(long lastEventSeen) {
+        public synchronized Promise<List<UniqueEvent<T>>> nextEvents(long lastEventSeen) {
             FilterTask<T> filter = new FilterTask<T>(lastEventSeen);
             waiting.add(filter);
             notifyNewEvent();
             return filter;
         }
 
-        public synchronized List<Event> availableEvents(long lastEventSeen) {
-            List<Event> result = new ArrayList<Event>();
-            for (Event event : events) {
+        public synchronized List<UniqueEvent> availableEvents(long lastEventSeen) {
+            List<UniqueEvent> result = new ArrayList<UniqueEvent>();
+            for (UniqueEvent event : events) {
                 if (event.id > lastEventSeen) {
                     result.add(event);
                 }
@@ -391,7 +432,7 @@ public class F {
 
         public List<T> archive() {
             List<T> result = new ArrayList<T>();
-            for (Event<T> event : events) {
+            for (UniqueEvent<T> event : events) {
                 result.add(event.data);
             }
             return result;
@@ -401,7 +442,7 @@ public class F {
             if (events.size() >= archiveSize) {
                 events.poll();
             }
-            events.offer(new Event(event));
+            events.offer(new UniqueEvent(event));
             notifyNewEvent();
             for (EventStream<T> eventStream : pipedStreams) {
                 eventStream.publish(event);
@@ -411,7 +452,7 @@ public class F {
         void notifyNewEvent() {
             for (ListIterator<FilterTask<T>> it = waiting.listIterator(); it.hasNext();) {
                 FilterTask<T> filter = it.next();
-                for (Event<T> event : events) {
+                for (UniqueEvent<T> event : events) {
                     filter.propose(event);
                 }
                 if (filter.trigger()) {
@@ -421,16 +462,16 @@ public class F {
             }
         }
 
-        static class FilterTask<K> extends Promise<List<Event<K>>> {
+        static class FilterTask<K> extends Promise<List<UniqueEvent<K>>> {
 
             final Long lastEventSeen;
-            final List<Event<K>> newEvents = new ArrayList<Event<K>>();
+            final List<UniqueEvent<K>> newEvents = new ArrayList<UniqueEvent<K>>();
 
             public FilterTask(Long lastEventSeen) {
                 this.lastEventSeen = lastEventSeen;
             }
 
-            public void propose(Event<K> event) {
+            public void propose(UniqueEvent<K> event) {
                 if (event.id > lastEventSeen) {
                     newEvents.add(event);
                 }
@@ -588,7 +629,7 @@ public class F {
 
         @Override
         public String toString() {
-            return "T2(_1: " + _1 + ", _2: " + _2 + ")";
+            return "Tuple(_1: " + _1 + ", _2: " + _2 + ")";
         }
     }
 
@@ -619,6 +660,85 @@ public class F {
                 return match(o.get());
             }
             return Option.None();
+        }
+
+        public <NR> Matcher<T, NR> and(final Matcher<R, NR> nextMatcher) {
+            final Matcher<T, R> firstMatcher = this;
+            return new Matcher<T, NR>() {
+
+                @Override
+                public Option<NR> match(T o) {
+                    for (R r : firstMatcher.match(o)) {
+                        return nextMatcher.match(r);
+                    }
+                    return Option.None();
+                }
+            };
+        }
+        public static Matcher<Object, String> String = new Matcher<Object, String>() {
+
+            @Override
+            public Option<String> match(Object o) {
+                if (o instanceof String) {
+                    return Option.Some((String) o);
+                }
+                return Option.None();
+            }
+        };
+
+        public static <K> Matcher<Object, K> ClassOf(final Class<K> clazz) {
+            return new Matcher<Object, K>() {
+
+                @Override
+                public Option<K> match(Object o) {
+                    if (o instanceof Option && ((Option) o).isDefined()) {
+                        o = ((Option) o).get();
+                    }
+                    if (clazz.isInstance(o)) {
+                        return Option.Some((K) o);
+                    }
+                    return Option.None();
+                }
+            };
+        }
+
+        public static Matcher<String, String> StartsWith(final String prefix) {
+            return new Matcher<String, String>() {
+
+                @Override
+                public Option<String> match(String o) {
+                    if (o.startsWith(prefix)) {
+                        return Option.Some(o);
+                    }
+                    return Option.None();
+                }
+            };
+        }
+
+        public static Matcher<String, String> Re(final String pattern) {
+            return new Matcher<String, String>() {
+
+                @Override
+                public Option<String> match(String o) {
+                    if (o.matches(pattern)) {
+                        return Option.Some(o);
+                    }
+                    return Option.None();
+                }
+            };
+        }
+
+        public static <X> Matcher<X, X> Equals(final X other) {
+            return new Matcher<X, X>() {
+
+                @Override
+                public Option<X> match(X o) {
+                    if (o.equals(other)) {
+                        return Option.Some(o);
+                    }
+                    return Option.None();
+                }
+            };
         }
     }
 }

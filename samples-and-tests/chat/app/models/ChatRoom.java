@@ -7,35 +7,102 @@ import play.libs.F.*;
 
 public class ChatRoom {
     
-    // Let's chat! 
+    // ~~~~~~~~~ Let's chat! 
     
-    final ArchivedEventStream<Message> messages = new ArchivedEventStream<Message>(100);
+    final ArchivedEventStream<Event> chatEvents = new ArchivedEventStream<Event>(100);
     
-    public EventStream<Message> join(String user) {
-        messages.publish(Message.on("notice", "%s has joined the room", user));
-        return messages.eventStream();
+    /**
+     * For WebSocket, when a user join the room we return a continuous event stream
+     * of ChatEvent
+     */
+    public EventStream<Event> join(String user) {
+        chatEvents.publish(new Join(user));
+        return chatEvents.eventStream();
     }
     
+    /**
+     * A user leave the room
+     */
     public void leave(String user) {
-        messages.publish(Message.on("notice", "%s has left the room", user));
+        chatEvents.publish(new Leave(user));
     }
     
-    public void say(String user, String message) {
-        if(message == null || message.trim().equals("")) {
+    /**
+     * A user say something on the room
+     */
+    public void say(String user, String text) {
+        if(text == null || text.trim().equals("")) {
             return;
         }
-        messages.publish(Message.on(user, message));
+        chatEvents.publish(new Message(user, text));
     }
     
-    public Promise<List<Event<Message>>> nextMessages(long lastReceived) {
-        return messages.nextEvents(lastReceived);
+    /**
+     * For long polling, as we are sometimes disconnected, we need to pass 
+     * the last event seen id, to be sure to not miss any message
+     */
+    public Promise<List<UniqueEvent<Event>>> nextMessages(long lastReceived) {
+        return chatEvents.nextEvents(lastReceived);
     }
     
-    public List<Message> archive() {
-        return messages.archive();
+    /**
+     * For active refresh, we need to retrieve the whole message archive at
+     * each refresh
+     */
+    public List<Event> archive() {
+        return chatEvents.archive();
     }
     
-    // Factory
+    // ~~~~~~~~~ Chat room events
+
+    public static abstract class Event {
+        
+        final public String type;
+        final public Long timestamp;
+        
+        public Event(String type) {
+            this.type = type;
+            this.timestamp = System.currentTimeMillis();
+        }
+        
+    }
+    
+    public static class Join extends Event {
+        
+        final public String user;
+        
+        public Join(String user) {
+            super("join");
+            this.user = user;
+        }
+        
+    }
+    
+    public static class Leave extends Event {
+        
+        final public String user;
+        
+        public Leave(String user) {
+            super("leave");
+            this.user = user;
+        }
+        
+    }
+    
+    public static class Message extends Event {
+        
+        final public String user;
+        final public String text;
+        
+        public Message(String user, String text) {
+            super("message");
+            this.user = user;
+            this.text = text;
+        }
+        
+    }
+    
+    // ~~~~~~~~~ Chat room factory
 
     static ChatRoom instance = null;
     public static ChatRoom get() {

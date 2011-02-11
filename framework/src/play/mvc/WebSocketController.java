@@ -5,7 +5,6 @@ import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSupport;
 import play.data.validation.Validation;
 import play.libs.F;
-import play.mvc.results.WebSocketContinue;
 import play.mvc.results.WebSocketDisconnect;
 
 public class WebSocketController implements ControllerSupport, LocalVariablesSupport {
@@ -45,7 +44,4 @@ public class WebSocketController implements ControllerSupport, LocalVariablesSup
         throw new WebSocketDisconnect();
     }
 
-    protected static void done() {
-        throw new WebSocketContinue();
-    }
 }

@@ -1,5 +1,6 @@
 package play.mvc;
 
+import com.google.gson.Gson;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -665,7 +666,6 @@ public class Http {
         }
 
         public abstract boolean isOpen();
-
     }
 
     /**
@@ -694,6 +694,10 @@ public class Http {
         public void send(String pattern, Object... args) {
             send(String.format(pattern, args));
         }
+
+        public void sendJson(Object o) {
+            send(new Gson().toJson(o));
+        }
     }
 
     public static class WebSocketEvent {
@@ -708,27 +712,32 @@ public class Http {
                 return F.Option.None();
             }
         };
-
-        static class TextMatcher extends F.Matcher<WebSocketEvent, String> {
+        public static F.Matcher<WebSocketEvent, String> TextFrame = new F.Matcher<WebSocketEvent, String>() {
 
             @Override
             public Option<String> match(WebSocketEvent o) {
                 if (o instanceof WebSocketFrame) {
                     WebSocketFrame frame = (WebSocketFrame) o;
-                    if (!frame.isBinary && match(frame.textData)) {
+                    if (!frame.isBinary) {
                         return F.Option.Some(frame.textData);
                     }
                 }
                 return F.Option.None();
             }
+        };
+        public static F.Matcher<WebSocketEvent, byte[]> BinaryFrame = new F.Matcher<WebSocketEvent, byte[]>() {
 
-            public boolean match(String text) {
-                return true;
+            @Override
+            public Option<byte[]> match(WebSocketEvent o) {
+                if (o instanceof WebSocketFrame) {
+                    WebSocketFrame frame = (WebSocketFrame) o;
+                    if (frame.isBinary) {
+                        return F.Option.Some(frame.binaryData);
+                    }
+                }
+                return F.Option.None();
             }
-        }
-        
-        public static F.Matcher<WebSocketEvent, String> TextFrame = new TextMatcher();
-
+        };
     }
 
     /**
