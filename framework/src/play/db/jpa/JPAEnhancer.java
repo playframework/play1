@@ -40,10 +40,6 @@ public class JPAEnhancer extends Enhancer {
         CtMethod findById = CtMethod.make("public static play.db.jpa.JPABase findById(Object id) { return play.db.jpa.JPQL.instance.findById(\"" + entityName + "\", id); }", ctClass);
         ctClass.addMethod(findById);
 
-        // findBy
-        CtMethod findBy = CtMethod.make("public static java.util.List findBy(String query, Object[] params) { return play.db.jpa.JPQL.instance.findBy(\"" + entityName + "\", query, params); }", ctClass);
-        ctClass.addMethod(findBy);
-
         // find
         CtMethod find = CtMethod.make("public static play.db.jpa.GenericModel.JPAQuery find(String query, Object[] params) { return play.db.jpa.JPQL.instance.find(\"" + entityName + "\", query, params); }", ctClass);
         ctClass.addMethod(find);
