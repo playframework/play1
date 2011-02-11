@@ -9,13 +9,13 @@ public class ChatRoom {
     
     // ~~~~~~~~~ Let's chat! 
     
-    final ArchivedEventStream<Event> chatEvents = new ArchivedEventStream<Event>(100);
+    final ArchivedEventStream<ChatRoom.Event> chatEvents = new ArchivedEventStream<ChatRoom.Event>(100);
     
     /**
      * For WebSocket, when a user join the room we return a continuous event stream
      * of ChatEvent
      */
-    public EventStream<Event> join(String user) {
+    public EventStream<ChatRoom.Event> join(String user) {
         chatEvents.publish(new Join(user));
         return chatEvents.eventStream();
     }
@@ -41,7 +41,7 @@ public class ChatRoom {
      * For long polling, as we are sometimes disconnected, we need to pass 
      * the last event seen id, to be sure to not miss any message
      */
-    public Promise<List<UniqueEvent<Event>>> nextMessages(long lastReceived) {
+    public Promise<List<IndexedEvent<ChatRoom.Event>>> nextMessages(long lastReceived) {
         return chatEvents.nextEvents(lastReceived);
     }
     
@@ -49,7 +49,7 @@ public class ChatRoom {
      * For active refresh, we need to retrieve the whole message archive at
      * each refresh
      */
-    public List<Event> archive() {
+    public List<ChatRoom.Event> archive() {
         return chatEvents.archive();
     }
     

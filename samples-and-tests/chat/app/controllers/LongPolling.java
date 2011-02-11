@@ -24,7 +24,7 @@ public class LongPolling extends Controller {
         // Here we use continuation to suspend 
         // the execution until a new message has been received
         List messages = await(ChatRoom.get().nextMessages(lastReceived));
-        renderJSON(messages, new TypeToken<List<UniqueEvent<ChatRoom.Event>>>() {}.getType());
+        renderJSON(messages, new TypeToken<List<IndexedEvent<ChatRoom.Event>>>() {}.getType());
     }
     
     public static void leave(String user) {

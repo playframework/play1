@@ -372,13 +372,13 @@ public class F {
         }
     }
 
-    public static class UniqueEvent<M> {
+    public static class IndexedEvent<M> {
 
         private static final AtomicLong idGenerator = new AtomicLong(1);
         final public M data;
         final public Long id;
 
-        public UniqueEvent(M data) {
+        public IndexedEvent(M data) {
             this.data = data;
             this.id = idGenerator.getAndIncrement();
         }
@@ -396,7 +396,7 @@ public class F {
     public static class ArchivedEventStream<T> {
 
         final int archiveSize;
-        final ConcurrentLinkedQueue<UniqueEvent<T>> events = new ConcurrentLinkedQueue<UniqueEvent<T>>();
+        final ConcurrentLinkedQueue<IndexedEvent<T>> events = new ConcurrentLinkedQueue<IndexedEvent<T>>();
         final List<FilterTask<T>> waiting = Collections.synchronizedList(new ArrayList<FilterTask<T>>());
         final List<EventStream<T>> pipedStreams = new ArrayList<EventStream<T>>();
 
@@ -406,23 +406,23 @@ public class F {
 
         public synchronized EventStream<T> eventStream() {
             final EventStream<T> stream = new EventStream<T>(archiveSize);
-            for (UniqueEvent<T> event : events) {
+            for (IndexedEvent<T> event : events) {
                 stream.publish(event.data);
             }
             pipedStreams.add(stream);
             return stream;
         }
 
-        public synchronized Promise<List<UniqueEvent<T>>> nextEvents(long lastEventSeen) {
+        public synchronized Promise<List<IndexedEvent<T>>> nextEvents(long lastEventSeen) {
             FilterTask<T> filter = new FilterTask<T>(lastEventSeen);
             waiting.add(filter);
             notifyNewEvent();
             return filter;
         }
 
-        public synchronized List<UniqueEvent> availableEvents(long lastEventSeen) {
-            List<UniqueEvent> result = new ArrayList<UniqueEvent>();
-            for (UniqueEvent event : events) {
+        public synchronized List<IndexedEvent> availableEvents(long lastEventSeen) {
+            List<IndexedEvent> result = new ArrayList<IndexedEvent>();
+            for (IndexedEvent event : events) {
                 if (event.id > lastEventSeen) {
                     result.add(event);
                 }
@@ -432,7 +432,7 @@ public class F {
 
         public List<T> archive() {
             List<T> result = new ArrayList<T>();
-            for (UniqueEvent<T> event : events) {
+            for (IndexedEvent<T> event : events) {
                 result.add(event.data);
             }
             return result;
@@ -442,7 +442,7 @@ public class F {
             if (events.size() >= archiveSize) {
                 events.poll();
             }
-            events.offer(new UniqueEvent(event));
+            events.offer(new IndexedEvent(event));
             notifyNewEvent();
             for (EventStream<T> eventStream : pipedStreams) {
                 eventStream.publish(event);
@@ -452,7 +452,7 @@ public class F {
         void notifyNewEvent() {
             for (ListIterator<FilterTask<T>> it = waiting.listIterator(); it.hasNext();) {
                 FilterTask<T> filter = it.next();
-                for (UniqueEvent<T> event : events) {
+                for (IndexedEvent<T> event : events) {
                     filter.propose(event);
                 }
                 if (filter.trigger()) {
@@ -462,16 +462,16 @@ public class F {
             }
         }
 
-        static class FilterTask<K> extends Promise<List<UniqueEvent<K>>> {
+        static class FilterTask<K> extends Promise<List<IndexedEvent<K>>> {
 
             final Long lastEventSeen;
-            final List<UniqueEvent<K>> newEvents = new ArrayList<UniqueEvent<K>>();
+            final List<IndexedEvent<K>> newEvents = new ArrayList<IndexedEvent<K>>();
 
             public FilterTask(Long lastEventSeen) {
                 this.lastEventSeen = lastEventSeen;
             }
 
-            public void propose(UniqueEvent<K> event) {
+            public void propose(IndexedEvent<K> event) {
                 if (event.id > lastEventSeen) {
                     newEvents.add(event);
                 }
