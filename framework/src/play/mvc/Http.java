@@ -404,7 +404,14 @@ public class Http {
                     if (m2.find()) {
                         q2 = Double.parseDouble(m2.group(1));
                     }
-                    return (int) (q2 - q1);
+
+                    if (q1 > q2) {
+                    	return -1;
+                    } else if (q1 == q2) {
+                    	return 0;
+                    } else {
+                    	return 1;
+                    }
                 }
             });
         	
