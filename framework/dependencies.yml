@@ -49,7 +49,7 @@ require:    &allDependencies
     - org.hibernate -> hibernate-commons-annotations 3.2.0.Final
     - org.hibernate -> hibernate-entitymanager 3.6.0.Final
     - org.hibernate.javax.persistence -> hibernate-jpa-2.0-api 1.0.0.Final
-    - org.jboss.netty -> netty 3.2.2.Final
+    - org.jboss.netty -> netty 3.2.4.Final
     - org.slf4j -> slf4j-api 1.6.1
     - org.slf4j -> slf4j-log4j12 1.6.1
     - org.yaml -> snakeyaml 1.7
