@@ -291,20 +291,17 @@ public class Http {
                 return;
             }
 
-            if (headers.get("accept") == null) {
-                format = Play.contentTypes.getProperty("default");
-                return;
-            }
-
-            String accept = headers.get("accept").value();
-            List<String> allowedTypes = Arrays.asList(accept.split(","));
-            List<String> sortedTypes = this.sortStrings(allowedTypes);
-            Collections.reverse(sortedTypes);
+            if (headers.get("accept") != null) {
+            	String accept = headers.get("accept").value();
+            	List<String> allowedTypes = Arrays.asList(accept.split(","));
+            	List<String> sortedTypes = this.sortStrings(allowedTypes);
+            	Collections.reverse(sortedTypes);
             
-            for (String type : sortedTypes) {
-            	if (Play.contentTypes.containsKey(type)) {
-            		format = Play.contentTypes.getProperty(type);
-            		return;
+            	for (String type : sortedTypes) {
+            		if (Play.contentTypes.containsKey(type)) {
+            			format = Play.contentTypes.getProperty(type);
+            			return;
+            		}
             	}
             }
             
