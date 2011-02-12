@@ -1,0 +1,75 @@
+# Content type mappings between HTTP accept header 
+# values and template formats.
+#
+
+# DEFAULT
+# ~~~~~~~~~~~
+default=html
+
+
+# APPLICATION
+# ~~~~~~~~~~~
+application/atom+xml;type\=feed=atomfeed
+application/atom+xml;type\=entry=atomentry
+application/atom+xml=atomfeed
+application/atomcat+xml=atomcat
+application/atomsvc+xml=atomsvc
+application/ccxml+xml=ccxml
+application/cellml+xml=cellml
+application/cnrp+xml=cnrp
+application/conference-info+xml=confinfo
+application/cpl+xml=cpl
+application/davmount+xml=davmount
+application/dialog-info+xml=dialoginfo
+application/dssc+xml=dssc
+application/emma+xml=emma
+application/epp+xml=epp
+application/exi=exi
+application/javascript=js
+application/json=json
+application/mathml+xml=mathml
+application/rdf+xml=rdf
+application/rss+xml=rss
+application/soap+xml=soap
+application/vnd.google-earth.kml+xml=kml
+application/vnd.mozilla.xul+xml=xul
+application/vnd.syncml+xml=syncml
+application/x-latex=latex
+application/x-tex=tex
+application/x-texinfo=texinfo
+application/x-vrml=vrml
+application/xhtml=html
+application/xml=xml
+application/xml-dtd=dtd
+application/xmpp+xml=xmpp
+application/xop+xml=xop
+application/xslt+xml=xslt
+
+
+# TEXT
+# ~~~~~~~~~~~
+text/calendar=ical
+text/csv=csv
+text/html=html
+text/javascript=json
+text/mcf=mcf
+text/pascal=pascal
+text/plain=txt
+text/sgml=sgml
+text/tab-separated-values=tsv
+text/uri-list=uris
+text/x-asm=asm
+text/x-c=c
+text/v-card=vcf
+text/x-fortran=f
+text/x-h=h
+text/x-java-source=j
+text/x-m=m
+text/x-script.scheme=scm
+text/x-vcalendar=vcs
+text/xml=xml
+
+
+# AUDIO
+# ~~~~~~~~~~~
+audio/x-mpequrl=m3u
