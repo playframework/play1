@@ -121,6 +121,10 @@ public class Play {
      */
     public static Properties configuration;
     /**
+     * The supported content types
+     */
+    public static Properties contentTypes;
+    /**
      * The last time than the application has started
      */
     public static long startedAt;
@@ -195,6 +199,9 @@ public class Play {
 
         // Read the configuration file
         readConfiguration();
+        
+        // Read the supported content types file
+        readContentTypes();
 
         Play.classes = new ApplicationClasses();
 
@@ -289,7 +296,19 @@ public class Play {
         }
     }
 
-    /**
+    static void readContentTypes() {
+    	VirtualFile appRoot = VirtualFile.open(applicationPath);
+        try {
+            contentTypes = IO.readUtf8Properties(appRoot.child("conf/types").inputstream());
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof IOException) {
+                Logger.fatal("Cannot read supported content types");
+                System.exit(-1);
+            }
+        }
+	}
+
+	/**
      * Read application.conf and resolve overriden key using the play id mechanism.
      */
     static void readConfiguration() {
