@@ -292,36 +292,22 @@ public class Http {
             }
 
             if (headers.get("accept") == null) {
-                format = "html".intern();
+                format = Play.contentTypes.getProperty("default");
                 return;
             }
 
             String accept = headers.get("accept").value();
-
-            if (accept.indexOf("application/xhtml") != -1 || accept.indexOf("text/html") != -1 || accept.startsWith("*/*")) {
-                format = "html".intern();
-                return;
+            List<String> allowedTypes = Arrays.asList(accept.split(","));
+            final List<String> sortedTypes = this.sortStrings(allowedTypes);
+            
+            for (String type : sortedTypes) {
+            	if (Play.contentTypes.containsKey(type)) {
+            		format = Play.contentTypes.getProperty(type);
+            		return;
+            	}
             }
-
-            if (accept.indexOf("application/xml") != -1 || accept.indexOf("text/xml") != -1) {
-                format = "xml".intern();
-                return;
-            }
-
-            if (accept.indexOf("text/plain") != -1) {
-                format = "txt".intern();
-                return;
-            }
-
-            if (accept.indexOf("application/json") != -1 || accept.indexOf("text/javascript") != -1) {
-                format = "json".intern();
-                return;
-            }
-
-            if (accept.endsWith("*/*")) {
-                format = "html".intern();
-                return;
-            }
+            
+            format = Play.contentTypes.getProperty("default");
         }
 
         /**
@@ -366,33 +352,13 @@ public class Http {
          * @return Language codes in order of preference, e.g. "en-us,en-gb,en,de".
          */
         public List<String> acceptLanguage() {
-            final Pattern qpattern = Pattern.compile("q=([0-9\\.]+)");
             if (!headers.containsKey("accept-language")) {
                 return Collections.<String>emptyList();
             }
             String acceptLanguage = headers.get("accept-language").value();
             List<String> languages = Arrays.asList(acceptLanguage.split(","));
-            Collections.sort(languages, new Comparator<String>() {
-
-                public int compare(String lang1, String lang2) {
-                    double q1 = 1.0;
-                    double q2 = 1.0;
-                    Matcher m1 = qpattern.matcher(lang1);
-                    Matcher m2 = qpattern.matcher(lang2);
-                    if (m1.find()) {
-                        q1 = Double.parseDouble(m1.group(1));
-                    }
-                    if (m2.find()) {
-                        q2 = Double.parseDouble(m2.group(1));
-                    }
-                    return (int) (q2 - q1);
-                }
-            });
-            List<String> result = new ArrayList<String>(10);
-            for (String lang : languages) {
-                result.add(lang.split(";")[0]);
-            }
-            return result;
+            
+            return this.sortStrings(languages);
         }
 
         public boolean isModified(String etag, long last) {
@@ -414,6 +380,39 @@ public class Http {
                     return true;
                 }
             }
+        }
+        
+        /**
+         * Sorts typical HTTP header strings such as "UTF-8;q=1.0" and "MacRoman;q=0.7" according to their <em>q</em> value
+         * and returns a list of strings without those values.
+         * 
+         * @param strings
+         * @return
+         */
+        private List<String> sortStrings(final List<String> strings) {
+        	final Pattern qpattern = Pattern.compile("q=([0-9\\.]+)");
+        	
+        	Collections.sort(strings, new Comparator<String>() {
+                public int compare(String first, String second) {
+                    double q1 = 1.0;
+                    double q2 = 1.0;
+                    Matcher m1 = qpattern.matcher(first);
+                    Matcher m2 = qpattern.matcher(second);
+                    if (m1.find()) {
+                        q1 = Double.parseDouble(m1.group(1));
+                    }
+                    if (m2.find()) {
+                        q2 = Double.parseDouble(m2.group(1));
+                    }
+                    return (int) (q2 - q1);
+                }
+            });
+        	
+        	List<String> result = new ArrayList<String>(10);
+            for (String string : strings) {
+                result.add(string.split(";")[0]);
+            }
+            return result;
         }
     }
 
