@@ -298,7 +298,8 @@ public class Http {
 
             String accept = headers.get("accept").value();
             List<String> allowedTypes = Arrays.asList(accept.split(","));
-            final List<String> sortedTypes = this.sortStrings(allowedTypes);
+            List<String> sortedTypes = this.sortStrings(allowedTypes);
+            Collections.reverse(sortedTypes);
             
             for (String type : sortedTypes) {
             	if (Play.contentTypes.containsKey(type)) {
@@ -384,7 +385,7 @@ public class Http {
         
         /**
          * Sorts typical HTTP header strings such as "UTF-8;q=1.0" and "MacRoman;q=0.7" according to their <em>q</em> value
-         * and returns a list of strings without those values.
+         * and returns a list of strings without those values in ascending order.
          * 
          * @param strings
          * @return
@@ -405,7 +406,7 @@ public class Http {
                         q2 = Double.parseDouble(m2.group(1));
                     }
 
-                    if (q1 > q2) {
+                    if (q1 < q2) {
                     	return -1;
                     } else if (q1 == q2) {
                     	return 0;
