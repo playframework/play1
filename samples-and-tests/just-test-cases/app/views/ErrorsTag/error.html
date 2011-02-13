@@ -1,0 +1,133 @@
+#{extends 'main.html' /}
+
+<h1>Errors tag</h1>
+
+%{ error_count = 0 }%
+
+<h3>#errors tag</h3>
+#{errors}
+	#errors.errors present<br />
+	
+	#errors(${error_index}).error: ${error}<br />
+	#errors(${error}).error_index: ${error_index}<br />
+	
+	#errors(${error}).error_isFirst: ${error_isFirst}<br />
+	#errors(${error}).error_isLast: ${error_isLast}<br />
+	#errors(${error}).error_parity: ${error_parity}<br />
+	<br />
+	%{ error_count += 1 }%
+	
+#{/errors}
+
+#errors.count: ${error_count}<br />
+<hr />
+
+%{ error_count = 0 }%
+
+<h3>#errors field1 tag</h3>
+#{errors 'field1'}
+	#errors(field1).errors present<br />
+	
+	#errors(field1,${error_index}).error: ${error}<br />
+	#errors(field1,${error}).error_index: ${error_index}<br />
+	
+	#errors(field1,${error}).error_isFirst: ${error_isFirst}<br />
+	#errors(field1,${error}).error_isLast: ${error_isLast}<br />
+	#errors(field1,${error}).error_parity: ${error_parity}<br />
+	<br />
+	%{ error_count += 1 }%
+	
+#{/errors}
+
+#errors(field1).count: ${error_count}<br />
+<hr />
+
+%{ error_count = 0 }%
+
+<h3>#errors field:field1 tag (with named parameter)</h3>
+#{errors field:'field1'}
+	#errors(field:field1).errors present<br />
+	
+	#errors(field:field1,${error_index}).error: ${error}<br />
+	#errors(field:field1,${error}).error_index: ${error_index}<br />
+	
+	#errors(field:field1,${error}).error_isFirst: ${error_isFirst}<br />
+	#errors(field:field1,${error}).error_isLast: ${error_isLast}<br />
+	#errors(field:field1,${error}).error_parity: ${error_parity}<br />
+	<br />
+	%{ error_count += 1 }%
+	
+#{/errors}
+
+#errors(field:field1).count: ${error_count}<br />
+<hr />
+
+%{ error_count = 0 }%
+
+<h3>#errors field2 tag</h3>
+#{errors 'field2'}
+	#errors(field2).errors present<br />
+	
+	#errors(field2,${error_index}).error: ${error}<br />
+	#errors(field2,${error}).error_index: ${error_index}<br />
+	
+	#errors(field2,${error}).error_isFirst: ${error_isFirst}<br />
+	#errors(field2,${error}).error_isLast: ${error_isLast}<br />
+	#errors(field2,${error}).error_parity: ${error_parity}<br />
+	<br />
+	%{ error_count += 1 }%
+	
+#{/errors}
+
+#errors(field2).count: ${error_count}<br />
+<hr />
+
+%{ error_count = 0 }%
+
+<h3>#errors field2 tag (with named parameter)</h3>
+#{errors field:'field2'}
+	#errors(field:field2).errors present<br />
+	
+	#errors(field:field2,${error_index}).error: ${error}<br />
+	#errors(field:field2,${error}).error_index: ${error_index}<br />
+	
+	#errors(field:field2,${error}).error_isFirst: ${error_isFirst}<br />
+	#errors(field:field2,${error}).error_isLast: ${error_isLast}<br />
+	#errors(field:field2,${error}).error_parity: ${error_parity}<br />
+	<br />
+	%{ error_count += 1 }%
+	
+#{/errors}
+
+#errors(field:field2).count: ${error_count}<br />
+<hr />
+
+<h3>errorClass tag</h3>
+
+#errorClass field1: #{errorClass 'field1' /};<br />
+#errorClass field2: #{errorClass 'field2' /};<br />
+
+<hr />
+
+<h3>error tag</h3>
+
+#error field1: #{error 'field1' /};<br />
+#error field2: #{error 'field2' /};<br />
+
+<hr />
+
+<h3>ifErrors tag</h3>
+
+#{ifErrors}
+  #iferrors present<br />
+#{/ifErrors}
+
+<h3>ifError tag</h3>
+
+#{ifError 'field1'}
+  #iferror field1 present<br />
+#{/ifError}
+
+#{ifError 'field2'}
+  #iferror field2 present<br />
+#{/ifError}
