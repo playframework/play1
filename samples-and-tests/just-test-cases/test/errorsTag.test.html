@@ -1,0 +1,281 @@
+#{selenium 'Test error tags: errors, error, hasError, ifErrors, ifError'}
+
+	open('@{ErrorsTag.noError()}')
+
+	assertTextPresent('#errors.count: 0')
+	assertTextNotPresent('#errors.errors present')
+	
+	assertTextPresent('#errors(field1).count: 0')
+	assertTextPresent('#errors(field:field1).count: 0')
+
+	assertTextNotPresent('#errors(field1).errors present')
+	assertTextNotPresent('#errors(field:field1).errors present')
+
+	assertTextPresent('#errors(field2).count: 0')
+	assertTextPresent('#errors(field:field2).count: 0')
+	
+	assertTextNotPresent('#errors(field2).errors present')
+	assertTextNotPresent('#errors(field:field2).errors present')
+
+	assertTextPresent('#errorClass field1: ;')
+	assertTextPresent('#errorClass field2: ;')
+	
+	assertTextPresent('#error field1: ;')
+	assertTextPresent('#error field2: ;')
+	
+	assertTextNotPresent('#iferrors present')
+	assertTextNotPresent('#iferror field1 present')
+	assertTextNotPresent('#iferror field2 present')
+
+	open('@{ErrorsTag.errorGeneral()}')
+	
+	assertTextPresent('#errors.errors present')
+	assertTextPresent('#errors(1).error: general error 1')
+	assertTextPresent('#errors(general error 1).error_index: 1')
+	assertTextPresent('#errors(general error 1).error_isFirst: true')
+	assertTextPresent('#errors(general error 1).error_isLast: false')
+	assertTextPresent('#errors(general error 1).error_parity: odd')
+	
+	assertTextPresent('#errors.errors present')
+	assertTextPresent('#errors(2).error: general error 2')
+	assertTextPresent('#errors(general error 2).error_index: 2')
+	assertTextPresent('#errors(general error 2).error_isFirst: false')
+	assertTextPresent('#errors(general error 2).error_isLast: true')
+	assertTextPresent('#errors(general error 2).error_parity: even')
+	
+	assertTextPresent('#errors.count: 2')
+
+	assertTextPresent('#errors(field1).count: 0')
+	assertTextPresent('#errors(field:field1).count: 0')
+
+	assertTextNotPresent('#errors(field1).errors present')
+	assertTextNotPresent('#errors(field:field1).errors present')
+
+	assertTextPresent('#errors(field2).count: 0')
+	assertTextPresent('#errors(field:field2).count: 0')
+	
+	assertTextNotPresent('#errors(field2).errors present')
+	assertTextNotPresent('#errors(field:field2).errors present')
+
+	assertTextPresent('#errorClass field1: ;')
+	assertTextPresent('#errorClass field2: ;')
+	
+	assertTextPresent('#error field1: ;')
+	assertTextPresent('#error field2: ;')
+
+	assertTextPresent('#iferrors present')
+	assertTextNotPresent('#iferror field1 present')
+	assertTextNotPresent('#iferror field2 present')
+
+
+	open('@{ErrorsTag.errorField1()}')
+	
+	assertTextPresent('#errors.errors present
+	assertTextPresent('#errors(1).error: general error 1')
+	assertTextPresent('#errors(general error 1).error_index: 1')
+	assertTextPresent('#errors(general error 1).error_isFirst: true')
+	assertTextPresent('#errors(general error 1).error_isLast: false')
+	assertTextPresent('#errors(general error 1).error_parity: odd')
+	
+	assertTextPresent('#errors(2).error: general error 2')
+	assertTextPresent('#errors(general error 2).error_index: 2')
+	assertTextPresent('#errors(general error 2).error_isFirst: false')
+	assertTextPresent('#errors(general error 2).error_isLast: false')
+	assertTextPresent('#errors(general error 2).error_parity: even')
+	
+	assertTextPresent('#errors(3).error: field 1 error 1')
+	assertTextPresent('#errors(field 1 error 1).error_index: 3')
+	assertTextPresent('#errors(field 1 error 1).error_isFirst: false')
+	assertTextPresent('#errors(field 1 error 1).error_isLast: false')
+	assertTextPresent('#errors(field 1 error 1).error_parity: odd')
+	
+	assertTextPresent('#errors(4).error: field 1 error 2')
+	assertTextPresent('#errors(field 1 error 2).error_index: 4')
+	assertTextPresent('#errors(field 1 error 2).error_isFirst: false')
+	assertTextPresent('#errors(field 1 error 2).error_isLast: true')
+	assertTextPresent('#errors(field 1 error 2).error_parity: even')
+	
+	assertTextPresent('#errors.count: 4')
+	
+	assertTextPresent('#errors(field1).errors present')
+	assertTextPresent('#errors(field1,1).error: field 1 error 1')
+	assertTextPresent('#errors(field1,field 1 error 1).error_index: 1')
+	assertTextPresent('#errors(field1,field 1 error 1).error_isFirst: true')
+	assertTextPresent('#errors(field1,field 1 error 1).error_isLast: false')
+	assertTextPresent('#errors(field1,field 1 error 1).error_parity: odd')
+	
+	assertTextPresent('#errors(field1,2).error: field 1 error 2')
+	assertTextPresent('#errors(field1,field 1 error 2).error_index: 2')
+	assertTextPresent('#errors(field1,field 1 error 2).error_isFirst: false')
+	assertTextPresent('#errors(field1,field 1 error 2).error_isLast: true')
+	assertTextPresent('#errors(field1,field 1 error 2).error_parity: even')
+	
+	assertTextPresent('#errors(field1).count: 2')
+	
+	assertTextPresent('#errors(field:field1).errors present')
+	assertTextPresent('#errors(field:field1,1).error: field 1 error 1')
+	assertTextPresent('#errors(field:field1,field 1 error 1).error_index: 1')
+	assertTextPresent('#errors(field:field1,field 1 error 1).error_isFirst: true')
+	assertTextPresent('#errors(field:field1,field 1 error 1).error_isLast: false')
+	assertTextPresent('#errors(field:field1,field 1 error 1).error_parity: odd')
+	
+	assertTextPresent('#errors(field:field1).errors present')
+	assertTextPresent('#errors(field:field1,2).error: field 1 error 2')
+	assertTextPresent('#errors(field:field1,field 1 error 2).error_index: 2')
+	assertTextPresent('#errors(field:field1,field 1 error 2).error_isFirst: false')
+	assertTextPresent('#errors(field:field1,field 1 error 2).error_isLast: true')
+	assertTextPresent('#errors(field:field1,field 1 error 2).error_parity: even')
+	
+	assertTextPresent('#errors(field:field1).count: 2')
+
+	assertTextPresent('#errors(field2).count: 0')
+	assertTextPresent('#errors(field:field2).count: 0')
+	
+	assertTextNotPresent('#errors(field2).errors present')
+	assertTextNotPresent('#errors(field:field2).errors present')
+
+	assertTextPresent('#errorClass field1: hasError;')
+	assertTextPresent('#errorClass field2: ;')
+	
+	assertTextPresent('#error field1: field 1 error 1;')
+	assertTextPresent('#error field2: ;')
+	
+	assertTextPresent('#iferrors present')
+	
+	assertTextPresent('#iferror field1 present')
+	
+	assertTextNotPresent('#iferror field2 present')
+
+
+	open('@{ErrorsTag.errorField1andField2()}')
+
+	assertTextPresent('#errors.errors present')
+	assertTextPresent('#errors(1).error: general error 1')
+	assertTextPresent('#errors(general error 1).error_index: 1')
+	assertTextPresent('#errors(general error 1).error_isFirst: true')
+	assertTextPresent('#errors(general error 1).error_isLast: false')
+	assertTextPresent('#errors(general error 1).error_parity: odd')
+	
+	assertTextPresent('#errors(2).error: general error 2')
+	assertTextPresent('#errors(general error 2).error_index: 2')
+	assertTextPresent('#errors(general error 2).error_isFirst: false')
+	assertTextPresent('#errors(general error 2).error_isLast: false')
+	assertTextPresent('#errors(general error 2).error_parity: even')
+	
+	assertTextPresent('#errors(3).error: field 1 error 1')
+	assertTextPresent('#errors(field 1 error 1).error_index: 3')
+	assertTextPresent('#errors(field 1 error 1).error_isFirst: false')
+	assertTextPresent('#errors(field 1 error 1).error_isLast: false')
+	assertTextPresent('#errors(field 1 error 1).error_parity: odd')
+	
+	assertTextPresent('#errors(4).error: field 1 error 2')
+	assertTextPresent('#errors(field 1 error 2).error_index: 4')
+	assertTextPresent('#errors(field 1 error 2).error_isFirst: false')
+	assertTextPresent('#errors(field 1 error 2).error_isLast: false')
+	assertTextPresent('#errors(field 1 error 2).error_parity: even')
+	
+	assertTextPresent('#errors(5).error: field 2 error 1')
+	assertTextPresent('#errors(field 2 error 1).error_index: 5')
+	assertTextPresent('#errors(field 2 error 1).error_isFirst: false')
+	assertTextPresent('#errors(field 2 error 1).error_isLast: false')
+	assertTextPresent('#errors(field 2 error 1).error_parity: odd')
+	
+	assertTextPresent('#errors(6).error: field 2 error 2')
+	assertTextPresent('#errors(field 2 error 2).error_index: 6')
+	assertTextPresent('#errors(field 2 error 2).error_isFirst: false')
+	assertTextPresent('#errors(field 2 error 2).error_isLast: false')
+	assertTextPresent('#errors(field 2 error 2).error_parity: even')
+	
+	assertTextPresent('#errors(7).error: field 2 error 3')
+	assertTextPresent('#errors(field 2 error 3).error_index: 7')
+	assertTextPresent('#errors(field 2 error 3).error_isFirst: false')
+	assertTextPresent('#errors(field 2 error 3).error_isLast: true')
+	assertTextPresent('#errors(field 2 error 3).error_parity: odd')
+	
+	assertTextPresent('#errors.count: 7')
+	
+	assertTextPresent('#errors(field1).errors present')
+	assertTextPresent('#errors(field1,1).error: field 1 error 1')
+	assertTextPresent('#errors(field1,field 1 error 1).error_index: 1')
+	assertTextPresent('#errors(field1,field 1 error 1).error_isFirst: true')
+	assertTextPresent('#errors(field1,field 1 error 1).error_isLast: false')
+	assertTextPresent('#errors(field1,field 1 error 1).error_parity: odd')
+	
+	assertTextPresent('#errors(field1,2).error: field 1 error 2')
+	assertTextPresent('#errors(field1,field 1 error 2).error_index: 2')
+	assertTextPresent('#errors(field1,field 1 error 2).error_isFirst: false')
+	assertTextPresent('#errors(field1,field 1 error 2).error_isLast: true')
+	assertTextPresent('#errors(field1,field 1 error 2).error_parity: even')
+	
+	assertTextPresent('#errors(field1).count: 2')
+	
+	assertTextPresent('#errors(field:field1).errors present')
+	assertTextPresent('#errors(field:field1,1).error: field 1 error 1')
+	assertTextPresent('#errors(field:field1,field 1 error 1).error_index: 1')
+	assertTextPresent('#errors(field:field1,field 1 error 1).error_isFirst: true')
+	assertTextPresent('#errors(field:field1,field 1 error 1).error_isLast: false')
+	assertTextPresent('#errors(field:field1,field 1 error 1).error_parity: odd')
+	
+	assertTextPresent('#errors(field:field1,2).error: field 1 error 2')
+	assertTextPresent('#errors(field:field1,field 1 error 2).error_index: 2')
+	assertTextPresent('#errors(field:field1,field 1 error 2).error_isFirst: false')
+	assertTextPresent('#errors(field:field1,field 1 error 2).error_isLast: true')
+	assertTextPresent('#errors(field:field1,field 1 error 2).error_parity: even')
+	
+	assertTextPresent('#errors(field:field1).count: 2')
+	assertTextPresent('#errors field2 tag')
+	
+	assertTextPresent('#errors(field2).errors present')
+	assertTextPresent('#errors(field2,1).error: field 2 error 1')
+	assertTextPresent('#errors(field2,field 2 error 1).error_index: 1')
+	assertTextPresent('#errors(field2,field 2 error 1).error_isFirst: true')
+	assertTextPresent('#errors(field2,field 2 error 1).error_isLast: false')
+	assertTextPresent('#errors(field2,field 2 error 1).error_parity: odd')
+	
+	assertTextPresent('#errors(field2,2).error: field 2 error 2')
+	assertTextPresent('#errors(field2,field 2 error 2).error_index: 2')
+	assertTextPresent('#errors(field2,field 2 error 2).error_isFirst: false')
+	assertTextPresent('#errors(field2,field 2 error 2).error_isLast: false')
+	assertTextPresent('#errors(field2,field 2 error 2).error_parity: even')
+	
+	assertTextPresent('#errors(field2,3).error: field 2 error 3')
+	assertTextPresent('#errors(field2,field 2 error 3).error_index: 3')
+	assertTextPresent('#errors(field2,field 2 error 3).error_isFirst: false')
+	assertTextPresent('#errors(field2,field 2 error 3).error_isLast: true')
+	assertTextPresent('#errors(field2,field 2 error 3).error_parity: odd')
+	
+	assertTextPresent('#errors(field2).count: 3')
+	
+	assertTextPresent('#errors(field:field2).errors present')
+	assertTextPresent('#errors(field:field2,1).error: field 2 error 1')
+	assertTextPresent('#errors(field:field2,field 2 error 1).error_index: 1')
+	assertTextPresent('#errors(field:field2,field 2 error 1).error_isFirst: true')
+	assertTextPresent('#errors(field:field2,field 2 error 1).error_isLast: false')
+	assertTextPresent('#errors(field:field2,field 2 error 1).error_parity: odd')
+	
+	assertTextPresent('#errors(field:field2,2).error: field 2 error 2')
+	assertTextPresent('#errors(field:field2,field 2 error 2).error_index: 2')
+	assertTextPresent('#errors(field:field2,field 2 error 2).error_isFirst: false')
+	assertTextPresent('#errors(field:field2,field 2 error 2).error_isLast: false')
+	assertTextPresent('#errors(field:field2,field 2 error 2).error_parity: even')
+	
+	assertTextPresent('#errors(field:field2,3).error: field 2 error 3')
+	assertTextPresent('#errors(field:field2,field 2 error 3).error_index: 3')
+	assertTextPresent('#errors(field:field2,field 2 error 3).error_isFirst: false')
+	assertTextPresent('#errors(field:field2,field 2 error 3).error_isLast: true')
+	assertTextPresent('#errors(field:field2,field 2 error 3).error_parity: odd')
+	
+	assertTextPresent('#errors(field:field2).count: 3')
+	
+	assertTextPresent('#errorClass field1: hasError;')
+	assertTextPresent('#errorClass field2: hasError;')
+	
+	assertTextPresent('#error field1: field 1 error 1;')
+	assertTextPresent('#error field2: field 2 error 1;')
+	
+	assertTextPresent('#iferrors present')
+	
+	assertTextPresent('#iferror field1 present')
+	assertTextPresent('#iferror field2 present')
+
+#{/selenium}

@@ -143,6 +143,16 @@ bc. <table>
 #{/errors}
 </table>
 
+You can also use the optional field parameter, or just the default parameter, to filter only the errors belonging to a certain field.
+
+bc. <ul>
+#{errors 'myField'}
+    There where errors with the field myField<br />
+    <li>${error}</li>
+#{/errors}
+</ul>
+
+
 h2. <a name="extends">extends</a>
 
 Makes the template inherit another template.
@@ -393,6 +403,8 @@ bc. #{option user.id} ${user.name} #{/option}
 Will output:
 
 bc. <option value="42">jto</option>h2. <a name="script">script</a>
+
+h2. <a name="script">script</a>
 
 Inserts a **script** tag in the template. By convention, the tag refers to a script in **/public/javascripts**
 
