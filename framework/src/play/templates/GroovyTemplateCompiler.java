@@ -161,7 +161,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         String expr = parser.getToken().trim();
         print("\t__val=");
         print(expr);
-        print(";out.print(__val!=null?__safe(__val):'')");
+        print(";out.print(__val!=null?__safe(__val, __val.toString()):'')");
         markLine(parser.getLine());
         println();
     }

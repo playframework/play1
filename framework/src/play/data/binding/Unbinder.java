@@ -9,6 +9,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import play.Play;
+import play.PlayPlugin;
 import play.data.binding.types.DateBinder;
 
 /**
@@ -24,11 +26,19 @@ public class Unbinder {
     }
 
     private static void unBind(Map<String, Object> result, Object src, Class<?> srcClazz, String name) {
+        for (PlayPlugin plugin : Play.plugins) {
+            Map<String, Object> r = plugin.unBind(src, name);
+            if (r != null) {
+                result.putAll(r);
+                return;
+            }
+        }
         if (isDirect(srcClazz) || src == null) {
             if (!result.containsKey(name)) {
                 result.put(name, src != null ? src.toString() : null);
             } else {
-                @SuppressWarnings("unchecked") List<Object> objects = (List<Object>) result.get(name);
+                @SuppressWarnings("unchecked")
+                List<Object> objects = (List<Object>) result.get(name);
                 objects.add(src != null ? src.toString() : null);
             }
         } else if (src.getClass().isArray()) {
@@ -51,7 +61,7 @@ public class Unbinder {
                 }
             }
         } else if (Date.class.isAssignableFrom(src.getClass())) {
-            result.put(name, new SimpleDateFormat(DateBinder.ISO8601).format((Date)src));
+            result.put(name, new SimpleDateFormat(DateBinder.ISO8601).format((Date) src));
         } else {
             Field[] fields = src.getClass().getDeclaredFields();
             for (Field field : fields) {
@@ -73,5 +83,4 @@ public class Unbinder {
     public static boolean isDirect(Class<?> clazz) {
         return clazz.equals(String.class) || clazz.equals(Integer.class) || Enum.class.isAssignableFrom(clazz) || clazz.equals(Boolean.class) || clazz.equals(Long.class) || clazz.equals(Double.class) || clazz.equals(Float.class) || clazz.equals(Short.class) || clazz.equals(BigDecimal.class) || clazz.isPrimitive();
     }
-    
 }

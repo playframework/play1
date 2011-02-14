@@ -168,6 +168,7 @@ public class Promises extends UnitTest {
     @Test
     public void bufferedEventStream() throws Exception {
         
+        IndexedEvent.resetIdGenerator();
         final ArchivedEventStream<String> stream = new ArchivedEventStream<String>(5);
         
         new Thread() {
@@ -187,7 +188,7 @@ public class Promises extends UnitTest {
         
         for(int i=0; i<10; i++) {
             
-            F.Either<List<UniqueEvent<String>>,String> eventReceived = Promise.waitEither(stream.nextEvents(lastSeen), new DoSomething2(100).now()).get();
+            F.Either<List<IndexedEvent<String>>,String> eventReceived = Promise.waitEither(stream.nextEvents(lastSeen), new DoSomething2(100).now()).get();
             System.out.println(i + " -> " + eventReceived);
             
             switch(i) {

@@ -44,6 +44,11 @@ public class Binder {
         supportedTypes.put(byte[].class, new ByteArrayBinder());
         supportedTypes.put(byte[][].class, new ByteArrayArrayBinder());
     }
+
+    public static <T> void register(Class<T> clazz, TypeBinder<T> typeBinder) {
+        supportedTypes.put(clazz, typeBinder);
+    }
+
     static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<Class<?>, BeanWrapper>();
 
     static BeanWrapper getBeanWrapper(Class<?> clazz) {
@@ -186,7 +191,7 @@ public class Binder {
                     // custom types
                     for (Class<?> c : supportedTypes.keySet()) {
                         if (c.isAssignableFrom(customArray.getClass())) {
-                            Object[] ar = (Object[]) supportedTypes.get(c).bind("value", annotations, name, customArray.getClass());
+                            Object[] ar = (Object[]) supportedTypes.get(c).bind("value", annotations, name, customArray.getClass(), null);
                             List l = Arrays.asList(ar);
                             if (clazz.equals(HashSet.class)) {
                                 return new HashSet(l);
@@ -223,7 +228,7 @@ public class Binder {
                                 }
                             }
                         }
-                        return r.size() == 0 ? MISSING : r;
+                        return r.isEmpty() ? MISSING : r;
                     }
                 }
                 if (value == null) {
@@ -252,7 +257,7 @@ public class Binder {
                 return MISSING;
             }
 
-            return directBind(name, annotations, value[0], clazz);
+            return directBind(name, annotations, value[0], clazz, type);
         } catch (Exception e) {
             Validation.addError(name + suffix, "validation.invalid");
             return MISSING;
@@ -380,8 +385,12 @@ public class Binder {
         return directBind(null, null, value, clazz);
     }
 
-    @SuppressWarnings("unchecked")
     public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz) throws Exception {
+        return directBind(name, annotations, value, clazz, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
         Logger.trace("directBind: value [" + value + "] annotation [" + Utils.join(annotations, " ") + "] Class [" + clazz + "]");
 
         boolean nullOrEmpty = value == null || value.trim().length() == 0;
@@ -393,7 +402,7 @@ public class Binder {
                     if (!(toInstanciate.equals(As.DEFAULT.class))) {
                         // Instantiate the binder
                         TypeBinder<?> myInstance = toInstanciate.newInstance();
-                        return myInstance.bind(name, annotations, value, clazz);
+                        return myInstance.bind(name, annotations, value, clazz, type);
                     }
                 }
             }
@@ -404,7 +413,7 @@ public class Binder {
             Logger.trace("directBind: value [" + value + "] c [" + c + "] Class [" + clazz + "]");
             if (c.isAssignableFrom(clazz)) {
                 Logger.trace("directBind: isAssignableFrom is true");
-                return nullOrEmpty ? null : supportedTypes.get(c).bind(name, annotations, value, clazz);
+                return supportedTypes.get(c).bind(name, annotations, value, clazz, type);
             }
         }
 
@@ -413,7 +422,7 @@ public class Binder {
             if (c.isAnnotationPresent(Global.class)) {
                 Class<?> forType = (Class) ((ParameterizedType) c.getGenericInterfaces()[0]).getActualTypeArguments()[0];
                 if (forType.isAssignableFrom(clazz)) {
-                    return c.newInstance().bind(name, annotations, value, clazz);
+                    return c.newInstance().bind(name, annotations, value, clazz, type);
                 }
             }
         }
