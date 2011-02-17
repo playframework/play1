@@ -41,7 +41,23 @@ import java.util.*;
  */
 public class ServletWrapper extends HttpServlet implements ServletContextListener {
 
+	/**
+	 * Constant for accessing the underlying HttpServletRequest from Play's Request
+	 * in a Servlet based deployment.
+	 * <p>Sample usage:</p>
+	 * <p> {@code HttpServletRequest req = Request.current().args.get(ServletWrapper.SERVLET_REQ);}</p>
+	 */
+	public static final String SERVLET_REQ = "__SERVLET_REQ";
+	/**
+	 * Constant for accessing the underlying HttpServletResponse from Play's Request
+	 * in a Servlet based deployment.
+	 * <p>Sample usage:</p>
+	 * <p> {@code HttpServletResponse res = Request.current().args.get(ServletWrapper.SERVLET_RES);}</p>
+	 */
+	public static final String SERVLET_RES = "__SERVLET_RES";
+	
     private volatile boolean routerInitializedWithContext = false;
+
 
     public void contextInitialized(ServletContextEvent e) {
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
@@ -460,8 +476,8 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             this.httpServletResponse = httpServletResponse;
             this.request = request;
             this.response = response;
-            request.args.put("__SERVLET_REQ", httpServletRequest);
-            request.args.put("__SERVLET_RES", httpServletResponse);
+            request.args.put(ServletWrapper.SERVLET_REQ, httpServletRequest);
+            request.args.put(ServletWrapper.SERVLET_RES, httpServletResponse);
         }
 
         @Override
