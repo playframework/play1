@@ -34,5 +34,9 @@
         </jar>
         <delete dir="tmp" />
     </target>
-
+    
+    <target name="clean">
+            <delete dir="lib" />
+	    <delete dir="tmp" />
+    </target>
 </project>
