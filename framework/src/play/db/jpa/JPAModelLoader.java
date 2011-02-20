@@ -4,6 +4,8 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -345,7 +347,7 @@ public class JPAModelLoader implements Model.Factory {
             }
         }
         if (Collection.class.isAssignableFrom(field.getType())) {
-            final Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+            final Class<?> fieldType = getFieldType(field);
             if (field.isAnnotationPresent(OneToMany.class)) {
                 if (field.getAnnotation(OneToMany.class).mappedBy().equals("")) {
                     modelProperty.isRelation = true;
@@ -399,6 +401,25 @@ public class JPAModelLoader implements Model.Factory {
         }
         return modelProperty;
     }
+
+	private Class<?> getFieldType(Field field) {
+		Type type = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+		if(type instanceof Class)
+			return (Class<?>) type;
+		// it could be an instantiated generic type, let's see about that
+		if(type instanceof TypeVariable){
+			TypeVariable var = ((TypeVariable)type);
+			String name = var.getName();
+			int typeIndex = 0;
+			for(TypeVariable<?> typeParam : field.getDeclaringClass().getTypeParameters()){
+				if(typeParam == var){
+					return (Class<?>) ((ParameterizedType)this.clazz.getGenericSuperclass()).getActualTypeArguments()[typeIndex];
+				}
+				typeIndex++;
+			}
+		}
+		throw new RuntimeException("Not implemented");
+	}
 
 	@Override
 	public boolean isGeneratedKey() {
