@@ -4,8 +4,10 @@ import oauth.signpost.OAuthConsumer;
 import oauth.signpost.OAuthProvider;
 import oauth.signpost.basic.DefaultOAuthConsumer;
 import oauth.signpost.basic.DefaultOAuthProvider;
+import oauth.signpost.exception.OAuthException;
 import play.mvc.Http.Request;
 import play.mvc.Scope.Params;
+import play.exceptions.WebServiceException;
 
 /**
  * Library to access ressources protected by OAuth 1.0a. For OAuth 2.0, see play.libs.OAuth2.
@@ -44,8 +46,8 @@ public class OAuth {
         String callbackURL = Request.current().getBase() + Request.current().url;
         try {
             provider.retrieveRequestToken(consumer, callbackURL);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (OAuthException e) {
+            throw new WebServiceException(e);
         }
         return new TokenPair(consumer.getToken(), consumer.getTokenSecret());
     }
@@ -56,8 +58,8 @@ public class OAuth {
         String verifier = Params.current().get("oauth_verifier");
         try {
             provider.retrieveAccessToken(consumer, verifier);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (OAuthException e) {
+            throw new WebServiceException(e);
         }
         return new TokenPair(consumer.getToken(), consumer.getTokenSecret());
     }
