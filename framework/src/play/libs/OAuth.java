@@ -7,7 +7,7 @@ import oauth.signpost.basic.DefaultOAuthProvider;
 import oauth.signpost.exception.OAuthException;
 import play.mvc.Http.Request;
 import play.mvc.Scope.Params;
-import play.exceptions.WebServiceException;
+import play.exceptions.ExternalWebServiceException;
 
 /**
  * Library to access ressources protected by OAuth 1.0a. For OAuth 2.0, see play.libs.OAuth2.
@@ -47,7 +47,7 @@ public class OAuth {
         try {
             provider.retrieveRequestToken(consumer, callbackURL);
         } catch (OAuthException e) {
-            throw new WebServiceException(e);
+            throw new ExternalWebServiceException(e);
         }
         return new TokenPair(consumer.getToken(), consumer.getTokenSecret());
     }
@@ -59,7 +59,7 @@ public class OAuth {
         try {
             provider.retrieveAccessToken(consumer, verifier);
         } catch (OAuthException e) {
-            throw new WebServiceException(e);
+            throw new ExternalWebServiceException(e);
         }
         return new TokenPair(consumer.getToken(), consumer.getTokenSecret());
     }
