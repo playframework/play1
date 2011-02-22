@@ -71,6 +71,22 @@ public class Validation {
     }
 
     /**
+     * Adds a new error for a given field with the specified parameters. The name of the field is
+     * infered from the name of the variable passed, for example:
+     * 
+     *   validation.addError(variable, "message", variables ...);
+     * 
+     * @param object from which the name is used as field name
+     * @param message message key
+     * @param variables message variables
+     */
+    public static void addErrorToVariable(Object object, String message, String... variables) {
+      // Retrieves the name of the variable provided as parameter
+      String field = getLocalName(object);
+      addError(field, message, variables);
+    }
+
+    /**
      * @return True if the current request has errors
      */
     public static boolean hasErrors() {
