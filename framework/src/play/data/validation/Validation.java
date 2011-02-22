@@ -57,15 +57,29 @@ public class Validation {
         }
         return result;
     }
+    
+    /**
+     * Adds a new error with the specified parameters.
+     * 
+     * @param object object associated to this error
+     * @param message message key
+     * @param variables message variables
+     */
+    public static void addError(Object object, String message, String... variables) {
+      String key = getLocalName(object);
+      
+      addError(key, message, variables);
+    }
 
     /**
-     * Add an error
-     * @param field Field name
-     * @param message Message key
-     * @param variables Message variables
+     * Adds a new error with the specified parameters.
+     * 
+     * @param field field name
+     * @param message message key
+     * @param variables message variables
      */
     public static void addError(String field, String message, String... variables) {
-        if(error(field) == null || !error(field).message.equals(message)) {
+        if ((error(field) == null) || !error(field).message.equals(message)) {
             Validation.current().errors.add(new Error(field, message, variables));
         }
     }
