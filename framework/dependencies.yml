@@ -17,7 +17,7 @@ require:    &allDependencies
     - commons-codec 1.4
     - commons-collections 3.2.1
     - commons-email 1.2
-    - commons-fileupload 1.2.1
+    - commons-fileupload 1.2.2
     - commons-io 2.0.1
     - commons-javaflow 1066591
     - commons-lang 2.6
