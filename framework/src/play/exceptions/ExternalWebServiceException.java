@@ -1,16 +1,16 @@
 package play.exceptions;
 
-public class WebServiceException extends PlayException {
+public class ExternalWebServiceException extends PlayException {
 
-    public WebServiceException(String message) {
+    public ExternalWebServiceException(String message) {
         super(message);
     }
 
-    public WebServiceException(Throwable cause) {
+    public ExternalWebServiceException(Throwable cause) {
         super("An exception occured using external web service.", cause);
     }
 
-    public WebServiceException(String message, Throwable cause) {
+    public ExternalWebServiceException(String message, Throwable cause) {
         super(message, cause);
     }
 
@@ -20,8 +20,8 @@ public class WebServiceException extends PlayException {
     }
 
     @Override
-    public String getExceptionDescription() {
-        if (getCause == null) {
+    public String getErrorDescription() {
+        if (getCause() == null) {
             return getErrorTitle();
         } else {
             return String.format("An exception occurred using external web service: %s", getCause().getClass().getSimpleName());
