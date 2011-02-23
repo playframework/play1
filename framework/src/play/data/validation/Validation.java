@@ -416,9 +416,15 @@ public class Validation {
         try {
             ValidationResult result = new ValidationResult();
             if (!check.isSatisfied(o, o, null, null)) {
-                Error error = new Error(key, check.getClass().getDeclaredField("mes").get(null) + "", check.getMessageVariables() == null ? new String[0] : check.getMessageVariables().values().toArray(new String[0]));
-                Validation.current().errors.add(error);
-                result.error = error;
+                // Makes sure we are not validating an object as in that case checks were already performed on its
+                // properties and might already have generated errors, thus it does not make sense to add a generic 
+                // error message (for the object itself) in addition to those error messages
+                if (!(check instanceof ValidCheck)) {
+                    Error error = new Error(key, check.getClass().getDeclaredField("mes").get(null) + "", check.getMessageVariables() == null ? new String[0] : check.getMessageVariables().values().toArray(new String[0]));
+                    Validation.current().errors.add(error);
+                    result.error = error;
+                }
+                
                 result.ok = false;
             } else {
                 result.ok = true;
