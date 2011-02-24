@@ -29,10 +29,20 @@ public class MemcachedImpl implements CacheImpl {
     SerializingTranscoder tc;
 
     public static MemcachedImpl getInstance() throws IOException {
+      return getInstance(false);
+    }
+
+    public static MemcachedImpl getInstance(boolean forceClientInit) throws IOException {
         if (uniqueInstance == null) {
             uniqueInstance = new MemcachedImpl();
+        } else if (forceClientInit) {
+            // When you stop the client, it sets the interrupted state of this thread to true. If you try to reinit it with the same thread in this state,
+            // Memcached client errors out. So a simple call to interrupted() will reset this flag
+            Thread.currentThread().interrupted();
+            uniqueInstance.initClient();
         }
         return uniqueInstance;
+
     }
 
     private MemcachedImpl() throws IOException {
@@ -67,7 +77,10 @@ public class MemcachedImpl implements CacheImpl {
                 return null;
             }
         };
+        initClient();
+    }
 
+    public void initClient() throws IOException {
         System.setProperty("net.spy.log.LoggerImpl", "net.spy.memcached.compat.log.Log4JLogger");
         if (Play.configuration.containsKey("memcached.host")) {
             client = new MemcachedClient(AddrUtil.getAddresses(Play.configuration.getProperty("memcached.host")));
