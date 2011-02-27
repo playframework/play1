@@ -155,19 +155,17 @@ public class YamlParser extends AbstractModuleDescriptorParser {
                                         throw new Oops("Unknown exclude format -> " + exName);
                                     }
                                 }
+                                String org = m.group(1);
+                                String module = "*";
+                                if (m.groupCount() > 1) {
+                                    module = m.group(2);
+                                }
+
+                                ArtifactId aid = new ArtifactId(new ModuleId(org, module), "*", "*", "*");
+                                PatternMatcher matcher = new ExactOrRegexpPatternMatcher();
+                                ExcludeRule excludeRule = new DefaultExcludeRule(aid, matcher, new HashMap());
+                                depDescriptor.addExcludeRule("default", excludeRule);
                             }
-
-                            String org = m.group(1);
-                            String module = "*";
-                            if (m.groupCount() > 1) {
-                                module = m.group(2);
-                            }
-
-                            ArtifactId aid = new ArtifactId(new ModuleId(org, module), "*", "*", "*");
-                            PatternMatcher matcher = new ExactOrRegexpPatternMatcher();
-                            ExcludeRule excludeRule = new DefaultExcludeRule(aid, matcher, new HashMap());
-                            depDescriptor.addExcludeRule("default", excludeRule);
-
                         }
 
                         // Ids
