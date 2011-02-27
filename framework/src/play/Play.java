@@ -60,6 +60,11 @@ public class Play {
      * Is the application started
      */
     public static boolean started = false;
+
+    /**
+     * True when the one and only shutdown hook is enabled
+     */
+    private static boolean shutdownHookEnabled = false;
     /**
      * The framework ID
      */
@@ -376,6 +381,18 @@ public class Play {
                 stop();
             }
 
+            if(!shutdownHookEnabled){
+                //registeres shutdown hook - New there's a good chance that we can notify
+                //our plugins that we're going down when some calls ctrl+c or just kills our process..
+                shutdownHookEnabled = true;
+
+                Runtime.getRuntime().addShutdownHook( new Thread() {
+                    public void run(){
+                        Play.stop();
+                    }
+                 });
+            }
+
             if (mode == Mode.DEV) {
                 // Need a new classloader
                 classloader = new ApplicationClassloader();
@@ -466,12 +483,15 @@ public class Play {
      * Stop the application
      */
     public static synchronized void stop() {
-        started = false;
-        for (PlayPlugin plugin : plugins) {
-            plugin.onApplicationStop();
+        if( started ){
+            Logger.info("Stopping the play application");
+            started = false;
+            for (PlayPlugin plugin : plugins) {
+                plugin.onApplicationStop();
+            }
+            Cache.stop();
+            Router.lastLoading = 0L;
         }
-        Cache.stop();
-        Router.lastLoading = 0L;
     }
 
     /**
