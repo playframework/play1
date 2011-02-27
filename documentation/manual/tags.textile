@@ -415,11 +415,13 @@ This tag can generate options using **items** attribute.
 * **items** (optional) - list of objects, used to create **options**
 * **value** (optional) - selected element in **items**
 * **labelProperty** (optional) - for each item, attribute used as option's label 
-* **valueProperty** (optional) - for each item, attribute used as option's value. **id** is used by default.
+* **valueProperty** (optional) - for each item, attribute used as option's value. **id** is used by default
+
+p(note). The **labelProperty** and **valueProperty** shouldn't be primitives value. So, for example, instead of using **int** or **long** use an **Integer** or **Long** variable.
 
 For example, giving a list of User, each having a name attribute:
 
-bc. #{select 'users', items:users, valueProperty:'id', labelProperty:'name', value:'User-5', class:"test", id:'select2' /}
+bc. #{select 'users', items:users, valueProperty:'id', labelProperty:'name', value:5, class:'test', id:'select2' /}
 
 Will output:
 

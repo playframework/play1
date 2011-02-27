@@ -16,3 +16,11 @@
 	assertText('css=#select3 option[value="19"]', '19')
 	assertElementPresent('css=#select3 option[value="5"][selected]')
 #{/selenium}
+
+#{selenium 'Check #select tag comparing selected values using toString()'}
+	open('@{Application.selectTag()}')
+	assertElementPresent('css=#select_long_value_long_sel option[value="5"][selected]')
+	assertElementPresent('css=#select_long_value_int_sel option[value="5"][selected]')
+	assertElementPresent('css=#select_int_value_long_sel option[value="5"][selected]')
+	assertElementPresent('css=#select_int_value_int_sel option[value="5"][selected]')
+#{/selenium}
