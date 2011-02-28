@@ -2,7 +2,6 @@ package play.jobs;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.jamonapi.Monitor;
@@ -57,8 +56,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      */
     public Promise<V> now() {
         final Promise<V> smartFuture = new Promise<V>();
-        Future<V> realFuture = JobsPlugin.executor.submit(new Callable<V>() {
-
+        JobsPlugin.executor.submit(new Callable<V>() {
             public V call() throws Exception {
                 V result =  Job.this.call();
                 smartFuture.invoke(result);
@@ -85,7 +83,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     public Promise<V> in(int seconds) {
         final Promise<V> smartFuture = new Promise<V>();
 
-        Future<V> realFuture = JobsPlugin.executor.schedule(new Callable<V>() {
+        JobsPlugin.executor.schedule(new Callable<V>() {
 
             public V call() throws Exception {
                 V result =  Job.this.call();

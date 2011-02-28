@@ -52,7 +52,6 @@ import play.utils.Java;
 import play.vfs.VirtualFile;
 
 import com.google.gson.JsonSerializer;
-import com.google.gson.reflect.TypeToken;
 import com.thoughtworks.xstream.XStream;
 import java.lang.reflect.Type;
 import org.apache.commons.javaflow.Continuation;
@@ -891,6 +890,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         throw new Suspend(millis);
     }
 
+    @SuppressWarnings("unchecked")
     protected static <T> T await(Future<T> future) {
         if(future != null) {
             Request.current().args.put(ActionInvoker.F, future);

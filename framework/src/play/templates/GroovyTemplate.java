@@ -387,6 +387,7 @@ public class GroovyTemplate extends BaseTemplate {
             }
 
             @Override
+            @SuppressWarnings("unchecked")
             public Object invokeMethod(String name, Object param) {
                 try {
                     if (controller == null) {

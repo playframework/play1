@@ -260,12 +260,14 @@ public class Fixtures {
         return (Map<?,?>)loadYaml(name);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T loadYaml(String name, Class<T> clazz) {
         Yaml yaml = new Yaml(new CustomClassLoaderConstructor(clazz, Play.classloader));
         yaml.setBeanAccess(BeanAccess.FIELD);
         return (T)loadYaml(name, yaml);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T loadYaml(String name, Yaml yaml) {
         VirtualFile yamlFile = null;
         try {

@@ -1,5 +1,6 @@
 package play.libs.ws;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -7,7 +8,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
 
 import oauth.signpost.AbstractOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
@@ -20,6 +20,7 @@ import org.apache.commons.lang.NotImplementedException;
 import play.Logger;
 import play.Play;
 import play.libs.Codec;
+import play.libs.F.Promise;
 import play.libs.MimeTypes;
 import play.libs.OAuth.ServiceInfo;
 import play.libs.OAuth.TokenPair;
@@ -39,7 +40,6 @@ import com.ning.http.client.PerRequestConfig;
 import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Response;
 import com.ning.http.client.StringPart;
-import play.libs.F.Promise;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -264,7 +264,7 @@ public class WSAsync implements WSImpl {
         private Promise<HttpResponse> execute(BoundRequestBuilder builder) {
             try {
                 final Promise<HttpResponse> smartFuture = new Promise<HttpResponse>();
-                Future<HttpResponse> realFuture =  prepare(builder).execute(new AsyncCompletionHandler<HttpResponse>() {
+                prepare(builder).execute(new AsyncCompletionHandler<HttpResponse>() {
                     @Override
                     public HttpResponse onCompleted(Response response) throws Exception {
                         HttpResponse httpResponse = new HttpAsyncResponse(response);
@@ -276,7 +276,7 @@ public class WSAsync implements WSImpl {
                         throw new RuntimeException(t);
                     }
                 });
-                
+
                 return smartFuture;
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -390,6 +390,8 @@ public class WSAsync implements WSImpl {
         public String getString() {
             try {
                 return response.getResponseBody();
+            } catch (IllegalStateException e) {
+                return ""; // Workaround AHC's bug on empty responses
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -403,6 +405,8 @@ public class WSAsync implements WSImpl {
         public InputStream getStream() {
             try {
                 return response.getResponseBodyAsStream();
+            } catch (IllegalStateException e) {
+                return new ByteArrayInputStream(new byte[]{}); // Workaround AHC's bug on empty responses
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
