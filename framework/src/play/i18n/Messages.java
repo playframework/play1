@@ -167,6 +167,8 @@ public class Messages {
      * @return messages as a {@link java.util.Properties java.util.Properties}
      */
     public static Properties all(String locale) {
+        if(locale == null || "".equals(locale))
+            return defaults;
         return locales.get(locale);
     }
 
