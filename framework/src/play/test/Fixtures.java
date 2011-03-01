@@ -35,6 +35,7 @@ import play.db.DBPlugin;
 import play.db.Model;
 import play.exceptions.UnexpectedException;
 import play.exceptions.YAMLException;
+import play.templates.TemplateLoader;
 import play.vfs.VirtualFile;
 
 public class Fixtures {
@@ -146,12 +147,15 @@ public class Fixtures {
                     break;
                 }
             }
-            InputStream is = Play.classloader.getResourceAsStream(name);
-            if (is == null) {
+            if (yamlFile == null) {
                 throw new RuntimeException("Cannot load fixture " + name + ", the file was not found");
             }
+            
+            // Render yaml file with 
+            String renderedYaml = TemplateLoader.load(yamlFile).render();
+            
             Yaml yaml = new Yaml();
-            Object o = yaml.load(is);
+            Object o = yaml.load(renderedYaml);
             if (o instanceof LinkedHashMap<?, ?>) {
                 @SuppressWarnings("unchecked") LinkedHashMap<Object, Map<?, ?>> objects = (LinkedHashMap<Object, Map<?, ?>>) o;
                 for (Object key : objects.keySet()) {

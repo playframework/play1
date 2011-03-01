@@ -1,0 +1,29 @@
+#==============================================================================
+# Tag
+#==============================================================================
+#{list ['China', 'France']}
+vendor.tag.AreaTag(at1${_index}):
+    label:            ${_}
+#{/list}
+#{list ['Wedding', 'Party']}
+vendor.tag.FunctionTag(ft${_index}):
+    label:            ${_}
+#{/list}
+
+#==============================================================================
+# Venue
+#==============================================================================
+vendor.VenueVendor(venue1):
+    tags:             [at11, at12, ft1, ft2]
+vendor.VenueVendor(venue2):
+    tags:             [at11, ft1]
+
+# Bloc
+Bloc(b):
+    name:            Yop
+    created:         2001-11-23T15:03:17-05
+    criterias:
+        ? key1
+        : value1
+        ? key2
+        : value2

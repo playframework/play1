@@ -1,3 +1,5 @@
+import static org.junit.Assert.*;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -9,7 +11,6 @@ import models.vendor.VenueVendor;
 import models.vendor.tag.AreaTag;
 import models.vendor.tag.FunctionTag;
 import models.vendor.tag.Tag;
-import models.Base;
 import models.*;
 
 import org.junit.Before;
@@ -59,6 +60,16 @@ public class FixturesTest extends UnitTest {
         }
 
     }
+    
+    @Test
+	public void loadTemplateData() throws Exception {
+        Fixtures.load("vendor-data-template.yml");
+        assertEquals(2, Vendor.findAll().size());
+        assertEquals(4, Tag.findAll().size());
+        assertEquals(2, AreaTag.findAll().size());
+        assertEquals(2, FunctionTag.findAll().size());
+        assertEquals(2, VenueVendor.findAll().size());
+	}
     
     @Test
     public void checkEmptyReferences() {
