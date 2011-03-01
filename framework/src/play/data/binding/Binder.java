@@ -290,12 +290,11 @@ public class Binder {
     }
 
     public static Object bind(Object o, String name, Map<String, String[]> params) {
-        for (PlayPlugin plugin : Play.plugins) {
-            Object result = plugin.bind(name, o, params);
-            if (result != null) {
-                return result;
-            }
+        Object result = Play.pluginCollection.bind(name, o, params);
+        if (result != null) {
+            return result;
         }
+        
         try {
             return new BeanWrapper(o.getClass()).bind(name, null, params, "", o, null);
         } catch (Exception e) {
@@ -311,13 +310,10 @@ public class Binder {
     public static Object bind(String name, Class<?> clazz, Type type, Annotation[] annotations, Map<String, String[]> params, Object o, Method method, int parameterIndex) {
         Logger.trace("bind: name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] ");
 
-        Object result = null;
         // Let a chance to plugins to bind this object
-        for (PlayPlugin plugin : Play.plugins) {
-            result = plugin.bind(name, clazz, type, annotations, params);
-            if (result != null) {
-                return result;
-            }
+        Object result = Play.pluginCollection.bind(name, clazz, type, annotations, params);
+        if (result != null) {
+            return result;
         }
         String[] profiles = null;
         if (annotations != null) {

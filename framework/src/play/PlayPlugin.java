@@ -263,10 +263,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * Inter-plugin communication.
      */
     public static void postEvent(String message, Object context) {
-        List<PlayPlugin> plugins = Play.plugins;
-        for (PlayPlugin playPlugin : plugins) {
-            playPlugin.onEvent(message, context);
-        }
+        Play.pluginCollection.onEvent(message, context);
     }
 
     public void onApplicationReady() {

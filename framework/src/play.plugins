@@ -7,3 +7,4 @@
 500:play.i18n.MessagesPlugin
 600:play.libs.WS
 700:play.jobs.JobsPlugin
+100000:play.plugins.ConfigurablePluginDisablingPlugin

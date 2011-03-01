@@ -26,12 +26,11 @@ public class TemplateLoader {
      */
     public static Template load(VirtualFile file) {
         // Try with plugin
-        for(PlayPlugin plugin : Play.plugins) {
-            Template pluginProvided = plugin.loadTemplate(file);
-            if(pluginProvided != null) {
-                return pluginProvided;
-            }
+        Template pluginProvided = Play.pluginCollection.loadTemplate(file);
+        if(pluginProvided != null) {
+            return pluginProvided;
         }
+
         // Use default engine
         String key = (file.relativePath().hashCode() + "").replace("-", "M");
         if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {

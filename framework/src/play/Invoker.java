@@ -182,9 +182,7 @@ public class Invoker {
          */
         public void before() {
             Thread.currentThread().setContextClassLoader(Play.classloader);
-            for (PlayPlugin plugin : Play.plugins) {
-                plugin.beforeInvocation();
-            }
+            Play.pluginCollection.beforeInvocation();
         }
 
         /**
@@ -192,9 +190,7 @@ public class Invoker {
          * (if the Invocation code has not thrown any exception)
          */
         public void after() {
-            for (PlayPlugin plugin : Play.plugins) {
-                plugin.afterInvocation();
-            }
+            Play.pluginCollection.afterInvocation();
             LocalVariablesNamesTracer.checkEmpty(); // detect bugs ....
         }
 
@@ -202,21 +198,14 @@ public class Invoker {
          * Things to do when the whole invocation has succeeded (before + execute + after)
          */
         public void onSuccess() throws Exception {
-            for (PlayPlugin plugin : Play.plugins) {
-                plugin.onInvocationSuccess();
-            }
+            Play.pluginCollection.onInvocationSuccess();
         }
 
         /**
          * Things to do if the Invocation code thrown an exception
          */
         public void onException(Throwable e) {
-            for (PlayPlugin plugin : Play.plugins) {
-                try {
-                    plugin.onInvocationException(e);
-                } catch (Throwable ex) {
-                }
-            }
+            Play.pluginCollection.onInvocationException(e);
             if (e instanceof PlayException) {
                 throw (PlayException) e;
             }
@@ -239,9 +228,7 @@ public class Invoker {
          * Things to do in all cases after the invocation.
          */
         public void _finally() {
-            for (PlayPlugin plugin : Play.plugins) {
-                plugin.invocationFinally();
-            }
+            Play.pluginCollection.invocationFinally();
         }
 
         /**

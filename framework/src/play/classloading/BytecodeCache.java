@@ -108,7 +108,7 @@ public class BytecodeCache {
     static String hash(String text) {
         try {
             StringBuffer plugins = new StringBuffer();
-            for(PlayPlugin plugin : Play.plugins) {
+            for(PlayPlugin plugin : Play.pluginCollection.getEnabledPlugins()) {
                 plugins.append(plugin.getClass().getName());
             }
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");

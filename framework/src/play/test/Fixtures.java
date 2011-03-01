@@ -54,9 +54,7 @@ public class Fixtures {
             Model.Manager.factoryFor(type).deleteAll();
         }
         enableForeignKeyConstraints();
-        for(PlayPlugin plugin : Play.plugins) {
-            plugin.afterFixtureLoad();
-        }
+        Play.pluginCollection.afterFixtureLoad();
     }
 
     /**
@@ -115,9 +113,7 @@ public class Fixtures {
                 }
             }
             enableForeignKeyConstraints();
-            for(PlayPlugin plugin : Play.plugins) {
-                plugin.afterFixtureLoad();
-            }
+            Play.pluginCollection.afterFixtureLoad();
         } catch (Exception e) {
             throw new RuntimeException("Cannot delete all table data : " + e.getMessage(), e);
         }
@@ -195,9 +191,7 @@ public class Fixtures {
                 }
             }
             // Most persistence engine will need to clear their state
-            for(PlayPlugin plugin : Play.plugins) {
-                plugin.afterFixtureLoad();
-            }
+            Play.pluginCollection.afterFixtureLoad();
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Class " + e.getMessage() + " was not found", e);
         } catch (ScannerException e) {

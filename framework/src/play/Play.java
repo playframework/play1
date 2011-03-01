@@ -7,14 +7,7 @@ import java.io.LineNumberReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +18,7 @@ import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
 import play.mvc.Router;
+import play.plugins.PluginCollection;
 import play.templates.TemplateLoader;
 import play.utils.OrderSafeProperties;
 import play.vfs.VirtualFile;
@@ -137,10 +131,20 @@ public class Play {
      * The very secret key
      */
     public static String secretKey;
+
+
     /**
-     * Play plugins
+     * pluginCollection that holds all loaded plugins and all enabled plugins..
      */
-    public static List<PlayPlugin> plugins = new ArrayList<PlayPlugin>(16);
+    public static PluginCollection pluginCollection = new PluginCollection();
+    /**
+     * Readonly list containing currently enabled plugins.
+     * This list is updated from pluginCollection when pluginCollection is modified
+     * Play plugins
+     * Use pluginCollection instead.
+     */
+    @Deprecated
+    public static List<PlayPlugin> plugins = pluginCollection.getEnabledPlugins();
     /**
      * Modules
      */
@@ -278,7 +282,7 @@ public class Play {
         }
 
         // Plugins
-        loadPlugins();
+        pluginCollection.loadPlugins();
 
         // Done !
         if (mode == Mode.PROD || System.getProperty("precompile") != null) {
@@ -293,9 +297,7 @@ public class Play {
         }
 
         // Plugins
-        for (PlayPlugin plugin : plugins) {
-            plugin.onApplicationReady();
-        }
+        pluginCollection.onApplicationReady();
     }
 
     /**
@@ -369,9 +371,8 @@ public class Play {
         }
         configuration.putAll(toInclude);
         // Plugins
-        for (PlayPlugin plugin : plugins) {
-            plugin.onConfigurationRead();
-        }
+        pluginCollection.onConfigurationRead();
+
     }
 
     /**
@@ -401,17 +402,8 @@ public class Play {
                 // Need a new classloader
                 classloader = new ApplicationClassloader();
                 // Reload plugins
-                List<PlayPlugin> newPlugins = new ArrayList<PlayPlugin>(16);
-                for (PlayPlugin plugin : plugins) {
-                    if (plugin.getClass().getClassLoader().getClass().equals(ApplicationClassloader.class)) {
-                        PlayPlugin newPlugin = (PlayPlugin) classloader.loadClass(plugin.getClass().getName()).getConstructors()[0].newInstance();
-                        newPlugin.onLoad();
-                        newPlugins.add(newPlugin);
-                    } else {
-                        newPlugins.add(plugin);
-                    }
-                }
-                plugins = newPlugins;
+                pluginCollection.reloadApplicationPlugins();
+
             }
 
             // Reload configuration
@@ -449,18 +441,16 @@ public class Play {
             Cache.init();
 
             // Plugins
-            for (PlayPlugin plugin : plugins) {
-                try {
-                    plugin.onApplicationStart();
-                } catch (Exception e) {
-                    if (Play.mode.isProd()) {
-                        Logger.error(e, "Can't start in PROD mode with errors");
-                    }
-                    if (e instanceof RuntimeException) {
-                        throw (RuntimeException) e;
-                    }
-                    throw new UnexpectedException(e);
+            try {
+                pluginCollection.onApplicationStart();
+            } catch (Exception e) {
+                if (Play.mode.isProd()) {
+                    Logger.error(e, "Can't start in PROD mode with errors");
                 }
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                }
+                throw new UnexpectedException(e);
             }
 
             if (firstStart) {
@@ -473,9 +463,7 @@ public class Play {
             startedAt = System.currentTimeMillis();
 
             // Plugins
-            for (PlayPlugin plugin : plugins) {
-                plugin.afterApplicationStart();
-            }
+            pluginCollection.afterApplicationStart();
 
         } catch (PlayException e) {
             started = false;
@@ -490,12 +478,10 @@ public class Play {
      * Stop the application
      */
     public static synchronized void stop() {
-        if( started ){
+        if (started) {
             Logger.trace("Stopping the play application");
             started = false;
-            for (PlayPlugin plugin : plugins) {
-                plugin.onApplicationStop();
-            }
+            pluginCollection.onApplicationStop();
             Cache.stop();
             Router.lastLoading = 0L;
         }
@@ -551,18 +537,14 @@ public class Play {
             return;
         }
         try {
-            for (PlayPlugin plugin : plugins) {
-                plugin.beforeDetectingChanges();
-            }
+            pluginCollection.beforeDetectingChanges();
             classloader.detectChanges();
             Router.detectChanges(ctxPath);
             if (conf.lastModified() > startedAt) {
                 start();
                 return;
             }
-            for (PlayPlugin plugin : plugins) {
-                plugin.detectChange();
-            }
+            pluginCollection.detectChange();
             if (!Play.started) {
                 throw new RuntimeException("Not started");
             }
@@ -576,47 +558,10 @@ public class Play {
 
     @SuppressWarnings("unchecked")
     public static <T> T plugin(Class<T> clazz) {
-        for (PlayPlugin p : plugins) {
-            if (clazz.isInstance(p)) {
-                return (T) p;
-            }
-        }
-        return null;
+        return (T)pluginCollection.getPluginInstance((Class<? extends PlayPlugin>)clazz);
     }
 
-    /**
-     * Enable found plugins
-     */
-    public static void loadPlugins() {
-        Logger.trace("Loading plugins");
-        // Play! plugings
-        Enumeration<URL> urls = null;
-        try {
-            urls = Play.classloader.getResources("play.plugins");
-        } catch (Exception e) {
-        }
-        while (urls != null && urls.hasMoreElements()) {
-            URL url = urls.nextElement();
-            Logger.trace("Found one plugins descriptor, %s", url);
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
-                String line = null;
-                while ((line = reader.readLine()) != null) {
-                    String[] infos = line.split(":");
-                    PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(infos[1].trim()).newInstance();
-                    Logger.trace("Loaded plugin %s", plugin);
-                    plugin.index = Integer.parseInt(infos[0]);
-                    plugins.add(plugin);
-                }
-            } catch (Exception ex) {
-                Logger.error(ex, "Cannot load %s", url);
-            }
-        }
-        Collections.sort(plugins);
-        for (PlayPlugin plugin : new ArrayList<PlayPlugin>(plugins)) { // wrap a new collection to allow some plugins to modify the list
-            plugin.onLoad();
-        }
-    }
+
 
     /**
      * Allow some code to run very early in Play - Use with caution !
