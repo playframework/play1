@@ -7,14 +7,7 @@ import java.io.LineNumberReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +18,7 @@ import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
 import play.mvc.Router;
+import play.plugins.PluginCollection;
 import play.templates.TemplateLoader;
 import play.utils.OrderSafeProperties;
 import play.vfs.VirtualFile;
@@ -132,10 +126,18 @@ public class Play {
      * The very secret key
      */
     public static String secretKey;
+
+
     /**
+     * pluginCollection that holds all loaded plugins and all enabled plugins..
+     */
+    public static PluginCollection pluginCollection = new PluginCollection();
+    /**
+     * Readonly list containing currently enabled plugins.
+     * This list is updated from pluginCollection when pluginCollection is modified
      * Play plugins
      */
-    public static List<PlayPlugin> plugins = new ArrayList<PlayPlugin>(16);
+    public static List<PlayPlugin> plugins = pluginCollection.getEnabledPlugins();
     /**
      * Modules
      */
@@ -380,17 +382,41 @@ public class Play {
                 // Need a new classloader
                 classloader = new ApplicationClassloader();
                 // Reload plugins
-                List<PlayPlugin> newPlugins = new ArrayList<PlayPlugin>(16);
-                for (PlayPlugin plugin : plugins) {
+                PluginCollection oldPluginCollection = pluginCollection;
+                pluginCollection = new PluginCollection();
+
+                Set<PlayPlugin> reloadedPlugins = new HashSet<PlayPlugin>();
+
+                for (PlayPlugin plugin : oldPluginCollection.getAllPlugins()) {
+
+                    boolean pluginAlreadyDisabled = oldPluginCollection.isEnabled(plugin) == false;
+
+                    //check if this plugin has been recompiled
                     if (plugin.getClass().getClassLoader().getClass().equals(ApplicationClassloader.class)) {
+                        //This plugin has been recompiled - must create new instance and must initialize it
                         PlayPlugin newPlugin = (PlayPlugin) classloader.loadClass(plugin.getClass().getName()).getConstructors()[0].newInstance();
-                        newPlugin.onLoad();
-                        newPlugins.add(newPlugin);
-                    } else {
-                        newPlugins.add(plugin);
+                        plugin = newPlugin;
+                        reloadedPlugins.add( plugin );
+                    }
+                    pluginCollection.addPlugin(plugin);
+                    //must "forward" this plugin's enable/disable-status
+                    if( pluginAlreadyDisabled ){
+                        //must disable it in new collection
+                        pluginCollection.disablePlugin( plugin );
                     }
                 }
-                plugins = newPlugins;
+
+                //now we must call onLoad for all reloaded plugins
+                for( PlayPlugin plugin : pluginCollection.getAllPlugins() ){
+                    if( reloadedPlugins.contains( plugin )){
+                        //this plugin was reloaded - initialize it
+                        initializePlugin( plugin );
+                    }else{
+                        int a = 0;
+                    }
+                }
+
+                pluginCollection.updayePlayPluginsList();
             }
 
             // Reload configuration
@@ -579,17 +605,51 @@ public class Play {
                     PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(infos[1].trim()).newInstance();
                     Logger.trace("Loaded plugin %s", plugin);
                     plugin.index = Integer.parseInt(infos[0]);
-                    plugins.add(plugin);
+                    pluginCollection.addPlugin( plugin );
                 }
             } catch (Exception ex) {
                 Logger.error(ex, "Cannot load %s", url);
             }
         }
-        Collections.sort(plugins);
-        for (PlayPlugin plugin : new ArrayList<PlayPlugin>(plugins)) { // wrap a new collection to allow some plugins to modify the list
-            plugin.onLoad();
+
+
+        //let's get the list of all enabled plugins
+        List<PlayPlugin> enabledPlugins = pluginCollection.getEnabledPlugins();
+
+
+        //now we must call onLoad for all plugins - and we must detect if a plugin
+        //disables another plugin the old way, by removing it from Play.plugins.
+        for( PlayPlugin plugin : enabledPlugins){
+
+            //is this plugin still enabled?
+            if( pluginCollection.isEnabled( plugin )){
+                initializePlugin(plugin);
+            }
+        }
+
+        //must update Play.plugins-list one last time
+        pluginCollection.updayePlayPluginsList();
+
+    }
+
+    private static void initializePlugin(PlayPlugin plugin) {
+        Logger.trace("Initializing plugin " + plugin);
+        //we're ready to call onLoad for this plugin.
+        //must create a unique Play.plugins-list for this onLoad-method-call so
+        //we can detect if some plugins are removed/disabled
+        plugins = new ArrayList<PlayPlugin>( pluginCollection.getEnabledPlugins() );
+        plugin.onLoad();
+        //check for missing/removed plugins
+        for( PlayPlugin enabledPlugin : pluginCollection.getEnabledPlugins()){
+            if( !plugins.contains( enabledPlugin)) {
+                Logger.info("Detected that plugin '" + plugin + "' disabled the plugin '" + enabledPlugin + "' the old way - should use Play.disablePlugin()");
+                //this enabled plugin was disabled.
+                //must disable it in pluginCollection
+                pluginCollection.disablePlugin( enabledPlugin);
+            }
         }
     }
+
 
     /**
      * Allow some code to run very early in Play - Use with caution !
