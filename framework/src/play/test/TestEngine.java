@@ -92,11 +92,9 @@ public class TestEngine {
             // Load test class
             final Class testClass = Play.classloader.loadClass(name);
 
-            for (PlayPlugin plugin : Play.plugins) {
-                TestResults pluginTestResults = plugin.runTest(testClass);
-                if (pluginTestResults != null) {
-                    return pluginTestResults;
-                }
+            TestResults pluginTestResults = Play.pluginCollection.runTest(testClass);
+            if (pluginTestResults != null) {
+                return pluginTestResults;
             }
 
             JUnitCore junit = new JUnitCore();

@@ -82,13 +82,12 @@ public class Messages {
 
     public static String getMessage(String locale, Object key, Object... args) {
         // Check if there is a plugin that handles translation
-        for (PlayPlugin plugin : Play.plugins) {
-            String message = plugin.getMessage(locale, key, args);
-            if(message != null) {
-                return message;
-            }
-        }
+        String message = Play.pluginCollection.getMessage(locale, key, args);
 
+        if(message != null) {
+            return message;
+        }
+    
         String value = null;
         if( key == null ) {
             return "";

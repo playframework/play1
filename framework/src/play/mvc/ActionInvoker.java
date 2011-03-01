@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.PatternLayout;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -69,13 +70,9 @@ public class ActionInvoker {
 
         // Route and resolve format if not already done
         if (request.action == null) {
-            for (PlayPlugin plugin : Play.plugins) {
-                plugin.routeRequest(request);
-            }
+            Play.pluginCollection.routeRequest(request);
             Route route = Router.route(request);
-            for (PlayPlugin plugin : Play.plugins) {
-                plugin.onRequestRouting(route);
-            }
+            Play.pluginCollection.onRequestRouting(route);
         }
         request.resolveFormat();
 
@@ -127,9 +124,7 @@ public class ActionInvoker {
             }
 
             ControllerInstrumentation.stopActionCall();
-            for (PlayPlugin plugin : Play.plugins) {
-                plugin.beforeActionInvocation(actionMethod);
-            }
+            Play.pluginCollection.beforeActionInvocation(actionMethod);
 
             // Monitoring
             monitor = MonitorFactory.start(request.action + "()");
@@ -233,9 +228,7 @@ public class ActionInvoker {
 
         } catch (Result result) {
 
-            for (PlayPlugin plugin : Play.plugins) {
-                plugin.onActionInvocationResult(result);
-            }
+            Play.pluginCollection.onActionInvocationResult(result);
 
             // OK there is a result to apply
             // Save session & flash scope now
@@ -245,9 +238,7 @@ public class ActionInvoker {
 
             result.apply(request, response);
 
-            for (PlayPlugin plugin : Play.plugins) {
-                plugin.afterActionInvocation();
-            }
+            Play.pluginCollection.afterActionInvocation();
 
             // @Finally
             if (Controller.getControllerClass() != null) {

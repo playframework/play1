@@ -26,13 +26,12 @@ public class Unbinder {
     }
 
     private static void unBind(Map<String, Object> result, Object src, Class<?> srcClazz, String name) {
-        for (PlayPlugin plugin : Play.plugins) {
-            Map<String, Object> r = plugin.unBind(src, name);
-            if (r != null) {
-                result.putAll(r);
-                return;
-            }
+        Map<String, Object> r = Play.pluginCollection.unBind(src, name);
+        if (r != null) {
+            result.putAll(r);
+            return;
         }
+        
         if (isDirect(srcClazz) || src == null) {
             if (!result.containsKey(name)) {
                 result.put(name, src != null ? src.toString() : null);

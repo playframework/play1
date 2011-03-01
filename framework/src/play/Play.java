@@ -137,6 +137,7 @@ public class Play {
      * This list is updated from pluginCollection when pluginCollection is modified
      * Play plugins
      */
+    @Deprecated
     public static List<PlayPlugin> plugins = pluginCollection.getEnabledPlugins();
     /**
      * Modules
@@ -286,9 +287,7 @@ public class Play {
         }
 
         // Plugins
-        for (PlayPlugin plugin : plugins) {
-            plugin.onApplicationReady();
-        }
+        pluginCollection.onApplicationReady();
     }
 
     /**
@@ -362,9 +361,8 @@ public class Play {
         }
         configuration.putAll(toInclude);
         // Plugins
-        for (PlayPlugin plugin : plugins) {
-            plugin.onConfigurationRead();
-        }
+        pluginCollection.onConfigurationRead();
+
     }
 
     /**
@@ -451,18 +449,16 @@ public class Play {
             Cache.init();
 
             // Plugins
-            for (PlayPlugin plugin : plugins) {
-                try {
-                    plugin.onApplicationStart();
-                } catch (Exception e) {
-                    if (Play.mode.isProd()) {
-                        Logger.error(e, "Can't start in PROD mode with errors");
-                    }
-                    if (e instanceof RuntimeException) {
-                        throw (RuntimeException) e;
-                    }
-                    throw new UnexpectedException(e);
+            try {
+                pluginCollection.onApplicationStart();
+            } catch (Exception e) {
+                if (Play.mode.isProd()) {
+                    Logger.error(e, "Can't start in PROD mode with errors");
                 }
+                if (e instanceof RuntimeException) {
+                    throw (RuntimeException) e;
+                }
+                throw new UnexpectedException(e);
             }
 
             if (firstStart) {
@@ -475,9 +471,7 @@ public class Play {
             startedAt = System.currentTimeMillis();
 
             // Plugins
-            for (PlayPlugin plugin : plugins) {
-                plugin.afterApplicationStart();
-            }
+            pluginCollection.afterApplicationStart();
 
         } catch (PlayException e) {
             started = false;
@@ -493,9 +487,7 @@ public class Play {
      */
     public static synchronized void stop() {
         started = false;
-        for (PlayPlugin plugin : plugins) {
-            plugin.onApplicationStop();
-        }
+        pluginCollection.onApplicationStop();
         Cache.stop();
         Router.lastLoading = 0L;
     }
@@ -550,18 +542,14 @@ public class Play {
             return;
         }
         try {
-            for (PlayPlugin plugin : plugins) {
-                plugin.beforeDetectingChanges();
-            }
+            pluginCollection.beforeDetectingChanges();
             classloader.detectChanges();
             Router.detectChanges(ctxPath);
             if (conf.lastModified() > startedAt) {
                 start();
                 return;
             }
-            for (PlayPlugin plugin : plugins) {
-                plugin.detectChange();
-            }
+            pluginCollection.detectChange();
             if (!Play.started) {
                 throw new RuntimeException("Not started");
             }
@@ -575,12 +563,7 @@ public class Play {
 
     @SuppressWarnings("unchecked")
     public static <T> T plugin(Class<T> clazz) {
-        for (PlayPlugin p : plugins) {
-            if (clazz.isInstance(p)) {
-                return (T) p;
-            }
-        }
-        return null;
+        return (T)pluginCollection.getPluginInstance((Class<? extends PlayPlugin>)clazz);
     }
 
     /**

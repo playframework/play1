@@ -26,9 +26,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     public BaseTemplate compile(BaseTemplate template) {
         try {
             extensionsClassnames.clear();
-            for(PlayPlugin p : Play.plugins) {
-                extensionsClassnames.addAll(p.addTemplateExtensions());
-            }
+            extensionsClassnames.addAll( Play.pluginCollection.addTemplateExtensions());
             List<Class> extensionsClasses = Play.classloader.getAssignableClasses(JavaExtensions.class);
             for (Class extensionsClass : extensionsClasses) {
                 extensionsClassnames.add(extensionsClass.getName());
@@ -44,12 +42,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         String source = template.source;
 
         // If a plugin has something to change in the template before the compilation
-        for(PlayPlugin plugin : Play.plugins) {
-            String newSource = plugin.overrideTemplateSource(template, source);
-            if(newSource != null) {
-                source = newSource;
-            }
-        }
+        source = Play.pluginCollection.overrideTemplateSource(template, source);
 
         // Static access
         List<String> names = new ArrayList<String>();

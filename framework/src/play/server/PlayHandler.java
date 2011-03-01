@@ -122,13 +122,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                 });
 
                 // Raw invocation
-                boolean raw = false;
-                for (PlayPlugin plugin : Play.plugins) {
-                    if (plugin.rawInvocation(request, response)) {
-                        raw = true;
-                        break;
-                    }
-                }
+                boolean raw = Play.pluginCollection.rawInvocation(request, response);
                 if (raw) {
                     copyResponse(ctx, request, response, nettyRequest);
                 } else {
@@ -762,13 +756,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             if ((file == null || !file.exists())) {
                 serve404(new NotFound("The file " + renderStatic.file + " does not exist"), ctx, request, nettyRequest);
             } else {
-                boolean raw = false;
-                for (PlayPlugin plugin : Play.plugins) {
-                    if (plugin.serveStatic(file, Request.current(), Response.current())) {
-                        raw = true;
-                        break;
-                    }
-                }
+                boolean raw = Play.pluginCollection.serveStatic(file, Request.current(), Response.current());
                 if (raw) {
                     copyResponse(ctx, request, response, nettyRequest);
                 } else {

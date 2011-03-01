@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.log4j.PatternLayout;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -287,9 +289,7 @@ public class ApplicationClassloader extends ClassLoader {
         Set<ApplicationClass> modifiedWithDependencies = new HashSet<ApplicationClass>();
         modifiedWithDependencies.addAll(modifieds);
         if (modifieds.size() > 0) {
-            for (PlayPlugin plugin : Play.plugins) {
-                modifiedWithDependencies.addAll(plugin.onClassesChange(modifieds));
-            }
+            modifiedWithDependencies.addAll(Play.pluginCollection.onClassesChange(modifieds));
         }
         List<ClassDefinition> newDefinitions = new ArrayList<ClassDefinition>();
         boolean dirtySig = false;
@@ -401,9 +401,7 @@ public class ApplicationClassloader extends ClassLoader {
                 List<ApplicationClass> all = new ArrayList<ApplicationClass>();
 
                 // Let's plugins play
-                for (PlayPlugin plugin : Play.plugins) {
-                    plugin.compileAll(all);
-                }
+                Play.pluginCollection.compileAll(all);
 
                 for (VirtualFile virtualFile : Play.javaPath) {
                     all.addAll(getAllClasses(virtualFile));

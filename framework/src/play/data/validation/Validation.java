@@ -460,12 +460,6 @@ public class Validation {
     }
 
     public static Object willBeValidated(Object value) {
-        for (PlayPlugin plugin : Play.plugins) {
-            Object newValue = plugin.willBeValidated(value);
-            if (newValue != null) {
-                return newValue;
-            }
-        }
-        return value;
+        return Play.pluginCollection.willBeValidated(value);
     }
 }

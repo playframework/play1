@@ -51,9 +51,7 @@ public class Router {
         parse(Play.routes, prefix);
         lastLoading = System.currentTimeMillis();
         // Plugins
-        for (PlayPlugin plugin : Play.plugins) {
-            plugin.onRoutesLoaded();
-        }
+        Play.pluginCollection.onRoutesLoaded();
     }
 
     /**
