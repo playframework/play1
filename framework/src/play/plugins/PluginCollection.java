@@ -25,11 +25,15 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * Created by IntelliJ IDEA.
- * User: mortenkjetland
- * Date: 2/28/11
- * Time: 11:29 PM
- * To change this template use File | Settings | File Templates.
+ * Class handling all plugins used by Play.
+ *
+ * Loading/reloading/enabling/disabling is handled here.
+ *
+ * This class also exposes many PlayPlugin-methods which
+ * when called, the method is executed on all enabled plugins.
+ *
+ * Since all the enabled-plugins-iteration is done here,
+ * the code elsewhere is cleaner.
  */
 public class PluginCollection {
 
@@ -267,6 +271,15 @@ public class PluginCollection {
         return false;
     }
 
+    /**
+     * disable plugin of specified type
+     * @return true if plugin was enabled and now is disabled
+     */
+    public boolean disablePlugin( Class<? extends PlayPlugin> pluginClazz ){
+        return disablePlugin( getPluginInstance( pluginClazz));
+    }
+
+
 
     /**
      * Must update Play.plugins-list to be backward compatible
@@ -276,13 +289,6 @@ public class PluginCollection {
         Play.plugins = Collections.unmodifiableList( getEnabledPlugins() );
     }
 
-    /**
-     * disable plugin of specified type
-     * @return true if plugin was enabled and now is disabled
-     */
-    public boolean disablePlugin( Class<? extends PlayPlugin> pluginClazz ){
-        return disablePlugin( getPluginInstance( pluginClazz));
-    }
 
     /**
      * Returns new readonly list of all enabled plugins

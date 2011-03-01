@@ -273,7 +273,7 @@ public class Play {
         }
 
         // Plugins
-        loadPlugins();
+        pluginCollection.loadPlugins();
 
         // Done !
         if (mode == Mode.PROD || System.getProperty("precompile") != null) {
@@ -533,14 +533,6 @@ public class Play {
     public static <T> T plugin(Class<T> clazz) {
         return (T)pluginCollection.getPluginInstance((Class<? extends PlayPlugin>)clazz);
     }
-
-    /**
-     * Enable found plugins
-     */
-    public static void loadPlugins() {
-        pluginCollection.loadPlugins();
-    }
-
 
 
 
