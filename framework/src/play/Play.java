@@ -136,6 +136,7 @@ public class Play {
      * Readonly list containing currently enabled plugins.
      * This list is updated from pluginCollection when pluginCollection is modified
      * Play plugins
+     * Use pluginCollection instead.
      */
     @Deprecated
     public static List<PlayPlugin> plugins = pluginCollection.getEnabledPlugins();
@@ -380,41 +381,8 @@ public class Play {
                 // Need a new classloader
                 classloader = new ApplicationClassloader();
                 // Reload plugins
-                PluginCollection oldPluginCollection = pluginCollection;
-                pluginCollection = new PluginCollection();
+                pluginCollection.reloadApplicationPlugins();
 
-                Set<PlayPlugin> reloadedPlugins = new HashSet<PlayPlugin>();
-
-                for (PlayPlugin plugin : oldPluginCollection.getAllPlugins()) {
-
-                    boolean pluginAlreadyDisabled = oldPluginCollection.isEnabled(plugin) == false;
-
-                    //check if this plugin has been recompiled
-                    if (plugin.getClass().getClassLoader().getClass().equals(ApplicationClassloader.class)) {
-                        //This plugin has been recompiled - must create new instance and must initialize it
-                        PlayPlugin newPlugin = (PlayPlugin) classloader.loadClass(plugin.getClass().getName()).getConstructors()[0].newInstance();
-                        plugin = newPlugin;
-                        reloadedPlugins.add( plugin );
-                    }
-                    pluginCollection.addPlugin(plugin);
-                    //must "forward" this plugin's enable/disable-status
-                    if( pluginAlreadyDisabled ){
-                        //must disable it in new collection
-                        pluginCollection.disablePlugin( plugin );
-                    }
-                }
-
-                //now we must call onLoad for all reloaded plugins
-                for( PlayPlugin plugin : pluginCollection.getAllPlugins() ){
-                    if( reloadedPlugins.contains( plugin )){
-                        //this plugin was reloaded - initialize it
-                        initializePlugin( plugin );
-                    }else{
-                        int a = 0;
-                    }
-                }
-
-                pluginCollection.updayePlayPluginsList();
             }
 
             // Reload configuration
@@ -570,68 +538,10 @@ public class Play {
      * Enable found plugins
      */
     public static void loadPlugins() {
-        Logger.trace("Loading plugins");
-        // Play! plugings
-        Enumeration<URL> urls = null;
-        try {
-            urls = Play.classloader.getResources("play.plugins");
-        } catch (Exception e) {
-        }
-        while (urls != null && urls.hasMoreElements()) {
-            URL url = urls.nextElement();
-            Logger.trace("Found one plugins descriptor, %s", url);
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
-                String line = null;
-                while ((line = reader.readLine()) != null) {
-                    String[] infos = line.split(":");
-                    PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(infos[1].trim()).newInstance();
-                    Logger.trace("Loaded plugin %s", plugin);
-                    plugin.index = Integer.parseInt(infos[0]);
-                    pluginCollection.addPlugin( plugin );
-                }
-            } catch (Exception ex) {
-                Logger.error(ex, "Cannot load %s", url);
-            }
-        }
-
-
-        //let's get the list of all enabled plugins
-        List<PlayPlugin> enabledPlugins = pluginCollection.getEnabledPlugins();
-
-
-        //now we must call onLoad for all plugins - and we must detect if a plugin
-        //disables another plugin the old way, by removing it from Play.plugins.
-        for( PlayPlugin plugin : enabledPlugins){
-
-            //is this plugin still enabled?
-            if( pluginCollection.isEnabled( plugin )){
-                initializePlugin(plugin);
-            }
-        }
-
-        //must update Play.plugins-list one last time
-        pluginCollection.updayePlayPluginsList();
-
+        pluginCollection.loadPlugins();
     }
 
-    private static void initializePlugin(PlayPlugin plugin) {
-        Logger.trace("Initializing plugin " + plugin);
-        //we're ready to call onLoad for this plugin.
-        //must create a unique Play.plugins-list for this onLoad-method-call so
-        //we can detect if some plugins are removed/disabled
-        plugins = new ArrayList<PlayPlugin>( pluginCollection.getEnabledPlugins() );
-        plugin.onLoad();
-        //check for missing/removed plugins
-        for( PlayPlugin enabledPlugin : pluginCollection.getEnabledPlugins()){
-            if( !plugins.contains( enabledPlugin)) {
-                Logger.info("Detected that plugin '" + plugin + "' disabled the plugin '" + enabledPlugin + "' the old way - should use Play.disablePlugin()");
-                //this enabled plugin was disabled.
-                //must disable it in pluginCollection
-                pluginCollection.disablePlugin( enabledPlugin);
-            }
-        }
-    }
+
 
 
     /**

@@ -4,6 +4,7 @@ import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses;
+import play.classloading.ApplicationClassloader;
 import play.db.Model;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http;
@@ -15,9 +16,12 @@ import play.test.BaseTest;
 import play.test.TestEngine;
 import play.vfs.VirtualFile;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -30,8 +34,133 @@ import java.util.*;
 public class PluginCollection {
 
     protected Object lock = new Object();
+    /**
+     * List that holds all loaded plugins, enabled or disabled
+     */
     protected List<PlayPlugin> allPlugins = new ArrayList<PlayPlugin>();
+
+    /**
+     * Readonly copy of allPlugins - updated each time allPlugins is updated.
+     * Using this cached copy so we don't have to create it all the time..
+     */
+    protected List<PlayPlugin> allPlugins_readOnlyCopy = createReadonlyCopy(allPlugins);
+
+    /**
+     * List of all enabled plugins
+     */
     protected List<PlayPlugin> enabledPlugins = new ArrayList<PlayPlugin>();
+
+    /**
+     * Readonly copy of enabledPlugins - updated each time enabledPlugins is updated.
+     * Using this cached copy so we don't have to create it all the time
+     */
+    protected List<PlayPlugin> enabledPlugins_readOnlyCopy = createReadonlyCopy(enabledPlugins);
+
+
+    /**
+     * Using readonly list to crash if someone tries to modify the copy.
+     * @param list
+     * @return
+     */
+    protected List<PlayPlugin> createReadonlyCopy( List<PlayPlugin> list ){
+        return Collections.unmodifiableList( new ArrayList<PlayPlugin>( list ));
+    }
+
+    /**
+     * Enable found plugins
+     */
+    public void loadPlugins() {
+        Logger.trace("Loading plugins");
+        // Play! plugings
+        Enumeration<URL> urls = null;
+        try {
+            urls = Play.classloader.getResources("play.plugins");
+        } catch (Exception e) {
+        }
+        while (urls != null && urls.hasMoreElements()) {
+            URL url = urls.nextElement();
+            Logger.trace("Found one plugins descriptor, %s", url);
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    String[] infos = line.split(":");
+                    PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(infos[1].trim()).newInstance();
+                    Logger.trace("Loaded plugin %s", plugin);
+                    plugin.index = Integer.parseInt(infos[0]);
+                    addPlugin(plugin);
+                }
+            } catch (Exception ex) {
+                Logger.error(ex, "Cannot load %s", url);
+            }
+        }
+
+        //now we must call onLoad for all plugins - and we must detect if a plugin
+        //disables another plugin the old way, by removing it from Play.plugins.
+        for( PlayPlugin plugin : getEnabledPlugins()){
+
+            //is this plugin still enabled?
+            if( isEnabled(plugin)){
+                initializePlugin(plugin);
+            }
+        }
+
+        //must update Play.plugins-list one last time
+        updatePlayPluginsList();
+
+    }
+
+    /**
+     * Reloads all loaded plugins that is application-supplied.
+     */
+    public void reloadApplicationPlugins() throws Exception{
+        Set<PlayPlugin> reloadedPlugins = new HashSet<PlayPlugin>();
+
+        for (PlayPlugin plugin : getAllPlugins()) {
+
+            //Is this plugin an application-supplied-plugin?
+            if (plugin.getClass().getClassLoader().getClass().equals(ApplicationClassloader.class)) {
+                //This plugin is application-supplied - Must reload it
+                PlayPlugin newPlugin = (PlayPlugin) Play.classloader.loadClass(plugin.getClass().getName()).getConstructors()[0].newInstance();
+                //replace this plugin
+                replacePlugin(plugin, newPlugin);
+                reloadedPlugins.add(newPlugin);
+            }
+        }
+
+        //now we must call onLoad for all reloaded plugins
+        for( PlayPlugin plugin : reloadedPlugins ){
+            initializePlugin( plugin );
+        }
+
+        updatePlayPluginsList();
+
+    }
+
+
+    /**
+     * Calls plugin.onLoad but detects if plugin removes other plugins from Play.plugins-list to detect
+     * if plugins disables a plugin the old hacked way..
+     * @param plugin
+     */
+    @SuppressWarnings({"deprecation"})
+    protected void initializePlugin(PlayPlugin plugin) {
+        Logger.trace("Initializing plugin " + plugin);
+        //we're ready to call onLoad for this plugin.
+        //must create a unique Play.plugins-list for this onLoad-method-call so
+        //we can detect if some plugins are removed/disabled
+        Play.plugins = new ArrayList<PlayPlugin>( getEnabledPlugins() );
+        plugin.onLoad();
+        //check for missing/removed plugins
+        for( PlayPlugin enabledPlugin : getEnabledPlugins()){
+            if( !Play.plugins.contains( enabledPlugin)) {
+                Logger.info("Detected that plugin '" + plugin + "' disabled the plugin '" + enabledPlugin + "' the old way - should use Play.disablePlugin()");
+                //this enabled plugin was disabled.
+                //must disable it in pluginCollection
+                disablePlugin( enabledPlugin);
+            }
+        }
+    }
 
 
     /**
@@ -39,15 +168,34 @@ public class PluginCollection {
      * @param plugin
      * @return true if plugin was new and was added
      */
-    public boolean addPlugin( PlayPlugin plugin ){
+    protected boolean addPlugin( PlayPlugin plugin ){
         synchronized( lock ){
             if( !allPlugins.contains(plugin) ){
                 allPlugins.add( plugin );
+                Collections.sort(allPlugins);
+                allPlugins_readOnlyCopy = createReadonlyCopy( allPlugins);
                 enablePlugin(plugin);
                 return true;
             }
         }
         return false;
+    }
+
+    protected void replacePlugin( PlayPlugin oldPlugin, PlayPlugin newPlugin){
+        synchronized( lock ){
+            if( allPlugins.remove( oldPlugin )){
+                allPlugins.add( newPlugin);
+                Collections.sort( allPlugins);
+                allPlugins_readOnlyCopy = createReadonlyCopy( allPlugins);
+            }
+
+            if( enabledPlugins.remove( oldPlugin )){
+                enabledPlugins.add(newPlugin);
+                Collections.sort( enabledPlugins);
+                enabledPlugins_readOnlyCopy = createReadonlyCopy( enabledPlugins);
+            }
+
+        }
     }
 
     /**
@@ -64,7 +212,8 @@ public class PluginCollection {
                     //plugin not currently enabled
                     enabledPlugins.add( plugin );
                     Collections.sort( enabledPlugins);
-                    updayePlayPluginsList();
+                    enabledPlugins_readOnlyCopy = createReadonlyCopy( enabledPlugins);
+                    updatePlayPluginsList();
                     Logger.trace("Plugin " + plugin + " enabled");
                     return true;
                 }
@@ -89,7 +238,7 @@ public class PluginCollection {
      */
     public PlayPlugin getPluginInstance( Class<? extends PlayPlugin> pluginClazz){
         synchronized( lock ){
-            for( PlayPlugin p : allPlugins){
+            for( PlayPlugin p : getAllPlugins()){
                 if (pluginClazz.isInstance(p)) {
                     return p;
                 }
@@ -109,7 +258,8 @@ public class PluginCollection {
             //try to disable it?
             if( enabledPlugins.remove( plugin ) ){
                 //plugin was removed
-                updayePlayPluginsList();
+                enabledPlugins_readOnlyCopy = createReadonlyCopy( enabledPlugins);
+                updatePlayPluginsList();
                 Logger.trace("Plugin " + plugin + " disabled");
                 return true;
             }
@@ -119,9 +269,10 @@ public class PluginCollection {
 
 
     /**
-     * Must update Play.plugins-list everything relies on this list..
+     * Must update Play.plugins-list to be backward compatible
      */
-    public void updayePlayPluginsList(){
+    @SuppressWarnings({"deprecation"})
+    public void updatePlayPluginsList(){
         Play.plugins = Collections.unmodifiableList( getEnabledPlugins() );
     }
 
@@ -138,9 +289,7 @@ public class PluginCollection {
      * @return
      */
     public List<PlayPlugin> getEnabledPlugins(){
-        synchronized( lock ){
-            return Collections.unmodifiableList(enabledPlugins);
-        }
+        return enabledPlugins_readOnlyCopy;
     }
 
     /**
@@ -148,10 +297,7 @@ public class PluginCollection {
      * @return
      */
     public List<PlayPlugin> getAllPlugins(){
-        synchronized( lock ){
-            Collections.sort( allPlugins);
-            return Collections.unmodifiableList(allPlugins);
-        }
+        return allPlugins_readOnlyCopy;
     }
 
 
@@ -161,9 +307,7 @@ public class PluginCollection {
      * @return true if plugin is enabled
      */
     public boolean isEnabled( PlayPlugin plugin){
-        synchronized( lock ){
-            return enabledPlugins.contains( plugin );
-        }
+        return getEnabledPlugins().contains( plugin );
     }
 
     public void invocationFinally(){
