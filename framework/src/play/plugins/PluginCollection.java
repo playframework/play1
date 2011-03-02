@@ -80,6 +80,7 @@ public class PluginCollection {
         try {
             urls = Play.classloader.getResources("play.plugins");
         } catch (Exception e) {
+            Logger.error("Error loading play.plugins", e);
         }
         while (urls != null && urls.hasMoreElements()) {
             URL url = urls.nextElement();

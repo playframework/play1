@@ -4,7 +4,12 @@ import org.junit.Before;
 import org.junit.Test;
 import play.Play;
 import play.PlayPlugin;
+import play.classloading.ApplicationClasses;
+import play.classloading.ApplicationClassloader;
+import play.vfs.VirtualFile;
 
+import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -132,6 +137,21 @@ public class ConfigurablePluginDisablingPluginTest {
 
         internalTest(config, pc, Arrays.asList(p,p2));
 
+    }
+
+    @Test
+    public void verify_that_the_plugin_gets_loaded(){
+        PluginCollection pc = new PluginCollection();
+
+        Play.configuration = new Properties();
+        Play.classes = new ApplicationClasses();
+        Play.javaPath = new ArrayList<VirtualFile>();
+        Play.applicationPath = new File(".");
+        Play.classloader = new ApplicationClassloader();
+        pc.loadPlugins();
+        PlayPlugin pi = pc.getPluginInstance(ConfigurablePluginDisablingPlugin.class);
+        assertThat(pi).isInstanceOf(ConfigurablePluginDisablingPlugin.class);
+        assertThat(pc.getEnabledPlugins()).contains( pi );
     }
 
 
