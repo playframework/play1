@@ -19,6 +19,9 @@
         <fileset dir="lib">
             <include name="*.jar"/>
         </fileset>
+        <fileset dir="lib-test">
+            <include name="*.jar"/>
+        </fileset>
     </path>
 
     <target name="clean" description="clean resources">
