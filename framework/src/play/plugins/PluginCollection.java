@@ -90,9 +90,13 @@ public class PluginCollection {
                 while ((line = reader.readLine()) != null) {
                     String[] infos = line.split(":");
                     PlayPlugin plugin = (PlayPlugin) Play.classloader.loadClass(infos[1].trim()).newInstance();
-                    Logger.trace("Loaded plugin %s", plugin);
+
                     plugin.index = Integer.parseInt(infos[0]);
-                    addPlugin(plugin);
+                    if( addPlugin(plugin) ){
+                        Logger.trace("Loaded plugin %s", plugin);
+                    }else{
+                        Logger.warn("Did not load plugin %s. Already loaded", plugin);
+                    }
                 }
             } catch (Exception ex) {
                 Logger.error(ex, "Cannot load %s", url);
