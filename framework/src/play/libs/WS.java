@@ -435,9 +435,8 @@ public class WS extends PlayPlugin {
          * @return the json response
          */
         public JsonElement getJson() {
-            String json = "";
+            String json = getString();
             try {
-                json = getString();
                 return new JsonParser().parse(json);
             } catch (Exception e) {
                 Logger.error("Bad JSON: \n%s", json);
