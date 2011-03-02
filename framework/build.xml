@@ -325,9 +325,7 @@
     </target>
 
     <target name="clean-unittest">
-        <delete>
-            <fileset dir="test-classes" includes="**/*.class" />
-        </delete>
+		<delete dir="test-classes" /> 
     </target>
 
     <target name="unittest" depends="compile-unittest">
