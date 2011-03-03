@@ -648,7 +648,7 @@ public class Play {
             }
         }
         // Auto add special modules
-        if (Play.id.equals("test")) {
+        if (Play.runingInTestMode()) {
             addModule("_testrunner", new File(Play.frameworkPath, "modules/testrunner"));
         }
         if (Play.mode == Mode.DEV) {
@@ -697,5 +697,17 @@ public class Play {
      */
     public static File getFile(String path) {
         return new File(applicationPath, path);
+    }
+
+    /**
+     * Returns true if application is runing in test-mode.
+     * Test-mode is resolved from the framework id.
+     *
+     * Your app is running in test-mode if the framwork id (Play.id)
+     * is 'test' or 'test-?.*'
+     * @return true if testmode
+     */
+    public static boolean runingInTestMode(){
+        return id.matches("test|test-?.*");
     }
 }

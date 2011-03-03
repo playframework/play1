@@ -213,3 +213,6 @@ def copy_directory(source, target, exclude = []):
             if not os.path.exists(to_directory):
                 os.makedirs(to_directory)
             shutil.copyfile(from_, to_)
+
+def isTestFrameworkId( framework_id ):
+    return (framework_id == 'test' or (framework_id.startswith('test-') and framework_id.__len__() >= 6 ))
