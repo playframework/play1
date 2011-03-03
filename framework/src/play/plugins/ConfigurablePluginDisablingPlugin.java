@@ -27,7 +27,7 @@ public class ConfigurablePluginDisablingPlugin extends PlayPlugin {
      * when reloading config, we have to enable hem again, in case,
      * they are no longer listed in the "disable plugins"-section
      */
-    private final static Set<String> previousDisabledPlugins = new HashSet<String>();
+    protected final static Set<String> previousDisabledPlugins = new HashSet<String>();
 
     @Override
     public void onConfigurationRead() {
