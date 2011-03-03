@@ -219,6 +219,11 @@
         
         <echo message="Using ${basedir}/../play${playExtension}" />
 
+		<antcall target="play-test-extra-param">
+    		<param name="testAppPath" value="${basedir}/../samples-and-tests/auto-test-with-special-framework-id"/>
+			<param name="extraParam" value="--%test-special"/>
+		</antcall>
+
         <antcall target="play-test">
             <param name="testAppPath" value="${basedir}/../samples-and-tests/just-test-cases"/>
         </antcall>
@@ -255,6 +260,7 @@
             <arg value="auto-test"/>
             <arg value="${testAppPath}"/>
         </exec>
+
         <available file="${testAppPath}/test-result/result.passed" property="${testAppPath}testPassed" />
         <fail message="Last test has failed ! (Check results in file://${testAppPath}/test-result)">
             <condition>
@@ -264,6 +270,24 @@
             </condition>
         </fail>
     </target>
+
+    <target name="play-test-extra-param">
+        <echo message="play auto-test ${testAppPath} (wait)" />
+        <exec executable="${basedir}/../play${playExtension}" failonerror="true">
+            <arg value="auto-test"/>
+            <arg value="${testAppPath}"/>
+			<arg value="${extraParam}"/>
+        </exec>
+        <available file="${testAppPath}/test-result/result.passed" property="${testAppPath}testPassed" />
+        <fail message="Last test has failed ! (Check results in file://${testAppPath}/test-result)">
+            <condition>
+                <not>
+                    <isset property="${testAppPath}testPassed"/>
+                </not>
+            </condition>
+        </fail>
+    </target>
+
     
     <target name="debug-test-single" depends="compile-tests" description="debug a single test">
         <nbjpdastart addressproperty="jpda.address" name="Play! framework" transport="dt_socket">
