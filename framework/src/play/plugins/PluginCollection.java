@@ -19,6 +19,7 @@ import play.vfs.VirtualFile;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.net.URL;
@@ -36,6 +37,12 @@ import java.util.*;
  * the code elsewhere is cleaner.
  */
 public class PluginCollection {
+
+    /**
+     * Property holding the name of the play.plugins-resource-name.
+     * Can be modified in unittest to supply modifies plugin-list
+     */
+    protected String play_plugins_resourceName = "play.plugins";
 
     protected Object lock = new Object();
     /**
@@ -78,7 +85,7 @@ public class PluginCollection {
         // Play! plugings
         Enumeration<URL> urls = null;
         try {
-            urls = Play.classloader.getResources("play.plugins");
+            urls = Play.classloader.getResources( play_plugins_resourceName);
         } catch (Exception e) {
             Logger.error("Error loading play.plugins", e);
         }
@@ -128,9 +135,21 @@ public class PluginCollection {
         for (PlayPlugin plugin : getAllPlugins()) {
 
             //Is this plugin an application-supplied-plugin?
-            if (plugin.getClass().getClassLoader().getClass().equals(ApplicationClassloader.class)) {
+            if (isLoadedByApplicationClassloader(plugin)) {
                 //This plugin is application-supplied - Must reload it
-                PlayPlugin newPlugin = (PlayPlugin) Play.classloader.loadClass(plugin.getClass().getName()).getConstructors()[0].newInstance();
+                String pluginClassName = plugin.getClass().getName();
+                Class pluginClazz = Play.classloader.loadClass( pluginClassName);
+
+                //first looking for constructors the old way
+                Constructor<?>[] constructors = pluginClazz.getConstructors();
+
+                if( constructors.length == 0){
+                    //no constructors in plugin
+                    //using getDeclaredConstructors() instead of getConstructors() to make it work for plugins without constructor
+                    constructors = pluginClazz.getDeclaredConstructors();
+                }
+
+                PlayPlugin newPlugin = (PlayPlugin) constructors[0].newInstance();
                 //replace this plugin
                 replacePlugin(plugin, newPlugin);
                 reloadedPlugins.add(newPlugin);
@@ -144,6 +163,10 @@ public class PluginCollection {
 
         updatePlayPluginsList();
 
+    }
+
+    protected boolean isLoadedByApplicationClassloader(PlayPlugin plugin) {
+        return plugin.getClass().getClassLoader().getClass().equals(ApplicationClassloader.class);
     }
 
 

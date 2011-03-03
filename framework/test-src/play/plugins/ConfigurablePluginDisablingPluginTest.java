@@ -3,6 +3,7 @@ package play.plugins;
 import org.junit.Before;
 import org.junit.Test;
 import play.Play;
+import play.PlayBuilder;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
@@ -143,11 +144,7 @@ public class ConfigurablePluginDisablingPluginTest {
     public void verify_that_the_plugin_gets_loaded(){
         PluginCollection pc = new PluginCollection();
 
-        Play.configuration = new Properties();
-        Play.classes = new ApplicationClasses();
-        Play.javaPath = new ArrayList<VirtualFile>();
-        Play.applicationPath = new File(".");
-        Play.classloader = new ApplicationClassloader();
+        new PlayBuilder().build();
         pc.loadPlugins();
         PlayPlugin pi = pc.getPluginInstance(ConfigurablePluginDisablingPlugin.class);
         assertThat(pi).isInstanceOf(ConfigurablePluginDisablingPlugin.class);
@@ -159,8 +156,13 @@ public class ConfigurablePluginDisablingPluginTest {
 
 class TestPlugin extends PlayPlugin {
 
+    //missing constructor on purpose
+
 }
 
 class TestPlugin2 extends PlayPlugin {
 
+    //included constructor on purpose
+    public TestPlugin2() {
+    }
 }
