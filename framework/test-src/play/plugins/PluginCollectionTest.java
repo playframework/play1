@@ -85,4 +85,57 @@ public class PluginCollectionTest {
 
     }
 
+    @SuppressWarnings({"deprecation"})
+    @Test
+    public void verifyUpdatePlayPluginsList(){
+        new PlayBuilder().build();
+
+        assertThat(Play.plugins).isEmpty();
+
+        PluginCollection pc = new PluginCollection();
+        pc.loadPlugins();
+
+        assertThat(Play.plugins).containsExactly( pc.getEnabledPlugins().toArray());
+
+
+    }
+
+    @SuppressWarnings({"deprecation"})
+    @Test
+    public void verifyThatDisabelingPluginsTheOldWayStillWorks(){
+        PluginCollection pc = new PluginCollection();
+
+
+        PlayPlugin legacyPlugin = new LegacyPlugin();
+
+        pc.addPlugin( legacyPlugin );
+        pc.addPlugin( new TestPlugin() );
+
+        pc.initializePlugin( legacyPlugin );
+
+        assertThat( pc.getEnabledPlugins() ).containsExactly(legacyPlugin);
+
+        //make sure Play.plugins-list is still correct
+        assertThat(Play.plugins).isEqualTo( pc.getEnabledPlugins() );
+
+    }
+
+}
+
+
+class LegacyPlugin extends PlayPlugin {
+
+    @SuppressWarnings({"deprecation"})
+    @Override
+    public void onLoad() {
+        //find TestPlugin in Play.plugins-list and remove it to disable it
+        PlayPlugin pluginToRemove = null;
+        for( PlayPlugin pp : Play.plugins){
+            if( pp.getClass().equals( TestPlugin.class)){
+                pluginToRemove = pp;
+                break;
+            }
+        }
+        Play.plugins.remove( pluginToRemove);
+    }
 }

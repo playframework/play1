@@ -7,6 +7,8 @@ import play.vfs.VirtualFile;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Properties;
 
 /**
@@ -24,6 +26,8 @@ public class PlayBuilder {
         return this;
     }
 
+
+    @SuppressWarnings({"deprecation"})
     public void build(){
         
         Play.configuration = configuration;
@@ -31,6 +35,7 @@ public class PlayBuilder {
         Play.javaPath = new ArrayList<VirtualFile>();
         Play.applicationPath = new File(".");
         Play.classloader = new ApplicationClassloader();
+        Play.plugins = Collections.unmodifiableList( new ArrayList<PlayPlugin>());
 
     }
 }
