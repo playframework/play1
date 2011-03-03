@@ -324,14 +324,17 @@ public class Scope {
         }
 
         public void put(String key, String value) {
+            checkAndParse();
             data.put(key, new String[]{value});
         }
 
         public void put(String key, String[] values) {
+            checkAndParse();
             data.put(key, values);
         }
 
         public void remove(String key) {
+            checkAndParse();
             data.remove(key);
         }
 
