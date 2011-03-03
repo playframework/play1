@@ -26,7 +26,7 @@ class PlayApplication:
         else:
             self.conf = None
         self.play_env = env
-        self.jpda_port = self.readConf('jpda_port')
+        self.jpda_port = self.readConf('jpda.port')
         self.ignoreMissingModules = ignoreMissingModules
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Configuration File
