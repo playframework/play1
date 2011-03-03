@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import play.Logger;
 import play.Play;
@@ -17,7 +18,41 @@ import play.exceptions.TemplateNotFoundException;
  */
 public class TemplateLoader {
 
+
     protected static Map<String, BaseTemplate> templates = new HashMap<String, BaseTemplate>();
+
+
+    /**
+     * See getUniqueNumberForTemplateFile() for more info
+     */
+    private static AtomicLong nextUniqueNumber = new AtomicLong(1000);//we start on 1000
+    private static Map<String, String> templateFile2UniqueNumber = new HashMap<String, String>();
+
+    /**
+     * All loaded templates is cached in the templates-list using a key.
+     * This key is included as part of the classname for the generated class for a specific template.
+     * The key is included in the classname to make it possible to resolve the original template-file
+     * from the classname, when creating cleanStackTrace
+     *
+     * This method returns a unique representation of the path which is usable as part of a classname
+     *
+     * @param path
+     * @return
+     */
+    public static String getUniqueNumberForTemplateFile(String path){
+        //a path cannot be a valid classname so we have to convert it somehow.
+        //If we did some encoding on the path, the result would be at least as long as the path.
+        //Therefor we assign a unique number to each path the first time we see it, and store it..
+        //This way, all seen paths gets a unique number. This number is our UniqueValidClassnamePart..
+
+        String uniqueNumber = templateFile2UniqueNumber.get(path);
+        if( uniqueNumber == null ){
+            //this is the first time we see this path - must assign a unique number to it.
+            uniqueNumber = Long.toString( nextUniqueNumber.getAndIncrement());
+            templateFile2UniqueNumber.put(path,uniqueNumber);
+        }
+        return uniqueNumber;
+    }
 
     /**
      * Load a template from a virtual file
@@ -33,7 +68,7 @@ public class TemplateLoader {
             }
         }
         // Use default engine
-        String key = (file.relativePath().hashCode() + "").replace("-", "M");
+        final String key = getUniqueNumberForTemplateFile(file.relativePath());
         if (!templates.containsKey(key) || templates.get(key).compiledTemplate == null) {
             if (Play.usePrecompiled) {
                 BaseTemplate template = new GroovyTemplate(file.relativePath().replaceAll("\\{(.*)\\}", "from_$1").replace(":", "_").replace("..", "parent"), file.contentAsString());
@@ -139,9 +174,16 @@ public class TemplateLoader {
                 break;
             }
         }
+        /*
         if (template == null) {
+            //When using the old 'key = (file.relativePath().hashCode() + "").replace("-", "M");',
+            //the next line never return anything, since all values written to templates is using the
+            //above key.
+            //when using just file.relativePath() as key, the next line start returning stuff..
+            //therefor I have commented it out.
             template = templates.get(path);
         }
+        */
         //TODO: remove ?
         if (template == null) {
             VirtualFile tf = Play.getVirtualFile(path);

@@ -246,6 +246,8 @@ public class GroovyTemplate extends BaseTemplate {
     Throwable cleanStackTrace(Throwable e) {
         List<StackTraceElement> cleanTrace = new ArrayList<StackTraceElement>();
         for (StackTraceElement se : e.getStackTrace()) {
+            //Here we are parsing the classname to find the file on disk the template was generated from.
+            //See GroovyTemplateCompiler.head() for more info.
             if (se.getClassName().startsWith("Template_")) {
                 String tn = se.getClassName().substring(9);
                 if (tn.indexOf("$") > -1) {

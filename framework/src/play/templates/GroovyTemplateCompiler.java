@@ -82,7 +82,14 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     @Override
     void head() {
         print("class ");
-        String className = "Template_" + ((template.name.hashCode() + "").replace("-", "M"));
+        //This generated classname is parsed when creating cleanStackTrace.
+        //The part after "Template_" is used as key when
+        //looking up the file on disk this template-class is generated from.
+        //cleanStackTrace is looking in TemplateLoader.templates
+
+        String uniqueNumberForTemplateFile = TemplateLoader.getUniqueNumberForTemplateFile(template.name);
+
+        String className = "Template_" + uniqueNumberForTemplateFile;
         print(className);
         println(" extends play.templates.GroovyTemplate.ExecutableTemplate {");
         println("public Object run() { use(play.templates.JavaExtensions) {");
