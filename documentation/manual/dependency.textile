@@ -251,5 +251,26 @@ repositories:
 
 Using this configuration all dependencies of the **com.zenexity** organisation will be retrieved and downloaded from a remote HTTP server.
 
+h3. Maven repositories
+
+You can also add maven2-compatible repositories using the **iBiblio** type like this:
+
+bc. # Application dependencies
+    
+require:
+    - play
+    - play -> scala 0.8
+    - org.jbpm -> jbpm-persistence-jpa 5.0.0:
+        exclude:
+            - javassist -> javassist *
+            - org.hibernate -> hibernate-annotations *
+            - javax.persistence -> persistence-api *
+repositories:
+    - jboss:
+        type: iBiblio
+        root: "http://repository.jboss.org/nexus/content/groups/public-jboss/"
+        contains:
+            - org.jbpm -> *
+            - org.drools -> *
 
 
