@@ -11,8 +11,11 @@
 ~ Run the application hosted at the app_path directory. If app_path is omitted, the current directory is used.
 ~ The application is run in foreground in the current shell. You can then stop it using Ctrl+C.
 ~
-~ The application is run in test mode: the framework ID is forced to 'test' and a web test runner is automatically
+~ The application is run in test mode: the framework ID is forced to 'test' (unless you specify it to be
+~ something matching 'test-?.*', e.g 'test-special') and a web test runner is automatically
 ~ started at the /@tests URL.
+~ (Note that when using special test framework ID you have to make sure all test-settings in 
+~ application.conf is available with this special framework ID)
 ~
 ~ The script first tries to locate the java command using the $JAVA_HOME environment variable (from $JAVA_HOME/bin).
 ~ If the $JAVA_HOME variable is not defined, the default java command available from the PATH is used.

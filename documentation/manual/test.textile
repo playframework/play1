@@ -186,6 +186,10 @@ On the test runner page, each test is a link. You can ‘right click’ and ‘O
 
 When you run tests this way, Play will start with a special **test** framework ID. So you can define special configurations in the **application.conf** file.
 
+If you want several different test-configuration, you can use framework IDs matching the pattern 'test-?.*' (e.g: 'test-special').
+If you use a framework ID other then the default 'test', you must make sure ALL test configuration in application.conf is available
+with that framework ID. When launching test with special test framework ID you do it like this: 'play test --%test-your-special-id'
+
 For example:
 
 bc. %test.db=mem
