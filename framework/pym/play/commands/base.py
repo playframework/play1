@@ -89,7 +89,7 @@ def new(app, args, env, cmdloader=None):
         application_name = raw_input("~ What is the application name? [%s] " % os.path.basename(app.path))
     if application_name == "":
         application_name = os.path.basename(app.path)
-    shutil.copytree(os.path.join(env["basedir"], 'resources/application-skel'), app.path)
+    copy_directory(os.path.join(env["basedir"], 'resources/application-skel'), app.path)
     os.mkdir(os.path.join(app.path, 'app/models'))
     os.mkdir(os.path.join(app.path, 'lib'))
     app.check()

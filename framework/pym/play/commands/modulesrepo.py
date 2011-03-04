@@ -181,7 +181,7 @@ def new(app, args, play_env):
     print "~ The new module will be created in %s" % os.path.normpath(app.path)
     print "~"
     application_name = os.path.basename(app.path)
-    shutil.copytree(os.path.join(play_env["basedir"], 'resources/module-skel'), app.path)
+    copy_directory(os.path.join(play_env["basedir"], 'resources/module-skel'), app.path)
     # check_application()
     replaceAll(os.path.join(app.path, 'build.xml'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'commands.py'), r'%MODULE%', application_name)

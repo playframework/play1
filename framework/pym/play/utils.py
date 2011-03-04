@@ -184,6 +184,7 @@ def delete(filename):
     else:
         os.remove(filename)
 
+# Copy a directory, skipping dot-files
 def copy_directory(source, target, exclude = []):
     skip = None
 
