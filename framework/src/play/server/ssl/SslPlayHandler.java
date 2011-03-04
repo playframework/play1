@@ -4,7 +4,6 @@ import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 import org.jboss.netty.handler.ssl.SslHandler;
 import play.Logger;
-import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.server.PlayHandler;
 import play.server.Server;

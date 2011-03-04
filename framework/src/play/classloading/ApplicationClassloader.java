@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.instrument.ClassDefinition;
-import java.lang.instrument.UnmodifiableClassException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AllPermission;

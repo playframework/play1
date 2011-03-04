@@ -459,11 +459,7 @@ public class ActionInvoker {
     }
 
     static Object invoke(Method method, Object instance, Object[] realArgs) throws Exception {
-        if (true) {
-            return invokeWithContinuation(method, instance, realArgs);
-        } else {
-            return method.invoke(instance, realArgs);
-        }
+        return invokeWithContinuation(method, instance, realArgs);
     }
     static final String C = "__continuation";
     static final String A = "__callback";

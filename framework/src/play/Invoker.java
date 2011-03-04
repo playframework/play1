@@ -349,9 +349,10 @@ public class Invoker {
 
         public static <V> void waitFor(Future<V> task, final Invocation invocation) {
             if (task instanceof Promise) {
-                Promise smartFuture = (Promise)task;
-                smartFuture.onRedeem(new F.Action() {
-                    public void invoke(Object result) {
+                Promise<V> smartFuture = (Promise<V>) task;
+                smartFuture.onRedeem(new F.Action<F.Promise<V>>() {
+                    @Override
+                    public void invoke(Promise<V> result) {
                         executor.submit(invocation);
                     }
                 });
