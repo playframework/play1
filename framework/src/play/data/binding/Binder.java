@@ -172,12 +172,12 @@ public class Binder {
                 if (clazz.isInterface()) {
                     if (clazz.equals(List.class)) {
                         clazz = ArrayList.class;
-                    }
-                    if (clazz.equals(Set.class)) {
+                    } else if (clazz.equals(Set.class)) {
                         clazz = HashSet.class;
-                    }
-                    if (clazz.equals(SortedSet.class)) {
+                    } else if (clazz.equals(SortedSet.class)) {
                         clazz = TreeSet.class;
+                    } else {
+                        clazz = ArrayList.class;
                     }
                 }
                 Collection r = (Collection) clazz.newInstance();
