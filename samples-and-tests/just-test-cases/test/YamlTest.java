@@ -12,7 +12,7 @@ public class YamlTest extends UnitTest {
         assertEquals("Morten", ym.name);
         
         //check binary
-        assertEquals("Morten", new String(ym.binaryData));
+        assertEquals("This String is stored in yaml file using base64", new String(ym.binaryData));
         
     }
     

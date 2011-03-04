@@ -175,11 +175,15 @@ public class Fixtures {
                         resolveDependencies(cType, params);
                         Model model = (Model)Binder.bind("object", cType, cType, null, params);
                         for(Field f : model.getClass().getFields()) {
-                            // TODO: handle something like FileAttachment
-                            if (f.getType().isAssignableFrom(Map.class)) {
-                                f.set(model, objects.get(key).get(f.getName()));
+                            //this approach works better for byte[] / binary
+                            Object value = objects.get(key).get(f.getName());
+                            if( value != null){
+                                try{
+                                    f.set(model, value);
+                                }catch(Exception e){
+                                    Logger.debug("Unable to set value from yaml-file into for property " + f, e);
+                                }
                             }
-
                         }
                         model._save();
                         Class<?> tType = cType;
