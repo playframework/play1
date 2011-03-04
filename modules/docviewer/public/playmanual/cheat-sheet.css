@@ -14,13 +14,12 @@ div.cs {
     font-size: 90%;
     margin-top: 10px;
     margin-bottom: 10px;
-    padding: 5px 0;
+    padding: 0 0 5px 0;
     -webkit-box-shadow: #ccc -1px 1px 3px;
     -moz-box-shadow: #ccc -1px 1px 3px;
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
-    min-height: 6.5em;
 }
 
 div.cs:hover {
@@ -28,8 +27,6 @@ div.cs:hover {
 }
 
 .wikistyle .cs h2 {
-	position: relative;
-	top: -5px;
 	width: 100%;
 	background: rgba(103, 169, 39, 0.75);
 	color: white;
@@ -46,7 +43,7 @@ div.cs:hover {
 }
 
 .wikistyle div.cs p {
-    margin: 0 0.5em 0.5em 0.5em !important;
+    margin: 0.5em !important;
     line-height: 1.3 !important;
 }
 
