@@ -1,38 +1,38 @@
 h1. Dependency management
 
-The Play's dependency management system allow to express all external dependencies required by your application in a single **dependencies.yml** file. 
+Play’s dependency management system allows you to express your application’s external dependencies in a single **dependencies.yml** file. 
 
-A Play application can have 3 kind of dependencies:
+A Play application can have three kinds of dependencies:
 
-* The Play framework itself since a Play application always depends of Play framework.
-* Any Java library, provided as **jar** file installed in your application's **lib/** directory.
-* A Play module (in fact an application fragment) installed in your application's **modules/** directory.
+* The Play framework itself, since a Play application always depends on the Play framework.
+* Any Java library, provided as **JAR** file installed in your application’s **lib/** directory.
+* A Play module (in fact an application fragment) installed in your application’s **modules/** directory.
 
-Once expressed all these dependencies in the **conf/dependencies.yml** file of you application, Play will resolve, download and install all required dependencies.
+Once you have expressed these dependencies in your application’s **conf/dependencies.yml** file, Play will resolve, download and install all required dependencies.
 
 h2. <a name="format">Dependency format</a>
 
-A dependency is described by an organisation a name and a revision number. In the **dependencies.yml** file you will write it this way:
+A dependency is described by an organisation a name and a revision number. In the **dependencies.yml** file you will write it like this:
 
 bc. organisation -> name revision
 
-So, for instance the "version 1.0 of the Play PDF module":http://www.playframework.org/modules/pdf is expressed this way:
+So, for instance version 1.0 of the "Play PDF module":http://www.playframework.org/modules/pdf is expressed like this:
 
 bc. play -> pdf 1.0
 
-Sometimes the organisation matches exactly the dependency name. It is for instance the case for "commons-lang":http://commons.apache.org/lang/:
+Sometimes the organisation name exactly matches the dependency name, as is the case for "commons-lang":http://commons.apache.org/lang/:
 
 bc. commons-lang -> commons-lang 2.5
 
-In this case, you can avoid the organisation in the dependency declaration:
+In this case, you can omit the organisation from the dependency declaration:
 
 bc. commons-lang 2.5
 
 h3. Dynamic revisions
 
-The revision can be given as a fixed one (1.2, for instance) or dynamically. A dynamic revision expresses a range of allowed revisions. 
+The revision can be fixed (1.2, for instance) or dynamic. A dynamic revision expresses a range of allowed revisions. 
 
-Example:
+For example:
 
 * **[1.0,2.0]** matches all versions greater or equal to 1.0 and lower or equal to 2.0
 * **[1.0,2.0[** matches all versions greater or equal to 1.0 and lower than 2.0
@@ -52,7 +52,7 @@ bc. # Application dependencies
 require:
     - play 1.2
 
-The **require** section list all dependencies needed by your application. Here the new application only depends of **Play version 1.2**. But let's say your application need "Google Guava":http://code.google.com/p/guava-libraries/, you would have:
+The **require** section list all dependencies needed by your application. Here the new application only depends of **Play version 1.2**. But let’s say your application needs "Google Guava":http://code.google.com/p/guava-libraries/; you would have:
 
 bc. # Application dependencies
     
@@ -60,7 +60,7 @@ require:
     - play 1.2
     - com.google.guava -> guava r07
 
-h3. The 'play dependencies' command
+h3. The ‘play dependencies’ command
 
 To ask Play to resolve, download and install the new dependencies, run **play dependencies**:
 
@@ -92,9 +92,9 @@ bc. $ play dependencies
 ~ Done!
 ~
 
-Now Play has downloaded 2 jars (guava-r07.jar, jsr305-1.3.7.jar) from the central Maven repository, and installed them into the application **lib/** directory. 
+Now Play has downloaded two JARs (guava-r07.jar, jsr305-1.3.7.jar) from the central Maven repository, and installed them into the application **lib/** directory. 
 
-Why 2 jars since we have only declared one dependency? Because Google Guava has a transitive dependency. In fact this dependency is not really required and we would like to exclude it. 
+Why two jars, since we only declared one dependency? Because Google Guava has a transitive dependency. In fact this dependency is not really required and we would like to exclude it. 
 
 h3. Transitive dependencies
 
@@ -168,7 +168,7 @@ bc. play dependencies --sync
 
 If you run this command again the unwanted **jar** will be deleted. 
 
-h2. <a name="conflicts">Conflicts resolution</a>
+h2. <a name="conflicts">Conflict resolution</a>
 
 Whenever two components need different revisions of the same dependency, the conflicts manager will choose one. The default is to keep the latest revision and to evict the others. 
 
@@ -209,9 +209,9 @@ bc. play dependencies
 ~ Done!
 ~
 
-Also, you can notice that dependencies already availables in **$PLAY/framework/lib** will not been installed in your application's **lib/** directory.
+Also, note that dependencies already available in **$PLAY/framework/lib** will not be installed in your application’s **lib/** directory.
 
-However sometimes you want to force a specific dependency version, either to override a core dependency or to choose another revision that the latest version available. 
+Sometimes you want to force a specific dependency version, either to override a core dependency or to choose another revision that the latest version available. 
 
 So you can specify the **force** option on any dependency:
 
@@ -226,9 +226,9 @@ require:
 
 h2. <a name="repositories">Adding new repositories</a>
 
-By default, Play will search for **jar** dependencies in the "central Maven repository":http://repo1.maven.org/maven2/, and will search for **Play modules** in the "central Play modules repository":http://www.playframework.org/modules. 
+By default, Play will search for **JAR** dependencies in the "central Maven repository":http://repo1.maven.org/maven2/, and will search for **Play modules** in the "central Play modules repository":http://www.playframework.org/modules. 
 
-But you can of course specify new custom repositories in the **repositories** section:
+You can, of course, specify new custom repositories in the **repositories** section:
 
 bc. # Application dependencies
     
@@ -253,7 +253,7 @@ Using this configuration all dependencies of the **com.zenexity** organisation w
 
 h3. Maven repositories
 
-You can also add maven2-compatible repositories using the **iBiblio** type like this:
+You can also add maven2-compatible repositories using the **iBiblio** type, like this:
 
 bc. # Application dependencies
     
