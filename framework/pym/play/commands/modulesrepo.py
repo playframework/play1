@@ -244,19 +244,27 @@ def list(app, args):
 
 def build(app, args, env):
     ftb = env["basedir"]
+    version = None
+    fwkMatch = None
 
     try:
-        optlist, args = getopt.getopt(args, '', ['framework='])
+        optlist, args = getopt.getopt(args, '', ['framework=', 'version=', 'require='])
         for o, a in optlist:
             if o in ('--framework'):
                 ftb = a
+            if o in ('--version'):
+                version = a
+            if o in ('--require'):
+                fwkMatch = a
     except getopt.GetoptError, err:
         print "~ %s" % str(err)
         print "~ "
         sys.exit(-1)
 
-    version = raw_input("~ What is the module version number? ")
-    fwkMatch = raw_input("~ What are the playframework versions required? ")
+    if version is None:
+        version = raw_input("~ What is the module version number? ")
+    if fwkMatch is None:
+        fwkMatch = raw_input("~ What are the playframework versions required? ")
 
     build_file = os.path.join(app.path, 'build.xml')
     if os.path.exists(build_file):
