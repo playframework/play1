@@ -87,4 +87,10 @@
 		open('/databinding/createFactory?factory.number=457&factory.name=Nestle&factory.color=')
 		assertTextPresent('false -> Nestle,null')
 
-#{/selenium}	
+        <!-- Test that value-less params are noticed -->
+        open('@{DataBinding.printParams()}?noValue&noValue2&key=value&noValue3')
+        assertTextPresent('noValue null')
+        assertTextPresent('noValue2 null')
+        assertTextPresent('key value')
+        assertTextPresent('noValue3 null')
+#{/selenium}
