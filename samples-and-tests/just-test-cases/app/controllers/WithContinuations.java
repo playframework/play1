@@ -19,7 +19,7 @@ public class WithContinuations extends Controller {
             if(i>0) sb.append(";");
             long s = System.currentTimeMillis();
             await(100);
-            boolean delay = System.currentTimeMillis() - s > 100 && System.currentTimeMillis() - s < 200;
+            boolean delay = System.currentTimeMillis() - s > 100 && System.currentTimeMillis() - s < 1000;
             sb.append(i + ":" + delay);
         }
         renderText(sb);
