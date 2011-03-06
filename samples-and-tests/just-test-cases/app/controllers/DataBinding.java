@@ -3,6 +3,7 @@ package controllers;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.text.SimpleDateFormat;
 
 import models.Person;
@@ -85,6 +86,15 @@ public class DataBinding extends Controller {
     
     public static void createFactory(@play.data.validation.Valid models.Factory factory) {
         renderText(validation.hasErrors() + " -> " + factory.name + "," + factory.color);
+    }
+
+    public static void printParams() {
+        Map<String, String> paramMap = params.allSimple();
+        String out = "";
+        for (String key : paramMap.keySet()) {
+            out += key + " " + paramMap.get(key) + "\n";
+        }
+        renderText(out);
     }
 }
 
