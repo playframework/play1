@@ -402,7 +402,7 @@ bc. #{option user.id} ${user.name} #{/option}
 
 Will output:
 
-bc. <option value="42">jto</option>h2. <a name="script">script</a>
+bc. <option value="42">jto</option>
 
 h2. <a name="script">script</a>
 
