@@ -24,8 +24,9 @@ def execute(**kargs):
         shutil.rmtree(os.path.join(app.path, 'precompiled'))
     java_cmd.insert(2, '-Dprecompile=yes')
     try:
-        subprocess.call(java_cmd, env=os.environ)
+        return subprocess.call(java_cmd, env=os.environ)
     except OSError:
         print "Could not execute the java executable, please make sure the JAVA_HOME environment variable is set properly (the java executable should reside at JAVA_HOME/bin/java). "
         sys.exit(-1)
-    print
+    finally:
+        print
