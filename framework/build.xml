@@ -329,13 +329,14 @@
     </target>
 
     <target name="unittest" depends="compile-unittest">
-        <junit>
+        <junit errorproperty="junit.failure" failureproperty="junit.failure">
             <classpath refid="classpath.test" />
             <formatter type="brief" usefile="false" />
             <batchtest>
                 <fileset dir="test-classes" includes="**/*Test.class" />
             </batchtest>
         </junit>
+        <fail if="junit.failure" message="Unit test(s) failed.  See reports!"/>
     </target>
 
     
