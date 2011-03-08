@@ -557,32 +557,28 @@ public class JPAPlugin extends PlayPlugin {
             if (Collection.class.isAssignableFrom(field.getType())) {
                 final Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                 if (field.isAnnotationPresent(OneToMany.class)) {
-                    if (field.getAnnotation(OneToMany.class).mappedBy().equals("")) {
-                        modelProperty.isRelation = true;
-                        modelProperty.isMultiple = true;
-                        modelProperty.relationType = fieldType;
-                        modelProperty.choices = new Model.Choices() {
+                    modelProperty.isRelation = true;
+                    modelProperty.isMultiple = true;
+                    modelProperty.relationType = fieldType;
+                    modelProperty.choices = new Model.Choices() {
 
-                            @SuppressWarnings("unchecked")
-                            public List<Object> list() {
-                                return JPA.em().createQuery("from " + fieldType.getName()).getResultList();
-                            }
-                        };
-                    }
+                        @SuppressWarnings("unchecked")
+                        public List<Object> list() {
+                            return JPA.em().createQuery("from " + fieldType.getName()).getResultList();
+                        }
+                    };
                 }
                 if (field.isAnnotationPresent(ManyToMany.class)) {
-                    if (field.getAnnotation(ManyToMany.class).mappedBy().equals("")) {
-                        modelProperty.isRelation = true;
-                        modelProperty.isMultiple = true;
-                        modelProperty.relationType = fieldType;
-                        modelProperty.choices = new Model.Choices() {
+                    modelProperty.isRelation = true;
+                    modelProperty.isMultiple = true;
+                    modelProperty.relationType = fieldType;
+                    modelProperty.choices = new Model.Choices() {
 
-                            @SuppressWarnings("unchecked")
-                            public List<Object> list() {
-                                return JPA.em().createQuery("from " + fieldType.getName()).getResultList();
-                            }
-                        };
-                    }
+                        @SuppressWarnings("unchecked")
+                        public List<Object> list() {
+                            return JPA.em().createQuery("from " + fieldType.getName()).getResultList();
+                        }
+                    };
                 }
             }
             if (field.getType().isEnum()) {
