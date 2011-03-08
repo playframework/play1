@@ -3,6 +3,7 @@ package play.db;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
@@ -21,6 +22,9 @@ import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.exceptions.DatabaseException;
+import play.mvc.Http;
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
 
 /**
  * The DB plugin
@@ -28,6 +32,17 @@ import play.exceptions.DatabaseException;
 public class DBPlugin extends PlayPlugin {
 
     public static String url = "";
+    org.h2.tools.Server h2Server;
+
+    @Override
+    public boolean rawInvocation(Request request, Response response) throws Exception {
+        if(Play.mode.isDev() && request.path.equals("/@db")) {
+            response.status = Http.StatusCode.MOVED;
+            response.setHeader("Location", "http://localhost:8082/");
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public void onApplicationStart() {
@@ -92,6 +107,15 @@ public class DBPlugin extends PlayPlugin {
                     }
                     Logger.info("Connected to %s", ds.getJdbcUrl());
 
+                    // For H2 embeded database, we'll also start the Web console
+                    if(Play.mode.isDev() && "org.h2.Driver".equals(p.get("db.driver"))) {
+                        if(h2Server != null) {
+                            h2Server.stop();
+                        }
+                        h2Server = org.h2.tools.Server.createWebServer();
+                        h2Server.start();
+                    }
+
                 }
 
             } catch (Exception e) {
@@ -105,6 +129,7 @@ public class DBPlugin extends PlayPlugin {
         }
     }
 
+    
     @Override
     public String getStatus() {
         StringWriter sw = new StringWriter();

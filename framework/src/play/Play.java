@@ -491,7 +491,7 @@ public class Play {
      */
     public static synchronized void stop() {
         if( started ){
-            Logger.info("Stopping the play application");
+            Logger.trace("Stopping the play application");
             started = false;
             for (PlayPlugin plugin : plugins) {
                 plugin.onApplicationStop();
