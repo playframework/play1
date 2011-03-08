@@ -325,6 +325,13 @@
         <javac encoding="utf-8" srcdir="test-src" destdir="test-classes" debug="true" target="1.5">
             <classpath refid="classpath.test" />
         </javac>
+        <copy todir="test-classes">
+            <fileset dir="test-src">
+                <include name="**/*.properties"/>
+                <include name="**/*.xml"/>
+                <include name="**/*.plugins"/>
+            </fileset>
+        </copy>
     </target>
 
     <target name="clean-unittest">
