@@ -57,7 +57,12 @@ public class JobsPlugin extends PlayPlugin {
                 }
 
                 if(job.getClass().isAnnotationPresent(On.class)) {
-                    out.print(" run with cron expression " + job.getClass().getAnnotation(On.class).value() + ".");
+
+                    String cron = job.getClass().getAnnotation(On.class).value();
+                    if (cron.startsWith("cron.")) {
+                        cron = Play.configuration.getProperty(cron);
+                    }
+                    out.print(" run with cron expression " + cron + ".");
                 }
                 if(job.getClass().isAnnotationPresent(Every.class)) {
                     out.print(" run every " + job.getClass().getAnnotation(Every.class).value() + ".");
