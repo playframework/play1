@@ -325,6 +325,13 @@
         <javac encoding="utf-8" srcdir="test-src" destdir="test-classes" debug="true" target="1.5">
             <classpath refid="classpath.test" />
         </javac>
+        <copy todir="test-classes">
+            <fileset dir="test-src">
+                <include name="**/*.properties"/>
+                <include name="**/*.xml"/>
+                <include name="**/*.plugins"/>
+            </fileset>
+        </copy>
     </target>
 
     <target name="clean-unittest">
@@ -332,13 +339,14 @@
     </target>
 
     <target name="unittest" depends="compile-unittest">
-        <junit>
+        <junit errorproperty="junit.failure" failureproperty="junit.failure">
             <classpath refid="classpath.test" />
             <formatter type="brief" usefile="false" />
             <batchtest>
                 <fileset dir="test-classes" includes="**/*Test.class" />
             </batchtest>
         </junit>
+        <fail if="junit.failure" message="Unit test(s) failed.  See reports!"/>
     </target>
 
     
