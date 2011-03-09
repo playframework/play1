@@ -9,6 +9,12 @@ import java.util.*;
 public class PropertyEnhancerModel extends Model {
     
     public String text;
+
+    public final String finalText = "test";
+
+    public static String staticText;
+
+    private String privateText;
    
     public String getText() {
         return text;
