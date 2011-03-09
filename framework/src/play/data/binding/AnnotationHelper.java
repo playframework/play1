@@ -59,10 +59,13 @@ public class AnnotationHelper {
             String[] commaSeparatedLang = l.split(",");
             for (String lang : commaSeparatedLang) {
                 if (Lang.get().equals(lang) || "*".equals(lang)) {
+                    Locale locale = null;
                     if ("*".equals(lang)) {
-                        lang = Locale.getDefault().getLanguage();
+                        locale = Lang.getLocale();
                     }
-                    Locale locale = Lang.getLocale(lang);
+                    if (locale == null) {
+                        locale = Lang.getLocale(lang);
+                    }
                     if (locale != null) {
                         return new Tuple(i, locale);
                     }
