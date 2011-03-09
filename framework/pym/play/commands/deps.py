@@ -23,9 +23,7 @@ def execute(**kargs):
 
     app.check()
     classpath = app.getClasspath()
-    
-    debug = ['-Xdebug', '-Xrunjdwp:transport=dt_socket,address=8888,server=y,suspend=n']
-    
+
     add_options = ['-Dapplication.path=%s' % (app.path), '-Dframework.path=%s' % (play_env['basedir']), '-Dplay.id=%s' % play_env['id'], '-Dplay.version=%s' % play_env['version']]
     if args.count('--verbose'):
         add_options.append('-Dverbose')
@@ -33,9 +31,11 @@ def execute(**kargs):
         add_options.append('-Dsync')
     if args.count('--debug'):
         add_options.append('-Ddebug')
-                
-    java_cmd = [app.java_path()] + add_options + ['-classpath', app.cp_args(), 'play.deps.DependenciesManager']
-    
-    subprocess.call(java_cmd, env=os.environ)
+    if args.count('--jpda'):
+        print "~ Waiting for JPDA client to continue"
+        add_options.extend(['-Xdebug', '-Xrunjdwp:transport=dt_socket,address=8888,server=y,suspend=y'])
 
+    java_cmd = [app.java_path()] + add_options + ['-classpath', app.cp_args(), 'play.deps.DependenciesManager']
+
+    subprocess.call(java_cmd, env=os.environ)
 

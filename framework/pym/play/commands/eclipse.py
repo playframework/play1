@@ -30,7 +30,7 @@ def execute(**kargs):
         application_name = application_name.replace("/", " ")
     else:
         application_name = os.path.basename(app.path)
-    
+
     dotProject = os.path.join(app.path, '.project')
     dotClasspath = os.path.join(app.path, '.classpath')
     dotSettings = os.path.join(app.path, '.settings')
