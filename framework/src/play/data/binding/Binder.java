@@ -154,8 +154,8 @@ public class Binder {
                                 r.put(oKey, oValue);
                             } else {
                                 tP = new HashMap<String, String[]>();
-                                tP.put("value", params.get(name + suffix + "[" + key + "]"));
-                                Object oValue = bindInternal("value", valueClass, valueClass, annotations, tP, "", value);
+                                tP.put(name + suffix + "[" + key + "]", params.get(name + suffix + "[" + key + "]"));
+                                Object oValue = bindInternal(name + suffix + "[" + key + "]", valueClass, valueClass, annotations, tP, "", value);
                                 if (oValue != MISSING) {
                                     r.put(oKey, oValue);
                                 } else {
@@ -220,8 +220,8 @@ public class Binder {
                                     ((List) r).set(key, oValue);
                                 } else {
                                     Map<String, String[]> tP = new HashMap<String, String[]>();
-                                    tP.put("value", params.get(name + suffix + "[" + key + "]"));
-                                    Object oValue = bindInternal("value", componentClass, componentClass, annotations, tP, "", value);
+                                    tP.put(name + suffix + "[" + key + "]", params.get(name + suffix + "[" + key + "]"));
+                                    Object oValue = bindInternal(name + suffix + "[" + key + "]", componentClass, componentClass, annotations, tP, "", value);
                                     if (oValue != MISSING) {
                                         ((List) r).set(key, oValue);
                                     }
