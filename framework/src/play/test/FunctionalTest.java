@@ -298,12 +298,22 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     public static Request newRequest() {
-        Request request = new Request();
-        request.domain = "localhost";
-        request.port = 80;
-        request.method = "GET";
-        request.path = "/";
-        request.querystring = "";
+        Request request = Request.createRequest(
+                null,
+                "GET",
+                "/",
+                "",
+                null,
+                null,
+                null,
+                null,
+                false,
+                80,
+                "localhost",
+                false,
+                null,
+                null
+        );
         return request;
     }
 

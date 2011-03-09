@@ -198,59 +198,74 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     }
 
     public static Request parseRequest(HttpServletRequest httpServletRequest) throws Exception {
-        Request request = new Http.Request();
-        Request.current.set(request);
+
         URI uri = new URI(httpServletRequest.getRequestURI());
-        request.method = httpServletRequest.getMethod().intern();
-        request.path = uri.getPath();
-        request.querystring = httpServletRequest.getQueryString() == null ? "" : httpServletRequest.getQueryString();
+        String method = httpServletRequest.getMethod().intern();
+        String path = uri.getPath();
+        String querystring = httpServletRequest.getQueryString() == null ? "" : httpServletRequest.getQueryString();
         Logger.trace("httpServletRequest.getContextPath(): " + httpServletRequest.getContextPath());
-        Logger.trace("request.path: " + request.path + ", request.querystring: " + request.querystring);
+        Logger.trace("request.path: " + path + ", request.querystring: " + querystring);
 
-        Router.routeOnlyStatic(request);
 
+
+        String contentType = null;
         if (httpServletRequest.getHeader("Content-Type") != null) {
-            request.contentType = httpServletRequest.getHeader("Content-Type").split(";")[0].trim().toLowerCase().intern();
+            contentType = httpServletRequest.getHeader("Content-Type").split(";")[0].trim().toLowerCase().intern();
         } else {
-            request.contentType = "text/html".intern();
+            contentType = "text/html".intern();
         }
 
         if (httpServletRequest.getHeader("X-HTTP-Method-Override") != null) {
-            request.method = httpServletRequest.getHeader("X-HTTP-Method-Override").intern();
+            method = httpServletRequest.getHeader("X-HTTP-Method-Override").intern();
         }
 
-        request.body = httpServletRequest.getInputStream();
-        request.secure = httpServletRequest.isSecure();
+        InputStream body = httpServletRequest.getInputStream();
+        boolean secure = httpServletRequest.isSecure();
 
-        request.url = uri.toString() + (httpServletRequest.getQueryString() == null ? "" : "?" + httpServletRequest.getQueryString());
-        request.host = httpServletRequest.getHeader("host");
-        if (request.host.contains(":")) {
-            request.port = Integer.parseInt(request.host.split(":")[1]);
-            request.domain = request.host.split(":")[0];
+        String url = uri.toString() + (httpServletRequest.getQueryString() == null ? "" : "?" + httpServletRequest.getQueryString());
+        String host = httpServletRequest.getHeader("host");
+        int port = 0;
+        String domain = null;
+        if (host.contains(":")) {
+            port = Integer.parseInt(host.split(":")[1]);
+            domain = host.split(":")[0];
         } else {
-            request.port = 80;
-            request.domain = request.host;
+            port = 80;
+            domain = host;
         }
 
-        request.remoteAddress = httpServletRequest.getRemoteAddr();
+        String remoteAddress = httpServletRequest.getRemoteAddr();
 
-        if (Play.configuration.containsKey("XForwardedSupport") && httpServletRequest.getHeader("X-Forwarded-For") != null) {
-            if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(",")).contains(request.remoteAddress)) {
-                throw new RuntimeException("This proxy request is not authorized");
-            } else {
-                request.secure = ("https".equals(Play.configuration.get("XForwardedProto")) || "https".equals(httpServletRequest.getHeader("X-Forwarded-Proto")) || "on".equals(httpServletRequest.getHeader("X-Forwarded-Ssl")));
-                if (Play.configuration.containsKey("XForwardedHost")) {
-                    request.host = (String) Play.configuration.get("XForwardedHost");
-                } else if (httpServletRequest.getHeader("X-Forwarded-Host") != null) {
-                    request.host = httpServletRequest.getHeader("X-Forwarded-Host");
-                }
-                if (httpServletRequest.getHeader("X-Forwarded-For") != null) {
-                    request.remoteAddress = httpServletRequest.getHeader("X-Forwarded-For");
-                }
-            }
-        }
+        boolean isLoopback = host.matches("^127\\.0\\.0\\.1:?[0-9]*$");
         
-	Enumeration headersNames = httpServletRequest.getHeaderNames();
+
+        final Request request = Request.createRequest(
+                remoteAddress,
+                method,
+                path,
+                querystring,
+                contentType,
+                body,
+                url,
+                host,
+                isLoopback,
+                port,
+                domain,
+                secure,
+                getHeaders(httpServletRequest),
+                getCookies(httpServletRequest));
+
+
+        Request.current.set(request);
+        Router.routeOnlyStatic(request);
+
+        return request;
+    }
+
+    protected static Map<String, Http.Header> getHeaders(HttpServletRequest httpServletRequest) {
+        Map<String, Http.Header> headers = new HashMap<String, Http.Header>(16);
+
+        Enumeration headersNames = httpServletRequest.getHeaderNames();
         while (headersNames.hasMoreElements()) {
             Http.Header hd = new Http.Header();
             hd.name = (String) headersNames.nextElement();
@@ -260,14 +275,17 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                 String value = (String) enumValues.nextElement();
                 hd.values.add(value);
             }
-            request.headers.put(hd.name.toLowerCase(), hd);
+            headers.put(hd.name.toLowerCase(), hd);
         }
 
-        request.resolveFormat();
+        return headers;
+    }
 
-        javax.servlet.http.Cookie[] cookies = httpServletRequest.getCookies();
-        if (cookies != null) {
-            for (javax.servlet.http.Cookie cookie : cookies) {
+    protected static Map<String, Http.Cookie> getCookies(HttpServletRequest httpServletRequest) {
+        Map<String, Http.Cookie> cookies = new HashMap<String, Http.Cookie>(16);
+        javax.servlet.http.Cookie[] cookiesViaServlet = httpServletRequest.getCookies();
+        if (cookiesViaServlet != null) {
+            for (javax.servlet.http.Cookie cookie : cookiesViaServlet) {
                 Http.Cookie playCookie = new Http.Cookie();
                 playCookie.name = cookie.getName();
                 playCookie.path = cookie.getPath();
@@ -275,14 +293,13 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                 playCookie.secure = cookie.getSecure();
                 playCookie.value = cookie.getValue();
                 playCookie.maxAge = cookie.getMaxAge();
-                request.cookies.put(playCookie.name, playCookie);
+                cookies.put(playCookie.name, playCookie);
             }
         }
 
-        request._init();
-
-        return request;
+        return cookies;
     }
+
 
     public void serve404(HttpServletRequest servletRequest, HttpServletResponse servletResponse, NotFound e) {
         Logger.warn("404 -> %s %s (%s)", servletRequest.getMethod(), servletRequest.getRequestURI(), e.getMessage());

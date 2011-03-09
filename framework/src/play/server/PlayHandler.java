@@ -487,88 +487,86 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             querystring = uri.substring(index + 1);
         }
 
-        final Request request = new Request();
-
-        request.remoteAddress = getRemoteIPAddress(ctx);
-        request.method = nettyRequest.getMethod().getName();
-        request.path = path;
-        request.querystring = querystring;
-        final String contentType = nettyRequest.getHeader(CONTENT_TYPE);
-        if (contentType != null) {
-            request.contentType = contentType.split(";")[0].trim().toLowerCase();
+        String remoteAddress = getRemoteIPAddress(ctx);
+        String method = nettyRequest.getMethod().getName();
+        final String nettyContentType = nettyRequest.getHeader(CONTENT_TYPE);
+        String contentType = null;
+        if (nettyContentType != null) {
+            contentType = nettyContentType.split(";")[0].trim().toLowerCase();
         } else {
-            request.contentType = "text/html";
+            contentType = "text/html";
         }
 
         if (nettyRequest.getHeader("X-HTTP-Method-Override") != null) {
-            request.method = nettyRequest.getHeader("X-HTTP-Method-Override").intern();
+            method = nettyRequest.getHeader("X-HTTP-Method-Override").intern();
         }
 
+        InputStream body = null;
         ChannelBuffer b = nettyRequest.getContent();
         if (b instanceof FileChannelBuffer) {
             FileChannelBuffer buffer = (FileChannelBuffer) b;
             // An error occurred
             Integer max = Integer.valueOf(Play.configuration.getProperty("play.netty.maxContentLength", "-1"));
 
-            request.body = buffer.getInputStream();
-            if (!(max == -1 || request.body.available() < max)) {
-                request.body = new ByteArrayInputStream(new byte[0]);
+            body = buffer.getInputStream();
+            if (!(max == -1 || body.available() < max)) {
+                body = new ByteArrayInputStream(new byte[0]);
             }
 
         } else {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             IOUtils.copy(new ChannelBufferInputStream(b), out);
             byte[] n = out.toByteArray();
-            request.body = new ByteArrayInputStream(n);
+            body = new ByteArrayInputStream(n);
         }
 
-        request.url = uri;
-        request.host = nettyRequest.getHeader(HOST);
-        request.isLoopback = ((InetSocketAddress) ctx.getChannel().getRemoteAddress()).getAddress().isLoopbackAddress() && request.host.matches("^127\\.0\\.0\\.1:?[0-9]*$");
 
-        if (request.host == null) {
-            request.host = "";
-            request.port = 80;
-            request.domain = "";
+        String host = nettyRequest.getHeader(HOST);
+        boolean isLoopback = ((InetSocketAddress) ctx.getChannel().getRemoteAddress()).getAddress().isLoopbackAddress() && host.matches("^127\\.0\\.0\\.1:?[0-9]*$");
+
+        int port = 0;
+        String domain = null;
+        if (host == null) {
+            host = "";
+            port = 80;
+            domain = "";
         } else {
-            if (request.host.contains(":")) {
-                final String[] host = request.host.split(":");
-                request.port = Integer.parseInt(host[1]);
-                request.domain = host[0];
+            if (host.contains(":")) {
+                final String[] hosts = host.split(":");
+                port = Integer.parseInt(hosts[1]);
+                domain = hosts[0];
             } else {
-                request.port = 80;
-                request.domain = request.host;
+                port = 80;
+                domain = host;
             }
         }
 
-        if (Play.configuration.containsKey("XForwardedSupport") && nettyRequest.getHeader("X-Forwarded-For") != null) {
-            if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(",")).contains(request.remoteAddress)) {
-                throw new RuntimeException("This proxy request is not authorized: " + request.remoteAddress);
-            } else {
-                request.secure = ("https".equals(Play.configuration.get("XForwardedProto")) || "https".equals(nettyRequest.getHeader("X-Forwarded-Proto")) || "on".equals(nettyRequest.getHeader("X-Forwarded-Ssl")));
-                if (Play.configuration.containsKey("XForwardedHost")) {
-                    request.host = (String) Play.configuration.get("XForwardedHost");
-                } else if (nettyRequest.getHeader("X-Forwarded-Host") != null) {
-                    request.host = nettyRequest.getHeader("X-Forwarded-Host");
-                }
-                if (nettyRequest.getHeader("X-Forwarded-For") != null) {
-                    request.remoteAddress = nettyRequest.getHeader("X-Forwarded-For");
-                }
-            }
-        }
+        boolean secure = false;
 
+        final Request request = Request.createRequest(
+                remoteAddress,
+                method,
+                path,
+                querystring,
+                contentType,
+                body,
+                uri,
+                host,
+                isLoopback,
+                port,
+                domain,
+                secure,
+                getHeaders(nettyRequest),
+                getCookies(nettyRequest));
 
-        addToRequest(nettyRequest, request);
-
-        request.resolveFormat();
-
-        request._init();
 
         Logger.trace("parseRequest: end");
         return request;
     }
 
-    protected static void addToRequest(HttpRequest nettyRequest, Request request) {
+    protected static Map<String, Http.Header> getHeaders(HttpRequest nettyRequest) {
+        Map<String, Http.Header> headers = new HashMap<String, Http.Header>(16);
+
         for (String key : nettyRequest.getHeaderNames()) {
             Http.Header hd = new Http.Header();
             hd.name = key.toLowerCase();
@@ -576,14 +574,19 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             for (String next : nettyRequest.getHeaders(key)) {
                 hd.values.add(next);
             }
-            request.headers.put(hd.name, hd);
+            headers.put(hd.name, hd);
         }
 
+        return headers;
+    }
+
+    protected static Map<String, Http.Cookie> getCookies(HttpRequest nettyRequest) {
+        Map<String, Http.Cookie> cookies = new HashMap<String, Http.Cookie>(16);
         String value = nettyRequest.getHeader(COOKIE);
         if (value != null) {
-            Set<Cookie> cookies = new CookieDecoder().decode(value);
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
+            Set<Cookie> cookieSet = new CookieDecoder().decode(value);
+            if (cookieSet != null) {
+                for (Cookie cookie : cookieSet) {
                     Http.Cookie playCookie = new Http.Cookie();
                     playCookie.name = cookie.getName();
                     playCookie.path = cookie.getPath();
@@ -591,11 +594,13 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                     playCookie.secure = cookie.isSecure();
                     playCookie.value = cookie.getValue();
                     playCookie.httpOnly = cookie.isHttpOnly();
-                    request.cookies.put(playCookie.name, playCookie);
+                    cookies.put(playCookie.name, playCookie);
                 }
             }
         }
+        return cookies;
     }
+
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {

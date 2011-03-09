@@ -205,11 +205,11 @@ public class Http {
         /**
          * HTTP Headers
          */
-        public Map<String, Http.Header> headers = new HashMap<String, Http.Header>(16);
+        public Map<String, Http.Header> headers = null;
         /**
          * HTTP Cookies
          */
-        public Map<String, Http.Cookie> cookies = new HashMap<String, Http.Cookie>(16);
+        public Map<String, Http.Cookie> cookies = null;
         /**
          * Body stream
          */
@@ -271,7 +271,103 @@ public class Http {
          */
         public final Scope.Params params = new Scope.Params();
 
+
+        /**
+         * Deprecate the default constructor to encourage the use of createRequest() when creating new
+         * requests.
+         *
+         * Cannot hide it with protected because we have to be backward compatible with modules - ie PlayGrizzlyAdapter.java
+         */
+        @Deprecated
+        public Request() {
+            headers = new HashMap<String, Http.Header>(16);
+            cookies = new HashMap<String, Http.Cookie>(16);
+        }
+
+        /**
+         * All creation / initing of new requests should use this method.
+         * The purpose of this is to "show" what is needed when creating new Requests.
+         * @return the newly created Request object
+         */
+        public static Request createRequest(
+                String _remoteAddress,
+                String _method,
+                String _path,
+                String _querystring,
+                String _contentType,
+                InputStream _body,
+                String _url,
+                String _host,
+                boolean _isLoopback,
+                int _port,
+                String _domain,
+                boolean _secure,
+                Map<String, Http.Header> _headers,
+                Map<String, Http.Cookie> _cookies
+        ) {
+            Request newRequest = new Request();
+
+            newRequest.remoteAddress = _remoteAddress;
+            newRequest.method = _method;
+            newRequest.path = _path;
+            newRequest.querystring = _querystring;
+            newRequest.contentType = _contentType;
+            newRequest.body = _body;
+            newRequest.url = _url;
+            newRequest.host = _host;
+            newRequest.isLoopback = _isLoopback;
+            newRequest.port = _port;
+            newRequest.domain = _domain;
+            newRequest.secure = _secure;
+
+            if(_headers == null) {
+                _headers = new HashMap<String, Http.Header>(16);
+            }
+            newRequest.headers = _headers;
+
+            if(_cookies == null) {
+                _cookies = new HashMap<String, Http.Cookie>(16);
+            }
+            newRequest.cookies = _cookies;
+
+            newRequest.parseXForwarded();
+
+            newRequest.resolveFormat();
+
+            newRequest.authorizationInit();
+
+            return newRequest;
+        }
+
+        protected void parseXForwarded() {
+
+            if (Play.configuration.containsKey("XForwardedSupport") && headers.get("X-Forwarded-For") != null) {
+                if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(",")).contains(remoteAddress)) {
+                    throw new RuntimeException("This proxy request is not authorized: " + remoteAddress);
+                } else {
+                    secure = ("https".equals(Play.configuration.get("XForwardedProto")) || "https".equals(headers.get("X-Forwarded-Proto").value()) || "on".equals(headers.get("X-Forwarded-Ssl").value()));
+                    if (Play.configuration.containsKey("XForwardedHost")) {
+                        host = (String) Play.configuration.get("XForwardedHost");
+                    } else if (headers.get("X-Forwarded-Host") != null) {
+                        host = headers.get("X-Forwarded-Host").value();
+                    }
+                    if (headers.get("X-Forwarded-For") != null) {
+                        remoteAddress = headers.get("X-Forwarded-For").value();
+                    }
+                }
+            }
+
+        }
+
+        /**
+         * Deprecated to encourage users to use createRequest() instead.
+         */
+        @Deprecated
         public void _init() {
+            authorizationInit();
+        }
+
+        protected void authorizationInit() {
             Header header = headers.get("authorization");
             if (header != null && header.value().startsWith("Basic ")) {
                 String data = header.value().substring(6);
