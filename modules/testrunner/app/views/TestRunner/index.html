@@ -418,7 +418,7 @@
                         $('.nbToRunPluralize').text((nb>1) ? 's' : '');
                         $('#start').removeAttr('disabled').removeClass('disabled');
                         $('#bms').show();
-                        $('#bms a').attr('href', bookmark());
+                        $('#bms a#bm').attr('href', bookmark());
                         $('#quickLinks').hide();
                     } else {
                         $('.nbToRun').text('no');
@@ -505,6 +505,11 @@
                     updateSelected();
                 });
                 
+                $('#da').click(function() {
+                    $('.test').removeClass('selected');
+                    updateSelected();
+                });
+
                 $('#ra').click(function() {
                     $('.test').addClass('selected');
                     updateSelected();
@@ -548,7 +553,12 @@
             <div id="stopped">
                 <span id="start">Start !</span>
                 &nbsp;
-                <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span> to run <span id="bms">(<a id="" href="#">Bookmark this link to save this configuration</a>)</span>
+                <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span> to run 
+                <span id="bms">
+                    <span id="bm">(<a id="" href="#">Bookmark this link to save this configuration</a></span> -
+                    <span id="da"><a id="" href="#">Deselect all</a>)</span>
+                </span>
+
                 <span id="quickLinks">
                     <span id="sa">(<a id="" href="#">Select all</a></span> -
                     <span id="ra"><a id="" href="#">Run all</a>)</span>
