@@ -36,5 +36,10 @@ class CommandLoader:
 
 def load_python_module(name, location):
     mod_desc = imp.find_module(name, [location])
-    return imp.load_module(name, mod_desc[0], mod_desc[1], mod_desc[2])
+    mod_file = mod_desc[0]
+    try:
+        return imp.load_module(name, mod_desc[0], mod_desc[1], mod_desc[2])
+    finally:
+        if mod_file is not None and not mod_file.closed:
+            mod_file.close()
 
