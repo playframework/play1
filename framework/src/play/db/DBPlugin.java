@@ -49,6 +49,15 @@ public class DBPlugin extends PlayPlugin {
         if (changed()) {
             try {
 
+                // Do we have an existing datasource?
+                if( DB.datasource != null ) {
+                    if( DB.datasource instanceof ComboPooledDataSource ) {
+                        // close it so we don't leak connections
+                        ((ComboPooledDataSource)DB.datasource).close();
+                        DB.datasource = null;
+                    }
+                }
+
                 Properties p = Play.configuration;
 
                 if (p.getProperty("db", "").startsWith("java:")) {
