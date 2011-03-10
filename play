@@ -109,6 +109,13 @@ try:
     if play_env["id"] is not '':
         print "~ framework ID is %s" % play_env["id"]
     print "~"
+    
+    # ~~~~~~~~~~~~~~~~~ Checking for disable_check_jpda
+    disable_check_jpda = False
+    if remaining_args.count('-f') == 1:
+        disable_check_jpda = True
+        remaining_args.remove('-f')
+    play_env["disable_check_jpda"] = disable_check_jpda 
 
     play_app = PlayApplication(application_path, play_env, ignoreMissing)
 
