@@ -12,6 +12,7 @@ import play.*;
 import play.mvc.*;
 import play.i18n.Lang;
 import play.libs.*;
+import play.jobs.*;
 
 import models.*;
 import utils.*;
@@ -187,6 +188,23 @@ public class Application extends Controller {
         email.setSubject("test attachments");
         Mail.send(email);
         renderText("OK5");
+    }
+    
+    public static void mailWithUrls() {
+        notifiers.Welcome.welcome_mailWithUrls(false);
+        renderText("OK_mailWithUrls");
+    }
+    
+    public static class MailJob extends Job {
+        @Override
+        public void doJob() {
+            notifiers.Welcome.welcome_mailWithUrls(true);
+        }
+    }
+    
+    public static void mailWithUrlsInJob() throws Exception {
+        new MailJob().now().get();
+        renderText("OK_mailWithUrlsInJob");
     }
 
     public static void ifthenelse() {

@@ -95,13 +95,27 @@ The template for the lostPassword method could look like this:
 
 **app/views/Mails/lostPassword.txt**
 
-bc. Hello ${user.name},
+bc.Hello ${user.name},
  
 Your new password is ${newpassword}.
 
 h3. text/html e-mail with text/plain alternative
 
 If an HTML template is defined and a text template exists, then the text template will be used as an alternative message. In our previous example, if both **app/views/Mails/lostPassword.html** and **app/views/Mails/lostPassword.txt** are defined, then the e-mail will be sent in text/html as defined in lostPassword.html with an alternative part as defined in lostPassword.txt. So you can send nice HMTL e-mail to your friends and still please those geeky friends that still use mutt ;)
+
+h3. Links to your application in e-mail
+
+Your can include links to your application in e-mails like this:
+
+bc.@@{application.index}
+
+If you send mails from Jobs you have to configure **application.baseUrl** in **application.conf**.
+**application.baseUrl** must be a valid external baseurl to your application.
+
+If the website playframework.org where to send you an e-mail from inside a Job, its configuration
+would look like this:
+
+bc.application.baseUrl=http://www.playframework.org/
 
 h2. <a name="smtp">SMTP configuration</a>
 

@@ -258,15 +258,18 @@ public class GroovyTemplate extends BaseTemplate {
                 if (tn.indexOf("$") > -1) {
                     tn = tn.substring(0, tn.indexOf("$"));
                 }
-                Integer line = TemplateLoader.templates.get(tn).linesMatrix.get(se.getLineNumber());
-                if (line != null) {
-                    String ext = "";
-                    if (tn.indexOf(".") > -1) {
-                        ext = tn.substring(tn.indexOf(".") + 1);
-                        tn = tn.substring(0, tn.indexOf("."));
+                BaseTemplate template = TemplateLoader.templates.get(tn);
+                if( template != null ) {
+                    Integer line = template.linesMatrix.get(se.getLineNumber());
+                    if (line != null) {
+                        String ext = "";
+                        if (tn.indexOf(".") > -1) {
+                            ext = tn.substring(tn.indexOf(".") + 1);
+                            tn = tn.substring(0, tn.indexOf("."));
+                        }
+                        StackTraceElement nse = new StackTraceElement(TemplateLoader.templates.get(tn).name, ext, "line", line);
+                        cleanTrace.add(nse);
                     }
-                    StackTraceElement nse = new StackTraceElement(TemplateLoader.templates.get(tn).name, ext, "line", line);
-                    cleanTrace.add(nse);
                 }
             }
             if (!se.getClassName().startsWith("org.codehaus.groovy.") && !se.getClassName().startsWith("groovy.") && !se.getClassName().startsWith("sun.reflect.") && !se.getClassName().startsWith("java.lang.reflect.") && !se.getClassName().startsWith("Template_")) {
