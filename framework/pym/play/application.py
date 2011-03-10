@@ -32,6 +32,8 @@ class PlayApplication:
         self.jpda_port = self.readConf('jpda_port')
         self.ignoreMissingModules = ignoreMissingModules
 
+
+
     # ~~~~~~~~~~~~~~~~~~~~~~ Configuration File
 
     def check(self):
@@ -231,6 +233,13 @@ class PlayApplication:
             args += ["--https.port=%s" % self.play_env['https.port']]
             
         java_args.append('-Dfile.encoding=utf-8')
+        
+        disable_check_jpda = False
+        if self.readConf('application.mode') == 'dev':
+            if not disable_check_jpda: self.check_jpda()
+            java_args.append('-Xdebug')
+            java_args.append('-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % self.jpda_port)
+            java_args.append('-Dplay.debug=yes')
         
         java_cmd = [self.java_path(), '-javaagent:%s' % self.agent_path()] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % self.path, '-Dplay.id=%s' % self.play_env["id"], className] + args
         return java_cmd
