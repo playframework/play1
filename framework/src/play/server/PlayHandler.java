@@ -169,7 +169,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Request.current.set(request);
             Response.current.set(response);
             try {
-                super.init();
+                if (Play.mode == Play.Mode.DEV) {
+                    Router.detectChanges(Play.ctxPath);
+                }
                 if (Play.mode == Play.Mode.PROD && staticPathsCache.containsKey(request.path)) {
                     RenderStatic rs = null;
                     synchronized (staticPathsCache) {
@@ -180,6 +182,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
                     return false;
                 }
                 Router.routeOnlyStatic(request);
+                super.init();
             } catch (NotFound nf) {
                 serve404(nf, ctx, request, nettyRequest);
                 Logger.trace("init: end false");
