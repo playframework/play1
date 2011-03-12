@@ -12,38 +12,36 @@ import play.utils.Utils;
 /**
  * Parameters map to POJO binder.
  */
-public class BeanWrapper {
+public abstract class BeanWrapper {
 
     final static int notwritableField = Modifier.FINAL | Modifier.NATIVE | Modifier.STATIC;
     final static int notaccessibleMethod = Modifier.NATIVE | Modifier.STATIC;
 
     private Class<?> beanClass;
 
-    /** 
+    /**
      * a cache for our properties and setters
      */
     private Map<String, Property> wrappers = new HashMap<String, Property>();
 
-    public BeanWrapper(Class<?> forClass) {
+    BeanWrapper(Class<?> forClass) {
         if (Logger.isTraceEnabled()) {
             Logger.trace("Bean wrapper for class %s", forClass.getName());
         }
-
         this.beanClass = forClass;
-        boolean isScala = false;
+    }
+
+    public static BeanWrapper forClass(Class<?> forClass) {
+        BeanWrapper beanWrapper = new JavaBeanWrapper(forClass);
         for (Class<?> intf : forClass.getInterfaces()) {
             if ("scala.ScalaObject".equals(intf.getName())) {
-                isScala = true;
+                beanWrapper = new ScalaBeanWrapper(forClass);
                 break;
             }
         }
-
-        registerSetters(forClass, isScala);
-        if(isScala) {
-            registerAllFields(forClass);
-        } else {
-            registerFields(forClass);
-        }
+        beanWrapper.registerSetters(forClass);
+        beanWrapper.registerFields(forClass);
+        return beanWrapper;
     }
 
     public Collection<Property> getWrappers() {
@@ -110,13 +108,7 @@ public class BeanWrapper {
 
     }
 
-    private boolean isSetter(Method method) {
-        return (!method.isAnnotationPresent(PlayPropertyAccessor.class) && method.getName().startsWith("set") && method.getName().length() > 3 && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
-    }
-
-    private boolean isScalaSetter(Method method) {
-        return (!method.isAnnotationPresent(PlayPropertyAccessor.class) && method.getName().endsWith("_$eq") && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
-    }
+    abstract boolean isSetter(Method method);
 
     protected Object newBeanInstance() throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Constructor constructor = beanClass.getDeclaredConstructor();
@@ -129,63 +121,77 @@ public class BeanWrapper {
         if (clazz == Object.class) {
             return;
         }
-        Field[] fields = clazz.getFields();
-        for (Field field : fields) {
+        for (Field field : getFields(clazz)) {
             if (wrappers.containsKey(field.getName())) {
                 continue;
             }
-            if ((field.getModifiers() & notwritableField) != 0) {
-                continue;
-            }
+            field.setAccessible(true);
             Property w = new Property(field);
             wrappers.put(field.getName(), w);
         }
         registerFields(clazz.getSuperclass());
     }
 
-    private void registerAllFields(Class<?> clazz) {
-        // recursive stop condition
+    private void registerSetters(Class<?> clazz) {
         if (clazz == Object.class) {
             return;
         }
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-            if (wrappers.containsKey(field.getName())) {
-                continue;
-            }
-            /*if ((field.getModifiers() & notwritableField) != 0) {
-                continue;
-            }*/
-            field.setAccessible(true);
-            Property w = new Property(field);
-            wrappers.put(field.getName(), w);
-        }
-        registerAllFields(clazz.getSuperclass());
-    }
-
-    private void registerSetters(Class<?> clazz, boolean isScala) {
-        if (clazz == Object.class) {
-            return;
-            // deep walk (superclass first)
-        }
-        registerSetters(clazz.getSuperclass(), isScala);
+        registerSetters(clazz.getSuperclass());
 
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
-            String propertyname;
-            if (isScala) {
-                if (!isScalaSetter(method)) {
-                    continue;
-                }
-                propertyname = method.getName().substring(0, method.getName().length() - 4);
-            } else {
-                if (!isSetter(method)) {
-                    continue;
-                }
-                propertyname = method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
+            if (!isSetter(method)) {
+                continue;
             }
+            final String propertyname = getPropertyName(method);
             Property wrapper = new Property(propertyname, method);
             wrappers.put(propertyname, wrapper);
+        }
+    }
+
+    abstract Collection<Field> getFields(Class<?> forClass);
+
+    abstract String getPropertyName(Method method);
+
+    private static class JavaBeanWrapper extends BeanWrapper {
+
+        JavaBeanWrapper(Class<?> forClass) {
+            super(forClass);
+        }
+
+        String getPropertyName(Method method) {
+            return method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
+        }
+
+        boolean isSetter(Method method) {
+            return (!method.isAnnotationPresent(PlayPropertyAccessor.class) && method.getName().startsWith("set") && method.getName().length() > 3 && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
+        }
+
+        Collection<Field> getFields(Class<?> forClass) {
+            final Collection<Field> fields = new ArrayList<Field>();
+            for (Field field : forClass.getFields()) {
+                if ((field.getModifiers() & notwritableField) != 0) {
+                    continue;
+                }
+                fields.add(field);
+            }
+            return fields;
+        }
+    }
+
+    private static class ScalaBeanWrapper extends BeanWrapper {
+        ScalaBeanWrapper(Class<?> forClass) {
+            super(forClass);
+        }
+        String getPropertyName(Method method) {
+            return method.getName().substring(0, method.getName().length() - 4);
+        }
+        boolean isSetter(Method method) {
+            return (!method.isAnnotationPresent(PlayPropertyAccessor.class) && method.getName().endsWith("_$eq") && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
+        }
+
+        Collection<Field> getFields(Class<?> forClass) {
+            return Arrays.asList(forClass.getDeclaredFields());
         }
     }
 
@@ -272,7 +278,6 @@ public class BeanWrapper {
         public String toString() {
             return type + "." + name;
         }
-
 
     }
 }

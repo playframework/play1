@@ -52,7 +52,7 @@ public class Binder {
 
     static BeanWrapper getBeanWrapper(Class<?> clazz) {
         if (!beanwrappers.containsKey(clazz)) {
-            BeanWrapper beanwrapper = new BeanWrapper(clazz);
+            BeanWrapper beanwrapper = BeanWrapper.forClass(clazz);
             beanwrappers.put(clazz, beanwrapper);
         }
         return beanwrappers.get(clazz);
@@ -300,9 +300,9 @@ public class Binder {
         if (result != null) {
             return result;
         }
-        
+
         try {
-            return new BeanWrapper(o.getClass()).bind(name, null, params, "", o, null);
+            return BeanWrapper.forClass(o.getClass()).bind(name, null, params, "", o, null);
         } catch (Exception e) {
             Validation.addError(name, "validation.invalid");
             return null;
