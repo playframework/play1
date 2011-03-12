@@ -35,7 +35,7 @@ import play.Logger;
 import play.utils.Utils;
 
 /**
- * A super class for JPA entities 
+ * A super class for JPA entities
  */
 @MappedSuperclass
 @SuppressWarnings("unchecked")
@@ -55,7 +55,7 @@ public class GenericModel extends JPABase {
     @SuppressWarnings("deprecation")
     public static <T extends JPABase> T edit(Object o, String name, Map<String, String[]> params, Annotation[] annotations) {
         try {
-            BeanWrapper bw = new BeanWrapper(o.getClass());
+            BeanWrapper bw = BeanWrapper.forClass(o.getClass());
             // Start with relations
             Set<Field> fields = new HashSet<Field>();
             Class clazz = o.getClass();
