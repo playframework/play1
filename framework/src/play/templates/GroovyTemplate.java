@@ -176,7 +176,7 @@ public class GroovyTemplate extends BaseTemplate {
         compiledTemplateName = compiledTemplate.getName();
     }
 
-    public String render(Map<String, Object> args) {
+    protected String internalRender(Map<String, Object> args) {
         compile();
         Binding binding = new Binding(args);
         binding.setVariable("play", new Play());
@@ -184,7 +184,15 @@ public class GroovyTemplate extends BaseTemplate {
         binding.setVariable("lang", Lang.get());
         StringWriter writer = null;
         Boolean applyLayouts = false;
+
+        // must check if this is the first template being rendered..
+        // If this template is called from inside another template,
+        // then args("out") have already been initialized
+
         if (!args.containsKey("out")) {
+            // This is the first template being rendered.
+            // We have to set up the PrintWriter that this (and all sub-templates) are going
+            // to write the output to..
             applyLayouts = true;
             layout.set(null);
             writer = new StringWriter();
@@ -234,7 +242,7 @@ public class GroovyTemplate extends BaseTemplate {
             Map<String, Object> layoutArgs = new HashMap<String, Object>(args);
             layoutArgs.remove("out");
             layoutArgs.put("_isLayout", true);
-            String layoutR = layout.get().render(layoutArgs);
+            String layoutR = layout.get().internalRender(layoutArgs);
             return layoutR.replace("____%LAYOUT%____", writer.toString().trim());
         }
         if (writer != null) {
@@ -331,7 +339,7 @@ public class GroovyTemplate extends BaseTemplate {
             }
             args.put("_body", body);
             try {
-                tagTemplate.render(args);
+                tagTemplate.internalRender(args);
             } catch (TagInternalException e) {
                 throw new TemplateExecutionException(template, fromLine, e.getMessage(), template.cleanStackTrace(e));
             } catch (TemplateNotFoundException e) {
