@@ -21,6 +21,7 @@ import play.exceptions.UnexpectedException;
 import play.libs.Expression;
 import play.utils.Java;
 import play.libs.Time;
+import play.utils.PThreadFactory;
 
 public class JobsPlugin extends PlayPlugin {
 
@@ -51,8 +52,10 @@ public class JobsPlugin extends PlayPlugin {
             for(Job job : scheduledJobs) {
                 out.print(job.getClass().getName());
                 if(job.getClass().isAnnotationPresent(OnApplicationStart.class)) {
-                    out.print(" run at application start.");
+                    OnApplicationStart appStartAnnotation = job.getClass().getAnnotation(OnApplicationStart.class);
+                    out.print(" run at application start" + (appStartAnnotation.async()?" (async)" : "") + ".");
                 }
+
                 if(job.getClass().isAnnotationPresent(On.class)) {
                     out.print(" run with cron expression " + job.getClass().getAnnotation(On.class).value() + ".");
                 }
@@ -97,27 +100,45 @@ public class JobsPlugin extends PlayPlugin {
         for (final Class<?> clazz : jobs) {
             // @OnApplicationStart
             if (clazz.isAnnotationPresent(OnApplicationStart.class)) {
-                try {
-                    Job<?> job = ((Job<?>) clazz.newInstance());
-                    scheduledJobs.add(job);
-                    job.run();
-                    if(job.wasError) {
-                        if(job.lastException != null) {
-                            throw job.lastException;
+                //check if we're going to run the job sync or async
+                OnApplicationStart appStartAnnotation = clazz.getAnnotation(OnApplicationStart.class);
+                if( !appStartAnnotation.async()) {
+                    //run job sync
+                    try {
+                        Job<?> job = ((Job<?>) clazz.newInstance());
+                        scheduledJobs.add(job);
+                        job.run();
+                        if(job.wasError) {
+                            if(job.lastException != null) {
+                                throw job.lastException;
+                            }
+                            throw new RuntimeException("@OnApplicationStart Job has failed");
                         }
-                        throw new RuntimeException("@OnApplicationStart Job has failed");
+                    } catch (InstantiationException e) {
+                        throw new UnexpectedException("Job could not be instantiated", e);
+                    } catch (IllegalAccessException e) {
+                        throw new UnexpectedException("Job could not be instantiated", e);
+                    } catch (Throwable ex) {
+                        if (ex instanceof PlayException) {
+                            throw (PlayException) ex;
+                        }
+                        throw new UnexpectedException(ex);
                     }
-                } catch (InstantiationException e) {
-                    throw new UnexpectedException("Job could not be instantiated", e);
-                } catch (IllegalAccessException e) {
-                    throw new UnexpectedException("Job could not be instantiated", e);
-                } catch (Throwable ex) {
-                    if (ex instanceof PlayException) {
-                        throw (PlayException) ex;
+                } else {
+                    //run job async
+                    try {
+                        Job<?> job = ((Job<?>) clazz.newInstance());
+                        scheduledJobs.add(job);
+                        //start running job now in the background
+                        executor.submit( (Callable<Job>)job );
+                    } catch (InstantiationException ex) {
+                        throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
+                    } catch (IllegalAccessException ex) {
+                        throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
                     }
-                    throw new UnexpectedException(ex);
                 }
             }
+
             // @On
             if (clazz.isAnnotationPresent(On.class)) {
                 try {
@@ -155,7 +176,7 @@ public class JobsPlugin extends PlayPlugin {
     @Override
     public void onApplicationStart() {
         int core = Integer.parseInt(Play.configuration.getProperty("play.jobs.pool", "10"));
-        executor = new ScheduledThreadPoolExecutor(core, new ThreadPoolExecutor.AbortPolicy());
+        executor = new ScheduledThreadPoolExecutor(core, new PThreadFactory("jobs"), new ThreadPoolExecutor.AbortPolicy());
     }
 
     public static <V> void scheduleForCRON(Job<V> job) {

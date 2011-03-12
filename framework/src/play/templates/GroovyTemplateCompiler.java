@@ -26,9 +26,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     public BaseTemplate compile(BaseTemplate template) {
         try {
             extensionsClassnames.clear();
-            for(PlayPlugin p : Play.plugins) {
-                extensionsClassnames.addAll(p.addTemplateExtensions());
-            }
+            extensionsClassnames.addAll( Play.pluginCollection.addTemplateExtensions());
             List<Class> extensionsClasses = Play.classloader.getAssignableClasses(JavaExtensions.class);
             for (Class extensionsClass : extensionsClasses) {
                 extensionsClassnames.add(extensionsClass.getName());
@@ -42,6 +40,9 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     @Override
     String source() {
         String source = template.source;
+
+        // If a plugin has something to change in the template before the compilation
+        source = Play.pluginCollection.overrideTemplateSource(template, source);
 
         // Static access
         List<String> names = new ArrayList<String>();
@@ -74,7 +75,14 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     @Override
     void head() {
         print("class ");
-        String className = "Template_" + ((template.name.hashCode() + "").replace("-", "M"));
+        //This generated classname is parsed when creating cleanStackTrace.
+        //The part after "Template_" is used as key when
+        //looking up the file on disk this template-class is generated from.
+        //cleanStackTrace is looking in TemplateLoader.templates
+
+        String uniqueNumberForTemplateFile = TemplateLoader.getUniqueNumberForTemplateFile(template.name);
+
+        String className = "Template_" + uniqueNumberForTemplateFile;
         print(className);
         println(" extends play.templates.GroovyTemplate.ExecutableTemplate {");
         println("public Object run() { use(play.templates.JavaExtensions) {");
@@ -153,7 +161,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         String expr = parser.getToken().trim();
         print("\t__val=");
         print(expr);
-        print(";out.print(__val!=null?__safe(__val):'')");
+        print(";out.print(__val!=null?__safe(__val, __val.toString()):'')");
         markLine(parser.getLine());
         println();
     }

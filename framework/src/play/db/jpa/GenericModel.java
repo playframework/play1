@@ -116,7 +116,7 @@ public class GenericModel extends JPABase {
                                 try {
                                     String localName = name + "." + field.getName();
                                     Object to = q.getSingleResult();
-                                    edit(to, localName, params, field.getAnnotations());                                    
+                                    edit(to, localName, params, field.getAnnotations());
                                     params = Utils.filterMap(params, localName);
                                     bw.set(field.getName(), o, to);
                                 } catch (NoResultException e) {
@@ -322,7 +322,7 @@ public class GenericModel extends JPABase {
         public <T> T first() {
             try {
                 List<T> results = query.setMaxResults(1).getResultList();
-                if (results.size() == 0) {
+                if (results.isEmpty()) {
                     return null;
                 }
                 return results.get(0);

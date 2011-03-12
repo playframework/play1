@@ -1,32 +1,13 @@
 package play.data.parsing;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
-import play.Logger;
-import play.mvc.Http.Request;
 
 /**
  * A data parser parse the HTTP request data to a Map<String,String[]>
  */
 public abstract class DataParser {
-
-    public static Map<String, String[]> resolveAndParse(Request request) throws UnsupportedEncodingException {
-        // 1. determine content-type in request
-        Logger.info("request contentType is %s", request.contentType);
-        String mimeType = request.contentType;
-        if (mimeType.indexOf(';') != -1) {
-            mimeType = mimeType.substring(0, mimeType.indexOf(';'));
-        }
-        DataParser parser = parsers.get(mimeType);
-        if (parser == null) {
-            Logger.warn("no parser registered for content type %s", mimeType);
-            return new HashMap<String, String[]>();
-        }
-        return parser.parse(new ByteArrayInputStream(request.querystring.getBytes("utf-8")));
-    }
 
     // ~~~~~~~~ Repository 
     public abstract Map<String, String[]> parse(InputStream is);    
@@ -36,6 +17,8 @@ public abstract class DataParser {
     static {
         parsers.put("application/x-www-form-urlencoded", new UrlEncodedParser());
         parsers.put("multipart/form-data", new ApacheMultipartParser());
+        parsers.put("application/xml", new TextParser());
+        parsers.put("application/json", new TextParser());
     }
 
     public static void putMapEntry(Map<String, String[]> map, String name, String value) {

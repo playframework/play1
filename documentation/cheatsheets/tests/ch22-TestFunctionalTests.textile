@@ -1,0 +1,16 @@
+h2. Test - Functional Tests
+
+*==public class ApplicationTest extends FunctionalTest==*
+Functional test are unit tests with an HTTP orientation
+
+*==newRequest()==*
+*==newResponse()==*
+*==GET(request, url)==*
+*==PUT(request, url)==*
+*==POST(request,url)==*
+*==DELETE(request,url)==*
+*==assertStatus(404, response)==*
+*==assertHeaderEquals(headerName, value, response)==*
+*==assertContentEquals(content, response)==*
+*==assertContentType(type,response)==*
+*==clearCookies()==*

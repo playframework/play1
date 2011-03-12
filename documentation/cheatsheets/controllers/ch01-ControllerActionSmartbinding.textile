@@ -1,0 +1,27 @@
+h2. Controller.action - Smart binding
+
+*==Controller/link?i=32&n=patrick==*
+==public static void link(int i, String n)==
+==public static void link(Integer i, String n)==
+==public static void link(Long i, String n)==
+
+*==Controller/show?id[0]=1&id[1]=2&id[2]=3&id[3]=4==*
+==public static void show(Long[] id)==
+==public static void show(List<Long> id)==
+==public static void show(Set<Long> id)==
+
+*==Controller/get?date=02-18-1972==*
+==public static void get(@As("MM-dd-yyyy") Date date)==
+
+*==(@As(binder=MyCustomStringBinder.class))==*
+Custom parameter binder
+
+*public static void create(String comment, File attachment)*
+Send File as multipart/form-data encoded POST request
+
+*==?client.name=paul&client.email=p@example.com==*
+*public static void create(Client client)*
+JavaBean (POJO) binding
+
+*@NoBinding*
+Marks a non-bindable field

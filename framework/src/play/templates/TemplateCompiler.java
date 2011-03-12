@@ -130,7 +130,7 @@ public abstract class TemplateCompiler {
     abstract void endTag();
 
     void markLine(int line) {
-        compiledSource.append("// line " + line);
+        compiledSource.append("// line ").append(line);
         template.linesMatrix.put(currentLine, line);
     }
 

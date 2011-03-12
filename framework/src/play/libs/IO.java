@@ -113,7 +113,6 @@ public class IO {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static List<String> readLines(InputStream is) {
         List<String> lines = null;
         try {
@@ -124,7 +123,6 @@ public class IO {
         return lines;
     }
 
-    @SuppressWarnings("unchecked")
     public static List<String> readLines(File file, String encoding) {
         List<String> lines = null;
         InputStream is = null;

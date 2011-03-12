@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -45,7 +44,7 @@ public class Java {
     /**
      * Try to discover what is hidden under a FutureTask (hack)
      */
-    public static Object extractUnderlyingCallable(FutureTask futureTask) {
+    public static Object extractUnderlyingCallable(FutureTask<?> futureTask) {
         try {
             Field syncField = FutureTask.class.getDeclaredField("sync");
             syncField.setAccessible(true);

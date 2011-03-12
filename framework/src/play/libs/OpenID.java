@@ -9,6 +9,8 @@ import java.util.Map;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import play.Logger;
 import play.exceptions.PlayException;
@@ -125,7 +127,7 @@ public class OpenID {
                 url += "&";
             }
 
-            url += "openid.ns=http://specs.openid.net/auth/2.0";
+            url += "openid.ns=" + URLEncoder.encode("http://specs.openid.net/auth/2.0", "UTF-8");
             url += "&openid.mode=checkid_setup";
             url += "&openid.claimed_id=" + URLEncoder.encode(claimedId, "utf8");
             url += "&openid.identity=" + URLEncoder.encode(delegate == null ? claimedId : delegate, "utf8");
@@ -141,21 +143,32 @@ public class OpenID {
                 url += "&openid.realm=" + URLEncoder.encode(Request.current().getBase() + Router.reverse(realmAction), "utf8");
             }
 
-            for (String a : sregOptional) {
-                url += "&openid.sreg.optional=" + a;
+            if (!sregOptional.isEmpty() || !sregRequired.isEmpty()) {
+                url += "&openid.ns.sreg=" + URLEncoder.encode("http://openid.net/extensions/sreg/1.1", "UTF-8");
             }
+            String sregO = "";
+            for (String a : sregOptional) {
+               sregO += URLEncoder.encode(a, "UTF-8") + ",";
+            }
+            if (!StringUtils.isEmpty(sregO)) {
+               url += "&openid.sreg.optional=" + sregO.substring(0, sregO.length() - 1);
+            }
+            String sregR = "";
             for (String a : sregRequired) {
-                url += "&openid.sreg.required=" + a;
+               sregR +=  URLEncoder.encode(a, "UTF-8") + ",";
+            }
+             if (!StringUtils.isEmpty(sregR)) {
+                url += "&openid.sreg.required=" + sregR.substring(0, sregR.length() - 1);
             }
 
             if (!axRequired.isEmpty() || !axOptional.isEmpty()) {
                 url += "&openid.ns.ax=http%3A%2F%2Fopenid.net%2Fsrv%2Fax%2F1.0";
                 url += "&openid.ax.mode=fetch_request";
                 for (String a : axOptional.keySet()) {
-                    url += "&openid.ax.type." + a + "=" + axOptional.get(a);
+                    url += "&openid.ax.type." + a + "=" + URLEncoder.encode(axOptional.get(a), "UTF-8");
                 }
                 for (String a : axRequired.keySet()) {
-                    url += "&openid.ax.type." + a + "=" + axRequired.get(a);
+                    url += "&openid.ax.type." + a + "=" + URLEncoder.encode(axRequired.get(a), "UTF-8");
                 }
                 if (!axRequired.isEmpty()) {
                     String r = "";

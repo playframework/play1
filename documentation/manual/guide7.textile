@@ -313,7 +313,7 @@ bc. #{extends 'CRUD/layout.html' /}
  
 </div>
 
-You can hack the **#{crud.form /}** tag the make the **tags** field custom:
+You can modify the **#{crud.form /}** tag in **Posts/show.html** to customise the **tags** field by adding a **crud.custom** tag to the **#{crud.form /}** tag body:
 
 bc. #{crud.form}
     #{crud.custom 'tags'}

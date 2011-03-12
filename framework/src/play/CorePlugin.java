@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import play.Play.Mode;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.classloading.enhancers.ContinuationEnhancer;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.Enhancer;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer;
@@ -34,7 +35,7 @@ public class CorePlugin extends PlayPlugin {
     public static String computeApplicationStatus(boolean json) {
         if (json) {
             JsonObject o = new JsonObject();
-            for (PlayPlugin plugin : Play.plugins) {
+            for (PlayPlugin plugin : Play.pluginCollection.getEnabledPlugins()) {
                 try {
                     JsonObject status = plugin.getJsonStatus();
                     if (status != null) {
@@ -49,7 +50,7 @@ public class CorePlugin extends PlayPlugin {
             return o.toString();
         }
         StringBuffer dump = new StringBuffer(16);
-        for (PlayPlugin plugin : Play.plugins) {
+        for (PlayPlugin plugin : Play.pluginCollection.getEnabledPlugins()) {
             try {
                 String status = plugin.getStatus();
                 if (status != null) {
@@ -135,8 +136,8 @@ public class CorePlugin extends PlayPlugin {
         out.println();
         out.println("Loaded plugins:");
         out.println("~~~~~~~~~~~~~~");
-        for (PlayPlugin plugin : Play.plugins) {
-            out.println(plugin.index + ":" + plugin.getClass().getName());
+        for (PlayPlugin plugin : Play.pluginCollection.getAllPlugins()) {
+            out.println(plugin.index + ":" + plugin.getClass().getName() + " [" + (Play.pluginCollection.isEnabled(plugin) ? "enabled" : "disabled") + "]");
         }
         out.println();
         out.println("Configuration:");
@@ -282,6 +283,7 @@ public class CorePlugin extends PlayPlugin {
         Class<?>[] enhancers = new Class[]{
             SigEnhancer.class,
             ControllersEnhancer.class,
+            ContinuationEnhancer.class,
             MailerEnhancer.class,
             PropertiesEnhancer.class,
             LocalvariablesNamesEnhancer.class

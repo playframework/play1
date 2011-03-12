@@ -11,7 +11,7 @@ This example provides a high-level view of how OpenID authentication can be used
 * Redirect the user to the OpenID provider
 * When the user comes back, get the verified OpenID and save it in the HTTP session.
 
-The OpenID functionality is provided by the **play.libs.OpenID** class and is built using "OpenID4Java":http://code.google.com/p/openid4java/.
+The OpenID functionality is provided by the **play.libs.OpenID** class.
 
 bc. @Before(unless={"login", "authenticate"})
 static void checkAuthenticated() {

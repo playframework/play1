@@ -43,6 +43,8 @@ public class User extends Model {
 
 The **@Entity** annotation marks this class as a managed JPA entity, and the **Model** superclass automatically provides a set of useful JPA helpers that we will discover later. All fields of this class will be automatically persisted to the database. 
 
+p(note). By default, the table name is ‘User’. If you change the configuration to use a database where ‘user’ is a reserved keyword, then you will need to specify a different table name for the JPA mapping. To do this, annotate the **User** class with **@Table(name="blog_user")**.
+
 p(note). It’s not required that your model objects extend the **play.db.jpa.Model** class. You can use plain JPA as well. But extending this class is a good choice in most cases as it will make a lot of the JPA stuff easier.
 
 If you have used JPA before, you know that every JPA entity must provide an **@Id** property. Here the Model superclass provides an automatically generated numeric ID, and in most cases this is good enough.

@@ -2,7 +2,6 @@ package play.jobs;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.jamonapi.Monitor;
@@ -15,6 +14,7 @@ import play.Play;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
 import play.libs.Time;
+import play.libs.F.Promise;
 
 /**
  * A job is an asynchronously executed unit of work
@@ -54,15 +54,25 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * Start this job now (well ASAP)
      * @return the job completion
      */
-    public Future<V> now() {
-        return JobsPlugin.executor.submit((Callable<V>) this);
+    public Promise<V> now() {
+        final Promise<V> smartFuture = new Promise<V>();
+        JobsPlugin.executor.submit(new Callable<V>() {
+            public V call() throws Exception {
+                V result =  Job.this.call();
+                smartFuture.invoke(result);
+                return result;
+            }
+            
+        });
+
+        return smartFuture;
     }
 
     /**
      * Start this job in several seconds
      * @return the job completion
      */
-    public Future<V> in(String delay) {
+    public Promise<V> in(String delay) {
         return in(Time.parseDuration(delay));
     }
 
@@ -70,8 +80,20 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * Start this job in several seconds
      * @return the job completion
      */
-    public Future<V> in(int seconds) {
-        return JobsPlugin.executor.schedule((Callable<V>) this, seconds, TimeUnit.SECONDS);
+    public Promise<V> in(int seconds) {
+        final Promise<V> smartFuture = new Promise<V>();
+
+        JobsPlugin.executor.schedule(new Callable<V>() {
+
+            public V call() throws Exception {
+                V result =  Job.this.call();
+                smartFuture.invoke(result);
+                return result;
+            }
+
+        }, seconds, TimeUnit.SECONDS);
+
+        return smartFuture;
     }
 
     /**
@@ -154,4 +176,6 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     public String toString() {
         return this.getClass().getName();
     }
+
+
 }

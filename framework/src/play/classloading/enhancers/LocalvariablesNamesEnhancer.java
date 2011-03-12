@@ -1,5 +1,6 @@
 package play.classloading.enhancers;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,7 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.Modifier;
@@ -20,11 +23,46 @@ import javassist.compiler.Javac;
 import javassist.compiler.NoFieldException;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.exceptions.UnexpectedException;
 
 /**
  * Track names of local variables ...
  */
 public class LocalvariablesNamesEnhancer extends Enhancer {
+
+    public static List<String> lookupParameterNames(Constructor constructor) {
+        try {
+            List<String> parameters = new ArrayList<String>();
+
+            ClassPool classPool = newClassPool();
+            CtClass ctClass = classPool.get(constructor.getDeclaringClass().getName());
+            CtClass[] cc = new CtClass[constructor.getParameterTypes().length];
+            for (int i = 0; i < constructor.getParameterTypes().length; i++) {
+                cc[i] = classPool.get(constructor.getParameterTypes()[i].getName());
+            }
+            CtConstructor ctConstructor = ctClass.getDeclaredConstructor(cc);
+
+            // Signatures names
+            CodeAttribute codeAttribute = (CodeAttribute) ctConstructor.getMethodInfo().getAttribute("Code");
+            if (codeAttribute != null) {
+                LocalVariableAttribute localVariableAttribute = (LocalVariableAttribute) codeAttribute.getAttribute("LocalVariableTable");
+                if (localVariableAttribute != null && localVariableAttribute.tableLength() >= ctConstructor.getParameterTypes().length) {
+                    for (int i = 0; i < ctConstructor.getParameterTypes().length + 1; i++) {
+                        String name = localVariableAttribute.getConstPool().getUtf8Info(localVariableAttribute.nameIndex(i));
+                        if (!name.equals("this")) {
+                            parameters.add(name);
+                        }
+                    }
+                }
+            }
+
+            return parameters;
+        } catch(Exception e) {
+            throw new UnexpectedException("Cannot extract parameter names", e);
+        }
+    }
+
+    //
 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
@@ -35,6 +73,11 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         }
 
         for (CtMethod method : ctClass.getDeclaredMethods()) {
+
+            if(method.getName().contains("$")) {
+                // Generated method, skip
+                continue;
+            }
 
             // Signatures names
             CodeAttribute codeAttribute = (CodeAttribute) method.getMethodInfo().getAttribute("Code");
@@ -52,13 +95,17 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 if (localVariableAttribute == null) {
                     continue;
                 }
-                String name = localVariableAttribute.getConstPool().getUtf8Info(localVariableAttribute.nameIndex(i));
-                if (!name.equals("this")) {
-                    names.add(name);
+                try {
+                    String name = localVariableAttribute.getConstPool().getUtf8Info(localVariableAttribute.nameIndex(i));
+                    if (!name.equals("this")) {
+                        names.add(name);
+                    }
+                } catch(Exception e) {
+                    Logger.warn(e, "While applying localvariables to %s.%s, param %s", ctClass.getName(), method.getName(), i);
                 }
             }
             StringBuilder iv = new StringBuilder();
-            if (names.size() == 0) {
+            if (names.isEmpty()) {
                 iv.append("new String[0];");
             } else {
                 iv.append("new String[] {");
@@ -347,7 +394,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             return getLocalVariables().get(variable);
         }
     }
-    private static Map<Integer, Integer> storeByCode = new HashMap<Integer, Integer>();
+    private final static Map<Integer, Integer> storeByCode = new HashMap<Integer, Integer>();
 
     /**
      * Useful instructions

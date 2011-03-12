@@ -1,0 +1,60 @@
+h2. Controller - Libraries
+
+*==WS.url("http://s.com/posts").get().toJSON();==*
+HTTP GET request to JSON
+
+*==WS.url("http://s.com/").post().toXML();==*
+HTTP POST request to XML
+
+*==DB.execute("raw sql");==*
+Eval raw SQL
+
+*==XML.getDocument(String);==*
+String to XML
+
+*==XML.serialize(Document);==*
+XML to String
+
+*==XPath.selectNodes(String xpath, Object node);==*
+XPath expression evaluator
+
+*==Files.copy(File,File);==*
+File copy
+
+*==Files.copyDir(File,File);==*
+Recursive directory copy
+
+*==Files.delete(File);==*
+*==Files.deleteDirectory(File);==*
+Deletes file/directory
+
+*==IO.readLines(File);==*
+*==IO.readContentAsString(File);==*
+*==IO.readContent(File);==*
+*==IO.write(byte[],File);==*
+Read/Write file contents
+
+*==Images.crop(File orig,File to, int x1, int y1, int x2, int y2);==*
+*==Images.resize(File orig, File to, int w, int h);==*
+*==Images.toBase64(File image);==*
+Handy methods!
+
+*==Crypto.encryptAES(String);==*
+*==Crypto.decryptAES(String);==*
+Encryption using the application secret key
+
+*==Crypto.passwordHash(String);==*
+Create an MD5 password hash
+
+*==Codec.UUID();==*
+Generates unique IDs
+
+*==Codec.byteToHexString(byte[] bytes);==*
+Write a byte array as hexadecimal String
+
+*==Codec.encodeBASE64(byte[] value);==*
+*==Codec.decodeBASE64(String base64);==*
+Encode/Decode a base64 value
+
+*==Codec.hexSHA1(String);==*
+Build a hexadecimal SHA1 hash for a String

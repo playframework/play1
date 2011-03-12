@@ -7,6 +7,10 @@ import oauth.signpost.basic.DefaultOAuthProvider;
 import play.mvc.Http.Request;
 import play.mvc.Scope.Params;
 
+/**
+ * Library to access ressources protected by OAuth 1.0a. For OAuth 2.0, see play.libs.OAuth2.
+ *
+ */
 public class OAuth {
 
     private ServiceInfo info;
@@ -63,6 +67,10 @@ public class OAuth {
                 oauth.signpost.OAuth.OAUTH_TOKEN, tokenPair.token);
     }
 
+    /**
+     * Information relative to an OAuth 1.0 provider.
+     *
+     */
     public static class ServiceInfo {
         public String requestTokenURL;
         public String accessTokenURL;

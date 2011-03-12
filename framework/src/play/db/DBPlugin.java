@@ -1,7 +1,9 @@
 package play.db;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
@@ -13,11 +15,16 @@ import java.util.Properties;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+
 import jregex.Matcher;
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.exceptions.DatabaseException;
+import play.mvc.Http;
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
 
 /**
  * The DB plugin
@@ -25,6 +32,17 @@ import play.exceptions.DatabaseException;
 public class DBPlugin extends PlayPlugin {
 
     public static String url = "";
+    org.h2.tools.Server h2Server;
+
+    @Override
+    public boolean rawInvocation(Request request, Response response) throws Exception {
+        if(Play.mode.isDev() && request.path.equals("/@db")) {
+            response.status = Http.StatusCode.MOVED;
+            response.setHeader("Location", "http://localhost:8082/");
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public void onApplicationStart() {
@@ -89,6 +107,15 @@ public class DBPlugin extends PlayPlugin {
                     }
                     Logger.info("Connected to %s", ds.getJdbcUrl());
 
+                    // For H2 embeded database, we'll also start the Web console
+                    if(Play.mode.isDev() && "org.h2.Driver".equals(p.get("db.driver"))) {
+                        if(h2Server != null) {
+                            h2Server.stop();
+                        }
+                        h2Server = org.h2.tools.Server.createWebServer();
+                        h2Server.start();
+                    }
+
                 }
 
             } catch (Exception e) {
@@ -102,6 +129,7 @@ public class DBPlugin extends PlayPlugin {
         }
     }
 
+    
     @Override
     public String getStatus() {
         StringWriter sw = new StringWriter();
@@ -131,19 +159,33 @@ public class DBPlugin extends PlayPlugin {
         DB.close();
     }
 
+    private static void check(Properties p, String mode, String property) {
+        if (!StringUtils.isEmpty(p.getProperty(property))) {
+            Logger.warn("Ignoring " + property + " because running the in " + mode + " db.");
+        }
+    }
+
     private static boolean changed() {
         Properties p = Play.configuration;
 
         if ("mem".equals(p.getProperty("db"))) {
-            p.put("db.driver", "org.hsqldb.jdbcDriver");
-            p.put("db.url", "jdbc:hsqldb:mem:playembed");
+            // If db.url or db.user or db.pass or db.driver is set but db=mem warn the user
+            check(p, "memory", "db.driver");
+            check(p, "memory", "db.url");
+
+            p.put("db.driver", "org.h2.Driver");
+            p.put("db.url", "jdbc:h2:mem:play;MODE=MYSQL");
             p.put("db.user", "sa");
             p.put("db.pass", "");
         }
 
         if ("fs".equals(p.getProperty("db"))) {
-            p.put("db.driver", "org.hsqldb.jdbcDriver");
-            p.put("db.url", "jdbc:hsqldb:file:" + (new File(Play.applicationPath, "db/db").getAbsolutePath()));
+            // If db.url or db.user or db.pass or db.driver is set but db=fs warn the user
+            check(p, "fs", "db.driver");
+            check(p, "fs", "db.url");
+
+            p.put("db.driver", "org.h2.Driver");
+            p.put("db.url", "jdbc:h2:" + (new File(Play.applicationPath, "db/h2/play").getAbsolutePath()) + ";MODE=MYSQL");
             p.put("db.user", "sa");
             p.put("db.pass", "");
         }

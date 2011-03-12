@@ -1,0 +1,17 @@
+h2. Controller - Interceptions
+
+*==@Before ➟ action ➟ @After ➟ template ➟ @Finally==*
+Interceptions evaluation order
+
+*==@Before static void checkAuthentification()==*
+*==@After static void log()==*
+*==@Finally static void audit()==*
+You get the idea
+
+*==@With(Secure.class)==*
+*==public class Admin extends Application==*
+Custom interceptors at the controller scope
+
+*==@Catch(value={RuntimeException.class})==*
+*public static void onException(RuntimeException e) {…}*
+Exception handling at the controller level

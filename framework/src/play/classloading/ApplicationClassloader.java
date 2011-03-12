@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.instrument.ClassDefinition;
-import java.lang.instrument.UnmodifiableClassException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AllPermission;
@@ -24,6 +23,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.log4j.PatternLayout;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -287,9 +288,7 @@ public class ApplicationClassloader extends ClassLoader {
         Set<ApplicationClass> modifiedWithDependencies = new HashSet<ApplicationClass>();
         modifiedWithDependencies.addAll(modifieds);
         if (modifieds.size() > 0) {
-            for (PlayPlugin plugin : Play.plugins) {
-                modifiedWithDependencies.addAll(plugin.onClassesChange(modifieds));
-            }
+            modifiedWithDependencies.addAll(Play.pluginCollection.onClassesChange(modifieds));
         }
         List<ClassDefinition> newDefinitions = new ArrayList<ClassDefinition>();
         boolean dirtySig = false;
@@ -311,10 +310,8 @@ public class ApplicationClassloader extends ClassLoader {
             if (HotswapAgent.enabled) {
                 try {
                     HotswapAgent.reload(newDefinitions.toArray(new ClassDefinition[newDefinitions.size()]));
-                } catch (ClassNotFoundException e) {
-                    throw new UnexpectedException(e);
-                } catch (UnmodifiableClassException e) {
-                    throw new UnexpectedException(e);
+                } catch (Throwable e) {
+                    throw new RuntimeException("Need reload");
                 }
             } else {
                 throw new RuntimeException("Need reload");
@@ -403,16 +400,15 @@ public class ApplicationClassloader extends ClassLoader {
                 List<ApplicationClass> all = new ArrayList<ApplicationClass>();
 
                 // Let's plugins play
-                for (PlayPlugin plugin : Play.plugins) {
-                    plugin.compileAll(all);
-                }
+                Play.pluginCollection.compileAll(all);
 
                 for (VirtualFile virtualFile : Play.javaPath) {
                     all.addAll(getAllClasses(virtualFile));
                 }
                 List<String> classNames = new ArrayList<String>();
                 for (int i = 0; i < all.size(); i++) {
-                    if (all.get(i) != null && !all.get(i).compiled) {
+                	ApplicationClass applicationClass = all.get(i);
+                    if (applicationClass != null && !applicationClass.compiled && applicationClass.isClass()) {
                         classNames.add(all.get(i).name);
                     }
                 }
@@ -460,7 +456,7 @@ public class ApplicationClassloader extends ClassLoader {
     public Class getClassIgnoreCase(String name) {
         getAllClasses();
         for (ApplicationClass c : Play.classes.all()) {
-            if (c.name.equalsIgnoreCase(name)) {
+            if (c.name.equalsIgnoreCase(name) || c.name.replace("$", ".").equalsIgnoreCase(name)) {
                 if (Play.usePrecompiled) {
                     return c.javaClass;
                 }
@@ -546,4 +542,5 @@ public class ApplicationClassloader extends ClassLoader {
     public String toString() {
         return "(play) " + (allClasses == null ? "" : allClasses.toString());
     }
+
 }

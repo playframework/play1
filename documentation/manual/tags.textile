@@ -70,7 +70,7 @@ However, you can also use it with the **list** tag and it will be executed if th
 
 bc. #{list items:task, as:'task'}
     <li>${task}</li>
-#{/li}
+#{/list}
  
 #{else}
     Nothing to do...
@@ -130,6 +130,7 @@ bc. <ul>
 
 The tag defines implicit variables in its body.
 
+* **error**, the error
 * **error_index**, the error’s index, starting at 1
 * **error_isLast**, true for the last element
 * **error_isFirst**, true for the first element
@@ -141,6 +142,16 @@ bc. <table>
     <tr class="${error_parity}"><td>${error_index}</td><td>${error}</td></tr>
 #{/errors}
 </table>
+
+You can also use the optional field parameter, or just the default parameter, to filter only the errors belonging to a certain field.
+
+bc. <ul>
+#{errors 'myField'}
+    There where errors with the field myField<br />
+    <li>${error}</li>
+#{/errors}
+</ul>
+
 
 h2. <a name="extends">extends</a>
 
@@ -176,22 +187,47 @@ So you don’t repeat **user.name** again and again.
 
 h2. <a name="form">form</a>
 
-Inserts a **form** tag. The HTTP method is guessed from the route, and defaults to POST. If there are both GET and POST routes configured for the URL, the tag will default to using the first route defined in routes.  
+Inserts a **form** tag. Play will guess the HTTP method from the route, with POST as the default. If there are both GET and POST routes configured for the URL, the tag will default to using the first route defined in routes.
 
-* Optional **id** attribute sets an ID to the form element. 
+* Optional **method** either POST or GET.
+* Optional **id** attribute sets an ID to the form element.
 * Optional **enctype** attribute sets the form’s data encoding. it defaults to ‘application/x-www-form-urlencoded’.
 
-Charset encoding is always ‘utf-8’.
+Charset encoding is always **utf-8**.
 
-bc. #{form @Client.create() , id:'creationForm' enctype:'multipart/form-data' }
+bc. #{form @Client.create(), method:'POST', id:'creationForm',
+       enctype:'multipart/form-data' }
    ...
 #{/form}
 
 Rendered as:
 
-bc. <form action="/client/create" id="creationForm" method="POST" accept-charset="utf-8" enctype="multipart/form-data">
+bc. <form action="/client/create" id="creationForm" method="POST"
+      accept-charset="utf-8" enctype="multipart/form-data">
  ...
 </form>
+
+You can also specify a target entity as part of the action method:
+
+bc. #{form @Client.update(client.id)}
+   ...
+#{/form}
+
+The HTTP parameter name name is detected from what you declared in your action method.
+
+bc. public static void update(String clientId){
+       // ...
+}
+
+Play will create an action URL with clientId:
+
+bc. <form action="/client/update?clientId=3442" method="POST"
+      accept-charset="utf-8" enctype="multipart/form-data">
+ ...
+</form>
+
+If your form updates a resource on the server-side, you _should_ use the **POST** method. If your form is used to filter data and does not update your domain, you can use a GET. Please read about "idempotence":http://en.wikipedia.org/wiki/Idempotence. POST is not idempotent, whereas GET, PUT and DELETE are.
+
 
 
 h2. <a name="get">get</a>
@@ -226,6 +262,9 @@ And retrieve keys from JavaScript:
 bc. alert(i18n('hello_world'));
 alert(i18n('hello_someone', 'John'));
 
+Optionally, you can restrict the tag to only some messages. The wildcard character is accepted at the end:
+
+bc. #{i18n keys:['title', 'menu.*'] /}
 
 h2. <a name="if">if</a>
 
@@ -363,7 +402,9 @@ bc. #{option user.id} ${user.name} #{/option}
 
 Will output:
 
-bc. <option value="42">jto</option>h2. <a name="script">script</a>
+bc. <option value="42">jto</option>
+
+h2. <a name="script">script</a>
 
 Inserts a **script** tag in the template. By convention, the tag refers to a script in **/public/javascripts**
 
@@ -412,11 +453,13 @@ This tag can generate options using **items** attribute.
 * **items** (optional) - list of objects, used to create **options**
 * **value** (optional) - selected element in **items**
 * **labelProperty** (optional) - for each item, attribute used as option's label 
-* **valueProperty** (optional) - for each item, attribute used as option's value. **id** is used by default.
+* **valueProperty** (optional) - for each item, attribute used as option's value. **id** is used by default
+
+p(note). The **labelProperty** and **valueProperty** shouldn't be primitives value. So, for example, instead of using **int** or **long** use an **Integer** or **Long** variable.
 
 For example, giving a list of User, each having a name attribute:
 
-bc. #{select 'users', items:users, valueProperty:'id', labelProperty:'name', value:'User-5', class:"test", id:'select2' /}
+bc. #{select 'users', items:users, valueProperty:'id', labelProperty:'name', value:5, class:'test', id:'select2' /}
 
 Will output:
 

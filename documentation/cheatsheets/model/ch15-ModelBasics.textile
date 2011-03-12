@@ -1,0 +1,16 @@
+h2. Model - Basics
+
+*==@Entity(name="sql_tbl") public class Post extends Model==*
+Specifies that the class is persistent
+
+*==@Embedded==*
+Defines this field as being embedded
+
+*==@EmbeddedId==*
+Defines this field as being (part of) the identity for the class, and being embedded into this class
+
+*==@Embeddable==*
+Specifies that the class is persistent embedded in another persistent class
+
+*==@MappedSuperclass==*
+Specifies that this class contains persistent information to be mapped in a subclass

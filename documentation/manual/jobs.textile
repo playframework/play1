@@ -55,6 +55,15 @@ public class Bootstrap extends Job {
 
 You don’t need to return a result. Even if you do it, the result will be lost.
 
+The default is that all jobs annotated with @OnApplicationStart will be executed in sequence. When all jobs are finished, your application is ready to
+start processing incoming requests.
+
+If you want your jobs to start when your application starts, but you want to start processing incoming requests immediately, you can
+annotate your job like this: @OnApplicationStart(async=true). Then your job will be started in the background when the application starts.
+All async jobs will be started at the same time.
+
+
+
 p(note). **Warning**
  
 When you run the application in DEV mode, the application waits for the first HTTP request to start. Moreover when you are in DEV mode, the application will sometimes automatically restart when needed. 
@@ -112,7 +121,7 @@ To resolve these use cases, Play allows you to temporarily suspend a request. Th
 
 p(note). **Tip**
  
-You can take a look at the **chat** sample application to see a real example.
+You can see a real example in **$PLAY_HOME/samples-and-tests/chat/**.
 
 For example, this action will launch a very long job and wait for its completion before returning the result to the HTTP response:
 
@@ -120,10 +129,10 @@ bc. public static void generatePDF(Long reportId) {
     if(request.isNew) {
         Report report = Report.findById(reportId);
         Future<InputStream> task = new ReportAsPDFJob(report).now();
-        request.args.put("task", task),
+        request.args.put("task", task);
         waitFor(task);
     }
-    renderBinary((Future<InputStream>)request.args.get("task").get());
+    renderBinary(((Future<inputstream>) request.args.get("task")).get());
 }
 
 This action will be called twice. On the first call the **request.isNew** tag is set to **true**, so the action will create a Job and start it immediately. Then it tells Play to wait for the task completion before trying the action again. After the task is completed, Play will call the action a second time. This time the **request.isNew** tag is set to false. The action will retrieve the job result and send it as the HTTP response.

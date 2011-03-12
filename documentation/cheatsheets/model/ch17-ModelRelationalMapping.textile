@@ -1,0 +1,31 @@
+h2. Model - Relational mapping
+
+*==@Table(name="sql_tbl", catalog="", schema="")==*
+Defines the table where this class will be stored
+
+*==@Id==*
+Defines this field as being (part of) the identity for the class
+
+*==@Version==*
+Defines this field as storing the version for the class
+
+*==@Basic==*
+Defines this field as being persistent, can be omitted
+
+*==@Transient==*
+Defines this field as being transient (not persisted)
+
+*==@Lob(fetch=[LAZY, EAGER], type=[BLOB,CLOB])==*
+Defines this field as being stored as a large object
+
+*==@UniqueConstraint(primary=false, String columns[])==*
+Used to define secondary indexes
+
+*==@Temporal(DATE,TIME,TIMESTAMP)==*
+Should only be used on java.util.Date and Calendar fields
+
+*==@Enumerated(ORDINAL, STRING)==*
+Defines this field as storing an enumerated class
+
+*==@Column(name="sql_column_name")==*
+Defines a table column name that is different to the field name

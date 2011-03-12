@@ -1,0 +1,81 @@
+#{extends 'main.html' /}
+#{set title:'Chat room' /}
+
+<h1>Ajax, long polling — You are now chatting as ${user} <a href="@{leave(user)}">Leave the chat room</a></h1> 
+
+<div id="thread">
+    <script type="text/html" id="message_tmpl">
+        <% if(event.type == 'message') { %>
+            <div class="message <%= event.user == '${user}' ? 'you' : '' %>">
+                <h2><%= event.user %></h2>
+                <p>
+                    <%= event.text %>
+                </p>
+            </div>
+        <% } %>
+        <% if(event.type == 'join') { %>
+            <div class="message notice">
+                <h2></h2>
+                <p>
+                    <%= event.user %> joined the room
+                </p>
+            </div>
+        <% } %>
+        <% if(event.type == 'leave') { %>
+            <div class="message notice">
+                <h2></h2>
+                <p>
+                    <%= event.user %> left the room
+                </p>
+            </div>
+        <% } %>
+    </script>
+</div>
+
+<div id="newMessage">
+    <input type="text" id="message" autocomplete="off">
+    <input type="submit" value="send" id="send">
+</div>
+
+<script type="text/javascript">
+
+    var lastReceived = 0
+    var waitMessages = #{jsAction @waitMessages(':lastReceived') /}
+    var say = #{jsAction @say(user) /}
+
+    $('#send').click(function(e) {
+        var message = $('#message').val()
+        $('#message').val('')
+        $.post(say(), {message: message})
+    });
+    
+    $('#message').keypress(function(e) {
+        if(e.charCode == 13 || e.keyCode == 13) {
+            $('#send').click()
+            e.preventDefault()
+        }
+    })
+
+    // Retrieve new messages
+    var getMessages = function() {
+        $.ajax({
+            url: waitMessages({lastReceived: lastReceived}),
+            success: function(events) {
+                $(events).each(function() {
+                    display(this.data)
+                    lastReceived = this.id
+                })
+                getMessages()
+            },
+            dataType: 'json'
+        });
+    }
+    getMessages();
+    
+    // Display a message
+    var display = function(event) {
+        $('#thread').append(tmpl('message_tmpl', {event: event}));
+        $('#thread').scrollTo('max')
+    }
+    
+</script>

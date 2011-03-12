@@ -8,6 +8,7 @@ import play.mvc.Http;
 public abstract class Result extends RuntimeException {
 
     public Result() {
+        super();
     }
 
     public Result(String description) {

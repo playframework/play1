@@ -20,6 +20,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.EmbeddedId;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NoResultException;
@@ -237,6 +238,8 @@ public class JPAPlugin extends PlayPlugin {
         String dialect = Play.configuration.getProperty("jpa.dialect");
         if (dialect != null) {
             return dialect;
+        } else if (driver.equals("org.h2.Driver")) {
+            return "org.hibernate.dialect.H2Dialect";
         } else if (driver.equals("org.hsqldb.jdbcDriver")) {
             return "org.hibernate.dialect.HSQLDialect";
         } else if (driver.equals("com.mysql.jdbc.Driver")) {
@@ -289,6 +292,13 @@ public class JPAPlugin extends PlayPlugin {
 
     @Override
     public void beforeInvocation() {
+
+        if(InvocationContext.current().getAnnotation(NoTransaction.class) != null ) {
+            //Called method is annotated with @NoTransaction telling us that
+            //we should not start a transaction
+            return ;
+        }
+
         boolean readOnly = false;
         Transactional tx = InvocationContext.current().getAnnotation(Transactional.class);
         if (tx != null) {
@@ -507,7 +517,7 @@ public class JPAPlugin extends PlayPlugin {
             try {
                 while (!c.equals(Object.class)) {
                     for (Field field : c.getDeclaredFields()) {
-                        if (field.isAnnotationPresent(Id.class)) {
+                        if (field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
                             field.setAccessible(true);
                             return field;
                         }

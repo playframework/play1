@@ -27,26 +27,26 @@ public class Logger {
      * Will force use of java.util.logging (default to try log4j first).
      */
     public static boolean forceJuli = false;
-    
     /**
      * Will redirect all log from java.util.logging to log4j.
      */
     public static boolean redirectJuli = false;
-    
     /**
      * Will record and display the caller method.
      */
     public static boolean recordCaller = false;
-    
     /**
      * The application logger (play).
      */
     public static org.apache.log4j.Logger log4j;
-    
     /**
      * When using java.util.logging.
      */
     public static java.util.logging.Logger juli = java.util.logging.Logger.getLogger("play");
+    /**
+     * true if logger is configured manually (log4j-config file supplied by application)
+     */
+    public static boolean configuredManually = false;
 
     /**
      * Try to init stuff.
@@ -63,10 +63,17 @@ public class Logger {
             shutUp.setProperty("log4j.rootLogger", "OFF");
             PropertyConfigurator.configure(shutUp);
         } else if (Logger.log4j == null) {
+
+            // The log4j configuration file is outside of the framework,
+            // so it's probably a custom configuration file
+            if(log4jConf.getFile().indexOf(Play.frameworkPath.getAbsolutePath()) == -1) {
+                configuredManually = true;
+            }
+
             PropertyConfigurator.configure(log4jConf);
             Logger.log4j = org.apache.log4j.Logger.getLogger("play");
             // In test mode, append logs to test-result/application.log
-            if (Play.id.equals("test")) {
+            if (Play.runingInTestMode()) {
                 org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
                 try {
                     if (!Play.getFile("test-result").exists()) {
@@ -131,6 +138,38 @@ public class Logger {
             juliLevel = java.util.logging.Level.OFF;
         }
         return juliLevel;
+    }
+
+    /**
+     * @return true if log4j.debug / jul.fine logging is enabled
+     */
+    public static boolean isDebugEnabled() {
+        if (forceJuli || log4j == null) {
+            return juli.isLoggable(java.util.logging.Level.FINE);
+        } else {
+            return log4j.isDebugEnabled();
+        }
+    }
+
+    /**
+     *
+     * @param level string representation of Logging-levels as used in log4j
+     * @return true if specified logging-level is enabled
+     */
+    public static boolean isEnabledFor(String level) {
+        //go from level-string to log4j-level-object
+        org.apache.log4j.Level log4jLevel = org.apache.log4j.Level.toLevel(level);
+
+        if (forceJuli || log4j == null) {
+            //must translate from log4j-level to jul-level
+            java.util.logging.Level julLevel = toJuliLevel(log4jLevel.toString());
+            //check level against jul
+            return juli.isLoggable(julLevel);
+        } else {
+            //check level against log4j
+            return log4j.isEnabledFor(log4jLevel);
+        }
+
     }
 
     /**
@@ -443,10 +482,10 @@ public class Logger {
             }
         }
     }
-    
+
     /**
      * If e is a PlayException -> a very clean report
-     */ 
+     */
     static boolean niceThrowable(org.apache.log4j.Level level, Throwable e, String message, Object... args) {
         if (e instanceof Exception) {
 
@@ -467,8 +506,8 @@ public class Logger {
                         cleanTrace.add(new StackTraceElement("Invocation", "Job", "Play!", -1));
                         break;
                     }
-                    if(se.getClassName().startsWith("play.server.PlayHandler") && se.getMethodName().equals("messageReceived")) {
-                       cleanTrace.add(new StackTraceElement("Invocation", "Message Received", "Play!", -1));
+                    if (se.getClassName().startsWith("play.server.PlayHandler") && se.getMethodName().equals("messageReceived")) {
+                        cleanTrace.add(new StackTraceElement("Invocation", "Message Received", "Play!", -1));
                         break;
                     }
                     if (se.getClassName().startsWith("sun.reflect.")) {
@@ -496,9 +535,9 @@ public class Logger {
             }
 
             StringWriter sw = new StringWriter();
-            
+
             // Better format for Play exceptions
-            if(e instanceof PlayException) {
+            if (e instanceof PlayException) {
                 PlayException playException = (PlayException) e;
                 PrintWriter errorOut = new PrintWriter(sw);
                 errorOut.println("");
@@ -593,10 +632,10 @@ public class Logger {
                 Object parameters[] = record.getParameters();
                 if (parameters != null && parameters.length != 0) {
                     // Check for the first few parameters ?
-                    if (message.indexOf("{0}") >= 0 ||
-                            message.indexOf("{1}") >= 0 ||
-                            message.indexOf("{2}") >= 0 ||
-                            message.indexOf("{3}") >= 0) {
+                    if (message.indexOf("{0}") >= 0
+                            || message.indexOf("{1}") >= 0
+                            || message.indexOf("{2}") >= 0
+                            || message.indexOf("{3}") >= 0) {
                         message = MessageFormat.format(message, parameters);
                     }
                 }
@@ -629,4 +668,5 @@ public class Logger {
             // nothing to do
         }
     }
+
 }

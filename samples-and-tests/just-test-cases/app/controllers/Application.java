@@ -69,8 +69,17 @@ public class Application extends Controller {
         renderText("IT WORKS");
     }
 
+    public static void ok(String re) {
+        renderText("OK: " + re);
+    }
+
     public static void index() {
+        routeArgs.put("lucky", "strike");
         render();
+    }
+    
+    public static void showIt() {
+        renderText("Done");
     }
 
     public static void index2() {
@@ -102,7 +111,9 @@ public class Application extends Controller {
     }
     
     public static void book(Date at) {
-        renderText("Booked at %1$tm %1$te,%1$tY !!", at);
+        java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("dd/MM/yy");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        renderText("Booked at %s !!", df.format(at));
     }
 
     public static void escapeData() {
@@ -225,8 +236,13 @@ public class Application extends Controller {
 
     public static void selectTag(){
         List<User> users = new ArrayList<User>(10);
-        for(long i = 0; i < 10; i++)
-            users.add(new User("User-" + i));
+        User user;
+        for(long i = 0; i < 10; i++) {
+        	user = new User("User-" + i);
+        	user.k = i;
+        	user.i = (int) i;
+        	users.add(user);
+        }
         render(users);
     }
 }

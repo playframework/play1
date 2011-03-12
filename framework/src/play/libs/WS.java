@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,6 +23,7 @@ import play.libs.OAuth.ServiceInfo;
 import play.libs.OAuth.TokenPair;
 import play.libs.ws.WSAsync;
 import play.libs.ws.WSUrlFetch;
+import play.libs.F.Promise;
 import play.mvc.Http.Header;
 import play.utils.NoOpEntityResolver;
 
@@ -130,7 +130,7 @@ public class WS extends PlayPlugin {
         public String url;
         public String username;
         public String password;
-        public String body;
+        public Object body;
         public FileParam[] fileParams;
         public Map<String, String> headers = new HashMap<String, String>();
         public Map<String, Object> parameters = new HashMap<String, Object>();
@@ -193,6 +193,17 @@ public class WS extends PlayPlugin {
         }
 
         /**
+         * Set the value of the request timeout, i.e. the number of seconds before cutting the
+         * connection - default to 60 seconds
+         * @param timeout the timeout value, e.g. "30s", "1min"
+         * @return the WSRequest for chaining
+         */
+        public WSRequest timeout(String timeout) {
+            this.timeout = Time.parseDuration(timeout);
+            return this;
+        }
+
+        /**
          * Add files to request. This will only work with POST or PUT.
          * @param files
          * @return the WSRequest for chaining.
@@ -218,7 +229,7 @@ public class WS extends PlayPlugin {
          * @return the WSRequest for chaining.
          */
         public WSRequest body(Object body) {
-            this.body = body == null ? "" : body.toString();
+            this.body = body;
             return this;
         }
 
@@ -285,7 +296,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse get();
 
         /** Execute a GET request asynchronously. */
-        public Future<HttpResponse> getAsync() {
+        public Promise<HttpResponse> getAsync() {
             throw new NotImplementedException();
         }
 
@@ -293,7 +304,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse post();
 
         /** Execute a POST request asynchronously.*/
-        public Future<HttpResponse> postAsync() {
+        public Promise<HttpResponse> postAsync() {
             throw new NotImplementedException();
         }
 
@@ -301,7 +312,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse put();
 
         /** Execute a PUT request asynchronously.*/
-        public Future<HttpResponse> putAsync() {
+        public Promise<HttpResponse> putAsync() {
             throw new NotImplementedException();
         }
 
@@ -309,7 +320,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse delete();
 
         /** Execute a DELETE request asynchronously.*/
-        public Future<HttpResponse> deleteAsync() {
+        public Promise<HttpResponse> deleteAsync() {
             throw new NotImplementedException();
         }
 
@@ -317,7 +328,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse options();
 
         /** Execute a OPTIONS request asynchronously.*/
-        public Future<HttpResponse> optionsAsync() {
+        public Promise<HttpResponse> optionsAsync() {
             throw new NotImplementedException();
         }
 
@@ -325,7 +336,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse head();
 
         /** Execute a HEAD request asynchronously.*/
-        public Future<HttpResponse> headAsync() {
+        public Promise<HttpResponse> headAsync() {
             throw new NotImplementedException();
         }
 
@@ -333,7 +344,7 @@ public class WS extends PlayPlugin {
         public abstract HttpResponse trace();
 
         /** Execute a TRACE request asynchronously.*/
-        public Future<HttpResponse> traceAsync() {
+        public Promise<HttpResponse> traceAsync() {
             throw new NotImplementedException();
         }
 
@@ -441,6 +452,22 @@ public class WS extends PlayPlugin {
         }
 
         /**
+         * Parse the response string as a query string.
+         * @return The parameters as a Map. Return an empty map if the response
+         * is not formed as a query string.
+         */
+        public Map<String, String> getQueryString() {
+            Map<String, String> result = new HashMap<String, String>();
+            String body = getString();
+            for (String entry: body.split("&")) {
+                if (entry.indexOf("=") > 0) {
+                    result.put(entry.split("=")[0], entry.split("=")[1]);
+                }
+            }
+            return result;
+        }
+
+        /**
          * get the response as a stream
          * @return an inputstream
          */
@@ -451,9 +478,8 @@ public class WS extends PlayPlugin {
          * @return the json response
          */
         public JsonElement getJson() {
-            String json = "";
+            String json = getString();
             try {
-                json = getString();
                 return new JsonParser().parse(json);
             } catch (Exception e) {
                 Logger.error("Bad JSON: \n%s", json);

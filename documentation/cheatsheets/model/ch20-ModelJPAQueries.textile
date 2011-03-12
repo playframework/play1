@@ -1,0 +1,12 @@
+h2. Model - JPA Queries
+
+*==@NamedQuery(name="q1", "jpql_query");==*
+Defines a named JPQL query to use in the persistence unit
+
+*==@NamedNativeQuery(name="q2","sql_query")==*
+Defines a native SQL query for use in the persistence unit
+
+*==@SqlResultSetMapping==*
+Used to map a native SQL query result to the object model
+
+p(note). This is only a subset of the JPA2 annotations, Hibernate also has its own non standard set.

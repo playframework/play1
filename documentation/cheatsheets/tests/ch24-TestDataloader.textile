@@ -1,0 +1,9 @@
+h2. Test - Data loader
+
+*==@Before public void setUp() { Fixtures.deleteAll();==*
+*==Fixtures.load("data.yml");}==*
+Fixtures is used to initialise the datastore before running a unit test
+
+*==#{fixture delete:'all', load:'data.yml' /}==*
+*==#{selenium} ... #{/selenium}==*
+Same idea using a Selenium test

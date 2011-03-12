@@ -4,7 +4,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play war [app_path] --output=war_path [--zip]
+~ play war [app_path] [--deps] [--%fwk_id] --output=war_path [--zip]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -25,3 +25,11 @@
 ~
 ~ --%fwk_id:
 ~ Use this ID to run the application (override the default framework ID)
+~
+~ --deps: 
+~ Resolve and install dependencies before running the command.
+~
+~ --exclude:
+~ Excludes a list of directories (separator is ':').
+~ Example: --exclude .svn:tmp:logs:target
+~

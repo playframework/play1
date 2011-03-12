@@ -1,0 +1,24 @@
+h2. Test - Unit Tests
+
+*==@Test public void getRental() { ... }==*
+*==@Test (expected = NumberFormatException.class )==*
+*==@Ignore==*
+Ignore any errors
+
+*==@Test (timeout=400)==*
+Test will fail after 400 milliseconds
+
+*==@Before public void prepareRecords();==*
+Run before each unit test
+
+*==@After public void cleanupJunk()==*
+Run after each unit test
+
+*==@BeforeClass void whenTestClassInstanciated();==*
+Run once, when the test class gets instantiated
+
+*==@AfterClass void whenTestClassCompleted()==*
+Run once when the test class is dismissed
+
+*==Assert.assert==*
+There are tons of assertions, look it up

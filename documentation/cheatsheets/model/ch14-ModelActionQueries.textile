@@ -1,0 +1,32 @@
+h2. Model.action - Queries
+
+*==Query query = JPA.em().createQuery("jpql_query");==*
+Access the persistence manager
+
+*==Post post = Post.findById(id);==*
+*==List<Post> posts = Post.findAll();==*
+Finder methods
+
+*==post.save();==*
+Save the object to the persistent store
+
+*==boolean post.validateAndSave();==*
+true if object validates and saved, see validation annotations
+
+*==List<Post> posts = Post.all().from(50).fetch(100);==*
+Read records 50 to 100, if any
+
+*==Post.find("select p from Post p, Comment c where c.post==*
+*=== p and c.subject like ?", "%hop%");==*
+Parametrized lookup using a join
+
+*==long userCount = Post.count("author=?", connectedUser);==*
+*==long postCount = Post.count();==*
+Counting records
+
+*==JPAPlugin.startTx(boolean readonly);==*
+*==JPAPlugin.closeTx(boolean rollback);==*
+Custom transaction control methods
+
+*==JPA.setRollbackOnly();==*
+Forces a transaction rollback

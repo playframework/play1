@@ -64,7 +64,7 @@ public class FastTags {
     public static void _option(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         Object value = args.get("arg");
         Object selectedValue = TagContext.parent("select").data.get("selected");
-        boolean selected = selectedValue != null && value != null && selectedValue.equals(value);
+        boolean selected = selectedValue != null && value != null && (selectedValue.toString()).equals(value.toString());
         out.print("<option value=\"" + (value == null ? "" : value) + "\" " + (selected ? "selected=\"selected\"" : "") + "" + serialize(args, "selected", "value") + ">");
         out.println(JavaExtensions.toString(body));
         out.print("</option>");
@@ -172,7 +172,7 @@ public class FastTags {
                 actionDef.method = "POST";
             }
             String id = Codec.UUID();
-            out.print("<form method=\"POST\" id=\"" + id + "\" style=\"display:none\" action=\"" + actionDef.url + "\">");
+            out.print("<form method=\"POST\" id=\"" + id + "\" " +(args.containsKey("target") ? "target=\"" + args.get("target") + "\"" : "")+ " style=\"display:none\" action=\"" + actionDef.url + "\">");
             _authenticityToken(args, body, out, template, fromLine);
             out.print("</form>");
             out.print("<a href=\"javascript:document.getElementById('" + id + "').submit();\" " + serialize(args, "href") + ">");
@@ -369,7 +369,7 @@ public class FastTags {
     }
 
     public static String serialize(Map<?, ?> args, String... unless) {
-        StringBuffer attrs = new StringBuffer();
+        StringBuilder attrs = new StringBuilder();
         Arrays.sort(unless);
         for (Object o : args.keySet()) {
             String attr = o.toString();

@@ -14,4 +14,8 @@ public abstract class Template {
         return render(new HashMap<String, Object>());
     }
 
+    public String getName() {
+        return name;
+    }
+
 }

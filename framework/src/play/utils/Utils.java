@@ -45,6 +45,22 @@ public class Utils {
         return (values == null) ? "" : join(Arrays.asList(values), separator);
     }
 
+    public static String getSimpleNames(Annotation[] values) {
+        if (values == null) {
+            return "";
+        }
+        List<Annotation> a = Arrays.asList(values);
+        Iterator<Annotation> iter = a.iterator();
+        if (!iter.hasNext()) {
+            return "";
+        }
+        StringBuffer toReturn = new StringBuffer("@" + iter.next().annotationType().getSimpleName());
+        while (iter.hasNext()) {
+            toReturn.append(", @" + iter.next().annotationType().getSimpleName());
+        }
+        return toReturn.toString();
+    }
+
     /**
      * @deprecated Use Utils.join(values, " ");
      */

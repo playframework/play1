@@ -13,6 +13,7 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Router.Route;
 import play.mvc.results.Result;
+import play.templates.BaseTemplate;
 import play.templates.Template;
 import play.test.BaseTest;
 import play.test.TestEngine.TestResults;
@@ -45,7 +46,14 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
         return null;
     }
 
+    /**
+     * Called when play need to bind an existing Java object from HTTP params
+     */
     public Object bind(String name, Object o, Map<String, String[]> params) {
+        return null;
+    }
+
+    public Map<String, Object> unBind(Object src, String name) {
         return null;
     }
     
@@ -255,10 +263,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * Inter-plugin communication.
      */
     public static void postEvent(String message, Object context) {
-        List<PlayPlugin> plugins = Play.plugins;
-        for (PlayPlugin playPlugin : plugins) {
-            playPlugin.onEvent(message, context);
-        }
+        Play.pluginCollection.onEvent(message, context);
     }
 
     public void onApplicationReady() {
@@ -268,4 +273,13 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public int compareTo(PlayPlugin o) {
         return (index < o.index ? -1 : (index == o.index ? 0 : 1));
     }
+
+    public String overrideTemplateSource(BaseTemplate template, String source) {
+        return null;
+    }
+
+    public Object willBeValidated(Object value) {
+        return null;
+    }
+    
 }

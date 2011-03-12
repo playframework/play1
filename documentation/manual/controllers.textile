@@ -219,6 +219,18 @@ bc. public static void show(Set<Long> id) {
     ...
 }
 
+Play also handles the special case of binding a Map<String, String> like this:
+
+bc. public static void show(Map<String, String> client) {
+    ...
+}
+
+
+A query string like the following:
+
+bc. ?user.name=John&user.phone=111-1111&user.phone=222-2222
+
+Would bind the client variable to a map with two elements. The first element with key "name" and value "John", and the second with key "phone" and value "111-1111, 222-2222"
 
 h3. POJO object binding
 
@@ -576,7 +588,8 @@ bc. public class Admin extends Application {
 
 h3. @Finally
 
-Methods annotated with the **@Finally** annotation are executed after each action result is applied from for this Controller.
+Methods annotated with the **@Finally** annotation are always executed after each action call to this Controller.
+@Finally-methods are called both after successful action calls and if an error occurred.
 
 bc. public class Admin extends Application {
  
@@ -593,6 +606,29 @@ bc. public class Admin extends Application {
     ...
  
 }
+
+If the method annotated with @Finally takes one argument of type Throwable, The Exception will be passed in if available:
+
+bc. public class Admin extends Application {
+ 
+    @Finally
+    static void log(Throwable e) {
+		if( e == null ){
+			Logger.info("action call was successful");
+		}else{
+			Logger.info("action call failed", e);
+		}
+    }
+ 
+    public static void index() {
+        List<User> users = User.findAll();
+        render(users);
+    }
+ 
+    ...
+ 
+}
+
 
 h3. Controller hierarchy
 
@@ -642,6 +678,10 @@ bc. public static void index() {
     }
     render(messages);
 }
+
+The session expires when you close your web browser, unless the **application.session.maxAge** configuration property is set. For example:
+
+bc. application.session.maxAge=7d  # Remember for one week.
 
 The cache has different semantics than the classic Servlet HTTP session object. You can’t assume that these objects will be always in the cache. So it forces you to handle the cache miss cases, and keeps your application fully stateless.
 

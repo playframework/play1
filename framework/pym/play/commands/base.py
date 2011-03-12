@@ -28,11 +28,12 @@ def execute(**kargs):
     app = kargs.get("app")
     args = kargs.get("args")
     env = kargs.get("env")
+    cmdloader = kargs.get("cmdloader")
 
     if command == 'id':
         id(env)
     if command == 'new' or command == 'new,run':
-        new(app, args, env)
+        new(app, args, env, cmdloader)
     if command == 'clean' or command == 'clean,run':
         clean(app)
     if command == 'new,run' or command == 'clean,run' or command == 'run':
@@ -44,7 +45,7 @@ def execute(**kargs):
     if command == 'modules':
         show_modules(app, args)
 
-def new(app, args, env):
+def new(app, args, env, cmdloader=None):
     withModules = []
     application_name = None
     try:
@@ -88,7 +89,7 @@ def new(app, args, env):
         application_name = raw_input("~ What is the application name? [%s] " % os.path.basename(app.path))
     if application_name == "":
         application_name = os.path.basename(app.path)
-    shutil.copytree(os.path.join(env["basedir"], 'resources/application-skel'), app.path)
+    copy_directory(os.path.join(env["basedir"], 'resources/application-skel'), app.path)
     os.mkdir(os.path.join(app.path, 'app/models'))
     os.mkdir(os.path.join(app.path, 'lib'))
     app.check()
@@ -96,11 +97,22 @@ def new(app, args, env):
     replaceAll(os.path.join(app.path, 'conf/application.conf'), r'%SECRET_KEY%', secretKey())
     print "~"
 
+    # Configure modules 
+    runDepsAfter = False
     for m in md:
-        mn = m
-        if mn.find('-') > 0:
-            mn = mn[:mn.find('-')]
-        replaceAll(os.path.join(app.path, 'conf/application.conf'), r'# ---- MODULES ----', '# ---- MODULES ----\nmodule.%s=${play.path}/modules/%s' % (mn, m) )
+        # Check dependencies.yml of the module
+        depsYaml = os.path.join(env["basedir"], 'modules/%s/conf/dependencies.yml' % m)
+        if os.path.exists(depsYaml):
+            deps = open(depsYaml).read()
+            try:
+                moduleDefinition = re.search(r'self:\s*(.*)\s*', deps).group(1)
+                replaceAll(os.path.join(app.path, 'conf/dependencies.yml'), r'- play\n', '- play\n    - %s\n' % moduleDefinition )
+                runDepsAfter = True
+            except Exception:
+                pass
+                
+    if runDepsAfter:
+        cmdloader.commands['dependencies'].execute(command='dependencies', app=app, args=['--sync'], env=env, cmdloader=cmdloader)
 
     print "~ OK, the application is created."
     print "~ Start it with : play run %s" % sys.argv[2]
@@ -241,7 +253,14 @@ def autotest(app, args):
         print "~ Some tests have failed. See file://%s for results" % test_result
         print "~"
     
-    kill(play_process.pid)
+    # Kill if exists
+    http_port = app.readConf('http.port')
+    try:
+        proxy_handler = urllib2.ProxyHandler({})
+        opener = urllib2.build_opener(proxy_handler)
+        opener.open('http://localhost:%s/@kill' % http_port);
+    except Exception, e:
+        pass
 
 def id(play_env):
     if not play_env["id"]:
