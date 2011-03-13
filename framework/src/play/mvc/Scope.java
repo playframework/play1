@@ -472,6 +472,7 @@ public class Scope {
 
         public String urlEncode() {
             checkAndParse();
+            String encoding = Http.Response.current().encoding;
             StringBuilder ue = new StringBuilder();
             for (String key : data.keySet()) {
                 if (key.equals("body")) {
@@ -480,9 +481,9 @@ public class Scope {
                 String[] values = data.get(key);
                 for (String value : values) {
                     try {
-                        ue.append(URLEncoder.encode(key, "utf-8")).append("=").append(URLEncoder.encode(value, "utf-8")).append("&");
+                        ue.append(URLEncoder.encode(key, encoding)).append("=").append(URLEncoder.encode(value, encoding)).append("&");
                     } catch (Exception e) {
-                        Logger.error(e, "Error (utf-8 ?)");
+                        Logger.error(e, "Error (encoding ?)");
                     }
                 }
             }

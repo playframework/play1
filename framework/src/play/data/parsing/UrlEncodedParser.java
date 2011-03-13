@@ -4,11 +4,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import play.exceptions.UnexpectedException;
+import play.mvc.Http;
 import play.utils.Utils;
 
 /**
@@ -20,7 +22,8 @@ public class UrlEncodedParser extends DataParser {
     
     public static Map<String, String[]> parse(String urlEncoded) {
         try {
-            return new UrlEncodedParser().parse(new ByteArrayInputStream(urlEncoded.getBytes("utf-8")));
+            final String encoding = Http.Request.current().encoding;
+            return new UrlEncodedParser().parse(new ByteArrayInputStream(urlEncoded.getBytes( encoding )));
         } catch (UnsupportedEncodingException ex) {
             throw new UnexpectedException(ex);
         }
@@ -34,60 +37,45 @@ public class UrlEncodedParser extends DataParser {
 
     @Override
     public Map<String, String[]> parse(InputStream is) {
+        final String encoding = Http.Request.current().encoding;
         try {
             Map<String, String[]> params = new HashMap<String, String[]>();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            int b;
-            while ((b = is.read()) != -1) {
-                os.write(b);
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ( (bytesRead = is.read(buffer)) > 0 ) {
+                os.write( buffer, 0, bytesRead);
             }
-            byte[] data = os.toByteArray();
+
+            String data = new String(os.toByteArray(), encoding);
             // add the complete body as a parameters
             if(!forQueryString) {
-                params.put("body", new String[] {new String(data, "utf-8")});
+                params.put("body", new String[] {data});
             }
-            
-            int ix = 0;
-            int ox = 0;
-            String key = null;
-            String value = null;
-            while (ix < data.length) {
-                byte c = data[ix++];
-                switch ((char) c) {
-                    case '&':
-                        value = new String(data, 0, ox, "utf-8");
-                        if (key != null) {
-                            Utils.Maps.mergeValueInMap(params, key, value);
-                            key = null;
+
+            // data is o the form:
+            // a=b&b=c%12...
+            String[] keyValues = data.split("&");
+            for (String keyValue : keyValues) {
+                // split this key-value on '='
+                String[] parts = keyValue.split("=");
+                // sanity check
+                if (parts.length >= 1) {
+                    String key = URLDecoder.decode(parts[0],encoding);
+                    if (key.length()>0) {
+                        String value = null;
+                        if (parts.length == 2) {
+                            value = URLDecoder.decode(parts[1],encoding);
                         } else {
-                            Utils.Maps.mergeValueInMap(params, value, (String) null);
+                            // if keyValue ends with "=", then we have an empty value
+                            // if not ending with "=", we have a key without a value (a flag)
+                            if (keyValue.endsWith("=")) {
+                                value = "";
+                            }
                         }
-                        ox = 0;
-                        break;
-                    case '=':
-                        if (key == null) {
-                            key = new String(data, 0, ox, "utf-8");
-                            ox = 0;
-                        } else {
-                            data[ox++] = c;
-                        }
-                        break;
-                    case '+':
-                        data[ox++] = (byte) ' ';
-                        break;
-                    case '%':
-                        data[ox++] = (byte) ((convertHexDigit(data[ix++]) << 4) + convertHexDigit(data[ix++]));
-                        break;
-                    default:
-                        data[ox++] = c;
+                        Utils.Maps.mergeValueInMap(params, key, value);
+                    }
                 }
-            }
-            //The last value does not end in '&'.  So save it now.
-            value = new String(data, 0, ox, "utf-8");
-            if (key != null) {
-                Utils.Maps.mergeValueInMap(params, key, value);
-            } else if (!StringUtils.isEmpty(value)) {
-                Utils.Maps.mergeValueInMap(params, value, (String) null);
             }
             return params;
         } catch (Exception e) {
@@ -95,16 +83,4 @@ public class UrlEncodedParser extends DataParser {
         }
     }
 
-    private static byte convertHexDigit(byte b) {
-        if ((b >= '0') && (b <= '9')) {
-            return (byte) (b - '0');
-        }
-        if ((b >= 'a') && (b <= 'f')) {
-            return (byte) (b - 'a' + 10);
-        }
-        if ((b >= 'A') && (b <= 'F')) {
-            return (byte) (b - 'A' + 10);
-        }
-        return 0;
-    }
 }

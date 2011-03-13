@@ -1,6 +1,6 @@
 #{extends 'main.html' /}
 #{set title:'Home' /}
-<script src="@{'/public/jquery.js'}" type="text/javascript" charset="utf-8"></script>
+<script src="@{'/public/jquery.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 
 <h1>Title: <span id="ch">yop</span></h1>
 
@@ -8,7 +8,7 @@
 <button id="showConfirm">Show confirm</button>
 <button id="usePrompt">Use prompt</button>
 
-<script type="text/javascript" charset="utf-8">
+<script type="text/javascript" charset="${_response_encoding}">
 	$('#showAlert').click(function() {
 		alert("Youhou")
 	})

@@ -1,14 +1,13 @@
 package play.libs.ws;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.ning.http.client.*;
 import oauth.signpost.AbstractOAuthConsumer;
 import oauth.signpost.exception.OAuthCommunicationException;
 import oauth.signpost.exception.OAuthExpectationFailedException;
@@ -27,10 +26,7 @@ import play.libs.WS.WSImpl;
 import play.libs.WS.WSRequest;
 import play.mvc.Http.Header;
 
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
-import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.AsyncHttpClientConfig.Builder;
 import com.ning.http.client.FilePart;
 import com.ning.http.client.PerRequestConfig;
@@ -38,7 +34,8 @@ import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Realm.AuthScheme;
 import com.ning.http.client.Realm.RealmBuilder;
 import com.ning.http.client.Response;
-import com.ning.http.client.StringPart;
+
+import javax.mail.internet.MimeUtility;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -86,6 +83,9 @@ public class WSAsync implements WSImpl {
         if (userAgent != null) {
             confBuilder.setUserAgent(userAgent);
         }
+        // when using raw urls, AHC does not encode the params in url.
+        // this means we can/must encode it(with correct encoding) before passing it to AHC
+        confBuilder.setUseRawUrl(true);
         httpClient = new AsyncHttpClient(confBuilder.build());
     }
 
@@ -94,16 +94,16 @@ public class WSAsync implements WSImpl {
         httpClient.close();
     }
 
-    public WSRequest newRequest(String url) {
-        return new WSAsyncRequest(url);
+    public WSRequest newRequest(String url, String encoding) {
+        return new WSAsyncRequest(url, encoding);
     }
 
     public class WSAsyncRequest extends WSRequest {
 
         protected String type = null;
 
-        protected WSAsyncRequest(String url) {
-            this.url = url;
+        protected WSAsyncRequest(String url, String encoding) {
+            super(url, encoding);
         }
 
         /** Execute a GET request synchronously. */
@@ -304,38 +304,89 @@ public class WSAsync implements WSImpl {
                     builder.addBodyPart(new FilePart(this.fileParams[i].paramName,
                             this.fileParams[i].file,
                             MimeTypes.getMimeType(this.fileParams[i].file.getName()),
-                            null));
+                            encoding));
                 }
                 if (this.parameters != null) {
-                    for (String key : this.parameters.keySet()) {
-                        Object value = this.parameters.get(key);
-                        if (value instanceof Collection<?> || value.getClass().isArray()) {
-                            Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
-                            for (Object v : values) {
-                                builder.addBodyPart(new StringPart(key, v.toString()));
+                    try {
+                        // AHC only supports ascii chars in keys in multipart
+                        for (String key : this.parameters.keySet()) {
+                            Object value = this.parameters.get(key);
+                            if (value instanceof Collection<?> || value.getClass().isArray()) {
+                                Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
+                                for (Object v : values) {
+                                    Part part = new ByteArrayPart(key, null, v.toString().getBytes(encoding), "text/plain", encoding);
+                                    builder.addBodyPart( part );
+                                }
+                            } else {
+                                Part part = new ByteArrayPart(key, null, value.toString().getBytes(encoding), "text/plain", encoding);
+                                builder.addBodyPart( part );
                             }
-                        } else {
-                            builder.addBodyPart(new StringPart(key, value.toString()));
                         }
+                    } catch(UnsupportedEncodingException e) {
+                        throw new RuntimeException(e);
                     }
                 }
                 return;
             }
             if (this.parameters != null && !this.parameters.isEmpty()) {
                 boolean isPostPut = "POST".equals(this.type) || ("PUT".equals(this.type));
-                for (String key : this.parameters.keySet()) {
-                    Object value = this.parameters.get(key);
-                    if (value == null) continue;
-                    if (value instanceof Collection<?> || value.getClass().isArray()) {
-                        Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
-                        for (Object v: values) {
-                            if (isPostPut) builder.addParameter(key, v.toString());
-                            else builder.addQueryParameter(key, v.toString());
+
+                if (isPostPut) {
+                    // Since AHC is hardcoded to encode using utf-8, we must build
+                    // the content our self..
+                    StringBuilder sb = new StringBuilder();
+
+                    for (String key : this.parameters.keySet()) {
+                        Object value = this.parameters.get(key);
+                        if (value == null) continue;
+
+
+                        if (value instanceof Collection<?> || value.getClass().isArray()) {
+                            Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
+                            for (Object v: values) {
+                                if (sb.length() > 0) {
+                                    sb.append('&');
+                                }
+                                sb.append(encode(key));
+                                sb.append('=');
+                                sb.append(encode(v.toString()));
+                            }
+                        } else {
+                            // Since AHC is hardcoded to encode using utf-8, we must build
+                            // the content our self..
+                            if (sb.length() > 0) {
+                                sb.append('&');
+                            }
+                            sb.append(encode(key));
+                            sb.append('=');
+                            sb.append(encode(value.toString()));
                         }
-                    } else {
-                        if (isPostPut) builder.addParameter(key, value.toString());
-                        else builder.addQueryParameter(key, value.toString());
                     }
+                    try {
+                        byte[] bodyBytes = sb.toString().getBytes( this.encoding );
+                        InputStream bodyInStream = new ByteArrayInputStream( bodyBytes );
+                        builder.setBody( bodyInStream );
+                    } catch ( UnsupportedEncodingException e) {
+                        throw new RuntimeException(e);
+                    }
+
+
+                } else {
+                    for (String key : this.parameters.keySet()) {
+                        Object value = this.parameters.get(key);
+                        if (value == null) continue;
+                        if (value instanceof Collection<?> || value.getClass().isArray()) {
+                            Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
+                            for (Object v: values) {
+                                // must encode it since AHC uses raw urls
+                                builder.addQueryParameter(encode(key), encode(v.toString()));
+                            }
+                        } else {
+                            // must encode it since AHC uses raw urls
+                            builder.addQueryParameter(encode(key), encode(value.toString()));
+                        }
+                    }
+
                 }
             }
             if (this.body != null) {
@@ -346,13 +397,24 @@ public class WSAsync implements WSImpl {
                     builder.setBody((InputStream)this.body);
                 } else {
                     if(this.body != null) {
-                        builder.setBody(this.body.toString());
+                        try {
+                            byte[] bodyBytes = this.body.toString().getBytes( this.encoding );
+                            InputStream bodyInStream = new ByteArrayInputStream( bodyBytes );
+                            builder.setBody( bodyInStream );
+                        } catch ( UnsupportedEncodingException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
-                if(this.mimeType != null) {
-                    builder.setHeader("Content-Type", this.mimeType);
-                }
             }
+            String contentType;
+            if(this.mimeType != null) {
+                contentType = this.mimeType;
+            } else {
+                contentType = "application/x-www-form-urlencoded";
+            }
+            builder.setHeader("Content-Type", contentType + "; charset="+this.encoding);
+
         }
 
     }
@@ -394,21 +456,6 @@ public class WSAsync implements WSImpl {
                 result.add(new Header(key, hdrs.get(key)));
             }
             return result;
-        }
-
-        /**
-         * get the response body as a string
-         * @return the body of the http response
-         */
-        @Override
-        public String getString() {
-            try {
-                return response.getResponseBody();
-            } catch (IllegalStateException e) {
-                return ""; // Workaround AHC's bug on empty responses
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
         }
 
         /**

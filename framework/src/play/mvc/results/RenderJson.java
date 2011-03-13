@@ -39,8 +39,9 @@ public class RenderJson extends Result {
 
     public void apply(Request request, Response response) {
         try {
-            setContentTypeIfNotSet(response, "application/json; charset=utf-8");
-            response.out.write(json.getBytes("utf-8"));
+            String encoding = getEncoding();
+            setContentTypeIfNotSet(response, "application/json; charset="+encoding);
+            response.out.write(json.getBytes(encoding));
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }

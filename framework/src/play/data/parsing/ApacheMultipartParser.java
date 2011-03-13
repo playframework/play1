@@ -32,6 +32,7 @@ import play.data.MemoryUpload;
 import play.data.Upload;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http.Request;
+import play.utils.HTTP;
 
 /**
  * From Apache commons fileupload.
@@ -540,7 +541,7 @@ public class ApacheMultipartParser extends DataParser {
     public Map<String, String[]> parse(InputStream body) {
         Map<String, String[]> result = new HashMap<String, String[]>();
         try {
-            FileItemIteratorImpl iter = new FileItemIteratorImpl(body, Request.current().headers.get("content-type").value(), "UTF-8");
+            FileItemIteratorImpl iter = new FileItemIteratorImpl(body, Request.current().headers.get("content-type").value(), Request.current().encoding);
             while (iter.hasNext()) {
                 FileItemStream item = iter.next();
                 FileItem fileItem = new AutoFileItem(item);
@@ -552,7 +553,17 @@ public class ApacheMultipartParser extends DataParser {
                     throw new IOFileUploadException("Processing of " + MULTIPART_FORM_DATA + " request failed. " + e.getMessage(), e);
                 }
                 if (fileItem.isFormField()) {
-                    putMapEntry(result, fileItem.getFieldName(), fileItem.getString("UTF-8"));
+                    // must resolve encoding
+                    String _encoding = Request.current().encoding; // this is our default
+                    String _contentType = fileItem.getContentType();
+                    if( _contentType != null ) {
+                        HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType(_contentType);
+                        if( contentTypeEncoding.encoding != null ) {
+                            _encoding = contentTypeEncoding.encoding;
+                        }
+                    }
+
+                    putMapEntry(result, fileItem.getFieldName(), fileItem.getString( _encoding ));
                 } else {
                     @SuppressWarnings("unchecked") List<Upload> uploads = (List<Upload>) Request.current().args.get("__UPLOADS");
                     if (uploads == null) {
