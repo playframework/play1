@@ -5,7 +5,7 @@
 	We will send you an email for confirmation
 </p>
 
-<form id="signup" action="@{Application.register}" method="POST" accept-charset="utf-8">
+<form id="signup" action="@{Application.register}" method="POST" accept-charset="${_response_encoding}">
 	<p>
 		<label>Email</label>
 		<input type="text" name="email" value="${flash.email}" id="email" />

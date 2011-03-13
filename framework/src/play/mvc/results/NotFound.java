@@ -51,7 +51,7 @@ public class NotFound extends Result {
         } catch(Exception e) {
         }
         try {
-            response.out.write(errorHtml.getBytes("utf-8"));
+            response.out.write(errorHtml.getBytes(getEncoding()));
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }

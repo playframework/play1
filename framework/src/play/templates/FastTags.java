@@ -21,6 +21,7 @@ import play.exceptions.TagInternalException;
 import play.exceptions.TemplateExecutionException;
 import play.exceptions.TemplateNotFoundException;
 import play.libs.Codec;
+import play.mvc.Http;
 import play.mvc.Router.ActionDefinition;
 import play.mvc.Scope.Flash;
 import play.mvc.Scope.Session;
@@ -98,7 +99,8 @@ public class FastTags {
             actionDef.url += separator + "x-http-method-override=" + actionDef.method.toUpperCase();
             actionDef.method = "POST";
         }
-        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toUpperCase() + "\" accept-charset=\"utf-8\" enctype=\"" + enctype + "\" " + serialize(args, "action", "method", "accept-charset", "enctype") + ">");
+        String encoding = Http.Response.current().encoding;
+        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toUpperCase() + "\" accept-charset=\""+encoding+"\" enctype=\"" + enctype + "\" " + serialize(args, "action", "method", "accept-charset", "enctype") + ">");
         if (!("GET".equals(actionDef.method))) {
             _authenticityToken(args, body, out, template, fromLine);
         }

@@ -150,8 +150,11 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
                     monitor = MonitorFactory.start(getClass().getName()+".doJob()");
 
                     //Hack to enable template rendering with urls in jobs
-                    if( Http.Request.current.get() == null) {
+                    if (Http.Request.current.get() == null) {
                         createFakeRequest();
+                    }
+                    if (Http.Response.current.get() == null) {
+                        createFakeResponse();
                     }
 
                     result = doJobWithResult();
@@ -213,6 +216,19 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
 
     }
 
+    /**
+     * If rendering with templates in a job, some template-operations require
+     * a current Response-object, eg: @@{...}}, because it needs to know which encoding to use..
+     * This method creates a fake one
+     */
+    private static void createFakeResponse() {
+
+        Http.Response fakeResponse = new Http.Response();
+        // now fakeResponse has default-encoding
+
+        Http.Response.current.set(fakeResponse);
+
+    }
 
 
     @Override

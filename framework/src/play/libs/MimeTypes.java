@@ -1,6 +1,8 @@
 package play.libs;
 
 import play.*;
+import play.mvc.Http;
+
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -73,7 +75,7 @@ public class MimeTypes {
     		contentType =  defaultContentType;
     	}
     	if (contentType != null && contentType.startsWith("text/")){
-    		return contentType + "; charset=utf-8";
+    		return contentType + "; charset=" + Http.Response.current().encoding;
     	}
     	return contentType;
     }

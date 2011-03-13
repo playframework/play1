@@ -1,10 +1,6 @@
 package play.libs.ws;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -15,10 +11,12 @@ import oauth.signpost.OAuthConsumer;
 import oauth.signpost.basic.DefaultOAuthConsumer;
 import play.Logger;
 import play.libs.IO;
+import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSImpl;
 import play.libs.WS.WSRequest;
 import play.mvc.Http.Header;
+import play.utils.HTTP;
 
 /**
  * Implementation of the WS interface based on Java URL Fetch API.
@@ -33,14 +31,14 @@ public class WSUrlFetch implements WSImpl {
     public void stop() {
     }
 
-    public play.libs.WS.WSRequest newRequest(String url) {
-        return new WSUrlfetchRequest(url);
+    public play.libs.WS.WSRequest newRequest(String url, String encoding) {
+        return new WSUrlfetchRequest(url, encoding);
     }
 
     public class WSUrlfetchRequest extends WSRequest {
 
-        protected WSUrlfetchRequest(String url) {
-            this.url = url;
+        protected WSUrlfetchRequest(String url, String encoding) {
+            super(url, encoding);
         }
 
         /** Execute a GET request synchronously. */
@@ -174,7 +172,7 @@ public class WSUrlFetch implements WSImpl {
             return;
             }*/
             if (this.parameters != null && !this.parameters.isEmpty()) {
-                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset="+encoding);
                 connection.setDoOutput(true);
                 OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
                 writer.write(createQueryString());
@@ -188,9 +186,26 @@ public class WSUrlFetch implements WSImpl {
                     connection.setRequestProperty("Content-Type", this.mimeType);
                 }
                 connection.setDoOutput(true);
-                OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
-                writer.write(this.body.toString());
-                writer.close();
+
+                OutputStream out = connection.getOutputStream();
+                if(this.body instanceof InputStream) {
+                    InputStream bodyStream = (InputStream)this.body;
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    while( (bytesRead = bodyStream.read(buffer, 0, buffer.length)) > 0) {
+                        out.write(buffer, 0, bytesRead);
+                    }
+                } else {
+                    try {
+                        byte[] bodyBytes = this.body.toString().getBytes( this.encoding );
+                        out.write( bodyBytes );
+                    } catch ( UnsupportedEncodingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                if(this.mimeType != null) {
+                    connection.setRequestProperty("Content-Type", this.mimeType+"; charset="+encoding);
+                }
             }
         }
     }
@@ -203,6 +218,7 @@ public class WSUrlFetch implements WSImpl {
         private String body;
         private Integer status;
         private Map<String, List<String>> headersMap;
+        private String encoding;
 
         /**
          * you shouldnt have to create an HttpResponse yourself
@@ -212,7 +228,7 @@ public class WSUrlFetch implements WSImpl {
             try {
                 this.status = connection.getResponseCode();
                 this.headersMap = connection.getHeaderFields();
-                this.body = IO.readContentAsString(connection.getInputStream());
+                this.body = IO.readContentAsString(connection.getInputStream(), getEncoding());
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             } finally {
@@ -259,7 +275,7 @@ public class WSUrlFetch implements WSImpl {
         @Override
         public InputStream getStream() {
             try {
-                return new ByteArrayInputStream(body.getBytes("UTF-8"));
+                return new ByteArrayInputStream(body.getBytes( getEncoding() ));
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
