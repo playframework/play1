@@ -155,7 +155,7 @@ public abstract class BeanWrapper {
 
         Collection<Field> getFields(Class<?> forClass) {
             final Collection<Field> fields = new ArrayList<Field>();
-            for (Field field : forClass.getDeclaredFields()) {
+            for (Field field : forClass.getFields()) {
                 if ((field.getModifiers() & notwritableField) != 0) {
                     continue;
                 }
