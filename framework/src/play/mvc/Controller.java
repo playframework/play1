@@ -604,6 +604,15 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         }
     }
 
+    protected static boolean templateExists(String templateName) {
+        try {
+            TemplateLoader.load(template(templateName));
+            return true;
+        } catch (TemplateNotFoundException ex) {
+            return false;
+        }
+    }
+
     /**
      * Render a specific template
      * @param templateName The template name

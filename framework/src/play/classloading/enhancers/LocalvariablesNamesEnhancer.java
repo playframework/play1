@@ -132,6 +132,10 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 continue;
             }
 
+            if(isScalaObject(ctClass)) {
+                continue;
+            }
+
             // OK.
             // Here after each local variable creation instruction,
             // we insert a call to play.utils.LocalVariables.addVariable('var', var)

@@ -33,6 +33,9 @@ public class PropertiesEnhancer extends Enhancer {
         if (ctClass.isInterface()) {
             return;
         }
+        if(ctClass.getName().endsWith(".package")) {
+            return;
+        }
 
         // Add a default constructor if needed
         try {
@@ -52,15 +55,13 @@ public class PropertiesEnhancer extends Enhancer {
             throw new UnexpectedException("Error in PropertiesEnhancer", e);
         }
 
-
-        for (CtClass itf : ctClass.getInterfaces()) {
-            if (itf.getName().equals("scala.ScalaObject")) {
-                // Done.
-                applicationClass.enhancedByteCode = ctClass.toBytecode();
-                ctClass.defrost();
-                return;
-            }
+        if (isScalaObject(ctClass)) {
+            // Done.
+            applicationClass.enhancedByteCode = ctClass.toBytecode();
+            ctClass.defrost();
+            return;
         }
+
         for (CtField ctField : ctClass.getDeclaredFields()) {
             try {
 

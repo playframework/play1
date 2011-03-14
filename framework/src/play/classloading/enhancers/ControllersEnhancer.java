@@ -79,8 +79,8 @@ public class ControllersEnhancer extends Enhancer {
                 }
             }
 
-            // Patch for new scala module -->
-            if(Play.configuration.getProperty("scala.enableAutoRedirect", "true").equals("false") && Modifier.isPublic(ctMethod.getModifiers()) && ((ctClass.getName().endsWith("$") && !ctMethod.getName().contains("$default$"))) && !isHandler) {
+            // Auto redirect -->
+            if(!isScalaObject(ctClass) && Modifier.isPublic(ctMethod.getModifiers()) && ((ctClass.getName().endsWith("$") && !ctMethod.getName().contains("$default$"))) && !isHandler) {
 
                 try {
                     ctMethod.insertBefore(
@@ -117,7 +117,7 @@ public class ControllersEnhancer extends Enhancer {
 
                 @Override
                 public void edit(Handler handler) throws CannotCompileException {
-                    StringBuffer code = new StringBuffer();
+                    StringBuilder code = new StringBuilder();
                     try {
                         code.append("if($1 instanceof play.mvc.results.Result || $1 instanceof play.Invoker.Suspend) throw $1;");
                         handler.insertBefore(code.toString());

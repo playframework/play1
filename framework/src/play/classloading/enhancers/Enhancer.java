@@ -163,5 +163,14 @@ public abstract class Enhancer {
         }
         return annotationsAttribute;
     }
+
+    boolean isScalaObject(CtClass ctClass) throws Exception {
+        for(CtClass i : ctClass.getInterfaces()) {
+            if(i.getName().equals("scala.ScalaObject")) {
+                return true;
+            }
+        }
+        return false;
+    }
     
 }

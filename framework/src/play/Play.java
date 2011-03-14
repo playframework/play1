@@ -1,5 +1,6 @@
 package play;
 
+import groovy.lang.ExpandoMetaClass;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;

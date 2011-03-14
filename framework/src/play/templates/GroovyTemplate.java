@@ -6,6 +6,7 @@ import groovy.lang.Binding;
 import groovy.lang.Closure;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObjectSupport;
+import groovy.lang.GroovyShell;
 import groovy.lang.MissingPropertyException;
 import groovy.lang.Script;
 import java.io.File;
@@ -58,6 +59,10 @@ import play.utils.HTML;
  * A template
  */
 public class GroovyTemplate extends BaseTemplate {
+
+    static {
+        new GroovyShell().evaluate("java.lang.String.metaClass.if = { condition -> if(condition) delegate; else '' }");
+    }
 
     public GroovyTemplate(String name, String source) {
         super(name, source);

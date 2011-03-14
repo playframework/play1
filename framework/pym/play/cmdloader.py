@@ -16,12 +16,17 @@ class CommandLoader:
                 self._load_cmd_from(mod)
 
     def load_play_module(self, modname):
-        try:
-            leafname = os.path.basename(modname).split('.')[0]
-            mod = imp.load_source(leafname, os.path.join(modname, "commands.py"))
-            self._load_cmd_from(mod)
-        except:
-            pass # No command to load in this module
+        commands = os.path.join(modname, "commands.py")
+        if os.path.exists(commands):
+            try:
+                leafname = os.path.basename(modname).split('.')[0]
+                mod = imp.load_source(leafname, os.path.join(modname, "commands.py"))
+                self._load_cmd_from(mod)
+            except Exception, e:
+                print '~'
+                print '~ !! Error whileloading %s: %s' % (commands, e)
+                print '~'
+                pass # No command to load in this module
 
     def _load_cmd_from(self, mod):
         try:
