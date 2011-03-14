@@ -388,7 +388,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     }
 
     /**
-     * Send a TODO response
+     * Send a todo response
      */
     protected static void todo() {
         notFound("This action has not been implemented Yet (" + request.action + ")");

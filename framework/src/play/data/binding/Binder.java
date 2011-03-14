@@ -70,7 +70,6 @@ public class Binder {
             Logger.trace("bindInternal: profile [" + Utils.join(profiles, ",") + "]");
             // Let see if we have a BindAs annotation and a separator. If so, we need to split the values
             // Look up for the BindAs annotation. Extract the profile if there is any.
-            // TODO: Move me somewhere else?
             if (annotations != null) {
                 for (Annotation annotation : annotations) {
                     if ((clazz.isArray() || Collection.class.isAssignableFrom(clazz)) && value != null && value.length > 0 && annotation.annotationType().equals(As.class)) {
@@ -264,10 +263,7 @@ public class Binder {
     }
 
     private static String escape(String s) {
-        s = s.replace(".", "\\.");
-        s = s.replace("[", "\\[");
-        s = s.replace("]", "\\]");
-        return s;
+        return s.replace(".", "\\.").replace("[", "\\[").replace("]", "\\]");
     }
 
     public static boolean contains(String[] profiles, String[] localProfiles) {
@@ -429,10 +425,7 @@ public class Binder {
 
         // Enums
         if (Enum.class.isAssignableFrom(clazz)) {
-            if (nullOrEmpty) {
-                return null;
-            }
-            return Enum.valueOf((Class<Enum>)clazz, value);
+            return nullOrEmpty ? null : Enum.valueOf((Class<Enum>)clazz, value);
         }
 
         // int or Integer binding
@@ -491,11 +484,7 @@ public class Binder {
 
         // BigDecimal binding
         if (clazz.equals(BigDecimal.class)) {
-            if (nullOrEmpty) {
-                return null;
-            }
-
-            return new BigDecimal(value);
+            return nullOrEmpty ? null : new BigDecimal(value);
         }
 
         // boolean or Boolean binding
