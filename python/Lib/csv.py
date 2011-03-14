@@ -4,6 +4,7 @@ csv.py - read/write/investigate CSV files
 """
 
 import re
+from functools import reduce
 from _csv import Error, __version__, writer, reader, register_dialect, \
                  unregister_dialect, get_dialect, list_dialects, \
                  field_size_limit, \
@@ -17,7 +18,8 @@ except ImportError:
     from StringIO import StringIO
 
 __all__ = [ "QUOTE_MINIMAL", "QUOTE_ALL", "QUOTE_NONNUMERIC", "QUOTE_NONE",
-            "Error", "Dialect", "excel", "excel_tab", "reader", "writer",
+            "Error", "Dialect", "__doc__", "excel", "excel_tab",
+            "field_size_limit", "reader", "writer",
             "register_dialect", "get_dialect", "list_dialects", "Sniffer",
             "unregister_dialect", "__version__", "DictReader", "DictWriter" ]
 
@@ -71,19 +73,36 @@ register_dialect("excel-tab", excel_tab)
 class DictReader:
     def __init__(self, f, fieldnames=None, restkey=None, restval=None,
                  dialect="excel", *args, **kwds):
-        self.fieldnames = fieldnames    # list of keys for the dict
+        self._fieldnames = fieldnames   # list of keys for the dict
         self.restkey = restkey          # key to catch long rows
         self.restval = restval          # default value for short rows
         self.reader = reader(f, dialect, *args, **kwds)
+        self.dialect = dialect
+        self.line_num = 0
 
     def __iter__(self):
         return self
 
+    @property
+    def fieldnames(self):
+        if self._fieldnames is None:
+            try:
+                self._fieldnames = self.reader.next()
+            except StopIteration:
+                pass
+        self.line_num = self.reader.line_num
+        return self._fieldnames
+
+    @fieldnames.setter
+    def fieldnames(self, value):
+        self._fieldnames = value
+
     def next(self):
+        if self.line_num == 0:
+            # Used only for its side effect.
+            self.fieldnames
         row = self.reader.next()
-        if self.fieldnames is None:
-            self.fieldnames = row
-            row = self.reader.next()
+        self.line_num = self.reader.line_num
 
         # unlike the basic reader, we prefer not to return blanks,
         # because we will typically wind up with a dict full of None
@@ -115,9 +134,10 @@ class DictWriter:
 
     def _dict_to_list(self, rowdict):
         if self.extrasaction == "raise":
-            for k in rowdict.keys():
-                if k not in self.fieldnames:
-                    raise ValueError, "dict contains fields not in fieldnames"
+            wrong_fields = [k for k in rowdict if k not in self.fieldnames]
+            if wrong_fields:
+                raise ValueError("dict contains fields not in fieldnames: " +
+                                 ", ".join(wrong_fields))
         return [rowdict.get(key, self.restval) for key in self.fieldnames]
 
     def writerow(self, rowdict):

@@ -1,0 +1,1511 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: brian_nt@nifty.com\n"
+"POT-Creation-Date: 2007-09-05 04:39+0900\n"
+"PO-Revision-Date: 2007-09-23 03:55+0900\n"
+"Last-Translator: Norihiko Tashi <brian_nt@nifty.com>\n"
+"Language-Team: ja <brian_nt@nifty.com>\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.2dev-r319\n"
+
+msgid ""
+"\n"
+"wxGlade-WARNING: only sizers can be pasted here"
+msgstr ""
+"\n"
+"wxGlade-警告: ここにはサイザーしか貼り付けることができません"
+
+msgid ""
+"\n"
+"wxGlade-WARNING: sizer already set for this window"
+msgstr ""
+"\n"
+"wxGlade-警告: このウィンドウにはサイザーが既に設定されています"
+
+msgid "  Add  "
+msgstr "  追加  "
+
+msgid "  Apply  "
+msgstr "  適用  "
+
+msgid "  Insert  "
+msgstr "  挿入  "
+
+msgid "  Remove  "
+msgstr "  削除  "
+
+msgid " Tree Control:"
+msgstr " ツリーコントロール:"
+
+msgid " seconds"
+msgstr "秒"
+
+msgid "\"%s\" is not a valid code generator module"
+msgstr "\"%s\" は、有効なコード生成モジュールではありません"
+
+msgid "%s files (*.%s)|*.%s"
+msgstr "%sファイル(*.%s)|*.%s"
+
+msgid "&Edit"
+msgstr "編集(&E)"
+
+msgid "&File"
+msgstr "ファイル(&F)"
+
+msgid "&Generate Code\tCtrl+G"
+msgstr "コード生成(&G)\tCtrl+G"
+
+msgid "&Help"
+msgstr "ヘルプ(&H)"
+
+msgid "&Import from XRC...\tCtrl+I"
+msgstr "XRCからインポート(&I)...\tCtrl+I"
+
+msgid "&New\tCtrl+N"
+msgstr "新規作成(&N)\tCtrl+N"
+
+msgid "&Open...\tCtrl+O"
+msgstr "開く(&O)...\tCtrl+O"
+
+msgid "&Raise All\tF4"
+msgstr "全て表示(&R)"
+
+msgid "&Refresh\tf5"
+msgstr "リフレッシュ(&R)\tf5"
+
+msgid "&Save\tCtrl+S"
+msgstr "保存(&S)\tCtrl+S"
+
+msgid "&View"
+msgstr "表示(&V)"
+
+msgid "'name' attribute missing"
+msgstr "'name'属性がありません"
+
+msgid "'object' items must have a 'class' attribute"
+msgstr "'object'項目は'class'属性を持っていなければなりません"
+
+msgid "'path' attribute missing: could not generate code"
+msgstr "'path' 属性がありません: コードを生成できませんでした"
+
+msgid "'sizeritem' object not found"
+msgstr "'sizerItem'オブジェクトが見つかりません"
+
+msgid "<Design> - "
+msgstr "<デザイン> - "
+
+msgid "<Preview> - %s"
+msgstr "<プレビュー> - %s"
+
+msgid ""
+"A comma-separated list of custom base classes. The first will be invoked "
+"with the same parameters as this class, while for the others the default "
+"constructor will be used. You should probably not use this if \"overwrite "
+"existing sources\" is not set."
+msgstr ""
+"コンマで区切ったカスタム基底クラスのリスト。最初のものは、このクラスと同じパ"
+"ラメータで呼び出されます。残りはディフォルトコンストラクタが使われます。\"既"
+"存のソースを上書きする\"が設定されていないなら、これを使うべきではありませ"
+"ん。"
+
+msgid ""
+"A template called '%s' already exists:\n"
+"do you want to overwrite it?"
+msgstr ""
+"'%s'テンプレートファイルは既に存在します:\n"
+"上書きしてもよろしいですか?"
+
+msgid "About wxGlade"
+msgstr "wxGladeについて"
+
+msgid "About..."
+msgstr "バージョン情報..."
+
+msgid "Add"
+msgstr "追加"
+
+msgid "Add a %s"
+msgstr "%sを追加"
+
+msgid "Add column"
+msgstr "列の追加"
+
+msgid "Add row"
+msgstr "行の追加"
+
+msgid "Add separator"
+msgstr "セパレータ追加"
+
+msgid "Add slot"
+msgstr "スロット追加"
+
+msgid "Alert"
+msgstr "警告"
+
+msgid "Alignment"
+msgstr "配置"
+
+msgid "Aligns the bitmap label to the bottom of the button. WIN32 only."
+msgstr "ビットマップラベルをボタンの下に揃える。WIN32のみ。"
+
+msgid "Aligns the bitmap label to the top of the button. WIN32 only."
+msgstr "ビットマップラベルをボタンの上に揃える。WIN32のみ。"
+
+msgid "Aligns the label to the bottom of the button. Windows and GTK+ only."
+msgstr "ラベルをボタンの下に揃える。WindowsとGTK+のみ。"
+
+msgid "Aligns the label to the top of the button. Windows and GTK+ only."
+msgstr "ラベルをボタンの上に揃える。WindowsとGTK+のみ。"
+
+msgid "All Files|*"
+msgstr "全てのファイル|*"
+
+msgid "All files|*"
+msgstr "全てのファイル|*"
+
+msgid "Allow duplicate widget names"
+msgstr "Widget名の重複を許可"
+
+msgid "Allows the user to select a range on the slider. Windows only."
+msgstr "ユーザがスライダーの範囲を選択可能にする。Windowsのみ。"
+
+msgid "Always show a vertical scrollbar."
+msgstr "常に垂直スクロールバーを表示する。"
+
+msgid ""
+"An exception occurred while generating the code for the application.\n"
+"This is the error message associated with it:\n"
+"        %s\n"
+"For more details, look at the full traceback on the console.\n"
+"If you think this is a wxGlade bug, please report it."
+msgstr ""
+"このアプリケーションのコード生成時に例外が発生しました。\n"
+"これは、以下に関連したエラーメッセージです:\n"
+"        %s\n"
+"詳細は、コンソールに出力された完全なトレースバックを参照してください。\n"
+"wxGladeのバグとお思いならばぜひ報告をお願いします。"
+
+msgid ""
+"An exception occurred while importing file \"%s\".\n"
+"This is the error message associated with it:\n"
+"        %s\n"
+"For more details, look at the full traceback on the console.\n"
+"If you think this is a wxGlade bug, please report it."
+msgstr ""
+"\"%s\"ファイルのインポート時に例外が発生しました。\n"
+"これは、以下に関連したエラーメッセージです:\n"
+"        %s\n"
+"詳細は、コンソールに出力された完全なトレースバックを参照してください。\n"
+"wxGladeのバグとお思いならばぜひ報告をお願いします。"
+
+msgid ""
+"An exception occurred while loading file \"%s\".\n"
+"This is the error message associated with it:\n"
+"        %s\n"
+"For more details, look at the full traceback on the console.\n"
+"If you think this is a wxGlade bug, please report it."
+msgstr ""
+"\"%s\"ファイルの読み込み時に例外が発生しました。\n"
+"これは、以下に関連したエラーメッセージです:\n"
+"        %s\n"
+"詳細は、コンソールに出力された完全なトレースバックを参照してください。\n"
+"wxGladeのバグとお思いならばぜひ報告をお願いします。"
+
+msgid ""
+"An exception occurred while saving file \"%s\".\n"
+"This is the error message associated with it:\n"
+"        %s\n"
+"For more details, look at the full traceback on the console.\n"
+"If you think this is a wxGlade bug, please report it."
+msgstr ""
+"\"%s\"ファイルの保存時に例外が発生しました。\n"
+"これは、以下に関連したエラーメッセージです:\n"
+"        %s\n"
+"詳細は、コンソールに出力された完全なトレースバックを参照してください。\n"
+"wxGladeのバグとお思いならばぜひ報告をお願いします。"
+
+msgid "Application"
+msgstr "アプリケーション"
+
+msgid "Apply"
+msgstr "適用"
+
+msgid "Are you sure?"
+msgstr "よろしいですか?"
+
+msgid "Author"
+msgstr "作者"
+
+msgid "Auto save detected"
+msgstr "自動保存を検出しました"
+
+msgid "Auto save wxg files every "
+msgstr "wxgファイルを指定時間毎に自動保存する "
+
+msgid "Auto saving... done"
+msgstr "自動保存... 完了"
+
+msgid "Available templates"
+msgstr "利用可能なテンプレート"
+
+msgid "Backup options"
+msgstr "バックアップオプション"
+
+msgid "Base class(es)"
+msgstr "基底クラス"
+
+msgid "Border"
+msgstr "ボーダー"
+
+msgid "Bottom"
+msgstr "下"
+
+msgid "Can't find the credits file!\n"
+msgstr "クレジットファイルが見つかりません！\n"
+
+msgid ""
+"Can't find the license!\n"
+"You can get a copy at \n"
+"http://www.opensource.org/licenses/mit-license.php"
+msgstr ""
+"ライセンスが見つかりません！\n"
+"以下でコピーを入手できます\n"
+"http://www.opensource.org/licenses/mit-license.php"
+
+msgid "Can't save a template with an empty name"
+msgstr "テンプレートを空の名前で保存できません"
+
+msgid "Cancel"
+msgstr "キャンセル"
+
+msgid "Changes will take effect after wxGlade is restarted"
+msgstr "変更はwxGlade再起動後に有効になります"
+
+msgid "Checked"
+msgstr "チェック化"
+
+msgid "Choose a directory:"
+msgstr "ディレクトリを選択してください"
+
+msgid "Choose a file"
+msgstr "ファイルを選択してください"
+
+msgid "Clicked"
+msgstr "クリック"
+
+msgid "Clipboard can't be opened."
+msgstr "クリップボードを開けません。"
+
+msgid "Close Preview"
+msgstr "プレビューを閉じる"
+
+msgid "Close preview"
+msgstr "プレビューを閉じる"
+
+msgid "Code"
+msgstr "コード"
+
+msgid "Code generation completed successfully"
+msgstr "コード生成が完了しました"
+
+msgid "Common"
+msgstr "共通"
+
+msgid "Confirm"
+msgstr "確認"
+
+msgid "Contents\tF1"
+msgstr "ヘルプの表示\tF1"
+
+msgid "Copy\tCtrl+C"
+msgstr "コピー\tCtrl+C"
+
+msgid "Core components"
+msgstr "コアコンポーネント"
+
+msgid "Create backup files for generated source"
+msgstr "生成ソースのバックアップファイルを作成する"
+
+msgid "Create backup wxg files"
+msgstr "wxgファイルのバックアップを作成する"
+
+msgid "Create horizontal scrollbar if contents are too wide (Windows only)."
+msgstr "幅を超えた場合水平スクロールバーを作成する(Windowsのみ)。"
+
+msgid "Creates a combobox with a drop-down list."
+msgstr "ドロップダウンリストを持つコンボボックスを作成"
+
+msgid "Creates a combobox with a permanently displayed list. Windows only."
+msgstr "常時表示リストを持つコンボボックスを作成。Windowsのみ。"
+
+msgid "Creates a flat button. Windows and GTK+ only."
+msgstr "二重ボーダを表示する。WindowsとMacのみ。"
+
+msgid "Creates a horizontal gauge."
+msgstr "水平ゲージを作成する"
+
+msgid "Creates a vertical gauge."
+msgstr "垂直ゲージを作成する"
+
+msgid ""
+"Creates smooth progress bar with one pixel wide update step (not supported "
+"by all platforms)."
+msgstr ""
+"1ピクセル幅の更新間隔を持つスムースプログレスバーを作成する全てのプラット"
+"フォームでサポートされているわけではありません"
+
+msgid ""
+"Creates the button as small as possible instead of making it of the standard "
+"size (which is the default behaviour )."
+msgstr "出来る限り小さいボタンを作成する。ディフォルトでは標準サイズ"
+
+msgid "Custom Widget: %s"
+msgstr "カスタムWidget: %s"
+
+msgid "Custom colour"
+msgstr "カスタムカラー"
+
+msgid "Custom components"
+msgstr "カスタムコンポーネント"
+
+msgid "Cut\tCtrl+X"
+msgstr "切り取り\tCtrl+X"
+
+msgid "Data can't be copied from clipboard."
+msgstr "クリップボードからデータをコピーできません。"
+
+msgid "Data can't be copied to clipboard."
+msgstr "クリップボードにデータをコピーできません。"
+
+msgid "Default border width for widgets"
+msgstr "Widgetのディフォルトボーダー幅"
+
+msgid "Delete template '%s'?"
+msgstr "テンプレート '%s'を削除しますか? "
+
+msgid "Description"
+msgstr "詳細"
+
+msgid "Disable the month (and, implicitly, the year) changing"
+msgstr "月(暗黙に年)の変更を禁止"
+
+msgid "Disable the year changing"
+msgstr "年の変更を禁止"
+
+msgid "Display a resizeable frame around the window."
+msgstr "ウィンドウ周りにリサイズ可能なフレームを表示"
+
+msgid "Display a system menu."
+msgstr "システムメニューを表示"
+
+msgid "Display a thick frame around the window."
+msgstr "ウィンドウ周りに薄いフレームを表示"
+
+msgid "Displays a border suitable for a static control. Windows only."
+msgstr "スタティックコントロール用に適したボーダを表示する。Windowsのみ。"
+
+msgid "Displays a close box on the frame."
+msgstr "クローズボックスをフレーム上に表示する"
+
+msgid "Displays a double border. Windows and Mac only."
+msgstr "二重ボーダを表示する。WindowsとMacのみ。"
+
+msgid "Displays a maximize box on the dialog."
+msgstr "ダイアログに最大ボックスを表示"
+
+msgid "Displays a minimize box on the dialog."
+msgstr "ダイアログに最小ボックスを表示"
+
+msgid "Displays a raised border."
+msgstr "浮き彫り型ボーダを表示する"
+
+msgid "Displays a sunken border."
+msgstr "窪んだボーダを表示する"
+
+msgid ""
+"Displays a thin border around the window. wxBORDER is the old name for this "
+"style."
+msgstr ""
+"ウィンドウに薄いボーダーを表示する。wxBORDERはこのスタイルの古い名前です。"
+
+msgid "Displays minimum, maximum and value labels."
+msgstr "ラベルの最小値・最大値・値ラベルを表示する"
+
+msgid "Displays no border, overriding the default border style for the window."
+msgstr ""
+"ボーダを表示しない。ウィンドウのディフォルトボーダスタイルを上書きします。"
+
+msgid "Displays the slider horizontally (this is the default)."
+msgstr "スライダを水平に表示(ディフォルト設定)"
+
+msgid "Displays the slider vertically."
+msgstr "スライダを垂直に表示"
+
+msgid "Displays tick marks."
+msgstr "メモリを表示"
+
+msgid "Displays ticks on the bottom (this is the default)."
+msgstr "メモリを下に表示する"
+
+msgid "Displays ticks on the left and forces the slider to be vertical."
+msgstr "目盛りを左に表示し、スライダーを垂直にします"
+
+msgid "Displays ticks on the right and forces the slider to be vertical."
+msgstr "目盛りを右に表示し、スライダーを垂直にします"
+
+msgid "Displays ticks on the top."
+msgstr "メモリを上に表示する"
+
+msgid "Don't generate code for this custom class"
+msgstr "このカスタムクラスではコードを生成しない"
+
+msgid "Down"
+msgstr "下へ"
+
+msgid "Draws light horizontal rules between rows in report mode."
+msgstr "レポートモードで行間に細い水平の罫線を絵画する"
+
+msgid "Draws light vertical rules between columns in report mode"
+msgstr "レポートモードで列間に細い垂直の罫線を絵画する"
+
+msgid "E&xit\tCtrl+Q"
+msgstr "終了(&X)\tCtrl+Q"
+
+msgid "ERR:"
+msgstr "エラー:"
+
+msgid "ERROR creating %s: %s"
+msgstr "%s 作成エラー: %s"
+
+msgid "ERROR loading \"%s\""
+msgstr "\"%s\"の読み込みエラー"
+
+msgid "Edit"
+msgstr "編集"
+
+msgid "Edit menus..."
+msgstr "メニューの編集..."
+
+msgid "Edit tools..."
+msgstr "ツールの編集..."
+
+msgid "EditBase or SizerBase object needed"
+msgstr "EditBaseまたはSizerBaseオブジェクトが必要です"
+
+msgid "EditPanel: Unable to disconnect the event hanlder"
+msgstr "エディットパネル:イベントハンドラを切断できません"
+
+msgid "Enable gettext support"
+msgstr "gettextサポートを有効化"
+
+msgid "Enter size"
+msgstr "サイズを入力してください"
+
+msgid "Error"
+msgstr "エラー"
+
+msgid ""
+"Error generating code:\n"
+"%s"
+msgstr ""
+"コード生成エラー:\n"
+"%s"
+
+msgid "Error loading file %s: %s"
+msgstr "ファイル%s読み込みエラー: %s"
+
+msgid ""
+"Error reading config file:\n"
+"%s"
+msgstr ""
+"コンフィグファイルの読み込みに失敗しました:\n"
+"%s"
+
+msgid ""
+"Error saving app:\n"
+"%s"
+msgstr ""
+"アプリ保存エラー:\n"
+"%s"
+
+msgid ""
+"Error saving preferences:\n"
+"%s"
+msgstr ""
+"設定保存エラー:\n"
+"%s"
+
+msgid "Error: %s"
+msgstr "エラー: %s"
+
+msgid "Error: no writer for language \"%s\" available"
+msgstr "エラー: \"%s\"言語用のライターは利用可能ではありません"
+
+msgid "Event"
+msgstr "イベント"
+
+msgid "Event Handler"
+msgstr "イベントハンドラ"
+
+msgid "Event Handler  "
+msgstr "イベントハンドラ  "
+
+msgid "Event handler `on_delete' not implemented!"
+msgstr "イベントハンドラ `on_delete' が実装されていません！"
+
+msgid "Event handler `on_edit' not implemented!"
+msgstr "イベントハンドラ `on_edit' が実装されていません！"
+
+msgid "Event handler `on_open' not implemented!"
+msgstr "イベントハンドラ `on_open' が実装されていません！"
+
+msgid "Event handler `on_select_template' not implemented!"
+msgstr "イベントハンドラ `on_select_template' が実装されていません！"
+
+msgid "Events"
+msgstr "イベント"
+
+msgid "Exception! obj: %s"
+msgstr "例外! オブジェクト: %s"
+
+msgid ""
+"Extended-selection list: the user can select multiple items using the SHIFT "
+"key and the mouse or special key combinations."
+msgstr ""
+"拡張選択リスト: ユーザはシフトキー、マウス、特殊なキー操作を使用することで複"
+"数項目を選択することができます"
+
+msgid "Extra code for this widget"
+msgstr "このWidget特有のコード"
+
+msgid "Extra properties for this widget"
+msgstr "このWidget特有のプロパティ"
+
+msgid "Family:"
+msgstr "ファミリー:"
+
+msgid "File '%s' already exists: do you really want to overwrite it?"
+msgstr "ファイル '%s' は既に存在します:本当に上書きしたいですか?"
+
+msgid "Fit parent"
+msgstr "親に合わせる"
+
+msgid "Flexible"
+msgstr "伸縮可能"
+
+msgid "Fork Error"
+msgstr "フォークエラー"
+
+msgid "Found widgets listing -> %s"
+msgstr "Widgetsリストが見つかりました -> %s"
+
+msgid "Generate code"
+msgstr "コード生成"
+
+msgid "Grid"
+msgstr "グリッド"
+
+msgid "Growable Columns"
+msgstr "伸張可能列"
+
+msgid "Growable Rows"
+msgstr "伸張可能行"
+
+msgid "Handler"
+msgstr "ハンドラ"
+
+msgid "Has MenuBar"
+msgstr "メニューバーを保持"
+
+msgid "Has StatusBar"
+msgstr "ステータスバーを保持"
+
+msgid "Has ToolBar"
+msgstr "ツールバーを保持"
+
+msgid "Has a Static Box"
+msgstr "スタティックボックスを保持"
+
+msgid "Help String"
+msgstr "ヘルプ文字列"
+
+msgid "Help String  "
+msgstr "ヘルプ文字列  "
+
+msgid "Help on \"Arguments\" property"
+msgstr "\"引数\"プロパティのヘルプ"
+
+msgid "Hide"
+msgstr "隠す"
+
+msgid "Highlight holidays in the calendar"
+msgstr "カレンダーで休日を強調"
+
+msgid "Horizontal"
+msgstr "水平"
+
+msgid "Icons align to the left."
+msgstr "アイコンを左に寄せます"
+
+msgid "Icons align to the top. Win32 default, Win32 only."
+msgstr "アイコンを上に寄せます。Win32のディフォルトです。Win32のみ。"
+
+msgid "Icons arrange themselves. Win32 only."
+msgstr "アイコン自身で整列。Win32のみ。"
+
+msgid ""
+"If this is a custom class, setting this property prevents wxGlade\n"
+"from generating the class definition code"
+msgstr ""
+"これがカスタムクラスなら、このプロパティをセットすることで\n"
+"wxGladeがクラス定義コードを生成するのを抑制します。"
+
+msgid ""
+"If you change the default value, it will be interpreted as the name of the "
+"subclass of the widget. How this name affects code generation depends on the "
+"kind (i.e. language) of output. See the docs for more details."
+msgstr ""
+"ディフォルト値を変更した場合は、そのWidgetのサブクラスの名前と解釈されます。"
+"この名前がコード生成にどう影響を与えるかは、出力方式(言語など)によります。詳"
+"細はドキュメントを参照してください。"
+
+msgid "Import file"
+msgstr "ファイルのインポート"
+
+msgid "Impossible to reload an unsaved application"
+msgstr "保存されていないアプリは再読み込みできません"
+
+msgid "Information"
+msgstr "情報"
+
+msgid ""
+"Initial path for \n"
+"code generation file dialogs:"
+msgstr ""
+"コード生成ファイルダイアログの\n"
+"初期パス:"
+
+msgid ""
+"Initial path for \n"
+"file opening/saving dialogs:"
+msgstr ""
+"ファイル読み込み/保存ダイアログの\n"
+"初期パス:"
+
+msgid "Insert .wxg file name on generated source files"
+msgstr "生成ソースファイルに.wxgファイル名を挿入する"
+
+msgid "Insert column..."
+msgstr "列の挿入..."
+
+msgid "Insert row..."
+msgstr "行の挿入..."
+
+msgid "Insert slot..."
+msgstr "スロット挿入..."
+
+msgid "Insert timestamp on generated source files"
+msgstr "生成ソースファイルにタイムスタンプを挿入する"
+
+msgid "Instructions"
+msgstr "説明"
+
+msgid "Interface"
+msgstr "インターフェース"
+
+msgid "Invalid data in the clipboard"
+msgstr "クリップボードのデータは有効ではありません"
+
+msgid ""
+"Inverses the mininum and maximum endpoints on the slider. Not compatible "
+"with wxSL_SELRANGE."
+msgstr ""
+"スライダーの最小値と最大値を反転する。wxSL_SELRANGEと\"\n"
+"\"互換性がありません。"
+
+msgid "Label"
+msgstr "ラベル  "
+
+msgid "Label  "
+msgstr "ラベル  "
+
+msgid "Label: "
+msgstr "ラベル: "
+
+msgid ""
+"Labels are editable: the application will be notified when editing starts."
+msgstr "ラベルは編集可能: アプリケーションは編集開始時に通知を受けます。"
+
+msgid "Large icon view, with optional labels."
+msgstr "オプションラベルを持つ大きいアイコンビュー"
+
+msgid "Layout"
+msgstr "レイアウト"
+
+msgid "Left"
+msgstr "左"
+
+msgid "Left-justifies the label. Windows and GTK+ only."
+msgstr "ラベルを左に揃える。WindowsとGTK+のみ。"
+
+msgid "List Control:"
+msgstr "リストコンロトール"
+
+msgid "Loaded %s (%.2f seconds)"
+msgstr " %sを読み込みました (%.2f 秒)"
+
+msgid "Loaded template"
+msgstr "テンプレートを読み込みました"
+
+msgid "Loading time: %.5f"
+msgstr "読み込み時間: %.5f"
+
+msgid "Loading..."
+msgstr "読み込み中..."
+
+msgid "Local widget path"
+msgstr "ローカルWidgetパス"
+
+msgid "Long Help"
+msgstr "長いヘルプ"
+
+msgid "Long Help  "
+msgstr "長いヘルプ"
+
+msgid "Marks the beginning of a new group of radio buttons."
+msgstr "新規ラジオボタングループの開始を指定してください"
+
+msgid "Menu editor"
+msgstr "メニューエディタ"
+
+msgid "Menu item:"
+msgstr "メニューアイテム:"
+
+msgid ""
+"Multicolumn list view, with optional small icons. Columns are computed "
+"automatically, i.e. you don't set columns as in wxLC_REPORT. In other words, "
+"the list wraps, unlike a wxListBox."
+msgstr ""
+"オプションの小さいアイコンを持つ複数列リストビュー。列は自動的に計算されます"
+"(wxLC_REPORTをセットしなくて良い)。言い換えると、wxListBoxと違い一巡します。"
+
+msgid "Multiple-selection list: the user can toggle multiple items on and off."
+msgstr "複数選択リスト: ユーザは複数のアイテムをオンオフ出来ます。"
+
+msgid "NO DESCRIPTION"
+msgstr "詳細なし"
+
+msgid "Name"
+msgstr "名前"
+
+msgid "Name  "
+msgstr "名前  "
+
+msgid ""
+"Name \"%s\" is already in use.\n"
+"Please enter a different one."
+msgstr ""
+"名前\"%s\"は既に使われています。\n"
+"別の名前を入力してください。"
+
+msgid "New from &Template...\tShift+Ctrl+N"
+msgstr "テンプレートから新規作成(&T)...\tShift+Ctrl+N"
+
+msgid "No %s code generator for %s (of type %s) available"
+msgstr "%sコードジェネレータは利用できません:%s (タイプ%s)"
+
+msgid "No files selected!"
+msgstr "ファイルが選択されませんでした！"
+
+msgid "No header in report mode."
+msgstr "レポートモード内にヘッダ無し"
+
+msgid "No wxApp created yet"
+msgstr "wxAppはまだ生成されていません"
+
+msgid "None node in _find_toplevel"
+msgstr "_find_toplevel内にノードがありません"
+
+msgid "Normal Bitmap"
+msgstr "通常のビットマップ"
+
+msgid ""
+"Number of buttons per row\n"
+"in the main palette"
+msgstr ""
+"メインパレットにおける\"\n"
+"\"一行当たりのボタンの数"
+
+msgid "Number of items in file history"
+msgstr "ファイル履歴の項目数"
+
+msgid "OK"
+msgstr "OK"
+
+msgid ""
+"On Windows, this style used to disable repainting the window completely when "
+"its size is changed. Since this behaviour is now the default, the style is "
+"now obsolete and no longer has an effect."
+msgstr ""
+"過去Windowsでは、サイズが変わったときに、このスタイルを使ってウィンドウの完全"
+"な再絵画を禁止していました。今ではこの動作がディフォルトです。このスタイルは"
+"現在削除されており、何の効果もありません。"
+
+msgid "Only create a vertical scrollbar if needed."
+msgstr "必要な時のみ垂直スクロールバーを表示する。"
+
+msgid "Oops!"
+msgstr "おっと！"
+
+msgid "Open file"
+msgstr "ファイルのインポート"
+
+msgid "Options"
+msgstr "オプション "
+
+msgid "Orientation"
+msgstr "方向"
+
+msgid "Other"
+msgstr "その他"
+
+msgid "Output path"
+msgstr "出力パス"
+
+msgid "Output path can't be a directory when generating a single file"
+msgstr "単一ファイル生成時の出力パスはディレクトリにできません"
+
+msgid ""
+"Output path must be an existing directory when generating multiple files"
+msgstr "複数ファイル生成時の出力パスは存在するディレクトでなければなりません"
+
+msgid "Overwrite existing sources"
+msgstr "既存のソースを上書きする"
+
+msgid "Paste\tCtrl+V"
+msgstr "貼り付け\tCtrl+V"
+
+msgid "Please only drop one file at a time"
+msgstr "同時に1ファイルのみドロップ可能です"
+
+msgid "Please select a top window for the application"
+msgstr "アプリケーション用のトップウィンドウを選択してください"
+
+msgid "Please wait while loading the app"
+msgstr "アプリを読み込む間お待ちください"
+
+msgid "Position"
+msgstr "位置"
+
+msgid "Preferences saved"
+msgstr "設定が保存されました"
+
+msgid "Preferences..."
+msgstr "設定..."
+
+msgid "Preview"
+msgstr "プレビュー"
+
+msgid "Problem previewing gui: %s"
+msgstr "GUIのプレビューに問題が発生しました: %s"
+
+msgid "Properties - <%s>"
+msgstr "プロパティ - <%s>"
+
+msgid "Properties - <>"
+msgstr "プロパティ - <>"
+
+msgid "Properties - <app>"
+msgstr "プロパティ - <app>"
+
+msgid "Property"
+msgstr "プロパティ"
+
+msgid "Proportion"
+msgstr "プロポーション"
+
+msgid "Puts a caption on the dialog box."
+msgstr "ダイアログボックスにキャプションを入れる"
+
+msgid "Python files|*.py;*.pyc|All files|*"
+msgstr "Pythonファイル|*.py;*.pyc|全てのファイル|*"
+
+msgid "Question"
+msgstr "質問"
+
+msgid "Recovery from auto save complete"
+msgstr "自動保存から完全に回復"
+
+msgid "Remember position and size of wxGlade windows"
+msgstr "wxGladeウィンドウズの位置とサイズを記憶"
+
+msgid "Remove"
+msgstr "削除"
+
+msgid "Remove\tDel"
+msgstr "削除\tDel"
+
+msgid "Right"
+msgstr "右"
+
+msgid "Right-justifies the bitmap label. WIN32 only."
+msgstr "ビットマップラベルを右に揃える。WIN32のみ。"
+
+msgid "Right-justifies the bitmap label. Windows and GTK+ only."
+msgstr "ぶっとマップラベルを右に揃える。WindowsとGTK+のみ。"
+
+msgid "Save As Template..."
+msgstr "テンプレートとして保存..."
+
+msgid "Save As...\tShift+Ctrl+S"
+msgstr "名前を付けて保存...\tShift+Ctrl+S"
+
+msgid "Save changes to the current app?"
+msgstr "現在のアプリへの変更を保存しますか?"
+
+msgid "Save project as..."
+msgstr "名前をつけてプロジェクトを保存..."
+
+msgid "Saved %s"
+msgstr "%sを保存しました"
+
+msgid "Second Bitmap"
+msgstr "二番目のビットマップ"
+
+msgid "Select a position"
+msgstr "位置を選択してください"
+
+msgid "Select font attributes"
+msgstr "フォント属性を選択してください"
+
+msgid "Select frame class"
+msgstr "メニューバークラスを選択してください"
+
+msgid "Select growable columns"
+msgstr "伸張可能列を選択してください"
+
+msgid "Select growable rows"
+msgstr "伸張可能行を選択してください"
+
+msgid "Select menubar class"
+msgstr "メニューバークラスを選択してください"
+
+msgid "Select output directory"
+msgstr "出力ディレクトリを選択してください:"
+
+msgid "Select output file"
+msgstr "出力ファイルを選択してください"
+
+msgid "Select sizer attributes"
+msgstr "サイザー属性を選択してください"
+
+msgid "Select sizer type"
+msgstr "サイザータイプを選択してください"
+
+msgid "Select style"
+msgstr "スタイルを選択してください"
+
+msgid "Select tab placement"
+msgstr "タブの位置を選択してください"
+
+msgid "Select the image for the button"
+msgstr "ボタンのイメージを選択してください"
+
+msgid "Select toolbar class"
+msgstr "ツールバークラスを選択してください"
+
+msgid "Select widget class"
+msgstr "メニューバークラスを選択してください"
+
+msgid "Select widget colour"
+msgstr "Widgetカラーを選択してください"
+
+msgid "Separate file for each class"
+msgstr "クラス別にファイルを分ける"
+
+msgid "Short Help"
+msgstr "短いヘルプ"
+
+msgid "Short Help  "
+msgstr "短いヘルプ"
+
+msgid "Show"
+msgstr "表示"
+
+msgid "Show \"handles\" of sizers"
+msgstr "サイザーの\"ハンドル\"を表示"
+
+msgid "Show &Properties\tF3"
+msgstr "プロパティを表示(&P)\tF3"
+
+msgid "Show &Tree\tF2"
+msgstr "ツリーを表示(&T)\tF2"
+
+msgid "Show Monday as the first day in the week"
+msgstr "月曜を週の最初に表示"
+
+msgid "Show Sunday as the first day in the week"
+msgstr "日曜を週の最初に表示"
+
+msgid "Show progress dialog when loading wxg files"
+msgstr "wxgファイルの読み込み時に進行ダイアログを表示"
+
+msgid "Show properties and tree windows as small frames"
+msgstr "プロパティとツリーウィンドウをスモールフレームとして表示"
+
+msgid "Show the neighbouring weeks in the previous and next months"
+msgstr "前と次の月の近隣週を表示"
+
+msgid "Single file"
+msgstr "単一ファイル"
+
+msgid "Single or multicolumn report view, with optional header."
+msgstr "オプションヘッダを持つ単一・複数列のレポート"
+
+msgid "Single selection (default is multiple)."
+msgstr "単一選択(ディフォルト設定)"
+
+msgid "Single-selection list."
+msgstr "単一選択リスト"
+
+msgid "Size in points:"
+msgstr "サイズ(ポイント)"
+
+msgid "Slots: "
+msgstr "スロット: "
+
+msgid "Small icon view, with optional labels."
+msgstr "オプションのラベルを持つ小さいアイコンビュー"
+
+msgid ""
+"Sort in ascending order (must still supply a comparison callback in "
+"SortItems."
+msgstr "昇順でソート(SortItems内で比較コールバックを提供する必要があります)。"
+
+msgid ""
+"Sort in descending order (must still supply a comparison callback in "
+"SortItems."
+msgstr "降順でソート(SortItems内で比較コールバックを提供する必要があります)。"
+
+msgid "Sorts the entries in the list alphabetically."
+msgstr "リスト内エントリをアルファベット順にソート"
+
+msgid "Spacer"
+msgstr "スペーサー"
+
+msgid "Span"
+msgstr "範囲"
+
+msgid "Specific font..."
+msgstr "フォント指定..."
+
+msgid "Store as attribute"
+msgstr "属性として保存"
+
+msgid "Style"
+msgstr "スタイル"
+
+msgid "Style:"
+msgstr "スタイル:"
+
+msgid "System colour"
+msgstr "システムカラー"
+
+msgid "Templates Manager..."
+msgstr "テンプレートマネージャ..."
+
+msgid ""
+"The application provides items text on demand. May only be used with "
+"wxLC_REPORT."
+msgstr ""
+"アプリケーションはオンデマンドで項目テキストを提供する。\"\n"
+"\"wxLC_REPORTと一緒の時のみ使われるでしょう。"
+
+msgid "The dialog stays on top of all other windows."
+msgstr "ダイアログを他の全てのウィンドウより前に表示"
+
+msgid ""
+"The following properties are meaningful\n"
+"only if 'Create grid' is selected"
+msgstr "以下のプロパティは'グリッドを作成する'が選択されている場合のみ有効です"
+
+msgid "The listbox contents are sorted in alphabetical order."
+msgstr "リストボックスの内容はアルファベット順にソート。"
+
+msgid ""
+"There seems to be auto saved data for this file: do you want to restore it?"
+msgstr ""
+"このファイルには自動保存されたデータがあるようです:\"\n"
+"\"回復しますか?"
+
+msgid ""
+"There seems to be auto saved data from last wxGlade session: do you want to "
+"restore it?"
+msgstr ""
+"最後のwxGladeセッションでの自動保存データがあるようです。\n"
+"回復しますか?:"
+
+msgid ""
+"To save the changes to the template, edit the GUI as usual,\n"
+"and then click File->Save as Template..."
+msgstr ""
+"テンプレートへの変更を保存する場合、GUIを通常通り編集し、\n"
+"ファイル->テンプレートとして保存...をクリックしてください"
+
+msgid "Tool:"
+msgstr "ツール:"
+
+msgid "Toolbar editor"
+msgstr "ツールバーエディタ"
+
+msgid "Top"
+msgstr "上"
+
+msgid "Top window"
+msgstr "トップウィンドウ"
+
+msgid "Type"
+msgstr "タイプ"
+
+msgid "Under Windows 95, creates a horizontal progress bar."
+msgstr "Windows 95では、水平プログレスバーを作成する。"
+
+msgid "Underlined"
+msgstr "下線"
+
+msgid "Up"
+msgstr "上へ"
+
+msgid ""
+"Use a checkbox button instead of radio button (currently supported only on "
+"PalmOS)."
+msgstr ""
+"ラジオボタンの代わりにチェックボックスボタンを使用してください(現在ではPalmOS"
+"でのみサポートされています)"
+
+msgid ""
+"Use alternative, more compact, style for the month and year selection "
+"controls."
+msgstr "月と年の選択に別のよりコンパクトなスタイルを使用"
+
+msgid "Use dialog units by default for size properties"
+msgstr "サイズプロパティではディフォルトでダイアログユニットを使用"
+
+msgid "Use icons in menu items"
+msgstr "メニューアイテムにアイコンを使う"
+
+msgid "Use native file dialogs on KDE"
+msgstr "KDEでネイティブのファイルダイアログを使用"
+
+msgid ""
+"Use old \"from wxPython.wx\"\n"
+"import (python output only)"
+msgstr ""
+"古い形式の\"wxPython.wx\"を使用する\n"
+"インポート(出力はpythonのみ)"
+
+msgid "Valid LANGUAGE values:"
+msgstr "有効なLANGUAGE値:"
+
+msgid "Value"
+msgstr "値"
+
+msgid "Vertical"
+msgstr "垂直"
+
+msgid "WARNING"
+msgstr "警告"
+
+msgid "Warning: property '%s' not supported by this object ('%s') "
+msgstr ""
+"警告: '%s'プロパティはこのオブジェクト('%s')ではサポートされていません "
+
+msgid "Weight:"
+msgstr "幅:"
+
+msgid ""
+"You must specify an output file\n"
+"before generating any code"
+msgstr ""
+"コード出力をする前に\n"
+"出力ファイルを指定してください"
+
+msgid "You selected file: %s"
+msgstr "次のファイルを選択しました: %s"
+
+msgid "append .bak to filename"
+msgstr "ファイル名に.bakを追加"
+
+msgid "append ~ to filename"
+msgstr "ファイル名に~を追加"
+
+msgid "arguments"
+msgstr "引数"
+
+msgid "background"
+msgstr "バックグラウンド"
+
+msgid "base class"
+msgstr "基底クラス"
+
+msgid "bitmap"
+msgstr "ビットマップ"
+
+msgid "bitmapsize"
+msgstr "ビットマップサイズ"
+
+msgid "border"
+msgstr "ボーダー"
+
+msgid "centered"
+msgstr "中央"
+
+msgid "character data can be present only inside properties"
+msgstr "キャラクタデータはproperty内にのみ存在可能です"
+
+msgid "character data can only appear inside properties"
+msgstr "キャラクタデータはproperty内にのみ存在可能です"
+
+msgid "choices"
+msgstr "選択"
+
+msgid "class"
+msgstr "クラス"
+
+msgid "code generation"
+msgstr "コード生成"
+
+msgid "col_label_size"
+msgstr "列ラベルサイズ"
+
+msgid "cols"
+msgstr "列"
+
+msgid "columns"
+msgstr "列"
+
+msgid "create_grid"
+msgstr "グリッドを作成する"
+
+msgid "default"
+msgstr "ディフォルト"
+
+msgid "dimension"
+msgstr "次元"
+
+msgid "disabled"
+msgstr "禁止"
+
+msgid "disabled bitmap"
+msgstr "禁止時ビットマップ"
+
+msgid "enable_col_resize"
+msgstr "列のリサイズを有効化"
+
+msgid "enable_editing"
+msgstr "編集を有効化"
+
+msgid "enable_grid_lines"
+msgstr "グリッドラインを有効化"
+
+msgid "enable_grid_resize"
+msgstr "グリッドのリサイズを有効化"
+
+msgid "enable_row_resize"
+msgstr "行のリサイズを有効化"
+
+msgid "encoding"
+msgstr "エンコーディング"
+
+msgid "error in the value of the property \"%s\""
+msgstr "プロパティ値エラー  \"%s\""
+
+msgid "events"
+msgstr "イベント"
+
+msgid "focused"
+msgstr "フォーカス"
+
+msgid "font"
+msgstr "フォント"
+
+msgid "foreground"
+msgstr "フォアグラウンド"
+
+msgid "height"
+msgstr "高さ"
+
+msgid "hgap"
+msgstr "水平ギャップ"
+
+msgid "hidden"
+msgstr "隠す"
+
+msgid "icon"
+msgstr "アイコン"
+
+msgid "label"
+msgstr "ラベル"
+
+msgid "label_bg_color"
+msgstr "ラベルバックグラウンドカラー"
+
+msgid "language"
+msgstr "言語"
+
+msgid "lines_color"
+msgstr "線の色"
+
+msgid "loaded code generator for %s"
+msgstr "%s 用のコードジェネレータを読み込みました"
+
+msgid "loading widget modules:"
+msgstr "Widgetモジュールを読み込み中:"
+
+msgid "malformed wxg file: slots can only be inside sizers!"
+msgstr "不正なwxgファイルです:slotはsizer内にのみ存在可能です"
+
+msgid "margins"
+msgstr "マージン"
+
+msgid "menu item outside a menu"
+msgstr "メニュー外のメニュー項目"
+
+msgid "name"
+msgstr "名前"
+
+msgid "orientation"
+msgstr "方向"
+
+msgid "packing"
+msgstr "パッキング"
+
+msgid "position"
+msgstr "位置"
+
+msgid "property '%s' not supported by '%s' objects"
+msgstr "'%s'プロパティは、'%s'クラスでサポートされていません"
+
+msgid "range"
+msgstr "範囲"
+
+msgid "row_label_size"
+msgstr "行ラベルサイズ"
+
+msgid "rows"
+msgstr "行"
+
+msgid "rows_number"
+msgstr "行の数"
+
+msgid "sash_pos"
+msgstr "窓枠位置"
+
+msgid "scroll_rate"
+msgstr "スクロールレート"
+
+msgid "scrollable"
+msgstr "スクロール可能"
+
+msgid "selection"
+msgstr "選択"
+
+msgid "selection_mode"
+msgstr "選択モード"
+
+msgid "separation"
+msgstr "セパレーション"
+
+msgid "size"
+msgstr "サイズ"
+
+msgid "sizer or sizeritem object cannot be None"
+msgstr "SizerまたはSizerItemオブジェクトが無いことは許されません"
+
+msgid "stockitem"
+msgstr "ストックアイテム"
+
+msgid "style"
+msgstr "スタイル"
+
+msgid "tab_placement"
+msgstr "タブ配置"
+
+msgid "tabs"
+msgstr "タブ"
+
+msgid "the root of the tree must be <application>"
+msgstr "ツリーのルートは<application>でなければなりません"
+
+msgid "title"
+msgstr "タイトル"
+
+msgid "tooltip"
+msgstr "ツールチップ"
+
+msgid "value"
+msgstr "値"
+
+msgid "vgap"
+msgstr "垂直ギャップ"
+
+msgid "width"
+msgstr "幅"
+
+msgid "wxGlade - Credits"
+msgstr "wxGlade - クレジット"
+
+msgid "wxGlade - License"
+msgstr "wxGlade - ライセンス"
+
+msgid "wxGlade message"
+msgstr "wxGladeメッセージ"
+
+msgid "wxGlade template information"
+msgstr "wxGladeテンプレート情報"
+
+msgid "wxGlade template list"
+msgstr "wxGladeテンプレートリスト"
+
+msgid "wxGlade template:\n"
+msgstr "wxGladeテンプレート:\n"
+
+msgid "wxGlade template: "
+msgstr "wxGladeテンプレート: "
+
+msgid ""
+"wxGlade usage:\n"
+"- to start the GUI: python wxglade.py [WXG_FILE]\n"
+"- to generate code from the command line: python wxglade.py OPTIONS... FILE\n"
+"  OPTIONS are the following:\n"
+"  -g, --generate-code=LANGUAGE  (required) give the output language\n"
+"  -o, --output=PATH             (optional) name of the output file (in\n"
+"                                single-file mode) or directory (in\n"
+"                                multi-file mode)\n"
+"    "
+msgstr ""
+"wxGlade 使用法:\n"
+"- GUIを開始する: python wxglade.py [WXG_FILE]\n"
+"- コマンドラインからコードを生成する: python wxglade.py オプション... FILE\n"
+"  オプションには以下の物があります:\n"
+"  -g, --generate-code=LANGUAGE  (必須) 出力言語を指定する\n"
+"  -o, --output=PATH             (オプション)\n"
+"                                 出力ファイル名(単一ファイルモード)\n"
+"                                ディレクトリ(複数ファイルモード)\n"
+"    "
+
+msgid "wxGlade: Tree"
+msgstr "wxGlade: ツリー"
+
+msgid "wxGlade: Tree %s"
+msgstr "wxGlade: ツリー %s"
+
+msgid "wxGlade: preferences"
+msgstr "wxGlade: 設定"
+
+msgid "wxWidgets compatibility"
+msgstr "wxWidgets互換性"

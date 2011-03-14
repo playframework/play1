@@ -10,6 +10,7 @@ not open blocks are not shown in the context hints pane.
 
 """
 import Tkinter
+from Tkconstants import TOP, LEFT, X, W, SUNKEN
 from configHandler import idleConf
 import re
 from sys import maxint as INFINITY
@@ -24,7 +25,6 @@ getspacesfirstword =\
 
 class CodeContext:
     menudefs = [('options', [('!Code Conte_xt', '<<toggle-code-context>>')])]
-
     context_depth = idleConf.GetOption("extensions", "CodeContext",
                                        "numlines", type="int", default=3)
     bgcolor = idleConf.GetOption("extensions", "CodeContext",
@@ -54,25 +54,35 @@ class CodeContext:
 
     def toggle_code_context_event(self, event=None):
         if not self.label:
-            self.pad_frame = Tkinter.Frame(self.editwin.top,
-                                           bg=self.bgcolor, border=2,
-                                           relief="sunken")
-            self.label = Tkinter.Label(self.pad_frame,
-                                      text="\n" * (self.context_depth - 1),
-                                      anchor="w", justify="left",
-                                      font=self.textfont,
-                                      bg=self.bgcolor, fg=self.fgcolor,
-                                      border=0,
-                                      width=1, # Don't request more than we get
-                                      )
-            self.label.pack(side="top", fill="x", expand=True,
-                            padx=4, pady=0)
-            self.pad_frame.pack(side="top", fill="x", expand=False,
-                                padx=0, pady=0,
-                                after=self.editwin.status_bar)
+            # Calculate the border width and horizontal padding required to
+            # align the context with the text in the main Text widget.
+            #
+            # All values are passed through int(str(<value>)), since some
+            # values may be pixel objects, which can't simply be added to ints.
+            widgets = self.editwin.text, self.editwin.text_frame
+            # Calculate the required vertical padding
+            padx = 0
+            for widget in widgets:
+                padx += int(str( widget.pack_info()['padx'] ))
+                padx += int(str( widget.cget('padx') ))
+            # Calculate the required border width
+            border = 0
+            for widget in widgets:
+                border += int(str( widget.cget('border') ))
+            self.label = Tkinter.Label(self.editwin.top,
+                                       text="\n" * (self.context_depth - 1),
+                                       anchor=W, justify=LEFT,
+                                       font=self.textfont,
+                                       bg=self.bgcolor, fg=self.fgcolor,
+                                       width=1, #don't request more than we get
+                                       padx=padx, border=border,
+                                       relief=SUNKEN)
+            # Pack the label widget before and above the text_frame widget,
+            # thus ensuring that it will appear directly above text_frame
+            self.label.pack(side=TOP, fill=X, expand=False,
+                            before=self.editwin.text_frame)
         else:
             self.label.destroy()
-            self.pad_frame.destroy()
             self.label = None
         idleConf.SetOption("extensions", "CodeContext", "visible",
                            str(self.label is not None))
@@ -147,7 +157,6 @@ class CodeContext:
                                                  stopindent)
         self.info.extend(lines)
         self.topvisible = new_topvisible
-
         # empty lines in context pane:
         context_strings = [""] * max(0, self.context_depth - len(self.info))
         # followed by the context hint lines:

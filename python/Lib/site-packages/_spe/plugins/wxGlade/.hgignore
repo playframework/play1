@@ -1,0 +1,9 @@
+# Files to be ignored by mercurial
+
+syntax: glob
+
+**.pyc
+**.pyo
+**~
+\#*\#
+**/\#*\#

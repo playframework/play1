@@ -6,12 +6,11 @@ and building lists of files.
 
 # This module should be kept compatible with Python 2.1.
 
-__revision__ = "$Id: filelist.py 37828 2004-11-10 22:23:15Z loewis $"
+__revision__ = "$Id: filelist.py 61000 2008-02-23 17:40:11Z christian.heimes $"
 
 import os, string, re
 import fnmatch
 from types import *
-from glob import glob
 from distutils.util import convert_path
 from distutils.errors import DistutilsTemplateError, DistutilsInternalError
 from distutils import log

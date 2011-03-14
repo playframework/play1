@@ -1,0 +1,1098 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-02-09 23:22+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: about.py:49
+msgid "About wxGlade"
+msgstr ""
+
+#: about.py:59
+msgid "wxGlade - License"
+msgstr ""
+
+#: about.py:64
+msgid ""
+"Can't find the license!\n"
+"You can get a copy at \n"
+"http://www.opensource.org/licenses/mit-license.php"
+msgstr ""
+
+#: about.py:67 edit_windows.py:149 main.py:620 main.py:637 main.py:692
+#: main.py:705 main.py:753 main.py:815 zmain.py:482 zmain.py:499 zmain.py:538
+#: zmain.py:551 zmain.py:587 edit_sizers/edit_sizers.py:651
+msgid "Error"
+msgstr ""
+
+#: about.py:80
+msgid "Can't find the credits file!\n"
+msgstr ""
+
+#: about.py:80
+msgid "Oops!"
+msgstr ""
+
+#: clipboard.py:40 clipboard.py:38
+msgid "Invalid data in the clipboard"
+msgstr ""
+
+#: clipboard.py:65 clipboard.py:63
+msgid "Data can't be copied to clipboard."
+msgstr ""
+
+#: clipboard.py:71 clipboard.py:105 clipboard.py:69 clipboard.py:103
+msgid "Clipboard can't be opened."
+msgstr ""
+
+#: clipboard.py:98 clipboard.py:96
+msgid "Data can't be copied from clipboard."
+msgstr ""
+
+#: clipboard.py:129 clipboard.py:127
+msgid "Please only drop one file at a time"
+msgstr ""
+
+#: color_dialog.py:18 color_dialog.py:19
+msgid "System colour"
+msgstr ""
+
+#: color_dialog.py:22 color_dialog.py:23
+msgid "Custom colour"
+msgstr ""
+
+#: color_dialog.py:25 configUI.py:38 color_dialog.py:26
+#: edit_sizers/edit_sizers.py:395 edit_sizers/edit_sizers.py:1808
+#: edit_sizers/edit_sizers.py:2026 edit_sizers/edit_sizers.py:2122
+#: widgets/gauge/gauge.py:104 widgets/menubar/menubar.py:71
+#: widgets/menubar/menubar.py:777 widgets/notebook/notebook.py:339
+msgid "OK"
+msgstr ""
+
+#: color_dialog.py:26 configUI.py:39 color_dialog.py:27
+#: edit_sizers/edit_sizers.py:396 edit_sizers/edit_sizers.py:1809
+#: widgets/menubar/menubar.py:73 widgets/menubar/menubar.py:778
+msgid "Cancel"
+msgstr ""
+
+#: color_dialog.py:70 color_dialog.py:71
+msgid "Select widget colour"
+msgstr ""
+
+#: common.py:92
+#, python-format
+msgid "\"%s\" is not a valid code generator module"
+msgstr ""
+
+#: common.py:96
+#, python-format
+msgid "loaded code generator for %s"
+msgstr ""
+
+#: common.py:127
+#, python-format
+msgid "Found widgets listing -> %s"
+msgstr ""
+
+#: common.py:128
+msgid "loading widget modules:"
+msgstr ""
+
+#: common.py:137
+#, python-format
+msgid "ERROR loading \"%s\""
+msgstr ""
+
+#: common.py:203
+#, python-format
+msgid "Add a %s"
+msgstr ""
+
+#: config.py:60
+#, python-format
+msgid ""
+"Error reading config file:\n"
+"%s"
+msgstr ""
+
+#: config.py:103
+msgid "Choose a directory:"
+msgstr ""
+
+#: config.py:246
+msgid "Changes will take effect after wxGlade is restarted"
+msgstr ""
+
+#: config.py:247
+msgid "Preferences saved"
+msgstr ""
+
+#: configUI.py:15
+msgid "Local widget path"
+msgstr ""
+
+#: configUI.py:17
+msgid "Use icons in menu items"
+msgstr ""
+
+#: configUI.py:18
+msgid "Show properties and tree windows as small frames (Win32 only)"
+msgstr ""
+
+#: configUI.py:19
+msgid "Show progress dialog when loading wxg files"
+msgstr ""
+
+#: configUI.py:20
+msgid "Remember position and size of wxGlade windows"
+msgstr ""
+
+#: configUI.py:21
+msgid "Show \"handles\" of sizers"
+msgstr ""
+
+#: configUI.py:22
+msgid "Use native file dialogs on KDE"
+msgstr ""
+
+#: configUI.py:27
+msgid "Use dialog units by default for size properties"
+msgstr ""
+
+#: configUI.py:28
+msgid "Create backup wxg files"
+msgstr ""
+
+#: configUI.py:29
+msgid "Create backup files for generated source"
+msgstr ""
+
+#: configUI.py:30
+msgid "Allow duplicate widget names"
+msgstr ""
+
+#: configUI.py:31
+msgid "Default border width for widgets"
+msgstr ""
+
+#: configUI.py:33
+msgid "Auto save wxg files every "
+msgstr ""
+
+#: configUI.py:35
+msgid "Backup options"
+msgstr ""
+
+#: configUI.py:35
+msgid "append ~ to filename"
+msgstr ""
+
+#: configUI.py:35
+msgid "append .bak to filename"
+msgstr ""
+
+#: configUI.py:47
+msgid "wxGlade: preferences"
+msgstr ""
+
+#: configUI.py:83
+msgid ""
+"Initial path for \n"
+"file opening/saving dialogs:"
+msgstr ""
+
+#: configUI.py:86
+msgid ""
+"Initial path for \n"
+"code generation file dialogs:"
+msgstr ""
+
+#: configUI.py:90
+msgid "Number of items in file history"
+msgstr ""
+
+#: configUI.py:93
+msgid ""
+"Number of buttons per row\n"
+"in the main palette"
+msgstr ""
+
+#: configUI.py:122
+msgid "Interface"
+msgstr ""
+
+#: configUI.py:123
+msgid "Other"
+msgstr ""
+
+#: wxglade.py:76 wxglade.py:78
+#, python-format
+msgid "Error: no writer for language \"%s\" available"
+msgstr ""
+
+#: wxglade.py:80 wxglade.py:82
+#, python-format
+msgid "Error: %s"
+msgstr ""
+
+#: wxglade.py:90 wxglade.py:92
+msgid ""
+"wxGlade usage:\n"
+"- to start the GUI: python wxglade.py [WXG_FILE]\n"
+"- to generate code from the command line: python wxglade.py OPTIONS... FILE\n"
+"  OPTIONS are the following:\n"
+"  -g, --generate-code=LANGUAGE  (required) give the output language\n"
+"  -o, --output=PATH             (optional) name of the output file (in\n"
+"                                single-file mode) or directory (in\n"
+"                                multi-file mode)\n"
+"    "
+msgstr ""
+
+#: wxglade.py:101 wxglade.py:103
+msgid "Valid LANGUAGE values:"
+msgstr ""
+
+#: edit_widget.py:103
+msgid "'name' attribute missing"
+msgstr ""
+
+#: edit_windows.py:57
+msgid ""
+"If you change the default value, it will be interpreted as the name of the "
+"subclass of the widget. How this name affects code generation depends on the "
+"kind (i.e. language) of output. See the docs for more details."
+msgstr ""
+
+#: edit_windows.py:148 edit_sizers/edit_sizers.py:650
+#, python-format
+msgid ""
+"Name \"%s\" is already in use.\n"
+"Please enter a different one."
+msgstr ""
+
+#: edit_windows.py:161 edit_windows.py:261 edit_sizers/edit_sizers.py:664
+#: edit_sizers/edit_sizers.py:706
+#, python-format
+msgid "Properties - <%s>"
+msgstr ""
+
+#: edit_windows.py:179 edit_windows.py:1024 edit_sizers/edit_sizers.py:87
+#: edit_sizers/edit_sizers.py:215 widgets/menubar/menubar.py:666
+msgid "Remove\tDel"
+msgstr ""
+
+#: edit_windows.py:181 edit_sizers/edit_sizers.py:498
+msgid "Copy\tCtrl+C"
+msgstr ""
+
+#: edit_windows.py:183 edit_sizers/edit_sizers.py:499
+msgid "Cut\tCtrl+X"
+msgstr ""
+
+#: edit_windows.py:480 edit_sizers/edit_sizers.py:634
+#: widgets/menubar/menubar.py:587
+msgid "Common"
+msgstr ""
+
+#: edit_windows.py:946
+msgid "Preview"
+msgstr ""
+
+#: edit_windows.py:960
+msgid "Close Preview"
+msgstr ""
+
+#: edit_windows.py:1026 widgets/menubar/menubar.py:668
+msgid "Hide"
+msgstr ""
+
+#: edit_windows.py:1033 edit_sizers/edit_sizers.py:89
+msgid "Paste\tCtrl+V"
+msgstr ""
+
+#: edit_windows.py:1041
+msgid ""
+"\n"
+"wxGlade-WARNING: sizer already set for this window"
+msgstr ""
+
+#: edit_windows.py:1050
+msgid ""
+"\n"
+"wxGlade-WARNING: only sizers can be pasted here"
+msgstr ""
+
+#: events_mixin.py:22
+msgid "Event"
+msgstr ""
+
+#: events_mixin.py:23
+msgid "Handler"
+msgstr ""
+
+#: font_dialog.py:30
+msgid "Family:"
+msgstr ""
+
+#: font_dialog.py:31
+msgid "Style:"
+msgstr ""
+
+#: font_dialog.py:32
+msgid "Weight:"
+msgstr ""
+
+#: font_dialog.py:97
+msgid "Select font attributes"
+msgstr ""
+
+#: kdefiledialog.py:69
+#, python-format
+msgid "File '%s' already exists: do you really want to overwrite it?"
+msgstr ""
+
+#: kdefiledialog.py:77 kdefiledialog.py:118
+msgid "Fork Error"
+msgstr ""
+
+#: layout_option_property.py:40 layout_option_property.py:42
+msgid "Option"
+msgstr ""
+
+#: layout_option_property.py:62 layout_option_property.py:64
+msgid "Position"
+msgstr ""
+
+#: layout_option_property.py:72 layout_option_property.py:74
+msgid "Span"
+msgstr ""
+
+#: main.py:165 zmain.py:148
+msgid "Show &Tree\tCtrl+T"
+msgstr ""
+
+#: main.py:168 zmain.py:151
+msgid "Show &Properties\tCtrl+P"
+msgstr ""
+
+#: main.py:172 zmain.py:155
+msgid "&New\tCtrl+N"
+msgstr ""
+
+#: main.py:174 zmain.py:157
+msgid "&Open...\tCtrl+O"
+msgstr ""
+
+#: main.py:176 zmain.py:159
+msgid "&Save\tCtrl+S"
+msgstr ""
+
+#: main.py:178 zmain.py:161
+msgid "Save As...\tShift+Ctrl+S"
+msgstr ""
+
+#: main.py:182
+msgid "&Refresh\tf5"
+msgstr ""
+
+#: main.py:184 zmain.py:165
+msgid "&Generate Code\tCtrl+G"
+msgstr ""
+
+#: main.py:189
+msgid "&Import from XRC...\tCtrl+I"
+msgstr ""
+
+#: main.py:193 zmain.py:169
+msgid "E&xit\tCtrl+Q"
+msgstr ""
+
+#: main.py:196 zmain.py:172
+msgid "Preferences..."
+msgstr ""
+
+#: main.py:197 zmain.py:173
+msgid "&File"
+msgstr ""
+
+#: main.py:198 zmain.py:174
+msgid "&View"
+msgstr ""
+
+#: main.py:200 zmain.py:176
+msgid "Contents\tF1"
+msgstr ""
+
+#: main.py:202 zmain.py:178
+msgid "About..."
+msgstr ""
+
+#: main.py:203 main.py:210 zmain.py:179
+msgid "&Help"
+msgstr ""
+
+#: main.py:228 main.py:573
+msgid ""
+"There seems to be auto saved data for this file: do you want to restore it?"
+msgstr ""
+
+#: main.py:230 main.py:478 main.py:575
+msgid "Auto save detected"
+msgstr ""
+
+#: main.py:274 zmain.py:219
+msgid "Core components"
+msgstr ""
+
+#: main.py:274 zmain.py:219
+msgid "Custom components"
+msgstr ""
+
+#: main.py:347 zmain.py:292
+msgid "Properties - <app>"
+msgstr ""
+
+#: main.py:380 zmain.py:324
+msgid "wxGlade: Tree"
+msgstr ""
+
+#: main.py:475
+msgid ""
+"There seems to be auto saved data from last wxGlade session: do you want to "
+"restore it?"
+msgstr ""
+
+#: main.py:484
+msgid "Recovery from auto save complete"
+msgstr ""
+
+#: main.py:491
+msgid "Auto saving... done"
+msgstr ""
+
+#: main.py:525 zmain.py:421
+msgid "Save changes to the current app?"
+msgstr ""
+
+#: main.py:525 zmain.py:421
+msgid "Confirm"
+msgstr ""
+
+#: main.py:549
+msgid "Impossible to reload an unsaved application"
+msgstr ""
+
+#: main.py:550
+msgid "Alert"
+msgstr ""
+
+#: main.py:565 zmain.py:445
+msgid "Open file"
+msgstr ""
+
+#: main.py:619 zmain.py:481
+#, python-format
+msgid "Error loading file %s: %s"
+msgstr ""
+
+#: main.py:632 zmain.py:494
+#, python-format
+msgid ""
+"An exception occurred while loading file \"%s\".\n"
+"This is the error message associated with it:\n"
+"        %s\n"
+"For more details, look at the full traceback on the console.\n"
+"If you think this is a wxGlade bug, please report it."
+msgstr ""
+
+#: main.py:653
+msgid "Loaded template"
+msgstr ""
+
+#: main.py:657
+#, python-format
+msgid "Loading time: %.5f"
+msgstr ""
+
+#: main.py:669
+#, python-format
+msgid "Loaded %s (%.2f seconds)"
+msgstr ""
+
+#: main.py:692 zmain.py:538
+#, python-format
+msgid ""
+"Error saving app:\n"
+"%s"
+msgstr ""
+
+#: main.py:698 zmain.py:544
+#, python-format
+msgid ""
+"An exception occurred while saving file \"%s\".\n"
+"This is the error message associated with it:\n"
+"        %s\n"
+"For more details, look at the full traceback on the console.\n"
+"If you think this is a wxGlade bug, please report it."
+msgstr ""
+
+#: main.py:714
+#, python-format
+msgid "Saved %s"
+msgstr ""
+
+#: main.py:720 zmain.py:560
+msgid "Save project as..."
+msgstr ""
+
+#: main.py:752 zmain.py:587
+#, python-format
+msgid ""
+"Error saving preferences:\n"
+"%s"
+msgstr ""
+
+#: main.py:797
+msgid "Import file"
+msgstr ""
+
+#: main.py:810
+#, python-format
+msgid ""
+"An exception occurred while importing file \"%s\".\n"
+"This is the error message associated with it:\n"
+"        %s\n"
+"For more details, look at the full traceback on the console.\n"
+"If you think this is a wxGlade bug, please report it."
+msgstr ""
+
+#: misc.py:404
+msgid "<Design> - "
+msgstr ""
+
+#: tree.py:32
+msgid "Properties - <>"
+msgstr ""
+
+#: tree.py:267
+msgid "Application"
+msgstr ""
+
+#: tree.py:280
+msgid "Show"
+msgstr ""
+
+#: tree.py:448
+#, python-format
+msgid "wxGlade: Tree %s"
+msgstr ""
+
+#: widget_properties.py:641
+msgid "All Files|*"
+msgstr ""
+
+#: widget_properties.py:642
+msgid "Choose a file"
+msgstr ""
+
+#: widget_properties.py:765
+#, python-format
+msgid "error in the value of the property \"%s\""
+msgstr ""
+
+#: widget_properties.py:918
+msgid "  Apply  "
+msgstr ""
+
+#: widget_properties.py:921
+msgid "  Add  "
+msgstr ""
+
+#: widget_properties.py:924
+msgid "  Insert  "
+msgstr ""
+
+#: widget_properties.py:927
+msgid "  Remove  "
+msgstr ""
+
+#: xml_parse.py:253
+msgid "Loading..."
+msgstr ""
+
+#: xml_parse.py:253
+msgid "Please wait while loading the app"
+msgstr ""
+
+#: zmain.py:445 zmain.py:561
+msgid "wxGlade files (*.wxg)|*.wxg|XML files (*.xml)|*.xml|All files|*"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:83
+msgid "Options"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:286 edit_sizers/edit_sizers.py:287
+msgid "Select sizer type"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:389
+msgid "Select a position"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:495 edit_sizers/edit_sizers.py:1492
+msgid "Add slot"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:496 edit_sizers/edit_sizers.py:1493
+msgid "Insert slot..."
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:626
+msgid "Fit parent"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:1494
+msgid "Add row"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:1495
+msgid "Add column"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:1496
+msgid "Insert row..."
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:1497
+msgid "Insert column..."
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:1885
+msgid "Growable Rows"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:1885
+msgid "Select growable rows"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:1891
+msgid "Growable Columns"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:1892
+msgid "Select growable columns"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:2002
+msgid "Orientation"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:2003 edit_sizers/edit_sizers.py:2049
+msgid "Horizontal"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:2003
+msgid "Vertical"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:2006
+msgid "Slots: "
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:2016
+msgid "Has a Static Box"
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:2022
+msgid "Label: "
+msgstr ""
+
+#: edit_sizers/edit_sizers.py:2098
+msgid "Select sizer attributes"
+msgstr ""
+
+#: widgets/bitmap_button/bitmap_button.py:120
+msgid "Select the image for the button"
+msgstr ""
+
+#: widgets/gauge/gauge.py:32
+msgid "Creates a horizontal gauge."
+msgstr ""
+
+#: widgets/gauge/gauge.py:33
+msgid "Creates a vertical gauge."
+msgstr ""
+
+#: widgets/gauge/gauge.py:34
+msgid "Under Windows 95, creates a horizontal progress bar."
+msgstr ""
+
+#: widgets/gauge/gauge.py:35
+msgid ""
+"Creates smooth progress bar with one pixel wide update step (not supported "
+"by all platforms)."
+msgstr ""
+
+#: widgets/gauge/gauge.py:91 widgets/slider/slider.py:131
+msgid "Select style"
+msgstr ""
+
+#: widgets/grid/grid.py:199
+msgid ""
+"The following properties are meaningful\n"
+"only if 'Create grid' is selected"
+msgstr ""
+
+#: widgets/grid/grid.py:220 widgets/notebook/notebook.py:224
+#: widgets/radio_button/radio_button.py:74 widgets/slider/slider.py:84
+#: widgets/static_text/static_text.py:65 widgets/text_ctrl/text_ctrl.py:76
+#: widgets/tree_ctrl/tree_ctrl.py:105
+msgid "Widget"
+msgstr ""
+
+#: widgets/list_box/list_box.py:46
+msgid "Single-selection list."
+msgstr ""
+
+#: widgets/list_box/list_box.py:47
+msgid "Multiple-selection list: the user can toggle multiple items on and off."
+msgstr ""
+
+#: widgets/list_box/list_box.py:48
+msgid ""
+"Extended-selection list: the user can select multiple items using the SHIFT "
+"key and the mouse or special key combinations."
+msgstr ""
+
+#: widgets/list_box/list_box.py:49
+msgid "Create horizontal scrollbar if contents are too wide (Windows only)."
+msgstr ""
+
+#: widgets/list_box/list_box.py:50
+msgid "Always show a vertical scrollbar."
+msgstr ""
+
+#: widgets/list_box/list_box.py:51
+msgid "Only create a vertical scrollbar if needed."
+msgstr ""
+
+#: widgets/list_box/list_box.py:52
+msgid "The listbox contents are sorted in alphabetical order."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:71
+msgid ""
+"Multicolumn list view, with optional small icons. Columns are computed "
+"automatically, i.e. you don't set columns as in wxLC_REPORT. In other words, "
+"the list wraps, unlike a wxListBox."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:72
+msgid "Single or multicolumn report view, with optional header."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:73
+msgid "Large icon view, with optional labels."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:74
+msgid ""
+"The application provides items text on demand. May only be used with "
+"wxLC_REPORT."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:75
+msgid "Small icon view, with optional labels."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:76
+msgid "Icons align to the top. Win32 default, Win32 only."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:77
+msgid "Icons align to the left."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:78
+msgid "Icons arrange themselves. Win32 only."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:79
+msgid ""
+"Labels are editable: the application will be notified when editing starts."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:80
+msgid "No header in report mode."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:81
+msgid "Single selection (default is multiple)."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:82
+msgid ""
+"Sort in ascending order (must still supply a comparison callback in "
+"SortItems."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:83
+msgid ""
+"Sort in descending order (must still supply a comparison callback in "
+"SortItems."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:84
+msgid "Draws light horizontal rules between rows in report mode."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:85
+msgid "Draws light vertical rules between columns in report mode"
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:86
+msgid ""
+"Displays a thin border around the window. wxBORDER is the old name for this "
+"style."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:87
+msgid "Displays a double border. Windows and Mac only."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:88
+msgid "Displays a sunken border."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:89
+msgid "Displays a raised border."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:90
+msgid "Displays a border suitable for a static control. Windows only."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:91
+msgid "Displays no border, overriding the default border style for the window."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:92
+msgid ""
+"Use this to indicate that the window wants to get all char/key events for "
+"all keys - even for keys like TAB or ENTER which are usually used for dialog "
+"navigation and which wouldn't be generated without this style. If you need "
+"to use this style in order to get the arrows or etc., but would still like "
+"to have normal keyboard navigation take place, you should create and send a "
+"wxNavigationKeyEvent in response to the key events for Tab and Shift-Tab."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:93
+msgid ""
+"On Windows, this style used to disable repainting the window completely when "
+"its size is changed. Since this behaviour is now the default, the style is "
+"now obsolete and no longer has an effect."
+msgstr ""
+
+#: widgets/list_ctrl/list_ctrl.py:94
+msgid ""
+"Use this style to force a complete redraw of the window whenever it is "
+"resized instead of redrawing just the part of the window affected by "
+"resizing. Note that this was the behaviour by default before 2.5.1 release "
+"and that if you experience redraw problems with code which previously used "
+"to work you may want to try this. Currently this style applies on GTK+ 2 and "
+"Windows only, and full repainting is always done on other platforms."
+msgstr ""
+
+#: widgets/menubar/menubar.py:18
+msgid "Menu editor"
+msgstr ""
+
+#: widgets/menubar/menubar.py:24
+msgid "Menu item:"
+msgstr ""
+
+#: widgets/menubar/menubar.py:32
+msgid "Label"
+msgstr ""
+
+#: widgets/menubar/menubar.py:33
+msgid "Id"
+msgstr ""
+
+#: widgets/menubar/menubar.py:34
+msgid "Name"
+msgstr ""
+
+#: widgets/menubar/menubar.py:35
+msgid "Help String"
+msgstr ""
+
+#: widgets/menubar/menubar.py:36 widgets/menubar/menubar.py:58
+msgid "Type"
+msgstr ""
+
+#: widgets/menubar/menubar.py:38
+msgid "Event Handler"
+msgstr ""
+
+#: widgets/menubar/menubar.py:61
+msgid "Add"
+msgstr ""
+
+#: widgets/menubar/menubar.py:62
+msgid "Remove"
+msgstr ""
+
+#: widgets/menubar/menubar.py:63
+msgid "Add separator"
+msgstr ""
+
+#: widgets/menubar/menubar.py:66
+msgid "Up"
+msgstr ""
+
+#: widgets/menubar/menubar.py:67
+msgid "Down"
+msgstr ""
+
+#: widgets/menubar/menubar.py:72
+msgid "Apply"
+msgstr ""
+
+#: widgets/menubar/menubar.py:120
+msgid "Id   "
+msgstr ""
+
+#: widgets/menubar/menubar.py:122
+msgid "Label  "
+msgstr ""
+
+#: widgets/menubar/menubar.py:124
+msgid "Name  "
+msgstr ""
+
+#: widgets/menubar/menubar.py:126
+msgid "Help String  "
+msgstr ""
+
+#: widgets/menubar/menubar.py:128
+msgid "Event Handler  "
+msgstr ""
+
+#: widgets/menubar/menubar.py:506
+msgid "Edit menus..."
+msgstr ""
+
+#: widgets/menubar/menubar.py:766
+msgid "Select menubar class"
+msgstr ""
+
+#: widgets/notebook/notebook.py:331
+msgid "Select tab placement"
+msgstr ""
+
+#: widgets/notebook/notebook.py:335
+msgid "Top"
+msgstr ""
+
+#: widgets/notebook/notebook.py:335
+msgid "Bottom"
+msgstr ""
+
+#: widgets/notebook/notebook.py:335
+msgid "Left"
+msgstr ""
+
+#: widgets/notebook/notebook.py:335
+msgid "Right"
+msgstr ""
+
+#: widgets/radio_button/radio_button.py:37
+msgid "Clicked"
+msgstr ""
+
+#: widgets/radio_button/radio_button.py:42
+msgid "Marks the beginning of a new group of radio buttons."
+msgstr ""
+
+#: widgets/radio_button/radio_button.py:43
+msgid ""
+"In some circumstances, radio buttons that are not consecutive siblings "
+"trigger a hang bug in Windows (only). If this happens, add this style to "
+"mark the button as not belonging to a group, and implement the mutually-"
+"exclusive group behaviour yourself."
+msgstr ""
+
+#: widgets/radio_button/radio_button.py:44
+msgid ""
+"Use a checkbox button instead of radio button (currently supported only on "
+"PalmOS)."
+msgstr ""
+
+#: widgets/slider/slider.py:52
+msgid "Displays the slider horizontally (this is the default)."
+msgstr ""
+
+#: widgets/slider/slider.py:53
+msgid "Displays the slider vertically."
+msgstr ""
+
+#: widgets/slider/slider.py:54
+msgid "Displays tick marks."
+msgstr ""
+
+#: widgets/slider/slider.py:55
+msgid "Displays minimum, maximum and value labels."
+msgstr ""
+
+#: widgets/slider/slider.py:56
+msgid "Displays ticks on the left and forces the slider to be vertical."
+msgstr ""
+
+#: widgets/slider/slider.py:57
+msgid "Displays ticks on the right and forces the slider to be vertical."
+msgstr ""
+
+#: widgets/slider/slider.py:58
+msgid "Displays ticks on the top."
+msgstr ""
+
+#: widgets/slider/slider.py:59
+msgid "Displays ticks on the bottom (this is the default)."
+msgstr ""
+
+#: widgets/slider/slider.py:60
+msgid "Allows the user to select a range on the slider. Windows only."
+msgstr ""
+
+#: widgets/slider/slider.py:61
+msgid ""
+"Inverses the mininum and maximum endpoints on the slider. Not compatible "
+"with wxSL_SELRANGE."
+msgstr ""
+
+#: widgets/static_text/static_text.py:42
+msgid "Store as attribute"
+msgstr ""
+
+#: widgets/tree_ctrl/tree_ctrl.py:79
+msgid " Tree Control:"
+msgstr ""
+
+#: widgets/tree_ctrl/tree_ctrl.py:82
+#, python-format
+msgid " on wxGlade %s"
+msgstr ""

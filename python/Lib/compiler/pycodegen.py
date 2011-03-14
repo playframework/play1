@@ -10,7 +10,7 @@ from compiler import pyassem, misc, future, symbols
 from compiler.consts import SC_LOCAL, SC_GLOBAL, SC_FREE, SC_CELL
 from compiler.consts import (CO_VARARGS, CO_VARKEYWORDS, CO_NEWLOCALS,
      CO_NESTED, CO_GENERATOR, CO_FUTURE_DIVISION,
-     CO_FUTURE_ABSIMPORT, CO_FUTURE_WITH_STATEMENT)
+     CO_FUTURE_ABSIMPORT, CO_FUTURE_WITH_STATEMENT, CO_FUTURE_PRINT_FUNCTION)
 from compiler.pyassem import TupleArg
 
 # XXX The version-specific code can go, since this code only works with 2.x.
@@ -218,6 +218,8 @@ class CodeGenerator:
                 self.graph.setFlag(CO_FUTURE_ABSIMPORT)
             elif feature == "with_statement":
                 self.graph.setFlag(CO_FUTURE_WITH_STATEMENT)
+            elif feature == "print_function":
+                self.graph.setFlag(CO_FUTURE_PRINT_FUNCTION)
 
     def initClass(self):
         """This method is called once for each class"""
@@ -573,12 +575,11 @@ class CodeGenerator:
     def visitListComp(self, node):
         self.set_lineno(node)
         # setup list
-        append = "$append%d" % self.__list_count
+        tmpname = "$list%d" % self.__list_count
         self.__list_count = self.__list_count + 1
         self.emit('BUILD_LIST', 0)
         self.emit('DUP_TOP')
-        self.emit('LOAD_ATTR', 'append')
-        self._implicitNameOp('STORE', append)
+        self._implicitNameOp('STORE', tmpname)
 
         stack = []
         for i, for_ in zip(range(len(node.quals)), node.quals):
@@ -590,10 +591,9 @@ class CodeGenerator:
                 self.visit(if_, cont)
             stack.insert(0, (start, cont, anchor))
 
-        self._implicitNameOp('LOAD', append)
+        self._implicitNameOp('LOAD', tmpname)
         self.visit(node.expr)
-        self.emit('CALL_FUNCTION', 1)
-        self.emit('POP_TOP')
+        self.emit('LIST_APPEND')
 
         for start, cont, anchor in stack:
             if cont:
@@ -604,7 +604,7 @@ class CodeGenerator:
                 self.nextBlock(skip_one)
             self.emit('JUMP_ABSOLUTE', start)
             self.startBlock(anchor)
-        self._implicitNameOp('DELETE', append)
+        self._implicitNameOp('DELETE', tmpname)
 
         self.__list_count = self.__list_count - 1
 
@@ -824,14 +824,13 @@ class CodeGenerator:
     def visitWith(self, node):
         body = self.newBlock()
         final = self.newBlock()
-        exitvar = "$exit%d" % self.__with_count
         valuevar = "$value%d" % self.__with_count
         self.__with_count += 1
         self.set_lineno(node)
         self.visit(node.expr)
         self.emit('DUP_TOP')
         self.emit('LOAD_ATTR', '__exit__')
-        self._implicitNameOp('STORE', exitvar)
+        self.emit('ROT_TWO')
         self.emit('LOAD_ATTR', '__enter__')
         self.emit('CALL_FUNCTION', 0)
         if node.vars is None:
@@ -851,8 +850,6 @@ class CodeGenerator:
         self.emit('LOAD_CONST', None)
         self.nextBlock(final)
         self.setups.push((END_FINALLY, final))
-        self._implicitNameOp('LOAD', exitvar)
-        self._implicitNameOp('DELETE', exitvar)
         self.emit('WITH_CLEANUP')
         self.emit('END_FINALLY')
         self.setups.pop()

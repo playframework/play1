@@ -4,9 +4,9 @@ Implements the Distutils 'sdist' command (create a source distribution)."""
 
 # This module should be kept compatible with Python 2.1.
 
-__revision__ = "$Id: sdist.py 38697 2005-03-23 18:54:36Z loewis $"
+__revision__ = "$Id: sdist.py 61263 2008-03-06 06:47:18Z georg.brandl $"
 
-import sys, os, string
+import os, string
 from types import *
 from glob import glob
 from distutils.core import Command
@@ -347,14 +347,14 @@ class sdist (Command):
           * the build tree (typically "build")
           * the release tree itself (only an issue if we ran "sdist"
             previously with --keep-temp, or it aborted)
-          * any RCS, CVS and .svn directories
+          * any RCS, CVS, .svn, .hg, .git, .bzr, _darcs directories
         """
         build = self.get_finalized_command('build')
         base_dir = self.distribution.get_fullname()
 
         self.filelist.exclude_pattern(None, prefix=build.build_base)
         self.filelist.exclude_pattern(None, prefix=base_dir)
-        self.filelist.exclude_pattern(r'/(RCS|CVS|\.svn)/.*', is_regex=1)
+        self.filelist.exclude_pattern(r'(^|/)(RCS|CVS|\.svn|\.hg|\.git|\.bzr|_darcs)/.*', is_regex=1)
 
 
     def write_manifest (self):
@@ -383,6 +383,7 @@ class sdist (Command):
             if line[-1] == '\n':
                 line = line[0:-1]
             self.filelist.append(line)
+        manifest.close()
 
     # read_manifest ()
 

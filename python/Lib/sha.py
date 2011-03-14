@@ -1,7 +1,11 @@
-# $Id: sha.py 39316 2005-08-21 18:45:59Z greg $
+# $Id: sha.py 58064 2007-09-09 20:25:00Z gregory.p.smith $
 #
-#  Copyright (C) 2005   Gregory P. Smith (greg@electricrain.com)
+#  Copyright (C) 2005   Gregory P. Smith (greg@krypto.org)
 #  Licensed to PSF under a Contributor Agreement.
+
+import warnings
+warnings.warn("the sha module is deprecated; use the hashlib module instead",
+                DeprecationWarning, 2)
 
 from hashlib import sha1 as sha
 new = sha

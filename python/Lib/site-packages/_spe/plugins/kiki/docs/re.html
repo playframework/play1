@@ -1,0 +1,783 @@
+<html>
+    <head>
+        <title>Regular expression docs
+        </title>
+    </head>
+    <body>
+        <table cellspacing="0" cellpadding="0">
+        
+            <tr><td bgcolor="#EAEAEA">
+                    <a name="syntax"></a>
+                    <b><font size="4">Syntax</font></b>
+            </td></tr>
+            <tr><td valign="top">
+                A regular expression (or RE) specifies a set of strings that matches it.
+                Kiki helps you find out if a certain regular expression matches a 
+                particular string.
+                <br />
+                <br />
+                Regular expressions can be concatenated to form new regular expressions: 
+                if <code>A</code> and <code>B</code> are both regular expressions, then 
+                <code>AB</code> is also a regular expression. 
+                <br />
+                If a string <code><i>p</i></code> matches <code>A</code> and another string 
+                <code><i>q</i></code> matches <code>B</code>, 
+                the string <code><i>pq</i></code> will match <code>AB</code> (presuming
+                the two RE's don't specify boundary conditions that are no longer satisfied 
+                by <code><i>pq</i></code>.
+                <br />
+                This means that complex expressions can easily be constructed from simpler 
+                primitive expressions. 
+                <br />
+                <br />
+                Regular expressions can contain both special and ordinary characters. 
+                Most ordinary characters, like 
+                <code><font color="purple"><i>A</i></font></code>, 
+                <code><font color="purple"><i>a</i></font></code>, or 
+                <code><font color="purple"><i>0</i></font></code>, 
+                are the simplest regular expressions: they simply match themselves. 
+                You can concatenate ordinary characters, so <code><font color="teal">last</font></code>
+                matches the string <code><font color="purple"><i>last</i></font></code>.
+                <br />Note the color coding used throughout these docs:
+                <code><font color="teal">this is a regex</font></code> while 
+                <code><font color="purple"><i>this is a string</i></font></code>.
+                <br /><br />
+                Some characters, like 
+                <code><font color="teal">|</font></code> or 
+                <code><font color="teal">(</font></code>, 
+                are special. Special characters, when used in regular expressions, 
+                either stand for classes of ordinary characters, 
+                or affect how the regular expressions around them are interpreted. 
+                <br /><br />
+            </td></tr>
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <tr><td bgcolor="#EAEAEA">
+                <a name="specialcharacters"></a>
+                <b><font size="4">Special characters</font></b>
+            </td></tr>
+            <tr><td valign="top">
+              <table>
+                <tr>
+                  <td valign="top" width="75px"><b><code><font color="teal">.</font></code></b></td>
+                  <td valign="top">(dot)  In the default mode, this matches any
+                      character except a newline.  If the <code>DOTALL</code> flag has been
+                      specified, this matches any character including a newline.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">^</font></code></b></td>
+                  <td valign="top">(caret)  Matches the start of the
+                      string, and in <code>MULTILINE</code> mode also matches immediately
+                      after each newline.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">$</font></code></b></td>
+                  <td valign="top">Matches the end of the string or just before the
+                    newline at the end of the string, and in <code>MULTILINE</code> mode
+                    also matches before a newline.<br />
+                    <code><font color="teal">foo</font></code> matches both 
+                    <code><font color="purple"><i>foo</i></font></code> and
+                    <code><font color="purple"><i>foobar</i></font></code>, 
+                    while the regular expression <code><font color="teal">foo$</font></code> 
+                    matches only <code><font color="purple"><i>foo</i></font></code>. 
+                    More interestingly, searching for <code><font color="teal">foo.$</font></code> in
+                    <code><font color="purple"><i>foo1&#92;nfoo2&#92;n</i></font></code> 
+                    matches <code><font color="purple"><i>foo2</i></font></code> normally,
+                    but <code><font color="purple"><i>foo1</i></font></code>
+                    in <code>MULTILINE</code> mode.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">*</font></code></b></td>
+                  <td valign="top">Causes the resulting RE to
+                    match 0 or more repetitions of the preceding RE, as many repetitions
+                    as are possible.<code><font color="teal">ab*</font></code> will
+                    match <code><font color="purple"><i>a</i></font></code>, 
+                    <code><font color="purple"><i>ab</i></font></code>, 
+                    or <code><font color="purple"><i>a</i></font></code> followed by any number of 
+                    <code><font color="purple"><i>b</i></font></code>'s.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">+</font></code></b></td>
+                  <td valign="top">Causes the resulting RE to match 1 or more repetitions of the preceding RE.
+                    <code><font color="teal">ab+</font></code> will match
+                    <code><font color="purple"><i>a</i></font></code> followed by any non-zero number 
+                    of <code><font color="purple"><i>b</i></font></code>'s. It
+                    will not match just <code><font color="purple"><i>a</i></font></code>.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">?</font></code></b></td>
+                  <td valign="top">Causes the resulting RE to match 0 or 1 repetitions of the preceding RE.  
+                    <code><font color="teal">ab?</font></code> will match either
+                    <code><font color="purple"><i>a</i></font></code>
+                    or
+                    <code><font color="purple"><i>ab</i></font></code>.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">*?</font></code>, 
+                      <code><font color="teal">+?</font></code>, 
+                      <code><font color="teal">??</font></code></b>
+                  </td>
+                  <td valign="top">The <code><font color="teal">*</font></code>,
+                    <code><font color="teal">+</font></code>, and 
+                    <code><font color="teal">?</font></code> qualifiers are all 
+                    <i>greedy</i>: they match as much text as possible. 
+                    Sometimes this behaviour isn't desired. 
+                    If the RE <code><font color="teal">&lt;.*&gt;</font></code> is matched against
+                    <code><font color="purple"><i>&lt;H1&gt;title&lt;/H1&gt;</i></font></code>, 
+                    it will match the entire string, and not just
+                    <code><font color="purple"><i>&lt;H1&gt;</i></font></code>.  
+                    Adding <code><font color="teal">?</font></code> after the qualifier makes it
+                    perform the match in <i>non-greedy</i> or <i>minimal</i> fashion: as
+                    <i>few</i> characters as possible will be matched. 
+                    Using <code><font color="teal">.*?</font></code>
+                    in the previous expression will match only 
+                    <code><font color="purple"><i>&lt;H1&gt;</i></font></code>.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">{<code><i>m</i></code>}</font></code></b></td>
+                  <td valign="top">Specifies that exactly <code><i>m</i></code> copies of the previous RE should be
+                    matched; fewer matches cause the entire RE not to match. 
+                    For example,
+                    <code><font color="teal">a{6}</font></code> will match exactly six 
+                    <code><font color="purple"><i>a</i></font></code> characters, but not five.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">{<code><i>m</i></code>,<code><i>n</i></code>}</font></code></b></td>
+                  <td valign="top">Causes the resulting RE to match from
+                    <code><i>m</i></code> to <code><i>n</i></code> repetitions of the preceding RE, attempting to
+                    match as many repetitions as possible.  For example, <code><font color="teal">a{3,5}</font></code>
+                    will match from 3 to 5 <code><font color="purple"><i>a</i></font></code> characters. 
+                    Omitting <code><i>m</i></code> specifies a lower bound of zero,
+                    and omitting <code><i>n</i></code> specifies an infinite upper bound.  As an
+                    example, <code><font color="teal">a{4,}b</font></code> will match 
+                    <code><font color="purple"><i>aaaab</i></font></code> or a thousand
+                    <code><font color="purple"><i>a</i></font></code> characters followed by a 
+                    <code><font color="purple"><i>b</i></font></code>, 
+                    but not <code><font color="purple"><i>aaab</i></font></code>.
+                    The comma may not be omitted or the modifier would be confused with
+                    the previously described form.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">{<code><i>m</i></code>,<code><i>n</i></code>}?</font></code></b></td>
+                  <td valign="top">Causes the resulting RE to
+                    match from <code><i>m</i></code> to <code><i>n</i></code> repetitions of the preceding RE,
+                    attempting to match as <i>few</i> repetitions as possible.  This is
+                    the non-greedy version of the previous qualifier.  For example, on the
+                    6-character string <code><font color="purple"><i>aaaaaa</i></font></code>, 
+                    <code><font color="teal">a{3,5}</font></code> will match 5
+                    <code><font color="purple"><i>a</i></font></code> characters, while 
+                    <code><font color="teal">a{3,5}?</font></code> will only match 3
+                    characters.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">&#92;</font></code></b></td>
+                  <td valign="top">Either escapes special characters (permitting
+                    you to match characters like 
+                    <code><font color="purple"><i>*</i></font></code>, 
+                    <code><font color="purple"><i>?</i></font></code>, and so
+                    forth), or signals a special sequence; special sequences are discussed
+                    below.
+                    <br />
+                    <br />
+                    If you're not using a raw string to
+                    express the pattern, remember that Python also uses the
+                    backslash as an escape sequence in string literals; if the escape
+                    sequence isn't recognized by Python's parser, the backslash and
+                    subsequent character are included in the resulting string.  However,
+                    if Python would recognize the resulting sequence, the backslash should
+                    be repeated twice. This is complicated and hard to understand, so
+                    it's highly recommended that you use raw strings for all but the
+                    simplest expressions.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">[]</font></code></b></td>
+                  <td valign="top">Used to indicate a set of characters.  Characters can
+                    be listed individually, or a range of characters can be indicated by
+                    giving two characters and separating them by a 
+                    <code><font color="purple"><i>-</i></font></code>.  Special
+                    characters are not active inside sets.  For example, 
+                    <code><font color="teal">[akm$]</font></code>
+                    will match any of the characters 
+                    <code><font color="purple"><i>a</i></font></code>, 
+                    <code><font color="purple"><i>k</i></font></code>,
+                    <code><font color="purple"><i>m</i></font></code>, or 
+                    <code><font color="purple"><i>$</i></font></code>.
+                    <code><font color="teal">[a-z]</font></code>
+                    will match any lowercase letter, and <code><font color="teal">[a-zA-Z0-9]</font></code> 
+                    matches any letter or digit. 
+                    Character classes such as 
+                    <code><font color="teal">&#92;w</font></code> or 
+                    <code><font color="teal">&#92;S</font></code>
+                    (defined below) are also acceptable inside a range.  If you want to
+                    include a <code><font color="teal">]</font></code> or a 
+                    <code><font color="teal">-</font></code> inside a set, precede it with a
+                    backslash, or place it as the first character.  The
+                    pattern <code><font color="teal">[]]</font></code> will match 
+                    <code><font color="purple"><i>]</i></font></code>, for example.
+                    <br />
+                    <br />
+                    You can match the characters not within a range by <i>complementing</i>
+                    the set.  This is indicated by including a
+                    <code><font color="purple"><i>^</i></font></code> as the first character of the set.
+                    <code><font color="purple"><i>^</i></font></code> elsewhere will simply match the
+                    <code><font color="purple"><i>^</i></font></code> character.  For example,
+                    <code><font color="teal">[^5]</font></code> will match
+                    any character except <code><font color="purple"><i>5</i></font></code>, and
+                    <code><font color="teal">[^^]</font></code> will match any character
+                    except <code><font color="purple"><i>^</i></font></code>.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">|</font></code></b></td>
+                  <td valign="top"><code>A|B</code>, where A and B can be arbitrary REs,
+                    creates a regular expression that will match either A or B. An
+                    arbitrary number of REs can be separated by the 
+                    <code><font color="teal">|</font></code> in this
+                    way.  This can be used inside groups (see below) as well.  REs
+                    separated by <code><font color="purple"><i>|</i></font></code> 
+                    are tried from left to right, and the first
+                    one that allows the complete pattern to match is considered the
+                    accepted branch.  This means that if <code>A</code> matches, <code>B</code> 
+                    will never be tested, even if it would produce a longer overall match.  In
+                    other words, the 
+                    <code><font color="teal">|</font></code> operator is never greedy.  To match a
+                    literal 
+                    <code><font color="purple"><i>|</i></font></code>, use 
+                    <code><font color="teal">&#92;|</font></code>, or enclose it inside a
+                    character class, as in <code><font color="teal">[|]</font></code>.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">(...)</font></code></b></td>
+                  <td valign="top">Matches whatever regular expression is inside the
+                    parentheses, and indicates the start and end of a group; the contents
+                    of a group can be retrieved after a match has been performed, and can
+                    be matched later in the string with the 
+                    <code><font color="teal">\<i>number</i></font></code> special
+                    sequence, described below.  To match the literals 
+                    <code><font color="purple"><i>(</i></font></code> or
+                    <code><font color="purple"><i>)</i></font></code>, use 
+                    <code><font color="teal">&#92;(</font></code> or 
+                    <code><font color="teal">&#92;)</font></code>, or enclose them
+                    inside a character class: <code><font color="teal">[(] [)]</font></code>.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">(?...)</font></code></b></td>
+                  <td valign="top">This is an extension notation 
+                    (a <code><font color="purple"><i>?</i></font></code>
+                    following a <code><font color="purple"><i>(</i></font></code> 
+                    is not meaningful otherwise).  The first
+                    character after the <code><font color="purple"><i>?</i></font></code>
+                    determines what the meaning and further syntax of the construct is.
+                    Extensions usually do not create a new group;
+                    <code><font color="teal">(?P&lt;<i>name</i>&gt;...)</font></code> is the only exception to this rule.
+                    The supported extensions are listed below.
+                  </td>
+                </tr>
+              </table>
+              <br />
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+            <tr><td bgcolor="#EAEAEA">
+                <a name="extensions"></a>
+                <b><font size="4">Extensions</font></b>
+            </td></tr>
+            <tr><td valign="top">              
+              <table>
+                <tr>
+                  <td valign="top" width="125px"><b><code><font color="teal">(?iLmsux)</font></code></b></td>
+                  <td valign="top">(One or more letters from the set 
+                    <code><font color="purple"><i>i</i></font></code>,
+                    <code><font color="purple"><i>L</i></font></code>, 
+                    <code><font color="purple"><i>m</i></font></code>, 
+                    <code><font color="purple"><i>s</i></font></code>, 
+                    <code><font color="purple"><i>u</i></font></code>,
+                    <code><font color="purple"><i>x</i></font></code>.)  
+                    The group matches the empty string and the letters set
+                    the corresponding flags (<code>re.I</code>, <code>re.L</code>,
+                    <code>re.M</code>, <code>re.S</code>, <code>re.U</code>, <code>re.X</code>)
+                    for the entire regular expression.  This is useful if you wish to
+                    include the flags as part of the regular expression, instead of
+                    passing a 
+                    <code><i>flag</i></code> argument to the 
+                    <code>compile()</code> function.
+                    <br /><br />
+                    Note that the <code><font color="teal">(?x)</font></code> flag changes 
+                    how the expression is parsed.
+                    It should be used first in the expression string, or after one or more
+                    whitespace characters.  If there are non-whitespace characters before
+                    the flag, the results are undefined.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">(?:...)</font></code></b></td>
+                  <td valign="top">A non-grouping version of regular parentheses.
+                    Matches whatever regular expression is inside the parentheses, but the
+                    substring matched by the
+                    group <i>cannot</i> be retrieved after performing a match or
+                    referenced later in the pattern.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">(?P&lt;<code><i>name</i></code>&gt;...)</font></code></b></td>
+                  <td valign="top">Similar to regular parentheses, but
+                    the substring matched by the group is accessible via the symbolic group
+                    name <code><i>name</i></code>.  Group names must be valid Python identifiers, and
+                    each group name must be defined only once within a regular expression.  A
+                    symbolic group is also a numbered group, just as if the group were not
+                    named.  So the group named
+                    <code><font color="purple"><i>id</i></font></code>
+                    in the example above can also be
+                    referenced as the numbered group 1.
+                    <br /><br />
+                    For example, if the pattern is
+                    <code><font color="teal">(?P&lt;id&gt;[a-zA-Z_]&#92;w*)</font></code>, 
+                    the group can be referenced by its
+                    name in arguments to methods of match objects, such as
+                    <code>m.group('id')</code> or <code>m.end('id')</code>, and also by name in
+                    pattern text (for example, <code><font color="teal">(?P=id)</font></code>) and 
+                    replacement text (such as <code><font color="teal">&#92;g&lt;id&gt;</font></code>).
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">(?P=<code><i>name</i></code>)</font></code></b></td>
+                  <td valign="top">Matches whatever text was matched by the
+                    earlier group named <code><i>name</i></code>.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">(?#...)</font></code></b></td>
+                  <td valign="top">A comment; the contents of the parentheses are
+                    simply ignored.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">(?=...)</font></code></b></td>
+                  <td valign="top">Matches if <code><font color="teal">...</font></code> matches next, but doesn't
+                    consume any of the string.  This is called a <b><i>lookahead assertion</i></b>.  For
+                    example, <code><font color="teal">Isaac (?=Asimov)</font></code> will match 
+                    <code><font color="purple"><i>Isaac&nbsp;</i></font></code> only if it's
+                    followed by <code><font color="purple"><i>Asimov</i></font></code>.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">(?!...)</font></code></b></td>
+                  <td valign="top">Matches if <code><font color="teal">...</font></code>
+                    doesn't match next.  This
+                    is a <b><i>negative lookahead assertion</i></b>.  For example,
+                    <code><font color="teal">Isaac (?!Asimov)</font></code> will match 
+                    <code><font color="purple"><i>Isaac&nbsp;</i></font></code> only if it's
+                    <i>not</i> followed by <code><font color="purple"><i>Asimov</i></font></code>.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code><font color="teal">(?&lt;=...)</font></code></b></td>
+                  <td valign="top">Matches if the current position in the string
+                    is preceded by a match for <code><font color="teal">...</font></code> 
+                    that ends at the current
+                    position.  This is called a <b><i>positive lookbehind assertion</i></b>.
+                    <code><font color="teal">(?&lt;=abc)def</font></code> will find a match in 
+                    <code><font color="purple"><i>abcdef</i></font></code>, since the
+                    lookbehind will back up 3 characters and check if the contained
+                    pattern matches.  The contained pattern must only match strings of
+                    some fixed length, meaning that 
+                    <code><font color="teal">abc</font></code> or 
+                    <code><font color="teal">a|b</font></code> are
+                    allowed, but 
+                    <code><font color="teal">a*</font></code> and 
+                    <code><font color="teal">a{3,4}</font></code> are not.  Note that
+                    patterns which start with positive lookbehind assertions will never
+                    match at the beginning of the string being searched. You will most
+                    likely want to use the <code>search()</code> 
+                    function rather than the 
+                    <code>match()</code> function:
+                    <pre>
+    &gt;&gt;&gt; import re
+    &gt;&gt;&gt; m = re.search('<code><font color="teal">(?&lt;=abc)def</font></code>', '<code><font color="purple"><i>abcdef</i></font></code>')
+    &gt;&gt;&gt; m.group(0)
+    <code><font color="purple"><i>def</i></font></code>
+                    </pre>
+                    
+                    This example looks for a word following a hyphen:
+                    <pre>
+    &gt;&gt;&gt; m = re.search('<code><font color="teal">(?&lt;=-)\w+</font></code>', '<code><font color="purple"><i>spam-egg</i></font></code>')
+    &gt;&gt;&gt; m.group(0)
+    <code><font color="purple"><i>egg</i></font></code>
+                    </pre>
+                  </td>
+                </tr>
+                    
+                <tr>
+                  <td valign="top"><b><code><font color="teal">(?&lt;!...)</font></code></b></td>
+                  <td valign="top">Matches if the current position in the string
+                    is not preceded by a match for <code><font color="teal">...</font></code>. 
+                    This is called a <b><i>negative lookbehind assertion</i></b>. 
+                    Similar to positive lookbehind
+                    assertions, the contained pattern must only match strings of some
+                    fixed length.  Patterns which start with negative lookbehind
+                    assertions may match at the beginning of the string being searched.
+                  </td>
+                </tr>
+              </table>
+              <br />
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+            <tr><td bgcolor="#EAEAEA">
+                <a name="specialsequences"></a>
+                <b><font size="4">Special sequences</font></b>
+            </td></tr>
+            <tr><td valign="top">          
+              The special sequences consist of <code><font color="teal">\</font></code> 
+              and a character from the list below. 
+              If the ordinary character is not on the list, then the resulting RE will match the 
+              second character. For example, <code><font color="teal">\$</font></code> matches the 
+              character <code><font color="purple"><i>$</i></font></code>. 
+              <table>
+                <tr>
+                  <td valign="top" width="70px"><b><code><font color="teal">\\</font></code></b></td>
+                  <td valign="top">
+                    matches a literal backslash character
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\number</font></code></b></td>
+                  <td valign="top">
+                    Matches the contents of the group of the same number. 
+                    Groups are numbered starting from 1. For example, 
+                    <code><font color="teal">(.+) \1</font></code> matches 
+                    <code><font color="purple"><i>the the</i></font></code> or 
+                    <code><font color="purple"><i>55 55</i></font></code>, 
+                    but not <code><font color="purple"><i>the end</i></font></code> 
+                    (note the space after the group). 
+                    This special sequence can only be used to match one of the first 99 groups. 
+                    If the first digit of <i>number</i> is 0, or <i>number</i> is 3 octal digits long, it will 
+                    not be interpreted as a group match, but as the character with octal value <i>number</i>. 
+                    Inside the <code><font color="teal">[</font></code> and 
+                    <code><font color="teal">]</font></code> of a character class, 
+                    all numeric escapes are treated as characters. 
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\a</font></code></b></td>
+                  <td valign="top">
+                    ASCII Bell (BEL)
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\A</font></code></b></td>
+                  <td valign="top">
+                    Matches only at the start of the string. 
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\b</font></code></b></td>
+                  <td valign="top">
+                    Matches the empty string, but only at the beginning or end of a word. 
+                    A word is defined as a sequence of alphanumeric or underscore characters, 
+                    so the end of a word is indicated by whitespace or a non-alphanumeric, 
+                    non-underscore character. 
+                    Note that <code><font color="teal">\b</font></code> is defined as the boundary 
+                    between <code><font color="teal">\w</font></code> and 
+                    <code><font color="teal">\W</font></code>, 
+                    so the precise set of characters deemed to be alphanumeric depends on the 
+                    values of the <code>LOCALE</code> and <code>UNICODE</code> flags. 
+                    <br />
+                    Inside a character range, <code><font color="teal">\b</font></code> 
+                    represents the backspace character, for compatibility with Python's string literals. 
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\B</font></code></b></td>
+                  <td valign="top">
+                    Matches the empty string, but only when it is not at the beginning or end of a word. 
+                    This is just the opposite of <code><font color="teal">\b</font></code>, 
+                    so is also subject to the settings of <code>LOCALE</code> and <code>UNICODE</code>. 
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\d</font></code></b></td>
+                  <td valign="top">
+                    Matches any decimal digit. This is equivalent to the set
+                    <code><font color="teal">[0-9]</font></code>. 
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\D</font></code></b></td>
+                  <td valign="top">
+                    Matches any non-digit character; this is equivalent to the set 
+                    <code><font color="teal">[^0-9]</font></code>. 
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\f</font></code></b></td>
+                  <td valign="top">
+                    ASCII Formfeed (FF)
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\n</font></code></b></td>
+                  <td valign="top">
+                    ASCII Linefeed (LF)
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\r</font></code></b></td>
+                  <td valign="top">
+                    ASCII Carriage Return (CR)
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\s</font></code></b></td>
+                  <td valign="top">
+                    Matches any whitespace character. This is equivalent to the set 
+                    <code><font color="teal">[ \t\n\r\f\v]</font></code>. 
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\S</font></code></b></td>
+                  <td valign="top">
+                    Matches any non-whitespace character. This is equivalent to the set 
+                    <code><font color="teal">[^ \t\n\r\f\v]</font></code>. 
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\t</font></code></b></td>
+                  <td valign="top">
+                    ASCII Horizontal Tab (TAB)
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\v</font></code></b></td>
+                  <td valign="top">
+                    ASCII Vertical Tab (VT)
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\w</font></code></b></td>
+                  <td valign="top">
+                    When the <code>LOCALE</code> and <code>UNICODE</code> flags are not specified, 
+                    matches any alphanumeric character and the underscore. 
+                    This is equivalent to the set 
+                    <code><font color="teal">[a-zA-Z0-9_]</font></code>.
+                    <br />
+                    With <code>LOCALE</code>, it will match the set 
+                    <code><font color="teal">[0-9_]</font></code> 
+                    plus whatever characters are defined as alphanumeric for the current locale.
+                    <br />
+                    If <code>UNICODE</code> is set, this will match the characters 
+                    <code><font color="teal">[0-9_]</font></code> plus whatever is 
+                    classified as alphanumeric in the Unicode character properties database. 
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\W</font></code></b></td>
+                  <td valign="top">
+                    When the <code>LOCALE</code> and <code>UNICODE</code> flags are not specified, 
+                    matches any non-alphanumeric character. 
+                    This is equivalent to the set 
+                    <code><font color="teal">[^a-zA-Z0-9_]</font></code>.
+                    <br />
+                    With <code>LOCALE</code>, it will match any character not in the set 
+                    <code><font color="teal">[0-9_]</font></code>,
+                    and not defined as alphanumeric for the current locale. 
+                    <br />
+                    If <code>UNICODE</code> is set, this will match anything other than
+                    <code><font color="teal">[0-9_]</font></code> and characters
+                    marked as alphanumeric in the Unicode character properties database.                     
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\x<i>hh</i></font></code></b></td>
+                  <td valign="top">
+                    ASCII character with hex value <code><i>hh</i></code>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td valign="top"><b><code><font color="teal">\Z</font></code></b></td>
+                  <td valign="top">
+                    Matches only at the end of the string. 
+                  </td>
+                </tr>
+              </table>
+              <br />
+              </td></tr>
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+            <tr><td bgcolor="#EAEAEA">
+                <a name="flags"></a>
+                <b><font size="4">Flags</font></b>
+            </td></tr>
+            <tr><td valign="top">          
+              The RE's behaviour can be modified by specifying a flags value. 
+              Values can be any of the following variables, combined using bitwise <code>or</code>
+              (the <code>|</code> operator). 
+              <br />
+              <table>
+                <tr>
+                  <td valign="top" width="130px"><b><code>IGNORECASE (I)</code></b></td>
+                  <td valign="top">
+                    Perform case-insensitive matching. 
+                    Expressions like <code><font color="teal">[A-Z]</font></code> will match lowercase letters, too. 
+                    This is not affected by the current locale. 
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code>LOCALE (L)</code></b></td>
+                  <td valign="top">
+                    Make <code><font color="teal">\w</font></code>, 
+                    <code><font color="teal">\W</font></code>, 
+                    <code><font color="teal">\b</font></code>, and 
+                    <code><font color="teal">\B</font></code> dependent on the current locale.
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code>MULTILINE (M)</code></b></td>
+                  <td valign="top">
+                    When specified, the pattern character 
+                    <code><font color="teal">^</font></code> 
+                    matches at the beginning of the string and at the beginning of each 
+                    line (immediately following each newline) and the pattern character 
+                    <code><font color="teal">$</font></code>
+                    matches at the end of the string and at the end of each line 
+                    (immediately preceding each newline).
+                    <br />
+                    By default, 
+                    <code><font color="teal">^</font></code> 
+                    matches only at the beginning of the string, and 
+                    <code><font color="teal">$</font></code>
+                    only at the end of the string and immediately before the newline 
+                    (if any) at the end of the string. 
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code>DOTALL (S)</code></b></td>
+                  <td valign="top">
+                    Make the 
+                    <code><font color="teal">.</font></code>
+                    special character match any character at all, including a newline. 
+                    Without this flag,
+                    <code><font color="teal">.</font></code>
+                    will match anything except a newline. 
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code>UNICODE (U)</code></b></td>
+                  <td valign="top">
+                    Make <code><font color="teal">\w</font></code>, 
+                    <code><font color="teal">\W</font></code>, 
+                    <code><font color="teal">\b</font></code>, and 
+                    <code><font color="teal">\B</font></code> dependent 
+                    on the Unicode character properties database (since Python 2.0).
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td valign="top"><b><code>VERBOSE (X)</code></b></td>
+                  <td valign="top">
+                    This flag allows you to write regular expressions that look nicer. 
+                    Whitespace within the pattern is ignored, except when in a character 
+                    class or preceded by an unescaped backslash, and, when a line contains a 
+                    <code><font color="teal">#</font></code> neither in a character class 
+                    or preceded by an unescaped backslash, all characters from the leftmost 
+                    such <code><font color="teal">#</font></code> through the end of the 
+                    line are ignored. 
+                  </td>
+                </tr>
+              </table>
+              
+            </td></tr>
+        </table>
+    </body>
+</html>

@@ -1,6 +1,6 @@
 #
 # XML-RPC CLIENT LIBRARY
-# $Id: xmlrpclib.py 41594 2005-12-04 19:11:17Z andrew.kuchling $
+# $Id: xmlrpclib.py 65467 2008-08-04 00:50:11Z brett.cannon $
 #
 # an XML-RPC client interface for Python.
 #
@@ -282,10 +282,13 @@ class Fault(Error):
 # @param value A boolean value.  Any true value is interpreted as True,
 #              all other values are interpreted as False.
 
+from sys import modules
+mod_dict = modules[__name__].__dict__
 if _bool_is_builtin:
     boolean = Boolean = bool
     # to avoid breaking code which references xmlrpclib.{True,False}
-    True, False = True, False
+    mod_dict['True'] = True
+    mod_dict['False'] = False
 else:
     class Boolean:
         """Boolean-value wrapper.
@@ -316,7 +319,8 @@ else:
         def __nonzero__(self):
             return self.value
 
-    True, False = Boolean(1), Boolean(0)
+    mod_dict['True'] = Boolean(1)
+    mod_dict['False'] = Boolean(0)
 
     ##
     # Map true or false value to XML-RPC boolean values.
@@ -333,6 +337,8 @@ else:
         """Convert any Python value to XML-RPC 'boolean'."""
         return _truefalse[operator.truth(value)]
 
+del modules, mod_dict
+
 ##
 # Wrapper for XML-RPC DateTime values.  This converts a time value to
 # the format used by XML-RPC.
@@ -346,6 +352,20 @@ else:
 # @param value The time, given as an ISO 8601 string, a time
 #              tuple, or a integer time value.
 
+def _strftime(value):
+    if datetime:
+        if isinstance(value, datetime.datetime):
+            return "%04d%02d%02dT%02d:%02d:%02d" % (
+                value.year, value.month, value.day,
+                value.hour, value.minute, value.second)
+
+    if not isinstance(value, (TupleType, time.struct_time)):
+        if value == 0:
+            value = time.time()
+        value = time.localtime(value)
+
+    return "%04d%02d%02dT%02d:%02d:%02d" % value[:6]
+
 class DateTime:
     """DateTime wrapper for an ISO 8601 string or time tuple or
     localtime integer value to generate 'dateTime.iso8601' XML-RPC
@@ -353,28 +373,62 @@ class DateTime:
     """
 
     def __init__(self, value=0):
-        if not isinstance(value, StringType):
-            if datetime and isinstance(value, datetime.datetime):
-                self.value = value.strftime("%Y%m%dT%H:%M:%S")
-                return
-            if datetime and isinstance(value, datetime.date):
-                self.value = value.strftime("%Y%m%dT%H:%M:%S")
-                return
-            if datetime and isinstance(value, datetime.time):
-                today = datetime.datetime.now().strftime("%Y%m%d")
-                self.value = value.strftime(today+"T%H:%M:%S")
-                return
-            if not isinstance(value, (TupleType, time.struct_time)):
-                if value == 0:
-                    value = time.time()
-                value = time.localtime(value)
-            value = time.strftime("%Y%m%dT%H:%M:%S", value)
-        self.value = value
+        if isinstance(value, StringType):
+            self.value = value
+        else:
+            self.value = _strftime(value)
+
+    def make_comparable(self, other):
+        if isinstance(other, DateTime):
+            s = self.value
+            o = other.value
+        elif datetime and isinstance(other, datetime.datetime):
+            s = self.value
+            o = other.strftime("%Y%m%dT%H:%M:%S")
+        elif isinstance(other, (str, unicode)):
+            s = self.value
+            o = other
+        elif hasattr(other, "timetuple"):
+            s = self.timetuple()
+            o = other.timetuple()
+        else:
+            otype = (hasattr(other, "__class__")
+                     and other.__class__.__name__
+                     or type(other))
+            raise TypeError("Can't compare %s and %s" %
+                            (self.__class__.__name__, otype))
+        return s, o
+
+    def __lt__(self, other):
+        s, o = self.make_comparable(other)
+        return s < o
+
+    def __le__(self, other):
+        s, o = self.make_comparable(other)
+        return s <= o
+
+    def __gt__(self, other):
+        s, o = self.make_comparable(other)
+        return s > o
+
+    def __ge__(self, other):
+        s, o = self.make_comparable(other)
+        return s >= o
+
+    def __eq__(self, other):
+        s, o = self.make_comparable(other)
+        return s == o
+
+    def __ne__(self, other):
+        s, o = self.make_comparable(other)
+        return s != o
+
+    def timetuple(self):
+        return time.strptime(self.value, "%Y%m%dT%H:%M:%S")
 
     def __cmp__(self, other):
-        if isinstance(other, DateTime):
-            other = other.value
-        return cmp(self.value, other)
+        s, o = self.make_comparable(other)
+        return cmp(s, o)
 
     ##
     # Get date/time value.
@@ -630,9 +684,19 @@ class Marshaller:
         try:
             f = self.dispatch[type(value)]
         except KeyError:
-            raise TypeError, "cannot marshal %s objects" % type(value)
-        else:
-            f(self, value, write)
+            # check if this object can be marshalled as a structure
+            try:
+                value.__dict__
+            except:
+                raise TypeError, "cannot marshal %s objects" % type(value)
+            # check if this class is a sub-class of a basic type,
+            # because we don't know how to marshal these types
+            # (e.g. a string sub-class)
+            for type_ in type(value).__mro__:
+                if type_ in self.dispatch.keys():
+                    raise TypeError, "cannot marshal %s objects" % type(value)
+            f = self.dispatch[InstanceType]
+        f(self, value, write)
 
     def dump_nil (self, value, write):
         if not self.allow_none:
@@ -686,7 +750,7 @@ class Marshaller:
 
     def dump_array(self, value, write):
         i = id(value)
-        if self.memo.has_key(i):
+        if i in self.memo:
             raise TypeError, "cannot marshal recursive sequences"
         self.memo[i] = None
         dump = self.__dump
@@ -700,7 +764,7 @@ class Marshaller:
 
     def dump_struct(self, value, write, escape=escape):
         i = id(value)
-        if self.memo.has_key(i):
+        if i in self.memo:
             raise TypeError, "cannot marshal recursive dictionaries"
         self.memo[i] = None
         dump = self.__dump
@@ -722,22 +786,9 @@ class Marshaller:
     if datetime:
         def dump_datetime(self, value, write):
             write("<value><dateTime.iso8601>")
-            write(value.strftime("%Y%m%dT%H:%M:%S"))
+            write(_strftime(value))
             write("</dateTime.iso8601></value>\n")
         dispatch[datetime.datetime] = dump_datetime
-
-        def dump_date(self, value, write):
-            write("<value><dateTime.iso8601>")
-            write(value.strftime("%Y%m%dT00:00:00"))
-            write("</dateTime.iso8601></value>\n")
-        dispatch[datetime.date] = dump_date
-
-        def dump_time(self, value, write):
-            write("<value><dateTime.iso8601>")
-            write(datetime.datetime.now().date().strftime("%Y%m%dT"))
-            write(value.strftime("%H:%M:%S"))
-            write("</dateTime.iso8601></value>\n")
-        dispatch[datetime.time] = dump_time
 
     def dump_instance(self, value, write):
         # check for special wrappers
@@ -852,6 +903,7 @@ class Unmarshaller:
         self.append(int(data))
         self._value = 0
     dispatch["i4"] = end_int
+    dispatch["i8"] = end_int
     dispatch["int"] = end_int
 
     def end_double(self, data):

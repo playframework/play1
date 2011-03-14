@@ -1,0 +1,43 @@
+KIKI 0.5.6 - regexes made nifty
+
+Copyright (C) 2003, 2004 Project 5 (http://come.to/project5)
+Licence: GPL (free)
+Requires: Python, wxPython
+System: any, provided (wx)Python runs on it
+
+History
+=======
+0.5.6 (8-4-2004, 32.5 kB)
+ - changed code to support wxPython 2.5.1.5
+ - saves settings before evaluating the regex
+
+0.5.5 (29-9-2003, 32.5kB)
+ - fixed bug which caused the selected regex
+   to disappear to the history when Evalute
+   was activated
+ - fixed Linux bug which caused warning
+   messages to be displayed when a different
+   doc was selected in the Help tab
+ - small changes in code and docs
+ - first public release outside Spe
+
+0.5 (28-9-2003, 32.8kB)
+ = added really nifty colors
+ = added docs and about screen
+ = added ferrety Easter Egg :)
+ = added __init__.py so that Kiki can be used
+   as package in Spe
+ - fixed bug that meant flags were actually
+   not used when compiling the regex
+ - locale used to be after multiline - restored
+   alphabetical order
+
+0.2 (26-9-2003, 25.7kB)
+ - fixed a bug with caused empty regex results
+   to lead to an infinite loop
+ = added pretty icons :)
+ - added support for integration in Spe
+ - misc changes
+
+0.1:
+ - first version, only available in Spe 0.1.8.a

@@ -13,6 +13,7 @@
     distributions on the real line:
     ------------------------------
            uniform
+           triangular
            normal (Gaussian)
            lognormal
            negative exponential
@@ -38,6 +39,7 @@ General notes on the underlying Mersenne Twister core generator:
 
 """
 
+from __future__ import division
 from warnings import warn as _warn
 from types import MethodType as _MethodType, BuiltinMethodType as _BuiltinMethodType
 from math import log as _log, exp as _exp, pi as _pi, e as _e, ceil as _ceil
@@ -47,7 +49,7 @@ from binascii import hexlify as _hexlify
 
 __all__ = ["Random","seed","random","uniform","randint","choice","sample",
            "randrange","shuffle","normalvariate","lognormvariate",
-           "expovariate","vonmisesvariate","gammavariate",
+           "expovariate","vonmisesvariate","gammavariate","triangular",
            "gauss","betavariate","paretovariate","weibullvariate",
            "getstate","setstate","jumpahead", "WichmannHill", "getrandbits",
            "SystemRandom"]
@@ -77,13 +79,13 @@ class Random(_random.Random):
 
     Class Random can also be subclassed if you want to use a different basic
     generator of your own devising: in that case, override the following
-    methods:  random(), seed(), getstate(), setstate() and jumpahead().
-    Optionally, implement a getrandombits() method so that randrange()
-    can cover arbitrarily large ranges.
+    methods: random(), seed(), getstate(), setstate() and jumpahead().
+    Optionally, implement a getrandbits() method so that randrange() can cover
+    arbitrarily large ranges.
 
     """
 
-    VERSION = 2     # used by getstate/setstate
+    VERSION = 3     # used by getstate/setstate
 
     def __init__(self, x=None):
         """Initialize an instance.
@@ -120,8 +122,19 @@ class Random(_random.Random):
     def setstate(self, state):
         """Restore internal state from object returned by getstate()."""
         version = state[0]
-        if version == 2:
+        if version == 3:
             version, internalstate, self.gauss_next = state
+            super(Random, self).setstate(internalstate)
+        elif version == 2:
+            version, internalstate, self.gauss_next = state
+            # In version 2, the state was saved as signed ints, which causes
+            #   inconsistencies between 32/64-bit systems. The state is
+            #   really unsigned 32-bit ints, so we convert negative ints from
+            #   version 2 to positive longs for version 3.
+            try:
+                internalstate = tuple( long(x) % (2**32) for x in internalstate )
+            except ValueError, e:
+                raise TypeError, e
             super(Random, self).setstate(internalstate)
         else:
             raise ValueError("state with version %s passed to "
@@ -338,6 +351,25 @@ class Random(_random.Random):
     def uniform(self, a, b):
         """Get a random number in the range [a, b)."""
         return a + (b-a) * self.random()
+
+## -------------------- triangular --------------------
+
+    def triangular(self, low=0.0, high=1.0, mode=None):
+        """Triangular distribution.
+
+        Continuous distribution bounded by given lower and upper limits,
+        and having a given mode value in-between.
+
+        http://en.wikipedia.org/wiki/Triangular_distribution
+
+        """
+        u = self.random()
+        c = 0.5 if mode is None else (mode - low) / (high - low)
+        if u > c:
+            u = 1.0 - u
+            c = 1.0 - c
+            low, high = high, low
+        return low + (high - low) * (u * c) ** 0.5
 
 ## -------------------- normal distribution --------------------
 
@@ -828,6 +860,7 @@ def _test(N=2000):
     _test_generator(N, gammavariate, (200.0, 1.0))
     _test_generator(N, gauss, (0.0, 1.0))
     _test_generator(N, betavariate, (3.0, 3.0))
+    _test_generator(N, triangular, (0.0, 1.0, 1.0/3.0))
 
 # Create one instance, seeded from current time, and export its methods
 # as module-level functions.  The functions share state across all uses
@@ -839,6 +872,7 @@ _inst = Random()
 seed = _inst.seed
 random = _inst.random
 uniform = _inst.uniform
+triangular = _inst.triangular
 randint = _inst.randint
 choice = _inst.choice
 randrange = _inst.randrange

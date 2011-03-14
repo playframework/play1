@@ -1,0 +1,651 @@
+2007-04-02: version 0.5 released, with some improvements, code ported to the
+            "new" wx namespace, wxWidgets 2.8 support, and more...
+-------------------------------------------------------------------------------
+2006-03-02: version 0.4.1 released.
+            Note that this file isn't very much up to date anymore...
+-------------------------------------------------------------------------------
+2005-10-10: version 0.4 released.
+-------------------------------------------------------------------------------
+2005-05-01: edit_sizers/edit_sizers.py:
+                updated layout() to work with wx2.6
+
+            widgets/frame/frame.py:
+                fixed a segfault when deleting a frame with a statusbar on
+                wx2.6
+
+            widgets/notebook/notebook.py:
+                updated notebook virtual sizer to fix broken layout on wx2.6
+
+            edit_windows.py:
+                fixed property_panel layout which was broken on wx2.6
+
+            tree.py:
+                - added wxBegin/EndBusyCursor() calls when showing a toplevel
+                  widget
+                - called fit_parent at the end of show_widget for toplevel
+                  widgets without a specific size
+
+
+2005-??-??: sorry, I didn't update this for a while, but there have been
+            changes and improvements even during this period :-) To summarize:
+            - added event handlers support (not for perl at the moment)
+            - better sizers layout
+            - many bugs fixed
+            - updated copyright information
+            - ...
+
+-------------------------------------------------------------------------------
+2004-11-08: version 0.3.5.1 released, due to a bug in version 0.3.5 (size
+            property not updating correctly)
+-------------------------------------------------------------------------------
+2004-11-04: version 0.3.5 released
+
+2004-11-02: kdefiledialog.py:
+                support for native file and dir dialogs on KDE
+
+            debian/:
+                support for Debian package (by Georges Khaznadar)
+
+2004-10-15: common.py, config.py, configUI.py, main.py, res/preferences.wxg:
+                auto save support (i.e. now wxg files can be saved
+                automatically periodically)
+
+2004-09-17: edit_sizers/sizers_codegen.py, edit_sizers/perl_sizers_codegen.py,
+            codegen/*.py:
+                fixed issue with wxStaticBoxSizer code generation
+
+            edit_sizers/edit_sizers.py, edit_windows.py:
+                fixed segfault on wxGTK2 when removing a widget from the
+                popup menu
+            
+            *.py:
+                updated copyright information
+
+2004-09-04: version 0.3.4.1 released, due to the introduction of a workaround
+            for a bug in wxPython 2.5.2.8 (about wxGrid and its default
+            size...)
+-------------------------------------------------------------------------------
+2004-09-01: version 0.3.4 released
+
+2004-08-12: common.py: 
+                minor UI tweak
+            edit_windows.py, config.py, configUI.py:
+                added `show "handles" of sizers' option
+                added `allow duplicate widget names' option
+
+2004-07-18: widgets/menubar/codegen.py:
+                changed python code generator to be smarter about menu items
+                with a user defined name
+
+2004-05-05: edit_windows.py, widget_properties.py:
+                fixed a couple of wxMac issues
+            widgets/frame/codegen.py:
+                added xrc code generator for wxStatusBar
+            widgets/choice/choice.py, widgets/combo_box/combo_box.py,
+            widgets/list_box/list_box.py:
+                removed default entry in Choices property
+            widgets/combo_box/codegen.py, widgets/spin_ctrl/codegen.py:
+                applied patch #944642
+            widgets/list_ctrl/list_ctrl.py:
+                added a couple of extra styles
+            widgets/button/*:
+                added wxButton styles
+
+2004-03-06: widgets/panel/panel.py:
+                fixed (hopefully) bug #880674
+
+2004-02-19: clipboard.py, main.py:
+                added Drag&Drop of wxg files for opening them (thanks to Chris
+                Liechti)
+
+2004-02-17: main.py, docs/index.html, docs/html/*:
+                new manual added
+
+2004-02-07: config.py: 
+                config path is now under APPDATA ok windows
+
+2004-01-25: widgets/bitmap_button/*, widgets/toolbar/*, 
+            widgets/static_bitmap/*:
+                added "code:" tag
+
+2003-12-28: xrc2wxg.py:
+                added wxSplitterWindow support
+
+2003-12-07: tree.py:
+                partially fixed bug #798041 (renaming of cut widgets)
+
+2003-12-06: widgets/panel/panel.py:
+                added ability to paste a sizer inside a panel, notebook page
+                and splitter pane
+
+2003-11-24: codegen/py_codegen.py, widgets/*/codegen.py,
+            edit_sizers/sizers_codegen.py:
+                changes to the python code generator to support new wx 
+                namespace
+-------------------------------------------------------------------------------
+2003-08-30: version 0.3.1 released: sigh! we found an annoying bug on
+            pl_codegen.py right after releasing 0.3 :-(
+-------------------------------------------------------------------------------
+2003-08-29: version 0.3 released
+
+2003-07-26: codegen/pl_codegen.py, toolbar/perl_codegen.py,
+            menubar/perl_codegen.py:
+                brought Perl code generator up to date:
+                 - multiple files support
+                 - ``keep contents'' support
+                 - automatic ids generation (ID_FOO=?) support
+                everything is still *experimental* and NEEDS EXTENSIVE TESTING
+
+2003-07-18: widgets/toolbar/codegen.py, widgets/bitmap_button/codegen.py,
+            widgets/static_bitmap/codegen.py:
+                added (limited) support to xpm data (not on files). I.e. if 
+                the bitmap property is something like var:variable_name, 
+                variable_name is taken to be a variable that holds xpm data
+
+2003-07-16: codegen/xrc_codegen.py, xml_parse.py, docs/turorial.html:
+                added subclass support to XRC output
+
+2003-07-15: application.py, tree.py, xml_parse.py, codegen/py_codegen.py,
+            codegen/cpp_codegen.py:
+                added "overwrite" property to Application, to allow 
+                re-generation of (C++ and python) code from scratch (as opposed
+                to updating wxGlade blocks).
+            docs/tutorial.html:
+                updated notes
+
+2003-07-11: codegen/py_codegen.py, codegen/cpp_codegen.py:
+                enhanced generate_code_id, to recognize ID_SOMETHING=? and
+                generate a "unique" id automatically
+            codegen/cpp_codegen.py:
+                fixed ids code generation when the output file already exists
+            widgets/toolbar.py:
+                fixed xrc code generation
+            common.py:
+                updated version number to 0.3pre1
+
+2003-07-05: edit_windows.py, application.py:
+                added validation code for `name' and `class' properties
+                (fixed bug #764186)
+            credits.txt:
+                updated developer names
+            codegen/py_codegen.py, codegen/cpp_codegen.py:
+                fixed bug in quote_str
+
+2003-06-26: tree.py, widgets/panel/*:
+                added scrolled window support (this required a small change
+                in Tree.Node.write in tree.py)
+
+2003-06-23: perl generation support added
+
+2003-06-21: nearly all around:
+                fixed various Unicode-related bugs
+            misc.py
+                added functions, streq and wxstr, to fix some Unicode issues
+
+2003-06-20: edit_windows.py, edit_sizers/edit_sizers.py, xml_parse.py:
+                added cut&paste support for toplevel sizers
+
+2003-06-02: common.py, main.py:
+                added ToggleButtonBox to separate the "core" components from
+                the "custom" ones (similar to Glade and QT-Designer)
+
+2003-05-22: common.py, config.py:
+                added local widgets path support
+-------------------------------------------------------------------------------
+2003-05-19: version 0.2.3 released
+            docs/tutorial.html: 
+                some updates to the tutorial
+
+2003-05-15: widgets/frame/*, widgets/dialog/*, edit_windows.py:
+                added new properties 'icon', 'centered' (for dialog and frames)
+                and 'disabled', 'focused' and 'hidden' (for all widgets)
+
+2003-05-13: widgets/button/button.py, widgets/toggle_button/toggle_button.py,
+            widgets/checkbox/checkbox.py, widgets/radio_button/radio_button.py:
+                changed 'label' property to accept multiline strings
+            xrc2wxg.py:
+                moved initialization code to a 'main' function
+
+2003-05-10: custom_widget/*, xrc2wxg.py: 
+                support of XRC code generation (and import) for custom widgets
+
+2003-05-07: application.py, edit_windows.py, xml_parse.py, 
+            widgets/menubar/codegen.py, widgets/toolbar/codegen.py,
+            widgets/custom_widget/codegen.py:
+                added preview support
+-------------------------------------------------------------------------------
+2003-05-01: version 0.2.2 released
+
+2003-04-24: widgets/toolbar/*:
+                first ToolBar support (only tools, not controls yet)
+            config.py:
+                added test to check for the WXGLADE_CONFIG_PATH env var, to
+                fix issue #726563
+
+2003-04-23: edit_sizers/edit_sizers.py, widgets/splitter_window/*,
+            widgets/notebook/*, xml_parse.py et al:
+                new "virtual sizers" interface
+
+2003-04-17: main.py, widgets/frame/frame.py, widgets/dialog/dialog.py, misc.py,
+            config.py, common.py:
+                - added ability to cancel the addition of a widget
+                - added new config option to remember the geometry of 
+                  wxGlade windows
+
+2003-04-14: widgets/menubar/*:
+                added support for radio menu items
+
+2003-03-30: codegen/*, widgets/*/codegen.py:
+                change of API to cleanup code
+            widgets/menubar:
+                added toplevel menubar support
+
+2003-03-20: edit_windows.py:
+                fixed bug #706890
+
+2003-03-15: widgets/frame/frame.py:
+                fixed bug #704091
+
+2003-03-14: config.py, main.py:
+                added new preference buttons_per_row, to control the geometry
+                of the main palette
+
+2003-03-11: widgets/list_ctrl/*, widgets/tree_ctrl/*:
+                first support for wxListCtrl and wxTreeCtrl
+
+2003-03-10: widget_properties.py, widgets/... (various modules),
+                fixed some UI bugs (horizontal scrollbars - bug #701088,
+                 size of columns in some GridProperty)
+            widgets/notebook/notebook.py:
+                fixed serious bug on win32 (added the function
+                _ugly_hack_for_win32_notebook_bug)
+
+2003-03-08: codegen/cpp_codegen.py, codegen/py_codegen.py:
+                fixed a couple of bugs in the regex to match class decl (still
+                not 100% accurate, but better...)
+
+2003-03-06: misc.py:
+                added sizer_fixed_Insert to fix bug in wxPython 2.4
+
+2003-03-05: widget_properties.py:
+                modified the display function of each property, to get rid of
+                useless wxPanels
+
+2003-02-14: main.py, application.py: 
+                better error messages in case of IOError or OSError exceptions
+
+2003-02-02: version 0.2.1 released
+------------------------------------------------------------------------------
+2003-01-27: codegen/py_codegen.py, codegen/cpp_codegen.py:
+                fixed bugs in multi-files mode code generation 
+
+2003-01-24: widget_properties.py:
+                fixed segfault caused by a change (bug?) in wxPython 2.4.0.2
+
+2003-01-01: main.py, common.py, config.py, codegen/*:
+                added support for automatic backup
+            application.py, codegen/*:
+                added gettext support for the generated code (python and C++)
+-------------------------------------------------------------------------------
+2002-12-28: version 0.2 released
+            edit_sizers/edit_sizers.py:
+                better (hopefully) implementation of SizerBase.layout
+
+2002-12-23: main.py, application.py: 
+                slightly better error messages
+
+2002-12-14: docs/tutorial.html: 
+                added notes
+
+2002-12-12: edit_sizers/edit_sizers.py, widgets/frame/frame.py:
+                changed the EditFrame builder function to automatically
+                set a sizer for the new frame
+
+2002-12-11: edit_sizers/edit_sizers.py: 
+                - added methods insert_row and insert_col to GridSizerBase
+                - EVT_MIDDLE_DOWN event handler to SizerSlot to paste from 
+                  the clipboard "the X way"
+
+2002-12-07: color_dialog.py, widget_properties.py: 
+                changed ColorDialogProperty to use a new custom dialog,
+                using wxPyColorChooser by Michael Gilfix (thanks!)
+
+2002-12-06: font_dialog.py, widget_properties.py: 
+                changed FontDialogProperty to use a new custom dialog
+                (made in wxGlade!)
+            edit_sizers/edit_sizers.py: 
+                changed set_growable_rows and set_growable_cols of
+                EditFlexGridSizer to allow the effective removal of
+                growable rows/cols
+            edit_sizers/edit_sizers.py, edit_windows.py: 
+                restored 2.3.2.1 compatibility, broken by calls to wxCallAfter 
+                instead of misc.wxCallAfter
+
+2002-11-28: edit_sizers/edit_sizers.py, tree.py: 
+                fixed bug on change_item_pos and change_node_pos
+
+2002-11-27: codegen/py_codegen.py: 
+                if the output file for code generation already exists, honor 
+                the indentation. This is desirable for instance for conditional
+                code, e.g. if you have to change behaviour if your app is 
+                invoked in GUI or non-GUI mode. 
+            about.py: 
+                updated developers credits
+
+2002-11-24: widgets/*/codegen.py, xml_parse.py, edit_windows.py:
+                changed code generation for "contol" widgets: now if you 
+                change the "Class" property, no extra code is generated, but
+                it is assumed that you have a declaration of such a custom 
+                class somewhere. This makes much more sense than the previous
+                behaviour (which I considered broken)
+
+2002-11-17: codegen/py_codegen.py: 
+                added import_modules argument to add_widget_handler to allow 
+                widgets that need extra modules imported
+
+2002-11-12: change (hopefully the last!) of license, from the Python2.2 one to
+            MIT (for the reasons, see
+            http://groups.google.com/groups?hl=en&lr=&ie=UTF-8&oe=UTF-8&frame=right&th=f37858bb262e4cff&seekm=918bc22f.0211051301.2010d077%40posting.google.com
+            and following)
+
+2002-11-11: codegen/cpp_codegen.py: 
+                modified attribute scope from private to protected in the 
+                generated code, to allow attribute access from a subclass
+
+2002-11-05: misc.py: 
+                fixed bug in check_wx_version
+            config.py, main.py: 
+                added support for wxFileHistory on wxPython >= 2.3.3 
+
+2002-11-01: misc.py: 
+                added focused_widget, accel_table, _remove, _cut, _copy, _paste
+                to support keyboard shortcuts for some widgets' popup menu 
+                items in a cross-platform way
+
+2002-10-28: widgets/custom_widget/*: 
+                added custom_widget module, to build apps which host widgets 
+                unknown to wxGlade
+
+2002-10-25: codegen/py_codegen.py: 
+                changed wxGlade tags to fix bug caused by nested classes
+
+2002-10-24: application.py, xml_parse.py, tree.py: 
+                added new encoding property to Application objects, which 
+                controls the encoding for the xml generation
+
+2002-10-23: widgets/panel/panel.py, widgets/dialog/dialog.py:
+		added new class EditTopLevelPanel to create panels without 
+		the need to create a container frame/dialog (the new class is
+		available from the Dialog button in the palette)
+
+2002-10-22: config.py: 
+                added config.py to configure some aspects of wxGlade
+		(through View->Preferences... menu)
+
+2002-10-20: edit_windows.py, edit_sizers/edit_sizers.py, main.py, misc.py:
+		- added icons for menu items
+		- support for keyboard shortcuts for popup menus 
+		  (not on GTK yet)
+
+2002-10-19: widget_properties.py, widgets/static_text/static_text.py,
+	    widgets/text_ctrl/text_ctrl.py: 
+		added multiline option to TextProperty to edit long values
+	    widgets/panel/*: 
+                added style property
+
+2002-10-12: edit_sizers/edit_sizers.py:
+		added method SizerBase.change_item_pos to change the position
+		of an item in the sizer
+	    tree.py: 
+                added method Tree.change_node_pos to change the position
+		of a node (and all its sub-nodes) on the tree
+	    edit_windows.py: 
+                added 'pos' property to ManagedBase instances to change the 
+                position of a widget inside its sizer
+
+2002-10-10: widgets/button/*, widgets/bitmap_button/*:
+	        added 'default' property to implement wxButton.SetDefault
+
+2002-10-08: edit_sizers/edit_sizers.py: 
+		- added function change_sizer (and related SizerBase.change
+		  event handler) to change the type of a sizer without deleting
+		  its contents  
+		- renamed SizerBase.Layout to SizerBase.layout for consistency
+		- added optional recursive argument to SizerBase.Layout to
+		  call the method recursively on the sizer's sizer (if any)
+
+2002-10-06: codegen/cpp_codegen.py, codegen/py_codegen.py, 
+            edit_sizers/edit_sizers.py: 
+                fixed bug related to notebook sizers
+	    edit_sizers/edit_sizers.py: 
+                fixed layout update on GridSizerBase, fixed add_col bug
+	    widgets/*: 
+                various layout improvements on some dialogs used to add widgets
+	    main.py: 
+                better layout of the tutorial window
+
+2002-09-08: codegen/xrc_codegen.py: 
+                fixed bug (background colour)
+	    main.py, application.py: 
+                better path handling of file dialogs on GTK
+	    edit_sizers/edit_sizers.py: 
+                added add_row and add_col methods to GridSizerBase
+
+2002-09-06: about.py: 
+                new about box with wxGlade logo
+-------------------------------------------------------------------------------
+2002-09-02: version 0.1.3 released
+	    switch from GPL license to the Python 2.2 (PSF) one
+
+2002-08-27: codegen/cpp_codegen.py: 
+                fixed bug in id code generation
+	    widgets/frame/frame.py, widgets/dialog/dialog.py:
+                fixed bug in get_style
+
+2002-08-26: widgets/*/codegen.py, codegen/py_codegen.py, 
+	    codegen/cpp_codegen.py: 
+                changed code generation to initialize widgets in the right
+                order, so as to preserve the tab traversal order 
+
+2002-08-15: edit_windows.py, codegen/py_codegen.py, codegen/cpp_codegen.py: 
+		added "tooltip" property
+	    main.py: 
+                modified file dialogs to display a filter for wxGlade XML
+		files (.wxg extension)
+            wxglade.py, main.py: 
+                added ability to open a wxGlade file at program startup
+
+2002-08-12: codegen/cpp_codegen.py, widgets/*/codegen.py:
+		added experimental C++ code generator
+ 
+2002-08-11: edit_windows.py, codegen/py_codegen.py: 
+                support of dialog units
+
+2002-08-10: widgets/*/codegen.py:
+                better python code generator functions
+	    widgets/button/codegen.py, widgets/frame/codegen.py:
+	        translation from "&" to "_" as accelerator marker in XRC
+		output
+	    main.py: 
+                added "Generate Code..." menu item to the File menu
+
+2002-08-09: widgets/*: 
+                fixed bug in the python code generation function when the 
+                object is an instance of a custom class
+
+2002-08-04 / 2002-08-06: many bugfixes all around,
+	    codegen/xrc_codegen.py: 
+                first experimental code generator for wxWindows' XRC resources
+	    codegen/py_codegen.py: 
+                added a self.Layout() call at the end of __do_layout 
+                (as this is necessary for Dialogs on Windows)
+
+2002-08-03: codegen/py_codegen.py, edit_sizers/sizers_codegen.py, xml_parse.py:
+		changes to separate sizers from windows in the generated code,
+		and to put sizers declarations in the __do_layout method
+	    application.py, widget_properties.py: 
+                fix for a just introduced wxPython 2.3.2.1 incompatibility
+            widgets/MenuTree.py: 
+                added support for help strings on menu items
+
+2002-08-02: widgets/* edit_sizers: 
+                turned into packages with two modules, to decouple code 
+                generation functions from the rest
+	    common.py: 
+                - moved Application to the new application.py
+		- moved misc._encode and widget_properties._encode here
+	    misc.py: 
+                moved _encode to common.py
+	    widget_properties.py: 
+                moved _encode to common.py
+	    wxglade.py: 
+                added functions usage and command_line_code_generation
+		to support code generation without starting the GUI
+	    main.py, widgets/frame/frame.py, widgets/frame/codegen.py:
+		modified wxMenu.Append with checkable items for wxPython
+		2.3.3 compatibility 
+
+2002-08-01: main.py: 
+                added a View->Show Properties menu item
+	    widgets/frame.py: 
+                experimental fix for menubar-related segfaults on GTK
+-------------------------------------------------------------------------------
+2002-08-01: version 0.1.2 released
+
+2002-08-01: clipboard.py: 
+                removed dirt at the end of xml_str when retrieved from the 
+                clipboard (this may happen on Windows) Removed renaming code
+	    xml_parse.py: 
+                added code to rename copied widgets in 
+                ClipboardXmlWidgetBuilder
+	    tree.py: 
+                fixed bug when a toplevel window is shown and it doesn't
+		have a sizer
+	    widgets/dialog.py: 
+                changed create_widget to use a default style and not the 
+                current one, to avoid for example frames without a caption
+	    edit_sizers.py: 
+                fixed a memory leak
+	    widgets/splitter_window.py: 
+                fixed bug in the code generation
+	    widget_properties.py: 
+                fixed bug in HiddenProperty
+	    widgets/radio_box.py, widgets/static_bitmap.py,
+             widgets/bitmap_button.py: 
+                fixed bugs
+	    README file added
+
+2002-07-30: xml_parse.py: 
+                removed fake obj replacement in XmlWidgetObject.add_property 
+                since it is not necessary anymore
+	    edit_sizers.py, widgets/static_line.py, widgets/notebook.py,
+	    widgets/splitter_window.py, widgets/slider.py:
+	        removed obsolete use of Fake* objects during xml
+		loading
+	    widgets/splitter_window.py: 
+                fixed bug in set_size regarding the position of the sash
+	    clipboard.py: 
+                changes to use system clipboard with wxTheClipboard 
+
+2002-07-29: tree.py, main.py: 
+                prevention of auto expansion of tree nodes during xml loading
+            widget_properties.py: 
+                fixed bug in self._enabler for many Properties
+	    edit_sizers.py: 
+                - fixed bug on EditStaticBoxSizer
+                - changed self._rmenu to be an instance of wxGladePopupMenu
+                - renamed Refresh to refresh for consistency with the implicit 
+                  coding conventions
+	    edit_windows.py: 
+                changed self._rmenu to be an instance of wxGladePopupMenu 
+	    misc.py: 
+                added wxGladePopupMenu
+	    tree.py: 
+                added popup menu to show hidden toplevel widgets
+	    widgets/panel.py, widgets/notebook.py, widgets/splitter_window.py:
+                removed obsolete on_parent_size methods
+	    widgets/panel.py: 
+                fixed bug that caused a bad layout of the panel when resized
+
+2002-07-28: about.py:
+                 updated developers credits
+
+2002-07-26 / 2002-07-28: 
+           transition to the new implementation, i.e. (partial)
+	   separation of the GUI from the core logic
+
+2002-07-22: TODO.txt: 
+                updated
+	    docs/tech_notes.txt: 
+                added (incomplete)
+
+2002-07-20: edit_sizers.py: 
+                - added a create_properties method, with the same purpose of 
+                  EditBase.create_properties
+		- fixed a couple of bugs (double Destroy call) on SizerSlot
+	    widgets/splitter_window.py:
+                completed transition from the old Property behaviour to the 
+                new one
+	    xml_parse.py: 
+                created ClipboardXmlWidgetBuilder, to parse the contents of 
+                the clipboard
+	    clipboard.py: 
+                changes to use the new ClipboardXmlWidgetBuilder
+
+2002-07-19: main.py, widget_properties.py, edit_windows.py, edit_sizers.py:
+                fixed a lot of memory leaks
+
+2002-07-18: widget_properties.py: 
+                changed all the Properties: they are not instances of wxPanel 
+                anymore, but they have a panel attribute, which is initialized 
+                only when needed (i.e. when the owner of the Property 
+                has focus)
+            edit_windows.py, edit_sizers.py: 
+                changes to reflect the new behaviour of Properties: now
+                the notebook inside which Properties are displayed is
+                built only when needed
+
+2002-07-17: codegen/py_codegen.py: 
+                - support for multiple output files
+                - initial support for tags in the generated source files to 
+                  know what to overwrite and what to leave untouched
+
+2002-07-16: codegen/py_codegen.py: 
+                - initial support for multiple files
+                - if __name__ == '__main__' block on generated code
+                - remove duplicate declarations of custom classes when 
+                  there is more than one instance
+            main.py: 
+                fixed some memory leaks
+	    common.py: 
+                initial support for generation of multiple files
+	    xml_parse.py: 
+                initial support for generation of multiple files
+	    TODO.txt: 
+                added plan to support an XRC code generator
+
+2002-07-14: version 0.1alpha2
+            wxglade.py: 
+                added comments, added an if __name__ == '__main__' block
+            codegen/py_codegen.py: 
+                - fixed bug in the generated code when a __do_layout method 
+                  is empty
+                - translated the last Italian comment to English
+            widgets/notebook.py: 
+                - fixed bug in the generated code when the notebook is an 
+                  instance of a custom class     
+                - fixed bug in xml_builder which prevented the 'class' property
+                  from having the right value
+            widgets/splitter_window.py: 
+                - fixed bug in the generated code when the window is an 
+                  instance of a custom class
+                - fixed bug in xml_builder which prevented the 'class' property
+                  from having the right value
+            widgets/static_line.py: 
+                fixed bug in xml_builder which prevented the 'class' property 
+                from having the right value
+            docs/tutorial.html: 
+                - fixed some errors
+                - added information about custom classes
+-------------------------------------------------------------------------------
+2002-07-12: version 0.1alpha (first public release)

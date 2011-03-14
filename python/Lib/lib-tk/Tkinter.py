@@ -30,20 +30,17 @@ button.pack(side=BOTTOM)
 tk.mainloop()
 """
 
-__version__ = "$Revision: 50704 $"
+__version__ = "$Revision: 67083 $"
 
 import sys
 if sys.platform == "win32":
-    import FixTk # Attempt to configure Tcl/Tk without requiring PATH
+    # Attempt to configure Tcl/Tk without requiring PATH
+    import FixTk
 import _tkinter # If this fails your Python may not be configured for Tk
 tkinter = _tkinter # b/w compat for export
 TclError = _tkinter.TclError
 from types import *
 from Tkconstants import *
-try:
-    import MacOS; _MacOS = MacOS; del MacOS
-except ImportError:
-    _MacOS = None
 
 wantobjects = 1
 
@@ -188,7 +185,7 @@ class Variable:
         else:
             self._name = 'PY_VAR' + repr(_varnum)
             _varnum += 1
-        if value != None:
+        if value is not None:
             self.set(value)
         elif not self._tk.call("info", "exists", self._name):
             self.set(self._default)
@@ -590,9 +587,6 @@ class Misc:
         status = self.tk.call('grab', 'status', self._w)
         if status == 'none': status = None
         return status
-    def lower(self, belowThis=None):
-        """Lower this widget in the stacking order."""
-        self.tk.call('lower', self._w, belowThis)
     def option_add(self, pattern, value, priority = None):
         """Set a VALUE (second parameter) for an option
         PATTERN (first parameter).
@@ -1055,23 +1049,35 @@ class Misc:
                 if k[-1] == '_': k = k[:-1]
                 if callable(v):
                     v = self._register(v)
+                elif isinstance(v, (tuple, list)):
+                    nv = []
+                    for item in v:
+                        if not isinstance(item, (basestring, int)):
+                            break
+                        elif isinstance(item, int):
+                            nv.append('%d' % item)
+                        else:
+                            # format it to proper Tcl code if it contains space
+                            nv.append(('{%s}' if ' ' in item else '%s') % item)
+                    else:
+                        v = ' '.join(nv)
                 res = res + ('-'+k, v)
         return res
     def nametowidget(self, name):
         """Return the Tkinter instance of a widget identified by
         its Tcl name NAME."""
+        name = str(name).split('.')
         w = self
-        if name[0] == '.':
+
+        if not name[0]:
             w = w._root()
             name = name[1:]
-        while name:
-            i = name.find('.')
-            if i >= 0:
-                name, tail = name[:i], name[i+1:]
-            else:
-                tail = ''
-            w = w.children[name]
-            name = tail
+
+        for n in name:
+            if not n:
+                break
+            w = w.children[n]
+
         return w
     _nametowidget = nametowidget
     def _register(self, func, subst=None, needcleanup=1):
@@ -1094,7 +1100,6 @@ class Misc:
             if self._tclCommands is None:
                 self._tclCommands = []
             self._tclCommands.append(name)
-        #print '+ Tkinter created command', name
         return name
     register = _register
     def _root(self):
@@ -1202,6 +1207,8 @@ class Misc:
     __getitem__ = cget
     def __setitem__(self, key, value):
         self.configure({key: value})
+    def __contains__(self, key):
+        raise TypeError("Tkinter objects don't support 'in' tests.")
     def keys(self):
         """Return a list of all resource names of this widget."""
         return map(lambda x: x[0][1:],
@@ -1570,7 +1577,7 @@ class Wm:
         """Bind function FUNC to command NAME for this widget.
         Return the function bound to NAME if None is given. NAME could be
         e.g. "WM_SAVE_YOURSELF" or "WM_DELETE_WINDOW"."""
-        if callable(func):
+        if hasattr(func, '__call__'):
             command = self._register(func)
         else:
             command = func
@@ -1644,12 +1651,6 @@ class Tk(Misc, Wm):
     def _loadtk(self):
         self._tkloaded = 1
         global _default_root
-        if _MacOS and hasattr(_MacOS, 'SchedParams'):
-            # Disable event scanning except for Command-Period
-            _MacOS.SchedParams(1, 0)
-            # Work around nasty MacTk bug
-            # XXX Is this one still needed?
-            self.update()
         # Version sanity checks
         tk_version = self.tk.getvar('tk_version')
         if tk_version != _tkinter.TK_VERSION:
@@ -1747,10 +1748,11 @@ class Pack:
         after=widget - pack it after you have packed widget
         anchor=NSEW (or subset) - position widget according to
                                   given direction
-                before=widget - pack it before you will pack widget
+        before=widget - pack it before you will pack widget
         expand=bool - expand widget if parent size grows
         fill=NONE or X or Y or BOTH - fill widget if widget grows
         in=master - use master to contain this widget
+        in_=master - see 'in' option description
         ipadx=amount - add internal padding in x direction
         ipady=amount - add internal padding in y direction
         padx=amount - add padding in x direction
@@ -1788,29 +1790,26 @@ class Place:
     Base class to use the methods place_* in every widget."""
     def place_configure(self, cnf={}, **kw):
         """Place a widget in the parent widget. Use as options:
-        in=master - master relative to which the widget is placed.
+        in=master - master relative to which the widget is placed
+        in_=master - see 'in' option description
         x=amount - locate anchor of this widget at position x of master
         y=amount - locate anchor of this widget at position y of master
         relx=amount - locate anchor of this widget between 0.0 and 1.0
                       relative to width of master (1.0 is right edge)
-            rely=amount - locate anchor of this widget between 0.0 and 1.0
+        rely=amount - locate anchor of this widget between 0.0 and 1.0
                       relative to height of master (1.0 is bottom edge)
-            anchor=NSEW (or subset) - position anchor according to given direction
+        anchor=NSEW (or subset) - position anchor according to given direction
         width=amount - width of this widget in pixel
         height=amount - height of this widget in pixel
         relwidth=amount - width of this widget between 0.0 and 1.0
                           relative to width of master (1.0 is the same width
-                  as the master)
-            relheight=amount - height of this widget between 0.0 and 1.0
+                          as the master)
+        relheight=amount - height of this widget between 0.0 and 1.0
                            relative to height of master (1.0 is the same
-                   height as the master)
-            bordermode="inside" or "outside" - whether to take border width of master widget
-                                               into account
-            """
-        for k in ['in_']:
-            if kw.has_key(k):
-                kw[k[:-1]] = kw[k]
-                del kw[k]
+                           height as the master)
+        bordermode="inside" or "outside" - whether to take border width of
+                                           master widget into account
+        """
         self.tk.call(
               ('place', 'configure', self._w)
               + self._options(cnf, kw))
@@ -1845,6 +1844,7 @@ class Grid:
         column=number - use cell identified with given column (starting with 0)
         columnspan=number - this widget will span several columns
         in=master - use master to contain this widget
+        in_=master - see 'in' option description
         ipadx=amount - add internal padding in x direction
         ipady=amount - add internal padding in y direction
         padx=amount - add padding in x direction
@@ -1921,6 +1921,8 @@ class BaseWidget(Misc):
             cnf = _cnfmerge((cnf, kw))
         self.widgetName = widgetName
         BaseWidget._setup(self, master, cnf)
+        if self._tclCommands is None:
+            self._tclCommands = []
         classes = []
         for k in cnf.keys():
             if type(k) is ClassType:
@@ -2658,7 +2660,19 @@ class Menu(Widget):
         """Add separator at INDEX."""
         self.insert(index, 'separator', cnf or kw)
     def delete(self, index1, index2=None):
-        """Delete menu items between INDEX1 and INDEX2 (not included)."""
+        """Delete menu items between INDEX1 and INDEX2 (included)."""
+        if index2 is None:
+            index2 = index1
+
+        num_index1, num_index2 = self.index(index1), self.index(index2)
+        if (num_index1 is None) or (num_index2 is None):
+            num_index1, num_index2 = 0, -1
+
+        for i in range(num_index1, num_index2 + 1):
+            if 'command' in self.entryconfig(i):
+                c = str(self.entrycget(i, 'command'))
+                if c:
+                    self.deletecommand(c)
         self.tk.call(self._w, 'delete', index1, index2)
     def entrycget(self, index, option):
         """Return the resource value of an menu item for OPTION at INDEX."""
@@ -2910,8 +2924,7 @@ class Text(Widget):
         and edit_undo
 
         """
-        return self._getints(
-            self.tk.call((self._w, 'edit') + args)) or ()
+        return self.tk.call(self._w, 'edit', *args)
 
     def edit_modified(self, arg=None):
         """Get or Set the modified flag
@@ -2981,7 +2994,7 @@ class Text(Widget):
         return self.tk.call(self._w, "image", "names")
     def index(self, index):
         """Return the index in the form line.char for INDEX."""
-        return self.tk.call(self._w, 'index', index)
+        return str(self.tk.call(self._w, 'index', index))
     def insert(self, index, chars, *args):
         """Insert CHARS before the characters at INDEX. An additional
         tag can be given in ARGS. Additional CHARS and tags can follow in ARGS."""
@@ -3017,7 +3030,7 @@ class Text(Widget):
         self.tk.call(self._w, 'scan', 'dragto', x, y)
     def search(self, pattern, index, stopindex=None,
            forwards=None, backwards=None, exact=None,
-           regexp=None, nocase=None, count=None):
+           regexp=None, nocase=None, count=None, elide=None):
         """Search PATTERN beginning from INDEX until STOPINDEX.
         Return the index of the first character of a match or an empty string."""
         args = [self._w, 'search']
@@ -3026,6 +3039,7 @@ class Text(Widget):
         if exact: args.append('-exact')
         if regexp: args.append('-regexp')
         if nocase: args.append('-nocase')
+        if elide: args.append('-elide')
         if count: args.append('-count'); args.append(count)
         if pattern[0] == '-': args.append('--')
         args.append(pattern)

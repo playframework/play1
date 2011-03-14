@@ -1,0 +1,248 @@
+%% LyX 1.5.1 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+
+\makeatletter
+\usepackage{babel}
+\makeatother
+
+\begin{document}
+\tableofcontents{}
+
+
+\title{XRCed Manual}
+
+
+\date{Roman Rolinsky <genericsoma@gmail.com>}
+
+\maketitle
+
+\section*{Introduction}
+
+XRCed is a resource editor for editing XRC resource files used in
+wxWidgets or wxPython. XRC is an XML-based format for describing the
+layout of the interface. When a XRC file it being parsed in the application
+(using wxXmlResource class), objects corresponding to the interface
+elements defined in .xrc file are created and can be immediately used.
+Please refer to the corresponding documentation depending on your
+language for details. XRC files are actually normal text files. Structure
+of an XML file is defined by a hierarchy of \emph{nodes,} each node
+is delimited by a pair of \emph{tags} in a similar manner to HTML
+format. XRC format uses a special \texttt{object} tag for defining
+interface element nodes, which can contain a number of \emph{attribute}
+nodes with tag names corresponding to the attribute names, e.g. \texttt{<pos>100,100</pos>}.
+Object nodes always have XML attribute {}``class'' defined, e.g.
+\texttt{<object class='wxFrame'>}.
+
+
+\section{Getting started}
+
+XRCed interface contains these components:
+
+\begin{description}
+\item [{XML\ tree}] a tree representing the structure of the resource
+file.
+\item [{Attribute\ panel}] a panel with the information about the currently
+selected tree item. Class and object name is shown in the upper part
+and a notebook with a number of pages is shown below for editing object's
+attributes.
+\item [{Pull-down\ menu}] is shown when a used right-clicks inside the
+tree control. Is is used for creating new elements and basic operations
+such as copy/paste.
+\item [{Component\ panel}] is a graphical menu for creating new elements
+by clicking on icons or by dragging them on the test window.
+\item [{Test\ window}] can be shown for an already existing part of the
+resource tree to see the resulting appearance of the interface.
+\end{description}
+Using XRCed is easy once you understand some basic principles. First
+of all, it is using a structure-oriented tree-based editing technique,
+versus point-and-click method used in most GUI builders. The tree
+is actually almost a direct respresentation of the hierarchy of \emph{object}
+nodes in XRC file. More precisely, only the nodes corresponding to
+visible interface elements are shown. An example of an object node
+which is not an interface element is the sizeritem node. 
+
+XRCed tries hard to make accessible the full information contained
+in XRC file, so even the nodes which are not shown in the tree must
+be represented. This is done by adding their property pages to the
+attribute panel.
+
+Secondly, creating new elements is context-dependent. The new elements
+are inserted in the tree relative to the current selection (except
+for drag-and-drop mode when the place is determined dynamically).
+Sometimes there is an ambiguity on the exact position, because some
+elements are \emph{containers} which can have children, but it may
+be needed to create the new element as a sibling node instead of a
+child. Sibling mode can be forced by holding \textbf{Ctrl} key on
+wxGTK/wxMSW or \textbf{Alt} key on wxMac when inserting a new element.
+Similarly, a new element can be inserted as the first child of a container
+by holding \textbf{Shift} key (default is to append it as the last
+child).
+
+
+\section{Tree editing}
+
+When you create a new interface element it is attached at some point
+to the existing XML tree. The root node of the tree is created automatically
+and has only one attribute - the encoding. Root is not shown in the
+tree control (to save space), so its attributes are visible when no
+other elements are selected. 
+
+As explained in the previous section, the new elements can be put
+in different locations relative to the parent element. What to do
+if the initial location is not correct, or should be changed in the
+development process? There two ways to re-arrange elements:
+
+\begin{enumerate}
+\item Cut some element, then select the new parent or sibling and paste
+at the new location. Modifier keys can be used in the same way as
+for creating to alter the default paste behaviour when using the pull-down
+command or the tool button (pasting by using the keyboard shortcut
+is always using the default way).
+\item Use one of the {}``Move'' menu or toolbar commands to swap elements
+or change their parent/child configuration. If a move tool button
+is disabled, this means that it does not make sense to do that kind
+of move due to incompatible parent/child configuration.
+\end{enumerate}
+When you cut a subtree, all elements are cut to the clipboard and
+will be pasted to the new location in the same configuration. On some
+platforms the clipboard is shared among different processes, so it
+is possible to start a second copy of XRCed and copy parts of one
+tree into another.
+
+
+\subsection*{Hidden nodes}
+
+Normally one tree element corresponds to a single <object> tag. Sometimes
+it makes sense to associate contents of some <object> tags to element
+attributes related to the parent. A common example is a sizer object,
+which uses \textbf{sizeritem} objects, which have a single child (a
+control or another sizer). For such simple objects an attribute page
+is added to the child element attributes. The side-effect of this
+when copying a child from one parent's subtree into a subtree of a
+parent of a different class, is that the hidden node attributes must
+be discarded. This is done automatically.
+
+
+\subsection*{Cut/Copy/Paste}
+
+To accelerate your workflow it may be very useful to use keyboard
+shortcuts. XRCed supports standard editing shortcuts for cut/copy/paste
+commands. Pasting operation depends on the state of additional modifier
+keys to select the desired pasting location relative to the active
+tree selection, in a way similar to creating new nodes. \textbf{Shift}
+modifier can be used with the toolbar Paste button or tree pulldown
+menu to activate {}``insert'' mode. To activate sibling mode on
+wxGTK/wxMSW, \textbf{Ctrl} or \textbf{Alt} modifier is used depending
+on the platform and the way of introducing Paste command:
+
+\begin{tabular}{ccc} & \textbf{wxGTK and wxMSW} & \textbf{wxMac}\\
+Tool button & Ctrl & Alt\\
+Pulldown menu & Ctrl & Alt\\
+Ctrl+V or Control+V shortcut & Alt & Alt\\
+\end{tabular} 
+
+
+\section{Defining attributes}
+
+Attributes are edited using the attribute panel. The upper part has
+the class field and, if applicable, the object name field. Lower part
+contains a notebook with one or several pages. Normally the first
+page contains the main attributes, the second is {}``Look'n'Feel''
+for editing visual behaviour attributes such as font, colors, etc.,
+the third is {}``Style'' with styles grouped in two columns - \textbf{Generic}
+and \textbf{Specific,} then there may be {}``ExStyle'' page for
+extra styles and if there is a hidden node a page with its attributes.
+
+
+\subsection*{Changing object's class}
+
+There are two ways to change the class of an element: by editing {}``class:''
+field in the attributes panel or by using {}``Replace With'' pulldown
+menu command. XRCed tried to preserve all attributes compatible with
+the new class.
+
+
+\section{Test window}
+
+Test view is created simply by loading a part of the resource file
+using XRC library, so it should look the same as in your application
+(without the contents and changes performed by the program, of course).
+There are elements which cannot be tested individually, but only as
+a part of a subtree.
+
+{}``Test'' command (View>Test or {}``radioactive sign'' tool or
+F5) creates a view of the selected element or subtree. If a top-level
+element (such as wxDialog) is selected, it is normally created as
+a top-level window. When the selected element cannot be a top-level
+window, a miniframe is created and the test view is put inside. Currenly
+shown parent element is made bold in the tree control while the test
+window is opened.
+
+It is possible to select an element by clicking on it in the test
+window after activating the {}``Locate'' command. While the test
+window is open, it is possible to create new elements by dragging
+a component icon on the test window. The parent element is highlighted
+by a blue box.
+
+
+\subsection*{Auto-refresh mode}
+
+When auto-refresh is activated, any changes made to the attibutes
+or the tree structure of the currently selected test subtree provoke
+test window refresh (reload from the updated resource). Sometimes
+it may be prefered to freeze the test window while making modifications
+by deactivating auto-refresh (from the View menu or using Alt+A keyboard
+shortcut). To force a refresh, press Ctrl+R or select View>Refresh
+command.
+
+
+\section{Component plugins}
+
+Each interface element available in XRCed is defined using a component
+plugin. This permits easy extension to include new XRC format features
+and classes and using custom application-specific components.
+
+A component plugin is actually a (singleton) object of \textbf{Component}
+class or one of derived classes, containing the data essential for
+constructing the visual interface for editing element attributes and
+defining its behaviour with respect to other components. Components
+must be registered with the component manager \textbf{Manager} object.
+
+
+\subsection*{Defining component plugins}
+
+There are two ways to define component plugins.
+
+\begin{itemize}
+\item Creating an object of one of component classes in a Python module
+(optionally defining a new class if a specific behaviour which cannot
+be provided by the standard classes) is needed. XRCed looks in standard
+\texttt{plugins} directory (in \texttt{XRCed} installation directory)
+and in each of the directories in \texttt{XRCEDPATH} environment variable.
+It tries to import all Python files, except with names starting with
+underscore ('\_'). It then looks in sub-directories which contain
+\texttt{\_\_init\_\_.py} and imports them using {*}-mode (so it's
+possible to group plugins by directory without listing too many in
+\texttt{XRCEDPATH}).
+\item Another option to define a plugin is to use an XML \emph{manifest}
+file. This can be used for simple plugins which do not require defining
+new component classes or component groups. The structure of this CRX
+file is very similar to a flat XRC file having only top-level nodes
+defined using \textbf{component} tag instead of \textbf{object} (that's
+why it is called CRX and uses .crx extention). This is done so that
+CRX files can be edited using XRCed, if you don't want to edit XML
+by hand. A special command-line options \texttt{-m} or \texttt{-{}-meta}
+should be used when starting XRCed to include support for so-called
+\emph{meta-components. }Attributes of meta-components correspond to
+the constructor parameters of Component classes (class name must be
+one of known component classes). It is possible to include normal
+interface elements in the same CRX file, for easy testing of new plugins.
+\end{itemize}
+Please refer to the wxPyWiki documentation for further information
+and examples about component plugins.
+\end{document}

@@ -14,36 +14,36 @@ non-error returns.  The HTTPRedirectHandler automatically deals with
 HTTP 301, 302, 303 and 307 redirect errors, and the HTTPDigestAuthHandler
 deals with digest authentication.
 
-urlopen(url, data=None) -- basic usage is the same as original
+urlopen(url, data=None) -- Basic usage is the same as original
 urllib.  pass the url and optionally data to post to an HTTP URL, and
 get a file-like object back.  One difference is that you can also pass
 a Request instance instead of URL.  Raises a URLError (subclass of
 IOError); for HTTP errors, raises an HTTPError, which can also be
 treated as a valid response.
 
-build_opener -- function that creates a new OpenerDirector instance.
-will install the default handlers.  accepts one or more Handlers as
+build_opener -- Function that creates a new OpenerDirector instance.
+Will install the default handlers.  Accepts one or more Handlers as
 arguments, either instances or Handler classes that it will
-instantiate.  if one of the argument is a subclass of the default
+instantiate.  If one of the argument is a subclass of the default
 handler, the argument will be installed instead of the default.
 
-install_opener -- installs a new opener as the default opener.
+install_opener -- Installs a new opener as the default opener.
 
 objects of interest:
 OpenerDirector --
 
-Request -- an object that encapsulates the state of a request.  the
-state can be a simple as the URL.  it can also include extra HTTP
+Request -- An object that encapsulates the state of a request.  The
+state can be as simple as the URL.  It can also include extra HTTP
 headers, e.g. a User-Agent.
 
 BaseHandler --
 
 exceptions:
-URLError-- a subclass of IOError, individual protocols have their own
-specific subclass
+URLError -- A subclass of IOError, individual protocols have their own
+specific subclass.
 
-HTTPError-- also a valid HTTP response, so you can treat an HTTP error
-as an exceptional event or valid response
+HTTPError -- Also a valid HTTP response, so you can treat an HTTP error
+as an exceptional event or valid response.
 
 internals:
 BaseHandler and parent
@@ -107,8 +107,8 @@ except ImportError:
     from StringIO import StringIO
 
 from urllib import (unwrap, unquote, splittype, splithost, quote,
-     addinfourl, splitport, splitgophertype, splitquery,
-     splitattr, ftpwrapper, noheaders, splituser, splitpasswd, splitvalue)
+     addinfourl, splitport,
+     splitattr, ftpwrapper, splituser, splitpasswd, splitvalue)
 
 # support for FileHandler, proxies via environment variables
 from urllib import localhost, url2pathname, getproxies
@@ -117,11 +117,11 @@ from urllib import localhost, url2pathname, getproxies
 __version__ = sys.version[:3]
 
 _opener = None
-def urlopen(url, data=None):
+def urlopen(url, data=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
     global _opener
     if _opener is None:
         _opener = build_opener()
-    return _opener.open(url, data)
+    return _opener.open(url, data, timeout)
 
 def install_opener(opener):
     global _opener
@@ -159,13 +159,10 @@ class HTTPError(URLError, addinfourl):
         # file object.  If this happens, the simplest workaround is to
         # not initialize the base classes.
         if fp is not None:
-            self.__super_init(fp, hdrs, url)
+            self.__super_init(fp, hdrs, url, code)
 
     def __str__(self):
         return 'HTTP Error %s: %s' % (self.code, self.msg)
-
-class GopherError(URLError):
-    pass
 
 # copied from cookielib.py
 _cut_port_re = re.compile(r":\d+$")
@@ -258,6 +255,9 @@ class Request:
         self.host, self.type = host, type
         self.__r_host = self.__original
 
+    def has_proxy(self):
+        return self.__r_host == self.__original
+
     def get_origin_req_host(self):
         return self.origin_req_host
 
@@ -341,7 +341,8 @@ class OpenerDirector:
             added = True
 
         if added:
-            # XXX why does self.handlers need to be sorted?
+            # the handlers must work in an specific order, the order
+            # is specified in a Handler attribute
             bisect.insort(self.handlers, handler)
             handler.add_parent(self)
 
@@ -361,7 +362,7 @@ class OpenerDirector:
             if result is not None:
                 return result
 
-    def open(self, fullurl, data=None):
+    def open(self, fullurl, data=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         # accept a URL or a Request object
         if isinstance(fullurl, basestring):
             req = Request(fullurl, data)
@@ -370,6 +371,7 @@ class OpenerDirector:
             if data is not None:
                 req.add_data(data)
 
+        req.timeout = timeout
         protocol = req.get_type()
 
         # pre-process request
@@ -447,14 +449,14 @@ def build_opener(*handlers):
                        FTPHandler, FileHandler, HTTPErrorProcessor]
     if hasattr(httplib, 'HTTPS'):
         default_classes.append(HTTPSHandler)
-    skip = []
+    skip = set()
     for klass in default_classes:
         for check in handlers:
             if isclass(check):
                 if issubclass(check, klass):
-                    skip.append(klass)
+                    skip.add(klass)
             elif isinstance(check, klass):
-                skip.append(klass)
+                skip.add(klass)
     for klass in skip:
         default_classes.remove(klass)
 
@@ -493,7 +495,9 @@ class HTTPErrorProcessor(BaseHandler):
     def http_response(self, request, response):
         code, msg, hdrs = response.code, response.msg, response.info()
 
-        if code not in (200, 206):
+        # According to RFC 2616, "2xx" code indicates that the client's
+        # request was successfully received, understood, and accepted.
+        if not (200 <= code < 300):
             response = self.parent.error(
                 'http', request, response, code, msg, hdrs)
 
@@ -533,8 +537,11 @@ class HTTPRedirectHandler(BaseHandler):
             # do the same.
             # be conciliant with URIs containing a space
             newurl = newurl.replace(' ', '%20')
+            newheaders = dict((k,v) for k,v in req.headers.items()
+                              if k.lower() not in ("content-length", "content-type")
+                             )
             return Request(newurl,
-                           headers=req.headers,
+                           headers=newheaders,
                            origin_req_host=req.get_origin_req_host(),
                            unverifiable=True)
         else:
@@ -553,6 +560,14 @@ class HTTPRedirectHandler(BaseHandler):
             newurl = headers.getheaders('uri')[0]
         else:
             return
+
+        # fix a possible malformed URL
+        urlparts = urlparse.urlparse(newurl)
+        if not urlparts.path:
+            urlparts = list(urlparts)
+            urlparts[2] = "/"
+        newurl = urlparse.urlunparse(urlparts)
+
         newurl = urlparse.urljoin(req.get_full_url(), newurl)
 
         # XXX Probably want to forget about the state of the current
@@ -776,7 +791,10 @@ class AbstractBasicAuthHandler:
     # XXX this allows for multiple auth-schemes, but will stupidly pick
     # the last one with a realm specified.
 
-    rx = re.compile('(?:.*,)*[ \t]*([^ \t]+)[ \t]+realm="([^"]*)"', re.I)
+    # allow for double- and single-quoted realm values
+    # (single quotes are a violation of the RFC, but appear in the wild)
+    rx = re.compile('(?:.*,)*[ \t]*([^ \t]+)[ \t]+'
+                    'realm=(["\'])(.*?)\\2', re.I)
 
     # XXX could pre-emptively send auth info already accepted (RFC 2617,
     # end of section 2, and section 1.2 immediately after "credentials"
@@ -796,7 +814,7 @@ class AbstractBasicAuthHandler:
         if authreq:
             mo = AbstractBasicAuthHandler.rx.search(authreq)
             if mo:
-                scheme, realm = mo.groups()
+                scheme, quote, realm = mo.groups()
                 if scheme.lower() == 'basic':
                     return self.retry_http_basic_auth(host, req, realm)
 
@@ -969,6 +987,8 @@ class AbstractDigestAuthHandler:
         return base
 
     def get_algorithm_impls(self, algorithm):
+        # algorithm should be case-insensitive according to RFC2617
+        algorithm = algorithm.upper()
         # lambdas assume digest modules are imported at the top level
         if algorithm == 'MD5':
             H = lambda x: hashlib.md5(x).hexdigest()
@@ -1036,10 +1056,13 @@ class AbstractHTTPHandler(BaseHandler):
                 request.add_unredirected_header(
                     'Content-length', '%d' % len(data))
 
-        scheme, sel = splittype(request.get_selector())
-        sel_host, sel_path = splithost(sel)
+        sel_host = host
+        if request.has_proxy():
+            scheme, sel = splittype(request.get_selector())
+            sel_host, sel_path = splithost(sel)
+
         if not request.has_header('Host'):
-            request.add_unredirected_header('Host', sel_host or host)
+            request.add_unredirected_header('Host', sel_host)
         for name, value in self.parent.addheaders:
             name = name.capitalize()
             if not request.has_header(name):
@@ -1061,7 +1084,7 @@ class AbstractHTTPHandler(BaseHandler):
         if not host:
             raise URLError('no host given')
 
-        h = http_class(host) # will parse host:port
+        h = http_class(host, timeout=req.timeout) # will parse host:port
         h.set_debuglevel(self._debuglevel)
 
         headers = dict(req.headers)
@@ -1215,24 +1238,28 @@ class FileHandler(BaseHandler):
 
     # not entirely sure what the rules are here
     def open_local_file(self, req):
-        import email.Utils
+        import email.utils
         import mimetypes
         host = req.get_host()
         file = req.get_selector()
         localfile = url2pathname(file)
-        stats = os.stat(localfile)
-        size = stats.st_size
-        modified = email.Utils.formatdate(stats.st_mtime, usegmt=True)
-        mtype = mimetypes.guess_type(file)[0]
-        headers = mimetools.Message(StringIO(
-            'Content-type: %s\nContent-length: %d\nLast-modified: %s\n' %
-            (mtype or 'text/plain', size, modified)))
-        if host:
-            host, port = splitport(host)
-        if not host or \
-           (not port and socket.gethostbyname(host) in self.get_names()):
-            return addinfourl(open(localfile, 'rb'),
-                              headers, 'file:'+file)
+        try:
+            stats = os.stat(localfile)
+            size = stats.st_size
+            modified = email.utils.formatdate(stats.st_mtime, usegmt=True)
+            mtype = mimetypes.guess_type(file)[0]
+            headers = mimetools.Message(StringIO(
+                'Content-type: %s\nContent-length: %d\nLast-modified: %s\n' %
+                (mtype or 'text/plain', size, modified)))
+            if host:
+                host, port = splitport(host)
+            if not host or \
+                (not port and socket.gethostbyname(host) in self.get_names()):
+                return addinfourl(open(localfile, 'rb'),
+                                  headers, 'file:'+file)
+        except OSError, msg:
+            # urllib2 users shouldn't expect OSErrors coming from urlopen()
+            raise URLError(msg)
         raise URLError('file not on local host')
 
 class FTPHandler(BaseHandler):
@@ -1241,7 +1268,7 @@ class FTPHandler(BaseHandler):
         import mimetypes
         host = req.get_host()
         if not host:
-            raise IOError, ('ftp error', 'no host given')
+            raise URLError('ftp error: no host given')
         host, port = splitport(host)
         if port is None:
             port = ftplib.FTP_PORT
@@ -1269,7 +1296,7 @@ class FTPHandler(BaseHandler):
         if dirs and not dirs[0]:
             dirs = dirs[1:]
         try:
-            fw = self.connect_ftp(user, passwd, host, port, dirs)
+            fw = self.connect_ftp(user, passwd, host, port, dirs, req.timeout)
             type = file and 'I' or 'D'
             for attr in attrs:
                 attr, value = splitvalue(attr)
@@ -1287,10 +1314,10 @@ class FTPHandler(BaseHandler):
             headers = mimetools.Message(sf)
             return addinfourl(fp, headers, req.get_full_url())
         except ftplib.all_errors, msg:
-            raise IOError, ('ftp error', msg), sys.exc_info()[2]
+            raise URLError, ('ftp error: %s' % msg), sys.exc_info()[2]
 
-    def connect_ftp(self, user, passwd, host, port, dirs):
-        fw = ftpwrapper(user, passwd, host, port, dirs)
+    def connect_ftp(self, user, passwd, host, port, dirs, timeout):
+        fw = ftpwrapper(user, passwd, host, port, dirs, timeout)
 ##        fw.ftp.set_debuglevel(1)
         return fw
 
@@ -1310,12 +1337,12 @@ class CacheFTPHandler(FTPHandler):
     def setMaxConns(self, m):
         self.max_conns = m
 
-    def connect_ftp(self, user, passwd, host, port, dirs):
-        key = user, host, port, '/'.join(dirs)
+    def connect_ftp(self, user, passwd, host, port, dirs, timeout):
+        key = user, host, port, '/'.join(dirs), timeout
         if key in self.cache:
             self.timeout[key] = time.time() + self.delay
         else:
-            self.cache[key] = ftpwrapper(user, passwd, host, port, dirs)
+            self.cache[key] = ftpwrapper(user, passwd, host, port, dirs, timeout)
             self.timeout[key] = time.time() + self.delay
         self.check_cache()
         return self.cache[key]
@@ -1339,22 +1366,3 @@ class CacheFTPHandler(FTPHandler):
                     del self.timeout[k]
                     break
             self.soonest = min(self.timeout.values())
-
-class GopherHandler(BaseHandler):
-    def gopher_open(self, req):
-        # XXX can raise socket.error
-        import gopherlib  # this raises DeprecationWarning in 2.5
-        host = req.get_host()
-        if not host:
-            raise GopherError('no host given')
-        host = unquote(host)
-        selector = req.get_selector()
-        type, selector = splitgophertype(selector)
-        selector, query = splitquery(selector)
-        selector = unquote(selector)
-        if query:
-            query = unquote(query)
-            fp = gopherlib.send_query(selector, query, host)
-        else:
-            fp = gopherlib.send_selector(selector, host)
-        return addinfourl(fp, noheaders(), req.get_full_url())

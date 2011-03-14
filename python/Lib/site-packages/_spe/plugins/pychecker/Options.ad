@@ -1,0 +1,9 @@
+*ok.text: Ok
+*cancel.text: Cancel
+*default.text: Reset
+*helpBox.wrapLength: 400
+*helpBox.height: 2
+*getfile.text: File:
+*check.text: Check!
+*fname.width: 50
+*close.text: Close

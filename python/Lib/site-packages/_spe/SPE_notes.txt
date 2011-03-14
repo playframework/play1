@@ -1,0 +1,50 @@
+TODO-LIST (not for end-users)
+
+save before run option
+
+uml export
+
+timecoded comment
+
+
+
+
+
+
+
+enable updaten voor alle menus ook van kinderen
+
+figure out Browser
+
+
+
+Autocad
+
+SetStatusText
+
+SetIcon
+
+
+
+simple:
+
+remember: filelist eval
+
+
+
+preferences:
+
+show busy cursor while running programs
+
+
+
+postponed:
+
+Alt+4 behaves strange
+
+saveall
+
+smarter todo index
+
+wxDocument/View architecture
+

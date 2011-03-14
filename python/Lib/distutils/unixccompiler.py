@@ -13,11 +13,10 @@ the "typical" Unix-style command-line C compiler:
   * link shared library handled by 'cc -shared'
 """
 
-__revision__ = "$Id: unixccompiler.py 54954 2007-04-25 06:42:41Z neal.norwitz $"
+__revision__ = "$Id: unixccompiler.py 65012 2008-07-16 13:24:06Z jesse.noller $"
 
 import os, sys
 from types import StringType, NoneType
-from copy import copy
 
 from distutils import sysconfig
 from distutils.dep_util import newer
@@ -65,7 +64,7 @@ def _darwin_compiler_fixup(compiler_so, cc_args):
         stripArch = '-arch' in cc_args
         stripSysroot = '-isysroot' in cc_args
 
-    if stripArch:
+    if stripArch or 'ARCHFLAGS' in os.environ:
         while 1:
             try:
                 index = compiler_so.index('-arch')
@@ -73,6 +72,11 @@ def _darwin_compiler_fixup(compiler_so, cc_args):
                 del compiler_so[index:index+2]
             except ValueError:
                 break
+
+    if 'ARCHFLAGS' in os.environ and not stripArch:
+        # User specified different -arch flags in the environ,
+        # see also distutils.sysconfig
+        compiler_so = compiler_so + os.environ['ARCHFLAGS'].split()
 
     if stripSysroot:
         try:

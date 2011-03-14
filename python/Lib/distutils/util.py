@@ -4,7 +4,7 @@ Miscellaneous utility functions -- anything that doesn't fit into
 one of the other *util.py modules.
 """
 
-__revision__ = "$Id: util.py 59116 2007-11-22 10:14:26Z ronald.oussoren $"
+__revision__ = "$Id: util.py 63955 2008-06-05 12:58:24Z ronald.oussoren $"
 
 import sys, os, string, re
 from distutils.errors import DistutilsPlatformError
@@ -29,8 +29,27 @@ def get_platform ():
        irix-5.3
        irix64-6.2
 
-    For non-POSIX platforms, currently just returns 'sys.platform'.
+    Windows will return one of:
+       win-amd64 (64bit Windows on AMD64 (aka x86_64, Intel64, EM64T, etc)
+       win-ia64 (64bit Windows on Itanium)
+       win32 (all others - specifically, sys.platform is returned)
+
+    For other non-POSIX platforms, currently just returns 'sys.platform'.
     """
+    if os.name == 'nt':
+        # sniff sys.version for architecture.
+        prefix = " bit ("
+        i = string.find(sys.version, prefix)
+        if i == -1:
+            return sys.platform
+        j = string.find(sys.version, ")", i)
+        look = sys.version[i+len(prefix):j].lower()
+        if look=='amd64':
+            return 'win-amd64'
+        if look=='itanium':
+            return 'win-ia64'
+        return sys.platform
+
     if os.name != "posix" or not hasattr(os, 'uname'):
         # XXX what about the architecture? NT is Intel or Alpha,
         # Mac OS is M68k or PPC, etc.
@@ -107,10 +126,17 @@ def get_platform ():
 
 
             if (release + '.') >= '10.4.' and \
-                    get_config_vars().get('UNIVERSALSDK', '').strip():
+                    '-arch' in get_config_vars().get('CFLAGS', '').strip():
                 # The universal build will build fat binaries, but not on
                 # systems before 10.4
+                #
+                # Try to detect 4-way universal builds, those have machine-type
+                # 'universal' instead of 'fat'.
+
                 machine = 'fat'
+
+                if '-arch x86_64' in get_config_vars().get('CFLAGS'):
+                    machine = 'universal'
 
             elif machine in ('PowerPC', 'Power_Macintosh'):
                 # Pick a sane name for the PPC architecture.
@@ -200,11 +226,11 @@ def check_environ ():
     if _environ_checked:
         return
 
-    if os.name == 'posix' and not os.environ.has_key('HOME'):
+    if os.name == 'posix' and 'HOME' not in os.environ:
         import pwd
         os.environ['HOME'] = pwd.getpwuid(os.getuid())[5]
 
-    if not os.environ.has_key('PLAT'):
+    if 'PLAT' not in os.environ:
         os.environ['PLAT'] = get_platform()
 
     _environ_checked = 1
@@ -222,7 +248,7 @@ def subst_vars (s, local_vars):
     check_environ()
     def _subst (match, local_vars=local_vars):
         var_name = match.group(1)
-        if local_vars.has_key(var_name):
+        if var_name in local_vars:
             return str(local_vars[var_name])
         else:
             return os.environ[var_name]

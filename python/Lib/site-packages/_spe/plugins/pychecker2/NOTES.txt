@@ -1,0 +1,131 @@
+This is a re-write of pychecker using traditional parse tree
+techniques, rather than the bytecode.
+
+There are some other design changes, related to Warning objects and
+Option handling.  In general, pychecker2 tries to distribute checks to
+separate classes.  These classes are more self-contained: they hold
+onto the option variables and define the Warning objects they support.
+
+ToDo:
+        All missing stuff
+        Always returning None
+        It is illegal to delete a name from the local namespace if it occurs
+            as a free variable in a nested block.
+        More path analysis
+            used before set for if/else try/except
+        Warn about unpacking args:
+             def f(a, (b, c)): pass
+
+Items still missing:
+        Error suppression (errors may be suppressed globally)
+
+        Detail of exception is an exception
+        Local used after deleted, already deleted, deleted before set
+        Not calling base class __init__
+        Using return value which is always None
+        Wrong # of args on function (including ctor)
+        Function arguments, kwargs
+        Abstract methods
+        exec may use locals/globals
+        import x with from x import
+
+        Modifying a default parameter
+        Tuple access to list list[1, 2]
+        List .append() takes one argument
+        Return None from __getattr__
+        string iteration
+        Inconsistent return type
+        Object has no attr
+        Method read as attribute, but not called:
+        Function always returns None (use empty return)
+        Unpack wrong size
+        Unpack wrong type
+
+        Exec warnings
+        Security warning: input()
+
+        Module imports itself
+        Complexity
+        Doc strings
+        New python features:
+             slots
+             properties
+             integer division
+        Warning for string raising
+
+Bugs:
+        More member not used
+        Speed
+        Is __file__ a builtin?
+
+        Aliases:
+            class C:
+                  def f(a, b): pass
+                  def g(a, b): pass
+                  h = f
+                  h = g			# redef of h, not caught now
+
+        foo = 1
+        del foo	                        # should not be unused
+
+        from __future__ import produces unused warnings
+        import of readline has side effect on input/raw_input, and should be
+           marked as used
+
+Important stuff:
+
+If you want to add new checks, there are some parts to be aware of:
+
+        File
+                A stupid data structure to hold everything we know about 
+                a file to be checked.
+
+                Members:
+                   name
+                        The file name.
+
+                   parseTree
+                        The root of the Abstract Syntax Tree returned from
+                        compiler.parseFile.  Will be None if the file
+                        won't even parse.
+
+                   scopes
+                        A dictionary of { node, scope } computed with
+                        from compiler.symbols. For convenience, scopes
+                        also refer back to the node and to the
+                        enclosing parent scope (node and parent,
+                        respectively).
+
+                    root_scope
+                        Convience for scopes[parseTree]
+
+        Check
+                Basic step for checking a file.  Usually contributes
+                Warnings or additional information to File.  New checks
+                will subclass this, and be added to the chain of checks
+                given in main().
+
+        Warning
+                A description of a warning emitted by pychecker.
+
+        CheckList
+                Contains "global" check information: cached module
+                data and the list of Check objects.
+
+        Command line options are pulled from each check.
+        A Warning is also turned into a boolean-style command line option.
+
+To add a new check, write a class (e.g., CompareCheck) that subclasses the
+Check class.  In its check method if you need to visit nodes of a particular
+type, write a Visitor class (subclass of BaseVisitor) which has a
+visit<Node> method, where <Node> is the name of a type of node to visit.
+See 
+
+    http://www.python.org/~jeremy/compiler/module-compiler.ast.html
+
+for the types of the nodes or print file.parseTree to see what classes all
+the nodes are.  See the OpChecks.CompareCheck class for an example of a
+check that visits all Compare nodes and the OpChecksExceptCheck class for an
+example that visits all TryExcept nodes.
+
+New checks should have unit tests in utest/.

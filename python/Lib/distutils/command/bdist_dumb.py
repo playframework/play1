@@ -6,12 +6,12 @@ $exec_prefix)."""
 
 # This module should be kept compatible with Python 2.1.
 
-__revision__ = "$Id: bdist_dumb.py 38697 2005-03-23 18:54:36Z loewis $"
+__revision__ = "$Id: bdist_dumb.py 61000 2008-02-23 17:40:11Z christian.heimes $"
 
 import os
 from distutils.core import Command
 from distutils.util import get_platform
-from distutils.dir_util import create_tree, remove_tree, ensure_relative
+from distutils.dir_util import remove_tree, ensure_relative
 from distutils.errors import *
 from distutils.sysconfig import get_python_version
 from distutils import log

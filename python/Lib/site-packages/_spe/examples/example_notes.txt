@@ -1,0 +1,9 @@
+blabla
+
+Here you can type some usefull information
+ for the script, which will be saved in an 
+external file.  This external file has the same 
+name as the script file but with a '.txt' 
+extension. Once you make this empty, the 
+external file and so the notes will also 
+disappear.

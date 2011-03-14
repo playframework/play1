@@ -1,6 +1,6 @@
 # -*-mode: python; fill-column: 75; tab-width: 8; coding: iso-latin-1-unix -*-
 #
-# $Id: Tix.py 52785 2006-11-18 18:42:22Z martin.v.loewis $
+# $Id: Tix.py 63487 2008-05-20 07:13:37Z georg.brandl $
 #
 # Tix.py -- Tix widget wrappers.
 #

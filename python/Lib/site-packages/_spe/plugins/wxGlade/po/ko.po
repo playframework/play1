@@ -1,0 +1,819 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: wxglade\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2007-02-09 23:22+0100\n"
+"PO-Revision-Date: 2007-11-07 18:48+0900\n"
+"Last-Translator: homin,Lee <ff4500@gmail.com>\n"
+"Language-Team: Gnome-kr-hackers <gnome-kr-hackers@lists.kldp.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Kannada\n"
+"X-Poedit-Country: KOREA, REPUBLIC OF\n"
+
+#: edit_windows.py:1131
+msgid ""
+"\n"
+"wxGlade-WARNING: only sizers can be pasted here"
+msgstr ""
+"\n"
+"wxGlade-경고: 이곳에는 sizer만 붙일 수 있습니다."
+
+#: edit_windows.py:1122
+msgid ""
+"\n"
+"wxGlade-WARNING: sizer already set for this window"
+msgstr ""
+"\n"
+"wxGlade-경고: 이 윈도우에 대한 sizer가 이미 설정되어 있습니다."
+
+#: widget_properties.py:926
+msgid "  Add  "
+msgstr " 더하기"
+
+#: widget_properties.py:923
+msgid "  Apply  "
+msgstr " 적용"
+
+#: widget_properties.py:930
+msgid "  Insert  "
+msgstr " 삽입"
+
+#: widget_properties.py:934
+msgid "  Remove  "
+msgstr " 지우기"
+
+#: configUI.py:127
+msgid " seconds"
+msgstr " 초"
+
+#: common.py:92
+#, python-format
+msgid "\"%s\" is not a valid code generator module"
+msgstr "\"%s\"은(는) 유효한 코드 생성 모듈이 아닙니다"
+
+#: templates_ui.py:87
+msgid "&Edit"
+msgstr "편집(&E)"
+
+#: main.py:207
+msgid "&File"
+msgstr "파일(&F)"
+
+#: main.py:190
+msgid "&Generate Code\tCtrl+G"
+msgstr "코드 생성하기(&G)\tCtrl+G"
+
+#: main.py:213
+#: main.py:220
+msgid "&Help"
+msgstr "도움말(&H)"
+
+#: main.py:195
+msgid "&Import from XRC...\tCtrl+I"
+msgstr "XRC로 부터 가져오기(&I)...\tCtrl+I"
+
+#: main.py:173
+msgid "&New\tCtrl+N"
+msgstr "새로 만들기(&N)\tCtrl+N"
+
+#: main.py:178
+msgid "&Open...\tCtrl+O"
+msgstr "열기(&O)...\tCtrl+O"
+
+#: main.py:171
+msgid "&Raise All\tF4"
+msgstr "모두 끌어 올리기(&R)\tF4"
+
+#: main.py:188
+msgid "&Refresh\tf5"
+msgstr "새로고침(&R)\tf5"
+
+#: main.py:180
+msgid "&Save\tCtrl+S"
+msgstr "저장(&S)\tCtrl+S"
+
+#: main.py:208
+msgid "&View"
+msgstr "보기(&V)"
+
+#: edit_widget.py:111
+msgid "'name' attribute missing"
+msgstr "'name' 속성 실종됨"
+
+#: configUI.py:53
+msgid "..."
+msgstr "..."
+
+#: misc.py:450
+msgid "<Design> - "
+msgstr "<Design> - "
+
+#: template.py:205
+#, python-format
+msgid ""
+"A template called '%s' already exists:\n"
+"do you want to overwrite it?"
+msgstr ""
+"'%s'(이)라는 템플릿이 이미 존재합니다:\n"
+"정말로 덮어쓰기를 원하시나요?"
+
+#: about.py:49
+msgid "About wxGlade"
+msgstr "wxGlade 정보 "
+
+#: main.py:212
+msgid "About..."
+msgstr "정보..."
+
+#: common.py:214
+#, python-format
+msgid "Add a %s"
+msgstr "%s 더하기(add)"
+
+#: main.py:601
+msgid "Alert"
+msgstr "경고"
+
+#: widget_properties.py:643
+msgid "All Files|*"
+msgstr "모든 파일|*"
+
+#: configUI.py:44
+msgid "Allow duplicate widget names"
+msgstr "위젯이름의 중복을 허용"
+
+#: main.py:881
+#, python-format
+msgid ""
+"An exception occurred while importing file \"%s\".\n"
+"This is the error message associated with it:\n"
+"        %s\n"
+"For more details, look at the full traceback on the console.\n"
+"If you think this is a wxGlade bug, please report it."
+msgstr ""
+"\"%s\"파일을 가져오는 도중 예외가 발생하였습니다.\n"
+"이것이 예외의 에러 메세지 입니다.:\n"
+"        %s\n"
+"더 자세한 내요은 콘솔에서 full traceback을 살펴보십시오.\n"
+"만약 이것이 wxGlade의 버그로 판단되면 레포트 해주시면 감사하겠습니다."
+
+#: main.py:685
+#, python-format
+msgid ""
+"An exception occurred while loading file \"%s\".\n"
+"This is the error message associated with it:\n"
+"        %s\n"
+"For more details, look at the full traceback on the console.\n"
+"If you think this is a wxGlade bug, please report it."
+msgstr ""
+"\"%s\"파일을 읽어오는 도중 예외가 발생하였습니다.\n"
+"이것이 예외의 에러 메세지 입니다.:\n"
+"        %s\n"
+"더 자세한 내요은 콘솔에서 full traceback을 살펴보십시오.\n"
+"만약 이것이 wxGlade의 버그로 판단되면 레포트 해주시면 감사하겠습니다."
+
+#: main.py:759
+#, python-format
+msgid ""
+"An exception occurred while saving file \"%s\".\n"
+"This is the error message associated with it:\n"
+"        %s\n"
+"For more details, look at the full traceback on the console.\n"
+"If you think this is a wxGlade bug, please report it."
+msgstr ""
+"\"%s\"파일을 저장하는 도중 예외가 발생하였습니다.\n"
+"이것이 예외의 에러 메세지 입니다.:\n"
+"        %s\n"
+"더 자세한 내요은 콘솔에서 full traceback을 살펴보십시오.\n"
+"만약 이것이 wxGlade의 버그로 판단되면 레포트 해주시면 감사하겠습니다."
+
+#: tree.py:280
+msgid "Application"
+msgstr "Application"
+
+#: template.py:126
+msgid "Are you sure?"
+msgstr "정말 입니까?"
+
+#: templates_ui.py:24
+#: templates_ui.py:77
+msgid "Author"
+msgstr "작성자"
+
+#: main.py:240
+#: main.py:508
+#: main.py:627
+msgid "Auto save detected"
+msgstr "자동 저장 발견됨"
+
+#: configUI.py:47
+msgid "Auto save wxg files every "
+msgstr "다음마다 wxg 파일들을 자동으로 저장"
+
+#: main.py:521
+msgid "Auto saving... done"
+msgstr "자동 저장... 완료"
+
+#: templates_ui.py:80
+msgid "Available templates"
+msgstr "사용가능한 템플릿"
+
+#: configUI.py:51
+msgid "Backup options"
+msgstr "백업 옵션"
+
+#: about.py:80
+msgid "Can't find the credits file!\n"
+msgstr "크레딧 파일을 찾을 수 없습니다!\n"
+
+#: about.py:64
+msgid ""
+"Can't find the license!\n"
+"You can get a copy at \n"
+"http://www.opensource.org/licenses/mit-license.php"
+msgstr ""
+"라이센스를 찾을 수 없습니다!\n"
+"아래의 위치에서 복사본을  얻을 수 있습니다. \n"
+"http://www.opensource.org/licenses/mit-license.php"
+
+#: template.py:191
+msgid "Can't save a template with an empty name"
+msgstr "이름 없이 템플릿을 저장할 수 없습니다"
+
+#: color_dialog.py:27
+msgid "Cancel"
+msgstr "취소"
+
+#: config.py:279
+msgid "Changes will take effect after wxGlade is restarted"
+msgstr "바뀐 내용은 wxGlade가 다시 시작될때 적용될 것 입니다"
+
+#: config.py:128
+msgid "Choose a directory:"
+msgstr "디렉토리 선택:"
+
+#: widget_properties.py:644
+msgid "Choose a file"
+msgstr "파일을 선택하세요"
+
+#: clipboard.py:69
+#: clipboard.py:103
+msgid "Clipboard can't be opened."
+msgstr "클립보드를 열 수 없습니다."
+
+#: edit_windows.py:1032
+msgid "Close Preview"
+msgstr "미리보기 닫기"
+
+#: edit_windows.py:231
+msgid "Close preview"
+msgstr "미리보기 닫기"
+
+#: edit_windows.py:547
+msgid "Common"
+msgstr "일반"
+
+#: main.py:566
+msgid "Confirm"
+msgstr "확인"
+
+#: main.py:210
+msgid "Contents\tF1"
+msgstr "내용\tF1"
+
+#: edit_windows.py:205
+msgid "Copy\tCtrl+C"
+msgstr "복사\tCtrl+C"
+
+#: main.py:300
+msgid "Core components"
+msgstr "핵심 컴포넌트들 "
+
+#: configUI.py:43
+msgid "Create backup files for generated source"
+msgstr "생성된 소스의 백업본을 만들기"
+
+#: configUI.py:42
+msgid "Create backup wxg files"
+msgstr "wxg파일의 백업본을 만들기"
+
+#: color_dialog.py:23
+msgid "Custom colour"
+msgstr "사용자 컬러"
+
+#: main.py:300
+msgid "Custom components"
+msgstr "사용자 컴포넌트들"
+
+#: edit_windows.py:207
+msgid "Cut\tCtrl+X"
+msgstr "잘라내기\tCtrl+X"
+
+#: clipboard.py:96
+msgid "Data can't be copied from clipboard."
+msgstr "데이터를 클립보드에서 복사할 수 없습니다."
+
+#: clipboard.py:63
+msgid "Data can't be copied to clipboard."
+msgstr "데이터를 클립보드에 복사할 수 없습니다."
+
+#: configUI.py:45
+msgid "Default border width for widgets"
+msgstr "위젯들의 기본 테두리 넓이"
+
+#: template.py:125
+#, python-format
+msgid "Delete template '%s'?"
+msgstr "'%s' 템플릿을 지울까요?"
+
+#: templates_ui.py:22
+#: templates_ui.py:78
+msgid "Description"
+msgstr "설명"
+
+#: main.py:199
+msgid "E&xit\tCtrl+Q"
+msgstr "나가기(&X)\tCtrl+Q"
+
+#: common.py:148
+#, python-format
+msgid "ERROR loading \"%s\""
+msgstr "\"%s\" 로딩 실패"
+
+#: main.py:673
+#: main.py:693
+#: main.py:753
+#: main.py:766
+#: main.py:821
+#: main.py:887
+#: about.py:67
+#: template.py:192
+#: edit_windows.py:173
+msgid "Error"
+msgstr "에러"
+
+#: main.py:671
+#, python-format
+msgid "Error loading file %s: %s"
+msgstr "%s 파일 불러오기 에러: %s"
+
+#: config.py:66
+#, python-format
+msgid ""
+"Error reading config file:\n"
+"%s"
+msgstr ""
+"설정파일 읽기 실패:\n"
+"%s"
+
+#: main.py:753
+#, python-format
+msgid ""
+"Error saving app:\n"
+"%s"
+msgstr ""
+"app 저장 에러:\n"
+"%s"
+
+#: main.py:820
+#, python-format
+msgid ""
+"Error saving preferences:\n"
+"%s"
+msgstr ""
+"설정 저장 에러:\n"
+"%s"
+
+#: wxglade.py:80
+#, python-format
+msgid "Error: %s"
+msgstr "에러: %s"
+
+#: wxglade.py:77
+#, python-format
+msgid "Error: no writer for language \"%s\" available"
+msgstr "에러: \"%s\"언어에 대한 사용가능한 작성기가 없습니다"
+
+#: events_mixin.py:22
+msgid "Event"
+msgstr "이벤트"
+
+#: code_property.py:90
+msgid "Extra properties for this widget"
+msgstr "이 위젯에 대한 추가 설정"
+
+#: font_dialog.py:30
+msgid "Family:"
+msgstr "종류(Family):"
+
+#: kdefiledialog.py:77
+#, python-format
+msgid "File '%s' already exists: do you really want to overwrite it?"
+msgstr "'%s' 파일이 이미 존재합니다: 정말로 덮어쓰기를 원하시나요?"
+
+#: kdefiledialog.py:86
+#: kdefiledialog.py:127
+msgid "Fork Error"
+msgstr "분기(Fork) 에러"
+
+#: common.py:129
+#, python-format
+msgid "Found widgets listing -> %s"
+msgstr "검색된 위젯들을 리스팅 -> %s"
+
+#: application.py:161
+msgid "Generate code"
+msgstr "코드 생성"
+
+#: events_mixin.py:23
+msgid "Handler"
+msgstr "핸들러"
+
+#: edit_windows.py:1102
+msgid "Hide"
+msgstr "숨기기"
+
+#: edit_windows.py:57
+msgid "If you change the default value, it will be interpreted as the name of the subclass of the widget. How this name affects code generation depends on the kind (i.e. language) of output. See the docs for more details."
+msgstr "만약 기본 값을 바꾼다면, 그것은 위젯의 서브클래스 이름으로 해석될 것입니다. 이 이름이 코드 생성에 어떻게 영향을 미치는 지는 출력 종류(예. 언어)에 따라 다릅니다. 자세한 내용은 문서를 참조하세요."
+
+#: main.py:867
+msgid "Import file"
+msgstr "파일 가져오기"
+
+#: main.py:600
+msgid "Impossible to reload an unsaved application"
+msgstr "저장하지 않은 application을 다시 읽어오는 것은 불가능합니다"
+
+#: main.py:898
+msgid "Information"
+msgstr "정보"
+
+#: configUI.py:106
+msgid ""
+"Initial path for \n"
+"code generation file dialogs:"
+msgstr ""
+"코드 생성 파일 다이얼로그의 \n"
+"초기 경로:"
+
+#: configUI.py:103
+msgid ""
+"Initial path for \n"
+"file opening/saving dialogs:"
+msgstr ""
+"파일 열기/저장 다이얼로그의 \n"
+"초기 경로:"
+
+#: configUI.py:50
+msgid "Insert .wxg file name on generated source files"
+msgstr "만들어진 소스 파일에 .wxg 파일 이름을 추가하기"
+
+#: configUI.py:49
+msgid "Insert timestamp on generated source files"
+msgstr "만들어진 소스 파일에 타임스탬프를 추가하기"
+
+#: templates_ui.py:23
+#: templates_ui.py:79
+msgid "Instructions"
+msgstr "사용 설명"
+
+#: configUI.py:137
+msgid "Interface"
+msgstr "인터페이스"
+
+#: clipboard.py:38
+msgid "Invalid data in the clipboard"
+msgstr "유효하지 않은 데이터가 클립보드에 있습니다"
+
+#: main.py:726
+#, python-format
+msgid "Loaded %s (%.2f seconds)"
+msgstr "%s 불러옴 (%.2f 초)"
+
+#: main.py:709
+msgid "Loaded template"
+msgstr "템플릿 불러옴"
+
+#: main.py:714
+#, python-format
+msgid "Loading time: %.5f"
+msgstr "불러오는중 시간: %.5f"
+
+#: xml_parse.py:255
+msgid "Loading..."
+msgstr "불러오는중..."
+
+#: configUI.py:29
+msgid "Local widget path"
+msgstr "로컬 위젯 경로"
+
+#: edit_windows.py:172
+#, python-format
+msgid ""
+"Name \"%s\" is already in use.\n"
+"Please enter a different one."
+msgstr ""
+"\"%s\"(이)라는 이름이 이미 사용중입니다.\n"
+"다른 이름을 입력하세요."
+
+#: main.py:176
+msgid "New from &Template...\tShift+Ctrl+N"
+msgstr "템플릿으로 부터 새로 만들기(&T)...\tShift+Ctrl+N"
+
+#: configUI.py:112
+msgid ""
+"Number of buttons per row\n"
+"in the main palette"
+msgstr ""
+"메인 팔렛트에서\n"
+"한줄당 단추의 개수"
+
+#: configUI.py:109
+msgid "Number of items in file history"
+msgstr "열었던 파일 기록의 갯수"
+
+#: color_dialog.py:26
+msgid "OK"
+msgstr "확인"
+
+#: about.py:80
+msgid "Oops!"
+msgstr "이런!"
+
+#: main.py:616
+msgid "Open file"
+msgstr "파일 열기"
+
+#: configUI.py:138
+msgid "Other"
+msgstr "기타"
+
+#: edit_windows.py:1109
+msgid "Paste\tCtrl+V"
+msgstr "붙이기\tCtrl+V"
+
+#: clipboard.py:131
+msgid "Please only drop one file at a time"
+msgstr "한번에 하나의 파일을 드롭해 주세요"
+
+#: xml_parse.py:255
+msgid "Please wait while loading the app"
+msgstr "app를 불러오는 중입니다. 잠시만 기다려주세요."
+
+#: layout_option_property.py:62
+#: layout_option_property.py:64
+msgid "Position"
+msgstr "위치"
+
+#: config.py:280
+msgid "Preferences saved"
+msgstr "참조 저장됨"
+
+#: main.py:205
+msgid "Preferences..."
+msgstr "기본 설정..."
+
+#: edit_windows.py:211
+#: edit_windows.py:233
+#: edit_windows.py:1018
+#: edit_windows.py:1114
+msgid "Preview"
+msgstr "미리보기"
+
+#: edit_windows.py:185
+#: edit_windows.py:313
+#, python-format
+msgid "Properties - <%s>"
+msgstr "속성들 - <%s>"
+
+#: tree.py:36
+msgid "Properties - <>"
+msgstr "설정 - <>"
+
+#: main.py:375
+msgid "Properties - <app>"
+msgstr "속성 - <app>"
+
+#: code_property.py:88
+msgid "Property"
+msgstr "설정"
+
+#: template.py:206
+msgid "Question"
+msgstr "질문"
+
+#: main.py:514
+msgid "Recovery from auto save complete"
+msgstr "자동 저장으로부터 복구 완료"
+
+#: configUI.py:34
+msgid "Remember position and size of wxGlade windows"
+msgstr "wxGlade 윈도우들의 위치와 크기 기억"
+
+#: edit_windows.py:203
+#: edit_windows.py:1100
+msgid "Remove\tDel"
+msgstr "삭제\tDel"
+
+#: main.py:185
+msgid "Save As Template..."
+msgstr "템플릿으로 저장하기..."
+
+#: main.py:182
+msgid "Save As...\tShift+Ctrl+S"
+msgstr "다른이름으로 저장...\tShift+Ctrl+S"
+
+#: main.py:565
+msgid "Save changes to the current app?"
+msgstr "현재 app에 바뀐 내용을 저장 할까요?"
+
+#: main.py:781
+msgid "Save project as..."
+msgstr "프로젝트를 다른이름으로 저장..."
+
+#: main.py:775
+#, python-format
+msgid "Saved %s"
+msgstr "%s 저장됨"
+
+#: font_dialog.py:97
+msgid "Select font attributes"
+msgstr "글꼴 속성 선택"
+
+#: color_dialog.py:71
+msgid "Select widget colour"
+msgstr "위젯 컬러 선택"
+
+#: tree.py:293
+msgid "Show"
+msgstr "보이기"
+
+#: configUI.py:35
+msgid "Show \"handles\" of sizers"
+msgstr "사이저의 \"핸들\"을 보여줌"
+
+#: main.py:170
+msgid "Show &Properties\tF3"
+msgstr "속성 보이기(&P)\tF3"
+
+#: main.py:167
+msgid "Show &Tree\tF2"
+msgstr "트리 보이기(&T)\tF2"
+
+#: configUI.py:33
+msgid "Show progress dialog when loading wxg files"
+msgstr "wxg파일을 읽을 때 프로그래스 바를 보여주기"
+
+#: configUI.py:32
+msgid "Show properties and tree windows as small frames"
+msgstr "설정창과 트리창을 작은 프레임으로 보여주기"
+
+#: layout_option_property.py:72
+#: layout_option_property.py:74
+msgid "Span"
+msgstr "폭(Span)"
+
+#: font_dialog.py:31
+msgid "Style:"
+msgstr "스타일:"
+
+#: color_dialog.py:19
+msgid "System colour"
+msgstr "시스템 컬러"
+
+#: main.py:203
+msgid "Templates Manager..."
+msgstr "템플릿 관리기..."
+
+#: main.py:238
+#: main.py:625
+msgid "There seems to be auto saved data for this file: do you want to restore it?"
+msgstr "이 파일에 대한 자동 저장 내용이 있습니다: 이 내용을 복구 할까요?"
+
+#: main.py:505
+msgid "There seems to be auto saved data from last wxGlade session: do you want to restore it?"
+msgstr "지난 wxGlade 세션의 자동 저장된 데이타가 있습니다: 이 내용을 복구 할까요?"
+
+#: main.py:896
+msgid ""
+"To save the changes to the template, edit the GUI as usual,\n"
+"and then click File->Save as Template..."
+msgstr ""
+"바뀐 내용을 템플릿에 저장하기 위해서는 평소처럼 GUI를 편집하고,\n"
+"파일->템플릿으로 저장하기... 를 선택하세요"
+
+#: configUI.py:41
+msgid "Use dialog units by default for size properties"
+msgstr "기본 크기 속성으로 다이얼로그 단위를 사용"
+
+#: configUI.py:31
+msgid "Use icons in menu items"
+msgstr "메뉴 아이템에 아이콘 사용"
+
+#: configUI.py:36
+msgid "Use native file dialogs on KDE"
+msgstr "KDE에서 고유의 파일 다이얼로그를 사용"
+
+#: wxglade.py:101
+msgid "Valid LANGUAGE values:"
+msgstr "유요한 언어(LANGUAGE) 값들:"
+
+#: code_property.py:89
+msgid "Value"
+msgstr "값"
+
+#: font_dialog.py:32
+msgid "Weight:"
+msgstr "너비:"
+
+#: configUI.py:51
+msgid "append .bak to filename"
+msgstr "파일 이름의 뒤에 .bak를 붙임"
+
+#: configUI.py:51
+msgid "append ~ to filename"
+msgstr "파일 이름의 뒤에 ~를 붙임"
+
+#: widget_properties.py:768
+#, python-format
+msgid "error in the value of the property \"%s\""
+msgstr "\"%s\"속성 값 에러"
+
+#: common.py:98
+#, python-format
+msgid "loaded code generator for %s"
+msgstr "%s을(를) 위한 코드 생성기가 로드됨"
+
+#: common.py:130
+msgid "loading widget modules:"
+msgstr "위젯 모듈을 로드중:"
+
+#: about.py:59
+msgid "wxGlade - License"
+msgstr "wxGlade - 라이센스"
+
+#: msgdialog.py:17
+#: msgdialog.py:28
+msgid "wxGlade message"
+msgstr "wxGlade 메세지"
+
+#: templates_ui.py:38
+msgid "wxGlade template information"
+msgstr "wxGlade 템플릿 정보"
+
+#: templates_ui.py:103
+msgid "wxGlade template list"
+msgstr "wxGlade 템플릿 리스트"
+
+#: template.py:115
+#: templates_ui.py:82
+msgid "wxGlade template:\n"
+msgstr "wxGalde 템플릿:\n"
+
+#: templates_ui.py:50
+msgid "wxGlade template: "
+msgstr "wxGlade 템플릿:"
+
+#: wxglade.py:90
+msgid ""
+"wxGlade usage:\n"
+"- to start the GUI: python wxglade.py [WXG_FILE]\n"
+"- to generate code from the command line: python wxglade.py OPTIONS... FILE\n"
+"  OPTIONS are the following:\n"
+"  -g, --generate-code=LANGUAGE  (required) give the output language\n"
+"  -o, --output=PATH             (optional) name of the output file (in\n"
+"                                single-file mode) or directory (in\n"
+"                                multi-file mode)\n"
+"    "
+msgstr ""
+"wxGlade 사용법\n"
+"- GUI로 시작하려면: python wxglade.py [WXG_FILE]\n"
+"- 커맨드라인에서 코드를 만들려면: python wxglade.py OPTIONS... FILE\n"
+"  OPTIONS 들은 아래와 같습니다.:\n"
+"  -g, --generate-code=LANGUAGE  (필수) 출력 언어\n"
+"  -o, --output=PATH             (선택) 출력 파일의 이름 (\n"
+"                                단일-파일 모드인 경우) 혹은 디렉토리 (\n"
+"                                여러-파일 모드인 경우)\n"
+"    "
+
+#: main.py:408
+msgid "wxGlade: Tree"
+msgstr "wxGlade: 트리"
+
+#: tree.py:463
+#, python-format
+msgid "wxGlade: Tree %s"
+msgstr "wxGlade: 트리 %s"
+
+#: configUI.py:63
+msgid "wxGlade: preferences"
+msgstr "wxGlade: 설정"
+

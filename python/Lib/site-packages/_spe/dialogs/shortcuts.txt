@@ -1,0 +1,66 @@
+HOME	VCHOME	Move caret to before first visible character on line. If already there move to first character on line	   
+CTRL+SPACE	JUMP	Jump from shell to file and line number
+UP+ARROW	LINEUP	Move caret up one line	   
+CTRL+DOWN ARROW	LINESCROLLDOWN	Scroll the document down, keeping the caret visible	   
+DOWN+ARROW	LINEDOWN	Move caret down one line	   
+SHIFT+UP ARROW 	LINEUPEXTEND	Move caret up one line extending selection to new caret position 	   
+CTRL+UP ARROW	LINESCROLLUP	Scroll the document up, keeping the caret visible	   
+CTRL+LEFT ARROW	WORDLEFT	Move caret left one word	   
+LEFT+ARROW	CHARLEFT	Move caret left one character	   
+ALT+LEFT ARROW	WORDPARTLEFT	Move to the previous change in capitalisation	   
+ALT+RIGHT ARROW	WORDPARTRIGHT	Move to the next change in capitalisation	   
+RIGHT+ARROW	CHARRIGHT	Move caret right one character	   
+SHIFT+HOME	VCHOMEEXTEND	Like VCHome but extending selection to new caret position	   
+CTRL+HOME	DOCUMENTSTART	Move caret to first position in document	   
+ALT+HOME	HOMEDISPLAY	Move caret to first position on display line	   
+CTRL+SHIFT+HOME	DOCUMENTSTARTEXTEND	Move caret to first position in document extending selection to new caret position	   
+SHIFT+DOWN ARROW	LINEDOWNEXTEND	Move caret down one line extending selection to new caret position	   
+SHIFT+LEFT ARROW	CHARLEFTEXTEND	Move caret left one character extending selection to new caret position	   
+CTRL+SHIFT LEFT ARROW	WORDLEFTEXTEND	Move caret left one word extending selection to new caret position	   
+SHIFT+RIGHT ARROW	CHARRIGHTEXTEND	Move caret right one character extending selection to new caret position	   
+CTRL+RIGHT ARROW	WORDRIGHT	Move caret right one word	   
+CTRL+SHIFT RIGHT ARROW	WORDRIGHTEXTEND	Move caret right one word extending selection to new caret position	   
+ALT+SHIFT LEFT ARROW	WORDPARTLEFTEXTEND	Move to the previous change in capitalisation extending selection to new caret position	   
+ALT+SHIFT RIGHT ARROW	WORDPARTRIGHTEXTEND	Move to the next change in capitalisation extending selection to new caret position.	   
+ALT+SHIFT+HOME	HOMEDISPLAYEXTEND	Move caret to first position on display line extending selection to new caret position.	   
+END	LINEEND	Move caret to last position on line	   
+SHIFT+END	LINEENDEXTEND	Move caret to last position on line extending selection to new caret position	   
+CTRL+END	DOCUMENTEND	Move caret to last position in document	   
+CTRL+SHIFT END	DOCUMENTENDEXTEND	Move caret to last position in document extending selection to new caret position	   
+ALT+END	LINEENDDISPLAY	Move caret to last position on display line	   
+ALT+SHIFT END	LINEENDDISPLAYEXTEND	Move caret to last position on display line extending selection to new caret position 	   
+PRIOR	PAGEUP	Move caret one page up	   
+SHIFT+PRIOR	PAGEUPEXTEND	Move caret one page up extending selection to new caret position	   
+NEXT	PAGEDOWN	Move caret one page down	   
+SHIFT+NEXT	SCI_PAGEDOWNEXTEND	Move caret one page down extending selection to new caret position	   
+DELETE	CLEAR	Delete all text in the document	   
+SHIFT+DELETE	CUT	Cut the selection to the clipboard	   
+CTRL+DELETE	DELWORDRIGHT	Delete the word to the right of the caret	   
+CTRL+SHIFT+DELETE	DELLINERIGHT	Delete forwards from the current position to the end of the line	   
+INSERT	EDITTOGGLEOVERTYPE	Switch from insert to overtype mode or the reverse	   
+SHIFT+INSERT	PASTE	Paste the contents of the clipboard into the document replacing the selection	   
+CTRL+INSERT	COPY	Copy the selection to the clipboard	   
+ESCAPE	CANCEL	Cancel any modes such as call tip or auto-completion list display	   
+BACKSPACE	DELETEBACK	Delete the selection or if no selection, the character before the caret	   
+SHIFT+BACKSPACE	BACKTAB	Dedent the selected lines	   
+CTRL+BACKSPACE	DELWORDLEFT	Delete the word to the left of the caret	   
+ALT+BACKSPACE	UNDO	Undo one action in the undo history	   
+CTRL+SHIFT BACK	DELLINELEFT	Delete back from the current position to the start of the line	   
+CTRL+'Z'	UNDO	Undo one action in the undo history	   
+CTRL+'Y'	REDO	Redoes the next action on the undo history	   
+CTRL+'X'	CUT	Cut the selection to the clipboard	   
+CTRL+'C'	COPY	Copy the selection to the clipboard	   
+CTRL+'V'	PASTE	Paste the contents of the clipboard into the document replacing the selection	   
+CTRL+'A'	SELECTALL	Select all the text in the document	   
+TAB	TAB	Indents multi-line selection, replaces with Tab otherwise   
+RETURN	NEWLINE	Insert a new line, may use a CRLF, CR or LF depending on EOL mode 	   
+SHIFT+RETURN	NEWLINE	Insert a new line, may use a CRLF, CR or LF depending on EOL mode	   
+CTRL+ADD	ZOOMIN	Magnify the displayed text by increasing the sizes by 1 point	   
+CTRL+SUBTRACT	ZOOMOUT	Make the displayed text smaller by decreasing the sizes by 1 point	   
+CTRL+DIVIDE	SETZOOM	Set the zoom level to 0. This returns the zoom to 'normal,' i.e., no zoom. 	   
+CTRL+'L'	LINECUT	Cut the line containing the caret	   
+CTRL+SHIFT 'L'	LINEDELETE	Delete the line containing the caret	   
+CTRL+'T'	LINETRANSPOSE	Switch the current line with the previous	   
+CTRL+'U'	LOWERCASE	Transform the selection to lower case	   
+CTRL+SHIFT 'U'	UPPERCASE	Transform the selection to upper case 	 
+

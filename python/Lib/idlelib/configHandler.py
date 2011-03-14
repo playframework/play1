@@ -39,22 +39,19 @@ class IdleConfParser(ConfigParser):
         self.file=cfgFile
         ConfigParser.__init__(self,defaults=cfgDefaults)
 
-    def Get(self, section, option, type=None, default=None):
+    def Get(self, section, option, type=None, default=None, raw=False):
         """
         Get an option value for given section/option or return default.
         If type is specified, return as type.
         """
-        if type=='bool':
-            getVal=self.getboolean
-        elif type=='int':
-            getVal=self.getint
-        else:
-            getVal=self.get
-        if self.has_option(section,option):
-            #return getVal(section, option, raw, vars, default)
-            return getVal(section, option)
-        else:
+        if not self.has_option(section, option):
             return default
+        if type=='bool':
+            return self.getboolean(section, option)
+        elif type=='int':
+            return self.getint(section, option)
+        else:
+            return self.get(section, option, raw=raw)
 
     def GetOptionList(self,section):
         """
@@ -207,7 +204,10 @@ class IdleConf:
             if not os.path.exists(userDir):
                 warn = ('\n Warning: os.path.expanduser("~") points to\n '+
                         userDir+',\n but the path does not exist.\n')
-                sys.stderr.write(warn)
+                try:
+                    sys.stderr.write(warn)
+                except IOError:
+                    pass
                 userDir = '~'
         if userDir == "~": # still no path to home!
             # traditionally IDLE has defaulted to os.getcwd(), is this adequate?
@@ -224,7 +224,7 @@ class IdleConf:
         return userDir
 
     def GetOption(self, configType, section, option, default=None, type=None,
-                  warn_on_default=True):
+                  warn_on_default=True, raw=False):
         """
         Get an option value for given config type and given general
         configuration section/option or return a default. If type is specified,
@@ -238,9 +238,11 @@ class IdleConf:
 
         """
         if self.userCfg[configType].has_option(section,option):
-            return self.userCfg[configType].Get(section, option, type=type)
+            return self.userCfg[configType].Get(section, option,
+                                                type=type, raw=raw)
         elif self.defaultCfg[configType].has_option(section,option):
-            return self.defaultCfg[configType].Get(section, option, type=type)
+            return self.defaultCfg[configType].Get(section, option,
+                                                   type=type, raw=raw)
         else: #returning default, print warning
             if warn_on_default:
                 warning = ('\n Warning: configHandler.py - IdleConf.GetOption -\n'
@@ -248,7 +250,10 @@ class IdleConf:
                            ' from section %r.\n'
                            ' returning default value: %r\n' %
                            (option, section, default))
-                sys.stderr.write(warning)
+                try:
+                    sys.stderr.write(warning)
+                except IOError:
+                    pass
             return default
 
     def SetOption(self, configType, section, option, value):
@@ -357,7 +362,10 @@ class IdleConf:
                            '\n from theme %r.\n'
                            ' returning default value: %r\n' %
                            (element, themeName, theme[element]))
-                sys.stderr.write(warning)
+                try:
+                    sys.stderr.write(warning)
+                except IOError:
+                    pass
             colour=cfgParser.Get(themeName,element,default=theme[element])
             theme[element]=colour
         return theme
@@ -611,7 +619,10 @@ class IdleConf:
                                '\n from key set %r.\n'
                                ' returning default value: %r\n' %
                                (event, keySetName, keyBindings[event]))
-                    sys.stderr.write(warning)
+                    try:
+                        sys.stderr.write(warning)
+                    except IOError:
+                        pass
         return keyBindings
 
     def GetExtraHelpSourceList(self,configSet):

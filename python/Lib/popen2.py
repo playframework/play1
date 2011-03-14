@@ -8,6 +8,9 @@ and popen3(cmd) which return two or three pipes to the spawned command.
 
 import os
 import sys
+import warnings
+warnings.warn("The popen2 module is deprecated.  Use the subprocess module.",
+              DeprecationWarning, stacklevel=2)
 
 __all__ = ["popen2", "popen3", "popen4"]
 
@@ -29,8 +32,8 @@ def _cleanup():
                 pass
 
 class Popen3:
-    """Class representing a child process.  Normally instances are created
-    by the factory functions popen2() and popen3()."""
+    """Class representing a child process.  Normally, instances are created
+    internally by the functions popen2() and popen3()."""
 
     sts = -1                    # Child not completed yet
 
@@ -79,11 +82,7 @@ class Popen3:
     def _run_child(self, cmd):
         if isinstance(cmd, basestring):
             cmd = ['/bin/sh', '-c', cmd]
-        for i in xrange(3, MAXFD):
-            try:
-                os.close(i)
-            except OSError:
-                pass
+        os.closerange(3, MAXFD)
         try:
             os.execvp(cmd[0], cmd)
         finally:
@@ -200,45 +199,3 @@ else:
         return inst.fromchild, inst.tochild
 
     __all__.extend(["Popen3", "Popen4"])
-
-def _test():
-    # When the test runs, there shouldn't be any open pipes
-    _cleanup()
-    assert not _active, "Active pipes when test starts " + repr([c.cmd for c in _active])
-    cmd  = "cat"
-    teststr = "ab cd\n"
-    if os.name == "nt":
-        cmd = "more"
-    # "more" doesn't act the same way across Windows flavors,
-    # sometimes adding an extra newline at the start or the
-    # end.  So we strip whitespace off both ends for comparison.
-    expected = teststr.strip()
-    print "testing popen2..."
-    r, w = popen2(cmd)
-    w.write(teststr)
-    w.close()
-    got = r.read()
-    if got.strip() != expected:
-        raise ValueError("wrote %r read %r" % (teststr, got))
-    print "testing popen3..."
-    try:
-        r, w, e = popen3([cmd])
-    except:
-        r, w, e = popen3(cmd)
-    w.write(teststr)
-    w.close()
-    got = r.read()
-    if got.strip() != expected:
-        raise ValueError("wrote %r read %r" % (teststr, got))
-    got = e.read()
-    if got:
-        raise ValueError("unexpected %r on stderr" % (got,))
-    for inst in _active[:]:
-        inst.wait()
-    _cleanup()
-    if _active:
-        raise ValueError("_active not empty")
-    print "All OK"
-
-if __name__ == '__main__':
-    _test()

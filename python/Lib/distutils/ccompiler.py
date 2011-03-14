@@ -5,7 +5,7 @@ for the Distutils compiler abstraction model."""
 
 # This module should be kept compatible with Python 2.1.
 
-__revision__ = "$Id: ccompiler.py 46331 2006-05-26 14:07:23Z bob.ippolito $"
+__revision__ = "$Id: ccompiler.py 60923 2008-02-21 18:18:37Z guido.van.rossum $"
 
 import sys, os, re
 from types import *
@@ -159,7 +159,7 @@ class CCompiler:
         # basically the same things with Unix C compilers.
 
         for key in args.keys():
-            if not self.executables.has_key(key):
+            if key not in self.executables:
                 raise ValueError, \
                       "unknown executable '%s' for class %s" % \
                       (key, self.__class__.__name__)

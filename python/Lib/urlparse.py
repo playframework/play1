@@ -5,7 +5,7 @@ UC Irvine, June 1995.
 """
 
 __all__ = ["urlparse", "urlunparse", "urljoin", "urldefrag",
-           "urlsplit", "urlunsplit"]
+           "urlsplit", "urlunsplit", "parse_qs", "parse_qsl"]
 
 # A classification of schemes ('' means apply by default)
 uses_relative = ['ftp', 'http', 'gopher', 'nntp', 'imap',
@@ -37,52 +37,17 @@ _parse_cache = {}
 
 def clear_cache():
     """Clear the parse cache."""
-    global _parse_cache
-    _parse_cache = {}
+    _parse_cache.clear()
 
 
-class BaseResult(tuple):
-    """Base class for the parsed result objects.
-
-    This provides the attributes shared by the two derived result
-    objects as read-only properties.  The derived classes are
-    responsible for checking the right number of arguments were
-    supplied to the constructor.
-
-    """
-
-    __slots__ = ()
-
-    # Attributes that access the basic components of the URL:
-
-    @property
-    def scheme(self):
-        return self[0]
-
-    @property
-    def netloc(self):
-        return self[1]
-
-    @property
-    def path(self):
-        return self[2]
-
-    @property
-    def query(self):
-        return self[-2]
-
-    @property
-    def fragment(self):
-        return self[-1]
-
-    # Additional attributes that provide access to parsed-out portions
-    # of the netloc:
+class ResultMixin(object):
+    """Shared methods for the parsed result objects."""
 
     @property
     def username(self):
         netloc = self.netloc
         if "@" in netloc:
-            userinfo = netloc.split("@", 1)[0]
+            userinfo = netloc.rsplit("@", 1)[0]
             if ":" in userinfo:
                 userinfo = userinfo.split(":", 1)[0]
             return userinfo
@@ -92,7 +57,7 @@ class BaseResult(tuple):
     def password(self):
         netloc = self.netloc
         if "@" in netloc:
-            userinfo = netloc.split("@", 1)[0]
+            userinfo = netloc.rsplit("@", 1)[0]
             if ":" in userinfo:
                 return userinfo.split(":", 1)[1]
         return None
@@ -101,7 +66,7 @@ class BaseResult(tuple):
     def hostname(self):
         netloc = self.netloc
         if "@" in netloc:
-            netloc = netloc.split("@", 1)[1]
+            netloc = netloc.rsplit("@", 1)[1]
         if ":" in netloc:
             netloc = netloc.split(":", 1)[0]
         return netloc.lower() or None
@@ -110,36 +75,25 @@ class BaseResult(tuple):
     def port(self):
         netloc = self.netloc
         if "@" in netloc:
-            netloc = netloc.split("@", 1)[1]
+            netloc = netloc.rsplit("@", 1)[1]
         if ":" in netloc:
             port = netloc.split(":", 1)[1]
             return int(port, 10)
         return None
 
+from collections import namedtuple
 
-class SplitResult(BaseResult):
+class SplitResult(namedtuple('SplitResult', 'scheme netloc path query fragment'), ResultMixin):
 
     __slots__ = ()
-
-    def __new__(cls, scheme, netloc, path, query, fragment):
-        return BaseResult.__new__(
-            cls, (scheme, netloc, path, query, fragment))
 
     def geturl(self):
         return urlunsplit(self)
 
 
-class ParseResult(BaseResult):
+class ParseResult(namedtuple('ParseResult', 'scheme netloc path params query fragment'), ResultMixin):
 
     __slots__ = ()
-
-    def __new__(cls, scheme, netloc, path, params, query, fragment):
-        return BaseResult.__new__(
-            cls, (scheme, netloc, path, params, query, fragment))
-
-    @property
-    def params(self):
-        return self[3]
 
     def geturl(self):
         return urlunparse(self)
@@ -219,16 +173,18 @@ def urlsplit(url, scheme='', allow_fragments=True):
     _parse_cache[key] = v
     return v
 
-def urlunparse((scheme, netloc, url, params, query, fragment)):
+def urlunparse(data):
     """Put a parsed URL back together again.  This may result in a
     slightly different, but equivalent URL, if the URL that was parsed
     originally had redundant delimiters, e.g. a ? with an empty query
     (the draft states that these are equivalent)."""
+    scheme, netloc, url, params, query, fragment = data
     if params:
         url = "%s;%s" % (url, params)
     return urlunsplit((scheme, netloc, url, query, fragment))
 
-def urlunsplit((scheme, netloc, url, query, fragment)):
+def urlunsplit(data):
+    scheme, netloc, url, query, fragment = data
     if netloc or (scheme and scheme in uses_netloc and url[:2] != '//'):
         if url and url[:1] != '/': url = '/' + url
         url = '//' + (netloc or '') + url
@@ -261,9 +217,18 @@ def urljoin(base, url, allow_fragments=True):
     if path[:1] == '/':
         return urlunparse((scheme, netloc, path,
                            params, query, fragment))
-    if not (path or params or query):
-        return urlunparse((scheme, netloc, bpath,
-                           bparams, bquery, fragment))
+    if not path:
+        path = bpath
+        if not params:
+            params = bparams
+        else:
+            path = path[:-1]
+            return urlunparse((scheme, netloc, path,
+                                params, query, fragment))
+        if not query:
+            query = bquery
+        return urlunparse((scheme, netloc, path,
+                           params, query, fragment))
     segments = bpath.split('/')[:-1] + path.split('/')
     # XXX The stuff below is bogus in various ways...
     if segments[-1] == '.':
@@ -301,6 +266,92 @@ def urldefrag(url):
         return defrag, frag
     else:
         return url, ''
+
+# unquote method for parse_qs and parse_qsl
+# Cannot use directly from urllib as it would create circular reference.
+# urllib uses urlparse methods ( urljoin)
+
+_hextochr = dict(('%02x' % i, chr(i)) for i in range(256))
+_hextochr.update(('%02X' % i, chr(i)) for i in range(256))
+
+def unquote(s):
+    """unquote('abc%20def') -> 'abc def'."""
+    res = s.split('%')
+    for i in xrange(1, len(res)):
+        item = res[i]
+        try:
+            res[i] = _hextochr[item[:2]] + item[2:]
+        except KeyError:
+            res[i] = '%' + item
+        except UnicodeDecodeError:
+            res[i] = unichr(int(item[:2], 16)) + item[2:]
+    return "".join(res)
+
+def parse_qs(qs, keep_blank_values=0, strict_parsing=0):
+    """Parse a query given as a string argument.
+
+        Arguments:
+
+        qs: URL-encoded query string to be parsed
+
+        keep_blank_values: flag indicating whether blank values in
+            URL encoded queries should be treated as blank strings.
+            A true value indicates that blanks should be retained as
+            blank strings.  The default false value indicates that
+            blank values are to be ignored and treated as if they were
+            not included.
+
+        strict_parsing: flag indicating what to do with parsing errors.
+            If false (the default), errors are silently ignored.
+            If true, errors raise a ValueError exception.
+    """
+    dict = {}
+    for name, value in parse_qsl(qs, keep_blank_values, strict_parsing):
+        if name in dict:
+            dict[name].append(value)
+        else:
+            dict[name] = [value]
+    return dict
+
+def parse_qsl(qs, keep_blank_values=0, strict_parsing=0):
+    """Parse a query given as a string argument.
+
+    Arguments:
+
+    qs: URL-encoded query string to be parsed
+
+    keep_blank_values: flag indicating whether blank values in
+        URL encoded queries should be treated as blank strings.  A
+        true value indicates that blanks should be retained as blank
+        strings.  The default false value indicates that blank values
+        are to be ignored and treated as if they were  not included.
+
+    strict_parsing: flag indicating what to do with parsing errors. If
+        false (the default), errors are silently ignored. If true,
+        errors raise a ValueError exception.
+
+    Returns a list, as G-d intended.
+    """
+    pairs = [s2 for s1 in qs.split('&') for s2 in s1.split(';')]
+    r = []
+    for name_value in pairs:
+        if not name_value and not strict_parsing:
+            continue
+        nv = name_value.split('=', 1)
+        if len(nv) != 2:
+            if strict_parsing:
+                raise ValueError, "bad query field: %r" % (name_value,)
+            # Handle case of a control-name with no equal sign
+            if keep_blank_values:
+                nv.append('')
+            else:
+                continue
+        if len(nv[1]) or keep_blank_values:
+            name = unquote(nv[0].replace('+', ' '))
+            value = unquote(nv[1].replace('+', ' '))
+            r.append((name, value))
+
+    return r
 
 
 test_input = """
@@ -352,9 +403,7 @@ def test():
         except ImportError:
             from StringIO import StringIO
         fp = StringIO(test_input)
-    while 1:
-        line = fp.readline()
-        if not line: break
+    for line in fp:
         words = line.split()
         if not words:
             continue

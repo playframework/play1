@@ -1,5 +1,4 @@
 import sys
-import os
 import linecache
 import time
 import socket
@@ -25,11 +24,13 @@ try:
 except ImportError:
     pass
 else:
-    def idle_formatwarning_subproc(message, category, filename, lineno):
+    def idle_formatwarning_subproc(message, category, filename, lineno,
+                                   file=None, line=None):
         """Format warnings the IDLE way"""
         s = "\nWarning (from warnings module):\n"
         s += '  File \"%s\", line %s\n' % (filename, lineno)
-        line = linecache.getline(filename, lineno).strip()
+        line = linecache.getline(filename, lineno).strip() \
+            if line is None else line
         if line:
             s += "    %s\n" % line
         s += "%s: %s\n" % (category.__name__, message)
@@ -38,10 +39,11 @@ else:
 
 # Thread shared globals: Establish a queue between a subthread (which handles
 # the socket) and the main thread (which runs user code), plus global
-# completion and exit flags:
+# completion, exit and interruptable (the main thread) flags:
 
 exit_now = False
 quitting = False
+interruptable = False
 
 def main(del_exitfunc=False):
     """Start the Python execution server in a subprocess
@@ -283,9 +285,14 @@ class Executive(object):
         self.autocomplete = AutoComplete.AutoComplete()
 
     def runcode(self, code):
+        global interruptable
         try:
             self.usr_exc_info = None
-            exec code in self.locals
+            interruptable = True
+            try:
+                exec code in self.locals
+            finally:
+                interruptable = False
         except:
             self.usr_exc_info = sys.exc_info()
             if quitting:
@@ -299,7 +306,8 @@ class Executive(object):
             flush_stdout()
 
     def interrupt_the_server(self):
-        thread.interrupt_main()
+        if interruptable:
+            thread.interrupt_main()
 
     def start_the_debugger(self, gui_adap_oid):
         return RemoteDebugger.start_debugger(self.rpchandler, gui_adap_oid)

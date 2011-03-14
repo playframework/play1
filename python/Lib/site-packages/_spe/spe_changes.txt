@@ -1,0 +1,988 @@
+These are the changes of the public releases:
+    
+Spe 0.7
+-------
+    [4.a]
+        Major bugfix release for wxPython 2.6+ (This version doesn't work for
+        sure with wxPython versions lower than 2.5.4.1) Bug reports which are
+        related to wxPython <2.6 will be ignored.
+    [3.a]
+        Major bugfix release for wxPython 2.5.4.1
+    [2.a]
+        The sidebar now features a file browser. I'm now trying to form a team
+        for future development of SPE. Besides me four people will join the project:
+            
+            - Sam Widmer for CVS and bugfixes. So soon more collaboration on SPE
+              will be possible.
+            - Nir Aides (author of rpdb) for helping implementing the remote debugger
+            - Kevin Walzer for the OS X Port of SPE. Please contact him for Mac specific
+              issues. Spe for the Mac will be distributed through:
+              http://www.wordtech-software.com/spe.html
+            - Jelle Feringa for documentation. The goal is to provide a pdf manual with
+              the SPE distribution based on the SPE wiki: http://www.stani.be/spe/wiki
+              Anyone who has comments or wants to edit the wiki as well can contact Jelle.
+
+        If you like SPE, please contribute by coding, writing documentation or
+        donating. I would like to thank especially Michael Balk, who gave the largest
+        donation ever to SPE.
+        
+        Also I would like to thank Michael Foord, who made SPE part of a new Python
+        distribution, called "movable python". It gives you the possibility to carry your
+        favorite developping environment on a USB stick. So you can continue your work on
+        any computer or test your modules for different python versions. This distribution
+        opens a lot of new possibilities, check it out!! For more info, visit
+        http://www.voidspace.org.uk/python/programs.shtml#movpy
+
+    [1.a]
+        I asked the ubuntu people for a python bounty in order to be get some
+        funding to implement a debugger in SPE. Please support this.  Also I 
+        want to put up a sponsering plan for SPE, comparable to eg Blender or 
+        PyCon.  Till now I only receive sponsering from zettai_ Is there anyone 
+        with some experience who could give some advice?
+        
+        There were a lot of nice reactions on the previous release. Mario 
+        Lacunza even gave me my first gmail account and offered help to 
+        translate SPE in Spanish.
+        
+        Anyway here you get another SPE release with again a new feature: 
+        XRCed_, an xrc editor. Just like wxGlade, it is a tool to design GUIs
+        with wxPython_. A bug prevented the uml view when there was only one 
+        class. This is fixed now.
+        
+    [0.a]
+        As a christmas present SPE offers you a built-in Python UML viewer. An
+        Uml diagram is hierarchal 2d map of your classes. See http://spe.pycs.net/pictures/800x600/11.html
+        for a nice screenshot. Attentive users notice that the uml view also uses 
+        the separators of the class explorer for a better outline. Once you get used to it, 
+        you can't live without.
+        
+        Recently I also have been helping Michael Foord with 'movable python', a python distro
+        (including SPE!) which can run from a usb stick with no need for installing. 
+        It's more handy than a laptop to carry your favorite Python environment around.
+        More about that later...
+        
+        I see that still a lot of people are unfortunately downloading old tar.gz 
+        versions. This makes absolutely no sense!!
+        Because of problems with tar.gz archives on the blender website, Linux and Mac
+        users must download the zip archive. I release them especially for that purpose.
+        The exe installer is of course for Windows.
+        
+        Also from now on blenpy will be discontinued. Nobody
+        seems to use it anyway. If you don't know what blenpy is, ... that's exactly
+        what I mean.
+        
+        A special thanks for everyone who donates. That always pushes me to next
+        release (hint,hint,...)
+    
+    :Batteries included:
+      - Kiki:
+          Regular Expression (regex) console. For more info:
+          http://project5.freezope.org/kiki/index.html
+      - PyChecker:
+          PyChecker is a tool for finding bugs in python source code. It
+          finds problems that are typically caught by a compiler for
+          less dynamic languages, like C and C++. It is similar to lint.
+          For more info: http://pychecker.sourceforge.net
+      - wxGlade:
+          wxGlade is a GUI designer written in Python with the
+          popular GUI toolkit wxPython, that helps you create
+          wxWindows/wxPython user interfaces. As you can guess by the
+          name, its model is Glade, the famous GTK+/GNOME GUI builder,
+          with which wxGlade shares the philosophy and the look & feel
+          (but not a line of code). For more info:
+          http://wxglade.sourceforge.net          
+        
+    :New features:
+      [4.y]
+        - editor:       close pages by double or middle-clicking on their tab
+        - Mac OsX:      single and multiple document interface
+      [4.a]
+        - editor:       call-tips for classes
+        - preferences:  configurable shortcuts (see shortcuts/__init__.py)
+        - preferences:  word characters for autocompletion and calltips
+        - sidebar:      realtime updating now works
+        - sidebar:      improved browser with filters
+      [2.a]
+        - sidebar browser (iniated by Attila Magyar)
+      [1.a]
+        - XRC editor
+      [0.a]
+        - Uml viewer
+        
+    :Bug fixes:
+      [4.y]
+        - Blender:      SPE runs inside Blender again
+      [4.q]
+        - preferences:  possible patch
+        - menu:         close
+      [4.p]
+        - menu:         open
+      [4.a]
+        - major bugfix for wxpython 2.6+
+        - major bugfix for Mac OS X
+        - notebooksizer deprecations
+        - blender:      support only exposed if run inside blender
+        - editor:       autocompletion (case sensitive)
+        - editor:       correctly scrolling to lines
+        - editor:       encoding
+        - editor:       improved call tips for classes
+        - editor:       no sash, no crash
+        - editor:       save checks if file exists
+        - editor:       scrollbars (no invisible source anymore)
+        - editor:       source gets focus properly
+        - editor:       find dialog gets focus if already opened
+        - editor:       shortcut for dedent is now Shift+Tab
+        - preferences:  added word characters
+        - sdi:          Tool pane has no toolbar
+        - shell:        pressing Tab no longer inserts a tab in the editor
+        - sidebar:      realtime updating
+        - tool:         find now also executes on enter
+        - tool:         find doesn't use notebooksizer anymore
+        - tool:         find now also executes on enter (Yoyong Hernan)
+        - tool:         browser add new folder starts from current folder (Yoyong Hernan)
+      [3.a]
+        - major bugfix for wxpython 2.5.4.1
+      [2.c]
+        - right click menu now works (Thurston Stone)
+        - pychecker tab
+        - window handling (maximize etc...)
+      [2.b]
+        - launch wxGlade GUI designer and XRC editor
+      [2.a]
+        - segfaults in Browser
+        - indentation can now be different from 4
+        - mac osx fixes for kiki, wxGlade & XRC
+        - scrollbars of UML view
+        - initial sizing and positioning are now restored
+      [1.a]
+        - uml view crashed when only 1 class was present
+        - mac menu fix for preferences, about & exit
+        - some icons are fixed by Jeff Grimmett
+
+    :Requirements:     
+      - full python 2.3+
+      - wxpython 2.5.4.1+
+      - optional blender 2.35
+      
+    :Donations:
+      [3.a] (20 euro)
+        - Gerard Blais 
+      [2.c] (50 euro)
+        - Mike (Partner2Partner)
+      [2.a] (177.20euro)
+        - Michael Balk (60euro!)
+        - Jason Powell
+        - David Ko Feng
+        - Winchell Chung
+        - Matthias Haberkorn
+        - Kristjan Kannike 
+        - Robert Cowham
+        - Andre Roberge
+        - Chris S
+      [0.a] (10euro)
+        - Brendan Simons
+
+    :Contributors:
+      - Yoyong Hernan
+      - Sam Widmer
+      - Attila Magyar
+      - Kevin Walzer
+      - Thurston Stone
+
+Spe 0.6.0
+---------
+    I'm happy to announce the first SPE release aimed for the Mac Os X platform. 
+    There might be still some minor issues, but if reported they might be fixed
+    soon. All mac feedback is welcome. This release was possible by Xavier
+    Nora who offered me access to his Mac through VNC.  If SPE doesn't startup
+    on your Mac, probably your wxPython version is too old. 
+    
+    Now SPE also has real built-in support for encoding, so SPE can now deal
+    with the most strange languages in the world. If the encoding is defined in
+    the file it will appear in the sidebar.
+    
+    :Batteries included:
+      - Kiki:
+          Regular Expression (regex) console. For more info:
+          http://project5.freezope.org/kiki/index.html
+      - PyChecker:
+          PyChecker is a tool for finding bugs in python source code. It
+          finds problems that are typically caught by a compiler for
+          less dynamic languages, like C and C++. It is similar to lint.
+          For more info: http://pychecker.sourceforge.net
+      - wxGlade:
+          wxGlade is a GUI designer written in Python with the
+          popular GUI toolkit wxPython, that helps you create
+          wxWindows/wxPython user interfaces. As you can guess by the
+          name, its model is Glade, the famous GTK+/GNOME GUI builder,
+          with which wxGlade shares the philosophy and the look & feel
+          (but not a line of code). For more info:
+          http://wxglade.sourceforge.net          
+        
+    :New features:
+      [a]
+        - encoding
+        - toolBar for Mac OS X
+        - blender script spe_blender.py to register spe in Blender script menu (copy to .blender/scripts)
+    
+    :Bug fixes:
+      [a]  
+        - new icons
+
+    :Requirements:     
+      - full python 2.3+
+      - wxpython 2.5.2.8+
+      - optional blender 2.35
+      
+    :Contributors:
+        [a]
+            - Xavier Noria (http://www.hashref.com)
+            - Jean Montambeault (blender script)
+
+    :Donations (thanks!):
+      - Oliver Tomic
+
+
+Spe 0.5.2
+---------
+    Release adapted to the latest wxGlade and Blender.
+    
+    :Batteries included:
+      - Kiki:
+          Regular Expression (regex) console. For more info:
+          http://project5.freezope.org/kiki/index.html
+      - PyChecker:
+          PyChecker is a tool for finding bugs in python source code. It
+          finds problems that are typically caught by a compiler for
+          less dynamic languages, like C and C++. It is similar to lint.
+          For more info: http://pychecker.sourceforge.net
+      - wxGlade:
+          wxGlade is a GUI designer written in Python with the
+          popular GUI toolkit wxPython, that helps you create
+          wxWindows/wxPython user interfaces. As you can guess by the
+          name, its model is Glade, the famous GTK+/GNOME GUI builder,
+          with which wxGlade shares the philosophy and the look & feel
+          (but not a line of code). For more info:
+          http://wxglade.sourceforge.net          
+        
+    :New features:
+      [a]
+        - wxGlade 0.3.5.1
+        - Blender: Sound and Registry support in Blender Browser
+    
+    :Bug fixes:
+      [a]  
+        - Blender browser
+        - anti-aliasing for Mac OS X
+        - find wxPython 2.5.3 documentation (Windows only)
+
+    :Requirements:     
+      - full python 2.3+
+      - wxpython 2.5.2.8+
+      - optional blender 2.35
+      
+    :Donations (thanks!):
+      - April Atkinson
+
+
+Spe 0.5.1
+---------
+    Stable release for wxPython 2.5
+    
+    :Batteries included:
+      - Kiki:
+          Regular Expression (regex) console. For more info:
+          http://project5.freezope.org/kiki/index.html
+      - PyChecker:
+          PyChecker is a tool for finding bugs in python source code. It
+          finds problems that are typically caught by a compiler for
+          less dynamic languages, like C and C++. It is similar to lint.
+          For more info: http://pychecker.sourceforge.net
+      - wxGlade:
+          wxGlade is a GUI designer written in Python with the
+          popular GUI toolkit wxPython, that helps you create
+          wxWindows/wxPython user interfaces. As you can guess by the
+          name, its model is Glade, the famous GTK+/GNOME GUI builder,
+          with which wxGlade shares the philosophy and the look & feel
+          (but not a line of code). For more info:
+          http://wxglade.sourceforge.net          
+        
+    :New features:
+      [h]
+        - wxGlade 0.3.5.1
+      [b]
+        - context-fed auto completion (Ctrl+Space)
+        - drag & drop support for \*.tpy files
+      [a]
+        - both MDI/SDI support
+        - Mac OS X support (probably still need a lot of debugging, volunteers needed)
+        - tabs with open files
+        - realtime sidebar (class explorer, todo & index update as you type!)
+        - wxPython 2.5 support (latest 2.4 also still supported)
+        - option to limit calltips to first paragraph
+        - speed improvements, SPE runs now more fast, especially the sidebar
+        - dynamic sash window for source code (allowing simultaneous splitted views)
+        - Pychecker has been smoothly integrated in the sidebar
+    
+    :Bug fixes:
+      [h]
+        - double scrollbars
+      [g]
+        - better tab indentation fix
+        - activepython documentation can be combined with the enthought distribution
+        - jump to source fix
+        - function names def* truncated in explore
+        - "Save changes to" doesn't show document
+        - File|Exit should use X as accel key
+        - Ctrl-F doesn't switch to open "Find" dlg
+        - bug in importing modules to shell
+        - Edit Preferences
+      [f]
+        - tab indentation fix
+        - htmlWindow fix
+      [e]
+        - This release works with the new wxPython 2.5.2.7
+      [b]  
+        - maximize new windows in MDI
+        - recent files are now alphabetically ordered
+        - uncomment now works properly
+        - spe scripts should now install properly
+        - menu links to files (mac issue)
+        - better save method to prevent data loss
+      [a]  
+        - Blender support is again enabled
+        - Icon transparencies on certain platforms
+        - setup.py doesn't have line endings anymore
+
+    
+    :Requirements:     
+      - full python 2.2.2+
+      - wxpython 2.4.1.2+
+      - optional blender 2.31+
+      
+    :Donations (thanks!):
+      - Manuel Ulloa
+      - Anne Ebel
+      - Eino Makitalo
+      - Michael Balk
+      - Kyle Odom
+      - Dov Nir Aides
+      - Frederick Lim
+      - John Fabiani
+      - Dagur Ammendrup
+
+Spe 0.5.0
+---------
+    This is a major rewrite because of wxPython 2.5. WARNING: This is a prerelease, use it at its own risk (as I do myself).  It's already quite stable for Windows XP and Linux, but probably for Mac OS X a lot of debugging should be done.
+    
+    If you've used SPE before, remove the file 'defaults.cfg' from your user path (see Help>About if you don't know your path) before installing . Also remove the 'sm' module folder from the site-packages path. Otherwise this will cause errors.
+    
+    Out of the box SPE chooses automatically the framework:
+      - MDI for Windows XP
+      - SDI for Linux and Mac Os X
+    
+    However you can override these settings in the preferences dialog box, but Mac doesn't really support MDI.
+    
+    The Blender support is currently not available, but that should be fixed soon.
+    
+    PS. Alberto Griggio about current version of wxGlade (http://wxglade.sourceforge.net):
+    
+    WARNING: There have been reported many problems running wxGlade with the just released wxPython 2.5.1.5: we know this, and we're trying to do our best to fix them as soon as possible. In the meantime, we recommend to use wxPython 2.4: the generated code will be compatible with 2.5 anyway. Sorry for this...
+    
+    
+    :Batteries included:
+      - Kiki:
+          Regular Expression (regex) console. For more info:
+          http://project5.freezope.org/kiki/index.html
+      - PyChecker:
+          PyChecker is a tool for finding bugs in python source code. It
+          finds problems that are typically caught by a compiler for
+          less dynamic languages, like C and C++. It is similar to lint.
+          For more info: http://pychecker.sourceforge.net
+      - wxGlade:
+          wxGlade is a GUI designer written in Python with the
+          popular GUI toolkit wxPython, that helps you create
+          wxWindows/wxPython user interfaces. As you can guess by the
+          name, its model is Glade, the famous GTK+/GNOME GUI builder,
+          with which wxGlade shares the philosophy and the look & feel
+          (but not a line of code). For more info:
+          http://wxglade.sourceforge.net          
+        
+    :New features:
+      [a]
+        - both MDI/SDI support
+        - Mac OS X support (probably still need a lot of debugging, volunteers needed)
+        - tabs with open files
+        - realtime sidebar (class explorer, todo & index update as you type!)
+        - wxPython 2.5 support (latest 2.4 also still supported)
+        - option to limit calltips to first paragraph
+        - speed improvements, SPE runs now more fast, especially the sidebar
+        - dynamic sash window for source code (allowing simultaneous splitted views)
+        - Pychecker has been smoothly integrated in the sidebar
+    
+    :Bug fixes:
+      [a]  
+        - cut, copy and paste shortcuts work now in shell
+        - True and False are now also highlighted
+    
+    :Requirements:     
+        - full python 2.2.2+
+        - wxpython 2.4.1.2+
+        - optional blender 2.31+
+      
+Spe 0.4.2
+---------
+    After some hibernation, spe is alive again. As I don't have Linux, I
+    would like to get feedback if it is possible to run programs in
+    terminal emulators.
+
+    I would like to thank Chu-Ching Huang for including spe in livezope,
+    his knoppix distro (bootabel Linux cd-rom). This makes it possible
+    to run Linux and spe in Linux on any PC, without the need of
+    installing Linux on the hard drive. You can download livezope from
+    ftp://math.cgu.edu.tw/pub/KNOPPIX Huang is looking for mirror sites.
+    I think this is VERY interesting to have a bootable Linux CD rom
+    filled with all the important Python stuff, so please help him.
+    Anyone interested can contact me
+
+    :Batteries included:
+      - Kiki:
+          Regular Expression (regex) console. For more info:
+          http://project5.freezope.org/kiki/index.html
+      - PyChecker:
+          PyChecker is a tool for finding bugs in python source code. It
+          finds problems that are typically caught by a compiler for
+          less dynamic languages, like C and C++. It is similar to lint.
+          For more info: http://pychecker.sourceforge.net
+      - wxGlade:
+          wxGlade is a GUI designer written in Python with the
+          popular GUI toolkit wxPython, that helps you create
+          wxWindows/wxPython user interfaces. As you can guess by the
+          name, its model is Glade, the famous GTK+/GNOME GUI builder,
+          with which wxGlade shares the philosophy and the look & feel
+          (but not a line of code). For more info:
+          http://wxglade.sourceforge.net          
+    
+    :New features:
+        - Ignore list for autocompletion in preferences dialog to
+          prevent spe crashing eg with 'gtk' autocompletion
+        - Blender browser contains now Lattices and Textures sections
+        - Preferences has a new tab 'Paths', which allows you to
+          specify which html browser should be used and where
+          documentation can be found. It also should allow *nix users to
+          run programs outside spe in terminal emulators (this was
+          already possible for windows). 
+        - Class browser: todo and separators definitions can now be
+          located anywhere in the source code, thanks to a patch of
+          Paul Evans.
+
+    :Fixes:
+        [d]
+            - Linux spe script line endings
+        [c]
+            - blender python manual is updated to 2.31
+            - unicode bug in preferences dialog
+            - pychecker is upgraded to latest version (0.8.13)
+        [a]
+            - Linux setup improved (Tina Hirsch)
+            - info.py improved (Tina Hirsch)
+            - unixUninstall improved (Tina Hirsch)
+            - Blender menu was improved
+        
+    :Requirements:
+        - full python_ 2.2.2+
+        - wxpython_ 2.4.1.2+
+        - optional blender_ 2.31
+
+    :Contributors:
+        - Tina Hirsch (various patches)
+        - Paul Evans (todo & separator patch)
+        - Chu-Ching Huang (livezope)
+            
+Spe 0.4.1
+---------
+    Better integration with wxGlade    
+
+    :Batteries included:
+      - Kiki:
+          Regular Expression (regex) console. For more info:
+          http://project5.tk
+      - PyChecker:
+          PyChecker is a tool for finding bugs in python source code. It
+          finds problems that are typically caught by a compiler for
+          less dynamic languages, like C and C++. It is similar to lint.
+          For more info: http://pychecker.sourceforge.net
+      - wxGlade:
+          wxGlade is a GUI designer written in Python with the
+          popular GUI toolkit wxPython, that helps you create
+          wxWindows/wxPython user interfaces. As you can guess by the
+          name, its model is Glade, the famous GTK+/GNOME GUI builder,
+          with which wxGlade shares the philosophy and the look & feel
+          (but not a line of code). For more info:
+          http://wxglade.sourceforge.net          
+        
+    :New features:
+        - Autoloading of externally modified files. This works very well
+          with wxGlade! You can disable this feature in the preferences.
+        - When 'find in files' path is empty, searches in open files
+        - Added 'Current folder' in browsertab
+        - Preferences entry 'Auto redraw Blender every [sec]'
+
+    :Fixes:
+        [e]
+            - Linux setup improved (Tina Hirsch)
+            - info.py improved (Tina Hirsch)
+            - unixUninstall improved (Tina Hirsch)
+        [d]
+            - trailing spaces fix
+            - redraw blender fix
+        [c]
+            - checkTime fix for closed files
+        [b]
+            - revert fix
+            - unnamed.py checktime fix
+        [a]
+            - tab key was not working in linux 
+            - install problem as root in linux
+            - redirectshell problem
+        
+    :Requirements:
+        - full python_ 2.2.2+
+        - wxpython_ 2.4.1.2+
+        - optional blender_ 2.28c
+
+    :Contributors:
+        - Tina Hirsch (various patches)
+            
+Spe 0.4.0
+---------
+    Spe nows ships with PyChecker, for more info see:
+    http://www.unixreview.com/documents/s=2426/uni1018986621203/0204h.htm
+    I'm afraid spe will fail to work with Python 2.2.1, so please upgrade!
+
+    :Batteries included:
+      - Kiki:
+          Regular Expression (regex) console. Altough still a pre-alpha
+          release, it might be already usefull. For more info: http://project5.tk
+      - PyChecker:
+          PyChecker is a tool for finding bugs in python source code. It
+          finds problems that are typically caught by a compiler for
+          less dynamic languages, like C and C++. It is similar to lint.
+          For more info: http://pychecker.sourceforge.net
+      - wxGlade:
+          wxGlade is a GUI designer written in Python with the
+          popular GUI toolkit wxPython, that helps you create
+          wxWindows/wxPython user interfaces. As you can guess by the
+          name, its model is Glade, the famous GTK+/GNOME GUI builder,
+          with which wxGlade shares the philosophy and the look & feel
+          (but not a line of code). For more info:
+          http://wxglade.sourceforge.net          
+        
+    :New features:
+        - PyChecker
+        - Block comment in Extra menu
+
+    :Fixes:
+      [e]
+        - improved preferences dialog box
+      [d]
+        - spe now always open non-existing files as empty scripts
+        - better icon implementation for windows
+      [c]
+        - plugin (kiki,wxGlade) fix
+      [b]
+        - winInstall fix
+        - focus fix
+      [a]
+        - all Alt shortcuts are replaced by Ctrl+Alt shortcuts
+        - improved userPath retrieval (by Greg Brunet)
+        - editor gets focus when shifting between child windows
+        - some minor fixes...
+        
+    :Requirements:
+        - full python_ 2.3 or 2.2.2
+        - wxpython_ 2.4.1.2+
+        - optional blender_ 2.28c
+
+    :Wanted:
+        - people to help implementing new features, documenting, ...
+        
+    :Contributors:
+        - Nicodemus (PyChecker integration)
+        - Greg Brunet
+        
+Spe 0.3.0
+---------
+    Spe now ships with a minimal preference dialog box, which will be
+    further extended. The most important editor settings can now be set, so
+    spe can now also be used by those who prefer tabs instead of spaces.
+    I'm afraid spe will fail to work with Python 2.2.1, so please upgrade!
+
+    :Batteries included:
+      - Kiki:
+          Regular Expression (regex) console. Altough still a pre-alpha
+          release, it might be already usefull. For more info: http://project5.tk
+      - wxGlade:
+          wxGlade is a GUI designer written in Python with the
+          popular GUI toolkit wxPython, that helps you create
+          wxWindows/wxPython user interfaces. As you can guess by the
+          name, its model is Glade, the famous GTK+/GNOME GUI builder,
+          with which wxGlade shares the philosophy and the look & feel
+          (but not a line of code). For more info:
+          http://wxglade.sourceforge.net          
+        
+    :New features:
+          - preference dialog
+
+    :Fixes:
+        [c]
+          - blenpy webbrowser fix for Linux
+          - find dialog imports selected text (Nicodemus)
+          - SPE_.pyw fixed
+        [b]
+          - sm.zfill fix
+          - options of find tab now work
+          - find tab layout fixed for Linux
+          - no syntax check on python files
+        
+    :Requirements:
+        - full python_ 2.3 or 2.2.2 (updated!)
+        - wxpython_ 2.4.1.2
+        - optional blender_ 2.28c
+
+    :Wanted:
+        - people to help implementing new features, documenting, ...
+        
+    :Contributors:
+        [c]
+            - Nicodemus
+            - Stuart Stock (Mac Os X screenshot)
+            - Greg Brunet (bug report)
+        [b]
+            - Tina Hirsch            
+
+Spe 0.2.0
+---------
+    Spe now ships with wxGlade, a GUI designer! Screenshots are at
+    http://wxglade.sourceforge.net/img/group.png A tutorial is included in
+    the help menu.Now it acts independantly from spe, but the purpose is to
+    integrate it tighter. The find tab is an example of how to extend spe
+    with wxGlade. Spe runs now also fine inside Blender2.28c 
+
+    Andrei compares wxGlade to Boa:        
+    *"I like Boa and as Delphi programmer it was my first choice when
+    I looked into GUIs. But as Python user, I find wxGlade suits my
+    needs better, because it doesn't encourage integration of GUI
+    and code and because of its excellent support for sizers, which
+    are a must-have for cross-platform development. Those
+    non-resizeable frames we are used to in Windows seem really
+    weird to Linux users - and with good reason."*
+
+    :Batteries included:
+      - Kiki:
+          Regular Expression (regex) console. Altough still a pre-alpha
+          release, it might be already usefull. For more info: http://project5.tk
+      - wxGlade:
+          wxGlade is a GUI designer written in Python with the
+          popular GUI toolkit wxPython, that helps you create
+          wxWindows/wxPython user interfaces. As you can guess by the
+          name, its model is Glade, the famous GTK+/GNOME GUI builder,
+          with which wxGlade shares the philosophy and the look & feel
+          (but not a line of code). For more info:
+          http://wxglade.sourceforge.net          
+        
+    :New features:
+          - opening an non existing files opens a new file with that filename
+          - find tab: find recursively text in files
+          - wxGlade: see above
+
+    :Fixes:
+        [c]
+          - sm.zfill fix
+          - options of find tab now work
+          - find tab layout fixed for Linux
+          - no syntax check on python files
+        [b]
+          - new Kiki version
+          - wxGlade missing files are now included
+          - wxGlade didn't start in Linux
+          - setup root fix
+          - redirect fix
+          - todoMax error
+          - os.path.exists typo
+        
+    :Requirements:
+        - full python_ 2.2 or 2.3
+        - wxpython_ 2.4.1.2
+        - optional blender_ 2.28c
+
+    :Contributors:
+        [c]
+            - Tina Hirsch
+        [b]
+            - Tina Hirsch (linux bug fixing)
+            - Andrei (new kiki version) http://come.to/project5
+        [a]
+        - the wxGlade team http://wxglade.sourceforge.net 
+            
+Spe 0.1.8
+---------
+    Hopefully this release can be a milestone. For the first time it
+    contains a plugin from an user. I would be happy if this would
+    happen more. Any wxDialog, wxFrame or wxPanel can be easily
+    integrated in spe.  So many thanks to Andrei (http://project5.tk),
+    who contributed Kiki, a regular expression console.
+
+    :New features:
+        [a]
+          - Kiki:
+              *"Kiki is a Regex tool which I think could be useful in
+              Spe for the idiots who, like me, aren't capable of
+              Thinking In Regex. It's inspired by - but has no code at
+              all in common with - a Tkinter tool called Recon (regex
+              console). I've attached the current snapshot, which is
+              very much not the finished product, even though it does
+              work. Planned features include: colored parentheses
+              showing the start/end of groups in re matches (currently
+              parens just wrap the match), overviews of all named and
+              unnamed groups for every match, docs in the Help."*
+              Andrei
+        
+    :Fixes:
+        [c]
+          - SetColumnWidth(-1,...) maybe fixed (Linux)
+          - sys.system_info fix (Linux)
+          - open files on command line was not working
+          - sys.argv error when spe is started from Blender
+          - blenpy send to fix
+          - spe.INFO problem
+          - improved user path retrieval
+        [a]
+          - @ was shortcut for contact, now it is Ctrl+@
+
+    :Requirements:
+        - full python_ 2.2 or 2.3
+        - wxpython_ 2.4.1.2
+        - optional blender_ 2.28
+
+    :Contributors:
+        [c]
+            - Tina Hirsch (feedback)
+            - Andrei (improved user path retrieval) http://come.to/project5
+        [a]
+            - Andrei (new feature: kiki) http://come.to/project5
+
+Spe 0.1.7
+---------
+    This release ships with a much improved installation/uninstallation
+    procedure and an extended help and popup menu.
+    
+    :New features:
+        [d]
+            - new popup menu
+            - command line option '--debug', if spe fails to start and
+              ends silently.
+        [c]        
+            - windows executable installer with extra winInstall and
+              winUninstall.py (linux stays the same)
+        [b]      
+            - 'browse to' in edit menu and toolbar button to locate modules
+              automatically based on the cursor position, this works not
+              only for import statements but also for external classes and
+              functions.          
+            - help menu enriched with internet links to tutorial, forums, ...
+            - option to create shortcut on desktop during setup (windows only)
+            - registering in windows explorer context menu (windows only)
+            - automatical uninstall script to remove spe from your computer
+            - setup.py is now executable and doesn't require anymore the
+              'python setup.py install' procedure
+        
+    :Fixes:
+        [g]
+            - autocomplete and calltip were disabled
+        [f]
+            - spe starts now more centered (Linux)
+            - key issues (Guillermo Fernandez)
+            
+        [e]
+            - SPE.pyw was missing
+            - some other small fixes
+        [d]
+            - indentation fix
+            - menu problem with 'www'
+            - startup problem because of fileList
+            - removed unnecessary png handlers
+            - Alt+C and Alt+V are copy and paste shortcuts for shell
+            - double click in shell jumps to error source code
+            - auto-indentation was not functioning after Enter is pressed
+            - ...
+        [c]
+            - python help menu for linux
+            - spe.blend can load spe from Blender in Linux, if Blender is compiled with the right libpng (1.2.x)
+        [b]
+            - improved setup installation
+            - running files path problem fixed
+            - sidebar updates whenever the editor control looses focus
+            - sidebar fix for python 2.2.1 because of rstrip problem
+            - international keyboard fix (Guillermo Fernandez)
+            - separator fix because of zfill error (Guillermo Fernandez)
+            - find & replace issues (Guillermo Fernandez)
+        [a]
+            - drag&drop works now also on the editor window
+            - help windows appear more left-up so that they are more visible
+            - shortcuts reference dialog: now resizable and corrected
+            - indent and dedent added to Edit menu
+            - improved about window showing where spe is installed and other relevant info
+
+
+    :Known Issues:
+        - tabs in shell are stolen by editor.
+         
+    :Requirements:
+        - full python_ 2.2 or 2.3
+        - wxpython_ 2.4.1.2
+        - optional blender_ 2.28a
+
+    :Contributors:
+        [f]
+            - Guillermo Fernandez (patches)
+        [c]
+            - Tina Hirsch (Linux feedback)
+        [b]
+            - Guillermo Fernandez (patches)
+        [a]
+            - Andrei (feedback) http://project5.tk
+
+-----------------------------------------------------------
+
+Spe 0.1.6
+---------
+
+    This release normally should have been on the blender_ website.
+    Unfortunately this is not possible. Therefore the latest release
+    will be available from the link *Download latest release* under the
+    calendar of http://spe.pycs.net
+
+    The focus in the spe development for the recent time has been to
+    make it as stable as possible for Linux. This release should run
+    without (major) problems outside blender_ in Linux (see also
+    *External bugs*). Following information is relative to 0.1.5.c:
+
+    :New features:
+        - Blender API documentation
+        - linux wrapper script to launch spe from the console
+        - spe updated for python_ 2.3
+        - spe help manual (Help menu>Manual)
+        - help window resizable
+        - blender_ python_ API documentation added to help menu
+        - homepage: http://spe.pycs.net (thanks to pyds_ and pycs_)
+        - webbrowser used for displaying bigger help files in blenpy and spe
+        - keyboard shortcuts in separate configurable python file
+
+    :Requirements:
+        - full python_ 2.2 or 2.3
+        - wxpython_ 2.4.1.2
+        - optional blender_ 2.28a (updated!)
+        
+    :Known Issues:
+        - Keyboard copy&paste operations in shell are stolen by editor.
+         
+    :External bugs:
+        - the Linux blender_ binaries of blender_.org are unfortunately
+          not compatible with spe.  blender_ still uses an old version of
+          the libpng (1.0.x), while spe requires a newer version.
+          Therefore compile blender_ from the sources with libpng 1.2.x
+          to make spe running in blender_. This problem doesn't apply to
+          Windows users, as the windows blender_ binary ships strangely
+          enough already with the new version of libpng.
+        - View end of line marker fails (probably wxpython_ bug)
+
+    :Fixes:
+        - class browser fixed
+        - usermenu problem
+        - spe can now close without open documents
+        - sidebar updates automatically when it gets focus
+        - enter now doesn't generate extra spaces with auto-complete
+        - blender_ 2.28a no longer crashes by exploring the Text window
+        - no pycrust_ warnings anymore
+        - todo tab: line scrolling
+        - about.htm is included (was missing)
+        - add your own menu help dialog typo
+        - shortcuts dialog typo
+        - busy cursor fix
+        - recent files does not display longer not existing files
+        - separators added between toolbar buttons
+        - ...and some more 3 minor fixes
+        - explore tab: text height (Linux)
+        - font size text dialogs (Linux)
+        - 11 fixes for visibility problems (mainly Linux)
+        - README.txt with better instructions for Linux users.
+        
+    :Contributors:
+        - Tina Hirsch (Linux bug fixing)
+        - Andrei (feedback) http://project5.tk
+
+    :Wanted:
+        - MacOs X tester for MacOs X screenshot
+        - wxpython_ programmers
+
+-----------------------------------------------------------
+
+Spe 0.1.5
+---------
+
+    :New features:
+         - blender_ browser updated for blender_ 2.28
+             - Armature
+             - Curve
+             - Effect
+             - IpoCurve
+             - Metaball
+         - Help windows improved with logo and html window.
+
+    :Fixes:
+        - blenpy has undergone numerous fixes and should run fine
+
+    :Requirements:
+        - full python_ 2.2
+        - wxpython_ 2.4.1.2 (updated!)
+        - optional blender_ 2.28 (updated!)
+
+    :Known issues:
+        - Exploring Texts in blender_ browser crashes due to internal
+          blender_ error.
+          
+    :Contributors:
+        - Tina Hirsch (Linux bug fixing)
+
+-----------------------------------------------------------
+
+Spe 0.1.4
+---------
+
+    :Requirements:
+        - full python_ 2.2
+        - wxpython_ 2.4.0.7u
+        - optional blender_ 2.26 or 2.27
+        
+    :Contributors:
+        - Tina Hirsch (Linux bug fixing)
+        - Wolfram Kraus (Linux feedback)
+
+-----------------------------------------------------------
+
+.. This document is written in the reStructuredText format.
+   For a quick reference of this specification see:
+   http://docutils.sourceforge.net/docs/rst/quickref.html
+
+.. _blender: http://www.blender.org
+.. _boa: http://boa-constructor.sourceforge.net
+.. _email: http://www.pycs.net/system/mailto.py?usernum=0000167
+.. _pyds: http://pyds.muensterland.org/
+.. _pycrust: http://www.wxpython.org
+.. _pycs: http://www.pycs.net
+.. _python: http://www.activestate.com/Products/ActivePython/index.html
+.. _wxpython: http://www.wxpython.org
+.. _zettai: http://www.zettai.net
+.. _XRCed: http://xrced.sourceforge.net
+

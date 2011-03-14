@@ -1,8 +1,8 @@
 # This module should be kept compatible with Python 2.1.
 
-__revision__ = "$Id: install_lib.py 37946 2004-12-02 20:14:16Z lemburg $"
+__revision__ = "$Id: install_lib.py 61000 2008-02-23 17:40:11Z christian.heimes $"
 
-import sys, os, string
+import os
 from types import IntType
 from distutils.core import Command
 from distutils.errors import DistutilsOptionError

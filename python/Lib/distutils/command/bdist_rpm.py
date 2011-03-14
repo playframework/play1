@@ -5,10 +5,9 @@ distributions)."""
 
 # This module should be kept compatible with Python 2.1.
 
-__revision__ = "$Id: bdist_rpm.py 52742 2006-11-12 18:56:18Z martin.v.loewis $"
+__revision__ = "$Id: bdist_rpm.py 61000 2008-02-23 17:40:11Z christian.heimes $"
 
 import sys, os, string
-import glob
 from types import *
 from distutils.core import Command
 from distutils.debug import DEBUG
