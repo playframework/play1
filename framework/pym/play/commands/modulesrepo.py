@@ -8,6 +8,7 @@ import string
 import imp
 import time
 import urllib
+import yaml
 
 from play.utils import *
 
@@ -260,6 +261,17 @@ def build(app, args, env):
         print "~ %s" % str(err)
         print "~ "
         sys.exit(-1)
+
+    deps_file = os.path.join(app.path, 'conf', 'dependencies.yml')
+    if os.path.exists(deps_file):
+        with open(deps_file) as f:
+            deps = yaml.load(f.read())
+            versionCandidate = deps["self"].split(" ").pop()
+            version = versionCandidate
+            for dep in deps["require"]:
+                splitted = dep.split(" ")
+                if len(splitted) == 2 and splitted[0] == "play":
+                    fwkMatch = splitted[1]
 
     if version is None:
         version = raw_input("~ What is the module version number? ")
