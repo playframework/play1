@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import play.Logger;
 import play.Play;
-import play.PlayPlugin;
 import play.vfs.VirtualFile;
 import play.exceptions.TemplateCompilationException;
 import play.exceptions.TemplateNotFoundException;

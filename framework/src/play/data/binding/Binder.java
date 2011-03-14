@@ -15,7 +15,6 @@ import org.joda.time.DateTime;
 
 import play.Logger;
 import play.Play;
-import play.PlayPlugin;
 import play.data.Upload;
 import play.data.binding.types.*;
 import play.data.validation.Validation;

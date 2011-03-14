@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import play.Play;
-import play.PlayPlugin;
 import play.data.binding.types.DateBinder;
 
 /**

@@ -14,10 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.PatternLayout;
 import play.Logger;
 import play.Play;
-import play.PlayPlugin;
 import play.cache.CacheFor;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;

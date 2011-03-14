@@ -38,7 +38,7 @@ public class MemcachedImpl implements CacheImpl {
         } else if (forceClientInit) {
             // When you stop the client, it sets the interrupted state of this thread to true. If you try to reinit it with the same thread in this state,
             // Memcached client errors out. So a simple call to interrupted() will reset this flag
-            Thread.currentThread().interrupted();
+            Thread.interrupted();
             uniqueInstance.initClient();
         }
         return uniqueInstance;

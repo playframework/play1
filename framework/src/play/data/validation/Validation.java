@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import play.Play;
-import play.PlayPlugin;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.UnexpectedException;
 

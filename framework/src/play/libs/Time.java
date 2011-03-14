@@ -15,6 +15,8 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.NotImplementedException;
+
 /**
  * Time utils
  */
@@ -196,7 +198,7 @@ public class Time {
      * month&quot;.
      * <P>
      * The '#' character is allowed for the day-of-week field. This character is
-     * used to specify &quot;the nth&quot; XXX day of the month. For example, the 
+     * used to specify &quot;the nth&quot; xxx day of the month. For example, the 
      * value of &quot;6#3&quot; in the day-of-week field means the third Friday of 
      * the month (day 6 = Friday and &quot;#3&quot; = the 3rd one in the month). 
      * Other examples: &quot;2#1&quot; = the first Monday of the month and 
@@ -355,8 +357,6 @@ public class Time {
             Date lastDate = adjustCal.getTime();
 
             Date newDate = null;
-
-            //TODO: (QUARTZ-481) IMPROVE THIS! The following is a BAD solution to this problem. Performance will be very bad here, depending on the cron expression. It is, however A solution.
 
             //keep getting the next included time until it's farther than one second
             // apart. At that point, lastDate is the last valid fire time. We return
@@ -1256,8 +1256,8 @@ public class Time {
                         continue;
                     }
                 } else if (dayOfWSpec && !dayOfMSpec) { // get day by day of week rule
-                    if (lastdayOfWeek) { // are we looking for the last XXX day of
-                        // the month?
+                    if (lastdayOfWeek) {
+                        // are we looking for the last day of the month?
                         int dow = daysOfWeek.first().intValue(); // desired
                         // d-o-w
                         int cDow = cl.get(Calendar.DAY_OF_WEEK); // current d-o-w
@@ -1300,7 +1300,7 @@ public class Time {
                         }
 
                     } else if (nthdayOfWeek != 0) {
-                        // are we looking for the Nth XXX day in the month?
+                        // are we looking for the Nth day in the month?
                         int dow = daysOfWeek.first().intValue(); // desired
                         // d-o-w
                         int cDow = cl.get(Calendar.DAY_OF_WEEK); // current d-o-w
@@ -1383,7 +1383,6 @@ public class Time {
                 } else { // dayOfWSpec && !dayOfMSpec
                     throw new UnsupportedOperationException(
                             "Support for specifying both a day-of-week AND a day-of-month parameter is not implemented.");
-                // TODO:
                 }
                 cl.set(Calendar.DAY_OF_MONTH, day);
 
@@ -1473,8 +1472,7 @@ public class Time {
          * that the <code>CronExpression</code> matches.
          */
         protected Date getTimeBefore(Date endTime) {
-            // TODO: implement QUARTZ-423
-            return null;
+            throw new NotImplementedException();
         }
 
         /**
@@ -1482,8 +1480,7 @@ public class Time {
          * <code>CronExpression</code> will match.
          */
         public Date getFinalFireTime() {
-            // TODO: implement QUARTZ-423
-            return null;
+            throw new NotImplementedException();
         }
 
         protected boolean isLeapYear(int year) {

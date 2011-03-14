@@ -89,6 +89,7 @@ public class ConfigurablePluginDisablingPlugin extends PlayPlugin {
         
     }
 
+    @SuppressWarnings("unchecked")
     private Class<PlayPlugin> resolveClass(String pluginClassName) {
         try{
             return (Class<PlayPlugin>)getClass().getClassLoader().loadClass(pluginClassName);

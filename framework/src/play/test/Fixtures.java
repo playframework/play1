@@ -26,7 +26,6 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 
 import play.Logger;
 import play.Play;
-import play.PlayPlugin;
 import play.classloading.ApplicationClasses;
 import play.data.binding.Binder;
 import play.data.binding.types.DateBinder;

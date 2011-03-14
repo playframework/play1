@@ -3,7 +3,6 @@ package play.db;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;

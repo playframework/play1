@@ -9,7 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import play.Play;
-import play.PlayPlugin;
 import play.data.binding.Binder;
 
 /**

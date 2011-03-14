@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.List;
 import play.Play;
-import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
 
 public interface Model {

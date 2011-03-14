@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import play.Play;
-import play.PlayPlugin;
 import play.exceptions.TemplateCompilationException;
 import play.templates.GroovyInlineTags.CALL;
 

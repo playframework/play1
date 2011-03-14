@@ -17,7 +17,6 @@ import org.junit.runner.notification.RunListener;
 
 import play.Logger;
 import play.Play;
-import play.PlayPlugin;
 import play.vfs.VirtualFile;
 
 /**

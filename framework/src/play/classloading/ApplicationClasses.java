@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import play.Logger;
 import play.Play;
-import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
 import play.vfs.VirtualFile;
 

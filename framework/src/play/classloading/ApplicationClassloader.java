@@ -24,10 +24,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.PatternLayout;
 import play.Logger;
 import play.Play;
-import play.PlayPlugin;
 import play.vfs.VirtualFile;
 import play.cache.Cache;
 import play.classloading.ApplicationClasses.ApplicationClass;

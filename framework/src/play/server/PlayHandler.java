@@ -48,7 +48,6 @@ import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
-import play.PlayPlugin;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Messages;
