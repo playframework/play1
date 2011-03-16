@@ -78,7 +78,7 @@ class PlayApplication:
                     modules.append(open(mf, 'r').read().strip())
         if isTestFrameworkId( self.play_env["id"] ):
             modules.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'modules/testrunner')))
-        return modules
+        return set(modules) # Ensure we don't have duplicates
 
     def module_names(self):
         return map(lambda x: x[7:],self.conf.getAllKeys("module."))
@@ -99,7 +99,7 @@ class PlayApplication:
                 print 'Module not found %s' % e
                 sys.exit(-1)
 
-            if isTestFrameworkId( play_env["id"] ):
+            if isTestFrameworkId(play_env["id"]):
                 modules.append(os.path.normpath(os.path.join(play_env["basedir"], 'modules/testrunner')))
 
     def override(self, f, t):
