@@ -39,6 +39,9 @@ import java.util.*;
  * Thanks to Lee Breisacher.
  */
 public class ServletWrapper extends HttpServlet implements ServletContextListener {
+	
+	public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
+	public static final String IF_NONE_MATCH = "If-None-Match";
 
 	/**
 	 * Constant for accessing the underlying HttpServletRequest from Play's Request
@@ -175,27 +178,39 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         }
     }
 
-    public static boolean isModified(String etag, long last, HttpServletRequest request) {
-        if (!(request.getHeader("If-None-Match") == null && request.getHeaders("If-Modified-Since") == null)) {
-            return true;
-        } else {
-            String browserEtag = request.getHeader("If-None-Match");
-            if (!browserEtag.equals(etag)) {
-                return true;
-            } else {
-                try {
-                    Date browserDate = Utils.getHttpDateFormatter().parse(request.getHeader("If-Modified-Since"));
-                    if (browserDate.getTime() >= last) {
-                        return false;
-                    }
-                } catch (ParseException ex) {
-                    Logger.error("Can't parse date", ex);
-                }
-                return true;
-            }
-        }
-    }
+	public static boolean isModified(String etag, long last,
+			HttpServletRequest request) {
+		// See section 14.26 in rfc 2616 http://www.faqs.org/rfcs/rfc2616.html
+		String browserEtag = request.getHeader(IF_NONE_MATCH);
+		String dateString = request.getHeader(IF_MODIFIED_SINCE);
+		if (browserEtag != null) {
+			boolean etagMatches = browserEtag.equals(etag);
+			if (!etagMatches) {
+				return true;
+			}
+			if (dateString != null) {
+				return !isValidTimeStamp(last, dateString);
+			}
+			return false;
+		} else {
+			if (dateString != null) {
+				return !isValidTimeStamp(last, dateString);
+			} else {
+				return true;
+			}
+		}
+	}
 
+	private static boolean isValidTimeStamp(long last, String dateString) {
+		try {
+			long browserDate = Utils.getHttpDateFormatter().parse(dateString).getTime();
+			return browserDate >= last;
+		} catch (ParseException e) {
+			Logger.error("Can't parse date", e);
+			return false;
+		}
+	}
+    	
     public static Request parseRequest(HttpServletRequest httpServletRequest) throws Exception {
 
         URI uri = new URI(httpServletRequest.getRequestURI());
