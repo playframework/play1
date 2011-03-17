@@ -21,7 +21,6 @@ def execute(**kargs):
     args = kargs.get("args")
     play_env = kargs.get("env")
 
-    app.check()
     classpath = app.getClasspath()
 
     add_options = ['-Dapplication.path=%s' % (app.path), '-Dframework.path=%s' % (play_env['basedir']), '-Dplay.id=%s' % play_env['id'], '-Dplay.version=%s' % play_env['version']]
