@@ -201,13 +201,20 @@ public class SettingsParser {
     }
 
     @SuppressWarnings("unchecked")
-    <T> T get(Map data, String key, Class<T> type) {
+    <T> T get(Map data, String key, Class<T> type) throws Oops {
         if (data.containsKey(key) && data.get(key) != null) {
             Object o = data.get(key);
             if (type.isAssignableFrom(o.getClass())) {
                 if (o instanceof String) {
-                    o = o.toString().replace("${play.path}", System.getProperty("play.path"));
-                    o = o.toString().replace("${application.path}", System.getProperty("application.path"));
+                    Matcher m = Pattern.compile("\\$\\{([^\\}]*)\\}").matcher((String)o); //search of ${something} group(1) => something
+                    while (m.find()) {
+                        String propertyValue = System.getProperty(m.group(1));
+                        if(propertyValue != null){
+                            o = o.toString().replace("${" + m.group(1) + "}",propertyValue);
+                            }else{
+                                throw new Oops("Unknow property " + m.group(1) + " in " + o);
+                                }
+                        }
                 }
                 return (T) o;
             }
@@ -215,7 +222,7 @@ public class SettingsParser {
         return null;
     }
 
-    <T> T get(Map data, String key, Class<T> type, T defaultValue) {
+    <T> T get(Map data, String key, Class<T> type, T defaultValue) throws Oops {
         T o = get(data, key, type);
         if (o == null) {
             return defaultValue;

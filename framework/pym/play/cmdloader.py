@@ -1,5 +1,13 @@
 import imp
 import os
+import warnings
+
+def play_formatwarning(msg, *a):
+    # ignore everything except the message
+    # format the message in a play cmdline way
+    return '~'+ '\n'+ '~ '+ str(msg) + '\n~\n'
+
+warnings.formatwarning = play_formatwarning
 
 class CommandLoader:
     def __init__(self, play_path):
@@ -16,9 +24,7 @@ class CommandLoader:
                     mod = load_python_module(name, self.path)
                     self._load_cmd_from(mod)
                 except:
-                    print '~'
-                    print '~ !! Warning: could not load core command file ' + filename
-                    print '~'
+                    warnings.warn("!! Warning: could not load core command file" + filename, RuntimeWarning)
 
     def load_play_module(self, modname):
         commands = os.path.join(modname, "commands.py")
@@ -42,7 +48,7 @@ class CommandLoader:
             if 'MODULE' in dir(mod):
                 self.modules[mod.MODULE] = mod
         except Exception:
-            print "~ Warning: error loading command " + name
+            warnings.warn("Warning: error loading command " + name)
 
 def load_python_module(name, location):
     mod_desc = imp.find_module(name, [location])

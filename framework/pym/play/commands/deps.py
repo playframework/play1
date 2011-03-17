@@ -21,7 +21,6 @@ def execute(**kargs):
     args = kargs.get("args")
     play_env = kargs.get("env")
 
-    app.check()
     classpath = app.getClasspath()
 
     add_options = ['-Dapplication.path=%s' % (app.path), '-Dframework.path=%s' % (play_env['basedir']), '-Dplay.id=%s' % play_env['id'], '-Dplay.version=%s' % play_env['version']]
@@ -34,6 +33,9 @@ def execute(**kargs):
     if args.count('--jpda'):
         print "~ Waiting for JPDA client to continue"
         add_options.extend(['-Xdebug', '-Xrunjdwp:transport=dt_socket,address=8888,server=y,suspend=y'])
+    for arg in args:
+        if arg.startswith("-D"):
+            add_options.append(arg)
 
     java_cmd = [app.java_path()] + add_options + ['-classpath', app.cp_args(), 'play.deps.DependenciesManager']
 
