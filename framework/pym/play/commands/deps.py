@@ -34,6 +34,9 @@ def execute(**kargs):
     if args.count('--jpda'):
         print "~ Waiting for JPDA client to continue"
         add_options.extend(['-Xdebug', '-Xrunjdwp:transport=dt_socket,address=8888,server=y,suspend=y'])
+    for arg in args:
+        if arg.startswith("-D"):
+            add_options.append(arg)
 
     java_cmd = [app.java_path()] + add_options + ['-classpath', app.cp_args(), 'play.deps.DependenciesManager']
 
