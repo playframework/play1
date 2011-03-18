@@ -294,7 +294,7 @@ public class JPAPlugin extends PlayPlugin {
     public void beforeInvocation() {
 
         if(InvocationContext.current().getAnnotation(NoTransaction.class) != null ) {
-            //Called method is annotated with @NoTransaction telling us that
+            //Called method or class is annotated with @NoTransaction telling us that
             //we should not start a transaction
             return ;
         }

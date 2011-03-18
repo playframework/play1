@@ -26,6 +26,13 @@ public class TransactionalJPATest extends FunctionalTest {
         response = GET("/Transactional/disabledTransactionTest");
         assertIsOk(response);
         assertEquals("isInsideTransaction: false", getContent(response));
+        
+        //verify that a method does not use a tranaction if the controller-class
+        //is annotated with @NoTransaction
+        response = GET("/Transactional2/disabledTransactionTest");
+        assertIsOk(response);
+        assertEquals("isInsideTransaction: false", getContent(response));
+        
     }
 
 }
