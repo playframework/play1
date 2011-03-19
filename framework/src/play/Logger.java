@@ -64,9 +64,9 @@ public class Logger {
             PropertyConfigurator.configure(shutUp);
         } else if (Logger.log4j == null) {
 
-            // The log4j configuration file is outside of the framework,
-            // so it's probably a custom configuration file
-            if(log4jConf.getFile().indexOf(Play.frameworkPath.getAbsolutePath()) == -1) {
+            if(log4jConf.getFile().indexOf(Play.applicationPath.getAbsolutePath()) == 0 ) {
+                // The log4j configuration file is located somewhere in the application folder,
+                // so it's probably a custom configuration file
                 configuredManually = true;
             }
 
