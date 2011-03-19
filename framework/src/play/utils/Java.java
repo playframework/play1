@@ -18,6 +18,7 @@ import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.bytecode.SourceFileAttribute;
 import play.Play;
+import play.classloading.ApplicationClassloaderState;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
@@ -30,6 +31,27 @@ import play.mvc.With;
  * Java utils
  */
 public class Java {
+
+    protected static JavaWithCaching _javaWithCaching = new JavaWithCaching();
+    protected static ApplicationClassloaderState _lastKnownApplicationClassloaderState = Play.classloader.currentState;
+    protected static Object _javaWithCachingLock = new Object();
+
+    protected static JavaWithCaching getJavaWithCaching() {
+        synchronized( _javaWithCachingLock ) {
+            // has the state of the ApplicationClassloader changed?
+            ApplicationClassloaderState currentApplicationClasloaderState = Play.classloader.currentState;
+            if( !currentApplicationClasloaderState.equals( _lastKnownApplicationClassloaderState )) {
+                // it has changed.
+                // we must drop our current _javaWithCaching and create a new one...
+                // and start the caching over again.
+                _lastKnownApplicationClassloaderState = currentApplicationClasloaderState;
+                _javaWithCaching = new JavaWithCaching();
+
+            }
+            return _javaWithCaching;
+        }
+    }
+
 
     public static String[] extractInfosFromByteCode(byte[] code) {
         try {
@@ -229,22 +251,8 @@ public class Java {
      * @return A list of method object
      */
     public static List<Method> findAllAnnotatedMethods(Class<?> clazz, Class<? extends Annotation> annotationType) {
-        List<Method> methods = new ArrayList<Method>();
-        // Clazz can be null if we are looking at an interface / annotation
-        while (clazz != null && !clazz.equals(Object.class)) {
-            for (Method method : clazz.getDeclaredMethods()) {
-                if (method.isAnnotationPresent(annotationType)) {
-                    methods.add(method);
-                }
-            }
-            if (clazz.isAnnotationPresent(With.class)) {
-                for (Class withClass : clazz.getAnnotation(With.class).value()) {
-                    methods.addAll(findAllAnnotatedMethods(withClass, annotationType));
-                }
-            }
-            clazz = clazz.getSuperclass();
-        }
-        return methods;
+
+        return getJavaWithCaching().findAllAnnotatedMethods(clazz, annotationType);
     }
 
     /**
@@ -379,5 +387,134 @@ public class Java {
             return "FieldWrapper (" + (writable ? "RW" : "R ") + ") for " + field;
         }
     }
+
+}
+
+
+/**
+ * This is an internal class uses only by the Java-class.
+ * It contains functionality with caching..
+ *
+ * The idea is that the Java-objects creates a new instance of JavaWithCaching,
+ * each time something new is compiled..
+ *
+ */
+class JavaWithCaching {
+
+    /**
+     * Class uses as key for storing info about the relation between a Class and an Annotation
+     */
+    private static class ClassAndAnnotation {
+        private final Class<?> clazz;
+        private final Class<? extends Annotation> annotation;
+
+        private ClassAndAnnotation(Class<?> clazz, Class<? extends Annotation> annotation) {
+            this.clazz = clazz;
+            this.annotation = annotation;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ClassAndAnnotation that = (ClassAndAnnotation) o;
+
+            if (annotation != null ? !annotation.equals(that.annotation) : that.annotation != null) return false;
+            if (clazz != null ? !clazz.equals(that.clazz) : that.clazz != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = clazz != null ? clazz.hashCode() : 0;
+            result = 31 * result + (annotation != null ? annotation.hashCode() : 0);
+            return result;
+        }
+    }
+
+
+    // cache follows..
+
+    private final Object classAndAnnotationsLock = new Object();
+    private final Map<ClassAndAnnotation, List<Method>> classAndAnnotation2Methods = new HashMap<ClassAndAnnotation, List<Method>>();
+    private final Map<Class<?>, List<Method>> class2AllMethodsWithAnnotations = new HashMap<Class<?>, List<Method>>();
+
+    /**
+     * Find all annotated method from a class
+     * @param clazz The class
+     * @param annotationType The annotation class
+     * @return A list of method object
+     */
+    public List<Method> findAllAnnotatedMethods(Class<?> clazz, Class<? extends Annotation> annotationType) {
+
+        if( clazz == null ) {
+            return new ArrayList<Method>(0);
+        }
+
+        synchronized( classAndAnnotationsLock ) {
+
+            // first look in cache
+
+            ClassAndAnnotation key = new ClassAndAnnotation(clazz, annotationType);
+
+            List<Method> methods = classAndAnnotation2Methods.get( key );
+            if( methods != null ) {
+                // cache hit
+                return methods;
+            }
+            // have to resolve it.
+            methods = new ArrayList<Method>();
+            // get list of all annotated methods on this class..
+            for( Method method : findAllAnnotatedMethods( clazz)) {
+                if (method.isAnnotationPresent(annotationType)) {
+                    methods.add(method);
+                }
+            }
+
+            // store it in cache
+            classAndAnnotation2Methods.put( key, methods);
+
+            return methods;
+        }
+    }
+
+    /**
+     * Find all annotated method from a class
+     * @param clazz The class
+     * @return A list of method object
+     */
+    public List<Method> findAllAnnotatedMethods(Class<?> clazz) {
+        synchronized( classAndAnnotationsLock ) {
+            // first check the cache..
+            List<Method> methods = class2AllMethodsWithAnnotations.get(clazz);
+            if( methods != null ) {
+                // cache hit
+                return methods;
+            }
+            //have to resolve it..
+            methods = new ArrayList<Method>();
+            // Clazz can be null if we are looking at an interface / annotation
+            while (clazz != null && !clazz.equals(Object.class)) {
+                for (Method method : clazz.getDeclaredMethods()) {
+                    if (method.getAnnotations().length > 0) {
+                        methods.add(method);
+                    }
+                }
+                if (clazz.isAnnotationPresent(With.class)) {
+                    for (Class withClass : clazz.getAnnotation(With.class).value()) {
+                        methods.addAll(findAllAnnotatedMethods(withClass ));
+                    }
+                }
+                clazz = clazz.getSuperclass();
+            }
+
+            //store it in the cache.
+            class2AllMethodsWithAnnotations.put(clazz, methods);
+            return methods;
+        }
+    }
+
 
 }

@@ -43,6 +43,12 @@ public class ApplicationClassloader extends ClassLoader {
     private final ClassStateHashCreator classStateHashCreator = new ClassStateHashCreator();
 
     /**
+     * A representation of the current state of the ApplicationClassloader.
+     * It gets a new value each time the state of the classloader changes.
+     */
+    public ApplicationClassloaderState currentState = new ApplicationClassloaderState();
+
+    /**
      * This protection domain applies to all loaded classes.
      */
     public ProtectionDomain protectionDomain;
@@ -297,6 +303,7 @@ public class ApplicationClassloader extends ClassLoader {
         for (ApplicationClass applicationClass : modifiedWithDependencies) {
             if (applicationClass.compile() == null) {
                 Play.classes.classes.remove(applicationClass.name);
+                currentState = new ApplicationClassloaderState();//show others that we have changed..
             } else {
                 int sigChecksum = applicationClass.sigChecksum;
                 applicationClass.enhance();
@@ -305,6 +312,7 @@ public class ApplicationClassloader extends ClassLoader {
                 }
                 BytecodeCache.cacheBytecode(applicationClass.enhancedByteCode, applicationClass.name, applicationClass.javaSource);
                 newDefinitions.add(new ClassDefinition(applicationClass.javaClass, applicationClass.enhancedByteCode));
+                currentState = new ApplicationClassloaderState();//show others that we have changed..
             }
         }
         if (newDefinitions.size() > 0) {
@@ -331,9 +339,11 @@ public class ApplicationClassloader extends ClassLoader {
             for (ApplicationClass applicationClass : Play.classes.all()) {
                 if (!applicationClass.javaFile.exists()) {
                     Play.classes.classes.remove(applicationClass.name);
+                    currentState = new ApplicationClassloaderState();//show others that we have changed..
                 }
                 if (applicationClass.name.contains("$")) {
                     Play.classes.classes.remove(applicationClass.name);
+                    currentState = new ApplicationClassloaderState();//show others that we have changed..
                     // Ok we have to remove all classes from the same file ...
                     VirtualFile vf = applicationClass.javaFile;
                     for (ApplicationClass ac : Play.classes.all()) {
