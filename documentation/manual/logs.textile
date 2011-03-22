@@ -43,6 +43,10 @@ log4j.appender.Console.layout.ConversionPattern=%d{ABSOLUTE} %-5p ~ %m%n
 
 Copy this file and update it for your specifics needs!
 
+h3. <a name="production">Production configuration</a>
+
+See: "configure logging for production":production#logging for another example.
+
 p(note). **Continuing the discussion**
  
 Next, we continue configuration with %(next)"Configuration in several environments":ids%.
