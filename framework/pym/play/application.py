@@ -29,14 +29,18 @@ class PlayApplication:
         else:
             self.conf = None
         self.play_env = env
-        self.jpda_port = self.readConf('jpda_port')
+        self.jpda_port = self.readConf('jpda.port')
         self.ignoreMissingModules = ignoreMissingModules
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Configuration File
 
     def check(self):
-        if not os.path.exists(os.path.join(self.path, 'conf', 'routes')):
-            print "~ Oops. %s does not seem to host a valid application" % os.path.normpath(self.path)
+        try:
+            assert os.path.exists(os.path.join(self.path, 'conf', 'routes'))
+            assert os.path.exists(os.path.join(self.path, 'conf', 'application.conf'))
+        except AssertionError:
+            print "~ Oops. conf/routes or conf/application.conf missing."
+            print "~ %s does not seem to host a valid application." % os.path.normpath(self.path)
             print "~"
             sys.exit(-1)
 
