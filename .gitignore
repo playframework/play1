@@ -128,3 +128,4 @@ samples-and-tests/zencontact/precompiled
 !modules/secure
 !modules/testrunner
 !framework/src/play/db
+.idea
