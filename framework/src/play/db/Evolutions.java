@@ -72,7 +72,7 @@ public class Evolutions extends PlayPlugin {
         }
     }
 
-    public void applyScript() {
+    public synchronized void applyScript() {
         try {
             Connection connection = getNewConnection();;
             int applying = -1;
@@ -148,7 +148,7 @@ public class Evolutions extends PlayPlugin {
         return sql.toString().trim();
     }
 
-    public void checkEvolutionsState() {
+    public synchronized void checkEvolutionsState() {
         if (DB.datasource != null && evolutionsDirectory.exists()) {
             List<Evolution> evolutionScript = getEvolutionScript();
             Connection connection = null;
@@ -181,7 +181,7 @@ public class Evolutions extends PlayPlugin {
         }
     }
 
-    public static List<Evolution> getEvolutionScript() {
+    public synchronized static List<Evolution> getEvolutionScript() {
         Stack<Evolution> app = listApplicationEvolutions();
         Stack<Evolution> db = listDatabaseEvolutions();
         List<Evolution> downs = new ArrayList<Evolution>();
@@ -212,7 +212,7 @@ public class Evolutions extends PlayPlugin {
         return script;
     }
 
-    public static Stack<Evolution> listApplicationEvolutions() {
+    public synchronized static Stack<Evolution> listApplicationEvolutions() {
         Stack<Evolution> evolutions = new Stack<Evolution>();
         evolutions.add(new Evolution(0, "", "", true));
         if (evolutionsDirectory.exists()) {
@@ -243,7 +243,7 @@ public class Evolutions extends PlayPlugin {
         return evolutions;
     }
 
-    public static Stack<Evolution> listDatabaseEvolutions() {
+    public synchronized static Stack<Evolution> listDatabaseEvolutions() {
         Stack<Evolution> evolutions = new Stack<Evolution>();
         evolutions.add(new Evolution(0, "", "", false));
         Connection connection = null;

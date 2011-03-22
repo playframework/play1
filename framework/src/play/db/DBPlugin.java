@@ -35,8 +35,16 @@ public class DBPlugin extends PlayPlugin {
 
     @Override
     public boolean rawInvocation(Request request, Response response) throws Exception {
-        if(Play.mode.isDev() && request.path.equals("/@db")) {
+        if (Play.mode.isDev() && request.path.equals("/@db")) {
             response.status = Http.StatusCode.MOVED;
+
+            // For H2 embeded database, we'll also start the Web console
+            if (h2Server != null) {
+                h2Server.stop();
+            }
+            h2Server = org.h2.tools.Server.createWebServer();
+            h2Server.start();
+
             response.setHeader("Location", "http://localhost:8082/");
             return true;
         }
@@ -106,15 +114,6 @@ public class DBPlugin extends PlayPlugin {
                     }
                     Logger.info("Connected to %s", ds.getJdbcUrl());
 
-                    // For H2 embeded database, we'll also start the Web console
-                    if(Play.mode.isDev() && "org.h2.Driver".equals(p.get("db.driver"))) {
-                        if(h2Server != null) {
-                            h2Server.stop();
-                        }
-                        h2Server = org.h2.tools.Server.createWebServer();
-                        h2Server.start();
-                    }
-
                 }
 
             } catch (Exception e) {
@@ -128,7 +127,6 @@ public class DBPlugin extends PlayPlugin {
         }
     }
 
-    
     @Override
     public String getStatus() {
         StringWriter sw = new StringWriter();

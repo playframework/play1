@@ -523,7 +523,11 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         request.url = uri;
         request.host = nettyRequest.getHeader(HOST);
-        request.isLoopback = ((InetSocketAddress) ctx.getChannel().getRemoteAddress()).getAddress().isLoopbackAddress() && request.host.matches("^127\\.0\\.0\\.1:?[0-9]*$");
+        try {
+            request.isLoopback = ((InetSocketAddress) ctx.getChannel().getRemoteAddress()).getAddress().isLoopbackAddress() && request.host.matches("^127\\.0\\.0\\.1:?[0-9]*$");
+        } catch(Exception e) {
+            // ignore it
+        }
 
         if (request.host == null) {
             request.host = "";

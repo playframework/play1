@@ -196,8 +196,23 @@ public class ControllersEnhancer extends Enhancer {
         if(type.equals(CtClass.charType)) {
             return "return '';";
         }
-        if(type.equals(CtClass.byteType) || type.equals(CtClass.doubleType) || type.equals(CtClass.floatType) || type.equals(CtClass.intType) || type.equals(CtClass.longType) || type.equals(CtClass.shortType)) {
-            return "return 0;";
+        if(type.equals(CtClass.byteType)) {
+            return "return (byte)0;";
+        }
+        if(type.equals(CtClass.doubleType)) {
+            return "return (double)0;";
+        }
+        if(type.equals(CtClass.floatType)) {
+            return "return (float)0;";
+        }
+        if(type.equals(CtClass.intType)) {
+            return "return (int)0;";
+        }
+        if(type.equals(CtClass.longType)) {
+            return "return (long)0;";
+        }
+        if(type.equals(CtClass.shortType)) {
+            return "return (short)0;";
         }
         return "return null;";
     }

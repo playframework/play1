@@ -1,6 +1,7 @@
 package play.libs;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Iterator;
@@ -80,7 +81,11 @@ public class F {
         }
 
         public static <T> Promise<List<T>> waitAll(final Promise<T>... promises) {
-            final CountDownLatch waitAllLock = new CountDownLatch(promises.length);
+            return waitAll(promises);
+        }
+
+        public static <T> Promise<List<T>> waitAll(final Collection<Promise<T>> promises) {
+            final CountDownLatch waitAllLock = new CountDownLatch(promises.size());
             final Promise<List<T>> result = new Promise<List<T>>() {
 
                 @Override
@@ -335,8 +340,10 @@ public class F {
         }
 
         void notifyNewEvent() {
+            T value = events.peek();
+            System.out.println("VALUE :" + value);
             for (Promise<T> task : waiting) {
-                task.invoke(events.peek());
+                task.invoke(value);
             }
             waiting.clear();
         }
@@ -364,7 +371,7 @@ public class F {
                 return value;
             }
 
-            void markAsRead(T value) {
+            private void markAsRead(T value) {
                 if (value != null) {
                     events.remove(value);
                 }
