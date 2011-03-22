@@ -150,7 +150,7 @@ public class PropertiesEnhancer extends Enhancer {
                             // On n'intercepte pas le getter de sa propre property
                             if (propertyName == null || !propertyName.equals(fieldAccess.getFieldName())) {
 
-                                String invocationPoint = ctClass.getName() + "." + ctMethod.getName() + ", ligne " + fieldAccess.getLineNumber();
+                                String invocationPoint = ctClass.getName() + "." + ctMethod.getName() + ", line " + fieldAccess.getLineNumber();
 
                                 if (fieldAccess.isReader()) {
 
