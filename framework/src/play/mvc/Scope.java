@@ -159,6 +159,9 @@ public class Scope {
 
         static Pattern sessionParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
 
+        static final String ID_KEY = "___ID";
+        static final String TS_KEY = "___TS";
+
         static Session restore() {
             try {
                 Session session = new Session();
@@ -176,19 +179,19 @@ public class Scope {
                     }
                     if (COOKIE_EXPIRE != null) {
                         // Verify that the session contains a timestamp, and that it's not expired
-                        if (!session.contains("___TS")) {
+                        if (!session.contains(TS_KEY)) {
                             session = new Session();
                         } else {
-                            if (Long.parseLong(session.get("___TS")) < System.currentTimeMillis()) {
+                            if (Long.parseLong(session.get(TS_KEY)) < System.currentTimeMillis()) {
                                 // Session expired
                                 session = new Session();
                             }
                         }
-                        session.put("___TS", System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
+                        session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
                     }
                 }
-                if (!session.contains("___ID")) {
-                    session.put("___ID", Codec.UUID());
+                if (!session.contains(ID_KEY)) {
+                    session.put(ID_KEY, Codec.UUID());
                 }
                 return session;
             } catch (Exception e) {
@@ -203,7 +206,7 @@ public class Scope {
         }
 
         public String getId() {
-            return data.get("___ID");
+            return data.get(ID_KEY);
         }
 
         public Map<String, String> all() {
@@ -217,6 +220,10 @@ public class Scope {
         void save() {
             if (Http.Response.current() == null) {
                 // Some request like WebSocket don't have any response
+                return;
+            }
+            if (isEmpty()) {
+                // The session is empty: no need to set a cookie
                 return;
             }
             try {
@@ -274,6 +281,17 @@ public class Scope {
 
         public void clear() {
             data.clear();
+        }
+
+        /**
+         * Returns true if the session is empty,
+         * e.g. does not contain anything else than the ID and the timestamp
+         */
+        public boolean isEmpty() {
+            for (String key: data.keySet()) {
+                if (!ID_KEY.equals(key) && !TS_KEY.equals(key)) return false;
+            }
+            return true;
         }
 
         public boolean contains(String key) {
