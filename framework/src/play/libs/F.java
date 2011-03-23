@@ -1,6 +1,7 @@
 package play.libs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -81,7 +82,7 @@ public class F {
         }
 
         public static <T> Promise<List<T>> waitAll(final Promise<T>... promises) {
-            return waitAll(promises);
+            return waitAll(Arrays.asList(promises));
         }
 
         public static <T> Promise<List<T>> waitAll(final Collection<Promise<T>> promises) {
