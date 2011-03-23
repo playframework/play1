@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import play.Logger;
 import play.Play;
+import play.classloading.hash.ClassStateHashCreator;
 import play.vfs.VirtualFile;
 import play.cache.Cache;
 import play.classloading.ApplicationClasses.ApplicationClass;
@@ -37,6 +38,9 @@ import play.libs.IO;
  * Load the classes from the application Java sources files.
  */
 public class ApplicationClassloader extends ClassLoader {
+
+
+    private final ClassStateHashCreator classStateHashCreator = new ClassStateHashCreator();
 
     /**
      * This protection domain applies to all loaded classes.
@@ -319,6 +323,7 @@ public class ApplicationClassloader extends ClassLoader {
         if (dirtySig) {
             throw new RuntimeException("Signature change !");
         }
+
         // Now check if there is new classes or removed classes
         int hash = computePathHash();
         if (hash != this.pathHash) {
@@ -347,30 +352,7 @@ public class ApplicationClassloader extends ClassLoader {
     int pathHash = 0;
 
     int computePathHash() {
-        StringBuffer buf = new StringBuffer();
-        for (VirtualFile virtualFile : Play.javaPath) {
-            scan(buf, virtualFile);
-        }
-        return buf.toString().hashCode();
-    }
-
-    void scan(StringBuffer buf, VirtualFile current) {
-        if (!current.isDirectory()) {
-            if (current.getName().endsWith(".java")) {
-                Matcher matcher = Pattern.compile("\\s+class\\s([a-zA-Z0-9_]+)\\s+").matcher(current.contentAsString());
-                buf.append(current.getName());
-                buf.append("(");
-                while (matcher.find()) {
-                    buf.append(matcher.group(1));
-                    buf.append(",");
-                }
-                buf.append(")");
-            }
-        } else if (!current.getName().startsWith(".")) {
-            for (VirtualFile virtualFile : current.list()) {
-                scan(buf, virtualFile);
-            }
-        }
+        return classStateHashCreator.computePathHash(Play.javaPath);
     }
 
     /**
