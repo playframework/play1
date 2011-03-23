@@ -5,6 +5,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,6 +60,10 @@ public class Scope {
         void save() {
             if (Http.Response.current() == null) {
                 // Some request like WebSocket don't have any response
+                return;
+            }
+            if (out.isEmpty()) {
+                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", "", null, "/", 0, COOKIE_SECURE);
                 return;
             }
             try {
@@ -159,6 +164,7 @@ public class Scope {
 
         static Pattern sessionParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
 
+        static final String AT_KEY = "___AT";
         static final String ID_KEY = "___ID";
         static final String TS_KEY = "___TS";
 
@@ -166,7 +172,7 @@ public class Scope {
             try {
                 Session session = new Session();
                 Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_SESSION");
-                if (cookie != null && Play.started) {
+                if (cookie != null && Play.started && cookie.value != null && !cookie.value.trim().equals("")) {
                     String value = cookie.value;
                     String sign = value.substring(0, value.indexOf("-"));
                     String data = value.substring(value.indexOf("-") + 1);
@@ -214,7 +220,10 @@ public class Scope {
         }
 
         public String getAuthenticityToken() {
-            return Crypto.sign(getId());
+            if(!data.containsKey(AT_KEY)) {
+                data.put(AT_KEY, Crypto.sign(UUID.randomUUID().toString()));
+            }
+            return data.get(AT_KEY);
         }
 
         void save() {
@@ -223,7 +232,8 @@ public class Scope {
                 return;
             }
             if (isEmpty()) {
-                // The session is empty: no need to set a cookie
+                // The session is empty: delete the cookie
+                Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", "", null, "/", 0, COOKIE_SECURE, SESSION_HTTPONLY);
                 return;
             }
             try {

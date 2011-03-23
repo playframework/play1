@@ -28,6 +28,7 @@ import com.ning.http.multipart.FilePart;
 import com.ning.http.multipart.MultipartRequestEntity;
 import com.ning.http.multipart.Part;
 import com.ning.http.multipart.StringPart;
+import java.util.ListIterator;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import play.Invoker;
@@ -275,9 +276,12 @@ public abstract class FunctionalTest extends BaseTest {
         try {
             invocationResult.get(30, TimeUnit.SECONDS);
             if (savedCookies == null) {
-                savedCookies = response.cookies;
-            } else {
-                savedCookies.putAll(response.cookies);
+                savedCookies = new HashMap<String, Http.Cookie>();
+            }
+            for(Map.Entry<String,Http.Cookie> e : response.cookies.entrySet()) {
+                if(e.getValue().maxAge != null && e.getValue().maxAge > 0) {
+                    savedCookies.put(e.getKey(), e.getValue());
+                }
             }
             response.out.flush();
         } catch (Exception ex) {
