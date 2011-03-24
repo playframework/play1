@@ -161,4 +161,12 @@ public class BinaryTest extends FunctionalTest {
 //	    assertEquals("Size does not match", "2440", size);
 //	}
 
+
+    @Test
+    public void testGetBinaryWithCustomContentType() {
+        Response response = GET("/binary/getBinaryWithCustomContentType");
+        assertIsOk(response);
+        assertContentType("custom/contentType", response);
+    }
+    
 }
