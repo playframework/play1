@@ -152,6 +152,18 @@ public class Logger {
     }
 
     /**
+     * @return true if log4j.trace / jul.finest logging is enabled
+     */
+    public static boolean isTraceEnabled() {
+        if (forceJuli || log4j == null) {
+            return juli.isLoggable(java.util.logging.Level.FINEST);
+        } else {
+            return log4j.isTraceEnabled();
+        }
+    }
+
+
+    /**
      *
      * @param level string representation of Logging-levels as used in log4j
      * @return true if specified logging-level is enabled
