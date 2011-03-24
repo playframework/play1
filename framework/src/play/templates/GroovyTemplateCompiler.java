@@ -48,11 +48,13 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         Map<String, String> originalNames = new HashMap<String, String>();
         for (Class clazz : Play.classloader.getAllClasses()) {
             if (clazz.getName().endsWith("$")) {
-                names.add(clazz.getName().substring(0, clazz.getName().length() - 1).replace("$", ".") + "$");
-                originalNames.put(clazz.getName().substring(0, clazz.getName().length() - 1).replace("$", ".") + "$", clazz.getName());
+                String name = clazz.getName().substring(0, clazz.getName().length() - 1).replace('$', '.') + '$';
+                names.add(name);
+                originalNames.put(name, clazz.getName());
             } else {
-                names.add(clazz.getName().replace("$", "."));
-                originalNames.put(clazz.getName().replace("$", "."), clazz.getName());
+                String name = clazz.getName().replace('$', '.');
+                names.add(name);
+                originalNames.put(name, clazz.getName());
             }
         }
         Collections.sort(names, new Comparator<String>() {
@@ -61,12 +63,44 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
                 return o2.length() - o1.length();
             }
         });
-        for (String cName : names) { // dynamic class binding
-            source = source.replaceAll("new " + Pattern.quote(cName) + "(\\([^)]*\\))", "_('" + originalNames.get(cName) + "').newInstance$1");
-            source = source.replaceAll("([a-zA-Z0-9.-_$]+)\\s+instanceof\\s+" + Pattern.quote(cName), "_('" + originalNames.get(cName).replace("$", "\\$") + "').isAssignableFrom($1.class)");
-            source = source.replaceAll("([^.])" + Pattern.quote(cName) + ".class", "$1_('" + originalNames.get(cName) + "')");
-            source = source.replaceAll("([^'\".])" + Pattern.quote(cName) + "([.][^'\"])", "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')$2");
+
+        // We're about to do many many String.replaceAll() so we do some checking first
+        // to try to reduce the number of needed replaceAll-calls.
+        // Morten: I have tried to create a single regexp that can be used instead of all the replaceAll,
+        // but I failed to do so.. Such a single regexp would be much faster since
+        // we then we only would have to have one pass.
+
+        if (!names.isEmpty()) {
+
+            if (names.size() <= 1 || source.indexOf("new ")>=0) {
+                for (String cName : names) { // dynamic class binding
+                    source = source.replaceAll("new " + Pattern.quote(cName) + "(\\([^)]*\\))", "_('" + originalNames.get(cName) + "').newInstance$1");
+                }
+            }
+
+            if (names.size() <= 1 || source.indexOf("instanceof")>=0) {
+                for (String cName : names) { // dynamic class binding
+                    source = source.replaceAll("([a-zA-Z0-9.-_$]+)\\s+instanceof\\s+" + Pattern.quote(cName), "_('" + originalNames.get(cName).replace("$", "\\$") + "').isAssignableFrom($1.class)");
+
+                }
+            }
+
+            if (names.size() <= 1 || source.indexOf(".class")>=0) {
+                for (String cName : names) { // dynamic class binding
+                    source = source.replaceAll("([^.])" + Pattern.quote(cName) + ".class", "$1_('" + originalNames.get(cName) + "')");
+
+                }
+            }
+
+            // With the current arg0 in replaceAll, it is not possible to do a quick indexOf-check for this one,
+            // so we have to run all the replaceAll-calls
+            for (String cName : names) { // dynamic class binding
+                source = source.replaceAll("([^'\".])" + Pattern.quote(cName) + "([.][^'\"])", "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')$2");
+
+            }
+
         }
+
 
         return source;
     }
@@ -209,10 +243,14 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
             if (!tagArgs.matches("^[_a-zA-Z0-9]+\\s*:.*$")) {
                 tagArgs = "arg:" + tagArgs;
             }
-            tagArgs = tagArgs.replaceAll("[:]\\s*[@]{2}", ":actionBridge._abs().");
-            tagArgs = tagArgs.replaceAll("(\\s)[@]{2}", "$1actionBridge._abs().");
-            tagArgs = tagArgs.replaceAll("[:]\\s*[@]{1}", ":actionBridge.");
-            tagArgs = tagArgs.replaceAll("(\\s)[@]{1}", "$1actionBridge.");
+            // We only have to try to replace the following if we find at least one
+            // @ in tagArgs..
+            if (tagArgs.indexOf('@')>=0) {
+                tagArgs = tagArgs.replaceAll("[:]\\s*[@]{2}", ":actionBridge._abs().");
+                tagArgs = tagArgs.replaceAll("(\\s)[@]{2}", "$1actionBridge._abs().");
+                tagArgs = tagArgs.replaceAll("[:]\\s*[@]{1}", ":actionBridge.");
+                tagArgs = tagArgs.replaceAll("(\\s)[@]{1}", "$1actionBridge.");
+            }
         } else {
             tagName = tagText;
             tagArgs = ":";
