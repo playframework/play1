@@ -19,7 +19,6 @@ import org.apache.commons.lang.NotImplementedException;
 
 import play.Logger;
 import play.Play;
-import play.libs.Codec;
 import play.libs.F.Promise;
 import play.libs.MimeTypes;
 import play.libs.OAuth.ServiceInfo;
@@ -38,6 +37,8 @@ import com.ning.http.client.AsyncHttpClientConfig.Builder;
 import com.ning.http.client.FilePart;
 import com.ning.http.client.PerRequestConfig;
 import com.ning.http.client.ProxyServer;
+import com.ning.http.client.Realm.AuthScheme;
+import com.ning.http.client.Realm.RealmBuilder;
 import com.ning.http.client.Response;
 import com.ning.http.client.StringPart;
 
@@ -248,8 +249,23 @@ public class WSAsync implements WSImpl {
 
         private BoundRequestBuilder prepare(BoundRequestBuilder builder) {
             checkFileBody(builder);
-            if (this.username != null && this.password != null) {
-                this.headers.put("Authorization", "Basic " + Codec.encodeBASE64(this.username + ":" + this.password));
+            if (this.username != null && this.password != null && this.scheme != null) {
+                AuthScheme authScheme;
+                switch (this.scheme) {
+                case DIGEST: authScheme = AuthScheme.DIGEST; break;
+                case NTLM: authScheme = AuthScheme.NTLM; break;
+                case KERBEROS: authScheme = AuthScheme.KERBEROS; break;
+                case SPNEGO: authScheme = AuthScheme.SPNEGO; break;
+                case BASIC: authScheme = AuthScheme.BASIC; break;
+                default: throw new RuntimeException("Scheme " + this.scheme + " not supported by the UrlFetch WS backend.");
+                }
+                builder.setRealm(
+                        (new RealmBuilder())
+                        .setScheme(authScheme)
+                        .setPrincipal(this.username)
+                        .setPassword(this.password)
+                        .build()
+                );
             }
             for (String key: this.headers.keySet()) {
                 builder.addHeader(key, headers.get(key));

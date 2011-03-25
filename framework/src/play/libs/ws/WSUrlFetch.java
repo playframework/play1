@@ -14,7 +14,6 @@ import java.util.Map;
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.basic.DefaultOAuthConsumer;
 import play.Logger;
-import play.libs.Codec;
 import play.libs.IO;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSImpl;
@@ -108,8 +107,13 @@ public class WSUrlFetch implements WSImpl {
         }
 
         private HttpURLConnection prepare(URL url, String method) {
-            if (this.username != null && this.password != null) {
-                this.headers.put("Authorization", "Basic " + Codec.encodeBASE64(this.username + ":" + this.password));
+            if (this.username != null && this.password != null && this.scheme != null) {
+                String authString = null;
+                switch (this.scheme) {
+                case BASIC: authString = basicAuthHeader(); break;
+                default: throw new RuntimeException("Scheme " + this.scheme + " not supported by the UrlFetch WS backend.");
+                }
+                this.headers.put("Authorization", authString);
             }
             try {
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
