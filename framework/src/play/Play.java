@@ -17,6 +17,7 @@ import play.classloading.ApplicationClassloader;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
+import play.mvc.Http;
 import play.mvc.Router;
 import play.plugins.PluginCollection;
 import play.templates.TemplateLoader;
@@ -279,6 +280,12 @@ public class Play {
         // Fix ctxPath
         if ("/".equals(Play.ctxPath)) {
             Play.ctxPath = "";
+        }
+
+        // Default cookie domain
+        Http.Cookie.defaultDomain = configuration.getProperty("application.defaultCookieDomain", null);
+        if (Http.Cookie.defaultDomain!=null) {
+            Logger.info("Using default cookie domain: " + Http.Cookie.defaultDomain);
         }
 
         // Plugins
