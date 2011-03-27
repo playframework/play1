@@ -6,27 +6,35 @@
     #{if !result.passed}
       #{if result.error?.startsWith("Failure")}
         <failure type="" message="${result.error}">
-          ${result.sourceInfos}
-          ${play.utils.Utils.open(result.sourceFile, result.sourceLine) ? ('<a href="' + play.utils.Utils.open(result.sourceFile, result.sourceLine) + '">').raw() : ''}
-              ${result.sourceCode} :
-          ${play.utils.Utils.open(result.sourceFile, result.sourceLine) ? '</a>'.raw() : ''}
+          <![CDATA[
+            ${result.sourceInfos}
+            ${play.utils.Utils.open(result.sourceFile, result.sourceLine) ? ('<a href="' + play.utils.Utils.open(result.sourceFile, result.sourceLine) + '">').raw() : ''}
+                ${result.sourceCode} :
+            ${play.utils.Utils.open(result.sourceFile, result.sourceLine) ? '</a>'.raw() : ''}
+          ]]>
         </failure>
         #{if result.trace}
           <system-err>
-            ${result.trace.raw()}
+            <![CDATA[
+              ${result.trace.raw()}
+            ]]>
           </system-err>  
         #{/if}}
       #{/if}
       #{else}
         <error type="" message="${result.error}">
-          ${result.sourceInfos}
-          ${play.utils.Utils.open(result.sourceFile, result.sourceLine) ? ('<a href="' + play.utils.Utils.open(result.sourceFile, result.sourceLine) + '">').raw() : ''}
-              ${result.sourceCode} :
-          ${play.utils.Utils.open(result.sourceFile, result.sourceLine) ? '</a>'.raw() : ''}
+          <![CDATA[
+            ${result.sourceInfos}
+            ${play.utils.Utils.open(result.sourceFile, result.sourceLine) ? ('<a href="' + play.utils.Utils.open(result.sourceFile, result.sourceLine) + '">').raw() : ''}
+                ${result.sourceCode} :
+            ${play.utils.Utils.open(result.sourceFile, result.sourceLine) ? '</a>'.raw() : ''}
+          ]]>
         </error>
         #{if result.trace}
           <system-err>
-            ${result.trace.raw()}
+            <![CDATA[
+              ${result.trace.raw()}
+            ]]>
           </system-err>  
         #{/if}}
       #{/else}
