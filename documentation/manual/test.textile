@@ -107,15 +107,17 @@ bc. #{selenium 'Get string from cache'}
 	type('Password', 'secretpass')
 	type('Password2', 'secretpass')
 	// .. Fill in the registration form ..
-
+        
 	// Get the value of the magicKey variable from the cache (set to the CAPTCHA answer in the application)
 	storeCacheEntry('magicKey', 'captchaAnswer')
 	// Type it into the form
 	type('Answer', '$[captchaAnswer]')
-
+        
     clickAndWait('register')
-
+    
 #{/selenium}
+
+p(note). You can use "Selenium IDE":http://seleniumhq.org/projects/ide/ in order to record test scripts easily. If you do so, you can use the "Selenium IDE plugin for Play":http://manuelbernhardt.github.com/play-selenium-plugin in order to import and export tests using the concise Play! markup.
 
 h2. <a name="fixtures">Fixtures</a>
 
