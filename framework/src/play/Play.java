@@ -310,7 +310,7 @@ public class Play {
     /**
      * Read application.conf and resolve overriden key using the play id mechanism.
      */
-    static void readConfiguration() {
+    public static void readConfiguration() {
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         conf = appRoot.child("conf/application.conf");
         try {

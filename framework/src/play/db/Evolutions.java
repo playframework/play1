@@ -1,5 +1,6 @@
 package play.db;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.Date;
@@ -13,6 +14,8 @@ import java.util.Stack;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
+import play.classloading.ApplicationClasses;
+import play.classloading.ApplicationClassloader;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.Codec;
@@ -20,9 +23,137 @@ import play.libs.IO;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.results.Redirect;
+import play.vfs.VirtualFile;
 
 public class Evolutions extends PlayPlugin {
 
+    public static void main(String[] args) {
+
+        /** Check that evolutions are enabled **/
+        if (!evolutionsDirectory.exists()) {
+            System.out.println("~ Evolutions are not enabled. Create a db/evolutions directory to create your first 1.sql evolution script.");
+            System.out.println("~");
+            return;
+        }
+
+        /** Start the DB plugin **/
+        Play.id = System.getProperty("play.id");
+        Play.applicationPath = new File(System.getProperty("application.path"));
+        Play.readConfiguration();
+        Play.javaPath = new ArrayList<VirtualFile>();
+        Play.classes = new ApplicationClasses();
+        Play.classloader = new ApplicationClassloader();
+        Logger.init();
+        Logger.setUp("ERROR");
+        new DBPlugin().onApplicationStart();
+
+        /** Connected **/
+        System.out.println("~ Connected to " + ((ComboPooledDataSource) DB.datasource).getJdbcUrl());
+
+        /** Sumary **/
+        Evolution database = listDatabaseEvolutions().peek();
+        Evolution application = listApplicationEvolutions().peek();
+
+        if ("resolve".equals(System.getProperty("mode"))) {
+            try {
+                checkEvolutionsState();
+                System.out.println("~");
+                System.out.println("~ Nothing to resolve...");
+                System.out.println("~");
+                return;
+            } catch (InconsistentDatabase e) {
+                resolve(e.revision);
+                System.out.println("~");
+                System.out.println("~ Revision " + e.revision + " has been resolved;");
+                System.out.println("~");
+            } catch (InvalidDatabaseRevision e) {
+                // see later
+            }
+        }
+
+        /** Check inconsistency **/
+        try {
+            checkEvolutionsState();
+        } catch (InconsistentDatabase e) {
+            System.out.println("~");
+            System.out.println("~ Your database is an inconsistent state!");
+            System.out.println("~");
+            System.out.println("~ While applying this script part:");
+            System.out.println("");
+            System.out.println(e.evolutionScript);
+            System.out.println("");
+            System.out.println("~ The following error occured:");
+            System.out.println("");
+            System.out.println(e.error);
+            System.out.println("");
+            System.out.println("~ Please correct it manually, and mark it resolved by running `play evolutions:resolve`");
+            System.out.println("~");
+            return;
+        } catch (InvalidDatabaseRevision e) {
+            // see later
+        }
+
+        System.out.print("~ Application revision is " + application.revision + " [" + application.hash.substring(0, 7) + "]");
+        System.out.println(" and Database revision is " + database.revision + " [" + database.hash.substring(0, 7) + "]");
+        System.out.println("~");
+
+        /** Evolution script **/
+        List<Evolution> evolutions = getEvolutionScript();
+        if (evolutions.isEmpty()) {
+            System.out.println("~ Your database is up to date");
+            System.out.println("~");
+        } else {
+
+            if ("apply".equals(System.getProperty("mode"))) {
+
+                System.out.println("~ Applying evolutions:");
+                System.out.println("");
+                System.out.println("# ------------------------------------------------------------------------------");
+                System.out.println("");
+                System.out.println(toHumanReadableScript(evolutions));
+                System.out.println("");
+                System.out.println("# ------------------------------------------------------------------------------");
+                System.out.println("");
+                if (applyScript(true)) {
+                    System.out.println("~");
+                    System.out.println("~ Evolutions script successfully applied!");
+                    System.out.println("~");
+                } else {
+                    System.out.println("~");
+                    System.out.println("~ Can't apply evolutions...");
+                    System.out.println("~");
+                }
+
+
+            } else if ("markApplied".equals(System.getProperty("mode"))) {
+
+                if (applyScript(false)) {
+                    System.out.println("~ Evolutions script marked as applied!");
+                    System.out.println("~");
+                } else {
+                    System.out.println("~ Can't apply evolutions...");
+                    System.out.println("~");
+                }
+
+            } else {
+
+                System.out.println("~ Your database needs evolutions!");
+                System.out.println("");
+                System.out.println("# ------------------------------------------------------------------------------");
+                System.out.println("");
+                System.out.println(toHumanReadableScript(evolutions));
+                System.out.println("");
+                System.out.println("# ------------------------------------------------------------------------------");
+                System.out.println("");
+                System.out.println("~ Run `play evolutions:apply` to automatically apply this script to the database");
+                System.out.println("~ or apply it yourself and mark it done using `play evolutions:markApplied`");
+                System.out.println("~");
+            }
+
+
+
+        }
+    }
     static File evolutionsDirectory = Play.getFile("db/evolutions");
 
     @Override
@@ -31,15 +162,14 @@ public class Evolutions extends PlayPlugin {
         // Mark an evolution as resolved
         if (Play.mode.isDev() && request.method.equals("POST") && request.url.matches("^/@evolutions/force/[0-9]+$")) {
             int revision = Integer.parseInt(request.url.substring(request.url.lastIndexOf("/") + 1));
-            execute("update play_evolutions set state = 'applied' where state = 'applying_up' and id = " + revision);
-            execute("delete from play_evolutions where state = 'applying_down' and id = " + revision);
+            resolve(revision);
             new Redirect("/").apply(request, response);
             return true;
         }
 
         // Apply the current evolution script
         if (Play.mode.isDev() && request.method.equals("POST") && request.url.equals("/@evolutions/apply")) {
-            applyScript();
+            applyScript(true);
             new Redirect("/").apply(request, response);
             return true;
         }
@@ -53,7 +183,7 @@ public class Evolutions extends PlayPlugin {
         } catch (InvalidDatabaseRevision e) {
             if ("mem".equals(Play.configuration.getProperty("db")) && listDatabaseEvolutions().peek().revision == 0) {
                 Logger.info("Automatically applying evolutions in in-memory database");
-                applyScript();
+                applyScript(true);
             } else {
                 throw e;
             }
@@ -66,15 +196,26 @@ public class Evolutions extends PlayPlugin {
             try {
                 checkEvolutionsState();
             } catch (InvalidDatabaseRevision e) {
-                Logger.warn("*** Your database needs evolution! You must run this script on your database: \n\n" + toHumanReadableScript(getEvolutionScript()) + "\n\n");
+                Logger.warn("");
+                Logger.warn("Your database is not up to date.");
+                Logger.warn("Use `play evolutions` command to manage database evolutions.");
                 throw e;
             }
         }
     }
 
-    public synchronized void applyScript() {
+    public static synchronized void resolve(int revision) {
         try {
-            Connection connection = getNewConnection();;
+            execute("update play_evolutions set state = 'applied' where state = 'applying_up' and id = " + revision);
+            execute("delete from play_evolutions where state = 'applying_down' and id = " + revision);
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
+    }
+
+    public static synchronized boolean applyScript(boolean runScript) {
+        try {
+            Connection connection = getNewConnection();
             int applying = -1;
             try {
                 for (Evolution evolution : getEvolutionScript()) {
@@ -95,11 +236,13 @@ public class Evolutions extends PlayPlugin {
                         execute("update play_evolutions set state = 'applying_down' where id = " + evolution.revision);
                     }
                     // Execute script
-                    for (String sql : (evolution.applyUp ? evolution.sql_up : evolution.sql_down).split(";")) {
-                        if (sql.trim().isEmpty()) {
-                            continue;
+                    if (runScript) {
+                        for (String sql : (evolution.applyUp ? evolution.sql_up : evolution.sql_down).split(";")) {
+                            if (sql.trim().isEmpty()) {
+                                continue;
+                            }
+                            execute(sql);
                         }
-                        execute(sql);
                     }
                     // Insert into logs
                     if (evolution.applyUp) {
@@ -108,7 +251,7 @@ public class Evolutions extends PlayPlugin {
                         execute("delete from play_evolutions where id = " + evolution.revision);
                     }
                 }
-
+                return true;
             } catch (Exception e) {
                 String message = e.getMessage();
                 if (e instanceof SQLException) {
@@ -121,13 +264,14 @@ public class Evolutions extends PlayPlugin {
                 ps.execute();
                 closeConnection(connection);
                 Logger.error(e, "Can't apply evolution");
+                return false;
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new UnexpectedException(e);
         }
     }
 
-    public String toHumanReadableScript(List<Evolution> evolutionScript) {
+    public static String toHumanReadableScript(List<Evolution> evolutionScript) {
         // Construct the script
         StringBuilder sql = new StringBuilder();
         boolean containsDown = false;
@@ -148,7 +292,7 @@ public class Evolutions extends PlayPlugin {
         return sql.toString().trim();
     }
 
-    public synchronized void checkEvolutionsState() {
+    public synchronized static void checkEvolutionsState() {
         if (DB.datasource != null && evolutionsDirectory.exists()) {
             List<Evolution> evolutionScript = getEvolutionScript();
             Connection connection = null;
@@ -232,7 +376,7 @@ public class Evolutions extends PlayPlugin {
                         } else if (line.startsWith("#")) {
                             // skip
                         } else if (!line.trim().isEmpty()) {
-                            current.append(line.trim() + "\n");
+                            current.append(line + "\n");
                         }
                     }
                     evolutions.add(new Evolution(version, sql_up.toString(), sql_down.toString(), true));
@@ -344,7 +488,7 @@ public class Evolutions extends PlayPlugin {
 
         @Override
         public String getErrorDescription() {
-            return "An SQL script will be run on your database. Please check the generated script before applying it.";
+            return "An SQL script will be run on your database.";
         }
 
         @Override
