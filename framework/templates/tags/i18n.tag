@@ -6,7 +6,7 @@ if (_keys) {
 }
 js_messages=new com.google.gson.Gson().toJson(ymessages);
 }%
-<script type="text/javascript" charset="${_response_encoding}">
+<script type="text/javascript">
 
 var i18nMessages = ${js_messages};
 
