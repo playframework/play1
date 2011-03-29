@@ -15,12 +15,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import org.codehaus.groovy.control.CompilationUnit;
 import org.codehaus.groovy.control.CompilationUnit.GroovyClassOperation;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -362,6 +358,44 @@ public class GroovyTemplate extends BaseTemplate {
             } catch (ClassNotFoundException e) {
                 return null;
             }
+        }
+
+        /**
+         * This method is faster to call from groovy than __safe() since we only evaluate val.toString()
+         * if we need to
+         */
+        public String __safeFaster(Object val) {
+            if (val != null) {
+                if (val instanceof RawData) {
+                    return ((RawData) val).data;
+                } else if (!template.name.endsWith(".html") || TagContext.hasParentTag("verbatim")) {
+                    return val.toString();
+                } else {
+                    return HTML.htmlEscape(val.toString());
+                }
+            } else {
+                return "";
+            }
+        }
+
+        public String __getMessage(Object[] val) {
+            if (val.length == 1) {
+                return Messages.get(val[0]);
+            } else {
+                return Messages.get(val[0], Arrays.copyOfRange(val,1,val.length));
+            }
+        }
+
+        public String __reverseWithCheck_absolute_true(String action) {
+            return __reverseWithCheck(action, true);
+        }
+
+        public String __reverseWithCheck_absolute_false(String action) {
+            return __reverseWithCheck(action, false);
+        }
+
+        private String __reverseWithCheck(String action, boolean absolute) {
+            return Router.reverseWithCheck(action, Play.getVirtualFile(action), absolute);
         }
 
         public String __safe(Object val, String stringValue) {

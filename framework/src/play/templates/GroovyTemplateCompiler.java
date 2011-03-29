@@ -134,6 +134,14 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         println("}");
     }
 
+
+    /**
+     * Interesting performance observation:
+     * Calling print(); from java (in ExecutableTemplate) called from groovy is MUCH slower than
+     * java returning string to groovy
+     * which then prints with out.print();
+     */
+
     @Override
     void plain() {
         String text = parser.getToken().replace("\\", "\\\\").replaceAll("\"", "\\\\\"").replace("$", "\\$");
@@ -141,34 +149,9 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
             text = text.substring(1);
         }
         skipLineBreak = false;
-        if (text.indexOf("\n") > -1) {
-            String[] lines = text.split("\n", 10000);
-            for (int i = 0; i < lines.length; i++) {
-                String line = lines[i];
-                if (line.length() > 0 && line.charAt(line.length() - 1) == 13) {
-                    line = line.substring(0, line.length() - 1);
-                }
-
-                if (i == lines.length - 1 && !text.endsWith("\n")) {
-                    print("\tout.print(\"");
-                } else if (i == lines.length - 1 && line.equals("")) {
-                    continue;
-                } else {
-                    print("\tout.println(\"");
-                }
-                print(line);
-                print("\");");
-
-                markLine(parser.getLine() + i);
-                println();
-            }
-        } else {
-            print("\tout.print(\"");
-            print(text);
-            print("\");");
-            markLine(parser.getLine());
-            println();
-        }
+        text = text.replaceAll("\r\n", "\n").replaceAll("\n", "\\\\n");
+        // we don't have to print linenumbers here since this cannot fail - it is only text printing
+        println("out.print(\""+text+"\");");
     }
 
     @Override
@@ -192,9 +175,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     @Override
     void expr() {
         String expr = parser.getToken().trim();
-        print("\t__val=");
-        print(expr);
-        print(";out.print(__val!=null?__safe(__val, __val.toString()):'')");
+        print(";out.print(__safeFaster("+expr+"))");
         markLine(parser.getLine());
         println();
     }
@@ -202,7 +183,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     @Override
     void message() {
         String expr = parser.getToken().trim();
-        print(";out.print(messages.get(" + expr + "))");
+        print(";out.print(__getMessage("+expr+"))");
         markLine(parser.getLine());
         println();
     }
@@ -212,9 +193,9 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         String action = parser.getToken().trim();
         if (action.trim().matches("^'.*'$")) {
             if (absolute) {
-                print("\tout.print(play.mvc.Router.reverseWithCheck(" + action + ", play.Play.getVirtualFile(" + action + "), true));");
+                print("\tout.print(__reverseWithCheck_absolute_true("+action+"));");
             } else {
-                print("\tout.print(play.mvc.Router.reverseWithCheck(" + action + ", play.Play.getVirtualFile(" + action + "), false));");
+                print("\tout.print(__reverseWithCheck_absolute_false("+action+"));");
             }
         } else {
             if (!action.endsWith(")")) {
