@@ -5,6 +5,7 @@ import java.util.Map;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import play.Logger;
+import play.Play;
 
 /**
  * EhCache implementation.
@@ -145,5 +146,8 @@ public class EhCacheImpl implements CacheImpl {
 
     public void stop() {
         cache.removeAll();
+        if (Play.mode.isProd()) {
+            cacheManager.shutdown();
+        }
     }
 }
