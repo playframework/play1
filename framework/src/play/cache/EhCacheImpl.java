@@ -15,6 +15,8 @@ import play.Play;
  * full-featured and this has made it the most widely-used Java-based cache.</p>
  *
  * @see http://ehcache.org/
+ *
+ * expiration is specified in seconds
  */
 public class EhCacheImpl implements CacheImpl {
 
@@ -24,10 +26,12 @@ public class EhCacheImpl implements CacheImpl {
 
     net.sf.ehcache.Cache cache;
 
+    private static final String cacheName = "play";
+
     private EhCacheImpl() {
         this.cacheManager = CacheManager.create();
-        this.cacheManager.addCache("play");
-        this.cache = cacheManager.getCache("play");
+        this.cacheManager.addCache(cacheName);
+        this.cache = cacheManager.getCache(cacheName);
     }
 
     public static EhCacheImpl getInstance() {
@@ -56,7 +60,8 @@ public class EhCacheImpl implements CacheImpl {
             return -1;
         }
         long newValue = ((Number) e.getValue()).longValue() - by;
-        Element newE = new Element(key, newValue, e.getExpirationTime());
+        Element newE = new Element(key, newValue);
+        newE.setTimeToLive(e.getTimeToLive());
         cache.put(newE);
         return newValue;
     }
@@ -84,7 +89,8 @@ public class EhCacheImpl implements CacheImpl {
             return -1;
         }
         long newValue = ((Number) e.getValue()).longValue() + by;
-        Element newE = new Element(key, newValue, e.getExpirationTime());
+        Element newE = new Element(key, newValue);
+        newE.setTimeToLive(e.getTimeToLive());
         cache.put(newE);
         return newValue;
 

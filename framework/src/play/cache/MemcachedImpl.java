@@ -19,6 +19,8 @@ import play.exceptions.ConfigurationException;
 
 /**
  * Memcached implementation (using http://code.google.com/p/spymemcached/)
+ *
+ * expiration is specified in seconds
  */
 public class MemcachedImpl implements CacheImpl {
 
