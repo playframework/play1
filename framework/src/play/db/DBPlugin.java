@@ -58,6 +58,10 @@ public class DBPlugin extends PlayPlugin {
 
                 Properties p = Play.configuration;
 
+                if (DB.datasource != null) {
+                    DB.destroy();
+                }
+
                 if (p.getProperty("db", "").startsWith("java:")) {
 
                     Context ctx = new InitialContext();
@@ -117,6 +121,8 @@ public class DBPlugin extends PlayPlugin {
 
                 }
 
+                DB.destroyMethod = p.getProperty("db.destroyMethod", "");
+
             } catch (Exception e) {
                 DB.datasource = null;
                 Logger.error(e, "Cannot connected to the database : %s", e.getMessage());
@@ -125,6 +131,12 @@ public class DBPlugin extends PlayPlugin {
                 }
                 throw new DatabaseException("Cannot connected to the database, " + e.getMessage(), e);
             }
+        }
+    }
+
+    public void onApplicationStop() {
+        if (Play.mode.isProd()) {
+            DB.destroy();
         }
     }
 
@@ -192,6 +204,11 @@ public class DBPlugin extends PlayPlugin {
             if (DB.datasource == null) {
                 return true;
             }
+        } else {
+            // Internal pool is c3p0, we should call the close() method to destroy it.
+            check(p, "internal pool", "db.destroyMethod");
+
+            p.put("db.destroyMethod", "close");
         }
 
         Matcher m = new jregex.Pattern("^mysql:(({user}[\\w]+)(:({pwd}[^@]+))?@)?({name}[\\w]+)$").matcher(p.getProperty("db", ""));
@@ -229,6 +246,11 @@ public class DBPlugin extends PlayPlugin {
                 return true;
             }
         }
+
+        if (!p.getProperty("db.destroyMethod", "").equals(DB.destroyMethod)) {
+            return true;
+        }
+
         return false;
     }
 
