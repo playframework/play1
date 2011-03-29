@@ -610,8 +610,21 @@ public class Http {
             setCookie(name, value, null, "/", null, false);
         }
 
+        /**
+         * Removes the specified cookie with path /
+         * @param name cookiename
+         */
         public void removeCookie(String name) {
-            setCookie(name, "", null, "/", 0, false);
+            removeCookie(name, "/");
+        }
+
+        /**
+         * Removes the cookie
+         * @param name cookiename
+         * @param path cookiepath
+         */
+        public void removeCookie(String name, String path) {
+            setCookie(name, "", null, path, 0, false);
         }
 
         /**
