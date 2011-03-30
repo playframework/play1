@@ -463,13 +463,13 @@ public class GroovyTemplate extends BaseTemplate {
                                 }
                                 for (int i = 0; i < ((Object[]) param).length; i++) {
                                     if (((Object[]) param)[i] instanceof Router.ActionDefinition && ((Object[]) param)[i] != null) {
-                                        Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "");
+                                        Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "", actionMethod.getAnnotations());
                                     } else if (isSimpleParam(actionMethod.getParameterTypes()[i])) {
                                         if (((Object[]) param)[i] != null) {
-                                            Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "");
+                                            Unbinder.unBind(r, ((Object[]) param)[i].toString(), i < names.length ? names[i] : "", actionMethod.getAnnotations());
                                         }
                                     } else {
-                                        Unbinder.unBind(r, ((Object[]) param)[i], i < names.length ? names[i] : "");
+                                        Unbinder.unBind(r, ((Object[]) param)[i], i < names.length ? names[i] : "", actionMethod.getAnnotations());
                                     }
                                 }
                             }
