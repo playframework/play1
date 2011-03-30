@@ -109,12 +109,10 @@ public class Lang {
     }
 
      public static Locale getLocale(String lang) {
-        for (Locale locale : Locale.getAvailableLocales()) {
-            if (locale.getLanguage().equals(lang)) {
-                return locale;
-            }
+        if (lang == null) {
+            return null;
         }
-        return null;
+        return new Locale(lang);
     }
 
 }
