@@ -38,7 +38,7 @@ public class Functions extends UnitTest {
     @Test
     public void either() {
 
-        F.Either3<String,Integer,Boolean> e = F.Either3.<String,Integer,Boolean>_2(6);
+        F.E3<String,Integer,Boolean> e = F.E3.<String,Integer,Boolean>_2(6);
 
         for(String oops : e._1) {
             fail("Oops!");
