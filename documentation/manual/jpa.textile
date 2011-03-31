@@ -24,6 +24,16 @@ Play will automatically manage transactions for you. It will start a transaction
 
 If you need to force transaction rollback from the application code, you can use the **JPA.setRollbackOnly()** method.
 
+You can also use annotations to specify how transactions should be handled.
+
+If you annotated the method in the controller with **@play.db.jpa.Transactional(readOnly=true)**, then the transaction will be read-only.
+
+If you want to prevent Play from starting a transaction at all, you can annotated the method with **@play.db.jpa.NoTransaction**.
+
+To prevent transactions for all methods, you can annotate the Controller-class with **@play.db.jpa.NoTransaction**.
+
+When using **@play.db.jpa.NoTransaction**, Play does not get a connection from the connection pool at all - which improves speed.
+
 h2. <a name="support">The **play.db.jpa.Model** support class</a>
 
 This is the main helper class for JPA. If you make one of your JPA entities extend the **play.db.jpa.Model** class, it will give you a lot of helper methods to simplify the JPA access.

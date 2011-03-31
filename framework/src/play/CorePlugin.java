@@ -49,7 +49,7 @@ public class CorePlugin extends PlayPlugin {
             }
             return o.toString();
         }
-        StringBuffer dump = new StringBuffer(16);
+        StringBuilder dump = new StringBuilder(16);
         for (PlayPlugin plugin : Play.pluginCollection.getEnabledPlugins()) {
             try {
                 String status = plugin.getStatus();

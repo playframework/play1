@@ -67,11 +67,13 @@ def getWithModules(args, env):
                 if os.path.isdir(os.path.join(env["basedir"], 'modules/%s' % f)) and f.find('%s-' % m) == 0:
                     dirname = os.path.join(env["basedir"], 'modules/%s' % f)
                     break
-                else:
-                    print "~ Oops. Module " + m + " not found (try running `play install " + m + "`)"
-                    print "~"
-                    sys.exit(-1)
+        if not dirname:
+            print "~ Oops. Module " + m + " not found (try running `play install " + m + "`)"
+            print "~"
+            sys.exit(-1)
+        
         md.append(dirname)
+    
     return md
 
 def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = []):

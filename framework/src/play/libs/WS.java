@@ -54,6 +54,10 @@ public class WS extends PlayPlugin {
 
     private static WSImpl wsImpl = null;
 
+    public enum Scheme {
+        BASIC, DIGEST, NTLM, KERBEROS, SPNEGO
+    }
+
     @Override
     public void onApplicationStop() {
         if (wsImpl != null) {
@@ -130,6 +134,7 @@ public class WS extends PlayPlugin {
         public String url;
         public String username;
         public String password;
+        public Scheme scheme;
         public Object body;
         public FileParam[] fileParams;
         public Map<String, String> headers = new HashMap<String, String>();
@@ -167,10 +172,23 @@ public class WS extends PlayPlugin {
          * @param password
          * @return the WSRequest for chaining.
          */
-        public WSRequest authenticate(String username, String password) {
+        public WSRequest authenticate(String username, String password, Scheme scheme) {
             this.username = username;
             this.password = password;
+            this.scheme = scheme;
             return this;
+        }
+
+        /**
+         * define client authentication for a server host
+         * provided credentials will be used during the request
+         * the basic scheme will be used
+         * @param username
+         * @param password
+         * @return the WSRequest for chaining.
+         */
+        public WSRequest authenticate(String username, String password) {
+            return authenticate(username, password, Scheme.BASIC);
         }
 
         /**
@@ -346,6 +364,10 @@ public class WS extends PlayPlugin {
         /** Execute a TRACE request asynchronously.*/
         public Promise<HttpResponse> traceAsync() {
             throw new NotImplementedException();
+        }
+
+        protected String basicAuthHeader() {
+            return  "Basic " + Codec.encodeBASE64(this.username + ":" + this.password);
         }
 
         protected String createQueryString() {

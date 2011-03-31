@@ -17,6 +17,7 @@ import play.classloading.ApplicationClassloader;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
+import play.mvc.Http;
 import play.mvc.Router;
 import play.plugins.PluginCollection;
 import play.templates.TemplateLoader;
@@ -281,6 +282,12 @@ public class Play {
             Play.ctxPath = "";
         }
 
+        // Default cookie domain
+        Http.Cookie.defaultDomain = configuration.getProperty("application.defaultCookieDomain", null);
+        if (Http.Cookie.defaultDomain!=null) {
+            Logger.info("Using default cookie domain: " + Http.Cookie.defaultDomain);
+        }
+
         // Plugins
         pluginCollection.loadPlugins();
 
@@ -303,7 +310,7 @@ public class Play {
     /**
      * Read application.conf and resolve overriden key using the play id mechanism.
      */
-    static void readConfiguration() {
+    public static void readConfiguration() {
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         conf = appRoot.child("conf/application.conf");
         try {

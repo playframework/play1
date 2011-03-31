@@ -35,8 +35,16 @@ public class DBPlugin extends PlayPlugin {
 
     @Override
     public boolean rawInvocation(Request request, Response response) throws Exception {
-        if(Play.mode.isDev() && request.path.equals("/@db")) {
+        if (Play.mode.isDev() && request.path.equals("/@db")) {
             response.status = Http.StatusCode.MOVED;
+
+            // For H2 embeded database, we'll also start the Web console
+            if (h2Server != null) {
+                h2Server.stop();
+            }
+            h2Server = org.h2.tools.Server.createWebServer();
+            h2Server.start();
+
             response.setHeader("Location", "http://localhost:8082/");
             return true;
         }
@@ -49,6 +57,10 @@ public class DBPlugin extends PlayPlugin {
             try {
 
                 Properties p = Play.configuration;
+
+                if (DB.datasource != null) {
+                    DB.destroy();
+                }
 
                 if (p.getProperty("db", "").startsWith("java:")) {
 
@@ -92,6 +104,7 @@ public class DBPlugin extends PlayPlugin {
                     ds.setBreakAfterAcquireFailure(false);
                     ds.setMaxPoolSize(Integer.parseInt(p.getProperty("db.pool.maxSize", "30")));
                     ds.setMinPoolSize(Integer.parseInt(p.getProperty("db.pool.minSize", "1")));
+                    ds.setMaxIdleTimeExcessConnections(Integer.parseInt(p.getProperty("db.pool.maxIdleTimeExcessConnections", "0")));
                     ds.setIdleConnectionTestPeriod(10);
                     ds.setTestConnectionOnCheckin(true);
                     DB.datasource = ds;
@@ -106,16 +119,9 @@ public class DBPlugin extends PlayPlugin {
                     }
                     Logger.info("Connected to %s", ds.getJdbcUrl());
 
-                    // For H2 embeded database, we'll also start the Web console
-                    if(Play.mode.isDev() && "org.h2.Driver".equals(p.get("db.driver"))) {
-                        if(h2Server != null) {
-                            h2Server.stop();
-                        }
-                        h2Server = org.h2.tools.Server.createWebServer();
-                        h2Server.start();
-                    }
-
                 }
+
+                DB.destroyMethod = p.getProperty("db.destroyMethod", "");
 
             } catch (Exception e) {
                 DB.datasource = null;
@@ -128,7 +134,12 @@ public class DBPlugin extends PlayPlugin {
         }
     }
 
-    
+    public void onApplicationStop() {
+        if (Play.mode.isProd()) {
+            DB.destroy();
+        }
+    }
+
     @Override
     public String getStatus() {
         StringWriter sw = new StringWriter();
@@ -193,6 +204,11 @@ public class DBPlugin extends PlayPlugin {
             if (DB.datasource == null) {
                 return true;
             }
+        } else {
+            // Internal pool is c3p0, we should call the close() method to destroy it.
+            check(p, "internal pool", "db.destroyMethod");
+
+            p.put("db.destroyMethod", "close");
         }
 
         Matcher m = new jregex.Pattern("^mysql:(({user}[\\w]+)(:({pwd}[^@]+))?@)?({name}[\\w]+)$").matcher(p.getProperty("db", ""));
@@ -230,6 +246,11 @@ public class DBPlugin extends PlayPlugin {
                 return true;
             }
         }
+
+        if (!p.getProperty("db.destroyMethod", "").equals(DB.destroyMethod)) {
+            return true;
+        }
+
         return false;
     }
 

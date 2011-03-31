@@ -34,6 +34,10 @@ import play.utils.HTML;
  */
 public class JavaExtensions {
 
+    public static Object[] enumValues(Class clazz) {
+        return clazz.getEnumConstants();
+    }
+
     public static boolean contains(String[] array, String value) {
         for (String v : array) {
             if (v.equals(value)) {

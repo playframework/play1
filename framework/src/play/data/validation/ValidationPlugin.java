@@ -25,8 +25,8 @@ import play.mvc.Scope;
 import play.mvc.results.Result;
 
 public class ValidationPlugin extends PlayPlugin {
-    
-    static ThreadLocal<Map<Object,String>> keys = new ThreadLocal<Map<Object,String>>();
+
+    static ThreadLocal<Map<Object, String>> keys = new ThreadLocal<Map<Object, String>>();
 
     @Override
     public void beforeInvocation() {
@@ -39,13 +39,13 @@ public class ValidationPlugin extends PlayPlugin {
         try {
             Validation.current.set(restore());
             boolean verify = false;
-            for(Annotation[] annotations : actionMethod.getParameterAnnotations()) {
-                if(annotations.length > 0) {
+            for (Annotation[] annotations : actionMethod.getParameterAnnotations()) {
+                if (annotations.length > 0) {
                     verify = true;
                     break;
                 }
             }
-            if(!verify) {
+            if (!verify) {
                 return;
             }
             List<ConstraintViolation> violations = new Validator().validateAction(actionMethod);
@@ -72,25 +72,23 @@ public class ValidationPlugin extends PlayPlugin {
 
     @Override
     public void invocationFinally() {
-        if(keys.get() != null) {
+        if (keys.get() != null) {
             keys.get().clear();
             keys.set(null);
         }
-    }    
+    }
 
-    
     // ~~~~~~
-
     static class Validator extends Guard {
 
         public List<ConstraintViolation> validateAction(Method actionMethod) throws Exception {
             List<ConstraintViolation> violations = new ArrayList<ConstraintViolation>();
             Object instance = null;
             // Patch for scala defaults
-            if(!Modifier.isStatic(actionMethod.getModifiers()) && actionMethod.getDeclaringClass().getSimpleName().endsWith("$")) {
+            if (!Modifier.isStatic(actionMethod.getModifiers()) && actionMethod.getDeclaringClass().getSimpleName().endsWith("$")) {
                 try {
                     instance = actionMethod.getDeclaringClass().getDeclaredField("MODULE$").get(null);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     throw new ActionNotFoundException(Http.Request.current().action, e);
                 }
             }
@@ -100,7 +98,6 @@ public class ValidationPlugin extends PlayPlugin {
             return violations;
         }
     }
-    
     static Pattern errorsParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
 
     static Validation restore() {
@@ -125,19 +122,23 @@ public class ValidationPlugin extends PlayPlugin {
     }
 
     static void save() {
-        if(Http.Response.current() == null) {
+        if (Http.Response.current() == null) {
             // Some request like WebSocket don't have any response
+            return;
+        }
+        if (Validation.errors().isEmpty()) {
+            Http.Response.current().setCookie(Scope.COOKIE_PREFIX + "_ERRORS", "", "0s");
             return;
         }
         try {
             StringBuilder errors = new StringBuilder();
-            if(Validation.current() != null && Validation.current().keep) {
+            if (Validation.current() != null && Validation.current().keep) {
                 for (Error error : Validation.errors()) {
                     errors.append("\u0000");
                     errors.append(error.key);
                     errors.append(":");
                     errors.append(error.message);
-                    for(String variable : error.variables) {
+                    for (String variable : error.variables) {
                         errors.append("\u0001");
                         errors.append(variable);
                     }
@@ -149,11 +150,11 @@ public class ValidationPlugin extends PlayPlugin {
         } catch (Exception e) {
             throw new UnexpectedException("Errors serializationProblem", e);
         }
-    }     
-    
+    }
+
     static void clear() {
         try {
-            if(Http.Response.current() != null && Http.Response.current().cookies != null) {
+            if (Http.Response.current() != null && Http.Response.current().cookies != null) {
                 Cookie cookie = new Cookie();
                 cookie.name = Scope.COOKIE_PREFIX + "_ERRORS";
                 cookie.value = "";
@@ -163,5 +164,5 @@ public class ValidationPlugin extends PlayPlugin {
         } catch (Exception e) {
             throw new UnexpectedException("Errors serializationProblem", e);
         }
-    } 
+    }
 }

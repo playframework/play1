@@ -83,7 +83,7 @@ public class Validation {
      */
     public static Error error(String field) {
         for (Error error : current.get().errors) {
-            if (error.key.equals(field)) {
+            if (error.key!=null && error.key.equals(field)) {
                 return error;
             }
         }
@@ -97,7 +97,7 @@ public class Validation {
     public static List<Error> errors(String field) {
         List<Error> errors = new ArrayList<Error>();
         for (Error error : current.get().errors) {
-            if (error.key.equals(field)) {
+            if (error.key!=null && error.key.equals(field)) {
                 errors.add(error);
             }
         }

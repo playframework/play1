@@ -107,7 +107,9 @@ public class Fixtures {
             disableForeignKeyConstraints();
             for (String name : names) {
                 if(Arrays.binarySearch(dontDeleteTheseTables, name) < 0) {
-                    Logger.trace("Dropping content of table %s", name);
+                    if (Logger.isTraceEnabled()) {
+                        Logger.trace("Dropping content of table %s", name);
+                    }
                     DB.execute(getDeleteTableStmt(name) + ";");
                 }
             }
