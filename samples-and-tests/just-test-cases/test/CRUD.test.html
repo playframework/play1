@@ -3,21 +3,17 @@
 #{selenium 'Test the CRUD module'}
 	
 	open('@{CRUD.index()}')
-	assertPath('/admin')
 	
 	// Create a company
 	clickAndWait('link=AdminCompany')
 	assertTextPresent('0 AdminCompany')
-	assertPath('/admin/admincompany')
 	clickAndWait('link=Add Company')
-	assertPath('/admin/admincompany/new')
 	assertTextPresent('version')
     assertElementPresent('object_version')	
 	type('object_name', 'Zenexity')
 	clickAndWait('css=input[name=_save]')
 	assertTextPresent('has been created')
 	assertTextPresent('Zenexity')
-	assertPath('/admin/admincompany')
 	clickAndWait('link=Zenexity')
 	assertTextPresent('Edit Company')
 	assertTextPresent('version')
@@ -25,12 +21,9 @@
 	
 	// Create a project
 	clickAndWait('link=Home')
-	assertPath('/admin')
 	clickAndWait('link=Projects')
-	assertPath('/admin/projects')
 	assertTextPresent('0 Projects')
 	clickAndWait('link=Add Project')
-	assertPath('/admin/projects/new')
 	type('object_name', 'Play')
 	select('object_company', 'Zenexity')
 	clickAndWait('css=input[name=_save]')
@@ -41,12 +34,9 @@
 	
 	// Create a factory
 	clickAndWait('link=Home')
-	assertPath('/admin')
 	clickAndWait('link=Factories')
-	assertPath('/admin/factories')
 	assertTextPresent('0 Factories')
 	clickAndWait('link=Add Factory')
-	assertPath('/admin/factories/new')
 	type('object_name', 'Cars')
 	clickAndWait('css=input[name=_save]')
 	assertTextPresent('has been created')
@@ -89,12 +79,9 @@
     
     // Create a company
     open('@{CRUD.index()}')
-    assertPath('/admin')
     clickAndWait('link=CustomAdminCompany')
     assertTextPresent('1 CustomAdminCompany')
-    assertPath('/admin/customadmincompany')
     clickAndWait('link=Add Company')
-    assertPath('/admin/customadmincompany/new')
     assertNotVisible('object_version')
     assertTextNotPresent('version')
     assertElementPresent('object_version')
@@ -102,7 +89,6 @@
     clickAndWait('css=input[name=_save]')
     assertTextPresent('has been created')
     assertTextPresent('Zenexity 2')
-    assertPath('/admin/customadmincompany')
     clickAndWait('link=Zenexity 2')
     assertTextPresent('Edit Company')
     assertNotVisible('object_version')
