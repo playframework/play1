@@ -78,38 +78,39 @@ public class ControllersEnhancer extends Enhancer {
                 }
             }
 
-            // Auto redirect -->
-            if(!isScalaObject(ctClass) && Modifier.isPublic(ctMethod.getModifiers()) && ((ctClass.getName().endsWith("$") && !ctMethod.getName().contains("$default$"))) && !isHandler) {
+            if (isScalaObject(ctClass)) {
 
-                try {
-                    ctMethod.insertBefore(
-                        "if(play.mvc.Controller._currentReverse.get() != null) {"
-                        + "play.mvc.Controller.redirect(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\", $args);"
-                        + generateValidReturnStatement(ctMethod.getReturnType())
-                    + "}");
-                } catch (Exception e) {
-                    Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (autoredirect).", applicationClass.name, ctMethod.getName());
-                    throw new UnexpectedException(e);
+                // Auto reverse -->
+                if (Modifier.isPublic(ctMethod.getModifiers()) && ((ctClass.getName().endsWith("$") && !ctMethod.getName().contains("$default$"))) && !isHandler) {
+                    try {
+                        ctMethod.insertBefore(
+                                "if(play.mvc.Controller._currentReverse.get() != null) {"
+                                + "play.mvc.Controller.redirect(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\", $args);"
+                                + generateValidReturnStatement(ctMethod.getReturnType())
+                                + "}");
+                    } catch (Exception e) {
+                        Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (auto-reverse).", applicationClass.name, ctMethod.getName());
+                        throw new UnexpectedException(e);
+                    }
                 }
 
             } else {
 
-                if (Modifier.isPublic(ctMethod.getModifiers()) && ((ctClass.getName().endsWith("$") && !ctMethod.getName().contains("$default$")) || (Modifier.isStatic(ctMethod.getModifiers()) && ctMethod.getReturnType().equals(CtClass.voidType))) && !isHandler) {
+                // Auto redirect -->
+                if (Modifier.isPublic(ctMethod.getModifiers()) && !isHandler) {
                     try {
                         ctMethod.insertBefore(
                                 "if(!play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.isActionCallAllowed()) {"
                                 + "play.mvc.Controller.redirect(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\", $args);"
-                                + generateValidReturnStatement(ctMethod.getReturnType()) +  "}"
+                                + generateValidReturnStatement(ctMethod.getReturnType()) + "}"
                                 + "play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.stopActionCall();");
                     } catch (Exception e) {
-                        Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (autoredirect).", applicationClass.name, ctMethod.getName());
+                        Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (auto-redirect).", applicationClass.name, ctMethod.getName());
                         throw new UnexpectedException(e);
                     }
                 }
 
             }
-
-            
 
             // Enhance global catch to avoid potential unwanted catching of play.mvc.results.Result
             ctMethod.instrument(new ExprEditor() {
@@ -187,31 +188,31 @@ public class ControllersEnhancer extends Enhancer {
     }
 
     static String generateValidReturnStatement(CtClass type) {
-        if(type.equals(CtClass.voidType)) {
+        if (type.equals(CtClass.voidType)) {
             return "return;";
         }
-        if(type.equals(CtClass.booleanType)) {
+        if (type.equals(CtClass.booleanType)) {
             return "return false;";
         }
-        if(type.equals(CtClass.charType)) {
+        if (type.equals(CtClass.charType)) {
             return "return '';";
         }
-        if(type.equals(CtClass.byteType)) {
+        if (type.equals(CtClass.byteType)) {
             return "return (byte)0;";
         }
-        if(type.equals(CtClass.doubleType)) {
+        if (type.equals(CtClass.doubleType)) {
             return "return (double)0;";
         }
-        if(type.equals(CtClass.floatType)) {
+        if (type.equals(CtClass.floatType)) {
             return "return (float)0;";
         }
-        if(type.equals(CtClass.intType)) {
+        if (type.equals(CtClass.intType)) {
             return "return (int)0;";
         }
-        if(type.equals(CtClass.longType)) {
+        if (type.equals(CtClass.longType)) {
             return "return (long)0;";
         }
-        if(type.equals(CtClass.shortType)) {
+        if (type.equals(CtClass.shortType)) {
             return "return (short)0;";
         }
         return "return null;";
