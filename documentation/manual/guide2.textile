@@ -365,7 +365,7 @@ User(bob):
 
 Well, because the **data.yml** file is a litle big, you can "download it here":files/data.yml.
 
-Now we create create a test case that loads this data and runs some assertions over it:
+Now we create a test case that loads this data and runs some assertions over it:
 
 bc. @Test
 public void fullTest() {
