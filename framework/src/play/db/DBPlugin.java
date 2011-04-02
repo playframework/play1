@@ -184,7 +184,7 @@ public class DBPlugin extends PlayPlugin {
             check(p, "memory", "db.url");
 
             p.put("db.driver", "org.h2.Driver");
-            p.put("db.url", "jdbc:h2:mem:play;MODE=MYSQL;DB_CLOSE_ON_EXIT=FALSE");
+            p.put("db.url", "jdbc:h2:mem:play;MODE=MYSQL;DB_CLOSE_ON_EXIT=FALSE;LOCK_MODE=0");
             p.put("db.user", "sa");
             p.put("db.pass", "");
         }
