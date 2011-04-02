@@ -9,6 +9,10 @@ public class ConfigurationException extends PlayException {
         super(message);
     }
 
+    public ConfigurationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
     @Override
     public String getErrorDescription() {
         return getMessage();

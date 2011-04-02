@@ -14,13 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.EmbeddedId;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NoResultException;
@@ -34,10 +33,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
+import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.hibernate.type.Type;
-
 import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
@@ -46,6 +45,7 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 import play.data.binding.Binder;
 import play.db.DB;
 import play.db.Model;
+import play.exceptions.ConfigurationException;
 import play.exceptions.JPAException;
 import play.exceptions.UnexpectedException;
 import play.utils.Utils;
@@ -187,6 +187,22 @@ public class JPAPlugin extends PlayPlugin {
             }
             // inject additional  hibernate.* settings declared in Play! configuration
             cfg.addProperties((Properties) Utils.Maps.filterMap(Play.configuration, "^hibernate\\..*"));
+
+            // custom naming strategy
+            String namingStrategyClass = Play.configuration.getProperty("jpa.namingStrategy", null);
+            if(namingStrategyClass != null) {
+                try {
+                    Class c = Play.classloader.loadApplicationClass(namingStrategyClass);
+                    if(c == null) {
+                        throw new ConfigurationException(String.format("Naming strategy class '%s' not found", namingStrategyClass));
+                    }
+                    NamingStrategy ns = (NamingStrategy) c.newInstance();
+                    Logger.info("JPA -> Loading naming strategy: %s", ns.getClass().getName());
+                    cfg.setNamingStrategy(ns);
+                } catch (Throwable t) {
+                    throw new ConfigurationException(String.format("Error initializing custom naming strategy class '%s' - did you implement a default constructor?", namingStrategyClass), t.getCause() != null ? t.getCause() : t);
+                }
+            }
 
             try {
                 Field field = cfg.getClass().getDeclaredField("overridenClassLoader");
