@@ -46,7 +46,7 @@ Now from the main application configuration file (my-project/main/conf/applicati
 
 bc. # Additional modules
 # ~~~~~
-mdoule.gwt=../gwt
+module.gwt=../gwt
 module.cms=../cms
 module.forum=../forum
 module.directory=../directory

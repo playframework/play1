@@ -78,6 +78,8 @@ class PlayApplication:
         if self.path and os.path.exists(os.path.join(self.path, 'modules')):
             for m in os.listdir(os.path.join(self.path, 'modules')):
                 mf = os.path.join(os.path.join(self.path, 'modules'), m)
+                if os.path.basename(mf)[0] == '.':
+                    continue
                 if os.path.isdir(mf):
                     modules.append(mf)
                 else:
