@@ -23,6 +23,9 @@ public class Unbinder {
         if (src == null) {
             return;
         }
+        if (src instanceof  Class) {
+            return ;
+        }
         unBind(result, src, src.getClass(), name, annotations);
     }
 
@@ -110,6 +113,6 @@ public class Unbinder {
     }
 
     public static boolean isDirect(Class<?> clazz) {
-        return clazz.equals(String.class) || clazz.equals(Integer.class) || Enum.class.isAssignableFrom(clazz) || clazz.equals(Boolean.class) || clazz.equals(Long.class) || clazz.equals(Double.class) || clazz.equals(Float.class) || clazz.equals(Short.class) || clazz.equals(BigDecimal.class) || clazz.isPrimitive();
+        return clazz.equals(String.class) || clazz.equals(Integer.class) || Enum.class.isAssignableFrom(clazz) || clazz.equals(Boolean.class) || clazz.equals(Long.class) || clazz.equals(Double.class) || clazz.equals(Float.class) || clazz.equals(Short.class) || clazz.equals(BigDecimal.class) || clazz.isPrimitive() || clazz.equals(Class.class);
     }
 }
