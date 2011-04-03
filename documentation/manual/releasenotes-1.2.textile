@@ -1,0 +1,38 @@
+h1. Play 1.2 -- Release notes
+
+You can read about the bugs fixed in Play 1.2 on the "road map page":http://www.playframework.org/roadmap/1.2. This page highlights the most important changes.
+
+h2. Migrating from Play 1.1.x
+
+Migrating from Play 1.1.x is pretty straightforward. There are no changes to the application layout, so your applications will run Play 1.2. However if you use any external modules in your application, you may have to use more recent versions that are compatible with Play 1.2. Check the corresponding module pages.
+
+Some APIs have been removed in Play 1.2, after having been deprecated for a long time, but most of the public API is the same. If you have compilation errors that you don’t know how to solve, ask on the Google group.
+
+# staticFile:
+# Fixtures from several files
+# 404 as action
+# create, validateAndCreate
+# evolutions
+# Invocation context
+# Junit rule
+# Added --pid_file=, --http.port=, --https.port= command line options to play 
+# Support lang-country pair (e.g. en-GB) 
+# Bind Map<String, String>, multivalues, composites... 
+# CRUD ObjectType
+# Surefire report for Java tests
+# Allow {_} to be used instead of {(.*)} in host part 
+# WS Timeout
+# {} in route regex
+# Dependencies
+# H2 + @db
+# Fixtures refactoring
+# play.libs.F
+# Cheatsheets + Doc
+# Chunked response
+# await / Continuations
+# Websockets
+# Templates for fixtures
+# servlet?foo&bar&baz
+# test ids
+# Cookies
+# application.baseUrl
