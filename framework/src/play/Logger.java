@@ -1,5 +1,7 @@
 package play;
 
+import java.io.File;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
@@ -10,11 +12,13 @@ import java.util.Properties;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+
 import org.apache.log4j.Appender;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.Priority;
 import org.apache.log4j.PropertyConfigurator;
+
 import play.exceptions.PlayException;
 
 /**
@@ -64,13 +68,45 @@ public class Logger {
             PropertyConfigurator.configure(shutUp);
         } else if (Logger.log4j == null) {
 
-            if(log4jConf.getFile().indexOf(Play.applicationPath.getAbsolutePath()) == 0 ) {
-                // The log4j configuration file is located somewhere in the application folder,
-                // so it's probably a custom configuration file
-                configuredManually = true;
-            }
 
-            PropertyConfigurator.configure(log4jConf);
+        	// read the properties
+        	Properties log4jProps = new Properties();
+			InputStream istream = null;
+			try {
+				istream = log4jConf.openStream();
+				log4jProps.load(istream);
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				if (istream != null)
+					try {
+						istream.close();
+					} catch (Exception ignore) {
+					}
+			}
+        	
+        	String applicationPath = Play.applicationPath.getAbsolutePath();
+			if (log4jConf.getFile().indexOf(applicationPath) == 0) {
+				// The log4j configuration file is located somewhere in the
+				// application folder,
+				// so it's probably a custom configuration file
+				configuredManually = true;
+
+				// relative path in log4j configuration should be based off the applicationPath
+				for (Object k : log4jProps.keySet()) {
+					String key = k.toString();
+					if (key.toString().endsWith(".File")) {
+						
+						String path = log4jProps.getProperty(key);
+						if (!path.startsWith("/")) {
+							path = (new File(applicationPath, path)).getAbsolutePath();
+							log4jProps.setProperty(key, path);
+						}
+					}
+				}
+			}
+
+            PropertyConfigurator.configure(log4jProps);
             Logger.log4j = org.apache.log4j.Logger.getLogger("play");
             // In test mode, append logs to test-result/application.log
             if (Play.runingInTestMode()) {
