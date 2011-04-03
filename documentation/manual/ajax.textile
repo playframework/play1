@@ -17,9 +17,12 @@ Now you can import this route client side:
 
 bc. <script type="text/javascript">
    var listAction = #{jsAction @list(':search', ':size', ':page') /}
-   $('#result').load(listAction({search: 'x', size: '10', page: '1'}), function() {
-       $('#content').css('visibility', 'visible')
-   })
+   $('#result').load(
+       listAction({search: 'x', size: '10', page: '1'}), 
+       function() {
+           $('#content').css('visibility', 'visible')
+       }
+   )
 </script>
 
 In this example we are requesting the list method from the default Application controller. We are also passing three parameters: search, size and page. The request we perform is then saved into the listAction variable. Now using jQuery and the **load** function we are performing a request (an HTTP GET request in fact).
