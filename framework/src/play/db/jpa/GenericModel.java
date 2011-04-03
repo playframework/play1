@@ -31,7 +31,6 @@ import java.util.TreeSet;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostUpdate;
-import play.Logger;
 import play.utils.Utils;
 
 /**
