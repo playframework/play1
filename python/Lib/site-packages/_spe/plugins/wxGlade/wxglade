@@ -1,5 +1,0 @@
-#!/bin/sh
-
-#pv=`python -c 'import sys; print sys.version[:3]'`
-pv="2.3"
-exec python /usr/lib/python$pv/site-packages/wxglade/wxglade.py "$@"
