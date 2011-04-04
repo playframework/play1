@@ -115,7 +115,3 @@ h2. <a name="stax">Stax cloud hosting platform</a>
 Easy deployment to the "Stax cloud hosting platform":http://www.stax.net: again nothing could be easier. Install the Stax module and deploy within seconds.
 
 Refer to the "module documentation":http://www.playframework.org/modules/stax-1.0.1/home for more information.
-
-p(note). **Continuing the discussion**
- 
-Next: %(next)"Production deployment":production%.

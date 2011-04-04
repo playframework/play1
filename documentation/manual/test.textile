@@ -214,4 +214,4 @@ Run these steps in a CRON tab, and you’re done!
 
 p(note). **Continuing the discussion**
  
-Next: %(next)"Deployment options":deployment%.
+Next: %(next)"Security guide":security%.

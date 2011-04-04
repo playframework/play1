@@ -95,10 +95,11 @@ Everything you need to know about Play.
 # "Asynchronous Jobs":jobs
 ## "Bootstrap jobs":jobs#concepts
 ## "Scheduled jobs":jobs#scheduling
-## "Triggering task jobs":jobs#taks
+## "Triggering task jobs":jobs#tasks
 # "Asynchronous programming with HTTP":asynchronous
-## "Suspending HTTP requests":asynchronous#suspendable
-## "Using WebSockets":asynchronous#websockets
+## "Suspending HTTP requests":asynchronous#SuspendingHTTPrequests
+## "HTTP response streaming":asynchronous#HTTPresponsestreaming
+## "Using WebSockets":asynchronous#UsingWebSockets
 # "Ajax requests":ajax
 ## "Making ajax requests with JQuery":ajax#jsaction
 # "Internationalization":i18n
@@ -137,15 +138,17 @@ Everything you need to know about Play.
 ## "dependencies.yml":dependency#yml
 ## "Conflicts resolution":dependency#conflicts
 ## "Adding new repositories":dependency#repositories
+# "Managing your database evolutions":evolutions
+## "Evolutions scripts":evolutions#script
+## "Synchronizing concurrent changes":evolutions#Synchronizingconcurrentchanges
+## "Inconsistent states":evolutions#Inconsistentstates
+## "Evolutions commands":evolutions#Evolutionscommands
 # "Logging configuration":logs
 ## "Logging from your application":logs#logging
 ## "Configure log levels":logs#levels
 # "Configuration in several environments":ids
 ## "The framework ID":ids#id
 ## "Setting the framework ID from the command line":ids#command
-# "Managing your database evolutions":evolutions
-## "Evolutions scripts":evolutions#scripts
-## "Evolutions commands":evolutions#commands
 # "Production deployment":production
 ## "Configure your application.conf":production#application
 ## "Configure logging":production#logging
@@ -170,7 +173,7 @@ Extended references for day-to-day hacking.
 ## "Model":cheatsheet/model
 ## "Testing":cheatsheet/tests
 ## "Multi Environment":cheatsheet/multiEnvironment
-# "Built-in extensions":#
+# "Built-in extensions":tags
 ## "Template tags":tags
 ## "Java extensions":javaextensions
 ## "Validations":validation-builtin

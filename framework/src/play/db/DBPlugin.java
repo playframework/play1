@@ -134,6 +134,7 @@ public class DBPlugin extends PlayPlugin {
         }
     }
 
+    @Override
     public void onApplicationStop() {
         if (Play.mode.isProd()) {
             DB.destroy();

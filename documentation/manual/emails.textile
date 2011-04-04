@@ -18,12 +18,12 @@ email.addTo("info@lunatech.com");
 email.setFrom(sender@lunatech.com", "Nicolas");
 email.setSubject("Test email with inline image");
 // embed the image and get the content id
-URL url = new URL("http://www.zenexity.fr/wp-content/themes/zenexity/images/logo.png");
+URL url = new URL("http://www.zenexity.fr/wp-content/themes/images/logo.png");
 String cid = email.embed(url, "Zenexity logo");
 // set the html message
 email.setHtmlMsg("<html>Zenexity logo - <img src=\"cid:"+cid+"\"></html>");
 // set the alternative message
-email.setTextMsg("Your email client does not support HTML messages, too bad :(");
+email.setTextMsg("Your email client does not support HTML, too bad :(");
 
 For more information see the "Commons Email documentation":http://commons.apache.org/email/userguide.html.
 
@@ -76,8 +76,11 @@ The template for the lostPassword method could look like this:
 
 **app/views/Mails/lostPassword.html**
 
-bc. <html><body><head>...</head><body><img src="mycompany.com/images"/><p>Hello ${user.name},<br/>
-Your new password is <b>${newpassword}</b>.
+bc. <html>
+<body><head>...</head><body>
+<img src="mycompany.com/images"/>
+<p>
+    Hello ${user.name}, Your new password is <b>${newpassword}</b>.
 </p>
 </body>
 </html>
@@ -95,7 +98,7 @@ The template for the lostPassword method could look like this:
 
 **app/views/Mails/lostPassword.txt**
 
-bc.Hello ${user.name},
+bc. Hello ${user.name},
  
 Your new password is ${newpassword}.
 
@@ -107,7 +110,7 @@ h3. Links to your application in e-mail
 
 Your can include links to your application in e-mails like this:
 
-bc.@@{application.index}
+bc. @@{application.index}
 
 If you send mails from Jobs you have to configure **application.baseUrl** in **application.conf**.
 **application.baseUrl** must be a valid external baseurl to your application.
@@ -115,7 +118,7 @@ If you send mails from Jobs you have to configure **application.baseUrl** in **a
 If the website playframework.org where to send you an e-mail from inside a Job, its configuration
 would look like this:
 
-bc.application.baseUrl=http://www.playframework.org/
+bc. application.baseUrl=http://www.playframework.org/
 
 h2. <a name="smtp">SMTP configuration</a>
 
@@ -161,7 +164,6 @@ mail.smtp.user=yourGmailLogin
 mail.smtp.pass=yourGmailPassword
 mail.smtp.channel=ssl
 
-
 p(note). **Continuing the discussion**
  
-Next: %(next)"Security guide":security%.
+Now we shall move on to %(next)"Testing the application":test%.

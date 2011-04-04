@@ -17,43 +17,7 @@ You can create a module with the **play new-module** command.
 
 h2. <a name="loading">How to load a module from an application</a>
 
-The default modules installation path is in the **$PLAY_HOME/modules** directory. This way all modules are automatically available to all applications run with the framework.
-
-If you want to load external modules from an application, just declare external modules in the application.conf file in the main application.
-
-bc. # Additional modules
-# ~~~~~
-# A module is another Play application. Add a line for each module you want
-# to add to your application. Module paths are either absolute or relative to
-# the application root.
-#
-module.crud=${play.path}/modules/crud
-
-You can also create a standalone project that contains all modules needed by your application. You just need to copy all modules into the same directory as your application. 
-
-Let’s say you have a large application with a CMS component, a forum component, a directory component and using the GWT module. You can create a project using this layout:
-
-bc. /my-project
-    /cms
-    /forum
-    /directory
-    /gwt
-    /main
-
-Here **main** is the directory of your main application (created using the **play new** command), **gwt** is a module installed from the modules repository, and **cms**, **forum** and **directory** are modules created using the **play new-module** command.
-
-Now from the main application configuration file (my-project/main/conf/application.conf), you can load these modules using:
-
-bc. # Additional modules
-# ~~~~~
-mdoule.gwt=../gwt
-module.cms=../cms
-module.forum=../forum
-module.directory=../directory
-
-When you run the main application (using **play run my-project/main**) it will load all these modules in memory as a larger application.
-
-p(note). If module paths are relative, they are resolved from the main application root.
+Modules are automatically loaded from the */modules* directory of the application. You can use the "dependencies management system":dependency to automatically manage your application modules.
 
 h2. <a name="routes">Load default routes from modules</a>
 
@@ -78,14 +42,14 @@ The "module repository":http://www.playframework.org/modules identifies all modu
 
 You can also browse the module repository using the **play list-modules** command. 
 
-bc. gbo-mac:~ guillaume$ play11 list-modules
+bc. gbo-mac:~ guillaume$ play list-modules
 ~        _            _ 
 ~  _ __ | | __ _ _  _| |
 ~ | '_ \| |/ _' | || |_|
 ~ |  __/|_|\____|\__ (_)
 ~ |_|            |__/   
 ~
-~ play! 1.1-unstable-r761, http://www.playframework.org
+~ play! 1.2, http://www.playframework.org
 ~
 ~ You can also browse this list online at http://www.playframework.org/modules
 ~
@@ -100,7 +64,9 @@ bc. gbo-mac:~ guillaume$ play11 list-modules
 ~   Versions: 1.0
 ...
 
-You can install a module using the **play install {module}-{version}** command. For example, to install the Scala support to the framework, use:
+You can install a module locally using the **play install {module}-{version}** command. Installing a module locally allow to use it from several application without having to install a different copy in each application. It is useful for large modules that are more framework extensions than your application extension. 
+
+For example, to install the Scala support to the framework, use:
 
 bc. play install scala-head
 
@@ -108,7 +74,9 @@ By convention the **head** version is the unstable version of the module. You ca
 
 bc. play install scala
 
-Modules installed this way are downloaded to the **/modules** directory of your framework installation. You can change the installation path using the **--path** option:
+Modules installed this way are downloaded to the **/modules** directory of your framework installation. 
+
+You can change the installation path using the **--path** option:
 
 bc. play install gwt --path=my-project
 
@@ -132,4 +100,4 @@ You can of course use the offical Google Group to provide help and share informa
 
 p(note). **Continuing the discussion**
  
-Next: %(next)"Internationalization":i18n%.
+Learn how efficiently manage your modules using %(next)"Dependencies management":dependency%.

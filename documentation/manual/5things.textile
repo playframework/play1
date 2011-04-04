@@ -108,11 +108,11 @@ File upload management is very simple with Play.
 
 The HTML form:
 
-bc. <form action="@{Article.uploadPhoto()}" method="POST" enctype="multipart/form-data">
+bc. #{form @uploadPhoto(), enctype:'multipart/form-data'}
     <input type="text" name="title" />
     <input type="file" id="photo" name="photo" />
     <input type="submit" value="Send it..." />
-</form>
+#{/}
 
 And the Java code:
 

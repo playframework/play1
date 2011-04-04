@@ -1,4 +1,4 @@
-h1. Dependency management
+h1. Dependencies management
 
 Play’s dependency management system allows you to express your application’s external dependencies in a single **dependencies.yml** file. 
 
@@ -274,3 +274,6 @@ repositories:
             - org.drools -> *
 
 
+p(note). **Continuing the discussion**
+
+Next: %(next)"Database evolutions":evolutions%.
