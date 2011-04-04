@@ -118,12 +118,6 @@ def execute(**kargs):
         os.rename(os.path.join(app.path, 'eclipse/test.launch'), os.path.join(app.path, 'eclipse/Test %s.launch' % application_name))
         os.rename(os.path.join(app.path, 'eclipse/debug.launch'), os.path.join(app.path, 'eclipse/%s.launch' % application_name))
 
-    # Module-specific modifications
-    for module in modules:
-        commands = os.path.join(module, 'commands.py')
-        if os.path.exists(commands):
-            execfile(commands)
-
     print "~ OK, the application is ready for eclipse"
     print "~ Use File/Import/General/Existing project to import %s into eclipse" % os.path.normpath(app.path)
     print "~"
