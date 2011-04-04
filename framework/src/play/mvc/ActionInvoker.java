@@ -255,6 +255,25 @@ public class ActionInvoker {
         }
     }
 
+    private static boolean isActionMethod(Method method) {
+        if (method.isAnnotationPresent(Before.class)) {
+            return false;
+        }
+        if (method.isAnnotationPresent(After.class)) {
+            return false;
+        }
+        if (method.isAnnotationPresent(Finally.class)) {
+            return false;
+        }
+        if (method.isAnnotationPresent(Catch.class)) {
+            return false;
+        }
+        if (method.isAnnotationPresent(Util.class)) {
+            return false;
+        }
+        return true;
+    }
+
     private static void handleBefores(Http.Request request) throws Exception {
         List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);
         Collections.sort(befores, new Comparator<Method>() {
@@ -350,10 +369,10 @@ public class ActionInvoker {
 
         if (Controller.getControllerClass() == null) {
             //skip it
-            return ;
+            return;
         }
 
-        try{
+        try {
             List<Method> allFinally = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Finally.class);
             Collections.sort(allFinally, new Comparator<Method>() {
 
@@ -393,7 +412,7 @@ public class ActionInvoker {
 
                     //check if method accepts Throwable as only parameter
                     Class[] parameterTypes = aFinally.getParameterTypes();
-                    if( parameterTypes.length == 1 && parameterTypes[0] == Throwable.class ){
+                    if (parameterTypes.length == 1 && parameterTypes[0] == Throwable.class) {
                         //invoking @Finally method with caughtException as parameter
                         invokeControllerMethod(aFinally, new Object[]{caughtException});
                     } else {
@@ -471,7 +490,11 @@ public class ActionInvoker {
     }
 
     static Object invoke(Method method, Object instance, Object[] realArgs) throws Exception {
-        return invokeWithContinuation(method, instance, realArgs);
+        if(isActionMethod(method)) {
+            return invokeWithContinuation(method, instance, realArgs);
+        } else {
+            return method.invoke(instance, realArgs);
+        }
     }
     static final String C = "__continuation";
     static final String A = "__callback";

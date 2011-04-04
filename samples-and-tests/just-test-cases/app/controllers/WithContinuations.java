@@ -12,6 +12,12 @@ import java.util.concurrent.atomic.*;
 import models.*;
 
 public class WithContinuations extends Controller {
+    
+    @Before
+    static void intercept() {
+        // just to check
+        Logger.info("Before continuation");
+    }
 
     public static void loopWithWait() {
         StringBuilder sb = new StringBuilder();
