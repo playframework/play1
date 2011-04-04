@@ -76,7 +76,7 @@ public class Evolutions extends PlayPlugin {
             checkEvolutionsState();
         } catch (InconsistentDatabase e) {
             System.out.println("~");
-            System.out.println("~ Your database is an inconsistent state!");
+            System.out.println("~ Your database is in an inconsistent state!");
             System.out.println("~");
             System.out.println("~ While applying this script part:");
             System.out.println("");
@@ -511,12 +511,12 @@ public class Evolutions extends PlayPlugin {
 
         @Override
         public String getErrorTitle() {
-            return "Your database is an inconsistent state!";
+            return "Your database is in an inconsistent state!";
         }
 
         @Override
         public String getErrorDescription() {
-            return "An evolution has not been applied properly. Please check the problem and resolve it manually before making it as resolved.";
+            return "An evolution has not been applied properly. Please check the problem and resolve it manually before marking it as resolved.";
         }
 
         @Override
