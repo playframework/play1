@@ -117,4 +117,4 @@ Calling @now()@ on a Job returns a @Promise@ value that you can use to retrieve 
 
 p(note). **Continuing the discussion**
 
-Let's see how to combine Jobs with more powerfull %(next)"Asynchronous programming with HTTP":asynchronous%.
+Let's see how to combine Jobs with more powerful %(next)"Asynchronous programming with HTTP":asynchronous%.

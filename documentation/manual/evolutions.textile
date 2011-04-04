@@ -1,10 +1,10 @@
 h1. Managing database evolutions
 
-When you use a relational database, you need a way to track and organize your database schema evolutions. Typically there are several situation where you need a more sophisticated way to track your database schema changes:
+When you use a relational database, you need a way to track and organize your database schema evolutions. Typically there are several situations where you need a more sophisticated way to track your database schema changes:
 
-* When you work within a team of developer, each person need to know about any schema change.
+* When you work within a team of developers, each person needs to know about any schema change.
 * When you deploy on a production server, you need to have a robust way to upgrade your database schema.
-* If you work on several machines, you need to keep all database schema synchronized.
+* If you work on several machines, you need to keep all database schemas synchronized.
 
 p(note). If you work with JPA, Hibernate can handle database evolutions for you automatically. Evolutions are useful if you don't use JPA or if you prefer to manually take care of your database schema for finer tuning. 
 
@@ -16,10 +16,10 @@ The first script is named **1.sql**, the second script **2.sql**, and so on…
 
 Each script contains two parts:
 
-* The *Ups* part the describe the required transformations.
-* The *Downs* part that describe how to revert them.
+* The *Ups* part the describes the required transformations.
+* The *Downs* part that describes how to revert them.
 
-For example, take a look at this first evolution script that bootstrap a basic application:
+For example, take a look at this first evolution script that bootstraps a basic application:
 
 bc. # Users schema
  
@@ -40,7 +40,7 @@ DROP TABLE User;
 
 As you see you have to delimitate the both *Ups* and *Downs* section by using comments in your SQL script.
 
-When **evolutions** are activated, Play will check your database schema state before each request in DEV mode, or before starting the application in PROD mode. In DEV mode, if you database schema is not up to date, an error page will propose you to synchronize you database schema by running the appropriate SQL script.
+When **evolutions** are activated, Play will check your database schema state before each request in DEV mode, or before starting the application in PROD mode. In DEV mode, if you database schema is not up to date, an error page will propose you to synchronize your database schema by running the appropriate SQL script.
 
 !images/evolutions!
 
@@ -50,7 +50,7 @@ p(note). If you use an in-memory database (*db=mem*), Play will automatically ru
 
 h2. Synchronizing concurrent changes
 
-Now let's imagine that we have two developers working on this project. Developer A will work on a feature that require a new database table. So it will create the following **2.sql** evolution script:
+Now let's imagine that we have two developers working on this project. Developer A will work on a feature that require a new database table. So he will create the following **2.sql** evolution script:
 
 bc. # Add Post
  
@@ -70,7 +70,7 @@ DROP TABLE Post;
 
 And Play apply it to his database.
 
-On the other hand, developer B will work on a feature that require to alter the User table. So it will also create the following **2.sql** evolution script:
+On the other hand, developer B will work on a feature that requires to alter the User table. So it will also create the following **2.sql** evolution script:
 
 bc. # Update User
  
@@ -80,7 +80,7 @@ ALTER TABLE User ADD age INT;
 # --- !Downs
 ALTER TABLE User DROP age;
 
-Developer B finishes his feature and commit (let's say they are using Git). Now developer A has to merge the work of his colleague before continuing, so it run **git pull**, and the merge has a conflict, like:
+Developer B finishes his feature and commit (let's say they are using Git). Now developer A has to merge the work of his colleague before continuing, so he runs **git pull**, and the merge has a conflict, like:
 
 bc. Auto-merging db/evolutions/2.sql
 CONFLICT (add/add): Merge conflict in db/evolutions/2.sql
@@ -144,7 +144,7 @@ So Play will detect it and ask developer A to synchronize its database by first 
 
 h2. Inconsistent states
 
-Sometimes you will make some mistake in your evolution scripts, and they will fail. In this case, Play will mark your database schema in an inconsistent state and will ask you to manually resolve the problem before continuing.
+Sometimes you will make some mistakes in your evolution scripts, and they will fail. In this case, Play will mark your database schema in an inconsistent state and will ask you to manually resolve the problem before continuing.
 
 For example, the **Ups** script of this evolution has an error:
 
@@ -166,7 +166,7 @@ bc. ALTER TABLE User ADD company varchar(255);
 
 And then mark this problem as manually resolved by clicking on the button.
 
-But because you evolution script has error, you probably want to fix it. So you modify the **3.sql** script:
+But because your evolution script has errors, you probably want to fix it. So you modify the **3.sql** script:
 
 bc. # Add another column to User
   
@@ -176,7 +176,7 @@ ALTER TABLE User ADD company varchar(255);
 # --- !Downs
 ALTER TABLE User DROP company;
 
-Play detects this new evolution that replace the previous *3* one, and will run the following script:
+Play detects this new evolution that replaces the previous *3* one, and will run the following script:
 
 !images/evolutions-resolve!
 
@@ -228,7 +228,7 @@ Exception in thread "main" play.db.Evolutions$InvalidDatabaseRevision
 	at play.Play.init(Play.java:298)
 	at play.server.Server.main(Server.java:141)
 
-The error message ask you to run the @play evolutions@ command:
+The error message asks you to run the @play evolutions@ command:
 
 bc. $ play evolutions
 ~        _            _ 
@@ -281,15 +281,15 @@ ALTER TABLE User ADD company varchar(255);
 ~ or apply it yourself and mark it done using `play evolutions:markApplied`
 ~
 
-If you want that Play automatically run this evolution for you, then run:
+If you want Play to automatically run this evolution for you, then run:
 
 bc. $ play evolutions:apply
 
-If you prefer running this script manually on your production database, you need to tell Play that you database is up to date by running:
+If you prefer running this script manually on your production database, you need to tell Play that your database is up to date by running:
 
 bc. $ play evolutions:markApplied
 
-If there are any error while automatically running the evolutions scripts, as in DEV mode, you need to manually resolve them, and mark your database schema a fixed by running:
+If there are any error while automatically running the evolutions scripts, as in DEV mode, you need to manually resolve them, and mark your database schema as fixed by running:
 
 bc. $ play evolutions:resolve
 

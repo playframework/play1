@@ -52,7 +52,7 @@ And using only 1 thread (which is the default in development mode) to process re
 
 h2. HTTP response streaming
 
-Now, because you are able to loop without blocking the request, perhaps you want to send data to the browser as soon you have part of the result available. It is the point of the "Content-Type:Chunked" HTTP response type. It allows to send your HTTP response is several times using multiples chunks. The browser will receive these chunk as soon as they are published.
+Now, because you are able to loop without blocking the request, perhaps you want to send data to the browser as soon you have part of the result available. It is the point of the "Content-Type:Chunked" HTTP response type. It allows to send your HTTP response in several times using multiples chunks. The browser will receive these chunks as soon as they are published.
 
 Using @await(…)@ and continuations, you can now achieve that using:
 
@@ -77,7 +77,7 @@ On the Play side you declare a WS route:
 
 bc. WS   /helloSocket            MyWebSocket.hello
 
-MyWebSocket is a WebSocketController. A WebSocket controller is like a standard HTTP controller but handle different concepts:
+MyWebSocket is a WebSocketController. A WebSocket controller is like a standard HTTP controller but handles different concepts:
 
 * It has a request object, but no response object.
 * It has access to the session but for read only.
@@ -85,9 +85,9 @@ MyWebSocket is a WebSocketController. A WebSocket controller is like a standard 
 * It can read params only from the route pattern or from the QueryString.
 * It has 2 communication channels: inbound and outbound.
 
-When the client connects to the **ws://localhost:9000/helloSocket** socket, Play will invoke the @MyWebSocket.hello@ action method. Once the @MyWebSocket.hello@ action method exit, the socket is closed.
+When the client connects to the **ws://localhost:9000/helloSocket** socket, Play will invoke the @MyWebSocket.hello@ action method. Once the @MyWebSocket.hello@ action method exits, the socket is closed.
 
-So a very basic socket example would be;
+So a very basic socket example would be:
 
 bc. public class MyWebSocket extends WebSocketController {
  
@@ -97,7 +97,7 @@ bc. public class MyWebSocket extends WebSocketController {
  
 }
 
-Here when the client connects to the socket, it receive the 'Hello Guillaume' message, and then Play closes the socket.
+Here when the client connects to the socket, it receives the 'Hello Guillaume' message, and then Play closes the socket.
 
 Of course usually you don't want to close the socket immediately. But it is easy to achieve using @await(…)@ and continuations.
 
@@ -127,7 +127,7 @@ bc. public class MyWebSocket extends WebSocketController {
  
 }
 
-In the previous example, the imbricated 'if' and 'cast' soup was tedious to write and error prone. And here Java sucks. Even for this simple case it is not easy to handle. And for more complicated cases where you combine several streams, and have even more event types, it becomes a nightmare.
+In the above example, the imbricated 'if' and 'cast' soup are tedious to write and error prone. And here Java sucks. Even for this simple case it is not easy to handle. And for more complicated cases where you combine several streams and have even more event types, it becomes a nightmare.
 
 That's why we have introduced a kind of basic pattern matching in Java in the "play.libs.F":libs#FunctionalprogrammingwithJava library.
 

@@ -64,7 +64,7 @@ bc. gbo-mac:~ guillaume$ play list-modules
 ~   Versions: 1.0
 ...
 
-You can install a module locally using the **play install {module}-{version}** command. Installing a module locally allow to use it from several application without having to install a different copy in each application. It is useful for large modules that are more framework extensions than your application extension. 
+You can install a module locally using the **play install {module}-{version}** command. Installing a module locally allows to use it from several applications without having to install a different copy in each application. It is useful for large modules that are more framework extensions than your application extension. 
 
 For example, to install the Scala support to the framework, use:
 
@@ -100,4 +100,4 @@ You can of course use the offical Google Group to provide help and share informa
 
 p(note). **Continuing the discussion**
  
-Learn how efficiently manage your modules using %(next)"Dependencies management":dependency%.
+Learn how to efficiently manage your modules using %(next)"Dependencies management":dependency%.
