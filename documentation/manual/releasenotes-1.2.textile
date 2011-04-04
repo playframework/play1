@@ -41,8 +41,7 @@ It was already possible to achieve asynchronism with Play 1.1 using Java Future 
 
 h3. Promises
 
-In Play 1.2 we introduce Promise that is the Play's custom Future type. In fact a @Promise<T>@ is also a @Future<T>@ so you can use it as a standard Future. But it has also a very interesting property: the ability to register callback using @onRedeem(…)@ that will be called as soon as the promised
-value is available. It allows the framework to register itself on them and to reschedule the request invocation as soon as possible.
+In Play 1.2 we introduce Promise that is the Play's custom Future type. In fact a @Promise<T>@ is also a @Future<T>@ so you can use it as a standard Future. But it has also a very interesting property: the ability to register callback using @onRedeem(…)@ that will be called as soon as the promised value is available. It allows the framework to register itself on them and to reschedule the request invocation as soon as possible.
 
 h3. play.libs.F
 
@@ -84,11 +83,11 @@ All these features are used in the new *Chat* sample application that demonstrat
 
 h2. Routes file improvements
 
-The **routes** file now supports a set of new features. You also now safely use *{}* characters in a route path regular expression.
+The **routes** file now supports a set of new features. Also you can now safely use *{* and *}* characters in a route path regular expression.
 
 h3. staticFile: mapping
 
-Like the old **staticDir** mapping, you can now directlt map an URL path to a static file rendering.
+Like the old **staticDir** mapping, you can now directly map an URL path to a static file rendering.
 
 bc. # Serve index.html static file for home requests
 GET     /home                   staticFile:/public/html/index.html
@@ -124,7 +123,7 @@ h2. Invocation context annotations
 
 Play map each invocation (an HTTP request, a WebSocket message, or an asynchonous job execution for example) as an **Invocation**. You can now annotate any invocation with some annotations that can be used by plugins to change the way they handle this particular invocation.
 
-For example, the **JPA Plugin** automatically open a database transacrion for each invocation if a database is configured. Now if you don't need any database connection for a particular invocation, you can annotate it with **@NoTransaction**:
+For example, the **JPA Plugin** automatically open a database transaction for each invocation if a database is configured. Now if you don't need any database connection for a particular invocation, you can annotate it with **@NoTransaction**:
 
 bc. @NoTransaction
 public static void index() {
@@ -143,7 +142,7 @@ The concept of invocation context can be extended to any plugin.
 
 h2. H2 as default in-memory database
 
-You are now using "H2 Database":http://www.h2database.com/ as in-memory database for Play. It is more compatible with production database like MySQL, so you will have less problem during deployment.
+We are now using "H2 Database":http://www.h2database.com/ as in-memory database for Play. It is more compatible with production database like MySQL, so you will have less problem during deployment.
 
 As a nice side effect, H2 provides a Web console, that you can launch using the */@db* url of any Play application using *db=mem* as configuration.
 
@@ -165,11 +164,11 @@ Now surefire reports are generated for any Java test class you run, making it ea
 
 h3. Yaml fixtures
 
-When can now load your fixtures from several yaml files in one time, and even use the template engine markup language in your yaml definitions to add some kind of dynamism.
+You can now load your fixtures from several yaml files in one time, and even use the template engine markup language in your yaml definitions to add some kind of dynamism.
 
 h3. Several test ids
 
-You can now create more than one test configuration, by specifying a framework id that matches *test-**.
+You can also create more than one test configuration, by specifying a framework id that matches *test-**.
 
 h2. Cheat-sheets provided with documentation
 
@@ -181,10 +180,10 @@ h2. Other small features
 
 There are also some small new features as well as "130 fixed bugs":http://play.lighthouseapp.com/projects/57987-play-framework/milestones/current, including:
 
-# New create() and validateAndCreate() methods for JPA model.
-# Added --pid_file=, --http.port=, --https.port= command line options to play 
-# Support for lang-country pair (e.g. en-GB) 
-# Binding of Map<String, String>, with multivalues, composites, etc.
-# Ability to create your own CRUD ObjectType.
-# play.lib.WS client now supports Timeout.
-# Session cookies are no longer sent if the session is empty.
+* New create() and validateAndCreate() methods for JPA model.
+* Added --pid_file=, --http.port=, --https.port= command line options to play 
+* Support for lang-country pair (e.g. en-GB) 
+* Binding of Map<String, String>, with multivalues, composites, etc.
+* Ability to create your own CRUD ObjectType.
+* play.lib.WS client now supports Timeout.
+* Session cookies are no longer sent if the session is empty.
