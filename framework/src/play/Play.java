@@ -398,11 +398,16 @@ public class Play {
                 //our plugins that we're going down when some calls ctrl+c or just kills our process..
                 shutdownHookEnabled = true;
 
-                Runtime.getRuntime().addShutdownHook( new Thread() {
-                    public void run(){
-                        Play.stop();
-                    }
-                 });
+                // Try to register shutdown-hook
+                try{
+                    Runtime.getRuntime().addShutdownHook( new Thread() {
+                        public void run(){
+                            Play.stop();
+                        }
+                    });
+                } catch(Exception e) {
+                    Logger.trace("Got error while trying to register JVM-shutdownHook. Probably using GAE");
+                }
             }
 
             if (mode == Mode.DEV) {
