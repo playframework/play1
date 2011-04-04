@@ -1,0 +1,4 @@
+self: play -> %MODULE% 0.1
+
+require:
+    - play
