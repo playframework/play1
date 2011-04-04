@@ -108,13 +108,13 @@ public class DependenciesManager {
             System.out.println("~");
         } else if (!notSync.isEmpty()) {
             System.out.println("~");
-            System.out.println("~ ******************************************************************************************************************************");
+            System.out.println("~ *****************************************************************************");
             System.out.println("~ WARNING: Your lib/ and modules/ directories and not synced with current dependencies (use --sync to automatically delete them)");
             System.out.println("~");
             for (File f : notSync) {
                 System.out.println("~ \tUnknown: " + f.getAbsolutePath());
             }
-            System.out.println("~ ******************************************************************************************************************************");
+            System.out.println("~ *****************************************************************************");
         }
     }
 
@@ -122,13 +122,13 @@ public class DependenciesManager {
         if (logger != null) {
             if (!logger.notFound.isEmpty()) {
                 System.out.println("~");
-                System.out.println("~ ************************************************************************************************************");
+                System.out.println("~ *****************************************************************************");
                 System.out.println("~ WARNING: These dependencies are missing, your application may not work properly (use --verbose for details),");
                 System.out.println("~");
                 for (String d : logger.notFound) {
                     System.out.println("~\t" + d);
                 }
-                System.out.println("~ ************************************************************************************************************");
+                System.out.println("~ *****************************************************************************");
                 return true;
             }
         }
