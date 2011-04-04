@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="%MODULE%" default="build" basedir=".">
+    
+    <target name="check" unless="play.path">
+        <fail message="Please specify Play framework path using -Dplay.path=/path/to/framework/home" />
+    </target>
 
     <path id="project.classpath">
         <pathelement path="${play.path}/framework/classes"/>
@@ -16,7 +20,7 @@
     </path>
 
     <target name="build" depends="compile">
-
+        <mkdir dir="lib" />
         <copy todir="tmp/classes">
             <fileset dir="src">
                 <include name="**/*.properties"/>
@@ -35,7 +39,7 @@
         <delete dir="tmp" />
     </target>
 
-    <target name="compile">
+    <target name="compile" depends="check">
         <mkdir dir="tmp/classes" />
         <javac srcdir="src" destdir="tmp/classes" target="1.5" debug="true">
             <classpath refid="project.classpath" />

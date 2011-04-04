@@ -187,6 +187,7 @@ def new(app, args, play_env):
     replaceAll(os.path.join(app.path, 'build.xml'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'commands.py'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'conf/messages'), r'%MODULE%', application_name)
+    replaceAll(os.path.join(app.path, 'conf/dependencies.yml'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE_LOWERCASE%', string.lower(application_name))
     os.mkdir(os.path.join(app.path, 'app'))
