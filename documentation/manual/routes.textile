@@ -55,6 +55,8 @@ The HTTP method can be any of the valid methods supported by HTTP:
 * **DELETE**
 * **HEAD**
 
+Moreover it supports **WS** as action method to indicate a "WebSocket":asynchronous#UsingWebSockets request.
+
 If you specify * as method, this route will match the HTTP Request for any method.
 
 bc. *   /clients/{id}             Clients.show           

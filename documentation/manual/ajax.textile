@@ -1,7 +1,6 @@
 h1. Ajax in the Play framework
 
-The Play framework allows you to easily perform Ajax requests, and is shipped with "jQuery":http://jquery.com by default.
-This section describes how to effectively use "jQuery":http://jquery.com within the framework.
+The Play framework allows you to easily perform Ajax requests, and is shipped with "jQuery":http://jquery.com by default. This section describes how to effectively use "jQuery":http://jquery.com within the framework.
 
 The Play framework also comes with the handy **jsAction** tag to transparently get a method definition from the controller.
 
@@ -43,3 +42,6 @@ bc. $.post(listAction, function(data) {
   $('#result').html(data);
 });
 
+p(note). **Continuing the discussion**
+ 
+Handle %(next)"Internationalization":i18n%.

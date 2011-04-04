@@ -8,31 +8,183 @@ Migrating from Play 1.1.x is pretty straightforward. There are no changes to the
 
 Some APIs have been removed in Play 1.2, after having been deprecated for a long time, but most of the public API is the same. If you have compilation errors that you don’t know how to solve, ask on the Google group.
 
-# staticFile:
-# Fixtures from several files
-# 404 as action
-# create, validateAndCreate
-# evolutions
-# Invocation context
-# Junit rule
+h2. Dependencies management
+
+"Play’s dependency management system":dependency allows you to express your application’s external dependencies in a single **dependencies.yml** file. 
+
+A Play application can have three kinds of dependencies:
+
+* The Play framework itself, since a Play application always depends on the Play framework.
+* Any Java library, provided as **JAR** file installed in your application’s **lib/** directory.
+* A Play module (in fact an application fragment) installed in your application’s **modules/** directory.
+
+Once you have expressed these dependencies in your application’s **conf/dependencies.yml** file, Play will resolve, download and install all required dependencies.
+
+For example, using this file:
+
+bc. # Application dependencies
+ 
+require:
+    - play
+    - com.google.guava -> guava r07
+    - play -> pdf 0.2
+
+You can run @`play dependencies`@:
+
+!images/dependencies!
+
+Under the hood it is powered by "Apache Ivy":http://ant.apache.org/ivy/, and it supports Maven compatible repositories.
+
+h2. Better asynchronous features
+
+It was already possible to achieve asynchronism with Play 1.1 using Java Future and @waitFor(…)@ and @suspend(.)@ controller methods. However these primitives was not really easy to use. That's why we've worked on a complete set of new coherent features for Play 1.2.
+
+h3. Promises
+
+In Play 1.2 we introduce Promise that is the Play's custom Future type. In fact a @Promise<T>@ is also a @Future<T>@ so you can use it as a standard Future. But it has also a very interesting property: the ability to register callback using @onRedeem(…)@ that will be called as soon as the promised
+value is available. It allows the framework to register itself on them and to reschedule the request invocation as soon as possible.
+
+h3. play.libs.F
+
+The Promise type is part of new library (play.libs.F) that introduces several useful constructs coming from functional programming. We also felt that we needed pattern matching in Java. Unfortunately Java has not built-in pattern matching, and because of the lack of function, it is difficult to add it as a library. Anyway we've worked on a solution that is not so bad.
+
+h3. await(…)
+
+When your application code returns values that are not yet available using a @Promise<T>@, you want to be able to ask Play to wait for this promised result to be available before resuming your request. It allows your code to say explicitly: 
+
+bq. "I'm waiting for a result that will be available later" 
+
+and so the framework to handle it as 
+
+bq. "Ok I will stop your code, reuse the thread to serve other requests, and resume your code as soon as the promised value you wait for is available".
+
+h3. Continuations
+
+Because the framework needs to recover the thread you were using in order to use it to serve other requests, it has to suspend your code. In the previous Play version the @await(…)@ equivalent was @waitFor(…)@. And waitFor was suspending your action, and then recalling it later from the beginning.
+
+To make it easier to deal with asynchronous code in Play 1.2 we have introduced continuations. Continuations allow your code to be suspended and resumed transparently.
+
+h3. Response streaming
+
+Because you are able to loop without blocking the request, perhaps you want to send data to the browser as soon you have part of the result available. It is the point of the "Content-Type:Chunked" HTTP response type. It allows to send your HTTP response is several times using multiples chunks. The browser will receive these chunk as soon as they are published.
+
+h3. WebSockets
+
+WebSockets are a way to open a 2 way communication channel between a browser and your application. It is now supported by your Play application.
+
+h3. New Chat sample application
+
+!images/chat-websocket!
+
+All these features are used in the new *Chat* sample application that demonstrate how to achieve a standard chat application using 3 differents way:
+
+* Active refresh
+* Ajax will long polling
+* WebSockets
+
+h2. Routes file improvements
+
+The **routes** file now supports a set of new features. You also now safely use *{}* characters in a route path regular expression.
+
+h3. staticFile: mapping
+
+Like the old **staticDir** mapping, you can now directlt map an URL path to a static file rendering.
+
+bc. # Serve index.html static file for home requests
+GET     /home                   staticFile:/public/html/index.html
+
+h3. 404 as action
+
+You can now use directly *404* as route action to mark an URL path that must be ignored by your application. For example:
+
+bc. # Ignore favicon requests
+GET     /favicon.ico            404
+
+h3. WS method
+
+The new **WS** method allows to declare a route that is mapped to a WebSocket.
+
+bc. # A WebSocket
+WS    /chat/messages            Chat.messages
+
+You can use the **@@{Chat.messages()}** notation to generate the reverse URL, as:
+
+bc. ws://localhost:9000/chat/messages
+
+
+h2. Database evolutions
+
+When you use a relational database, you need a way to track and organize your database schema evolutions. Play evolutions automatically track these changes and update your schema. 
+
+!images/evolutions!
+
+It also resolve conflicts occuring when several developers work on the same application.
+
+h2. Invocation context annotations
+
+Play map each invocation (an HTTP request, a WebSocket message, or an asynchonous job execution for example) as an **Invocation**. You can now annotate any invocation with some annotations that can be used by plugins to change the way they handle this particular invocation.
+
+For example, the **JPA Plugin** automatically open a database transacrion for each invocation if a database is configured. Now if you don't need any database connection for a particular invocation, you can annotate it with **@NoTransaction**:
+
+bc. @NoTransaction
+public static void index() {
+    render();
+}
+
+Another annotation allow to ask a read only transaction for a particular invocation;
+
+bc. @Transactional(readOnly=true)
+public static show(Long id) {
+    Post post = Post.findById(id);
+    render(post);
+}
+
+The concept of invocation context can be extended to any plugin.
+
+h2. H2 as default in-memory database
+
+You are now using "H2 Database":http://www.h2database.com/ as in-memory database for Play. It is more compatible with production database like MySQL, so you will have less problem during deployment.
+
+As a nice side effect, H2 provides a Web console, that you can launch using the */@db* url of any Play application using *db=mem* as configuration.
+
+!images/h2console!
+
+h2. Test-runner updates
+
+There are several update concerning the test-runner.
+
+h3. Run your JUnit based test from any JUnit test runner
+
+You can now run you Java test cases directly from any existing JUnit test runner, like the one provided in eclipse.
+
+!images/eclipse-test-runner!
+
+h3. Surefire reports
+
+Now surefire reports are generated for any Java test class you run, making it easier to integrate it with other continuous integration softwares.
+
+h3. Yaml fixtures
+
+When can now load your fixtures from several yaml files in one time, and even use the template engine markup language in your yaml definitions to add some kind of dynamism.
+
+h3. Several test ids
+
+You can now create more than one test configuration, by specifying a framework id that matches *test-**.
+
+h2. Cheat-sheets provided with documentation
+
+The Play documentation now includes several Cheat sheets, for quick reference to the common Play functions. They can be easily printed.
+
+!images/cheatsheet!
+
+h2. Other small features
+
+There are also some small new features as well as "130 fixed bugs":http://play.lighthouseapp.com/projects/57987-play-framework/milestones/current, including:
+
+# New create() and validateAndCreate() methods for JPA model.
 # Added --pid_file=, --http.port=, --https.port= command line options to play 
-# Support lang-country pair (e.g. en-GB) 
-# Bind Map<String, String>, multivalues, composites... 
-# CRUD ObjectType
-# Surefire report for Java tests
-# Allow {_} to be used instead of {(.*)} in host part 
-# WS Timeout
-# {} in route regex
-# Dependencies
-# H2 + @db
-# Fixtures refactoring
-# play.libs.F
-# Cheatsheets + Doc
-# Chunked response
-# await / Continuations
-# Websockets
-# Templates for fixtures
-# servlet?foo&bar&baz
-# test ids
-# Cookies
-# application.baseUrl
+# Support for lang-country pair (e.g. en-GB) 
+# Binding of Map<String, String>, with multivalues, composites, etc.
+# Ability to create your own CRUD ObjectType.
+# play.lib.WS client now supports Timeout.
+# Session cookies are no longer sent if the session is empty.

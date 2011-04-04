@@ -265,3 +265,6 @@ bc. GET   /                     Application.index
 GET   /login                Application.login
 *     /authenticate         Application.authenticate
 
+p(note). **Continuing the discussion**
+ 
+Now we’ll check how to perform operations outside any HTTP request using %(next)"Ansynchronous Jobs":jobs%.

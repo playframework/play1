@@ -232,4 +232,4 @@ bc. for(Post p : Post.<Post>findAll()) {
 
 p(note). **Continuing the discussion**
 
-Now we’ll check how to configure %(next)"Logging":logs%.
+Now we’ll check some %(next)"Play libraries":libs%.

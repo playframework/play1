@@ -107,4 +107,4 @@ memcached.2.host=127.0.0.1:11212
 
 p(note). **Continuing the discussion**
  
-Now we’ll check how to perform operations outside any HTTP request using %(next)"Jobs":jobs%.
+Learn about %(next)"Sending emails":emails%.

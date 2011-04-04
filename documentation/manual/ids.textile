@@ -49,4 +49,4 @@ bc. play run --%test
 
 p(note). **Continuing the discussion**
  
-Now we shall move on to %(next)"Testing the application":test%.
+Now we shall move on to %(next)"Production deployment":production%.
