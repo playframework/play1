@@ -100,4 +100,4 @@ You can of course use the offical Google Group to provide help and share informa
 
 p(note). **Continuing the discussion**
  
-Learn how efficiently manage your modules using %(next)"Dependency management":dependency%.
+Learn how to efficiently manage your modules using %(next)"Dependency management":dependency%.

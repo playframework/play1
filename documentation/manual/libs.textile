@@ -93,7 +93,7 @@ Promise p = Promise.waitEither(p1, p2, p3)
 
 h3. Pattern Matching
 
-Sometimes we feel that we need pattern matching in Java. Unfortunately Java does not have built-in pattern matching, and because of the lack of functional constructs, it is difficult to add it as a library. Anyway we’ve worked on a solution that is not so bad.
+Several times we've felt that we needed pattern matching in Java. Unfortunately Java does not have built-in pattern matching, and because of the lack of functional constructs, it is difficult to add it as a library. Anyway we’ve worked on a solution that is not so bad.
 
 Our idea was to use the latest ‘for loop’ syntax to achieve basic pattern matching for Java. Pattern matching must both check if your object matches the required conditions and extract the interesting value. The Pattern matching library for Play is part of the @play.libs.F@ library.
 
@@ -194,7 +194,7 @@ bc. public static void auth() {
     FACEBOOK.requestAccessToken(); // This will trigger a redirect
 }
 
-Once you have the access token associated to the current user, you can use it to query the service on behalf of the user:
+Once you have the access token associated with the current user, you can use it to query the service on behalf of the user:
 
 bc. WS.url(
     "https://graph.facebook.com/me?access_token=%s", access_token
