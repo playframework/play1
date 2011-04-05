@@ -55,9 +55,9 @@ The HTTP method can be any of the valid methods supported by HTTP:
 * **DELETE**
 * **HEAD**
 
-Moreover it supports **WS** as action method to indicate a "WebSocket":asynchronous#UsingWebSockets request.
+It also supports **WS** as action method to indicate a "WebSocket":asynchronous#UsingWebSockets request.
 
-If you specify * as method, this route will match the HTTP Request for any method.
+If you specify @*@ as the method, this route will match the HTTP Request for any method.
 
 bc. *   /clients/{id}             Clients.show           
 
@@ -124,6 +124,13 @@ You can add a Java package before the Controller class name if it isn’t define
 
 bc. GET    /admin             admin.Dashboard.index           
 
+h3. 404 as action
+
+You can also directly use @404@ as a route action to mark a URL path that must be ignored by your application. For example:
+
+bc. # Ignore favicon requests
+GET     /favicon.ico            404
+
 h3. Assign static args
 
 In some cases, you want to reuse an existing action but define a more specific route based on the values of some of the arguments.
@@ -177,15 +184,24 @@ will be intercepted by the first route and will call Clients.listAll (even if th
 
 h2. <a name="static">Serving static resources</a>
 
+h3. staticDir: mapping
+
 Use the special action **staticDir**, to point to each folder you wish to publish as a static resources container.
 
 For example:
 
 bc. GET    /public/           staticDir:public
 
-When supplied with a request for a /public/* path, Play will serve your files from the application /public folder.
+When supplied with a request for a @/public/*@ path, Play will serve your files from the application /public folder.
 
-Priorities are applied as for a standard route.
+Priorities are applied as for standard routes.
+
+h3. staticFile: mapping
+
+You can also directly map a URL path to a static file rendering.
+
+bc. # Serve index.html static file for home requests
+GET     /home                   staticFile:/public/html/index.html
 
 
 h2. <a name="reverse">Reverse routing: generate some URL</a>

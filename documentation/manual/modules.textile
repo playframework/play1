@@ -17,7 +17,7 @@ You can create a module with the **play new-module** command.
 
 h2. <a name="loading">How to load a module from an application</a>
 
-Modules are automatically loaded from the */modules* directory of the application. You can use the "dependencies management system":dependency to automatically manage your application modules.
+Modules are automatically loaded from the */modules* directory of the application. You can use the "dependency management system":dependency to automatically manage your application modules.
 
 h2. <a name="routes">Load default routes from modules</a>
 
@@ -64,9 +64,9 @@ bc. gbo-mac:~ guillaume$ play list-modules
 ~   Versions: 1.0
 ...
 
-You can install a module locally using the **play install {module}-{version}** command. Installing a module locally allow to use it from several application without having to install a different copy in each application. It is useful for large modules that are more framework extensions than your application extension. 
+You can install a module locally using the **play install {module}-{version}** command. Installing a module locally allows you to use it from several application without having to install a different copy in each application. It is useful for large modules that are more like framework extensions than extensions to your application.
 
-For example, to install the Scala support to the framework, use:
+For example, to install Scala support in the framework, use:
 
 bc. play install scala-head
 
@@ -87,7 +87,7 @@ First you need to have an OpenID. It will help us to authenticate you as author 
 Please tell us:
 
 * More about your module. What is it?
-* Your module name. It must match the [a-zA-Z]+ regular expression.
+* Your module name. It must match the @[a-zA-Z]+@ regular expression.
 * A short description of the module.
 * Your project home page.
 * Your OpenID.
@@ -100,4 +100,4 @@ You can of course use the offical Google Group to provide help and share informa
 
 p(note). **Continuing the discussion**
  
-Learn how efficiently manage your modules using %(next)"Dependencies management":dependency%.
+Learn how efficiently manage your modules using %(next)"Dependency management":dependency%.

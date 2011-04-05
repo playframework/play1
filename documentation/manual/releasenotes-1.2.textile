@@ -94,14 +94,14 @@ The **routes** file now supports a set of new features. Also you can now safely 
 
 h3. staticFile: mapping
 
-Like the old **staticDir** mapping, you can now directly map an URL path to a static file rendering.
+Like the old **staticDir** mapping, you can now directly map a URL path to a static file rendering.
 
 bc. # Serve index.html static file for home requests
 GET     /home                   staticFile:/public/html/index.html
 
 h3. 404 as action
 
-You can now use directly *404* as route action to mark an URL path that must be ignored by your application. For example:
+You can now directly use @404@ as a route action to mark a URL path that must be ignored by your application. For example:
 
 bc. # Ignore favicon requests
 GET     /favicon.ico            404
@@ -179,7 +179,7 @@ You can also create more than one test configuration, by specifying a framework 
 
 h2. Cheat-sheets provided with documentation
 
-The Play documentation now includes several Cheat sheets, for quick reference to the common Play functions. They can be easily printed.
+The Play documentation now includes several Cheat sheets that provide a quick reference for the common Play functions. They can be easily printed.
 
 !images/cheatsheet!
 
@@ -191,6 +191,6 @@ There are also some small new features as well as "130 fixed bugs":http://play.l
 * Added @--pid_file=@, @--http.port=@, @--https.port=@ command line options to the @play@ command.
 * Support for lang-country pair (e.g. en-GB) 
 * Binding of @Map<String, String>@, with multivalues, composites, etc.
-* Ability to create your own CRUD ObjectType.
+* Ability to create your own CRUD @ObjectType@.
 * play.lib.WS client now supports Timeout.
 * Session cookies are no longer sent if the session is empty.
