@@ -147,7 +147,7 @@ And then:
 bc. @Before
 public void setUp() {
     Fixtures.deleteAll();
-    Fixtures.load("data.yml");
+    Fixtures.loadModels("data.yml");
 }
 
 p(note). You can read more about Play and YAML in the "YAML manual page":yaml.
@@ -164,7 +164,7 @@ bc. #{fixture delete:'all', load:'data.yml' /}
 
 Sometimes it is convenient to split data into several YAML files. You can load fixtures from multiple files at once:
 
-bc. Fixtures.load("users.yml", "roles.yml", "permissions.yml");
+bc. Fixtures.loadModels("users.yml", "roles.yml", "permissions.yml");
 
 and for Selenium tests:
 
