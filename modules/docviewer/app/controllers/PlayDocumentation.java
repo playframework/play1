@@ -74,8 +74,11 @@ public class PlayDocumentation extends Controller {
         renderBinary(image);
     }
     
-    public static void file(String name) {
+    public static void file(String name, String module) {
         File file = new File(Play.frameworkPath, "documentation/files/"+name);
+        if(module != null) {
+             file = new File(Play.modules.get(module).getRealFile(),"documentation/files/"+name);
+        }
         if(!file.exists()) {
             notFound();
         }

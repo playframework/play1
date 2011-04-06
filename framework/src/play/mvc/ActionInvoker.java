@@ -35,10 +35,12 @@ import play.utils.Utils;
 
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
+import java.util.Stack;
 import java.util.concurrent.Future;
 import org.apache.commons.javaflow.Continuation;
 import org.apache.commons.javaflow.bytecode.StackRecorder;
 import play.Invoker.Suspend;
+import play.classloading.enhancers.ControllersEnhancer;
 import play.mvc.results.NotFound;
 
 /**
@@ -61,6 +63,8 @@ public class ActionInvoker {
         Scope.RouteArgs.current.set(new Scope.RouteArgs());
         Scope.Session.current.set(Scope.Session.restore());
         Scope.Flash.current.set(Scope.Flash.restore());
+
+        ControllersEnhancer.currentAction.set(new Stack<String>());
 
         if (request.resolved) {
             return;
