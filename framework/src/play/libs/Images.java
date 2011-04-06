@@ -43,12 +43,27 @@ public class Images {
      * @param h The new height (or -1 to proportionally resize)
      */
     public static void resize(File originalImage, File to, int w, int h) {
+      resize(originalImage, to, w, h, false);
+    }
+    
+    /**
+     * Resize an image
+     * @param originalImage The image file
+     * @param to The destination file
+     * @param w The new width (or -1 to proportionally resize) or the maxWidth if keepRatio is true
+     * @param h The new height (or -1 to proportionally resize) or the maxHeight if keepRatio is true
+     * @param keepRatio : if true, resize will keep the original image ratio and use w and h as max dimensions
+     */
+    public static void resize(File originalImage, File to, int w, int h, boolean keepRatio) {
         try {
             BufferedImage source = ImageIO.read(originalImage);
             int owidth = source.getWidth();
             int oheight = source.getHeight();
             double ratio = (double) owidth / oheight;
-
+            
+            int maxWidth = w;
+            int maxHeight = h;
+            
             if (w < 0 && h < 0) {
                 w = owidth;
                 h = oheight;
@@ -58,6 +73,18 @@ public class Images {
             }
             if (w > 0 && h < 0) {
                 h = (int) (w / ratio);
+            }
+            
+            if(keepRatio) {
+                h = (int) (w / ratio);
+                if(h > maxHeight) {
+                    h = maxHeight;
+                    w = (int) (w * ratio);
+                }
+                if(w > maxWidth) {
+                    w = maxWidth;
+                    h = (int) (w / ratio);
+                }
             }
 
             String mimeType = "image/jpeg";
