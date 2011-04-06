@@ -11,5 +11,6 @@ import java.lang.annotation.Target;
 @Target(value={ElementType.METHOD,ElementType.TYPE})
 public @interface Transactional {
     public boolean readOnly() default false;
+    public boolean autoCommit() default false;
 }
 

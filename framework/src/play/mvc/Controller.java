@@ -920,7 +920,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             StackRecorder.get().value = null;
             future = (Future<T>)Request.current().args.get(ActionInvoker.F);
         } else {
-            throw new UnexpectedException("Lost future for " + Http.Request.current() + "!");
+            throw new UnexpectedException("Lost promise for " + Http.Request.current() + "!");
         }
         
         if(future.isDone()) {

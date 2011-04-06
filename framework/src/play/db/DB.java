@@ -102,7 +102,7 @@ public class DB {
                 if (close != null) {
                     close.invoke(DB.datasource, new Object[] {});
                     DB.datasource = null;
-                    Logger.info("Datasource destroyed");
+                    Logger.trace("Datasource destroyed");
                 }
             }
         } catch (Throwable t) {

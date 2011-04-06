@@ -8,6 +8,7 @@ import java.util.*;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
+import play.db.jpa.Transactional;
 import play.libs.IO;
 import play.libs.Mail;
 import play.mvc.*;
@@ -43,6 +44,7 @@ public class TestRunner extends Controller {
         renderText(list);
     }
 
+    @Transactional(autoCommit=true)
     public static void run(String test) throws Exception {
         if (test.equals("init")) {
             File testResults = Play.getFile("test-result");
