@@ -1,5 +1,6 @@
 package play.test;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -34,6 +35,7 @@ import play.db.DBPlugin;
 import play.db.Model;
 import play.exceptions.UnexpectedException;
 import play.exceptions.YAMLException;
+import play.libs.IO;
 import play.templates.TemplateLoader;
 import play.vfs.VirtualFile;
 
@@ -41,6 +43,18 @@ public class Fixtures {
 
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
     static Map<String, Object> idCache = new HashMap<String, Object>();
+
+    public static void executeSQL(String sqlScript) {
+        for(String sql: sqlScript.split(";")) {
+            if(sql.trim().length() > 0) {
+                DB.execute(sql);
+            }
+        }
+    }
+
+    public static void executeSQL(File sqlScript) {
+        executeSQL(IO.readContentAsString(sqlScript));
+    }
 
     /**
      * Delete all Model instances for the given types using the underlying persistance mechanisms
