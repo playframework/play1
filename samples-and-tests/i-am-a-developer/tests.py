@@ -29,6 +29,7 @@ class IamADeveloper(unittest.TestCase):
         self.assert_(waitFor(self.play, 'The new application will be created'))
         self.assert_(waitFor(self.play, 'OK, the application is created'))
         self.assert_(waitFor(self.play, 'Have fun!'))
+        
         self.play.wait()
     
         app = '%s/loglevelsapp' % self.working_directory
@@ -509,8 +510,6 @@ class IamADeveloper(unittest.TestCase):
         except urllib2.HTTPError, error:
             self.assert_(browser.viewing_html())
             self.assert_(browser.title() == 'Not found')
-            html = ''.join(error.readlines())
-            self.assert_(html.count('GET /hello'))
         
         # Create the new controller
         step('Create the new controller')
@@ -663,9 +662,12 @@ def waitForWithFail(process, pattern, failPattern):
     timer.start()
     while True:
         line = process.stdout.readline().strip()
+        #print timeoutOccured
+        if timeoutOccured:
+            return False
         if line == '@KILLED':
             return False
-        print line
+        if line: print line
         if failPattern != "" and line.count(failPattern):
             timer.cancel()
             return False
@@ -673,9 +675,13 @@ def waitForWithFail(process, pattern, failPattern):
             timer.cancel()
             return True
 
+timeoutOccured = False
+
 def timeout(process):
+    global timeoutOccured 
     print '@@@@ TIMEOUT !'
     killPlay()
+    timeoutOccured = True
 
 def killPlay():
     try:
