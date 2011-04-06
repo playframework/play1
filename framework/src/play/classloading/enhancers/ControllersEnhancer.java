@@ -4,6 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Stack;
 import javassist.CannotCompileException;
 import javassist.CtClass;
 import javassist.CtField;
@@ -22,6 +23,8 @@ import play.exceptions.UnexpectedException;
  * Enhance controllers classes. 
  */
 public class ControllersEnhancer extends Enhancer {
+
+    public static ThreadLocal<Stack<String>> currentAction = new ThreadLocal<Stack<String>>();
 
     @Override
     public void enhanceThisClass(final ApplicationClass applicationClass) throws Exception {
@@ -88,6 +91,13 @@ public class ControllersEnhancer extends Enhancer {
                                 + "play.mvc.Controller.redirect(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\", $args);"
                                 + generateValidReturnStatement(ctMethod.getReturnType())
                                 + "}");
+
+                        ctMethod.insertBefore(
+                                "((java.util.Stack)play.classloading.enhancers.ControllersEnhancer.currentAction.get()).push(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\");");
+
+                        ctMethod.insertAfter(
+                                "((java.util.Stack)play.classloading.enhancers.ControllersEnhancer.currentAction.get()).pop();", true);
+
                     } catch (Exception e) {
                         Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (auto-reverse).", applicationClass.name, ctMethod.getName());
                         throw new UnexpectedException(e);
@@ -104,6 +114,7 @@ public class ControllersEnhancer extends Enhancer {
                                 + "play.mvc.Controller.redirect(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\", $args);"
                                 + generateValidReturnStatement(ctMethod.getReturnType()) + "}"
                                 + "play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.stopActionCall();");
+
                     } catch (Exception e) {
                         Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (auto-redirect).", applicationClass.name, ctMethod.getName());
                         throw new UnexpectedException(e);

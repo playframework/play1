@@ -355,7 +355,7 @@ public class JPAPlugin extends PlayPlugin {
         }
         EntityManager manager = JPA.get().entityManager;
         try {
-            if (autoTxs && JPA.get().autoCommit == false) {
+            if (autoTxs) {
                 if (manager.getTransaction().isActive()) {
                     if (JPA.get().readonly || rollback || manager.getTransaction().getRollbackOnly()) {
                         manager.getTransaction().rollback();
