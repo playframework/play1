@@ -300,11 +300,13 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         boolean readOnly = false;
+        boolean autoCommit = false;
         Transactional tx = InvocationContext.current().getAnnotation(Transactional.class);
         if (tx != null) {
             readOnly = tx.readOnly();
+            autoCommit = tx.autoCommit();
         }
-        startTx(readOnly);
+        startTx(readOnly, autoCommit);
     }
 
     @Override
@@ -326,8 +328,9 @@ public class JPAPlugin extends PlayPlugin {
      * initialize the JPA context and starts a JPA transaction
      * 
      * @param readonly true for a readonly transaction
+     * @param autoCommit true to automatically commit the DB transaction after each JPA statement
      */
-    public static void startTx(boolean readonly) {
+    public static void startTx(boolean readonly, boolean autoCommit) {
         if (!JPA.isEnabled()) {
             return;
         }
@@ -339,7 +342,7 @@ public class JPAPlugin extends PlayPlugin {
         if (autoTxs) {
             manager.getTransaction().begin();
         }
-        JPA.createContext(manager, readonly);
+        JPA.createContext(manager, readonly, autoCommit);
     }
 
     /**

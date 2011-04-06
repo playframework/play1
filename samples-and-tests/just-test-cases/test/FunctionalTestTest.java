@@ -7,20 +7,21 @@ import controllers.*;
 public class FunctionalTestTest extends FunctionalTest {
     
     @org.junit.Before
-    public void setUp() {
-        Fixtures.deleteAll();
+    public void setUp() throws Exception {
+        Fixtures.deleteDatabase();
+        Fixtures.loadModels("users.yml");
     }
     
     @Test
     public void testAndCall() {
-        assertEquals(0, User.count());
+        assertEquals(2, User.count());
         URL url = reverse(); {
             controllers.Users.newUser("Guillaume");
         }
-        Response response = GET(url);
+        Response response = POST(url);
         assertIsOk(response);
         assertContentEquals("Created user with name Guillaume", response);
-        assertEquals(1, User.count());
+        assertEquals(3, User.count());
         User guillaume = User.find("byName", "Guillaume").first();
         assertNotNull(guillaume);
         assertEquals("Guillaume", guillaume.name);
@@ -32,6 +33,32 @@ public class FunctionalTestTest extends FunctionalTest {
         assertIsOk(response);
         response = GET("/jpacontroller/show");
         assertIsOk(response);
+    }
+    
+    @Test
+    public void usingTransaction() {
+        Response response = GET("/users/list");
+        assertIsOk(response);
+        assertContentEquals("2", response);
+    }
+    
+    @Test
+    public void usingTransaction2() {
+        new User("Bob").create();
+        Response response = GET("/users/list");
+        assertIsOk(response);
+        assertContentEquals("3", response);
+        User bob = User.find("byName", "Bob").first();
+        assertNotNull(bob);
+    }
+    
+    @Test
+    public void usingTransaction3() {
+        Response response = POST("/users/newUser?name=Kiki");
+        assertIsOk(response);
+        assertEquals(3, User.count());
+        User kiki = User.find("byName", "Kiki").first();
+        assertNotNull(kiki);
     }
     
     public static class AnotherInnerTest extends UnitTest {

@@ -3,8 +3,10 @@ package play.db.jpa;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import play.db.DB;
 
 import play.exceptions.JPAException;
+import play.exceptions.UnexpectedException;
 
 /**
  * JPA Support
@@ -15,6 +17,7 @@ public class JPA {
     public static ThreadLocal<JPA> local = new ThreadLocal<JPA>();
     public EntityManager entityManager;
     boolean readonly = true;
+    boolean autoCommit = false;
 
     static JPA get() {
         if (local.get() == null) {
@@ -27,11 +30,11 @@ public class JPA {
         local.remove();
     }
 
-    static void createContext(EntityManager entityManager, boolean readonly) {
+    static void createContext(EntityManager entityManager, boolean readonly, boolean autoCommit) {
         if (local.get() != null) {
             try {
                 local.get().entityManager.close();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 // Let's it fail
             }
             local.remove();
@@ -39,21 +42,27 @@ public class JPA {
         JPA context = new JPA();
         context.entityManager = entityManager;
         context.readonly = readonly;
+        context.autoCommit = autoCommit;
         local.set(context);
+
+        try {
+            DB.getConnection().setAutoCommit(autoCommit);
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
     }
-    
+
     // ~~~~~~~~~~~
-    
     /*
      * Retrieve the current entityManager
-     */ 
+     */
     public static EntityManager em() {
         return get().entityManager;
     }
-    
+
     /*
      * Tell to JPA do not commit the current transaction
-     */ 
+     */
     public static void setRollbackOnly() {
         em().getTransaction().setRollbackOnly();
     }
@@ -64,7 +73,7 @@ public class JPA {
     public static boolean isEnabled() {
         return entityManagerFactory != null;
     }
-    
+
     /**
      * Execute a JPQL query
      */
@@ -75,7 +84,7 @@ public class JPA {
     /*
      * Build a new entityManager.
      * (In most case you want to use the local entityManager with em)
-     */ 
+     */
     public static EntityManager newEntityManager() {
         return entityManagerFactory.createEntityManager();
     }
@@ -84,11 +93,11 @@ public class JPA {
      * @return true if current thread is running inside a transaction
      */
     public static boolean isInsideTransaction() {
-        try{
+        try {
             EntityManager manager = JPA.get().entityManager;
-		    EntityTransaction transaction =  manager.getTransaction();
+            EntityTransaction transaction = manager.getTransaction();
             return transaction != null;
-        }catch(JPAException e){
+        } catch (JPAException e) {
             return false;
         }
     }
