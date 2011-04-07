@@ -138,7 +138,6 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     // Customize Invocation
     @Override
     public void onException(Throwable e) {
-        storeAndClearRequestCurrent();
         wasError = true;
         lastException = e;
         try {
@@ -146,28 +145,27 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
         } catch(Throwable ex) {
             Logger.error(ex, "Error during job execution (%s)", this);
         }
-        restoreRequestCurrent();
+    }
+
+    @Override
+    public boolean init() {
+        storeAndClearRequestCurrent();
+        return super.init();
     }
 
     @Override
     public void before() {
-        storeAndClearRequestCurrent();
         super.before();
-        restoreRequestCurrent();
     }
 
     @Override
     public void after() {
-        storeAndClearRequestCurrent();
         super.after();
-        restoreRequestCurrent();
     }
 
     @Override
     public void onSuccess() throws Exception {
-        storeAndClearRequestCurrent();
         super.onSuccess();
-        restoreRequestCurrent();
     }
 
     @Override
@@ -255,7 +253,6 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
 
     @Override
     public void _finally() {
-        storeAndClearRequestCurrent();
         super._finally();
         if (executor == JobsPlugin.executor) {
             JobsPlugin.scheduleForCRON(this);
