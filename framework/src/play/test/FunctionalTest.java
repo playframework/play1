@@ -28,7 +28,6 @@ import com.ning.http.multipart.FilePart;
 import com.ning.http.multipart.MultipartRequestEntity;
 import com.ning.http.multipart.Part;
 import com.ning.http.multipart.StringPart;
-import java.util.ListIterator;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import play.Invoker;
@@ -39,8 +38,6 @@ import play.mvc.Router.ActionDefinition;
  * Application tests support
  */
 public abstract class FunctionalTest extends BaseTest {
-
-    public static final String invocationType = "FunctionalTest";
 
     public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
     public static final String MULTIPART_FORM_DATA = "multipart/form-data";
@@ -271,7 +268,7 @@ public abstract class FunctionalTest extends BaseTest {
             @Override
             public InvocationContext getInvocationContext() {
                 ActionInvoker.resolve(request, response);
-                return new InvocationContext(invocationType,
+                return new InvocationContext(Http.invocationType,
                         request.invokedMethod.getAnnotations(),
                         request.invokedMethod.getDeclaringClass().getAnnotations());
             }
