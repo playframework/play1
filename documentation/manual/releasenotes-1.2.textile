@@ -8,6 +8,13 @@ Migrating from Play 1.1.x is pretty straightforward. There are no changes to the
 
 Some APIs have been removed in Play 1.2, after having been deprecated for a long time, but most of the public API is the same. If you have compilation errors that you don’t know how to solve, ask on the "Google group":https://groups.google.com/forum/#!forum/play-framework.
 
+When you call a controller from a @FunctionalTest@, the action invocation now runs in its own transaction. Because the test itself also run in its own transaction, deadlocks can occur. So it's better to configure your database with *READ_UNCOMMITED* transactions while running tests. If you test again the in-memory H2 database, use the following database configuration:
+
+bc. %test.db.url=jdbc:h2:mem:play;MODE=MYSQL;LOCK_MODE=0@ 
+
+If you can't use *READ_UNCOMMITED* for your database transactions, you need to run every JPA access it their own transaction, either by managing JPA transaction by hand (using @JPA.em().getTransaction()@) or by spawning invocations using *Jobs*. 
+
+
 h2. Dependency management
 
 "Play’s dependency management system":dependency allows you to express your application’s external dependencies in a single **dependencies.yml** file. 

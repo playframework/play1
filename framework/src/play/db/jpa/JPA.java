@@ -3,10 +3,8 @@ package play.db.jpa;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import play.db.DB;
 
 import play.exceptions.JPAException;
-import play.exceptions.UnexpectedException;
 
 /**
  * JPA Support
@@ -30,7 +28,7 @@ public class JPA {
         local.remove();
     }
 
-    static void createContext(EntityManager entityManager, boolean readonly, boolean autoCommit) {
+    static void createContext(EntityManager entityManager, boolean readonly) {
         if (local.get() != null) {
             try {
                 local.get().entityManager.close();
@@ -42,14 +40,7 @@ public class JPA {
         JPA context = new JPA();
         context.entityManager = entityManager;
         context.readonly = readonly;
-        context.autoCommit = autoCommit;
         local.set(context);
-
-        try {
-            DB.getConnection().setAutoCommit(autoCommit);
-        } catch (Exception e) {
-            throw new UnexpectedException(e);
-        }
     }
 
     // ~~~~~~~~~~~

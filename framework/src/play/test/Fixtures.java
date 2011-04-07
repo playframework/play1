@@ -64,7 +64,12 @@ public class Fixtures {
         idCache.clear();
         disableForeignKeyConstraints();
         for (Class<? extends Model> type : types) {
-            Model.Manager.factoryFor(type).deleteAll();
+            try {
+                Model.Manager.factoryFor(type).deleteAll();
+            } catch(Exception e) {
+                Logger.error(e, "While deleting " + type + " instances");
+            }
+            
         }
         enableForeignKeyConstraints();
         Play.pluginCollection.afterFixtureLoad();
