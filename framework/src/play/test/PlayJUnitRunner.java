@@ -16,6 +16,8 @@ import play.Play;
 
 public class PlayJUnitRunner extends Runner {
 
+    public static final String invocationType = "JUnitTest";
+
     public static boolean useCustomRunner = false;
     
     // *******************
@@ -72,6 +74,11 @@ public class PlayJUnitRunner extends Runner {
                                     } catch (Throwable e) {
                                         throw new RuntimeException(e);
                                     }
+                                }
+
+                                @Override
+                                public Invoker.InvocationContext getInvocationContext() {
+                                    return new Invoker.InvocationContext(invocationType);
                                 }
                             });
                         } catch (Throwable e) {

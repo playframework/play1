@@ -520,7 +520,9 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         @Override
         public InvocationContext getInvocationContext() {
             ActionInvoker.resolve(request, response);
-            return new InvocationContext(request.invokedMethod.getAnnotations(), request.invokedMethod.getDeclaringClass().getAnnotations());
+            return new InvocationContext(Http.invocationType,
+                    request.invokedMethod.getAnnotations(),
+                    request.invokedMethod.getDeclaringClass().getAnnotations());
         }
         
     }

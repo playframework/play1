@@ -26,6 +26,7 @@ import play.utils.FakeRequestCreator;
  */
 public class Job<V> extends Invoker.Invocation implements Callable<V> {
 
+    public static final String invocationType = "Job";
     public static final String applicationBaseUrl_configPropertyName = "application.baseUrl";
 
     protected ExecutorService executor;
@@ -38,7 +39,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
 
     @Override
     public InvocationContext getInvocationContext() {
-        return new InvocationContext(this.getClass().getAnnotations());
+        return new InvocationContext(invocationType, this.getClass().getAnnotations());
     }
     
     /**

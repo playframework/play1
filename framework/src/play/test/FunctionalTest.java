@@ -40,6 +40,8 @@ import play.mvc.Router.ActionDefinition;
  */
 public abstract class FunctionalTest extends BaseTest {
 
+    public static final String invocationType = "FunctionalTest";
+
     public static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
     public static final String MULTIPART_FORM_DATA = "multipart/form-data";
 
@@ -269,7 +271,9 @@ public abstract class FunctionalTest extends BaseTest {
             @Override
             public InvocationContext getInvocationContext() {
                 ActionInvoker.resolve(request, response);
-                return new InvocationContext(request.invokedMethod.getAnnotations(), request.invokedMethod.getDeclaringClass().getAnnotations());
+                return new InvocationContext(invocationType,
+                        request.invokedMethod.getAnnotations(),
+                        request.invokedMethod.getDeclaringClass().getAnnotations());
             }
 
         });
