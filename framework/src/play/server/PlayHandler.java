@@ -205,7 +205,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         @Override
         public InvocationContext getInvocationContext() {
             ActionInvoker.resolve(request, response);
-            return new InvocationContext(request.invokedMethod.getAnnotations(), request.invokedMethod.getDeclaringClass().getAnnotations());
+            return new InvocationContext(Http.invocationType,
+                    request.invokedMethod.getAnnotations(),
+                    request.invokedMethod.getDeclaringClass().getAnnotations());
         }
 
         @Override
@@ -1168,7 +1170,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         @Override
         public InvocationContext getInvocationContext() {
             WebSocketInvoker.resolve(request);
-            return new InvocationContext(request.invokedMethod.getAnnotations(), request.invokedMethod.getDeclaringClass().getAnnotations());
+            return new InvocationContext(Http.invocationType,
+                    request.invokedMethod.getAnnotations(),
+                    request.invokedMethod.getDeclaringClass().getAnnotations());
         }
 
         @Override

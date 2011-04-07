@@ -33,6 +33,8 @@ import play.utils.Utils;
  */
 public class Http {
 
+    public static final String invocationType = "HttpRequest";
+
     public static class StatusCode {
 
         public static final int OK = 200;
