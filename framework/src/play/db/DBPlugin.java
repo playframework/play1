@@ -179,29 +179,21 @@ public class DBPlugin extends PlayPlugin {
     private static boolean changed() {
         Properties p = Play.configuration;
 
-        if ("mem".equals(p.getProperty("db"))) {
-            // If db.url or db.user or db.pass or db.driver is set but db=mem warn the user
-            check(p, "memory", "db.driver");
-            check(p, "memory", "db.url");
-
+        if ("mem".equals(p.getProperty("db")) && p.getProperty("db.url") == null) {
             p.put("db.driver", "org.h2.Driver");
-            p.put("db.url", "jdbc:h2:mem:play;MODE=MYSQL;DB_CLOSE_ON_EXIT=FALSE");
+            p.put("db.url", "jdbc:h2:mem:play;MODE=MYSQL");
             p.put("db.user", "sa");
             p.put("db.pass", "");
         }
 
-        if ("fs".equals(p.getProperty("db"))) {
-            // If db.url or db.user or db.pass or db.driver is set but db=fs warn the user
-            check(p, "fs", "db.driver");
-            check(p, "fs", "db.url");
-
+        if ("fs".equals(p.getProperty("db")) && p.getProperty("db.url") == null) {
             p.put("db.driver", "org.h2.Driver");
             p.put("db.url", "jdbc:h2:" + (new File(Play.applicationPath, "db/h2/play").getAbsolutePath()) + ";MODE=MYSQL");
             p.put("db.user", "sa");
             p.put("db.pass", "");
         }
 
-        if (p.getProperty("db", "").startsWith("java:")) {
+        if (p.getProperty("db", "").startsWith("java:") && p.getProperty("db.url") == null) {
             if (DB.datasource == null) {
                 return true;
             }
@@ -227,9 +219,16 @@ public class DBPlugin extends PlayPlugin {
             }
         }
 
+        if(p.getProperty("db.url") != null && p.getProperty("db.url").startsWith("jdbc:h2:mem:")) {
+            p.put("db.driver", "org.h2.Driver");
+            p.put("db.user", "sa");
+            p.put("db.pass", "");
+        }
+
         if ((p.getProperty("db.driver") == null) || (p.getProperty("db.url") == null)) {
             return false;
         }
+        
         if (DB.datasource == null) {
             return true;
         } else {

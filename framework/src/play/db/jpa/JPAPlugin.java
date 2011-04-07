@@ -5,6 +5,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -300,13 +301,11 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         boolean readOnly = false;
-        boolean autoCommit = false;
         Transactional tx = InvocationContext.current().getAnnotation(Transactional.class);
         if (tx != null) {
             readOnly = tx.readOnly();
-            autoCommit = tx.autoCommit();
         }
-        startTx(readOnly, autoCommit);
+        startTx(readOnly);
     }
 
     @Override
@@ -330,19 +329,17 @@ public class JPAPlugin extends PlayPlugin {
      * @param readonly true for a readonly transaction
      * @param autoCommit true to automatically commit the DB transaction after each JPA statement
      */
-    public static void startTx(boolean readonly, boolean autoCommit) {
+    public static void startTx(boolean readonly) {
         if (!JPA.isEnabled()) {
             return;
         }
         EntityManager manager = JPA.entityManagerFactory.createEntityManager();
-        //if(Play.configuration.getProperty("future.bindJPAObjects", "false").equals("true")) {
         manager.setFlushMode(FlushModeType.COMMIT);
         manager.setProperty("org.hibernate.readOnly", readonly);
-        //}
         if (autoTxs) {
             manager.getTransaction().begin();
         }
-        JPA.createContext(manager, readonly, autoCommit);
+        JPA.createContext(manager, readonly);
     }
 
     /**
