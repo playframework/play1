@@ -356,6 +356,13 @@ public class JPAPlugin extends PlayPlugin {
         EntityManager manager = JPA.get().entityManager;
         try {
             if (autoTxs) {
+                // Be sure to set the connection is non-autoCommit mode as some driver will complain about COMMIT statement
+                try {
+                    DB.getConnection().setAutoCommit(false);
+                } catch(Exception e) {
+                    Logger.error(e, "Why the driver complains here?");
+                }
+                // Commit the transaction
                 if (manager.getTransaction().isActive()) {
                     if (JPA.get().readonly || rollback || manager.getTransaction().getRollbackOnly()) {
                         manager.getTransaction().rollback();
