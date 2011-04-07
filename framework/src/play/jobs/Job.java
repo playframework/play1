@@ -34,9 +34,6 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     protected boolean wasError = false;
     protected Throwable lastException = null;
 
-    // [#707] Used to store original current before invoking plugins
-    private Http.Request originalCurrentRequest = null;
-
     @Override
     public InvocationContext getInvocationContext() {
         return new InvocationContext(invocationType, this.getClass().getAnnotations());
@@ -120,21 +117,6 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
         JobsPlugin.executor.scheduleWithFixedDelay(this, seconds, seconds, TimeUnit.SECONDS);
     }
 
-    /**
-     * [#707] make sure Request.current always is null when Plugins are called from jobs
-     */
-    private void storeAndClearRequestCurrent() {
-        originalCurrentRequest = Http.Request.current.get();
-        Http.Request.current.set(null);
-    }
-
-    /**
-     * [#707] restore the original value of Request.current
-     */
-    private void restoreRequestCurrent() {
-        Http.Request.current.set(originalCurrentRequest);
-    }
-    
     // Customize Invocation
     @Override
     public void onException(Throwable e) {
@@ -145,27 +127,6 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
         } catch(Throwable ex) {
             Logger.error(ex, "Error during job execution (%s)", this);
         }
-    }
-
-    @Override
-    public boolean init() {
-        storeAndClearRequestCurrent();
-        return super.init();
-    }
-
-    @Override
-    public void before() {
-        super.before();
-    }
-
-    @Override
-    public void after() {
-        super.after();
-    }
-
-    @Override
-    public void onSuccess() throws Exception {
-        super.onSuccess();
     }
 
     @Override
@@ -257,7 +218,6 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
         if (executor == JobsPlugin.executor) {
             JobsPlugin.scheduleForCRON(this);
         }
-        restoreRequestCurrent();
     }
 
     @Override
