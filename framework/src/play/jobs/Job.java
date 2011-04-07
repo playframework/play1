@@ -33,6 +33,9 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     protected boolean wasError = false;
     protected Throwable lastException = null;
 
+    // [#707] Used to store original current before invoking plugins
+    private Http.Request originalCurrentRequest = null;
+
     @Override
     public InvocationContext getInvocationContext() {
         return new InvocationContext(this.getClass().getAnnotations());
@@ -115,10 +118,26 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     public void every(int seconds) {
         JobsPlugin.executor.scheduleWithFixedDelay(this, seconds, seconds, TimeUnit.SECONDS);
     }
+
+    /**
+     * [#707] make sure Request.current always is null when Plugins are called from jobs
+     */
+    private void storeAndClearRequestCurrent() {
+        originalCurrentRequest = Http.Request.current.get();
+        Http.Request.current.set(null);
+    }
+
+    /**
+     * [#707] restore the original value of Request.current
+     */
+    private void restoreRequestCurrent() {
+        Http.Request.current.set(originalCurrentRequest);
+    }
     
     // Customize Invocation
     @Override
     public void onException(Throwable e) {
+        storeAndClearRequestCurrent();
         wasError = true;
         lastException = e;
         try {
@@ -126,6 +145,28 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
         } catch(Throwable ex) {
             Logger.error(ex, "Error during job execution (%s)", this);
         }
+        restoreRequestCurrent();
+    }
+
+    @Override
+    public void before() {
+        storeAndClearRequestCurrent();
+        super.before();
+        restoreRequestCurrent();
+    }
+
+    @Override
+    public void after() {
+        storeAndClearRequestCurrent();
+        super.after();
+        restoreRequestCurrent();
+    }
+
+    @Override
+    public void onSuccess() throws Exception {
+        storeAndClearRequestCurrent();
+        super.onSuccess();
+        restoreRequestCurrent();
     }
 
     @Override
@@ -213,10 +254,12 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
 
     @Override
     public void _finally() {
+        storeAndClearRequestCurrent();
         super._finally();
         if (executor == JobsPlugin.executor) {
             JobsPlugin.scheduleForCRON(this);
         }
+        restoreRequestCurrent();
     }
 
     @Override
