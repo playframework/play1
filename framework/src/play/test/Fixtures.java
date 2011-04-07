@@ -31,6 +31,7 @@ import play.classloading.ApplicationClasses;
 import play.data.binding.Binder;
 import play.data.binding.types.DateBinder;
 import play.db.DB;
+import play.db.DBConfig;
 import play.db.DBPlugin;
 import play.db.Model;
 import play.exceptions.UnexpectedException;
@@ -62,7 +63,12 @@ public class Fixtures {
      */
     public static void delete(Class<? extends Model>... types) {
         idCache.clear();
-        disableForeignKeyConstraints();
+        // since we don't know which db(s) we're deleting from,
+        // we just disableForeignKeyConstraints() on all configs
+        for (DBConfig dbConfig : DB.getDBConfigs()) {
+            disableForeignKeyConstraints(dbConfig);
+        }
+
         for (Class<? extends Model> type : types) {
             try {
                 Model.Manager.factoryFor(type).deleteAll();
@@ -71,7 +77,11 @@ public class Fixtures {
             }
             
         }
-        enableForeignKeyConstraints();
+
+        for (DBConfig dbConfig : DB.getDBConfigs()) {
+            enableForeignKeyConstraints(dbConfig);
+        }
+
         Play.pluginCollection.afterFixtureLoad();
     }
 
@@ -112,27 +122,43 @@ public class Fixtures {
     static String[] dontDeleteTheseTables = new String[] {"play_evolutions"};
 
     /**
-     * Flush the entire JDBC database
+     * Flush the entire JDBC database for all configured databases.
      */
     public static void deleteDatabase() {
+        for ( DBConfig dbConfig : DB.getDBConfigs()) {
+            deleteDatabase(dbConfig.getDBConfigName());
+        }
+    }
+
+    /**
+     * Flush the entire specified JDBC database
+     * @param dbConfigName specifies which configured database to delete - use null to delete the default database
+     */
+    public static void deleteDatabase(String dbConfigName) {
+
+        if (dbConfigName==null) {
+            dbConfigName = DBConfig.defaultDbConfigName;
+        }
+        
         try {
             idCache.clear();
             List<String> names = new ArrayList<String>();
-            ResultSet rs = DB.getConnection().getMetaData().getTables(null, null, null, new String[]{"TABLE"});
+            DBConfig dbConfig = DB.getDBConfig(dbConfigName);
+            ResultSet rs = dbConfig.getConnection().getMetaData().getTables(null, null, null, new String[]{"TABLE"});
             while (rs.next()) {
                 String name = rs.getString("TABLE_NAME");
                 names.add(name);
             }
-            disableForeignKeyConstraints();
+            disableForeignKeyConstraints(dbConfig);
             for (String name : names) {
                 if(Arrays.binarySearch(dontDeleteTheseTables, name) < 0) {
                     if (Logger.isTraceEnabled()) {
                         Logger.trace("Dropping content of table %s", name);
                     }
-                    DB.execute(getDeleteTableStmt(name) + ";");
+                    dbConfig.execute(getDeleteTableStmt(dbConfig.getUrl(), name) + ";");
                 }
             }
-            enableForeignKeyConstraints();
+            enableForeignKeyConstraints(dbConfig);
             Play.pluginCollection.afterFixtureLoad();
         } catch (Exception e) {
             throw new RuntimeException("Cannot delete all table data : " + e.getMessage(), e);
@@ -384,9 +410,9 @@ public class Fixtures {
     }
 
 
-    private static void disableForeignKeyConstraints() {
-        if (DBPlugin.url.startsWith("jdbc:oracle:")) {
-            DB.execute("begin\n" +
+    private static void disableForeignKeyConstraints(DBConfig dbConfig) {
+        if (dbConfig.getUrl().startsWith("jdbc:oracle:")) {
+            dbConfig.execute("begin\n" +
                     "for i in (select constraint_name, table_name from user_constraints where constraint_type ='R'\n" +
                     "and status = 'ENABLED') LOOP\n" +
                     "execute immediate 'alter table '||i.table_name||' disable constraint '||i.constraint_name||'';\n" +
@@ -395,33 +421,33 @@ public class Fixtures {
             return;
         }
 
-        if (DBPlugin.url.startsWith("jdbc:hsqldb:")) {
-            DB.execute("SET REFERENTIAL_INTEGRITY FALSE");
+        if (dbConfig.getUrl().startsWith("jdbc:hsqldb:")) {
+            dbConfig.execute("SET REFERENTIAL_INTEGRITY FALSE");
             return;
         }
 
-        if (DBPlugin.url.startsWith("jdbc:h2:")) {
-            DB.execute("SET REFERENTIAL_INTEGRITY FALSE");
+        if (dbConfig.getUrl().startsWith("jdbc:h2:")) {
+            dbConfig.execute("SET REFERENTIAL_INTEGRITY FALSE");
             return;
         }
 
-        if (DBPlugin.url.startsWith("jdbc:mysql:")) {
-            DB.execute("SET foreign_key_checks = 0;");
+        if (dbConfig.getUrl().startsWith("jdbc:mysql:")) {
+            dbConfig.execute("SET foreign_key_checks = 0;");
             return;
         }
 
-        if (DBPlugin.url.startsWith("jdbc:postgresql:")) {
-            DB.execute("SET CONSTRAINTS ALL DEFERRED");
+        if (dbConfig.getUrl().startsWith("jdbc:postgresql:")) {
+            dbConfig.execute("SET CONSTRAINTS ALL DEFERRED");
             return;
         }
 
         // Maybe Log a WARN for unsupported DB ?
-        Logger.warn("Fixtures : unable to disable constraints, unsupported database : " + DBPlugin.url);
+        Logger.warn("Fixtures : unable to disable constraints, unsupported database : " + dbConfig.getUrl());
     }
 
-    private static void enableForeignKeyConstraints() {
-        if (DBPlugin.url.startsWith("jdbc:oracle:")) {
-             DB.execute("begin\n" +
+    private static void enableForeignKeyConstraints(DBConfig dbConfig) {
+        if (dbConfig.getUrl().startsWith("jdbc:oracle:")) {
+             dbConfig.execute("begin\n" +
                      "for i in (select constraint_name, table_name from user_constraints where constraint_type ='R'\n" +
                      "and status = 'DISABLED') LOOP\n" +
                      "execute immediate 'alter table '||i.table_name||' enable constraint '||i.constraint_name||'';\n" +
@@ -430,36 +456,36 @@ public class Fixtures {
             return;
         }
 
-        if (DBPlugin.url.startsWith("jdbc:hsqldb:")) {
-            DB.execute("SET REFERENTIAL_INTEGRITY TRUE");
+        if (dbConfig.getUrl().startsWith("jdbc:hsqldb:")) {
+            dbConfig.execute("SET REFERENTIAL_INTEGRITY TRUE");
             return;
         }
 
-        if (DBPlugin.url.startsWith("jdbc:h2:")) {
-            DB.execute("SET REFERENTIAL_INTEGRITY TRUE");
+        if (dbConfig.getUrl().startsWith("jdbc:h2:")) {
+            dbConfig.execute("SET REFERENTIAL_INTEGRITY TRUE");
             return;
         }
 
-        if (DBPlugin.url.startsWith("jdbc:mysql:")) {
-            DB.execute("SET foreign_key_checks = 1;");
+        if (dbConfig.getUrl().startsWith("jdbc:mysql:")) {
+            dbConfig.execute("SET foreign_key_checks = 1;");
             return;
         }
 
-        if (DBPlugin.url.startsWith("jdbc:postgresql:")) {
+        if (dbConfig.getUrl().startsWith("jdbc:postgresql:")) {
             return;
         }
 
         // Maybe Log a WARN for unsupported DB ?
-        Logger.warn("Fixtures : unable to enable constraints, unsupported database : " + DBPlugin.url);
+        Logger.warn("Fixtures : unable to enable constraints, unsupported database : " + dbConfig.getUrl());
     }
 
 
-    static String getDeleteTableStmt(String name) {
-        if (DBPlugin.url.startsWith("jdbc:mysql:") ) {
+    static String getDeleteTableStmt(String url, String name) {
+        if (url.startsWith("jdbc:mysql:") ) {
             return "TRUNCATE TABLE " + name;
-        } else if (DBPlugin.url.startsWith("jdbc:postgresql:")) {
+        } else if (url.startsWith("jdbc:postgresql:")) {
             return "TRUNCATE TABLE " + name + " cascade";
-        } else if (DBPlugin.url.startsWith("jdbc:oracle:")) {
+        } else if (url.startsWith("jdbc:oracle:")) {
             return "TRUNCATE TABLE " + name;
         }
         return "DELETE FROM " + name;

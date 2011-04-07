@@ -40,7 +40,9 @@ test-result
 logs
 logs
 tmp
-db
+# Cannot ignore 'db' - it blocks new files in framework/src/play/db and framework/test-src/play/db
+# db
+
 *.pyc
 test-result
 samples-and-tests/with-gwt/nbproject

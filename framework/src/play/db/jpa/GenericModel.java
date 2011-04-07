@@ -11,13 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.NoResultException;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Query;
+import javax.persistence.*;
+
 import play.Play;
 import play.data.binding.BeanWrapper;
 import play.data.binding.Binder;
@@ -28,9 +23,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import javax.persistence.PostLoad;
-import javax.persistence.PostPersist;
-import javax.persistence.PostUpdate;
 import play.utils.Utils;
 
 /**
@@ -82,6 +74,7 @@ public class GenericModel extends JPABase {
                     Class<Model> c = (Class<Model>) Play.classloader.loadClass(relation);
                     if (JPABase.class.isAssignableFrom(c)) {
                         String keyName = Model.Manager.factoryFor(c).keyName();
+                        EntityManager em = JPABase.getJPAConfig(c).getJPAContext().em();
                         if (multiple && Collection.class.isAssignableFrom(field.getType())) {
                             Collection l = new ArrayList();
                             if (SortedSet.class.isAssignableFrom(field.getType())) {
@@ -96,7 +89,7 @@ public class GenericModel extends JPABase {
                                     if (_id.equals("")) {
                                         continue;
                                     }
-                                    Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");
+                                    Query q = em.createQuery("from " + relation + " where " + keyName + " = ?");
                                     q.setParameter(1, Binder.directBind(_id, Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType()));
                                     try {
                                         l.add(q.getSingleResult());
@@ -110,7 +103,7 @@ public class GenericModel extends JPABase {
                             String[] ids = params.get(name + "." + field.getName() + "." + keyName);
                             if (ids != null && ids.length > 0 && !ids[0].equals("")) {
                                 params.remove(name + "." + field.getName() + "." + keyName);
-                                Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");
+                                Query q = em.createQuery("from " + relation + " where " + keyName + " = ?");
                                 q.setParameter(1, Binder.directBind(ids[0], Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType()));
                                 try {
                                     String localName = name + "." + field.getName();
