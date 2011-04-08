@@ -229,22 +229,25 @@ class PlayConfParser:
         self.readFile(filepath, application_path)
 
     def readFile(self, filepath, application_path):
-        f = file(filepath)
-        for line in f:
-            linedef = line.strip()
-            if len(linedef) == 0:
-                continue
-            if linedef[0] in ('!', '#'):
-                continue
-            if linedef.find('=') == -1:
-                continue
-            val = linedef.split('=')[1].lstrip();
-            if linedef.find('@include.') == 0:
-                val = os.path.join(application_path, 'conf', val)
-                self.readFile(val, application_path)
-            else:
-                self.entries[linedef.split('=')[0].rstrip()] = val
-        f.close()
+	try:
+            f = file(filepath)
+            for line in f:
+                linedef = line.strip()
+                if len(linedef) == 0:
+                    continue
+                if linedef[0] in ('!', '#'):
+                    continue
+                if linedef.find('=') == -1:
+                    continue
+                val = linedef.split('=')[1].lstrip();
+                if linedef.find('@include.') == 0:
+                    val = os.path.join(application_path, 'conf', val)
+                    self.readFile(val, application_path)
+                else:
+                    self.entries[linedef.split('=')[0].rstrip()] = val
+            f.close()
+        except IOError, x:
+            print "WARNING: Failed to read configuration from %s %s" % (filepath, x)
 
     def get(self, key):
         idkey = '%' + self.id + "." + key
