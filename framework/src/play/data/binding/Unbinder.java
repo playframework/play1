@@ -97,6 +97,12 @@ public class Unbinder {
         } else {
             Field[] fields = src.getClass().getDeclaredFields();
             for (Field field : fields) {
+
+                if ((field.getModifiers() & BeanWrapper.notwritableField) != 0) {
+                    // skip fields that cannot be bound by BeanWrapper
+                    continue;
+                }
+
                 String newName = name + "." + field.getName();
                 boolean oldAcc = field.isAccessible();
                 field.setAccessible(true);
