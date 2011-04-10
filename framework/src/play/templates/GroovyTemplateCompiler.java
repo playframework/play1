@@ -150,8 +150,26 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         }
         skipLineBreak = false;
         text = text.replaceAll("\r\n", "\n").replaceAll("\n", "\\\\n");
-        // we don't have to print linenumbers here since this cannot fail - it is only text printing
-        println("out.print(\""+text+"\");");
+        // we don't have to print line numbers here since this cannot fail - it is only text printing
+
+        // [#714] The groovy-compiler complaints if a line is more than 65535 unicode units long..
+        // Have to split it if it is really that big
+        final int maxLength = 60000;
+        if (text.length() <maxLength) {
+            // text is "short" - just print it
+            println("out.print(\""+text+"\");");
+        } else {
+            // text is long - must split it
+            int offset = 0;
+            do {
+                int endPos = offset+maxLength;
+                if (endPos>text.length()) {
+                    endPos = text.length();
+                }
+                println("out.print(\""+text.substring(offset, endPos)+"\");");
+                offset+=maxLength;
+            }while(offset < text.length());
+        }
     }
 
     @Override
