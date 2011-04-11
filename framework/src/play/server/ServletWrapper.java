@@ -224,8 +224,6 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         Logger.trace("httpServletRequest.getContextPath(): " + httpServletRequest.getContextPath());
         Logger.trace("request.path: " + path + ", request.querystring: " + querystring);
 
-
-
         String contentType = null;
         if (httpServletRequest.getHeader("Content-Type") != null) {
             contentType = httpServletRequest.getHeader("Content-Type").split(";")[0].trim().toLowerCase().intern();

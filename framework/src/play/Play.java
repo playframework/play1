@@ -228,6 +228,9 @@ public class Play {
             mode = Mode.PROD;
         }
 
+        // Context path
+        ctxPath = configuration.getProperty("http.path", ctxPath);
+
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         roots.add(appRoot);
