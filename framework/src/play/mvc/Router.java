@@ -319,7 +319,7 @@ public class Router {
 
     public static String getFullUrl(String action, Map<String, Object> args) {
         ActionDefinition actionDefinition = reverse(action, args);
-        if(actionDefinition.method.equals("WS")) {
+        if (actionDefinition.method.equals("WS")) {
             return Http.Request.current().getBase().replaceFirst("https?", "ws") + actionDefinition;
         }
         return Http.Request.current().getBase() + actionDefinition;
@@ -386,7 +386,7 @@ public class Router {
             for (String key : Scope.RouteArgs.current().data.keySet()) {
                 if (!args.containsKey(key)) {
                     args.put(key, Scope.RouteArgs.current().data.get(key));
-                }               
+                }
             }
         }
         for (Route route : routes) {
@@ -578,13 +578,27 @@ public class Router {
         }
 
         public void absolute() {
+            String hostPart = host;
+            String domain = Http.Request.current().domain;
+            int port = Http.Request.current().port;
+            if (port != 80 && port != 443) {
+                hostPart += ":" + port;
+            }
+            // ~
             if (!url.startsWith("http")) {
                 if (StringUtils.isEmpty(host)) {
                     url = Http.Request.current().getBase() + url;
+                } else if (host.contains("{_}")) {
+                    java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("([-_a-z0-9A-Z]+([.][-_a-z0-9A-Z]+)?)$").matcher(domain);
+                    if (matcher.find()) {
+                        url = (Http.Request.current().secure ? "https://" : "http://") + hostPart.replace("{_}", matcher.group(1)) + url;
+                    } else {
+                        url = (Http.Request.current().secure ? "https://" : "http://") + hostPart + url;
+                    }
                 } else {
-                    url = (Http.Request.current().secure ? "https://" : "http://") + host + url;
+                    url = (Http.Request.current().secure ? "https://" : "http://") + hostPart + url;
                 }
-                if(method.equals("WS")) {
+                if (method.equals("WS")) {
                     url = url.replaceFirst("https?", "ws");
                 }
             }
