@@ -90,6 +90,14 @@ public class Application extends Controller {
     public static void simpleStatusCode() {
         response.status = 204;
     }
+    
+    public static void imagesAssets() {
+        
+    }
+    
+    public static void dashboard(String client) {
+        
+    }
 
     public static void hello(String name) {
         render(name);

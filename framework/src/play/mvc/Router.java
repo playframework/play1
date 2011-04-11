@@ -579,8 +579,8 @@ public class Router {
 
         public void absolute() {
             String hostPart = host;
-            String domain = Http.Request.current().domain;
-            int port = Http.Request.current().port;
+            String domain = Http.Request.current().get().domain;
+            int port = Http.Request.current().get().port;
             if (port != 80 && port != 443) {
                 hostPart += ":" + port;
             }
