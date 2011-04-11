@@ -5,6 +5,7 @@ import play.mvc.*;
 import play.db.jpa.*;
 import play.libs.*;
 import play.libs.F.*;
+import static play.libs.F.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.*;
@@ -41,6 +42,29 @@ public class WithContinuations extends Controller {
             sb.append(i + ":" + delay + "[" + r + "]");
         }
         renderText(sb);
+    }
+    
+    public static void waitWithTimeout() {
+        Promise<String> task1 = new jobs.DoSomething(100).now();
+        Promise<String> task2 = new jobs.DoSomething(2000).now();
+        Either<List<String>,Timeout> r = await(Promise.waitEither(Promise.waitAll(task1, task2), Timeout(300)));
+        
+        for(Timeout t : r._2) {
+            
+            StringBuilder result = new StringBuilder();
+            
+            if(task1.isDone()) {
+                result.append(" + Task1 -> " + task1.getOrNull());
+            }
+            
+            if(task2.isDone()) {
+                result.append(" + Task2 -> " + task2.getOrNull());
+            }
+            
+            renderText("Timeout! Partial result is " + result);
+        }
+        
+        renderText("Fail!");
     }
     
     public static void waitAll() {
