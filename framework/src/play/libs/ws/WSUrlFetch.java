@@ -44,6 +44,7 @@ public class WSUrlFetch implements WSImpl {
         }
 
         /** Execute a GET request synchronously. */
+        @Override
         public HttpResponse get() {
             try {
                 return new HttpUrlfetchResponse(prepare(new URL(url), "GET"));
@@ -54,6 +55,7 @@ public class WSUrlFetch implements WSImpl {
         }
 
         /** Execute a POST request.*/
+        @Override
         public HttpResponse post() {
             try {
                 HttpURLConnection conn = prepare(new URL(url), "POST");
@@ -64,6 +66,7 @@ public class WSUrlFetch implements WSImpl {
         }
 
         /** Execute a PUT request.*/
+        @Override
         public HttpResponse put() {
             try {
                 return new HttpUrlfetchResponse(prepare(new URL(url), "PUT"));
@@ -73,6 +76,7 @@ public class WSUrlFetch implements WSImpl {
         }
 
         /** Execute a DELETE request.*/
+        @Override
         public HttpResponse delete() {
             try {
                 return new HttpUrlfetchResponse(prepare(new URL(url), "DELETE"));
@@ -82,6 +86,7 @@ public class WSUrlFetch implements WSImpl {
         }
 
         /** Execute a OPTIONS request.*/
+        @Override
         public HttpResponse options() {
             try {
                 return new HttpUrlfetchResponse(prepare(new URL(url), "OPTIONS"));
@@ -91,6 +96,7 @@ public class WSUrlFetch implements WSImpl {
         }
 
         /** Execute a HEAD request.*/
+        @Override
         public HttpResponse head() {
             try {
                 return new HttpUrlfetchResponse(prepare(new URL(url), "HEAD"));
@@ -100,6 +106,7 @@ public class WSUrlFetch implements WSImpl {
         }
 
         /** Execute a TRACE request.*/
+        @Override
         public HttpResponse trace() {
             try {
                 return new HttpUrlfetchResponse(prepare(new URL(url), "TRACE"));
