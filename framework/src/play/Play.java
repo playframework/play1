@@ -248,7 +248,7 @@ public class Play {
         }
 
         // Context path
-        ctxPath = configuration.getProperty("http.path", "");
+        ctxPath = configuration.getProperty("http.path", ctxPath);
 
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
