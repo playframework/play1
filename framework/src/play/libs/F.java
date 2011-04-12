@@ -355,6 +355,7 @@ public class F {
 
         static Timer timer = new Timer("F.Timeout", true);
         final public String token;
+        final public long delay;
 
         public Timeout(String delay) {
             this(Time.parseDuration(delay) * 1000);
@@ -369,6 +370,7 @@ public class F {
         }
 
         public Timeout(String token, long delay) {
+            this.delay = delay;
             this.token = token;
             final Timeout timeout = this;
             timer.schedule(new TimerTask() {
@@ -379,6 +381,12 @@ public class F {
                 }
             }, delay);
         }
+
+        @Override
+        public String toString() {
+            return "Timeout(" + delay + ")";
+        }
+
     }
 
     public static Timeout Timeout(String delay) {

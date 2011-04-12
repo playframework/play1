@@ -216,6 +216,7 @@ public class Play {
         if( !Logger.configuredManually) {
             Logger.setUp(logLevel);
         }
+        Logger.recordCaller = Boolean.parseBoolean(configuration.getProperty("application.log.recordCaller", "false"));
 
         Logger.info("Starting %s", root.getAbsolutePath());
 
@@ -246,6 +247,9 @@ public class Play {
         if (usePrecompiled || forceProd) {
             mode = Mode.PROD;
         }
+
+        // Context path
+        ctxPath = configuration.getProperty("http.path", ctxPath);
 
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
@@ -427,6 +431,7 @@ public class Play {
             if( !Logger.configuredManually) {
                 Logger.setUp(logLevel);
             }
+            Logger.recordCaller = Boolean.parseBoolean(configuration.getProperty("application.log.recordCaller", "false"));
 
             // Locales
             langs = new ArrayList<String>(Arrays.asList(configuration.getProperty("application.langs", "").split(",")));

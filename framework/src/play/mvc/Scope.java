@@ -163,7 +163,6 @@ public class Scope {
     public static class Session {
 
         static Pattern sessionParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
-
         static final String AT_KEY = "___AT";
         static final String ID_KEY = "___ID";
         static final String TS_KEY = "___TS";
@@ -196,9 +195,6 @@ public class Scope {
                         session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
                     }
                 }
-                if (!session.contains(ID_KEY)) {
-                    session.put(ID_KEY, Codec.UUID());
-                }
                 return session;
             } catch (Exception e) {
                 throw new UnexpectedException("Corrupted HTTP session from " + Http.Request.current().remoteAddress, e);
@@ -212,7 +208,11 @@ public class Scope {
         }
 
         public String getId() {
+            if (!data.containsKey(ID_KEY)) {
+                data.put(ID_KEY, Codec.UUID());
+            }
             return data.get(ID_KEY);
+
         }
 
         public Map<String, String> all() {
@@ -220,7 +220,7 @@ public class Scope {
         }
 
         public String getAuthenticityToken() {
-            if(!data.containsKey(AT_KEY)) {
+            if (!data.containsKey(AT_KEY)) {
                 data.put(AT_KEY, Crypto.sign(UUID.randomUUID().toString()));
             }
             return data.get(AT_KEY);
@@ -295,11 +295,13 @@ public class Scope {
 
         /**
          * Returns true if the session is empty,
-         * e.g. does not contain anything else than the ID and the timestamp
+         * e.g. does not contain anything else than the timestamp
          */
         public boolean isEmpty() {
-            for (String key: data.keySet()) {
-                if (!ID_KEY.equals(key) && !TS_KEY.equals(key)) return false;
+            for (String key : data.keySet()) {
+                if (!TS_KEY.equals(key)) {
+                    return false;
+                }
             }
             return true;
         }

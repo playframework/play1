@@ -442,6 +442,14 @@ public class Http {
         }
 
         /**
+         * Useful because we sometime use a lazy request loader
+         * @return itself
+         */
+        public Request get() {
+            return this;
+        }
+
+        /**
          * This request was sent by an Ajax framework.
          * (rely on the X-Requested-With header).
          */
