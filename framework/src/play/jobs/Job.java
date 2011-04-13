@@ -1,11 +1,9 @@
 package play.jobs;
 
+import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.LazyLoader;
@@ -15,10 +13,13 @@ import play.Logger;
 import play.Play;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
-import play.libs.Time;
 import play.libs.F.Promise;
+import play.libs.Time;
 import play.mvc.Http;
 import play.utils.FakeRequestCreator;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
 
 /**
  * A job is an asynchronously executed unit of work
@@ -33,6 +34,8 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     protected long lastRun = 0;
     protected boolean wasError = false;
     protected Throwable lastException = null;
+
+    Date nextPlannedExecution = null;
 
     @Override
     public InvocationContext getInvocationContext() {
