@@ -297,7 +297,18 @@ public class Validation {
         String key = getLocalName(o);
         return Validation.future(key, o, new Date());
     }
-
+    
+    public static ValidationResult inArray(String key, Object o,  Object[] array) {
+        InArrayCheck check = new InArrayCheck();
+        check.array = array;
+        return applyCheck(check, key, o);
+    }
+    
+    public ValidationResult inArray(Object o, Object[] array) {
+        String key = getLocalName(o);
+        return Validation.inArray(key, o, array);
+    }
+    
     public static ValidationResult past(String key, Object o, Date reference) {
         InPastCheck check = new InPastCheck();
         check.reference = reference;
