@@ -59,29 +59,32 @@ public class Validation {
     }
     
     /**
-     * Adds a new error with the specified parameters.
+     * Adds a new error with the specified parameters. This method handles the case where the object provided is either 
+     * a string literal with the name of the field the error is associated to or the field variable itself (with the 
+     * name of the variable to use as key for the error), for example:
      * 
-     * @param object object associated to this error
+     *   validation.addError("field name", "message", variables ...);
+     * 
+     * Or:
+     * 
+     *   validation.addError(field, "message", variables ...);
+     * 
+     * @param object variable or name of the field associated to this error
      * @param message message key
      * @param variables message variables
      */
     public static void addError(Object object, String message, String... variables) {
-      String key = getLocalName(object);
+      // Retrieves the name of the variable provided as parameter
+      String field = getLocalName(object);
       
-      addError(key, message, variables);
-    }
-
-    /**
-     * Adds a new error with the specified parameters.
-     * 
-     * @param field field name
-     * @param message message key
-     * @param variables message variables
-     */
-    public static void addError(String field, String message, String... variables) {
-        if ((error(field) == null) || !error(field).message.equals(message)) {
-            Validation.current().errors.add(new Error(field, message, variables));
-        }
+      // Handles the case where a string literal was provided
+      if (field.isEmpty()) {
+        field = (String) object;
+      }
+      
+      if ((error(field) == null) || !error(field).message.equals(message)) {
+        Validation.current().errors.add(new Error(field, message, variables));
+      }
     }
 
     /**
