@@ -8,6 +8,7 @@ since.years   = %s year%s ago
 since.format  = MMM d, yyyy
 
 # Validation messages
+validation.array=Not in the list of allowed values: %2$s
 validation.required=Required
 validation.minSize=Minimum size is %2$d
 validation.maxSize=Maximum size is %2$d
