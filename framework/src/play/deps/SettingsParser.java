@@ -121,6 +121,7 @@ public class SettingsParser {
             if (get(options, "artifact", String.class) != null) {
                 fileSystemResolver.addArtifactPattern(get(options, "artifact", String.class));
             }
+            fileSystemResolver.setCheckmodified(true);
             resolver = fileSystemResolver;
         }
 
@@ -142,7 +143,11 @@ public class SettingsParser {
             chainResolver.setName(repName);
             chainResolver.setReturnFirst(true);
             for (Object o : get(options, "using", List.class, new ArrayList())) {
-                chainResolver.add(parseRepository((Map) o, modules));
+                DependencyResolver res = parseRepository((Map) o, modules);
+                if(res instanceof FileSystemResolver) {
+                    chainResolver.setCheckmodified(true);
+                }
+                chainResolver.add(res);
             }
             resolver = chainResolver;
         }
