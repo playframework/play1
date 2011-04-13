@@ -788,7 +788,7 @@ public class Play {
         }
 
         // Auto add special modules
-        if (Play.runingInTestMode()) {
+        if (Play.runningInTestMode()) {
             addModule(appRoot, "_testrunner", new File(Play.frameworkPath, "modules/testrunner"));
         }
     }
