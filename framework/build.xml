@@ -2,7 +2,7 @@
 
 <project name="play! framework" default="jar" basedir=".">
     
-    <property name="baseversion" value="master" />
+    <property name="baseversion" value="1.2.x" />
 
     <path id="project.classpath">
         <fileset dir=".">
