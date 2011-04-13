@@ -1,3 +1,12 @@
+play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-9) maverick; urgency=low
+
+  * Added a new validation check to be able to check a field against a list of 
+    allowed values.
+  * Merged addError() methods and fixed an issue for the use case where the 
+    field would be provided as a string literal.
+
+ -- Stéphane Thomas <sthomas@lunatech.com>  Fri, 13 Apr 2011 12:45:00 +0200
+
 play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-8) maverick; urgency=low
 
   * play/py Do not abort configuration loading when @include is not found
