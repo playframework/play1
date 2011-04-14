@@ -917,6 +917,8 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             StackRecorder.get().isRestoring = false;
             StackRecorder.get().value = null;
             future = (Future<T>)Request.current().args.get(ActionInvoker.F);
+            // Now reset the Controller invocation context
+            ControllerInstrumentation.stopActionCall();
         } else {
             throw new UnexpectedException("Lost promise for " + Http.Request.current() + "!");
         }

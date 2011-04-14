@@ -4,6 +4,9 @@
 
     open('@{WithContinuations.loopWithWait()}')
     assertTextPresent('0:true;1:true;2:true;3:true;4:true')
+    
+    open('@{WithContinuations.waitAndThenRedirect()}')
+    assertTextPresent('Hello -> DONE:100')
 
     open('@{WithContinuations.waitFuture()}')
     assertTextPresent('0:true[DONE:100];1:true[DONE:100];2:true[DONE:100];3:true[DONE:100];4:true[DONE:100]')

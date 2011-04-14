@@ -32,6 +32,17 @@ public class WithContinuations extends Controller {
         renderText(sb);
     }
     
+    public static void waitAndThenRedirect() {
+        String hello = "Hello";
+        String r = await(new jobs.DoSomething(100).now());
+        System.out.println(play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.isActionCallAllowed());
+        sayHello(hello + " -> " + r);
+    }
+    
+    public static void sayHello(String text) {
+        render(text);
+    }
+    
     public static void waitFuture() {
         StringBuilder sb = new StringBuilder();
         for(int i=0; i<5; i++) {
