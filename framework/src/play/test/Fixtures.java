@@ -156,22 +156,29 @@ public class Fixtures {
      */
     public static void loadModels(String name) {
         VirtualFile yamlFile = null;
+        for (VirtualFile vf : Play.javaPath) {
+        	yamlFile = vf.child(name);
+        	if (yamlFile != null && yamlFile.exists()) {
+        		break;
+        	}
+        }
+        if (yamlFile == null) {
+        	throw new RuntimeException("Cannot load fixture " + name + ", the file was not found");
+        }
+
+        // Render yaml file with 
+        String renderedYaml = TemplateLoader.load(yamlFile).render();
+        loadModels(renderedYaml, yamlFile);
+    }
+    
+    public static void loadModelsFromString(String yamlFixture) {
+    	loadModels(yamlFixture, null);
+    }
+    
+    public static void loadModels(String yamlFixture, VirtualFile yamlFile) {
         try {
-            for (VirtualFile vf : Play.javaPath) {
-                yamlFile = vf.child(name);
-                if (yamlFile != null && yamlFile.exists()) {
-                    break;
-                }
-            }
-            if (yamlFile == null) {
-                throw new RuntimeException("Cannot load fixture " + name + ", the file was not found");
-            }
-            
-            // Render yaml file with 
-            String renderedYaml = TemplateLoader.load(yamlFile).render();
-            
             Yaml yaml = new Yaml();
-            Object o = yaml.load(renderedYaml);
+            Object o = yaml.load(yamlFixture);
             if (o instanceof LinkedHashMap<?, ?>) {
                 @SuppressWarnings("unchecked") LinkedHashMap<Object, Map<?, ?>> objects = (LinkedHashMap<Object, Map<?, ?>>) o;
                 for (Object key : objects.keySet()) {
@@ -183,7 +190,7 @@ public class Fixtures {
                             type = "models." + type;
                         }
                         if (idCache.containsKey(type + "-" + id)) {
-                            throw new RuntimeException("Cannot load fixture " + name + ", duplicate id '" + id + "' for type " + type);
+                            throw new RuntimeException("Cannot load fixture, duplicate id '" + id + "' for type " + type);
                         }
                         Map<String, String[]> params = new HashMap<String, String[]>();
                         if (objects.get(key) == null) {
@@ -205,7 +212,7 @@ public class Fixtures {
                         try{
                         	model._save();
                         }catch(Exception x){
-                        	throw new UnexpectedException("Failed to load fixture "+name+": problem while saving object "+id, x);
+                        	throw new UnexpectedException("Failed to load fixture: problem while saving object "+id, x);
                         }
                         Class<?> tType = cType;
                         // FIXME: this is most probably wrong since superclasses might share IDs implemented by disjoint
@@ -224,9 +231,11 @@ public class Fixtures {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Class " + e.getMessage() + " was not found", e);
         } catch (ScannerException e) {
-            throw new YAMLException(e, yamlFile);
+        	if(yamlFile != null)
+        		throw new YAMLException(e, yamlFile);
+        	throw new RuntimeException(e);
         } catch (Throwable e) {
-            throw new RuntimeException("Cannot load fixture " + name + ": " + e.getMessage(), e);
+            throw new RuntimeException("Cannot load fixture: " + e.getMessage(), e);
         }
     }
 
