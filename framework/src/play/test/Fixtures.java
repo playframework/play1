@@ -147,19 +147,27 @@ public class Fixtures {
         }
     }
 
-    public static void load(String name) {
+    public static void load(String name){
         VirtualFile yamlFile = null;
+        for (VirtualFile vf : Play.javaPath) {
+            yamlFile = vf.child(name);
+            if (yamlFile != null && yamlFile.exists()) {
+                break;
+            }
+        }
+        InputStream is = Play.classloader.getResourceAsStream(name);
+        if (is == null) {
+            throw new RuntimeException("Cannot load fixture " + name + ", the file was not found");
+        }
+    	load(is, yamlFile);
+    }
+    
+    public static void load(InputStream is) {
+    	load(is, null);
+    }
+    
+    public static void load(InputStream is, VirtualFile yamlFile) {
         try {
-            for (VirtualFile vf : Play.javaPath) {
-                yamlFile = vf.child(name);
-                if (yamlFile != null && yamlFile.exists()) {
-                    break;
-                }
-            }
-            InputStream is = Play.classloader.getResourceAsStream(name);
-            if (is == null) {
-                throw new RuntimeException("Cannot load fixture " + name + ", the file was not found");
-            }
             Yaml yaml = new Yaml();
             Object o = yaml.load(is);
             if (o instanceof LinkedHashMap<?, ?>) {
@@ -174,7 +182,7 @@ public class Fixtures {
                             type = "models." + type;
                         }
                         if (idCache.containsKey(type + "-" + id)) {
-                            throw new RuntimeException("Cannot load fixture " + name + ", duplicate id '" + id + "' for type " + type);
+                            throw new RuntimeException("Cannot load fixture, duplicate id '" + id + "' for type " + type);
                         }
                         Map<String, String[]> params = new HashMap<String, String[]>();
                         if (objects.get(key) == null) {
@@ -195,7 +203,7 @@ public class Fixtures {
                         try{
                         	model._save();
                         }catch(Exception x){
-                        	throw new UnexpectedException("Failed to load fixture "+name+": problem while saving object "+id, x);
+                        	throw new UnexpectedException("Failed to load fixture: problem while saving object "+id, x);
                         }
                         Class<?> tType = cType;
                         // FIXME: this is most probably wrong since superclasses might share IDs implemented by disjoint
@@ -216,9 +224,11 @@ public class Fixtures {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Class " + e.getMessage() + " was not found", e);
         } catch (ScannerException e) {
-            throw new YAMLException(e, yamlFile);
+        	if(yamlFile != null)
+        		throw new YAMLException(e, yamlFile);
+        	throw new RuntimeException(e);
         } catch (Throwable e) {
-            throw new RuntimeException("Cannot load fixture " + name + ": " + e.getMessage(), e);
+            throw new RuntimeException("Cannot load fixture: " + e.getMessage(), e);
         }
     }
 
