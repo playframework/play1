@@ -59,32 +59,34 @@ public class Validation {
     }
     
     /**
-     * Adds a new error with the specified parameters. This method handles the case where the object provided is either 
-     * a string literal with the name of the field the error is associated to or the field variable itself (with the 
-     * name of the variable to use as key for the error), for example:
+     * Adds a new error to the given field with the specified parameters, for example:
      * 
      *   validation.addError("field name", "message", variables ...);
      * 
-     * Or:
-     * 
-     *   validation.addError(field, "message", variables ...);
-     * 
-     * @param object variable or name of the field associated to this error
+     * @param name of the field associated to this error
      * @param message message key
      * @param variables message variables
      */
-    public static void addError(Object object, String message, String... variables) {
+    public static void addError(String key, String message, String... variables) {
+        if ((error(key) == null) || !error(key).message.equals(message)) {
+          Validation.current().errors.add(new Error(key, message, variables));
+        }
+    }
+
+    /**
+     * Adds a new error for a given field with the specified parameters. The name of the field is
+     * infered from the name of the variable passed, for example:
+     * 
+     *   validation.addError(variable, "message", variables ...);
+     * 
+     * @param object from which the name is used as field name
+     * @param message message key
+     * @param variables message variables
+     */
+    public static void addErrorToVariable(Object object, String message, String... variables) {
       // Retrieves the name of the variable provided as parameter
       String field = getLocalName(object);
-      
-      // Handles the case where a string literal was provided
-      if (field.isEmpty()) {
-        field = (String) object;
-      }
-      
-      if ((error(field) == null) || !error(field).message.equals(message)) {
-        Validation.current().errors.add(new Error(field, message, variables));
-      }
+      addError(field, message, variables);
     }
 
     /**
