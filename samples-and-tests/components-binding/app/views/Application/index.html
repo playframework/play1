@@ -1,0 +1,72 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+<script type="text/html" id="address_tmpl">
+	<tr id="tr_newaddr_<%=id%>">
+		<input type="hidden" name="actor.addresses.id" value="new:<%=id%>"/>
+		<td><input type="text" name="actor.addresses@new:<%=id%>.streetName" value=""/></td>
+		<td><input type="text" name="actor.addresses@new:<%=id%>.cityName" value=""/></td>
+		<td><a href="#" onclick="javascript:removeAddress($('#tr_newaddr_<%=id%>'))">Undo added address</a></td>
+	</tr>
+</script>
+<script type="text/javascript">
+<!--
+	var addedAddress = 0;
+	function addAddress(){
+		 $('#table_addresses').append(tmpl('address_tmpl', {id: addedAddress }));
+		 addedAddress++;
+	}
+	function removeAddress(elem){
+		elem.remove();
+	}
+//-->
+</script>
+
+<a href="@{Application.index(actor.id)}">Refresh</a>
+<br/>
+
+#{form @Application.save()}
+<input type="hidden" name="actor.id" value="${actor.id}"/>
+<p>
+Actor : <input type="text" name="actor.name" value="${actor.name}"/>
+</p>
+
+<br/>
+Addresses: <a href="#" onclick="javascript:addAddress()">Add</a>
+<table border="1" id="table_addresses">
+	<tr>
+		<td>Street</td>
+		<td>City</td>
+		<td>Remove</td>
+	</tr>
+	#{list items:actor.addresses, as:'address'}
+	<tr id="tr_address_${address.id}">
+		<input type="hidden" name="actor.addresses.id" value="${address.id}"/>
+		<td><input type="text" name="actor.addresses@${address.id}.streetName" value="${address.streetName}"/></td>
+		<td><input type="text" name="actor.addresses@${address.id}.cityName" value="${address.cityName}"/></td>
+		<td><a href="@{Application.removeAddress(actor.id,address.id)}">Remove by url</a> -or- <a href="#" onclick="javascript:removeAddress($('#tr_address_${address.id}'))">Remove by post after save</a> </td>
+	</tr>
+	#{/list}
+</table>
+
+<br/>
+Movies:
+<table>
+	<tr>
+		<td>
+			<select multiple="multiple" size="4" name="actor.movies.id">
+				#{list items:allMovies, as:'movie'}
+					<option 
+						value="${movie.id}" 
+						#{if actor.movies.contains(movie)} selected="selected" #{/if} >
+						${movie.name}
+					</option>
+				#{/list}
+			</select>
+		</td>
+	</tr>
+</table>
+
+<br/>
+<input type="submit" name="save" value="save"/>
+#{/form}
