@@ -22,7 +22,6 @@ import play.Play;
 import play.libs.F.Promise;
 import play.libs.MimeTypes;
 import play.libs.OAuth.ServiceInfo;
-import play.libs.OAuth.TokenPair;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSImpl;
@@ -236,8 +235,8 @@ public class WSAsync implements WSImpl {
         }
 
         private WSRequest sign() {
-            if (this.oauthTokens != null) {
-                WSOAuthConsumer consumer = new WSOAuthConsumer(oauthInfo, oauthTokens);
+            if (this.oauthToken != null && this.oauthSecret != null) {
+                WSOAuthConsumer consumer = new WSOAuthConsumer(oauthInfo, oauthToken, oauthSecret);
                 try {
                     consumer.sign(this, this.type);
                 } catch (Exception e) {
@@ -436,9 +435,9 @@ public class WSAsync implements WSImpl {
             super(consumerKey, consumerSecret);
         }
 
-        public WSOAuthConsumer(ServiceInfo info, TokenPair tokens) {
+        public WSOAuthConsumer(ServiceInfo info, String token, String secret) {
             super(info.consumerKey, info.consumerSecret);
-            setTokenWithSecret(tokens.token, tokens.secret);
+            setTokenWithSecret(token, secret);
         }
 
         @Override
