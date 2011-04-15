@@ -332,11 +332,11 @@ public class WSAsync implements WSImpl {
                         Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
                         for (Object v: values) {
                             if (isPostPut) builder.addParameter(key, v.toString());
-                            else builder.addQueryParameter(key, WS.encode(v.toString()));
+                            else builder.addQueryParameter(key, v.toString());
                         }
                     } else {
                         if (isPostPut) builder.addParameter(key, value.toString());
-                        else builder.addQueryParameter(key, WS.encode(value.toString()));
+                        else builder.addQueryParameter(key, value.toString());
                     }
                 }
             }
