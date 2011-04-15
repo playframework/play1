@@ -8,7 +8,6 @@ import javassist.CtMethod;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import org.apache.commons.javaflow.bytecode.transformation.asm.AsmClassTransformer;
-import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 public class ContinuationEnhancer extends Enhancer {

@@ -1,11 +1,9 @@
 package play.utils;
 
 import net.sf.oval.internal.util.LinkedSet;
-import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 
-import java.beans.Encoder;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
