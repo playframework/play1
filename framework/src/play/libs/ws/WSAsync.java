@@ -22,7 +22,6 @@ import play.Play;
 import play.libs.F.Promise;
 import play.libs.MimeTypes;
 import play.libs.OAuth.ServiceInfo;
-import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSImpl;
 import play.libs.WS.WSRequest;
@@ -331,11 +330,11 @@ public class WSAsync implements WSImpl {
                         Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
                         for (Object v: values) {
                             if (isPostPut) builder.addParameter(key, v.toString());
-                            else builder.addQueryParameter(key, WS.encode(v.toString()));
+                            else builder.addQueryParameter(key, v.toString());
                         }
                     } else {
                         if (isPostPut) builder.addParameter(key, value.toString());
-                        else builder.addQueryParameter(key, WS.encode(value.toString()));
+                        else builder.addQueryParameter(key, value.toString());
                     }
                 }
             }
