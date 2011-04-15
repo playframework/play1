@@ -369,14 +369,14 @@ public class Evolutions extends PlayPlugin {
                     StringBuffer sql_down = new StringBuffer();
                     StringBuffer current = new StringBuffer();
                     for (String line : sql.split("\n")) {
-                        if (line.matches("^#.*[!]Ups")) {
+                        if (line.trim().matches("^#.*[!]Ups")) {
                             current = sql_up;
-                        } else if (line.matches("^#.*[!]Downs")) {
+                        } else if (line.trim().matches("^#.*[!]Downs")) {
                             current = sql_down;
-                        } else if (line.startsWith("#")) {
+                        } else if (line.trim().startsWith("#")) {
                             // skip
                         } else if (!line.trim().isEmpty()) {
-                            current.append(line + "\n");
+                            current.append(line).append("\n");
                         }
                     }
                     evolutions.add(new Evolution(version, sql_up.toString(), sql_down.toString(), true));
