@@ -137,9 +137,9 @@ public class WSUrlFetch implements WSImpl {
                     connection.setRequestProperty(key, headers.get(key));
                 }
                 checkFileBody(connection);
-                if (this.oauthTokens != null) {
+                if (this.oauthToken != null && this.oauthSecret != null) {
                     OAuthConsumer consumer = new DefaultOAuthConsumer(oauthInfo.consumerKey, oauthInfo.consumerSecret);
-                    consumer.setTokenWithSecret(oauthTokens.token, oauthTokens.secret);
+                    consumer.setTokenWithSecret(oauthToken, oauthSecret);
                     consumer.sign(connection);
                 }
                 return connection;
