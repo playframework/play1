@@ -1,41 +1,50 @@
 package play.db.jpa;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
+import javax.persistence.PostUpdate;
 import javax.persistence.Query;
+
+import org.hibernate.Hibernate;
+
 import play.Play;
 import play.data.binding.BeanWrapper;
 import play.data.binding.Binder;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import javax.persistence.PostLoad;
-import javax.persistence.PostPersist;
-import javax.persistence.PostUpdate;
 import play.utils.Utils;
 
+
 /**
- * A super class for JPA entities 
- */
+* A super class for JPA entities
+*/
 @MappedSuperclass
 @SuppressWarnings("unchecked")
 public class GenericModel extends JPABase {
@@ -62,6 +71,7 @@ public class GenericModel extends JPABase {
                 Collections.addAll(fields, clazz.getDeclaredFields());
                 clazz = clazz.getSuperclass();
             }
+            SortedMap paramsCopy = null;
             for (Field field : fields) {
                 boolean isEntity = false;
                 String relation = null;
@@ -83,28 +93,107 @@ public class GenericModel extends JPABase {
                     if (JPABase.class.isAssignableFrom(c)) {
                         String keyName = Model.Manager.factoryFor(c).keyName();
                         if (multiple && Collection.class.isAssignableFrom(field.getType())) {
-                            Collection l = new ArrayList();
-                            if (SortedSet.class.isAssignableFrom(field.getType())) {
-                                l = new TreeSet();
-                            } else if (Set.class.isAssignableFrom(field.getType())) {
-                                l = new HashSet();
-                            }
                             String[] ids = params.get(name + "." + field.getName() + "." + keyName);
+                            // no need to create a new Collection, just use field's value
+                            Collection l = (Collection) field.get(o);
+                            // need to initialise this collection 
+                            Hibernate.initialize(l);
+                            Map createdComponents = new HashMap();
                             if (ids != null) {
+                                // component's id are in params, we need to check to remove or add any compounds
                                 params.remove(name + "." + field.getName() + "." + keyName);
+                                List idsListParams = Arrays.asList(ids);
+                                List idsListObj = new ArrayList(); 
+                                for (Iterator iterator = l.iterator(); iterator.hasNext();) {
+                                    JPABase component = (JPABase) iterator.next();
+                                    if (!idsListParams.contains(component._key().toString())) {
+                                        // this compound isn't in ids, we need to remove it
+                                        iterator.remove();
+                                    }
+                                    idsListObj.add(component._key().toString());
+                                }
                                 for (String _id : ids) {
-                                    if (_id.equals("")) {
+                                    if (_id.equals("") || idsListObj.contains(_id)) {
                                         continue;
                                     }
-                                    Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");
-                                    q.setParameter(1, Binder.directBind(_id, Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType()));
-                                    try {
-                                        l.add(q.getSingleResult());
-                                    } catch (NoResultException e) {
-                                        Validation.addError(name + "." + field.getName(), "validation.notFound", _id);
+                                    // add a component
+                                    if(_id.startsWith("new:")){
+                                        // new component 
+                                        Constructor constructor = Play.classloader.loadClass(relation).getDeclaredConstructor();
+                                        constructor.setAccessible(true);
+                                        Model newComponent = (Model) c.newInstance();
+                                        createdComponents.put(_id, newComponent);
+                                        l.add(newComponent);
+                                    } else {
+                                        Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");
+                                        q.setParameter(1, Binder.directBind(_id, Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType()));
+                                        try {
+                                            l.add(q.getSingleResult());
+                                        } catch (NoResultException e) {
+                                            Validation.addError(name + "." + field.getName(), "validation.notFound", _id);
+                                        }
                                     }
                                 }
-                                bw.set(field.getName(), o, l);
+                            }
+                            
+                            // now we check update component
+                            // I choose @ symbol to identifiate a component, but we can choose another syntax
+                            // example : "compound.coumponent@52.firstName" is key for update firstName of the component with id=52
+                            String prefixe = name + "." + field.getName() + "@";
+                            Pattern p = Pattern.compile("^" + prefixe + "([^\\.]*)\\.(.*)$");
+                            if (paramsCopy == null) {
+                                // I use a sorted copy of params for optimize search
+                                paramsCopy = new TreeMap(params);
+                            }
+                            String lastComponentId = null;
+                            // looping over all params prefixed with name + "." + field.getName() + "@"
+                            for (Iterator iteratorParams = paramsCopy.tailMap(prefixe).entrySet().iterator(); iteratorParams.hasNext();) {
+                                Map.Entry entry = (Map.Entry) iteratorParams.next();
+                                String key = (String) entry.getKey();
+                                if (!key.startsWith(prefixe)) {
+                                    break;
+                                }
+                                String[] value = (String[]) entry.getValue();
+                                if (value != null && value.length > 0 && !value[0].equals("")) {
+                                    Matcher m = p.matcher(key);
+                                    if (m.matches()) {
+                                        // the coupound' id
+                                        String componentKey = m.group(1);
+                                        if(componentKey.equals(lastComponentId)){
+                                            // for not insert many times the same component
+                                            continue;
+                                        }
+                                        lastComponentId = componentKey;
+                                        if (componentKey.startsWith("new:")) {
+                                            // possible to create several components, with use of "virtuals" ids, example : 
+                                            // "compound.coumponent@new:1.firstName" ; "compound.coumponent@new:1.lastName"
+                                            // "compound.coumponent@new:2.firstName" ; "compound.coumponent@new:2.lastName"
+                                            String localName = name + "." + field.getName() + "@" + componentKey;
+                                            Object component = createdComponents.get(componentKey);
+                                            if (component==null) {
+                                                Model newComponent = create(c, localName, params, field.getAnnotations());
+                                                l.add(newComponent);
+                                            } else {
+                                                edit(component, localName, params, field.getAnnotations());
+                                            }
+                                        } else {
+                                            // update component
+                                            boolean componentFounded = false;
+                                            for (Iterator iterator = l.iterator(); iterator.hasNext();) {
+                                                Model component = (Model) iterator.next();
+                                                if (component._key().toString().equals(componentKey)){
+                                                    componentFounded = true;
+                                                    String localName = name + "." + field.getName() + "@" + componentKey;
+                                                    edit(component, localName, params, field.getAnnotations());
+                                                    break;
+                                                }
+                                            }
+                                            if (!componentFounded) {
+                                                Validation.addError(prefixe , "validation.notFound", componentKey);
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         } else {
                             String[] ids = params.get(name + "." + field.getName() + "." + keyName);
