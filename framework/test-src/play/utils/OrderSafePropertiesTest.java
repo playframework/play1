@@ -1,6 +1,7 @@
 package play.utils;
 
 import org.junit.Test;
+import play.Logger;
 import play.libs.IO;
 
 import java.io.InputStream;
@@ -13,8 +14,19 @@ import static org.fest.assertions.Assertions.assertThat;
 public class OrderSafePropertiesTest {
 
     @Test
-    public void verifyCorrectOrder() throws Exception{
+    public void verifyThatEscaping_properties_content_giveSameResultAs_java_util_properties() throws Exception {
+        // see info about escaping - http://download.oracle.com/javase/1.5.0/docs/api/java/util/Properties.html - "public void load(InputStream inStream)"
+        Properties javaP = new Properties();
+        Properties playP = new OrderSafeProperties();
+        javaP.load(getClass().getResourceAsStream("/play/utils/OrderSaferPropertiesTest2.properties"));
+        playP.load(getClass().getResourceAsStream("/play/utils/OrderSaferPropertiesTest2.properties"));
+        assertThat(playP.getProperty("a")).isEqualTo(javaP.getProperty("a"));
+        Logger.info("playP.getProperty(\"a\"):" + playP.getProperty("a"));
 
+    }
+
+    @Test
+    public void verifyCorrectOrder() throws Exception{
         InputStream in = getClass().getResourceAsStream("/play/utils/OrderSaferPropertiesTest.properties");
         assertThat(in).isNotNull();
         Properties p = new OrderSafeProperties();

@@ -28,7 +28,14 @@ public class OrderSafeProperties extends java.util.Properties {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         // escape "special-chars" (to utf-16 on the format \\uxxxx) in lines and store as iso-8859-1
+        // see info about escaping - http://download.oracle.com/javase/1.5.0/docs/api/java/util/Properties.html - "public void load(InputStream inStream)"
         for (String line : lines) {
+
+            // due to "...by the rule above, single and double quote characters preceded
+            // by a backslash still yield single and double quote characters, respectively."
+            // we must transform \" => " and \' => ' before escaping to prevent escaping the backslash
+            line = line.replaceAll("\\\\\"", "\"").replaceAll("(^|[^\\\\])(\\\\')", "$1'");
+            
             String escapedLine = StringEscapeUtils.escapeJava( line ) + "\n";
             // remove escaped backslashes
             escapedLine = escapedLine.replaceAll("\\\\\\\\","\\\\");
