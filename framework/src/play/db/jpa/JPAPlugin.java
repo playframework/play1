@@ -5,23 +5,30 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.EmbeddedId;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NoResultException;
@@ -45,6 +52,7 @@ import play.Play;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.data.binding.Binder;
+import play.data.validation.Validation;
 import play.db.DB;
 import play.db.Model;
 import play.exceptions.JPAException;
@@ -60,16 +68,20 @@ public class JPAPlugin extends PlayPlugin {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Object bind(String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations, Map<String, String[]> params) {
+    public Object bind(String name, Class clazz, java.lang.reflect.Type type,
+            Annotation[] annotations, Map<String, String[]> params) {
         // TODO need to be more generic in order to work with JPASupport
         if (JPABase.class.isAssignableFrom(clazz)) {
             String keyName = Model.Manager.factoryFor(clazz).keyName();
             String idKey = name + "." + keyName;
-            if (params.containsKey(idKey) && params.get(idKey).length > 0 && params.get(idKey)[0] != null && params.get(idKey)[0].trim().length() > 0) {
+            if (params.containsKey(idKey) && params.get(idKey).length > 0
+                    && params.get(idKey)[0] != null && params.get(idKey)[0].trim().length() > 0) {
                 String id = params.get(idKey)[0];
                 try {
-                    Query query = JPA.em().createQuery("from " + clazz.getName() + " o where o." + keyName + " = ?");
-                    query.setParameter(1, play.data.binding.Binder.directBind(name, annotations, id + "", Model.Manager.factoryFor(clazz).keyType()));
+                    Query query = JPA.em().createQuery(
+                            "from " + clazz.getName() + " o where o." + keyName + " = ?");
+                    query.setParameter(1, play.data.binding.Binder.directBind(name, annotations, id
+                            + "", Model.Manager.factoryFor(clazz).keyType()));
                     Object o = query.getSingleResult();
                     return GenericModel.edit(o, name, params, annotations);
                 } catch (NoResultException e) {
@@ -79,6 +91,61 @@ public class JPAPlugin extends PlayPlugin {
                 }
             }
             return GenericModel.create(clazz, name, params, annotations);
+        } else if (Collection.class.isAssignableFrom(clazz)) {
+            try {
+                // maybe it's collection of entities !
+                if (type instanceof ParameterizedType) {
+                    Class classElem = (Class) ((ParameterizedType) type).getActualTypeArguments()[0];
+                    if (JPABase.class.isAssignableFrom(classElem)) {
+                        if (clazz.isInterface()) {
+                            if (clazz.equals(List.class)) {
+                                clazz = ArrayList.class;
+                            } else if (clazz.equals(Set.class)) {
+                                clazz = HashSet.class;
+                            } else if (clazz.equals(SortedSet.class)) {
+                                clazz = TreeSet.class;
+                            } else {
+                                clazz = ArrayList.class;
+                            }
+                        }
+                        Collection r = (Collection) clazz.newInstance();
+                      
+                        String keyName = Model.Manager.factoryFor(classElem).keyName();
+                        Pattern p = Pattern.compile("^" + name + "@([^\\.]*)\\.(.*)$");
+                        SortedMap paramsCopy = new TreeMap(params);
+                        String lastComponentId = null;
+                        for (Iterator iteratorParams = paramsCopy.tailMap(name).entrySet().iterator(); iteratorParams.hasNext();) {
+                            Map.Entry entry = (Map.Entry) iteratorParams.next();
+                            String key = (String) entry.getKey();
+                            if (!key.startsWith(name)) {
+                                break;
+                            }
+                            String[] value = (String[]) entry.getValue();
+                            if (value != null && value.length > 0 && !value[0].equals("")) {
+                                Matcher m = p.matcher(key);
+                                if (m.matches()) {
+                                    // the coupound' id
+                                    String componentKey = m.group(1);
+                                    if(componentKey.equals(lastComponentId)){
+                                        // for not insert many times the same component
+                                        continue;
+                                    }
+                                    lastComponentId = componentKey;
+                                    Query q = JPA.em().createQuery("from " + classElem.getName() + " where " + keyName + " = ?");
+                                    q.setParameter(1, Binder.directBind(componentKey, Model.Manager.factoryFor(classElem).keyType()));
+                                    Object element = q.getSingleResult();
+                                    r.add(element);
+                                    GenericModel.edit(element, name + "@" + componentKey, params, annotations);
+                                }
+                            }
+                        }
+                        return r;
+                    }
+                }
+            } catch (Exception e) {
+                Validation.addError(name, "validation.invalid");
+                return null;
+            }
         }
         return super.bind(name, clazz, type, annotations, params);
     }
@@ -104,9 +171,12 @@ public class JPAPlugin extends PlayPlugin {
                 return;
             }
 
-            final String dataSource = Play.configuration.getProperty("hibernate.connection.datasource");
+            final String dataSource = Play.configuration
+                    .getProperty("hibernate.connection.datasource");
             if (StringUtils.isEmpty(dataSource) && DB.datasource == null) {
-                throw new JPAException("Cannot start a JPA manager without a properly configured database", new NullPointerException("No datasource configured"));
+                throw new JPAException(
+                        "Cannot start a JPA manager without a properly configured database",
+                        new NullPointerException("No datasource configured"));
             }
 
             Ejb3Configuration cfg = new Ejb3Configuration();
@@ -115,27 +185,35 @@ public class JPAPlugin extends PlayPlugin {
                 cfg.setDataSource(DB.datasource);
             }
 
-            if (!Play.configuration.getProperty("jpa.ddl", Play.mode.isDev() ? "update" : "none").equals("none")) {
-                cfg.setProperty("hibernate.hbm2ddl.auto", Play.configuration.getProperty("jpa.ddl", "update"));
+            if (!Play.configuration.getProperty("jpa.ddl", Play.mode.isDev() ? "update" : "none")
+                    .equals("none")) {
+                cfg.setProperty("hibernate.hbm2ddl.auto",
+                        Play.configuration.getProperty("jpa.ddl", "update"));
             }
 
-            cfg.setProperty("hibernate.dialect", getDefaultDialect(Play.configuration.getProperty("db.driver")));
+            cfg.setProperty("hibernate.dialect",
+                    getDefaultDialect(Play.configuration.getProperty("db.driver")));
             cfg.setProperty("javax.persistence.transaction", "RESOURCE_LOCAL");
 
             // Explicit SAVE for JPABase is implemented here
             // ~~~~~~
-            // We've hacked the org.hibernate.event.def.AbstractFlushingEventListener line 271, to flush collection update,remove,recreation
+            // We've hacked the
+            // org.hibernate.event.def.AbstractFlushingEventListener line 271,
+            // to flush collection update,remove,recreation
             // only if the owner will be saved.
             // As is:
-            // if (session.getInterceptor().onCollectionUpdate(coll, ce.getLoadedKey())) {
-            //      actionQueue.addAction(...);
+            // if (session.getInterceptor().onCollectionUpdate(coll,
+            // ce.getLoadedKey())) {
+            // actionQueue.addAction(...);
             // }
             //
-            // This is really hacky. We should move to something better than Hibernate like EBEAN
+            // This is really hacky. We should move to something better than
+            // Hibernate like EBEAN
             cfg.setInterceptor(new EmptyInterceptor() {
 
                 @Override
-                public int[] findDirty(Object o, Serializable id, Object[] arg2, Object[] arg3, String[] arg4, Type[] arg5) {
+                public int[] findDirty(Object o, Serializable id, Object[] arg2, Object[] arg3,
+                        String[] arg4, Type[] arg5) {
                     if (o instanceof JPABase && !((JPABase) o).willBeSaved) {
                         return new int[0];
                     }
@@ -143,7 +221,8 @@ public class JPAPlugin extends PlayPlugin {
                 }
 
                 @Override
-                public boolean onCollectionUpdate(Object collection, Serializable key) throws CallbackException {
+                public boolean onCollectionUpdate(Object collection, Serializable key)
+                        throws CallbackException {
                     if (collection instanceof PersistentCollection) {
                         Object o = ((PersistentCollection) collection).getOwner();
                         if (o instanceof JPABase) {
@@ -156,7 +235,8 @@ public class JPAPlugin extends PlayPlugin {
                 }
 
                 @Override
-                public boolean onCollectionRecreate(Object collection, Serializable key) throws CallbackException {
+                public boolean onCollectionRecreate(Object collection, Serializable key)
+                        throws CallbackException {
                     if (collection instanceof PersistentCollection) {
                         Object o = ((PersistentCollection) collection).getOwner();
                         if (o instanceof JPABase) {
@@ -169,7 +249,8 @@ public class JPAPlugin extends PlayPlugin {
                 }
 
                 @Override
-                public boolean onCollectionRemove(Object collection, Serializable key) throws CallbackException {
+                public boolean onCollectionRemove(Object collection, Serializable key)
+                        throws CallbackException {
                     if (collection instanceof PersistentCollection) {
                         Object o = ((PersistentCollection) collection).getOwner();
                         if (o instanceof JPABase) {
@@ -186,15 +267,18 @@ public class JPAPlugin extends PlayPlugin {
             } else {
                 org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.OFF);
             }
-            // inject additional  hibernate.* settings declared in Play! configuration
-            cfg.addProperties((Properties) Utils.Maps.filterMap(Play.configuration, "^hibernate\\..*"));
+            // inject additional hibernate.* settings declared in Play!
+            // configuration
+            cfg.addProperties((Properties) Utils.Maps.filterMap(Play.configuration,
+                    "^hibernate\\..*"));
 
             try {
                 Field field = cfg.getClass().getDeclaredField("overridenClassLoader");
                 field.setAccessible(true);
                 field.set(cfg, Play.classloader);
             } catch (Exception e) {
-                Logger.error(e, "Error trying to override the hibernate classLoader (new hibernate version ???)");
+                Logger.error(e,
+                        "Error trying to override the hibernate classLoader (new hibernate version ???)");
             }
             for (Class<?> clazz : classes) {
                 if (clazz.isAnnotationPresent(Entity.class)) {
@@ -278,8 +362,9 @@ public class JPAPlugin extends PlayPlugin {
         } else if ("org.firebirdsql.jdbc.FBDriver".equals(driver)) {
             return "org.hibernate.dialect.FirebirdDialect";
         } else {
-            throw new UnsupportedOperationException("I do not know which hibernate dialect to use with "
-                    + driver + " and I cannot guess it, use the property jpa.dialect in config file");
+            throw new UnsupportedOperationException(
+                    "I do not know which hibernate dialect to use with " + driver
+                            + " and I cannot guess it, use the property jpa.dialect in config file");
         }
     }
 
@@ -294,10 +379,11 @@ public class JPAPlugin extends PlayPlugin {
     @Override
     public void beforeInvocation() {
 
-        if(InvocationContext.current().getAnnotation(NoTransaction.class) != null ) {
-            //Called method or class is annotated with @NoTransaction telling us that
-            //we should not start a transaction
-            return ;
+        if (InvocationContext.current().getAnnotation(NoTransaction.class) != null) {
+            // Called method or class is annotated with @NoTransaction telling
+            // us that
+            // we should not start a transaction
+            return;
         }
 
         boolean readOnly = false;
@@ -326,16 +412,19 @@ public class JPAPlugin extends PlayPlugin {
     /**
      * initialize the JPA context and starts a JPA transaction
      * 
-     * @param readonly true for a readonly transaction
-     * @param autoCommit true to automatically commit the DB transaction after each JPA statement
+     * @param readonly
+     *            true for a readonly transaction
      */
     public static void startTx(boolean readonly) {
         if (!JPA.isEnabled()) {
             return;
         }
         EntityManager manager = JPA.entityManagerFactory.createEntityManager();
+        // if(Play.configuration.getProperty("future.bindJPAObjects",
+        // "false").equals("true")) {
         manager.setFlushMode(FlushModeType.COMMIT);
         manager.setProperty("org.hibernate.readOnly", readonly);
+        // }
         if (autoTxs) {
             manager.getTransaction().begin();
         }
@@ -343,8 +432,11 @@ public class JPAPlugin extends PlayPlugin {
     }
 
     /**
-     * clear current JPA context and transaction 
-     * @param rollback shall current transaction be committed (false) or cancelled (true)
+     * clear current JPA context and transaction
+     * 
+     * @param rollback
+     *            shall current transaction be committed (false) or cancelled
+     *            (true)
      */
     public static void closeTx(boolean rollback) {
         if (!JPA.isEnabled() || JPA.local.get() == null) {
@@ -353,15 +445,9 @@ public class JPAPlugin extends PlayPlugin {
         EntityManager manager = JPA.get().entityManager;
         try {
             if (autoTxs) {
-                // Be sure to set the connection is non-autoCommit mode as some driver will complain about COMMIT statement
-                try {
-                    DB.getConnection().setAutoCommit(false);
-                } catch(Exception e) {
-                    Logger.error(e, "Why the driver complains here?");
-                }
-                // Commit the transaction
                 if (manager.getTransaction().isActive()) {
-                    if (JPA.get().readonly || rollback || manager.getTransaction().getRollbackOnly()) {
+                    if (JPA.get().readonly || rollback
+                            || manager.getTransaction().getRollbackOnly()) {
                         manager.getTransaction().rollback();
                     } else {
                         try {
@@ -418,7 +504,10 @@ public class JPAPlugin extends PlayPlugin {
                 return null;
             }
             try {
-                return JPA.em().find(clazz, Binder.directBind(id.toString(), Model.Manager.factoryFor(clazz).keyType()));
+                return JPA.em()
+                        .find(clazz,
+                                Binder.directBind(id.toString(), Model.Manager.factoryFor(clazz)
+                                        .keyType()));
             } catch (Exception e) {
                 // Key is invalid, thus nothing was found
                 return null;
@@ -426,7 +515,8 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         @SuppressWarnings("unchecked")
-        public List<Model> fetch(int offset, int size, String orderBy, String order, List<String> searchFields, String keywords, String where) {
+        public List<Model> fetch(int offset, int size, String orderBy, String order,
+                List<String> searchFields, String keywords, String where) {
             String q = "from " + clazz.getName();
             if (keywords != null && !keywords.equals("")) {
                 String searchQuery = getSearchQuery(searchFields);
@@ -524,7 +614,8 @@ public class JPAPlugin extends PlayPlugin {
             try {
                 while (!c.equals(Object.class)) {
                     for (Field field : c.getDeclaredFields()) {
-                        if (field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
+                        if (field.isAnnotationPresent(Id.class)
+                                || field.isAnnotationPresent(EmbeddedId.class)) {
                             field.setAccessible(true);
                             return field;
                         }
@@ -532,15 +623,19 @@ public class JPAPlugin extends PlayPlugin {
                     c = c.getSuperclass();
                 }
             } catch (Exception e) {
-                throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz);
+                throw new UnexpectedException(
+                        "Error while determining the object @Id for an object of type " + clazz);
             }
-            throw new UnexpectedException("Cannot get the object @Id for an object of type " + clazz);
+            throw new UnexpectedException("Cannot get the object @Id for an object of type "
+                    + clazz);
         }
 
         String getSearchQuery(List<String> searchFields) {
             String q = "";
             for (Model.Property property : listProperties()) {
-                if (property.isSearchable && (searchFields == null || searchFields.isEmpty() ? true : searchFields.contains(property.name))) {
+                if (property.isSearchable
+                        && (searchFields == null || searchFields.isEmpty() ? true : searchFields
+                                .contains(property.name))) {
                     if (!q.equals("")) {
                         q += " or ";
                     }
@@ -563,7 +658,8 @@ public class JPAPlugin extends PlayPlugin {
 
                             @SuppressWarnings("unchecked")
                             public List<Object> list() {
-                                return JPA.em().createQuery("from " + field.getType().getName()).getResultList();
+                                return JPA.em().createQuery("from " + field.getType().getName())
+                                        .getResultList();
                             }
                         };
                     }
@@ -575,13 +671,15 @@ public class JPAPlugin extends PlayPlugin {
 
                         @SuppressWarnings("unchecked")
                         public List<Object> list() {
-                            return JPA.em().createQuery("from " + field.getType().getName()).getResultList();
+                            return JPA.em().createQuery("from " + field.getType().getName())
+                                    .getResultList();
                         }
                     };
                 }
             }
             if (Collection.class.isAssignableFrom(field.getType())) {
-                final Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                final Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType())
+                        .getActualTypeArguments()[0];
                 if (field.isAnnotationPresent(OneToMany.class)) {
                     if (field.getAnnotation(OneToMany.class).mappedBy().equals("")) {
                         modelProperty.isRelation = true;
@@ -591,7 +689,8 @@ public class JPAPlugin extends PlayPlugin {
 
                             @SuppressWarnings("unchecked")
                             public List<Object> list() {
-                                return JPA.em().createQuery("from " + fieldType.getName()).getResultList();
+                                return JPA.em().createQuery("from " + fieldType.getName())
+                                        .getResultList();
                             }
                         };
                     }
@@ -605,7 +704,8 @@ public class JPAPlugin extends PlayPlugin {
 
                             @SuppressWarnings("unchecked")
                             public List<Object> list() {
-                                return JPA.em().createQuery("from " + fieldType.getName()).getResultList();
+                                return JPA.em().createQuery("from " + fieldType.getName())
+                                        .getResultList();
                             }
                         };
                     }

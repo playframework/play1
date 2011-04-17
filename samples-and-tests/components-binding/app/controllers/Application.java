@@ -1,5 +1,6 @@
 package controllers;
 
+import java.util.Collection;
 import java.util.List;
 
 import models.Actor;
@@ -25,6 +26,13 @@ public class Application extends Controller {
 		actor.addresses.remove(Address.findById( addressId));
 		actor.save();
 		index(actor.id);
+	}
+
+	public static void massSaveAddresses(Long actorId, Collection<Address> justAddresses) {
+		for (Address address : justAddresses) {
+	        address.save();
+        }
+		index(actorId);
 	}
 
 }

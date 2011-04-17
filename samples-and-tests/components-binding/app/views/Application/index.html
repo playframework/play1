@@ -70,3 +70,24 @@ Movies:
 <br/>
 <input type="submit" name="save" value="save"/>
 #{/form}
+
+<br/>
+<hr/>
+
+Mass save addresses
+#{form @Application.massSaveAddresses()}
+<input type="submit" name="mass save" value="mass save"/>
+<input type="hidden" name="actorId" value="${address.id}"/>
+<table border="1">
+	<tr>
+		<td>Street</td>
+		<td>City</td>
+	</tr>
+	#{list items:actor.addresses, as:'address'}
+	<tr>
+		<td><input type="text" name="justAddresses@${address.id}.streetName" value="${address.streetName}"/></td>
+		<td><input type="text" name="justAddresses@${address.id}.cityName" value="${address.cityName}"/></td>
+	</tr>
+	#{/list}
+</table>
+#{/form}
