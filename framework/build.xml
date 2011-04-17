@@ -131,6 +131,7 @@
 
     <target name="nb-profile-application">
         <property name="application.path" value="" />
+        <loadfile property="version" srcFile="src/play/version"/>
         <loadfile property="play.id" srcFile="../id" failonerror="false" quiet="true" />
         <loadproperties srcfile="${application.path}/conf/application.conf" />
         <property name="jpda.port" value="8000" />
@@ -157,6 +158,7 @@
     </target>
 
     <target name="nb-run-application">
+        <loadfile property="version" srcFile="src/play/version"/>
         <loadfile property="play.id" srcFile="../id" failonerror="false" quiet="true" />
         <loadproperties srcfile="${application.path}/conf/application.conf" />
         <property name="jpda.port" value="8000" />
@@ -185,6 +187,7 @@
     </target>
 
     <target name="test-application">
+        <loadfile property="version" srcFile="src/play/version"/>
         <loadproperties srcfile="${application.path}/conf/application.conf" />
         <property name="jpda.port" value="8000" />
         <java classname="play.test.TestRunner" dir="${basedir}" fork="true">
