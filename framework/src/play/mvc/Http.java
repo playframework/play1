@@ -373,23 +373,23 @@ public class Http {
         }
 
         protected void parseXForwarded() {
-
-            if (Play.configuration.containsKey("XForwardedSupport") && headers.get("X-Forwarded-For") != null) {
+            if (Play.configuration.containsKey("XForwardedSupport") && headers.get("x-forwarded-for") != null) {
                 if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(",")).contains(remoteAddress)) {
                     throw new RuntimeException("This proxy request is not authorized: " + remoteAddress);
                 } else {
-                    secure = ("https".equals(Play.configuration.get("XForwardedProto")) || "https".equals(headers.get("X-Forwarded-Proto").value()) || "on".equals(headers.get("X-Forwarded-Ssl").value()));
+                    secure = ("https".equals(Play.configuration.get("XForwardedProto")) ||
+                              (headers.get("x-forwarded-proto") != null && "https".equals(headers.get("x-forwarded-proto").value())) ||
+                              (headers.get("x-forwarded-ssl") != null && "on".equals(headers.get("x-forwarded-ssl").value())));
                     if (Play.configuration.containsKey("XForwardedHost")) {
                         host = (String) Play.configuration.get("XForwardedHost");
-                    } else if (headers.get("X-Forwarded-Host") != null) {
-                        host = headers.get("X-Forwarded-Host").value();
+                    } else if (headers.get("x-forwarded-host") != null) {
+                        host = headers.get("x-forwarded-host").value();
                     }
-                    if (headers.get("X-Forwarded-For") != null) {
-                        remoteAddress = headers.get("X-Forwarded-For").value();
+                    if (headers.get("x-forwarded-for") != null) {
+                        remoteAddress = headers.get("x-forwarded-for").value();
                     }
                 }
             }
-
         }
 
         /**
