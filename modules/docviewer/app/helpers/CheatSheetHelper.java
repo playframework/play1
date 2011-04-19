@@ -18,7 +18,6 @@ public class CheatSheetHelper {
         if(cheatSheetDir.exists() && cheatSheetDir.isDirectory()) {
             File[] sheetFiles = cheatSheetDir.listFiles(new FileFilter() {
 
-                @Override
                 public boolean accept(File pathname) {
                     return pathname.isFile() && pathname.getName().endsWith(".textile");
                 }
@@ -27,7 +26,6 @@ public class CheatSheetHelper {
             // first letters of file name before "-" serves as sort index
             Arrays.sort(sheetFiles, new Comparator<File>() {
 
-                @Override
                 public int compare(File f1, File f2) {
                     
                     String o1 = f1.getName();
@@ -70,7 +68,6 @@ public class CheatSheetHelper {
 
     public static Map<String, String> listCategoriesAndTitles() {
         File[] categories = cheatSheetBaseDir.listFiles(new FileFilter() {
-            @Override
             public boolean accept(File pathname) {
                 return pathname.isDirectory();
             }
