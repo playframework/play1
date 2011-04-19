@@ -37,7 +37,7 @@ def execute(**kargs):
     serr = open(os.path.join(app.log_path(), 'javadoc.err'), 'w')
     if (os.path.isdir(outdir)):
         shutil.rmtree(outdir)
-    javadoc_cmd = [javadoc_path, '-classpath', app.cp_args(), '-d', outdir] + fileList
+    javadoc_cmd = [javadoc_path, '-classpath', app.cp_args(), '-d', outdir] + args + fileList
     print "Generating Javadoc in " + outdir + "..."
     subprocess.call(javadoc_cmd, env=os.environ, stdout=sout, stderr=serr)
     print "Done! You can open " + os.path.join(outdir, 'overview-tree.html') + " in your browser."
