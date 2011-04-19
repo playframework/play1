@@ -1,22 +1,17 @@
 package play.db;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.reflect.Method;
-import java.sql.*;
-import java.util.*;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import jregex.Matcher;
-import org.apache.commons.lang.StringUtils;
-import play.Play;
-import play.db.jpa.JPA;
-import play.exceptions.DatabaseException;
 import play.Logger;
+import play.exceptions.DatabaseException;
 
 /**
  * Database connection utilities.
@@ -129,7 +124,6 @@ public class DB {
      * Open a connection for the current thread.
      * @return A valid SQL connection
      */
-    @SuppressWarnings("deprecation")
     public static Connection getConnection() {
         return defaultDBConfig.getConnection();
     }

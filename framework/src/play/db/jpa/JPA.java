@@ -1,16 +1,15 @@
 package play.db.jpa;
 
-import javax.persistence.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
 
 import org.hibernate.ejb.Ejb3Configuration;
+
 import play.Logger;
-import play.db.DB;
 import play.db.DBConfig;
 import play.exceptions.JPAException;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 
 /**

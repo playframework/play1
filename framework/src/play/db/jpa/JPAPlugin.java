@@ -17,8 +17,6 @@ import java.util.Set;
 
 import javax.persistence.*;
 
-import com.sun.tools.internal.jxc.gen.config.Classes;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
@@ -26,7 +24,6 @@ import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.hibernate.type.Type;
 
-import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -121,15 +118,6 @@ public class JPAPlugin extends PlayPlugin {
                 List<Class> classes = findEntityClassesForThisConfig(configName, propPrefix);
                 if (classes == null) continue;
 
-
-                // we're ready to configure this instance of JPA
-                final String hibernateDataSource = Play.configuration.getProperty(propPrefix+"hibernate.connection.datasource");
-
-                if (StringUtils.isEmpty(hibernateDataSource) && dbConfig == null) {
-                    throw new JPAException("Cannot start a JPA manager without a properly configured database"+getConfigInfoString(configName),
-                            new NullPointerException("No datasource configured"));
-                }
-
                 Ejb3Configuration cfg = new Ejb3Configuration();
 
                 if (dbConfig.getDatasource() != null) {
@@ -146,6 +134,11 @@ public class JPAPlugin extends PlayPlugin {
                 } else {
                     driver = Play.configuration.getProperty(propPrefix+"driver");
                 }
+                if (driver == null) {
+                    throw new JPAException("Cannot start a JPA manager without a properly configured database",
+                    new NullPointerException("No datasource configured"));
+                }
+
                 cfg.setProperty("hibernate.dialect", getDefaultDialect(propPrefix, driver));
                 cfg.setProperty("javax.persistence.transaction", "RESOURCE_LOCAL");
 

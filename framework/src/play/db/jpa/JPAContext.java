@@ -1,10 +1,10 @@
 package play.db.jpa;
 
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
+import javax.persistence.PersistenceException;
 
-import org.hibernate.ejb.Ejb3Configuration;
 import play.exceptions.JPAException;
-import play.exceptions.UnexpectedException;
 
 /**
  * JPA Support
@@ -15,7 +15,6 @@ public class JPAContext {
     private EntityManager entityManager;
     private boolean readonly = true;
 
-    @SuppressWarnings("deprecation")
     protected JPAContext(JPAConfig jpaConfig, boolean readonly, boolean beginTransaction) {
 
         this.jpaConfig = jpaConfig;

@@ -30,7 +30,6 @@ public class JPQL {
         this.jpaConfig = jpaConfig;
     }
 
-    @SuppressWarnings("deprecation")
     protected static void createSingleton() {
         instance = new JPQL();
     }
