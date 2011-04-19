@@ -15,8 +15,9 @@ def execute(**kargs):
     args = kargs.get("args")
     play_env = kargs.get("env")
 
+    # check to see if application.conf exists... do not use app.check() because
+    # that will cause eclipsify to fail if run on a module
     is_application = os.path.exists(os.path.join(app.path, 'conf', 'application.conf'))
-    app.check()
     if is_application:
         app.check_jpda()
     modules = app.modules()
