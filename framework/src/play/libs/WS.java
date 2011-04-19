@@ -247,7 +247,7 @@ public class WS extends PlayPlugin {
          * If user sets it again, it is his responsability to make sure the encoding-stuff is ok
          */
         private void setDefaultContentType() {
-            headers.put("Content-Type", "application/x-www-form-urlencoded ; charset="+encoding);
+            headers.put("Content-Type", "application/x-www-form-urlencoded; charset="+encoding);
         }
 
         /**
