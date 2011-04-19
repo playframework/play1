@@ -1,5 +1,8 @@
 package play.db;
 
+import play.Logger;
+import play.exceptions.DatabaseException;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
@@ -9,9 +12,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import play.Logger;
-import play.exceptions.DatabaseException;
 
 /**
  * Database connection utilities.
@@ -57,10 +57,12 @@ public class DB {
             } else {
                 // must add new config
                 dbConfig = new DBConfig(dbConfigName);
-                dbConfig.configure();
-                dbConfigs.put(dbConfigName, dbConfig);
-                if (DBConfig.defaultDbConfigName.equals(dbConfigName)) {
-                    defaultDBConfig = dbConfig;
+                if (dbConfig.configure()) {
+                    // The database was configured - lets add it..
+                    dbConfigs.put(dbConfigName, dbConfig);
+                    if (DBConfig.defaultDbConfigName.equals(dbConfigName)) {
+                        defaultDBConfig = dbConfig;
+                    }
                 }
             }
         }
@@ -83,19 +85,41 @@ public class DB {
     /**
      * dbConfigName corresponds to properties-names in application.conf.
      *
-     * The default DBConfig is the one configured using 'db.' in application.conf
+     * The default dbConfig is named 'play', and is the one configured using 'db.' in application.conf
      *
      * dbConfigName = 'other' is configured like this:
      *
      * db_other = mem
      * db_other.user = batman
      *
+     * An exception is thrown if the config is not found
+     *
      * @param dbConfigName name of the config
      * @return a DBConfig specified by name
      */
     public static DBConfig getDBConfig(String dbConfigName) {
+        return getDBConfig(dbConfigName, false);
+    }
+
+    /**
+     * dbConfigName corresponds to properties-names in application.conf.
+     *
+     * The default dbConfig is named 'play', and is the one configured using 'db.' in application.conf
+     *
+     * dbConfigName = 'other' is configured like this:
+     *
+     * db_other = mem
+     * db_other.user = batman
+     *
+     * An exception is thrown if the config is not found, unless ignoreError == true
+     *
+     * @param dbConfigName name of the config
+     * @param ignoreError set to true if null should be returned if config is missing
+     * @return a DBConfig specified by name
+     */
+    public static DBConfig getDBConfig(String dbConfigName, boolean ignoreError) {
         DBConfig dbConfig = dbConfigs.get(dbConfigName);
-        if (dbConfig==null) {
+        if (dbConfig==null && ignoreError == false) {
             throw new RuntimeException("No DBConfig found with the name " + dbConfigName);
         }
         return dbConfig;
