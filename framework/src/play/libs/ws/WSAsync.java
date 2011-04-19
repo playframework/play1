@@ -413,7 +413,7 @@ public class WSAsync implements WSImpl {
             } else {
                 contentType = "application/x-www-form-urlencoded";
             }
-            builder.setHeader("Content-Type", contentType + "; charset="+this.encoding);
+            this.headers.put("Content-Type", contentType + "; charset="+this.encoding);
 
         }
 
