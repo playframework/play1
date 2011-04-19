@@ -25,7 +25,16 @@ import play.mvc.Http.Response;
 import play.mvc.results.Redirect;
 import play.vfs.VirtualFile;
 
+/**
+ * Handles migration of data.
+ *
+ * Does only support the default DBConfig
+ */
 public class Evolutions extends PlayPlugin {
+
+    protected static ComboPooledDataSource getDatasource() {
+        return (ComboPooledDataSource)DB.getDBConfig(DBConfig.defaultDbConfigName).getDatasource();
+    }
 
     public static void main(String[] args) {
 
@@ -48,7 +57,7 @@ public class Evolutions extends PlayPlugin {
         new DBPlugin().onApplicationStart();
 
         /** Connected **/
-        System.out.println("~ Connected to " + ((ComboPooledDataSource) DB.datasource).getJdbcUrl());
+        System.out.println("~ Connected to " + getDatasource().getJdbcUrl());
 
         /** Sumary **/
         Evolution database = listDatabaseEvolutions().peek();
@@ -293,7 +302,7 @@ public class Evolutions extends PlayPlugin {
     }
 
     public synchronized static void checkEvolutionsState() {
-        if (DB.datasource != null && evolutionsDirectory.exists()) {
+        if (getDatasource() != null && evolutionsDirectory.exists()) {
             List<Evolution> evolutionScript = getEvolutionScript();
             Connection connection = null;
             try {
@@ -369,14 +378,14 @@ public class Evolutions extends PlayPlugin {
                     StringBuffer sql_down = new StringBuffer();
                     StringBuffer current = new StringBuffer();
                     for (String line : sql.split("\n")) {
-                        if (line.matches("^#.*[!]Ups")) {
+                        if (line.trim().matches("^#.*[!]Ups")) {
                             current = sql_up;
-                        } else if (line.matches("^#.*[!]Downs")) {
+                        } else if (line.trim().matches("^#.*[!]Downs")) {
                             current = sql_down;
-                        } else if (line.startsWith("#")) {
+                        } else if (line.trim().startsWith("#")) {
                             // skip
                         } else if (!line.trim().isEmpty()) {
-                            current.append(line + "\n");
+                            current.append(line).append("\n");
                         }
                     }
                     evolutions.add(new Evolution(version, sql_up.toString(), sql_down.toString(), true));
@@ -457,7 +466,7 @@ public class Evolutions extends PlayPlugin {
     }
 
     static Connection getNewConnection() throws SQLException {
-        Connection connection = DB.datasource.getConnection();
+        Connection connection = getDatasource().getConnection();
         connection.setAutoCommit(true); // Yes we want auto-commit
         return connection;
     }

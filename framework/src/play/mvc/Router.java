@@ -377,6 +377,9 @@ public class Router {
     }
 
     public static ActionDefinition reverse(String action, Map<String, Object> args) {
+
+        String encoding = Http.Response.current().encoding;
+
         if (action.startsWith("controllers.")) {
             action = action.substring(12);
         }
@@ -461,14 +464,14 @@ public class Router {
                                     @SuppressWarnings("unchecked")
                                     List<Object> vals = (List<Object>) value;
                                     try {
-                                        path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(vals.get(0).toString().replace("$", "\\$"), "utf-8"));
+                                        path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(vals.get(0).toString().replace("$", "\\$"), encoding));
                                     } catch (UnsupportedEncodingException e) {
                                         throw new UnexpectedException(e);
                                     }
                                 } else {
                                     try {
-                                        path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString().replace("$", "\\$"), "utf-8").replace("%3A", ":").replace("%40", "@"));
-                                        host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString().replace("$", "\\$"), "utf-8").replace("%3A", ":").replace("%40", "@"));
+                                        path = path.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString().replace("$", "\\$"), encoding).replace("%3A", ":").replace("%40", "@"));
+                                        host = host.replaceAll("\\{(<[^>]+>)?" + key + "\\}", URLEncoder.encode(value.toString().replace("$", "\\$"), encoding).replace("%3A", ":").replace("%40", "@"));
                                     } catch (UnsupportedEncodingException e) {
                                         throw new UnexpectedException(e);
                                     }
@@ -483,12 +486,12 @@ public class Router {
                                     List<Object> vals = (List<Object>) value;
                                     for (Object object : vals) {
                                         try {
-                                            queryString.append(URLEncoder.encode(key, "utf-8"));
+                                            queryString.append(URLEncoder.encode(key, encoding));
                                             queryString.append("=");
                                             if (object.toString().startsWith(":")) {
                                                 queryString.append(object.toString());
                                             } else {
-                                                queryString.append(URLEncoder.encode(object.toString() + "", "utf-8"));
+                                                queryString.append(URLEncoder.encode(object.toString() + "", encoding));
                                             }
                                             queryString.append("&");
                                         } catch (UnsupportedEncodingException ex) {
@@ -498,12 +501,12 @@ public class Router {
                                     // Skip defaults in queryString
                                 } else {
                                     try {
-                                        queryString.append(URLEncoder.encode(key, "utf-8"));
+                                        queryString.append(URLEncoder.encode(key, encoding));
                                         queryString.append("=");
                                         if (value.toString().startsWith(":")) {
                                             queryString.append(value.toString());
                                         } else {
-                                            queryString.append(URLEncoder.encode(value.toString() + "", "utf-8"));
+                                            queryString.append(URLEncoder.encode(value.toString() + "", encoding));
                                         }
                                         queryString.append("&");
                                     } catch (UnsupportedEncodingException ex) {

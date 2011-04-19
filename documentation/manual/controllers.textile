@@ -505,6 +505,25 @@ POST   /clients                 Clients.create
 * The browser then issues **GET /clients/3132**.
 * …
 
+h3. Customizing web encoding
+
+Play! emphasize the use of UTF-8, but there might be situations where some responses must use different encoding,
+or that the whole app has to use other encoding.
+
+h4. Custom encoding for current Response
+
+To change encoding for current response, you can do it like this in your Controller:
+
+bc. response.encoding = "ISO-8859-1";
+
+h4. Custom web encoding for the entire App
+
+By setting the property **application.web_encoding** in application.conf, you can customize which encoding
+Play! uses when communicating with the browser. This also changes the default encoding for Plays powerful Web Service client WS.
+
+bc. application.web_encoding=ISO-8859-1
+
+When changing application.web_encoding, it affects the charset-part of the content-type-header. It also affects which encoding is used when transmitting rendered dynamic results, but it **does not** affect the bytes sent when Play! serves static content: So if you have modified the default response encoding and you have static text-files (in the public/ folder) that does contain special letters, you have to make sure that these files are stored according to the specified encoding. All other files should be stored in UTF-8.
 
 h2. <a name="interceptions">Interceptions</a>
 
@@ -585,6 +604,51 @@ bc. public class Admin extends Application {
     ...
  
 }
+
+h3. @Catch
+
+Methods annotated with **@Catch** are called if another action method throws the specified exception. The thrown exception is passed as a parameter to the @Catch method.
+
+bc. public class Admin extends Application {
+	
+    @Catch(IllegalStateException.class)
+    public static void logIllegalState(Throwable throwable) {
+        Logger.error("Illegal state %s…", throwable);
+    }
+    
+    public static void index() {
+        List<User> users = User.findAll();
+        if (users.size() == 0) {
+            throw new IllegalStateException("Invalid database - 0 users");
+        }
+        render(users);
+    }
+}
+
+As with normal Java exception handling, you can catch a super-class to catch more exception types. If you have more than one catch method, you can specify their **priority** so that they are executed in order of priority (priority 1 is executed first).
+
+bc. public class Admin extends Application {
+ 
+    @Catch(value = Throwable.class, priority = 1)
+    public static void logThrowable(Throwable throwable) {
+        // Custom error logging…
+        Logger.error("EXCEPTION %s", throwable);
+    }
+ 
+    @Catch(value = IllegalStateException.class, priority = 2)
+    public static void logIllegalState(Throwable throwable) {
+        Logger.error("Illegal state %s…", throwable);
+    }
+ 
+    public static void index() {
+        List<User> users = User.findAll();
+        if(users.size() == 0) {
+            throw new IllegalStateException("Invalid database - 0 users");
+        }
+        render(users);
+    }
+}
+
 
 h3. @Finally
 

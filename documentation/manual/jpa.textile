@@ -20,7 +20,7 @@ bc. public static index() {
 
 h2. <a name="transactions">Transaction management</a>
 
-Play will automatically manage transactions for you. It will start a transaction for each HTTP request and commit it when the HTTP response is sent. If your code throws an exception, the transaction will automatically rollback.
+Play will automatically manage transactions for you. It will start a transaction automatically the first time you perform an JPA operation in the HTTP request and commit it when the HTTP response is sent. If your code throws an exception, the transaction will automatically rollback.
 
 If you need to force transaction rollback from the application code, you can use the **JPA.setRollbackOnly()** method.
 
@@ -28,11 +28,9 @@ You can also use annotations to specify how transactions should be handled.
 
 If you annotated the method in the controller with **@play.db.jpa.Transactional(readOnly=true)**, then the transaction will be read-only.
 
-If you want to prevent Play from starting a transaction at all, you can annotated the method with **@play.db.jpa.NoTransaction**.
-
-To prevent transactions for all methods, you can annotate the Controller-class with **@play.db.jpa.NoTransaction**.
-
-When using **@play.db.jpa.NoTransaction**, Play does not get a connection from the connection pool at all - which improves speed.
+You don't have to prevent Play from starting a transaction if you don't want any. If you do not perform any JPA actions while processing the request,
+no transaction will be created. If you would like to enforce this - you can annotate your Controller method or class with **@play.db.jpa.NoTransaction**.
+If you try to perform a JPA action in a controller annotated with @play.db.jpa.NoTransaction, an exception will be thrown.
 
 h2. <a name="support">The **play.db.jpa.Model** support class</a>
 
@@ -229,6 +227,31 @@ But wait, there is a better way. You can use a practical but somewhat unknown Ja
 bc. for(Post p : Post.<Post>findAll()) {
     p.delete();
 }
+
+h3. Using JPA with multiple databases
+
+You can configure Play to use multiple databases.
+
+See Model-documentation for more info about configuring one or many databases.
+
+When creating Entity- / Model-classes for the none-default databases, you have to annotate the Class with **@PersistenceUnit(name="other")**.
+In this case "other" corresponds to the DB config name "other" (See Model-documentation for more info).
+
+You can use 'package-info.java' and annotate the package with @PersistenceUnit to enforce a specific JPA configuration to all entity-classes in this package.
+
+If you need to specify special hibernate configuration parameters for none-default JPA configurations, you must prefix the 'hibernate.'-settings in application.conf with 'db_configName.', eg. 'db_other.hibernate.some.special.setting=true'.
+
+When executing methods on the Entity-classes/Objects Play automatically uses the correct db configuration, but if you like you can access it with code:
+
+bc. EntityManager em = JPA.getJPAConfig("other").em();
+
+JPA.getJPAConfig(configName) returns an object with all the same methods you find in JPA.
+
+It is important to notice that Play does not support XA (two phase commits). If you use several different JPA configurations in the same request, **Play will try to commit as many transactions as possible**. If the commit to the first database succeeds and the second commit to the other database fails, the first commit will not get rolled back. Have this in mind when using multiple JPA configurations in the same request.
+
+
+
+
 
 p(note). **Continuing the discussion**
 

@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
 #{set title:'Book ' + hotel.name /}
 #{set 'moreScripts'}
-    <script src="@{'/public/javascripts/jquery-ui-1.7.2.custom.min.js'}" type="text/javascript" charset="utf-8"></script>
+    <script src="@{'/public/javascripts/jquery-ui-1.7.2.custom.min.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 #{/set}
 #{set 'moreStyles'}
     <link rel="stylesheet" type="text/css" media="screen" href="@{'/public/ui-lightness/jquery-ui-1.7.2.custom.css'}" />
@@ -97,7 +97,7 @@
     </p>
 #{/form}
 
-<script type="text/javascript" charset="utf-8">
+<script type="text/javascript" charset="${_response_encoding}">
     $(function() {
 		$(".datepicker").datepicker({dateFormat: 'yy-mm-dd'});
 	});

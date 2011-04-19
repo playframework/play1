@@ -26,6 +26,7 @@ import play.libs.F.Option;
 import play.libs.F.Promise;
 import play.libs.F.EventStream;
 import play.libs.Time;
+import play.utils.HTTP;
 import play.utils.Utils;
 
 /**
@@ -200,6 +201,11 @@ public class Http {
          */
         public String contentType;
         /**
+         * This is the encoding used to decode this request.
+         * If encoding-info is not found in request, then Play.defaultWebEncoding is used
+         */
+        public String encoding = Play.defaultWebEncoding;
+        /**
          * Controller to invoke
          */
         public String controller;
@@ -324,7 +330,21 @@ public class Http {
             newRequest.method = _method;
             newRequest.path = _path;
             newRequest.querystring = _querystring;
-            newRequest.contentType = _contentType;
+
+            // must try to extract encoding-info from contentType
+            if( _contentType == null ) {
+                newRequest.contentType = "text/html".intern();
+            } else {
+
+                HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType( _contentType );
+                newRequest.contentType = contentTypeEncoding.contentType;
+                // check for encoding-info
+                if( contentTypeEncoding.encoding != null ) {
+                    // encoding-info was found in request
+                    newRequest.encoding = contentTypeEncoding.encoding;
+                }
+            }
+
             newRequest.body = _body;
             newRequest.url = _url;
             newRequest.host = _host;
@@ -353,23 +373,29 @@ public class Http {
         }
 
         protected void parseXForwarded() {
-
-            if (Play.configuration.containsKey("XForwardedSupport") && headers.get("X-Forwarded-For") != null) {
+            if (Play.configuration.containsKey("XForwardedSupport") && headers.get("x-forwarded-for") != null) {
                 if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(",")).contains(remoteAddress)) {
                     throw new RuntimeException("This proxy request is not authorized: " + remoteAddress);
                 } else {
-                    secure = ("https".equals(Play.configuration.get("XForwardedProto")) || "https".equals(headers.get("X-Forwarded-Proto").value()) || "on".equals(headers.get("X-Forwarded-Ssl").value()));
+                    secure = isRequestSecure();
                     if (Play.configuration.containsKey("XForwardedHost")) {
                         host = (String) Play.configuration.get("XForwardedHost");
-                    } else if (headers.get("X-Forwarded-Host") != null) {
-                        host = headers.get("X-Forwarded-Host").value();
+                    } else if (headers.get("x-forwarded-host") != null) {
+                        host = headers.get("x-forwarded-host").value();
                     }
-                    if (headers.get("X-Forwarded-For") != null) {
-                        remoteAddress = headers.get("X-Forwarded-For").value();
+                    if (headers.get("x-forwarded-for") != null) {
+                        remoteAddress = headers.get("x-forwarded-for").value();
                     }
                 }
             }
+        }
 
+        private boolean isRequestSecure() {
+            Header xForwardedProtoHeader = headers.get("x-forwarded-proto");
+            Header xForwardedSslHeader = headers.get("x-forwarded-ssl");
+            return ("https".equals(Play.configuration.get("XForwardedProto")) ||
+                    (xForwardedProtoHeader != null && "https".equals(xForwardedProtoHeader.value())) ||
+                    (xForwardedSslHeader != null && "on".equals(xForwardedSslHeader.value())));
         }
 
         /**
@@ -563,6 +589,11 @@ public class Http {
          * Send this file directly
          */
         public Object direct;
+
+        /**
+         * The encoding used when writing response to client
+         */
+        public String encoding = Play.defaultWebEncoding;
         /**
          * Bind to thread
          */
@@ -742,9 +773,9 @@ public class Http {
 
         public void print(Object o) {
             try {
-                out.write(o.toString().getBytes("utf-8"));
+                out.write(o.toString().getBytes(Response.current().encoding));
             } catch (IOException ex) {
-                throw new UnexpectedException("UTF-8 problem ?", ex);
+                throw new UnexpectedException("Encoding problem ?", ex);
             }
         }
 

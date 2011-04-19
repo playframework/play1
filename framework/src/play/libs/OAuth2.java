@@ -18,6 +18,7 @@ public class OAuth2 {
     public String accessTokenURL;
     public String clientid;
     public String secret;
+
     public OAuth2(String authorizationURL,
             String accessTokenURL,
             String clientid,

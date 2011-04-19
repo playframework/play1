@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import play.exceptions.UnexpectedException;
+import play.mvc.Http;
 
 public class TextParser extends DataParser {
 
@@ -18,7 +19,7 @@ public class TextParser extends DataParser {
                 os.write(b);
             }
             byte[] data = os.toByteArray();
-            params.put("body", new String[] {new String(data, "utf-8")});
+            params.put("body", new String[] {new String(data, Http.Request.current().encoding)});
             return params;
         } catch (Exception e) {
             throw new UnexpectedException(e);

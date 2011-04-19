@@ -134,8 +134,7 @@ h3. <a>OAuth 1.0</a>
 
 The OAuth 1.0 functionality is provided by the **play.libs.OAuth** class and is based on "oauth-signpost":http://code.google.com/p/oauth-signpost/. It is used by services such as "Twitter":http://apiwiki.twitter.com/ or "Google":http://code.google.com/apis/accounts/docs/OAuth.html
 
-To connect to a service, you need the create a OAuth.ServiceInfo instance using the
-following information, obtained from the service provider:
+To connect to a service, you need the create a OAuth.ServiceInfo instance using the following information, obtained from the service provider:
 * Request token URL
 * Access token URL
 * Authorize URL
@@ -149,26 +148,30 @@ bc. public static void authenticate() {
     // getUser() is a method returning the current user 
     if (OAuth.isVerifierResponse()) {
         // We got the verifier; 
-        // now get the access tokens using the unauthorized tokens
-        TokenPair tokens = OAuth.service(TWITTER).requestAccessToken(
-            getUser().getTokenPair()
+        // now get the access tokens using the request tokens
+        OAuth.Response resp = OAuth.service(TWITTER).retrieveAccessToken(
+            getUser().token, getUser().secret
         );
         // let's store them and go back to index
-        getUser().setTokenPair(tokens);
+        getUser().token = resp.token; getUser().secret = resp.secret;
+        getUser().save()
         index();
     }
     OAuth twitt = OAuth.service(TWITTER);
-    TokenPair tokens = twitt.requestUnauthorizedToken();
+    Response resp = twitt.retrieveRequestToken();
     // We received the unauthorized tokens 
     // we need to store them before continuing
-    getUser().setTokenPair(tokens);
+    getUser().token = resp.token; getUser().secret = resp.secret;
+    getUser().save()
     // Redirect the user to the authorization page
-    redirect(twitt.redirectUrl(tokens));
+    redirect(twitt.redirectUrl(resp.token));
 }
 
 Calls can now be done by signing the requests using the token pair:
 
-bc. mentions = WS.url(url).oauth(TWITTER, getUser().getTokenPair()).get().getString();
+bc. mentions = WS.url(url).oauth(TWITTER, getUser().token, getUser().secret).get().getString();
+
+While the example doesn't check for errors, in production you should. The OAuth.Response object holds an error field that is non null when an error occurred. Most likely it could be that the user didn't grant you access, that the provider is down or buggy.
 
 The full example usage is available in **samples-and-tests/twitter-oauth**.
 

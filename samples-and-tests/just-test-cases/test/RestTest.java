@@ -16,6 +16,7 @@ import play.mvc.Http.Header;
 import play.test.UnitTest;
 
 import com.google.gson.JsonObject;
+import controllers.Rest;
 
 
 public class RestTest extends UnitTest {
@@ -26,12 +27,12 @@ public class RestTest extends UnitTest {
         params = new HashMap<String, Object>();
         params.put("timestamp", 1200000L);
         params.put("cachable", true);
-        params.put("multipleValues", new String[]{"欢迎", "dobrodošli", "ยินดีต้อนรับ"});
+        params.put("multipleValues", new String[]{Rest.filterString("欢迎"), Rest.filterString("dobrodošli"), Rest.filterString("ยินดีต้อนรับ")});
     }
 
     @Test
     public void testGet() throws Exception {
-        assertEquals("对!", WS.url("http://localhost:9003/ressource/%s", "ééééééçççççç汉语漢語").get().getString());
+        assertEquals(Rest.filterString("对!"), WS.url("http://localhost:9003/ressource/%s", Rest.filterString("ééééééçççççç汉语漢語")).get().getString());
     }
 
     @Test
@@ -43,21 +44,21 @@ public class RestTest extends UnitTest {
     public void testPost() throws Exception {
         JsonObject jsonResponse = new JsonObject();
         jsonResponse.addProperty("id", 101);
-        assertEquals(jsonResponse.toString(), WS.url("http://localhost:9003/ressource/%s", "名字").params(params).post().getJson().toString());
+        assertEquals(jsonResponse.toString(), WS.url("http://localhost:9003/ressource/%s", Rest.filterString("名字")).params(params).post().getJson().toString());
         File fileToSend = new File(new URLDecoder().decode(getClass().getResource("/kiki.txt").getFile(), "UTF-8"));
         assertTrue(fileToSend.exists());
-        assertEquals("POSTED!", WS.url("http://localhost:9003/ressource/file/%s", "名字").files(new FileParam(fileToSend, "file")).post().getString());
-        assertEquals("FILE AND PARAMS POSTED!", WS.url("http://localhost:9003/ressource/fileAndParams/%s", "名字").files(new FileParam(fileToSend, "file")).params(params).post().getString());
+        assertEquals("POSTED!", WS.url("http://localhost:9003/ressource/file/%s", Rest.filterString("名字")).files(new FileParam(fileToSend, "file")).post().getString());
+        assertEquals("FILE AND PARAMS POSTED!", WS.url("http://localhost:9003/ressource/fileAndParams/%s", Rest.filterString("名字")).files(new FileParam(fileToSend, "file")).params(params).post().getString());
 
     }
 
     @Test
     public void testHead() throws Exception {
-        HttpResponse headResponse = WS.url("http://localhost:9003/ressource/%s", "ééééééçççççç汉语漢語").head();
+        HttpResponse headResponse = WS.url("http://localhost:9003/ressource/%s", Rest.filterString("ééééééçççççç汉语漢語")).head();
         List<Header> headResponseHeaders = headResponse.getHeaders();
         assertTrue(headResponse.getStatus() == 200);
         assertEquals("", headResponse.getString());
-        HttpResponse getResponse = WS.url("http://localhost:9003/ressource/%s", "ééééééçççççç汉语漢語").get();
+        HttpResponse getResponse = WS.url("http://localhost:9003/ressource/%s", Rest.filterString("ééééééçççççç汉语漢語")).get();
         assertTrue(getResponse.getStatus() == 200);
         List<Header> getResponseHeaders = getResponse.getHeaders();
         for (int i = 0; i < getResponseHeaders.size(); i++) {
@@ -71,21 +72,21 @@ public class RestTest extends UnitTest {
     public void testPut() throws Exception {
         JsonObject jsonResponse = new JsonObject();
         jsonResponse.addProperty("id", 101);
-        assertEquals(jsonResponse.toString(), WS.url("http://localhost:9003/ressource/%s", "名字").params(params).put().getJson().toString());
+        assertEquals(jsonResponse.toString(), WS.url("http://localhost:9003/ressource/%s", Rest.filterString("名字")).params(params).put().getJson().toString());
         File fileToSend = new File(new URLDecoder().decode(getClass().getResource("/kiki.txt").getFile(), "UTF-8"));
         assertTrue(fileToSend.exists());
-        assertEquals("POSTED!", WS.url("http://localhost:9003/ressource/file/%s", "名字").files(new FileParam(fileToSend, "file")).put().getString());
-        assertEquals("FILE AND PARAMS POSTED!", WS.url("http://localhost:9003/ressource/fileAndParams/%s", "名字").files(new FileParam(fileToSend, "file")).params(params).put().getString());
+        assertEquals("POSTED!", WS.url("http://localhost:9003/ressource/file/%s", Rest.filterString("名字")).files(new FileParam(fileToSend, "file")).put().getString());
+        assertEquals("FILE AND PARAMS POSTED!", WS.url("http://localhost:9003/ressource/fileAndParams/%s", Rest.filterString("名字")).files(new FileParam(fileToSend, "file")).params(params).put().getString());
     }
 
     @Test
     public void testParallelCalls() throws Exception {
-        Future<HttpResponse> response = WS.url("http://localhost:9003/ressource/%s", "ééééééçççççç汉语漢語").getAsync();
+        Future<HttpResponse> response = WS.url("http://localhost:9003/ressource/%s", Rest.filterString("ééééééçççççç汉语漢語")).getAsync();
         Future<HttpResponse> response2 = WS.url("http://localhost:9003/ressource/%s", "foobar").getAsync();
         int success = 0;
         while (success < 2) {
             if (response.isDone()) {
-                assertEquals("对!", response.get().getString());
+                assertEquals(Rest.filterString("对!"), response.get().getString());
                 success++;
             }
             if (response2.isDone()) {
@@ -94,6 +95,34 @@ public class RestTest extends UnitTest {
             }
             Thread.sleep(1000);
         }
+    }
+    
+    @Test
+    public void testEncodingOfParams() throws Exception {
+        // related to #737
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put( "paramÆØÅ", "%%%æøåÆØÅ");
+        
+        String res = WS.url("http://localhost:9003/ressource/returnParam").params(params).get().getString();
+        Logger.info("res: " + res);
+        assertEquals("param: %%%æøåÆØÅ", res);
+        
+        // try it again with different encoding
+        HttpResponse r = WS.withEncoding("iso-8859-1").url("http://localhost:9003/ressource/returnParam").params(params).get();
+        Logger.info("res.contentType: " + r.getContentType());
+        assertEquals("param: %%%æøåÆØÅ", r.getString());
+        
+        // do the same with post..
+        res = WS.url("http://localhost:9003/ressource/returnParam").params(params).post().getString();
+        Logger.info("res: " + res);
+        assertEquals("param: %%%æøåÆØÅ", res);
+        
+        // try it again with different encoding
+        r = WS.withEncoding("iso-8859-1").url("http://localhost:9003/ressource/returnParam").params(params).post();
+        Logger.info("res.contentType: " + r.getContentType());
+        assertEquals("param: %%%æøåÆØÅ", r.getString());
+        
+        
     }
 
 }

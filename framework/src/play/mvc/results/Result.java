@@ -22,4 +22,11 @@ public abstract class Result extends FastRuntimeException {
         response.setContentTypeIfNotSet(contentType);
     }
 
+    /**
+     * The encoding that should be used when writing this response to the client
+     */
+    protected String getEncoding() {
+        return Http.Response.current().encoding;
+    }
+
 }

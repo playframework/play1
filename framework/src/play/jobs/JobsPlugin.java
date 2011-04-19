@@ -202,20 +202,17 @@ public class JobsPlugin extends PlayPlugin {
         }
         try {
             Date now = new Date();
-            Date nextInvalid;
-            // Bug #13: to avoid clock problems, we don't set the next execution to less than
-            // 5% of the interval between 2 executions
-            long threshold = Time.cronInterval(cron) * 5 / 100;
             cron = Expression.evaluate(cron, cron).toString();
             CronExpression cronExp = new CronExpression(cron);
             Date nextDate = cronExp.getNextValidTimeAfter(now);
-            long delay = nextDate.getTime() - now.getTime();
-            while (delay < threshold) {
-                nextInvalid = cronExp.getNextInvalidTimeAfter(nextDate);
+            if (nextDate.equals(job.nextPlannedExecution)) {
+                // Bug #13: avoid running the job twice for the same time
+                // (happens when we end up running the job a few minutes before the planned time)
+                Date nextInvalid = cronExp.getNextInvalidTimeAfter(nextDate);
                 nextDate = cronExp.getNextValidTimeAfter(nextInvalid);
-                delay = nextDate.getTime() - now.getTime();
             }
-            executor.schedule((Callable<V>)job, delay, TimeUnit.MILLISECONDS);
+            job.nextPlannedExecution = nextDate;
+            executor.schedule((Callable<V>)job, nextDate.getTime() - now.getTime(), TimeUnit.MILLISECONDS);
             job.executor = executor;
         } catch (Exception ex) {
             throw new UnexpectedException(ex);

@@ -45,6 +45,7 @@ import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.Codec;
+import play.mvc.Http;
 import play.utils.Java;
 import play.mvc.ActionInvoker;
 import play.mvc.Http.Request;
@@ -183,6 +184,11 @@ public class GroovyTemplate extends BaseTemplate {
         binding.setVariable("play", new Play());
         binding.setVariable("messages", new Messages());
         binding.setVariable("lang", Lang.get());
+        // If current response-object is present, add _response_encoding'
+        Http.Response currentResponse = Http.Response.current();
+        if (currentResponse != null) {
+            binding.setVariable("_response_encoding", currentResponse.encoding);
+        }
         StringWriter writer = null;
         Boolean applyLayouts = false;
 

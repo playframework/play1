@@ -132,6 +132,24 @@ For example, using the NetBeans debugger:
 
 !images/screenshot_attach-debugger!
 
+
+h2. Class enhancement
+
+A Play plug-in (i.e. a subclass of **play.PlayPlugin**) may include ‘enhancers’ that modify application classes at runtime, to add functionality. This is how some of Play’s magic works.
+
+The built-in **play.CorePlugin** uses several enhancers from the **play.classloading.enhancers** package to dynamically add code to your application’s classes:
+
+* **ContinuationEnhancer** - adds continuations support to controller classes
+* **ControllersEnhancer** - makes controller action methods thread-safe and adds HTTP redirects for method calls
+* **LocalvariablesNamesEnhancer** - tracks local variable names in controllers
+* **MailerEnhancer** - sets-up **play.mvc.Mailer** subclasses
+* **PropertiesEnhancer** - turns all application classes into valid JavaBeans, with properties based on fields
+* **SigEnhancer** - computes a unique hash for each class’ signature, to enable automatic reloading.
+
+In addition, the **play.db.jpa.JPAPlugin** enhances subclasses of **play.db.jpa.JPABase** with implementations of the convenience methods for JPA queries. This normally applies to your application's model classes that subclass **play.db.jpa.Model**. The JPA queries in question are those defined in **play.db.jpa.GenericModel**.
+
+To add your own enhancer, call a subclass of **play.classloading.enhancers.Enhancer** from your plug-in’s **enhance(ApplicationClass)** method.
+
 p(note). **Continuing the discussion**
  
 Now that you’ve seen what a Play application is, let’s see how %(next)"HTTP routing":routes% works. The Router is in charge of translating incoming HTTP Requests into actions.
