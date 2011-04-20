@@ -150,6 +150,7 @@ public class PluginCollection {
                 }
 
                 PlayPlugin newPlugin = (PlayPlugin) constructors[0].newInstance();
+                newPlugin.index = plugin.index;
                 //replace this plugin
                 replacePlugin(plugin, newPlugin);
                 reloadedPlugins.add(newPlugin);
