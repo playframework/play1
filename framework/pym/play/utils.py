@@ -117,6 +117,10 @@ def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = []):
         shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/war'))
     if os.path.exists(os.path.join(war_path, 'WEB-INF/application/logs')):
         shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/logs'))
+    if os.path.exists(os.path.join(war_path, 'WEB-INF/application/tmp')):
+        shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/tmp'))
+    if os.path.exists(os.path.join(war_path, 'WEB-INF/application/modules')):
+        shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/modules'))
     copy_directory(os.path.join(app.path, 'conf'), os.path.join(war_path, 'WEB-INF/classes'))
     if os.path.exists(os.path.join(war_path, 'WEB-INF/lib')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/lib'))
     os.mkdir(os.path.join(war_path, 'WEB-INF/lib'))
@@ -129,7 +133,7 @@ def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = []):
 
     # modules
     for module in modules:
-        to = os.path.join(war_path, 'WEB-INF/modules/%s' % os.path.basename(module))
+        to = os.path.join(war_path, 'WEB-INF/application/modules/%s' % os.path.basename(module))
         copy_directory(module, to)
         if os.path.exists(os.path.join(to, 'src')):
             shutil.rmtree(os.path.join(to, 'src'))
@@ -147,10 +151,6 @@ def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = []):
             shutil.rmtree(os.path.join(to, 'nbproject'))
         if os.path.exists(os.path.join(to, 'documentation')):
             shutil.rmtree(os.path.join(to, 'documentation'))
-    pm = app.readConfs('module.')
-    for m in pm:
-        nm = os.path.basename(m)
-        replaceAll(os.path.join(war_path, 'WEB-INF/application/conf/application.conf'), m, '../modules/%s' % nm)
 
     if not os.path.exists(os.path.join(war_path, 'WEB-INF/resources')): os.mkdir(os.path.join(war_path, 'WEB-INF/resources'))
     shutil.copyfile(os.path.join(env["basedir"], 'resources/messages'), os.path.join(war_path, 'WEB-INF/resources/messages'))
