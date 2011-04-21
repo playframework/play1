@@ -58,7 +58,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
      */
     public static final String SERVLET_RES = "__SERVLET_RES";
 
-    private volatile boolean routerInitializedWithContext = false;
+    private static volatile boolean routerInitializedWithContext = false;
 
     public void contextInitialized(ServletContextEvent e) {
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
