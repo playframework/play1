@@ -37,7 +37,7 @@ def execute(**kargs):
         if arg.startswith("-D"):
             add_options.append(arg)
 
-    java_cmd = [app.java_path()] + add_options + ['-classpath', app.cp_args(), 'play.deps.DependenciesManager']
+    java_cmd = [app.java_path()] + add_options + ['-classpath', app.fw_cp_args(), 'play.deps.DependenciesManager']
 
     subprocess.call(java_cmd, env=os.environ)
 
