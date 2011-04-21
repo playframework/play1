@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import play.exceptions.UnexpectedException;
 import play.utils.Utils;
 
@@ -85,7 +86,7 @@ public class UrlEncodedParser extends DataParser {
             value = new String(data, 0, ox, "utf-8");
             if (key != null) {
                 Utils.Maps.mergeValueInMap(params, key, value);
-            } else if (!value.isEmpty()) {
+            } else if (!StringUtils.isEmpty(value)) {
                 Utils.Maps.mergeValueInMap(params, value, (String) null);
             }
             return params;

@@ -9,6 +9,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import org.apache.commons.lang.StringUtils;
 import play.Play.Mode;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.classloading.enhancers.ContinuationEnhancer;
@@ -118,7 +120,7 @@ public class CorePlugin extends PlayPlugin {
         out.println("~~~~~~~~~~~~~~~");
         out.println("Version: " + Play.version);
         out.println("Path: " + Play.frameworkPath);
-        out.println("ID: " + (Play.id == null || Play.id.isEmpty() ? "(not set)" : Play.id));
+        out.println("ID: " + (StringUtils.isEmpty(Play.id) ? "(not set)" : Play.id));
         out.println("Mode: " + Play.mode);
         out.println("Tmp dir: " + (Play.tmpDir == null ? "(no tmp dir)" : Play.tmpDir));
         out.println();

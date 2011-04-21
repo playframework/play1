@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
+
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -238,7 +240,7 @@ public class Evolutions extends PlayPlugin {
                     // Execute script
                     if (runScript) {
                         for (String sql : (evolution.applyUp ? evolution.sql_up : evolution.sql_down).split(";")) {
-                            if (sql.trim().isEmpty()) {
+                            if (StringUtils.isEmpty(sql.trim())) {
                                 continue;
                             }
                             execute(sql);
@@ -375,7 +377,7 @@ public class Evolutions extends PlayPlugin {
                             current = sql_down;
                         } else if (line.trim().startsWith("#")) {
                             // skip
-                        } else if (!line.trim().isEmpty()) {
+                        } else if (!StringUtils.isEmpty(line.trim())) {
                             current.append(line).append("\n");
                         }
                     }
