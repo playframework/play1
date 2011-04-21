@@ -1,3 +1,16 @@
+<script>
+	function check() {
+		for(i=0;i<document.getElementsByTagName("input").length;i++) {
+			if(document.getElementsByTagName("input")[i].type == "checkbox") {
+				if(document.getElementById("delete_all").checked == true) {
+					document.getElementsByTagName("input")[i].checked=true;
+				} else {
+					document.getElementsByTagName("input")[i].checked=false;
+				}
+			}
+		}
+	}
+</script>
 %{
     // Eval fields tags
     def fieldsHandler = [:]
@@ -8,12 +21,14 @@
 %{
     }
 }%
-
+#{form @multiple_deletes()}
 <table>
     <thead>
         <tr>
+        <th><input type="checkbox" id="delete_all" onclick="javascript:check()" /></th>
         %{ if(_fields) { }%
             %{ _fields.each() { }%
+            
             <th width="${100 / _fields.size()}%">
                 %{ if(!_sort || _sort.contains(it)) { }%
                 <a class="${_caller.orderBy == it ? (_caller.order == 'DESC' ? 'crudSortedDesc' : 'crudSortedAsc') : ''}" href="@{list().remove('page').add('search', params.search).add('orderBy', it).add('order', (_caller.orderBy == it && _caller.order == 'ASC' ? 'DESC' : 'ASC'))}">
@@ -35,6 +50,7 @@
     </thead>
     %{ _caller.objects.eachWithIndex() { object, k -> }%
     <tr class="${k % 2 ? 'even' : 'odd'}">
+    	<td><input type="checkbox" name="deletes[]" value="${object.id}" /></td>
         %{ if(_fields) { }%
             %{ _fields.eachWithIndex() { field, i -> }%
             <td>
@@ -80,3 +96,6 @@
     </tr>
     %{ } }%
 </table>
+
+<input type="submit" value="Delete" />
+#{/form}
