@@ -1,5 +1,37 @@
 package play.db.jpa;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Level;
+import org.hibernate.CallbackException;
+import org.hibernate.EmptyInterceptor;
+import org.hibernate.collection.PersistentCollection;
+import org.hibernate.ejb.Ejb3Configuration;
+import org.hibernate.type.Type;
+import play.Logger;
+import play.Play;
+import play.PlayPlugin;
+import play.classloading.ApplicationClasses.ApplicationClass;
+import play.data.binding.Binder;
+import play.db.DB;
+import play.db.DBConfig;
+import play.db.Model;
+import play.exceptions.JPAException;
+import play.exceptions.UnexpectedException;
+import play.utils.Utils;
+
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.NoResultException;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.PersistenceException;
+import javax.persistence.Query;
+import javax.persistence.Transient;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -14,27 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import javax.persistence.*;
-
-import org.apache.log4j.Level;
-import org.hibernate.CallbackException;
-import org.hibernate.EmptyInterceptor;
-import org.hibernate.collection.PersistentCollection;
-import org.hibernate.ejb.Ejb3Configuration;
-import org.hibernate.type.Type;
-
-import play.Logger;
-import play.Play;
-import play.PlayPlugin;
-import play.classloading.ApplicationClasses.ApplicationClass;
-import play.data.binding.Binder;
-import play.db.DB;
-import play.db.DBConfig;
-import play.db.Model;
-import play.exceptions.JPAException;
-import play.exceptions.UnexpectedException;
-import play.utils.Utils;
 
 /**
  * JPA Plugin
@@ -118,6 +129,15 @@ public class JPAPlugin extends PlayPlugin {
                 List<Class> classes = findEntityClassesForThisConfig(configName, propPrefix);
                 if (classes == null) continue;
 
+
+                // we're ready to configure this instance of JPA
+                final String hibernateDataSource = Play.configuration.getProperty(propPrefix+"hibernate.connection.datasource");
+
+                if (StringUtils.isEmpty(hibernateDataSource) && dbConfig == null) {
+                    throw new JPAException("Cannot start a JPA manager without a properly configured database"+getConfigInfoString(configName),
+                            new NullPointerException("No datasource configured"));
+                }
+
                 Ejb3Configuration cfg = new Ejb3Configuration();
 
                 if (dbConfig.getDatasource() != null) {
@@ -134,11 +154,6 @@ public class JPAPlugin extends PlayPlugin {
                 } else {
                     driver = Play.configuration.getProperty(propPrefix+"driver");
                 }
-                if (driver == null) {
-                    throw new JPAException("Cannot start a JPA manager without a properly configured database",
-                    new NullPointerException("No datasource configured"));
-                }
-
                 cfg.setProperty("hibernate.dialect", getDefaultDialect(propPrefix, driver));
                 cfg.setProperty("javax.persistence.transaction", "RESOURCE_LOCAL");
 

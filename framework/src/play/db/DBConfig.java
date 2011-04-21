@@ -17,7 +17,12 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Properties;
 
 public class DBConfig {
@@ -155,9 +160,11 @@ public class DBConfig {
     }
 
     /**
-     * Detects changes and reconfigures this dbConfig
+     * Detects changes and reconfigures this dbConfig.
+     * Returns true if the database was configured (Config info present.
+     * An exception is throwns if the config process fails.
      */
-    protected void configure() {
+    protected boolean configure() {
 
         // prefix used before all properties when loafing config. default is 'db'
         String propsPrefix;
@@ -167,8 +174,13 @@ public class DBConfig {
             propsPrefix = "db_"+dbConfigName;
         }
 
+        boolean dbConfigured = false;
+
         if (changed(propsPrefix)) {
             try {
+
+                // We now know that we will either config the db, or fail with exception
+                dbConfigured = true;
 
                 Properties p = Play.configuration;
 
@@ -244,6 +256,8 @@ public class DBConfig {
                 throw new DatabaseException("Cannot connected to the database"+getConfigInfoString()+", " + e.getMessage(), e);
             }
         }
+
+        return dbConfigured;
     }
 
     /**

@@ -1,16 +1,6 @@
 package play.db;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import java.io.File;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Stack;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
@@ -25,6 +15,17 @@ import play.mvc.Http.Response;
 import play.mvc.results.Redirect;
 import play.vfs.VirtualFile;
 
+import java.io.File;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Stack;
+
 /**
  * Handles migration of data.
  *
@@ -33,7 +34,11 @@ import play.vfs.VirtualFile;
 public class Evolutions extends PlayPlugin {
 
     protected static ComboPooledDataSource getDatasource() {
-        return (ComboPooledDataSource)DB.getDBConfig(DBConfig.defaultDbConfigName).getDatasource();
+        DBConfig dbConfig = DB.getDBConfig(DBConfig.defaultDbConfigName, true);
+        if (dbConfig==null) {
+            return null;
+        }
+        return (ComboPooledDataSource)dbConfig.getDatasource();
     }
 
     public static void main(String[] args) {
