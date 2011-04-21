@@ -40,14 +40,14 @@ For example, look at this Post model object:
 
 bc. @Entity
 public class Post extends Model {
-
+ 
     public String title;
     public String content;
     public Date postDate;
-
+ 
     @ManyToOne
     public Author author;
-
+ 
     @OneToMany
     public List<Comment> comments;
 }
@@ -68,10 +68,10 @@ public class User extends GenericModel {
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name = "system-uuid", strategy = "uuid")
     public String id;
-
+ 
     @Required
     public String name;
-
+ 
     @Required
     @MaxSize(value=255, message = "email.maxsize")
     @play.data.validation.Email
