@@ -44,6 +44,24 @@ public abstract class CRUD extends Controller {
         }
     }
 
+    public static void multiple_deletes(String[] deletes) {
+        ObjectType type = ObjectType.get(getControllerClass());
+        notFoundIfNull(type);
+
+        for (String id : deletes) {
+            System.out.println(id);
+            Model object = type.findById(id);
+            notFoundIfNull(object);
+            try {
+                object._delete();
+            } catch (Exception e) {
+                flash.error(Messages.get("crud.delete.error", type.modelName));
+            }
+        }
+
+        redirect(request.controller + ".list");
+    }
+
     public static void show(String id) {
         ObjectType type = ObjectType.get(getControllerClass());
         notFoundIfNull(type);
