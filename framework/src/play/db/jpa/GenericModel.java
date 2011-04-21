@@ -14,6 +14,7 @@ import java.util.Set;
 import javax.persistence.*;
 
 import play.Play;
+import play.classloading.enhancers.LVEnhancer;
 import play.data.binding.BeanWrapper;
 import play.data.binding.Binder;
 import play.data.validation.Validation;
@@ -156,7 +157,7 @@ public class GenericModel extends JPABase {
     }
 
     public boolean validateAndSave() {
-        if (Validation.current().valid(this).ok) {
+        if (Validation.valid(LVEnhancer.LVEnhancerRuntime.getParamNames().subject, this).ok) {
             save();
             return true;
         }

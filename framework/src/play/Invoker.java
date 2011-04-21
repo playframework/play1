@@ -16,7 +16,6 @@ import com.jamonapi.MonitorFactory;
 import java.util.ArrayList;
 
 import play.Play.Mode;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.F;
@@ -211,7 +210,6 @@ public class Invoker {
          */
         public void after() {
             Play.pluginCollection.afterInvocation();
-            LocalVariablesNamesTracer.checkEmpty(); // detect bugs ....
         }
 
         /**

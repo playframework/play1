@@ -19,7 +19,7 @@ import javassist.CtClass;
 import javassist.bytecode.SourceFileAttribute;
 import play.Play;
 import play.classloading.ApplicationClassloaderState;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
+import play.classloading.enhancers.LVEnhancer;
 import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
 import play.mvc.After;
@@ -190,7 +190,7 @@ public class Java {
      */
     public static String[] parameterNames(Method method) throws Exception {
         try {
-            return (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LocalVariablesNamesTracer.computeMethodHash(method.getParameterTypes())).get(null);
+            return (String[]) method.getDeclaringClass().getDeclaredField("$" + method.getName() + LVEnhancer.computeMethodHash(method.getParameterTypes())).get(null);
         } catch (Exception e) {
             throw new UnexpectedException("Cannot read parameter names for " + method);
         }
