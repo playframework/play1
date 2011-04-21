@@ -16,7 +16,7 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 import play.classloading.enhancers.ContinuationEnhancer;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.Enhancer;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer;
+import play.classloading.enhancers.LVEnhancer;
 import play.classloading.enhancers.MailerEnhancer;
 import play.classloading.enhancers.PropertiesEnhancer;
 import play.classloading.enhancers.SigEnhancer;
@@ -285,10 +285,10 @@ public class CorePlugin extends PlayPlugin {
         Class<?>[] enhancers = new Class[]{
             SigEnhancer.class,
             ControllersEnhancer.class,
+            LVEnhancer.class,
             ContinuationEnhancer.class,
             MailerEnhancer.class,
-            PropertiesEnhancer.class,
-            LocalvariablesNamesEnhancer.class
+            PropertiesEnhancer.class
         };
         for (Class<?> enhancer : enhancers) {
             try {
