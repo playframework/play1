@@ -523,6 +523,7 @@ public class Play {
         }
         try {
             Logger.info("Precompiling ...");
+            Thread.currentThread().setContextClassLoader(Play.classloader);
             long start = System.currentTimeMillis();
             classloader.getAllClasses();
             Logger.trace("%sms to precompile the Java stuff", System.currentTimeMillis() - start);
