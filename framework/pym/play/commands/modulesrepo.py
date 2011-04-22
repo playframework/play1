@@ -336,7 +336,7 @@ def install(app, args, env):
     for mod in modules_list:
         if mod['name'] == module:
             for v in mod['versions']:
-                if version is not None and v['isDefault']:
+                if version is None and v['isDefault']:
                     print '~ Will install %s-%s' % (module, v['version'])
                     print '~ This module is compatible with: %s' % v['matches']
                     ok = raw_input('~ Do you want to install this version (y/n)? ')
