@@ -396,6 +396,7 @@ def install(app, args, env):
 def add(app, args, env):
     app.check()
 
+    m = None
     try:
         optlist, args = getopt.getopt(args, '', ['module='])
         for o, a in optlist:
