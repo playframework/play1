@@ -19,12 +19,12 @@ class CommandLoader:
     def load_core(self):
         for filename in os.listdir(self.path):
             if filename != "__init__.py" and filename.endswith(".py"):
-                try:
+               # try:
                     name = filename.replace(".py", "")
                     mod = load_python_module(name, self.path)
                     self._load_cmd_from(mod)
-                except:
-                    warnings.warn("!! Warning: could not load core command file " + filename, RuntimeWarning)
+                #except:
+                #    warnings.warn("!! Warning: could not load core command file " + filename, RuntimeWarning)
 
     def load_play_module(self, modname):
         commands = os.path.join(modname, "commands.py")

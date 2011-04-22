@@ -40,14 +40,14 @@ repositories = []
 
 def execute(**kargs):
     global repositories
-
+    
     command = kargs.get("command")
     app = kargs.get("app")
     args = kargs.get("args")
     env = kargs.get("env")
-
+    
     repositories = get_repositories(env['basedir'])
-
+    
     if command in NM:
         new(app, args, env)
     elif command in LM:
@@ -76,12 +76,12 @@ class Downloader(object):
     history = []
     cycles = 0
     average = lambda self: sum(self.history) / (len(self.history) or 1)
-
+    
     def __init__(self, width=55):
         self.width = width
         self.kibi = lambda bits: bits / 2 ** 10
         self.proc = lambda a, b: a / (b * 0.01)
-
+    
     def retrieve(self, url, destination, callback=None):
         self.size = 0
         time.clock()
@@ -100,14 +100,14 @@ class Downloader(object):
             sys.exit()
         print ''
         return self.size
-
+    
     def progress(self, blocks, blocksize, filesize):
         self.cycles += 1
         bits = min(blocks*blocksize, filesize)
         if bits != filesize:
-           done = self.proc(bits, filesize)
+			done = self.proc(bits, filesize)
         else:
-           done = 100
+      		done = 100
 		bar = self.bar(done)
         if not self.cycles % 3 and bits != filesize:
             now = time.clock()
@@ -120,7 +120,7 @@ class Downloader(object):
         average = round(sum(self.history[-4:]) / 4, 1)
         self.size = self.kibi(bits)
         print '\r~ [%s] %s KiB/s  ' % (bar, str(average)),
-
+    
     def bar(self, done):
         span = self.width * done * 0.01
         offset = len(str(int(done))) - .99
@@ -131,7 +131,7 @@ class Unzip:
     def __init__(self, verbose = False, percent = 10):
         self.verbose = verbose
         self.percent = percent
-
+    
     def extract(self, file, dir):
         if not dir.endswith(':') and not os.path.exists(dir):
             os.mkdir(dir)
@@ -153,17 +153,17 @@ class Unzip:
                 outfile.write(zf.read(name))
                 outfile.flush()
                 outfile.close()
-
+    
     def _createstructure(self, file, dir):
         self._makedirs(self._listdirs(file), dir)
-
+    
     def _makedirs(self, directories, basedir):
         """ Create any directories that don't currently exist """
         for dir in directories:
             curdir = os.path.join(basedir, dir)
             if not os.path.exists(curdir):
                 os.makedirs(curdir)
-
+    
     def _listdirs(self, file):
             """ Grabs all the directories in the zip structure
             This is necessary to create the structure before trying
@@ -181,7 +181,7 @@ def new(app, args, play_env):
         print "~ Oops. %s already exists" % app.path
         print "~"
         sys.exit(-1)
-
+    
     print "~ The new module will be created in %s" % os.path.normpath(app.path)
     print "~"
     application_name = os.path.basename(app.path)
@@ -205,7 +205,7 @@ def new(app, args, play_env):
     os.mkdir(os.path.join(app.path, 'src/play'))
     os.mkdir(os.path.join(app.path, 'src/play/modules'))
     os.mkdir(os.path.join(app.path, 'src/play/modules/%s' % application_name))
-
+    
     print "~ OK, the module is created."
     print "~ Start using it by adding this line in the application.conf modules list: "
     print "~ module.%s=%s" % (application_name, os.path.normpath(app.path))
@@ -218,9 +218,9 @@ def list(app, args):
     for repo in repositories:
         print "~    %s/modules" % repo
     print "~"
-
+    
     modules_list = load_module_list()
-
+    
     for mod in modules_list:
         print "~ [%s]" % mod['name']
         print "~   %s" % mod['fullname']
@@ -233,13 +233,13 @@ def list(app, args):
             i = i+1
             if i < len(mod['versions']):
                 vl += ', '
-
+        
         if vl:
             print "~   Versions: %s" % vl
         else:
             print "~   (No versions released yet)"
         print "~"
-
+    
     print "~ To install one of these modules use:"
     print "~ play install module-version (eg: play install scala-1.0)"
     print "~"
@@ -251,7 +251,7 @@ def build(app, args, env):
     ftb = env["basedir"]
     version = None
     fwkMatch = None
-
+    
     try:
         optlist, args = getopt.getopt(args, '', ['framework=', 'version=', 'require='])
         for o, a in optlist:
@@ -265,24 +265,24 @@ def build(app, args, env):
         print "~ %s" % str(err)
         print "~ "
         sys.exit(-1)
-
+    
     deps_file = os.path.join(app.path, 'conf', 'dependencies.yml')
     if os.path.exists(deps_file):
-		f = open(deps_file)
-		deps = yaml.load(f.read())
-		versionCandidate = deps["self"].split(" ").pop()
- 		version = versionCandidate
-  		for dep in deps["require"]:
-        	splitted = dep.split(" ")
-          	if len(splitted) == 2 and splitted[0] == "play":
-          		fwkMatch = splitted[1]
- 		f.close
-
+        f = open(deps_file)
+        deps = yaml.load(f.read())
+        versionCandidate = deps["self"].split(" ").pop()
+        version = versionCandidate
+        for dep in deps["require"]:
+            splitted = dep.split(" ")
+            if len(splitted) == 2 and splitted[0] == "play":
+                fwkMatch = splitted[1]
+        f.close
+    
     if version is None:
         version = raw_input("~ What is the module version number? ")
     if fwkMatch is None:
         fwkMatch = raw_input("~ What are the playframework versions required? ")
-
+    
     build_file = os.path.join(app.path, 'build.xml')
     if os.path.exists(build_file):
         print "~"
@@ -290,20 +290,20 @@ def build(app, args, env):
         print "~"
         os.system('ant -f %s -Dplay.path=%s' % (build_file, ftb) )
         print "~"
-
+    
     mv = '%s-%s' % (os.path.basename(app.path), version)
     print("~ Packaging %s ... " % mv)
-
+    
     dist_dir = os.path.join(app.path, 'dist')
     if os.path.exists(dist_dir):
         shutil.rmtree(dist_dir)
     os.mkdir(dist_dir)
-
+    
     manifest = os.path.join(app.path, 'manifest')
     manifestF = open(manifest, 'w')
     manifestF.write('version=%s\nframeworkVersions=%s\n' % (version, fwkMatch))
     manifestF.close()
-
+    
     zip = zipfile.ZipFile(os.path.join(dist_dir, '%s.zip' % mv), 'w', zipfile.ZIP_STORED)
     for (dirpath, dirnames, filenames) in os.walk(app.path):
         if dirpath == dist_dir:
@@ -315,9 +315,9 @@ def build(app, args, env):
                 continue
             zip.write(os.path.join(dirpath, file), os.path.join(dirpath[len(app.path):], file))
     zip.close()
-
+    
     os.remove(manifest)
-
+    
     print "~"
     print "~ Done!"
     print "~ Package is available at %s" % os.path.join(dist_dir, '%s.zip' % mv)
@@ -328,7 +328,7 @@ def install(app, args, env):
         help_file = os.path.join(env["basedir"], 'documentation/commands/cmd-install.txt')
         print open(help_file, 'r').read()
         sys.exit(0)
-
+    
     name = cmd = sys.argv[2]
     groups = re.match(r'^([a-zA-Z0-9]+)([-](.*))?$', name)
     module = groups.group(1)
@@ -336,7 +336,7 @@ def install(app, args, env):
     
     modules_list = load_module_list()
     fetch = None
-
+    
     for mod in modules_list:
         if mod['name'] == module:
             for v in mod['versions']:
@@ -357,11 +357,11 @@ def install(app, args, env):
                     if not ok == 'y':
                         print '~'
                         sys.exit(-1)
-
+                    
                     print '~ Installing module %s-%s...' % (module, v['version'])
                     fetch = '%s/modules/%s-%s.zip' % (mod['server'], module, v['version'])
                     break
-
+    
     if fetch == None:
         print '~ No module found \'%s\'' % name
         print '~ Try play list-modules to get the modules list'
@@ -371,22 +371,22 @@ def install(app, args, env):
     archive = os.path.join(env["basedir"], 'modules/%s-%s.zip' % (module, v['version']))
     if os.path.exists(archive):
         os.remove(archive)
-
+    
     print '~'
     print '~ Fetching %s' % fetch
     Downloader().retrieve(fetch, archive)
-
+    
     if not os.path.exists(archive):
         print '~ Oops, file does not exist'
         print '~'
         sys.exist(-1)
-
+    
     print '~ Unzipping...'
-
+    
     if os.path.exists(os.path.join(env["basedir"], 'modules/%s-%s' % (module, v['version']))):
         shutil.rmtree(os.path.join(env["basedir"], 'modules/%s-%s' % (module, v['version'])))
     os.mkdir(os.path.join(env["basedir"], 'modules/%s-%s' % (module, v['version'])))
-
+    
     Unzip().extract(archive, os.path.join(env["basedir"], 'modules/%s-%s' % (module, v['version'])))
     os.remove(archive)
     print '~'
@@ -399,7 +399,7 @@ def install(app, args, env):
 
 def add(app, args, env):
     app.check()
-
+    
     try:
         optlist, args = getopt.getopt(args, '', ['module='])
         for o, a in optlist:
@@ -409,42 +409,42 @@ def add(app, args, env):
         print "~ %s" % str(err)
         print "~ "
         sys.exit(-1)
-
+    
     if m is None:
         print "~ Usage: play add --module=<modulename>"
         print "~ "
         sys.exit(-1)
-
+    
     appConf = os.path.join(app.path, 'conf/application.conf')
     if not fileHas(appConf, '# ---- MODULES ----'):
         print "~ Line '---- MODULES ----' missing in your application.conf. Add it to use this command."
         print "~ "
         sys.exit(-1)
-
+    
     mn = m
     if mn.find('-') > 0:
         mn = mn[:mn.find('-')]
-
+    
     if mn in app.module_names():
         print "~ Module %s already declared in application.conf, not doing anything." % mn
         print "~ "
         sys.exit(-1)
-
+    
     replaceAll(appConf, r'# ---- MODULES ----', '# ---- MODULES ----\nmodule.%s=${play.path}/modules/%s' % (mn, m) )
     print "~ Module %s add to application %s." % (mn, app.name())
     print "~ "
 
 def load_module_list():
-
+    
     def addServer(module, server):
         module['server'] = server
         return module
-
+    
     def any(arr, func):
         for x in arr:
             if func(x): return True
         return False
-
+    
     modules = None
     rev = repositories[:] # clone
     rev.reverse()
