@@ -91,25 +91,6 @@ class PlayApplication(object):
     def module_names(self):
         return map(lambda x: x[7:],self.conf.getAllKeys("module."))
 
-    def load_modules(self):
-        if os.environ.has_key('MODULES'):
-            if os.name == 'nt':
-                modules = os.environ['MODULES'].split(';')
-            else:
-                modules = os.environ['MODULES'].split(':')
-        else:
-            modules = []
-
-        if play_app is not None:
-            try:
-                modules = play_app.modules()
-            except ModuleNotFound, e:
-                print 'Module not found %s' % e
-                sys.exit(-1)
-
-            if isTestFrameworkId(play_env["id"]):
-                modules.append(os.path.normpath(os.path.join(play_env["basedir"], 'modules/testrunner')))
-
     def override(self, f, t):
         fromFile = None
         for module in self.modules():
