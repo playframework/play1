@@ -336,7 +336,7 @@ def install(app, args, env):
     for mod in modules_list:
         if mod['name'] == module:
             for v in mod['versions']:
-                if version == None and v['isDefault']:
+                if version is not None and v['isDefault']:
                     print '~ Will install %s-%s' % (module, v['version'])
                     print '~ This module is compatible with: %s' % v['matches']
                     ok = raw_input('~ Do you want to install this version (y/n)? ')
@@ -358,7 +358,7 @@ def install(app, args, env):
                     fetch = '%s/modules/%s-%s.zip' % (mod['server'], module, v['version'])
                     break
 
-    if fetch == None:
+    if fetch is None:
         print '~ No module found \'%s\'' % name
         print '~ Try play list-modules to get the modules list'
         print '~'
@@ -446,7 +446,7 @@ def load_module_list():
     rev.reverse()
     for repo in rev:
         result = load_modules_from(repo)
-        if modules == None:
+        if modules is None:
             modules = map(lambda m: addServer(m, repo), result['modules'])
         else:
             for module in result['modules']:
