@@ -61,7 +61,6 @@ class PlayApplication(object):
     def modules(self):
         modules = []
         for m in self.readConfs('module.'):
-            om = m
             if '${play.path}' in m:
                 m = m.replace('${play.path}', self.play_env["basedir"])
             if m[0] is not '/':
@@ -162,19 +161,19 @@ class PlayApplication(object):
 
     def pid_path(self):
         if self.play_env.has_key('pid_file'):
-            return os.path.join(self.path, self.play_env['pid_file']);
+            return os.path.join(self.path, self.play_env['pid_file'])
         elif os.environ.has_key('PLAY_PID_PATH'):
-            return os.environ['PLAY_PID_PATH'];
+            return os.environ['PLAY_PID_PATH']
         else:
-            return os.path.join(self.path, 'server.pid');
+            return os.path.join(self.path, 'server.pid')
 
     def log_path(self):
         if not os.environ.has_key('PLAY_LOG_PATH'):
-            log_path = os.path.join(self.path, 'logs');
+            log_path = os.path.join(self.path, 'logs')
         else:
-            log_path = os.environ['PLAY_LOG_PATH'];
+            log_path = os.environ['PLAY_LOG_PATH']
         if not os.path.exists(log_path):
-            os.mkdir(log_path);
+            os.mkdir(log_path)
         return log_path
 
     def check_jpda(self):
@@ -290,6 +289,6 @@ class PlayConfParser:
 def hasKey(arr, elt):
     try:
         i = arr.index(elt)
-        return True;
+        return True
     except:
-        return False;
+        return False
