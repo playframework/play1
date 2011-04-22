@@ -196,8 +196,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
             public Object loadObject() throws Exception {
                 // someone is trying to access our Request-object. We must
                 // initialize it..
-                String applicationBaseUrl = Play.configuration.getProperty(
-                        applicationBaseUrl_configPropertyName);
+                String applicationBaseUrl = Play.configuration.getProperty(applicationBaseUrl_configPropertyName);
 
                 if( applicationBaseUrl == null ) {
                     throw new RuntimeException("Since you are probably trying to resolve urls from inside a Job, " +
@@ -218,6 +217,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     @Override
     public void _finally() {
         super._finally();
+        Http.Request.current.remove();
         if (executor == JobsPlugin.executor) {
             JobsPlugin.scheduleForCRON(this);
         }

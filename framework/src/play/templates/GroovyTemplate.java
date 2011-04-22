@@ -238,6 +238,7 @@ public class GroovyTemplate extends BaseTemplate {
             if (monitor != null) {
                 monitor.stop();
             }
+            currentTemplate.remove();
         }
         if (applyLayouts && layout.get() != null) {
             Map<String, Object> layoutArgs = new HashMap<String, Object>(args);
