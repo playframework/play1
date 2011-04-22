@@ -81,7 +81,7 @@ public class Scope {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
         }        // ThreadLocal access
-        static ThreadLocal<Flash> current = new ThreadLocal<Flash>();
+        public static ThreadLocal<Flash> current = new ThreadLocal<Flash>();
 
         public static Flash current() {
             return current.get();

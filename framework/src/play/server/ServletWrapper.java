@@ -138,6 +138,14 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             return;
         } catch (Throwable e) {
             throw new ServletException(e);
+        } finally {
+            Request.current.remove();
+            Response.current.remove();
+            Scope.Session.current.remove();
+            Scope.Params.current.remove();
+            Scope.Flash.current.remove();
+            Scope.RenderArgs.current.remove();
+            Scope.RouteArgs.current.remove();
         }
     }
 
@@ -177,39 +185,39 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         }
     }
 
-	public static boolean isModified(String etag, long last,
-			HttpServletRequest request) {
-		// See section 14.26 in rfc 2616 http://www.faqs.org/rfcs/rfc2616.html
-		String browserEtag = request.getHeader(IF_NONE_MATCH);
-		String dateString = request.getHeader(IF_MODIFIED_SINCE);
-		if (browserEtag != null) {
-			boolean etagMatches = browserEtag.equals(etag);
-			if (!etagMatches) {
-				return true;
-			}
-			if (dateString != null) {
-				return !isValidTimeStamp(last, dateString);
-			}
-			return false;
-		} else {
-			if (dateString != null) {
-				return !isValidTimeStamp(last, dateString);
-			} else {
-				return true;
-			}
-		}
-	}
+    public static boolean isModified(String etag, long last,
+            HttpServletRequest request) {
+        // See section 14.26 in rfc 2616 http://www.faqs.org/rfcs/rfc2616.html
+        String browserEtag = request.getHeader(IF_NONE_MATCH);
+        String dateString = request.getHeader(IF_MODIFIED_SINCE);
+        if (browserEtag != null) {
+            boolean etagMatches = browserEtag.equals(etag);
+            if (!etagMatches) {
+                return true;
+            }
+            if (dateString != null) {
+                return !isValidTimeStamp(last, dateString);
+            }
+            return false;
+        } else {
+            if (dateString != null) {
+                return !isValidTimeStamp(last, dateString);
+            } else {
+                return true;
+            }
+        }
+    }
 
-	private static boolean isValidTimeStamp(long last, String dateString) {
-		try {
-			long browserDate = Utils.getHttpDateFormatter().parse(dateString).getTime();
-			return browserDate >= last;
-		} catch (ParseException e) {
-			Logger.error("Can't parse date", e);
-			return false;
-		}
-	}
-    	
+    private static boolean isValidTimeStamp(long last, String dateString) {
+        try {
+            long browserDate = Utils.getHttpDateFormatter().parse(dateString).getTime();
+            return browserDate >= last;
+        } catch (ParseException e) {
+            Logger.error("Can't parse date", e);
+            return false;
+        }
+    }
+
     public static Request parseRequest(HttpServletRequest httpServletRequest) throws Exception {
 
         URI uri = new URI(httpServletRequest.getRequestURI());
@@ -248,7 +256,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         String remoteAddress = httpServletRequest.getRemoteAddr();
 
         boolean isLoopback = host.matches("^127\\.0\\.0\\.1:?[0-9]*$");
-        
+
 
         final Request request = Request.createRequest(
                 remoteAddress,
@@ -310,7 +318,6 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
         return cookies;
     }
-
 
     public void serve404(HttpServletRequest servletRequest, HttpServletResponse servletResponse, NotFound e) {
         Logger.warn("404 -> %s %s (%s)", servletRequest.getMethod(), servletRequest.getRequestURI(), e.getMessage());
@@ -501,13 +508,13 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         public boolean init() {
             try {
                 return super.init();
-            } catch(NotFound e) {
+            } catch (NotFound e) {
                 serve404(httpServletRequest, httpServletResponse, e);
                 return false;
-            } catch(RenderStatic r) {
+            } catch (RenderStatic r) {
                 try {
                     serveStatic(httpServletResponse, httpServletRequest, r);
-                } catch(IOException e) {
+                } catch (IOException e) {
                     throw new UnexpectedException(e);
                 }
                 return false;
@@ -537,6 +544,5 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                     request.invokedMethod.getAnnotations(),
                     request.invokedMethod.getDeclaringClass().getAnnotations());
         }
-        
     }
 }
