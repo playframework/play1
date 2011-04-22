@@ -55,7 +55,7 @@ def execute(**kargs):
         req = urllib2.Request(url)
         req.add_header('Authorization', authorization)
         opener = urllib2.build_opener(proxy_handler)
-        status = opener.open(req);
+        status = opener.open(req)
         print '~ Status from %s,' % url
         print '~'
         print status.read()
