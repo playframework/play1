@@ -186,7 +186,9 @@ class PlayApplication(object):
             print 'JPDA port %s is already used. Will try to use any free port for debugging' % self.jpda_port
             self.jpda_port = 0
 
-    def java_cmd(self, java_args, cp_args=None, className='play.server.Server', args=['']):
+    def java_cmd(self, java_args, cp_args=None, className='play.server.Server', args = None):
+        if args is None:
+            args = ['']
         memory_in_args=False
         for arg in java_args:
             if arg.startswith('-Xm'):
