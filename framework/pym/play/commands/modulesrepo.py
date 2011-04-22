@@ -104,8 +104,11 @@ class Downloader(object):
     def progress(self, blocks, blocksize, filesize):
         self.cycles += 1
         bits = min(blocks*blocksize, filesize)
-        done = self.proc(bits, filesize) if bits != filesize else 100
-        bar = self.bar(done)
+        if bits != filesize:
+           done = self.proc(bits, filesize)
+        else:
+           done = 100
+		bar = self.bar(done)
         if not self.cycles % 3 and bits != filesize:
             now = time.clock()
             elapsed = now-self.before
@@ -265,14 +268,15 @@ def build(app, args, env):
 
     deps_file = os.path.join(app.path, 'conf', 'dependencies.yml')
     if os.path.exists(deps_file):
-        with open(deps_file) as f:
-            deps = yaml.load(f.read())
-            versionCandidate = deps["self"].split(" ").pop()
-            version = versionCandidate
-            for dep in deps["require"]:
-                splitted = dep.split(" ")
-                if len(splitted) == 2 and splitted[0] == "play":
-                    fwkMatch = splitted[1]
+		f = open(deps_file)
+		deps = yaml.load(f.read())
+		versionCandidate = deps["self"].split(" ").pop()
+ 		version = versionCandidate
+  		for dep in deps["require"]:
+        	splitted = dep.split(" ")
+          	if len(splitted) == 2 and splitted[0] == "play":
+          		fwkMatch = splitted[1]
+ 		f.close
 
     if version is None:
         version = raw_input("~ What is the module version number? ")
