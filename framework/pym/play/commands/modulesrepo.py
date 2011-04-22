@@ -104,7 +104,10 @@ class Downloader(object):
     def progress(self, blocks, blocksize, filesize):
         self.cycles += 1
         bits = min(blocks*blocksize, filesize)
-        done = self.proc(bits, filesize) if bits != filesize else 100
+        if bits != filesize:
+            done = self.proc(bits, filesize)
+        else:
+            done = 100
         bar = self.bar(done)
         if not self.cycles % 3 and bits != filesize:
             now = time.clock()
@@ -222,7 +225,7 @@ def list(app, args):
         print "~ [%s]" % mod['name']
         print "~   %s" % mod['fullname']
         print "~   %s/modules/%s" % (mod['server'], mod['name'])
-        
+
         vl = ''
         i = 0
         for v in mod['versions']:
@@ -331,7 +334,7 @@ def install(app, args, env):
     groups = re.match(r'^([a-zA-Z0-9]+)([-](.*))?$', name)
     module = groups.group(1)
     version = groups.group(3)
-    
+
     modules_list = load_module_list()
     fetch = None
 
@@ -365,7 +368,7 @@ def install(app, args, env):
         print '~ Try play list-modules to get the modules list'
         print '~'
         sys.exit(-1)
-    
+
     archive = os.path.join(env["basedir"], 'modules/%s-%s.zip' % (module, v['version']))
     if os.path.exists(archive):
         os.remove(archive)
@@ -474,4 +477,3 @@ def load_modules_from(modules_server):
         print "~ Cannot fetch the modules list from %s ..." % (url)
         print "~"
         sys.exit(-1)
-
