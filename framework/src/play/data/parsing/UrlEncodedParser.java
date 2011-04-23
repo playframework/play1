@@ -8,7 +8,7 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http;
 import play.utils.Utils;
@@ -37,6 +37,7 @@ public class UrlEncodedParser extends DataParser {
 
     @Override
     public Map<String, String[]> parse(InputStream is) {
+        // Encoding is either retrieved from contentType or it is the default encoding
         final String encoding = Http.Request.current().encoding;
         try {
             Map<String, String[]> params = new HashMap<String, String[]>();
@@ -48,24 +49,30 @@ public class UrlEncodedParser extends DataParser {
             }
 
             String data = new String(os.toByteArray(), encoding);
-            // add the complete body as a parameters
-            if(!forQueryString) {
-                params.put("body", new String[] {data});
-            }
 
             // data is o the form:
             // a=b&b=c%12...
+
+            // Let us parse in two phases - we wait until everything is parsed before
+            // we decoded it - this makes it possible for use to look for the
+            // special _charset_ param which can hold the charset the form is encoded in.
+            //
+            // http://www.crazysquirrel.com/computing/general/form-encoding.jspx
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=18643
+            //
+            // NB: _charset_ must always be used with accept-charset and it must have the same value
+
             String[] keyValues = data.split("&");
             for (String keyValue : keyValues) {
                 // split this key-value on '='
                 String[] parts = keyValue.split("=");
                 // sanity check
                 if (parts.length >= 1) {
-                    String key = URLDecoder.decode(parts[0],encoding);
+                    String key = parts[0];
                     if (key.length()>0) {
                         String value = null;
                         if (parts.length == 2) {
-                            value = URLDecoder.decode(parts[1],encoding);
+                            value = parts[1];
                         } else {
                             // if keyValue ends with "=", then we have an empty value
                             // if not ending with "=", we have a key without a value (a flag)
@@ -77,7 +84,41 @@ public class UrlEncodedParser extends DataParser {
                     }
                 }
             }
-            return params;
+
+            // Second phase - look for _charset_ param and do the encoding
+            String charset = encoding;
+            if (params.containsKey("_charset_")) {
+                // The form contains a _charset_ param - When this is used together
+                // with accept-charset, we can use _charset_ to extract the encoding.
+                // PS: When rendering the view/form, _charset_ and accept-charset must be given the
+                // same value - since only Firefox and sometimes IE actually sets it when Posting
+                String providedCharset = params.get("_charset_")[0];
+                // Must be sure the providedCharset is a valid encoding..
+                try {
+                    "test".getBytes(providedCharset);
+                    charset = providedCharset; // it works..
+                } catch (Exception e) {
+                    Logger.debug("Got invalid _charset_ in form: " + providedCharset);
+                    // lets just use the default one..
+                }
+            }
+
+            // We're ready to decode the params
+            Map<String, String[]> decodedParams = new HashMap<String, String[]>();
+            for (Map.Entry<String, String[]> e : params.entrySet()) {
+                String key = URLDecoder.decode(e.getKey(),charset);
+                for (String value : e.getValue()) {
+
+                    Utils.Maps.mergeValueInMap(decodedParams, key, (value==null ? null : URLDecoder.decode(value,charset)));
+                }
+            }
+
+            // add the complete body as a parameters
+            if(!forQueryString) {
+                decodedParams.put("body", new String[] {data});
+            }
+
+            return decodedParams;
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
