@@ -43,7 +43,7 @@ h2. <a>Customizing the authentication process</a>
 
 The application has to provide an instance of **controllers.Secure.Security** to customize the authentication process. By creating our own version of this class we will be able to specify exactly how users should be authenticated.
 
-Create a **yabe/controllers/Security.java** file and override the **authenticate()** method:
+Create a **yabe/app/controllers/Security.java** file and override the **authenticate()** method:
 
 bc. package controllers;
  
