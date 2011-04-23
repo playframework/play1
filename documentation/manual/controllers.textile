@@ -516,6 +516,12 @@ To change encoding for current response, you can do it like this in your Control
 
 bc. response.encoding = "ISO-8859-1";
 
+When posting a form using other encoding than what is default on the server, you should include the encoding/charset twice in the form, both in **accept-charset** and in a special hidden form-field named **_charset_**. accept-charset tells the browser which encoding to use when posting the from, and the form-field _charset_ tells Play! what that encoding is:
+
+bc. <form action="@{application.index}" method="POST" accept-charset="ISO-8859-1">
+    <input type="hidden" name="_charset_" value="ISO-8859-1">
+</form>
+
 h4. Custom web encoding for the entire App
 
 By setting the property **application.web_encoding** in application.conf, you can customize which encoding
