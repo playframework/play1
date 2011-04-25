@@ -76,7 +76,9 @@ def getWithModules(args, env):
     
     return md
 
-def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = []):
+def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = None):
+    if war_exclusion_list is None:
+        war_exclusion_list = []
     app.check()
     modules = app.modules()
     classpath = app.getClasspath()
@@ -191,7 +193,9 @@ def delete(filename):
         os.remove(filename)
 
 # Copy a directory, skipping dot-files
-def copy_directory(source, target, exclude = []):
+def copy_directory(source, target, exclude = None):
+    if exclude is None:
+        exclude = []
     skip = None
 
     if not os.path.exists(target):
