@@ -192,9 +192,13 @@ public class Scope {
                                 session = new Session();
                             }
                         }
-                        session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
                     }
                 }
+
+                if (COOKIE_EXPIRE != null) {
+                    session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
+                }
+
                 return session;
             } catch (Exception e) {
                 throw new UnexpectedException("Corrupted HTTP session from " + Http.Request.current().remoteAddress, e);
