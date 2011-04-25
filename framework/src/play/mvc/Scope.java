@@ -198,7 +198,13 @@ public class Scope {
                         // Just restored. Nothing changed. No cookie-expire.
                         session.changed = false;
                     }
+                } else {
+                    // no previous cookie to restore; but we may have to set the timestamp in the new cookie
+                    if (COOKIE_EXPIRE != null) {
+                        session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
+                    }
                 }
+
                 return session;
             } catch (Exception e) {
                 throw new UnexpectedException("Corrupted HTTP session from " + Http.Request.current().remoteAddress, e);
