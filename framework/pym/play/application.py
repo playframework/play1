@@ -20,7 +20,7 @@ class PlayApplication:
         if application_path is not None:
             confpath = os.path.join(application_path, 'conf/application.conf')
             try:
-                self.conf = PlayConfParser(confpath, env["id"])
+                self.conf = PlayConfParser(confpath, env["id"], application_path)
             except:
                 self.conf = None # No app / Invalid app
         else:
@@ -223,10 +223,13 @@ class PlayConfParser:
         'jpda.port': '8000'
     }
 
-    def __init__(self, filepath, frameworkId):
+    def __init__(self, filepath, frameworkId, application_path):
         self.id = frameworkId
-        f = file(filepath)
         self.entries = dict()
+        self.readFile(filepath, application_path)
+
+    def readFile(self, filepath, application_path):
+        f = file(filepath)
         for line in f:
             linedef = line.strip()
             if len(linedef) == 0:
@@ -235,7 +238,12 @@ class PlayConfParser:
                 continue
             if linedef.find('=') == -1:
                 continue
-            self.entries[linedef.split('=')[0].rstrip()] = linedef.split('=')[1].lstrip()
+            val = linedef.split('=')[1].lstrip();
+            if linedef.find('@include.') == 0:
+                val = os.path.join(application_path, 'conf', val)
+                self.readFile(val, application_path)
+            else:
+                self.entries[linedef.split('=')[0].rstrip()] = val
         f.close()
 
     def get(self, key):

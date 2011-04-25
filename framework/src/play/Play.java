@@ -294,77 +294,82 @@ public class Play {
     static void readConfiguration() {
         VirtualFile appRoot = VirtualFile.open(applicationPath);
         conf = appRoot.child("conf/application.conf");
+        Properties newConfiguration = null;
         try {
-            configuration = IO.readUtf8Properties(conf.inputstream());        
+            newConfiguration = IO.readUtf8Properties(conf.inputstream());        
         } catch (RuntimeException e) {
             if (e.getCause() instanceof IOException) {
                 Logger.fatal("Cannot read application.conf");
                 System.exit(0);
             }
         }
-        // Ok, check for instance specifics configuration
-        Properties newConfiguration = new OrderSafeProperties();
-        Pattern pattern = Pattern.compile("^%([a-zA-Z0-9_\\-]+)\\.(.*)$");
-        for (Object key : configuration.keySet()) {
-            Matcher matcher = pattern.matcher(key + "");
-            if (!matcher.matches()) {
-                newConfiguration.put(key, configuration.get(key).toString().trim());
-            }
-        }
-        for (Object key : configuration.keySet()) {
-            Matcher matcher = pattern.matcher(key + "");
-            if (matcher.matches()) {
-                String instance = matcher.group(1);
-                if (instance.equals(id)) {
-                    newConfiguration.put(matcher.group(2), configuration.get(key).toString().trim());
-                }
-            }
-        }
-        configuration = newConfiguration;
-        // Resolve ${..}
-        pattern = Pattern.compile("\\$\\{([^}]+)}");
-        for (Object key : configuration.keySet()) {
-            String value = configuration.getProperty(key.toString());
-            Matcher matcher = pattern.matcher(value);
-            StringBuffer newValue = new StringBuffer(100);
-            while (matcher.find()) {
-                String jp = matcher.group(1);
-                String r;
-                if (jp.equals("application.path")) {
-                    r = Play.applicationPath.getAbsolutePath();
-                } else if (jp.equals("play.path")) {
-                    r = Play.frameworkPath.getAbsolutePath();
-                } else {
-                    r = System.getProperty(jp);
-                    if (r == null) {
-                        Logger.warn("Cannot replace %s in configuration (%s=%s)", jp, key, value);
-                        continue;
-                    }
-                }
-                matcher.appendReplacement(newValue, r.replaceAll("\\\\", "\\\\\\\\"));
-            }
-            matcher.appendTail(newValue);
-            configuration.setProperty(key.toString(), newValue.toString());
-        }
-        // Include
-        Map toInclude = new HashMap(16);
-        for (Object key : configuration.keySet()) {
-            if (key.toString().startsWith("@include.")) {
-                try {
-                    toInclude.putAll(IO.readUtf8Properties(appRoot.child("conf/" + configuration.getProperty(key.toString())).inputstream()));
-                } catch (Exception ex) {
-                    Logger.warn("Missing include: %s", key);
-                }
-            }
-        }
-        configuration.putAll(toInclude);
+        configuration = new OrderSafeProperties();
+        parseConfiguration(appRoot, newConfiguration);
         // Plugins
         for (PlayPlugin plugin : plugins) {
             plugin.onConfigurationRead();
         }
     }
 
-    /**
+    private static void parseConfiguration(VirtualFile appRoot, Properties newConfiguration) {
+        // Ok, check for instance specifics configuration
+        Pattern pattern = Pattern.compile("^%([a-zA-Z0-9_\\-]+)\\.(.*)$");
+        Pattern varPattern = Pattern.compile("\\$\\{([^}]+)}");
+        for (Object key : newConfiguration.keySet()) {
+            String keyName = key.toString();
+        	Matcher matcher = pattern.matcher(keyName);
+            String val = newConfiguration.get(key).toString().trim();
+            // first deal with IDs
+            if (matcher.matches()) {
+                String instance = matcher.group(1);
+                if (!instance.equals(id)) {
+                	// skip it
+                	continue;
+                }
+                keyName = matcher.group(2);
+            }
+            // then with variables
+            matcher = varPattern.matcher(val);
+            if(matcher.matches())
+            	val = resolveVariables(key, val, matcher);
+            // now is it an include?
+            if (keyName.startsWith("@include.")) {
+                try {
+                	VirtualFile includedFile = appRoot.child("conf/" + newConfiguration.getProperty(keyName));
+                	Properties includedProperties = IO.readUtf8Properties(includedFile.inputstream());
+                	parseConfiguration(appRoot, includedProperties);
+                } catch (Exception ex) {
+                    Logger.warn("Missing include: %s", key);
+                }
+            }else{
+            	configuration.put(keyName, val);
+            }
+        }
+	}
+
+	private static String resolveVariables(Object key, String val, Matcher matcher) {
+        StringBuffer newValue = new StringBuffer(100);
+        while (matcher.find()) {
+            String jp = matcher.group(1);
+            String r;
+            if (jp.equals("application.path")) {
+                r = Play.applicationPath.getAbsolutePath();
+            } else if (jp.equals("play.path")) {
+                r = Play.frameworkPath.getAbsolutePath();
+            } else {
+                r = System.getProperty(jp);
+                if (r == null) {
+                    Logger.warn("Cannot replace %s in configuration (%s=%s)", jp, key, val);
+                    continue;
+                }
+            }
+            matcher.appendReplacement(newValue, r.replaceAll("\\\\", "\\\\\\\\"));
+        }
+        matcher.appendTail(newValue);
+        return newValue.toString();
+	}
+
+	/**
      * Start the application.
      * Recall to restart !
      */
