@@ -182,7 +182,7 @@ def autotest(app, args):
     try:
         proxy_handler = urllib2.ProxyHandler({})
         opener = urllib2.build_opener(proxy_handler)
-        opener.open('http://localhost:%s/@kill' % http_port);
+        opener.open('http://localhost:%s/@kill' % http_port)
     except Exception, e:
         pass
 
@@ -243,7 +243,7 @@ def autotest(app, args):
     try:
         proxy_handler = urllib2.ProxyHandler({})
         opener = urllib2.build_opener(proxy_handler)
-        opener.open('http://localhost:%s/@kill' % http_port);
+        opener.open('http://localhost:%s/@kill' % http_port)
     except Exception, e:
         pass
 
