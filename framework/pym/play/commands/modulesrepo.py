@@ -265,14 +265,16 @@ def build(app, args, env):
 
     deps_file = os.path.join(app.path, 'conf', 'dependencies.yml')
     if os.path.exists(deps_file):
-        with open(deps_file) as f:
-            deps = yaml.load(f.read())
-            versionCandidate = deps["self"].split(" ").pop()
-            version = versionCandidate
-            for dep in deps["require"]:
+        f = open(deps_file)
+        deps = yaml.load(f.read())
+        versionCandidate = deps["self"].split(" ").pop()
+        version = versionCandidate
+        for dep in deps["require"]:
+            if isinstance(dep, basestring):
                 splitted = dep.split(" ")
                 if len(splitted) == 2 and splitted[0] == "play":
                     fwkMatch = splitted[1]
+        f.close
 
     if version is None:
         version = raw_input("~ What is the module version number? ")
