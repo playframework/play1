@@ -273,9 +273,10 @@ def build(app, args, env):
         versionCandidate = deps["self"].split(" ").pop()
         version = versionCandidate
         for dep in deps["require"]:
-            splitted = dep.split(" ")
-            if len(splitted) == 2 and splitted[0] == "play":
-                fwkMatch = splitted[1]
+            if isinstance(dep, basestring):
+                splitted = dep.split(" ")
+                if len(splitted) == 2 and splitted[0] == "play":
+                    fwkMatch = splitted[1]
         f.close
 
     if version is None:
