@@ -149,7 +149,7 @@ public class JPAPlugin extends PlayPlugin {
                 }
 
                 String driver = null;
-                if (propPrefix.isEmpty()) {
+                if (StringUtils.isEmpty(propPrefix)) {
                     driver = Play.configuration.getProperty("db.driver");
                 } else {
                     driver = Play.configuration.getProperty(propPrefix+"driver");
@@ -161,7 +161,7 @@ public class JPAPlugin extends PlayPlugin {
                 cfg.setInterceptor(new PlayInterceptor());
 
                 // This setting is global for all JPAs - only configure if configuring default JPA
-                if (propPrefix.isEmpty()) {
+                if (StringUtils.isEmpty(propPrefix)) {
                     if (Play.configuration.getProperty(propPrefix+"jpa.debugSQL", "false").equals("true")) {
                         org.apache.log4j.Logger.getLogger("org.hibernate.SQL").setLevel(Level.ALL);
                     } else {
@@ -174,7 +174,7 @@ public class JPAPlugin extends PlayPlugin {
                 Properties transformedAdditionalProperties = new Properties();
                 for (Map.Entry<Object, Object> entry : additionalProperties.entrySet()) {
                     Object key = entry.getKey();
-                    if (!propPrefix.isEmpty()) {
+                    if (!StringUtils.isEmpty(propPrefix)) {
                         key = ((String)key).substring(propPrefix.length()); // chop off the prefix
                     }
                     transformedAdditionalProperties.put(key, entry.getValue());

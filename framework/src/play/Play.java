@@ -55,7 +55,6 @@ public class Play {
      * Is the application started
      */
     public static boolean started = false;
-
     /**
      * True when the one and only shutdown hook is enabled
      */
@@ -132,8 +131,6 @@ public class Play {
      * The very secret key
      */
     public static String secretKey;
-
-
     /**
      * pluginCollection that holds all loaded plugins and all enabled plugins..
      */
@@ -165,7 +162,6 @@ public class Play {
      * Lazy load the templates on demand
      */
     public static boolean lazyLoadTemplates = false;
-
     /**
      * This is used as default encoding everywhere related to the web: request, response, WS
      */
@@ -218,7 +214,7 @@ public class Play {
         String logLevel = configuration.getProperty("application.log", "INFO");
 
         //only override log-level if Logger was not configured manually
-        if( !Logger.configuredManually) {
+        if (!Logger.configuredManually) {
             Logger.setUp(logLevel);
         }
         Logger.recordCaller = Boolean.parseBoolean(configuration.getProperty("application.log.recordCaller", "false"));
@@ -293,7 +289,7 @@ public class Play {
 
         // Default cookie domain
         Http.Cookie.defaultDomain = configuration.getProperty("application.defaultCookieDomain", null);
-        if (Http.Cookie.defaultDomain!=null) {
+        if (Http.Cookie.defaultDomain != null) {
             Logger.info("Using default cookie domain: " + Http.Cookie.defaultDomain);
         }
 
@@ -402,19 +398,20 @@ public class Play {
                 stop();
             }
 
-            if(!shutdownHookEnabled){
+            if (!shutdownHookEnabled) {
                 //registeres shutdown hook - New there's a good chance that we can notify
                 //our plugins that we're going down when some calls ctrl+c or just kills our process..
                 shutdownHookEnabled = true;
 
                 // Try to register shutdown-hook
-                try{
-                    Runtime.getRuntime().addShutdownHook( new Thread() {
-                        public void run(){
+                try {
+                    Runtime.getRuntime().addShutdownHook(new Thread() {
+
+                        public void run() {
                             Play.stop();
                         }
                     });
-                } catch(Exception e) {
+                } catch (Exception e) {
                     Logger.trace("Got error while trying to register JVM-shutdownHook. Probably using GAE");
                 }
             }
@@ -433,7 +430,7 @@ public class Play {
             // Configure logs
             String logLevel = configuration.getProperty("application.log", "INFO");
             //only override log-level if Logger was not configured manually
-            if( !Logger.configuredManually) {
+            if (!Logger.configuredManually) {
                 Logger.setUp(logLevel);
             }
             Logger.recordCaller = Boolean.parseBoolean(configuration.getProperty("application.log.recordCaller", "false"));
@@ -455,13 +452,13 @@ public class Play {
 
             // Default web encoding
             String _defaultWebEncoding = configuration.getProperty("application.web_encoding");
-            if( _defaultWebEncoding != null ) {
+            if (_defaultWebEncoding != null) {
                 Logger.info("Using custom default web encoding: " + _defaultWebEncoding);
                 defaultWebEncoding = _defaultWebEncoding;
                 // Must update current response also, since the request/response triggering
                 // this configuration-loading in dev-mode have already been
                 // set up with the previous encoding
-                if( Http.Response.current() != null ) {
+                if (Http.Response.current() != null) {
                     Http.Response.current().encoding = _defaultWebEncoding;
                 }
             }
@@ -545,6 +542,7 @@ public class Play {
         }
         try {
             Logger.info("Precompiling ...");
+            Thread.currentThread().setContextClassLoader(Play.classloader);
             long start = System.currentTimeMillis();
             classloader.getAllClasses();
             Logger.trace("%sms to precompile the Java stuff", System.currentTimeMillis() - start);
@@ -594,10 +592,8 @@ public class Play {
 
     @SuppressWarnings("unchecked")
     public static <T> T plugin(Class<T> clazz) {
-        return (T)pluginCollection.getPluginInstance((Class<? extends PlayPlugin>)clazz);
+        return (T) pluginCollection.getPluginInstance((Class<? extends PlayPlugin>) clazz);
     }
-
-
 
     /**
      * Allow some code to run very early in Play - Use with caution !
@@ -743,7 +739,7 @@ public class Play {
      * is 'test' or 'test-?.*'
      * @return true if testmode
      */
-    public static boolean runningInTestMode(){
+    public static boolean runningInTestMode() {
         return id.matches("test|test-?.*");
     }
 }

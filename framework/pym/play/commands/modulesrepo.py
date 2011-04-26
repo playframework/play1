@@ -104,7 +104,10 @@ class Downloader(object):
     def progress(self, blocks, blocksize, filesize):
         self.cycles += 1
         bits = min(blocks*blocksize, filesize)
-        done = self.proc(bits, filesize) if bits != filesize else 100
+        if bits != filesize:
+            done = self.proc(bits, filesize)
+        else:
+            done = 100
         bar = self.bar(done)
         if not self.cycles % 3 and bits != filesize:
             now = time.clock()
@@ -222,7 +225,7 @@ def list(app, args):
         print "~ [%s]" % mod['name']
         print "~   %s" % mod['fullname']
         print "~   %s/modules/%s" % (mod['server'], mod['name'])
-        
+
         vl = ''
         i = 0
         for v in mod['versions']:
@@ -265,14 +268,15 @@ def build(app, args, env):
 
     deps_file = os.path.join(app.path, 'conf', 'dependencies.yml')
     if os.path.exists(deps_file):
-        with open(deps_file) as f:
-            deps = yaml.load(f.read())
-            versionCandidate = deps["self"].split(" ").pop()
-            version = versionCandidate
-            for dep in deps["require"]:
-                splitted = dep.split(" ")
-                if len(splitted) == 2 and splitted[0] == "play":
-                    fwkMatch = splitted[1]
+        f = open(deps_file)
+        deps = yaml.load(f.read())
+        versionCandidate = deps["self"].split(" ").pop()
+        version = versionCandidate
+        for dep in deps["require"]:
+            splitted = dep.split(" ")
+            if len(splitted) == 2 and splitted[0] == "play":
+                fwkMatch = splitted[1]
+        f.close
 
     if version is None:
         version = raw_input("~ What is the module version number? ")
@@ -329,14 +333,14 @@ def install(app, args, env):
     groups = re.match(r'^([a-zA-Z0-9]+)([-](.*))?$', name)
     module = groups.group(1)
     version = groups.group(3)
-    
+
     modules_list = load_module_list()
     fetch = None
 
     for mod in modules_list:
         if mod['name'] == module:
             for v in mod['versions']:
-                if version == None and v['isDefault']:
+                if version is None and v['isDefault']:
                     print '~ Will install %s-%s' % (module, v['version'])
                     print '~ This module is compatible with: %s' % v['matches']
                     ok = raw_input('~ Do you want to install this version (y/n)? ')
@@ -358,12 +362,12 @@ def install(app, args, env):
                     fetch = '%s/modules/%s-%s.zip' % (mod['server'], module, v['version'])
                     break
 
-    if fetch == None:
+    if fetch is None:
         print '~ No module found \'%s\'' % name
         print '~ Try play list-modules to get the modules list'
         print '~'
         sys.exit(-1)
-    
+
     archive = os.path.join(env["basedir"], 'modules/%s-%s.zip' % (module, v['version']))
     if os.path.exists(archive):
         os.remove(archive)
@@ -387,15 +391,17 @@ def install(app, args, env):
     os.remove(archive)
     print '~'
     print '~ Module %s-%s is installed!' % (module, v['version'])
-    print '~ You can now use it by add adding this line to application.conf file:'
+    print '~ You can now use it by adding it to the dependencies.yml file:'
     print '~'
-    print '~ module.%s=${play.path}/modules/%s-%s' % (module, module, v['version'])
+    print '~ require:'
+    print '~     play -> %s %s' % (module, v['version'])
     print '~'
     sys.exit(0)
 
 def add(app, args, env):
     app.check()
 
+    m = None
     try:
         optlist, args = getopt.getopt(args, '', ['module='])
         for o, a in optlist:
@@ -446,7 +452,7 @@ def load_module_list():
     rev.reverse()
     for repo in rev:
         result = load_modules_from(repo)
-        if modules == None:
+        if modules is None:
             modules = map(lambda m: addServer(m, repo), result['modules'])
         else:
             for module in result['modules']:
@@ -471,4 +477,3 @@ def load_modules_from(modules_server):
         print "~ Cannot fetch the modules list from %s ..." % (url)
         print "~"
         sys.exit(-1)
-

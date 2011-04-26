@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.data.validation.Error;
 import play.data.validation.Validation;
@@ -100,7 +101,7 @@ public class FastTags {
             actionDef.method = "POST";
         }
         String encoding = Http.Response.current().encoding;
-        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toUpperCase() + "\" accept-charset=\""+encoding+"\" enctype=\"" + enctype + "\" " + serialize(args, "action", "method", "accept-charset", "enctype") + ">");
+        out.print("<form action=\"" + actionDef.url + "\" method=\"" + actionDef.method.toLowerCase() + "\" accept-charset=\""+encoding+"\" enctype=\"" + enctype + "\" " + serialize(args, "action", "method", "accept-charset", "enctype") + ">");
         if (!("GET".equals(actionDef.method))) {
             _authenticityToken(args, body, out, template, fromLine);
         }
@@ -122,7 +123,7 @@ public class FastTags {
         field.put("name", _arg);
         field.put("id", _arg.replace('.','_'));
         field.put("flash", Flash.current().get(_arg));
-        field.put("flashArray", field.get("flash") != null && !field.get("flash").toString().isEmpty() ? field.get("flash").toString().split(",") : new String[0]);
+        field.put("flashArray", field.get("flash") != null && !StringUtils.isEmpty(field.get("flash").toString()) ? field.get("flash").toString().split(",") : new String[0]);
         field.put("error", Validation.error(_arg));
         field.put("errorClass", field.get("error") != null ? "hasError" : "");
         String[] pieces = _arg.split("\\.");

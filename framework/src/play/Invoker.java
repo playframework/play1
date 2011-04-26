@@ -249,6 +249,7 @@ public class Invoker {
          */
         public void _finally() {
             Play.pluginCollection.invocationFinally();
+            InvocationContext.current.remove();
         }
 
         /**

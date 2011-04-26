@@ -74,8 +74,9 @@ public class ValidationPlugin extends PlayPlugin {
     public void invocationFinally() {
         if (keys.get() != null) {
             keys.get().clear();
-            keys.set(null);
         }
+        keys.remove();
+        Validation.current.remove();
     }
 
     // ~~~~~~

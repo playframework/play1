@@ -125,7 +125,7 @@ The **play.test.Fixtures** class helps you to manipulate your database and to in
 
 bc. @Before
 public void setUp() {
-    Fixtures.deleteAll();
+    Fixtures.deleteDatabase();
 }
 
 To import data, it is simpler to define them in a YAML file that the Fixtures helper can automatically import.
@@ -146,7 +146,7 @@ And then:
 
 bc. @Before
 public void setUp() {
-    Fixtures.deleteAll();
+    Fixtures.deleteDatabase();
     Fixtures.loadModels("data.yml");
 }
 
