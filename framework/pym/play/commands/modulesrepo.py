@@ -387,9 +387,10 @@ def install(app, args, env):
     os.remove(archive)
     print '~'
     print '~ Module %s-%s is installed!' % (module, v['version'])
-    print '~ You can now use it by add adding this line to application.conf file:'
+    print '~ You can now use it by adding it to the dependencies.yml file:'
     print '~'
-    print '~ module.%s=${play.path}/modules/%s-%s' % (module, module, v['version'])
+    print '~ require:'
+    print '~     play -> %s %s' % (module, v['version'])
     print '~'
     sys.exit(0)
 
