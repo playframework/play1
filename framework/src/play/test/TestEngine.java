@@ -3,18 +3,18 @@ package play.test;
 import java.io.File;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 
 import org.junit.Assert;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
-
 import play.Logger;
 import play.Play;
 import play.vfs.VirtualFile;
@@ -23,6 +23,14 @@ import play.vfs.VirtualFile;
  * Run application tests
  */
 public class TestEngine {
+
+    private final static class ClassNameComparator implements Comparator<Class> {
+        public int compare(Class aClass, Class bClass) {
+            return aClass.getName().compareTo(bClass.getName());
+        }
+    }
+
+    private final static ClassNameComparator classNameComparator = new ClassNameComparator();
 
     public static ExecutorService functionalTestsExecutor = Executors.newSingleThreadExecutor();
 
@@ -38,6 +46,7 @@ public class TestEngine {
                 }
             }
         }
+        Collections.sort(classes, classNameComparator);
         return classes;
     }
 
@@ -48,6 +57,7 @@ public class TestEngine {
                 it.remove();
             }
         }
+        Collections.sort(classes, classNameComparator);
         return classes;
     }
 
@@ -65,6 +75,7 @@ public class TestEngine {
         for (VirtualFile root : Play.roots) {
             seleniumTests(root.relativePath() + "/test", results);
         }
+        Collections.sort(results);
         return results;
     }
 
