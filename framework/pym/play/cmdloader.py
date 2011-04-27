@@ -24,7 +24,7 @@ class CommandLoader:
                     mod = load_python_module(name, self.path)
                     self._load_cmd_from(mod)
                 except:
-                    warnings.warn("!! Warning: could not load core command file" + filename, RuntimeWarning)
+                    warnings.warn("!! Warning: could not load core command file " + filename, RuntimeWarning)
 
     def load_play_module(self, modname):
         commands = os.path.join(modname, "commands.py")
