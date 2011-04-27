@@ -187,28 +187,6 @@ public class Play {
 
         guessFrameworkPath();
 
-        // Guess the framework path
-        try {
-            URL versionUrl = Play.class.getResource("/play/version");
-            // Read the content of the file
-            Play.version = new LineNumberReader(new InputStreamReader(versionUrl.openStream())).readLine();
-
-            // This is used only by the embedded server (Mina, Netty, Jetty etc)
-            URI uri = new URI(versionUrl.toString().replace(" ", "%20"));
-            if (frameworkPath == null || !frameworkPath.exists()) {
-                if (uri.getScheme().equals("jar")) {
-                    String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
-                    frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
-                } else if (uri.getScheme().equals("file")) {
-                    frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
-                } else {
-                    throw new UnexpectedException("Cannot find the Play! framework - trying with uri: " + uri + " scheme " + uri.getScheme());
-                }
-            }
-        } catch (Exception e) {
-            throw new UnexpectedException("Where is the framework ?", e);
-        }
-
         // Read the configuration file
         readConfiguration();
 
