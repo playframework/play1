@@ -1,5 +1,14 @@
 package play.ant;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.FileSet;
@@ -7,12 +16,7 @@ import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.selectors.FilenameSelector;
 import org.apache.tools.ant.util.FileUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import play.libs.IO;
 
 /**
  * Ant task which loads settings needed by the ant from the ant configuration file.
@@ -33,6 +37,8 @@ public class PlayConfigurationLoadTask {
     private String modulesClasspath = "modules.classpath";
     /** Source file to read */
     private File applicationDir;
+    /** Properties extracted from the conf file */
+    private Map<String, String> properties = null;
 
     public void setProject(Project project) {
         this.project = project;
@@ -54,57 +60,50 @@ public class PlayConfigurationLoadTask {
         if (applicationDir == null) {
             throw new BuildException("No applicationDir set!");
         }
-        File srcFile = new File(applicationDir, "conf/application.conf");
-        if (!srcFile.exists()) {
-            throw new BuildException("No application configuration found! " + srcFile.getAbsolutePath());
-        }
-        Map<String,String> map = loadAndResolve(srcFile, playId);
-        for (Map.Entry<String,String> entry: map.entrySet()) {
+
+        // Add the properties from application.conf as ant properties
+        for (Map.Entry<String,String> entry: properties().entrySet()) {
             String key = entry.getKey();
             String value = project.replaceProperties(entry.getValue());
             project.setProperty(prefix + key, value);
             project.log("Loaded property '" + prefix + key + "'='" + value + "'", Project.MSG_VERBOSE);
         }
 
-        File applicationDir = srcFile.getParentFile().getParentFile();
+        // Add the module classpath as an ant property
         Path path = new Path(project);
-
         FilenameSelector endsToJar = new FilenameSelector();
         endsToJar.setName("*.jar");
 
-        for (Map.Entry<String,String> entry : map.entrySet()) {
-            if (entry.getKey().startsWith("module.")) {
-                String s = entry.getValue();
-                s = project.replaceProperties(s);
-                File moduleDir;
-                if (!FileUtils.isAbsolutePath(s)) {
-                    moduleDir = new File(new File(applicationDir, "conf"), s);
-                } else {
-                    moduleDir = new File(s);
-                }
-                if (!moduleDir.exists()) {
-                    project.log("Failed add non existing module to classpath! " + moduleDir.getAbsolutePath(), Project.MSG_WARN);
-                    continue;
-                }
-                File moduleLib = new File(moduleDir, "lib");
-                if (moduleLib.exists()) {
-                    FileSet fileSet = new FileSet();
-                    fileSet.setDir(moduleLib);
-                    fileSet.addFilename(endsToJar);
-                    path.addFileset(fileSet);
-                    project.log("Added fileSet to path: " + fileSet, Project.MSG_VERBOSE);
-                } else {
-                    project.log("Ignoring non existing lib dir: " + moduleLib.getAbsolutePath(), Project.MSG_VERBOSE);
-                }
+        for (File module: modules()) {
+            File moduleLib = new File(module, "lib");
+            if (moduleLib.exists()) {
+                FileSet fileSet = new FileSet();
+                fileSet.setDir(moduleLib);
+                fileSet.addFilename(endsToJar);
+                path.addFileset(fileSet);
+                project.log("Added fileSet to path: " + fileSet, Project.MSG_VERBOSE);
+            } else {
+                project.log("Ignoring non existing lib dir: " + moduleLib.getAbsolutePath(), Project.MSG_VERBOSE);
             }
         }
         project.addReference(modulesClasspath, path);
         project.log("Generated classpath '" + modulesClasspath + "':" + project.getReference(modulesClasspath), Project.MSG_VERBOSE);
     }
 
-    public static Map<String, String> loadAndResolve(File srcFile, String playId) {
+    /**
+     * Load all properties from the given conf file, resolving the id
+     * @param srcFile the conf file
+     * @param playId the current id
+     * @return a Map of key, values corresponding to the entries in the conf file
+     */
+    private Map<String, String> properties() {
+        if (properties != null) return properties;
+        File srcFile = new File(applicationDir, "conf/application.conf");
+        if (!srcFile.exists()) {
+            throw new BuildException("No application configuration found! " + srcFile.getAbsolutePath());
+        }
         try {
-            Map<String,String> defaults = new HashMap<String,String>();
+            properties = new HashMap<String,String>();
             Map<String,String> idSpecific = new HashMap<String,String>();
             BufferedReader reader = new BufferedReader(new FileReader(srcFile));
             String line;
@@ -120,33 +119,66 @@ public class PlayConfigurationLoadTask {
                         if (sa != null) {
                             idSpecific.put(sa[0], sa[1]);
                         }
-                    } else {
-                        continue;
                     }
                 } else {
                     String[] sa = splitLine(line);
                     if (sa != null) {
-                        defaults.put(sa[0], sa[1]);
+                        properties.put(sa[0], sa[1]);
                     }
                 }
             }
-            defaults.putAll(idSpecific);
-            return defaults;
+            properties.putAll(idSpecific);
+            return properties;
         } catch (IOException e) {
             throw new BuildException("Failed to load configuration file: " + srcFile.getAbsolutePath(), e);
         }
     }
 
-    private static String[] splitLine(String line) {
-        int i = line.indexOf("=");
-        if (i > 0) {
-            String key = line.substring(0, i);
-            String value = "";
-            if (i < line.length()) {
-                value = line.substring(i+1);
+    /*
+     * Get the set of modules for the current project. This include old-style (using application.conf)
+     * and new style, with dependencies starting at 1.2 (load everything from the modules/ dir)
+     */
+    private Set<File> modules() {
+        Set<File> modules = new HashSet<File>();
+
+        // Old-skool
+        for (Map.Entry<String,String> entry: properties().entrySet()) {
+            if (!entry.getKey().startsWith("module.")) {
+                continue;
             }
-            return new String[]{key.trim(), value.trim()};
+            String s = project.replaceProperties(entry.getValue());
+            File moduleDir;
+            if (!FileUtils.isAbsolutePath(s)) {
+                moduleDir = new File(new File(applicationDir, "conf"), s);
+            } else {
+                moduleDir = new File(s);
+            }
+            if (!moduleDir.exists()) {
+                project.log("Failed add non existing module to classpath! " + moduleDir.getAbsolutePath(), Project.MSG_WARN);
+                continue;
+            }
+            modules.add(moduleDir);
         }
-        return null;
+
+        // 1.2+ fashion
+        File modulesDir = new File(applicationDir, "modules");
+        if (modulesDir.exists()) {
+            for (File child: modulesDir.listFiles()) {
+                if (child == null) {
+                    // No-op
+                } else if (child.isDirectory()) {
+                    modules.add(child);
+                } else {
+                    modules.add(new File(IO.readContentAsString(child)));
+                }
+            }
+        }
+        return modules;
+    }
+
+    private static String[] splitLine(String line) {
+        if (line.indexOf("=") == -1) return null;
+        String[] splitted = line.split("=");
+        return new String[]{splitted[0].trim(), splitted[1].trim()};
     }
 }
