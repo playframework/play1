@@ -55,6 +55,7 @@ public class Play {
      * Is the application started
      */
     public static boolean started = false;
+
     /**
      * True when the one and only shutdown hook is enabled
      */
@@ -131,6 +132,8 @@ public class Play {
      * The very secret key
      */
     public static String secretKey;
+
+
     /**
      * pluginCollection that holds all loaded plugins and all enabled plugins..
      */
@@ -181,6 +184,8 @@ public class Play {
 
         // load all play.static of exists
         initStaticStuff();
+
+        guessFrameworkPath();
 
         // Guess the framework path
         try {
@@ -311,6 +316,30 @@ public class Play {
         // Plugins
         pluginCollection.onApplicationReady();
     }
+
+	public static void guessFrameworkPath() {
+		// Guess the framework path
+        try {
+            URL versionUrl = Play.class.getResource("/play/version");
+            // Read the content of the file
+            Play.version = new LineNumberReader(new InputStreamReader(versionUrl.openStream())).readLine();
+
+            // This is used only by the embedded server (Mina, Netty, Jetty etc)
+            URI uri = new URI(versionUrl.toString().replace(" ", "%20"));
+            if (frameworkPath == null || !frameworkPath.exists()) {
+                if (uri.getScheme().equals("jar")) {
+                    String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
+                    frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
+                } else if (uri.getScheme().equals("file")) {
+                    frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
+                } else {
+                    throw new UnexpectedException("Cannot find the Play! framework - trying with uri: " + uri + " scheme " + uri.getScheme());
+                }
+            }
+        } catch (Exception e) {
+            throw new UnexpectedException("Where is the framework ?", e);
+        }
+	}
 
     /**
      * Read application.conf and resolve overriden key using the play id mechanism.
@@ -595,6 +624,8 @@ public class Play {
         return (T) pluginCollection.getPluginInstance((Class<? extends PlayPlugin>) clazz);
     }
 
+
+
     /**
      * Allow some code to run very early in Play - Use with caution !
      */
@@ -742,4 +773,6 @@ public class Play {
     public static boolean runningInTestMode() {
         return id.matches("test|test-?.*");
     }
+    
+
 }
