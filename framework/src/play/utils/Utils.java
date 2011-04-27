@@ -1,6 +1,5 @@
 package play.utils;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
