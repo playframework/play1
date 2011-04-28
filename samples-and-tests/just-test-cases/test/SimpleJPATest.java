@@ -59,8 +59,11 @@ public class SimpleJPATest extends UnitTest {
         
         List<User> usersFounded;
         //Elike
-        usersFounded = User.find("byNameElikeAndJ", "%A%", 45).fetch();
+        //TODO niels
+        usersFounded = User.find("byNameElikeAndJ", "%a%", 45).fetch();
         assertEquals(0, usersFounded.size());
+        usersFounded = User.find("byNameElikeAndJ", "%A%", 45).fetch();
+        assertEquals(1, usersFounded.size());
         //Ilike
         usersFounded = User.find("byNameIlikeAndJ", "%A%", 45).fetch();
         assertEquals(1, usersFounded.size());
