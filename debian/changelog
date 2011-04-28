@@ -1,3 +1,10 @@
+play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-11) maverick; urgency=low
+
+  * Changed Fixtures.load(InputStream -> Reader)
+  * Handle encoding in WS.POST/PUT
+
+ -- Stephane Epardaud <stephane@epardaud.fr>  Thu, 28 Apr 2011 15:29:50 +0200
+
 play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-10) maverick; urgency=low
 
   * Added Fixtures.load(InputStream)
