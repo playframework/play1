@@ -452,7 +452,9 @@ public class PluginCollection {
             try {
                 long start = System.currentTimeMillis();
                 plugin.enhance(applicationClass);
-                Logger.trace("%sms to apply %s to %s", System.currentTimeMillis() - start, plugin, applicationClass.name);
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("%sms to apply %s to %s", System.currentTimeMillis() - start, plugin, applicationClass.name);
+                }
             } catch (Exception e) {
                 throw new UnexpectedException("While applying " + plugin + " on " + applicationClass.name, e);
             }

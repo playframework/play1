@@ -54,7 +54,10 @@ public class BytecodeCache {
                     offset++;
                 }
                 if (!hash(source).equals(hash.toString())) {
-                    Logger.trace("Bytecode too old (%s != %s)", hash, hash(source));
+
+                    if (Logger.isTraceEnabled()) {
+                        Logger.trace("Bytecode too old (%s != %s)", hash, hash(source));
+                    }
                     return null;
                 }
                 byte[] byteCode = new byte[(int) f.length() - (offset + 1)];
@@ -62,7 +65,10 @@ public class BytecodeCache {
                 fis.close();
                 return byteCode;
             }
-            Logger.trace("Cache MISS for %s", name);
+
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("Cache MISS for %s", name);
+            }
             return null;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -95,7 +101,7 @@ public class BytecodeCache {
                 fos.write(byteCode);
                 fos.close();
             }
-            
+
             if (Logger.isTraceEnabled()) {
                 Logger.trace("%s cached", name);
             }

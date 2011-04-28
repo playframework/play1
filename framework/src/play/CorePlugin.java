@@ -291,7 +291,9 @@ public class CorePlugin extends PlayPlugin {
             try {
                 long start = System.currentTimeMillis();
                 ((Enhancer) enhancer.newInstance()).enhanceThisClass(applicationClass);
-                Logger.trace("%sms to apply %s to %s", System.currentTimeMillis() - start, enhancer.getSimpleName(), applicationClass.name);
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("%sms to apply %s to %s", System.currentTimeMillis() - start, enhancer.getSimpleName(), applicationClass.name);
+                }
             } catch (Exception e) {
                 throw new UnexpectedException("While applying " + enhancer + " on " + applicationClass.name, e);
             }

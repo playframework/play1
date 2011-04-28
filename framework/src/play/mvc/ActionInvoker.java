@@ -90,7 +90,10 @@ public class ActionInvoker {
             request.action = request.controller + "." + request.actionMethod;
             request.invokedMethod = actionMethod;
 
-            Logger.trace("------- %s", actionMethod);
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("------- %s", actionMethod);
+            }
+
             request.resolved = true;
 
         } catch (ActionNotFoundException e) {
@@ -621,7 +624,10 @@ public class ActionInvoker {
             } else {
                 params.putAll(Scope.Params.current().all());
             }
-            Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.join(method.getParameterAnnotations()[i], " ") + "]");
+
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.join(method.getParameterAnnotations()[i], " ") + "]");
+            }
 
             rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params, o, method, i + 1);
         }

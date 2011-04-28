@@ -198,7 +198,9 @@ public class JPAPlugin extends PlayPlugin {
             for (Class<?> clazz : classes) {
                 if (clazz.isAnnotationPresent(Entity.class)) {
                     cfg.addAnnotatedClass(clazz);
-                    Logger.trace("JPA Model : %s", clazz);
+                    if (Logger.isTraceEnabled()) {
+                        Logger.trace("JPA Model : %s", clazz);
+                    }
                 }
             }
             String[] moreEntities = Play.configuration.getProperty("jpa.entities", "").split(", ");
@@ -224,7 +226,9 @@ public class JPAPlugin extends PlayPlugin {
             if (mappingFile != null && mappingFile.length() > 0) {
                 cfg.addResource(mappingFile);
             }
-            Logger.trace("Initializing JPA ...");
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("Initializing JPA ...");
+            }
             try {
                 JPA.entityManagerFactory = cfg.buildEntityManagerFactory();
             } catch (PersistenceException e) {

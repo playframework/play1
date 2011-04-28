@@ -137,7 +137,11 @@ public class ApplicationClassloader extends ClassLoader {
                 return applicationClass.javaClass;
             }
             byte[] bc = BytecodeCache.getBytecode(name, applicationClass.javaSource);
-            Logger.trace("Compiling code for %s", name);
+
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("Compiling code for %s", name);
+            }
+
             if (!applicationClass.isClass()) {
                 definePackage(applicationClass.getPackage(), null, null, null, null, null, null, null);
             } else {
@@ -150,7 +154,11 @@ public class ApplicationClassloader extends ClassLoader {
                 if (!applicationClass.isClass()) {
                     applicationClass.javaPackage = applicationClass.javaClass.getPackage();
                 }
-                Logger.trace("%sms to load class %s from cache", System.currentTimeMillis() - start, name);
+
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("%sms to load class %s from cache", System.currentTimeMillis() - start, name);
+                }
+
                 return applicationClass.javaClass;
             }
             if (applicationClass.javaByteCode != null || applicationClass.compile() != null) {
@@ -161,7 +169,11 @@ public class ApplicationClassloader extends ClassLoader {
                 if (!applicationClass.isClass()) {
                     applicationClass.javaPackage = applicationClass.javaClass.getPackage();
                 }
-                Logger.trace("%sms to load class %s", System.currentTimeMillis() - start, name);
+
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("%sms to load class %s", System.currentTimeMillis() - start, name);
+                }
+
                 return applicationClass.javaClass;
             }
             Play.classes.classes.remove(name);

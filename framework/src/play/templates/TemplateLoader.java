@@ -223,7 +223,9 @@ public class TemplateLoader {
             if (template != null) {
                 try {
                     template.compile();
-                    Logger.trace("%sms to load %s", System.currentTimeMillis() - start, current.getName());
+                    if (Logger.isTraceEnabled()) {
+                        Logger.trace("%sms to load %s", System.currentTimeMillis() - start, current.getName());
+                    }
                 } catch (TemplateCompilationException e) {
                     Logger.error("Template %s does not compile at line %d", e.getTemplate().name, e.getLineNumber());
                     throw e;

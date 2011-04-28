@@ -375,7 +375,10 @@ public class Evolutions extends PlayPlugin {
         if (evolutionsDirectory.exists()) {
             for (File evolution : evolutionsDirectory.listFiles()) {
                 if (evolution.getName().matches("^[0-9]+[.]sql$")) {
-                    Logger.trace("Loading evolution %s", evolution);
+                    if (Logger.isTraceEnabled()) {
+                        Logger.trace("Loading evolution %s", evolution);
+                    }
+
                     int version = Integer.parseInt(evolution.getName().substring(0, evolution.getName().indexOf(".")));
                     String sql = IO.readContentAsString(evolution);
                     StringBuffer sql_up = new StringBuffer();
