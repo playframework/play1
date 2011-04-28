@@ -2,6 +2,8 @@ package play.test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
@@ -159,17 +161,17 @@ public class Fixtures {
         if (is == null) {
             throw new RuntimeException("Cannot load fixture " + name + ", the file was not found");
         }
-    	load(is, yamlFile);
+    	load(new InputStreamReader(is), yamlFile);
     }
     
-    public static void load(InputStream is) {
-    	load(is, null);
+    public static void load(Reader reader) {
+    	load(reader, null);
     }
     
-    public static void load(InputStream is, VirtualFile yamlFile) {
+    public static void load(Reader reader, VirtualFile yamlFile) {
         try {
             Yaml yaml = new Yaml();
-            Object o = yaml.load(is);
+            Object o = yaml.load(reader);
             if (o instanceof LinkedHashMap<?, ?>) {
                 @SuppressWarnings("unchecked") LinkedHashMap<Object, Map<?, ?>> objects = (LinkedHashMap<Object, Map<?, ?>>) o;
                 Map<String, Object> idCache = new HashMap<String, Object>();
