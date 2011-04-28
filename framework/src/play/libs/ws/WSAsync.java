@@ -2,6 +2,7 @@ package play.libs.ws;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,6 +19,7 @@ import oauth.signpost.exception.OAuthMessageSignerException;
 import oauth.signpost.http.HttpRequest;
 import play.Logger;
 import play.Play;
+import play.exceptions.UnexpectedException;
 import play.libs.Codec;
 import play.libs.MimeTypes;
 import play.libs.OAuth.ServiceInfo;
@@ -287,11 +289,33 @@ public class WSAsync implements WSImpl {
                 if (this.parameters != null && !this.parameters.isEmpty()) {
                     throw new RuntimeException("POST or PUT method with parameters AND body are not supported.");
                 }
-                builder.setBody(this.body);
+                String charset = getCharset();
+                if(charset != null){
+                	try {
+                		builder.setBody(this.body.getBytes(charset));
+                	} catch (IllegalArgumentException e) {
+                		throw new UnexpectedException(e);
+                	} catch (UnsupportedEncodingException e) {
+                		throw new UnexpectedException(e);
+                	}
+                }else
+                	builder.setBody(this.body);
                 if(this.mimeType != null) {
                     builder.setHeader("Content-Type", this.mimeType);
                 }
             }
+        }
+        
+        protected String getCharset(){
+        	if(this.mimeType == null || this.mimeType.indexOf(';') == -1)
+        		return null;
+        	String[] params = this.mimeType.split(";");
+        	for(String param : params){
+        		param = param.trim();
+        		if(param.startsWith("charset="))
+        			return param.substring(8);
+        	}
+        	return null;
         }
 
     }
