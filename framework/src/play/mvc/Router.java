@@ -134,7 +134,9 @@ public class Router {
         route.addFormat(headers);
         route.addParams(params);
         route.compute();
-        Logger.trace("Adding [" + route.toString() + "] with params [" + params + "] and headers [" + headers + "]");
+        if (Logger.isTraceEnabled()) {
+            Logger.trace("Adding [" + route.toString() + "] with params [" + params + "] and headers [" + headers + "]");
+        }
         return route;
     }
 
@@ -251,12 +253,16 @@ public class Router {
     }
 
     public static Route route(Http.Request request) {
-        Logger.trace("Route: " + request.path + " - " + request.querystring);
+        if (Logger.isTraceEnabled()) {
+            Logger.trace("Route: " + request.path + " - " + request.querystring);
+        }
         // request method may be overriden if a x-http-method-override parameter is given
         if (request.querystring != null && methodOverride.matches(request.querystring)) {
             Matcher matcher = methodOverride.matcher(request.querystring);
             if (matcher.matches()) {
-                Logger.trace("request method %s overriden to %s ", request.method, matcher.group("method"));
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("request method %s overriden to %s ", request.method, matcher.group("method"));
+                }
                 request.method = matcher.group("method");
             }
         }
@@ -684,8 +690,10 @@ public class Router {
                     this.host = p.substring(0, p.indexOf("/"));
                     String pattern = host.replaceAll("\\.", "\\\\.").replaceAll("\\{.*\\}", "(.*)");
 
-                    Logger.trace("pattern [" + pattern + "]");
-                    Logger.trace("host [" + host + "]");
+                    if (Logger.isTraceEnabled()) {
+                        Logger.trace("pattern [" + pattern + "]");
+                        Logger.trace("host [" + host + "]");
+                    }
 
                     Matcher m = new Pattern(pattern).matcher(host);
                     this.hostPattern = new Pattern(pattern);
@@ -696,13 +704,18 @@ public class Router {
                             if (!name.equals("_")) {
                                 hostArg = new Arg();
                                 hostArg.name = name;
-                                Logger.trace("hostArg name [" + name + "]");
+                                if (Logger.isTraceEnabled()) {
+                                    Logger.trace("hostArg name [" + name + "]");
+                                }
                                 // The default value contains the route version of the host ie {client}.bla.com
                                 // It is temporary and it indicates it is an url route.
                                 // TODO Check that default value is actually used for other cases.
                                 hostArg.defaultValue = host;
                                 hostArg.constraint = new Pattern(".*");
-                                Logger.trace("adding hostArg [" + hostArg + "]");
+
+                                if (Logger.isTraceEnabled()) {
+                                    Logger.trace("adding hostArg [" + hostArg + "]");
+                                }
 
                                 args.add(hostArg);
                             }

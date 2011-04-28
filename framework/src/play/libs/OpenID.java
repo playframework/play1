@@ -189,8 +189,10 @@ public class OpenID {
             }
 
 
-            // Debug
-            Logger.trace("Send request %s", url);
+            if (Logger.isTraceEnabled()) {
+                // Debug
+                Logger.trace("Send request %s", url);
+            }
 
             throw new Redirect(url);
         } catch (Redirect e) {

@@ -55,7 +55,6 @@ public class Play {
      * Is the application started
      */
     public static boolean started = false;
-
     /**
      * True when the one and only shutdown hook is enabled
      */
@@ -132,8 +131,6 @@ public class Play {
      * The very secret key
      */
     public static String secretKey;
-
-
     /**
      * pluginCollection that holds all loaded plugins and all enabled plugins..
      */
@@ -212,7 +209,11 @@ public class Play {
             if (!tmpDir.isAbsolute()) {
                 tmpDir = new File(applicationPath, tmpDir.getPath());
             }
-            Logger.trace("Using %s as tmp dir", Play.tmpDir);
+
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("Using %s as tmp dir", Play.tmpDir);
+            }
+
             if (!tmpDir.exists()) {
                 try {
                     if (readOnlyTmp) {
@@ -296,7 +297,7 @@ public class Play {
     }
 
 	public static void guessFrameworkPath() {
-		// Guess the framework path
+        // Guess the framework path
         try {
             URL versionUrl = Play.class.getResource("/play/version");
             // Read the content of the file
@@ -317,7 +318,7 @@ public class Play {
         } catch (Exception e) {
             throw new UnexpectedException("Where is the framework ?", e);
         }
-	}
+    }
 
     /**
      * Read application.conf and resolve overriden key using the play id mechanism.
@@ -552,11 +553,18 @@ public class Play {
             Thread.currentThread().setContextClassLoader(Play.classloader);
             long start = System.currentTimeMillis();
             classloader.getAllClasses();
-            Logger.trace("%sms to precompile the Java stuff", System.currentTimeMillis() - start);
+
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("%sms to precompile the Java stuff", System.currentTimeMillis() - start);
+            }
+
             if (!lazyLoadTemplates) {
                 start = System.currentTimeMillis();
                 TemplateLoader.getAllTemplate();
-                Logger.trace("%sms to precompile the templates", System.currentTimeMillis() - start);
+
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("%sms to precompile the templates", System.currentTimeMillis() - start);
+                }
             }
             return true;
         } catch (Throwable e) {

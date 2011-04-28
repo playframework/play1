@@ -247,7 +247,11 @@ public class ApplicationClasses {
         public byte[] compile() {
             long start = System.currentTimeMillis();
             Play.classes.compiler.compile(new String[]{this.name});
-            Logger.trace("%sms to compile class %s", System.currentTimeMillis() - start, name);
+
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("%sms to compile class %s", System.currentTimeMillis() - start, name);
+            }
+
             return this.javaByteCode;
         }
 

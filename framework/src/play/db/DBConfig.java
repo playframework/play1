@@ -145,7 +145,9 @@ public class DBConfig {
                 if (close != null) {
                     close.invoke(datasource, new Object[] {});
                     datasource = null;
-                    Logger.trace("Datasource destroyed for db config " + dbConfigName);
+                    if (Logger.isTraceEnabled()) {
+                        Logger.trace("Datasource destroyed for db config " + dbConfigName);
+                    }
                 }
             }
         } catch (Throwable t) {
