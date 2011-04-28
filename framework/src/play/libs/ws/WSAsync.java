@@ -3,6 +3,7 @@ package play.libs.ws;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,6 +21,8 @@ import org.apache.commons.lang.NotImplementedException;
 import play.Logger;
 import play.Play;
 import play.libs.F.Promise;
+import play.exceptions.UnexpectedException;
+import play.libs.Codec;
 import play.libs.MimeTypes;
 import play.libs.OAuth.ServiceInfo;
 import play.libs.OAuth.TokenPair;
@@ -348,13 +351,36 @@ public class WSAsync implements WSImpl {
                     builder.setBody((InputStream)this.body);
                 } else {
                     if(this.body != null) {
-                        builder.setBody(this.body.toString());
+                    	String val = this.body.toString();
+                        String charset = getCharset();
+                        if(charset != null){
+                        	try {
+                        		builder.setBody(val.getBytes(charset));
+                        	} catch (IllegalArgumentException e) {
+                        		throw new UnexpectedException(e);
+                        	} catch (UnsupportedEncodingException e) {
+                        		throw new UnexpectedException(e);
+                        	}
+                        }else
+                        	builder.setBody(val);
                     }
                 }
                 if(this.mimeType != null) {
                     builder.setHeader("Content-Type", this.mimeType);
                 }
             }
+        }
+        
+        protected String getCharset(){
+        	if(this.mimeType == null || this.mimeType.indexOf(';') == -1)
+        		return null;
+        	String[] params = this.mimeType.split(";");
+        	for(String param : params){
+        		param = param.trim();
+        		if(param.startsWith("charset="))
+        			return param.substring(8);
+        	}
+        	return null;
         }
 
     }
