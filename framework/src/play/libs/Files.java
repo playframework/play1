@@ -1,13 +1,18 @@
 package play.libs;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
+import play.exceptions.UnexpectedException;
 
 /**
  * Files utils
@@ -102,6 +107,37 @@ public class Files {
             zipFile.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static void zip(File directory, File zipFile) {
+        try {
+            FileOutputStream os = new FileOutputStream(zipFile);
+            ZipOutputStream zos = new ZipOutputStream(os);
+            zipDirectory(directory, directory, zos);
+            zos.close();
+            os.close();
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
+    }
+
+    static void zipDirectory(File root, File directory, ZipOutputStream zos) throws Exception {
+        for (File item : directory.listFiles()) {
+            if (item.isDirectory()) {
+                zipDirectory(root, item, zos);
+            } else {
+                byte[] readBuffer = new byte[2156];
+                int bytesIn = 0;
+                FileInputStream fis = new FileInputStream(item);
+                String path = item.getAbsolutePath().substring(root.getAbsolutePath().length() + 1);
+                ZipEntry anEntry = new ZipEntry(path);
+                zos.putNextEntry(anEntry);
+                while ((bytesIn = fis.read(readBuffer)) != -1) {
+                    zos.write(readBuffer, 0, bytesIn);
+                }
+                fis.close();
+            }
         }
     }
 }
