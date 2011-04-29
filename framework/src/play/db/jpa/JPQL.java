@@ -243,8 +243,8 @@ public class JPQL {
                 String prop = extractProp(part, "Ilike");
                 jpql.append("LOWER(" + prop + ") like LOWER(?)");
             } else if (part.endsWith("Elike")) {
-                String prop = extractProp(part, "Ilike");
-                jpql.append(prop + " like LOWER(?)");
+                String prop = extractProp(part, "Elike");
+                jpql.append(prop + " like ?");
             } else {
                 String prop = extractProp(part, "");
                 jpql.append(prop + " = ?");
