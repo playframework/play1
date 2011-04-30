@@ -225,9 +225,8 @@ public class DependenciesManager {
     }
 
     private boolean isFrameworkLocal(ArtifactDownloadReport artifact) throws Exception {
-        String frameworkPath = framework.getCanonicalPath();
-        String filePath = artifact.getLocalFile().getCanonicalPath();
-        return filePath.startsWith(frameworkPath);
+        String artifactFileName = artifact.getLocalFile().getName();
+        return new File(framework, "framework/lib/" + artifactFileName).exists() || new File(framework, "framework/" + artifactFileName).exists();
     }
 
     private boolean isPlayModule(ArtifactDownloadReport artifact) throws Exception {
