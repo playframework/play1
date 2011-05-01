@@ -258,7 +258,11 @@ public class ApplicationCompiler {
                         }
                         clazzName.append(compoundName[j]);
                     }
-                    Logger.trace("Compiled %s", clazzName);
+
+                    if (Logger.isTraceEnabled()) {
+                        Logger.trace("Compiled %s", clazzName);
+                    }
+
                     applicationClasses.getApplicationClass(clazzName.toString()).compiled(clazzFile.getBytes());
                 }
             }

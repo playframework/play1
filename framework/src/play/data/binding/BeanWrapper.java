@@ -25,7 +25,10 @@ public class BeanWrapper {
     private Map<String, Property> wrappers = new HashMap<String, Property>();
 
     public BeanWrapper(Class<?> forClass) {
-        Logger.trace("Bean wrapper for class %s", forClass.getName());
+        if (Logger.isTraceEnabled()) {
+            Logger.trace("Bean wrapper for class %s", forClass.getName());
+        }
+
         this.beanClass = forClass;
         boolean isScala = false;
         for (Class<?> intf : forClass.getInterfaces()) {
@@ -54,25 +57,37 @@ public class BeanWrapper {
 
     public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Object instance, Annotation[] annotations) throws Exception {
         for (Property prop : wrappers.values()) {
-            Logger.trace("beanwrapper: prefix [" + prefix + "] prop.getName() [" + prop.getName() + "]");
-            for (String key : params.keySet()) {
-                Logger.trace("key: [" + key + "]");
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("beanwrapper: prefix [" + prefix + "] prop.getName() [" + prop.getName() + "]");
+                for (String key : params.keySet()) {
+                    Logger.trace("key: [" + key + "]");
+                }
             }
 
             String newPrefix = prefix + "." + prop.getName();
             if (name.equals("") && prefix.equals("") && newPrefix.startsWith(".")) {
                 newPrefix = newPrefix.substring(1);
             }
-            Logger.trace("beanwrapper: bind name [" + name + "] annotation [" + Utils.join(annotations, " ") + "]");
+
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("beanwrapper: bind name [" + name + "] annotation [" + Utils.join(annotations, " ") + "]");
+            }
+
             Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), prop.getAnnotations(), params, newPrefix, prop.profiles);
             if (value != Binder.MISSING) {
                 if (value != Binder.NO_BINDING) {
                     prop.setValue(instance, value);
                 }
             } else {
-                Logger.trace("beanwrapper: bind annotation [" + Utils.join(prop.getAnnotations(), " ") + "]");
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("beanwrapper: bind annotation [" + Utils.join(prop.getAnnotations(), " ") + "]");
+                }
+
                 value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), annotations, params, newPrefix, prop.profiles);
-                Logger.trace("beanwrapper: value [" + value + "]");
+
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("beanwrapper: value [" + value + "]");
+                }
 
                 if (value != Binder.MISSING && value != Binder.NO_BINDING) {
                     prop.setValue(instance, value);
@@ -217,11 +232,17 @@ public class BeanWrapper {
         public void setValue(Object instance, Object value) {
             try {
                 if (setter != null) {
-                    Logger.trace("invoke setter %s on %s with value %s", setter, instance, value);
+                    if (Logger.isTraceEnabled()) {
+                        Logger.trace("invoke setter %s on %s with value %s", setter, instance, value);
+                    }
+
                     setter.invoke(instance, value);
                     return;
                 } else {
-                    Logger.trace("field.set(%s, %s)", instance, value);
+                    if (Logger.isTraceEnabled()) {
+                        Logger.trace("field.set(%s, %s)", instance, value);
+                    }
+
                     field.set(instance, value);
                 }
 

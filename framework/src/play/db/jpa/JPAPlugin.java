@@ -193,7 +193,9 @@ public class JPAPlugin extends PlayPlugin {
 
                 for (Class<?> clazz : classes) {
                     cfg.addAnnotatedClass(clazz);
-                    Logger.trace("JPA Model : %s", clazz);
+                    if (Logger.isTraceEnabled()) {
+                        Logger.trace("JPA Model : %s", clazz);
+                    }
                 }
                 String[] moreEntities = Play.configuration.getProperty(propPrefix+"jpa.entities", "").split(", ");
                 for (String entity : moreEntities) {
@@ -220,7 +222,11 @@ public class JPAPlugin extends PlayPlugin {
                 if (mappingFile != null && mappingFile.length() > 0) {
                     cfg.addResource(mappingFile);
                 }
-                Logger.trace("Initializing JPA"+getConfigInfoString(configName)+" ...");
+
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("Initializing JPA"+getConfigInfoString(configName)+" ...");
+                }
+
                 try {
                     JPA.addConfiguration(configName, cfg);
                 } catch (PersistenceException e) {

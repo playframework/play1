@@ -154,7 +154,9 @@ public class GroovyTemplate extends BaseTemplate {
                     }
                 }
 
-                Logger.trace("%sms to compile template %s to %d classes", System.currentTimeMillis() - start, name, groovyClassesForThisTemplate.size());
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("%sms to compile template %s to %d classes", System.currentTimeMillis() - start, name, groovyClassesForThisTemplate.size());
+                }
 
             } catch (MultipleCompilationErrorsException e) {
                 if (e.getErrorCollector().getLastError() != null) {
@@ -219,7 +221,9 @@ public class GroovyTemplate extends BaseTemplate {
             t.run();
             monitor.stop();
             monitor = null;
-            Logger.trace("%sms to render template %s", System.currentTimeMillis() - start, name);
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("%sms to render template %s", System.currentTimeMillis() - start, name);
+            }
         } catch (NoRouteFoundException e) {
             if (e.isSourceAvailable()) {
                 throw e;

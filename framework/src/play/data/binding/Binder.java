@@ -63,11 +63,17 @@ public class Binder {
     @SuppressWarnings("unchecked")
     static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String suffix, String[] profiles) {
         try {
-            Logger.trace("bindInternal: name [" + name + "] suffix [" + suffix + "]");
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("bindInternal: name [" + name + "] suffix [" + suffix + "]");
+            }
 
             String[] value = params.get(name + suffix);
-            Logger.trace("bindInternal: value [" + value + "]");
-            Logger.trace("bindInternal: profile [" + Utils.join(profiles, ",") + "]");
+
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("bindInternal: value [" + value + "]");
+                Logger.trace("bindInternal: profile [" + Utils.join(profiles, ",") + "]");
+            }
+
             // Let see if we have a BindAs annotation and a separator. If so, we need to split the values
             // Look up for the BindAs annotation. Extract the profile if there is any.
             if (annotations != null) {
@@ -80,7 +86,9 @@ public class Binder {
                     if (annotation.annotationType().equals(NoBinding.class)) {
                         NoBinding bind = ((NoBinding) annotation);
                         String[] localUnbindProfiles = bind.value();
-                        Logger.trace("bindInternal: localUnbindProfiles [" + Utils.join(localUnbindProfiles, ",") + "]");
+                        if (Logger.isTraceEnabled()) {
+                            Logger.trace("bindInternal: localUnbindProfiles [" + Utils.join(localUnbindProfiles, ",") + "]");
+                        }
 
                         if (localUnbindProfiles != null && contains(profiles, localUnbindProfiles)) {
                             return NO_BINDING;
@@ -244,7 +252,10 @@ public class Binder {
             }
 
             // Assume a Bean if isComposite
-            Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] isComposite [" + isComposite(name + suffix, params) + "]");
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] isComposite [" + isComposite(name + suffix, params) + "]");
+            }
+
             if (isComposite(name + suffix, params)) {
                 BeanWrapper beanWrapper = getBeanWrapper(clazz);
                 return beanWrapper.bind(name, type, params, suffix, annotations);
@@ -303,7 +314,9 @@ public class Binder {
     }
 
     public static Object bind(String name, Class<?> clazz, Type type, Annotation[] annotations, Map<String, String[]> params, Object o, Method method, int parameterIndex) {
-        Logger.trace("bind: name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] ");
+        if (Logger.isTraceEnabled()) {
+            Logger.trace("bind: name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] ");
+        }
 
         // Let a chance to plugins to bind this object
         Object result = Play.pluginCollection.bind(name, clazz, type, annotations, params);
@@ -382,7 +395,9 @@ public class Binder {
 
     @SuppressWarnings("unchecked")
     public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
-        Logger.trace("directBind: value [" + value + "] annotation [" + Utils.join(annotations, " ") + "] Class [" + clazz + "]");
+        if (Logger.isTraceEnabled()) {
+            Logger.trace("directBind: value [" + value + "] annotation [" + Utils.join(annotations, " ") + "] Class [" + clazz + "]");
+        }
 
         boolean nullOrEmpty = value == null || value.trim().length() == 0;
 
@@ -411,9 +426,14 @@ public class Binder {
 
          // custom types
         for (Class<?> c : supportedTypes.keySet()) {
-            Logger.trace("directBind: value [" + value + "] c [" + c + "] Class [" + clazz + "]");
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("directBind: value [" + value + "] c [" + c + "] Class [" + clazz + "]");
+            }
+
             if (c.isAssignableFrom(clazz)) {
-                Logger.trace("directBind: isAssignableFrom is true");
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("directBind: isAssignableFrom is true");
+                }
                 return supportedTypes.get(c).bind(name, annotations, value, clazz, type);
             }
         }

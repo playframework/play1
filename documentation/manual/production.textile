@@ -177,6 +177,24 @@ bc. ProxyPreserveHost on
 
 The host: header will be the original host request header issued by the client. By combining theses two techniques, your app will appear to be directly exposed.
 
+h2. <a name="nopython">Deploying Without Python</a>
+
+Python is installed by default on most Unix machines, and a Windows version is embedded with Play. However there may be cases where you need to deploy an application on a server without any Python executable.
+
+For that, a build.xml file providing limited functionalities is provided with Play applications.
+
+From the application folder, you can start the server using:
+
+bc. ant start -Dplay.path=/path/to/playdirectory
+
+Warning: using the play command the output will be redirected to system.out; however using ant the standard output is not accessible. It is necessary to provide a log4j properties file where you specify a file appended.
+
+To stop the server:
+
+bc. ant stop -Dplay.path=/path/to/playdirectory
+
+Note that you can also specify the path to Play framework in an environment variable or directly in your application's build.xml.
+
 p(note). **Continuing the discussion**
  
 Next: %(next)"Deployment options":deployment%.

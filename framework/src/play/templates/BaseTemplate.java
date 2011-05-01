@@ -54,7 +54,9 @@ public abstract class BaseTemplate extends Template {
             byte[] bc = BytecodeCache.getBytecode(name, source);
             if (bc != null) {
                 directLoad(bc);
-                Logger.trace("%sms to load template %s from cache", System.currentTimeMillis() - start, name);
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("%sms to load template %s from cache", System.currentTimeMillis() - start, name);
+                }
                 return true;
             }
         } catch (Exception e) {

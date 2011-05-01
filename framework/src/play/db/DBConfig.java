@@ -84,7 +84,7 @@ public class DBConfig {
     public Connection getConnection() {
         try {
             // do we have a present JPAContext for this db-config in current thread?
-            JPAConfig jpaConfig = JPA.getJPAConfig(dbConfigName);
+            JPAConfig jpaConfig = JPA.getJPAConfig(dbConfigName, true);
             if (jpaConfig!=null) {
                 JPAContext jpaContext = jpaConfig.getJPAContext();
                 return ((org.hibernate.ejb.EntityManagerImpl) jpaContext.em()).getSession().connection();
@@ -145,7 +145,9 @@ public class DBConfig {
                 if (close != null) {
                     close.invoke(datasource, new Object[] {});
                     datasource = null;
-                    Logger.trace("Datasource destroyed for db config " + dbConfigName);
+                    if (Logger.isTraceEnabled()) {
+                        Logger.trace("Datasource destroyed for db config " + dbConfigName);
+                    }
                 }
             }
         } catch (Throwable t) {

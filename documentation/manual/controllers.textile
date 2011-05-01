@@ -271,6 +271,12 @@ bc. public static void save(User user) {
     user.save(); // ok with 1.0.1
 }
 
+You can use JPA binding to modify complete object graphs in the same way as POJO mapping works, but you have to supply the ID for each sub object you intend to modify:
+
+bc. user.id = 1
+&user.name=morten
+&user.address.id=34
+&user.address.street=MyStreet 
 
 h2. <a name="custombinding">Custom binding</a>
 

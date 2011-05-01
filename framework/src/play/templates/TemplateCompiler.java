@@ -13,7 +13,9 @@ public abstract class TemplateCompiler {
         try {
             long start = System.currentTimeMillis();
             generate(template);
-            Logger.trace("%sms to parse template %s", System.currentTimeMillis() - start, template.name);
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("%sms to parse template %s", System.currentTimeMillis() - start, template.name);
+            }
             return template;
         } catch (PlayException e) {
             throw e;
@@ -105,7 +107,9 @@ public abstract class TemplateCompiler {
         // Done !
         template.compiledSource = compiledSource.toString();
 
-        Logger.trace("%s is compiled to %s", template.name, template.compiledSource);
+        if (Logger.isTraceEnabled()) {
+            Logger.trace("%s is compiled to %s", template.name, template.compiledSource);
+        }
 
     }
 

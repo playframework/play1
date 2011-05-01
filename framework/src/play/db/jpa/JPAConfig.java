@@ -1,9 +1,13 @@
 package play.db.jpa;
 
-import javax.persistence.*;
+import java.lang.reflect.Modifier;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 import org.hibernate.ejb.Ejb3Configuration;
 import play.Invoker;
+import play.Play;
+import play.classloading.ApplicationClasses;
 import play.exceptions.JPAException;
 
 /**
@@ -30,6 +34,7 @@ public class JPAConfig {
 
     protected JPAConfig(Ejb3Configuration cfg, String configName) {
         this.configName = configName;
+        invokeJPAConfigurationExtensions(cfg, configName);
         entityManagerFactory = cfg.buildEntityManagerFactory();
         jpql = new JPQL(this);
     }
@@ -128,5 +133,27 @@ public class JPAConfig {
             return false;
         }
         return getJPAContext().isInsideTransaction();
+    }
+
+    /**
+     * Looks up all {@link JPAConfigurationExtension} implementations and applies them to the JPA configuration.
+     * 
+     * @param cfg the {@link} Ejb3Configuration for this {@link JPAConfig}
+     * @param configName the name of the db configuration
+     */
+    protected void invokeJPAConfigurationExtensions(Ejb3Configuration cfg, String configName) {
+        for(ApplicationClasses.ApplicationClass c : Play.classes.getAssignableClasses(JPAConfigurationExtension.class)) {
+            if(!Modifier.isAbstract(c.getClass().getModifiers())) {
+                JPAConfigurationExtension extension = null;
+                try {
+                    extension = (JPAConfigurationExtension) c.javaClass.newInstance();
+                } catch (Throwable t) {
+                    throw new JPAException(String.format("Could not instantiate JPAConfigurationExtension '%s'", c.javaClass.getName()), t);
+                }
+                if(extension.getConfigurationName() == null || extension.getConfigurationName().equals(configName)) {
+                    extension.configure(cfg);
+                }
+            }
+        }
     }
 }
