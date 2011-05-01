@@ -35,17 +35,7 @@ def secretKey():
     return ''.join([random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') for i in range(64)])
 
 def isParentOf(path1, path2):
-    if len(path2) < len(path1) or len(path2) < 2:
-        return False
-    if (path1 == path2):
-        return True
-    return isParentOf(path1, os.path.dirname(path2))
-
-def isParentOf(path1, path2):
-    if len(path2) < len(path1) or len(path2) < 2:
-        return False
-    if (path1 == path2):
-        return True
+    return path2.startswith(path1 + '/' ) 
 
 def getWithModules(args, env):
     withModules = []
