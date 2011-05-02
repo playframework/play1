@@ -205,6 +205,10 @@ public class JobsPlugin extends PlayPlugin {
             cron = Expression.evaluate(cron, cron).toString();
             CronExpression cronExp = new CronExpression(cron);
             Date nextDate = cronExp.getNextValidTimeAfter(now);
+            if (nextDate == null) {
+                Logger.warn("The cron expression for job %s doesn't have any match in the future, will never be executed", job.getClass().getName());
+                return;
+            }
             if (nextDate.equals(job.nextPlannedExecution)) {
                 // Bug #13: avoid running the job twice for the same time
                 // (happens when we end up running the job a few minutes before the planned time)
