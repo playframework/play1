@@ -503,6 +503,7 @@ public class ActionInvoker {
     static final String C = "__continuation";
     static final String A = "__callback";
     static final String F = "__future";
+    static final String LV = "__localVariableNames";
 
     static Object invokeWithContinuation(Method method, Object instance, Object[] realArgs) throws Exception {
         // Callback case

@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.*;
 
 import models.*;
 
+import play.jobs.*;
+
 public class WithContinuations extends Controller {
     
     @Before
@@ -233,6 +235,30 @@ public class WithContinuations extends Controller {
                 renderText("yep -> %s", result);
             }
         });
+    }
+    
+    public static void renderTemplateWithVariablesAssignedBeforeAwait() {
+        int n = 1;
+        String a = "A";
+        Job<String> job = new Job<String>(){
+            public String doJobWithResult() {
+                return "B";
+            }
+        };
+        
+        String b = await(job.now());
+        
+        String c = "C";
+        
+        await(40);
+        
+        String d = "D";
+        
+        //await("1s");
+        
+        String e = "E";
+        
+        render(n,a,b,c,d,e);
     }
     
 }
