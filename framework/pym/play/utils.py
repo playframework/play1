@@ -226,3 +226,14 @@ def copy_directory(source, target, exclude = None):
 
 def isTestFrameworkId( framework_id ):
     return (framework_id == 'test' or (framework_id.startswith('test-') and framework_id.__len__() >= 6 ))
+
+# ~~~~~~~~~
+# Little utility to get command line arguments
+def get_opt(args, arg, env):
+    s = "--%s=" % arg
+    for a in args:
+        if a.find(s) == 0:
+            env[arg] = a[len(s):]
+            args.remove(a)
+            # print "~ get_opt: '%s' -> '%s'" % (arg, env[arg])
+            break
