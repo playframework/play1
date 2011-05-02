@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.matcher.PatternMatcher;
 import org.apache.ivy.plugins.resolver.ChainResolver;
@@ -61,7 +62,7 @@ public class SettingsParser {
 
                     List repositories = (List) data.get("repositories");
                     List<Map<String, String>> modules = new ArrayList<Map<String, String>>();
-                    for (Object dep : repositories) {
+                    for (Object dep: repositories) {
                         if (dep instanceof Map) {
                             settings.addResolver(parseRepository((Map) dep, modules));
                         } else {
@@ -69,7 +70,7 @@ public class SettingsParser {
                         }
                     }
 
-                    for (Map attributes : modules) {
+                    for (Map attributes: modules) {
                         settings.addModuleConfiguration(attributes, settings.getMatcher(PatternMatcher.EXACT_OR_REGEXP), (String) attributes.remove("resolver"), null, null, null);
                     }
 
@@ -90,9 +91,13 @@ public class SettingsParser {
 
     DependencyResolver parseRepository(Map repoDescriptor, List<Map<String, String>> modules) throws Oops {
 
-        String repName = ((Map) repoDescriptor).keySet().iterator().next().toString().trim();
-        Map options = (Map) ((Map) repoDescriptor).values().iterator().next();
+        Object key = repoDescriptor.keySet().iterator().next();
+        String repName = key.toString().trim();
+        Map options = (Map) repoDescriptor.get(key);
 
+        if (options == null) {
+            throw new Oops("Parsing error in " + repName + ": check the format and the indentation.");
+        }
         String type = get(options, "type", String.class);
         if (type == null) {
             throw new Oops("Repository type need to be specified -> " + repName + ": " + options);
