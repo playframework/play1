@@ -399,6 +399,20 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
         public static Object getLocalVariable(String variable) {
             return getLocalVariables().get(variable);
         }
+
+        public static Stack<Map<String, Object>> getLocalVariablesStateBeforeAwait() {
+            Stack<Map<String, Object>> state = localVariables.get();
+            // must clear the ThreadLocal to prevent destroying the state when exit() is called due to continuations-suspend
+            localVariables.set(new Stack<Map<String, Object>>());
+            return state;
+        }
+
+        public static void setLocalVariablesStateAfterAwait(Stack<Map<String, Object>> state) {
+            if (state==null) {
+                state = new Stack<Map<String, Object>>();
+            }
+            localVariables.set( state );
+        }
     }
     private final static Map<Integer, Integer> storeByCode = new HashMap<Integer, Integer>();
 
