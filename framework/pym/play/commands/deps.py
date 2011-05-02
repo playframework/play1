@@ -13,9 +13,6 @@ HELP = {
 }
 
 def execute(**kargs):
-    args = kargs.get("args")
-    play_env = kargs.get("env")
-
     command = kargs.get("command")
     app = kargs.get("app")
     args = kargs.get("args")
@@ -24,6 +21,9 @@ def execute(**kargs):
     classpath = app.getClasspath()
 
     add_options = ['-Dapplication.path=%s' % (app.path), '-Dframework.path=%s' % (play_env['basedir']), '-Dplay.id=%s' % play_env['id'], '-Dplay.version=%s' % play_env['version']]
+    get_opt(args, 'with-descriptors', play_env)
+    if 'with-descriptors' in play_env:
+        add_options.append('-Ddescriptors=%s' % play_env['with-descriptors'])
     if args.count('--verbose'):
         add_options.append('-Dverbose')
     if args.count('--sync'):

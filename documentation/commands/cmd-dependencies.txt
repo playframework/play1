@@ -8,7 +8,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play dependencies [app_path] [--verbose] [--debug] [--sync] [--%fwk_id]
+~ play dependencies [app_path] [--verbose] [--debug] [--sync] [--%fwk_id] [--with-descriptors=file1,...]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -37,4 +37,8 @@
 ~
 ~ --%fwk_id:
 ~ Use this ID to run the application (override the default framework ID)
+~
+~ --with-descriptors=file1,...
+~ Load additional descriptors. File descriptors must follow the play dependencies.yml
+~ format.
 ~

@@ -25,8 +25,17 @@ public class DependenciesManager {
         // Paths
         File application = new File(System.getProperty("application.path"));
         File framework = new File(System.getProperty("framework.path"));
+        List<File> descriptors = new ArrayList<File>();
+        String descriptorsProperty = System.getProperty("descriptors");
+        if (descriptorsProperty != null) {
+            String[] paths = descriptorsProperty.split(",");
+            for (String path : paths) {
+                descriptors.add(new File(path));
+            }
+        }
 
-        DependenciesManager deps = new DependenciesManager(application, framework);
+        DependenciesManager deps = new DependenciesManager(application, framework,
+                descriptors.toArray(new File[descriptors.size()]));
 
         ResolveReport report = deps.resolve();
             if(report != null) {
@@ -49,10 +58,12 @@ public class DependenciesManager {
     File application;
     File framework;
     HumanReadyLogger logger;
+    private File[] moreDescriptors;
 
-    public DependenciesManager(File application, File framework) {
+    public DependenciesManager(File application, File framework, File[] moreDescriptors) {
         this.application = application;
         this.framework = framework;
+        this.moreDescriptors = moreDescriptors;
     }
 
     public void report() {
@@ -141,7 +152,7 @@ public class DependenciesManager {
         List<ArtifactDownloadReport> missing = new ArrayList<ArtifactDownloadReport>();
 
         List<ArtifactDownloadReport> artifacts = new ArrayList<ArtifactDownloadReport>();
-        for (Iterator iter = report.getDependencies().iterator(); iter.hasNext();) {
+        for (Iterator<?> iter = report.getDependencies().iterator(); iter.hasNext();) {
             IvyNode node = (IvyNode) iter.next();
             if (node.isLoaded() && !node.isCompletelyEvicted()) {
                 ArtifactDownloadReport[] adr = report.getArtifactsReports(node.getResolvedId());
@@ -281,6 +292,9 @@ public class DependenciesManager {
         IvySettings ivySettings = new IvySettings();
         new SettingsParser(humanReadyLogger).parse(ivySettings, new File(framework, "framework/dependencies.yml"));
         new SettingsParser(humanReadyLogger).parse(ivySettings, new File(application, "conf/dependencies.yml"));
+        for (File descriptor : moreDescriptors) {
+            new SettingsParser(humanReadyLogger).parse(ivySettings, descriptor);
+        }
         ivySettings.setDefaultResolver("mavenCentral");
         ivySettings.setDefaultUseOrigin(true);
         PlayConflictManager conflictManager = new PlayConflictManager();
