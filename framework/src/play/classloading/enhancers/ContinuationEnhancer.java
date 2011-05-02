@@ -13,6 +13,7 @@ import play.classloading.ApplicationClasses.ApplicationClass;
 public class ContinuationEnhancer extends Enhancer {
 
     static final List<String> continuationMethods = new ArrayList<String>();
+
     static {
         continuationMethods.add("play.mvc.Controller.await(java.lang.String)");
         continuationMethods.add("play.mvc.Controller.await(int)");
@@ -24,6 +25,9 @@ public class ContinuationEnhancer extends Enhancer {
 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
+        if (isScala(applicationClass)) {
+            return;
+        }
 
         CtClass ctClass = makeClass(applicationClass);
 
@@ -31,29 +35,28 @@ public class ContinuationEnhancer extends Enhancer {
             return;
         }
 
-        final boolean[] needsContinuations = new boolean[] {false};
+        final boolean[] needsContinuations = new boolean[]{false};
 
-        for(CtMethod m : ctClass.getDeclaredMethods()) {
+        for (CtMethod m : ctClass.getDeclaredMethods()) {
             m.instrument(new ExprEditor() {
 
                 @Override
                 public void edit(MethodCall m) throws CannotCompileException {
                     try {
-                        if(continuationMethods.contains(m.getMethod().getLongName())) {
+                        if (continuationMethods.contains(m.getMethod().getLongName())) {
                             needsContinuations[0] = true;
                         }
-                    } catch(Exception e) {                        
+                    } catch (Exception e) {
                     }
                 }
-
             });
 
-            if(needsContinuations[0]) {
+            if (needsContinuations[0]) {
                 break;
             }
         }
 
-        if(!needsContinuations[0]) {
+        if (!needsContinuations[0]) {
             return;
         }
 
@@ -62,5 +65,4 @@ public class ContinuationEnhancer extends Enhancer {
 
         ctClass.defrost();
     }
-
 }

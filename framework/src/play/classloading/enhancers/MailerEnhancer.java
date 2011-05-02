@@ -15,6 +15,10 @@ public class MailerEnhancer extends Enhancer {
 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
+        if (isScala(applicationClass)) {
+            return;
+        }
+
         CtClass ctClass = makeClass(applicationClass);
 
         if (!ctClass.subtypeOf(classPool.get(Mailer.class.getName()))) {

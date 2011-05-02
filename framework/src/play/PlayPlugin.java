@@ -35,6 +35,13 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public void onLoad() {
     }
 
+    public boolean compileSources() {
+        return false;
+    }
+
+    /**
+     * Run a test class
+     */
     public TestResults runTest(Class<BaseTest> clazz) {
         return null;
     }
@@ -128,6 +135,14 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * Throw an exception is the application must be reloaded.
      */
     public void detectChange() {
+    }
+
+    /**
+     * It's time for the plugin to detect changes.
+     * Throw an exception is the application must be reloaded.
+     */
+    public boolean detectClassesChange() {
+        return false;
     }
 
     /**
@@ -242,6 +257,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
      * Let a chance to the plugin to compile it owns classes.
      * Must be added to the mutable list.
      */
+    @Deprecated
     public void compileAll(List<ApplicationClass> classes) {
     }
 
