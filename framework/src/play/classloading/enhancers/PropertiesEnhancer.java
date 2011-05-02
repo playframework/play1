@@ -29,8 +29,12 @@ public class PropertiesEnhancer extends Enhancer {
 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
+        if (isScala(applicationClass)) {
+            return;
+        }
+
         final CtClass ctClass = makeClass(applicationClass);
-        if (ctClass.isInterface()) {
+        if (isScalaObject(ctClass) || ctClass.isInterface()) {
             return;
         }
         if(ctClass.getName().endsWith(".package")) {

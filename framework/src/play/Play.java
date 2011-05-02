@@ -52,6 +52,11 @@ public class Play {
         }
     }
     /**
+     * Is the application initialized
+     */
+    public static boolean initialized = false;
+
+    /**
      * Is the application started
      */
     public static boolean started = false;
@@ -289,10 +294,12 @@ public class Play {
 
         // Plugins
         pluginCollection.onApplicationReady();
+
+        Play.initialized = true;
     }
 
-	public static void guessFrameworkPath() {
-		// Guess the framework path
+    public static void guessFrameworkPath() {
+        // Guess the framework path
         try {
             URL versionUrl = Play.class.getResource("/play/version");
             // Read the content of the file
@@ -560,7 +567,9 @@ public class Play {
         }
         try {
             pluginCollection.beforeDetectingChanges();
-            classloader.detectChanges();
+            if(!pluginCollection.detectClassesChange()) {
+                classloader.detectChanges();
+            }
             Router.detectChanges(ctxPath);
             if (conf.lastModified() > startedAt) {
                 start();

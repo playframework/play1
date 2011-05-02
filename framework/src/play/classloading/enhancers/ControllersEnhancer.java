@@ -28,6 +28,10 @@ public class ControllersEnhancer extends Enhancer {
 
     @Override
     public void enhanceThisClass(final ApplicationClass applicationClass) throws Exception {
+        if (isAnon(applicationClass)) {
+            return;
+        }
+
         CtClass ctClass = makeClass(applicationClass);
 
         if (!ctClass.subtypeOf(classPool.get(ControllerSupport.class.getName()))) {

@@ -17,8 +17,15 @@ public class SigEnhancer extends Enhancer {
 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
+        if (isScala(applicationClass)) {
+            return;
+        }
 
-        CtClass ctClass = makeClass(applicationClass);
+        final CtClass ctClass = makeClass(applicationClass);
+        if (isScalaObject(ctClass)) {
+            return;
+        }
+
         StringBuilder sigChecksum = new StringBuilder();
 
         sigChecksum.append("Class->" + ctClass.getName() + ":");
@@ -51,28 +58,30 @@ public class SigEnhancer extends Enhancer {
                 }
             }
         }
-        
-        if(ctClass.getClassInitializer() != null) {
+
+        if (ctClass.getClassInitializer() != null) {
             sigChecksum.append("Static Code->");
-            for(CodeIterator i = ctClass.getClassInitializer().getMethodInfo().getCodeAttribute().iterator(); i.hasNext(); ) {
+            for (CodeIterator i = ctClass.getClassInitializer().getMethodInfo().getCodeAttribute().iterator(); i.hasNext();) {
                 int index = i.next();
                 int op = i.byteAt(index);
                 sigChecksum.append(op);
-                if(op == Opcode.LDC) {
-                    sigChecksum.append("["+i.get().getConstPool().getLdcValue(i.byteAt(index+1))+"]");;
+                if (op == Opcode.LDC) {
+                    sigChecksum.append("[" + i.get().getConstPool().getLdcValue(i.byteAt(index + 1)) + "]");
+                    ;
                 }
-                sigChecksum.append(".");                
+                sigChecksum.append(".");
             }
         }
 
-        if(ctClass.getName().endsWith("$")) {
+        if (ctClass.getName().endsWith("$")) {
             sigChecksum.append("Singletons->");
-            for(CodeIterator i = ctClass.getDeclaredConstructors()[0].getMethodInfo().getCodeAttribute().iterator(); i.hasNext(); ) {
+            for (CodeIterator i = ctClass.getDeclaredConstructors()[0].getMethodInfo().getCodeAttribute().iterator(); i.hasNext();) {
                 int index = i.next();
                 int op = i.byteAt(index);
                 sigChecksum.append(op);
-                if(op == Opcode.LDC) {
-                    sigChecksum.append("["+i.get().getConstPool().getLdcValue(i.byteAt(index+1))+"]");;
+                if (op == Opcode.LDC) {
+                    sigChecksum.append("[" + i.get().getConstPool().getLdcValue(i.byteAt(index + 1)) + "]");
+                    ;
                 }
                 sigChecksum.append(".");
             }

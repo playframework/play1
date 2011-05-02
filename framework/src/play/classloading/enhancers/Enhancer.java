@@ -172,5 +172,13 @@ public abstract class Enhancer {
         }
         return false;
     }
+
+    boolean isScala(ApplicationClass app) {
+        return app.javaFile.getName().endsWith(".scala");
+    }
+
+    boolean isAnon(ApplicationClass app) {
+        return app.name.contains("$anonfun$") || app.name.contains("$anon$");
+    }
     
 }
