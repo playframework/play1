@@ -560,7 +560,6 @@ public class F {
                 }
                 if (filter.trigger()) {
                     it.remove();
-                    break;
                 }
             }
         }
