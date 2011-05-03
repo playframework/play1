@@ -57,6 +57,8 @@ public class SettingsParser {
 
             Map data = (Map) o;
 
+            parseIncludes(settings, data);
+
             if (data.containsKey("repositories")) {
                 if (data.get("repositories") instanceof List) {
 
@@ -86,6 +88,25 @@ public class SettingsParser {
             System.out.println("~ \t" + e.getMessage());
             System.out.println("~");
             throw new RuntimeException("Malformed dependencies.yml descriptor");
+        }
+    }
+
+    /**
+     * Look for an "include" property containing a list of yaml descriptors and load their repositories.
+     */
+    private void parseIncludes(IvySettings settings, Map data) throws Oops {
+        if (data.containsKey("include") && data.get("include") != null) {
+            if (data.get("include") instanceof List) {
+                List<?> includes = (List)data.get("include");
+                if (includes != null) {
+                    for (Object inc : includes) {
+                        File include = new File(substitute(inc.toString()));
+                        new SettingsParser(logger).parse(settings, include); // Load found descriptors
+                    }
+                }
+            } else {
+                throw new Oops("\"include\" property must be a list");
+            }
         }
     }
 
@@ -216,20 +237,34 @@ public class SettingsParser {
             Object o = data.get(key);
             if (type.isAssignableFrom(o.getClass())) {
                 if (o instanceof String) {
-                    Matcher m = Pattern.compile("\\$\\{([^\\}]*)\\}").matcher((String)o); //search of ${something} group(1) => something
-                    while (m.find()) {
-                        String propertyValue = System.getProperty(m.group(1));
-                        if(propertyValue != null){
-                            o = o.toString().replace("${" + m.group(1) + "}",propertyValue);
-                            }else{
-                                throw new Oops("Unknow property " + m.group(1) + " in " + o);
-                                }
-                        }
+                    o = substitute(o.toString());
                 }
                 return (T) o;
             }
         }
         return null;
+    }
+
+    /**
+     * Substitute environment variables found in a <code>String</code> with their value.
+     * This function search for <code>${variable}</code> patterns and replace them with
+     * their value taken from current environment.
+     *
+     * @param s <code>String</code> to substitute
+     * @return The substituted <code>String</code>
+     * @throws Oops If an environment variable is not found
+     */
+    private String substitute(String s) throws Oops {
+        Matcher m = Pattern.compile("\\$\\{([^\\}]*)\\}").matcher((String)s); //search of ${something} group(1) => something
+        while (m.find()) {
+            String propertyValue = System.getProperty(m.group(1));
+            if(propertyValue != null){
+                s = s.replace("${" + m.group(1) + "}",propertyValue);
+            } else {
+                throw new Oops("Unknown property " + m.group(1) + " in " + s);
+            }
+        }
+        return s;
     }
 
     <T> T get(Map data, String key, Class<T> type, T defaultValue) throws Oops {
