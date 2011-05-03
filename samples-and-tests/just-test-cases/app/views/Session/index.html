@@ -1,0 +1,85 @@
+#{extends 'Session/main.html'/}
+
+#{set 'moreScripts'}
+<script type="text/javascript">
+function loadIndex() {
+    window.location = "@@{Session.index()}";
+}
+
+function loadIndexRequest(key) {
+    /*
+     * Send an ajax-long-polling-request to the server.
+     * When the server answers the dialog can be closed.
+     */
+    jQuery.ajax({
+        url: "@@{Session.suspendedRequest()}",
+        data: {'key': key},
+        dataType: "jsonp",
+        jsonp: "callback",
+        jsonpCallback: "loadIndex"
+    });
+}
+
+function causeResponse(key) {
+    /*
+     * Revoke the requests to stop suspending it
+     * and cause an Response.
+     */
+    jQuery.ajax({
+        url: "@@{Session.stopSuspendedRequest()}",
+        data: {'key': key},
+        dataType: "jsonp",
+        jsonp: "callback",
+        jsonpCallback: "loadIndex"
+    });
+}
+
+function showSubmitDialog(key) {
+    jQuery('body').append('<p><button id="causeResponse">Close ajax-request</button></p>');
+    jQuery('#causeResponse').click(function() {
+        causeResponse(key);
+    });
+    
+    jQuery('body').append('<iframe src="@{Session.submit()}" name="submitFrame"/>');
+    jQuery('#showDialog').hide();
+    jQuery('#usernameInfo').hide();
+    jQuery('#dialogInfo').hide();
+
+    jQuery('#requestInfo').show();
+    loadIndexRequest(key);
+}
+
+jQuery(document).ready(function() {
+    jQuery('#showDialog').click(function() {
+        showSubmitDialog("01125813");
+    });
+});
+</script>
+#{/set}
+
+#{if session['username']}
+    <p>A username is set in the session</p>
+    <p id="currentUsername">username: ${session['username']}</p>
+    <a href="@{Session.remove('username')}">Remove username</a>
+#{/if}
+#{else}
+    <p id="usernameInfo">No username is set!</p>
+    <button id="showDialog">Show username-dialog</button>
+    <p id="dialogInfo">
+        Clicking "Show username-dialog" starts an ajax long-polling-request to close the dialog.
+        If the request is answered the dialog closes.
+    </p>
+    <p>
+        Scope.SESSION_SEND_ONLY_IF_CHANGED = <strong>${SESSION_SEND_ONLY_IF_CHANGED}</strong> - 
+        <a href="@{Session.setSendOnlyIfChanged()}?value=${!SESSION_SEND_ONLY_IF_CHANGED}">
+            Set ${!SESSION_SEND_ONLY_IF_CHANGED}
+        </a>
+    </p>    
+    <p id="requestInfo" style="display:none;">
+        For this demo/test the request can be closed manually by clicking "Close ajax-request".<br/><br/>
+        If false: The response of the suspended ajax-request
+        will overwrite the session-cookie with the username-information.<br/><br/>
+        If true: No Set-Cookie is send back in the header,
+        consequently the response will not overwrite the session-cookie.
+    </p>
+#{/else}
