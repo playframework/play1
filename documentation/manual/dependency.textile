@@ -273,6 +273,35 @@ repositories:
             - org.jbpm -> *
             - org.drools -> *
 
+h3. Local repositories
+
+Finally and probably foremost, you may want to define a repository that references local modules. With this scenario, dependencies work very much like application.conf's module resolution (now deprecated).
+
+So given the following folder structure,
+
+bc. myplayapp/
+myfirstmodule/
+mysecondmodule/
+
+The following myplayapp/conf/depencencies.yml will achieve its goal.
+
+bc. # Application dependencies
+    
+require:
+    - play
+    - myfirstmodule -> myfirstmodule
+    - mysecondmodule -> mysecondmodule
+    
+repositories:
+    - My modules:
+        type:       local
+        artifact:   ${application.path}/../[module]
+        contains:
+            - myfirstmodule
+            - mysecondmodule
+
+Note: don't forget to run **play dependencies myplayapp**
+
 
 p(note). **Continuing the discussion**
 
