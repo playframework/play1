@@ -280,7 +280,7 @@ public abstract class FunctionalTest extends BaseTest {
                 savedCookies = new HashMap<String, Http.Cookie>();
             }
             for(Map.Entry<String,Http.Cookie> e : response.cookies.entrySet()) {
-                if(e.getValue().maxAge != null && e.getValue().maxAge > 0) {
+                if(e.getValue().maxAge == null || e.getValue().maxAge > 0) {
                     savedCookies.put(e.getKey(), e.getValue());
                 }
             }
