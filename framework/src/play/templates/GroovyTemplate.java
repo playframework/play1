@@ -180,6 +180,16 @@ public class GroovyTemplate extends BaseTemplate {
         compiledTemplateName = compiledTemplate.getName();
     }
 
+    @Override
+    public String render(Map<String, Object> args) {
+        try {
+            return super.render(args);
+        } finally {
+            currentTemplate.remove();
+        }
+    }
+
+    @Override
     protected String internalRender(Map<String, Object> args) {
         compile();
         Binding binding = new Binding(args);
@@ -248,7 +258,6 @@ public class GroovyTemplate extends BaseTemplate {
             if (monitor != null) {
                 monitor.stop();
             }
-            currentTemplate.remove();
         }
         if (applyLayouts && layout.get() != null) {
             Map<String, Object> layoutArgs = new HashMap<String, Object>(args);
