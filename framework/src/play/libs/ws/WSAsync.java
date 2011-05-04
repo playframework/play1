@@ -22,7 +22,6 @@ import play.Play;
 import play.libs.F.Promise;
 import play.libs.MimeTypes;
 import play.libs.OAuth.ServiceInfo;
-import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.libs.WS.WSImpl;
 import play.libs.WS.WSRequest;
