@@ -194,6 +194,11 @@ public class Scope {
                         }
                         session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
                     }
+                } else {
+                    if (COOKIE_EXPIRE != null) {
+                        // New/empty session needs a timstamp, too
+                        session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
+                    }
                 }
                 return session;
             } catch (Exception e) {
