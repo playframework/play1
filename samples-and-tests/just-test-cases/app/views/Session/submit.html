@@ -1,0 +1,12 @@
+#{extends 'Session/main.html'/}
+
+#{form @Session.put(), method:'POST', id:'sessionForm', enctype:'multipart/form-data'}
+    <p>Set username</p>
+    <p>
+        <label for="username">Username:</label>
+        <input type="text" name="value" value="bob"/>
+        <input type="hidden" name="key" value="username"/>
+    </p>
+    <input type="submit" name="submit" value="submit"/>
+#{/form}
+
