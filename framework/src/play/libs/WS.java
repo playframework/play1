@@ -21,7 +21,6 @@ import play.Play;
 import play.PlayPlugin;
 import play.libs.F.Promise;
 import play.libs.OAuth.ServiceInfo;
-import play.libs.OAuth;
 import play.libs.ws.WSAsync;
 import play.libs.ws.WSUrlFetch;
 import play.mvc.Http.Header;
@@ -512,7 +511,7 @@ public class WS extends PlayPlugin {
             return sb.toString();
         }
 
-    };
+    }
 
     public static class FileParam {
         public File file;
@@ -645,7 +644,7 @@ public class WS extends PlayPlugin {
         public abstract InputStream getStream();
 
         /**
-         * get the response body as a {@link com.google.gson.JSONObject}
+         * get the response body as a {@link com.google.gson.JsonElement}
          * @return the json response
          */
         public JsonElement getJson() {
