@@ -143,6 +143,20 @@ class PlayApplication(object):
 
         return classpath
 
+    def getFrameworkClasspath(self):
+        classpath = []
+
+        # The default
+        classpath.append(os.path.normpath(os.path.join(self.path, 'conf')))
+        classpath.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'framework/play-%s.jar' % self.play_env['version'])))
+
+        # The framework
+        for jar in os.listdir(os.path.join(self.play_env["basedir"], 'framework/lib')):
+            if jar.endswith('.jar'):
+                classpath.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'framework/lib/%s' % jar)))
+
+        return classpath
+
     def agent_path(self):
         return os.path.join(self.play_env["basedir"], 'framework/play-%s.jar' % self.play_env['version'])
 
@@ -152,6 +166,14 @@ class PlayApplication(object):
         if os.name == 'nt':
             cp_args = ';'.join(classpath)
         return cp_args
+
+    def fw_cp_args(self):
+        classpath = self.getFrameworkClasspath()
+        cp_args = ':'.join(classpath)
+        if os.name == 'nt':
+            cp_args = ';'.join(classpath)
+        return cp_args
+
 
     def java_path(self):
         if not os.environ.has_key('JAVA_HOME'):
