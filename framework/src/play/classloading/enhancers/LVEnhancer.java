@@ -1,6 +1,5 @@
 package play.classloading.enhancers;
 
-import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.Stack;
 
