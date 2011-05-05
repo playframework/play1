@@ -340,7 +340,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             nettyResponse.addHeader(SET_COOKIE, encoder.encode());
         }
 
-        if (!response.headers.containsKey(CACHE_CONTROL)) {
+        if (!response.headers.containsKey(CACHE_CONTROL) && !response.headers.containsKey(EXPIRES)) {
             nettyResponse.setHeader(CACHE_CONTROL, "no-cache");
         }
 
