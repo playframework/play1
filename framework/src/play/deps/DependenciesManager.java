@@ -292,6 +292,7 @@ public class DependenciesManager {
 
         Ivy ivy = Ivy.newInstance(ivySettings);
 
+        // Default ivy config
         File ivyDefaultSettings = new File(userHome, ".ivy2/ivysettings.xml");
         if(ivyDefaultSettings.exists()) {
             ivy.configure(ivyDefaultSettings);
