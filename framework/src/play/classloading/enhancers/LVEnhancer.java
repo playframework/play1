@@ -82,14 +82,12 @@ public class LVEnhancer extends Enhancer {
                         DecodedMethodInvocationOp dmio = (DecodedMethodInvocationOp) frame.decodedOp;
                         StringBuffer stmt = new StringBuffer("{");
                         MethodParams methodParams = DecodedMethodInvocationOp.resolveParameters(frame);
-                        stmt.append("String[] $$paramNames = new String[").append((methodParams.subject != null ? 1 : 0) + methodParams.params.length + (methodParams.varargs != null ? methodParams.varargs.length : 0)).append("];");
-                        if(methodParams.subject != null && methodParams.subject.name != null)
-                            stmt.append("$$paramNames[").append(0).append("] = \"").append(methodParams.subject.name).append("\";");
+                        stmt.append("String[] $$paramNames = new String[").append(methodParams.params.length + (methodParams.varargs != null ? methodParams.varargs.length : 0)).append("];");
                         for(int i = 0; i < methodParams.params.length; i++)
                             if(methodParams.params[i] != null && methodParams.params[i].name != null)
-                                stmt.append("$$paramNames[").append(i + (methodParams.subject != null ? 1 : 0)).append("] = \"").append(methodParams.params[i].name).append("\";");
+                                stmt.append("$$paramNames[").append(i).append("] = \"").append(methodParams.params[i].name).append("\";");
                         if(methodParams.varargs != null)
-                            for(int i = 0, j = methodParams.params.length + (methodParams.subject != null ? 1 : 0); i < methodParams.varargs.length; i++, j++)
+                            for(int i = 0, j = methodParams.params.length; i < methodParams.varargs.length; i++, j++)
                                 if(methodParams.varargs[i] != null && methodParams.varargs[i].name != null)
                                     stmt.append("$$paramNames[").append(j).append("] = \"").append(methodParams.varargs[i].name).append("\";");
 
@@ -240,6 +238,11 @@ public class LVEnhancer extends Enhancer {
                 this.subject = subject;
                 this.params = params;
                 this.varargs = varargs;
+            }
+            
+            @Override
+            public String toString() {
+                return "Params: subject=" + subject + ", params=" + Arrays.toString(params) + ", varargs=" + Arrays.toString(varargs);
             }
         }
     }
