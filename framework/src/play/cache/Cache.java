@@ -183,7 +183,7 @@ public abstract class Cache {
 
     /**
      * Delete an element from the cache.
-     * @param key The element key     * 
+     * @param key The element key
      */
     public static void delete(String key) {
         cacheImpl.delete(key);
@@ -236,7 +236,7 @@ public abstract class Cache {
                 cacheImpl = EhCacheImpl.getInstance();
             }
         } else {
-            cacheImpl = EhCacheImpl.getInstance();
+            cacheImpl = EhCacheImpl.newInstance();
         }
     }
 

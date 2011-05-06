@@ -5,7 +5,6 @@ import java.util.Map;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import play.Logger;
-import play.Play;
 
 /**
  * EhCache implementation.
@@ -35,9 +34,11 @@ public class EhCacheImpl implements CacheImpl {
     }
 
     public static EhCacheImpl getInstance() {
-        if (uniqueInstance == null) {
-            uniqueInstance = new EhCacheImpl();
-        }
+        return uniqueInstance;
+    }
+
+    public static EhCacheImpl newInstance() {
+        uniqueInstance = new EhCacheImpl();
         return uniqueInstance;
     }
 
@@ -151,9 +152,6 @@ public class EhCacheImpl implements CacheImpl {
     }
 
     public void stop() {
-        cache.removeAll();
-        if (Play.mode.isProd()) {
-            cacheManager.shutdown();
-        }
+        cacheManager.shutdown();
     }
 }
