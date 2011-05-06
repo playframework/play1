@@ -292,7 +292,7 @@ public class DependenciesManager {
 
         Ivy ivy = Ivy.newInstance(ivySettings);
 
-        // Default ivy config
+        // Default ivy config see: http://play.lighthouseapp.com/projects/57987-play-framework/tickets/807
         File ivyDefaultSettings = new File(userHome, ".ivy2/ivysettings.xml");
         if(ivyDefaultSettings.exists()) {
             ivy.configure(ivyDefaultSettings);
