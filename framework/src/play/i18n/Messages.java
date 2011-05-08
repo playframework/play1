@@ -30,7 +30,7 @@ public class Messages {
 
     private static final Object[] NO_ARGS = new Object[]{null};
 
-	static public Properties defaults;
+    static public Properties defaults;
 
     static public Map<String, Properties> locales = new HashMap<String, Properties>();
 

@@ -7,7 +7,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -18,8 +17,8 @@ import play.Logger;
 import play.Play;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSupport;
+import play.classloading.enhancers.LVEnhancer;
+import play.classloading.enhancers.LVEnhancer.LVEnhancerRuntime;
 import play.data.binding.Unbinder;
 import play.data.validation.Validation;
 import play.exceptions.NoRouteFoundException;
@@ -64,7 +63,7 @@ import play.libs.F;
  * This is the class that your controllers should extend.
  * 
  */
-public class Controller implements ControllerSupport, LocalVariablesSupport {
+public class Controller implements ControllerSupport {
 
     /**
      * The current HTTP request: the message sent by the client to the server.
@@ -550,7 +549,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
         try {
             Map<String, Object> newArgs = new HashMap<String, Object>(args.length);
             Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
-            String[] names = (String[]) actionMethod.getDeclaringClass().getDeclaredField("$" + actionMethod.getName() + LocalVariablesNamesTracer.computeMethodHash(actionMethod.getParameterTypes())).get(null);
+            String[] names = (String[]) actionMethod.getDeclaringClass().getDeclaredField("$" + actionMethod.getName() + LVEnhancer.computeMethodHash(actionMethod.getParameterTypes())).get(null);
             for (int i = 0; i < names.length && i < args.length; i++) {
                 Annotation[] annotations = actionMethod.getParameterAnnotations()[i];
                 boolean isDefault = false;
@@ -628,11 +627,11 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     protected static void renderTemplate(String templateName, Object... args) {
         // Template datas
         Map<String, Object> templateBinding = new HashMap<String, Object>(16);
-        for (Object o : args) {
-            List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
-            for (String name : names) {
-                templateBinding.put(name, o);
-            }
+        String[] names = LVEnhancerRuntime.getParamNames().varargs;
+        if(args != null && args.length > 0 && names == null)
+            throw new UnexpectedException("no varargs names while args.length > 0 !");
+        for(int i = 0; i < args.length; i++) {
+            templateBinding.put(names[i], args[i]);
         }
         renderTemplate(templateName, templateBinding);
     }
@@ -684,7 +683,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
      */
     protected static void render(Object... args) {
         String templateName = null;
-        if (args.length > 0 && args[0] instanceof String && LocalVariablesNamesTracer.getAllLocalVariableNames(args[0]).isEmpty()) {
+        if (args.length > 0 && args[0] instanceof String && LVEnhancerRuntime.getParamNames().mergeParamsAndVarargs()[0] == null) {
             templateName = args[0].toString();
         } else {
             templateName = template();
@@ -782,12 +781,9 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
     @Deprecated
     protected static void parent(Object... args) {
         Map<String, Object> map = new HashMap<String, Object>(16);
-        for (Object o : args) {
-            List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
-            for (String name : names) {
-                map.put(name, o);
-            }
-        }
+        String[] names = LVEnhancerRuntime.getParamNames().mergeParamsAndVarargs();
+        for(int i = 0; i < names.length; i++)
+            map.put(names[i], args[i]);
         parent(map);
     }
 
@@ -917,6 +913,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             StackRecorder.get().isRestoring = false;
             StackRecorder.get().value = null;
             future = (Future<T>)Request.current().args.get(ActionInvoker.F);
+
             // Now reset the Controller invocation context
             ControllerInstrumentation.stopActionCall();
         } else {

@@ -19,7 +19,7 @@ public class BytecodeCache {
      */
     public static void deleteBytecode(String name) {
         try {
-            if (Play.tmpDir == null || Play.readOnlyTmp || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
+            if (!Play.initialized || Play.tmpDir == null || Play.readOnlyTmp || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
                 return;
             }
             File f = cacheFile(name.replace("/", "_").replace("{", "_").replace("}", "_").replace(":", "_"));
@@ -39,7 +39,7 @@ public class BytecodeCache {
      */
     public static byte[] getBytecode(String name, String source) {
         try {
-            if (Play.tmpDir == null || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
+            if (!Play.initialized || Play.tmpDir == null || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
                 return null;
             }
             File f = cacheFile(name.replace("/", "_").replace("{", "_").replace("}", "_").replace(":", "_"));
@@ -83,7 +83,7 @@ public class BytecodeCache {
      */
     public static void cacheBytecode(byte[] byteCode, String name, String source) {
         try {
-            if (Play.tmpDir == null || Play.readOnlyTmp || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
+            if (!Play.initialized || Play.tmpDir == null || Play.readOnlyTmp || !Play.configuration.getProperty("play.bytecodeCache", "true").equals("true")) {
                 return;
             }
             File f = cacheFile(name.replace("/", "_").replace("{", "_").replace("}", "_").replace(":", "_"));
@@ -92,15 +92,6 @@ public class BytecodeCache {
             fos.write(0);
             fos.write(byteCode);
             fos.close();
-
-            // emit bytecode to standard class layout as well
-            if(!name.contains("/") && !name.contains("{")) {
-                f = new File(Play.tmpDir, "classes/"+(name.replace(".", "/"))+".class");
-                f.getParentFile().mkdirs();
-                fos = new FileOutputStream(f);
-                fos.write(byteCode);
-                fos.close();
-            }
 
             if (Logger.isTraceEnabled()) {
                 Logger.trace("%s cached", name);

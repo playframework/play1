@@ -89,7 +89,7 @@ public class ApplicationClasses {
             } catch (ClassNotFoundException ex) {
                 throw new UnexpectedException(ex);
             }
-            if (applicationClass.javaClass.isAnnotationPresent(clazz)) {
+            if (applicationClass.javaClass != null && applicationClass.javaClass.isAnnotationPresent(clazz)) {
                 results.add(applicationClass);
             }
         }

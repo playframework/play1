@@ -3,9 +3,6 @@
  */
 package models;
 
-import java.util.List;
-import java.util.Map;
-
 import javax.persistence.Entity;
 
 import models.OptimisticLockingModel.OptimisticLockingCheck;
@@ -46,9 +43,8 @@ public class OptimisticLockingModelPlayTest extends UnitTest {
         Validation.clear();
         result = Validation.current().valid(testModel);
         assertFalse(result.ok);
-        assertNotNull(Validation.errors(".version"));
-        Error error = Validation.errors(".version").get(0);
-        System.out.println(error.getKey());
+        assertNotNull(Validation.errors("testModel.version"));
+        Error error = Validation.errors("testModel.version").get(0);
         assertEquals("The object was changed. Your version is 1 the database version is 2. " +
                 "<a href=\"/@tests/models.OptimisticLockingModelPlayTest.class\">Reload</a> " +
                 "and do your changes again.", error.message());       

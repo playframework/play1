@@ -17,7 +17,6 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
 
     private final FileInputStream is;
 
-
     public FileChannelBuffer(File file) {
         if (file == null) {
             throw new NullPointerException("file");
@@ -177,13 +176,6 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
     }
 
     public byte getByte(int index) {
-//        try {
-//            byte[] b = new byte[1];
-//            is.read(b, index, 1);
-//            return b[0];
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
         throw new RuntimeException();
     }
 
@@ -212,11 +204,6 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
 
     @Override
     public ByteBuffer[] toByteBuffers(int index, int length) {
-//        ByteBuffer[] bufs = buffer.toByteBuffers(index, length);
-//        for (int i = 0; i < bufs.length; i++) {
-//            bufs[i] = bufs[i].asReadOnlyBuffer();
-//        }
-//        return bufs;
         throw new RuntimeException();
     }
 
@@ -236,15 +223,7 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
         throw new RuntimeException();
     }
 
-    public ChannelBuffer readBytes(ChannelBufferIndexFinder endIndexFinder) {
-        throw new RuntimeException();
-    }
-
     public ChannelBuffer readSlice(int length) {
-        throw new RuntimeException();
-    }
-
-    public ChannelBuffer readSlice(ChannelBufferIndexFinder endIndexFinder) {
         throw new RuntimeException();
     }
 
@@ -282,17 +261,12 @@ public class FileChannelBuffer extends AbstractChannelBuffer implements WrappedC
     public int readBytes(GatheringByteChannel out, int length)
             throws IOException {
         checkReadableBytes(length);
-        int readBytes = getBytes(0, out, length);
-        return readBytes;
+        return getBytes(0, out, length);
     }
 
     public void readBytes(OutputStream out, int length) throws IOException {
         checkReadableBytes(length);
         getBytes(0, out, length);
-    }
-
-    public String toString(int q, int a, java.lang.String b) {
-        throw new RuntimeException();
     }
 
     public void setShort(int a, int b) {

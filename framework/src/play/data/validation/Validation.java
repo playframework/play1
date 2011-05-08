@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import play.Play;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
+import play.classloading.enhancers.LVEnhancer.LVEnhancerRuntime;
 import play.exceptions.UnexpectedException;
 
 public class Validation {
@@ -451,10 +451,9 @@ public class Validation {
     }
 
     static String getLocalName(Object o) {
-        List<String> names = LocalVariablesNamesTracer.getAllLocalVariableNames(o);
-        if (names.size() > 0) {
-            return names.get(0);
-        }
+        String[] names = LVEnhancerRuntime.getParamNames().params;
+        if(names.length > 0 && names[0] != null)
+            return names[0];
         return "";
     }
 

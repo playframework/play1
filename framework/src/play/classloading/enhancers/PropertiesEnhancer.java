@@ -29,6 +29,7 @@ public class PropertiesEnhancer extends Enhancer {
 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
+
         final CtClass ctClass = makeClass(applicationClass);
         if (ctClass.isInterface()) {
             return;
@@ -55,8 +56,8 @@ public class PropertiesEnhancer extends Enhancer {
             throw new UnexpectedException("Error in PropertiesEnhancer", e);
         }
 
-        if (isScalaObject(ctClass)) {
-            // Done.
+        if (isScala(applicationClass)) {
+            // Temporary hack for Scala. Done.
             applicationClass.enhancedByteCode = ctClass.toBytecode();
             ctClass.defrost();
             return;

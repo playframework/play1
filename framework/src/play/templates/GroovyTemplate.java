@@ -31,7 +31,7 @@ import play.Logger;
 import play.Play;
 import play.Play.Mode;
 import play.classloading.BytecodeCache;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
+import play.classloading.enhancers.LVEnhancer;
 import play.data.binding.Unbinder;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.NoRouteFoundException;
@@ -180,6 +180,16 @@ public class GroovyTemplate extends BaseTemplate {
         compiledTemplateName = compiledTemplate.getName();
     }
 
+    @Override
+    public String render(Map<String, Object> args) {
+        try {
+            return super.render(args);
+        } finally {
+            currentTemplate.remove();
+        }
+    }
+
+    @Override
     protected String internalRender(Map<String, Object> args) {
         compile();
         Binding binding = new Binding(args);
@@ -248,7 +258,6 @@ public class GroovyTemplate extends BaseTemplate {
             if (monitor != null) {
                 monitor.stop();
             }
-            currentTemplate.remove();
         }
         if (applyLayouts && layout.get() != null) {
             Map<String, Object> layoutArgs = new HashMap<String, Object>(args);
@@ -463,7 +472,7 @@ public class GroovyTemplate extends BaseTemplate {
                     try {
                         Map<String, Object> r = new HashMap<String, Object>();
                         Method actionMethod = (Method) ActionInvoker.getActionMethod(action)[1];
-                        String[] names = (String[]) actionMethod.getDeclaringClass().getDeclaredField("$" + actionMethod.getName() + LocalVariablesNamesTracer.computeMethodHash(actionMethod.getParameterTypes())).get(null);
+                        String[] names = (String[]) actionMethod.getDeclaringClass().getDeclaredField("$" + actionMethod.getName() + LVEnhancer.computeMethodHash(actionMethod.getParameterTypes())).get(null);
                         if (param instanceof Object[]) {
                             if(((Object[])param).length == 1 && ((Object[])param)[0] instanceof Map) {
                                 r = (Map<String,Object>)((Object[])param)[0];
