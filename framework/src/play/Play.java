@@ -337,11 +337,11 @@ public class Play {
             // now is it an include?
             if (keyName.startsWith("@include.")) {
                 try {
-                	VirtualFile includedFile = appRoot.child("conf/" + newConfiguration.getProperty(keyName));
+                	VirtualFile includedFile = appRoot.child("conf/" + val);
                 	Properties includedProperties = IO.readUtf8Properties(includedFile.inputstream());
                 	parseConfiguration(appRoot, includedProperties);
                 } catch (Exception ex) {
-                    Logger.warn("Missing include: %s", key);
+                    Logger.warn("Missing include: %s", keyName);
                 }
             }else{
             	configuration.put(keyName, val);
