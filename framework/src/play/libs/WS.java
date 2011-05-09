@@ -23,6 +23,7 @@ import play.libs.F.Promise;
 import play.libs.OAuth.ServiceInfo;
 import play.libs.ws.WSAsync;
 import play.libs.ws.WSUrlFetch;
+import play.mvc.Http;
 import play.mvc.Http.Header;
 import play.utils.HTTP;
 import play.utils.NoOpEntityResolver;
@@ -543,6 +544,13 @@ public class WS extends PlayPlugin {
          * @return the status code of the http response
          */
         public abstract Integer getStatus();
+
+        /**
+         * @return true if the status code is 20x, false otherwise
+         */
+        public boolean success() {
+            return Http.StatusCode.success(this.getStatus());
+        }
 
         /**
          * The http response content type

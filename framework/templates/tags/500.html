@@ -1,5 +1,5 @@
 %{
-	exception = _arg ?: _exception
+exception = _arg ?: _exception
 }%
 
 <style type="text/css">
@@ -8,7 +8,7 @@
         padding: 0;
         font-family: Helvetica, Arial, Sans;
         background: #EEEEEE;
-    }            
+    }
     .block {
         padding: 20px;
         border-bottom: 1px solid #aaa;
@@ -73,15 +73,15 @@
     #source a:hover pre {
         background: #FAFFCF !important;
     }
-	#source em {
-		font-style: normal;
-		text-decoration: underline;
-		font-weight: bold;
-	}
-	#source strong {
-		font-style: normal;
-		font-weight: bold;
-	}
+    #source em {
+        font-style: normal;
+        text-decoration: underline;
+        font-weight: bold;
+    }
+    #source strong {
+        font-style: normal;
+        font-weight: bold;
+    }
 </style>
 
 #{if exception instanceof play.exceptions.PlayException}
@@ -105,7 +105,7 @@
         <h2>In ${exception.sourceFile} (around line ${exception.lineNumber})</h2>
         %{ 
             from = exception.lineNumber - 5 >= 0 && exception.lineNumber < exception.source.size() ? exception.lineNumber - 5 : 0
-            to = exception.lineNumber + 5  < exception.source.size() ? exception.lineNumber + 5 : exception.source.size()-1          
+            to = exception.lineNumber + 5  < exception.source.size() ? exception.lineNumber + 5 : exception.source.size()-1
         }%
         #{list items:exception.source[from..to], as:'line'}
             ${play.utils.Utils.open(exception.sourceFile, line_index+from) ? ('<a href="' + play.utils.Utils.open(exception.sourceFile, line_index+from) + '">').raw() : ''}
@@ -117,12 +117,12 @@
          #{/list}
     </div>
     #{/if}
-	%{ moreHtml = exception.moreHTML }%
-	#{if moreHtml}
-		<div id="specific" class="block">
-			${moreHtml.raw()}
-		</div>
-	#{/if}
+    %{ moreHtml = exception.moreHTML }%
+    #{if moreHtml}
+        <div id="specific" class="block">
+            ${moreHtml.raw()}
+        </div>
+    #{/if}
     <div id="more" class="block">
         This exception has been logged with id <strong>${exception.id}</strong>
     </div>

@@ -190,11 +190,14 @@ To connect to a service, you need the create a OAuth2 instance using the followi
 bc. public static void auth() {
     // FACEBOOK is a OAuth2 object
     if (OAuth2.isCodeResponse()) {
-        String access_token = FACEBOOK.getAccessToken();
-        // Save access_token, you will need it to request the service
+        OAuth2.Response response = FACEBOOK.retrieveAccessToken(authUrl); // authUrl must be the same as the retrieveVerificationCode call
+        String accessToken = response.accessToken; // null if an error occurred
+        OAuth2.Error = response.error; // null if the call was a success
+        // Save accessToken, you will need it to request the service
         index();
     }
-    FACEBOOK.requestAccessToken(); // This will trigger a redirect
+    // authUrl is a String containing an absolute URL where the service should redirect the user back
+    FACEBOOK.requestVerificationCode(authUrl); // This will trigger a redirect
 }
 
 Once you have the access token associated with the current user, you can use it to query the service on behalf of the user:

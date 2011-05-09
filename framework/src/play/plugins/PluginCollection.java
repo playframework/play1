@@ -324,7 +324,6 @@ public class PluginCollection {
         Play.plugins = Collections.unmodifiableList( getEnabledPlugins() );
     }
 
-
     /**
      * Returns new readonly list of all enabled plugins
      * @return

@@ -10,8 +10,8 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Before { 
-    
+public @interface Before {
+
     /**
      * Does not intercept these actions
      */
@@ -22,5 +22,5 @@ public @interface Before {
      * Interceptor priority (0 is high priority)
      */
     int priority() default 0;
-    
+
 }

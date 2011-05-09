@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Finally { 
-    
+
     /**
      * Does not intercept these actions
      */
@@ -22,5 +22,5 @@ public @interface Finally {
      * Interceptor priority (0 is high priority)
      */
     int priority() default 0;
-    
+
 }
