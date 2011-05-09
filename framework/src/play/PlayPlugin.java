@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.Model;
 import play.mvc.Http.Request;
@@ -74,14 +75,14 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
-     * Retun the plugin status
+     * Return the plugin status
      */
     public String getStatus() {
         return null;
     }
 
     /**
-     * Retun the plugin status in JSON format
+     * Return the plugin status in JSON format
      */
     public JsonObject getJsonStatus() {
         return null;
@@ -114,7 +115,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
-     * Let a chance to this plugin to manage a static ressource
+     * Let a chance to this plugin to manage a static resource
      * @param request The Play request
      * @param response The Play response
      * @return true if this plugin has managed this request
@@ -147,7 +148,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Called at application start (and at each reloading)
-     * Time to start statefull things.
+     * Time to start stateful things.
      */
     public void onApplicationStart() {
     }
@@ -160,7 +161,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Called at application stop (and before each reloading)
-     * Time to shutdown statefull things.
+     * Time to shutdown stateful things.
      */
     public void onApplicationStop() {
     }
@@ -226,7 +227,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
-     * Called when the application.cond has been read.
+     * Called when the application.conf has been read.
      */
     public void onConfigurationRead() {
     }
@@ -251,6 +252,15 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     public List<String> addTemplateExtensions() {
         return new ArrayList<String>();
+    }
+
+    /**
+     * Override to provide additional mime types from your plugin. These mimetypes get priority over
+     * the default framework mimetypes but not over the application's configuration.
+     * @return a Map from extensions (without dot) to mimetypes
+     */
+    public Map<String, String> addMimeTypes() {
+        return new HashMap<String, String>();
     }
 
     /**
