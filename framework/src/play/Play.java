@@ -144,7 +144,7 @@ public class Play {
      * Readonly list containing currently enabled plugins.
      * This list is updated from pluginCollection when pluginCollection is modified
      * Play plugins
-     * Use pluginCollection instead.
+     * @deprecated Use pluginCollection instead.
      */
     @Deprecated
     public static List<PlayPlugin> plugins = pluginCollection.getEnabledPlugins();
@@ -768,6 +768,5 @@ public class Play {
     public static boolean runningInTestMode() {
         return id.matches("test|test-?.*");
     }
-    
 
 }
