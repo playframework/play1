@@ -1,3 +1,9 @@
+play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-12) maverick; urgency=low
+
+  * Fixes in @include and %id
+
+ -- Stephane Epardaud <stephane@epardaud.fr>  Mon, 09 May 2011 10:57:41 +0200
+
 play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-11) maverick; urgency=low
 
   * Changed Fixtures.load(InputStream -> Reader)
