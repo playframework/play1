@@ -17,7 +17,7 @@ public class JPQL {
     }
 
     public long count(String entity) {
-        return Long.parseLong(em().createQuery("select count(e) from " + entity + " e").getSingleResult().toString());
+        return Long.parseLong(em().createQuery("select count(*) from " + entity + " e").getSingleResult().toString());
     }
 
     public long count(String entity, String query, Object[] params) {
