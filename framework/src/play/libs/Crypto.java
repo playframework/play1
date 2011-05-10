@@ -17,6 +17,21 @@ import play.exceptions.UnexpectedException;
  */
 public class Crypto {
 
+    /**
+     * Define a hash type enumeration for strong-typing
+     */
+    public enum HashType {
+        MD5,
+        SHA1,
+        SHA256,
+        SHA512
+    }
+
+    /**
+     * Set-up MD5 as the default hashing algorithm
+     */
+    private static final HashType defaultHashAlgorithm = HashType.MD5;
+
     static final char[] HEX_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
     /**
@@ -62,13 +77,25 @@ public class Crypto {
     }
 
     /**
-     * Create an MD5 password hash
-     * @param input The password
-     * @return The password hash
-     */
-    public static String passwordHash(String input) {
+        * Create a password hash using the default hashing algorithm
+        * @param input The password
+        * @return The password hash
+        */
+    public static String passwordHash(String input)
+    {
+        return passwordHash(input, defaultHashAlgorithm);
+    }
+
+    /**
+        * Create a password hash using specific hashing algorithm
+        * @param input The password
+        * @param hashType The hashing algorithm
+        * @return The password hash
+        */
+    public static String passwordHash(String input, HashType hashType)
+    {
         try {
-            MessageDigest m = MessageDigest.getInstance("MD5");
+            MessageDigest m = MessageDigest.getInstance(GetAlgorithm(hashType));
             byte[] out = m.digest(input.getBytes());
             return new String(Base64.encodeBase64(out));
         } catch (NoSuchAlgorithmException e) {
@@ -127,6 +154,26 @@ public class Crypto {
             return new String(cipher.doFinal(Codec.hexStringToByte(value)));
         } catch (Exception ex) {
             throw new UnexpectedException(ex);
+        }
+    }
+
+    /**
+     * Get the string representation of the hashType enumeration
+     * @param algorithm The hash type algorithm
+     * @return The hash algorithm in String
+     */
+    private static String GetAlgorithm(HashType algorithm) throws NoSuchAlgorithmException {
+        switch (algorithm) {
+            case MD5:
+                return "MD5";
+            case SHA1:
+                return "SHA-1";
+            case SHA256:
+                return "SHA-256";
+            case SHA512:
+                return "SHA-512";
+            default:
+                throw new NoSuchAlgorithmException("The algorithm '" + algorithm + "' is not supported.");
         }
     }
 }
