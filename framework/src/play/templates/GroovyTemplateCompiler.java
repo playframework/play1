@@ -201,7 +201,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     @Override
     void message() {
         String expr = parser.getToken().trim();
-        print(";out.print(__safeFaster(__getMessage("+expr+")))");
+        print(";out.print(__getMessage("+expr+"))");
         markLine(parser.getLine());
         println();
     }
