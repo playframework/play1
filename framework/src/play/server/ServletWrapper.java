@@ -42,6 +42,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
     public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
     public static final String IF_NONE_MATCH = "If-None-Match";
+
     /**
      * Constant for accessing the underlying HttpServletRequest from Play's Request
      * in a Servlet based deployment.
@@ -56,7 +57,8 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
      * <p> {@code HttpServletResponse res = Request.current().args.get(ServletWrapper.SERVLET_RES);}</p>
      */
     public static final String SERVLET_RES = "__SERVLET_RES";
-    private volatile boolean routerInitializedWithContext = false;
+
+    private static boolean routerInitializedWithContext = false;
 
     public void contextInitialized(ServletContextEvent e) {
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
@@ -90,7 +92,10 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         Play.stop();
     }
 
-    private void loadRouter(String contextPath) {
+    private static synchronized void loadRouter(String contextPath) {
+        // Reload the rules, but this time with the context. Not really efficient through...
+        // Servlet 2.4 does not allow you to get the context path from the servletcontext...
+        if (routerInitializedWithContext) return;
         Play.ctxPath = contextPath;
         Router.load(contextPath);
         routerInitializedWithContext = true;
@@ -106,8 +111,6 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     protected void service(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
 
         if (!routerInitializedWithContext) {
-            // Reload the rules, but this time with the context. Not really efficient through...
-            // Servlet 2.4 does not allow you to get the context path from the servletcontext...
             loadRouter(httpServletRequest.getContextPath());
         }
 
