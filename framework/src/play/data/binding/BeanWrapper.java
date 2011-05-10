@@ -33,7 +33,7 @@ public abstract class BeanWrapper {
 
     public static BeanWrapper forClass(Class<?> forClass) {
         BeanWrapper beanWrapper = new JavaBeanWrapper(forClass);
-        for (Class<?> intf : forClass.getInterfaces()) {
+        for (Class<?> intf: forClass.getInterfaces()) {
             if ("scala.ScalaObject".equals(intf.getName())) {
                 beanWrapper = new ScalaBeanWrapper(forClass);
                 break;
@@ -154,20 +154,16 @@ public abstract class BeanWrapper {
     abstract String getPropertyName(Method method);
 
     private static class JavaBeanWrapper extends BeanWrapper {
-
         JavaBeanWrapper(Class<?> forClass) {
             super(forClass);
         }
-
-        String getPropertyName(Method method) {
+        @Override String getPropertyName(Method method) {
             return method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
         }
-
-        boolean isSetter(Method method) {
+        @Override boolean isSetter(Method method) {
             return (!method.isAnnotationPresent(PlayPropertyAccessor.class) && method.getName().startsWith("set") && method.getName().length() > 3 && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
         }
-
-        Collection<Field> getFields(Class<?> forClass) {
+        @Override Collection<Field> getFields(Class<?> forClass) {
             final Collection<Field> fields = new ArrayList<Field>();
             for (Field field : forClass.getFields()) {
                 if ((field.getModifiers() & notwritableField) != 0) {
@@ -183,20 +179,18 @@ public abstract class BeanWrapper {
         ScalaBeanWrapper(Class<?> forClass) {
             super(forClass);
         }
-        String getPropertyName(Method method) {
+        @Override String getPropertyName(Method method) {
             return method.getName().substring(0, method.getName().length() - 4);
         }
-        boolean isSetter(Method method) {
+        @Override boolean isSetter(Method method) {
             return (!method.isAnnotationPresent(PlayPropertyAccessor.class) && method.getName().endsWith("_$eq") && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
         }
-
-        Collection<Field> getFields(Class<?> forClass) {
+        @Override Collection<Field> getFields(Class<?> forClass) {
             return Arrays.asList(forClass.getDeclaredFields());
         }
     }
 
     public static class Property {
-
         private Annotation[] annotations;
         private Method setter;
         private Field field;
@@ -241,17 +235,13 @@ public abstract class BeanWrapper {
                     if (Logger.isTraceEnabled()) {
                         Logger.trace("invoke setter %s on %s with value %s", setter, instance, value);
                     }
-
                     setter.invoke(instance, value);
-                    return;
                 } else {
                     if (Logger.isTraceEnabled()) {
                         Logger.trace("field.set(%s, %s)", instance, value);
                     }
-
                     field.set(instance, value);
                 }
-
             } catch (Exception ex) {
                 Logger.warn(ex, "ERROR in BeanWrapper when setting property %s value is %s (%s)", name, value, value == null ? null : value.getClass());
                 throw new UnexpectedException(ex);
