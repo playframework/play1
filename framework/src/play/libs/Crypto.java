@@ -13,7 +13,7 @@ import play.Play;
 import play.exceptions.UnexpectedException;
 
 /**
- * Crypto utils
+ * Cryptography utils
  */
 public class Crypto {
 
@@ -21,16 +21,19 @@ public class Crypto {
      * Define a hash type enumeration for strong-typing
      */
     public enum HashType {
-        MD5,
-        SHA1,
-        SHA256,
-        SHA512
+        MD5("MD5"),
+        SHA1("SHA-1"),
+        SHA256("SHA-256"),
+        SHA512("SHA-512");
+        private String algorithm;
+        HashType(String algorithm) { this.algorithm = algorithm; }
+        @Override public String toString() { return this.algorithm; }
     }
 
     /**
      * Set-up MD5 as the default hashing algorithm
      */
-    private static final HashType defaultHashAlgorithm = HashType.MD5;
+    private static final HashType DEFAULT_HASH_TYPE = HashType.MD5;
 
     static final char[] HEX_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
@@ -83,7 +86,7 @@ public class Crypto {
         */
     public static String passwordHash(String input)
     {
-        return passwordHash(input, defaultHashAlgorithm);
+        return passwordHash(input, DEFAULT_HASH_TYPE);
     }
 
     /**
@@ -95,11 +98,11 @@ public class Crypto {
     public static String passwordHash(String input, HashType hashType)
     {
         try {
-            MessageDigest m = MessageDigest.getInstance(GetAlgorithm(hashType));
+            MessageDigest m = MessageDigest.getInstance(hashType.toString());
             byte[] out = m.digest(input.getBytes());
             return new String(Base64.encodeBase64(out));
         } catch (NoSuchAlgorithmException e) {
-            return null;
+            throw new RuntimeException(e);
         }
     }
 
@@ -157,23 +160,4 @@ public class Crypto {
         }
     }
 
-    /**
-     * Get the string representation of the hashType enumeration
-     * @param algorithm The hash type algorithm
-     * @return The hash algorithm in String
-     */
-    private static String GetAlgorithm(HashType algorithm) throws NoSuchAlgorithmException {
-        switch (algorithm) {
-            case MD5:
-                return "MD5";
-            case SHA1:
-                return "SHA-1";
-            case SHA256:
-                return "SHA-256";
-            case SHA512:
-                return "SHA-512";
-            default:
-                throw new NoSuchAlgorithmException("The algorithm '" + algorithm + "' is not supported.");
-        }
-    }
 }
