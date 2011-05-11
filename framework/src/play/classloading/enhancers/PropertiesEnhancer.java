@@ -83,6 +83,7 @@ public class PropertiesEnhancer extends Enhancer {
                         // Créé le getter
                         String code = "public " + ctField.getType().getName() + " " + getter + "() { return this." + ctField.getName() + "; }";
                         CtMethod getMethod = CtMethod.make(code, ctClass);
+                        getMethod.setModifiers(getMethod.getModifiers() | AccessFlag.SYNTHETIC);
                         ctClass.addMethod(getMethod);
                     }
 
@@ -94,6 +95,7 @@ public class PropertiesEnhancer extends Enhancer {
                     } catch (NotFoundException noSetter) {
                         // Créé le setter
                         CtMethod setMethod = CtMethod.make("public void " + setter + "(" + ctField.getType().getName() + " value) { this." + ctField.getName() + " = value; }", ctClass);
+                        setMethod.setModifiers(setMethod.getModifiers() | AccessFlag.SYNTHETIC);
                         ctClass.addMethod(setMethod);
                         createAnnotation(getAnnotations(setMethod), PlayPropertyAccessor.class);
                     }
