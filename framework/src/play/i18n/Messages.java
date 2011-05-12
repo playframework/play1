@@ -10,6 +10,12 @@ import java.util.regex.Pattern;
 
 import play.Play;
 import play.data.binding.Binder;
+import play.mvc.Http.Request;
+import play.templates.BaseTemplate.RawData;
+import play.templates.TagContext;
+import play.utils.HTML;
+import play.utils.SafeFormatter;
+import play.utils.SafeFormatterHandler;
 
 /**
  * I18n Helper
@@ -80,8 +86,12 @@ public class Messages {
         }
         return result;
     }
-
+    
     public static String getMessage(String locale, Object key, Object... args) {
+    	return getMessage(locale, key, true, args);
+    }
+    
+    public static String getMessage(String locale, Object key, boolean safe, Object... args) {
         // Check if there is a plugin that handles translation
         String message = Play.pluginCollection.getMessage(locale, key, args);
 
@@ -103,18 +113,48 @@ public class Messages {
             value = key.toString();
         }
 
-        return formatString(value, args);
+        return formatString(value, safe, args);
     }
 
+	private static SafeFormatter safeFormatter = new SafeFormatter(new SafeFormatterHandler() {
+		@Override
+		public String appendArgument(String format, Object arg) {
+			String val = formatString(format, false, arg);
+
+			//Determine if escaping is necessary 
+            if (!(arg instanceof RawData) && Request.current().format.equals("html") && !TagContext.hasParentTag("verbatim")) {
+            	val = HTML.htmlEscape(val);
+            }
+            
+            return val;
+		}
+
+		@Override
+		public String append(String value) {
+			return recurse(value);
+		}
+	});
+	
+	private static String recurse(String message) {
+		Matcher matcher = recursive.matcher(message);
+		StringBuffer sb = new StringBuffer();
+		while(matcher.find()) {
+			matcher.appendReplacement(sb, get(matcher.group(1)));
+		}
+		matcher.appendTail(sb);
+		return sb.toString();
+	}
+
     public static String formatString(String value, Object... args) {
-        String message = String.format(value, coolStuff(value, args));
-        Matcher matcher = recursive.matcher(message);
-        StringBuffer sb = new StringBuffer();
-        while(matcher.find()) {
-            matcher.appendReplacement(sb, get(matcher.group(1)));
-        }
-        matcher.appendTail(sb);
-        return sb.toString();
+    	return formatString(value, true, args);
+    }
+    
+    public static String formatString(String value, boolean safe, Object... args) {
+    	if(!safe || args == null || args.length == 0) {
+    		return recurse(String.format(value, coolStuff(value, args)));
+    	} else {
+    		return safeFormatter.format(value, args);
+    	}
     }
 
     static Pattern formatterPattern = Pattern.compile("%((\\d+)\\$)?([-#+ 0,(]+)?(\\d+)?([.]\\d+)?([bBhHsScCdoxXeEfgGaAtT])");

@@ -414,11 +414,6 @@ public class GroovyTemplate extends BaseTemplate {
             } else {
             	message = Messages.get(val[0], Arrays.copyOfRange(val,1,val.length));
             }
-            
-            if(Play.configuration.getProperty("application.messages.safe", "false").equals("true")) {
-            	message = __safeFaster(message);
-            }
-            
             return message;
         }
 

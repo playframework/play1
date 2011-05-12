@@ -1,6 +1,7 @@
 package play.templates;
 
 import groovy.lang.Closure;
+
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
 import play.Play;
 import play.exceptions.TemplateCompilationException;
 import play.templates.GroovyInlineTags.CALL;
@@ -201,7 +203,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     @Override
     void message() {
         String expr = parser.getToken().trim();
-        print(";out.print(__safeFaster(__getMessage("+expr+")))");
+        print(";out.print(__getMessage("+expr+"))");
         markLine(parser.getLine());
         println();
     }
