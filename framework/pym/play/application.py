@@ -32,8 +32,6 @@ class PlayApplication(object):
         self.jpda_port = self.readConf('jpda.port')
         self.ignoreMissingModules = ignoreMissingModules
 
-
-
     # ~~~~~~~~~~~~~~~~~~~~~~ Configuration File
 
     def check(self):
@@ -252,6 +250,18 @@ class PlayApplication(object):
         
         java_cmd = [self.java_path(), '-javaagent:%s' % self.agent_path()] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % self.path, '-Dplay.id=%s' % self.play_env["id"], className] + args
         return java_cmd
+
+    # ~~~~~~~~~~~~~~~~~~~~~~ MISC
+
+    def toRelative(self, path):
+        return _absoluteToRelative(path, self.path, "").replace("//", "/")
+
+def _absoluteToRelative(path, reference, dots):
+    if path.find(reference) > -1:
+        ending = path.find(reference) + len(reference)
+        return dots + path[ending:]
+    else:
+        return _absoluteToRelative(path, os.path.dirname(reference), "/.." + dots)
 
 class PlayConfParser:
 
