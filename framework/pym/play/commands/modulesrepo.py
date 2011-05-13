@@ -11,6 +11,7 @@ import urllib
 import yaml
 
 from play.utils import *
+import simplejson
 
 NM = ['new-module', 'nm']
 LM = ['list-modules', 'lm']
@@ -28,13 +29,6 @@ HELP = {
 }
 
 DEFAULT_REPO = 'http://www.playframework.org'
-
-def load_module(name):
-    base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
-    mod_desc = imp.find_module(name, [os.path.join(base, 'framework/pym')])
-    return imp.load_module(name, mod_desc[0], mod_desc[1], mod_desc[2])
-
-json = load_module('simplejson')
 
 repositories = []
 
@@ -467,7 +461,7 @@ def load_modules_from(modules_server):
         req = urllib2.Request(url)
         req.add_header('Accept', 'application/json')
         result = urllib2.urlopen(req)
-        return json.loads(result.read())
+        return simplejson.loads(result.read())
     except urllib2.HTTPError, e:
         print "~ Oops,"
         print "~ Cannot fetch the modules list from %s (%s)..." % (url, e.code)
