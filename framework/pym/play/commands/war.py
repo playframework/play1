@@ -26,7 +26,14 @@ def execute(**kargs):
         optlist, args = getopt.getopt(args, 'o:', ['output=', 'zip','exclude='])
         for o, a in optlist:
             if o in ('-o', '--output'):
-                war_path = os.path.normpath(os.path.abspath(a))
+                war_path = os.path.normpath(os.path.abspath(a.format(version=app.readConf('application.version'))))
+        if not war_path:
+            war_path = app.readConf('application.name')
+            version = app.readConf('application.version')
+            if version:
+                war_path = "%s-%s" % (war_path, version)
+            war_path = os.path.normpath(os.path.abspath(war_path))
+        print "~ Using '%s' to generate the WAR" % war_path
         for o, a in optlist:
             if o in ('--zip'):
                 war_zip_path = war_path + '.war'
