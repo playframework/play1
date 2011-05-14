@@ -45,8 +45,6 @@ import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.Codec;
-import play.mvc.Http;
-import play.mvc.Scope;
 import play.utils.Java;
 import play.mvc.ActionInvoker;
 import play.mvc.Http.Request;
@@ -188,28 +186,13 @@ public class GroovyTemplate extends BaseTemplate {
         }
     }
 
-    private void hideObjectInArgs(Map<String, Object> args, String oldName) {
-        if (args.containsKey(oldName)) {
-            Object value = args.remove( oldName);
-            args.put("_hidden_" + oldName, value);
-        }
-    }
-
     @Override
     protected String internalRender(Map<String, Object> args) {
         compile();
-        Map<String, Object> argsForBinding = new HashMap<String, Object>(args);
-        // must move objects that is available directly from binding away from original name - performance improvement
-        // by "hiding" them groovy would no longer "find" them by name and will then use the actuall property in
-        // ExecutableTemplate, but we can still find them while calling subTags etc...
-
-        hideObjectInArgs(argsForBinding,"session");
-        // cannot just do it with "flash" - it is being read somewhere and written back again as array.... breaks it if we use it as property
-        hideObjectInArgs(argsForBinding,"request");
-        hideObjectInArgs(argsForBinding,"params");
-        hideObjectInArgs(argsForBinding,"out");
-
-        Binding binding = new Binding(argsForBinding);
+        Binding binding = new Binding(args);
+        binding.setVariable("play", new Play());
+        binding.setVariable("messages", new Messages());
+        binding.setVariable("lang", Lang.get());
         StringWriter writer = null;
         Boolean applyLayouts = false;
 
@@ -217,33 +200,21 @@ public class GroovyTemplate extends BaseTemplate {
         // If this template is called from inside another template,
         // then args("out") have already been initialized
 
-        if (!argsForBinding.containsKey("_hidden_out")) {
+        if (!args.containsKey("out")) {
             // This is the first template being rendered.
             // We have to set up the PrintWriter that this (and all sub-templates) are going
             // to write the output to..
             applyLayouts = true;
             layout.set(null);
             writer = new StringWriter();
-            PrintWriter out = new PrintWriter(writer);
-            binding.setProperty("_hidden_out", out);
-            argsForBinding.put("_hidden_out", out);
+            binding.setProperty("out", new PrintWriter(writer));
             currentTemplate.set(this);
         }
-        if (!argsForBinding.containsKey("_body") && !argsForBinding.containsKey("_isLayout") && !argsForBinding.containsKey("_isInclude")) {
+        if (!args.containsKey("_body") && !args.containsKey("_isLayout") && !args.containsKey("_isInclude")) {
             layoutData.set(new HashMap<Object, Object>());
             TagContext.init();
         }
         ExecutableTemplate t = (ExecutableTemplate) InvokerHelper.createScript(compiledTemplate, binding);
-
-        // have often used "variables" directly available without binding - improves groovy performance a lot!
-        t.session = (Scope.Session)argsForBinding.get("_hidden_session");
-        t.request = (Request)argsForBinding.get("_hidden_request");
-        t.params = (Scope.Params)argsForBinding.get("_hidden_params");
-        t.play = new Play();
-        t.lang = Lang.get();
-        t.messages = new Messages();
-        t.out = (PrintWriter)argsForBinding.get("_hidden_out");
-
         t.template = this;
         Monitor monitor = null;
         try {
@@ -279,8 +250,8 @@ public class GroovyTemplate extends BaseTemplate {
             }
         }
         if (applyLayouts && layout.get() != null) {
-            Map<String, Object> layoutArgs = new HashMap<String, Object>(argsForBinding);
-            layoutArgs.remove("_hidden_out");
+            Map<String, Object> layoutArgs = new HashMap<String, Object>(args);
+            layoutArgs.remove("out");
             layoutArgs.put("_isLayout", true);
             String layoutR = layout.get().internalRender(layoutArgs);
             return layoutR.replace("____%LAYOUT%____", writer.toString().trim());
@@ -331,15 +302,6 @@ public class GroovyTemplate extends BaseTemplate {
         // Leave this field public to allow custom creation of TemplateExecutionException from different pkg
         public GroovyTemplate template;
 
-        public Scope.Session session;
-        public Request request;
-        public Scope.Params params;
-        public Play play;
-        public String lang;
-        public Messages messages;
-        public PrintWriter out;
-
-
         @Override
         public Object getProperty(String property) {
             try {
@@ -373,11 +335,14 @@ public class GroovyTemplate extends BaseTemplate {
             }
             TagContext.enterTag(tag);
             Map<String, Object> args = new HashMap<String, Object>();
-            args.put("_hidden_session", getBinding().getVariables().get("_hidden_session"));
+            args.put("session", getBinding().getVariables().get("session"));
             args.put("flash", getBinding().getVariables().get("flash"));
-            args.put("_hidden_request", getBinding().getVariables().get("_hidden_request"));
-            args.put("_hidden_params", getBinding().getVariables().get("_hidden_params"));
-            args.put("_hidden_out", getBinding().getVariable("_hidden_out"));
+            args.put("request", getBinding().getVariables().get("request"));
+            args.put("params", getBinding().getVariables().get("params"));
+            args.put("play", getBinding().getVariables().get("play"));
+            args.put("lang", getBinding().getVariables().get("lang"));
+            args.put("messages", getBinding().getVariables().get("messages"));
+            args.put("out", getBinding().getVariable("out"));
             args.put("_attrs", attrs);
             // all other vars are template-specific
             args.put("_caller", getBinding().getVariables());
