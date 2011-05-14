@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.text.ParseException;
 import java.util.*;
 
@@ -222,7 +223,10 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
 
         URI uri = new URI(httpServletRequest.getRequestURI());
         String method = httpServletRequest.getMethod().intern();
-        String path = uri.getPath();
+        String path = uri.getRawPath();
+        if (path != null ) {
+            path = URLDecoder.decode(path, "utf-8");
+        }
         String querystring = httpServletRequest.getQueryString() == null ? "" : httpServletRequest.getQueryString();
         Logger.trace("httpServletRequest.getContextPath(): " + httpServletRequest.getContextPath());
         Logger.trace("request.path: " + path + ", request.querystring: " + querystring);
