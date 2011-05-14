@@ -25,12 +25,6 @@ public class ApplicationTest extends FunctionalTest {
     public void testGettingUTF8FromConfig() {
         assertEquals("欢迎", Play.configuration.getProperty("utf8value"));
     }
-    
-    @Test
-    public void verifyRenderingWithSetTag() {
-        Response response = GET("/Application/renderingWithSetTag");
-        assertContentEquals("FromParent*TheContent*PartData", response);
-    }
 
 }
 

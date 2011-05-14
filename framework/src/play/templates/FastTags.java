@@ -291,15 +291,12 @@ public class FastTags {
         // Body case
         Object name = args.get("arg");
         if (name != null && body != null) {
-            PrintWriter oldOut = (PrintWriter)body.getProperty("_hidden_out");
+            Object oldOut = body.getProperty("out");
             StringWriter sw = new StringWriter();
-            PrintWriter specialOut = new PrintWriter(sw);
-            body.setProperty("_hidden_out", specialOut);
-            template.out = specialOut;
+            body.setProperty("out", new PrintWriter(sw));
             body.call();
             BaseTemplate.layoutData.get().put(name, sw.toString());
-            body.setProperty("_hidden_out", oldOut);
-            template.out = oldOut;
+            body.setProperty("out", oldOut);
         }
     }
 
