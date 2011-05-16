@@ -69,11 +69,11 @@ public class JavaExtensions {
     }
 
     public static String toString(Closure closure) {
-        PrintWriter oldWriter = (PrintWriter) closure.getProperty("_hidden_out");
+        PrintWriter oldWriter = (PrintWriter) closure.getProperty("out");
         StringWriter newWriter = new StringWriter();
-        closure.setProperty("_hidden_out", new PrintWriter(newWriter));
+        closure.setProperty("out", new PrintWriter(newWriter));
         closure.call();
-        closure.setProperty("_hidden_out", oldWriter);
+        closure.setProperty("out", oldWriter);
         return newWriter.toString();
     }
 
