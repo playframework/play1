@@ -97,8 +97,8 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 }
             } else {
                 for(int i=0; i<localVariableAttribute.tableLength(); i++) {
-                    if(localVariableAttribute.startPc(i) == 0) {
-                        parameterNames.add(new T2<Integer,String>(localVariableAttribute.index(i), localVariableAttribute.variableName(i)));
+                    if (!localVariableAttribute.variableName(i).equals("__stackRecorder")) {
+                        parameterNames.add(new T2<Integer,String>(localVariableAttribute.startPc(i) + localVariableAttribute.index(i), localVariableAttribute.variableName(i)));
                     }
                 }
                 Collections.sort(parameterNames, new Comparator<T2<Integer,String>>() {
