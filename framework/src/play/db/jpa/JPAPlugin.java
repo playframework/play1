@@ -497,37 +497,23 @@ public class JPAPlugin extends PlayPlugin {
                 }
                 for (PropertyDescriptor pd: bi.getPropertyDescriptors()) {
                     Method readMethod = pd.getReadMethod(), writeMethod = pd.getWriteMethod();
-                    Field correspondingField = null;
-                    {
-                        Class<?> tclazz = clazz;
-                        while (!tclazz.equals(Object.class)) {
-                            try {
-                                correspondingField = tclazz.getDeclaredField(pd.getName());
-                                break;
-                            } catch (NoSuchFieldException e) {}
-                            tclazz = tclazz.getSuperclass();
+                    if (readMethod != null) {
+                        if (readMethod.isAnnotationPresent(Transient.class)) {
+                            continue;
+                        }
+                        if (readMethod.isSynthetic()) {
+                            properties.clear();
+                            break;
                         }
                     }
-                    // Deal with the case accessors are generated on runtime.
-                    if (correspondingField != null && (
-                            correspondingField.isAnnotationPresent(Basic.class) ||
-                            correspondingField.isAnnotationPresent(Column.class) ||
-                            correspondingField.isAnnotationPresent(Id.class) ||
-                            correspondingField.isAnnotationPresent(GeneratedValue.class) ||
-                            correspondingField.isAnnotationPresent(OneToOne.class) ||
-                            correspondingField.isAnnotationPresent(OneToMany.class) ||
-                            correspondingField.isAnnotationPresent(ManyToOne.class) ||
-                            correspondingField.isAnnotationPresent(ManyToMany.class))) {
-                        properties.clear();
-                        break;
-                    }
-                    if ((readMethod != null && (
-                            Modifier.isTransient(readMethod.getModifiers()) ||
-                            readMethod.isAnnotationPresent(Transient.class))) ||
-                        (writeMethod != null && (
-                            Modifier.isTransient(writeMethod.getModifiers()) ||
-                            writeMethod.isAnnotationPresent(Transient.class)))) {
-                        continue;
+                    if (writeMethod != null) {
+                        if (writeMethod.isAnnotationPresent(Transient.class)) {
+                            continue;
+                        }
+                        if (writeMethod.isSynthetic()) {
+                            properties.clear();
+                            break;
+                        }
                     }
                     Model.Property mp = buildProperty(pd);
                     if (mp != null) {
