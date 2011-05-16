@@ -41,18 +41,18 @@ public class TagContext {
         }
         return currentStack.get().get(currentStack.get().size()-2);
     }
-    
+
     public static boolean hasParentTag(String name) {
-    	if(currentStack.get() != null) {
-    		for(int i=currentStack.get().size()-1; i>=0; i--) {
-    			if(name.equals(currentStack.get().get(i).tagName)) {
-    				return true;
-    			}
-    		}
-    	}
+        if (currentStack.get() != null) {
+            for (int i = currentStack.get().size() - 1; i >= 0; i--) {
+                if (name.equals(currentStack.get().get(i).tagName)) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
-    
+
     public static TagContext parent(String name) {
         for(int i=currentStack.get().size()-1; i>=0; i--) {
             if(name.equals(currentStack.get().get(i).tagName)) {

@@ -53,7 +53,7 @@ public class Messages {
     public static String get(Object key, Object... args) {
         return getMessage(Lang.get(), key, args);
     }
-    
+
     /**
      * Given a message code, translate it using current locale.
      * If there is no message in the current locale for the given key, the key
@@ -65,7 +65,7 @@ public class Messages {
      * @return translated message
      */
     public static String get(Object key, boolean safe, Object... args) {
-    	return getMessage(Lang.get(), key, safe, args);
+        return getMessage(Lang.get(), key, safe, args);
     }
 
     /**
@@ -99,11 +99,11 @@ public class Messages {
         }
         return result;
     }
-    
+
     public static String getMessage(String locale, Object key, Object... args) {
-    	return getMessage(locale, key, false, args);
+        return getMessage(locale, key, false, args);
     }
-    
+
     public static String getMessage(String locale, Object key, boolean safe, Object... args) {
         // Check if there is a plugin that handles translation
         String message = Play.pluginCollection.getMessage(locale, key, args);
@@ -111,7 +111,7 @@ public class Messages {
         if(message != null) {
             return message;
         }
-    
+
         String value = null;
         if( key == null ) {
             return "";
@@ -129,54 +129,56 @@ public class Messages {
         return formatString(value, safe, args);
     }
 
-	private static SafeFormatter safeFormatter = new SafeFormatter() {
-		@Override
-		public String appendArgument(String format, Object arg) {
-			String val = formatString(format, false, arg);
+    private static SafeFormatter safeFormatter = new SafeFormatter() {
+        @Override
+        public String appendArgument(String format, Object arg) {
+            String val = formatString(format, false, arg);
 
-			//Determine if escaping is necessary 
-            if (!(arg instanceof RawData) && Request.current().format.equals("html") && !TagContext.hasParentTag("verbatim")) {
-            	val = HTML.htmlEscape(val);
+            // Determine if escaping is necessary
+            if (!(arg instanceof RawData) && Request.current().format.equals("html") &&
+                    !TagContext.hasParentTag("verbatim")) {
+                val = HTML.htmlEscape(val);
             }
-            
-            return val;
-		}
 
-		@Override
-		public String append(String value) {
-			return recurse(value);
-		}
-	};
-	
-	private static String recurse(String message) {
-		Matcher matcher = recursive.matcher(message);
-		StringBuffer sb = new StringBuffer();
-		while(matcher.find()) {
-			matcher.appendReplacement(sb, get(matcher.group(1)));
-		}
-		matcher.appendTail(sb);
-		return sb.toString();
-	}
+            return val;
+        }
+
+        @Override
+        public String append(String value) {
+            return recurse(value);
+        }
+    };
+
+    private static String recurse(String message) {
+        Matcher matcher = recursive.matcher(message);
+        StringBuffer sb = new StringBuffer();
+        while(matcher.find()) {
+            matcher.appendReplacement(sb, get(matcher.group(1)));
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
 
     public static String formatString(String value, Object... args) {
-    	return formatString(value, true, args);
-    }
-    
-    public static String formatString(String value, boolean safe, Object... args) {
-    	if(!safe || args == null || args.length == 0) {
-    		return recurse(String.format(value, coolStuff(value, args)));
-    	} else {
-    		return safeFormatter.format(value, args);
-    	}
+        return formatString(value, true, args);
     }
 
-    static Pattern formatterPattern = Pattern.compile("%((\\d+)\\$)?([-#+ 0,(]+)?(\\d+)?([.]\\d+)?([bBhHsScCdoxXeEfgGaAtT])");
+    public static String formatString(String value, boolean safe, Object... args) {
+        if(!safe || args == null || args.length == 0) {
+            return recurse(String.format(value, coolStuff(value, args)));
+        } else {
+            return safeFormatter.format(value, args);
+        }
+    }
+
+    static Pattern formatterPattern = Pattern
+            .compile("%((\\d+)\\$)?([-#+ 0,(]+)?(\\d+)?([.]\\d+)?([bBhHsScCdoxXeEfgGaAtT])");
 
     @SuppressWarnings("unchecked")
     static Object[] coolStuff(String pattern, Object[] args) {
-    	// when invoked with a null argument we get a null args instead of an array with a null value.
-    	if(args == null)
-    		return NO_ARGS;
+        // when invoked with a null argument we get a null args instead of an array with a null value.
+        if(args == null)
+            return NO_ARGS;
         Class<? extends Number>[] conversions = new Class[args.length];
 
         Matcher matcher = formatterPattern.matcher(pattern);
