@@ -22,6 +22,7 @@ import play.mvc.Router;
 import play.plugins.PluginCollection;
 import play.templates.TemplateLoader;
 import play.utils.OrderSafeProperties;
+import play.utils.Utils;
 import play.vfs.VirtualFile;
 
 /**
@@ -662,7 +663,7 @@ public class Play {
                     if (!modulePath.exists() || !modulePath.isDirectory()) {
                         Logger.error("Module %s will not be loaded because %s does not exist", modulePath.getName(), modulePath.getAbsolutePath());
                     } else {
-                        addModule(modulePath.getName(), modulePath);
+                        addModule(Utils.dropRevision(modulePath.getName()), modulePath);
                     }
                 }
             }
@@ -688,10 +689,7 @@ public class Play {
         File localModules = Play.getFile("modules");
         if (localModules.exists() && localModules.isDirectory()) {
             for (File module : localModules.listFiles()) {
-                String moduleName = module.getName();
-                if (moduleName.contains("-")) {
-                    moduleName = moduleName.substring(0, moduleName.indexOf("-"));
-                }
+                String moduleName = Utils.dropRevision(module.getName());
                 if (module.isDirectory()) {
                     addModule(moduleName, module);
                 } else {

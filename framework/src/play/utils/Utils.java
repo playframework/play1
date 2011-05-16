@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import play.Play;
 import play.mvc.Scope;
@@ -59,6 +61,18 @@ public class Utils {
             toReturn.append(", @" + iter.next().annotationType().getSimpleName());
         }
         return toReturn.toString();
+    }
+    
+    /**
+     * @return An artifact name without its trailing revision number
+     */
+    public static String dropRevision(final String name) {
+    	// Looks for a trailing dash followed by either "head" or a digit followed by anything but a dash
+    	Matcher revisionMatcher = Pattern.compile("-((head)|(\\d[^\\-]*))\\z").matcher(name);
+    	if (revisionMatcher.find()) {
+    		return name.substring(0, revisionMatcher.start());
+    	}
+    	return name;
     }
 
     /**
