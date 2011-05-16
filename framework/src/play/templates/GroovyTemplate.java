@@ -412,7 +412,7 @@ public class GroovyTemplate extends BaseTemplate {
             if (val.length == 1) {
             	message = Messages.get(val[0]);
             } else {
-            	message = Messages.get(val[0], Arrays.copyOfRange(val,1,val.length));
+            	message = Messages.get(val[0], true, Arrays.copyOfRange(val,1,val.length));
             }
             return message;
         }

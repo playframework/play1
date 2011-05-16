@@ -43,11 +43,13 @@ public class TagContext {
     }
     
     public static boolean hasParentTag(String name) {
-        for(int i=currentStack.get().size()-1; i>=0; i--) {
-            if(name.equals(currentStack.get().get(i).tagName)) {
-                return true;
-            }
-        }
+    	if(currentStack.get() != null) {
+    		for(int i=currentStack.get().size()-1; i>=0; i--) {
+    			if(name.equals(currentStack.get().get(i).tagName)) {
+    				return true;
+    			}
+    		}
+    	}
         return false;
     }
     

@@ -15,7 +15,6 @@ import play.templates.BaseTemplate.RawData;
 import play.templates.TagContext;
 import play.utils.HTML;
 import play.utils.SafeFormatter;
-import play.utils.SafeFormatterHandler;
 
 /**
  * I18n Helper
@@ -54,6 +53,20 @@ public class Messages {
     public static String get(Object key, Object... args) {
         return getMessage(Lang.get(), key, args);
     }
+    
+    /**
+     * Given a message code, translate it using current locale.
+     * If there is no message in the current locale for the given key, the key
+     * is returned.
+     * 
+     * @param key the message code
+     * @param safe escapes the message parameters to prevent code injection
+     * @param args optional message format arguments
+     * @return translated message
+     */
+    public static String get(Object key, boolean safe, Object... args) {
+    	return getMessage(Lang.get(), key, safe, args);
+    }
 
     /**
      * Return several messages for a locale
@@ -88,7 +101,7 @@ public class Messages {
     }
     
     public static String getMessage(String locale, Object key, Object... args) {
-    	return getMessage(locale, key, true, args);
+    	return getMessage(locale, key, false, args);
     }
     
     public static String getMessage(String locale, Object key, boolean safe, Object... args) {
@@ -116,7 +129,7 @@ public class Messages {
         return formatString(value, safe, args);
     }
 
-	private static SafeFormatter safeFormatter = new SafeFormatter(new SafeFormatterHandler() {
+	private static SafeFormatter safeFormatter = new SafeFormatter() {
 		@Override
 		public String appendArgument(String format, Object arg) {
 			String val = formatString(format, false, arg);
@@ -133,7 +146,7 @@ public class Messages {
 		public String append(String value) {
 			return recurse(value);
 		}
-	});
+	};
 	
 	private static String recurse(String message) {
 		Matcher matcher = recursive.matcher(message);

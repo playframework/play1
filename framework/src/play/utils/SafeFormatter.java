@@ -4,21 +4,11 @@ import java.util.MissingFormatArgumentException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SafeFormatter {
+public abstract class SafeFormatter {
 	// Pattern copied from java.util.Formatter
     private static final Pattern formatSpecifier
 	= Pattern.compile("%(\\d+\\$)?([-#+ 0,(\\<]*)?(\\d+)?(\\.\\d+)?([tT])?([a-zA-Z%])");
  
-    private SafeFormatterHandler safeFormatterHandler;
-    
-    public SafeFormatter(SafeFormatterHandler safeFormatterHandler) {
-    	if(safeFormatterHandler == null) {
-    		throw new NullPointerException();
-    	}
-    	
-    	this.safeFormatterHandler = safeFormatterHandler;
-    }
-    
     public String format(String format, Object...args) {
 		Matcher matcher = formatSpecifier.matcher(format);
     	StringBuffer sb = new StringBuffer();
@@ -48,24 +38,27 @@ public class SafeFormatter {
 				}
 			}
 			
-			sb.append(safeFormatterHandler.append(format.substring(lastAppend, matcher.start())));
+			sb.append(append(format.substring(lastAppend, matcher.start())));
 
 			if(matcher.group(6) != null && (matcher.group(6).equals("n") || matcher.group(6).equals("%"))) {
 				//Parameters that don't require an argument
-				sb.append(safeFormatterHandler.appendArgument(newFormatPattern.toString(), null));
+				sb.append(appendArgument(newFormatPattern.toString(), null));
 			} else {
 				//Parameters that do require an argument
 			    if (args != null && index > args.length)
 					throw new MissingFormatArgumentException(matcher.group());
 				    
-				sb.append(safeFormatterHandler.appendArgument(newFormatPattern.toString(), args == null ? null : args[index - 1]));
+				sb.append(appendArgument(newFormatPattern.toString(), args == null ? null : args[index - 1]));
 			}
 			
 			lastAppend = matcher.end();
 		}
 		
-		sb.append(safeFormatterHandler.append(format.substring(lastAppend, format.length())));
+		sb.append(append(format.substring(lastAppend, format.length())));
 		
 		return sb.toString();
     }
+    
+	public abstract String appendArgument(String format, Object arg);
+	public abstract String append(String value);
 }

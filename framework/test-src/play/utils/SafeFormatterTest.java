@@ -15,7 +15,7 @@ public class SafeFormatterTest {
 	
 	@Test
 	public void testSafeFormatter() {
-		SafeFormatter s = new SafeFormatter(new SafeFormatterHandler() {
+		SafeFormatter s = new SafeFormatter() {
 			@Override
 			public String appendArgument(String format, Object arg) {
 				return HTML.htmlEscape(String.format(format, arg));
@@ -25,7 +25,7 @@ public class SafeFormatterTest {
 			public String append(String value) {
 				return value;
 			}
-		});
+		};
 
 		//Check if String.format and SafeFormatter.format return the same result when there is nothing to escape
 		checkFormat(s, "%n", new Object[]{null});
