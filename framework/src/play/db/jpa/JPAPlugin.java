@@ -24,6 +24,8 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NoResultException;
@@ -483,6 +485,7 @@ public class JPAPlugin extends PlayPlugin {
             getJPAContext().em().createQuery("delete from " + clazz.getName()).executeUpdate();
         }
 
+
         public List<Model.Property> listProperties() {
             {
                 List<Model.Property> properties = new ArrayList<Model.Property>();
@@ -494,6 +497,30 @@ public class JPAPlugin extends PlayPlugin {
                 }
                 for (PropertyDescriptor pd: bi.getPropertyDescriptors()) {
                     Method readMethod = pd.getReadMethod(), writeMethod = pd.getWriteMethod();
+                    Field correspondingField = null;
+                    {
+                        Class<?> tclazz = clazz;
+                        while (!tclazz.equals(Object.class)) {
+                            try {
+                                correspondingField = tclazz.getDeclaredField(pd.getName());
+                                break;
+                            } catch (NoSuchFieldException e) {}
+                            tclazz = tclazz.getSuperclass();
+                        }
+                    }
+                    // Deal with the case accessors are generated on runtime.
+                    if (correspondingField != null && (
+                            correspondingField.isAnnotationPresent(Basic.class) ||
+                            correspondingField.isAnnotationPresent(Column.class) ||
+                            correspondingField.isAnnotationPresent(Id.class) ||
+                            correspondingField.isAnnotationPresent(GeneratedValue.class) ||
+                            correspondingField.isAnnotationPresent(OneToOne.class) ||
+                            correspondingField.isAnnotationPresent(OneToMany.class) ||
+                            correspondingField.isAnnotationPresent(ManyToOne.class) ||
+                            correspondingField.isAnnotationPresent(ManyToMany.class))) {
+                        properties.clear();
+                        break;
+                    }
                     if ((readMethod != null && (
                             Modifier.isTransient(readMethod.getModifiers()) ||
                             readMethod.isAnnotationPresent(Transient.class))) ||
