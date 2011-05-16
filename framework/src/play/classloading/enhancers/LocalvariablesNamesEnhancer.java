@@ -3,6 +3,8 @@ package play.classloading.enhancers;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +26,7 @@ import javassist.compiler.NoFieldException;
 import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
+import play.libs.F.T2;
 
 /**
  * Track names of local variables ...
@@ -87,10 +90,24 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                 continue;
             }
             LocalVariableAttribute localVariableAttribute = (LocalVariableAttribute) codeAttribute.getAttribute("LocalVariableTable");
+            List<T2<Integer,String>> parameterNames = new ArrayList<T2<Integer,String>>();
             if (localVariableAttribute == null || localVariableAttribute.tableLength() < method.getParameterTypes().length) {
-                if (method.getParameterTypes().length > 0) {
+                if(method.getParameterTypes().length > 0) {
                     continue;
                 }
+            } else {
+                for(int i=0; i<localVariableAttribute.tableLength(); i++) {
+                    if(localVariableAttribute.startPc(i) == 0) {
+                        parameterNames.add(new T2<Integer,String>(localVariableAttribute.index(i), localVariableAttribute.variableName(i)));
+                    }
+                }
+                Collections.sort(parameterNames, new Comparator<T2<Integer,String>>() {
+
+                    public int compare(T2<Integer, String> o1, T2<Integer, String> o2) {
+                        return o1._1.compareTo(o2._1);
+                    }
+
+                });
             }
             List<String> names = new ArrayList<String>();
             for (int i = 0; i < method.getParameterTypes().length + (Modifier.isStatic(method.getModifiers()) ? 0 : 1); i++) {
@@ -98,7 +115,7 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
                     continue;
                 }
                 try {
-                    String name = localVariableAttribute.getConstPool().getUtf8Info(localVariableAttribute.nameIndex(i));
+                    String name = parameterNames.get(i)._2;
                     if (!name.equals("this")) {
                         names.add(name);
                     }
