@@ -374,11 +374,11 @@
                         %{
                             protocol = "http";
                             port = 9000;
-                            if(play.configuration['http.port'] != null) {
-                                port = play.configuration['http.port'];
-                            } else if (play.configuration['https.port'] != null) {
+                            if(play.configuration['https.port'] != null) {
                                 port = play.configuration['https.port'];
                                 protocol = "https";
+                            } else if (play.configuration['http.port'] != null) {
+                                port = play.configuration['http.port'];
                             }
                         }%
                         $('#selenium-runner').attr('src', '@{'/public/test-runner/selenium/TestRunner.html'}?baseUrl=${protocol}://localhost:${port}&test=/@tests/'+testId+'.suite&auto=true&close=true&resultsUrl=/@tests/'+testId);
@@ -620,11 +620,11 @@
                 %{
                     protocol = "http";
                     port = 9000;
-                    if(play.configuration['http.port'] != null) {
-                        port = play.configuration['http.port'];
-                    } else if (play.configuration['https.port'] != null) {
+                    if(play.configuration['https.port'] != null) {
                         port = play.configuration['https.port'];
                         protocol = "https";
+                    } else if (play.configuration['http.port'] != null) {
+                        port = play.configuration['http.port'];
                     }
                 }%
                 #{list items:seleniumTests, as:'test'}

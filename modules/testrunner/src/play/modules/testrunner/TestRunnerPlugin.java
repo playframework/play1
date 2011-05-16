@@ -35,11 +35,11 @@ public class TestRunnerPlugin extends PlayPlugin {
     public void onApplicationReady() {
         String protocol = "http";
         String port = "9000";
-        if(Play.configuration.getProperty("http.port") != null) {
-            port = Play.configuration.getProperty("http.port");
-        } else if(Play.configuration.getProperty("https.port") != null) {
+        if(Play.configuration.getProperty("https.port") != null) {
             port = Play.configuration.getProperty("https.port");
             protocol = "https";
+        } else if(Play.configuration.getProperty("http.port") != null) {
+          port = Play.configuration.getProperty("http.port");
         }
         System.out.println("~");
         System.out.println("~ Go to "+protocol+"://localhost:" + port + "/@tests to run the tests");
