@@ -35,6 +35,7 @@ import javax.persistence.Transient;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
@@ -46,6 +47,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.beans.PropertyDescriptor;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.BeanInfo;
 
 /**
  * JPA Plugin
@@ -479,42 +484,100 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         public List<Model.Property> listProperties() {
-            List<Model.Property> properties = new ArrayList<Model.Property>();
-            Set<Field> fields = new LinkedHashSet<Field>();
-            Class<?> tclazz = clazz;
-            while (!tclazz.equals(Object.class)) {
-                Collections.addAll(fields, tclazz.getDeclaredFields());
-                tclazz = tclazz.getSuperclass();
+            {
+                List<Model.Property> properties = new ArrayList<Model.Property>();
+                BeanInfo bi = null;
+                try {
+                    bi = Introspector.getBeanInfo(clazz);
+                } catch (IntrospectionException e) {
+                    throw new UnexpectedException(e);
+                }
+                for (PropertyDescriptor pd: bi.getPropertyDescriptors()) {
+                    Method readMethod = pd.getReadMethod(), writeMethod = pd.getWriteMethod();
+                    if ((readMethod != null && (
+                            Modifier.isTransient(readMethod.getModifiers()) ||
+                            readMethod.isAnnotationPresent(Transient.class))) ||
+                        (writeMethod != null && (
+                            Modifier.isTransient(writeMethod.getModifiers()) ||
+                            writeMethod.isAnnotationPresent(Transient.class)))) {
+                        continue;
+                    }
+                    Model.Property mp = buildProperty(pd);
+                    if (mp != null) {
+                        properties.add(mp);
+                    }
+                }
+
+                if (properties.size() != 0)
+                    return properties;
             }
-            for (Field f : fields) {
-                if (Modifier.isTransient(f.getModifiers())) {
-                    continue;
+
+            {
+                List<Model.Property> properties = new ArrayList<Model.Property>();
+                Set<Field> fields = new LinkedHashSet<Field>();
+                Class<?> tclazz = clazz;
+                while (!tclazz.equals(Object.class)) {
+                    Collections.addAll(fields, tclazz.getDeclaredFields());
+                    tclazz = tclazz.getSuperclass();
                 }
-                if (f.isAnnotationPresent(Transient.class)) {
-                    continue;
+                for (Field f : fields) {
+                    if (Modifier.isTransient(f.getModifiers())) {
+                        continue;
+                    }
+                    if (f.isAnnotationPresent(Transient.class)) {
+                        continue;
+                    }
+                    Model.Property mp = buildProperty(f);
+                    if (mp != null) {
+                        properties.add(mp);
+                    }
                 }
-                Model.Property mp = buildProperty(f);
-                if (mp != null) {
-                    properties.add(mp);
-                }
+                return properties;
             }
-            return properties;
         }
 
         public String keyName() {
-            return keyField().getName();
+            Field field = keyField();
+            if (field != null) {
+                return field.getName();
+            }
+            PropertyDescriptor pd = keyMethod();
+            if (pd != null) {
+                return pd.getName();
+            }
+            throw new UnexpectedException("Cannot get the object @Id for an object of type " + clazz);
         }
 
         public Class<?> keyType() {
-            return keyField().getType();
+            Field field = keyField();
+            if (field != null) {
+                return field.getType();
+            }
+            PropertyDescriptor pd = keyMethod();
+            if (pd != null) {
+                return pd.getPropertyType();
+            }
+            throw new UnexpectedException("Cannot get the object @Id for an object of type " + clazz);
         }
 
         public Object keyValue(Model m) {
-            try {
-                return keyField().get(m);
-            } catch (Exception ex) {
-                throw new UnexpectedException(ex);
+            Field field = keyField();
+            if (field != null) {
+                try {
+                    return field.get(m);
+                } catch (Exception e) {
+                    throw new UnexpectedException(e);
+                }
             }
+            PropertyDescriptor pd = keyMethod();
+            if (pd != null) {
+                try {
+                    return pd.getReadMethod().invoke(m);
+                } catch (Exception e) {
+                    throw new UnexpectedException(e);
+                }
+            }
+            throw new UnexpectedException("Cannot get the object @Id for an object of type " + clazz);
         }
 
         //
@@ -531,9 +594,36 @@ public class JPAPlugin extends PlayPlugin {
                     c = c.getSuperclass();
                 }
             } catch (Exception e) {
-                throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz);
+                throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz, e);
             }
-            throw new UnexpectedException("Cannot get the object @Id for an object of type " + clazz);
+            return null;
+        }
+
+        PropertyDescriptor keyMethod() {
+            Class c = clazz;
+            try {
+                BeanInfo bi = Introspector.getBeanInfo(c);
+                for (PropertyDescriptor pd: bi.getPropertyDescriptors()) {
+                    Method readMethod = pd.getReadMethod(), writeMethod = pd.getWriteMethod();
+                    if ((readMethod != null &&
+                            (readMethod.isAnnotationPresent(Id.class) ||
+                             readMethod.isAnnotationPresent(EmbeddedId.class))) ||
+                        (writeMethod != null &&
+                            (writeMethod.isAnnotationPresent(Id.class) ||
+                             writeMethod.isAnnotationPresent(EmbeddedId.class)))) {
+                        if (readMethod != null) {
+                            readMethod.setAccessible(true);
+                        }
+                        if (writeMethod != null) {
+                            writeMethod.setAccessible(true);
+                        }
+                        return pd;
+                    }
+                }
+            } catch (Exception e) {
+                throw new UnexpectedException("Error while determining the object @Id for an object of type " + clazz, e);
+            }
+            return null;
         }
 
         String getSearchQuery(List<String> searchFields) {
@@ -550,80 +640,85 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         Model.Property buildProperty(final Field field) {
-            Model.Property modelProperty = new Model.Property();
-            modelProperty.type = field.getType();
-            modelProperty.field = field;
-            if (Model.class.isAssignableFrom(field.getType())) {
-                if (field.isAnnotationPresent(OneToOne.class)) {
-                    if (field.getAnnotation(OneToOne.class).mappedBy().equals("")) {
+            return populateProperty(new Model.FieldProperty(field));
+        }
+
+        Model.Property buildProperty(final PropertyDescriptor pd) {
+            return populateProperty(new Model.AccessorProperty(pd));
+        }
+
+        Model.Property populateProperty(final Model.Property modelProperty) {
+            if (Model.class.isAssignableFrom(modelProperty.getType())) {
+                if (modelProperty.isAnnotationPresent(OneToOne.class)) {
+                    if (modelProperty.getAnnotation(OneToOne.class).mappedBy().equals("")) {
                         modelProperty.isRelation = true;
-                        modelProperty.relationType = field.getType();
+                        modelProperty.relationType = modelProperty.getType();
                         modelProperty.choices = new Model.Choices() {
 
                             @SuppressWarnings("unchecked")
                             public List<Object> list() {
-                                return getJPAContext().em().createQuery("from " + field.getType().getName()).getResultList();
+                                return getJPAContext().em().createQuery("from " + modelProperty.getType().getName()).getResultList();
                             }
                         };
                     }
                 }
-                if (field.isAnnotationPresent(ManyToOne.class)) {
+                if (modelProperty.isAnnotationPresent(ManyToOne.class)) {
                     modelProperty.isRelation = true;
-                    modelProperty.relationType = field.getType();
+                    modelProperty.relationType = modelProperty.getType();
                     modelProperty.choices = new Model.Choices() {
 
                         @SuppressWarnings("unchecked")
                         public List<Object> list() {
-                            return getJPAContext().em().createQuery("from " + field.getType().getName()).getResultList();
+                            return getJPAContext().em().createQuery("from " + modelProperty.getType().getName()).getResultList();
                         }
                     };
                 }
             }
-            if (Collection.class.isAssignableFrom(field.getType())) {
-                final Class<?> fieldType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                if (field.isAnnotationPresent(OneToMany.class)) {
-                    if (field.getAnnotation(OneToMany.class).mappedBy().equals("")) {
+            if (Collection.class.isAssignableFrom(modelProperty.getType())) {
+                final Class<?> elementType = (Class<?>) ((ParameterizedType) modelProperty.getGenericType()).getActualTypeArguments()[0];
+                if (modelProperty.isAnnotationPresent(OneToMany.class)) {
+                    if (modelProperty.getAnnotation(OneToMany.class).mappedBy().equals("")) {
                         modelProperty.isRelation = true;
                         modelProperty.isMultiple = true;
-                        modelProperty.relationType = fieldType;
+                        modelProperty.relationType = elementType;
                         modelProperty.choices = new Model.Choices() {
 
                             @SuppressWarnings("unchecked")
                             public List<Object> list() {
-                                return getJPAContext().em().createQuery("from " + fieldType.getName()).getResultList();
+                                return getJPAContext().em().createQuery("from " + elementType.getName()).getResultList();
                             }
                         };
                     }
                 }
-                if (field.isAnnotationPresent(ManyToMany.class)) {
-                    if (field.getAnnotation(ManyToMany.class).mappedBy().equals("")) {
+                if (modelProperty.isAnnotationPresent(ManyToMany.class)) {
+                    if (modelProperty.getAnnotation(ManyToMany.class).mappedBy().equals("")) {
                         modelProperty.isRelation = true;
                         modelProperty.isMultiple = true;
-                        modelProperty.relationType = fieldType;
+                        modelProperty.relationType = elementType;
                         modelProperty.choices = new Model.Choices() {
 
                             @SuppressWarnings("unchecked")
                             public List<Object> list() {
-                                return getJPAContext().em().createQuery("from " + fieldType.getName()).getResultList();
+                                return getJPAContext().em().createQuery("from " + elementType.getName()).getResultList();
                             }
                         };
                     }
                 }
             }
-            if (field.getType().isEnum()) {
+            if (modelProperty.getType().isEnum()) {
                 modelProperty.choices = new Model.Choices() {
 
                     @SuppressWarnings("unchecked")
                     public List<Object> list() {
-                        return (List<Object>) Arrays.asList(field.getType().getEnumConstants());
+                        return (List<Object>) Arrays.asList(modelProperty.getType().getEnumConstants());
                     }
                 };
             }
-            modelProperty.name = field.getName();
-            if (field.getType().equals(String.class)) {
+            modelProperty.name = modelProperty.getName();
+            if (modelProperty.getType().equals(String.class)) {
                 modelProperty.isSearchable = true;
             }
-            if (field.isAnnotationPresent(GeneratedValue.class)) {
+            if (modelProperty.isAnnotationPresent(GeneratedValue.class)) {
                 modelProperty.isGenerated = true;
             }
             return modelProperty;
