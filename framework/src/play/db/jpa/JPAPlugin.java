@@ -393,7 +393,7 @@ public class JPAPlugin extends PlayPlugin {
     @Override
     public Model.Factory modelFactory(Class<? extends Model> modelClass) {
         if (modelClass.isAnnotationPresent(Entity.class)) {
-            return new JPAModelLoader(modelClass);
+            return JPAModelLoader.instance(modelClass);
         }
         return null;
     }
