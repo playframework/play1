@@ -65,6 +65,10 @@ public interface Model {
          */
         public Object makeKey(Map<String, Object> id);
         public Model findById(Object id);
+        /**
+         * Returns true if this factory's type has a generated key, false if the user can set the key himself.
+         */
+        public boolean isGeneratedKey();
         public List<Model> fetch(int offset, int length, String orderBy, String orderDirection, List<String> properties, String keywords, String where);
         public Long count(List<String> properties, String keywords, String where);
         public void deleteAll();
