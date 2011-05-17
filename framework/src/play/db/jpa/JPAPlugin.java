@@ -24,6 +24,7 @@ import javax.persistence.Id;
 import javax.persistence.EmbeddedId;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -403,5 +404,18 @@ public class JPAPlugin extends PlayPlugin {
         if (JPA.isEnabled()) {
             JPA.em().clear();
         }
+    }
+    
+    public static Set<Field> getModelFields(Class<?> clazz){
+    	Set<Field> fields = new LinkedHashSet<Field>();
+    	Class<?> tclazz = clazz;
+    	while (!tclazz.equals(Object.class)) {
+    		// Only add fields for mapped types
+    		if(tclazz.isAnnotationPresent(Entity.class)
+    				|| tclazz.isAnnotationPresent(MappedSuperclass.class))
+    			Collections.addAll(fields, tclazz.getDeclaredFields());
+    		tclazz = tclazz.getSuperclass();
+    	}
+    	return fields;
     }
 }
