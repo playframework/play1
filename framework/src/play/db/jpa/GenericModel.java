@@ -1,36 +1,39 @@
 package play.db.jpa;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
+import javax.persistence.PostUpdate;
 import javax.persistence.Query;
+
+import org.apache.commons.lang.StringUtils;
+
 import play.Play;
 import play.data.binding.BeanWrapper;
 import play.data.binding.Binder;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
 import play.mvc.Scope.Params;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import javax.persistence.PostLoad;
-import javax.persistence.PostPersist;
-import javax.persistence.PostUpdate;
 import play.utils.Utils;
 
 /**
@@ -74,9 +77,9 @@ public class GenericModel extends JPABase {
                 }
 
                 if (isEntity) {
-                    Class<Model> c = (Class<Model>) Play.classloader.loadClass(relation);
+                    Class<JPABase> c = (Class<JPABase>) Play.classloader.loadClass(relation);
                     if (JPABase.class.isAssignableFrom(c)) {
-                        String keyName = Model.Manager.factoryFor(c).keyName();
+                    	Factory relationFactory = Model.Manager.factoryFor(c);
                         if (multiple && Collection.class.isAssignableFrom(field.getType())) {
                             Collection l = new ArrayList();
                             if (SortedSet.class.isAssignableFrom(field.getType())) {
@@ -84,41 +87,21 @@ public class GenericModel extends JPABase {
                             } else if (Set.class.isAssignableFrom(field.getType())) {
                                 l = new HashSet();
                             }
-                            String[] ids = params.get(name + "." + field.getName() + "." + keyName);
-                            if (ids != null) {
-                                params.remove(name + "." + field.getName() + "." + keyName);
-                                for (String _id : ids) {
-                                    if (_id.equals("")) {
-                                        continue;
-                                    }
-                                    Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");
-                                    q.setParameter(1, Binder.directBind(_id, Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType()));
-                                    try {
-                                        l.add(q.getSingleResult());
-                                    } catch (NoResultException e) {
-                                        Validation.addError(name + "." + field.getName(), "validation.notFound", _id);
-                                    }
-                                }
-                                bw.set(field.getName(), o, l);
-                            }
+                            l.addAll(findEntities(name + "." + field.getName(), params, true, c, relationFactory));
+                            if(!l.isEmpty())
+                            	bw.set(field.getName(), o, l);
                         } else {
-                            String[] ids = params.get(name + "." + field.getName() + "." + keyName);
-                            if (ids != null && ids.length > 0 && !ids[0].equals("")) {
-                                params.remove(name + "." + field.getName() + "." + keyName);
-                                Query q = JPA.em().createQuery("from " + relation + " where " + keyName + " = ?");
-                                q.setParameter(1, Binder.directBind(ids[0], Model.Manager.factoryFor((Class<Model>) Play.classloader.loadClass(relation)).keyType()));
-                                try {
-                                    String localName = name + "." + field.getName();
-                                    Object to = q.getSingleResult();
-                                    edit(to, localName, params, field.getAnnotations());
+                        	String localName = name + "." + field.getName();
+                        	List<JPABase> entities = findEntities(localName, params, false, c, relationFactory);
+                        	if(!entities.isEmpty()){
+                        		JPABase entity = entities.get(0);
+                        		if (entity != null) {
+                                    edit(entity, localName, params, field.getAnnotations());
                                     params = Utils.filterMap(params, localName);
-                                    bw.set(field.getName(), o, to);
-                                } catch (NoResultException e) {
-                                    Validation.addError(name + "." + field.getName(), "validation.notFound", ids[0]);
-                                }
-                            } else if (ids != null && ids.length > 0 && ids[0].equals("")) {
-                                bw.set(field.getName(), o, null);
-                                params.remove(name + "." + field.getName() + "." + keyName);
+                        			bw.set(field.getName(), o, entity);
+                        		} else {
+                        			bw.set(field.getName(), o, null);
+                        		}
                             }
                         }
                     }
@@ -152,6 +135,119 @@ public class GenericModel extends JPABase {
         }
     }
 
+    static <T extends JPABase> List<T> findEntities(String name, Map<String, String[]> params, 
+    		boolean wantsCollection,
+    		Class<T> relation, Factory relationFactory) throws Exception{
+    	List<Property> keys = relationFactory.listKeys();
+    	// we put the more complex composite key resolving somewhere else
+    	if(keys.size() > 1)
+    		return findEntitiesWithCompositeKey(name, params, wantsCollection, relation, relationFactory, keys);
+    	// single key
+        String keyName = keys.get(0).name;
+    	List<T> results = new ArrayList<T>();
+        String[] ids = params.get(name + "." + keyName);
+        if (ids != null) {
+        	params.remove(name + "." + keyName);
+        	// special case for blanking out the property
+        	if(!wantsCollection){
+        		if(ids.length > 1)
+        			throw new UnexpectedException("Too many entries for non-collection: "+name);
+        		if(ids.length == 1 && StringUtils.isEmpty(ids[0])){
+        			results.add(null);
+        			return results;
+        		}
+        	}
+        	for (String _id : ids) {
+        		if (_id.equals("")) {
+        			continue;
+        		}
+        		T entity = JPA.em().find(relation, Binder.directBind(_id, relationFactory.keyType()));
+        		if(entity != null)
+        			results.add(entity);
+        		else
+        			Validation.addError(name, "validation.notFound", _id);
+        	}
+        }
+        return results;
+    }
+
+    private static <T extends JPABase> List<T> findEntitiesWithCompositeKey(String name, Map<String, String[]> params, 
+    		boolean wantsCollection,
+    		Class<T> relation, Factory relationFactory, List<Property> keys) throws Exception{
+    	Object[][] idParts = new Object[keys.size()][];
+    	int keyCount = 0;
+    	// collect every key part
+    	for (int i = 0; i < idParts.length; i++) {
+    		Property key = keys.get(i);
+    		String paramKey = name + "." + key.name;
+    		// we can resolve single keys in this method, but not relations, for that we recurse
+    		if(key.isRelation){
+    			List<JPABase> idEntities = findEntities(paramKey, params, true, 
+    					(Class<JPABase>)key.relationType, Manager.factoryFor((Class<JPABase>)key.relationType));
+    			idParts[i] = idEntities.toArray();
+    		}else
+    			idParts[i] = params.get(paramKey);
+    		
+			int thisKeyCount = 0;
+			if(idParts[i] != null){
+				params.remove(paramKey);
+				thisKeyCount = idParts[i].length;
+			}
+			// make sure each part has the right number of keys
+			if(i > 0 && keyCount != thisKeyCount){
+				throw new UnexpectedException("Missing key parts");
+			}else
+				keyCount = thisKeyCount;
+		}
+    	List<T> results = new ArrayList<T>();
+    	if(keyCount == 0)
+    		return results;
+    	// special case for a single entry with null ids
+    	if(!wantsCollection){
+    		if(keyCount > 1)
+    			throw new UnexpectedException("Too many entries for non-collection: "+name);
+    		if(keyCount == 1){
+    			boolean isAllEmpty = true;
+    			for (int i = 0; i < idParts.length; i++) {
+    				Object idPart = idParts[i][0];
+    				if(idPart != null
+    						|| (idPart instanceof String && !StringUtils.isEmpty((String)idPart))){
+    					isAllEmpty = false;
+    					break;
+    				}
+    			}
+    			if(isAllEmpty){
+    				results.add(null);
+    				return results;
+    			}
+    		}
+    	}
+    	// now resolve
+    	for (int i = 0; i < idParts[0].length; i++) {
+    		Map<String, Object> id = new HashMap<String, Object>();
+        	for (int p = 0; p < idParts.length; p++) {
+        		Property key = keys.get(p);
+        		Object unboundValue = idParts[p][i];
+        		Object boundValue;
+        		// is this an id?
+        		if(key.isRelation){
+        			// we have already resolved it
+        			boundValue = unboundValue;
+        		}else
+        			boundValue = Binder.directBind((String)unboundValue, key.type);
+        		id.put(key.name, boundValue);
+        	}
+        	// we have all parts of the id, make an id
+        	Object realId = relationFactory.makeKey(id);
+        	T q = JPA.em().find(relation, realId);
+        	if(q == null)
+        		Validation.addError(name, "validation.notFound", realId.toString());
+        	else
+        		results.add(q);
+    	}
+    	return results;
+    }
+    
     public <T extends GenericModel> T edit(String name, Map<String, String[]> params) {
         edit(this, name, params, new Annotation[0]);
         return (T) this;
