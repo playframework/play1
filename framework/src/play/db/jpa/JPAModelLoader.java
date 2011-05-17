@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import javax.persistence.EmbeddedId;
 import javax.persistence.GeneratedValue;
@@ -21,17 +22,33 @@ import javax.persistence.OneToOne;
 import javax.persistence.Query;
 import javax.persistence.Transient;
 
+import play.Logger;
 import play.data.binding.Binder;
 import play.db.Model;
+import play.db.Model.Factory;
 import play.exceptions.UnexpectedException;
 
 public class JPAModelLoader implements Model.Factory {
 
     private Class<? extends Model> clazz;
+    private static WeakHashMap<Class<?>, JPAModelLoader> cache = new WeakHashMap<Class<?>, JPAModelLoader>();
 
     public JPAModelLoader(Class<? extends Model> clazz) {
         this.clazz = clazz;
     }
+
+    public static Factory instance(Class<? extends Model> modelClass) {
+    	synchronized (cache) {
+    		JPAModelLoader factory = cache.get(modelClass);
+			if(factory == null){
+				Logger.debug("Cache miss for %s factory", modelClass);
+				factory = new JPAModelLoader(modelClass);
+				cache.put(modelClass, factory);
+			}else
+				Logger.debug("Cache hit for %s factory", modelClass);
+			return factory;
+		}
+	}
 
     public Model findById(Object id) {
         if (id == null) {
