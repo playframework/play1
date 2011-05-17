@@ -56,12 +56,7 @@ public class GenericModel extends JPABase {
         try {
             BeanWrapper bw = new BeanWrapper(o.getClass());
             // Start with relations
-            Set<Field> fields = new HashSet<Field>();
-            Class clazz = o.getClass();
-            while (!clazz.equals(Object.class)) {
-                Collections.addAll(fields, clazz.getDeclaredFields());
-                clazz = clazz.getSuperclass();
-            }
+    		Set<Field> fields = JPAPlugin.getModelFields(o.getClass());
             for (Field field : fields) {
                 boolean isEntity = false;
                 String relation = null;

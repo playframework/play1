@@ -6,8 +6,6 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -118,12 +116,7 @@ public class JPAModelLoader implements Model.Factory {
 
     public List<Model.Property> listProperties() {
         List<Model.Property> properties = new ArrayList<Model.Property>();
-        Set<Field> fields = new LinkedHashSet<Field>();
-        Class<?> tclazz = clazz;
-        while (!tclazz.equals(Object.class)) {
-            Collections.addAll(fields, tclazz.getDeclaredFields());
-            tclazz = tclazz.getSuperclass();
-        }
+        Set<Field> fields = JPAPlugin.getModelFields(clazz);
         for (Field f : fields) {
             if (Modifier.isTransient(f.getModifiers())) {
                 continue;
