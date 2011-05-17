@@ -40,6 +40,7 @@ public class JPAModelLoader implements Model.Factory {
     private Class<? extends Model> clazz;
     private Map<String, Model.Property> properties;
     private List<Model.Property> keyProperties;
+	private boolean isGeneratedKey;
     private static WeakHashMap<Class<?>, JPAModelLoader> cache = new WeakHashMap<Class<?>, JPAModelLoader>();
 
     public JPAModelLoader(Class<? extends Model> clazz) {
@@ -393,7 +394,15 @@ public class JPAModelLoader implements Model.Factory {
         if (field.isAnnotationPresent(Id.class)
         		|| field.isAnnotationPresent(EmbeddedId.class)) {
         	modelProperty.isKey = true;
+        	if(modelProperty.isGenerated)
+        		isGeneratedKey = true;
         }
         return modelProperty;
     }
+
+	@Override
+	public boolean isGeneratedKey() {
+		initProperties();
+		return isGeneratedKey;
+	}
 }
