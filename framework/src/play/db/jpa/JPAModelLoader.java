@@ -65,7 +65,7 @@ public class JPAModelLoader implements Model.Factory {
             return null;
         }
         try {
-            return JPA.em().find(clazz, Binder.directBind(id.toString(), Model.Manager.factoryFor(clazz).keyType()));
+            return JPA.em().find(clazz, id);
         } catch (Exception e) {
             // Key is invalid, thus nothing was found
             return null;
