@@ -6,7 +6,9 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -29,6 +31,7 @@ import play.exceptions.UnexpectedException;
 public class JPAModelLoader implements Model.Factory {
 
     private Class<? extends Model> clazz;
+    private Map<String, Model.Property> properties;
     private static WeakHashMap<Class<?>, JPAModelLoader> cache = new WeakHashMap<Class<?>, JPAModelLoader>();
 
     public JPAModelLoader(Class<? extends Model> clazz) {
@@ -115,21 +118,29 @@ public class JPAModelLoader implements Model.Factory {
     }
 
     public List<Model.Property> listProperties() {
-        List<Model.Property> properties = new ArrayList<Model.Property>();
-        Set<Field> fields = JPAPlugin.getModelFields(clazz);
-        for (Field f : fields) {
-            if (Modifier.isTransient(f.getModifiers())) {
-                continue;
-            }
-            if (f.isAnnotationPresent(Transient.class)) {
-                continue;
-            }
-            Model.Property mp = buildProperty(f);
-            if (mp != null) {
-                properties.add(mp);
-            }
+    	initProperties();
+    	return new ArrayList<Model.Property>(this.properties.values());
+    }
+
+    private void initProperties() {
+    	synchronized(this){
+    		if(properties != null)
+    			return;
+    		properties = new HashMap<String,Model.Property>();
+    		Set<Field> fields = JPAPlugin.getModelFields(clazz);
+    		for (Field f : fields) {
+    			if (Modifier.isTransient(f.getModifiers())) {
+    				continue;
+    			}
+    			if (f.isAnnotationPresent(Transient.class)) {
+    				continue;
+    			}
+    			Model.Property mp = buildProperty(f);
+    			if (mp != null) {
+    				properties.put(mp.name, mp);
+    			}
+    		}
         }
-        return properties;
     }
 
     public String keyName() {
