@@ -1,7 +1,5 @@
 package play.templates;
 
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
 import groovy.lang.Binding;
 import groovy.lang.Closure;
 import groovy.lang.GroovyClassLoader;
@@ -9,13 +7,20 @@ import groovy.lang.GroovyObjectSupport;
 import groovy.lang.GroovyShell;
 import groovy.lang.MissingPropertyException;
 import groovy.lang.Script;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.codehaus.groovy.control.CompilationUnit;
 import org.codehaus.groovy.control.CompilationUnit.GroovyClassOperation;
@@ -27,6 +32,7 @@ import org.codehaus.groovy.control.messages.SyntaxErrorMessage;
 import org.codehaus.groovy.runtime.InvokerHelper;
 import org.codehaus.groovy.syntax.SyntaxException;
 import org.codehaus.groovy.tools.GroovyClass;
+
 import play.Logger;
 import play.Play;
 import play.Play.Mode;
@@ -45,12 +51,15 @@ import play.exceptions.UnexpectedException;
 import play.i18n.Lang;
 import play.i18n.Messages;
 import play.libs.Codec;
-import play.mvc.Http;
-import play.utils.Java;
 import play.mvc.ActionInvoker;
+import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Router;
 import play.utils.HTML;
+import play.utils.Java;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
 
 /**
  * A template
@@ -388,7 +397,7 @@ public class GroovyTemplate extends BaseTemplate {
             if (val != null) {
                 if (val instanceof RawData) {
                     return ((RawData) val).data;
-                } else if (!template.name.endsWith(".html") || TagContext.hasParentTag("verbatim")) {
+                } else if (!Request.current().format.equals("html") || TagContext.hasParentTag("verbatim")) {
                     return val.toString();
                 } else {
                     return HTML.htmlEscape(val.toString());
