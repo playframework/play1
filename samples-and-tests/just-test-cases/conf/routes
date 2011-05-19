@@ -33,6 +33,8 @@ PUT         /ressource/{id}                 Rest.postOrPut
 DELETE      /ressource/{id}                 Rest.delete
 OPTIONS     /ressource/{id}                 Rest.options
 
+*			/encoding/echo/{id}				Rest.echo
+
 POST        /needAuthenticity               WithAuthenticity.needAuthenticity
 GET         /needAuthenticity               WithAuthenticity.needAuthenticity
 

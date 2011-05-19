@@ -2,6 +2,8 @@ package play.libs;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
@@ -243,6 +245,75 @@ public class WS extends PlayPlugin {
         }
 
         public WSRequest(String url, String encoding) {
+
+            // WSAsync is using raw-urls in AHC => does not encode the url or the parameters.
+            // so we have to do it before sending them to AHC.
+            // Params added with setParameter() are encoded before sent to AHC.
+            // We need to pile of any params directly added to the url, and add them as parameters.
+            // This will make all params correct encoded.. (This is the same as happens inside AHC when
+            // passing AHC an url with params). This approach should work fine with all impls of WSImpl.
+
+            // does url contain query_string?
+            int i = url.indexOf('?');
+            if ( i > 0) {
+
+                try {
+                    // extract query-string-part
+                    String queryPart = url.substring(i+1);
+                    // remove query-string from url
+                    url = url.substring(0,i);
+
+                    // parse queryPart - and decode it... (it is going to be re-encoded later)
+                    for( String param : queryPart.split("&")) {
+                        String[] paramParts = param.split("=");
+                        String name;
+                        String value = null;
+                        if ( paramParts.length == 1) {
+                            // only a flag
+                            name = URLDecoder.decode(paramParts[0], encoding);
+
+                            // if param ends with "=", then we have an empty value
+                            // if not ending with "=", we have a key without a value (a flag)
+                            if (param.endsWith("=")) {
+                                value = "";
+                            }
+                        } else {
+                            name = URLDecoder.decode(paramParts[0], encoding);
+                            value = URLDecoder.decode(paramParts[1], encoding);
+                        }
+
+                        // create or add param/value
+                        Object existingParamValue = parameters.get(name);
+                        if ( existingParamValue != null) {
+                            if ( value != null ) {
+                                // must add it.
+
+                                if ( existingParamValue instanceof String[]) {
+                                    String[] oldArray = (String[])existingParamValue;
+                                    // allready got array with values.. must add one more..
+                                    String[] newArray = new String[oldArray.length+1];
+                                    int n=0;
+                                    for( String oldValue : oldArray) {
+                                        newArray[n++] = oldValue;
+                                    }
+                                    newArray[n++] = value;
+                                } else {
+                                    // existingParamValue is a string, we must replace it with array
+                                    // containing both old and new value
+                                    parameters.put( name, new String[]{(String)existingParamValue, value});
+                                }
+                            }
+                        } else {
+                            // a new param - add it
+                            parameters.put(name, value);
+                        }
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException("Error parsing query-part of url",e);
+                }
+            }
+
+
             this.url = url;
             this.encoding = encoding;
             setDefaultContentType();
