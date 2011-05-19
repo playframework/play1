@@ -664,7 +664,11 @@ public class Play {
                     if (!modulePath.exists() || !modulePath.isDirectory()) {
                         Logger.error("Module %s will not be loaded because %s does not exist", modulePath.getName(), modulePath.getAbsolutePath());
                     } else {
-                        addModule(modulePath.getName(), modulePath);
+                        final String modulePathName = modulePath.getName();
+                        final String moduleName = modulePathName.contains("-") ?
+                                modulePathName.substring(0, modulePathName.lastIndexOf("-")) :
+                                modulePathName;
+                        addModule(moduleName, modulePath);
                     }
                 }
             }
