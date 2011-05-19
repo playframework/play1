@@ -515,9 +515,11 @@ public class Play {
 
         } catch (PlayException e) {
             started = false;
+            try { Cache.stop(); } catch(Exception ignored) {}
             throw e;
         } catch (Exception e) {
             started = false;
+            try { Cache.stop(); } catch(Exception ignored) {}
             throw new UnexpectedException(e);
         }
     }
