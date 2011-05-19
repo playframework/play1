@@ -387,7 +387,7 @@ public class Router {
 
     public static ActionDefinition reverse(String action, Map<String, Object> args) {
 
-        String encoding = Http.Response.current().encoding;
+        String encoding = Http.Response.current() == null ? "utf-8" : Http.Response.current().encoding;
 
         if (action.startsWith("controllers.")) {
             action = action.substring(12);
