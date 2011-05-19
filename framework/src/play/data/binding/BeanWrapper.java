@@ -1,44 +1,84 @@
 package play.data.binding;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.util.*;
-
 import play.Logger;
 import play.classloading.enhancers.PropertiesEnhancer.PlayPropertyAccessor;
 import play.exceptions.UnexpectedException;
 import play.utils.Utils;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 /**
  * Parameters map to POJO binder.
+ * <p/>
+ * Immutable for thread safety
  */
 public abstract class BeanWrapper {
 
     final static int notwritableField = Modifier.FINAL | Modifier.NATIVE | Modifier.STATIC;
     final static int notaccessibleMethod = Modifier.NATIVE | Modifier.STATIC;
+    final static ConcurrentMap<Class<?>, BeanWrapper> beanWrapperCache = new ConcurrentHashMap<Class<?>, BeanWrapper>();
 
-    private Class<?> beanClass;
+
+    private final Class<?> beanClass;
 
     /**
-     * a cache for our properties and setters
+     * a cache for our properties and setters - really it is
+     * immutable after the constructor
      */
-    private Map<String, Property> wrappers = new HashMap<String, Property>();
 
-    BeanWrapper(Class<?> forClass) {
+    private final Map<String, Property> wrappers = new HashMap<String, Property>();
+
+    private BeanWrapper(Class<?> forClass) {
         if (Logger.isTraceEnabled()) {
             Logger.trace("Bean wrapper for class %s", forClass.getName());
         }
         this.beanClass = forClass;
     }
 
+
+    /**
+     * Generator method - uses thread-safe cache
+     *
+     * @param forClass the class to be wrapped
+     * @return the wrapper
+     */
+
     public static BeanWrapper forClass(Class<?> forClass) {
-        BeanWrapper beanWrapper = new JavaBeanWrapper(forClass);
-        for (Class<?> intf: forClass.getInterfaces()) {
+        final BeanWrapper wrapper = beanWrapperCache.get(forClass);
+        if (wrapper == null) {
+            final BeanWrapper newWrapper = BeanWrapper.generateForClass(forClass);
+            /*
+              Sometimes it create an instance, but it won't be used, as
+              somebody has generated another yet, and put it into the cache
+            */
+            final BeanWrapper cachedWrapper = beanWrapperCache.putIfAbsent(forClass, newWrapper);
+
+            return cachedWrapper == null ? newWrapper : cachedWrapper;
+            /*
+            It is not thread-safe consistent to get then use put later, putIfAbsent makes it consistent,
+            it returns always the same value.
+            */
+        }
+        return wrapper;
+    }
+
+    private static BeanWrapper generateForClass(Class<?> forClass) {
+        BeanWrapper beanWrapper = null;
+        for (Class<?> intf : forClass.getInterfaces()) {
             if ("scala.ScalaObject".equals(intf.getName())) {
                 beanWrapper = new ScalaBeanWrapper(forClass);
                 break;
             }
         }
+
+        if (beanWrapper == null) {
+            beanWrapper = new JavaBeanWrapper(forClass);
+        }
+
         beanWrapper.registerSetters(forClass);
         beanWrapper.registerFields(forClass);
         return beanWrapper;
@@ -157,13 +197,19 @@ public abstract class BeanWrapper {
         JavaBeanWrapper(Class<?> forClass) {
             super(forClass);
         }
-        @Override String getPropertyName(Method method) {
+
+        @Override
+        String getPropertyName(Method method) {
             return method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
         }
-        @Override boolean isSetter(Method method) {
+
+        @Override
+        boolean isSetter(Method method) {
             return (!method.isAnnotationPresent(PlayPropertyAccessor.class) && method.getName().startsWith("set") && method.getName().length() > 3 && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
         }
-        @Override Collection<Field> getFields(Class<?> forClass) {
+
+        @Override
+        Collection<Field> getFields(Class<?> forClass) {
             final Collection<Field> fields = new ArrayList<Field>();
             for (Field field : forClass.getFields()) {
                 if ((field.getModifiers() & notwritableField) != 0) {
@@ -179,25 +225,34 @@ public abstract class BeanWrapper {
         ScalaBeanWrapper(Class<?> forClass) {
             super(forClass);
         }
-        @Override String getPropertyName(Method method) {
+
+        @Override
+        String getPropertyName(Method method) {
             return method.getName().substring(0, method.getName().length() - 4);
         }
-        @Override boolean isSetter(Method method) {
+
+        @Override
+        boolean isSetter(Method method) {
             return (!method.isAnnotationPresent(PlayPropertyAccessor.class) && method.getName().endsWith("_$eq") && method.getParameterTypes().length == 1 && (method.getModifiers() & notaccessibleMethod) == 0);
         }
-        @Override Collection<Field> getFields(Class<?> forClass) {
+
+        @Override
+        Collection<Field> getFields(Class<?> forClass) {
             return Arrays.asList(forClass.getDeclaredFields());
         }
     }
 
+    /**
+     * Immutable property wrapper
+     */
     public static class Property {
-        private Annotation[] annotations;
-        private Method setter;
-        private Field field;
-        private Class<?> type;
-        private Type genericType;
-        private String name;
-        private String[] profiles;
+        final private Annotation[] annotations;
+        final private Method setter;
+        final private Field field;
+        final private Class<?> type;
+        final private Type genericType;
+        final private String name;
+        final private String[] profiles;
 
         Property(String propertyName, Method setterMethod) {
             name = propertyName;
@@ -205,7 +260,8 @@ public abstract class BeanWrapper {
             type = setter.getParameterTypes()[0];
             annotations = setter.getAnnotations();
             genericType = setter.getGenericParameterTypes()[0];
-            setProfiles(this.annotations);
+            field = null;
+            profiles = createProfiles(this.annotations);
         }
 
         Property(Field field) {
@@ -213,20 +269,22 @@ public abstract class BeanWrapper {
             this.field.setAccessible(true);
             name = field.getName();
             type = field.getType();
+            setter = null;
             annotations = field.getAnnotations();
             genericType = field.getGenericType();
-            setProfiles(this.annotations);
+            profiles = createProfiles(this.annotations);
         }
 
-        public void setProfiles(Annotation[] annotations) {
+        private static String[] createProfiles(Annotation[] annotations) {
             if (annotations != null) {
                 for (Annotation annotation : annotations) {
                     if (annotation.annotationType().equals(NoBinding.class)) {
                         NoBinding as = ((NoBinding) annotation);
-                        profiles = as.value();
+                        return as.value();
                     }
                 }
             }
+            return null;
         }
 
         public void setValue(Object instance, Object value) {
