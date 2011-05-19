@@ -325,10 +325,11 @@ public class Router {
 
     public static String getFullUrl(String action, Map<String, Object> args) {
         ActionDefinition actionDefinition = reverse(action, args);
+        String base =  Http.Request.current() == null ? Play.configuration.getProperty("application.baseUrl", "application.baseUrl") : Http.Request.current().getBase();
         if (actionDefinition.method.equals("WS")) {
-            return Http.Request.current().getBase().replaceFirst("https?", "ws") + actionDefinition;
+            return base.replaceFirst("https?", "ws") + actionDefinition;
         }
-        return Http.Request.current().getBase() + actionDefinition;
+        return base + actionDefinition;
     }
 
     public static String getFullUrl(String action) {
@@ -361,11 +362,13 @@ public class Router {
                         to = to.substring(0, to.length() - "/index.html".length() + 1);
                     }
                     if (absolute) {
+                        boolean isSecure = Http.Request.current() == null ? false : Http.Request.current().secure;
+                        String base =  Http.Request.current() == null ? Play.configuration.getProperty("application.baseUrl", "application.baseUrl") : Http.Request.current().getBase();
                         if (!StringUtils.isEmpty(route.host)) {
                             // Compute the host
-                            to = (Http.Request.current().secure ? "https://" : "http://") + route.host + to;
+                            to = (isSecure ? "https://" : "http://") + route.host + to;
                         } else {
-                            to = Http.Request.current().getBase() + to;
+                            to = base + to;
                         }
                     }
                     return to;
@@ -422,7 +425,7 @@ public class Router {
                             String host = route.host.replaceAll("\\{", "").replaceAll("\\}", "");
                             if (host.equals(arg.name) || host.matches(arg.name)) {
                                 args.remove(arg.name);
-                                route.host = Http.Request.current().domain;
+                                route.host = Http.Request.current() == null ? "" : Http.Request.current().domain;
                                 break;
                             } else {
                                 allRequiredArgsAreHere = false;
@@ -443,7 +446,7 @@ public class Router {
                     // les parametres codes en dur dans la route matchent-ils ?
                     for (String staticKey : route.staticArgs.keySet()) {
                         if (staticKey.equals("format")) {
-                            if (!Http.Request.current().format.equals(route.staticArgs.get("format"))) {
+                            if (!(Http.Request.current() == null ? "" : Http.Request.current().format).equals(route.staticArgs.get("format"))) {
                                 allRequiredArgsAreHere = false;
                                 break;
                             }
@@ -587,25 +590,27 @@ public class Router {
         }
 
         public void absolute() {
+            boolean isSecure = Http.Request.current() == null ? false : Http.Request.current().secure;
+            String base =  Http.Request.current() == null ? Play.configuration.getProperty("application.baseUrl", "application.baseUrl") : Http.Request.current().getBase();
             String hostPart = host;
-            String domain = Http.Request.current().get().domain;
-            int port = Http.Request.current().get().port;
+            String domain = Http.Request.current() == null ? "" : Http.Request.current().get().domain;
+            int port = Http.Request.current() == null ? 80 : Http.Request.current().get().port;
             if (port != 80 && port != 443) {
                 hostPart += ":" + port;
             }
             // ~
             if (!url.startsWith("http")) {
                 if (StringUtils.isEmpty(host)) {
-                    url = Http.Request.current().getBase() + url;
+                    url = base + url;
                 } else if (host.contains("{_}")) {
                     java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("([-_a-z0-9A-Z]+([.][-_a-z0-9A-Z]+)?)$").matcher(domain);
                     if (matcher.find()) {
-                        url = (Http.Request.current().secure ? "https://" : "http://") + hostPart.replace("{_}", matcher.group(1)) + url;
+                        url = (isSecure ? "https://" : "http://") + hostPart.replace("{_}", matcher.group(1)) + url;
                     } else {
-                        url = (Http.Request.current().secure ? "https://" : "http://") + hostPart + url;
+                        url = (isSecure ? "https://" : "http://") + hostPart + url;
                     }
                 } else {
-                    url = (Http.Request.current().secure ? "https://" : "http://") + hostPart + url;
+                    url = (isSecure ? "https://" : "http://") + hostPart + url;
                 }
                 if (method.equals("WS")) {
                     url = url.replaceFirst("https?", "ws");
