@@ -385,8 +385,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         if (Logger.isTraceEnabled()) {
             Logger.trace("copyResponse: begin");
         }
-        //response.out.flush();
-
         // Decide whether to close the connection or not.
 
         HttpResponse nettyResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.status));
@@ -516,9 +514,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Logger.trace("parseRequest: begin");
             Logger.trace("parseRequest: URI = " + nettyRequest.getUri());
         }
-        int index = nettyRequest.getUri().indexOf("?");
-        String querystring = "";
-
+        final int index = nettyRequest.getUri().indexOf("?");
         String uri = nettyRequest.getUri();
         // Remove domain and port from URI if it's present.
         if (uri.startsWith("http://") || uri.startsWith("https://")) {
@@ -531,16 +527,18 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         // need to get the encoding now - before the Http.Request is created
         String encoding = Play.defaultWebEncoding;
         if( contentType != null ) {
-            HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType( contentType );
+            HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType(contentType);
             if( contentTypeEncoding.encoding != null ) {
                 encoding = contentTypeEncoding.encoding;
             }
         }
 
+        final int i = uri.indexOf("?");
+        String querystring = "";
         String path = URLDecoder.decode(uri, encoding);
-        if (index != -1) {
-            path = URLDecoder.decode(uri.substring(0, index), encoding);
-            querystring = uri.substring(index + 1);
+        if (i != -1) {
+            path = URLDecoder.decode(uri.substring(0, i), encoding);
+            querystring = uri.substring(i + 1);
         }
 
         String remoteAddress = getRemoteIPAddress(ctx);
