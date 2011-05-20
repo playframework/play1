@@ -64,7 +64,10 @@ public class Scope {
                 return;
             }
             if (out.isEmpty()) {
-                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", "", null, "/", 0, COOKIE_SECURE);
+                // Only send "delete cookie" header when the cookie was present in the request (lighthouse ticket 838)
+                if(Http.Request.current().cookies.containsKey(COOKIE_PREFIX + "_FLASH")) {
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", "", null, "/", 0, COOKIE_SECURE);
+                }
                 return;
             }
             try {
@@ -251,8 +254,11 @@ public class Scope {
                 return;
             }
             if (isEmpty()) {
-                // The session is empty: delete the cookie
-                Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", "", null, "/", 0, COOKIE_SECURE, SESSION_HTTPONLY);
+                // Only send "delete cookie" header when the cookie was present in the request (lighthouse ticket 838)
+                if(Http.Request.current().cookies.containsKey(COOKIE_PREFIX + "_SESSION")) {
+                    // The session is empty: delete the cookie
+                    Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", "", null, "/", 0, COOKIE_SECURE, SESSION_HTTPONLY);
+                }
                 return;
             }
             try {

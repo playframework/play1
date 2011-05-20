@@ -11,18 +11,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import net.sf.oval.ConstraintViolation;
 import net.sf.oval.context.MethodParameterContext;
 import net.sf.oval.guard.Guard;
 import play.PlayPlugin;
 import play.exceptions.ActionNotFoundException;
 import play.exceptions.UnexpectedException;
-import play.utils.Java;
 import play.mvc.ActionInvoker;
 import play.mvc.Http;
 import play.mvc.Http.Cookie;
 import play.mvc.Scope;
 import play.mvc.results.Result;
+import play.utils.Java;
 
 public class ValidationPlugin extends PlayPlugin {
 
@@ -128,7 +129,10 @@ public class ValidationPlugin extends PlayPlugin {
             return;
         }
         if (Validation.errors().isEmpty()) {
-            Http.Response.current().setCookie(Scope.COOKIE_PREFIX + "_ERRORS", "", "0s");
+            // Only send "delete cookie" header when the cookie was present in the request (lighthouse ticket 838)
+            if(Http.Request.current().cookies.containsKey(Scope.COOKIE_PREFIX + "_ERRORS")) {
+                Http.Response.current().setCookie(Scope.COOKIE_PREFIX + "_ERRORS", "", "0s");
+            }
             return;
         }
         try {

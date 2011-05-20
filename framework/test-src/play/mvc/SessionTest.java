@@ -1,16 +1,20 @@
 package play.mvc;
 
-import java.lang.reflect.*;
-import java.util.HashMap;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
+import org.junit.Test;
 
 import play.Play;
-import play.libs.Crypto;
-import play.mvc.Http.*;
+import play.mvc.Http.Cookie;
+import play.mvc.Http.Request;
+import play.mvc.Http.Response;
 import play.mvc.Scope.Session;
-
-import static org.junit.Assert.*;
 
 public class SessionTest {
 
@@ -71,6 +75,8 @@ public class SessionTest {
 
         // Change nothing in the session
         session = Session.restore();
+        session.put("username", "Bob");
+        session.changed = false;
         session.save();
         assertNull(Response.current().cookies.get(Scope.COOKIE_PREFIX + "_SESSION"));
 
@@ -95,8 +101,23 @@ public class SessionTest {
 
         // Change nothing in the session
         session = Session.restore();
+        session.put("username", "Bob");
+        session.changed = false;
         session.save();
         assertNotNull(Response.current().cookies.get(Scope.COOKIE_PREFIX + "_SESSION"));
+    }
+    
+    @Test
+    public void testSendDeleteOnlyWhenCookieInRequest() {
+        Session session;
+        setSendOnlyIfChangedConstant(false);
+        mockRequestAndResponse();
+        
+        // Change nothing in the session
+        session = Session.restore();
+        session.save();
+        
+        assertNull(Response.current().cookies.get(Scope.COOKIE_PREFIX + "_SESSION"));
     }
 
     @After
