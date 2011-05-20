@@ -260,7 +260,19 @@ public class GroovyTemplate extends BaseTemplate {
             layoutArgs.remove("out");
             layoutArgs.put("_isLayout", true);
             String layoutR = layout.get().internalRender(layoutArgs);
-            return layoutR.replace("____%LAYOUT%____", writer.toString().trim());
+
+            // Must replace '____%LAYOUT%____' inside the string layoutR with the content from writer..
+            final String whatToFind = "____%LAYOUT%____";
+            final int pos = layoutR.indexOf(whatToFind);
+            if (pos >=0) {
+                // prepending and appending directly to writer/buffer to prevent us
+                // from having to duplicate the string.
+                // this makes us use half of the memory!
+                writer.getBuffer().insert(0,layoutR.substring(0,pos));
+                writer.append(layoutR.substring(pos+whatToFind.length()));
+                return writer.toString().trim();
+            }
+            return layoutR;
         }
         if (writer != null) {
             return writer.toString();
