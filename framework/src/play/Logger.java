@@ -555,10 +555,17 @@ public class Logger {
                 sw.append(format(message, args));
             }
 
-            if (forceJuli || log4j == null) {
-                juli.log(toJuliLevel(level.toString()), sw.toString(), e);
-            } else {
-                log4j.log(level, sw.toString(), e);
+            try {
+              if (forceJuli || log4j == null) {
+                  juli.log(toJuliLevel(level.toString()), sw.toString(), e);
+              } else if (recordCaller) {
+                org.apache.log4j.Logger.getLogger(getCallerClassName(5)).log(level, sw.toString(), null);
+              } else {
+                log4j.log(level, sw.toString(), null);
+              }
+            }
+            catch (Exception e1) {
+              log4j.error("Oops. Error in Logger !", e1);
             }
             return true;
         }
@@ -602,6 +609,13 @@ public class Logger {
      */
     static String getCallerClassName() {
         final int level = 4;
+        return getCallerClassName(level);
+    }
+    
+    /**
+     * @return the className of the class actually logging the message
+     */
+    static String getCallerClassName(final int level) {
         CallInfo ci = getCallerInformations(level);
         return ci.className;
     }
