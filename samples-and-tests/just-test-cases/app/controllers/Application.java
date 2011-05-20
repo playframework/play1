@@ -271,8 +271,4 @@ public class Application extends Controller {
         }
         render(users);
     }
-    
-    public static void renderingWithSetTag() {
-        render();
-    }
 }

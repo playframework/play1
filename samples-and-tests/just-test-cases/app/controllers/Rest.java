@@ -103,4 +103,16 @@ public class Rest extends Controller {
 	    renderText("param: " + param);
 	}
 	
+	public static void echo(String id) {
+        String r = id;
+
+        for ( String key : params.all().keySet()) {
+            String[] values = params.all().get(key);
+            for( String v : values) {
+                r += "|" + key + "|" + v; 
+            }
+        }
+        renderText(r);
+    }
+	
 }

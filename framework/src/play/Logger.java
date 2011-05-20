@@ -551,6 +551,8 @@ public class Logger {
                     errorOut.println(playException.getErrorTitle());
                 }
                 errorOut.println(playException.getErrorDescription().replaceAll("</?\\w+/?>", "").replace("\n", " "));
+            } else {
+                sw.append(format(message, args));
             }
 
             if (forceJuli || log4j == null) {
