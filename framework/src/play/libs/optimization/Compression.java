@@ -82,4 +82,37 @@ public class Compression
 
         return stringOutputStream;
     }
+
+    /**
+     * GZIP the "input" file and save to "output".
+     *
+     * @param source
+     * @param destination Will be overwritten if it already exists.
+     * @return If successful or not.
+     */
+    public static void gzip(final File source, final File destination)
+    {
+        try
+        {
+            destination.delete();
+            destination.createNewFile();
+
+            final InputStream in = new FileInputStream(source);
+            final OutputStream out = new GZIPOutputStream(new FileOutputStream(destination));
+
+            final byte[] buf = new byte[5000];
+            int len;
+            while ((len = in.read(buf)) > 0)
+            {
+                out.write(buf, 0, len);
+            }
+
+            in.close();
+            out.close();
+        }
+        catch (final IOException ex)
+        {
+            throw new RuntimeException(ex);
+        }
+    }
 }
