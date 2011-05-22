@@ -8,6 +8,8 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 
 import com.thoughtworks.xstream.XStream;
+import java.io.ByteArrayOutputStream;
+import play.libs.optimization.Compression;
 
 /**
  * 200 OK with a text/xml
@@ -34,8 +36,20 @@ public class RenderXml extends Result {
 
     public void apply(Request request, Response response) {
         try {
+            if (Boolean.parseBoolean(play.Play.configuration.getProperty("optimization.compressXML"))) {
+                xml = Compression.compressXML(xml);
+            }
+
             setContentTypeIfNotSet(response, "text/xml");
-            response.out.write(xml.getBytes(getEncoding()));
+
+            if (gzipIsSupported(request)) {
+                final ByteArrayOutputStream gzip = Compression.gzip(xml);
+                response.setHeader("Content-Encoding", "gzip");
+                response.setHeader("Content-Length", gzip.size() + "");
+                response.out = gzip;
+            } else {
+                response.out.write(xml.getBytes(getEncoding()));
+            }
         } catch(Exception e) {
             throw new UnexpectedException(e);
         }

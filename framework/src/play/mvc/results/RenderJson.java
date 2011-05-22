@@ -3,11 +3,13 @@ package play.mvc.results;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSerializer;
+import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.exceptions.UnexpectedException;
+import play.libs.optimization.Compression;
 
 /**
  * 200 OK with application/json
@@ -41,7 +43,15 @@ public class RenderJson extends Result {
         try {
             String encoding = getEncoding();
             setContentTypeIfNotSet(response, "application/json; charset="+encoding);
-            response.out.write(json.getBytes(encoding));
+
+            if (gzipIsSupported(request)) {
+                final ByteArrayOutputStream gzip = Compression.gzip(json);
+                response.setHeader("Content-Encoding", "gzip");
+                response.setHeader("Content-Length", gzip.size() + "");
+                response.out = gzip;
+            } else {
+                response.out.write(json.getBytes(getEncoding()));
+            }
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
