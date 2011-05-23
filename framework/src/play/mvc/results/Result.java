@@ -29,4 +29,14 @@ public abstract class Result extends FastRuntimeException {
         return Http.Response.current().encoding;
     }
 
+    /**
+     * @return Whether the request browser supports GZIP encoding and config option "optimization.gzip" is true.
+     */
+    protected boolean gzipIsSupported(final Http.Request request)
+    {
+        final Http.Header encodingHeader = request.headers.get("accept-encoding"); // key must be lower-case.
+        return (encodingHeader != null
+            && encodingHeader.value().contains("gzip")
+            && Boolean.parseBoolean(play.Play.configuration.getProperty("optimization.gzip")));
+    }
 }
