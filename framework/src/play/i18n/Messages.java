@@ -132,7 +132,7 @@ public class Messages {
     private static SafeFormatter safeFormatter = new SafeFormatter() {
         @Override
         public String appendArgument(String format, Object arg) {
-            String val = formatString(format, false, arg);
+            String val = String.format(format, coolStuff(format, new Object[]{arg}));
 
             // Determine if escaping is necessary
             if (!(arg instanceof RawData) && Request.current().format.equals("html") &&
@@ -145,7 +145,7 @@ public class Messages {
 
         @Override
         public String append(String value) {
-            return recurse(value);
+            return value;
         }
     };
 
@@ -167,7 +167,7 @@ public class Messages {
         if(!safe || args == null || args.length == 0) {
             return recurse(String.format(value, coolStuff(value, args)));
         } else {
-            return safeFormatter.format(value, args);
+            return recurse(safeFormatter.format(value, args));
         }
     }
 
