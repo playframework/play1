@@ -263,12 +263,18 @@ public class Application extends Controller {
     public static void selectTag(){
         List<User> users = new ArrayList<User>(10);
         User user;
+        
+        // Check html escaping
+        user = new User("<All>");
+        users.add(user);
+        
         for(long i = 0; i < 10; i++) {
         	user = new User("User-" + i);
         	user.k = i;
         	user.i = (int) i;
         	users.add(user);
         }
+        
         render(users);
     }
 }
