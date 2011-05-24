@@ -2,6 +2,7 @@ import sys
 import os
 import getopt
 import shutil
+from datetime import datetime
 
 import play.commands.precompile
 from play.utils import *
@@ -24,9 +25,18 @@ def execute(**kargs):
     war_exclusion_list = []
     try:
         optlist, args = getopt.getopt(args, 'o:', ['output=', 'zip','exclude='])
+        version = app.readConf('application.version')
+        if not version:
+            version = datetime.now().strftime("%Y%d%d%I%M%S")
         for o, a in optlist:
             if o in ('-o', '--output'):
-                war_path = os.path.normpath(os.path.abspath(a))
+                war_path = os.path.normpath(os.path.abspath(a.format(version)))
+        if not war_path:
+            war_path = app.readConf('application.name')
+            if version:
+                war_path = "%s-%s" % (war_path, version)
+            war_path = os.path.normpath(os.path.abspath(war_path))
+        print "~ Using '%s' to generate the WAR" % war_path
         for o, a in optlist:
             if o in ('--zip'):
                 war_zip_path = war_path + '.war'
