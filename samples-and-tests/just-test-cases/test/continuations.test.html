@@ -86,4 +86,17 @@
     open('@{WithContinuations.renderTemplateWithVariablesAssignedBeforeAwait()}')
     assertTextPresent('1-A-B-C-D-E')
 
+	open('/useAwaitViaOtherClass')
+    assertTextPresent('failCount: 2')
+
+	open('@{WithContinuations.useAwaitInWebSocketControllerWithContinuations()}')
+    assertTextPresent('ok')
+
+	open('@{WithContinuations.useAwaitInWebSocketControllerWithoutContinuations()}')
+    assertTextPresent('failCount: 1')
+
+
+
+
+
 #{/selenium}

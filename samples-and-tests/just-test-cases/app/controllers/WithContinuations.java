@@ -14,12 +14,22 @@ import models.*;
 
 import play.jobs.*;
 
+import play.exceptions.*;
+
 public class WithContinuations extends Controller {
     
     @Before
     static void intercept() {
         // just to check
         Logger.info("Before continuation");
+    }
+    
+    protected static void doAwait() {
+        await(100);
+    }
+    
+    protected static void doAwait2() {
+        String s = await(new jobs.DoSomething(100).now());
     }
 
     public static void loopWithWait() {
@@ -260,6 +270,68 @@ public class WithContinuations extends Controller {
         
         render(n,a,b,c,d,e);
     }
+    
+    // This class does not use await() directly and therefor is not enhanched for Continuations
+    public static class ControllerWithoutContinuations extends Controller{
+        
+        public static void useAwaitViaOtherClass() {
+            int failCount = 0;
+            try {
+                WithContinuations.doAwait();
+            } catch (ContinuationsException e) {
+                failCount++;
+            }
+            
+            try {
+                WithContinuations.doAwait2();
+            } catch (ContinuationsException e) {
+                failCount++;
+            }
+            
+            renderText("failCount: " + failCount);
+        }
+    }
+    
+    
+    // I don't know how to test WebSocketController directly so since we only are testing that the await stuff
+    // is working, we'll just call it via this regular controller - only testing that the enhancing is working ok.
+    public static void useAwaitInWebSocketControllerWithContinuations() {
+        WebSocketControllerWithContinuations.useAwait();
+        renderText("ok");
+    }
+    
+    // This is a WebSocketController, but since I'm not sre how to test a WebSocket,
+    // I'll just call a protected static method in it doing continuations.
+    // I'm doing this just to make sure that the enhancing is working for WebSocketControllers as well
+    public static class WebSocketControllerWithContinuations extends WebSocketController {
+        
+        protected static void useAwait() {
+            await(100);
+        }
+    }
+    
+    // I don't know how to test WebSocketController directly so since we only are testing that the await stuff
+    // is working, we'll just call it via this regular controller - only testing that the enhancing is working ok.
+    public static void useAwaitInWebSocketControllerWithoutContinuations() {
+        renderText( WebSocketControllerWithoutContinuations.useAwaitViaOtherClass() );
+    }
+
+
+    public static class WebSocketControllerWithoutContinuations extends WebSocketController {
+        
+        protected static String useAwaitViaOtherClass() {
+            int failCount = 0;
+            try {
+                WithContinuations.doAwait();
+            } catch (ContinuationsException e) {
+                failCount++;
+            }
+            
+            return "failCount: " + failCount;
+        }
+    }
+    
+    
     
 }
 
