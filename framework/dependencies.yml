@@ -12,7 +12,7 @@ require:    &allDependencies
     - cglib -> cglib-nodep 2.2
     - com.google.code.gson -> gson 1.7.1
     - com.jamonapi -> jamon 2.7
-    - com.ning -> async-http-client 1.6.1
+    - com.ning -> async-http-client 1.6.3
     - commons-beanutils 1.8.3  
     - commons-codec 1.4
     - commons-collections 3.2.1
