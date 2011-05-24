@@ -67,6 +67,7 @@ public class Secure extends Controller {
             flash.keep("url");
             flash.error("secure.error");
             params.flash();
+            Security.invoke("onAuthenticationFailed");
             login();
         }
         // Mark user as connected
@@ -179,6 +180,13 @@ public class Secure extends Controller {
          */
         static void onCheckFailed(String profile) {
             forbidden();
+        }
+
+        /**
+         * This method is called if an authentication does not succeed.
+         * You need to override this method if you wish to perform specific actions (eg. Record the number of incorrect login attempts)
+         */
+        static void onAuthenticationFailed() {
         }
 
         private static Object invoke(String m, Object... args) throws Throwable {
