@@ -17,6 +17,8 @@ import org.w3c.dom.Document;
 import play.Invoker.Suspend;
 import play.Logger;
 import play.Play;
+import play.classloading.ApplicationClasses;
+import play.classloading.enhancers.ContinuationEnhancer;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer;
@@ -24,10 +26,7 @@ import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNam
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesSupport;
 import play.data.binding.Unbinder;
 import play.data.validation.Validation;
-import play.exceptions.NoRouteFoundException;
-import play.exceptions.PlayException;
-import play.exceptions.TemplateNotFoundException;
-import play.exceptions.UnexpectedException;
+import play.exceptions.*;
 import play.libs.Time;
 import play.mvc.Http.Request;
 import play.mvc.Router.ActionDefinition;
@@ -59,6 +58,8 @@ import java.lang.reflect.Type;
 import org.apache.commons.javaflow.Continuation;
 import org.apache.commons.javaflow.bytecode.StackRecorder;
 import play.libs.F;
+
+import javax.management.RuntimeErrorException;
 
 /**
  * Application controller support: The controller receives input and initiates a response by making calls on model objects.
@@ -899,6 +900,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     protected static void await(int millis) {
         Request.current().isNew = false;
+        verifyContinuationsEnhancement();
         storeOrRestoreDataStateForContinuations(null);
         Continuation.suspend(millis);
     }
@@ -986,9 +988,49 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
             }
         } else {
             Request.current().isNew = false;
+            verifyContinuationsEnhancement();
             storeOrRestoreDataStateForContinuations( false );
             Continuation.suspend(future);
             return null;
+        }
+    }
+
+    /**
+     * Verifies that all application-code is properly enhanched.
+     * "application code" is the code on the callstack after leaving actionInvoke into the app, and before reentering Controller.await
+     */
+    private static void verifyContinuationsEnhancement() {
+        // only check in dev mode..
+        if (Play.mode == Play.Mode.PROD) {
+            return;
+        }
+        
+        try {
+            throw new Exception();
+        } catch (Exception e) {
+            boolean haveSeenFirstApplicationClass = false;
+            for (StackTraceElement ste : e.getStackTrace() ) {
+                String className = ste.getClassName();
+
+                if (!haveSeenFirstApplicationClass) {
+                    haveSeenFirstApplicationClass = Play.classes.getApplicationClass(className) != null;
+                    // when haveSeenFirstApplicationClass is set to true, we are entering the user application code..
+                }
+
+                if (haveSeenFirstApplicationClass) {
+                    if (className.startsWith("sun.") || className.startsWith("play.")) {
+                        // we're back into the play framework code...
+                        return ; // done checking
+                    } else {
+                        // is this class enhanched?
+                        boolean enhanced = ContinuationEnhancer.isEnhanced(className);
+                        if (!enhanced) {
+                            throw new ContinuationsException("Cannot use await/continuations when not all application classes on the callstack are properly enhanced. The following class is not enhanced: " + className);
+                        }
+                    }
+                }
+            }
+
         }
     }
 

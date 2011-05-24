@@ -65,3 +65,6 @@ GET     /databinding/showList/{<.*>mailboxes}/?             DataBinding.showList
 GET     /databinding/showCalendar/{cal}/?               DataBinding.showCalendar
 GET     /databinding/showCalendar2/{cal}/?               DataBinding.showCalendar2
 GET     /databinding/changeLanguage/{lang}/?                DataBinding.changeLanguage
+
+
+GET		/useAwaitViaOtherClass				WithContinuations.ControllerWithoutContinuations.useAwaitViaOtherClass
