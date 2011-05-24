@@ -16,6 +16,7 @@ public class PlayDocumentation extends Controller {
         page("home", null);
     }
     
+    @SuppressWarnings("unchecked")
     public static void page(String id, String module) throws Exception {
         File page = new File(Play.frameworkPath, "documentation/manual/"+id+".textile");
         if(module != null) {
@@ -46,6 +47,7 @@ public class PlayDocumentation extends Controller {
         render(id, html, title, modules, apis, module);
     }
     
+    @SuppressWarnings("unchecked")
     public static void cheatSheet(String category) {
         File[] sheetFiles = CheatSheetHelper.getSheets(category);
         if(sheetFiles != null) {
