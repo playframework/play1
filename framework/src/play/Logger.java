@@ -561,7 +561,7 @@ public class Logger {
               } else if (recordCaller) {
                 org.apache.log4j.Logger.getLogger(getCallerClassName(5)).log(level, sw.toString(), null);
               } else {
-                log4j.log(level, sw.toString(), null);
+                log4j.log(level, sw.toString(), e);
               }
             }
             catch (Exception e1) {
