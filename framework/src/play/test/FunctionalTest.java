@@ -295,6 +295,18 @@ public abstract class FunctionalTest extends BaseTest {
     public static Response makeRequest(final Request request) {
         Response response = newResponse();
         makeRequest(request, response);
+
+        if (response.status == 302) { // redirect
+            // if Location-header is pressent, fix it to "look like" a functional-test-url
+            Http.Header locationHeader = response.headers.get("Location");
+            if (locationHeader != null) {
+                String locationUrl = locationHeader.value();
+                if (locationUrl.startsWith("http://localhost/")) {
+                    locationHeader.values.clear();
+                    locationHeader.values.add( locationUrl.substring(16));//skip 'http://localhost'
+                }
+            }
+        }
         return response;
     }
 
