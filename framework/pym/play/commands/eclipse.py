@@ -62,6 +62,12 @@ def execute(**kargs):
         if os.path.basename(el) != "conf" and el.endswith('-sources.jar'):
             cpJarToSource[el.replace('-sources', '')] = el
 
+    javadocLocation = {}
+    for el in classpath:
+        urlFile = el.replace(r'.jar','.docurl')
+        if os.path.basename(el) != "conf" and os.path.exists(urlFile):
+            javadocLocation[el] = urlFile
+
     cpXML = ""
     for el in classpath:
         if os.path.basename(el) != "conf":
@@ -71,7 +77,16 @@ def execute(**kargs):
                 if cpJarToSource.has_key(el):
                     cpXML += '<classpathentry kind="lib" path="%s" sourcepath="%s"/>\n\t' % (os.path.normpath(el), cpJarToSource[el])
                 else:
-                    cpXML += '<classpathentry kind="lib" path="%s"/>\n\t' % os.path.normpath(el)
+                    if javadocLocation.has_key(el):
+                        cpXML += '<classpathentry kind="lib" path="%s">\n\t\t' % os.path.normpath(el)
+                        cpXML += '<attributes>\n\t\t\t'
+                        f = file(javadocLocation[el])
+                        url = f.readline()
+                        cpXML += '<attribute name="javadoc_location" value="%s"/>\n\t\t' % (url.strip())
+                        cpXML += '</attributes>\n\t'
+                        cpXML += '</classpathentry>\n\t'
+                    else:
+                        cpXML += '<classpathentry kind="lib" path="%s"/>\n\t' % os.path.normpath(el)
     if not is_application:
         cpXML += '<classpathentry kind="src" path="src"/>'
     replaceAll(dotClasspath, r'%PROJECTCLASSPATH%', cpXML)
