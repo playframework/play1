@@ -414,7 +414,12 @@ public class GroovyTemplate extends BaseTemplate {
             if (val.length == 1) {
                 return Messages.get(val[0]);
             } else {
-                return Messages.get(val[0], Arrays.copyOfRange(val,1,val.length));
+                // extract args from val
+                Object[] args = new Object[val.length-1];
+                for( int i=1;i<val.length;i++) {
+                    args[i-1] = val[i];
+                }
+                return Messages.get(val[0], args);
             }
         }
 
