@@ -19,6 +19,12 @@ public class ApplicationTest extends FunctionalTest {
         Response response = GET("/application/simplestatuscode");
         assertStatus(204, response);
     }
+    
+    @Test
+    public void testFastTag_render() {
+        Response response = GET("/application/fastTag_render_test");
+        assertContentEquals("OuterInnerRenderPart", response);
+    }
 
 }
 
