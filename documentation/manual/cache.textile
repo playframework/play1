@@ -72,6 +72,8 @@ bc. if(!Cache.safeDelete("product_" + id)) {
 
 Note that those being blocking calls, **safe** methods will slow down your application. So use them only when needed.
 
+Also note that when specifying expiration == "0s" (zero seconds) the actual expiration-time may vary between different cache implementations.
+
 h2. <a name="session">Don’t use the Session as a cache!</a>
 
 If you come from a framework that uses an in-memory Session implementation, you may be frustrated to see that Play allows only a small set of String data to be saved in the HTTP Session. But this is much better because a session is not the place to cache your application data! 

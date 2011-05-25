@@ -33,6 +33,8 @@ PUT         /ressource/{id}                 Rest.postOrPut
 DELETE      /ressource/{id}                 Rest.delete
 OPTIONS     /ressource/{id}                 Rest.options
 
+*			/encoding/echo/{id}				Rest.echo
+
 POST        /needAuthenticity               WithAuthenticity.needAuthenticity
 GET         /needAuthenticity               WithAuthenticity.needAuthenticity
 
@@ -62,3 +64,6 @@ GET     /databinding/showList/{<.*>mailboxes}/?             DataBinding.showList
 GET     /databinding/showCalendar/{cal}/?               DataBinding.showCalendar
 GET     /databinding/showCalendar2/{cal}/?               DataBinding.showCalendar2
 GET     /databinding/changeLanguage/{lang}/?                DataBinding.changeLanguage
+
+
+GET		/useAwaitViaOtherClass				WithContinuations.ControllerWithoutContinuations.useAwaitViaOtherClass

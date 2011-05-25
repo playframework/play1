@@ -1,31 +1,7 @@
 package play.server;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -36,27 +12,23 @@ import org.jboss.netty.handler.codec.http.websocket.WebSocketFrame;
 import org.jboss.netty.handler.codec.http.websocket.WebSocketFrameDecoder;
 import org.jboss.netty.handler.codec.http.websocket.WebSocketFrameEncoder;
 import org.jboss.netty.handler.stream.ChunkedFile;
-import org.jboss.netty.handler.stream.ChunkedStream;
 import org.jboss.netty.handler.stream.ChunkedInput;
+import org.jboss.netty.handler.stream.ChunkedStream;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
-
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
-import static org.jboss.netty.buffer.ChannelBuffers.*;
-
 import play.Invoker;
 import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
+import play.data.validation.Validation;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.i18n.Messages;
+import play.libs.F.Action;
+import play.libs.F.Promise;
 import play.libs.MimeTypes;
-import play.mvc.ActionInvoker;
-import play.mvc.Http;
+import play.mvc.*;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
-import play.mvc.Router;
-import play.mvc.Scope;
 import play.mvc.results.NotFound;
 import play.mvc.results.RenderStatic;
 import play.templates.JavaExtensions;
@@ -64,10 +36,20 @@ import play.templates.TemplateLoader;
 import play.utils.HTTP;
 import play.utils.Utils;
 import play.vfs.VirtualFile;
-import play.data.validation.Validation;
-import play.libs.F.Action;
-import play.libs.F.Promise;
-import play.mvc.WebSocketInvoker;
+
+import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import static org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
 
 public class PlayHandler extends SimpleChannelUpstreamHandler {
 
@@ -149,6 +131,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Logger.trace("messageReceived: end");
         }
     }
+
     private static final Map<String, RenderStatic> staticPathsCache = new HashMap<String, RenderStatic>();
 
     public class NettyInvocation extends Invoker.Invocation {
@@ -385,7 +368,6 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         if (Logger.isTraceEnabled()) {
             Logger.trace("copyResponse: begin");
         }
-        //response.out.flush();
 
         // Decide whether to close the connection or not.
 
@@ -395,9 +377,9 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         }
 
         if (response.contentType != null) {
-            nettyResponse.setHeader(CONTENT_TYPE, response.contentType + (response.contentType.startsWith("text/") && !response.contentType.contains("charset") ? "; charset="+response.encoding : ""));
+            nettyResponse.setHeader(CONTENT_TYPE, response.contentType + (response.contentType.startsWith("text/") && !response.contentType.contains("charset") ? "; charset=" + response.encoding : ""));
         } else {
-            nettyResponse.setHeader(CONTENT_TYPE, "text/plain; charset="+response.encoding);
+            nettyResponse.setHeader(CONTENT_TYPE, "text/plain; charset=" + response.encoding);
         }
 
         addToResponse(response, nettyResponse);
@@ -516,9 +498,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             Logger.trace("parseRequest: begin");
             Logger.trace("parseRequest: URI = " + nettyRequest.getUri());
         }
-        int index = nettyRequest.getUri().indexOf("?");
-        String querystring = "";
-
+        final int index = nettyRequest.getUri().indexOf("?");
         String uri = nettyRequest.getUri();
         // Remove domain and port from URI if it's present.
         if (uri.startsWith("http://") || uri.startsWith("https://")) {
@@ -530,17 +510,19 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         // need to get the encoding now - before the Http.Request is created
         String encoding = Play.defaultWebEncoding;
-        if( contentType != null ) {
-            HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType( contentType );
-            if( contentTypeEncoding.encoding != null ) {
+        if (contentType != null) {
+            HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType(contentType);
+            if (contentTypeEncoding.encoding != null) {
                 encoding = contentTypeEncoding.encoding;
             }
         }
 
+        final int i = uri.indexOf("?");
+        String querystring = "";
         String path = URLDecoder.decode(uri, encoding);
-        if (index != -1) {
-            path = URLDecoder.decode(uri.substring(0, index), encoding);
-            querystring = uri.substring(index + 1);
+        if (i != -1) {
+            path = URLDecoder.decode(uri.substring(0, i), encoding);
+            querystring = uri.substring(i + 1);
         }
 
         String remoteAddress = getRemoteIPAddress(ctx);
@@ -573,7 +555,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
         boolean isLoopback = false;
         try {
             isLoopback = ((InetSocketAddress) ctx.getChannel().getRemoteAddress()).getAddress().isLoopbackAddress() && host.matches("^127\\.0\\.0\\.1:?[0-9]*$");
-        } catch(Exception e) {
+        } catch (Exception e) {
             // ignore it
         }
 
@@ -684,7 +666,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
 
         String errorHtml = TemplateLoader.load("errors/404." + format).render(binding);
         try {
-            ChannelBuffer buf = ChannelBuffers.copiedBuffer(errorHtml.getBytes( Response.current().encoding));
+            ChannelBuffer buf = ChannelBuffers.copiedBuffer(errorHtml.getBytes(Response.current().encoding));
             setContentLength(nettyResponse, errorHtml.length());
             nettyResponse.setContent(buf);
             ChannelFuture writeFuture = ctx.getChannel().write(nettyResponse);
@@ -989,6 +971,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
     public static void setContentLength(HttpMessage message, long contentLength) {
         message.setHeader(HttpHeaders.Names.CONTENT_LENGTH, String.valueOf(contentLength));
     }
+
     // ~~~~~~~~~~~ Chunked response
     final ChunkedWriteHandler chunkedWriteHandler = new ChunkedWriteHandler();
 
@@ -1050,6 +1033,7 @@ public class PlayHandler extends SimpleChannelUpstreamHandler {
             throw new UnexpectedException(e);
         }
     }
+
     // ~~~~~~~~~~~ Websocket
     final static Map<ChannelHandlerContext, Http.Inbound> channels = new ConcurrentHashMap<ChannelHandlerContext, Http.Inbound>();
 

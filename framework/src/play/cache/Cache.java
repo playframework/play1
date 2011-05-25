@@ -10,7 +10,9 @@ import play.exceptions.CacheException;
 import play.libs.Time;
 
 /**
- * The Cache. Mainly an interface to memcached.
+ * The Cache. Mainly an interface to memcached or EhCache.
+ *
+ * Note: When specifying expiration == "0s" (zero seconds) the actual expiration-time may vary between different cache implementations
  */
 public abstract class Cache {
 

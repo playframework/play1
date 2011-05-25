@@ -13,6 +13,11 @@ public class Users extends Controller {
         render();
     }
     
+    public static void redirectToIndex() {
+        // just redirect to index
+        index();
+    }
+    
     public static void list() {
         List users = User.findAll();
         renderText(users.size());

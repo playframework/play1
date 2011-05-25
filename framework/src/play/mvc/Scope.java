@@ -405,7 +405,7 @@ public class Scope {
         public <T> T get(String key, Class<T> type) {
             try {
                 // TODO: This is used by the test, but this is not the most convenient.
-                return (T) Binder.directBind(key, null, get(key), type);
+                return (T) Binder.bind(key, type, type, null, data);
             } catch (Exception e) {
                 Validation.addError(key, "validation.invalid");
                 return null;
