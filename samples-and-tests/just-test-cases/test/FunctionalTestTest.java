@@ -70,5 +70,22 @@ public class FunctionalTestTest extends FunctionalTest {
         
     }
     
+    @Test
+    public void usingRedirection() {
+        Response response = GET("/users/redirectToIndex");
+        assertStatus( 302, response);
+        String location = response.headers.get("Location").value();
+        
+        response = GET( location );
+        assertIsOk(response);
+        
+        response = POST("/users/redirectToIndex");
+        assertStatus( 302, response);
+        location = response.headers.get("Location").value();
+        
+        response = POST( location );
+        assertIsOk(response);
+    }
+    
 }
 
