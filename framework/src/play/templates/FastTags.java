@@ -365,7 +365,8 @@ public class FastTags {
             Map<String, Object> newArgs = new HashMap<String, Object>();
             newArgs.putAll((Map<? extends String, ? extends Object>) args);
             newArgs.put("_isInclude", true);
-            out.println(t.internalRender(newArgs));
+            newArgs.put("out", out);
+            t.internalRender(newArgs);
         } catch (TemplateNotFoundException e) {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
         }
