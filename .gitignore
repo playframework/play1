@@ -131,3 +131,4 @@ samples-and-tests/zencontact/precompiled
 !modules/testrunner
 !framework/src/play/db
 .idea
+*~
