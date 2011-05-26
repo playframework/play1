@@ -267,6 +267,7 @@ public class WSAsync implements WSImpl {
                         .setScheme(authScheme)
                         .setPrincipal(this.username)
                         .setPassword(this.password)
+                        .setUsePreemptiveAuth(true)
                         .build()
                 );
             }
