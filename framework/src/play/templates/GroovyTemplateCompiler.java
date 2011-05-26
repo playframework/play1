@@ -21,6 +21,11 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
 
     public static List<String> extensionsClassnames = new ArrayList<String>();
 
+    // [#714] The groovy-compiler complaints if a line is more than 65535 unicode units long..
+    // Have to split it if it is really that big
+    protected static final int maxPlainTextLength = 60000;
+
+
     @Override
     public BaseTemplate compile(BaseTemplate template) {
         try {
@@ -154,20 +159,26 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
 
         // [#714] The groovy-compiler complaints if a line is more than 65535 unicode units long..
         // Have to split it if it is really that big
-        final int maxLength = 60000;
-        if (text.length() <maxLength) {
+        if (text.length() <maxPlainTextLength) {
             // text is "short" - just print it
             println("out.print(\""+text+"\");");
         } else {
             // text is long - must split it
             int offset = 0;
             do {
-                int endPos = offset+maxLength;
+                int endPos = offset+maxPlainTextLength;
                 if (endPos>text.length()) {
                     endPos = text.length();
+                } else {
+                    // #869 If the last char (at endPos-1) is \, we're dealing with escaped char - must include the next one also..
+                    if ( text.charAt(endPos-1) == '\\') {
+                        // use one more char so the escaping is not broken. Don't have to check length, since
+                        // all '\' is used in escaping, ref replaceAll above..
+                        endPos++;
+                    }
                 }
                 println("out.print(\""+text.substring(offset, endPos)+"\");");
-                offset+=maxLength;
+                offset+= (endPos - offset);
             }while(offset < text.length());
         }
     }
