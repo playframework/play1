@@ -899,19 +899,33 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     protected static void await(int millis) {
         Request.current().isNew = false;
-        storeOrRestoreLocalVariableNamesState();
+        storeOrRestoreDataStateForContinuations();
         Continuation.suspend(millis);
     }
 
-    private static void storeOrRestoreLocalVariableNamesState() {
-        Stack<Map<String, Object>> localVariablesState = (Stack<Map<String, Object>>) Http.Request.current().args.remove(ActionInvoker.LV);
+    private static void storeOrRestoreDataStateForContinuations() {
+
+        // localVariablesState
+        Stack<Map<String, Object>> localVariablesState = (Stack<Map<String, Object>>) Http.Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES);
         if (localVariablesState!=null) {
             //we are restoring localVariableNames after suspend
             LocalvariablesNamesEnhancer.LocalVariablesNamesTracer.setLocalVariablesStateAfterAwait(localVariablesState);
         } else {
             // we are capturing localVariableNames before suspend
-            Request.current().args.put(ActionInvoker.LV, LocalVariablesNamesTracer.getLocalVariablesStateBeforeAwait());
+            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES, LocalVariablesNamesTracer.getLocalVariablesStateBeforeAwait());
         }
+
+        //renderArgs
+        Scope.RenderArgs renderArgs = (Scope.RenderArgs) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS);
+        if ( renderArgs!=null ) {
+            //we are restoring after suspend
+            Scope.RenderArgs.current.set( renderArgs);
+        } else {
+            // we are capturing before suspend
+            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS, Scope.RenderArgs.current());
+        }
+
+
     }
 
     protected static void await(int millis, F.Action0 callback) {
@@ -922,7 +936,7 @@ public class Controller implements ControllerSupport, LocalVariablesSupport {
 
     @SuppressWarnings("unchecked")
     protected static <T> T await(Future<T> future) {
-        storeOrRestoreLocalVariableNamesState();
+        storeOrRestoreDataStateForContinuations();
         if(future != null) {
             Request.current().args.put(ActionInvoker.F, future);
         } else if(Request.current().args.containsKey(ActionInvoker.F)) {

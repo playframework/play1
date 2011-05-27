@@ -86,4 +86,8 @@
     open('@{WithContinuations.renderTemplateWithVariablesAssignedBeforeAwait()}')
     assertTextPresent('1-A-B-C-D-E')
 
+    open('@{WithContinuations.usingRenderArgsAndAwait()}')
+    assertBodyText('true')
+
+
 #{/selenium}

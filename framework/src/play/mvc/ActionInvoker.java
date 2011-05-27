@@ -504,7 +504,8 @@ public class ActionInvoker {
     static final String C = "__continuation";
     static final String A = "__callback";
     static final String F = "__future";
-    static final String LV = "__localVariableNames";
+    static final String CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES = "__CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES";
+    static final String CONTINUATIONS_STORE_RENDER_ARGS = "__CONTINUATIONS_STORE_RENDER_ARGS";
 
     static Object invokeWithContinuation(Method method, Object instance, Object[] realArgs) throws Exception {
         // Callback case
