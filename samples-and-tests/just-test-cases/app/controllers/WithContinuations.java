@@ -332,6 +332,18 @@ public class WithContinuations extends Controller {
     }
     
     
+    public static void usingRenderArgsAndAwait() {
+        renderArgs.put("a", "1");
+        int size = Scope.RenderArgs.current().data.size();
+        await(10);
+        renderArgs.put("b", "2");
+        size++;
+        
+        
+        boolean res = "1".equals(renderArgs.get("a")) && "2".equals(renderArgs.get("b")) && size == Scope.RenderArgs.current().data.size();
+        
+        renderText( res );
+    }
     
 }
 

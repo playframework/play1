@@ -895,7 +895,23 @@ public class Controller implements ControllerSupport {
     protected static void await(int millis) {
         Request.current().isNew = false;
         verifyContinuationsEnhancement();
+        storeOrRestoreDataStateForContinuations();
         Continuation.suspend(millis);
+    }
+
+    private static void storeOrRestoreDataStateForContinuations() {
+
+        //renderArgs
+        Scope.RenderArgs renderArgs = (Scope.RenderArgs) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS);
+        if ( renderArgs!=null ) {
+            //we are restoring after suspend
+            Scope.RenderArgs.current.set( renderArgs);
+        } else {
+            // we are capturing before suspend
+            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS, Scope.RenderArgs.current());
+        }
+
+
     }
 
     protected static void await(int millis, F.Action0 callback) {
@@ -906,6 +922,7 @@ public class Controller implements ControllerSupport {
 
     @SuppressWarnings("unchecked")
     protected static <T> T await(Future<T> future) {
+        storeOrRestoreDataStateForContinuations();
         if(future != null) {
             Request.current().args.put(ActionInvoker.F, future);
         } else if(Request.current().args.containsKey(ActionInvoker.F)) {

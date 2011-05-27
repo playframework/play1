@@ -95,8 +95,8 @@
 	open('@{WithContinuations.useAwaitInWebSocketControllerWithoutContinuations()}')
     assertTextPresent('failCount: 1')
 
-
-
+    open('@{WithContinuations.usingRenderArgsAndAwait()}')
+    assertBodyText('true')
 
 
 #{/selenium}
