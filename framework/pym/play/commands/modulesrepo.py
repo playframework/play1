@@ -30,7 +30,7 @@ HELP = {
 DEFAULT_REPO = 'http://www.playframework.org'
 
 def load_module(name):
-    base = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
+    base = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..')) # base = $PLAY_HOME
     mod_desc = imp.find_module(name, [os.path.join(base, 'framework/pym')])
     return imp.load_module(name, mod_desc[0], mod_desc[1], mod_desc[2])
 
