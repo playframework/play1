@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.Future;
 
 import org.w3c.dom.Document;
@@ -21,6 +22,7 @@ import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.classloading.enhancers.LVEnhancer;
 import play.classloading.enhancers.LVEnhancer.LVEnhancerRuntime;
+import play.classloading.enhancers.LVEnhancer.MethodExecution;
 import play.data.binding.Unbinder;
 import play.data.validation.Validation;
 import play.exceptions.*;
@@ -906,9 +908,15 @@ public class Controller implements ControllerSupport {
         if ( renderArgs!=null ) {
             //we are restoring after suspend
             Scope.RenderArgs.current.set( renderArgs);
+            Stack<MethodExecution> currentMethodExecutions = (Stack<MethodExecution>) Request.current().args.get(ActionInvoker.CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES);
+            if(currentMethodExecutions != null)
+                LVEnhancer.LVEnhancerRuntime.reinitRuntime(currentMethodExecutions);
         } else {
             // we are capturing before suspend
             Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS, Scope.RenderArgs.current());
+            Stack<MethodExecution> currentMethodExecutions = new Stack<LVEnhancer.MethodExecution>();
+            currentMethodExecutions.addAll(LVEnhancer.LVEnhancerRuntime.getCurrentMethodParams());
+            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES, currentMethodExecutions);
         }
 
 
