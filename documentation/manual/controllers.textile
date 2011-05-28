@@ -540,31 +540,29 @@ POST   /clients                 Clients.create
 * The browser then issues **GET /clients/3132**.
 * …
 
-h3. <a name="encoding">Customizing web encoding</a>
+h3. <a name="encoding">Customise web encoding</a>
 
-Play! emphasize the use of UTF-8, but there might be situations where some responses must use different encoding,
-or that the whole app has to use other encoding.
+Play emphasises the use of UTF-8, but there are situations where some responses, or the whole application, must use a different encoding.
 
-h4. Custom encoding for current Response
+h4. Custom encoding for current response
 
-To change encoding for current response, you can do it like this in your Controller:
+To change encoding for current response, you can do it like this in your controller:
 
 bc. response.encoding = "ISO-8859-1";
 
-When posting a form using other encoding than what is default on the server, you should include the encoding/charset twice in the form, both in **accept-charset** and in a special hidden form-field named **_charset_**. accept-charset tells the browser which encoding to use when posting the from, and the form-field _charset_ tells Play! what that encoding is:
+When posting a form using an encoding other than the server default, you should include the encoding/charset twice in the form, both in the @accept-charset@ attribute and in a special hidden form field named @_charset_@. The @accept-charset@ attribute tells the browser which encoding to use when posting the from, and the form-field @_charset_@ tells Play what that encoding is:
 
 bc. <form action="@{application.index}" method="POST" accept-charset="ISO-8859-1">
     <input type="hidden" name="_charset_" value="ISO-8859-1">
 </form>
 
-h4. Custom web encoding for the entire App
+h4. Custom encoding for the entire application
 
-By setting the property **application.web_encoding** in application.conf, you can customize which encoding
-Play! uses when communicating with the browser. This also changes the default encoding for Plays powerful Web Service client WS.
+Set the @application.web_encoding@ in @application.conf@ to specify which encoding Play uses when communicating with the browser. This also changes the default encoding for Play’s powerful "Web Service client":libs#WebServiceclient.
 
 bc. application.web_encoding=ISO-8859-1
 
-When changing application.web_encoding, it affects the charset-part of the content-type-header. It also affects which encoding is used when transmitting rendered dynamic results, but it **does not** affect the bytes sent when Play! serves static content: So if you have modified the default response encoding and you have static text-files (in the public/ folder) that does contain special letters, you have to make sure that these files are stored according to the specified encoding. All other files should be stored in UTF-8.
+Changing @application.web_encoding@ affects the @charset@ part of the @Content-type@ HTTP header. It also affects which encoding is used when transmitting rendered dynamic results, but it **does not** affect the bytes sent when Play serves static content: So, if you have modified the default response encoding and you have static text-files (in the @public/@ folder) that contain special characters, you must make sure that these files are stored according to the specified encoding. All other files should be stored in UTF-8.
 
 h2. <a name="interceptions">Interceptions</a>
 
