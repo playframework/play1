@@ -196,21 +196,48 @@ bc. INFO  ~ Connected to jdbc:h2:mem:play
 
 h2. <a>Using a version control system 	to track changes</a>
 
-When you work on a project, it’s highly recommended to store your source code in a version control system (VCS). It allows you to revert to a previous version if a change breaks something, work with several people and give access to all the successive versions of the application. Of course you can use any VCS to store your project, but here we will use Bazaar as an example. "Bazaar":http://bazaar-vcs.org/ is a distributed source version control system.
+When you work on a project, it’s highly recommended to store your source code in a version control system (VCS). It allows you to revert to a previous version if a change breaks something, work with several people and give access to all the successive versions of the application.
+
+When storing a Play application in a VCS, it’s important to exclude the **tmp/**, **modules/**, **lib/**, **test-result/** and **logs/** directories.
+
+h3. <a>Bazaar</a>
+
+Here we will use Bazaar as an example. "Bazaar":http://bazaar-vcs.org/ is a distributed source version control system.
 
 Installing Bazaar is beyond the scope of this tutorial but it is very easy on any system. Once you have a working installation of Bazaar, go to the blog directory and init the application versioning by typing:
 
 bc. $ bzr init
-
-When storing a Play application in a VCS, it’s important to exclude the **tmp/** and **logs/** directories.
-
-bc. $ bzr ignore tmp
+$ bzr ignore tmp
+$ bzr ignore modules
+$ bzr ignore lib
+$ bzr ignore test-result
 $ bzr ignore logs
 
 Now we can commit our first blog engine version:
 
 bc. $ bzr add
 $ bzr commit -m "YABE inital version"
+
+h3. <a>Git</a>
+
+"Git":http://git-scm.com is another distributed version control system, see its documentation for more information.
+
+Create a git working repository at the application root directory:
+
+bc. $ git init
+
+Create a @.gitignore@ file containing the following content:
+
+bc. /tmp
+/modules
+/lib
+/test-result
+/logs
+
+Add the content of the application and commit it:
+
+bc. $ git add .
+$ git commit -m "YABE initial version"
 
 Version 1 is committed and we now have a solid foundation for our project. 
 
