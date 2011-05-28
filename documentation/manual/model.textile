@@ -62,7 +62,7 @@ bc. public class Product {
         return price;
     }
  
-    public void setPrice(Integer name) {
+    public void setPrice(Integer price) {
         this.price = price;
     }
  
