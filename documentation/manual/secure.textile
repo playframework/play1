@@ -4,10 +4,10 @@ The simple **Secure** module helps you to set-up basic authentication and author
 
 h2. <a>Enable the Secure module for the application</a>
 
-In the **/conf/application.conf** file, enable the Secure module by adding this line:
+In the **/conf/dependencies.yml** file, enable the Secure module by adding a line after **require:**
 
-bc. # The secure module
-module.secure=${play.path}/modules/secure
+bc. require:
+    - play -> secure
 
 h2. <a>Import default Secure routes</a>
 
