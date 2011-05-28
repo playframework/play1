@@ -8,10 +8,10 @@ Let’s see a simple example of using the CRUD module to manage user data.
 
 h3. <a name="enable">Enable the CRUD module for the application</a>
 
-In the **/conf/application.conf** file, enable the CRUD module by adding this line:
+In the **/conf/dependencies.yml** file, enable the CRUD module by adding a line after **require:**
 
-bc. # The CRUD module
-module.crud=${play.path}/modules/crud
+bc. require:
+    - play -> crud
 
 h3. <a name="routes">Import default CRUD routes</a>
 
