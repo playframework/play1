@@ -20,7 +20,7 @@ Your Play application can also run inside your favorite application server. Most
 
 h3. Application server compatibility matrix
 
-|| JBoss 4.2.x || JBoss 5.x || JBoss 6M2 || Glasshfish v3 || IBM Websphere 6.1 ||IBM Websphere 7 || Geronimo 2.x || Tomcat 6.x || Jetty 7.x || Resin 4.0.5 ||
+|| JBoss 4.2.x || JBoss 5.x || JBoss 6M2 || Glassfish v3 || IBM Websphere 6.1 ||IBM Websphere 7 || Geronimo 2.x || Tomcat 6.x || Jetty 7.x || Resin 4.0.5 ||
 || ✓ || ✓ || ✓ || ✓ || ✓ || ✓ || ✓ || ✓ ||  ✓ || ✓  ||                                                                                                                                                            
 
 These application server are known to work with Play 1.1 but feel free to report any other working deployment.
