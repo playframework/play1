@@ -64,7 +64,7 @@ In all cases, Play extracts this data and builds a Map<String, String[]> which c
 * The name portion of a name-value pair taken from the Query String
 * The contents of a x-www-urlform-encoded body.
 
-h3. Using the params map
+h3. <a name="paramsmap">Using the params map</a>
 
 The **params** object is available to any Controller class (it is defined in the **play.mvc.Controller** super class). This object contains all the HTTP parameters found for the current request.
 
@@ -83,7 +83,7 @@ bc. public static void show() {
 
 But wait, there are better ways to do this :)
 
-h3. From the action method signature
+h3. <a name="methodsignature">From the action method signature</a>
 
 You can retrieve HTTP parameters directly from the action method signature. The Java parameter’s name must be the same as the HTTP parameter’s.
 
@@ -125,7 +125,7 @@ If the HTTP parameter corresponding to the action method argument is not found, 
 
 h2. <a name="binding">Advanced HTTP to Java binding</a>
 
-h3. Simple types
+h3. <a name="simpletypes">Simple types</a>
 
 All the native and common Java types are automatically bound:
 
@@ -133,7 +133,7 @@ All the native and common Java types are automatically bound:
 
 Note that if the parameter is missing in the HTTP Request, or if automatic conversion fails, Object types will be set to null and native types will be set to their default values.
 
-h3. Date
+h3. <a name="date">Date</a>
 
 A date object can be automatically bound if the date’s string representation matches one of the following patterns:
 
@@ -182,11 +182,11 @@ bc. application.langs=fr
 This property also affects how the dates are rendered in the templates using **${date.format()}**.
 
 
-h3. Calendar
+h3. <a name="calendar">Calendar</a>
 
 The calendar binding works exactly as with the date, except that Play is choosing the Calendar object according to your locale. The **@Bind** annotation can also be used.
 
-h3. Files
+h3. <a name="file">File</a>
 
 File upload is easy with Play. Use a **multipart/form-data** encoded request to post files to the server, and then use the **java.io.File** type to retrieve the file object:
 
@@ -199,7 +199,18 @@ bc. public static void create(String comment, File attachment) {
 
 The created file has the same name as the original file. It’s stored in a temporary directory and deleted at the end of the request. So you have to copy it in a safe directory or it will be lost.
 
-h3. Arrays or collections of supported types
+The uploaded file's MIME type should normally be specified by the HTTP request’s @Content-type@ header. However, when uploading files from a web browser, this might not happen for uncommon types. In this case, you can map the file name’s extension to a MIME type, using the @play.libs.MimeTypes@ class.
+
+bc. String mimeType = MimeTypes.getContentType(attachment.getName()); 
+
+The @play.libs.MimeTypes@ class looks up the MIME type for the given file name’s extension in the file @$PLAY_HOME/framework/src/play/libs/mime-types.properties@ 
+
+You can also add your own types to your application’s @conf/application.conf@ file. For example, to add a MIME type for GIMP images with the @.xcf@ extension, add the line: 
+
+bc. mimetype.xcf=application/x-gimp-image 
+
+
+h3. <a name="array">Arrays or collections of supported types</a>
 
 All supported types can be retrieved as an Array or a collection of objects:
 
@@ -232,7 +243,7 @@ bc. ?client.name=John&client.phone=111-1111&client.phone=222-2222
 
 would bind the client variable to a map with two elements. The first element with key **name** and value **John**, and the second with key **phone** and value **111-1111, 222-2222**.
 
-h3. POJO object binding
+h3. <a name="pojo">POJO object binding</a>
 
 Play also automatically binds any of your model classes using the same simple naming convention rules.
 
@@ -282,7 +293,7 @@ h2. <a name="custombinding">Custom binding</a>
 
 The binding system now supports more customization.
 
-h3. @play.data.binding.As
+h3. <a name="as">@play.data.binding.As</a>
 
 The first thing is the new **@play.data.binding.As** annotation that makes it possible to contextually configure a binding. You can use it for example to specify the date format that must be used by the **DateBinder**:
 
@@ -310,7 +321,7 @@ bc. public static void update(@As(",") List<String> items) {
 
 This binds a simple comma separated **String** as a **List**.
 
-h3. @play.data.binding.NoBinding
+h3. <a name="nobinding">@play.data.binding.NoBinding</a>
 
 The new **@play.data.binding.NoBinding** annotation allows yous to mark non-bindable fields, resolving potential security issues. For example:
 
@@ -326,7 +337,7 @@ public static void editProfile(@As("profile") User user) {
 
 In this case, the **isAdmin** field will never be bound from the **editProfile** action, even if an malicious user includes a **user.isAdmin=true** field in a fake form post.
 
-h3. play.data.binding.TypeBinder
+h3. <a name="typebinder">play.data.binding.TypeBinder</a>
 
 The *@As* annotation also allows you to define a completely custom binder. A custom binder is subclass of **TypeBinder** that you define in your project. For example:
 
@@ -343,7 +354,7 @@ bc. public static void anyAction(@As(binder=MyCustomStringBinder.class) String n
 	...
 }
 
-h3. @play.data.binding.Global
+h3. <a name="global">@play.data.binding.Global</a>
 
 Alternatively, you can define a global custom binder that will apply for the corresponding type. For example, you define a binder for the **java.awt.Point** class like this:
 
@@ -376,7 +387,7 @@ bc. public static void show(Long id) {
 
 The **render(…)** method emits a Result object and stops further method execution.
 
-h3. Return some textual content
+h3. <a name="text">Return some textual content</a>
 
 The **renderText(…)** method emits a simple Result event which writes some text directly to the underlying HTTP Response.
 
@@ -394,7 +405,25 @@ bc. public static void countUnreadMessages() {
     renderText("There are %s unread messages", unreadMessages);
 }
 
-h3. Execute a template
+h3. <a name="binary">Return binary content</a>
+
+To serve binary data, such as a "file stored on the server":jpa#file, use the @renderBinary@ method. For example, if you have a @User@ model with a @play.db.jpa.Blob photo@ property, add a controller method to load the model object and render the image with the stored MIME type:
+
+bc. public static void userPhoto(long id) { 
+   final User user = User.findById(id); 
+   response.setContentTypeIfNotSet(user.photo.type());
+   java.io.InputStream binaryData = user.photo.get();
+   renderBinary(binaryData);
+} 
+
+h3. <a name="attachment">Download a file as an attachment</a>
+
+You can set an HTTP header to instruct the web browser to treat a binary response as an ‘attachment’, which generally results in the web browser downloading the file to the user’s computer. To do this, pass a file name as a parameter to the @renderBinary@ method, which causes Play to set the @Content-Disposition@ response header, providing a file name. For example, supposing the @User@ model from the previous example as a @photoFileName@ property:
+
+bc. renderBinary(binaryData, user.photoFileName); 
+
+
+h3. <a name="template">Execute a template</a>
 
 If the generated content is complex, you should use a template to generate the response content.
 
@@ -466,7 +495,7 @@ bc. public static void show(Long id) {
     renderTemplate("Clients/showClient.html", id, client);    
 }
 
-h3. Redirect to another URL
+h3. <a name="redirect">Redirect to another URL</a>
 
 The **redirect(…)** method emits a Redirect event that in turn generates an HTTP Redirect response.
 
@@ -475,7 +504,7 @@ bc. public static void index() {
 }
 
 
-h3. Action chaining
+h3. <a name="chaining">Action chaining</a>
 
 There is no equivalent to the Servlet API **forward**. An HTTP request can only invoke one action. If you need to invoke another action, you have to redirect the browser to the URL able to invoke that action. In this way, the browser URL is always consistent with the executed action, and the **Back/Forward/Refresh** management is much easier.
 
@@ -511,7 +540,7 @@ POST   /clients                 Clients.create
 * The browser then issues **GET /clients/3132**.
 * …
 
-h3. Customizing web encoding
+h3. <a name="encoding">Customizing web encoding</a>
 
 Play! emphasize the use of UTF-8, but there might be situations where some responses must use different encoding,
 or that the whole app has to use other encoding.
@@ -543,7 +572,7 @@ A controller can define interception methods. Interceptors are invoked for all a
 
 These methods have to be **static** but not **public**. You have to annotate these methods with a valid interception marker.
 
-h3. @Before
+h3. <a name="before">@Before</a>
 
 Methods annotated with the **@Before** annotation are executed before each action call for this Controller.
 
@@ -597,7 +626,7 @@ bc. public class Admin extends Application {
 
 The **unless** and **only** parameters are available for the **@After**, **@Before** and **@Finally** annotations.
 
-h3. @After
+h3. <a name="after">@After</a>
 
 Methods annotated with the **@After** annotation are executed after each action call for this Controller.
 
@@ -617,7 +646,7 @@ bc. public class Admin extends Application {
  
 }
 
-h3. @Catch
+h3. <a name="catch">@Catch</a>
 
 Methods annotated with **@Catch** are called if another action method throws the specified exception. The thrown exception is passed as a parameter to the @Catch method.
 
@@ -662,7 +691,7 @@ bc. public class Admin extends Application {
 }
 
 
-h3. @Finally
+h3. <a name="finally">@Finally</a>
 
 Methods annotated with the **@Finally** annotation are always executed after each action call to this Controller.
 @Finally-methods are called both after successful action calls and if an error occurred.
@@ -706,11 +735,11 @@ bc. public class Admin extends Application {
 }
 
 
-h3. Controller hierarchy
+h3. <a name="hierarchy">Controller hierarchy</a>
 
 If a Controller class is a subclass of another Controller class, interceptions are applied to the full Controller hierarchy.
 
-h3. Adding more interceptors using the @With annotation
+h3. <a name="with">Adding more interceptors using the @With annotation</a>
 
 Because Java does not allow multiple inheritance, it can be very limiting to rely on the Controller hierarchy to apply interceptors. But you can define some interceptors in a totally different class, and link them with any controller using the **@With** annotation.
 
