@@ -161,14 +161,14 @@ class PlayApplication(object):
     def cp_args(self):
         classpath = self.getClasspath()
         cp_args = ':'.join(classpath)
-        if os.name == 'nt':
+        if os.name == 'nt' or os.sys.platform == 'cygwin':
             cp_args = ';'.join(classpath)
         return cp_args
 
     def fw_cp_args(self):
         classpath = self.getFrameworkClasspath()
         cp_args = ':'.join(classpath)
-        if os.name == 'nt':
+        if os.name == 'nt' or os.sys.platform == 'cygwin':
             cp_args = ';'.join(classpath)
         return cp_args
 

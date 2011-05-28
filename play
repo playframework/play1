@@ -34,7 +34,7 @@ try:
     play_env = dict()
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Where is the framework?
-    play_env["basedir"] = os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0])))
+    play_env["basedir"] = normalizePath(os.path.normpath(os.path.dirname(os.path.realpath(sys.argv[0]))))
 
     # ~~~~~~~~~~~~~~~~~~~~~~ What is the framework id?
     play_env["id_file"] = os.path.join(play_env['basedir'], 'id')
@@ -117,7 +117,7 @@ try:
         remaining_args.remove('-f')
     play_env["disable_check_jpda"] = disable_check_jpda 
 
-    play_app = PlayApplication(application_path, play_env, ignoreMissing)
+    play_app = PlayApplication(normalizePath(application_path), play_env, ignoreMissing)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ~~~~~~~~~~~~~~~~~~~~~~ The commands ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
