@@ -35,7 +35,7 @@ bc. public static void showProduct(String id) {
 public static void addProduct(String name, int price) {
     Product product = new Product(name, price);
     product.save();
-    showProduct(id);
+    showProduct(product.id);
 }
  
 public static void editProduct(String id, String name, int price) {
