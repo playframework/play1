@@ -228,8 +228,6 @@ public class JPQL {
                 String prop = extractProp(part, "Elike");
                 jpql.append(prop + " like ?");
             } else {
-                if(part.contains("OrderBy"))
-                    part = part.split("OrderBy")[0];
                 String prop = extractProp(part, "");
                 jpql.append(prop + " = ?");
             }
@@ -238,7 +236,7 @@ public class JPQL {
             }
         }
 		//ORDER BY clause
-		if (findBy.contains("OrderBy")) {
+	if (findBy.contains("OrderBy")) {
             jpql.append(" ORDER BY ");
             String orderQuery = findBy.split("OrderBy")[1];
             parts = orderQuery.split("And");
