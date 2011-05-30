@@ -55,15 +55,6 @@ public class MessagesPlugin extends PlayPlugin {
         lastLoading = System.currentTimeMillis();
     }
 
-    @Override
-    public void beforeInvocation() {
-        if (Play.langs.isEmpty()) {
-            Lang.set("");
-        } else {
-            Lang.set(Play.langs.get(0));
-        }
-    }
-
     static Properties read(VirtualFile vf) {
         if (vf != null) {
             return IO.readUtf8Properties(vf.inputstream());
