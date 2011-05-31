@@ -45,7 +45,11 @@ public class JPAConfig {
 
     protected void close() {
         if (isEnabled()) {
-            entityManagerFactory.close();
+            try {
+                entityManagerFactory.close();
+            } catch (Exception e) {
+                // ignore it - we don't care if it failed..
+            }
             entityManagerFactory = null;
         }
     }

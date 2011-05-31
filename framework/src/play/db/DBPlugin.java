@@ -50,8 +50,12 @@ public class DBPlugin extends PlayPlugin {
 
         List<String> dbConfigNames = new ArrayList<String>(1);
 
-        // first we must configure the default dbConfig
-        dbConfigNames.add(DBConfig.defaultDbConfigName);
+        // first we must look for and configure the default dbConfig
+        if (isDefaultDBConfigPresent(Play.configuration)) {
+            // Can only add default db config-name if it is present in config-file.
+            // Must do this to be able to detect if user removes default db config from config file
+            dbConfigNames.add(DBConfig.defaultDbConfigName);
+        }
 
         //look for other configurations
         dbConfigNames.addAll(detectedExtraDBConfigs(Play.configuration));
@@ -61,7 +65,23 @@ public class DBPlugin extends PlayPlugin {
     }
 
     /**
-     * Looks for extra db configs in config
+     * @return true if default db config properties is found
+     */
+    protected boolean isDefaultDBConfigPresent(Properties props) {
+        Pattern pattern = Pattern.compile("^db(?:$|\\..*)");
+        for( String propName : props.stringPropertyNames()) {
+            Matcher m = pattern.matcher(propName);
+            if (m.find()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Looks for extra db configs in config.
+     *
+     * Properties starting with 'db_'
      * @return list of all extra db config names found
      */
     protected Set<String> detectedExtraDBConfigs(Properties props) {
