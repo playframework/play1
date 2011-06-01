@@ -8,6 +8,7 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -221,7 +222,7 @@ public class WS extends PlayPlugin {
         public Object body;
         public FileParam[] fileParams;
         public Map<String, String> headers = new HashMap<String, String>();
-        public Map<String, Object> parameters = new HashMap<String, Object>();
+        public Map<String, Object> parameters = new LinkedHashMap<String, Object>();
         public String mimeType;
         public boolean followRedirects = true;
         /**
