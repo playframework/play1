@@ -685,7 +685,7 @@ public class Controller implements ControllerSupport {
     protected static void render(Object... args) {
         String templateName = null;
         if (args.length > 0 && args[0] instanceof String && LVEnhancerRuntime.getParamNames().mergeParamsAndVarargs()[0] == null) {
-            templateName = args[0].toString();
+            templateName = template(args[0].toString());
         } else {
             templateName = template();
         }
