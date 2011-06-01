@@ -70,12 +70,14 @@ public class Fixtures {
         }
 
         for (Class<? extends Model> type : types) {
-            try {
-                Model.Manager.factoryFor(type).deleteAll();
-            } catch(Exception e) {
-                Logger.error(e, "While deleting " + type + " instances");
+            // A Model might not be an Entity if it is a sub-class.
+            if (type.isAnnotationPresent(javax.persistence.Entity.class)) {
+                try {
+                    Model.Manager.factoryFor(type).deleteAll();
+                } catch(Exception e) {
+                    Logger.error(e, "While deleting " + type + " instances");
+                }
             }
-            
         }
 
         for (DBConfig dbConfig : DB.getDBConfigs()) {
