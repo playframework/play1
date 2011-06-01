@@ -338,14 +338,13 @@ public class WSAsync implements WSImpl {
                 boolean isPostPut = "POST".equals(this.type) || ("PUT".equals(this.type));
 
                 if (isPostPut) {
-                    // Since AHC is hardcoded to encode using utf-8, we must build
-                    // the content our self..
+                    // Since AHC is hard-coded to encode to use UTF-8, we must build
+                    // the content ourself..
                     StringBuilder sb = new StringBuilder();
 
                     for (String key : this.parameters.keySet()) {
                         Object value = this.parameters.get(key);
                         if (value == null) continue;
-
 
                         if (value instanceof Collection<?> || value.getClass().isArray()) {
                             Collection<?> values = value.getClass().isArray() ? Arrays.asList((Object[]) value) : (Collection<?>) value;
@@ -358,8 +357,8 @@ public class WSAsync implements WSImpl {
                                 sb.append(encode(v.toString()));
                             }
                         } else {
-                            // Since AHC is hardcoded to encode using utf-8, we must build
-                            // the content our self..
+                            // Since AHC is hard-coded to encode using UTF-8, we must build
+                            // the content ourself..
                             if (sb.length() > 0) {
                                 sb.append('&');
                             }
@@ -375,7 +374,6 @@ public class WSAsync implements WSImpl {
                     } catch ( UnsupportedEncodingException e) {
                         throw new RuntimeException(e);
                     }
-
 
                 } else {
                     for (String key : this.parameters.keySet()) {
