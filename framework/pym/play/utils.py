@@ -231,7 +231,11 @@ def isTestFrameworkId( framework_id ):
 if sys.platform == 'cygwin':
     def normalizePath(path):
         """Transform a possibly Windows path to a Cygwin path and escape spaces"""
-        return string.replace(os.popen('cygpath -md "' + path + '"').read(), '\n', '').replace(' ', '\\ ')
+        if os.path.exists(path):
+            return string.replace(os.popen('cygpath -md "' + path + '"').read(), '\n', '').replace(' ', '\\ ')
+        else:
+            parts = os.path.split(os.path.realpath(path))
+            return os.path.join(string.replace(os.popen('cygpath -md "' + parts[0] + '"').read(), '\n', '').replace(' ', '\\ '), parts[1])
 else:
     def normalizePath(path):
         """Nothing to do if platform is not Cygwin"""
