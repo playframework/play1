@@ -20,4 +20,4 @@
         throw new play.exceptions.TagInternalException("File not found: " + _src);
     }
 }%
-<script type="text/javascript" language="javascript"#{if _id} id="${_id}"#{/if}#{if _charset} charset="_charset"#{/if}  src="${_abs}"></script>
+<script type="text/javascript" language="javascript"#{if _id} id="${_id}"#{/if}#{if _charset} charset="${_charset}"#{/if}  src="${_abs}"></script>
