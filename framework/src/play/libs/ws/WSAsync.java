@@ -1,6 +1,8 @@
 package play.libs.ws;
 
 import java.io.*;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,8 +36,6 @@ import com.ning.http.client.ProxyServer;
 import com.ning.http.client.Realm.AuthScheme;
 import com.ning.http.client.Realm.RealmBuilder;
 import com.ning.http.client.Response;
-
-import javax.mail.internet.MimeUtility;
 
 /**
  * Simple HTTP client to make webservices requests.
@@ -106,13 +106,105 @@ public class WSAsync implements WSImpl {
             super(url, encoding);
         }
 
+        /**
+         * Returns the url but removed the queryString-part of it
+         * The QueryString-info is later added with addQueryString()
+         */
+        protected String getUrlWithoutQueryString() {
+            int i = url.indexOf('?');
+            if ( i > 0) {
+                return url.substring(0,i);
+            } else {
+                return url;
+            }
+        }
+
+        /**
+         * Adds the queryString-part of the url to the BoundRequestBuilder
+         * @return the same BoundRequestBuilder as passed in
+         */
+        protected BoundRequestBuilder addQueryString(BoundRequestBuilder requestBuilder) {
+
+            // AsyncHttpClient is by default encoding everything in utf-8 so for us to be able to use
+            // different encoding we have configured AHC to use raw urls. When using raw urls,
+            // AHC does not encode url and QueryParam with utf-8 - but there is another problem:
+            // If we send raw (none-encoded) url (with queryString) to AHC, it does not url-encode it,
+            // but transform all illegal chars to '?'.
+            // If we pre-encoded the url with QueryString before sending it to AHC, ahc will decode it, and then
+            // later break it with '?'.
+
+            // This method basically does the same as RequestBuilderBase.buildUrl() except from destroying the
+            // pre-encoding
+
+            // does url contain query_string?
+            int i = url.indexOf('?');
+            if ( i > 0) {
+
+                try {
+                    // extract query-string-part
+                    String queryPart = url.substring(i+1);
+
+                    // parse queryPart - and decode it... (it is going to be re-encoded later)
+                    for( String param : queryPart.split("&")) {
+
+                        i = param.indexOf('=');
+                        String name;
+                        String value = null;
+                        if ( i<=0) {
+                            // only a flag
+                            name = URLDecoder.decode(param, encoding);
+                        } else {
+                            name = URLDecoder.decode(param.substring(0,i), encoding);
+                            value = URLDecoder.decode(param.substring(i+1), encoding);
+                        }
+
+                        if (value == null) {
+                            requestBuilder.addQueryParameter(URLEncoder.encode(name, encoding), null);
+                        } else {
+                            requestBuilder.addQueryParameter(URLEncoder.encode(name, encoding), URLEncoder.encode(value, encoding));
+                        }
+
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException("Error parsing query-part of url",e);
+                }
+            }
+
+            return requestBuilder;
+        }
+
+
+        public BoundRequestBuilder prepareGet() {
+            return addQueryString(httpClient.prepareGet(getUrlWithoutQueryString()));
+        }
+
+        public BoundRequestBuilder prepareOptions() {
+            return addQueryString(httpClient.prepareOptions(getUrlWithoutQueryString()));
+        }
+
+        public BoundRequestBuilder prepareHead() {
+            return addQueryString(httpClient.prepareHead(getUrlWithoutQueryString()));
+        }
+
+        public BoundRequestBuilder preparePost() {
+            return addQueryString(httpClient.preparePost(getUrlWithoutQueryString()));
+        }
+
+        public BoundRequestBuilder preparePut() {
+            return addQueryString(httpClient.preparePut(getUrlWithoutQueryString()));
+        }
+
+        public BoundRequestBuilder prepareDelete() {
+            return addQueryString(httpClient.prepareDelete(getUrlWithoutQueryString()));
+        }
+
         /** Execute a GET request synchronously. */
         @Override
         public HttpResponse get() {
             this.type = "GET";
             sign();
             try {
-                return new HttpAsyncResponse(prepare(httpClient.prepareGet(url)).execute().get());
+                return new HttpAsyncResponse(prepare(prepareGet()).execute().get());
             } catch (Exception e) {
                 Logger.error(e.toString());
                 throw new RuntimeException(e);
@@ -124,8 +216,9 @@ public class WSAsync implements WSImpl {
         public Promise<HttpResponse> getAsync() {
             this.type = "GET";
             sign();
-            return execute(httpClient.prepareGet(url));
+            return execute(prepareGet());
         }
+
 
         /** Execute a POST request.*/
         @Override
@@ -133,7 +226,7 @@ public class WSAsync implements WSImpl {
             this.type = "POST";
             sign();
             try {
-                return new HttpAsyncResponse(prepare(httpClient.preparePost(url)).execute().get());
+                return new HttpAsyncResponse(prepare(preparePost()).execute().get());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -144,7 +237,7 @@ public class WSAsync implements WSImpl {
         public Promise<HttpResponse> postAsync() {
             this.type = "POST";
             sign();
-            return execute(httpClient.preparePost(url));
+            return execute(preparePost());
         }
 
         /** Execute a PUT request.*/
@@ -152,7 +245,7 @@ public class WSAsync implements WSImpl {
         public HttpResponse put() {
             this.type = "PUT";
             try {
-                return new HttpAsyncResponse(prepare(httpClient.preparePut(url)).execute().get());
+                return new HttpAsyncResponse(prepare(preparePut()).execute().get());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -162,7 +255,7 @@ public class WSAsync implements WSImpl {
         @Override
         public Promise<HttpResponse> putAsync() {
             this.type = "PUT";
-            return execute(httpClient.preparePut(url));
+            return execute(preparePut());
         }
 
         /** Execute a DELETE request.*/
@@ -170,7 +263,7 @@ public class WSAsync implements WSImpl {
         public HttpResponse delete() {
             this.type = "DELETE";
             try {
-                return new HttpAsyncResponse(prepare(httpClient.prepareDelete(url)).execute().get());
+                return new HttpAsyncResponse(prepare(prepareDelete()).execute().get());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -180,7 +273,7 @@ public class WSAsync implements WSImpl {
         @Override
         public Promise<HttpResponse> deleteAsync() {
             this.type = "DELETE";
-            return execute(httpClient.prepareDelete(url));
+            return execute(prepareDelete());
         }
 
         /** Execute a OPTIONS request.*/
@@ -188,7 +281,7 @@ public class WSAsync implements WSImpl {
         public HttpResponse options() {
             this.type = "OPTIONS";
             try {
-                return new HttpAsyncResponse(prepare(httpClient.prepareOptions(url)).execute().get());
+                return new HttpAsyncResponse(prepare(prepareOptions()).execute().get());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -198,7 +291,7 @@ public class WSAsync implements WSImpl {
         @Override
         public Promise<HttpResponse> optionsAsync() {
             this.type = "OPTIONS";
-            return execute(httpClient.prepareOptions(url));
+            return execute(prepareOptions());
         }
 
         /** Execute a HEAD request.*/
@@ -206,7 +299,7 @@ public class WSAsync implements WSImpl {
         public HttpResponse head() {
             this.type = "HEAD";
             try {
-                return new HttpAsyncResponse(prepare(httpClient.prepareHead(url)).execute().get());
+                return new HttpAsyncResponse(prepare(prepareHead()).execute().get());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -216,7 +309,7 @@ public class WSAsync implements WSImpl {
         @Override
         public Promise<HttpResponse> headAsync() {
             this.type = "HEAD";
-            return execute(httpClient.prepareHead(url));
+            return execute(prepareHead());
         }
 
         /** Execute a TRACE request.*/

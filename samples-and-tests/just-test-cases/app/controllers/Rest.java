@@ -109,6 +109,9 @@ public class Rest extends Controller {
         for ( String key : params.all().keySet()) {
             String[] values = params.all().get(key);
             for( String v : values) {
+                if ( v == null) {
+                    v = "flag";
+                }
                 r += "|" + key + "|" + v; 
             }
         }
