@@ -63,8 +63,8 @@ def stop(app):
         print "~"
         sys.exit(-1)
     pid = open(app.pid_path()).readline().strip()
-    os.remove(app.pid_path())
     kill(pid)
+    os.remove(app.pid_path())
     print "~ OK, %s is stopped" % app.path
     print "~"
 
