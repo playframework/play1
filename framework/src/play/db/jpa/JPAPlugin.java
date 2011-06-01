@@ -241,7 +241,8 @@ public class JPAPlugin extends PlayPlugin {
         for (Class clazz : allEntityClasses) {
             String configName = Entity2JPAConfigResolver.getJPAConfigNameForEntityClass(clazz);
             if (JPA.getJPAConfig(configName, true)==null) {
-                throw new JPAException("Found Entity-class ("+clazz.getName()+") referring to none-existing JPAConfig ("+configName+")");
+                throw new JPAException("Found Entity-class ("+clazz.getName()+") referring to none-existing JPAConfig" + getConfigInfoString(configName) + ". " +
+                        "Is JPA properly configured?");
             }
         }
     }

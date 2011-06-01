@@ -116,7 +116,6 @@ public class ActionInvoker {
             // add parameters from the URI query string
             String encoding = Http.Request.current().encoding;
             Scope.Params.current()._mergeWith(UrlEncodedParser.parseQueryString(new ByteArrayInputStream(request.querystring.getBytes(encoding))));
-            Lang.resolvefrom(request);
 
             // 2. Easy debugging ...
             if (Play.mode == Play.Mode.DEV) {

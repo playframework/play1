@@ -308,14 +308,14 @@ public class DBConfig {
 
         if ("mem".equals(p.getProperty(propsPrefix)) && p.getProperty(propsPrefix+".url") == null) {
             p.put(propsPrefix+".driver", "org.h2.Driver");
-            p.put(propsPrefix+".url", "jdbc:h2:mem:"+dbConfigName+";MODE=MYSQL");
+            p.put(propsPrefix+".url", "jdbc:h2:mem:"+dbConfigName+";MODE=MYSQL;DB_CLOSE_ON_EXIT=FALSE");
             p.put(propsPrefix+".user", "sa");
             p.put(propsPrefix+".pass", "");
         }
 
         if ("fs".equals(p.getProperty(propsPrefix)) && p.getProperty(propsPrefix+".url") == null) {
             p.put(propsPrefix+".driver", "org.h2.Driver");
-            p.put(propsPrefix+".url", "jdbc:h2:" + (new File(Play.applicationPath, "db/h2/"+dbConfigName).getAbsolutePath()) + ";MODE=MYSQL");
+            p.put(propsPrefix+".url", "jdbc:h2:" + (new File(Play.applicationPath, "db/h2/"+dbConfigName).getAbsolutePath()) + ";MODE=MYSQL;DB_CLOSE_ON_EXIT=FALSE");
             p.put(propsPrefix+".user", "sa");
             p.put(propsPrefix+".pass", "");
         }
