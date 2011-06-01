@@ -62,7 +62,7 @@ public class Blob implements BinaryField, UserType {
     }
 
     public File getFile() {
-        if(file == null) {
+        if(file == null || !file.getName().equals(UUID)) {
             file = new File(getStore(), UUID);
         }
         return file;
