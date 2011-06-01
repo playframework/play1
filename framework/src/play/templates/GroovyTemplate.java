@@ -411,6 +411,11 @@ public class GroovyTemplate extends BaseTemplate {
         }
 
         public String __getMessage(Object[] val) {
+            if (val==null) {
+                throw new NullPointerException("You are trying to resolve a message with an expression " +
+                        "that is resolved to null - " +
+                        "have you forgotten quotes around the message-key?");
+            }
             if (val.length == 1) {
                 return Messages.get(val[0]);
             } else {
