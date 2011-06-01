@@ -45,8 +45,16 @@ public class OAuth {
      * @return a Response object holding either the result in case of a success or the error
      */
     public Response retrieveRequestToken() {
+        return retrieveRequestToken(Request.current().getBase() + Request.current().url);
+    }
+
+    /**
+     * Request the request token and secret.
+     * @param callbackURL the URL where the provider should redirect to
+     * @return a Response object holding either the result in case of a success or the error
+     */
+    public Response retrieveRequestToken(String callbackURL) {
         OAuthConsumer consumer = new DefaultOAuthConsumer(info.consumerKey, info.consumerSecret);
-        String callbackURL = Request.current().getBase() + Request.current().url;
         try {
             provider.retrieveRequestToken(consumer, callbackURL);
         } catch (OAuthException e) {
@@ -55,10 +63,21 @@ public class OAuth {
         return Response.success(consumer.getToken(), consumer.getTokenSecret());
     }
 
+    /**
+     * Exchange a request token for an access token.
+     * @param requestTokenResponse a successful response obtained from retrieveRequestToken
+     * @return a Response object holding either the result in case of a success or the error
+     */
     public Response retrieveAccessToken(Response requestTokenResponse) {
         return retrieveAccessToken(requestTokenResponse.token, requestTokenResponse.secret);
     }
 
+    /**
+     * Exchange a request token for an access token.
+     * @param token the token obtained from a previous call
+     * @param secret your application secret
+     * @return a Response object holding either the result in case of a success or the error
+     */
     public Response retrieveAccessToken(String token, String secret) {
          OAuthConsumer consumer = new DefaultOAuthConsumer(info.consumerKey, info.consumerSecret);
         consumer.setTokenWithSecret(token, secret);
