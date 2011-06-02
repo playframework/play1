@@ -124,24 +124,24 @@ public class RestTest extends UnitTest {
         
         
     }
-    
+
     @Test
     public void testEncodingEcho() {
         // verify that we have no encoding regression bugs related to raw urls and params
         if ( play.Play.defaultWebEncoding.equalsIgnoreCase("utf-8") ) {
-            assertEquals("æøå|id|æøå|body||b|æøå|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/%C3%A6%C3%B8%C3%A5?a=%C3%A6%C3%B8%C3%A5&a=x&b=%C3%A6%C3%B8%C3%A5").get().getString());
+            assertEquals("æøå|id|æøå|b|æøå|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/%C3%A6%C3%B8%C3%A5?a=%C3%A6%C3%B8%C3%A5&a=x&b=%C3%A6%C3%B8%C3%A5").get().getString());
         }
-        assertEquals("abc|id|abc|body||b|æøå|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/abc?a=æøå&a=x&b=æøå").get().getString());
-        assertEquals("æøå|id|æøå|body||b|æøå|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/%s?a=æøå&a=x&b=æøå", "æøå").get().getString());
-        assertEquals("æøå|id|æøå|body||b|æøå|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/%s?", "æøå").setParameter("a",new String[]{"æøå","x"}).setParameter("b","æøå").get().getString());
+        assertEquals("abc|id|abc|b|æøå|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/abc?a=æøå&a=x&b=æøå").get().getString());
+        assertEquals("æøå|id|æøå|b|æøå|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/%s?a=æøå&a=x&b=æøå", "æøå").get().getString());
+        assertEquals("æøå|id|æøå|b|æøå|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/%s?", "æøå").setParameter("a",new String[]{"æøå","x"}).setParameter("b","æøå").get().getString());
         // test with value including '='
-        assertEquals("abc|id|abc|body||b|æøå=|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/abc?a=æøå&a=x&b=æøå=").get().getString());
+        assertEquals("abc|id|abc|b|æøå=|a|æøå|a|x", WS.url("http://localhost:9003/encoding/echo/abc?a=æøå&a=x&b=æøå=").get().getString());
         //test with 'flag'
-        assertEquals("abc|id|abc|body||b|flag|a|flag", WS.url("http://localhost:9003/encoding/echo/abc?a&b=").get().getString());
+        assertEquals("abc|id|abc|b|flag|a|flag", WS.url("http://localhost:9003/encoding/echo/abc?a&b=").get().getString());
         
         // verify url ending with only ? or none
-        assertEquals("abc|id|abc|body|", WS.url("http://localhost:9003/encoding/echo/abc?").get().getString());
-        assertEquals("abc|id|abc|body|", WS.url("http://localhost:9003/encoding/echo/abc").get().getString());
+        assertEquals("abc|id|abc", WS.url("http://localhost:9003/encoding/echo/abc?").get().getString());
+        assertEquals("abc|id|abc", WS.url("http://localhost:9003/encoding/echo/abc").get().getString());
     }
 
 }

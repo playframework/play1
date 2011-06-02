@@ -49,6 +49,10 @@ public class UrlEncodedParser extends DataParser {
             }
 
             String data = new String(os.toByteArray(), encoding);
+            if (data.length() == 0) {
+                //data is empty - can skip the rest
+                return new HashMap<String, String[]>(0);
+            }
 
             // data is o the form:
             // a=b&b=c%12...
@@ -64,24 +68,18 @@ public class UrlEncodedParser extends DataParser {
 
             String[] keyValues = data.split("&");
             for (String keyValue : keyValues) {
-                // split this key-value on '='
-                String[] parts = keyValue.split("=");
-                // sanity check
-                if (parts.length >= 1) {
-                    String key = parts[0];
-                    if (key.length()>0) {
-                        String value = null;
-                        if (parts.length == 2) {
-                            value = parts[1];
-                        } else {
-                            // if keyValue ends with "=", then we have an empty value
-                            // if not ending with "=", we have a key without a value (a flag)
-                            if (keyValue.endsWith("=")) {
-                                value = "";
-                            }
-                        }
-                        Utils.Maps.mergeValueInMap(params, key, value);
-                    }
+                // split this key-value on the first '='
+                int i = keyValue.indexOf('=');
+                String key=null;
+                String value=null;
+                if ( i > 0) {
+                    key = keyValue.substring(0,i);
+                    value = keyValue.substring(i+1);
+                } else {
+                    key = keyValue;
+                }
+                if (key.length()>0) {
+                    Utils.Maps.mergeValueInMap(params, key, value);
                 }
             }
 
@@ -104,7 +102,7 @@ public class UrlEncodedParser extends DataParser {
             }
 
             // We're ready to decode the params
-            Map<String, String[]> decodedParams = new HashMap<String, String[]>();
+            Map<String, String[]> decodedParams = new HashMap<String, String[]>(params.size());
             for (Map.Entry<String, String[]> e : params.entrySet()) {
                 String key = URLDecoder.decode(e.getKey(),charset);
                 for (String value : e.getValue()) {
