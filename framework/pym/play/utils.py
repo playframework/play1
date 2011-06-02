@@ -76,9 +76,7 @@ def getWithModules(args, env):
     
     return md
 
-def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = None):
-    if war_exclusion_list is None:
-        war_exclusion_list = []
+def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = []):
     app.check()
     modules = app.modules()
     classpath = app.getClasspath()
@@ -114,6 +112,7 @@ def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = None):
     else:
         replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%PLAY_ID%', 'war')
     if os.path.exists(os.path.join(war_path, 'WEB-INF/application')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/application'))
+    war_exclusion_list.append(war_path)
     copy_directory(app.path, os.path.join(war_path, 'WEB-INF/application'), war_exclusion_list)
     if os.path.exists(os.path.join(war_path, 'WEB-INF/application/war')):
         shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/war'))
@@ -193,33 +192,25 @@ def delete(filename):
         os.remove(filename)
 
 # Copy a directory, skipping dot-files
-def copy_directory(source, target, exclude = None):
-    if exclude is None:
-        exclude = []
-    skip = None
-
+def copy_directory(source, target, exclude = []):
     if not os.path.exists(target):
         os.makedirs(target)
     for root, dirs, files in os.walk(source):
+        # Loop to detect directories to exclude (coming from exclude list)
+        # Search is done only on path for the moment
+        if filter(lambda exclusion: root.find(exclusion) > -1, exclude):
+            continue
+
         for file in files:
             if root.find('/.') > -1 or root.find('\\.') > -1:
                 continue
             if file.find('~') == 0 or file.startswith('.'):
                 continue
 
-            # Loop to detect files to exclude (coming from exclude list)
-            # Search is done only on path for the moment
-            skip = 0
-            for exclusion in exclude:
-                if root.find(exclusion) > -1:
-                    skip = 1
-            # Skipping the file if exclusion has been found
-            if skip == 1:
-                continue
-
             from_ = os.path.join(root, file)
             to_ = from_.replace(source, target, 1)
             to_directory = os.path.split(to_)[0]
+
             if not os.path.exists(to_directory):
                 os.makedirs(to_directory)
             shutil.copyfile(from_, to_)
