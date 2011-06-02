@@ -236,21 +236,11 @@ public class WS extends PlayPlugin {
 
         public WSRequest() {
             this.encoding = Play.defaultWebEncoding;
-            setDefaultContentType();
         }
 
         public WSRequest(String url, String encoding) {
             this.url = url;
             this.encoding = encoding;
-            setDefaultContentType();
-        }
-
-        /**
-         * Sets the contentType-header.
-         * If user sets it again, it is his responsability to make sure the encoding-stuff is ok
-         */
-        private void setDefaultContentType() {
-            headers.put("Content-Type", "application/x-www-form-urlencoded; charset="+encoding);
         }
 
         /**

@@ -101,6 +101,8 @@ public class WSAsync implements WSImpl {
     public class WSAsyncRequest extends WSRequest {
 
         protected String type = null;
+        private String generatedContentType = null;
+
 
         protected WSAsyncRequest(String url, String encoding) {
             super(url, encoding);
@@ -121,9 +123,8 @@ public class WSAsync implements WSImpl {
 
         /**
          * Adds the queryString-part of the url to the BoundRequestBuilder
-         * @return the same BoundRequestBuilder as passed in
          */
-        protected BoundRequestBuilder addQueryString(BoundRequestBuilder requestBuilder) {
+        protected void addQueryString(BoundRequestBuilder requestBuilder) {
 
             // AsyncHttpClient is by default encoding everything in utf-8 so for us to be able to use
             // different encoding we have configured AHC to use raw urls. When using raw urls,
@@ -169,33 +170,39 @@ public class WSAsync implements WSImpl {
                     throw new RuntimeException("Error parsing query-part of url",e);
                 }
             }
+        }
 
+
+        private BoundRequestBuilder prepareAll(BoundRequestBuilder requestBuilder) {
+            checkFileBody(requestBuilder);
+            addQueryString(requestBuilder);
+            addGeneratedContentType(requestBuilder);
             return requestBuilder;
         }
 
 
         public BoundRequestBuilder prepareGet() {
-            return addQueryString(httpClient.prepareGet(getUrlWithoutQueryString()));
+            return prepareAll(httpClient.prepareGet(getUrlWithoutQueryString()));
         }
 
         public BoundRequestBuilder prepareOptions() {
-            return addQueryString(httpClient.prepareOptions(getUrlWithoutQueryString()));
+            return prepareAll(httpClient.prepareOptions(getUrlWithoutQueryString()));
         }
 
         public BoundRequestBuilder prepareHead() {
-            return addQueryString(httpClient.prepareHead(getUrlWithoutQueryString()));
+            return prepareAll(httpClient.prepareHead(getUrlWithoutQueryString()));
         }
 
         public BoundRequestBuilder preparePost() {
-            return addQueryString(httpClient.preparePost(getUrlWithoutQueryString()));
+            return prepareAll(httpClient.preparePost(getUrlWithoutQueryString()));
         }
 
         public BoundRequestBuilder preparePut() {
-            return addQueryString(httpClient.preparePut(getUrlWithoutQueryString()));
+            return prepareAll(httpClient.preparePut(getUrlWithoutQueryString()));
         }
 
         public BoundRequestBuilder prepareDelete() {
-            return addQueryString(httpClient.prepareDelete(getUrlWithoutQueryString()));
+            return prepareAll(httpClient.prepareDelete(getUrlWithoutQueryString()));
         }
 
         /** Execute a GET request synchronously. */
@@ -339,7 +346,6 @@ public class WSAsync implements WSImpl {
         }
 
         private BoundRequestBuilder prepare(BoundRequestBuilder builder) {
-            checkFileBody(builder);
             if (this.username != null && this.password != null && this.scheme != null) {
                 AuthScheme authScheme;
                 switch (this.scheme) {
@@ -392,6 +398,7 @@ public class WSAsync implements WSImpl {
         }
 
         private void checkFileBody(BoundRequestBuilder builder) {
+            setResolvedContentType(null);
             if (this.fileParams != null) {
                 //could be optimized, we know the size of this array.
                 for (int i = 0; i < this.fileParams.length; i++) {
@@ -420,6 +427,9 @@ public class WSAsync implements WSImpl {
                         throw new RuntimeException(e);
                     }
                 }
+
+                // Don't have to set content-type: AHC will automatically choose multipart
+                
                 return;
             }
             if (this.parameters != null && !this.parameters.isEmpty()) {
@@ -463,6 +473,8 @@ public class WSAsync implements WSImpl {
                         throw new RuntimeException(e);
                     }
 
+                    setResolvedContentType("application/x-www-form-urlencoded; charset=" + encoding);
+
                 } else {
                     for (String key : this.parameters.keySet()) {
                         Object value = this.parameters.get(key);
@@ -478,7 +490,7 @@ public class WSAsync implements WSImpl {
                             builder.addQueryParameter(encode(key), encode(value.toString()));
                         }
                     }
-
+                    setResolvedContentType("text/html; charset=" + encoding);
                 }
             }
             if (this.body != null) {
@@ -488,25 +500,41 @@ public class WSAsync implements WSImpl {
                 if(this.body instanceof InputStream) {
                     builder.setBody((InputStream)this.body);
                 } else {
-                    if(this.body != null) {
-                        try {
-                            byte[] bodyBytes = this.body.toString().getBytes( this.encoding );
-                            InputStream bodyInStream = new ByteArrayInputStream( bodyBytes );
-                            builder.setBody( bodyInStream );
-                        } catch ( UnsupportedEncodingException e) {
-                            throw new RuntimeException(e);
-                        }
+                    try {
+                        byte[] bodyBytes = this.body.toString().getBytes( this.encoding );
+                        InputStream bodyInStream = new ByteArrayInputStream( bodyBytes );
+                        builder.setBody( bodyInStream );
+                    } catch ( UnsupportedEncodingException e) {
+                        throw new RuntimeException(e);
                     }
                 }
+                setResolvedContentType("text/html; charset=" + encoding);
             }
-            String contentType;
+            
             if(this.mimeType != null) {
-                contentType = this.mimeType;
-            } else {
-                contentType = "application/x-www-form-urlencoded";
+                // User has specified mimeType
+                this.headers.put("Content-Type", this.mimeType);
             }
-            this.headers.put("Content-Type", contentType + "; charset="+this.encoding);
+        }
 
+        /**
+         * Sets the resolved Content-type - This is added as Content-type-header to AHC
+         * if ser has not specified Content-type or mimeType manually
+         * (Cannot add it directly to this.header since this cause problem
+         * when Request-object is used multiple times with first GET, then POST)
+         */
+        private void setResolvedContentType(String contentType) {
+            generatedContentType = contentType;
+        }
+
+        /**
+         * If generatedContentType is present AND if Content-type header is not already present,
+         * add generatedContentType as Content-Type to headers in requestBuilder
+         */
+        private void addGeneratedContentType(BoundRequestBuilder requestBuilder) {
+            if (!headers.containsKey("Content-Type") && generatedContentType!=null) {
+                requestBuilder.addHeader("Content-Type", generatedContentType);
+            }
         }
 
     }
