@@ -53,7 +53,7 @@ public class JPABase implements Serializable, play.db.Model {
             em().persist(this);
             PlayPlugin.postEvent("JPASupport.objectPersisted", this);
         }
-        avoidCascadeSaveLoops.set(new ArrayList<JPABase>());
+        avoidCascadeSaveLoops.set(new HashSet<JPABase>());
         try {
             saveAndCascade(true);
         } finally {
@@ -68,7 +68,7 @@ public class JPABase implements Serializable, play.db.Model {
                 throw e;
             }
         }
-        avoidCascadeSaveLoops.set(new ArrayList<JPABase>());
+        avoidCascadeSaveLoops.set(new HashSet<JPABase>());
         try {
             saveAndCascade(false);
         } finally {
@@ -78,7 +78,7 @@ public class JPABase implements Serializable, play.db.Model {
 
     public void _delete() {
         try {
-            avoidCascadeSaveLoops.set(new ArrayList<JPABase>());
+            avoidCascadeSaveLoops.set(new HashSet<JPABase>());
             try {
                 saveAndCascade(true);
             } finally {
@@ -94,7 +94,7 @@ public class JPABase implements Serializable, play.db.Model {
                     throw e;
                 }
             }
-            avoidCascadeSaveLoops.set(new ArrayList<JPABase>());
+            avoidCascadeSaveLoops.set(new HashSet<JPABase>());
             try {
                 saveAndCascade(false);
             } finally {
@@ -114,7 +114,7 @@ public class JPABase implements Serializable, play.db.Model {
 
     // ~~~ SAVING
     public transient boolean willBeSaved = false;
-    static transient ThreadLocal<List<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<List<JPABase>>();
+    static transient ThreadLocal<Set<JPABase>> avoidCascadeSaveLoops = new ThreadLocal<Set<JPABase>>();
 
     private void saveAndCascade(boolean willBeSaved) {
         this.willBeSaved = willBeSaved;
