@@ -140,8 +140,8 @@ or even a part of:
 bc. Post.find("title", "My first post").fetch();
 Post.find("title like ?", "%hello%").fetch();
 Post.find("author is null").fetch();
-Post.find("title like % and author is null", "%hello%").fetch();
-Post.find("title like % and author is null order by postDate", "%hello%").fetch();
+Post.find("title like ? and author is null", "%hello%").fetch();
+Post.find("title like ? and author is null order by postDate", "%hello%").fetch();
 
 You can even specify only the **order by** statement:
 
