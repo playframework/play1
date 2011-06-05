@@ -44,7 +44,9 @@ public class Server {
 
         InetAddress address = null;
         InetAddress secureAddress = null;
+        InetAddress localhostAddress = null;
         try {
+            localhostAddress = InetAddress.getByName("localhost");
             if (p.getProperty("http.address") != null) {
                 address = InetAddress.getByName(p.getProperty("http.address"));
             } else if (System.getProperties().containsKey("http.address")) {
@@ -72,6 +74,10 @@ public class Server {
             if (httpPort != -1) {
                 bootstrap.setPipelineFactory(new HttpServerPipelineFactory());
                 bootstrap.bind(new InetSocketAddress(address, httpPort));
+                if (address != null) {
+                    // since we're listening on specific address, we must also listen on 127.0.0.1
+                    bootstrap.bind(new InetSocketAddress(localhostAddress, httpPort));
+                }
                 bootstrap.setOption("child.tcpNoDelay", true);
 
                 if (Play.mode == Mode.DEV) {
@@ -103,6 +109,11 @@ public class Server {
             if (httpsPort != -1) {
                 bootstrap.setPipelineFactory(new SslHttpServerPipelineFactory());
                 bootstrap.bind(new InetSocketAddress(secureAddress, httpsPort));
+                if (secureAddress
+                        != null) {
+                    // since we're listening on specific address, we must also listen on 127.0.0.1
+                    bootstrap.bind(new InetSocketAddress(localhostAddress, httpsPort));
+                }
                 bootstrap.setOption("child.tcpNoDelay", true);
 
                 if (Play.mode == Mode.DEV) {
