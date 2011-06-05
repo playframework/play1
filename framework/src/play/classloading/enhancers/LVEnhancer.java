@@ -187,8 +187,22 @@ public class LVEnhancer extends Enhancer {
             getCurrentMethodParams().peek().currentNestedMethodCall = new MethodExecution(subject, paramNames, nbParams);
             Logger.trace("initMethodCall for '" + method + "' with " + Arrays.toString(paramNames));
         }
-
-        private static Stack<MethodExecution> getCurrentMethodParams() {
+        
+        /**
+         * Replace the current methodParams stack by the given one.
+         * Don't use it unless you know exactly what you do.
+         * @param init the stack to restore.
+         */
+        public static void reinitRuntime(Stack<MethodExecution> init) {
+            methodParams.set(init);
+        }
+        
+        /**
+         * Get the current stack of methodExecutions.
+         * This should not be altered unless you know exactly what you do.
+         * @return the current stack of methodExecutions.
+         */
+        public static Stack<MethodExecution> getCurrentMethodParams() {
             Stack<MethodExecution> result = methodParams.get();
             if(result == null) {
                 result = new Stack<MethodExecution>();
@@ -247,7 +261,7 @@ public class LVEnhancer extends Enhancer {
         }
     }
 
-    protected static class MethodExecution {
+    public static class MethodExecution {
         protected String[] paramsNames;
         protected String[] varargsNames;
         protected String subject;
@@ -261,6 +275,22 @@ public class LVEnhancer extends Enhancer {
             if(nb < params.length)
                 varargsNames = Arrays.copyOfRange(params, nb, params.length);
             else varargsNames = null;
+        }
+
+        public String[] getParamsNames() {
+            return paramsNames;
+        }
+
+        public String[] getVarargsNames() {
+            return varargsNames;
+        }
+
+        public String getSubject() {
+            return subject;
+        }
+
+        public MethodExecution getCurrentNestedMethodCall() {
+            return currentNestedMethodCall;
         }
     }
 }
