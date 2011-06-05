@@ -1,18 +1,7 @@
 package play.data.binding;
 
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.regex.*;
-
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-
 import play.Logger;
 import play.Play;
 import play.data.Upload;
@@ -21,6 +10,17 @@ import play.data.validation.Validation;
 import play.db.Model;
 import play.exceptions.UnexpectedException;
 import play.utils.Utils;
+
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The binder try to convert String values to Java objects.
@@ -48,15 +48,12 @@ public class Binder {
         supportedTypes.put(clazz, typeBinder);
     }
 
-    static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<Class<?>, BeanWrapper>();
 
     static BeanWrapper getBeanWrapper(Class<?> clazz) {
-        if (!beanwrappers.containsKey(clazz)) {
-            BeanWrapper beanwrapper = BeanWrapper.forClass(clazz);
-            beanwrappers.put(clazz, beanwrapper);
-        }
-        return beanwrappers.get(clazz);
+        return BeanWrapper.forClass(clazz);
     }
+
+
     public final static Object MISSING = new Object();
     public final static Object NO_BINDING = new Object();
 
@@ -70,7 +67,7 @@ public class Binder {
             String[] value = params.get(name + suffix);
 
             if (Logger.isTraceEnabled()) {
-                Logger.trace("bindInternal: value [" + value + "]");
+                Logger.trace("bindInternal: value [" + value.toString() + "]");
                 Logger.trace("bindInternal: profile [" + Utils.join(profiles, ",") + "]");
             }
 
