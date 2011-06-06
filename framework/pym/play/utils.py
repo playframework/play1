@@ -201,9 +201,10 @@ def copy_directory(source, target, exclude = None):
     if not os.path.exists(target):
         os.makedirs(target)
     for root, dirs, files in os.walk(source):
+        path_from_source = root[len(source):]
+        if path_from_source.find('/.') > -1 or path_from_source.find('\\.') > -1:
+            continue
         for file in files:
-            if root.find('/.') > -1 or root.find('\\.') > -1:
-                continue
             if file.find('~') == 0 or file.startswith('.'):
                 continue
 
