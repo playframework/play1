@@ -52,10 +52,21 @@ public class TagContext {
     }
     
     public static TagContext parent(String name) {
-        for(int i=currentStack.get().size()-1; i>=0; i--) {
+        for(int i=currentStack.get().size()-2; i>=0; i--) {
             if(name.equals(currentStack.get().get(i).tagName)) {
                 return currentStack.get().get(i);
             }
+        }
+        return null;
+    }
+
+    public static TagContext parent(String... names) {
+        for(int i=currentStack.get().size()-2; i>=0; i--) {
+        	for(String name : names) {
+	            if(name.equals(currentStack.get().get(i).tagName)) {
+	                return currentStack.get().get(i);
+	            }
+        	}
         }
         return null;
     }
