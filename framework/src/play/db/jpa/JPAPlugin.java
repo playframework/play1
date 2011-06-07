@@ -457,7 +457,7 @@ public class JPAPlugin extends PlayPlugin {
         }
 
         public Long count(List<String> searchFields, String keywords, String where) {
-            String q = "select count(e) from " + clazz.getName() + " e";
+            String q = "select count(*) from " + clazz.getName() + " e";
             if (keywords != null && !keywords.equals("")) {
                 String searchQuery = getSearchQuery(searchFields);
                 if (!searchQuery.equals("")) {

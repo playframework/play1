@@ -154,7 +154,7 @@ public class JPQL {
         if (query.trim().length() == 0) {
             return "select count(*) from " + entityName;
         }
-        return "select count(e) from " + entityName + " e where " + query;
+        return "select count(*) from " + entityName + " e where " + query;
     }
 
     @SuppressWarnings("unchecked")
