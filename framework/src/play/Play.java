@@ -174,6 +174,12 @@ public class Play {
     public static String defaultWebEncoding = "utf-8";
 
     /**
+     * This flag indicates if the app is running in a standalone Play server or
+     * as a WAR in an applicationServer
+     */
+    public static boolean standalonePlayServer = true;
+
+    /**
      * Init the framework
      *
      * @param root The application path
@@ -354,7 +360,7 @@ public class Play {
         } catch (RuntimeException e) {
             if (e.getCause() instanceof IOException) {
                 Logger.fatal("Cannot read "+filename);
-                System.exit(-1);
+                fatalServerErrorOccurred();
             }
         }
         // OK, check for instance specifics configuration
@@ -432,20 +438,17 @@ public class Play {
                 stop();
             }
 
-            if(!shutdownHookEnabled){
-                //registeres shutdown hook - New there's a good chance that we can notify
-                //our plugins that we're going down when some calls ctrl+c or just kills our process..
-                shutdownHookEnabled = true;
-
-                // Try to register shutdown-hook
-                try{
-                    Runtime.getRuntime().addShutdownHook( new Thread() {
-                        public void run(){
+            if( standalonePlayServer) {
+                // Can only register shutdown-hook if running as standalone server
+                if (!shutdownHookEnabled) {
+                    //registers shutdown hook - Now there's a good chance that we can notify
+                    //our plugins that we're going down when some calls ctrl+c or just kills our process..
+                    shutdownHookEnabled = true;
+                    Runtime.getRuntime().addShutdownHook(new Thread() {
+                        public void run() {
                             Play.stop();
                         }
                     });
-                } catch(Exception e) {
-                    Logger.trace("Got error while trying to register JVM-shutdownHook. Probably using GAE");
                 }
             }
 
@@ -568,11 +571,7 @@ public class Play {
                 return true;
             }
             Logger.error("Precompiled classes are missing!!");
-            try {
-                System.exit(-1);
-            } catch (Exception ex) {
-                // Will not work in some application servers
-            }
+            fatalServerErrorOccurred();
             return false;
         }
         try {
@@ -596,11 +595,7 @@ public class Play {
             return true;
         } catch (Throwable e) {
             Logger.error(e, "Cannot start in PROD mode with errors");
-            try {
-                System.exit(-1);
-            } catch (Exception ex) {
-                // Will not work in some application servers
-            }
+            fatalServerErrorOccurred();
             return false;
         }
     }
@@ -793,5 +788,21 @@ public class Play {
         return id.matches("test|test-?.*");
     }
     
+
+    /**
+     * Call this method when there has been a fatal error that Play cannot recover from
+     */
+    public static void fatalServerErrorOccurred() {
+        if (standalonePlayServer) {
+            // Just quit the process
+            System.exit(-1);
+        } else {
+            // Cannot quit the process while running inside an applicationServer
+            String msg = "A fatal server error occurred";
+            Logger.error(msg);
+            throw new Error(msg);
+        }
+    }
+
 
 }
