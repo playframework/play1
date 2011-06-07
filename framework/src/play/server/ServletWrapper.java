@@ -62,6 +62,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
     private static boolean routerInitializedWithContext = false;
 
     public void contextInitialized(ServletContextEvent e) {
+        Play.standalonePlayServer = false;
         String appDir = e.getServletContext().getRealPath("/WEB-INF/application");
         File root = new File(appDir);
         final String playId = e.getServletContext().getInitParameter("play.id");

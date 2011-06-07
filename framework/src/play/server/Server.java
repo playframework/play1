@@ -39,7 +39,7 @@ public class Server {
 
         if (httpPort == httpsPort) {
             Logger.error("Could not bind on https and http on the same port " + httpPort);
-            System.exit(-1);
+            Play.fatalServerErrorOccurred();
         }
 
         InetAddress address = null;
@@ -53,7 +53,7 @@ public class Server {
 
         } catch (Exception e) {
             Logger.error(e, "Could not understand http.address");
-            System.exit(-1);
+            Play.fatalServerErrorOccurred();
         }
         try {
             if (p.getProperty("https.address") != null) {
@@ -63,7 +63,7 @@ public class Server {
             }
         } catch (Exception e) {
             Logger.error(e, "Could not understand https.address");
-            System.exit(-1);
+            Play.fatalServerErrorOccurred();
         }
         ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
                 Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
@@ -92,7 +92,7 @@ public class Server {
 
         } catch (ChannelException e) {
             Logger.error("Could not bind on port " + httpPort, e);
-            System.exit(-1);
+            Play.fatalServerErrorOccurred();
         }
 
         bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
@@ -123,7 +123,7 @@ public class Server {
 
         } catch (ChannelException e) {
             Logger.error("Could not bind on port " + httpsPort, e);
-            System.exit(-1);
+            Play.fatalServerErrorOccurred();
         }
 
     }
@@ -162,4 +162,5 @@ public class Server {
             Logger.info("Done.");
         }
     }
+
 }

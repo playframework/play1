@@ -105,9 +105,6 @@ public class LVEnhancer extends Enhancer {
                 }
             } catch(Exception e) {
                 throw new UnexpectedException("LVEnhancer: cannot enhance the behavior '" + behavior.getLongName() + "'", e);
-                //e.printStackTrace();
-                //new FileOutputStream("/tmp/" + ctClass.getName() + ".class").write(applicationClass.enhancedByteCode);
-                //System.exit(0);
             }
         }
         applicationClass.enhancedByteCode = ctClass.toBytecode();
