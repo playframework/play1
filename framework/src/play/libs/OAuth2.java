@@ -42,10 +42,15 @@ public class OAuth2 {
      *
      * @param callbackURL
      */
-    public void retrieveVerificationCode(String callbackURL) {
-        throw new Redirect(authorizationURL
-                + "?client_id=" + clientid
-                + "&redirect_uri=" + callbackURL);
+    public void retrieveVerificationCode(String callbackURL, String... params) {
+		StringBuilder url = new StringBuilder(authorizationURL);
+		url.append("?client_id=").append(clientid).append("&redirect_uri=").append(callbackURL);
+		
+		for(int i=0; i<params.length; i+=2)		{
+			url.append("&").append(params[i]).append("=").append(WS.encode(params[i+1]));
+		}
+		
+        throw new Redirect(url.toString());
     }
 
     public void retrieveVerificationCode() {
