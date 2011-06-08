@@ -4,7 +4,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play war [app_path] [--deps] [--%fwk_id] --output=war_path [--zip]
+~ play war [app_path] [--deps] [--%fwk_id] [--output=war_path] [--zip]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -19,6 +19,11 @@
 ~ ~~~~~~~~~
 ~ --output, or -o: 
 ~ The path where the WAR directory will be created. The contents of this directory will first be deleted.
+~ If ommited, the directory will be created using the "application.name" and "application.version" properties
+~ from the application.conf file. If there is no "application.version" defined in the configuration file, the
+~ current timestamp will be used. The default pattern is {application.name}-{application.version}.
+~ When specified, you can use "{version}" if you want to add the version in the name.
+~ Example: -o MyApp-{version}
 ~
 ~ --zip:
 ~ By default, the script creates an exploded WAR. If you want a zipped archive, specify the --zip option.

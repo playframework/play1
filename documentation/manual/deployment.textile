@@ -10,7 +10,7 @@ The built-in HTTP server can serve thousands of HTTP requests per second so it w
 
 Those servers support long polling and allow to manage very long requests (waiting for a long task to complete), and direct streaming of File objects (and any InputStream if you specify the Content-Length), without blocking the execution thread.
 
-You will have less problems running your application this way, as you will use the same environment that you used during the development process. A lot of bugs can be discovered only when you deploy to a JEE application server (different home dir, classloader issues, library conflicts, etc...).
+You will have less problems running your application this way, as you will use the same environment that you used during the development process. A lot of bugs can be discovered only when you deploy to a JEE application server (different home dir, classloader issues, libray conflicts, etc...).
 
 Please refer to the "'Put your application in production' page":production for more information.
 
@@ -27,9 +27,17 @@ These application server are known to work with Play 1.1 but feel free to report
 
 h3. Deploying
 
-You need to package your application as a war file. This is easily done with the following command:
+You need to package your application as a war folder. This is easily done with the following command:
 
-bc. play war myapp -o myapp.war
+bc. play war myapp
+
+If you want your application as a war file, just add the "--zip" parameter:
+
+bc. play war myapp --zip
+
+Do you want a custom name for your war packaging?
+
+bc. play war myapp -o myapp-{version}.war --zip
 
 p(note). Please note that your application server must support deployment of exploded WAR files.
 
