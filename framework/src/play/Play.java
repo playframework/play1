@@ -337,39 +337,54 @@ public class Play {
      * Read application.conf and resolve overriden key using the play id mechanism.
      */
     public static void readConfiguration() {
+        configuration = readOneConfigurationFile("application.conf", new HashSet<String>());
+        // Plugins
+        pluginCollection.onConfigurationRead();
+    }
+
+
+    private static Properties readOneConfigurationFile(String filename, Set<String> seenFileNames) {
+
+        if (seenFileNames.contains(filename)) {
+            throw new RuntimeException("Detected recursive @include usage. Have seen the file " + filename + " before");
+        }
+        seenFileNames.add(filename);
+
+        Properties propsFromFile=null;
+
         VirtualFile appRoot = VirtualFile.open(applicationPath);
-        conf = appRoot.child("conf/application.conf");
+        conf = appRoot.child("conf/" + filename);
         try {
-            configuration = IO.readUtf8Properties(conf.inputstream());
+            propsFromFile = IO.readUtf8Properties(conf.inputstream());
         } catch (RuntimeException e) {
             if (e.getCause() instanceof IOException) {
-                Logger.fatal("Cannot read application.conf");
+                Logger.fatal("Cannot read "+filename);
                 fatalServerErrorOccurred();
             }
         }
         // Ok, check for instance specifics configuration
         Properties newConfiguration = new OrderSafeProperties();
         Pattern pattern = Pattern.compile("^%([a-zA-Z0-9_\\-]+)\\.(.*)$");
-        for (Object key : configuration.keySet()) {
+        for (Object key : propsFromFile.keySet()) {
             Matcher matcher = pattern.matcher(key + "");
             if (!matcher.matches()) {
-                newConfiguration.put(key, configuration.get(key).toString().trim());
+                newConfiguration.put(key, propsFromFile.get(key).toString().trim());
             }
         }
-        for (Object key : configuration.keySet()) {
+        for (Object key : propsFromFile.keySet()) {
             Matcher matcher = pattern.matcher(key + "");
             if (matcher.matches()) {
                 String instance = matcher.group(1);
                 if (instance.equals(id)) {
-                    newConfiguration.put(matcher.group(2), configuration.get(key).toString().trim());
+                    newConfiguration.put(matcher.group(2), propsFromFile.get(key).toString().trim());
                 }
             }
         }
-        configuration = newConfiguration;
+        propsFromFile = newConfiguration;
         // Resolve ${..}
         pattern = Pattern.compile("\\$\\{([^}]+)}");
-        for (Object key : configuration.keySet()) {
-            String value = configuration.getProperty(key.toString());
+        for (Object key : propsFromFile.keySet()) {
+            String value = propsFromFile.getProperty(key.toString());
             Matcher matcher = pattern.matcher(value);
             StringBuffer newValue = new StringBuffer(100);
             while (matcher.find()) {
@@ -389,23 +404,23 @@ public class Play {
                 matcher.appendReplacement(newValue, r.replaceAll("\\\\", "\\\\\\\\"));
             }
             matcher.appendTail(newValue);
-            configuration.setProperty(key.toString(), newValue.toString());
+            propsFromFile.setProperty(key.toString(), newValue.toString());
         }
         // Include
         Map<Object, Object> toInclude = new HashMap<Object, Object>(16);
-        for (Object key : configuration.keySet()) {
+        for (Object key : propsFromFile.keySet()) {
             if (key.toString().startsWith("@include.")) {
                 try {
-                    toInclude.putAll(IO.readUtf8Properties(appRoot.child("conf/" + configuration.getProperty(key.toString())).inputstream()));
+                    String filenameToInclude = propsFromFile.getProperty(key.toString());
+                    toInclude.putAll( readOneConfigurationFile(filenameToInclude, seenFileNames) );
                 } catch (Exception ex) {
                     Logger.warn("Missing include: %s", key);
                 }
             }
         }
-        configuration.putAll(toInclude);
-        // Plugins
-        pluginCollection.onConfigurationRead();
+        propsFromFile.putAll(toInclude);
 
+        return propsFromFile;
     }
 
     /**
