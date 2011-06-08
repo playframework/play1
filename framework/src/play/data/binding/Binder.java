@@ -48,15 +48,11 @@ public class Binder {
         supportedTypes.put(clazz, typeBinder);
     }
 
-    static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<Class<?>, BeanWrapper>();
 
     static BeanWrapper getBeanWrapper(Class<?> clazz) {
-        if (!beanwrappers.containsKey(clazz)) {
-            BeanWrapper beanwrapper = BeanWrapper.forClass(clazz);
-            beanwrappers.put(clazz, beanwrapper);
-        }
-        return beanwrappers.get(clazz);
+        return BeanWrapper.forClass(clazz);
     }
+
     public final static Object MISSING = new Object();
     public final static Object NO_BINDING = new Object();
 
