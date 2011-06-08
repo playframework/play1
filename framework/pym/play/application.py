@@ -324,9 +324,7 @@ class PlayConfParser:
         return washedResult
 
     def get(self, key):
-        print "key:" + key
         if key in self.entries:
-            print "value:"+self.entries[key]
             return self.entries[key]
         if key in self.DEFAULTS:
             return self.DEFAULTS[key]
