@@ -897,29 +897,59 @@ public class Controller implements ControllerSupport {
     protected static void await(int millis) {
         Request.current().isNew = false;
         verifyContinuationsEnhancement();
-        storeOrRestoreDataStateForContinuations();
+        storeOrRestoreDataStateForContinuations(null);
         Continuation.suspend(millis);
     }
 
-    private static void storeOrRestoreDataStateForContinuations() {
+    /**
+     * Used to store data before Continuation suspend and restore after.
+     *
+     * If isRestoring == null, the method will try to resolve it.
+     *
+     * important: when using isRestoring == null you have to KNOW that continuation suspend
+     * is going to happen and that this method is called twice for this single
+     * continuation suspend operation for this specific request.
+     *
+     * @param isRestoring true if restoring, false if storing, and null if you don't know
+     */
+    private static void storeOrRestoreDataStateForContinuations(Boolean isRestoring) {
 
-        //renderArgs
-        Scope.RenderArgs renderArgs = (Scope.RenderArgs) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS);
-        if ( renderArgs!=null ) {
+        if (isRestoring==null) {
+            // Sometimes, due to how continuations suspends/restarts the code, we do not
+            // know when calling this method if we're suspending or restoring.
+
+            final String continuationStateKey = "__storeOrRestoreDataStateForContinuations_started";
+            if ( Http.Request.current().args.remove(continuationStateKey)!=null ) {
+                isRestoring = true;
+            } else {
+                Http.Request.current().args.put(continuationStateKey, true);
+                isRestoring = false;
+            }
+        }
+
+        if (isRestoring) {
             //we are restoring after suspend
-            Scope.RenderArgs.current.set( renderArgs);
+
+            // localVariablesState
             Stack<MethodExecution> currentMethodExecutions = (Stack<MethodExecution>) Request.current().args.get(ActionInvoker.CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES);
             if(currentMethodExecutions != null)
                 LVEnhancer.LVEnhancerRuntime.reinitRuntime(currentMethodExecutions);
+
+            // renderArgs
+            Scope.RenderArgs renderArgs = (Scope.RenderArgs) Request.current().args.remove(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS);
+            Scope.RenderArgs.current.set( renderArgs);
+
         } else {
-            // we are capturing before suspend
-            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS, Scope.RenderArgs.current());
+            // we are storing before suspend
+
+            // localVariablesState
             Stack<MethodExecution> currentMethodExecutions = new Stack<LVEnhancer.MethodExecution>();
             currentMethodExecutions.addAll(LVEnhancer.LVEnhancerRuntime.getCurrentMethodParams());
             Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES, currentMethodExecutions);
+
+            // renderArgs
+            Request.current().args.put(ActionInvoker.CONTINUATIONS_STORE_RENDER_ARGS, Scope.RenderArgs.current());
         }
-
-
     }
 
     protected static void await(int millis, F.Action0 callback) {
@@ -930,7 +960,7 @@ public class Controller implements ControllerSupport {
 
     @SuppressWarnings("unchecked")
     protected static <T> T await(Future<T> future) {
-        storeOrRestoreDataStateForContinuations();
+
         if(future != null) {
             Request.current().args.put(ActionInvoker.F, future);
         } else if(Request.current().args.containsKey(ActionInvoker.F)) {
@@ -943,6 +973,7 @@ public class Controller implements ControllerSupport {
 
             // Now reset the Controller invocation context
             ControllerInstrumentation.stopActionCall();
+            storeOrRestoreDataStateForContinuations( true );
         } else {
             throw new UnexpectedException("Lost promise for " + Http.Request.current() + "!");
         }
@@ -956,6 +987,7 @@ public class Controller implements ControllerSupport {
         } else {
             Request.current().isNew = false;
             verifyContinuationsEnhancement();
+            storeOrRestoreDataStateForContinuations( false );
             Continuation.suspend(future);
             return null;
         }
