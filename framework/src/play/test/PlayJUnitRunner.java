@@ -26,7 +26,7 @@ public class PlayJUnitRunner extends Runner {
     public PlayJUnitRunner(Class testClass) throws ClassNotFoundException, InitializationError {
         synchronized (Play.class) {
             if (!Play.started) {
-                Play.init(new File("."), "test");
+                Play.init(new File("."), PlayJUnitRunner.getPlayId());
                 Play.javaPath.add(Play.getVirtualFile("test"));
                 Play.start();
                 useCustomRunner = true;
@@ -35,6 +35,14 @@ public class PlayJUnitRunner extends Runner {
             Class classToRun = Play.classloader.loadApplicationClass(testClass.getName());
             jUnit4 = new JUnit4(classToRun);
         }
+    }
+
+    private static String getPlayId() {
+        String playId = System.getProperty("play.id", "test");
+        if(! (playId.startsWith("test-") && playId.length() >= 6)) {
+            playId = "test";
+        }
+        return playId;
     }
 
     @Override
@@ -60,7 +68,7 @@ public class PlayJUnitRunner extends Runner {
                     public void evaluate() throws Throwable {
                         if (!Play.started) {
                             Play.forceProd = true;
-                            Play.init(new File("."), "test");
+                            Play.init(new File("."), PlayJUnitRunner.getPlayId());
                         }
 
                         try {
