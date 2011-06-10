@@ -1,5 +1,6 @@
 package play.classloading.enhancers;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -64,6 +65,38 @@ public class LocalvariablesNamesEnhancer extends Enhancer {
             throw new UnexpectedException("Cannot extract parameter names", e);
         }
     }
+    
+    public static List<String> lookupParameterNames(Method method) {
+       try {
+           List<String> parameters = new ArrayList<String>();
+
+           ClassPool classPool = newClassPool();
+           CtClass ctClass = classPool.get(method.getDeclaringClass().getName());
+           CtClass[] cc = new CtClass[method.getParameterTypes().length];
+           for (int i = 0; i < method.getParameterTypes().length; i++) {
+               cc[i] = classPool.get(method.getParameterTypes()[i].getName());
+           }
+           CtMethod ctMethod = ctClass.getDeclaredMethod(method.getName(),cc);
+
+           // Signatures names
+           CodeAttribute codeAttribute = (CodeAttribute) ctMethod.getMethodInfo().getAttribute("Code");
+           if (codeAttribute != null) {
+               LocalVariableAttribute localVariableAttribute = (LocalVariableAttribute) codeAttribute.getAttribute("LocalVariableTable");
+               if (localVariableAttribute != null && localVariableAttribute.tableLength() >= ctMethod.getParameterTypes().length) {
+                   for (int i = 0; i < ctMethod.getParameterTypes().length + 1; i++) {
+                       String name = localVariableAttribute.getConstPool().getUtf8Info(localVariableAttribute.nameIndex(i));
+                       if (!name.equals("this")) {
+                           parameters.add(name);
+                       }
+                   }
+               }
+           }
+
+           return parameters;
+       } catch (Exception e) {
+           throw new UnexpectedException("Cannot extract parameter names", e);
+       }
+   }
 
     //
     @Override
