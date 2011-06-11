@@ -100,7 +100,7 @@ public class Bootstrap extends Job {
 
 p(note). **Tip**
  
-We use the CRON expression parser from the "Quartz library":http://www.opensymphony.com/quartz/wikidocs/CronTriggers%20Tutorial.html.
+We use the CRON expression parser from the "Quartz library":http://www.quartz-scheduler.org/docs/tutorials/crontrigger.html.
 
 You don’t need to return a result. Even if you do it, the result will be lost.
 
