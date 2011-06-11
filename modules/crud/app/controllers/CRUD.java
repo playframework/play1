@@ -88,7 +88,7 @@ public abstract class CRUD extends Controller {
         notFoundIfNull(object);
         Binder.bind(object, "object", params.all());
         validation.valid(object);
-        if (Validation.hasErrors()) {
+        if (validation.hasErrors()) {
             renderArgs.put("error", play.i18n.Messages.get("crud.hasErrors"));
             try {
                 render(request.controller.replace(".", "/") + "/show.html", type, object);
@@ -125,7 +125,7 @@ public abstract class CRUD extends Controller {
         Model object = (Model) constructor.newInstance();
         Binder.bind(object, "object", params.all());
         validation.valid(object);
-        if (Validation.hasErrors()) {
+        if (validation.hasErrors()) {
             renderArgs.put("error", play.i18n.Messages.get("crud.hasErrors"));
             try {
                 render(request.controller.replace(".", "/") + "/blank.html", type, object);
