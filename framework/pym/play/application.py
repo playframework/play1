@@ -200,7 +200,7 @@ class PlayApplication(object):
         self.jpda_port = self.readConf('jpda.port')
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.bind(('127.0.0.1', int(self.jpda_port)))
+            s.bind(('', int(self.jpda_port)))
             s.close()
         except socket.error, e:
             print 'JPDA port %s is already used. Will try to use any free port for debugging' % self.jpda_port
