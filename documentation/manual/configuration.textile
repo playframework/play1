@@ -836,6 +836,15 @@ Values - ‘standard names’ from the JDK Security API:
 
 Default: @JKS@
 
+bc. play.netty.clientAuth
+
+Values 
+
+* @want@ Controls whether accepted server-mode SSLSockets will be initially configured to request client authentication. 
+* @need@ Controls whether accepted server-mode SSLSockets will be initially configured to require client authentication.
+* @none@ None of the above
+
+Default: @none@
 
 h2(#upload). File upload
 
