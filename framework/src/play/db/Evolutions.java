@@ -194,6 +194,9 @@ public class Evolutions extends PlayPlugin {
 
     @Override
     public void beforeInvocation() {
+        if(isDisabled()) {
+            return;
+        }
         try {
             checkEvolutionsState();
         } catch (InvalidDatabaseRevision e) {
@@ -208,7 +211,7 @@ public class Evolutions extends PlayPlugin {
 
     @Override
     public void onApplicationStart() {
-        if (Play.mode.isProd()) {
+        if (! isDisabled() && Play.mode.isProd()) {
             try {
                 checkEvolutionsState();
             } catch (InvalidDatabaseRevision e) {
@@ -220,6 +223,13 @@ public class Evolutions extends PlayPlugin {
         }
     }
 
+    /**
+     * Checks if evolutions is disabled in application.conf (property "evolutions.enabled")
+     */
+    private boolean isDisabled() {
+        return "false".equals(Play.configuration.getProperty("evolutions.enabled", "true"));
+    }
+    
     public static synchronized void resolve(int revision) {
         try {
             execute("update play_evolutions set state = 'applied' where state = 'applying_up' and id = " + revision);
