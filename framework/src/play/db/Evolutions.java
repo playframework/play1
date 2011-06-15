@@ -194,7 +194,7 @@ public class Evolutions extends PlayPlugin {
 
     @Override
     public void beforeInvocation() {
-        if(isDisabled()) {
+        if(isDisabled() || Play.mode.isProd()) {
             return;
         }
         try {
