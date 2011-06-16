@@ -22,9 +22,9 @@ public class IPv4AddressCheck extends AbstractAnnotationCheck<IPv4Address> {
         }
         try {
             String[] parts = value.toString().split("[.]");
-			if (parts.length != 4) {
-				return false;
-			}
+            if (parts.length != 4) {
+                return false;
+            }
             for(int i=0; i<4; i++) {
                 int p = Integer.valueOf(parts[i]);
                 if(p < 0 || p > 255) {
