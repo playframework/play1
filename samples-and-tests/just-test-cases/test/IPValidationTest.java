@@ -17,6 +17,8 @@ public class IPValidationTest extends UnitTest {
 		assertTrue(testv4("392.3.1.222", false));
 		assertTrue(testv4("127.0.0.1", true));
 		assertTrue(testv4("192.167.1.2", true));
+		assertTrue(testv4("32.3.222", false));
+		assertTrue(testv4("32.3.1.222.32", false));
 	}
 
 	@Test
