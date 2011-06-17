@@ -34,6 +34,11 @@ import java.util.Stack;
  */
 public class Evolutions extends PlayPlugin {
 
+	/**
+	 * Indicates if evolutions is disabled in application.conf ("evolutions.enabled" property)
+	 */
+	private boolean disabled = false;
+	
     protected static ComboPooledDataSource getDatasource() {
         DBConfig dbConfig = DB.getDBConfig(DBConfig.defaultDbConfigName, true);
         if (dbConfig==null) {
@@ -194,7 +199,7 @@ public class Evolutions extends PlayPlugin {
 
     @Override
     public void beforeInvocation() {
-        if(isDisabled() || Play.mode.isProd()) {
+        if(disabled || Play.mode.isProd()) {
             return;
         }
         try {
@@ -211,7 +216,9 @@ public class Evolutions extends PlayPlugin {
 
     @Override
     public void onApplicationStart() {
-        if (! isDisabled() && Play.mode.isProd()) {
+    	disabled = "false".equals(Play.configuration.getProperty("evolutions.enabled", "true"));
+    	
+        if (! disabled && Play.mode.isProd()) {
             try {
                 checkEvolutionsState();
             } catch (InvalidDatabaseRevision e) {
@@ -221,13 +228,6 @@ public class Evolutions extends PlayPlugin {
                 throw e;
             }
         }
-    }
-
-    /**
-     * Checks if evolutions is disabled in application.conf (property "evolutions.enabled")
-     */
-    private boolean isDisabled() {
-        return "false".equals(Play.configuration.getProperty("evolutions.enabled", "true"));
     }
     
     public static synchronized void resolve(int revision) {
