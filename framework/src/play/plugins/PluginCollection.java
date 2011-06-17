@@ -78,6 +78,7 @@ public class PluginCollection {
         return Collections.unmodifiableList( new ArrayList<PlayPlugin>( list ));
     }
 
+
     /**
      * Enable found plugins
      */
@@ -86,7 +87,10 @@ public class PluginCollection {
         // Play! plugings
         Enumeration<URL> urls = null;
         try {
-            urls = Play.classloader.getResources( play_plugins_resourceName);
+            // must look in parent classloader first to make sure we find the play.plugins-file
+            // bundled with Play first - This must be to make sure we load all core plugins first to be able to enhance
+            // app-classes used by app-plugins when they are loaded.
+            urls = Play.classloader.getResources( play_plugins_resourceName, true);
         } catch (Exception e) {
             Logger.error("Error loading play.plugins", e);
         }

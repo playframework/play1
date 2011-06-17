@@ -264,28 +264,58 @@ public class ApplicationClassloader extends ClassLoader {
     }
 
     /**
-     * You know ...
+     * Returns all resources with specified name in sorted order:
+     * First the ones found in Play.javaPath, then what is found in parent classloader
      */
     @Override
     public Enumeration<URL> getResources(String name) throws IOException {
-        List<URL> urls = new ArrayList<URL>();
+        return getResources(name, false);
+    }
+
+    /**
+     *  Returns all resources with specified name in sorted order:
+     *  if lookInParentClassloaderFirst == true, then we look in parent classloader before
+     *  looking in Play.javaPath
+     */
+    public Enumeration<URL> getResources(String name, boolean lookInParentClassloaderFirst) throws IOException {
+        List<URL> urlsFromJavaPath = new ArrayList<URL>();
         for (VirtualFile vf : Play.javaPath) {
             VirtualFile res = vf.child(name);
             if (res != null && res.exists()) {
                 try {
-                    urls.add(res.getRealFile().toURI().toURL());
+                    urlsFromJavaPath.add(res.getRealFile().toURI().toURL());
                 } catch (MalformedURLException ex) {
                     throw new UnexpectedException(ex);
                 }
             }
         }
+
+        List<URL> urlsFromParentClassloader = new ArrayList<URL>();
         Enumeration<URL> parent = super.getResources(name);
         while (parent.hasMoreElements()) {
             URL next = parent.nextElement();
-            if (!urls.contains(next)) {
-                urls.add(next);
+            urlsFromParentClassloader.add(next);
+        }
+
+
+        // now we must add all urls in correct order based on lookInParentClassloaderFirst
+        List<URL> urls = new ArrayList<URL>();
+        List<URL> second;
+
+        if (lookInParentClassloaderFirst) {
+            urls.addAll( urlsFromParentClassloader );
+            second = urlsFromJavaPath;
+        } else {
+            urls.addAll( urlsFromJavaPath );
+            second = urlsFromParentClassloader;
+        }
+
+        for (URL url : second) {
+            if (!urls.contains(url)) {
+                urls.add(url);
             }
         }
+
         final Iterator<URL> it = urls.iterator();
         return new Enumeration<URL>() {
 
