@@ -31,10 +31,9 @@ public class PlayJUnitRunner extends Runner {
                 Play.start();
                 useCustomRunner = true;
                 Class classToRun = Play.classloader.loadApplicationClass(testClass.getName());
-                jUnit4 = new JUnit4(classToRun);
-            } else {
-                jUnit4 = new JUnit4(testClass);
             }
+            Class classToRun = Play.classloader.loadApplicationClass(testClass.getName());
+            jUnit4 = new JUnit4(classToRun);
         }
     }
 
