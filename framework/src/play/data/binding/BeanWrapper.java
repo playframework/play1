@@ -50,53 +50,6 @@ public class BeanWrapper {
         return wrappers.values();
     }
 
-    public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Annotation[] annotations) throws Exception {
-        Object instance = newBeanInstance();
-        return bind(name, type, params, prefix, instance, annotations);
-    }
-
-    public Object bind(String name, Type type, Map<String, String[]> params, String prefix, Object instance, Annotation[] annotations) throws Exception {
-        for (Property prop : wrappers.values()) {
-            if (Logger.isTraceEnabled()) {
-                Logger.trace("beanwrapper: prefix [" + prefix + "] prop.getName() [" + prop.getName() + "]");
-                for (String key : params.keySet()) {
-                    Logger.trace("key: [" + key + "]");
-                }
-            }
-
-            String newPrefix = prefix + "." + prop.getName();
-            if (name.equals("") && prefix.equals("") && newPrefix.startsWith(".")) {
-                newPrefix = newPrefix.substring(1);
-            }
-
-            if (Logger.isTraceEnabled()) {
-                Logger.trace("beanwrapper: bind name [" + name + "] annotation [" + Utils.join(annotations, " ") + "]");
-            }
-
-            Object value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), prop.getAnnotations(), params, newPrefix, prop.profiles);
-            if (value != Binder.MISSING) {
-                if (value != Binder.NO_BINDING) {
-                    prop.setValue(instance, value);
-                }
-            } else {
-                if (Logger.isTraceEnabled()) {
-                    Logger.trace("beanwrapper: bind annotation [" + Utils.join(prop.getAnnotations(), " ") + "]");
-                }
-
-                value = Binder.bindInternal(name, prop.getType(), prop.getGenericType(), annotations, params, newPrefix, prop.profiles);
-
-                if (Logger.isTraceEnabled()) {
-                    Logger.trace("beanwrapper: value [" + value + "]");
-                }
-
-                if (value != Binder.MISSING && value != Binder.NO_BINDING) {
-                    prop.setValue(instance, value);
-                }
-            }
-        }
-        return instance;
-    }
-
     public void set(String name, Object instance, Object value) {
         for (Property prop : wrappers.values()) {
             if (name.equals(prop.name)) {

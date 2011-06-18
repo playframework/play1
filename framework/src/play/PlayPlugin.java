@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.data.binding.RootParamNode;
 import play.db.Model;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
@@ -48,17 +49,41 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
-     * Called when play need to bind a Java object from HTTP params
+     * Use method using RootParamNode instead
+     * @return
      */
+    @Deprecated
     public Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params) {
         return null;
     }
 
     /**
-     * Called when play need to bind an existing Java object from HTTP params
+     * Called when play need to bind a Java object from HTTP params.
+     *
+     * When overriding this method, do not call super impl.. super impl is calling old bind method
+     * to be backward compatible.
      */
+    public Object bind( RootParamNode rootParamNode, String name, Class<?> clazz, Type type, Annotation[] annotations) {
+        // call old method to be backward compatible
+        return bind(name, clazz, type, annotations, rootParamNode.originalParams);
+    }
+
+    /**
+     * Use bindBean instead
+     */
+    @Deprecated
     public Object bind(String name, Object o, Map<String, String[]> params) {
         return null;
+    }
+
+    /**
+     * Called when play need to bind an existing Java object from HTTP params.
+     * When overriding this method, DO NOT call the super method, since its default impl is to
+     * call the old bind method to be backward compatible.
+     */
+    public Object bindBean(RootParamNode rootParamNode, String name, Object bean) {
+        // call old method to be backward compatible.
+        return bind( rootParamNode.getOriginalKey(), bean, rootParamNode.originalParams);
     }
 
     public Map<String, Object> unBind(Object src, String name) {

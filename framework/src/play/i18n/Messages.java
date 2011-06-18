@@ -154,7 +154,7 @@ public class Messages {
             } else {
                 try {
                     // TODO: I think we need to type of direct bind -> primitive and object binder
-                    result[i] = Binder.directBind(args[i] + "", conversions[i]);
+                    result[i] = Binder.directBind(null, args[i] + "", conversions[i], null);
                 } catch(Exception e) {
                     result[i] = null;
                 }

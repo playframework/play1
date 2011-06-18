@@ -32,6 +32,8 @@ import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses;
 import play.data.binding.Binder;
+import play.data.binding.ParamNode;
+import play.data.binding.RootParamNode;
 import play.data.binding.types.DateBinder;
 import play.db.DB;
 import play.db.DBPlugin;
@@ -195,7 +197,10 @@ public class Fixtures {
                         @SuppressWarnings("unchecked")
                         Class<Model> cType = (Class<Model>)Play.classloader.loadClass(type);
                         resolveDependencies(cType, params);
-                        Model model = (Model)Binder.bind("object", cType, cType, null, params);
+
+                        RootParamNode rootParamNode = ParamNode.convert(params);
+
+                        Model model = (Model) Binder.bind(rootParamNode, "object", cType, cType, null);
                         for(Field f : model.getClass().getFields()) {
                             if (f.getType().isAssignableFrom(Map.class)) {	 	
                                 f.set(model, objects.get(key).get(f.getName()));
@@ -395,9 +400,10 @@ public class Fixtures {
                         }
                         ids[i] = idCache.get(id).toString();
                     }
+                    serialized.put("object." + field.name + "." + Model.Manager.factoryFor((Class<? extends Model>)field.relationType).keyName(), ids);
                 }
                 serialized.remove("object." + field.name);
-                serialized.put("object." + field.name + "." + Model.Manager.factoryFor((Class<? extends Model>)field.relationType).keyName(), ids);
+
             }
         }
     }

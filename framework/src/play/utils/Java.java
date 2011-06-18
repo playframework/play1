@@ -21,6 +21,8 @@ import play.Play;
 import play.classloading.ApplicationClassloaderState;
 import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.data.binding.Binder;
+import play.data.binding.ParamNode;
+import play.data.binding.RootParamNode;
 import play.exceptions.UnexpectedException;
 import play.mvc.After;
 import play.mvc.Before;
@@ -178,9 +180,12 @@ public class Java {
         if (paramsNames == null && method.getParameterTypes().length > 0) {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }
+
+        RootParamNode rootParamNode = ParamNode.convert(args);
+
         Object[] rArgs = new Object[method.getParameterTypes().length];
         for (int i = 0; i < method.getParameterTypes().length; i++) {
-            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], args);
+            rArgs[i] = Binder.bind(rootParamNode, paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i]);
         }
         return rArgs;
     }

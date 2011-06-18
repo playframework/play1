@@ -87,7 +87,7 @@ public abstract class CRUD extends Controller {
         notFoundIfNull(type);
         Model object = type.findById(id);
         notFoundIfNull(object);
-        Binder.bind(object, "object", params.all());
+        Binder.bindBean(params.getRootParamNode(), "object", object);
         validation.valid(object);
         if (validation.hasErrors()) {
             renderArgs.put("error", Messages.get("crud.hasErrors"));
@@ -124,7 +124,7 @@ public abstract class CRUD extends Controller {
         Constructor<?> constructor = type.entityClass.getDeclaredConstructor();
         constructor.setAccessible(true);
         Model object = (Model) constructor.newInstance();
-        Binder.bind(object, "object", params.all());
+        Binder.bindBean(params.getRootParamNode(), "object", object);
         validation.valid(object);
         if (validation.hasErrors()) {
             renderArgs.put("error", Messages.get("crud.hasErrors"));
