@@ -38,6 +38,7 @@ Selenium.prototype.assertNotEquals = function(a, b) {
     }
 };
 
+// assertTextLike seems to NOT assert on errors in Chrome
 Selenium.prototype.assertTextLike = function(a, b) {
     a = a.replace(/\n/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ')
     b = b.replace(/\n/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ')

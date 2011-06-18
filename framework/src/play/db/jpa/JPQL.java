@@ -7,6 +7,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import play.Play;
+import play.data.binding.ParamNode;
+import play.data.binding.RootParamNode;
 import play.db.DBConfig;
 import play.db.jpa.GenericModel.JPAQuery;
 import play.mvc.Scope.Params;
@@ -107,7 +109,10 @@ public class JPQL {
 
     public JPABase create(String entity, String name, Params params) throws Exception {
         Object o = Play.classloader.loadClass(entity).newInstance();
-        return ((GenericModel) o).edit(name, params.all());
+
+        RootParamNode rootParamNode = ParamNode.convert(params.all());
+
+        return ((GenericModel) o).edit(rootParamNode, name);
     }
 
     public String createFindByQuery(String entityName, String entityClass, String query, Object... params) {

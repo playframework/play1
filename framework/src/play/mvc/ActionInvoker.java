@@ -9,7 +9,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +19,7 @@ import play.cache.CacheFor;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
 import play.data.binding.Binder;
+import play.data.binding.RootParamNode;
 import play.data.parsing.UrlEncodedParser;
 import play.data.validation.Validation;
 import play.exceptions.ActionNotFoundException;
@@ -613,22 +613,25 @@ public class ActionInvoker {
         if (paramsNames == null && method.getParameterTypes().length > 0) {
             throw new UnexpectedException("Parameter names not found for method " + method);
         }
+
+        RootParamNode root = Scope.Params.current().getRootParamNode();
+
         Object[] rArgs = new Object[method.getParameterTypes().length];
         for (int i = 0; i < method.getParameterTypes().length; i++) {
 
-            Class<?> type = method.getParameterTypes()[i];
-            Map<String, String[]> params = new HashMap<String, String[]>();
-            if (type.equals(String.class) || Number.class.isAssignableFrom(type) || type.isPrimitive()) {
-                params.put(paramsNames[i], Scope.Params.current().getAll(paramsNames[i]));
-            } else {
-                params.putAll(Scope.Params.current().all());
-            }
+             Class<?> type = method.getParameterTypes()[i];
 
             if (Logger.isTraceEnabled()) {
                 Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.join(method.getParameterAnnotations()[i], " ") + "]");
             }
 
-            rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params, o, method, i + 1);
+            rArgs[i] = Binder.bind(
+                    root,
+                    paramsNames[i],
+                    method.getParameterTypes()[i],
+                    method.getGenericParameterTypes()[i],
+                    method.getParameterAnnotations()[i],
+                    new Binder.MethodAndParamInfo(o, method, i + 1));
         }
         return rArgs;
     }

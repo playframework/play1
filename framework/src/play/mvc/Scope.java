@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
 import play.Logger;
 import play.Play;
 import play.data.binding.Binder;
+import play.data.binding.ParamNode;
+import play.data.binding.RootParamNode;
 import play.data.parsing.DataParser;
 import play.data.parsing.TextParser;
 import play.data.validation.Validation;
@@ -353,6 +355,18 @@ public class Scope {
         boolean requestIsParsed;
         private Map<String, String[]> data = new HashMap<String, String[]>();
 
+        boolean rootParamsNodeIsGenerated = false;
+        private RootParamNode rootParamNode = null;
+
+        public RootParamNode getRootParamNode() {
+            checkAndParse();
+            if (!rootParamsNodeIsGenerated) {
+                rootParamNode = ParamNode.convert(data);
+                rootParamsNodeIsGenerated = true;
+            }
+            return rootParamNode;
+        }
+
         public void checkAndParse() {
             if (!requestIsParsed) {
                 Http.Request request = Http.Request.current();
@@ -379,16 +393,22 @@ public class Scope {
         public void put(String key, String value) {
             checkAndParse();
             data.put(key, new String[]{value});
+            // make sure rootsParamsNode is regenerated if needed
+            rootParamsNodeIsGenerated = false;
         }
 
         public void put(String key, String[] values) {
             checkAndParse();
             data.put(key, values);
+            // make sure rootsParamsNode is regenerated if needed
+            rootParamsNodeIsGenerated = false;
         }
 
         public void remove(String key) {
             checkAndParse();
             data.remove(key);
+            // make sure rootsParamsNode is regenerated if needed
+            rootParamsNodeIsGenerated = false;
         }
 
         public String get(String key) {
@@ -403,9 +423,10 @@ public class Scope {
 
         @SuppressWarnings("unchecked")
         public <T> T get(String key, Class<T> type) {
+            checkAndParse();
             try {
                 // TODO: This is used by the test, but this is not the most convenient.
-                return (T) Binder.bind(key, type, type, null, data);
+                return (T) Binder.bind(rootParamNode, key, type, type, null);
             } catch (Exception e) {
                 Validation.addError(key, "validation.invalid");
                 return null;
@@ -414,12 +435,15 @@ public class Scope {
 
         @SuppressWarnings("unchecked")
         public <T> T get(Annotation[] annotations, String key, Class<T> type) {
+            throw new RuntimeException("method not yet supported after refactoring Binding-code");
+            /**
             try {
-                return (T) Binder.directBind(key, annotations, get(key), type);
+                return (T) Binder.directBind(annotations, get(key), type, null);
             } catch (Exception e) {
                 Validation.addError(key, "validation.invalid");
                 return null;
             }
+             */
         }
 
         public boolean _contains(String key) {

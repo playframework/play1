@@ -12,6 +12,8 @@ import play.Play;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.data.binding.Binder;
+import play.data.binding.ParamNode;
+import play.data.binding.RootParamNode;
 import play.db.DB;
 import play.db.DBConfig;
 import play.db.Model;
@@ -55,35 +57,36 @@ public class JPAPlugin extends PlayPlugin {
     public static boolean autoTxs = true;
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Object bind(String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations, Map<String, String[]> params) {
+    public Object bind(RootParamNode rootParamNode, String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations) {
         // TODO need to be more generic in order to work with JPASupport
         if (JPABase.class.isAssignableFrom(clazz)) {
+
+            ParamNode paramNode = rootParamNode.getChild(name, true);
+
             String keyName = Model.Manager.factoryFor(clazz).keyName();
-            String idKey = name + "." + keyName;
-            if (params.containsKey(idKey) && params.get(idKey).length > 0 && params.get(idKey)[0] != null && params.get(idKey)[0].trim().length() > 0) {
-                String id = params.get(idKey)[0];
+            String id = paramNode.getChild(keyName, true).getFirstValue(null);
+            if (id != null && id.trim().length()>0) {
                 try {
                     EntityManager em = JPABase.getJPAConfig(clazz).getJPAContext().em();
                     Query query = em.createQuery("from " + clazz.getName() + " o where o." + keyName + " = ?");
-                    query.setParameter(1, play.data.binding.Binder.directBind(name, annotations, id + "", Model.Manager.factoryFor(clazz).keyType()));
+                    query.setParameter(1, Binder.directBind(annotations, id + "", Model.Manager.factoryFor(clazz).keyType(), null));
                     Object o = query.getSingleResult();
-                    return GenericModel.edit(o, name, params, annotations);
+                    return GenericModel.edit(rootParamNode, name, o, annotations);
                 } catch (NoResultException e) {
                     // ok
                 } catch (Exception e) {
                     throw new UnexpectedException(e);
                 }
             }
-            return GenericModel.create(clazz, name, params, annotations);
+            return GenericModel.create(rootParamNode, name, clazz, annotations);
         }
-        return super.bind(name, clazz, type, annotations, params);
+        return null;
     }
 
     @Override
-    public Object bind(String name, Object o, Map<String, String[]> params) {
-        if (o instanceof JPABase) {
-            return GenericModel.edit(o, name, params, null);
+    public Object bindBean(RootParamNode rootParamNode, String name, Object bean) {
+        if (bean instanceof JPABase) {
+            return GenericModel.edit(rootParamNode, name, bean, null);
         }
         return null;
     }
@@ -417,7 +420,7 @@ public class JPAPlugin extends PlayPlugin {
                 return null;
             }
             try {
-                return getJPAContext().em().find(clazz, Binder.directBind(id.toString(), Model.Manager.factoryFor(clazz).keyType()));
+                return getJPAContext().em().find(clazz, Binder.directBind(null, id.toString(), Model.Manager.factoryFor(clazz).keyType(), null));
             } catch (Exception e) {
                 // Key is invalid, thus nothing was found
                 return null;

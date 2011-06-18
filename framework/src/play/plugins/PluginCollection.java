@@ -5,6 +5,7 @@ import play.Play;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses;
 import play.classloading.ApplicationClassloader;
+import play.data.binding.RootParamNode;
 import play.db.Model;
 import play.exceptions.UnexpectedException;
 import play.mvc.Http;
@@ -534,9 +535,9 @@ public class PluginCollection {
         }
     }
 
-    public Object bind(String name, Object o, Map<String, String[]> params){
+    public Object bind(RootParamNode rootParamNode, String name, Class<?> clazz, Type type, Annotation[] annotations){
         for (PlayPlugin plugin : getEnabledPlugins()) {
-            Object result = plugin.bind(name, o, params);
+            Object result = plugin.bind(rootParamNode, name, clazz, type, annotations);
             if (result != null) {
                 return result;
             }
@@ -544,9 +545,9 @@ public class PluginCollection {
         return null;
     }
 
-    public Object bind(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params){
+    public Object bindBean(RootParamNode rootParamNode, String name, Object bean){
         for (PlayPlugin plugin : getEnabledPlugins()) {
-            Object result = plugin.bind(name, clazz, type, annotations, params);
+            Object result = plugin.bindBean(rootParamNode, name, bean);
             if (result != null) {
                 return result;
             }
