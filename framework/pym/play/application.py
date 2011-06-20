@@ -284,10 +284,11 @@ class PlayConfParser:
                     continue
                 if linedef[0] in ('!', '#'):
                     continue
-                if linedef.find('=') == -1:
+                sep = linedef.find('=');
+                if sep == -1:
                     continue
                 key = linedef.split('=')[0].strip()
-                val = linedef[(linedef.find('=')+1):].strip()
+                val = linedef[(sep+1):].lstrip();
                 if linedef.find('@include.') == 0:
                     val = os.path.join(application_path, 'conf', val)
                     self.readFile(val, application_path)
