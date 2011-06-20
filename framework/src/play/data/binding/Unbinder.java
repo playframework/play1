@@ -55,6 +55,8 @@ public class Unbinder {
         } else {
             Field[] fields = src.getClass().getDeclaredFields();
             for (Field field : fields) {
+            	if(field.isAnnotationPresent(NoBinding.class))
+            		continue;
                 String newName = name + "." + field.getName();
                 boolean oldAcc = field.isAccessible();
                 field.setAccessible(true);
