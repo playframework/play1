@@ -137,21 +137,50 @@ public class Lang {
      * associated to the current Lang.
      */
     public static Locale getLocale() {
-        String lang = get();
+        return getLocaleOrDefault(get());
+    }
+
+    public static Locale getLocaleOrDefault(String lang) {
         Locale locale = getLocale(lang);
         if (locale != null) {
             return locale;
         }
-        return Locale.getDefault();
+        return Locale.getDefault(); 
     }
-
-     public static Locale getLocale(String lang) {
-        for (Locale locale : Locale.getAvailableLocales()) {
-            if (locale.getLanguage().equals(lang)) {
-                return locale;
+    
+    public static Locale getLocale(String lang) {
+        if(lang == null) {
+            return null;
+        }
+        
+        //Only language (eg. fr)
+        if (lang.length() == 2) {
+            lang = lang.toLowerCase();
+            for (Locale locale : Locale.getAvailableLocales()) {
+                if(locale.getLanguage().equals(lang) && 
+                   "".equals(locale.getCountry()))
+                {
+                    return locale;
+                }
             }
         }
+        
+        //language and country (eg. fr_FR)
+        if (lang.length() == 5) {
+            if(lang.charAt(2) != '_') {
+                return null;
+            }
+            String language = lang.substring(0, 2).toLowerCase();
+            String country = lang.substring(3, 5).toUpperCase();
+            for (Locale locale : Locale.getAvailableLocales()) {            
+                if(locale.getLanguage().equals(language) &&
+                   locale.getCountry().equals(country))
+                {
+                    return locale;
+                }
+            }
+        }
+        
         return null;
     }
-
 }
