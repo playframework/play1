@@ -103,7 +103,10 @@ public class Unbinder {
                     continue;
                 }
 
-                String newName = name + "." + field.getName();
+            	if(field.isAnnotationPresent(NoBinding.class))
+            		continue;
+
+            	String newName = name + "." + field.getName();
                 boolean oldAcc = field.isAccessible();
                 field.setAccessible(true);
                 try {
