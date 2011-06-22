@@ -1,3 +1,10 @@
+play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-13) maverick; urgency=low
+
+  * Fixed bug in applucation.py where lines containing a '=' were not loaded
+  * Unbinder: do not unbind @NoBinding fields
+
+ -- Stephane Epardaud <stephane@epardaud.fr>  Wed, 22 Jun 2011 13:58:54 +0200
+
 play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-12) maverick; urgency=low
 
   * Fixes in @include and %id
