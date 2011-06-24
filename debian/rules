@@ -36,6 +36,5 @@ override_dh_auto_install:
 	ln -s /usr/share/play-modules/1.1/debian $(DEB_PATH)$(INSTALL_PATH)/modules/debian
 	cp -r documentation $(DEB_PATH)$(DOC_PATH)
 	ln -s $(DOC_PATH)/documentation $(DEB_PATH)$(INSTALL_PATH)
-	cp -r debian/id repositories $(DEB_PATH)$(ETC_PATH)
-	ln -s $(ETC_PATH)/repositories $(DEB_PATH)$(INSTALL_PATH)
+	cp -r debian/id $(DEB_PATH)$(ETC_PATH)
 	ln -s $(ETC_PATH) $(DEB_PATH)$(INSTALL_PATH)/etc
