@@ -55,7 +55,9 @@ The HTTP method can be any of the valid methods supported by HTTP:
 * **DELETE**
 * **HEAD**
 
-If you specify * as method, this route will match the HTTP Request for any method.
+It also supports **WS** as action method to indicate a "WebSocket":asynchronous#UsingWebSockets request.
+
+If you specify @*@ as the method, this route will match the HTTP Request for any method.
 
 bc. *   /clients/{id}             Clients.show           
 
@@ -122,6 +124,13 @@ You can add a Java package before the Controller class name if it isn’t define
 
 bc. GET    /admin             admin.Dashboard.index           
 
+h3. 404 as action
+
+You can also directly use @404@ as a route action to mark a URL path that must be ignored by your application. For example:
+
+bc. # Ignore favicon requests
+GET     /favicon.ico            404
+
 h3. Assign static args
 
 In some cases, you want to reuse an existing action but define a more specific route based on the values of some of the arguments.
@@ -144,6 +153,18 @@ GET    /pages/{id}        Application.page
 
 The first route is equivalent to the second one when the page ID is ‘home’. However, since it has higher priority, this route will be used as the default for the call to Application.page with ID ‘home’.
 
+h3. Variables and scripts
+
+You can also use the **${ … }** syntax for variables, and the **%{ … }** syntax for scripts in the **routes** file, as you can in templates. For example:
+
+bc. %{ context = play.configuration.getProperty('context', '') }%
+ 
+# Home page
+GET    ${context}         Secure.login
+GET    ${context}/        Secure.login
+
+Another example is the CRUD module’s **routes** file, which uses the **crud.types** tag to loop over model types to generate controller route definitions for each type.
+
 
 h2. <a name="priority">Routes priority</a>
 
@@ -156,12 +177,14 @@ GET    /clients/{id}      Clients.show
 
 With these definitions, the URI:
 
-bc. /client/all
+bc. /clients/all
 
 will be intercepted by the first route and will call Clients.listAll (even if the second route matched the request too).
 
 
 h2. <a name="static">Serving static resources</a>
+
+h3. staticDir: mapping
 
 Use the special action **staticDir**, to point to each folder you wish to publish as a static resources container.
 
@@ -169,9 +192,16 @@ For example:
 
 bc. GET    /public/           staticDir:public
 
-When supplied with a request for a /public/* path, Play will serve your files from the application /public folder.
+When supplied with a request for a @/public/*@ path, Play will serve your files from the application /public folder.
 
-Priorities are applied as for a standard route.
+Priorities are applied as for standard routes.
+
+h3. staticFile: mapping
+
+You can also directly map a URL path to a static file rendering.
+
+bc. # Serve index.html static file for home requests
+GET     /home                   staticFile:/public/html/index.html
 
 
 h2. <a name="reverse">Reverse routing: generate some URL</a>

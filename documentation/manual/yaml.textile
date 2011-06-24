@@ -34,7 +34,7 @@ Neighborhood(coghlan):
     tags: "cafes, bars"
     users: [john]
 
-p. Play’s YAML syntax varies slightly from the standard. Each stanza must start with the name of the model class (eg **Neighborhood**) and can optionally be followed by an identifier in brackets (eg **villalugano**) so that you can reference the object elsewhere in the file. This is different to standard YAML syntax, which uses the ampersand character to indicate a reference.
+p. Play’s YAML syntax varies slightly from the standard. Each stanza must start with the name of the model class (eg **Neighborhood**) and be followed by an identifier in brackets (eg **villalugano**), which you can use to reference the object elsewhere in the file. This is different to standard YAML syntax, which uses the ampersand character to indicate a reference.
 
 Play uses "SnakeYAML":http://code.google.com/p/snakeyaml/, which has an excellent "documentation page":http://code.google.com/p/snakeyaml/wiki/Documentation#YAML_syntax with many examples.
 

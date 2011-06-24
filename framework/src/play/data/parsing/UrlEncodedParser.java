@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import play.exceptions.UnexpectedException;
 import play.utils.Utils;
 
@@ -58,6 +59,8 @@ public class UrlEncodedParser extends DataParser {
                         if (key != null) {
                             Utils.Maps.mergeValueInMap(params, key, value);
                             key = null;
+                        } else {
+                            Utils.Maps.mergeValueInMap(params, value, (String) null);
                         }
                         ox = 0;
                         break;
@@ -80,9 +83,11 @@ public class UrlEncodedParser extends DataParser {
                 }
             }
             //The last value does not end in '&'.  So save it now.
+            value = new String(data, 0, ox, "utf-8");
             if (key != null) {
-                value = new String(data, 0, ox, "utf-8");
                 Utils.Maps.mergeValueInMap(params, key, value);
+            } else if (!StringUtils.isEmpty(value)) {
+                Utils.Maps.mergeValueInMap(params, value, (String) null);
             }
             return params;
         } catch (Exception e) {

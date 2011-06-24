@@ -25,15 +25,24 @@ def execute(**kargs):
     cpXML = ""
 
     replaceAll(imlFile, r'%PLAYHOME%', play_env["basedir"].replace('\\', '/'))
+    replaceAll(imlFile, r'%PLAYVERSION%', play_env["version"].replace('\\', '/'))
 
     if len(modules):
         lXML = ""
         cXML = ""
-        for module in modules:
-            lXML += '    <content url="file://%s">\n      <sourceFolder url="file://%s" isTestSource="false" />\n    </content>\n' % (module, os.path.join(module, 'app').replace('\\', '/'))
-        replaceAll(imlFile, r'%LINKS%', lXML)
+        for i, module in enumerate(modules):
+            lXML += '    <content url="file://%s">\n            <sourceFolder url="file://%s" isTestSource="false" />\n        </content>\n' % (module, os.path.join(module, 'app').replace('\\', '/'))
+            if i == (len(modules) -1):
+                replaceAll(imlFile, r'%LINKS%', lXML)
+                replaceAll(imlFile, r'%MODULE_LINKS%', '')
+                replaceAll(imlFile, r'%MODULE_LIB_CLASSES%', '')
+                replaceAll(imlFile, r'%MODULE_LIBRARIES%', '')
     else:
         replaceAll(imlFile, r'%LINKS%', '')
+        replaceAll(imlFile, r'%MODULE_LINKS%', '')
+        replaceAll(imlFile, r'%MODULE_LIB_CLASSES%', '')
+        replaceAll(imlFile, r'%MODULE_LIBRARIES%', '')
+
 
     print "~ OK, the application is ready for Intellij Idea"
     print "~ Use File/New Module/Import Existing module"

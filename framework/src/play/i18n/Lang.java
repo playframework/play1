@@ -64,7 +64,17 @@ public class Lang {
             }
             return;
         }
-        // Try from accept-language
+        // Try from accept-language - look for an exact match
+        for (String a: request.acceptLanguage()) {
+            a = a.replace("-", "_").toLowerCase();
+            for (String locale: Play.langs) {
+                if (locale.toLowerCase().equals(a)) {
+                    set(locale);
+                    return;
+                }
+            }
+        }
+        // now see if we have a country-only match
         for (String a: request.acceptLanguage()) {
             if (a.indexOf("-") > 0) {
                 a = a.substring(0, a.indexOf("-"));

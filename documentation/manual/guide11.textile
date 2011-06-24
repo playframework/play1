@@ -26,7 +26,7 @@ Now when you run the yabe application on the server, it will automatically start
 
 h2. <a>Configuring a MySQL server</a>
 
-For production use, we will use a MySQL server as database server instead of the in-memory HSQLDB we have used so far. Play comes with the JDBC driver for MySQL so we don’t need to install anything more.
+For production use, we will use a MySQL server as database server instead of the in-memory H2 Database we have used so far. Play comes with the JDBC driver for MySQL so we don’t need to install anything more.
 
 Edit the database configuration in the **yabe/conf/application.conf** file:
 

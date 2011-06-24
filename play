@@ -5,12 +5,26 @@
 import sys
 import os
 import os.path
+import re
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(sys.argv[0])), 'framework', 'pym'))
 
 from play.cmdloader import CommandLoader
 from play.application import PlayApplication
 from play.utils import *
+
+
+# ~~~~~~~~~
+# Little utility to get command line arguments
+def get_opt(args, arg, env):
+    s = "--%s=" % arg
+    for a in args:
+        if a.find(s) == 0:
+            env[arg] = a[len(s):]
+            args.remove(a)
+            # print "~ get_opt: '%s' -> '%s'" % (arg, env[arg])
+            break
+    
 
 # ~~~~~~~~~
 # Main
@@ -73,6 +87,13 @@ try:
     else:
         play_command = 'none'
 
+    # ~~~~~~~~~~~~~~~~~ Override pid_file
+    get_opt(remaining_args, "pid_file", play_env)
+
+    # ~~~~~~~~~~~~~~~~~ Override port
+    get_opt(remaining_args, "http.port", play_env)
+    get_opt(remaining_args, "https.port", play_env)
+
     # ~~~~~~~~~~~~~~~~~ Override id
     for a in remaining_args:
         if a.find('--%') == 0:
@@ -81,11 +102,20 @@ try:
         remaining_args.remove('--%%%s' % play_env["id"])
 
     if play_command == 'test' or play_command == 'auto-test':
-        play_env["id"] = 'test'
+        # If framework-id is not a valid test-id, force it to 'test'
+        if not isTestFrameworkId( play_env["id"] ): 
+            play_env["id"] = 'test'
 
     if play_env["id"] is not '':
         print "~ framework ID is %s" % play_env["id"]
     print "~"
+    
+    # ~~~~~~~~~~~~~~~~~ Checking for disable_check_jpda
+    disable_check_jpda = False
+    if remaining_args.count('-f') == 1:
+        disable_check_jpda = True
+        remaining_args.remove('-f')
+    play_env["disable_check_jpda"] = disable_check_jpda 
 
     play_app = PlayApplication(application_path, play_env, ignoreMissing)
 
@@ -94,6 +124,11 @@ try:
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     cmdloader = CommandLoader(play_env["basedir"])
+    
+    # ~~~~~~~~~~~~~~~~~ Resolve dependencies if needed
+    if remaining_args.count('--deps') == 1:
+        cmdloader.commands['dependencies'].execute(command='dependencies', app=play_app, args=['--sync'], env=play_env, cmdloader=cmdloader)
+        remaining_args.remove('--deps')
 
     # Load module commands
     if play_app:

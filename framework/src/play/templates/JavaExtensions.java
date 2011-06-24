@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
@@ -32,6 +33,10 @@ import play.utils.HTML;
  * Java extensions in templates
  */
 public class JavaExtensions {
+
+    public static Object[] enumValues(Class clazz) {
+        return clazz.getEnumConstants();
+    }
 
     public static boolean contains(String[] array, String value) {
         for (String v : array) {
@@ -167,6 +172,12 @@ public class JavaExtensions {
         return new SimpleDateFormat(pattern, new Locale(lang)).format(date);
     }
 
+    public static String format(Date date, String pattern, String lang, String timezone) {
+        DateFormat df = new SimpleDateFormat(pattern, new Locale(lang));
+        df.setTimeZone(TimeZone.getTimeZone(timezone));
+        return df.format(date);
+    }
+
     public static Integer page(Number number, Integer pageSize) {
         return number.intValue() / pageSize + (number.intValue() % pageSize > 0 ? 1 : 0);
     }
@@ -213,6 +224,10 @@ public class JavaExtensions {
 
     public static String asdate(Long timestamp, String pattern, String lang) {
         return new SimpleDateFormat(pattern, new Locale(lang)).format(new Date(timestamp));
+    }
+
+    public static String asdate(Long timestamp, String pattern, String lang, String timezone) {
+        return format(new Date(timestamp), pattern, lang, timezone);
     }
 
     public static RawData nl2br(Object data) {
@@ -334,14 +349,24 @@ public class JavaExtensions {
     }
 
     public static String slugify(String string) {
+        return slugify(string, Boolean.TRUE);
+    }
+
+    public static String slugify(String string, Boolean lowercase) {
         string = noAccents(string);
-        return string.replaceAll("[^\\w]", "-").replaceAll("-{2,}", "-").replaceAll("-$", "").toLowerCase();
+        // Apostrophes.
+        string = string.replaceAll("([a-z])'s([^a-z])", "$1s$2");
+        string = string.replaceAll("[^\\w]", "-").replaceAll("-{2,}", "-");
+        // Get rid of any - at the start and end.
+        string.replaceAll("-+$", "").replaceAll("^-+", "");
+
+        return (lowercase ? string.toLowerCase() : string);
     }
 
     public static String camelCase(String string) {
         string = noAccents(string);
         string = string.replaceAll("[^\\w ]", "");
-        StringBuilder result = new StringBuilder();
+        StringBuilder result = new StringBuilder(string.length());
         for (String part : string.split(" ")) {
             result.append(capFirst(part));
         }

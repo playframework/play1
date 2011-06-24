@@ -2,27 +2,31 @@ h1. CRUD: Administration generator
 
 The CRUD (Create, Read, Update, Delete) module generates a fully usable web interface for your JPA Model objects.
 
-Let's see a simple example.
+h2. <a name="usage">Using the CRUD module</a>
 
-h2. <a>Enable the CRUD module for the application</a>
+Let’s see a simple example of using the CRUD module to manage user data.
+
+h3. <a name="enable">Enable the CRUD module for the application</a>
 
 In the **/conf/application.conf** file, enable the CRUD module by adding this line:
 
-bc. # The crud module
+bc. # The CRUD module
 module.crud=${play.path}/modules/crud
 
-h2. <a>Import default CRUD routes</a>
+h3. <a name="routes">Import default CRUD routes</a>
 
 In the **conf/routes** file, import the default module routes by adding this line:
 
 bc. # Import CRUD routes
-*      /admin              module:crud
+*     /admin           module:crud
+
+This adds several routes for each of your CRUD controllers, which you will add below.
 
 p(note). **Note** that using the default routes file is not required. You can also define your own routes, or mix the two.
 
-h2. <a>Create a User class</a>
+h3. <a name="model">Create a User class</a>
 
-We will start by creating a User class:
+The CRUD module provides a user-interface for your application’s model classes. We will start by creating a User model class, which is a "JPA":jpa entity:
 
 bc. package models;
  
@@ -41,21 +45,21 @@ public class User extends Model {
  	
 }
 
-h2. <a>Create the Users controller</a>
+h3. <a name="controller">Create the Users controller</a>
 
-Then, we create a simple controller that just inherits the CRUD controller.
+Next, we create a simple controller that just inherits the CRUD controller. This is a kind of ‘marker’ that the CRUD module uses for generating routes.
 
 bc. package controllers;
  
 public class Users extends CRUD {
-    
+   
 }
 
 Now open "http://localhost:9000/admin":http://localhost:9000/admin and you should see the User admin area.
 
 !images/crud1!
 
-The controller's class name has to be the model class name with a final 's'. If you want to name it differently, you can do it using an annotation.
+The controller’s class name has to be the model class name with a final ‘s’. If you want to name it differently, you can do it using an annotation.
 
 bc. package controllers;
  
@@ -66,7 +70,7 @@ public class AdminUsers extends CRUD {
    
 }
 
-h2. <a>The User form</a>
+h3. <a name="view">The User form</a>
 
 Click the **Add** button, and you should see the User form.
 
@@ -87,21 +91,21 @@ import play.data.validation.*;
 @Entity
 public class User extends Model {
  	
-    @Required
-    @MinSize(8)
-    public String name;
+   @Required
+   @MinSize(8)
+   public String name;
 	
-    @Required
-    @Email
-    public String email;
+   @Required
+   @Email
+   public String email;
 	
-    @Required
-    @MaxSize(1000)
-    public String address;
+   @Required
+   @MaxSize(1000)
+   public String address;
  
-    public String toString() {
-        return email;
-    }
+   public String toString() {
+      return email;
+   }
 	
 }
 
@@ -110,7 +114,7 @@ Refresh the User form and you will see that the validation is automatically appl
 
 !images/crud3!
 
-h2. <a>Change the form label</a>
+h3. <a name="labels">Change the form label</a>
 
 Add these lines to the **conf/messages** file in your application:
 
@@ -118,13 +122,13 @@ bc. name=Name
 email=Email address
 address=Postal address
 
-And refresh the User form.
+and refresh the User form:
 
 !images/crud4!
 
-h2. <a>Create a User and customize the list view</a>
+h3. <a name="list">Create a User and customize the list view</a>
 
-The default list view uses only one column containing the result of the object's toString() method.
+The default list view uses only one column containing the result of the object’s **toString()** method.
 
 !images/crud5!
 
@@ -166,16 +170,18 @@ and refresh the list.
 !images/crud6!
 
 
-h2. <a>Custom fields rendering: the crud.custom tag</a>
+h3. <a name="custom">Custom field rendering: the crud.custom tag</a>
 
-You can go a bit further by customizing the way each field of your ''User'' entity is displayed in the list and form views.
+You can go a bit further by customizing the way each field of your **User** entity is displayed in the list and form views.
 
-To customize a field, use the ''#{crud.custom}'' tag:
+To customize a field, use the **#{crud.custom}** tag:
 
 bc. #{crud.table fields:['name', 'company']}
  
    #{crud.custom 'company'}
-       <a href="@{Companies.show(object.company.id)}">${object.company.name}</a>
+     <a href="@{Companies.show(object.company.id)}">
+      	 ${object.company.name}
+     </a>
    #{/crud.custom}
  
 #{/crud.table}
@@ -185,36 +191,112 @@ You can also display additional columns or form inputs by defining custom handle
 bc. #{crud.table fields:['name', 'company', 'edit']}
  
    #{crud.custom 'company'}
-       <a href="@{Companies.show(object.company.id)}">${object.company.name}</a>
+      <a href="@{Companies.show(object.company.id)}">${object.company.name}</a>
    #{/crud.custom}
  
    #{crud.custom 'edit'}
-       <a href="@{Users.edit(object.id)}">Edit</a>
+      <a href="@{Users.edit(object.id)}">Edit</a>
    #{/crud.custom}
  
 #{/crud.table}
 
-h2. List of String and List of enumeration
+
+h2. <a name="collections">List of String and List of enumeration</a>
 
 The CRUD module is showing them as a text field. In this text field, the list is represented by a comma separated list of String. For example:
 
 bc. @Entity
 public class Account extends Model {
  
-        @CollectionOfElements
-        public Set<ContentType> contentTypes;
+      @CollectionOfElements
+      public Set<ContentType> contentTypes;
  
-        @CollectionOfElements
-        public Set<String> usernames;
+      @CollectionOfElements
+      public Set<String> usernames;
  
-        public Account(Set<String> usernames {
-                super();
-                this.usernames = usernames;
-        }
+      public Account(Set<String> usernames {
+            super();
+            this.usernames = usernames;
+      }
 }
 
-This is shown as: "myEnumId1","myEnumId2" for the contentTypes and "string1","string2" for the user names. Per definition, this is what you should first customize in your CRUD module.
+This is shown as: "myEnumId1","myEnumId2" for the contentTypes and "string1","string2" for the user names. By definition, this is what you should first customize in your CRUD module.
 
-h2. <a>Limitation</a>
+h2. <a name="objecttype">Customize the _show_ and _blank_ views in a generic way</a>
 
-The CRUD module will show the relationships that are unidirectional in one entity: the one that does not have the **mappedBy** attribute.
+A central influence on the behavior of CRUD views is the **ObjectType** for each field. So if you want to 
+change the CRUD module’s behaviour in a generic way, for example to hide fields with the **@Version** annotation, you can create you own **ObjectType** class. You must also declare a static method in your controller or a superclass of your controller.
+
+bc. protected static ObjectType createObjectType(Class<? extends Model> type) {
+   return new VersionObjectType(type);
+} 
+
+Here is a complete example:
+
+bc.   public class CustomAdminCompany extends CRUD {
+   protected static ObjectType createObjectType(Class<? extends Model> type) {
+      return new VersionObjectType(type);
+   }
+   
+   public static class VersionObjectType extends ObjectType {
+      
+      private final String versionColumn;
+      
+      public VersionObjectType(Class<? extends Model> modelClass) {
+         super(modelClass);
+         versionColumn = getVersionColumnName(modelClass);
+      }
+      private String getVersionColumnName(Class modelClass) {
+         Class c = modelClass;
+         try {
+            while (!c.equals(Object.class)) {
+               for (Field field : c.getDeclaredFields()) {
+                  if (field.isAnnotationPresent(Version.class)) {
+                     return field.getName();
+                  }
+               }
+               c = c.getSuperclass();
+            }
+         } catch (Exception e) {
+            throw new UnexpectedException("Error while determining the "
+               + "object @Version for an object of type " + modelClass);
+         }
+         return null;
+      }
+ 
+      @Override
+      public List<ObjectField> getFields() {
+         List<ObjectField> result = super.getFields();
+         for (ObjectField objectField : result) {
+            if (objectField.name.equals(versionColumn)) {
+               objectField.type = "hidden";
+            }
+         }
+         return result;
+      }
+   }   
+}
+
+This is not the end; you can also customize **findPage** and other methods. Have a look at the source code.
+
+h2. <a name="commands">Commands</a>
+
+The CRUD module provides a *crud:override* command that you use on the command line to override the default templates. This works because the CRUD module loads templates from your application if they are present, instead of its own. You can also use **crud:ov** instead of **crud:override**.
+
+h3. play crud:override --template [path]
+
+Copies the template specified by the path, e.g. **Users/list**, to your application’s **app/views/CRUD/** directory. You can also use **-t** instead of **--template**.
+
+h3. play crud:override --layout
+
+Overrides the main page layout template, **layout.html**.
+
+h3. play crud:override --css
+
+Overrides the style sheet, **crud.css**, copying it to your the **public/stylesheets/** directory.
+
+
+
+h2. <a name="limitation">Limitation</a>
+
+Limitation The CRUD module only shows bi-directional relationships in one of the two entities: the one that does not have the **mappedBy** attribute.

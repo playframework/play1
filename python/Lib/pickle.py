@@ -24,7 +24,7 @@ Misc variables:
 
 """
 
-__version__ = "$Revision: 38432 $"       # Code version
+__version__ = "$Revision: 65524 $"       # Code version
 
 from types import *
 from copy_reg import dispatch_table
@@ -351,7 +351,7 @@ class Pickler:
             raise PicklingError("args from reduce() should be a tuple")
 
         # Assert that func is callable
-        if not callable(func):
+        if not hasattr(func, '__call__'):
             raise PicklingError("func from reduce should be callable")
 
         save = self.save

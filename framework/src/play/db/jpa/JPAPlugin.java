@@ -5,6 +5,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,11 +15,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.EmbeddedId;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NoResultException;
@@ -27,23 +30,26 @@ import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.persistence.Transient;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.hibernate.type.Type;
+
+import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.data.binding.Binder;
 import play.db.DB;
 import play.db.Model;
 import play.exceptions.JPAException;
-import play.utils.Utils;
-import org.apache.commons.lang.StringUtils;
-import play.data.binding.Binder;
 import play.exceptions.UnexpectedException;
+import play.utils.Utils;
 
 /**
  * JPA Plugin
@@ -233,6 +239,8 @@ public class JPAPlugin extends PlayPlugin {
         String dialect = Play.configuration.getProperty("jpa.dialect");
         if (dialect != null) {
             return dialect;
+        } else if (driver.equals("org.h2.Driver")) {
+            return "org.hibernate.dialect.H2Dialect";
         } else if (driver.equals("org.hsqldb.jdbcDriver")) {
             return "org.hibernate.dialect.HSQLDialect";
         } else if (driver.equals("com.mysql.jdbc.Driver")) {
@@ -285,7 +293,19 @@ public class JPAPlugin extends PlayPlugin {
 
     @Override
     public void beforeInvocation() {
-        startTx(false);
+
+        if(InvocationContext.current().getAnnotation(NoTransaction.class) != null ) {
+            //Called method or class is annotated with @NoTransaction telling us that
+            //we should not start a transaction
+            return ;
+        }
+
+        boolean readOnly = false;
+        Transactional tx = InvocationContext.current().getAnnotation(Transactional.class);
+        if (tx != null) {
+            readOnly = tx.readOnly();
+        }
+        startTx(readOnly);
     }
 
     @Override
@@ -307,15 +327,15 @@ public class JPAPlugin extends PlayPlugin {
      * initialize the JPA context and starts a JPA transaction
      * 
      * @param readonly true for a readonly transaction
+     * @param autoCommit true to automatically commit the DB transaction after each JPA statement
      */
     public static void startTx(boolean readonly) {
         if (!JPA.isEnabled()) {
             return;
         }
         EntityManager manager = JPA.entityManagerFactory.createEntityManager();
-        //if(Play.configuration.getProperty("future.bindJPAObjects", "false").equals("true")) {
         manager.setFlushMode(FlushModeType.COMMIT);
-        //}
+        manager.setProperty("org.hibernate.readOnly", readonly);
         if (autoTxs) {
             manager.getTransaction().begin();
         }
@@ -333,6 +353,13 @@ public class JPAPlugin extends PlayPlugin {
         EntityManager manager = JPA.get().entityManager;
         try {
             if (autoTxs) {
+                // Be sure to set the connection is non-autoCommit mode as some driver will complain about COMMIT statement
+                try {
+                    DB.getConnection().setAutoCommit(false);
+                } catch(Exception e) {
+                    Logger.error(e, "Why the driver complains here?");
+                }
+                // Commit the transaction
                 if (manager.getTransaction().isActive()) {
                     if (JPA.get().readonly || rollback || manager.getTransaction().getRollbackOnly()) {
                         manager.getTransaction().rollback();
@@ -497,7 +524,7 @@ public class JPAPlugin extends PlayPlugin {
             try {
                 while (!c.equals(Object.class)) {
                     for (Field field : c.getDeclaredFields()) {
-                        if (field.isAnnotationPresent(Id.class)) {
+                        if (field.isAnnotationPresent(Id.class) || field.isAnnotationPresent(EmbeddedId.class)) {
                             field.setAccessible(true);
                             return field;
                         }

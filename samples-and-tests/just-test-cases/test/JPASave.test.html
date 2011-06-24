@@ -2,6 +2,39 @@
 
 #{selenium 'Test that JPA.abort() works'}
 
+	// Insert (bug)
+	open('@{Horses.index()}')
+	clickAndWait('dontSave')
+	assertTextPresent('Blups:0')
+	open('@{Horses.index()}')
+	clickAndWait('dontSave')
+	assertTextPresent('Blups:0')
+	open('@{Horses.index()}')
+	clickAndWait('save')
+	assertTextPresent('Blups:1')
+	open('@{Horses.index()}')
+	clickAndWait('dontSave')
+	assertTextPresent('Blups:1')
+	open('@{Horses.index()}')
+	clickAndWait('save')
+	assertTextPresent('Blups:2')
+
+	// A simple test case
+	open('@{JPABinding.aSaveForm()}')
+	assertTextPresent('A: 0')
+	assertTextPresent('B: 0')
+	clickAndWait('saveAll')
+	assertTextPresent('A: 0')
+	assertTextPresent('B: 0')
+	
+	// Three levels
+	open('@{JPAController.with3Levels()}')
+	assertTextPresent('Guillaume 06 Paris')
+	clickAndWait('dontSave')
+	assertTextPresent('Guillaume 06 Paris')
+	clickAndWait('save')
+	assertTextPresent('Bob 07 Berlin')
+
     // Init
     open('@{JPAController.init()}')
     assertTextPresent('Post1')

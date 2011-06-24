@@ -1,13 +1,15 @@
 package play.mvc.results;
 
 import play.mvc.Http;
+import play.utils.FastRuntimeException;
 
 /**
  * Result support
  */
-public abstract class Result extends RuntimeException {
+public abstract class Result extends FastRuntimeException {
 
     public Result() {
+        super();
     }
 
     public Result(String description) {

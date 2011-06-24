@@ -4,7 +4,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play new app_path
+~ play new app_path [--with module_list]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -23,3 +23,7 @@
 ~ --with module_list:
 ~ Automatically enable this set of module for the newly created application
 ~ For example: play new myApp --with scala,crud`
+~
+~ This modules must be available in the framework local modules repository.
+~ (using play install)
+~

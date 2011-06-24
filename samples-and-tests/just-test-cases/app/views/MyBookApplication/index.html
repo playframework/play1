@@ -1,0 +1,7 @@
+#{extends 'main.html' /}
+#{set title:'Home' /}
+<ul>
+#{list items:testEntries, as:'entry'}
+    <li>#{a @MyBookApplication.edit(entry.id)}${entry.text}#{/a}</li>
+#{/list}
+</ul>

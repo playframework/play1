@@ -77,7 +77,7 @@ When using the **@@{...}** notation (absolute reverse routing) in a template, th
 
 For example, if you want to use a content distribution network to distribute your static assets in production, you could write a **routes** file like this:
 
-bc. #{if Play.mode.isDev()}
+bc. #{if play.Play.mode.isDev()}
     GET     /public/                        staticDir:public
 #{/}
 #{else}
@@ -93,17 +93,17 @@ This will be reversed as **http://locahost:9000/public/images/logo.png** in DEV 
 
 h2. <a name="binding">Support for custom binding</a>
 
-The binding system now support more customization.
+The binding system now supports more customization.
 
 h3. @play.data.binding.As
 
-The first thing is the new **@play.data.binding.As** annotation that allow to contextually configure a binding. You can use it for example to specify the date format that must be used by the **DateBinder**:
+The first thing is the new **@play.data.binding.As** annotation that makes it possible to contextually configure a binding. You can use it for example to specify the date format that must be used by the **DateBinder**:
 
 bc. public static void update(@As("dd/MM/yyyy") Date updatedAt) {
 	...
 } 
 
-The **@As** annotation as also support for internationalization. It means that you can provide a specific annotation for each locale:
+The **@As** annotation also has internationalisation support, which means that you can provide a specific annotation for each locale:
 
 bc. public static void update(
 		@As(
@@ -125,7 +125,7 @@ This binds a simple comma separated **String** as a **List**.
 
 h3. @play.data.binding.NoBinding
 
-The new **@play.data.binding.NoBinding** annotation allow to mark non-bindable fields, resolving potential security issues. For example:
+The new **@play.data.binding.NoBinding** annotation allows yous to mark non-bindable fields, resolving potential security issues. For example:
 
 bc. public class User extends Model {	
 	@NoBinding("profile") public boolean isAdmin;
@@ -137,7 +137,7 @@ public static void editProfile(@As("profile") User user) {
 	...
 }
 
-In this case, the **isAdmin** field will never be binded from the **editProfile** action, even if an malicious user include a **user.isAdmin=true** field in a fake form post.
+In this case, the **isAdmin** field will never be bound from the **editProfile** action, even if an malicious user includes a **user.isAdmin=true** field in a fake form post.
 
 h3. play.data.binding.TypeBinder
 
@@ -151,7 +151,7 @@ bc. public class MyCustomStringBinder implements TypeBinder<String> {
  
 }
 
-You can use in any action, like:
+You can use it in any action, like:
 
 bc. public static void anyAction(@As(binder=MyCustomStringBinder.class) String name) {
 	...
@@ -159,7 +159,7 @@ bc. public static void anyAction(@As(binder=MyCustomStringBinder.class) String n
 
 h3. @play.data.binding.Global
 
-Or you can define global custom binder that will apply for the corresponding type. For example, you define a binder able to bind the **java.awt.Point** class this way:
+Alternatively, you can define a global custom binder that will apply for the corresponding type. For example, you define a binder for the **java.awt.Point** class like this:
 
 bc. @Global
 public class PointBinder implements TypeBinder<Point> {
@@ -174,7 +174,8 @@ public class PointBinder implements TypeBinder<Point> {
     
 } 
 
-As you see a global binder is a classical binder annotated with *@play.data.binding.Global*. An external module can contribute binders to a project, allowing to define reusable binder extensions.
+As you see a global binder is a classical binder annotated with *@play.data.binding.Global*. An external module can contribute binders to a project, which makes it possible to define reusable binder extensions.
+
 
 h2. <a name="asyncHTTP">New powerful async WS library</a>
 
@@ -213,15 +214,23 @@ bc. http.port=9000
 https.port=9443
 
 You need to put your certificates in the *conf* directory. Play supports X509 certificates and keystore certificates. The X509 certificates must be named as follow:
-*host.cert* for the certificate and *host.key* for the key. If you are using keystore, then, by default it should be named *keystore.jks*.
+*host.cert* for the certificate and *host.key* for the key. If you are using keystore, then, by default it should be named *certificate.jks*.
 
 If you are using X509 certificates, then the following parameters can be configured though your *application.conf*:
 
 bc. # X509 certificates
-certificate.key.file=host.key
-certificate.file=host.cert
+certificate.key.file=conf/host.key
+certificate.file=conf/host.cert
 # In case your key file is password protected
 certificate.password=secret
+trustmanager.algorithm=JKS
+
+In case your are using keystore:
+
+bc. keystore.algorithm=JKS
+keystore.password=secret
+keystore.file=conf/certificate.jks
+
 
 Note that the values above are the default values.
 

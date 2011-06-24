@@ -21,7 +21,9 @@
                 border-bottom: 1px solid #aaa;
             }
             #header {
-                position: relative;
+                position: fixed;
+                height: 60px;
+                width: 100%;
             }
             #header h1 {
                 font-weight: normal;
@@ -36,6 +38,10 @@
             }
             #results {
                 background: #f6f6f6;
+                position: fixed;
+                height: 20px;
+                width: 100%;
+                top: 100px;
             }
             label {
                 font-weight: bold;
@@ -49,6 +55,9 @@
                 font-size: 80%;
                 position: relative;
                 top: -3px;
+            }
+            #tests {
+            	padding-top: 12em;
             }
             #tests h2 {
                 color: #333;
@@ -334,7 +343,9 @@
                        data: {result: areFailedTests ? 'failed' : 'passed'}
                     });
                     if(areFailedTests) {
-                        $.scrollTo($('.test.failed'), 500);
+                        var skip = $("#header").outerHeight();
+                        skip += $("#results").outerHeight();
+                        $.scrollTo($('.test.failed').offset().top - skip, 500);
                     }
                 };
                                 
@@ -493,6 +504,12 @@
                     $('.test').addClass('selected');
                     updateSelected();
                 });
+
+                $('#unselectAll').click(function(e) {
+	                e.preventDefault();
+                    $('.test').removeClass('selected');
+					updateSelected();
+                });
                 
                 $('#ra').click(function() {
                     $('.test').addClass('selected');
@@ -507,6 +524,19 @@
                 }
                         
             });
+            function toggle_trace(link){
+            	var $link = jQuery(link);
+            	var $trace = jQuery("pre[data-role=trace]", $link.parent());
+            	if($trace.attr('data-shown') == "true"){
+            		$trace.hide();
+            		$link.text("Show trace");
+            		$trace.attr('data-shown', false);
+            	}else{
+            		$trace.show();
+            		$link.text("Hide trace");
+            		$trace.attr('data-shown', true);
+            	}
+            }
         </script>
     </head>
     <body>
@@ -524,7 +554,8 @@
             <div id="stopped">
                 <span id="start">Start !</span>
                 &nbsp;
-                <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span> to run <span id="bms">(<a id="" href="#">Bookmark this link to save this configuration</a>)</span>
+                <span class="nbToRun">no</span> test<span class="nbToRunPluralize"></span> to run <span id="bms">(<a id="" href="#">Bookmark this link to save this configuration</a>) - <span id="unselectAll"><a id="" href="#">Unselect all</a></span></span>
+				
                 <span id="quickLinks">
                     <span id="sa">(<a id="" href="#">Select all</a></span> -
                     <span id="ra"><a id="" href="#">Run all</a>)</span>

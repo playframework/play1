@@ -107,7 +107,7 @@ If the parameter is multivalued, you can declare an Array argument:
 
 bc. public static void show(Long[] id) {
     for(String anId : id) {
-        System.out.println(id); 
+        System.out.println(anid); 
     }
 }
 
@@ -115,7 +115,7 @@ or even a collection type:
 
 bc. public static void show(List<Long> id) {
     for(String anId : id) {
-        System.out.println(id); 
+        System.out.println(anid); 
     }
 }
 
@@ -219,6 +219,18 @@ bc. public static void show(Set<Long> id) {
     ...
 }
 
+Play also handles the special case of binding a Map<String, String> like this:
+
+bc. public static void show(Map<String, String> client) {
+    ...
+}
+
+
+A query string like the following:
+
+bc. ?user.name=John&user.phone=111-1111&user.phone=222-2222
+
+Would bind the client variable to a map with two elements. The first element with key "name" and value "John", and the second with key "phone" and value "111-1111, 222-2222"
 
 h3. POJO object binding
 
@@ -258,6 +270,97 @@ You can provide the **user.id** field yourself in the HTTP parameters. When Play
 bc. public static void save(User user) {
     user.save(); // ok with 1.0.1
 }
+
+You can use JPA binding to modify complete object graphs in the same way as POJO mapping works, but you have to supply the ID for each sub object you intend to modify:
+
+bc. user.id = 1
+&user.name=morten
+&user.address.id=34
+&user.address.street=MyStreet 
+
+h2. <a name="custombinding">Custom binding</a>
+
+The binding system now supports more customization.
+
+h3. @play.data.binding.As
+
+The first thing is the new **@play.data.binding.As** annotation that makes it possible to contextually configure a binding. You can use it for example to specify the date format that must be used by the **DateBinder**:
+
+bc. public static void update(@As("dd/MM/yyyy") Date updatedAt) {
+	...
+}
+
+The **@As** annotation also has internationalisation support, which means that you can provide a specific annotation for each locale:
+
+bc. public static void update(
+		@As(
+			lang={"fr,de","en","*"},
+			value={"dd/MM/yyyy","dd-MM-yyyy","MM-dd-yy"}
+		)
+		Date updatedAt
+	) {
+	...
+}
+
+The **@As** annotation can work with all binders that support it, including your own binder. For example, using the **ListBinder**:
+
+bc. public static void update(@As(",") List<String> items) {
+	...
+}
+
+This binds a simple comma separated **String** as a **List**.
+
+h3. @play.data.binding.NoBinding
+
+The new **@play.data.binding.NoBinding** annotation allows yous to mark non-bindable fields, resolving potential security issues. For example:
+
+bc. public class User extends Model {
+	@NoBinding("profile") public boolean isAdmin;
+	@As("dd, MM yyyy") Date birthDate;
+	public String name;
+}
+ 
+public static void editProfile(@As("profile") User user) {
+	...
+}
+
+In this case, the **isAdmin** field will never be bound from the **editProfile** action, even if an malicious user includes a **user.isAdmin=true** field in a fake form post.
+
+h3. play.data.binding.TypeBinder
+
+The *@As* annotation also allows you to define a completely custom binder. A custom binder is subclass of **TypeBinder** that you define in your project. For example:
+
+bc. public class MyCustomStringBinder implements TypeBinder<String> {
+ 
+    public Object bind(String name, Annotation[] anns, String value, Class clazz) {
+        return "!!" + value + "!!";
+    }
+}
+
+You can use it in any action, like:
+
+bc. public static void anyAction(@As(binder=MyCustomStringBinder.class) String name) {
+	...
+}
+
+h3. @play.data.binding.Global
+
+Alternatively, you can define a global custom binder that will apply for the corresponding type. For example, you define a binder for the **java.awt.Point** class like this:
+
+bc. @Global
+public class PointBinder implements TypeBinder<Point> {
+ 
+    public Object bind(String name, Annotation[] anns, String value, Class class) {
+		String[] values = value.split(",");
+		return new Point(
+			Integer.parseInt(values[0]),
+			Integer.parseInt(values[1])
+		);
+    }
+}
+
+As you see a global binder is a classical binder annotated with *@play.data.binding.Global*. An external module can contribute binders to a project, which makes it possible to define reusable binder extensions.
+
 
 h2. <a name="result">Result types</a>
 
@@ -467,7 +570,7 @@ bc. public class Admin extends Application {
    	...
 }
 
-unless and only params are available for @After @Before and @Finally
+The **unless** and **only** parameters are available for the **@After**, **@Before** and **@Finally** annotations.
 
 h3. @After
 
@@ -489,9 +592,55 @@ bc. public class Admin extends Application {
  
 }
 
+h3. @Catch
+
+Methods annotated with **@Catch** are called if another action method throws the specified exception. The thrown exception is passed as a parameter to the @Catch method.
+
+bc. public class Admin extends Application {
+	
+    @Catch(IllegalStateException.class)
+    public static void logIllegalState(Throwable throwable) {
+        Logger.error("Illegal state %s…", throwable);
+    }
+    
+    public static void index() {
+        List<User> users = User.findAll();
+        if (users.size() == 0) {
+            throw new IllegalStateException("Invalid database - 0 users");
+        }
+        render(users);
+    }
+}
+
+As with normal Java exception handling, you can catch a super-class to catch more exception types. If you have more than one catch method, you can specify their **priority** so that they are executed in order of priority (priority 1 is executed first).
+
+bc. public class Admin extends Application {
+ 
+    @Catch(value = Throwable.class, priority = 1)
+    public static void logThrowable(Throwable throwable) {
+        // Custom error logging…
+        Logger.error("EXCEPTION %s", throwable);
+    }
+ 
+    @Catch(value = IllegalStateException.class, priority = 2)
+    public static void logIllegalState(Throwable throwable) {
+        Logger.error("Illegal state %s…", throwable);
+    }
+ 
+    public static void index() {
+        List<User> users = User.findAll();
+        if(users.size() == 0) {
+            throw new IllegalStateException("Invalid database - 0 users");
+        }
+        render(users);
+    }
+}
+
+
 h3. @Finally
 
-Methods annotated with the **@Finally** annotation are executed after each action result is applied from for this Controller.
+Methods annotated with the **@Finally** annotation are always executed after each action call to this Controller.
+@Finally-methods are called both after successful action calls and if an error occurred.
 
 bc. public class Admin extends Application {
  
@@ -508,6 +657,29 @@ bc. public class Admin extends Application {
     ...
  
 }
+
+If the method annotated with @Finally takes one argument of type Throwable, The Exception will be passed in if available:
+
+bc. public class Admin extends Application {
+ 
+    @Finally
+    static void log(Throwable e) {
+		if( e == null ){
+			Logger.info("action call was successful");
+		}else{
+			Logger.info("action call failed", e);
+		}
+    }
+ 
+    public static void index() {
+        List<User> users = User.findAll();
+        render(users);
+    }
+ 
+    ...
+ 
+}
+
 
 h3. Controller hierarchy
 
@@ -557,6 +729,10 @@ bc. public static void index() {
     }
     render(messages);
 }
+
+The session expires when you close your web browser, unless the **application.session.maxAge** configuration property is set. For example:
+
+bc. application.session.maxAge=7d  # Remember for one week.
 
 The cache has different semantics than the classic Servlet HTTP session object. You can’t assume that these objects will be always in the cache. So it forces you to handle the cache miss cases, and keeps your application fully stateless.
 

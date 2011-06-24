@@ -3,6 +3,8 @@ package controllers;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.text.SimpleDateFormat;
 
 import models.Person;
 import play.Logger;
@@ -17,7 +19,7 @@ public class DataBinding extends Controller {
     }
 
     public static void showDefaultDateFormat(Date date) {
-        renderText(date);
+        renderText(new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(date));
     }
 
     public static void changeLanguage(String lang) {
@@ -25,15 +27,15 @@ public class DataBinding extends Controller {
     }
 
     public static void showLocaleDateFormat(Date date) {
-        renderText(date);
+        renderText(new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(date));
     }
 
     public static void showDefaultLocaleDateFormat(Date date) {
-        renderText(date);
+        renderText(new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(date));
     }
 
     public static void showDateFormat(@As("MM-dd-yyyy'T'HH:mm:ss") Date date) {
-        renderText(date);
+        renderText(new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(date));
     }
 
     public static void showList(@As("/") List<String> mailboxes) {
@@ -41,12 +43,12 @@ public class DataBinding extends Controller {
     }
 
     public static void showCalendar(@As("dd-MMM-yyyy") Calendar cal) {
-        renderText(cal.getTime());
+        renderText(new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(cal.getTime()));
     }
 
 
     public static void showCalendar2(@As(lang={"fr,de","*"}, value={"dd-MM-yyyy","MM-dd-yyyy"}) Calendar cal) {
-        renderText(cal.getTime());
+        renderText(new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(cal.getTime()));
     }
 
     public static void signinPage() {
@@ -84,6 +86,15 @@ public class DataBinding extends Controller {
     
     public static void createFactory(@play.data.validation.Valid models.Factory factory) {
         renderText(validation.hasErrors() + " -> " + factory.name + "," + factory.color);
+    }
+
+    public static void printParams() {
+        Map<String, String> paramMap = params.allSimple();
+        String out = "";
+        for (String key : paramMap.keySet()) {
+            out += key + " " + paramMap.get(key) + "\n";
+        }
+        renderText(out);
     }
 }
 

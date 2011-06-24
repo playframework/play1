@@ -6,21 +6,23 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
 import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.Expression;
-import play.utils.Java;
 import play.libs.Time;
+import play.libs.Time.CronExpression;
+import play.utils.Java;
+import play.utils.PThreadFactory;
 
 public class JobsPlugin extends PlayPlugin {
 
@@ -31,7 +33,7 @@ public class JobsPlugin extends PlayPlugin {
     public String getStatus() {
         StringWriter sw = new StringWriter();
         PrintWriter out = new PrintWriter(sw);
-        if(executor == null) {
+        if (executor == null) {
             out.println("Jobs execution pool:");
             out.println("~~~~~~~~~~~~~~~~~~~");
             out.println("(not yet started)");
@@ -44,22 +46,29 @@ public class JobsPlugin extends PlayPlugin {
         out.println("Scheduled task count: " + executor.getTaskCount());
         out.println("Queue size: " + executor.getQueue().size());
         SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-        if(!scheduledJobs.isEmpty()) {
+        if (!scheduledJobs.isEmpty()) {
             out.println();
             out.println("Scheduled jobs ("+scheduledJobs.size()+"):");
             out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            for(Job job : scheduledJobs) {
+            for (Job job : scheduledJobs) {
                 out.print(job.getClass().getName());
-                if(job.getClass().isAnnotationPresent(OnApplicationStart.class)) {
-                    out.print(" run at application start.");
+                if (job.getClass().isAnnotationPresent(OnApplicationStart.class)) {
+                    OnApplicationStart appStartAnnotation = job.getClass().getAnnotation(OnApplicationStart.class);
+                    out.print(" run at application start" + (appStartAnnotation.async()?" (async)" : "") + ".");
                 }
-                if(job.getClass().isAnnotationPresent(On.class)) {
-                    out.print(" run with cron expression " + job.getClass().getAnnotation(On.class).value() + ".");
+
+                if( job.getClass().isAnnotationPresent(On.class)) {
+
+                    String cron = job.getClass().getAnnotation(On.class).value();
+                    if (cron != null && cron.startsWith("cron.")) {
+                        cron = Play.configuration.getProperty(cron);
+                    }
+                    out.print(" run with cron expression " + cron + ".");
                 }
-                if(job.getClass().isAnnotationPresent(Every.class)) {
+                if (job.getClass().isAnnotationPresent(Every.class)) {
                     out.print(" run every " + job.getClass().getAnnotation(Every.class).value() + ".");
                 }
-                if(job.lastRun > 0) {
+                if (job.lastRun > 0) {
                     out.print(" (last run at " + df.format(new Date(job.lastRun)));
                     if(job.wasError) {
                         out.print(" with error)");
@@ -72,11 +81,11 @@ public class JobsPlugin extends PlayPlugin {
                 out.println();
             }
         }
-        if(!executor.getQueue().isEmpty()) {
+        if (!executor.getQueue().isEmpty()) {
             out.println();
             out.println("Waiting jobs:");
             out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            for(Object o : executor.getQueue()) {
+            for (Object o : executor.getQueue()) {
                 ScheduledFuture task = (ScheduledFuture)o;
                 out.println(Java.extractUnderlyingCallable((FutureTask)task) + " will run in " + task.getDelay(TimeUnit.SECONDS) + " seconds");        
             }
@@ -97,27 +106,47 @@ public class JobsPlugin extends PlayPlugin {
         for (final Class<?> clazz : jobs) {
             // @OnApplicationStart
             if (clazz.isAnnotationPresent(OnApplicationStart.class)) {
-                try {
-                    Job<?> job = ((Job<?>) clazz.newInstance());
-                    scheduledJobs.add(job);
-                    job.run();
-                    if(job.wasError) {
-                        if(job.lastException != null) {
-                            throw job.lastException;
+                //check if we're going to run the job sync or async
+                OnApplicationStart appStartAnnotation = clazz.getAnnotation(OnApplicationStart.class);
+                if( !appStartAnnotation.async()) {
+                    //run job sync
+                    try {
+                        Job<?> job = ((Job<?>) clazz.newInstance());
+                        scheduledJobs.add(job);
+                        job.run();
+                        if(job.wasError) {
+                            if(job.lastException != null) {
+                                throw job.lastException;
+                            }
+                            throw new RuntimeException("@OnApplicationStart Job has failed");
                         }
-                        throw new RuntimeException("@OnApplicationStart Job has failed");
+                    } catch (InstantiationException e) {
+                        throw new UnexpectedException("Job could not be instantiated", e);
+                    } catch (IllegalAccessException e) {
+                        throw new UnexpectedException("Job could not be instantiated", e);
+                    } catch (Throwable ex) {
+                        if (ex instanceof PlayException) {
+                            throw (PlayException) ex;
+                        }
+                        throw new UnexpectedException(ex);
                     }
-                } catch (InstantiationException e) {
-                    throw new UnexpectedException("Job could not be instantiated", e);
-                } catch (IllegalAccessException e) {
-                    throw new UnexpectedException("Job could not be instantiated", e);
-                } catch (Throwable ex) {
-                    if (ex instanceof PlayException) {
-                        throw (PlayException) ex;
+                } else {
+                    //run job async
+                    try {
+                        Job<?> job = ((Job<?>) clazz.newInstance());
+                        scheduledJobs.add(job);
+                        //start running job now in the background
+                        @SuppressWarnings("unchecked")
+                        Callable<Job> callable = (Callable<Job>)job;
+                        executor.submit(callable);
+                    } catch (InstantiationException ex) {
+                        throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
+                    } catch (IllegalAccessException ex) {
+                        throw new UnexpectedException("Cannot instanciate Job " + clazz.getName());
                     }
-                    throw new UnexpectedException(ex);
                 }
             }
+
             // @On
             if (clazz.isAnnotationPresent(On.class)) {
                 try {
@@ -137,7 +166,7 @@ public class JobsPlugin extends PlayPlugin {
                     scheduledJobs.add(job);
                     String value = job.getClass().getAnnotation(Every.class).value();
                     if (value.startsWith("cron.")) {
-               	        value = Play.configuration.getProperty(value);
+                        value = Play.configuration.getProperty(value);
                     }
                     value = Expression.evaluate(value, value).toString();
                     if(!"never".equalsIgnoreCase(value)){
@@ -155,30 +184,38 @@ public class JobsPlugin extends PlayPlugin {
     @Override
     public void onApplicationStart() {
         int core = Integer.parseInt(Play.configuration.getProperty("play.jobs.pool", "10"));
-        executor = new ScheduledThreadPoolExecutor(core, new ThreadPoolExecutor.AbortPolicy());
+        executor = new ScheduledThreadPoolExecutor(core, new PThreadFactory("jobs"), new ThreadPoolExecutor.AbortPolicy());
     }
 
     public static <V> void scheduleForCRON(Job<V> job) {
-        if (job.getClass().isAnnotationPresent(On.class)) {
-            String cron = job.getClass().getAnnotation(On.class).value();
-            if (cron.startsWith("cron.")) {
-                cron = Play.configuration.getProperty(cron);
-            }
+        if (!job.getClass().isAnnotationPresent(On.class)) {
+            return;
+        }
+        String cron = job.getClass().getAnnotation(On.class).value();
+        if (cron.startsWith("cron.")) {
+            cron = Play.configuration.getProperty(cron);
+        }
+        cron = Expression.evaluate(cron, cron).toString();
+        if (cron == null || "".equals(cron) || "never".equalsIgnoreCase(cron)) {
+            Logger.info("Skipping job %s, cron expression is not defined", job.getClass().getName());
+            return;
+        }
+        try {
+            Date now = new Date();
             cron = Expression.evaluate(cron, cron).toString();
-            if (cron != null && !cron.equals("") && !cron.equalsIgnoreCase("never")) {
-                try {
-                    Date now = new Date();
-                    cron = Expression.evaluate(cron, cron).toString();
-                    Date nextDate = Time.parseCRONExpression(cron);
-                    long delay = nextDate.getTime() - now.getTime();
-                    executor.schedule((Callable<V>)job, delay, TimeUnit.MILLISECONDS);
-                    job.executor = executor;
-                } catch (Exception ex) {
-                    throw new UnexpectedException(ex);
-                }
-            } else {
-                Logger.info("Skipping job %s, cron expression is not defined", job.getClass().getName());
+            CronExpression cronExp = new CronExpression(cron);
+            Date nextDate = cronExp.getNextValidTimeAfter(now);
+            if (nextDate.equals(job.nextPlannedExecution)) {
+                // Bug #13: avoid running the job twice for the same time
+                // (happens when we end up running the job a few minutes before the planned time)
+                Date nextInvalid = cronExp.getNextInvalidTimeAfter(nextDate);
+                nextDate = cronExp.getNextValidTimeAfter(nextInvalid);
             }
+            job.nextPlannedExecution = nextDate;
+            executor.schedule((Callable<V>)job, nextDate.getTime() - now.getTime(), TimeUnit.MILLISECONDS);
+            job.executor = executor;
+        } catch (Exception ex) {
+            throw new UnexpectedException(ex);
         }
     }
 

@@ -14,7 +14,7 @@ public class Secure extends Controller {
     static void checkAccess() throws Throwable {
         // Authent
         if(!session.contains("username")) {
-            flash.put("url", request.method == "GET" ? request.url : "/"); // seems a good default
+            flash.put("url", "GET".equals(request.method) ? request.url : "/"); // seems a good default
             login();
         }
         // Checks
@@ -36,7 +36,7 @@ public class Secure extends Controller {
             }
         }
     }
-    
+
     // ~~~ Login
 
     public static void login() throws Throwable {
@@ -80,15 +80,16 @@ public class Secure extends Controller {
     }
 
     public static void logout() throws Throwable {
+        Security.invoke("onDisconnect");
         session.clear();
         response.removeCookie("rememberme");
         Security.invoke("onDisconnected");
         flash.success("secure.logout");
         login();
     }
-    
+
     // ~~~ Utils
-    
+
     static void redirectToOriginalURL() throws Throwable {
         Security.invoke("onAuthenticated");
         String url = flash.get("url");
@@ -159,8 +160,15 @@ public class Secure extends Controller {
         }
 
          /**
+         * This method is called before a user tries to sign off.
+         * You need to override this method if you wish to perform specific actions (eg. Record the name of the user who signed off)
+         */
+        static void onDisconnect() {
+        }
+
+         /**
          * This method is called after a successful sign off.
-         * You need to override this method if you with to perform specific actions (eg. Record the time the user signed off)
+         * You need to override this method if you wish to perform specific actions (eg. Record the time the user signed off)
          */
         static void onDisconnected() {
         }

@@ -1,7 +1,12 @@
 %{
-js_messages=new com.google.gson.Gson().toJson(play.i18n.Messages.all(play.i18n.Lang.get()));
+if (_keys) {
+    ymessages = play.i18n.Messages.find(play.i18n.Lang.get(), _keys as Set);
+} else {
+    ymessages = play.i18n.Messages.all(play.i18n.Lang.get());
+}
+js_messages=new com.google.gson.Gson().toJson(ymessages);
 }%
-<script type="text/javascript" charset="utf-8">
+<script type="text/javascript">
 
 var i18nMessages = ${js_messages};
 

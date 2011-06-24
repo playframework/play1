@@ -41,6 +41,10 @@ bc. application.langs=fr,en,ja
 
 On the first request from a new user, Play will guess the default language to use. It does so by parsing the HTTP **Accept-language** header. It will then save the chosen language in a **PLAY_LANG** cookie. So the next request will use the same language.
 
+You can use language/country pair if you want to distinguish between variant, such as en_US and en_GB, or zh_CN and zh_TW. However, be aware that some users may only expose a language and not a country in their Accept-language. For that reason, you should always provide the "naked" language (e.g. en).
+
+For example, if most of your users are from US but you also want to support British English, it is recommended to use simply "en" of US English and "en_GB" for British English.
+
 From your application code your can retrieve the current language for the user by accessing the **play.i18n.Lang** object:
 
 bc. String lang = Lang.get();

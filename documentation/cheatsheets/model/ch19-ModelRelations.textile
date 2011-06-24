@@ -1,0 +1,23 @@
+h2. Model - Relations
+
+*==@OneToOne(entity, fetch=[LAZY,EAGER], nullable=true)==*
+Defines this field as being a 1-1 relation with another persistent entity
+
+*==@OneToMany(mappedBy="remote_attribute")==*
+Defines this field as being a 1-N relation with other persistent entities
+
+*==@ManyToMany(cascade=[ALL, PERSIST, MERGE,==*
+*==REMOVE, REFRESH, DETACH])==*
+Defines this field as being a M-N relation with other persistent entities
+
+*==@ManyToOne==*
+Defines this field as being a N-1 relation with another persistent entity
+
+*==@JoinColumn(name = "id_connector")==*
+Defines a column for joining to either a join table or foreign key relation.
+
+*==@JoinTable(name = "nm_table", joinColumns ===*
+*=={ @JoinColumn(name = "id_coupon", nullable = false) },==*
+*==inverseJoinColumns = { @JoinColumn(name ===*
+*=="id_campaign", nullable = false) })==*
+Used to map ManyToMany relationships

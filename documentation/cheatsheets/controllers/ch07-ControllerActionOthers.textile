@@ -1,0 +1,15 @@
+h2. Controller.action - Others
+
+*==Logger.info("Action executed ...");==*
+*==Logger.debug("A log message");==*
+*==Logger.error(ex, "Oops");==*
+Logging configuration lives in application.conf
+
+*==@CacheFor("1h") public static void index() { ... }==*
+Caches the result of the action for 1 hour
+
+*==Play.configuration.getProperty("blog.title");==*
+Access to the configuration file
+
+*==Query query = JPA.em().createQuery("query");==*
+Access the persistence manager

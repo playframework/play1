@@ -6,6 +6,7 @@ import play.db.Model;
 import play.mvc.Http.Request;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,12 +17,15 @@ import java.util.List;
 public class UploadArrayBinder implements TypeBinder<Model.BinaryField[]> {
 
     @SuppressWarnings("unchecked")
-    public Upload[] bind(String name, Annotation[] annotations, String value, Class actualClass) {
+    public Upload[] bind(String name, Annotation[] annotations, String value, Class actualClass, Type genericType) {
+        if (value == null || value.trim().length() == 0) {
+            return null;
+        }
         List<Upload> uploads = (List<Upload>) Request.current().args.get("__UPLOADS");
         List<Upload> uploadArray = new ArrayList<Upload>();
 
-        for(Upload upload : uploads) {
-            if(upload.getFieldName().equals(value)) {
+        for (Upload upload : uploads) {
+            if (upload.getFieldName().equals(value)) {
                 uploadArray.add(upload);
             }
         }

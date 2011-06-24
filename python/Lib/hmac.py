@@ -3,13 +3,13 @@
 Implements the HMAC algorithm as described by RFC 2104.
 """
 
-def _strxor(s1, s2):
-    """Utility method. XOR the two strings s1 and s2 (must have same length).
-    """
-    return "".join(map(lambda x, y: chr(ord(x) ^ ord(y)), s1, s2))
+import warnings as _warnings
+
+trans_5C = "".join ([chr (x ^ 0x5C) for x in xrange(256)])
+trans_36 = "".join ([chr (x ^ 0x36) for x in xrange(256)])
 
 # The size of the digests returned by HMAC depends on the underlying
-# hashing module used.
+# hashing module used.  Use digest_size from the instance of HMAC instead.
 digest_size = None
 
 # A unique object passed by HMAC.copy() to the HMAC constructor, in order
@@ -18,10 +18,11 @@ digest_size = None
 _secret_backdoor_key = []
 
 class HMAC:
-    """RFC2104 HMAC class.
+    """RFC 2104 HMAC class.  Also complies with RFC 4231.
 
     This supports the API for Cryptographic Hash Functions (PEP 247).
     """
+    blocksize = 64  # 512-bit HMAC; can be changed in subclasses.
 
     def __init__(self, key, msg = None, digestmod = None):
         """Create a new HMAC object.
@@ -40,7 +41,7 @@ class HMAC:
             import hashlib
             digestmod = hashlib.md5
 
-        if callable(digestmod):
+        if hasattr(digestmod, '__call__'):
             self.digest_cons = digestmod
         else:
             self.digest_cons = lambda d='': digestmod.new(d)
@@ -54,19 +55,22 @@ class HMAC:
             if blocksize < 16:
                 # Very low blocksize, most likely a legacy value like
                 # Lib/sha.py and Lib/md5.py have.
-                blocksize = 64
+                _warnings.warn('block_size of %d seems too small; using our '
+                               'default of %d.' % (blocksize, self.blocksize),
+                               RuntimeWarning, 2)
+                blocksize = self.blocksize
         else:
-            blocksize = 64
-
-        ipad = "\x36" * blocksize
-        opad = "\x5C" * blocksize
+            _warnings.warn('No block_size attribute on given digest object; '
+                           'Assuming %d.' % (self.blocksize),
+                           RuntimeWarning, 2)
+            blocksize = self.blocksize
 
         if len(key) > blocksize:
             key = self.digest_cons(key).digest()
 
         key = key + chr(0) * (blocksize - len(key))
-        self.outer.update(_strxor(key, opad))
-        self.inner.update(_strxor(key, ipad))
+        self.outer.update(key.translate(trans_5C))
+        self.inner.update(key.translate(trans_36))
         if msg is not None:
             self.update(msg)
 
@@ -83,12 +87,21 @@ class HMAC:
 
         An update to this copy won't affect the original object.
         """
-        other = HMAC(_secret_backdoor_key)
+        other = self.__class__(_secret_backdoor_key)
         other.digest_cons = self.digest_cons
         other.digest_size = self.digest_size
         other.inner = self.inner.copy()
         other.outer = self.outer.copy()
         return other
+
+    def _current(self):
+        """Return a hash object for the current state.
+
+        To be used only internally with digest() and hexdigest().
+        """
+        h = self.outer.copy()
+        h.update(self.inner.digest())
+        return h
 
     def digest(self):
         """Return the hash value of this hashing object.
@@ -97,15 +110,14 @@ class HMAC:
         not altered in any way by this function; you can continue
         updating the object after calling this function.
         """
-        h = self.outer.copy()
-        h.update(self.inner.digest())
+        h = self._current()
         return h.digest()
 
     def hexdigest(self):
         """Like digest(), but returns a string of hexadecimal digits instead.
         """
-        return "".join([hex(ord(x))[2:].zfill(2)
-                        for x in tuple(self.digest())])
+        h = self._current()
+        return h.hexdigest()
 
 def new(key, msg = None, digestmod = None):
     """Create a new hashing object and return it.

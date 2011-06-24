@@ -228,7 +228,7 @@ public abstract class Cache {
         }
         if (Play.configuration.getProperty("memcached", "disabled").equals("enabled")) {
             try {
-                cacheImpl = MemcachedImpl.getInstance();
+                cacheImpl = MemcachedImpl.getInstance(true);
                 Logger.info("Connected to memcached");
             } catch (Exception e) {
                 Logger.error(e, "Error while connecting to memcached");

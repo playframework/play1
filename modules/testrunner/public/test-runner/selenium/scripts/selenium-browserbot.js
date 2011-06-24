@@ -291,7 +291,8 @@ BrowserBot.prototype._modifyWindow = function(win) {
     if (!this.proxyInjectionMode) {
         LOG.debug('modifyWindow ' + this.uniqueId + ":" + win[this.uniqueId]);
     }
-    if (!win[this.uniqueId]) {
+    
+    if (!win[this.uniqueId] || true) {
         win[this.uniqueId] = 1;
         this.modifyWindowToRecordPopUpDialogs(win, this);
     }

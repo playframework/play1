@@ -75,6 +75,48 @@ bc. #{selenium 'Test security'}
  
 #{/selenium}
 
+Because Selenium tests are run within your browser access to emails sent by the mock email and to String values placed in the Play Cache must be made using extensions to Selenium.
+
+Here is an example of accessing the most recent email sent to a specific email account:
+
+bc. #{selenium 'Test email sending'}
+ 
+    // Open email form and send an email to boron@localhost
+    open('/sendEmail')
+    assertTextPresent('Email form')
+    type('To', 'boron@localhost')
+    type('Subject', 'Berillium Subject')
+    clickAndWait('send')
+ 	
+	// Extract the last email sent to boron@localhost into a javascript variable called email
+	storeLastReceivedEmailBy('boron@localhost', 'email')
+	// Extract the subject line from the email variable into a variable called subject
+	store('javascript{/Subject:\s+(.*)/.exec(storedVars["email"])[1]}', 'subject')
+	// Test the contents of the subject variable
+	assertEquals('Berillium Subject', '$[subject]')
+ 
+#{/selenium}
+
+Here is an example of accessing a String stored in the Play Cache (for example the correct answer to a CAPTCHA):
+
+bc. #{selenium 'Get string from cache'}
+ 
+	open('/register')
+	assertTextPresent('Registration form')
+	type('Email', 'my@email.com')
+	type('Password', 'secretpass')
+	type('Password2', 'secretpass')
+	// .. Fill in the registration form ..
+
+	// Get the value of the magicKey variable from the cache (set to the CAPTCHA answer in the application)
+	storeCacheEntry('magicKey', 'captchaAnswer')
+	// Type it into the form
+	type('Answer', '$[captchaAnswer]')
+
+    clickAndWait('register')
+
+#{/selenium}
+
 h2. <a name="fixtures">Fixtures</a>
 
 When you run tests, you need to have stable data for your application. The simplest way is to reset your database before each test.
@@ -105,7 +147,7 @@ And then:
 bc. @Before
 public void setUp() {
     Fixtures.deleteAll();
-    Fixtures.load("data.yml");
+    Fixtures.loadModels("data.yml");
 }
 
 p(note). You can read more about Play and YAML in the "YAML manual page":yaml.
@@ -119,6 +161,14 @@ bc. #{fixture delete:'all', load:'data.yml' /}
     // Write your test here
  
 #{/selenium}
+
+Sometimes it is convenient to split data into several YAML files. You can load fixtures from multiple files at once:
+
+bc. Fixtures.loadModels("users.yml", "roles.yml", "permissions.yml");
+
+and for Selenium tests:
+
+bc. #{fixture delete:'all', load:['users.yml', 'roles.yml', 'permissions.yml'] /}
 
 h2. <a name="running">Running the tests</a>
 
@@ -136,31 +186,14 @@ On the test runner page, each test is a link. You can ‘right click’ and ‘O
 
 When you run tests this way, Play will start with a special **test** framework ID. So you can define special configurations in the **application.conf** file.
 
+If you want several different test-configuration, you can use framework IDs matching the pattern 'test-?.*' (e.g: 'test-special').
+If you use a framework ID other then the default 'test', you must make sure ALL test configuration in application.conf is available
+with that framework ID. When launching test with special test framework ID you do it like this: 'play test --%test-your-special-id'
+
 For example:
 
 bc. %test.db=mem
 %test.jpa.ddl=create-drop
-
-h2. <a name="running_outside">Running tests outside the web based runner</a>
-
-Out of the box, tests written for Play cannot be run with your favorite IDE. This is because Play context needs to be loaded in order for tests to succeed. To overcome this limitation, Play test framework provides you with a JUnit4 Rule that initializes Play before running tests. Tests annotated this way can be run **both** inside web based runner **and** inside an IDE.
-
-For example:
-
-bc. import play.test.*;
-import org.junit.*;
- 
-public class MyTest extends UnitTest {
-    
-    @Rule
-    public StartPlay startPlayBeforeTests = StartPlay.rule();
-    
-    @Test
-    public void aTest() {
-        assertEquals(2, 1 + 1); // A really important thing to test
-    }
-
-}
 
 h2. <a name="continuous">Continuous integration, and running the tests automatically</a>
 
@@ -181,4 +214,4 @@ Run these steps in a CRON tab, and you’re done!
 
 p(note). **Continuing the discussion**
  
-Next: %(next)"Deployment options":deployment%.
+Next: %(next)"Security guide":security%.

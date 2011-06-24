@@ -26,18 +26,42 @@ import play.exceptions.UnexpectedException;
  * Generate valid JavaBeans. 
  */
 public class PropertiesEnhancer extends Enhancer {
- 
+
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
         final CtClass ctClass = makeClass(applicationClass);
         if (ctClass.isInterface()) {
             return;
         }
-        for(CtClass itf : ctClass.getInterfaces()) {
-            if(itf.getName().equals("scala.ScalaObject")) {
-                return;
-            }
+        if(ctClass.getName().endsWith(".package")) {
+            return;
         }
+
+        // Add a default constructor if needed
+        try {
+            boolean hasDefaultConstructor = false;
+            for (CtConstructor constructor : ctClass.getDeclaredConstructors()) {
+                if (constructor.getParameterTypes().length == 0) {
+                    hasDefaultConstructor = true;
+                    break;
+                }
+            }
+            if (!hasDefaultConstructor && !ctClass.isInterface()) {
+                CtConstructor defaultConstructor = CtNewConstructor.make("public " + ctClass.getSimpleName() + "() {}", ctClass);
+                ctClass.addConstructor(defaultConstructor);
+            }
+        } catch (Exception e) {
+            Logger.error(e, "Error in PropertiesEnhancer");
+            throw new UnexpectedException("Error in PropertiesEnhancer", e);
+        }
+
+        if (isScalaObject(ctClass)) {
+            // Done.
+            applicationClass.enhancedByteCode = ctClass.toBytecode();
+            ctClass.defrost();
+            return;
+        }
+
         for (CtField ctField : ctClass.getDeclaredFields()) {
             try {
 
@@ -50,7 +74,7 @@ public class PropertiesEnhancer extends Enhancer {
 
                     try {
                         CtMethod ctMethod = ctClass.getDeclaredMethod(getter);
-                        if(ctMethod.getParameterTypes().length > 0) {
+                        if (ctMethod.getParameterTypes().length > 0 || Modifier.isStatic(ctMethod.getModifiers())) {
                             throw new NotFoundException("it's not a getter !");
                         }
                     } catch (NotFoundException noGetter) {
@@ -63,7 +87,7 @@ public class PropertiesEnhancer extends Enhancer {
 
                     try {
                         CtMethod ctMethod = ctClass.getDeclaredMethod(setter);
-                        if(ctMethod.getParameterTypes().length != 1 || !ctMethod.getParameterTypes()[0].equals(ctField.getType()) ) {
+                        if (ctMethod.getParameterTypes().length != 1 || !ctMethod.getParameterTypes()[0].equals(ctField.getType()) || Modifier.isStatic(ctMethod.getModifiers())) {
                             throw new NotFoundException("it's not a setter !");
                         }
                     } catch (NotFoundException noSetter) {
@@ -108,22 +132,25 @@ public class PropertiesEnhancer extends Enhancer {
                 public void edit(FieldAccess fieldAccess) throws CannotCompileException {
                     try {
 
-                        // Accés à une property ?
+                        // Acces à une property ?
                         if (isProperty(fieldAccess.getField())) {
 
                             // TODO : vérifier que c'est bien un champ d'une classe de l'application (fieldAccess.getClassName())
 
                             // Si c'est un getter ou un setter
                             String propertyName = null;
-                            if ((ctMethod.getName().startsWith("get") || ctMethod.getName().startsWith("set")) && ctMethod.getName().length() > 3) {
-                                propertyName = ctMethod.getName().substring(3);
-                                propertyName = propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
+                            if (fieldAccess.getField().getDeclaringClass().equals(ctMethod.getDeclaringClass())
+                                || ctMethod.getDeclaringClass().subclassOf(fieldAccess.getField().getDeclaringClass())) {
+                                if ((ctMethod.getName().startsWith("get") || ctMethod.getName().startsWith("set")) && ctMethod.getName().length() > 3) {
+                                    propertyName = ctMethod.getName().substring(3);
+                                    propertyName = propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
+                                }
                             }
 
                             // On n'intercepte pas le getter de sa propre property
                             if (propertyName == null || !propertyName.equals(fieldAccess.getFieldName())) {
 
-                                String invocationPoint = ctClass.getName() + "." + ctMethod.getName() + ", ligne " + fieldAccess.getLineNumber();
+                                String invocationPoint = ctClass.getName() + "." + ctMethod.getName() + ", line " + fieldAccess.getLineNumber();
 
                                 if (fieldAccess.isReader()) {
 
@@ -159,9 +186,9 @@ public class PropertiesEnhancer extends Enhancer {
         if (ctField.getName().equals(ctField.getName().toUpperCase()) || ctField.getName().substring(0, 1).equals(ctField.getName().substring(0, 1).toUpperCase())) {
             return false;
         }
-        return Modifier.isPublic(ctField.getModifiers()) &&
-                !Modifier.isFinal(ctField.getModifiers()) &&
-                !Modifier.isStatic(ctField.getModifiers());
+        return Modifier.isPublic(ctField.getModifiers())
+                && !Modifier.isFinal(ctField.getModifiers())
+                && !Modifier.isStatic(ctField.getModifiers());
     }
 
     /**
@@ -221,8 +248,8 @@ public class PropertiesEnhancer extends Enhancer {
         }
 
         public static void invokeWriteProperty(Object o, String property, Class<?> valueType, Object value, String targetType, String invocationPoint) throws Throwable {
-	    if (o == null) { 
-               throw new NullPointerException("Attempting to write a property  " + property + " on a null object of type " + targetType + " (" + invocationPoint + ")");
+            if (o == null) {
+                throw new NullPointerException("Attempting to write a property  " + property + " on a null object of type " + targetType + " (" + invocationPoint + ")");
             }
             String setter = "set" + property.substring(0, 1).toUpperCase() + property.substring(1);
             try {
@@ -235,10 +262,9 @@ public class PropertiesEnhancer extends Enhancer {
             }
         }
     }
-    
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
-    public @interface PlayPropertyAccessor { 
-
+    public @interface PlayPropertyAccessor {
     }
 }

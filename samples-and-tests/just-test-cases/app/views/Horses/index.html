@@ -1,0 +1,11 @@
+<form action="@{dontSave()}" method="POST">
+    <input name="horse.id" value="${existing.id}">
+    <input name="horse.blup.total" value="10">
+    <input type="submit" id="dontSave">
+</form>
+
+<form action="@{save()}" method="POST">
+    <input name="horse.id" value="${existing.id}">
+    <input name="horse.blup.total" value="10">
+    <input type="submit" id="save">
+</form>

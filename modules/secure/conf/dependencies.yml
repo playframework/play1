@@ -1,0 +1,4 @@
+self: play -> secure $version
+
+require:
+    - play

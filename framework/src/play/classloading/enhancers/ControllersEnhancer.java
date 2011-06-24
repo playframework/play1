@@ -4,6 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Stack;
 import javassist.CannotCompileException;
 import javassist.CtClass;
 import javassist.CtField;
@@ -15,7 +16,6 @@ import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
 import javassist.expr.Handler;
 import play.Logger;
-import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.exceptions.UnexpectedException;
 
@@ -23,6 +23,8 @@ import play.exceptions.UnexpectedException;
  * Enhance controllers classes. 
  */
 public class ControllersEnhancer extends Enhancer {
+
+    public static ThreadLocal<Stack<String>> currentAction = new ThreadLocal<Stack<String>>();
 
     @Override
     public void enhanceThisClass(final ApplicationClass applicationClass) throws Exception {
@@ -79,45 +81,54 @@ public class ControllersEnhancer extends Enhancer {
                 }
             }
 
-            // Patch for new scala module -->
-            if(Play.configuration.getProperty("scala.enableAutoRedirect", "true").equals("false") && Modifier.isPublic(ctMethod.getModifiers()) && ((ctClass.getName().endsWith("$") && !ctMethod.getName().contains("$default$"))) && !isHandler) {
+            if (isScalaObject(ctClass)) {
 
-                try {
-                    ctMethod.insertBefore(
-                        "if(play.mvc.Controller._currentReverse.get() != null) {"
-                        + "play.mvc.Controller.redirect(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\", $args);"
-                        + generateValidReturnStatement(ctMethod.getReturnType())
-                    + "}");
-                } catch (Exception e) {
-                    Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (autoredirect).", applicationClass.name, ctMethod.getName());
-                    throw new UnexpectedException(e);
+                // Auto reverse -->
+                if (Modifier.isPublic(ctMethod.getModifiers()) && ((ctClass.getName().endsWith("$") && !ctMethod.getName().contains("$default$"))) && !isHandler) {
+                    try {
+                        ctMethod.insertBefore(
+                                "if(play.mvc.Controller._currentReverse.get() != null) {"
+                                + "play.mvc.Controller.redirect(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\", $args);"
+                                + generateValidReturnStatement(ctMethod.getReturnType())
+                                + "}");
+
+                        ctMethod.insertBefore(
+                                "((java.util.Stack)play.classloading.enhancers.ControllersEnhancer.currentAction.get()).push(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\");");
+
+                        ctMethod.insertAfter(
+                                "((java.util.Stack)play.classloading.enhancers.ControllersEnhancer.currentAction.get()).pop();", true);
+
+                    } catch (Exception e) {
+                        Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (auto-reverse).", applicationClass.name, ctMethod.getName());
+                        throw new UnexpectedException(e);
+                    }
                 }
 
             } else {
 
-                if (Modifier.isPublic(ctMethod.getModifiers()) && ((ctClass.getName().endsWith("$") && !ctMethod.getName().contains("$default$")) || (Modifier.isStatic(ctMethod.getModifiers()) && ctMethod.getReturnType().equals(CtClass.voidType))) && !isHandler) {
+                // Auto redirect -->
+                if (Modifier.isPublic(ctMethod.getModifiers()) && Modifier.isStatic(ctMethod.getModifiers()) && ctMethod.getReturnType().equals(CtClass.voidType) && !isHandler) {
                     try {
                         ctMethod.insertBefore(
                                 "if(!play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.isActionCallAllowed()) {"
                                 + "play.mvc.Controller.redirect(\"" + ctClass.getName().replace("$", "") + "." + ctMethod.getName() + "\", $args);"
-                                + generateValidReturnStatement(ctMethod.getReturnType()) +  "}"
+                                + generateValidReturnStatement(ctMethod.getReturnType()) + "}"
                                 + "play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.stopActionCall();");
+
                     } catch (Exception e) {
-                        Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (autoredirect).", applicationClass.name, ctMethod.getName());
+                        Logger.error(e, "Error in ControllersEnhancer. %s.%s has not been properly enhanced (auto-redirect).", applicationClass.name, ctMethod.getName());
                         throw new UnexpectedException(e);
                     }
                 }
 
             }
 
-            
-
             // Enhance global catch to avoid potential unwanted catching of play.mvc.results.Result
             ctMethod.instrument(new ExprEditor() {
 
                 @Override
                 public void edit(Handler handler) throws CannotCompileException {
-                    StringBuffer code = new StringBuffer();
+                    StringBuilder code = new StringBuilder();
                     try {
                         code.append("if($1 instanceof play.mvc.results.Result || $1 instanceof play.Invoker.Suspend) throw $1;");
                         handler.insertBefore(code.toString());
@@ -132,6 +143,7 @@ public class ControllersEnhancer extends Enhancer {
 
         // Done.
         applicationClass.enhancedByteCode = ctClass.toBytecode();
+
         ctClass.defrost();
 
     }
@@ -146,7 +158,7 @@ public class ControllersEnhancer extends Enhancer {
      * Check if a field must be translated to a 'thread safe field'
      */
     static boolean isThreadedFieldAccess(CtField field) {
-        if (field.getDeclaringClass().getName().equals("play.mvc.Controller")) {
+        if (field.getDeclaringClass().getName().equals("play.mvc.Controller") || field.getDeclaringClass().getName().equals("play.mvc.WebSocketController")) {
             return field.getName().equals("params")
                     || field.getName().equals("request")
                     || field.getName().equals("response")
@@ -155,6 +167,8 @@ public class ControllersEnhancer extends Enhancer {
                     || field.getName().equals("renderArgs")
                     || field.getName().equals("routeArgs")
                     || field.getName().equals("validation")
+                    || field.getName().equals("inbound")
+                    || field.getName().equals("outbound")
                     || field.getName().equals("flash");
         }
         return false;
@@ -185,17 +199,32 @@ public class ControllersEnhancer extends Enhancer {
     }
 
     static String generateValidReturnStatement(CtClass type) {
-        if(type.equals(CtClass.voidType)) {
+        if (type.equals(CtClass.voidType)) {
             return "return;";
         }
-        if(type.equals(CtClass.booleanType)) {
+        if (type.equals(CtClass.booleanType)) {
             return "return false;";
         }
-        if(type.equals(CtClass.charType)) {
+        if (type.equals(CtClass.charType)) {
             return "return '';";
         }
-        if(type.equals(CtClass.byteType) || type.equals(CtClass.doubleType) || type.equals(CtClass.floatType) || type.equals(CtClass.intType) || type.equals(CtClass.longType) || type.equals(CtClass.shortType)) {
-            return "return 0;";
+        if (type.equals(CtClass.byteType)) {
+            return "return (byte)0;";
+        }
+        if (type.equals(CtClass.doubleType)) {
+            return "return (double)0;";
+        }
+        if (type.equals(CtClass.floatType)) {
+            return "return (float)0;";
+        }
+        if (type.equals(CtClass.intType)) {
+            return "return (int)0;";
+        }
+        if (type.equals(CtClass.longType)) {
+            return "return (long)0;";
+        }
+        if (type.equals(CtClass.shortType)) {
+            return "return (short)0;";
         }
         return "return null;";
     }

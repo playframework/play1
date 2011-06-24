@@ -7,6 +7,7 @@ import java.util.*;
 
 import play.Logger;
 import play.Play;
+import play.cache.Cache;
 import play.libs.IO;
 import play.libs.Mail;
 import play.mvc.*;
@@ -72,6 +73,16 @@ public class TestRunner extends Controller {
             String result = resultTemplate.render(options);
             File testResults = Play.getFile("test-result/" + test + (results.passed ? ".passed" : ".failed") + ".html");
             IO.writeContent(result, testResults);
+            try {
+                // Write xml output
+                options.remove("out");
+                resultTemplate = TemplateLoader.load("TestRunner/results-xunit.xml");
+                String resultXunit = resultTemplate.render(options);
+                File testXunitResults = Play.getFile("test-result/TEST-" + test.substring(0, test.length()-6) + ".xml");
+                IO.writeContent(resultXunit, testXunitResults);
+            } catch(Exception e) {
+                Logger.error(e, "Cannot ouput XML unit output");
+            }            
             response.contentType = "text/html";
             renderText(result);
         }
@@ -139,5 +150,13 @@ public class TestRunner extends Controller {
         renderText(email);
     }
 
+	public static void cacheEntry(String key){
+    	String value = Cache.get(key,String.class);
+    	if(value == null){
+    		notFound();
+    	}
+    	renderText(value);
+    }
+	
 }
 

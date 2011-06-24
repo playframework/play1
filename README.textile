@@ -23,11 +23,11 @@ h2. Getting started
 
 1. Install the latest version of Play framework and unzip it anywhere you want:
 
-bc. unzip play-1.1.zip -d /opt/play-1.1
+bc. unzip play-1.2.zip -d /opt/play-1.2
 
 2. Add the **play** script to your PATH:
 
-bc. export PATH=$PATH:/opt/play-1.1
+bc. export PATH=$PATH:/opt/play-1.2
 
 3. Create a new Play application:
 

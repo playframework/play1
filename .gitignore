@@ -1,4 +1,8 @@
+bin
 framework/classes
+framework/test-classes
+framework/out
+framework/.idea
 framework/play.jar
 .DS_Store
 nbproject/genfiles.properties
@@ -12,6 +16,7 @@ framework/src/play/version
 framework/src/play/version
 framework/src/play/version
 framework/tests/test-application/db
+.settings
 .classpath
 .project
 framework/tests/tmp
@@ -83,9 +88,13 @@ samples-and-tests/with-scala/eclipse
 samples-and-tests/test-scala/tmp
 samples-and-tests/test-scala/logs
 samples-and-tests/i-am-a-developer/i-am-working-here
+samples-and-tests/i-am-a-developer/i-am-creating-jobs-here
+samples-and-tests/i-am-a-developer/i-am-testing-log-levels-here
 samples-and-tests/just-test-cases/attachments
 samples-and-tests/booking/logs
 samples-and-tests/booking/tmp
+samples-and-tests/twitter-oauth/.settings
+samples-and-tests/twitter-oauth/eclipse
 help
 *.iml
 *.ipr
@@ -119,6 +128,9 @@ samples-and-tests/zencontact/precompiled
 !modules/console
 !modules/grizzly
 !modules/secure
+!modules/testrunner
+!framework/src/play/db
+.idea
 debian/files
 build-stamp
 configure-stamp

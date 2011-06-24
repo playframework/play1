@@ -1,5 +1,13 @@
 import imp
 import os
+import warnings
+
+def play_formatwarning(msg, *a):
+    # ignore everything except the message
+    # format the message in a play cmdline way
+    return '~'+ '\n'+ '~ '+ str(msg) + '\n~\n'
+
+warnings.formatwarning = play_formatwarning
 
 class CommandLoader:
     def __init__(self, play_path):
@@ -11,17 +19,25 @@ class CommandLoader:
     def load_core(self):
         for filename in os.listdir(self.path):
             if filename != "__init__.py" and filename.endswith(".py"):
-                name = filename.replace(".py", "")
-                mod = load_python_module(name, self.path)
-                self._load_cmd_from(mod)
+                try:
+                    name = filename.replace(".py", "")
+                    mod = load_python_module(name, self.path)
+                    self._load_cmd_from(mod)
+                except:
+                    warnings.warn("!! Warning: could not load core command file " + filename, RuntimeWarning)
 
     def load_play_module(self, modname):
-        try:
-            leafname = os.path.basename(modname).split('.')[0]
-            mod = imp.load_source(leafname, os.path.join(modname, "commands.py"))
-            self._load_cmd_from(mod)
-        except:
-            pass # No command to load in this module
+        commands = os.path.join(modname, "commands.py")
+        if os.path.exists(commands):
+            try:
+                leafname = os.path.basename(modname).split('.')[0]
+                mod = imp.load_source(leafname, os.path.join(modname, "commands.py"))
+                self._load_cmd_from(mod)
+            except Exception, e:
+                print '~'
+                print '~ !! Error whileloading %s: %s' % (commands, e)
+                print '~'
+                pass # No command to load in this module
 
     def _load_cmd_from(self, mod):
         try:
@@ -32,9 +48,14 @@ class CommandLoader:
             if 'MODULE' in dir(mod):
                 self.modules[mod.MODULE] = mod
         except Exception:
-            print "~ Warning: error loading command " + name
+            warnings.warn("Warning: error loading command " + name)
 
 def load_python_module(name, location):
     mod_desc = imp.find_module(name, [location])
-    return imp.load_module(name, mod_desc[0], mod_desc[1], mod_desc[2])
+    mod_file = mod_desc[0]
+    try:
+        return imp.load_module(name, mod_desc[0], mod_desc[1], mod_desc[2])
+    finally:
+        if mod_file is not None and not mod_file.closed:
+            mod_file.close()
 

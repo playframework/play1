@@ -13,6 +13,12 @@ import os
 import re
 import pprint
 import traceback
+
+
+class Restart(Exception):
+    """Causes a debugger to be restarted for the debugged python program."""
+    pass
+
 # Create a custom safe Repr instance and increase its maxstring.
 # The default of 30 truncates error messages too easily.
 _repr = Repr()
@@ -23,7 +29,7 @@ __all__ = ["run", "pm", "Pdb", "runeval", "runctx", "runcall", "set_trace",
            "post_mortem", "help"]
 
 def find_function(funcname, filename):
-    cre = re.compile(r'def\s+%s\s*[(]' % funcname)
+    cre = re.compile(r'def\s+%s\s*[(]' % re.escape(funcname))
     try:
         fp = open(filename)
     except IOError:
@@ -169,7 +175,8 @@ class Pdb(bdb.Bdb, cmd.Cmd):
         print >>self.stdout, '--Return--'
         self.interaction(frame, None)
 
-    def user_exception(self, frame, (exc_type, exc_value, exc_traceback)):
+    def user_exception(self, frame, exc_info):
+        exc_type, exc_value, exc_traceback = exc_info
         """This function is called if an exception occurs,
         but only if we are to stop at or just below this level."""
         frame.f_locals['__exception__'] = exc_type, exc_value
@@ -193,7 +200,15 @@ class Pdb(bdb.Bdb, cmd.Cmd):
         globals = self.curframe.f_globals
         try:
             code = compile(line + '\n', '<stdin>', 'single')
-            exec code in globals, locals
+            save_stdout = sys.stdout
+            save_stdin = sys.stdin
+            try:
+                sys.stdin = self.stdin
+                sys.stdout = self.stdout
+                exec code in globals, locals
+            finally:
+                sys.stdout = save_stdout
+                sys.stdin = save_stdin
         except:
             t, v = sys.exc_info()[:2]
             if type(t) == type(''):
@@ -598,6 +613,11 @@ class Pdb(bdb.Bdb, cmd.Cmd):
             self.lineno = None
     do_d = do_down
 
+    def do_until(self, arg):
+        self.set_until(self.curframe)
+        return 1
+    do_unt = do_until
+
     def do_step(self, arg):
         self.set_step()
         return 1
@@ -607,6 +627,18 @@ class Pdb(bdb.Bdb, cmd.Cmd):
         self.set_next(self.curframe)
         return 1
     do_n = do_next
+
+    def do_run(self, arg):
+        """Restart program by raising an exception to be caught in the main debugger
+        loop. If arguments were given, set them in sys.argv."""
+        if arg:
+            import shlex
+            argv0 = sys.argv[0:1]
+            sys.argv = shlex.split(arg)
+            sys.argv[:0] = argv0
+        raise Restart
+
+    do_restart = do_run
 
     def do_return(self, arg):
         self.set_return(self.curframe)
@@ -936,6 +968,14 @@ i.e., the breakpoint is made unconditional."""
 Execute the current line, stop at the first possible occasion
 (either in a function that is called or in the current function)."""
 
+    def help_until(self):
+        self.help_unt()
+
+    def help_unt(self):
+        print """unt(il)
+Continue execution until the line with a number greater than the current
+one is reached or until the current frame returns"""
+
     def help_next(self):
         self.help_n()
 
@@ -1011,6 +1051,15 @@ To assign to a global variable you must always prefix the
 command with a 'global' command, e.g.:
 (Pdb) global list_options; list_options = ['-l']
 (Pdb)"""
+
+    def help_run(self):
+        print """run [args...]
+Restart the debugged python program. If a string is supplied, it is
+splitted with "shlex" and the result is used as the new sys.argv.
+History, breakpoints, actions and debugger options are preserved.
+"restart" is an alias for "run"."""
+
+    help_restart = help_run
 
     def help_quit(self):
         self.help_q()
@@ -1120,11 +1169,17 @@ see no sign that the breakpoint was reached.
         return None
 
     def _runscript(self, filename):
-        # Start with fresh empty copy of globals and locals and tell the script
-        # that it's being run as __main__ to avoid scripts being able to access
-        # the pdb.py namespace.
-        globals_ = {"__name__" : "__main__", "__file__" : filename}
-        locals_ = globals_
+        # The script has to run in __main__ namespace (or imports from
+        # __main__ will break).
+        #
+        # So we clear up the __main__ and set several special variables
+        # (this gets rid of pdb's globals and cleans old variables on restarts).
+        import __main__
+        __main__.__dict__.clear()
+        __main__.__dict__.update({"__name__"    : "__main__",
+                                  "__file__"    : filename,
+                                  "__builtins__": __builtins__,
+                                 })
 
         # When bdb sets tracing, a number of call and line events happens
         # BEFORE debugger even reaches user's code (and the exact sequence of
@@ -1135,7 +1190,7 @@ see no sign that the breakpoint was reached.
         self.mainpyfile = self.canonic(filename)
         self._user_requested_quit = 0
         statement = 'execfile( "%s")' % filename
-        self.run(statement, globals=globals_, locals=locals_)
+        self.run(statement)
 
 # Simplified interface
 
@@ -1157,12 +1212,19 @@ def set_trace():
 
 # Post-Mortem interface
 
-def post_mortem(t):
+def post_mortem(t=None):
+    # handling the default
+    if t is None:
+        # sys.exc_info() returns (type, value, traceback) if an exception is
+        # being handled, otherwise it returns None
+        t = sys.exc_info()[2]
+        if t is None:
+            raise ValueError("A valid traceback must be passed if no "
+                                               "exception is being handled")
+
     p = Pdb()
     p.reset()
-    while t.tb_next is not None:
-        t = t.tb_next
-    p.interaction(t.tb_frame, t)
+    p.interaction(None, t)
 
 def pm():
     post_mortem(sys.last_traceback)
@@ -1188,7 +1250,7 @@ def help():
         print 'along the Python search path'
 
 def main():
-    if not sys.argv[1:]:
+    if not sys.argv[1:] or sys.argv[1] in ("--help", "-h"):
         print "usage: pdb.py scriptfile [arg] ..."
         sys.exit(2)
 
@@ -1204,9 +1266,8 @@ def main():
 
     # Note on saving/restoring sys.argv: it's a good idea when sys.argv was
     # modified by the script being debugged. It's a bad idea when it was
-    # changed by the user from the command line. The best approach would be to
-    # have a "restart" command which would allow explicit specification of
-    # command line arguments.
+    # changed by the user from the command line. There is a "restart" command which
+    # allows explicit specification of command line arguments.
     pdb = Pdb()
     while 1:
         try:
@@ -1214,6 +1275,9 @@ def main():
             if pdb._user_requested_quit:
                 break
             print "The program finished and will be restarted"
+        except Restart:
+            print "Restarting", mainpyfile, "with arguments:"
+            print "\t" + " ".join(sys.argv[1:])
         except SystemExit:
             # In most cases SystemExit does not warrant a post-mortem session.
             print "The program exited via sys.exit(). Exit status: ",
@@ -1223,12 +1287,11 @@ def main():
             print "Uncaught exception. Entering post mortem debugging"
             print "Running 'cont' or 'step' will restart the program"
             t = sys.exc_info()[2]
-            while t.tb_next is not None:
-                t = t.tb_next
-            pdb.interaction(t.tb_frame,t)
+            pdb.interaction(None, t)
             print "Post mortem debugger finished. The "+mainpyfile+" will be restarted"
 
 
 # When invoked as main program, invoke the debugger on a script
-if __name__=='__main__':
-    main()
+if __name__ == '__main__':
+    import pdb
+    pdb.main()

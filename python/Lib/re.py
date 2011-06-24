@@ -232,6 +232,8 @@ def _compile(*key):
         return p
     pattern, flags = key
     if isinstance(pattern, _pattern_type):
+        if flags:
+            raise ValueError('Cannot process flags argument with a compiled pattern')
         return pattern
     if not sre_compile.isstring(pattern):
         raise TypeError, "first argument must be string or compiled pattern"
@@ -314,7 +316,7 @@ class Scanner:
             if i == j:
                 break
             action = self.lexicon[m.lastindex-1][1]
-            if callable(action):
+            if hasattr(action, '__call__'):
                 self.match = m
                 action = action(self, m.group())
             if action is not None:

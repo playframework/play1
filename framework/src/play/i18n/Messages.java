@@ -1,10 +1,14 @@
 package play.i18n;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import play.Play;
 import play.data.binding.Binder;
 
 /**
@@ -24,7 +28,9 @@ import play.data.binding.Binder;
  */
 public class Messages {
 
-    static public Properties defaults;
+    private static final Object[] NO_ARGS = new Object[]{null};
+
+	static public Properties defaults;
 
     static public Map<String, Properties> locales = new HashMap<String, Properties>();
 
@@ -32,19 +38,63 @@ public class Messages {
 
     /**
      * Given a message code, translate it using current locale.
-     * Notice that if the message can't be found, the string <em>!code!</em> is returned.
+     * If there is no message in the current locale for the given key, the key
+     * is returned.
      * 
      * @param key the message code
      * @param args optional message format arguments
      * @return translated message
      */
     public static String get(Object key, Object... args) {
+        return getMessage(Lang.get(), key, args);
+    }
+
+    /**
+     * Return several messages for a locale
+     * @param locale the locale code, e.g. fr, fr_FR
+     * @param keys the keys to get messages from. Wildcards can be used at the end: {'title', 'login.*'}
+     * @returnmessages as a {@link java.util.Properties java.util.Properties}
+     */
+    public static Properties find(String locale, Set<String> keys) {
+        Properties result = new Properties();
+        Properties all = all(locale);
+        // Expand the set for wildcards
+        Set<String> wildcards = new HashSet<String>();
+        for (String key: keys) {
+            if (key.endsWith("*")) wildcards.add(key);
+        }
+        for (String key: wildcards) {
+            keys.remove(key);
+            String start = key.substring(0, key.length() - 1);
+            for (Object key2: all.keySet()) {
+                if (((String)key2).startsWith(start)) {
+                    keys.add((String)key2);
+                }
+            }
+        }
+        // Build the result
+        for (Object key: all.keySet()) {
+            if (keys.contains(key)) {
+                result.put(key, all.get(key));
+            }
+        }
+        return result;
+    }
+
+    public static String getMessage(String locale, Object key, Object... args) {
+        // Check if there is a plugin that handles translation
+        String message = Play.pluginCollection.getMessage(locale, key, args);
+
+        if(message != null) {
+            return message;
+        }
+    
         String value = null;
         if( key == null ) {
             return "";
         }
-        if (locales.containsKey(Lang.get())) {
-            value = locales.get(Lang.get()).getProperty(key.toString());
+        if (locales.containsKey(locale)) {
+            value = locales.get(locale).getProperty(key.toString());
         }
         if (value == null) {
             value = defaults.getProperty(key.toString());
@@ -52,6 +102,11 @@ public class Messages {
         if (value == null) {
             value = key.toString();
         }
+
+        return formatString(value, args);
+    }
+
+    public static String formatString(String value, Object... args) {
         String message = String.format(value, coolStuff(value, args));
         Matcher matcher = recursive.matcher(message);
         StringBuffer sb = new StringBuffer();
@@ -66,7 +121,9 @@ public class Messages {
 
     @SuppressWarnings("unchecked")
     static Object[] coolStuff(String pattern, Object[] args) {
-
+    	// when invoked with a null argument we get a null args instead of an array with a null value.
+    	if(args == null)
+    		return NO_ARGS;
         Class<? extends Number>[] conversions = new Class[args.length];
 
         Matcher matcher = formatterPattern.matcher(pattern);
@@ -112,6 +169,9 @@ public class Messages {
      * @return messages as a {@link java.util.Properties java.util.Properties}
      */
     public static Properties all(String locale) {
+        if(locale == null || "".equals(locale))
+            return defaults;
         return locales.get(locale);
     }
+
 }

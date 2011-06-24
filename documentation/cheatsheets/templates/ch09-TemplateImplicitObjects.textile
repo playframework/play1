@@ -1,0 +1,29 @@
+h2. Template - Implicit objects
+
+*errors*
+The validation errors raised in the controller
+
+*flash*
+Flash scope
+
+*lang*
+The negotiated language
+
+*messages*
+The map of localised messages
+
+*out*
+The output stream writer
+
+*params*
+Current parameters
+
+*play*
+Main framework class
+
+*request*
+The current HTTP request
+
+*session*
+The session scope
+

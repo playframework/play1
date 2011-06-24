@@ -1,3 +1,5 @@
+import static org.junit.Assert.*;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -5,10 +7,10 @@ import javax.management.RuntimeErrorException;
 
 import models.Bloc;
 import models.vendor.Vendor;
+import models.vendor.VenueVendor;
 import models.vendor.tag.AreaTag;
 import models.vendor.tag.FunctionTag;
 import models.vendor.tag.Tag;
-import models.Base;
 import models.*;
 
 import org.junit.Before;
@@ -31,8 +33,12 @@ public class FixturesTest extends UnitTest {
         assertEquals(4, Tag.findAll().size());
         assertEquals(2, AreaTag.findAll().size());
         assertEquals(2, FunctionTag.findAll().size());
+        assertEquals(2, VenueVendor.findAll().size());
 
-        assertEquals(2, Vendor.find(
+        Fixtures.load("vendor-data1.yml", "vendor-data2.yml");
+        assertEquals(4, VenueVendor.findAll().size());
+
+        assertEquals(3, Vendor.find(
                 "SELECT DISTINCT v.id " +
                 "FROM Vendor v " +
                 "JOIN v.tags as t " +
@@ -48,12 +54,22 @@ public class FixturesTest extends UnitTest {
         assertEquals("value2", b.criterias.get("key2"));
 
         try {
-            assertEquals(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse("2001/11/23 21:03:17"), b.created);
+            assertEquals(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss Z").parse("2001/11/23 21:03:17 +0100"), b.created);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
 
     }
+    
+    @Test
+	public void loadTemplateData() throws Exception {
+        Fixtures.load("vendor-data-template.yml");
+        assertEquals(2, Vendor.findAll().size());
+        assertEquals(4, Tag.findAll().size());
+        assertEquals(2, AreaTag.findAll().size());
+        assertEquals(2, FunctionTag.findAll().size());
+        assertEquals(2, VenueVendor.findAll().size());
+	}
     
     @Test
     public void checkEmptyReferences() {

@@ -1,0 +1,48 @@
+#{selenium 'Try more complex binding'}
+
+	//
+	open('@{CompositeMapBinding.index()}')
+
+	//Map binding: Map<String, String>, taking "composite." as identifier (composite value)
+	type('composite_name', 'tom')
+	type('composite_surname', 'hanks')
+	type('composite_phone1', '111')
+	type('composite_phone2', '222')
+	type('composite_phone3', '333')
+
+	//Map binding: Map<String, String>, taking "items" as identifier (non composite value)
+	
+	type('items_first', 'curly')
+	type('items_second', 'larry')
+	type('items_third', 'moe')
+	
+	//Map binding: Map<String, ComplexModel>, taking "models" as identifier
+	type('models_first_name', 'woody')
+	type('models_first_surname', 'allen')
+	type('models_first_phone', '444')
+
+	type('models_second_name', 'alfred')
+	type('models_second_surname', 'hitchcock')
+	type('models_second_phone', '555')
+
+	clickAndWait('go')
+	
+	assertText('composite_size', '3')
+	assertText('composite_name', 'tom')
+	assertText('composite_surname', 'hanks')
+	assertText('composite_phone', '111, 222, 333')
+
+	assertText('items_size', '3')
+	assertText('items_first', 'curly')
+	assertText('items_second', 'larry')
+	assertText('items_third', 'moe')
+
+	assertText('models_size', '2')
+	assertText('models_first_name', 'woody')
+	assertText('models_first_surname', 'allen')
+	assertText('models_first_phone', '444')
+	assertText('models_second_name', 'alfred')
+	assertText('models_second_surname', 'hitchcock')
+	assertText('models_second_phone', '555')
+
+#{/selenium}

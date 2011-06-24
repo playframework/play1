@@ -177,7 +177,6 @@ bc. ProxyPreserveHost on
 
 The host: header will be the original host request header issued by the client. By combining theses two techniques, your app will appear to be directly exposed.
 
-
 p(note). **Continuing the discussion**
  
-Next: %(next)"Play modules":modules%.
+Next: %(next)"Deployment options":deployment%.

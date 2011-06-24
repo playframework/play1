@@ -88,3 +88,7 @@ bc. #{form @ destroyMyAccount()}
 You can of course add this as a before filter if you want to protect all actions of a hierarchy of controllers.
 
 "More on cross-site request forgery":http://en.wikipedia.org/wiki/Cross-site_request_forgery
+
+p(note). **Continuing the discussion**
+ 
+Next: %(next)"Play modules":modules%.

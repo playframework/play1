@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.List;
 import play.Play;
-import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
 
 public interface Model {
@@ -50,11 +49,9 @@ public interface Model {
 
         public static Model.Factory factoryFor(Class<? extends Model> clazz) {
             if(Model.class.isAssignableFrom(clazz)) {
-                for(PlayPlugin plugin : Play.plugins) {
-                    Model.Factory factory = plugin.modelFactory(clazz);
-                    if(factory != null) {
-                        return factory;
-                    }
+                Model.Factory factory = Play.pluginCollection.modelFactory(clazz);
+                if( factory != null) {
+                    return factory;
                 }
             }
             throw new UnexpectedException("Model " + clazz.getName() + " is not managed by any plugin");

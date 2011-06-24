@@ -6,6 +6,7 @@ package play.templates;
 public class TemplateParser {
 
     private String pageSource;
+    private int nestedBracesCounter; // counts nested braces in current expression/tag
 
     public TemplateParser(String pageSource) {
         this.pageSource = pageSource;
@@ -57,7 +58,7 @@ public class TemplateParser {
         }
         return "";
     }
-
+    
     public Token nextToken() {
         for (;;) {
 
@@ -80,12 +81,14 @@ public class TemplateParser {
                         return found(Token.SCRIPT, 2);
                     }
                     if (c == '$' && c1 == '{') {
+                        nestedBracesCounter = 0;
                         return found(Token.EXPR, 2);
                     }
                     if (c == '#' && c1 == '{' && c2 == '/') {
                         return found(Token.END_TAG, 3);
                     }
                     if (c == '#' && c1 == '{') {
+                        nestedBracesCounter = 0;
                         return found(Token.START_TAG, 2);
                     }
                     if (c == '&' && c1 == '{') {
@@ -115,12 +118,14 @@ public class TemplateParser {
                     }
                     break;
                 case START_TAG:
-                    if (c == '}') {
+                    if (c == '}' && nestedBracesCounter == 0) {
                         return found(Token.PLAIN, 1);
                     }
                     if (c == '/' && c1 == '}') {
                         return found(Token.END_TAG, 1);
                     }
+                    if (c == '{') nestedBracesCounter++;
+                    if (c == '}') nestedBracesCounter--;
                     break;
                 case END_TAG:
                     if (c == '}') {
@@ -128,9 +133,11 @@ public class TemplateParser {
                     }
                     break;
                 case EXPR:
-                    if (c == '}') {
+                    if (c == '}' && nestedBracesCounter == 0) {
                         return found(Token.PLAIN, 1);
                     }
+                    if (c == '{') nestedBracesCounter++;
+                    if (c == '}') nestedBracesCounter--;
                     break;
                 case ACTION:
                     if (c == '}') {

@@ -1,6 +1,6 @@
 h1. Sending e-mail
 
-E-mail functionality uses the "Apache Commons Email":http://commons.apache.org/email/userguide.html library under the hoot. You can use the **play.libs.Mail** utility class to send e-mail very easily.
+E-mail functionality uses the "Apache Commons Email":http://commons.apache.org/email/userguide.html library under the hood. You can use the **play.libs.Mail** utility class to send e-mail very easily.
 
 A simple e-mail:
 
@@ -18,12 +18,12 @@ email.addTo("info@lunatech.com");
 email.setFrom(sender@lunatech.com", "Nicolas");
 email.setSubject("Test email with inline image");
 // embed the image and get the content id
-URL url = new URL("http://www.zenexity.fr/wp-content/themes/zenexity/images/logo.png");
+URL url = new URL("http://www.zenexity.fr/wp-content/themes/images/logo.png");
 String cid = email.embed(url, "Zenexity logo");
 // set the html message
 email.setHtmlMsg("<html>Zenexity logo - <img src=\"cid:"+cid+"\"></html>");
 // set the alternative message
-email.setTextMsg("Your email client does not support HTML messages, too bad :(");
+email.setTextMsg("Your email client does not support HTML, too bad :(");
 
 For more information see the "Commons Email documentation":http://commons.apache.org/email/userguide.html.
 
@@ -46,7 +46,7 @@ public class Mails extends Mailer {
    public static void welcome(User user) {
       setSubject("Welcome %s", user.name);
       addRecipient(user.email);
-      addFrom("Me <me@me.com>");
+      setFrom("Me <me@me.com>");
       EmailAttachment attachment = new EmailAttachment();
       attachment.setDescription("A pdf document");
       attachment.setPath(Play.getFile("rules.pdf").getPath());
@@ -56,7 +56,7 @@ public class Mails extends Mailer {
  
    public static void lostPassword(User user) {
       String newpassword = user.password;
-      addFrom("Robot <robot@thecompany.com>");
+      setFrom("Robot <robot@thecompany.com>");
       setSubject("Your password has been reset");
       addRecipient(user.email);
       send(user, newpassword);
@@ -76,8 +76,11 @@ The template for the lostPassword method could look like this:
 
 **app/views/Mails/lostPassword.html**
 
-bc. <html><body><head>...</head><body><img src="mycompany.com/images"/><p>Hello ${user.name},<br/>
-Your new password is <b>${newpassword}</b>.
+bc. <html>
+<body><head>...</head><body>
+<img src="mycompany.com/images"/>
+<p>
+    Hello ${user.name}, Your new password is <b>${newpassword}</b>.
 </p>
 </body>
 </html>
@@ -102,6 +105,20 @@ Your new password is ${newpassword}.
 h3. text/html e-mail with text/plain alternative
 
 If an HTML template is defined and a text template exists, then the text template will be used as an alternative message. In our previous example, if both **app/views/Mails/lostPassword.html** and **app/views/Mails/lostPassword.txt** are defined, then the e-mail will be sent in text/html as defined in lostPassword.html with an alternative part as defined in lostPassword.txt. So you can send nice HMTL e-mail to your friends and still please those geeky friends that still use mutt ;)
+
+h3. Links to your application in e-mail
+
+Your can include links to your application in e-mails like this:
+
+bc. @@{application.index}
+
+If you send mails from Jobs you have to configure **application.baseUrl** in **application.conf**.
+**application.baseUrl** must be a valid external baseurl to your application.
+
+If the website playframework.org where to send you an e-mail from inside a Job, its configuration
+would look like this:
+
+bc. application.baseUrl=http://www.playframework.org/
 
 h2. <a name="smtp">SMTP configuration</a>
 
@@ -147,7 +164,6 @@ mail.smtp.user=yourGmailLogin
 mail.smtp.pass=yourGmailPassword
 mail.smtp.channel=ssl
 
-
 p(note). **Continuing the discussion**
  
-Next: %(next)"Security guide":security%.
+Now we shall move on to %(next)"Testing the application":test%.

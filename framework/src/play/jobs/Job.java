@@ -1,17 +1,25 @@
 package play.jobs;
 
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
+import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import play.Play;
+
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.LazyLoader;
 import play.Invoker;
+import play.Invoker.InvocationContext;
 import play.Logger;
+import play.Play;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
+import play.libs.F.Promise;
 import play.libs.Time;
+import play.mvc.Http;
+import play.utils.FakeRequestCreator;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
 
 /**
  * A job is an asynchronously executed unit of work
@@ -19,11 +27,21 @@ import play.libs.Time;
  */
 public class Job<V> extends Invoker.Invocation implements Callable<V> {
 
+    public static final String invocationType = "Job";
+    public static final String applicationBaseUrl_configPropertyName = "application.baseUrl";
+
     protected ExecutorService executor;
     protected long lastRun = 0;
     protected boolean wasError = false;
     protected Throwable lastException = null;
 
+    Date nextPlannedExecution = null;
+
+    @Override
+    public InvocationContext getInvocationContext() {
+        return new InvocationContext(invocationType, this.getClass().getAnnotations());
+    }
+    
     /**
      * Here you do the job
      */
@@ -46,15 +64,25 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * Start this job now (well ASAP)
      * @return the job completion
      */
-    public Future<V> now() {
-        return JobsPlugin.executor.submit((Callable<V>) this);
+    public Promise<V> now() {
+        final Promise<V> smartFuture = new Promise<V>();
+        JobsPlugin.executor.submit(new Callable<V>() {
+            public V call() throws Exception {
+                V result =  Job.this.call();
+                smartFuture.invoke(result);
+                return result;
+            }
+            
+        });
+
+        return smartFuture;
     }
 
     /**
      * Start this job in several seconds
      * @return the job completion
      */
-    public Future<V> in(String delay) {
+    public Promise<V> in(String delay) {
         return in(Time.parseDuration(delay));
     }
 
@@ -62,8 +90,20 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
      * Start this job in several seconds
      * @return the job completion
      */
-    public Future<V> in(int seconds) {
-        return JobsPlugin.executor.schedule((Callable<V>) this, seconds, TimeUnit.SECONDS);
+    public Promise<V> in(int seconds) {
+        final Promise<V> smartFuture = new Promise<V>();
+
+        JobsPlugin.executor.schedule(new Callable<V>() {
+
+            public V call() throws Exception {
+                V result =  Job.this.call();
+                smartFuture.invoke(result);
+                return result;
+            }
+
+        }, seconds, TimeUnit.SECONDS);
+
+        return smartFuture;
     }
 
     /**
@@ -79,7 +119,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     public void every(int seconds) {
         JobsPlugin.executor.scheduleWithFixedDelay(this, seconds, seconds, TimeUnit.SECONDS);
     }
-    
+
     // Customize Invocation
     @Override
     public void onException(Throwable e) {
@@ -103,10 +143,17 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
             if (init()) {
                 before();
                 V result = null;
+
                 try {
                     lastException = null;
                     lastRun = System.currentTimeMillis();
                     monitor = MonitorFactory.start(getClass().getName()+".doJob()");
+
+                    //Hack to enable template rendering with urls in jobs
+                    if( Http.Request.current.get() == null) {
+                        createFakeRequest();
+                    }
+
                     result = doJobWithResult();
                     monitor.stop();
                     monitor = null;
@@ -134,9 +181,43 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
         return null;
     }
 
+    /**
+     * If rendering with templates in a job, some template-operations require
+     * a current Request-object, eg: @@{...}}.
+     * This method creates a fake one based on a configurable baseUrl in application.conf
+     */
+    private static void createFakeRequest() {
+
+        // We want this to fail ONLY if user is actually trying to resolve urls and the
+        // configuration is missing..
+        // To archieve this we create a lazy proxy for our FakeRequestCreator.
+        // Our initialization is executed the first time any code tries to access our request..
+        final Http.Request lazyRequest = (Http.Request)Enhancer.create(Http.Request.class, new LazyLoader() {
+            public Object loadObject() throws Exception {
+                // someone is trying to access our Request-object. We must
+                // initialize it..
+                String applicationBaseUrl = Play.configuration.getProperty(applicationBaseUrl_configPropertyName);
+
+                if( applicationBaseUrl == null ) {
+                    throw new RuntimeException("Since you are probably trying to resolve urls from inside a Job, " +
+                            "you have to configure '"+applicationBaseUrl_configPropertyName+"' in application.conf");
+                }
+
+                return FakeRequestCreator.createFakeRequestFromBaseUrl(applicationBaseUrl);
+
+            }
+        });
+
+        Http.Request.current.set(lazyRequest);
+
+    }
+
+
+
     @Override
     public void _finally() {
         super._finally();
+        Http.Request.current.remove();
         if (executor == JobsPlugin.executor) {
             JobsPlugin.scheduleForCRON(this);
         }
@@ -146,4 +227,6 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     public String toString() {
         return this.getClass().getName();
     }
+
+
 }

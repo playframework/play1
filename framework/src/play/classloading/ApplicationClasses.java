@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import play.Logger;
 import play.Play;
-import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
 import play.vfs.VirtualFile;
 
@@ -206,15 +205,7 @@ public class ApplicationClasses {
         public byte[] enhance() {
             this.enhancedByteCode = this.javaByteCode;
             if (isClass()) {
-                for (PlayPlugin plugin : Play.plugins) {
-                    try {
-                        long start = System.currentTimeMillis();
-                        plugin.enhance(this);
-                        Logger.trace("%sms to apply %s to %s", System.currentTimeMillis() - start, plugin, name);
-                    } catch (Exception e) {
-                        throw new UnexpectedException("While applying " + plugin + " on " + name, e);
-                    }
-                }
+                Play.pluginCollection.enhance(this);
             }
             if (System.getProperty("precompile") != null) {
                 try {

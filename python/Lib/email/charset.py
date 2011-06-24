@@ -46,6 +46,7 @@ CHARSETS = {
     'iso-8859-13': (QP,        QP,      None),
     'iso-8859-14': (QP,        QP,      None),
     'iso-8859-15': (QP,        QP,      None),
+    'iso-8859-16': (QP,        QP,      None),
     'windows-1252':(QP,        QP,      None),
     'viscii':      (QP,        QP,      None),
     'us-ascii':    (None,      None,    None),
@@ -81,6 +82,8 @@ ALIASES = {
     'latin-8': 'iso-8859-14',
     'latin_9': 'iso-8859-15',
     'latin-9': 'iso-8859-15',
+    'latin_10':'iso-8859-16',
+    'latin-10':'iso-8859-16',
     'cp949':   'ks_c_5601-1987',
     'euc_jp':  'euc-jp',
     'euc_kr':  'euc-kr',
@@ -250,7 +253,7 @@ class Charset:
         Returns "base64" if self.body_encoding is BASE64.
         Returns "7bit" otherwise.
         """
-        assert self.body_encoding <> SHORTEST
+        assert self.body_encoding != SHORTEST
         if self.body_encoding == QP:
             return 'quoted-printable'
         elif self.body_encoding == BASE64:
@@ -260,7 +263,7 @@ class Charset:
 
     def convert(self, s):
         """Convert a string from the input_codec to the output_codec."""
-        if self.input_codec <> self.output_codec:
+        if self.input_codec != self.output_codec:
             return unicode(s, self.input_codec).encode(self.output_codec)
         else:
             return s

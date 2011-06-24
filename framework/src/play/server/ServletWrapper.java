@@ -2,9 +2,9 @@ package play.server;
 
 import org.apache.commons.lang.StringUtils;
 import play.Invoker;
+import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
-import play.PlayPlugin;
 import play.data.validation.Validation;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
@@ -40,6 +40,22 @@ import java.util.*;
  */
 public class ServletWrapper extends HttpServlet implements ServletContextListener {
 
+    public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
+    public static final String IF_NONE_MATCH = "If-None-Match";
+    /**
+     * Constant for accessing the underlying HttpServletRequest from Play's Request
+     * in a Servlet based deployment.
+     * <p>Sample usage:</p>
+     * <p> {@code HttpServletRequest req = Request.current().args.get(ServletWrapper.SERVLET_REQ);}</p>
+     */
+    public static final String SERVLET_REQ = "__SERVLET_REQ";
+    /**
+     * Constant for accessing the underlying HttpServletResponse from Play's Request
+     * in a Servlet based deployment.
+     * <p>Sample usage:</p>
+     * <p> {@code HttpServletResponse res = Request.current().args.get(ServletWrapper.SERVLET_RES);}</p>
+     */
+    public static final String SERVLET_RES = "__SERVLET_RES";
     private volatile boolean routerInitializedWithContext = false;
 
     public void contextInitialized(ServletContextEvent e) {
@@ -53,7 +69,11 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         Play.frameworkPath = root.getParentFile();
         Play.usePrecompiled = true;
         Play.init(root, playId);
-        
+        Play.Mode mode = Play.Mode.valueOf(Play.configuration.getProperty("application.mode", "DEV").toUpperCase());
+        if (mode.isDev()) {
+            Logger.info("Forcing PROD mode because deploying as a war file.");
+        }
+
         // Servlet 2.4 does not allow you to get the context path from the servletcontext...
         if (isGreaterThan(e.getServletContext(), 2, 4)) {
             loadRouter(e.getServletContext().getContextPath());
@@ -82,7 +102,6 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         return (contextMajorVersion > majorVersion) || (contextMajorVersion == majorVersion && contextMinorVersion > minorVersion);
     }
 
-
     @Override
     protected void service(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
 
@@ -100,13 +119,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             Response.current.set(response);
             request = parseRequest(httpServletRequest);
             Logger.trace("ServletWrapper>service, request: " + request);
-            boolean raw = false;
-            for (PlayPlugin plugin : Play.plugins) {
-                if (plugin.rawInvocation(request, response)) {
-                    raw = true;
-                    break;
-                }
-            }
+            boolean raw = Play.pluginCollection.rawInvocation(request, response);
             if (raw) {
                 copyResponse(Request.current(), Response.current(), httpServletRequest, httpServletResponse);
             } else {
@@ -122,6 +135,14 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             return;
         } catch (Throwable e) {
             throw new ServletException(e);
+        } finally {
+            Request.current.remove();
+            Response.current.remove();
+            Scope.Session.current.remove();
+            Scope.Params.current.remove();
+            Scope.Flash.current.remove();
+            Scope.RenderArgs.current.remove();
+            Scope.RouteArgs.current.remove();
         }
     }
 
@@ -132,13 +153,7 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             serve404(servletRequest, servletResponse, new NotFound("The file " + renderStatic.file + " does not exist"));
         } else {
             servletResponse.setContentType(MimeTypes.getContentType(file.getName()));
-            boolean raw = false;
-            for (PlayPlugin plugin : Play.plugins) {
-                if (plugin.serveStatic(file, Request.current(), Response.current())) {
-                    raw = true;
-                    break;
-                }
-            }
+            boolean raw = Play.pluginCollection.serveStatic(file, Request.current(), Response.current());
             if (raw) {
                 copyResponse(Request.current(), Response.current(), servletRequest, servletResponse);
             } else {
@@ -167,81 +182,108 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         }
     }
 
-    public static boolean isModified(String etag, long last, HttpServletRequest request) {
-        if (!(request.getHeader("If-None-Match") == null && request.getHeaders("If-Modified-Since") == null)) {
-            return true;
-        } else {
-            String browserEtag = request.getHeader("If-None-Match");
-            if (!browserEtag.equals(etag)) {
+    public static boolean isModified(String etag, long last,
+            HttpServletRequest request) {
+        // See section 14.26 in rfc 2616 http://www.faqs.org/rfcs/rfc2616.html
+        String browserEtag = request.getHeader(IF_NONE_MATCH);
+        String dateString = request.getHeader(IF_MODIFIED_SINCE);
+        if (browserEtag != null) {
+            boolean etagMatches = browserEtag.equals(etag);
+            if (!etagMatches) {
                 return true;
+            }
+            if (dateString != null) {
+                return !isValidTimeStamp(last, dateString);
+            }
+            return false;
+        } else {
+            if (dateString != null) {
+                return !isValidTimeStamp(last, dateString);
             } else {
-                try {
-                    Date browserDate = Utils.getHttpDateFormatter().parse(request.getHeader("If-Modified-Since"));
-                    if (browserDate.getTime() >= last) {
-                        return false;
-                    }
-                } catch (ParseException ex) {
-                    Logger.error("Can't parse date", ex);
-                }
                 return true;
             }
         }
     }
 
+    private static boolean isValidTimeStamp(long last, String dateString) {
+        try {
+            long browserDate = Utils.getHttpDateFormatter().parse(dateString).getTime();
+            return browserDate >= last;
+        } catch (ParseException e) {
+            Logger.error("Can't parse date", e);
+            return false;
+        }
+    }
+
     public static Request parseRequest(HttpServletRequest httpServletRequest) throws Exception {
-        Request request = new Http.Request();
-        Request.current.set(request);
+
         URI uri = new URI(httpServletRequest.getRequestURI());
-        request.method = httpServletRequest.getMethod().intern();
-        request.path = uri.getPath();
-        request.querystring = httpServletRequest.getQueryString() == null ? "" : httpServletRequest.getQueryString();
+        String method = httpServletRequest.getMethod().intern();
+        String path = uri.getPath();
+        String querystring = httpServletRequest.getQueryString() == null ? "" : httpServletRequest.getQueryString();
         Logger.trace("httpServletRequest.getContextPath(): " + httpServletRequest.getContextPath());
-        Logger.trace("request.path: " + request.path + ", request.querystring: " + request.querystring);
+        Logger.trace("request.path: " + path + ", request.querystring: " + querystring);
 
-        Router.routeOnlyStatic(request);
 
+
+        String contentType = null;
         if (httpServletRequest.getHeader("Content-Type") != null) {
-            request.contentType = httpServletRequest.getHeader("Content-Type").split(";")[0].trim().toLowerCase().intern();
+            contentType = httpServletRequest.getHeader("Content-Type").split(";")[0].trim().toLowerCase().intern();
         } else {
-            request.contentType = "text/html".intern();
+            contentType = "text/html".intern();
         }
 
         if (httpServletRequest.getHeader("X-HTTP-Method-Override") != null) {
-            request.method = httpServletRequest.getHeader("X-HTTP-Method-Override").intern();
+            method = httpServletRequest.getHeader("X-HTTP-Method-Override").intern();
         }
 
-        request.body = httpServletRequest.getInputStream();
-        request.secure = httpServletRequest.isSecure();
+        InputStream body = httpServletRequest.getInputStream();
+        boolean secure = httpServletRequest.isSecure();
 
-        request.url = uri.toString() + (httpServletRequest.getQueryString() == null ? "" : "?" + httpServletRequest.getQueryString());
-        request.host = httpServletRequest.getHeader("host");
-        if (request.host.contains(":")) {
-            request.port = Integer.parseInt(request.host.split(":")[1]);
-            request.domain = request.host.split(":")[0];
+        String url = uri.toString() + (httpServletRequest.getQueryString() == null ? "" : "?" + httpServletRequest.getQueryString());
+        String host = httpServletRequest.getHeader("host");
+        int port = 0;
+        String domain = null;
+        if (host.contains(":")) {
+            port = Integer.parseInt(host.split(":")[1]);
+            domain = host.split(":")[0];
         } else {
-            request.port = 80;
-            request.domain = request.host;
+            port = 80;
+            domain = host;
         }
 
-        request.remoteAddress = httpServletRequest.getRemoteAddr();
+        String remoteAddress = httpServletRequest.getRemoteAddr();
 
-        if (Play.configuration.containsKey("XForwardedSupport") && httpServletRequest.getHeader("X-Forwarded-For") != null) {
-            if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(",")).contains(request.remoteAddress)) {
-                throw new RuntimeException("This proxy request is not authorized");
-            } else {
-                request.secure = ("https".equals(Play.configuration.get("XForwardedProto")) || "https".equals(httpServletRequest.getHeader("X-Forwarded-Proto")) || "on".equals(httpServletRequest.getHeader("X-Forwarded-Ssl")));
-                if (Play.configuration.containsKey("XForwardedHost")) {
-                    request.host = (String) Play.configuration.get("XForwardedHost");
-                } else if (httpServletRequest.getHeader("X-Forwarded-Host") != null) {
-                    request.host = httpServletRequest.getHeader("X-Forwarded-Host");
-                }
-                if (httpServletRequest.getHeader("X-Forwarded-For") != null) {
-                    request.remoteAddress = httpServletRequest.getHeader("X-Forwarded-For");
-                }
-            }
-        }
-        
-	Enumeration headersNames = httpServletRequest.getHeaderNames();
+        boolean isLoopback = host.matches("^127\\.0\\.0\\.1:?[0-9]*$");
+
+
+        final Request request = Request.createRequest(
+                remoteAddress,
+                method,
+                path,
+                querystring,
+                contentType,
+                body,
+                url,
+                host,
+                isLoopback,
+                port,
+                domain,
+                secure,
+                getHeaders(httpServletRequest),
+                getCookies(httpServletRequest));
+
+
+        Request.current.set(request);
+        Router.routeOnlyStatic(request);
+
+        return request;
+    }
+
+    protected static Map<String, Http.Header> getHeaders(HttpServletRequest httpServletRequest) {
+        Map<String, Http.Header> headers = new HashMap<String, Http.Header>(16);
+
+        Enumeration headersNames = httpServletRequest.getHeaderNames();
         while (headersNames.hasMoreElements()) {
             Http.Header hd = new Http.Header();
             hd.name = (String) headersNames.nextElement();
@@ -251,14 +293,17 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                 String value = (String) enumValues.nextElement();
                 hd.values.add(value);
             }
-            request.headers.put(hd.name.toLowerCase(), hd);
+            headers.put(hd.name.toLowerCase(), hd);
         }
 
-        request.resolveFormat();
+        return headers;
+    }
 
-        javax.servlet.http.Cookie[] cookies = httpServletRequest.getCookies();
-        if (cookies != null) {
-            for (javax.servlet.http.Cookie cookie : cookies) {
+    protected static Map<String, Http.Cookie> getCookies(HttpServletRequest httpServletRequest) {
+        Map<String, Http.Cookie> cookies = new HashMap<String, Http.Cookie>(16);
+        javax.servlet.http.Cookie[] cookiesViaServlet = httpServletRequest.getCookies();
+        if (cookiesViaServlet != null) {
+            for (javax.servlet.http.Cookie cookie : cookiesViaServlet) {
                 Http.Cookie playCookie = new Http.Cookie();
                 playCookie.name = cookie.getName();
                 playCookie.path = cookie.getPath();
@@ -266,13 +311,11 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
                 playCookie.secure = cookie.getSecure();
                 playCookie.value = cookie.getValue();
                 playCookie.maxAge = cookie.getMaxAge();
-                request.cookies.put(playCookie.name, playCookie);
+                cookies.put(playCookie.name, playCookie);
             }
         }
 
-        request._init();
-
-        return request;
+        return cookies;
     }
 
     public void serve404(HttpServletRequest servletRequest, HttpServletResponse servletResponse, NotFound e) {
@@ -455,6 +498,25 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
             this.httpServletResponse = httpServletResponse;
             this.request = request;
             this.response = response;
+            request.args.put(ServletWrapper.SERVLET_REQ, httpServletRequest);
+            request.args.put(ServletWrapper.SERVLET_RES, httpServletResponse);
+        }
+
+        @Override
+        public boolean init() {
+            try {
+                return super.init();
+            } catch (NotFound e) {
+                serve404(httpServletRequest, httpServletResponse, e);
+                return false;
+            } catch (RenderStatic r) {
+                try {
+                    serveStatic(httpServletResponse, httpServletRequest, r);
+                } catch (IOException e) {
+                    throw new UnexpectedException(e);
+                }
+                return false;
+            }
         }
 
         @Override
@@ -471,6 +533,14 @@ public class ServletWrapper extends HttpServlet implements ServletContextListene
         public void execute() throws Exception {
             ActionInvoker.invoke(request, response);
             copyResponse(request, response, httpServletRequest, httpServletResponse);
+        }
+
+        @Override
+        public InvocationContext getInvocationContext() {
+            ActionInvoker.resolve(request, response);
+            return new InvocationContext(Http.invocationType,
+                    request.invokedMethod.getAnnotations(),
+                    request.invokedMethod.getDeclaringClass().getAnnotations());
         }
     }
 }

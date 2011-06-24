@@ -1,0 +1,52 @@
+h2. Template - Standard Tags
+
+*==#{extends ʻpage.htmlʼ/}==*
+*==#{doLayout /}==*
+Master template decorators
+
+*==#{get 'title'}Used if title not set#{/get}==*
+*==#{set title:ʻHome Pageʼ}==*
+Shared variables between page and master templates
+
+*==#{include 'tree.html'/}==*
+Includes fragment - page context is shared
+
+*==#{script id:'myscript' , src:ʻscript.js', charset:'utf-8' /}==*
+*==#{stylesheet id:'main', media:'print', src:'print.css' /}==*
+Imports script & styles in the page
+
+*==#{a @Application.logout() }Disconnect#{/a}==*
+*==#{form @Client.create() , id:'form' enctype:'multipart/form-==*
+*==data' } ... #{/form}==*
+Handy tags to create anchors and forms
+
+*==#{verbatim}${'&amp;'}#{/verbatim}==*
+Disables HTML escaping
+
+*==#{i18n /}==*
+Exports localized messages in Javascript
+
+*==#{ifErrors} &lt;p&gt;Error(s) found!&lt;/p&gt; #{/ifErrors}==*
+Checks for validation errors
+
+*==#{ifError 'user.name'} #{error 'user.name' /} #{/ifError}==*
+Checks a given error
+
+*==#{errors} &lt;li&gt;${error}&lt;/li&gt; #{/errors}==*
+Iterates over the current validation errors
+
+*==#{if cond}...#{/if}#{elseif cond}...#{/elseif}#{else}...#{/else}==*
+*==#{ifnot cond}...#{/ifnot}==*
+Conditional constructs
+
+*==#{list items:0..10, as:'i'}${i}#{/list}==*
+*==#{list items:'a'..'z', as:'l'}${l} ${l_isLast ?'':'|' }#{/list}==*
+*==#{list users}${_}#{/list}==*
+Loop constructs
+
+*==#{list items:task, as:'task'}${task}#{/list}==*
+*==#{else}No tasks on the list#{/else}==*
+Tip: Else can be used along with list
+
+*==#{cache ʻkeyʼ, for:ʼ15minʼ}...#{/cache}==*
+Caches content for 15 minutes

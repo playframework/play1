@@ -26,7 +26,7 @@ public class Bootstrap extends Job {
     public void doJob() {
         // Check if the database is empty
         if(User.count() == 0) {
-            Fixtures.load("initial-data.yml");
+            Fixtures.loadModels("initial-data.yml");
         }
     }
  
@@ -89,7 +89,7 @@ bc. #{extends 'main.html' /}
             <span class="post-comments">
                 &nbsp;|&nbsp; 
                 ${frontPost.comments.size() ?: 'no'} 
-                comment${frontPost.comments.size().pluralize()}</a>
+                comment${frontPost.comments.size().pluralize()}
                 #{if frontPost.comments}
                     , latest by ${frontPost.comments[0].author}
                 #{/if}

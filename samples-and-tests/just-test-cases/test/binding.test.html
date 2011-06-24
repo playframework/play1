@@ -2,21 +2,21 @@
 
         open('/databinding/changeLanguage/fr/')
         open('/databinding/showLocaleDateFormat/24-01-1902/')
-        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        assertTextPresent('24/01/02 00:00:00')
         open('/databinding/showLocaleDateFormat?date=24-01-1902')
-        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        assertTextPresent('24/01/02 00:00:00')
 
         <!-- No locale is defined for ch, so it uses the default locale date format from application.conf -->
         open('/databinding/changeLanguage/ch/')
         open('/databinding/showDefaultLocaleDateFormat/1902-01-24/')
-        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        assertTextPresent('24/01/02 00:00:00')
         open('/databinding/showDefaultLocaleDateFormat?date=1902-01-24')
-        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        assertTextPresent('24/01/02 00:00:00')
 
         open('/databinding/showDateFormat/01-24-1902T12:01:01/')
-        assertTextPresent('Fri Jan 24 12:01:01 CET 1902')
+        assertTextPresent('24/01/02 12:01:01')
         open('/databinding/showDateFormat?date=01-24-1902T12:01:01')
-        assertTextPresent('Fri Jan 24 12:01:01 CET 1902')
+        assertTextPresent('24/01/02 12:01:01')
 
         open('/databinding/showList/01/02/04/')
         assertTextPresent('[01, 02, 04]')
@@ -24,22 +24,22 @@
         <!-- Force the locale -->
         open('/databinding/changeLanguage/en/')
         open('/databinding/showCalendar/24-Jan-1902/')
-        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        assertTextPresent('24/01/02 00:00:00')
         open('/databinding/showCalendar?cal=24-Jan-1902')
-        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        assertTextPresent('24/01/02 00:00:00')
 
         <!-- Force the locale -->
         open('/databinding/changeLanguage/en/')
         open('/databinding/showCalendar2/01-24-1902/')
-        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        assertTextPresent('24/01/02 00:00:00')
         open('/databinding/showCalendar2?cal=01-24-1902')
-        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        assertTextPresent('24/01/02 00:00:00')
 
         open('/databinding/changeLanguage/fr/')
         open('/databinding/showCalendar2/24-01-1902/')
-        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        assertTextPresent('24/01/02 00:00:00')
         open('/databinding/showCalendar2?cal=24-01-1902')
-        assertTextPresent('Fri Jan 24 00:00:00 CET 1902')
+        assertTextPresent('24/01/02 00:00:00')
 
 
          <!-- As and NoBinding -->
@@ -74,8 +74,9 @@
         assertTextPresent('Incorrect value')
 
 		<!-- Now unbind dates -->
-		open('@{Application.book(new java.util.Date(2879877856556))}')
-		assertTextPresent('Booked at 04 5,2061 !!')
+        open('/databinding/changeLanguage/en/')
+        open('@{Application.book(new java.util.Date(2879877856556))}')
+		assertTextPresent('Booked at 04/04/61 !!')
 		
 		<!-- Binding internal enum with empty string -->
 		open('/databinding/createFactory?factory.number=457&factory.name=Nestle&factory.color=RED')
@@ -87,4 +88,10 @@
 		open('/databinding/createFactory?factory.number=457&factory.name=Nestle&factory.color=')
 		assertTextPresent('false -> Nestle,null')
 
-#{/selenium}	
+        <!-- Test that value-less params are noticed -->
+        open('@{DataBinding.printParams()}?noValue&noValue2&key=value&noValue3')
+        assertTextPresent('noValue null')
+        assertTextPresent('noValue2 null')
+        assertTextPresent('key value')
+        assertTextPresent('noValue3 null')
+#{/selenium}

@@ -8,6 +8,7 @@ import string
 import imp
 import time
 import urllib
+import yaml
 
 from play.utils import *
 
@@ -103,7 +104,10 @@ class Downloader(object):
     def progress(self, blocks, blocksize, filesize):
         self.cycles += 1
         bits = min(blocks*blocksize, filesize)
-        done = self.proc(bits, filesize) if bits != filesize else 100
+        if bits != filesize:
+            done = self.proc(bits, filesize)
+        else:
+            done = 100
         bar = self.bar(done)
         if not self.cycles % 3 and bits != filesize:
             now = time.clock()
@@ -181,11 +185,12 @@ def new(app, args, play_env):
     print "~ The new module will be created in %s" % os.path.normpath(app.path)
     print "~"
     application_name = os.path.basename(app.path)
-    shutil.copytree(os.path.join(play_env["basedir"], 'resources/module-skel'), app.path)
+    copy_directory(os.path.join(play_env["basedir"], 'resources/module-skel'), app.path)
     # check_application()
     replaceAll(os.path.join(app.path, 'build.xml'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'commands.py'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'conf/messages'), r'%MODULE%', application_name)
+    replaceAll(os.path.join(app.path, 'conf/dependencies.yml'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE%', application_name)
     replaceAll(os.path.join(app.path, 'conf/routes'), r'%MODULE_LOWERCASE%', string.lower(application_name))
     os.mkdir(os.path.join(app.path, 'app'))
@@ -220,7 +225,7 @@ def list(app, args):
         print "~ [%s]" % mod['name']
         print "~   %s" % mod['fullname']
         print "~   %s/modules/%s" % (mod['server'], mod['name'])
-        
+
         vl = ''
         i = 0
         for v in mod['versions']:
@@ -244,19 +249,40 @@ def list(app, args):
 
 def build(app, args, env):
     ftb = env["basedir"]
+    version = None
+    fwkMatch = None
 
     try:
-        optlist, args = getopt.getopt(args, '', ['framework='])
+        optlist, args = getopt.getopt(args, '', ['framework=', 'version=', 'require='])
         for o, a in optlist:
             if o in ('--framework'):
                 ftb = a
+            if o in ('--version'):
+                version = a
+            if o in ('--require'):
+                fwkMatch = a
     except getopt.GetoptError, err:
         print "~ %s" % str(err)
         print "~ "
         sys.exit(-1)
 
-    version = raw_input("~ What is the module version number? ")
-    fwkMatch = raw_input("~ What are the playframework versions required? ")
+    deps_file = os.path.join(app.path, 'conf', 'dependencies.yml')
+    if os.path.exists(deps_file):
+        f = open(deps_file)
+        deps = yaml.load(f.read())
+        versionCandidate = deps["self"].split(" ").pop()
+        version = versionCandidate
+        for dep in deps["require"]:
+            if isinstance(dep, basestring):
+                splitted = dep.split(" ")
+                if len(splitted) == 2 and splitted[0] == "play":
+                    fwkMatch = splitted[1]
+        f.close
+
+    if version is None:
+        version = raw_input("~ What is the module version number? ")
+    if fwkMatch is None:
+        fwkMatch = raw_input("~ What are the playframework versions required? ")
 
     build_file = os.path.join(app.path, 'build.xml')
     if os.path.exists(build_file):
@@ -283,7 +309,7 @@ def build(app, args, env):
     for (dirpath, dirnames, filenames) in os.walk(app.path):
         if dirpath == dist_dir:
             continue
-        if dirpath.find('/.') > -1 or dirpath.find('/tmp/') > -1  or dirpath.find('/test-result/') > -1 or dirpath.find('/logs/') > -1 or dirpath.find('/eclipse/') > -1 or dirpath.endswith('/test-result') or dirpath.endswith('/logs')  or dirpath.endswith('/eclipse') or dirpath.endswith('/nbproject'):
+        if dirpath.find(os.sep + '.') > -1 or dirpath.find('/tmp/') > -1  or dirpath.find('/test-result/') > -1 or dirpath.find('/logs/') > -1 or dirpath.find('/eclipse/') > -1 or dirpath.endswith('/test-result') or dirpath.endswith('/logs')  or dirpath.endswith('/eclipse') or dirpath.endswith('/nbproject'):
             continue
         for file in filenames:
             if file.find('~') > -1 or file.endswith('.iml') or file.startswith('.'):
@@ -308,7 +334,7 @@ def install(app, args, env):
     groups = re.match(r'^([a-zA-Z0-9]+)([-](.*))?$', name)
     module = groups.group(1)
     version = groups.group(3)
-    
+
     modules_list = load_module_list()
     fetch = None
 
@@ -342,7 +368,7 @@ def install(app, args, env):
         print '~ Try play list-modules to get the modules list'
         print '~'
         sys.exit(-1)
-    
+
     archive = os.path.join(env["basedir"], 'modules/%s-%s.zip' % (module, v['version']))
     if os.path.exists(archive):
         os.remove(archive)
@@ -366,9 +392,10 @@ def install(app, args, env):
     os.remove(archive)
     print '~'
     print '~ Module %s-%s is installed!' % (module, v['version'])
-    print '~ You can now use it by add adding this line to application.conf file:'
+    print '~ You can now use it by adding it to the dependencies.yml file:'
     print '~'
-    print '~ module.%s=${play.path}/modules/%s-%s' % (module, module, v['version'])
+    print '~ require:'
+    print '~     play -> %s %s' % (module, v['version'])
     print '~'
     sys.exit(0)
 
@@ -450,4 +477,3 @@ def load_modules_from(modules_server):
         print "~ Cannot fetch the modules list from %s ..." % (url)
         print "~"
         sys.exit(-1)
-

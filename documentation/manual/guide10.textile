@@ -123,7 +123,7 @@ bc. #{fixture delete:'all', load:'data.yml' /}
     assertTextPresent('Just a test of YABE')
 #{/selenium}
 
-We use the standard Selenium syntax, called "selenese":http://seleniumhq.org/docs/04_selenese_commands.html.
+We use the standard Selenium syntax, called "Selenese":http://seleniumhq.org/docs/02_selenium_ide.html#selenium-commands-selenese.
 
 Run it (you can run in a different window just by opening the test link in a new window).
 

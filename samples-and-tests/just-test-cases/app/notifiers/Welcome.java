@@ -28,5 +28,27 @@ public class Welcome extends Mailer {
         setSubject("Yop4");
         addRecipient("toto@localhost");
         send(msg);
-    }  
+    }
+    
+    public static void seleniumTest() {
+        String msg = "Selenium";
+        setFrom("x@x.com");
+        setSubject("Berillium Subject");
+        addRecipient("boron@localhost");
+        send(msg);
+    }
+    
+    public static void welcome_mailWithUrls(boolean fromJob) {
+        String msg = "Welcome";
+        setFrom("x@x.com");
+        setSubject("Yop4");
+        if( fromJob ) {
+            addRecipient("mailWithUrlsJob@localhost");
+        } else {
+            addRecipient("mailWithUrls@localhost");
+        }
+
+        send(msg);
+    }
+    
 }

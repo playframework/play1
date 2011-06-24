@@ -276,6 +276,7 @@ public class Mailer implements LocalVariablesSupport {
                     multiPartEmail.attach(object);
                 }
             }
+            email.setCharset("utf-8");
 
             if (from != null) {
                 try {

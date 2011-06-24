@@ -1,0 +1,40 @@
+~ Name:
+~ ~~~~~
+~ dependencies -- Resolve and retrieve project dependencies
+~
+~ Alias:
+~ ~~~~~
+~ deps
+~ 
+~ Synopsis:
+~ ~~~~~~~~~
+~ play dependencies [app_path] [--verbose] [--debug] [--sync] [--%fwk_id]
+~
+~ Description:
+~ ~~~~~~~~~~~~
+~ Compute resolve and retrieve project dependencies and install them either
+~ in lib/ directory for jar artifacts or in modules/ for Play modules artifacts.
+~
+~ By default the command will not delete unrecognized artifacts. Use the --sync option
+~ to keep both lib/ and modules/ directory synchronized with the dependencies management
+~ system.
+~
+~ Options:
+~ ~~~~~~~~
+~ --verbose:
+~ Verbose mode
+~
+~ --debug:
+~ Debug mode (even more informations logged than in verbose mode)
+~
+~ --jpda:
+~ Listen for JPDA connection. The process will be suspended until
+~ a client is plugged to the JPDA port.
+~
+~ --sync:
+~ Keep lib/ and modules/ directory synced.
+~ Delete unknow dependencies.
+~
+~ --%fwk_id:
+~ Use this ID to run the application (override the default framework ID)
+~

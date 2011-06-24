@@ -1,11 +1,13 @@
 package play.db;
 
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import play.db.jpa.JPA;
 import play.exceptions.DatabaseException;
+import play.Logger;
 
 /**
  * Database connection utilities.
@@ -16,6 +18,11 @@ public class DB {
      * The loaded datasource.
      */
     public static DataSource datasource = null;
+
+    /**
+     * The method used to destroy the datasource
+     */
+    public static String destroyMethod = "";
 
     /**
      * Close the connection opened for the current thread.
@@ -82,6 +89,24 @@ public class DB {
             return getConnection().createStatement().executeQuery(SQL);
         } catch (SQLException ex) {
             throw new DatabaseException(ex.getMessage(), ex);
+        }
+    }
+
+    /**
+     * Destroy the datasource
+     */
+    public static void destroy() {
+        try {
+            if (DB.datasource != null && DB.destroyMethod != null && !DB.destroyMethod.equals("")) {
+                Method close = DB.datasource.getClass().getMethod(DB.destroyMethod, new Class[] {});
+                if (close != null) {
+                    close.invoke(DB.datasource, new Object[] {});
+                    DB.datasource = null;
+                    Logger.trace("Datasource destroyed");
+                }
+            }
+        } catch (Throwable t) {
+             Logger.error("Couldn't destroy the datasource", t);
         }
     }
 }

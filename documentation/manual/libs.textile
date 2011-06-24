@@ -1,0 +1,272 @@
+h1. Play libs
+
+The @play.libs@ package contains several useful libraries that will help you to achieve common programming tasks. 
+
+Most of these libraries are simple helpers that are really straightforward to use: 
+
+* "Codec":/@api/play/libs/Codec.html: Utilities to encode and decode data.
+* "Crypto":/@api/play/libs/Crypto.html: Cryptographics utilities.
+* "Expression":/@api/play/libs/Expression.html: Evaluate dynamic expressions.
+* "F":/@api/play/libs/F.html: Functional programming with Java.
+* "Files":/@api/play/libs/Files.html: File system manipulation helpers.
+* "I18N":/@api/play/libs/I18N.html: Internationalization helpers.
+* "IO":/@api/play/libs/IO.html: Stream manipulation helpers.
+* "Images":/@api/play/libs/Images.html: Image manipulation utilities.
+* "Mail":/@api/play/libs/Mail.html: E-mail functions.
+* "MimeTypes":/@api/play/libs/MimeTypes.html: Dealing with MIME types.
+* "OAuth":/@api/play/libs/OAuth.html: OAuth client protocol.
+* "OAuth2":/@api/play/libs/OAuth2.html: OAuth2 client protocol.
+* "OpenID":/@api/play/libs/OpenID.html: OpenID client protocol.
+* "Time":/@api/play/libs/Time.html: Time and duration utilities.
+* "WS":/@api/play/libs/WS.html: Powerful Web Service client.
+* "XML":/@api/play/libs/XML.html: Loading XML structures.
+* "XPath":/@api/play/libs/XPath.html: Parsing XML using XPath.
+
+The following sections provide more information about the most important libraries.
+
+h2. Parsing XML using XPath
+
+"XPath":http://en.wikipedia.org/wiki/XPath is probably the easiest way to parse an XML document without having to use code generation tools. The @play.libs.XPath@ library offers all the needed primitives to efficiently achieve this task.
+
+The @XPath@ operations operate on all @org.w3.dom.Node@ types:
+
+bc. org.w3.dom.Document xmlDoc = … // retrieve a Document somewhere
+  
+for(Node event: XPath.selectNodes("events//event", xmlDoc)) {
+    
+    String name = XPath.selectText("name", event);
+    String data = XPath.selectText("@date", event);
+    
+    for(Node place: XPath.selectNodes("//place", event)) {
+        String place = XPath.selectText("@city", place);
+        …
+    }
+    
+    …
+}
+
+h2. Web Service client
+
+The @play.libs.WS@ provides a powerful HTTP client. Under the hood it uses "Async HTTP client":https://github.com/AsyncHttpClient/async-http-client. 
+
+Making a request is easy:
+
+bc. HttpResponse res = WS.url("http://www.google.com").get();
+
+Once you have an @HttpResponse@ object you can access all the response properties.
+
+bc. int status = res.getStatus();
+String type = res.getContentType();
+
+You can also retrieve the body content in several content types:
+
+bc. String content = res.getString();
+Document xml = res.getXml();
+JsonElement json = res.getJson();
+InputStream is = res.getStream();
+
+You can also use the *async* API to make HTTP requests in a non-blocking way. Then you will receive a @Promise<HttpResponse>@. Once redeemed, you can use the @HttpResponse@ as usual:
+
+bc. Promise<HttpResponse> futureResponse = WS.url(
+    "http://www.google.com"
+).getAsync();
+
+h2. Functional programming with Java
+
+The @play.libs.F@ library provide several useful constructs coming from functional programming. These constructs are used to handle complex abstraction cases. For those that are accustomed to functional programming we provide:
+
+* @Option<T>@ (a T value that can be or not set)
+* @Either<A,B>@ (contains either a A value or a B value)
+* @Tuple<A,B>@ (contains both A and B values)
+
+h3. Promises
+
+A @Promise@ is Play’s custom @Future@ type. In fact a @Promise<T>@ is also a @Future<T>@ so you can use it as a standard @Future@. But it has also a very interesting property: the ability to register callback using @onRedeem(…)@ that will be called as soon as the promised value is available. 
+
+Promises are used everywhere in Play in place of Future (for Jobs, WS.async, etc…).
+
+Promises can be combined in several ways. For example:
+
+bc. Promise p = Promise.waitAll(p1, p2, p3)
+Promise p = Promise.waitAny(p1, p2, p3)
+Promise p = Promise.waitEither(p1, p2, p3)
+
+h3. Pattern Matching
+
+Sometimes we feel that we need pattern matching in Java. Unfortunately Java does not have built-in pattern matching, and because of the lack of functional constructs, it is difficult to add it as a library. Anyway we’ve worked on a solution that is not so bad.
+
+Our idea was to use the latest ‘for loop’ syntax to achieve basic pattern matching for Java. Pattern matching must both check if your object matches the required conditions and extract the interesting value. The Pattern matching library for Play is part of the @play.libs.F@ library.
+
+Let’s see a simple example; you have a reference of type Object and you want to check that it is a string that starts by "command:". 
+
+The standard way would be:
+
+bc. Object o = anything();
+ 
+if(o instanceof String && ((String)o).startsWith("command:")) {
+    String s = (String)o;
+    System.out.println(s.toUpperCase());
+}
+
+Using the Play pattern matching library, you can write it as:
+
+bc. for(String s: String.and(StartsWith("command:")).match(o)) {
+    System.out.println(s.toUpperCase());
+}
+
+The for loop is executed once, only if the condition is met, and it automatically extracts the String value without the need for casting. Because there is no explicit cast, everything is type-safe, and checked by the compiler.
+
+h2. OAuth
+
+"OAuth":http://oauth.net/ is an open protocol for secure API authorization, using a simple and standard approach, from desktop and web applications.
+
+Two different specifications exist: OAuth 1.0 and OAuth 2.0. Play provides libraries to connect as a consumer to services proposing either of these specifications.
+
+The general process is the following:
+
+* Redirect the user to the provider’s authorization page
+* After the user grants authorization, he is redirected back to your server along with an unauthorized token
+* Your server exchanges the unauthorized token with an access token specific to the current user, that needs to be saved in order to perform requests to the service. This step is done as server-to-server communication.
+
+The Play framework takes care of most of the process.
+
+h3. <a>OAuth 1.0</a>
+
+The OAuth 1.0 functionality is provided by the **play.libs.OAuth** class and is based on "oauth-signpost":http://code.google.com/p/oauth-signpost/. It is used by services such as "Twitter":http://apiwiki.twitter.com/ or "Google":http://code.google.com/apis/accounts/docs/OAuth.html
+
+To connect to a service, you need the create a OAuth.ServiceInfo instance using the
+following information, obtained from the service provider:
+* Request token URL
+* Access token URL
+* Authorize URL
+* Consumer key
+* Consumer secret
+
+The access token can be retrieved this way:
+
+bc. public static void authenticate() {
+    // TWITTER is a OAuth.ServiceInfo object
+    // getUser() is a method returning the current user 
+    if (OAuth.isVerifierResponse()) {
+        // We got the verifier; 
+        // now get the access tokens using the unauthorized tokens
+        TokenPair tokens = OAuth.service(TWITTER).requestAccessToken(
+            getUser().getTokenPair()
+        );
+        // let's store them and go back to index
+        getUser().setTokenPair(tokens);
+        index();
+    }
+    OAuth twitt = OAuth.service(TWITTER);
+    TokenPair tokens = twitt.requestUnauthorizedToken();
+    // We received the unauthorized tokens 
+    // we need to store them before continuing
+    getUser().setTokenPair(tokens);
+    // Redirect the user to the authorization page
+    redirect(twitt.redirectUrl(tokens));
+}
+
+Calls can now be done by signing the requests using the token pair:
+
+bc. mentions = WS.url(url).oauth(TWITTER, getUser().getTokenPair()).get().getString();
+
+The full example usage is available in **samples-and-tests/twitter-oauth**.
+
+h3. <a>OAuth 2.0</a>
+
+OAuth 2.0 is much simpler than OAuth 1.0 because it doesn’t involve signing requests. It is used by "Facebook":http://developers.facebook.com/docs/authentication/ and "37signals":http://37signals.com.
+
+Functionality is provided by **play.libs.OAuth2**.
+
+To connect to a service, you need the create a OAuth2 instance using the following information, obtained from the service provider:
+* Access token URL
+* Authorize URL
+* Client ID
+* Secret
+
+bc. public static void auth() {
+    // FACEBOOK is a OAuth2 object
+    if (OAuth2.isCodeResponse()) {
+        String access_token = FACEBOOK.getAccessToken();
+        // Save access_token, you will need it to request the service
+        index();
+    }
+    FACEBOOK.requestAccessToken(); // This will trigger a redirect
+}
+
+Once you have the access token associated to the current user, you can use it to query the service on behalf of the user:
+
+bc. WS.url(
+    "https://graph.facebook.com/me?access_token=%s", access_token
+).get().getJson();
+
+The full example usage is available in **samples-and-tests/facebook-oauth2**.
+
+
+h2. OpenID
+
+"OpenID":http://openid.net/ is an open and decentralized identity system. You can easily accept new users in your application without having to keep specific user information. You just have to keep track of authorized users through their **OpenID**.
+
+This example provides a high-level view of how OpenID authentication can be used within a Play application:
+
+* For each request, check if the user is connected
+* If not, display a page where the user can submit his OpenID
+* Redirect the user to the OpenID provider
+* When the user comes back, get the verified OpenID and save it in the HTTP session.
+
+The OpenID functionality is provided by the **play.libs.OpenID** class.
+
+bc. @Before(unless={"login", "authenticate"})
+static void checkAuthenticated() {
+    if(!session.contains("user")) {
+        login();
+    }
+}
+ 
+public static void index() {
+    render("Hello %s!", session.get("user"));
+}
+     
+public static void login() {
+    render();
+}
+    
+public static void authenticate(String user) {
+    if(OpenID.isAuthenticationResponse()) {
+        UserInfo verifiedUser = OpenID.getVerifiedID();
+        if(verifiedUser == null) {
+            flash.error("Oops. Authentication has failed");
+            login();
+        } 
+        session.put("user", verifiedUser.id);
+        index();
+    } else {
+        if(!OpenID.id(user).verify()) { // will redirect the user
+            flash.error("Cannot verify your OpenID");
+            login();
+        } 
+    }
+}
+
+And the **login.html** template:
+
+bc. #{if flash.error}
+<h1>${flash.error}</h1>
+#{/if}
+ 
+<form action="@{Application.authenticate()}" method="POST">
+    <label for="user">What’s your OpenID?</label>
+    <input type="text" name="user" id="user" />
+    <input type="submit" value="login..." />
+</form>
+</code>
+
+And finally the routes definitions:
+
+bc. GET   /                     Application.index
+GET   /login                Application.login
+*     /authenticate         Application.authenticate
+
+p(note). **Continuing the discussion**
+ 
+Now we’ll check how to perform operations outside any HTTP request using %(next)"Ansynchronous Jobs":jobs%.

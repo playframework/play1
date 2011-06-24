@@ -1,6 +1,7 @@
 package play.mvc.results;
 
 import java.util.Map;
+import play.Logger;
 
 import play.Play;
 import play.exceptions.UnexpectedException;
@@ -47,6 +48,7 @@ public class Error extends Result {
         try {
             errorHtml = TemplateLoader.load("errors/" + this.status + "." + (format == null ? "html" : format)).render(binding);
         } catch (Exception e) {
+            Logger.warn(e, "Error page caused an error");
         }
         try {
             response.out.write(errorHtml.getBytes("utf-8"));

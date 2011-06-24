@@ -35,7 +35,7 @@ public class SimpleJPATest extends UnitTest {
         assertEquals(0, a.l);
         assertNull(a.k);
         assertNull(b.birth);
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTime(a.birth);
         assertEquals(2009, cal.get(Calendar.YEAR));
         assertEquals(11, cal.get(Calendar.MONTH));
@@ -59,8 +59,10 @@ public class SimpleJPATest extends UnitTest {
         
         List<User> usersFounded;
         //Elike
-        usersFounded = User.find("byNameElikeAndJ", "%A%", 45).fetch();
+        usersFounded = User.find("byNameElikeAndJ", "%a%", 45).fetch();
         assertEquals(0, usersFounded.size());
+        usersFounded = User.find("byNameElikeAndJ", "%A%", 45).fetch();
+        assertEquals(1, usersFounded.size());
         //Ilike
         usersFounded = User.find("byNameIlikeAndJ", "%A%", 45).fetch();
         assertEquals(1, usersFounded.size());

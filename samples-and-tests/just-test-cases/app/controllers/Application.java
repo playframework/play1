@@ -12,12 +12,15 @@ import play.*;
 import play.mvc.*;
 import play.i18n.Lang;
 import play.libs.*;
+import play.jobs.*;
 
 import models.*;
 import utils.*;
+import jobs.*;
 
 import javax.mail.internet.InternetAddress;
 
+@play.db.jpa.Transactional
 public class Application extends Controller {
 
     // bug
@@ -37,6 +40,23 @@ public class Application extends Controller {
     public static void myHomePage(String clientName) {
         renderText(clientName);
     }
+    
+    public static void some1() {
+        renderText(Invoker.InvocationContext.current());
+    }
+    
+    @Youhou
+    public static void some2() {
+        renderText(Invoker.InvocationContext.current());
+    }
+    
+    @Youhou
+    public static void some3() throws Exception {
+        JobWithContext job = new JobWithContext();
+        Future<String> future = job.now();
+        renderText(future.get());
+    }
+    
 
     // bug
 
@@ -50,8 +70,17 @@ public class Application extends Controller {
         renderText("IT WORKS");
     }
 
+    public static void ok(String re) {
+        renderText("OK: " + re);
+    }
+
     public static void index() {
+        routeArgs.put("lucky", "strike");
         render();
+    }
+    
+    public static void showIt() {
+        renderText("Done");
     }
 
     public static void index2() {
@@ -61,12 +90,24 @@ public class Application extends Controller {
     public static void simpleStatusCode() {
         response.status = 204;
     }
+    
+    public static void imagesAssets() {
+        
+    }
+    
+    public static void dashboard(String client) {
+        
+    }
 
     public static void hello(String name) {
         render(name);
     }
 
     public static void yop() {
+        render();
+    }
+
+    public static void alertConfirmPrompt() {
         render();
     }
 
@@ -79,7 +120,9 @@ public class Application extends Controller {
     }
     
     public static void book(Date at) {
-        renderText("Booked at %1$tm %1$te,%1$tY !!", at);
+        java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("dd/MM/yy");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        renderText("Booked at %s !!", df.format(at));
     }
 
     public static void escapeData() {
@@ -154,6 +197,23 @@ public class Application extends Controller {
         Mail.send(email);
         renderText("OK5");
     }
+    
+    public static void mailWithUrls() {
+        notifiers.Welcome.welcome_mailWithUrls(false);
+        renderText("OK_mailWithUrls");
+    }
+    
+    public static class MailJob extends Job {
+        @Override
+        public void doJob() {
+            notifiers.Welcome.welcome_mailWithUrls(true);
+        }
+    }
+    
+    public static void mailWithUrlsInJob() throws Exception {
+        new MailJob().now().get();
+        renderText("OK_mailWithUrlsInJob");
+    }
 
     public static void ifthenelse() {
         boolean a = true;
@@ -202,8 +262,13 @@ public class Application extends Controller {
 
     public static void selectTag(){
         List<User> users = new ArrayList<User>(10);
-        for(long i = 0; i < 10; i++)
-            users.add(new User("User-" + i));
+        User user;
+        for(long i = 0; i < 10; i++) {
+        	user = new User("User-" + i);
+        	user.k = i;
+        	user.i = (int) i;
+        	users.add(user);
+        }
         render(users);
     }
 }

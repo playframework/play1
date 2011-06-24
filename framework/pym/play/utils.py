@@ -67,10 +67,16 @@ def getWithModules(args, env):
                 if os.path.isdir(os.path.join(env["basedir"], 'modules/%s' % f)) and f.find('%s-' % m) == 0:
                     dirname = os.path.join(env["basedir"], 'modules/%s' % f)
                     break
+        if not dirname:
+            print "~ Oops. Module " + m + " not found (try running `play install " + m + "`)"
+            print "~"
+            sys.exit(-1)
+        
         md.append(dirname)
+    
     return md
 
-def package_as_war(app, env, war_path, war_zip_path):
+def package_as_war(app, env, war_path, war_zip_path, war_exclusion_list = []):
     app.check()
     modules = app.modules()
     classpath = app.getClasspath()
@@ -106,11 +112,15 @@ def package_as_war(app, env, war_path, war_zip_path):
     else:
         replaceAll(os.path.join(war_path, 'WEB-INF/web.xml'), r'%PLAY_ID%', 'war')
     if os.path.exists(os.path.join(war_path, 'WEB-INF/application')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/application'))
-    copy_directory(app.path, os.path.join(war_path, 'WEB-INF/application'))
+    copy_directory(app.path, os.path.join(war_path, 'WEB-INF/application'), war_exclusion_list)
     if os.path.exists(os.path.join(war_path, 'WEB-INF/application/war')):
         shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/war'))
     if os.path.exists(os.path.join(war_path, 'WEB-INF/application/logs')):
         shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/logs'))
+    if os.path.exists(os.path.join(war_path, 'WEB-INF/application/tmp')):
+        shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/tmp'))
+    if os.path.exists(os.path.join(war_path, 'WEB-INF/application/modules')):
+        shutil.rmtree(os.path.join(war_path, 'WEB-INF/application/modules'))
     copy_directory(os.path.join(app.path, 'conf'), os.path.join(war_path, 'WEB-INF/classes'))
     if os.path.exists(os.path.join(war_path, 'WEB-INF/lib')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/lib'))
     os.mkdir(os.path.join(war_path, 'WEB-INF/lib'))
@@ -120,10 +130,10 @@ def package_as_war(app, env, war_path, war_zip_path):
     if os.path.exists(os.path.join(war_path, 'WEB-INF/framework')): shutil.rmtree(os.path.join(war_path, 'WEB-INF/framework'))
     os.mkdir(os.path.join(war_path, 'WEB-INF/framework'))
     copy_directory(os.path.join(env["basedir"], 'framework/templates'), os.path.join(war_path, 'WEB-INF/framework/templates'))
-    
+
     # modules
     for module in modules:
-        to = os.path.join(war_path, 'WEB-INF/modules/%s' % os.path.basename(module))
+        to = os.path.join(war_path, 'WEB-INF/application/modules/%s' % os.path.basename(module))
         copy_directory(module, to)
         if os.path.exists(os.path.join(to, 'src')):
             shutil.rmtree(os.path.join(to, 'src'))
@@ -141,10 +151,6 @@ def package_as_war(app, env, war_path, war_zip_path):
             shutil.rmtree(os.path.join(to, 'nbproject'))
         if os.path.exists(os.path.join(to, 'documentation')):
             shutil.rmtree(os.path.join(to, 'documentation'))
-    pm = app.readConfs('module.')
-    for m in pm:
-        nm = os.path.basename(m)
-        replaceAll(os.path.join(war_path, 'WEB-INF/application/conf/application.conf'), m, '../modules/%s' % nm)
 
     if not os.path.exists(os.path.join(war_path, 'WEB-INF/resources')): os.mkdir(os.path.join(war_path, 'WEB-INF/resources'))
     shutil.copyfile(os.path.join(env["basedir"], 'resources/messages'), os.path.join(war_path, 'WEB-INF/resources/messages'))
@@ -183,19 +189,36 @@ def delete(filename):
         shutil.rmtree(filename)
     else:
         os.remove(filename)
-        
-def copy_directory(source, target):
+
+# Copy a directory, skipping dot-files
+def copy_directory(source, target, exclude = []):
+    skip = None
+
     if not os.path.exists(target):
         os.makedirs(target)
-    for root, dirs, files in os.walk(source):         
+    for root, dirs, files in os.walk(source):
         for file in files:
-            if root.find('/.') > -1:
+            if root.find('/.') > -1 or root.find('\\.') > -1:
                 continue
             if file.find('~') == 0 or file.startswith('.'):
                 continue
-            from_ = os.path.join(root, file)           
+
+            # Loop to detect files to exclude (coming from exclude list)
+            # Search is done only on path for the moment
+            skip = 0
+            for exclusion in exclude:
+                if root.find(exclusion) > -1:
+                    skip = 1
+            # Skipping the file if exclusion has been found
+            if skip == 1:
+                continue
+
+            from_ = os.path.join(root, file)
             to_ = from_.replace(source, target, 1)
             to_directory = os.path.split(to_)[0]
             if not os.path.exists(to_directory):
                 os.makedirs(to_directory)
             shutil.copyfile(from_, to_)
+
+def isTestFrameworkId( framework_id ):
+    return (framework_id == 'test' or (framework_id.startswith('test-') and framework_id.__len__() >= 6 ))

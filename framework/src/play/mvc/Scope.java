@@ -5,6 +5,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +13,7 @@ import play.Logger;
 import play.Play;
 import play.data.binding.Binder;
 import play.data.parsing.DataParser;
+import play.data.parsing.TextParser;
 import play.data.validation.Validation;
 import play.exceptions.UnexpectedException;
 import play.libs.Codec;
@@ -56,6 +58,14 @@ public class Scope {
         }
 
         void save() {
+            if (Http.Response.current() == null) {
+                // Some request like WebSocket don't have any response
+                return;
+            }
+            if (out.isEmpty()) {
+                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", "", null, "/", 0, COOKIE_SECURE);
+                return;
+            }
             try {
                 StringBuilder flash = new StringBuilder();
                 for (String key : out.keySet()) {
@@ -71,8 +81,7 @@ public class Scope {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
         }        // ThreadLocal access
-
-        static ThreadLocal<Flash> current = new ThreadLocal<Flash>();
+        public static ThreadLocal<Flash> current = new ThreadLocal<Flash>();
 
         public static Flash current() {
             return current.get();
@@ -142,6 +151,7 @@ public class Scope {
             return data.containsKey(key);
         }
 
+        @Override
         public String toString() {
             return data.toString();
         }
@@ -153,12 +163,15 @@ public class Scope {
     public static class Session {
 
         static Pattern sessionParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
+        static final String AT_KEY = "___AT";
+        static final String ID_KEY = "___ID";
+        static final String TS_KEY = "___TS";
 
         static Session restore() {
             try {
                 Session session = new Session();
                 Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_SESSION");
-                if (cookie != null && Play.started) {
+                if (cookie != null && Play.started && cookie.value != null && !cookie.value.trim().equals("")) {
                     String value = cookie.value;
                     String sign = value.substring(0, value.indexOf("-"));
                     String data = value.substring(value.indexOf("-") + 1);
@@ -171,26 +184,22 @@ public class Scope {
                     }
                     if (COOKIE_EXPIRE != null) {
                         // Verify that the session contains a timestamp, and that it's not expired
-                        if (!session.contains("___TS")) {
+                        if (!session.contains(TS_KEY)) {
                             session = new Session();
                         } else {
-                            if (Long.parseLong(session.get("___TS")) < System.currentTimeMillis()) {
+                            if (Long.parseLong(session.get(TS_KEY)) < System.currentTimeMillis()) {
                                 // Session expired
                                 session = new Session();
                             }
                         }
-                        session.put("___TS", System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
+                        session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
                     }
-                }
-                if (!session.contains("___ID")) {
-                    session.put("___ID", Codec.UUID());
                 }
                 return session;
             } catch (Exception e) {
                 throw new UnexpectedException("Corrupted HTTP session from " + Http.Request.current().remoteAddress, e);
             }
         }
-
         Map<String, String> data = new HashMap<String, String>(); // ThreadLocal access
         public static ThreadLocal<Session> current = new ThreadLocal<Session>();
 
@@ -199,7 +208,11 @@ public class Scope {
         }
 
         public String getId() {
-            return data.get("___ID");
+            if (!data.containsKey(ID_KEY)) {
+                data.put(ID_KEY, Codec.UUID());
+            }
+            return data.get(ID_KEY);
+
         }
 
         public Map<String, String> all() {
@@ -207,13 +220,25 @@ public class Scope {
         }
 
         public String getAuthenticityToken() {
-            return Crypto.sign(getId());
+            if (!data.containsKey(AT_KEY)) {
+                data.put(AT_KEY, Crypto.sign(UUID.randomUUID().toString()));
+            }
+            return data.get(AT_KEY);
         }
 
         void save() {
+            if (Http.Response.current() == null) {
+                // Some request like WebSocket don't have any response
+                return;
+            }
+            if (isEmpty()) {
+                // The session is empty: delete the cookie
+                Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", "", null, "/", 0, COOKIE_SECURE, SESSION_HTTPONLY);
+                return;
+            }
             try {
                 StringBuilder session = new StringBuilder();
-                for (String key: data.keySet()) {
+                for (String key : data.keySet()) {
                     session.append("\u0000");
                     session.append(key);
                     session.append(":");
@@ -236,7 +261,7 @@ public class Scope {
             if (key.contains(":")) {
                 throw new IllegalArgumentException("Character ':' is invalid in a session key.");
             }
-            if(value == null) {
+            if (value == null) {
                 data.remove(key);
             } else {
                 data.put(key, value);
@@ -268,6 +293,19 @@ public class Scope {
             data.clear();
         }
 
+        /**
+         * Returns true if the session is empty,
+         * e.g. does not contain anything else than the timestamp
+         */
+        public boolean isEmpty() {
+            for (String key : data.keySet()) {
+                if (!TS_KEY.equals(key)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public boolean contains(String key) {
             return data.containsKey(key);
         }
@@ -276,7 +314,6 @@ public class Scope {
         public String toString() {
             return data.toString();
         }
-
     }
 
     /**
@@ -284,12 +321,12 @@ public class Scope {
      */
     public static class Params {
         // ThreadLocal access
+
         public static ThreadLocal<Params> current = new ThreadLocal<Params>();
 
         public static Params current() {
             return current.get();
         }
-
         boolean requestIsParsed;
         private Map<String, String[]> data = new HashMap<String, String[]>();
 
@@ -301,26 +338,33 @@ public class Scope {
                     DataParser dataParser = DataParser.parsers.get(contentType);
                     if (dataParser != null) {
                         _mergeWith(dataParser.parse(request.body));
+                    } else {
+                        if (contentType.startsWith("text/")) {
+                            _mergeWith(new TextParser().parse(request.body));
+                        }
                     }
                 }
                 try {
                     request.body.close();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    //
                 }
                 requestIsParsed = true;
             }
         }
 
         public void put(String key, String value) {
+            checkAndParse();
             data.put(key, new String[]{value});
         }
 
         public void put(String key, String[] values) {
+            checkAndParse();
             data.put(key, values);
         }
 
         public void remove(String key) {
+            checkAndParse();
             data.remove(key);
         }
 
@@ -405,7 +449,7 @@ public class Scope {
 
         public String urlEncode() {
             checkAndParse();
-            StringBuffer ue = new StringBuffer();
+            StringBuilder ue = new StringBuilder();
             for (String key : data.keySet()) {
                 if (key.equals("body")) {
                     continue;
@@ -429,7 +473,9 @@ public class Scope {
                         StringBuilder sb = new StringBuilder();
                         boolean coma = false;
                         for (String d : data.get(key)) {
-                            if (coma) sb.append(",");
+                            if (coma) {
+                                sb.append(",");
+                            }
                             sb.append(d);
                             coma = true;
                         }
@@ -444,7 +490,9 @@ public class Scope {
                         StringBuilder sb = new StringBuilder();
                         boolean coma = false;
                         for (String d : data.get(key)) {
-                            if (coma) sb.append(",");
+                            if (coma) {
+                                sb.append(",");
+                            }
                             sb.append(d);
                             coma = true;
                         }
@@ -460,7 +508,6 @@ public class Scope {
         public String toString() {
             return data.toString();
         }
-
     }
 
     /**
@@ -492,7 +539,6 @@ public class Scope {
         public String toString() {
             return data.toString();
         }
-
     }
 
     /**
@@ -519,7 +565,5 @@ public class Scope {
         public String toString() {
             return data.toString();
         }
-
     }
-
 }

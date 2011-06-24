@@ -15,7 +15,6 @@ import net.sf.oval.configuration.annotation.Constraint;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Constraint(checkWith = IsTrueCheck.class)
 public @interface IsTrue {
-
     String message() default IsTrueCheck.mes;
 }
 

@@ -85,7 +85,7 @@ products = (List<Product>)httpServletRequest.getSession().get("userProducts");
 
 In Play you achieve the same effect a little differently. We think it’s a better approach:
 
-bc. Cache.put(session.getId(), products);
+bc. Cache.set(session.getId(), products);
 ...
 // and then in subsequent requests
 List<Product> products = Cache.get(session.getId(), List.class)
@@ -107,4 +107,4 @@ memcached.2.host=127.0.0.1:11212
 
 p(note). **Continuing the discussion**
  
-Now we’ll check how to perform operations outside any HTTP request using %(next)"Jobs":jobs%.
+Learn about %(next)"Sending emails":emails%.

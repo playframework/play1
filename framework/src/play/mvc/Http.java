@@ -1,5 +1,6 @@
 package play.mvc;
 
+import com.google.gson.Gson;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +21,10 @@ import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
 import play.libs.Codec;
+import play.libs.F;
+import play.libs.F.Option;
+import play.libs.F.Promise;
+import play.libs.F.EventStream;
 import play.libs.Time;
 import play.utils.Utils;
 
@@ -27,6 +32,8 @@ import play.utils.Utils;
  * HTTP interface
  */
 public class Http {
+
+    public static final String invocationType = "HttpRequest";
 
     public static class StatusCode {
 
@@ -41,7 +48,7 @@ public class Http {
         public static final int NOT_MODIFIED = 304;
         public static final int BAD_REQUEST = 400;
         public static final int UNAUTHORIZED = 401;
-        public static final int PAYMENT_REQUIERED = 402;
+        public static final int PAYMENT_REQUIRED = 402;
         public static final int FORBIDDEN = 403;
         public static final int NOT_FOUND = 404;
         public static final int INTERNAL_ERROR = 500;
@@ -109,6 +116,17 @@ public class Http {
      * An HTTP Cookie
      */
     public static class Cookie implements Serializable {
+
+        /**
+         * When creating cookie without specifying domain,
+         * this value is used. Can be configured using
+         * the property 'application.defaultCookieDomain'
+         * in application.conf.
+         *
+         * This feature can be used to allow sharing
+         * session/cookies between multiple sub domains.
+         */
+        public static String defaultDomain = null;
 
         /**
          * Cookie name
@@ -200,11 +218,11 @@ public class Http {
         /**
          * HTTP Headers
          */
-        public Map<String, Http.Header> headers = new HashMap<String, Http.Header>(16);
+        public Map<String, Http.Header> headers = null;
         /**
          * HTTP Cookies
          */
-        public Map<String, Http.Cookie> cookies = new HashMap<String, Http.Cookie>(16);
+        public Map<String, Http.Cookie> cookies = null;
         /**
          * Body stream
          */
@@ -258,11 +276,128 @@ public class Http {
          */
         public boolean isLoopback;
         /**
+         * ActionInvoker.resolvedRoutes was called?
+         */
+        boolean resolved;
+        /**
          * Params
          */
         public final Scope.Params params = new Scope.Params();
 
+
+        /**
+         * Deprecate the default constructor to encourage the use of createRequest() when creating new
+         * requests.
+         *
+         * Cannot hide it with protected because we have to be backward compatible with modules - ie PlayGrizzlyAdapter.java
+         */
+        @Deprecated
+        public Request() {
+            headers = new HashMap<String, Http.Header>(16);
+            cookies = new HashMap<String, Http.Cookie>(16);
+        }
+
+        /**
+         * All creation / initing of new requests should use this method.
+         * The purpose of this is to "show" what is needed when creating new Requests.
+         * @return the newly created Request object
+         */
+        public static Request createRequest(
+                String _remoteAddress,
+                String _method,
+                String _path,
+                String _querystring,
+                String _contentType,
+                InputStream _body,
+                String _url,
+                String _host,
+                boolean _isLoopback,
+                int _port,
+                String _domain,
+                boolean _secure,
+                Map<String, Http.Header> _headers,
+                Map<String, Http.Cookie> _cookies
+        ) {
+            Request newRequest = new Request();
+
+            newRequest.remoteAddress = _remoteAddress;
+            newRequest.method = _method;
+            newRequest.path = _path;
+            newRequest.querystring = _querystring;
+            newRequest.contentType = _contentType;
+            newRequest.body = _body;
+            newRequest.url = _url;
+            newRequest.host = _host;
+            newRequest.isLoopback = _isLoopback;
+            newRequest.port = _port;
+            newRequest.domain = _domain;
+            newRequest.secure = _secure;
+
+            if(_headers == null) {
+                _headers = new HashMap<String, Http.Header>(16);
+            }
+            newRequest.headers = _headers;
+
+            if(_cookies == null) {
+                _cookies = new HashMap<String, Http.Cookie>(16);
+            }
+            newRequest.cookies = _cookies;
+
+            newRequest.parseXForwarded();
+
+            newRequest.resolveFormat();
+
+            newRequest.authorizationInit();
+
+            return newRequest;
+        }
+
+        protected void parseXForwarded() {
+
+            if (Play.configuration.containsKey("XForwardedSupport") && headers.get("x-forwarded-for") != null) {
+                if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(",")).contains(remoteAddress)) {
+                    throw new RuntimeException("This proxy request is not authorized: " + remoteAddress);
+                } else {
+                    secure = isRequestSecure();
+                    if (Play.configuration.containsKey("XForwardedHost")) {
+                        host = (String) Play.configuration.get("XForwardedHost");
+                    } else if (headers.get("x-forwarded-host") != null) {
+                        host = headers.get("x-forwarded-host").value();
+                    }
+                    if (headers.get("x-forwarded-for") != null) {
+                        remoteAddress = headers.get("x-forwarded-for").value();
+                    }
+                }
+            }
+        }
+        
+        private boolean isRequestSecure() {
+            if ("https".equals(Play.configuration.get("XForwardedProto"))) {
+                return true;
+            }
+        	
+            Header xForwardedProtoHeader = headers.get("x-forwarded-proto");
+            if (xForwardedProtoHeader != null && "https".equals(xForwardedProtoHeader.value())) {
+                return true;
+            }
+
+            Header xForwardedSslHeader = headers.get("x-forwarded-ssl");
+            if (xForwardedSslHeader != null && "on".equals(xForwardedSslHeader.value())) {
+                return true;
+            }
+        	
+            return false;
+        }
+
+        /**
+         * Deprecated to encourage users to use createRequest() instead.
+         */
+        @Deprecated
         public void _init() {
+            authorizationInit();
+        }
+
+        protected void authorizationInit() {
             Header header = headers.get("authorization");
             if (header != null && header.value().startsWith("Basic ")) {
                 String data = header.value().substring(6);
@@ -321,6 +456,14 @@ public class Http {
          */
         public static Request current() {
             return current.get();
+        }
+
+        /**
+         * Useful because we sometime use a lazy request loader
+         * @return itself
+         */
+        public Request get() {
+            return this;
         }
 
         /**
@@ -494,8 +637,21 @@ public class Http {
             setCookie(name, value, null, "/", null, false);
         }
 
+        /**
+         * Removes the specified cookie with path /
+         * @param name cookiename
+         */
         public void removeCookie(String name) {
-            setCookie(name, "", null, "/", 0, false);
+            removeCookie(name, "/");
+        }
+
+        /**
+         * Removes the cookie
+         * @param name cookiename
+         * @param path cookiepath
+         */
+        public void removeCookie(String name, String path) {
+            setCookie(name, "", null, path, 0, false);
         }
 
         /**
@@ -529,6 +685,8 @@ public class Http {
                 cookie.httpOnly = httpOnly;
                 if (domain != null) {
                     cookie.domain = domain;
+                } else {
+                    cookie.domain = Cookie.defaultDomain;
                 }
                 if (maxAge != null) {
                     cookie.maxAge = maxAge;
@@ -610,5 +768,149 @@ public class Http {
         public void reset() {
             out.reset();
         }
+        // Chunked stream
+        public boolean chunked = false;
+        final List<F.Action<Object>> writeChunkHandlers = new ArrayList<F.Action<Object>>();
+
+        public void writeChunk(Object o) {
+            this.chunked = true;
+            if (writeChunkHandlers.isEmpty()) {
+                throw new UnsupportedOperationException("Your HTTP server doesn't yet support chunked response stream");
+            }
+            for (F.Action<Object> handler : writeChunkHandlers) {
+                handler.invoke(o);
+            }
+        }
+
+        public void onWriteChunk(F.Action<Object> handler) {
+            writeChunkHandlers.add(handler);
+        }
+    }
+
+    /**
+     * A Websocket Inbound channel
+     */
+    public abstract static class Inbound {
+
+        public final static ThreadLocal<Inbound> current = new ThreadLocal<Inbound>();
+
+        public static Inbound current() {
+            return current.get();
+        }
+        final EventStream<WebSocketEvent> stream = new EventStream<WebSocketEvent>();
+
+        public void _received(WebSocketFrame frame) {
+            stream.publish(frame);
+        }
+
+        public Promise<WebSocketEvent> nextEvent() {
+            if (!isOpen()) {
+                throw new IllegalStateException("The inbound channel is closed");
+            }
+            return stream.nextEvent();
+        }
+
+        public void close() {
+            stream.publish(new WebSocketClose());
+        }
+
+        public abstract boolean isOpen();
+    }
+
+    /**
+     * A Websocket Outbound channel
+     */
+    public static abstract class Outbound {
+
+        public static ThreadLocal<Outbound> current = new ThreadLocal<Outbound>();
+
+        public static Outbound current() {
+            return current.get();
+        }
+
+        public abstract void send(String data);
+
+        public abstract void send(byte opcode, byte[] data, int offset, int length);
+
+        public abstract boolean isOpen();
+
+        public abstract void close();
+
+        public void send(byte opcode, byte[] data) {
+            send(opcode, data, 0, data.length);
+        }
+
+        public void send(String pattern, Object... args) {
+            send(String.format(pattern, args));
+        }
+
+        public void sendJson(Object o) {
+            send(new Gson().toJson(o));
+        }
+    }
+
+    public static class WebSocketEvent {
+
+        public static F.Matcher<WebSocketEvent, WebSocketClose> SocketClosed = new F.Matcher<WebSocketEvent, WebSocketClose>() {
+
+            @Override
+            public Option<WebSocketClose> match(WebSocketEvent o) {
+                if (o instanceof WebSocketClose) {
+                    return F.Option.Some((WebSocketClose) o);
+                }
+                return F.Option.None();
+            }
+        };
+        public static F.Matcher<WebSocketEvent, String> TextFrame = new F.Matcher<WebSocketEvent, String>() {
+
+            @Override
+            public Option<String> match(WebSocketEvent o) {
+                if (o instanceof WebSocketFrame) {
+                    WebSocketFrame frame = (WebSocketFrame) o;
+                    if (!frame.isBinary) {
+                        return F.Option.Some(frame.textData);
+                    }
+                }
+                return F.Option.None();
+            }
+        };
+        public static F.Matcher<WebSocketEvent, byte[]> BinaryFrame = new F.Matcher<WebSocketEvent, byte[]>() {
+
+            @Override
+            public Option<byte[]> match(WebSocketEvent o) {
+                if (o instanceof WebSocketFrame) {
+                    WebSocketFrame frame = (WebSocketFrame) o;
+                    if (frame.isBinary) {
+                        return F.Option.Some(frame.binaryData);
+                    }
+                }
+                return F.Option.None();
+            }
+        };
+    }
+
+    /**
+     * A Websocket frame
+     */
+    public static class WebSocketFrame extends WebSocketEvent {
+
+        final public boolean isBinary;
+        final public String textData;
+        final public byte[] binaryData;
+
+        public WebSocketFrame(String data) {
+            this.isBinary = false;
+            this.textData = data;
+            this.binaryData = null;
+        }
+
+        public WebSocketFrame(byte[] data) {
+            this.isBinary = true;
+            this.binaryData = data;
+            this.textData = null;
+        }
+    }
+
+    public static class WebSocketClose extends WebSocketEvent {
     }
 }

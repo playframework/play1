@@ -10,6 +10,7 @@ import java.util.*;
 
 import models.*;
 import play.vfs.VirtualFile;
+import java.io.*;
 
 public class Binary extends Controller {
 	
@@ -49,5 +50,17 @@ public class Binary extends Controller {
 
         Http.Response.current().headers.put("Content-Length", new Http.Header("Content-Length", String.valueOf(upload.asBytes().length)));
         renderBinary(upload.asFile());
+    }
+
+     public static void uploadMultipleFiles(List<File> files) {
+
+        Http.Response.current().headers.put("Content-Length", new Http.Header("Content-Length", String.valueOf(files.get(1).length())));
+        renderBinary(files.get(1));
+    }
+    
+    public static void getBinaryWithCustomContentType() throws Exception{
+        InputStream inStream = new ByteArrayInputStream( "hello".getBytes("utf-8"));
+        renderBinary(inStream, "filename.customContentType");
+        
     }
 }

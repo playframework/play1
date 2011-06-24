@@ -3,7 +3,10 @@ import shutil
 import getopt
 import hmac
 import urllib2
-from hashlib import sha1 as sha
+try:
+   from hashlib import sha1 as sha
+except ImportError:
+   import sha
 
 from play.utils import *
 

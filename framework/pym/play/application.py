@@ -4,6 +4,9 @@ import re
 import shutil
 import socket
 
+from play.utils import *
+
+
 class ModuleNotFound(Exception):
     def __init__(self, value):
         self.value = value
@@ -26,14 +29,20 @@ class PlayApplication:
         else:
             self.conf = None
         self.play_env = env
-        self.jpda_port = self.readConf('jpda_port')
+        self.jpda_port = self.readConf('jpda.port')
         self.ignoreMissingModules = ignoreMissingModules
+
+
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Configuration File
 
     def check(self):
-        if not os.path.exists(os.path.join(self.path, 'conf', 'routes')):
-            print "~ Oops. %s does not seem to host a valid application" % os.path.normpath(self.path)
+        try:
+            assert os.path.exists(os.path.join(self.path, 'conf', 'routes'))
+            assert os.path.exists(os.path.join(self.path, 'conf', 'application.conf'))
+        except AssertionError:
+            print "~ Oops. conf/routes or conf/application.conf missing."
+            print "~ %s does not seem to host a valid application." % os.path.normpath(self.path)
             print "~"
             sys.exit(-1)
 
@@ -66,9 +75,18 @@ class PlayApplication:
                     print "~"
                 sys.exit(-1)
             modules.append(m)
-        if self.play_env["id"] == 'test':
+        if self.path and os.path.exists(os.path.join(self.path, 'modules')):
+            for m in os.listdir(os.path.join(self.path, 'modules')):
+                mf = os.path.join(os.path.join(self.path, 'modules'), m)
+                if os.path.basename(mf)[0] == '.':
+                    continue
+                if os.path.isdir(mf):
+                    modules.append(mf)
+                else:
+                    modules.append(open(mf, 'r').read().strip())
+        if isTestFrameworkId( self.play_env["id"] ):
             modules.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'modules/testrunner')))
-        return modules
+        return set(modules) # Ensure we don't have duplicates
 
     def module_names(self):
         return map(lambda x: x[7:],self.conf.getAllKeys("module."))
@@ -89,7 +107,7 @@ class PlayApplication:
                 print 'Module not found %s' % e
                 sys.exit(-1)
 
-            if play_env["id"] == 'test':
+            if isTestFrameworkId(play_env["id"]):
                 modules.append(os.path.normpath(os.path.join(play_env["basedir"], 'modules/testrunner')))
 
     def override(self, f, t):
@@ -121,7 +139,7 @@ class PlayApplication:
 
         # The default
         classpath.append(os.path.normpath(os.path.join(self.path, 'conf')))
-        classpath.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'framework/play.jar')))
+        classpath.append(os.path.normpath(os.path.join(self.play_env["basedir"], 'framework/play-%s.jar' % self.play_env['version'])))
 
         # The application
         if os.path.exists(os.path.join(self.path, 'lib')):
@@ -146,7 +164,7 @@ class PlayApplication:
         return classpath
 
     def agent_path(self):
-        return os.path.join(self.play_env["basedir"], 'framework/play.jar')
+        return os.path.join(self.play_env["basedir"], 'framework/play-%s.jar' % self.play_env['version'])
 
     def cp_args(self):
         classpath = self.getClasspath()
@@ -162,7 +180,9 @@ class PlayApplication:
             return os.path.normpath("%s/bin/java" % os.environ['JAVA_HOME'])
 
     def pid_path(self):
-        if os.environ.has_key('PLAY_PID_PATH'):
+        if self.play_env.has_key('pid_file'):
+            return os.path.join(self.path, self.play_env['pid_file']);
+        elif os.environ.has_key('PLAY_PID_PATH'):
             return os.environ['PLAY_PID_PATH'];
         else:
             return os.path.join(self.path, 'server.pid');
@@ -213,6 +233,19 @@ class PlayApplication:
                 java_args.append('-Djava.security.manager')
                 java_args.append('-Djava.security.policy==%s' % policyFile)
 
+        if self.play_env.has_key('http.port'):
+            args += ["--http.port=%s" % self.play_env['http.port']]
+        if self.play_env.has_key('https.port'):
+            args += ["--https.port=%s" % self.play_env['https.port']]
+            
+        java_args.append('-Dfile.encoding=utf-8')
+
+        if self.readConf('application.mode') == 'dev':
+            if not self.play_env["disable_check_jpda"]: self.check_jpda()
+            java_args.append('-Xdebug')
+            java_args.append('-Xrunjdwp:transport=dt_socket,address=%s,server=y,suspend=n' % self.jpda_port)
+            java_args.append('-Dplay.debug=yes')
+        
         java_cmd = [self.java_path(), '-javaagent:%s' % self.agent_path()] + java_args + ['-classpath', cp_args, '-Dapplication.path=%s' % self.path, '-Dplay.id=%s' % self.play_env["id"], className] + args
         return java_cmd
 
@@ -235,7 +268,9 @@ class PlayConfParser:
                 continue
             if linedef.find('=') == -1:
                 continue
-            self.entries[linedef.split('=')[0].rstrip()] = linedef.split('=')[1].lstrip()
+            key = linedef.split('=')[0].strip()
+            value = linedef[(linedef.find('=')+1):].strip()
+            self.entries[key] = value
         f.close()
 
     def get(self, key):

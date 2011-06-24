@@ -8,7 +8,7 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play classpath [app_path]
+~ play classpath [app_path] [--deps] [--%fwk_id]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
@@ -17,4 +17,12 @@
 ~
 ~ The displayed classpath is the same than the one passed to the JVM using the -cp argument.
 ~ The classpath depends of enabled modules in the conf/application.conf file.
+~
+~ Options:
+~ ~~~~~~~~~
+~ --deps: 
+~ Resolve and install dependencies before running the command.
+~
+~ --%fwk_id:
+~ Use this ID to run the application (override the default framework ID)
 ~

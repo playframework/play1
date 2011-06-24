@@ -1,0 +1,22 @@
+h2. Controller.action - Redirection
+
+*render(params...);*
+Renders template with given parameters, as text/html
+
+*renderXML(params...);*
+Renders parameters as application/xml
+
+*renderJson(params...);*
+Renders parameters as application/json
+
+*renderText(params...);*
+Renders parameters as text/plain
+
+*renderTemplate("Clients/showClient.html", id, client);*
+Bypasses default template
+
+*redirect("http://www.crionics.com");*
+HTTP redirect to the given URL
+
+*From an action, calling another Controller.action()*
+The framework transparently generates a REDIRECT!
