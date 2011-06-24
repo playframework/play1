@@ -52,11 +52,23 @@ The generated configuration files contains absolute references to your framework
 
 h2(#intellij). <a>IntelliJ IDEA</a>
 
-Play provides a command to simplify IntelliJ IDEA configuration. To transform an existing application to a valid IntelliJ IDEA module/project, use the **idealize** command:
+Play provides a command to simplify IntelliJ IDEA configuration. To transform an existing application to a valid IntelliJ IDEA module, use the **idealize** command:
 
 bc. # play idealize myApp
 
-Then you can just import the application in IntelliJ using the import module facility.
+To create a single module project, do the following in IntelliJ IDEA.
+
+# On the *File* menu, select *New Project…*
+# In the *New Project* wizard, select *Create project from scratch*.
+# Click the *Next* button.
+# Change the *Project files location* to the Play application directory.
+# Set the *Project file format* to your preferred format.
+# Uncheck *Create module* (since the module already exists).
+# Click the *Finish* button.
+# On the *File* menu, select *New Module…*
+# On the *Add Module* wizard, select *Import existing module*.
+# Under *Select IDEA module file*, select the @.iml@ file in the application directory.
+# Click the *Finish* button.
 
 !images/intellij!
 
