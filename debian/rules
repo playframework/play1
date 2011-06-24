@@ -10,13 +10,9 @@
 VERSION=$(shell git describe --tags refs/heads/master | tr '[A-Z]' '[a-z]')
 
 DEB_PATH=debian/play-$(VERSION)
-DEB_PATH_HH=debian/play-$(VERSION)-hh
 INSTALL_PATH=/usr/share/play/$(VERSION)
-INSTALL_PATH_HH=/usr/share/play/$(VERSION)-hh
 ETC_PATH=/etc/play/$(VERSION)
-ETC_PATH_HH=/etc/play/$(VERSION)-hh
 DOC_PATH=/usr/share/doc/play-$(VERSION)
-DOC_PATH_HH=/usr/share/doc/play-$(VERSION)-hh
 
 %:
 	dh  $@
@@ -33,29 +29,13 @@ override_dh_auto_clean:
 override_dh_auto_install: 
 	# New hibernate
 	install -d $(DEB_PATH)$(INSTALL_PATH) $(DEB_PATH)$(INSTALL_PATH)/modules $(DEB_PATH)$(ETC_PATH) $(DEB_PATH)$(DOC_PATH)
-	cp -r framework play resources support $(DEB_PATH)$(INSTALL_PATH)
+	rsync -r --exclude framework/classes framework play resources support $(DEB_PATH)$(INSTALL_PATH)
 	for m in console crud docviewer grizzly secure testrunner; \
-	 do cp -r modules/$$m $(DEB_PATH)$(INSTALL_PATH)/modules/ ;\
+	 do rsync -r --exclude tmp modules/$$m $(DEB_PATH)$(INSTALL_PATH)/modules/ ;\
 	done
-	rm -f $(DEB_PATH)$(INSTALL_PATH)/framework/lib/ejb* $(DEB_PATH)$(INSTALL_PATH)/framework/lib/hibernate*
-	cp debian/lib-new-hh/*.jar $(DEB_PATH)$(INSTALL_PATH)/framework/lib/
 	ln -s /usr/share/play-modules/1.1/debian $(DEB_PATH)$(INSTALL_PATH)/modules/debian
 	cp -r documentation $(DEB_PATH)$(DOC_PATH)
 	ln -s $(DOC_PATH)/documentation $(DEB_PATH)$(INSTALL_PATH)
 	cp -r debian/id repositories $(DEB_PATH)$(ETC_PATH)
 	ln -s $(ETC_PATH)/repositories $(DEB_PATH)$(INSTALL_PATH)
 	ln -s $(ETC_PATH) $(DEB_PATH)$(INSTALL_PATH)/etc
-	# Old hibernate
-	install -d $(DEB_PATH_HH)$(INSTALL_PATH_HH) $(DEB_PATH_HH)$(INSTALL_PATH_HH)/modules $(DEB_PATH_HH)$(ETC_PATH_HH) $(DEB_PATH_HH)$(DOC_PATH_HH)
-	cp -r framework play resources support $(DEB_PATH_HH)$(INSTALL_PATH_HH)
-	for m in console crud docviewer grizzly secure testrunner; \
-	 do cp -r modules/$$m $(DEB_PATH_HH)$(INSTALL_PATH_HH)/modules/ ;\
-	done
-	rm -f $(DEB_PATH_HH)$(INSTALL_PATH_HH)/framework/lib/ejb* $(DEB_PATH_HH)$(INSTALL_PATH_HH)/framework/lib/hibernate*
-	cp debian/lib-old-hh/*.jar $(DEB_PATH_HH)$(INSTALL_PATH_HH)/framework/lib/
-	ln -s /usr/share/play-modules/1.1/debian $(DEB_PATH_HH)$(INSTALL_PATH_HH)/modules/debian
-	cp -r documentation $(DEB_PATH_HH)$(DOC_PATH_HH)
-	ln -s $(DOC_PATH_HH)/documentation $(DEB_PATH_HH)$(INSTALL_PATH_HH)
-	cp -r debian/id repositories $(DEB_PATH_HH)$(ETC_PATH_HH)
-	ln -s $(ETC_PATH_HH)/repositories $(DEB_PATH_HH)$(INSTALL_PATH_HH)
-	ln -s $(ETC_PATH_HH) $(DEB_PATH_HH)$(INSTALL_PATH_HH)/etc

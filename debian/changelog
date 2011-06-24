@@ -1,3 +1,9 @@
+play-1.2.1 (play-1.2.1-1) maverick; urgency=low
+
+  * Rebased on 1.2.1
+
+ -- Stephane Epardaud <stephane@epardaud.fr>  Fri, 24 Jun 2011 14:31:45 +0200
+
 play-1.1rc2-120-gf92a4ae (play-1.1rc2-120-gf92a4ae-13) maverick; urgency=low
 
   * Fixed bug in applucation.py where lines containing a '=' were not loaded
