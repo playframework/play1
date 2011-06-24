@@ -333,7 +333,7 @@ h2. <a name="builtin">Built-in validations</a>
 
 The **play.data.validation** package contains several "built-in validations":validation-builtin that you can use on the **Validation** object or with annotations.
 
-h2. <a name="custom">Custom validation</a>
+h2. <a name="custom">Custom validation using @CheckWith</a>
 
 Can’t find the validator you need in the **play.data.validation** package? Write your own. You can use the generic **@CheckWith** annotation to bind your own **Check** implementation.
 
@@ -350,9 +350,102 @@ bc. public class User {
         public boolean isSatisfied(Object user, Object password) {
             return notMatchPreviousPasswords(password);
         }
-        
     }
 }
+
+The default validation error message key is @validation.invalid@. To use a different key, call @Check.setMessage@ with a message key and message parameters.
+
+bc. static class MyPasswordCheck extends Check {
+ 
+    public boolean isSatisfied(Object user, Object password) {
+        final Date lastUsed = dateLastUsed(password);
+        setMessage("validation.used", JavaExtensions.format(lastUsed));
+        return lastUsed == null;
+    }
+}
+
+The message look up always has the field name as the first parameter, and your message parameters as subsequent parameters. So, for the example above, you could define the message like:
+
+bc. validation.used = &{%1$s} already used on date %2$s
+user.password = Password
+
+
+h2. <a name="customannotations">Custom annotations</a>
+
+You can also write your own annotation validations, which is more complex but makes your model code cleaner and allows you to introduce validator parameters.
+
+For example, suppose we want a less restrictive version of the "@URL":validation-builtin#url validation, so we can allow URLs with any scheme such as a @file://@ URL, and with a parameter that lets us specify exactly which schemes are allowed.
+
+First, we write a custom validation annotation, with a parameter for overriding the default message:
+
+bc. import net.sf.oval.configuration.annotation.Constraint;
+import java.lang.annotation.*;
+ 
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Constraint(checkWith = URICheck.class)
+public @interface URI {
+    String message() default URICheck.message;
+}
+
+This annotation refers to an implementation of @net.sf.oval.configuration.annotation.AbstractAnnotationCheck@.
+
+bc. public class URICheck extends AbstractAnnotationCheck<URI> {
+ 
+    /** Error message key. */
+    public final static String message = "validation.uri";
+ 
+    /** URI schemes allowed by validation. */
+    private List<String> schemes;
+ 
+    @Override
+    public void configure(URI uri) {
+        setMessage(uri.message());
+        this.schemes = Arrays.asList(uri.schemes());
+    }
+ 
+    /**
+     * Add the URI schemes to the message variables so they can be included
+     * in the error message.
+     */
+    @Override
+    public Map<String, String> createMessageVariables() {
+        final Map<String, String> variables = new TreeMap<String, String>();
+        variables.put("2", JavaExtensions.join(schemes, ", "));
+        return variables;
+    }
+ 
+    @Override
+    public boolean isSatisfied(Object validatedObject, Object value,
+        OValContext context, Validator validator) throws OValException {
+ 
+        requireMessageVariablesRecreation();
+        try {
+            final java.net.URI uri = new java.net.URI(value.toString());
+            final boolean schemeValid = schemes.contains(uri.getScheme());
+            return schemes.size() == 0 || schemeValid;
+        } catch (URISyntaxException e) {
+            return false;
+        }
+    }
+}
+
+The @isSatisfied@ method calls @requireMessageVariablesRecreation()@ to instruct OVal to call @createMessageVariables()@ before rendering the message. This returns an ordered map of variables that are passed to the message formatter. The map keys are not used; the @"2"@ in this example indicates the message parameter index. As before, the first parameter is the field name.
+
+To use this use the annotation on a model property.
+
+bc. public class User {
+    
+    @URI(message = "validation.uri.schemes", schemes = {"http", "https"})
+    public String profile;
+}
+
+We can define the messages like this:
+
+bc. validation.uri = Not a valid URI
+validation.uri.schemes = &{%1$s} is not a valid URI - allowed schemes are %2$s
+
+
 
 p(note). **Continuing the discussion**
  
