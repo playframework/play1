@@ -1,8 +1,0 @@
-#!/bin/sh -e
-
-VERSION=1.1rc2-120-gf92a4ae
-
-if [ "$1" = "remove" ] || [ "$1" = "deconfigure" ]; then
-	update-alternatives --remove play-1.1 /usr/share/play/$VERSION/play
-fi
- 
