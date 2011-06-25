@@ -80,12 +80,18 @@ bc. public static destroyMyAccount() {
 
 Will only work when called from a form including a proper authenticity token:
 
-bc. #{form @ destroyMyAccount()}
+bc. <form method="post" action="/account/destroy">
     #{authenticityToken /}
     <input type="submit" value="destroy my account">
 #{/form}
 
-You can of course add this as a before filter if you want to protect all actions of a hierarchy of controllers.
+For POST requests, Play’s "form tag":tags#form automatically generates the authenticity token:
+
+bc. #{form @destroyMyAccount()}
+    <input type="submit" value="destroy my account">
+#{/form}
+
+You can of course add the **checkAuthenticity()** method call as a "before filter":controllers#before if you want to protect all actions of a hierarchy of controllers.
 
 "More on cross-site request forgery":http://en.wikipedia.org/wiki/Cross-site_request_forgery
 
