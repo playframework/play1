@@ -20,13 +20,14 @@ If the action you try to call does not have any route able to invoke it using a 
 
 h2. <a name="authenticityToken">authenticityToken</a>
 
-Renders a hidden input field containing a generated token that you can use in any form. See the "Cross-Site Request Forgery":security#csrf section.
+Renders a hidden input field containing a generated token that you can use in any form, to prevent "Cross-Site Request Forgery":security#csrf.
 
 bc. #{authenticityToken /}
 
 Rendered as:
 
-bc. <input type="hidden" name="authenticityToken" value="1c6d92fed96200347f06b7c5e1a3a28fa258ef7c">
+bc. <input type="hidden" name="authenticityToken"
+       value="1c6d92fed96200347f06b7c5e1a3a28fa258ef7c">
 
 
 h2. <a name="cache">cache</a>
@@ -195,6 +196,38 @@ Inserts a **form** tag. Play will guess the HTTP method from the route, with POS
 
 Charset encoding is always **utf-8**.
 
+bc. #{form @Client.details(), method:'GET', id:'detailsForm'}
+   ...
+#{/form}
+
+Rendered as:
+
+bc. <form action="/client/details" id="detailsForm" method="GET"
+      accept-charset="utf-8">
+ ...
+</form>
+
+You can also specify a target entity as part of the action method:
+
+bc. #{form @Client.details(client.id)}
+   ...
+#{/form}
+
+The HTTP parameter name name is detected from what you declared in your action method.
+
+bc. public static void details(String clientId){
+       // ...
+}
+
+Play will create an action URL with clientId:
+
+bc. <form action="/client/details?clientId=3442" method="GET"
+      accept-charset="utf-8">
+ ...
+</form>
+
+The **form** tag also automatically includes an "authenticity token":#authenticityToken, for methods other than GET.
+
 bc. #{form @Client.create(), method:'POST', id:'creationForm',
        enctype:'multipart/form-data' }
    ...
@@ -204,30 +237,12 @@ Rendered as:
 
 bc. <form action="/client/create" id="creationForm" method="POST"
       accept-charset="utf-8" enctype="multipart/form-data">
- ...
-</form>
-
-You can also specify a target entity as part of the action method:
-
-bc. #{form @Client.update(client.id)}
-   ...
-#{/form}
-
-The HTTP parameter name name is detected from what you declared in your action method.
-
-bc. public static void update(String clientId){
-       // ...
-}
-
-Play will create an action URL with clientId:
-
-bc. <form action="/client/update?clientId=3442" method="POST"
-      accept-charset="utf-8" enctype="multipart/form-data">
+<input type="hidden" name="authenticityToken" 
+       value="1c6d92fed96200347f06b7c5e1a3a28fa258ef7c">
  ...
 </form>
 
 If your form updates a resource on the server-side, you _should_ use the **POST** method. If your form is used to filter data and does not update your domain, you can use a GET. Please read about "idempotence":http://en.wikipedia.org/wiki/Idempotence. POST is not idempotent, whereas GET, PUT and DELETE are.
-
 
 
 h2. <a name="get">get</a>
