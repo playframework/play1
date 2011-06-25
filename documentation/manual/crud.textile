@@ -8,14 +8,14 @@ Let’s see a simple example of using the CRUD module to manage user data.
 
 h3. <a name="enable">Enable the CRUD module for the application</a>
 
-In the **/conf/dependencies.yml** file, enable the CRUD module by adding a line after **require:**
+In the @/conf/dependencies.yml@ file, enable the CRUD module by adding a line after @require:@
 
 bc. require:
     - play -> crud
 
 h3. <a name="routes">Import default CRUD routes</a>
 
-In the **conf/routes** file, import the default module routes by adding this line:
+In the @conf/routes@ file, import the default module routes by adding this line:
 
 bc. # Import CRUD routes
 *     /admin           module:crud
@@ -116,7 +116,7 @@ Refresh the User form and you will see that the validation is automatically appl
 
 h3. <a name="labels">Change the form label</a>
 
-Add these lines to the **conf/messages** file in your application:
+Add these lines to the @conf/messages@ file in your application:
 
 bc. name=Name
 email=Email address
@@ -128,17 +128,17 @@ and refresh the User form:
 
 h3. <a name="list">Create a User and customize the list view</a>
 
-The default list view uses only one column containing the result of the object’s **toString()** method.
+The default list view uses only one column containing the result of the object’s @toString()@ method.
 
 !images/crud5!
 
-To customize this view, we need to create the **/app/views/Users/list.html** template in the application.
+To customize this view, we need to create the @/app/views/Users/list.html@ template in the application.
 
 Open a shell, go the application directory and type:
 
 bc. play crud:ov --template Users/list
 
-This will copy the default CRUD **list.html** template to the **Users/list.html** template in your application, overwriting it if present.
+This will copy the default CRUD @list.html@ template to the @Users/list.html@ template in your application, overwriting it if present.
 
 Edit the template like this:
 
@@ -172,9 +172,9 @@ and refresh the list.
 
 h3. <a name="custom">Custom field rendering: the crud.custom tag</a>
 
-You can go a bit further by customizing the way each field of your **User** entity is displayed in the list and form views.
+You can go a bit further by customizing the way each field of your @User@ entity is displayed in the list and form views.
 
-To customize a field, use the **#{crud.custom}** tag:
+To customize a field, use the @#{crud.custom}@ tag:
 
 bc. #{crud.table fields:['name', 'company']}
  
@@ -224,8 +224,8 @@ This is shown as: "myEnumId1","myEnumId2" for the contentTypes and "string1","st
 
 h2. <a name="objecttype">Customize the _show_ and _blank_ views in a generic way</a>
 
-A central influence on the behavior of CRUD views is the **ObjectType** for each field. So if you want to 
-change the CRUD module’s behaviour in a generic way, for example to hide fields with the **@Version** annotation, you can create you own **ObjectType** class. You must also declare a static method in your controller or a superclass of your controller.
+A central influence on the behavior of CRUD views is the @ObjectType@ for each field. So if you want to 
+change the CRUD module’s behaviour in a generic way, for example to hide fields with the <code>@Version</code> annotation, you can create you own @ObjectType@ class. You must also declare a static method in your controller or a superclass of your controller.
 
 bc. protected static ObjectType createObjectType(Class<? extends Model> type) {
    return new VersionObjectType(type);
@@ -277,26 +277,26 @@ bc.   public class CustomAdminCompany extends CRUD {
    }   
 }
 
-This is not the end; you can also customize **findPage** and other methods. Have a look at the source code.
+This is not the end; you can also customize @findPage@ and other methods. Have a look at the source code.
 
 h2. <a name="commands">Commands</a>
 
-The CRUD module provides a *crud:override* command that you use on the command line to override the default templates. This works because the CRUD module loads templates from your application if they are present, instead of its own. You can also use **crud:ov** instead of **crud:override**.
+The CRUD module provides a *crud:override* command that you use on the command line to override the default templates. This works because the CRUD module loads templates from your application if they are present, instead of its own. You can also use @crud:ov@ instead of @crud:override@.
 
 h3. play crud:override --template [path]
 
-Copies the template specified by the path, e.g. **Users/list**, to your application’s **app/views/CRUD/** directory. You can also use **-t** instead of **--template**.
+Copies the template specified by the path, e.g. @Users/list@, to your application’s @app/views/CRUD/@ directory. You can also use @-t@ instead of @--template@.
 
 h3. play crud:override --layout
 
-Overrides the main page layout template, **layout.html**.
+Overrides the main page layout template, @layout.html@.
 
 h3. play crud:override --css
 
-Overrides the style sheet, **crud.css**, copying it to your the **public/stylesheets/** directory.
+Overrides the style sheet, @crud.css@, copying it to your the @public/stylesheets/@ directory.
 
 
 
 h2. <a name="limitation">Limitation</a>
 
-Limitation The CRUD module only shows bi-directional relationships in one of the two entities: the one that does not have the **mappedBy** attribute.
+Limitation The CRUD module only shows bi-directional relationships in one of the two entities: the one that does not have the @mappedBy@ attribute.

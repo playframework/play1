@@ -4,7 +4,7 @@ This section explains how to deal with asynchonism in a Play application to achi
 
 h2. Suspending HTTP requests
 
-Play is intended to work with very short requests. It uses a fixed thread pool to process requests queued by the HTTP connector. To get optimum results, the thread pool should be as small as possible. We typically use the optimum value of **number of processors + 1** to set the default pool size.
+Play is intended to work with very short requests. It uses a fixed thread pool to process requests queued by the HTTP connector. To get optimum results, the thread pool should be as small as possible. We typically use the optimum value of @number of processors + 1@ to set the default pool size.
 
 That means that if a request’s processing time is very long (for example waiting for a long computation) it will block the thread pool and penalise your application’s responsiveness. Of course you could add more threads to the pool, but that would result in wasted resources, and anyway the pool size will never be infinite.
 
@@ -85,7 +85,7 @@ bc. WS   /helloSocket            MyWebSocket.hello
 * It can read params only from the route pattern or from the QueryString.
 * It has two communication channels: inbound and outbound.
 
-When the client connects to the **ws://localhost:9000/helloSocket** socket, Play will invoke the @MyWebSocket.hello@ action method. Once the @MyWebSocket.hello@ action method exits, the socket is closed.
+When the client connects to the @ws://localhost:9000/helloSocket@ socket, Play will invoke the @MyWebSocket.hello@ action method. Once the @MyWebSocket.hello@ action method exits, the socket is closed.
 
 So a very basic socket example would be:
 

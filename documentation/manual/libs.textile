@@ -83,7 +83,7 @@ h3. Promises
 
 A @Promise@ is Play’s custom @Future@ type. In fact a @Promise<T>@ is also a @Future<T>@ so you can use it as a standard @Future@. But it has also a very interesting property: the ability to register callback using @onRedeem(…)@ that will be called as soon as the promised value is available. 
 
-Promises are used everywhere in Play in place of Future (for Jobs, WS.async, etc…).
+@Promise@ instances are used everywhere in Play in place of @Future@ instances (for Jobs, @WS.async@, etc…).
 
 Promises can be combined in several ways. For example:
 
@@ -97,7 +97,7 @@ Several times we've felt that we needed pattern matching in Java. Unfortunately 
 
 Our idea was to use the latest ‘for loop’ syntax to achieve basic pattern matching for Java. Pattern matching must both check if your object matches the required conditions and extract the interesting value. The Pattern matching library for Play is part of the @play.libs.F@ library.
 
-Let’s see a simple example; you have a reference of type Object and you want to check that it is a string that starts by "command:". 
+Let’s see a simple example; you have a reference of type Object and you want to check that it is a string that starts by ‘command:’. 
 
 The standard way would be:
 
@@ -132,7 +132,7 @@ The Play framework takes care of most of the process.
 
 h3. <a>OAuth 1.0</a>
 
-The OAuth 1.0 functionality is provided by the **play.libs.OAuth** class and is based on "oauth-signpost":http://code.google.com/p/oauth-signpost/. It is used by services such as "Twitter":http://apiwiki.twitter.com/ or "Google":http://code.google.com/apis/accounts/docs/OAuth.html
+The OAuth 1.0 functionality is provided by the @play.libs.OAuth@ class and is based on "oauth-signpost":http://code.google.com/p/oauth-signpost/. It is used by services such as "Twitter":http://apiwiki.twitter.com/ or "Google":http://code.google.com/apis/accounts/docs/OAuth.html
 
 To connect to a service, you need the create a OAuth.ServiceInfo instance using the following information, obtained from the service provider:
 * Request token URL
@@ -171,15 +171,15 @@ Calls can now be done by signing the requests using the token pair:
 
 bc. mentions = WS.url(url).oauth(TWITTER, getUser().token, getUser().secret).get().getString();
 
-While the example doesn't check for errors, in production you should. The OAuth.Response object holds an error field that is non null when an error occurred. Most likely it could be that the user didn't grant you access, that the provider is down or buggy.
+While the example doesn't check for errors, in production you should. The OAuth.Response object holds an error field that is non-null when an error occurred. Most likely it could be that the user didn't grant you access, that the provider is down or buggy.
 
-The full example usage is available in **samples-and-tests/twitter-oauth**.
+The full example usage is available in @samples-and-tests/twitter-oauth@.
 
 h3. <a>OAuth 2.0</a>
 
 OAuth 2.0 is much simpler than OAuth 1.0 because it doesn’t involve signing requests. It is used by "Facebook":http://developers.facebook.com/docs/authentication/ and "37signals":http://37signals.com.
 
-Functionality is provided by **play.libs.OAuth2**.
+Functionality is provided by @play.libs.OAuth2@.
 
 To connect to a service, you need the create a OAuth2 instance using the following information, obtained from the service provider:
 * Access token URL
@@ -190,14 +190,19 @@ To connect to a service, you need the create a OAuth2 instance using the followi
 bc. public static void auth() {
     // FACEBOOK is a OAuth2 object
     if (OAuth2.isCodeResponse()) {
-        OAuth2.Response response = FACEBOOK.retrieveAccessToken(authUrl); // authUrl must be the same as the retrieveVerificationCode call
-        String accessToken = response.accessToken; // null if an error occurred
-        OAuth2.Error = response.error; // null if the call was a success
+        // authUrl must be the same as the retrieveVerificationCode call
+        OAuth2.Response response = FACEBOOK.retrieveAccessToken(authUrl);
+        // null if an error occurred
+        String accessToken = response.accessToken;
+        // null if the call was a success
+        OAuth2.Error = response.error;
         // Save accessToken, you will need it to request the service
         index();
     }
-    // authUrl is a String containing an absolute URL where the service should redirect the user back
-    FACEBOOK.requestVerificationCode(authUrl); // This will trigger a redirect
+    // authUrl is a String containing an absolute URL where the service 
+    // should redirect the user back
+    // This will trigger a redirect
+    FACEBOOK.requestVerificationCode(authUrl);
 }
 
 Once you have the access token associated with the current user, you can use it to query the service on behalf of the user:
@@ -206,7 +211,7 @@ bc. WS.url(
     "https://graph.facebook.com/me?access_token=%s", access_token
 ).get().getJson();
 
-The full example usage is available in **samples-and-tests/facebook-oauth2**.
+The full example usage is available in @samples-and-tests/facebook-oauth2@.
 
 
 h2. OpenID
@@ -220,7 +225,7 @@ This example provides a high-level view of how OpenID authentication can be used
 * Redirect the user to the OpenID provider
 * When the user comes back, get the verified OpenID and save it in the HTTP session.
 
-The OpenID functionality is provided by the **play.libs.OpenID** class.
+The OpenID functionality is provided by the @play.libs.OpenID@ class.
 
 bc. @Before(unless={"login", "authenticate"})
 static void checkAuthenticated() {
@@ -254,7 +259,7 @@ public static void authenticate(String user) {
     }
 }
 
-And the **login.html** template:
+And the @login.html@ template:
 
 bc. #{if flash.error}
 <h1>${flash.error}</h1>
@@ -263,11 +268,11 @@ bc. #{if flash.error}
 <form action="@{Application.authenticate()}" method="POST">
     <label for="user">What’s your OpenID?</label>
     <input type="text" name="user" id="user" />
-    <input type="submit" value="login..." />
+    <input type="submit" value="login…" />
 </form>
 </code>
 
-And finally the routes definitions:
+And finally the @routes@ definitions:
 
 bc. GET   /                     Application.index
 GET   /login                Application.login

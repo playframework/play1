@@ -1,6 +1,6 @@
 h1. Sample applications
 
-Play comes with the following set of sample applications in the the **samples-and-test/** directory, in the framework installation path. We use them to run our automated test suite, and you can take a look at them to discover typical Play usages.
+Play comes with the following set of sample applications in the the @samples-and-test/@ directory, in the framework installation path. We use them to run our automated test suite, and you can take a look at them to discover typical Play usages.
 
 h2. <a>Yet Another Blog Engine</a>
 
