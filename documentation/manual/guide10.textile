@@ -4,7 +4,7 @@ We’ve now finished the blog engine we wanted to create in this tutorial. Howev
 
 Of course we’ve already written unit tests in order to test all the yabe model layer functionality. And it’s great as it will ensure that the blog engine’s core functionality is well tested. But a web application is not only about the ‘model’ part. We need to ensure that the web interface works as expected. That means testing the yabe blog engine’s controller layer. But we even need to test the UI itself, as for example, our JavaScript code.
 
-h2. <a>Testing the controller part</a>
+h2. <a name="controller">Testing the controller part</a>
 
 Play gives you a way to test directly the application’s controller part using JUnit. We call these tests **‘Functional tests’**. This is because we want to test the web application’s complete functionality.
 
@@ -53,7 +53,7 @@ Well, we could continue to test all the application functionalities this way, bu
 
 These kinds of JUnit based **‘Functional tests’** are still useful, typically to test Web services returning non-HTML responses such as JSON or XML over HTTP.
 
-h2. <a>Writing Selenium tests</a>
+h2. <a name="selenium">Writing Selenium tests</a>
 
 "Selenium":http://seleniumhq.org is a testing tool specifically for testing web applications. The cool things here is that Selenium allows to run the test suite directly in any existing browser. As it does not use any ‘browser simulator’, you can be sure that you’re testing what your users will use.
 
@@ -176,11 +176,15 @@ clickAndWait('css=input[type=submit]')
 
 And now run the test again, it should work.
 
-h2. <a>Measuring code coverage</a>
+h2. <a name="cobertura">Measuring code coverage</a>
 
 Of course we haven’t written all required test cases for the application. But it’s enough for this tutorial. Now in a real-world project, how can we know if we have written enough test cases? We need something called **‘code coverage’**. 
 
-Play comes with a code coverage module based on the "Cobertura":http://cobertura.sourceforge.net/ tool. We need to enable this module only for test mode. So add this line to the @application.conf@ file, and restart the application in test mode.
+The ""Cobertura module":http://www.playframework.org/modules/cobertura generates code coverage reports using the "Cobertura":http://cobertura.sourceforge.net/ tool. Install the module using the @install@ command:
+
+bc. play install cobertura-{version}
+
+We need to enable this module only for test mode. So add this line to the @application.conf@ file, and restart the application in test mode.
 
 bc. # Import the cobertura module in test mode
 %test.module.cobertura=${play.path}/modules/cobertura
