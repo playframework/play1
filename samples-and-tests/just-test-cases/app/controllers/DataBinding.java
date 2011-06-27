@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import models.Person;
 import play.Logger;
 import play.data.binding.As;
+import play.data.validation.Error;
 import play.i18n.Lang;
 import play.mvc.Controller;
 
@@ -64,6 +65,35 @@ public class DataBinding extends Controller {
             renderText(validation.errors());
         }
         renderText(p.x + "|" + p.y);
+    }
+
+    public static void singleBinder(Integer single) {
+        if (validation.hasErrors()) {
+            renderText(errorsToString());
+        }
+        renderText("Success");
+    }
+
+    public static void listBinder(List<Integer> list) {
+        if (validation.hasErrors()) {
+            renderText(errorsToString());
+        }
+        renderText("Success");
+    }
+
+    public static void mapBinder(Map<String, Integer> map) {
+        if (validation.hasErrors()) {
+            renderText(errorsToString());
+        }
+        renderText("Success");
+    }
+
+    private static String errorsToString() {
+        String ret = "";
+        for (Error error: validation.errors()) {
+            ret += error.getKey() + '=' + error.message() + '\n';
+        }
+        return ret;
     }
 
     public static void signin(@As("secure") Person person) {
