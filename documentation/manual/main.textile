@@ -76,7 +76,7 @@ p(note). **Tip**
 By default the /public directory is mapped to the /public URL path, but you can easily change that, or even use several directories for your static assets.
 
 
-h3. The **conf** directory
+h3(#conf). The **conf** directory
 
 The **conf** directory contains all configuration files for the application.
 

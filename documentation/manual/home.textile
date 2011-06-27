@@ -177,6 +177,7 @@ Extended references for day-to-day hacking.
 ## "Template tags":tags
 ## "Java extensions":javaextensions
 ## "Validations":validation-builtin
+# "Configuration reference":configuration
 
 h2. <a name="modules">Distribution Modules</a>
 
