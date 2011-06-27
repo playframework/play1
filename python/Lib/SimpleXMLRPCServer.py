@@ -105,6 +105,7 @@ import SocketServer
 import BaseHTTPServer
 import sys
 import os
+import traceback
 try:
     import fcntl
 except ImportError:
@@ -140,7 +141,7 @@ def list_public_methods(obj):
 
     return [member for member in dir(obj)
                 if not member.startswith('_') and
-                    callable(getattr(obj, member))]
+                    hasattr(getattr(obj, member), '__call__')]
 
 def remove_duplicates(lst):
     """remove_duplicates([2,2,2,1,3,3]) => [3,1,2]
@@ -264,8 +265,9 @@ class SimpleXMLRPCDispatcher:
                                        encoding=self.encoding)
         except:
             # report exception back to server
+            exc_type, exc_value, exc_tb = sys.exc_info()
             response = xmlrpclib.dumps(
-                xmlrpclib.Fault(1, "%s:%s" % (sys.exc_type, sys.exc_value)),
+                xmlrpclib.Fault(1, "%s:%s" % (exc_type, exc_value)),
                 encoding=self.encoding, allow_none=self.allow_none,
                 )
 
@@ -313,7 +315,7 @@ class SimpleXMLRPCDispatcher:
         Returns a string containing documentation for the specified method."""
 
         method = None
-        if self.funcs.has_key(method_name):
+        if method_name in self.funcs:
             method = self.funcs[method_name]
         elif self.instance is not None:
             # Instance can implement _methodHelp to return help for a method
@@ -364,9 +366,10 @@ class SimpleXMLRPCDispatcher:
                      'faultString' : fault.faultString}
                     )
             except:
+                exc_type, exc_value, exc_tb = sys.exc_info()
                 results.append(
                     {'faultCode' : 1,
-                     'faultString' : "%s:%s" % (sys.exc_type, sys.exc_value)}
+                     'faultString' : "%s:%s" % (exc_type, exc_value)}
                     )
         return results
 
@@ -468,9 +471,16 @@ class SimpleXMLRPCRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             response = self.server._marshaled_dispatch(
                     data, getattr(self, '_dispatch', None)
                 )
-        except: # This should only happen if the module is buggy
+        except Exception, e: # This should only happen if the module is buggy
             # internal error, report as HTTP server error
             self.send_response(500)
+
+            # Send information about the exception if requested
+            if hasattr(self.server, '_send_traceback_header') and \
+                    self.server._send_traceback_header:
+                self.send_header("X-exception", str(e))
+                self.send_header("X-traceback", traceback.format_exc())
+
             self.end_headers()
         else:
             # got a valid XML RPC response
@@ -515,12 +525,18 @@ class SimpleXMLRPCServer(SocketServer.TCPServer,
 
     allow_reuse_address = True
 
+    # Warning: this is for debugging purposes only! Never set this to True in
+    # production code, as will be sending out sensitive information (exception
+    # and stack trace details) when exceptions are raised inside
+    # SimpleXMLRPCRequestHandler.do_POST
+    _send_traceback_header = False
+
     def __init__(self, addr, requestHandler=SimpleXMLRPCRequestHandler,
-                 logRequests=True, allow_none=False, encoding=None):
+                 logRequests=True, allow_none=False, encoding=None, bind_and_activate=True):
         self.logRequests = logRequests
 
         SimpleXMLRPCDispatcher.__init__(self, allow_none, encoding)
-        SocketServer.TCPServer.__init__(self, addr, requestHandler)
+        SocketServer.TCPServer.__init__(self, addr, requestHandler, bind_and_activate)
 
         # [Bug #1222790] If possible, set close-on-exec flag; if a
         # method spawns a subprocess, the subprocess shouldn't have

@@ -1,23 +1,29 @@
 package play.server;
 
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.ChannelException;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import play.Logger;
-import play.Play;
-import play.Play.Mode;
-import play.server.ssl.SslHttpServerPipelineFactory;
-
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 
+import org.jboss.netty.bootstrap.ServerBootstrap;
+import org.jboss.netty.channel.ChannelException;
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+
+import play.Logger;
+import play.Play;
+import play.Play.Mode;
+import play.libs.IO;
+import play.server.ssl.SslHttpServerPipelineFactory;
+import play.vfs.VirtualFile;
+
 public class Server {
 
     public static int httpPort;
     public static int httpsPort;
+
+    public final static String PID_FILE = "server.pid";
 
     public Server(String[] args) {
 
@@ -33,7 +39,7 @@ public class Server {
 
         if (httpPort == httpsPort) {
             Logger.error("Could not bind on https and http on the same port " + httpPort);
-            System.exit(-1);
+            Play.fatalServerErrorOccurred();
         }
 
         InetAddress address = null;
@@ -47,7 +53,7 @@ public class Server {
 
         } catch (Exception e) {
             Logger.error(e, "Could not understand http.address");
-            System.exit(-1);
+            Play.fatalServerErrorOccurred();
         }
         try {
             if (p.getProperty("https.address") != null) {
@@ -57,7 +63,7 @@ public class Server {
             }
         } catch (Exception e) {
             Logger.error(e, "Could not understand https.address");
-            System.exit(-1);
+            Play.fatalServerErrorOccurred();
         }
         ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
                 Executors.newCachedThreadPool(), Executors.newCachedThreadPool())
@@ -86,7 +92,7 @@ public class Server {
 
         } catch (ChannelException e) {
             Logger.error("Could not bind on port " + httpPort, e);
-            System.exit(-1);
+            Play.fatalServerErrorOccurred();
         }
 
         bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
@@ -117,9 +123,8 @@ public class Server {
 
         } catch (ChannelException e) {
             Logger.error("Could not bind on port " + httpsPort, e);
-            System.exit(-1);
+            Play.fatalServerErrorOccurred();
         }
-
 
     }
 
@@ -133,10 +138,22 @@ public class Server {
         return defaultValue; 
     }
 
+    private static void writePID(File root) {
+        String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+        File pidfile = new File(root, PID_FILE);
+        if (pidfile.exists()) {
+            throw new RuntimeException("The " + PID_FILE + " already exists. Is the server already running?");
+        }
+        IO.write(pid.getBytes(), pidfile);
+    }
+
     public static void main(String[] args) throws Exception {
         File root = new File(System.getProperty("application.path"));
         if (System.getProperty("precompiled", "false").equals("true")) {
             Play.usePrecompiled = true;
+        }
+        if (System.getProperty("writepid", "false").equals("true")) {
+            writePID(root);
         }
         Play.init(root, System.getProperty("play.id", ""));
         if (System.getProperty("precompile") == null) {
@@ -145,4 +162,5 @@ public class Server {
             Logger.info("Done.");
         }
     }
+
 }

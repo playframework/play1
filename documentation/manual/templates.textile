@@ -2,7 +2,7 @@ h1. The template engine
 
 Play has an efficient templating system which allows to dynamically generate HTML, XML, JSON or any text-based formatted document. The template engine uses "Groovy":http://groovy.codehaus.org/ as an expression language. A tag system allows you to create reusable functions.
 
-Templates are stored in the **app/views** directory. 
+Templates are stored in the @app/views@ directory. 
 
 h2. <a name="syntax">Template syntax</a>
 
@@ -12,7 +12,7 @@ Dynamic elements are resolved during template execution. The rendered result is 
 
 h3. Expressions: ${…}
 
-The simplest way to make a dynamic element is to declare an expression. The syntax used here is **${…}**. The result of evaluating the expression is inserted in place of the expression.
+The simplest way to make a dynamic element is to declare an expression. The syntax used here is @${…}@. The result of evaluating the expression is inserted in place of the expression.
 
 For example:
 
@@ -37,7 +37,7 @@ bc. #{extends 'simpledesign.html' /}
 #{set title:'A decorated page' /}
 This content will be decorated.
 
-The decorator : **simpledesign.html**
+The decorator : @simpledesign.html@
 
 bc. <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
@@ -67,7 +67,7 @@ or
 
 bc. #{script 'jquery.js'}#{/script}
 
-For example the **list** tag allows iteration over any collection. It takes two mandatory parameters:
+For example the @list@ tag allows iteration over any collection. It takes two mandatory parameters:
 
 bc. <h1>Client ${client.name}</h1>
 <ul>
@@ -76,15 +76,15 @@ bc. <h1>Client ${client.name}</h1>
     #{/list}
 </ul>
 
-All dynamic expressions are escaped by the template engine to avoid XSS security issues in your application. So the **title** variable containing **==&lt;h1>Title&lt;/h1>==** is now escaped:
+All dynamic expressions are escaped by the template engine to avoid XSS security issues in your application. So the @title@ variable containing <code>==&lt;h1>Title&lt;/h1>==</code> is now escaped:
 
 bc. ${title} --> &lt;h1&gt;Title&lt;/h1&gt;
 
-If you really want to display it in an unescaped way, you need to explicitely call the **raw()** method:
+If you really want to display it in an unescaped way, you need to explicitely call the @raw()@ method:
 
 bc. ${title.raw()} --> <h1>Title</h1>
 
-Also, if you want to display a large part of raw HTML, you can use the **#{verbatim /}** tag:
+Also, if you want to display a large part of raw HTML, you can use the @#{verbatim /}@ tag:
 
 bc. #{verbatim}
     ${title} --> <h1>Title</h1>
@@ -92,7 +92,7 @@ bc. #{verbatim}
 
 h3. Actions: @{…} or @@{…}
 
-You can use the Router to (reverse) generate a URL corresponding to a specified route. From a template you can use the special **@{…}** syntax to do that.
+You can use the Router to (reverse) generate a URL corresponding to a specified route. From a template you can use the special <code>@{…}</code> syntax to do that.
 
 For example:
 
@@ -103,13 +103,13 @@ bc. <h1>Client ${client.name}</h1>
 <hr />
 <a href="@{Clients.index()}">Back</a>
 
-The **@@{…}** syntax does the same but generates an absolute URL (notably useful for e-mail, …).
+The <code>@@{…}</code> syntax does the same but generates an absolute URL (notably useful for e-mail).
 
 h3. Messages: &{…}
 
-If your application needs internationalization you can use the **&{…}** syntax to display an internationalized message:
+If your application needs internationalization you can use the @&{…}@ syntax to display an internationalized message:
 
-For example in the files **conf/messages** we specify:
+For example in the files @conf/messages@ we specify:
 
 bc. clientName=The client name is %s
 
@@ -128,7 +128,7 @@ bc. *{**** Display the user name ****}*
 
 h3. Scripts: ==%{…}%==
 
-A script is a more complicated set of expressions. A script can declare some variables and define some statements. Use the **%{…}%** syntax to insert a script.
+A script is a more complicated set of expressions. A script can declare some variables and define some statements. Use the @%{…}%@ syntax to insert a script.
 
 bc. %{
    fullName = client.name.toUpperCase()+' '+client.forname;
@@ -136,7 +136,7 @@ bc. %{
  
 <h1>Client ${fullName}</h1>
 
-A script can write dynamic content directly using the **out** object:
+A script can write dynamic content directly using the @out@ object:
 
 bc. %{
    fullName = client.name.toUpperCase()+' '+client.forname;
@@ -162,13 +162,13 @@ h2. <a name="inheritance">Template inheritance</a>
 
 A template can inherit another template, i.e. it can be included as a part of an other template.
 
-To inherit another template, use the **extends** tag:
+To inherit another template, use the @extends@ tag:
 
 bc. #{extends 'main.html' /}
  
 <h1>Some code</h1>
 
-The **main.html** template is a standard template, but it uses the **doLayout** tag to include the content:
+The @main.html@ template is a standard template, but it uses the @doLayout@ tag to include the content:
 
 bc. <h1>Main template</h1>
  
@@ -179,9 +179,9 @@ bc. <h1>Main template</h1>
 
 h2. <a name="tags">Custom template tags</a>
 
-You can easily create specific tags for your application. A tag is a simple template file, stored in the **app/views/tags** directory. The template’s file name is used as the tag name.
+You can easily create specific tags for your application. A tag is a simple template file, stored in the @app/views/tags@ directory. The template’s file name is used as the tag name.
 
-To create a **hello** tag, just create the **app/views/tags/hello.html** file.
+To create a @hello@ tag, just create the @app/views/tags/hello.html@ file.
 
 bc. Hello from tag!
 
@@ -201,7 +201,7 @@ And you can pass the name parameter to the tag:
 
 bc. #{hello name:'Bob' /}
 
-If your tag has only one parameter, you can use the fact than the default parameter name is **arg** and that its name is implicit.
+If your tag has only one parameter, you can use the fact than the default parameter name is @arg@ and that its name is implicit.
 
 Example:
 
@@ -213,7 +213,7 @@ bc. #{hello 'Bob' /}
 
 h3. Invoke tag body
 
-If your tag supports a **body**, you can include it at any point in the tag code, using the **doBody** tag.
+If your tag supports a @body@, you can include it at any point in the tag code, using the @doBody@ tag.
 
 For example:
 
@@ -227,14 +227,14 @@ bc. #{hello}
 
 h3. Format-specific tags
 
-You can have different versions of a tag for different "content types":routes#content-types and Play will select the appropriate tag. For example, Play will use the **app/views/tags/hello.html** tag when **request.format** is **html**, and **app/views/tags/hello.xml** when the format is **xml**.
+You can have different versions of a tag for different "content types":routes#content-types and Play will select the appropriate tag. For example, Play will use the @app/views/tags/hello.html@ tag when @request.format@ is @html@, and @app/views/tags/hello.xml@ when the format is @xml@.
 
-Whatever the content type, Play will fall back to the **.tag** extension if a format-specific tag is not available, e.g. **app/views/tags/hello.tag**.
+Whatever the content type, Play will fall back to the @.tag@ extension if a format-specific tag is not available, e.g. @app/views/tags/hello.tag@.
 
 
 h2. <a name="fasttags">Custom Java tags</a>
 
-You can also define custom tags in Java code. Similarly to how JavaExtensions work by extending the **play.templates.JavaExtensions** class, to create a FastTag you need to create a method in a class that extends **play.templates.FastTags**. Each method that you want to execute as a tag must have the following method signature.
+You can also define custom tags in Java code. Similarly to how JavaExtensions work by extending the @play.templates.JavaExtensions@ class, to create a FastTag you need to create a method in a class that extends @play.templates.FastTags@. Each method that you want to execute as a tag must have the following method signature.
 
 bc. public static void _tagName(Map<?, ?> args, Closure body, PrintWriter out, 
    ExecutableTemplate template, int fromLine)
@@ -243,7 +243,7 @@ p(note). Note the underscore before the tag name.
 
 To understand how to build an actual tag, let’s look at two of the built-in tags.
 
-For example, the **verbatim** tag is implemented by a one-line method that simply calls the toString method on the JavaExtensions, and passes in the body of the tag.
+For example, the @verbatim@ tag is implemented by a one-line method that simply calls the toString method on the JavaExtensions, and passes in the body of the tag.
 
 bc. public static void _verbatim(Map<?, ?> args, Closure body, PrintWriter out, 
    ExecutableTemplate template, int fromLine) {
@@ -259,7 +259,7 @@ The body value would be
 
 bc. My verbatim
 
-The second example is the **option** tag, which is slightly more complex because it relies on a parent tag to function.
+The second example is the @option@ tag, which is slightly more complex because it relies on a parent tag to function.
 
 bc. public static void _option(Map<?, ?> args, Closure body, PrintWriter out, 
       ExecutableTemplate template, int fromLine) {
@@ -276,15 +276,15 @@ bc. public static void _option(Map<?, ?> args, Closure body, PrintWriter out,
    out.print("</option>");
 }
 
-This code works by outputting an HTML **option** tag, and sets the selected value by checking which value is selected from the parent tag. The first three lines set variables for use in the output output. Then, the final three lines output the result of the tag.
+This code works by outputting an HTML @option@ tag, and sets the selected value by checking which value is selected from the parent tag. The first three lines set variables for use in the output output. Then, the final three lines output the result of the tag.
 
 There are many more examples in the source code for the built in tags, with varying degrees of complexity. See "FastTags.java in github":https://github.com/playframework/play/blob/master/framework/src/play/templates/FastTags.java.
 
 h3. Tag namespaces
 
-To ensure that your tags do not conflict between projects, or with the core Play tags, you can set up namespaces, using the class level annotation **@FastTags.Namespace**.
+To ensure that your tags do not conflict between projects, or with the core Play tags, you can set up namespaces, using the class level annotation <code>@FastTags.Namespace</code>.
 
-So, for a **hello** tag, in a **my.tags** namespace, you would do the following
+So, for a @hello@ tag, in a @my.tags@ namespace, you would do the following
 
 bc. @FastTags.Namespace("my.tags") 
 public class MyFastTag extends FastTags {
@@ -304,7 +304,7 @@ h2. <a name="extensions">Java object extensions in templates</a>
 
 When you use your Java object within the template engine, new methods are added to it. These methods don’t exist in the original Java class and are dynamically added by the template engine.
 
-For example, to allow easy number formatting in a template, a **format** method is added to **java.lang.Number**.
+For example, to allow easy number formatting in a template, a @format@ method is added to @java.lang.Number@.
 
 It’s then very easy to format a number:
 
@@ -314,7 +314,7 @@ bc. <ul>
 #{/list}
 </ul>
 
-The same applies to **java.util.Date**.
+The same applies to @java.util.Date@.
 
 The "Java extensions":javaextensions manual page lists the available methods, by type.
 
@@ -323,7 +323,7 @@ h3. Create custom extensions
 
 Your project may have specific formatting needs, in which case you can provide your own extensions.
 
-You only need to create a Java class extending **play.templates.JavaExtensions**.
+You only need to create a Java class extending @play.templates.JavaExtensions@.
 
 For instance, to provide a custom currency formatter for a number:
 
@@ -340,7 +340,7 @@ public class CurrencyExtensions extends JavaExtensions {
  
 }
 
-Each extension method is a static method and should return a **java.lang.String** to be written back in the page. The first parameter will hold the enhanced object.
+Each extension method is a static method and should return a @java.lang.String@ to be written back in the page. The first parameter will hold the enhanced object.
 
 Use your formatter like this:
 
@@ -350,7 +350,7 @@ Template extension classes are automatically detected by Play at start-up. You j
 
 h2. <a name="implicits">Implicit objects available in a template</a>
 
-All objects added to the **renderArgs** scope are directly injected as template variables. 
+All objects added to the @renderArgs@ scope are directly injected as template variables. 
 
 For instance, to inject a ‘user’ bean into the template from a controller:
 
@@ -359,16 +359,16 @@ bc. renderArgs.put("user", user );
 When you render a template from an action, the framework also adds implicit objects:
 
 || Variable || Description || API documentation || See also ||
-| **errors** | Validation errors | "play.data.validation.Validation.errors()":/@api/play/data/validation/Validation.html#errors%28%29 | "Validating HTTP data":validation |
-| **flash** | Flash scope | "play.mvc.Scope.Flash":/@api/play/mvc/Scope.Flash.html  | "Controllers - Session & Flash Scope":controllers#session |
-| **lang** | The current language | "play.i18n.Lang":/@api/play/i18n/Lang.html | "Setting up I18N - Define languages":i18n#languages |
-| **messages** | The messages map | "play.i18n.Messages":/@api/play/i18n/Messages.html | "Setting up I18N - Externalize messages":i18n#messages |
-| **out** | The output stream writer | java.io.PrintWriter |  |
-| **params** | Current parameters | "play.mvc.Scope.Params":/@api/play/mvc/Scope.Params.html  | "Controllers - HTTP parameters":controllers#params |
-| **play** | Main framework class | "play.Play":/@api/play/Play.html |  |
-| **request** | The current HTTP request | "play.mvc.Http.Request":/@api/play/mvc/Http.Request.html  |  |
-| **session** | Session scope | "play.mvc.Scope.Session":/@api/play/mvc/Scope.Session.html  | "Controllers - Session & Flash Scope":controllers#session |
+| @errors@ | Validation errors | "play.data.validation.Validation.errors()":/@api/play/data/validation/Validation.html#errors%28%29 | "Validating HTTP data":validation |
+| @flash@ | Flash scope | "play.mvc.Scope.Flash":/@api/play/mvc/Scope.Flash.html  | "Controllers - Session & Flash Scope":controllers#session |
+| @lang@ | The current language | "play.i18n.Lang":/@api/play/i18n/Lang.html | "Setting up I18N - Define languages":i18n#languages |
+| @messages@ | The messages map | "play.i18n.Messages":/@api/play/i18n/Messages.html | "Setting up I18N - Externalize messages":i18n#messages |
+| @out@ | The output stream writer | java.io.PrintWriter |  |
+| @params@ | Current parameters | "play.mvc.Scope.Params":/@api/play/mvc/Scope.Params.html  | "Controllers - HTTP parameters":controllers#params |
+| @play@ | Main framework class | "play.Play":/@api/play/Play.html |  |
+| @request@ | The current HTTP request | "play.mvc.Http.Request":/@api/play/mvc/Http.Request.html  |  |
+| @session@ | Session scope | "play.mvc.Scope.Session":/@api/play/mvc/Scope.Session.html  | "Controllers - Session & Flash Scope":controllers#session |
 
-In addition to the list above the names **owner**, **delegate** and **it** are reserved in Groovy and shouldn't be used as variable names in templates.
+In addition to the list above the names @owner@, @delegate@ and @it@ are reserved in Groovy and shouldn't be used as variable names in templates.
 
 p(note). Next: %(next)"Form data validation":validation%

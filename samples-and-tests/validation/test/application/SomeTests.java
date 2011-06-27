@@ -20,7 +20,7 @@ public class SomeTests extends ApplicationTest {
     // check the response is HTML
     assertContentType("text/html", response);
     // check the declared charset encoding
-    assertCharset("utf-8", response);
+    assertCharset(play.Play.defaultWebEncoding, response);
     // check some content in the page. may also test a regexp
     assertContentMatch("<h1>It works !</h1>", response);
   }

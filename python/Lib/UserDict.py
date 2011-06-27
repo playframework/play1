@@ -41,7 +41,7 @@ class UserDict:
     def iterkeys(self): return self.data.iterkeys()
     def itervalues(self): return self.data.itervalues()
     def values(self): return self.data.values()
-    def has_key(self, key): return self.data.has_key(key)
+    def has_key(self, key): return key in self.data
     def update(self, dict=None, **kwargs):
         if dict is None:
             pass
@@ -55,11 +55,11 @@ class UserDict:
         if len(kwargs):
             self.data.update(kwargs)
     def get(self, key, failobj=None):
-        if not self.has_key(key):
+        if key not in self:
             return failobj
         return self[key]
     def setdefault(self, key, failobj=None):
-        if not self.has_key(key):
+        if key not in self:
             self[key] = failobj
         return self[key]
     def pop(self, key, *args):
@@ -78,6 +78,10 @@ class UserDict:
 class IterableUserDict(UserDict):
     def __iter__(self):
         return iter(self.data)
+
+import _abcoll
+_abcoll.MutableMapping.register(IterableUserDict)
+
 
 class DictMixin:
     # Mixin defining all dictionary methods for classes that already have

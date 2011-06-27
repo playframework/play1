@@ -137,27 +137,36 @@ public class Utils {
         return newMap;
     }
 
-	public static Map<String, String> filterParams(Scope.Params params, String prefix) {
-		return filterParams(params.all(), prefix);
-	}
-    
-	public static Map<String, String> filterParams(Map<String, String[]> params, String prefix, String separator) {
-		Map<String, String> filteredMap = new LinkedHashMap<String, String>();
-		prefix += ".";
-		for(Map.Entry<String, String[]> e: params.entrySet()){
-			if(e.getKey().startsWith(prefix)) {
-				filteredMap.put(
-						e.getKey().substring(prefix.length()), 
-						Utils.join(e.getValue(), separator)
-				);
-			}
-		}
-		return filteredMap;
-	}
-	public static Map<String, String> filterParams(Map<String, String[]> params, String prefix) {
-		return filterParams(params, prefix, ", ");
-	}
-    
+    public static Map<String, String> filterParams(Scope.Params params, String prefix) {
+        return filterParams(params.all(), prefix);
+    }
+
+    public static Map<String, String> filterParams(Map<String, String[]> params, String prefix, String separator) {
+        Map<String, String> filteredMap = new LinkedHashMap<String, String>();
+        prefix += ".";
+        for(Map.Entry<String, String[]> e: params.entrySet()){
+            if(e.getKey().startsWith(prefix)) {
+                filteredMap.put(
+                        e.getKey().substring(prefix.length()),
+                        Utils.join(e.getValue(), separator)
+                );
+            }
+        }
+        return filteredMap;
+    }
+
+    public static Map<String, String> filterParams(Map<String, String[]> params, String prefix) {
+        return filterParams(params, prefix, ", ");
+    }
+
+    public static void kill(String pid) throws Exception {
+        String os = System.getProperty("os.name");
+        String command = (os.startsWith("Windows"))
+                       ? "taskkill /F /PID " + pid
+                       : "kill " + pid;
+        Runtime.getRuntime().exec(command).waitFor();
+    }
+
     public static class AlternativeDateFormat {
 
         Locale locale;
@@ -203,7 +212,7 @@ public class Utils {
                         "dd'/'MM'/'yyyy HH:mm:ss",
                         "dd-MM-yyyy HH:mm:ss",
                         "ddMMyyyy HHmmss",
-                        "ddMMyyyy"));
+                "ddMMyyyy"));
             }
             return dateformat.get();
         }

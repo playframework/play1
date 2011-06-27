@@ -26,12 +26,15 @@ import play.libs.F.Option;
 import play.libs.F.Promise;
 import play.libs.F.EventStream;
 import play.libs.Time;
+import play.utils.HTTP;
 import play.utils.Utils;
 
 /**
  * HTTP interface
  */
 public class Http {
+
+    public static final String invocationType = "HttpRequest";
 
     public static class StatusCode {
 
@@ -116,6 +119,17 @@ public class Http {
     public static class Cookie implements Serializable {
 
         /**
+         * When creating cookie without specifying domain,
+         * this value is used. Can be configured using
+         * the property 'application.defaultCookieDomain'
+         * in application.conf.
+         *
+         * This feature can be used to allow sharing
+         * session/cookies between multiple sub domains.
+         */
+        public static String defaultDomain = null;
+
+        /**
          * Cookie name
          */
         public String name;
@@ -187,6 +201,11 @@ public class Http {
          */
         public String contentType;
         /**
+         * This is the encoding used to decode this request.
+         * If encoding-info is not found in request, then Play.defaultWebEncoding is used
+         */
+        public String encoding = Play.defaultWebEncoding;
+        /**
          * Controller to invoke
          */
         public String controller;
@@ -205,11 +224,11 @@ public class Http {
         /**
          * HTTP Headers
          */
-        public Map<String, Http.Header> headers = new HashMap<String, Http.Header>(16);
+        public Map<String, Http.Header> headers = null;
         /**
          * HTTP Cookies
          */
-        public Map<String, Http.Cookie> cookies = new HashMap<String, Http.Cookie>(16);
+        public Map<String, Http.Cookie> cookies = null;
         /**
          * Body stream
          */
@@ -271,7 +290,123 @@ public class Http {
          */
         public final Scope.Params params = new Scope.Params();
 
+
+        /**
+         * Deprecate the default constructor to encourage the use of createRequest() when creating new
+         * requests.
+         *
+         * Cannot hide it with protected because we have to be backward compatible with modules - ie PlayGrizzlyAdapter.java
+         */
+        @Deprecated
+        public Request() {
+            headers = new HashMap<String, Http.Header>(16);
+            cookies = new HashMap<String, Http.Cookie>(16);
+        }
+
+        /**
+         * All creation / initing of new requests should use this method.
+         * The purpose of this is to "show" what is needed when creating new Requests.
+         * @return the newly created Request object
+         */
+        public static Request createRequest(
+                String _remoteAddress,
+                String _method,
+                String _path,
+                String _querystring,
+                String _contentType,
+                InputStream _body,
+                String _url,
+                String _host,
+                boolean _isLoopback,
+                int _port,
+                String _domain,
+                boolean _secure,
+                Map<String, Http.Header> _headers,
+                Map<String, Http.Cookie> _cookies
+        ) {
+            Request newRequest = new Request();
+
+            newRequest.remoteAddress = _remoteAddress;
+            newRequest.method = _method;
+            newRequest.path = _path;
+            newRequest.querystring = _querystring;
+
+            // must try to extract encoding-info from contentType
+            if( _contentType == null ) {
+                newRequest.contentType = "text/html".intern();
+            } else {
+
+                HTTP.ContentTypeWithEncoding contentTypeEncoding = HTTP.parseContentType( _contentType );
+                newRequest.contentType = contentTypeEncoding.contentType;
+                // check for encoding-info
+                if( contentTypeEncoding.encoding != null ) {
+                    // encoding-info was found in request
+                    newRequest.encoding = contentTypeEncoding.encoding;
+                }
+            }
+
+            newRequest.body = _body;
+            newRequest.url = _url;
+            newRequest.host = _host;
+            newRequest.isLoopback = _isLoopback;
+            newRequest.port = _port;
+            newRequest.domain = _domain;
+            newRequest.secure = _secure;
+
+            if(_headers == null) {
+                _headers = new HashMap<String, Http.Header>(16);
+            }
+            newRequest.headers = _headers;
+
+            if(_cookies == null) {
+                _cookies = new HashMap<String, Http.Cookie>(16);
+            }
+            newRequest.cookies = _cookies;
+
+            newRequest.parseXForwarded();
+
+            newRequest.resolveFormat();
+
+            newRequest.authorizationInit();
+
+            return newRequest;
+        }
+
+        protected void parseXForwarded() {
+            if (Play.configuration.containsKey("XForwardedSupport") && headers.get("x-forwarded-for") != null) {
+                if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(",")).contains(remoteAddress)) {
+                    throw new RuntimeException("This proxy request is not authorized: " + remoteAddress);
+                } else {
+                    secure = isRequestSecure();
+                    if (Play.configuration.containsKey("XForwardedHost")) {
+                        host = (String) Play.configuration.get("XForwardedHost");
+                    } else if (headers.get("x-forwarded-host") != null) {
+                        host = headers.get("x-forwarded-host").value();
+                    }
+                    if (headers.get("x-forwarded-for") != null) {
+                        remoteAddress = headers.get("x-forwarded-for").value();
+                    }
+                }
+            }
+        }
+
+        private boolean isRequestSecure() {
+            Header xForwardedProtoHeader = headers.get("x-forwarded-proto");
+            Header xForwardedSslHeader = headers.get("x-forwarded-ssl");
+            return ("https".equals(Play.configuration.get("XForwardedProto")) ||
+                    (xForwardedProtoHeader != null && "https".equals(xForwardedProtoHeader.value())) ||
+                    (xForwardedSslHeader != null && "on".equals(xForwardedSslHeader.value())));
+        }
+
+        /**
+         * Deprecated to encourage users to use createRequest() instead.
+         */
+        @Deprecated
         public void _init() {
+            authorizationInit();
+        }
+
+        protected void authorizationInit() {
             Header header = headers.get("authorization");
             if (header != null && header.value().startsWith("Basic ")) {
                 String data = header.value().substring(6);
@@ -330,6 +465,14 @@ public class Http {
          */
         public static Request current() {
             return current.get();
+        }
+
+        /**
+         * Useful because we sometime use a lazy request loader
+         * @return itself
+         */
+        public Request get() {
+            return this;
         }
 
         /**
@@ -446,6 +589,11 @@ public class Http {
          * Send this file directly
          */
         public Object direct;
+
+        /**
+         * The encoding used when writing response to client
+         */
+        public String encoding = Play.defaultWebEncoding;
         /**
          * Bind to thread
          */
@@ -503,8 +651,21 @@ public class Http {
             setCookie(name, value, null, "/", null, false);
         }
 
+        /**
+         * Removes the specified cookie with path /
+         * @param name cookiename
+         */
         public void removeCookie(String name) {
-            setCookie(name, "", null, "/", 0, false);
+            removeCookie(name, "/");
+        }
+
+        /**
+         * Removes the cookie
+         * @param name cookiename
+         * @param path cookiepath
+         */
+        public void removeCookie(String name, String path) {
+            setCookie(name, "", null, path, 0, false);
         }
 
         /**
@@ -538,6 +699,8 @@ public class Http {
                 cookie.httpOnly = httpOnly;
                 if (domain != null) {
                     cookie.domain = domain;
+                } else {
+                    cookie.domain = Cookie.defaultDomain;
                 }
                 if (maxAge != null) {
                     cookie.maxAge = maxAge;
@@ -610,9 +773,9 @@ public class Http {
 
         public void print(Object o) {
             try {
-                out.write(o.toString().getBytes("utf-8"));
+                out.write(o.toString().getBytes(Response.current().encoding));
             } catch (IOException ex) {
-                throw new UnexpectedException("UTF-8 problem ?", ex);
+                throw new UnexpectedException("Encoding problem ?", ex);
             }
         }
 

@@ -69,9 +69,18 @@ except ImportError:
     from StringIO import StringIO
 
 import UserDict
-import warnings
 
 __all__ = ["Shelf","BsdDbShelf","DbfilenameShelf","open"]
+
+class _ClosedDict(UserDict.DictMixin):
+    'Marker for a closed dict.  Access attempts raise a ValueError.'
+
+    def closed(self, *args):
+        raise ValueError('invalid operation on closed shelf')
+    __getitem__ = __setitem__ = __delitem__ = keys = closed
+
+    def __repr__(self):
+        return '<Closed Dictionary>'
 
 class Shelf(UserDict.DictMixin):
     """Base class for shelf implementations.
@@ -95,13 +104,13 @@ class Shelf(UserDict.DictMixin):
         return len(self.dict)
 
     def has_key(self, key):
-        return self.dict.has_key(key)
+        return key in self.dict
 
     def __contains__(self, key):
-        return self.dict.has_key(key)
+        return key in self.dict
 
     def get(self, key, default=None):
-        if self.dict.has_key(key):
+        if key in self.dict:
             return self[key]
         return default
 
@@ -136,7 +145,7 @@ class Shelf(UserDict.DictMixin):
             self.dict.close()
         except AttributeError:
             pass
-        self.dict = 0
+        self.dict = _ClosedDict()
 
     def __del__(self):
         if not hasattr(self, 'writeback'):

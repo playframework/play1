@@ -29,7 +29,6 @@ from compiler.ast import *
 import parser
 import symbol
 import token
-import sys
 
 class WalkerError(StandardError):
     pass
@@ -232,6 +231,18 @@ class Transformer:
             assert dec_nodelist[0] == symbol.decorator
             items.append(self.decorator(dec_nodelist[1:]))
         return Decorators(items)
+
+    def decorated(self, nodelist):
+        assert nodelist[0][0] == symbol.decorators
+        if nodelist[1][0] == symbol.funcdef:
+            n = [nodelist[0]] + list(nodelist[1][1:])
+            return self.funcdef(n)
+        elif nodelist[1][0] == symbol.classdef:
+            decorators = self.decorators(nodelist[0][1:])
+            cls = self.classdef(nodelist[1][1:])
+            cls.decorators = decorators
+            return cls
+        raise WalkerError()
 
     def funcdef(self, nodelist):
         #                    -6   -5    -4         -3  -2    -1
@@ -930,7 +941,7 @@ class Transformer:
         for i in range(3, len(nodelist), 3):
             node = nodelist[i]
             if node[0] == symbol.except_clause:
-                # except_clause: 'except' [expr [',' expr]] */
+                # except_clause: 'except' [expr [(',' | 'as') expr]] */
                 if len(node) > 2:
                     expr1 = self.com_node(node[2])
                     if len(node) > 4:
@@ -1211,12 +1222,27 @@ class Transformer:
             return CallFunc(primaryNode, [], lineno=extractLineNo(nodelist))
         args = []
         kw = 0
+        star_node = dstar_node = None
         len_nodelist = len(nodelist)
-        for i in range(1, len_nodelist, 2):
+        i = 1
+        while i < len_nodelist:
             node = nodelist[i]
-            if node[0] == token.STAR or node[0] == token.DOUBLESTAR:
-                break
-            kw, result = self.com_argument(node, kw)
+
+            if node[0]==token.STAR:
+                if star_node is not None:
+                    raise SyntaxError, 'already have the varargs indentifier'
+                star_node = self.com_node(nodelist[i+1])
+                i = i + 3
+                continue
+            elif node[0]==token.DOUBLESTAR:
+                if dstar_node is not None:
+                    raise SyntaxError, 'already have the kwargs indentifier'
+                dstar_node = self.com_node(nodelist[i+1])
+                i = i + 3
+                continue
+
+            # positional or named parameters
+            kw, result = self.com_argument(node, kw, star_node)
 
             if len_nodelist != 2 and isinstance(result, GenExpr) \
                and len(node) == 3 and node[2][0] == symbol.gen_for:
@@ -1225,37 +1251,20 @@ class Transformer:
                 raise SyntaxError, 'generator expression needs parenthesis'
 
             args.append(result)
-        else:
-            # No broken by star arg, so skip the last one we processed.
-            i = i + 1
-        if i < len_nodelist and nodelist[i][0] == token.COMMA:
-            # need to accept an application that looks like "f(a, b,)"
-            i = i + 1
-        star_node = dstar_node = None
-        while i < len_nodelist:
-            tok = nodelist[i]
-            ch = nodelist[i+1]
-            i = i + 3
-            if tok[0]==token.STAR:
-                if star_node is not None:
-                    raise SyntaxError, 'already have the varargs indentifier'
-                star_node = self.com_node(ch)
-            elif tok[0]==token.DOUBLESTAR:
-                if dstar_node is not None:
-                    raise SyntaxError, 'already have the kwargs indentifier'
-                dstar_node = self.com_node(ch)
-            else:
-                raise SyntaxError, 'unknown node type: %s' % tok
+            i = i + 2
+
         return CallFunc(primaryNode, args, star_node, dstar_node,
                         lineno=extractLineNo(nodelist))
 
-    def com_argument(self, nodelist, kw):
+    def com_argument(self, nodelist, kw, star_node):
         if len(nodelist) == 3 and nodelist[2][0] == symbol.gen_for:
             test = self.com_node(nodelist[1])
             return 0, self.com_generator_expression(test, nodelist[2])
         if len(nodelist) == 2:
             if kw:
                 raise SyntaxError, "non-keyword arg after keyword arg"
+            if star_node:
+                raise SyntaxError, "only named arguments may follow *expression"
             return 0, self.com_node(nodelist[1])
         result = self.com_node(nodelist[3])
         n = nodelist[1]

@@ -17,17 +17,23 @@ GET         /{lucky}/doIt                   Application.showIt
 
 GET         www.zenexity.com/hello          Application.helloZen
 GET         {clientName}.myApp.com/home     Application.myHomePage
+GET         assets.{_}/images               Application.imagesAssets
+GET         {client}.{_}/dashboard          Application.dashboard
 
 POST        /ressource/file/{id}            Rest.postOrPutFile
 PUT         /ressource/file/{id}            Rest.postOrPutFile
 POST        /ressource/fileAndParams/{id}   Rest.postOrPutFileAndParams
 PUT         /ressource/fileAndParams/{id}   Rest.postOrPutFileAndParams
 
+GET         /ressource/returnParam          Rest.returnParam
+POST        /ressource/returnParam          Rest.returnParam
 GET         /ressource/{id}                 Rest.get
 POST        /ressource/{id}                 Rest.postOrPut
 PUT         /ressource/{id}                 Rest.postOrPut
 DELETE      /ressource/{id}                 Rest.delete
 OPTIONS     /ressource/{id}                 Rest.options
+
+*			/encoding/echo/{id}				Rest.echo
 
 POST        /needAuthenticity               WithAuthenticity.needAuthenticity
 GET         /needAuthenticity               WithAuthenticity.needAuthenticity
@@ -58,3 +64,6 @@ GET     /databinding/showList/{<.*>mailboxes}/?             DataBinding.showList
 GET     /databinding/showCalendar/{cal}/?               DataBinding.showCalendar
 GET     /databinding/showCalendar2/{cal}/?               DataBinding.showCalendar2
 GET     /databinding/changeLanguage/{lang}/?                DataBinding.changeLanguage
+
+
+GET		/useAwaitViaOtherClass				WithContinuations.ControllerWithoutContinuations.useAwaitViaOtherClass

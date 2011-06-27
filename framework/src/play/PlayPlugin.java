@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.Model;
 import play.mvc.Http.Request;
@@ -35,6 +36,13 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     public void onLoad() {
     }
 
+    public boolean compileSources() {
+        return false;
+    }
+
+    /**
+     * Run a test class
+     */
     public TestResults runTest(Class<BaseTest> clazz) {
         return null;
     }
@@ -67,14 +75,14 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
-     * Retun the plugin status
+     * Return the plugin status
      */
     public String getStatus() {
         return null;
     }
 
     /**
-     * Retun the plugin status in JSON format
+     * Return the plugin status in JSON format
      */
     public JsonObject getJsonStatus() {
         return null;
@@ -107,7 +115,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
-     * Let a chance to this plugin to manage a static ressource
+     * Let a chance to this plugin to manage a static resource
      * @param request The Play request
      * @param response The Play response
      * @return true if this plugin has managed this request
@@ -131,8 +139,16 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
+     * It's time for the plugin to detect changes.
+     * Throw an exception is the application must be reloaded.
+     */
+    public boolean detectClassesChange() {
+        return false;
+    }
+
+    /**
      * Called at application start (and at each reloading)
-     * Time to start statefull things.
+     * Time to start stateful things.
      */
     public void onApplicationStart() {
     }
@@ -145,7 +161,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     /**
      * Called at application stop (and before each reloading)
-     * Time to shutdown statefull things.
+     * Time to shutdown stateful things.
      */
     public void onApplicationStop() {
     }
@@ -211,7 +227,7 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
-     * Called when the application.cond has been read.
+     * Called when the application.conf has been read.
      */
     public void onConfigurationRead() {
     }
@@ -239,9 +255,19 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
     }
 
     /**
+     * Override to provide additional mime types from your plugin. These mimetypes get priority over
+     * the default framework mimetypes but not over the application's configuration.
+     * @return a Map from extensions (without dot) to mimetypes
+     */
+    public Map<String, String> addMimeTypes() {
+        return new HashMap<String, String>();
+    }
+
+    /**
      * Let a chance to the plugin to compile it owns classes.
      * Must be added to the mutable list.
      */
+    @Deprecated
     public void compileAll(List<ApplicationClass> classes) {
     }
 
@@ -271,7 +297,27 @@ public abstract class PlayPlugin implements Comparable<PlayPlugin> {
 
     // ~~~~~
     public int compareTo(PlayPlugin o) {
-        return (index < o.index ? -1 : (index == o.index ? 0 : 1));
+        int res = index < o.index ? -1 : (index == o.index ? 0 : 1);
+        if (res!=0) {
+            return res;
+        }
+
+        // index is equal in both plugins.
+        // sort on classtype to get consistent order
+        res = this.getClass().getName().compareTo(o.getClass().getName());
+        if (res != 0 ) {
+            // classnames where different
+            return res;
+        }
+
+        // identical classnames.
+        // sort on instance to get consistent order.
+        // We only return 0 (equal) if both identityHashCode are identical
+        // which is only the case if both this and other are the same object instance.
+        // This is consistent with equals() when no special equals-method is implemented.
+        int thisHashCode = System.identityHashCode(this);
+        int otherHashCode = System.identityHashCode(o);
+        return (thisHashCode < otherHashCode ? -1 : (thisHashCode == otherHashCode ? 0 : 1));
     }
 
     public String overrideTemplateSource(BaseTemplate template, String source) {

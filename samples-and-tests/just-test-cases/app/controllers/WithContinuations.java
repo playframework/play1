@@ -5,13 +5,33 @@ import play.mvc.*;
 import play.db.jpa.*;
 import play.libs.*;
 import play.libs.F.*;
+import static play.libs.F.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.*;
+import java.util.concurrent.*;
 
 import models.*;
 
+import play.jobs.*;
+
+import play.exceptions.*;
+
 public class WithContinuations extends Controller {
+    
+    @Before
+    static void intercept() {
+        // just to check
+        Logger.info("Before continuation");
+    }
+    
+    protected static void doAwait() {
+        await(100);
+    }
+    
+    protected static void doAwait2() {
+        String s = await(new jobs.DoSomething(100).now());
+    }
 
     public static void loopWithWait() {
         StringBuilder sb = new StringBuilder();
@@ -25,6 +45,17 @@ public class WithContinuations extends Controller {
         renderText(sb);
     }
     
+    public static void waitAndThenRedirect() {
+        String hello = "Hello";
+        String r = await(new jobs.DoSomething(100).now());
+        System.out.println(play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation.isActionCallAllowed());
+        sayHello(hello + " -> " + r);
+    }
+    
+    public static void sayHello(String text) {
+        render(text);
+    }
+    
     public static void waitFuture() {
         StringBuilder sb = new StringBuilder();
         for(int i=0; i<5; i++) {
@@ -35,6 +66,29 @@ public class WithContinuations extends Controller {
             sb.append(i + ":" + delay + "[" + r + "]");
         }
         renderText(sb);
+    }
+    
+    public static void waitWithTimeout() {
+        Promise<String> task1 = new jobs.DoSomething(100).now();
+        Promise<String> task2 = new jobs.DoSomething(2000).now();
+        Either<List<String>,Timeout> r = await(Promise.waitEither(Promise.waitAll(task1, task2), Timeout(300)));
+        
+        for(Timeout t : r._2) {
+            
+            StringBuilder result = new StringBuilder();
+            
+            if(task1.isDone()) {
+                result.append(" + Task1 -> " + task1.getOrNull());
+            }
+            
+            if(task2.isDone()) {
+                result.append(" + Task2 -> " + task2.getOrNull());
+            }
+            
+            renderText("Timeout! Partial result is " + result);
+        }
+        
+        renderText("Fail!");
     }
     
     public static void waitAll() {
@@ -192,6 +246,149 @@ public class WithContinuations extends Controller {
                 renderText("yep -> %s", result);
             }
         });
+    }
+    
+    
+    public static class CompletedFuture<T> implements Future {
+
+        private final T data;
+        
+        public CompletedFuture(T data) {
+            this.data = data;
+        }
+
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
+
+        public boolean isCancelled() {
+            return false;
+        }
+
+        public boolean isDone() {
+            return true;
+        }
+
+        public T get() throws InterruptedException, ExecutionException {
+            return data;
+        }
+
+        public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            return data;
+        }
+    }
+    
+    public static void renderTemplateWithVariablesAssignedBeforeAwait() {
+        int n = 1;
+        String a = "A";
+        Job<String> job = new Job<String>(){
+            public String doJobWithResult() {
+                return "B";
+            }
+        };
+        
+        String b = await(job.now());
+        
+        String c = "C";
+        
+        await(40);
+        
+        String d = "D";
+        
+        await( new CompletedFuture<Boolean>(true));
+        
+        String e = "E";
+        
+        render(n,a,b,c,d,e);
+    }
+    
+    // This class does not use await() directly and therefor is not enhanched for Continuations
+    public static class ControllerWithoutContinuations extends Controller{
+        
+        public static void useAwaitViaOtherClass() {
+            int failCount = 0;
+            try {
+                WithContinuations.doAwait();
+            } catch (ContinuationsException e) {
+                failCount++;
+            }
+            
+            try {
+                WithContinuations.doAwait2();
+            } catch (ContinuationsException e) {
+                failCount++;
+            }
+            
+            renderText("failCount: " + failCount);
+        }
+    }
+    
+    
+    // I don't know how to test WebSocketController directly so since we only are testing that the await stuff
+    // is working, we'll just call it via this regular controller - only testing that the enhancing is working ok.
+    public static void useAwaitInWebSocketControllerWithContinuations() {
+        WebSocketControllerWithContinuations.useAwait();
+        renderText("ok");
+    }
+    
+    // This is a WebSocketController, but since I'm not sre how to test a WebSocket,
+    // I'll just call a protected static method in it doing continuations.
+    // I'm doing this just to make sure that the enhancing is working for WebSocketControllers as well
+    public static class WebSocketControllerWithContinuations extends WebSocketController {
+        
+        protected static void useAwait() {
+            await(100);
+        }
+    }
+    
+    // I don't know how to test WebSocketController directly so since we only are testing that the await stuff
+    // is working, we'll just call it via this regular controller - only testing that the enhancing is working ok.
+    public static void useAwaitInWebSocketControllerWithoutContinuations() {
+        renderText( WebSocketControllerWithoutContinuations.useAwaitViaOtherClass() );
+    }
+
+
+    public static class WebSocketControllerWithoutContinuations extends WebSocketController {
+        
+        protected static String useAwaitViaOtherClass() {
+            int failCount = 0;
+            try {
+                WithContinuations.doAwait();
+            } catch (ContinuationsException e) {
+                failCount++;
+            }
+            
+            return "failCount: " + failCount;
+        }
+    }
+    
+    
+    public static void usingRenderArgsAndAwait() {
+        renderArgs.put("a", "1");
+        int size = Scope.RenderArgs.current().data.size();
+        await(10);
+        renderArgs.put("b", "2");
+        size++;
+        
+        Job<String> job = new Job<String>(){
+            public String doJobWithResult() {
+                return "B";
+            }
+        };
+        
+        String b = await(job.now());
+        
+        renderArgs.put("c", "3");
+        size++;
+        
+        await( new CompletedFuture<Boolean>(true));
+        
+        renderArgs.put("d", "4");
+        size++;
+        
+        boolean res = "1234".equals(""+renderArgs.get("a")+renderArgs.get("b")+renderArgs.get("c")+renderArgs.get("d")) && size == Scope.RenderArgs.current().data.size();
+        
+        renderText( res );
     }
     
 }

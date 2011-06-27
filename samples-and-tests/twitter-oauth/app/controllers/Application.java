@@ -5,7 +5,6 @@ import java.net.URLEncoder;
 import play.Logger;
 import play.libs.OAuth;
 import play.libs.OAuth.ServiceInfo;
-import play.libs.OAuth.TokenPair;
 import play.libs.WS;
 import play.libs.WS.HttpResponse;
 import play.mvc.Controller;
@@ -26,17 +25,13 @@ public class Application extends Controller {
     public static void index() {
         String url = "http://twitter.com/statuses/mentions.xml";
         String mentions = "";
-        try {
-            mentions = WS.url(url).oauth(TWITTER, getUser().getTokenPair()).get().getString();
-        } catch(Exception e) {
-            // User is not authentified
-        }
+        mentions = WS.url(url).oauth(TWITTER, getUser().token, getUser().secret).get().getString();
         render(mentions);
     }
 
     public static void setStatus(String status) throws Exception {
         String url = "http://twitter.com/statuses/update.json?status=" + URLEncoder.encode(status, "utf-8");
-        String response = WS.url(url).oauth(TWITTER, getUser().getTokenPair()).post().getString();
+        String response = WS.url(url).oauth(TWITTER, getUser().token, getUser().secret).post().getString();
         request.current().contentType = "application/json";
         renderText(response);
     }
@@ -44,17 +39,31 @@ public class Application extends Controller {
     // Twitter authentication
 
     public static void authenticate() {
+        User user = getUser();
         if (OAuth.isVerifierResponse()) {
             // We got the verifier; now get the access token, store it and back to index
-            TokenPair tokens = OAuth.service(TWITTER).requestAccessToken(getUser().getTokenPair());
-            getUser().setTokenPair(tokens);
+            OAuth.Response oauthResponse = OAuth.service(TWITTER).retrieveAccessToken(user.token, user.secret);
+            if (oauthResponse.error == null) {
+                user.token = oauthResponse.token;
+                user.secret = oauthResponse.secret;
+                user.save();
+            } else {
+                Logger.error("Error connecting to twitter: " + oauthResponse.error);
+            }
             index();
         }
         OAuth twitt = OAuth.service(TWITTER);
-        TokenPair tokens = twitt.requestUnauthorizedToken();
-        // We received the unauthorized tokens in the OAuth object - store it before we proceed
-        getUser().setTokenPair(tokens);
-        redirect(twitt.redirectUrl(tokens));
+        OAuth.Response oauthResponse = twitt.retrieveRequestToken();
+        if (oauthResponse.error == null) {
+            // We received the unauthorized tokens in the OAuth object - store it before we proceed
+            user.token = oauthResponse.token;
+            user.secret = oauthResponse.secret;
+            user.save();
+            redirect(twitt.redirectUrl(oauthResponse.token));
+        } else {
+            Logger.error("Error connecting to twitter: " + oauthResponse.error);
+            index();
+        }
     }
 
     private static User getUser() {

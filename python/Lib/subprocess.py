@@ -348,8 +348,6 @@ except that:
 * stdin=PIPE and stdout=PIPE must be specified.
 * popen2 closes all filedescriptors by default, but you have to specify
   close_fds=True with subprocess.Popen.
-
-
 """
 
 import sys
@@ -359,6 +357,7 @@ import os
 import types
 import traceback
 import gc
+import signal
 
 # Exception classes used by this module.
 class CalledProcessError(Exception):
@@ -386,6 +385,7 @@ if mswindows:
         from win32process import CreateProcess, STARTUPINFO, \
                                  GetExitCodeProcess, STARTF_USESTDHANDLES, \
                                  STARTF_USESHOWWINDOW, CREATE_NEW_CONSOLE
+        from win32process import TerminateProcess
         from win32event import WaitForSingleObject, INFINITE, WAIT_OBJECT_0
     else:
         from _subprocess import *
@@ -411,17 +411,17 @@ except:
     MAXFD = 256
 
 # True/False does not exist on 2.2.0
-try:
-    False
-except NameError:
-    False = 0
-    True = 1
+#try:
+#    False
+#except NameError:
+#    False = 0
+#    True = 1
 
 _active = []
 
 def _cleanup():
     for inst in _active[:]:
-        if inst.poll(_deadstate=sys.maxint) >= 0:
+        if inst._internal_poll(_deadstate=sys.maxint) >= 0:
             try:
                 _active.remove(inst)
             except ValueError:
@@ -473,8 +473,8 @@ def list2cmdline(seq):
 
     2) A string surrounded by double quotation marks is
        interpreted as a single argument, regardless of white space
-       contained within.  A quoted string can be embedded in an
-       argument.
+       or pipe characters contained within.  A quoted string can be
+       embedded in an argument.
 
     3) A double quotation mark preceded by a backslash is
        interpreted as a literal double quotation mark.
@@ -500,7 +500,7 @@ def list2cmdline(seq):
         if result:
             result.append(' ')
 
-        needquote = (" " in arg) or ("\t" in arg) or arg == ""
+        needquote = (" " in arg) or ("\t" in arg) or ("|" in arg) or not arg
         if needquote:
             result.append('"')
 
@@ -509,7 +509,7 @@ def list2cmdline(seq):
                 # Don't know if we need to double yet.
                 bs_buf.append(c)
             elif c == '"':
-                # Double backspaces.
+                # Double backslashes.
                 result.append('\\' * len(bs_buf)*2)
                 bs_buf = []
                 result.append('\\"')
@@ -520,7 +520,7 @@ def list2cmdline(seq):
                     bs_buf = []
                 result.append(c)
 
-        # Add remaining backspaces, if any.
+        # Add remaining backslashes, if any.
         if bs_buf:
             result.extend(bs_buf)
 
@@ -548,9 +548,10 @@ class Popen(object):
             if preexec_fn is not None:
                 raise ValueError("preexec_fn is not supported on Windows "
                                  "platforms")
-            if close_fds:
+            if close_fds and (stdin is not None or stdout is not None or
+                              stderr is not None):
                 raise ValueError("close_fds is not supported on Windows "
-                                 "platforms")
+                                 "platforms if you redirect stdin/stdout/stderr")
         else:
             # POSIX
             if startupinfo is not None:
@@ -609,14 +610,14 @@ class Popen(object):
                 os.close(errread)
                 errread = None
 
-        if p2cwrite:
+        if p2cwrite is not None:
             self.stdin = os.fdopen(p2cwrite, 'wb', bufsize)
-        if c2pread:
+        if c2pread is not None:
             if universal_newlines:
                 self.stdout = os.fdopen(c2pread, 'rU', bufsize)
             else:
                 self.stdout = os.fdopen(c2pread, 'rb', bufsize)
-        if errread:
+        if errread is not None:
             if universal_newlines:
                 self.stderr = os.fdopen(errread, 'rU', bufsize)
             else:
@@ -634,7 +635,7 @@ class Popen(object):
             # We didn't get to successfully create a child process.
             return
         # In case the child hasn't been waited on, check if it's done.
-        self.poll(_deadstate=sys.maxint)
+        self._internal_poll(_deadstate=sys.maxint)
         if self.returncode is None and _active is not None:
             # Child is still running, keep us alive until we can wait on it.
             _active.append(self)
@@ -660,12 +661,18 @@ class Popen(object):
                 self.stdin.close()
             elif self.stdout:
                 stdout = self.stdout.read()
+                self.stdout.close()
             elif self.stderr:
                 stderr = self.stderr.read()
+                self.stderr.close()
             self.wait()
             return (stdout, stderr)
 
         return self._communicate(input)
+
+
+    def poll(self):
+        return self._internal_poll()
 
 
     if mswindows:
@@ -807,9 +814,7 @@ class Popen(object):
                 hp, ht, pid, tid = CreateProcess(executable, args,
                                          # no special security
                                          None, None,
-                                         # must inherit handles to pass std
-                                         # handles
-                                         1,
+                                         int(not close_fds),
                                          creationflags,
                                          env,
                                          cwd,
@@ -841,7 +846,7 @@ class Popen(object):
                 errwrite.Close()
 
 
-        def poll(self, _deadstate=None):
+        def _internal_poll(self, _deadstate=None):
             """Check if child process has terminated.  Returns returncode
             attribute."""
             if self.returncode is None:
@@ -909,6 +914,21 @@ class Popen(object):
             self.wait()
             return (stdout, stderr)
 
+        def send_signal(self, sig):
+            """Send a signal to the process
+            """
+            if sig == signal.SIGTERM:
+                self.terminate()
+            else:
+                raise ValueError("Only SIGTERM is supported on Windows")
+
+        def terminate(self):
+            """Terminates the process
+            """
+            TerminateProcess(self._handle, 1)
+
+        kill = terminate
+
     else:
         #
         # POSIX methods
@@ -969,13 +989,8 @@ class Popen(object):
 
 
         def _close_fds(self, but):
-            for i in xrange(3, MAXFD):
-                if i == but:
-                    continue
-                try:
-                    os.close(i)
-                except:
-                    pass
+            os.closerange(3, but)
+            os.closerange(but + 1, MAXFD)
 
 
         def _execute_child(self, args, executable, preexec_fn, close_fds,
@@ -1018,29 +1033,29 @@ class Popen(object):
                 # Child
                 try:
                     # Close parent's pipe ends
-                    if p2cwrite:
+                    if p2cwrite is not None:
                         os.close(p2cwrite)
-                    if c2pread:
+                    if c2pread is not None:
                         os.close(c2pread)
-                    if errread:
+                    if errread is not None:
                         os.close(errread)
                     os.close(errpipe_read)
 
                     # Dup fds for child
-                    if p2cread:
+                    if p2cread is not None:
                         os.dup2(p2cread, 0)
-                    if c2pwrite:
+                    if c2pwrite is not None:
                         os.dup2(c2pwrite, 1)
-                    if errwrite:
+                    if errwrite is not None:
                         os.dup2(errwrite, 2)
 
                     # Close pipe fds.  Make sure we don't close the same
                     # fd more than once, or standard fds.
-                    if p2cread and p2cread not in (0,):
+                    if p2cread is not None and p2cread not in (0,):
                         os.close(p2cread)
-                    if c2pwrite and c2pwrite not in (p2cread, 1):
+                    if c2pwrite is not None and c2pwrite not in (p2cread, 1):
                         os.close(c2pwrite)
-                    if errwrite and errwrite not in (p2cread, c2pwrite, 2):
+                    if errwrite is not None and errwrite not in (p2cread, c2pwrite, 2):
                         os.close(errwrite)
 
                     # Close all other fds, if asked for
@@ -1051,7 +1066,7 @@ class Popen(object):
                         os.chdir(cwd)
 
                     if preexec_fn:
-                        apply(preexec_fn)
+                        preexec_fn()
 
                     if env is None:
                         os.execvp(executable, args)
@@ -1075,11 +1090,11 @@ class Popen(object):
             if gc_was_enabled:
                 gc.enable()
             os.close(errpipe_write)
-            if p2cread and p2cwrite:
+            if p2cread is not None and p2cwrite is not None:
                 os.close(p2cread)
-            if c2pwrite and c2pread:
+            if c2pwrite is not None and c2pread is not None:
                 os.close(c2pwrite)
-            if errwrite and errread:
+            if errwrite is not None and errread is not None:
                 os.close(errwrite)
 
             # Wait for exec to fail or succeed; possibly raising exception
@@ -1101,7 +1116,7 @@ class Popen(object):
                 raise RuntimeError("Unknown child exit status!")
 
 
-        def poll(self, _deadstate=None):
+        def _internal_poll(self, _deadstate=None):
             """Check if child process has terminated.  Returns returncode
             attribute."""
             if self.returncode is None:
@@ -1147,13 +1162,19 @@ class Popen(object):
 
             input_offset = 0
             while read_set or write_set:
-                rlist, wlist, xlist = select.select(read_set, write_set, [])
+                try:
+                    rlist, wlist, xlist = select.select(read_set, write_set, [])
+                except select.error, e:
+                    if e.args[0] == errno.EINTR:
+                        continue
+                    raise
 
                 if self.stdin in wlist:
                     # When select has indicated that the file is writable,
                     # we can write up to PIPE_BUF bytes without risk
                     # blocking.  POSIX defines PIPE_BUF >= 512
-                    bytes_written = os.write(self.stdin.fileno(), buffer(input, input_offset, 512))
+                    chunk = input[input_offset : input_offset + 512]
+                    bytes_written = os.write(self.stdin.fileno(), chunk)
                     input_offset += bytes_written
                     if input_offset >= len(input):
                         self.stdin.close()
@@ -1191,6 +1212,21 @@ class Popen(object):
 
             self.wait()
             return (stdout, stderr)
+
+        def send_signal(self, sig):
+            """Send a signal to the process
+            """
+            os.kill(self.pid, sig)
+
+        def terminate(self):
+            """Terminate the process with SIGTERM
+            """
+            self.send_signal(signal.SIGTERM)
+
+        def kill(self):
+            """Kill the process with SIGKILL
+            """
+            self.send_signal(signal.SIGKILL)
 
 
 def _demo_posix():

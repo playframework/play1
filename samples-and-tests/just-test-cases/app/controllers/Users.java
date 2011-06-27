@@ -12,6 +12,16 @@ public class Users extends Controller {
     public static void index() {
         render();
     }
+    
+    public static void redirectToIndex() {
+        // just redirect to index
+        index();
+    }
+    
+    public static void list() {
+        List users = User.findAll();
+        renderText(users.size());
+    }
 
     public static void submit(User u) {
         Logger.info("user date [" + u.birth + "]");

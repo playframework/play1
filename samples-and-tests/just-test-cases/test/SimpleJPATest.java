@@ -59,8 +59,10 @@ public class SimpleJPATest extends UnitTest {
         
         List<User> usersFounded;
         //Elike
-        usersFounded = User.find("byNameElikeAndJ", "%A%", 45).fetch();
+        usersFounded = User.find("byNameElikeAndJ", "%a%", 45).fetch();
         assertEquals(0, usersFounded.size());
+        usersFounded = User.find("byNameElikeAndJ", "%A%", 45).fetch();
+        assertEquals(1, usersFounded.size());
         //Ilike
         usersFounded = User.find("byNameIlikeAndJ", "%A%", 45).fetch();
         assertEquals(1, usersFounded.size());
@@ -147,6 +149,27 @@ public class SimpleJPATest extends UnitTest {
         assertEquals(b, User.find("from User order by b DESC").first());
         assertEquals(b, User.find("from User order by j ASC").first());
         assertEquals(a, User.find("from User order by j DESC").first());
+    }
+    
+    @Test
+    public void verifyCountWithCompositeKey() {
+        
+        List<DataWithCompositeKey> list = DataWithCompositeKey.findAll();
+        for (DataWithCompositeKey d : list) {
+            d.delete();
+        }
+        DataWithCompositeKey d = new DataWithCompositeKey();
+        d.key1 = "1";
+        d.key2 = "1";
+        d.save();
+        
+        d = new DataWithCompositeKey();
+        d.key1 = "1";
+        d.key2 = "2";
+        d.save();
+        
+        assertEquals(2l, DataWithCompositeKey.count());
+        assertEquals(2l, DataWithCompositeKey.count(""));
     }
     
 }

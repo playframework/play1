@@ -1,0 +1,124 @@
+h1. Index
+
+Use this page to navigate quickly to a specific Play framework function.
+
+h2. Implicit template variables
+
+<div class="index">
+# "errors":/@api/play/data/validation/Validation.html#errors%28%29
+# "flash":/@api/play/mvc/Scope.Flash.html
+# "lang":/@api/play/i18n/Lang.html
+# "messages":/@api/play/i18n/Messages.html
+# "out":http://download.oracle.com/javase/1.5.0/docs/api/java/io/PrintWriter.html
+# "params":/@api/play/mvc/Scope.Params.html
+# "play":/@api/play/Play.html
+# "request":/@api/play/mvc/Http.Request.html
+# "session":/@api/play/mvc/Scope.Session.html
+</div>
+
+h2. Built-in tags
+
+<div class="index">
+# "a":tags#a
+# "authenticityToken":tags#authenticityToken
+# "cache":tags#cache
+# "doLayout":tags#dolayout
+# "else":tags#else
+# "elseif":tags#elseif
+# "error":tags#error
+# "errorClass":tags#errorClass
+# "errors":tags#errors
+# "extends":tags#extends
+# "field":tags#field
+# "form":tags#form
+# "get":tags#get
+# "i18n":tags#i18n
+# "if":tags#if
+# "ifError":tags#iferror
+# "ifErrors":tags#iferrors
+# "ifnot":tags#ifnot
+# "include":tags#include
+# "jsAction":tags#jsaction
+# "list":tags#list
+# "option":tags#option
+# "script":tags#script
+# "render":tags#render
+# "select":tags#select
+# "set":tags#set
+# "stylesheet":tags#stylesheet
+# "verbatim":tags#verbatim
+</div>
+
+h2. Built-in Java Extensions
+
+<div class="index">
+# "Collection extensions":javaextensions#collection
+# "join(separator)":javaextensions#join
+# "pluralize()":javaextensions#pluralize
+# "pluralize(plural)":javaextensions#pluralize-plural
+# "pluralize(singular, plural)":javaextensions#pluralize-singular-plural
+# "Date extensions":javaextensions#date
+# "format(format)":javaextensions#format
+# "format(format, lang)":javaextensions#format-language
+# "since()":javaextensions#since
+# "since(condition)":javaextensions#since-condition
+# "Long extensions":javaextensions#long
+# "asdate(format)":javaextensions#asdate
+# "asdate(format, lang)":javaextensions#asdate-language
+# "formatSize()":javaextensions#formatSize
+# "Map extensions":javaextensions#map
+# "asAttr()":javaextensions#asAttr
+# "asAttr(condition)":javaextensions#asAttr-condition
+# "Number extensions":javaextensions#number
+# "divisibleBy(divisor)":javaextensions#number-divisibleBy
+# "format(format)":javaextensions#number-format
+# "formatCurrency(code)":javaextensions#number-formatCurrency
+# "page(pageSize)":javaextensions#number-page
+# "pluralize()":javaextensions#number-pluralize
+# "pluralize(plural)":javaextensions#number-pluralize-plural
+# "pluralize(singular, plural)":javaextensions#number-pluralize-singular-plural
+# "Object extensions":javaextensions#object
+# "addSlashes()":javaextensions#addSlashes
+# "capAll()":javaextensions#capAll
+# "capFirst()":javaextensions#capFirst
+# "cut(substring)":javaextensions#cut
+# "escape()":javaextensions#escape
+# "nl2br()":javaextensions#nl2br
+# "raw()":javaextensions#raw
+# "raw(condition)":javaextensions#raw-condition
+# "yesNo(‘yes’, ‘no’)":javaextensions#yesNo
+# "String extensions":javaextensions#string
+# "asXml()":javaextensions#asXml
+# "camelCase()":javaextensions#camelCase
+# "capitalizeWords()":javaextensions#capitalizeWords
+# "escapeHtml()":javaextensions#escapeHtml
+# "escapeJavaScript()":javaextensions#escapeJavaScript
+# "escapeXml()":javaextensions#escapeXml
+# "last()":javaextensions#last
+# "noAccents()":javaextensions#noAccents
+# "pad(length)":javaextensions#pad
+# "slugify()":javaextensions#slugify
+# "urlEncode()":javaextensions#urlEncode
+# "String array extensions":javaextensions#string-array
+# "add(value)":javaextensions#add
+# "contains(string)":javaextensions#contains
+# "remove(string) ":javaextensions#remove
+</div>
+
+h2. Built-in validation
+
+<div class="index">
+# "email":validation-builtin#email
+# "equals":validation-builtin#equals
+# "future":validation-builtin#future
+# "isTrue":validation-builtin#isTrue
+# "match":validation-builtin#match
+# "max":validation-builtin#max
+# "maxSize":validation-builtin#maxSize
+# "min":validation-builtin#min
+# "minSize":validation-builtin#minSize
+# "past":validation-builtin#past
+# "range":validation-builtin#range
+# "required":validation-builtin#required
+# "url":validation-builtin#url
+</div>

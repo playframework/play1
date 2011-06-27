@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import play.Play;
-import play.PlayPlugin;
 import play.exceptions.TemplateCompilationException;
 import play.templates.GroovyInlineTags.CALL;
 
@@ -21,6 +20,11 @@ import play.templates.GroovyInlineTags.CALL;
 public class GroovyTemplateCompiler extends TemplateCompiler {
 
     public static List<String> extensionsClassnames = new ArrayList<String>();
+
+    // [#714] The groovy-compiler complaints if a line is more than 65535 unicode units long..
+    // Have to split it if it is really that big
+    protected static final int maxPlainTextLength = 60000;
+
 
     @Override
     public BaseTemplate compile(BaseTemplate template) {
@@ -49,11 +53,13 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         Map<String, String> originalNames = new HashMap<String, String>();
         for (Class clazz : Play.classloader.getAllClasses()) {
             if (clazz.getName().endsWith("$")) {
-                names.add(clazz.getName().substring(0, clazz.getName().length() - 1).replace("$", ".") + "$");
-                originalNames.put(clazz.getName().substring(0, clazz.getName().length() - 1).replace("$", ".") + "$", clazz.getName());
+                String name = clazz.getName().substring(0, clazz.getName().length() - 1).replace('$', '.') + '$';
+                names.add(name);
+                originalNames.put(name, clazz.getName());
             } else {
-                names.add(clazz.getName().replace("$", "."));
-                originalNames.put(clazz.getName().replace("$", "."), clazz.getName());
+                String name = clazz.getName().replace('$', '.');
+                names.add(name);
+                originalNames.put(name, clazz.getName());
             }
         }
         Collections.sort(names, new Comparator<String>() {
@@ -62,12 +68,44 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
                 return o2.length() - o1.length();
             }
         });
-        for (String cName : names) { // dynamic class binding
-            source = source.replaceAll("new " + Pattern.quote(cName) + "(\\([^)]*\\))", "_('" + originalNames.get(cName) + "').newInstance$1");
-            source = source.replaceAll("([a-zA-Z0-9.-_$]+)\\s+instanceof\\s+" + Pattern.quote(cName), "_('" + originalNames.get(cName).replace("$", "\\$") + "').isAssignableFrom($1.class)");
-            source = source.replaceAll("([^.])" + Pattern.quote(cName) + ".class", "$1_('" + originalNames.get(cName) + "')");
-            source = source.replaceAll("([^'\".])" + Pattern.quote(cName) + "([.][^'\"])", "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')$2");
+
+        // We're about to do many many String.replaceAll() so we do some checking first
+        // to try to reduce the number of needed replaceAll-calls.
+        // Morten: I have tried to create a single regexp that can be used instead of all the replaceAll,
+        // but I failed to do so.. Such a single regexp would be much faster since
+        // we then we only would have to have one pass.
+
+        if (!names.isEmpty()) {
+
+            if (names.size() <= 1 || source.indexOf("new ")>=0) {
+                for (String cName : names) { // dynamic class binding
+                    source = source.replaceAll("new " + Pattern.quote(cName) + "(\\([^)]*\\))", "_('" + originalNames.get(cName) + "').newInstance$1");
+                }
+            }
+
+            if (names.size() <= 1 || source.indexOf("instanceof")>=0) {
+                for (String cName : names) { // dynamic class binding
+                    source = source.replaceAll("([a-zA-Z0-9.-_$]+)\\s+instanceof\\s+" + Pattern.quote(cName), "_('" + originalNames.get(cName).replace("$", "\\$") + "').isAssignableFrom($1.class)");
+
+                }
+            }
+
+            if (names.size() <= 1 || source.indexOf(".class")>=0) {
+                for (String cName : names) { // dynamic class binding
+                    source = source.replaceAll("([^.])" + Pattern.quote(cName) + ".class", "$1_('" + originalNames.get(cName) + "')");
+
+                }
+            }
+
+            // With the current arg0 in replaceAll, it is not possible to do a quick indexOf-check for this one,
+            // so we have to run all the replaceAll-calls
+            for (String cName : names) { // dynamic class binding
+                source = source.replaceAll("([^'\".])" + Pattern.quote(cName) + "([.][^'\"])", "$1_('" + originalNames.get(cName).replace("$", "\\$") + "')$2");
+
+            }
+
         }
+
 
         return source;
     }
@@ -101,6 +139,14 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         println("}");
     }
 
+
+    /**
+     * Interesting performance observation:
+     * Calling print(); from java (in ExecutableTemplate) called from groovy is MUCH slower than
+     * java returning string to groovy
+     * which then prints with out.print();
+     */
+
     @Override
     void plain() {
         String text = parser.getToken().replace("\\", "\\\\").replaceAll("\"", "\\\\\"").replace("$", "\\$");
@@ -108,33 +154,32 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
             text = text.substring(1);
         }
         skipLineBreak = false;
-        if (text.indexOf("\n") > -1) {
-            String[] lines = text.split("\n", 10000);
-            for (int i = 0; i < lines.length; i++) {
-                String line = lines[i];
-                if (line.length() > 0 && line.charAt(line.length() - 1) == 13) {
-                    line = line.substring(0, line.length() - 1);
-                }
+        text = text.replaceAll("\r\n", "\n").replaceAll("\n", "\\\\n");
+        // we don't have to print line numbers here since this cannot fail - it is only text printing
 
-                if (i == lines.length - 1 && !text.endsWith("\n")) {
-                    print("\tout.print(\"");
-                } else if (i == lines.length - 1 && line.equals("")) {
-                    continue;
-                } else {
-                    print("\tout.println(\"");
-                }
-                print(line);
-                print("\");");
-
-                markLine(parser.getLine() + i);
-                println();
-            }
+        // [#714] The groovy-compiler complaints if a line is more than 65535 unicode units long..
+        // Have to split it if it is really that big
+        if (text.length() <maxPlainTextLength) {
+            // text is "short" - just print it
+            println("out.print(\""+text+"\");");
         } else {
-            print("\tout.print(\"");
-            print(text);
-            print("\");");
-            markLine(parser.getLine());
-            println();
+            // text is long - must split it
+            int offset = 0;
+            do {
+                int endPos = offset+maxPlainTextLength;
+                if (endPos>text.length()) {
+                    endPos = text.length();
+                } else {
+                    // #869 If the last char (at endPos-1) is \, we're dealing with escaped char - must include the next one also..
+                    if ( text.charAt(endPos-1) == '\\') {
+                        // use one more char so the escaping is not broken. Don't have to check length, since
+                        // all '\' is used in escaping, ref replaceAll above..
+                        endPos++;
+                    }
+                }
+                println("out.print(\""+text.substring(offset, endPos)+"\");");
+                offset+= (endPos - offset);
+            }while(offset < text.length());
         }
     }
 
@@ -159,9 +204,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     @Override
     void expr() {
         String expr = parser.getToken().trim();
-        print("\t__val=");
-        print(expr);
-        print(";out.print(__val!=null?__safe(__val, __val.toString()):'')");
+        print(";out.print(__safeFaster("+expr+"))");
         markLine(parser.getLine());
         println();
     }
@@ -169,7 +212,7 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
     @Override
     void message() {
         String expr = parser.getToken().trim();
-        print(";out.print(messages.get(" + expr + "))");
+        print(";out.print(__getMessage("+expr+"))");
         markLine(parser.getLine());
         println();
     }
@@ -179,9 +222,9 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
         String action = parser.getToken().trim();
         if (action.trim().matches("^'.*'$")) {
             if (absolute) {
-                print("\tout.print(play.mvc.Router.reverseWithCheck(" + action + ", play.Play.getVirtualFile(" + action + "), true));");
+                print("\tout.print(__reverseWithCheck_absolute_true("+action+"));");
             } else {
-                print("\tout.print(play.mvc.Router.reverseWithCheck(" + action + ", play.Play.getVirtualFile(" + action + "), false));");
+                print("\tout.print(__reverseWithCheck_absolute_false("+action+"));");
             }
         } else {
             if (!action.endsWith(")")) {
@@ -210,10 +253,14 @@ public class GroovyTemplateCompiler extends TemplateCompiler {
             if (!tagArgs.matches("^[_a-zA-Z0-9]+\\s*:.*$")) {
                 tagArgs = "arg:" + tagArgs;
             }
-            tagArgs = tagArgs.replaceAll("[:]\\s*[@]{2}", ":actionBridge._abs().");
-            tagArgs = tagArgs.replaceAll("(\\s)[@]{2}", "$1actionBridge._abs().");
-            tagArgs = tagArgs.replaceAll("[:]\\s*[@]{1}", ":actionBridge.");
-            tagArgs = tagArgs.replaceAll("(\\s)[@]{1}", "$1actionBridge.");
+            // We only have to try to replace the following if we find at least one
+            // @ in tagArgs..
+            if (tagArgs.indexOf('@')>=0) {
+                tagArgs = tagArgs.replaceAll("[:]\\s*[@]{2}", ":actionBridge._abs().");
+                tagArgs = tagArgs.replaceAll("(\\s)[@]{2}", "$1actionBridge._abs().");
+                tagArgs = tagArgs.replaceAll("[:]\\s*[@]{1}", ":actionBridge.");
+                tagArgs = tagArgs.replaceAll("(\\s)[@]{1}", "$1actionBridge.");
+            }
         } else {
             tagName = tagText;
             tagArgs = ":";

@@ -1,8 +1,13 @@
 package play.libs;
 
-import play.*;
+import play.Logger;
+import play.Play;
+import play.PlayPlugin;
+import play.mvc.Http;
+
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,7 +54,7 @@ public class MimeTypes {
         }
         return defaultMimeType;
     }
-    
+
     /**
      * return the content-type from a file name. If none is found returning application/octet-stream<br/>
      * For a text-based content-type, also return the encoding suffix eg. <em>"text/plain; charset=utf-8"</em>
@@ -57,9 +62,9 @@ public class MimeTypes {
      * @return the content-type deduced from the file extension.
      */
     public static String getContentType(String filename){
-    	return getContentType(filename, "application/octet-stream");
+        return getContentType(filename, "application/octet-stream");
     }
-    
+
     /**
      * return the content-type from a file name.<br/>
      * For a text-based content-type, also return the encoding suffix eg. <em>"text/plain; charset=utf-8"</em>
@@ -68,16 +73,16 @@ public class MimeTypes {
      * @return the content-type deduced from the file extension.
      */
     public static String getContentType(String filename, String defaultContentType){
-    	String contentType = getMimeType(filename, null);
-    	if (contentType == null){
-    		contentType =  defaultContentType;
-    	}
-    	if (contentType != null && contentType.startsWith("text/")){
-    		return contentType + "; charset=utf-8";
-    	}
-    	return contentType;
+        String contentType = getMimeType(filename, null);
+        if (contentType == null){
+            contentType =  defaultContentType;
+        }
+        if (contentType != null && contentType.startsWith("text/")){
+            return contentType + "; charset=" + Http.Response.current().encoding;
+        }
+        return contentType;
     }
-    
+
     /**
      * check the mimetype is referenced in the mimetypes database
      * @param mimeType the mimeType to verify
@@ -92,24 +97,38 @@ public class MimeTypes {
         }
     }
 
+    private static synchronized void initMimetypes() {
+        if (mimetypes != null) return;
+        // Load default mimetypes from the framework
+        try {
+            InputStream is = MimeTypes.class.getClassLoader().getResourceAsStream("play/libs/mime-types.properties");
+            mimetypes = new Properties();
+            mimetypes.load(is);
+        } catch (Exception ex) {
+            Logger.warn(ex.getMessage());
+        }
+        // Load mimetypes from plugins
+        for (PlayPlugin plugin: Play.pluginCollection.getEnabledPlugins()) {
+            Map<String, String> pluginTypes = plugin.addMimeTypes();
+            for (String type: pluginTypes.keySet()) {
+                mimetypes.setProperty(type, pluginTypes.get(type));
+            }
+        }
+        // Load custom mimetypes from the application configuration
+        Enumeration<Object> confenum = Play.configuration.keys();
+        while (confenum.hasMoreElements()) {
+            String key = (String)confenum.nextElement();
+            if (key.startsWith("mimetype.")) {
+                String type = key.substring(key.indexOf('.') + 1).toLowerCase();
+                String value = (String)Play.configuration.get(key);
+                mimetypes.setProperty(type, value);
+            }
+        }
+    }
+
     private static Properties mimetypes() {
         if (mimetypes == null) {
-            try {
-                InputStream is = MimeTypes.class.getClassLoader().getResourceAsStream("play/libs/mime-types.properties");
-                mimetypes = new Properties();
-                mimetypes.load(is);
-            } catch (Exception ex) {
-                Logger.warn(ex.getMessage());
-            }
-            Enumeration<Object> confenum = Play.configuration.keys();
-            while (confenum.hasMoreElements()) {
-                String key = (String)confenum.nextElement();
-                if (key.startsWith("mimetype.")) {
-                    String type = key.substring(key.indexOf('.'));
-                    String value = (String)Play.configuration.get(key);
-                    mimetypes.setProperty(type, value);
-                }
-            }
+            initMimetypes();
         }
         return mimetypes;
     }

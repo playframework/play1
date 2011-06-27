@@ -45,10 +45,3 @@ Selenium.prototype.assertTextLike = function(a, b) {
         Assert.fail(a+' == '+b);
     }
 };
-
-Selenium.prototype.assertPath = function(expectedPath) {
-    var path = window.document.location.path;
-    if(path == expectedPath) {
-        Assert.fail('Expected path '+expectedPath+' but was '+path);
-    }
-};

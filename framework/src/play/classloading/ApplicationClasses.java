@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import play.Logger;
 import play.Play;
-import play.PlayPlugin;
 import play.exceptions.UnexpectedException;
 import play.vfs.VirtualFile;
 
@@ -90,7 +89,7 @@ public class ApplicationClasses {
             } catch (ClassNotFoundException ex) {
                 throw new UnexpectedException(ex);
             }
-            if (applicationClass.javaClass.isAnnotationPresent(clazz)) {
+            if (applicationClass.javaClass != null && applicationClass.javaClass.isAnnotationPresent(clazz)) {
                 results.add(applicationClass);
             }
         }
@@ -248,7 +247,11 @@ public class ApplicationClasses {
         public byte[] compile() {
             long start = System.currentTimeMillis();
             Play.classes.compiler.compile(new String[]{this.name});
-            Logger.trace("%sms to compile class %s", System.currentTimeMillis() - start, name);
+
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("%sms to compile class %s", System.currentTimeMillis() - start, name);
+            }
+
             return this.javaByteCode;
         }
 

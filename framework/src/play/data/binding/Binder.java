@@ -15,7 +15,6 @@ import org.joda.time.DateTime;
 
 import play.Logger;
 import play.Play;
-import play.PlayPlugin;
 import play.data.Upload;
 import play.data.binding.types.*;
 import play.data.validation.Validation;
@@ -49,29 +48,30 @@ public class Binder {
         supportedTypes.put(clazz, typeBinder);
     }
 
-    static Map<Class<?>, BeanWrapper> beanwrappers = new HashMap<Class<?>, BeanWrapper>();
 
     static BeanWrapper getBeanWrapper(Class<?> clazz) {
-        if (!beanwrappers.containsKey(clazz)) {
-            BeanWrapper beanwrapper = new BeanWrapper(clazz);
-            beanwrappers.put(clazz, beanwrapper);
-        }
-        return beanwrappers.get(clazz);
+        return BeanWrapper.forClass(clazz);
     }
+
     public final static Object MISSING = new Object();
     public final static Object NO_BINDING = new Object();
 
     @SuppressWarnings("unchecked")
     static Object bindInternal(String name, Class clazz, Type type, Annotation[] annotations, Map<String, String[]> params, String suffix, String[] profiles) {
         try {
-            Logger.trace("bindInternal: name [" + name + "] suffix [" + suffix + "]");
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("bindInternal: name [" + name + "] suffix [" + suffix + "]");
+            }
 
             String[] value = params.get(name + suffix);
-            Logger.trace("bindInternal: value [" + value + "]");
-            Logger.trace("bindInternal: profile [" + Utils.join(profiles, ",") + "]");
+
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("bindInternal: value [" + value + "]");
+                Logger.trace("bindInternal: profile [" + Utils.join(profiles, ",") + "]");
+            }
+
             // Let see if we have a BindAs annotation and a separator. If so, we need to split the values
             // Look up for the BindAs annotation. Extract the profile if there is any.
-            // TODO: Move me somewhere else?
             if (annotations != null) {
                 for (Annotation annotation : annotations) {
                     if ((clazz.isArray() || Collection.class.isAssignableFrom(clazz)) && value != null && value.length > 0 && annotation.annotationType().equals(As.class)) {
@@ -82,7 +82,9 @@ public class Binder {
                     if (annotation.annotationType().equals(NoBinding.class)) {
                         NoBinding bind = ((NoBinding) annotation);
                         String[] localUnbindProfiles = bind.value();
-                        Logger.trace("bindInternal: localUnbindProfiles [" + Utils.join(localUnbindProfiles, ",") + "]");
+                        if (Logger.isTraceEnabled()) {
+                            Logger.trace("bindInternal: localUnbindProfiles [" + Utils.join(localUnbindProfiles, ",") + "]");
+                        }
 
                         if (localUnbindProfiles != null && contains(profiles, localUnbindProfiles)) {
                             return NO_BINDING;
@@ -246,7 +248,10 @@ public class Binder {
             }
 
             // Assume a Bean if isComposite
-            Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] isComposite [" + isComposite(name + suffix, params) + "]");
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("bindInternal: class [" + clazz + "] name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] isComposite [" + isComposite(name + suffix, params) + "]");
+            }
+
             if (isComposite(name + suffix, params)) {
                 BeanWrapper beanWrapper = getBeanWrapper(clazz);
                 return beanWrapper.bind(name, type, params, suffix, annotations);
@@ -265,10 +270,7 @@ public class Binder {
     }
 
     private static String escape(String s) {
-        s = s.replace(".", "\\.");
-        s = s.replace("[", "\\[");
-        s = s.replace("]", "\\]");
-        return s;
+        return s.replace(".", "\\.").replace("[", "\\[").replace("]", "\\]");
     }
 
     public static boolean contains(String[] profiles, String[] localProfiles) {
@@ -294,9 +296,9 @@ public class Binder {
         if (result != null) {
             return result;
         }
-        
+
         try {
-            return new BeanWrapper(o.getClass()).bind(name, null, params, "", o, null);
+            return BeanWrapper.forClass(o.getClass()).bind(name, null, params, "", o, null);
         } catch (Exception e) {
             Validation.addError(name, "validation.invalid");
             return null;
@@ -308,7 +310,9 @@ public class Binder {
     }
 
     public static Object bind(String name, Class<?> clazz, Type type, Annotation[] annotations, Map<String, String[]> params, Object o, Method method, int parameterIndex) {
-        Logger.trace("bind: name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] ");
+        if (Logger.isTraceEnabled()) {
+            Logger.trace("bind: name [" + name + "] annotation [" + Utils.join(annotations, " ") + "] ");
+        }
 
         // Let a chance to plugins to bind this object
         Object result = Play.pluginCollection.bind(name, clazz, type, annotations, params);
@@ -387,7 +391,9 @@ public class Binder {
 
     @SuppressWarnings("unchecked")
     public static Object directBind(String name, Annotation[] annotations, String value, Class<?> clazz, Type type) throws Exception {
-        Logger.trace("directBind: value [" + value + "] annotation [" + Utils.join(annotations, " ") + "] Class [" + clazz + "]");
+        if (Logger.isTraceEnabled()) {
+            Logger.trace("directBind: value [" + value + "] annotation [" + Utils.join(annotations, " ") + "] Class [" + clazz + "]");
+        }
 
         boolean nullOrEmpty = value == null || value.trim().length() == 0;
 
@@ -404,22 +410,27 @@ public class Binder {
             }
         }
 
-        // custom types
-        for (Class<?> c : supportedTypes.keySet()) {
-            Logger.trace("directBind: value [" + value + "] c [" + c + "] Class [" + clazz + "]");
-            if (c.isAssignableFrom(clazz)) {
-                Logger.trace("directBind: isAssignableFrom is true");
-                return supportedTypes.get(c).bind(name, annotations, value, clazz, type);
-            }
-        }
-
-        // application custom types
+        // application custom types have higher priority
         for (Class<TypeBinder<?>> c : Play.classloader.getAssignableClasses(TypeBinder.class)) {
             if (c.isAnnotationPresent(Global.class)) {
                 Class<?> forType = (Class) ((ParameterizedType) c.getGenericInterfaces()[0]).getActualTypeArguments()[0];
                 if (forType.isAssignableFrom(clazz)) {
                     return c.newInstance().bind(name, annotations, value, clazz, type);
                 }
+            }
+        }
+
+         // custom types
+        for (Class<?> c : supportedTypes.keySet()) {
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("directBind: value [" + value + "] c [" + c + "] Class [" + clazz + "]");
+            }
+
+            if (c.isAssignableFrom(clazz)) {
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("directBind: isAssignableFrom is true");
+                }
+                return supportedTypes.get(c).bind(name, annotations, value, clazz, type);
             }
         }
 
@@ -430,10 +441,7 @@ public class Binder {
 
         // Enums
         if (Enum.class.isAssignableFrom(clazz)) {
-            if (nullOrEmpty) {
-                return null;
-            }
-            return Enum.valueOf((Class<Enum>)clazz, value);
+            return nullOrEmpty ? null : Enum.valueOf((Class<Enum>)clazz, value);
         }
 
         // int or Integer binding
@@ -492,11 +500,7 @@ public class Binder {
 
         // BigDecimal binding
         if (clazz.equals(BigDecimal.class)) {
-            if (nullOrEmpty) {
-                return null;
-            }
-
-            return new BigDecimal(value);
+            return nullOrEmpty ? null : new BigDecimal(value);
         }
 
         // boolean or Boolean binding

@@ -12,7 +12,7 @@ playAppSearch="on"
 playapp="app conf public"  
 
 # play options
-opts="auto-test build-module classpath clean eclipsify help id idealize install javadoc list-modules modules netbeansify new new-module out pid precompile run restart secret status start stop test war";
+opts="auto-test build-module check classpath clean dependencies eclipsify evolutions evolutions:apply evolutions:markApplied evolutions:resolve help id idealize install javadoc list-modules modules netbeansify new new-module out pid precompile run restart secret status start stop test war";
 
 #############
 

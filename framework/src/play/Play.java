@@ -17,6 +17,7 @@ import play.classloading.ApplicationClassloader;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
 import play.libs.IO;
+import play.mvc.Http;
 import play.mvc.Router;
 import play.plugins.PluginCollection;
 import play.templates.TemplateLoader;
@@ -51,10 +52,14 @@ public class Play {
         }
     }
     /**
+     * Is the application initialized
+     */
+    public static boolean initialized = false;
+
+    /**
      * Is the application started
      */
     public static boolean started = false;
-
     /**
      * True when the one and only shutdown hook is enabled
      */
@@ -131,8 +136,6 @@ public class Play {
      * The very secret key
      */
     public static String secretKey;
-
-
     /**
      * pluginCollection that holds all loaded plugins and all enabled plugins..
      */
@@ -141,7 +144,7 @@ public class Play {
      * Readonly list containing currently enabled plugins.
      * This list is updated from pluginCollection when pluginCollection is modified
      * Play plugins
-     * Use pluginCollection instead.
+     * @deprecated Use pluginCollection instead.
      */
     @Deprecated
     public static List<PlayPlugin> plugins = pluginCollection.getEnabledPlugins();
@@ -164,6 +167,16 @@ public class Play {
      * Lazy load the templates on demand
      */
     public static boolean lazyLoadTemplates = false;
+    /**
+     * This is used as default encoding everywhere related to the web: request, response, WS
+     */
+    public static String defaultWebEncoding = "utf-8";
+
+    /**
+     * This flag indicates if the app is running in a standalone Play server or
+     * as a WAR in an applicationServer
+     */
+    public static boolean standalonePlayServer = true;
 
     /**
      * Init the framework
@@ -180,27 +193,7 @@ public class Play {
         // load all play.static of exists
         initStaticStuff();
 
-        // Guess the framework path
-        try {
-            URL versionUrl = Play.class.getResource("/play/version");
-            // Read the content of the file
-            Play.version = new LineNumberReader(new InputStreamReader(versionUrl.openStream())).readLine();
-
-            // This is used only by the embedded server (Mina, Netty, Jetty etc)
-            URI uri = new URI(versionUrl.toString().replace(" ", "%20"));
-            if (frameworkPath == null || !frameworkPath.exists()) {
-                if (uri.getScheme().equals("jar")) {
-                    String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
-                    frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
-                } else if (uri.getScheme().equals("file")) {
-                    frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
-                } else {
-                    throw new UnexpectedException("Cannot find the Play! framework - trying with uri: " + uri + " scheme " + uri.getScheme());
-                }
-            }
-        } catch (Exception e) {
-            throw new UnexpectedException("Where is the framework ?", e);
-        }
+        guessFrameworkPath();
 
         // Read the configuration file
         readConfiguration();
@@ -212,9 +205,10 @@ public class Play {
         String logLevel = configuration.getProperty("application.log", "INFO");
 
         //only override log-level if Logger was not configured manually
-        if( !Logger.configuredManually) {
+        if (!Logger.configuredManually) {
             Logger.setUp(logLevel);
         }
+        Logger.recordCaller = Boolean.parseBoolean(configuration.getProperty("application.log.recordCaller", "false"));
 
         Logger.info("Starting %s", root.getAbsolutePath());
 
@@ -226,7 +220,11 @@ public class Play {
             if (!tmpDir.isAbsolute()) {
                 tmpDir = new File(applicationPath, tmpDir.getPath());
             }
-            Logger.trace("Using %s as tmp dir", Play.tmpDir);
+
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("Using %s as tmp dir", Play.tmpDir);
+            }
+
             if (!tmpDir.exists()) {
                 try {
                     if (readOnlyTmp) {
@@ -245,6 +243,9 @@ public class Play {
         if (usePrecompiled || forceProd) {
             mode = Mode.PROD;
         }
+
+        // Context path
+        ctxPath = configuration.getProperty("http.path", ctxPath);
 
         // Build basic java source path
         VirtualFile appRoot = VirtualFile.open(applicationPath);
@@ -281,6 +282,12 @@ public class Play {
             Play.ctxPath = "";
         }
 
+        // Default cookie domain
+        Http.Cookie.defaultDomain = configuration.getProperty("application.defaultCookieDomain", null);
+        if (Http.Cookie.defaultDomain != null) {
+            Logger.info("Using default cookie domain: " + Http.Cookie.defaultDomain);
+        }
+
         // Plugins
         pluginCollection.loadPlugins();
 
@@ -298,45 +305,86 @@ public class Play {
 
         // Plugins
         pluginCollection.onApplicationReady();
+
+        Play.initialized = true;
+    }
+
+    public static void guessFrameworkPath() {
+        // Guess the framework path
+        try {
+            URL versionUrl = Play.class.getResource("/play/version");
+            // Read the content of the file
+            Play.version = new LineNumberReader(new InputStreamReader(versionUrl.openStream())).readLine();
+
+            // This is used only by the embedded server (Mina, Netty, Jetty etc)
+            URI uri = new URI(versionUrl.toString().replace(" ", "%20"));
+            if (frameworkPath == null || !frameworkPath.exists()) {
+                if (uri.getScheme().equals("jar")) {
+                    String jarPath = uri.getSchemeSpecificPart().substring(5, uri.getSchemeSpecificPart().lastIndexOf("!"));
+                    frameworkPath = new File(jarPath).getParentFile().getParentFile().getAbsoluteFile();
+                } else if (uri.getScheme().equals("file")) {
+                    frameworkPath = new File(uri).getParentFile().getParentFile().getParentFile().getParentFile();
+                } else {
+                    throw new UnexpectedException("Cannot find the Play! framework - trying with uri: " + uri + " scheme " + uri.getScheme());
+                }
+            }
+        } catch (Exception e) {
+            throw new UnexpectedException("Where is the framework ?", e);
+        }
     }
 
     /**
      * Read application.conf and resolve overriden key using the play id mechanism.
      */
-    static void readConfiguration() {
+    public static void readConfiguration() {
+        configuration = readOneConfigurationFile("application.conf", new HashSet<String>());
+        // Plugins
+        pluginCollection.onConfigurationRead();
+    }
+
+
+    private static Properties readOneConfigurationFile(String filename, Set<String> seenFileNames) {
+
+        if (seenFileNames.contains(filename)) {
+            throw new RuntimeException("Detected recursive @include usage. Have seen the file " + filename + " before");
+        }
+        seenFileNames.add(filename);
+
+        Properties propsFromFile=null;
+
         VirtualFile appRoot = VirtualFile.open(applicationPath);
-        conf = appRoot.child("conf/application.conf");
+        conf = appRoot.child("conf/" + filename);
         try {
-            configuration = IO.readUtf8Properties(conf.inputstream());
+            propsFromFile = IO.readUtf8Properties(conf.inputstream());
         } catch (RuntimeException e) {
             if (e.getCause() instanceof IOException) {
-                Logger.fatal("Cannot read application.conf");
-                System.exit(-1);
+                Logger.fatal("Cannot read "+filename);
+                fatalServerErrorOccurred();
             }
         }
         // Ok, check for instance specifics configuration
         Properties newConfiguration = new OrderSafeProperties();
         Pattern pattern = Pattern.compile("^%([a-zA-Z0-9_\\-]+)\\.(.*)$");
-        for (Object key : configuration.keySet()) {
+        for (Object key : propsFromFile.keySet()) {
             Matcher matcher = pattern.matcher(key + "");
             if (!matcher.matches()) {
-                newConfiguration.put(key, configuration.get(key).toString().trim());
+                newConfiguration.put(key, propsFromFile.get(key).toString().trim());
             }
         }
-        for (Object key : configuration.keySet()) {
+        for (Object key : propsFromFile.keySet()) {
             Matcher matcher = pattern.matcher(key + "");
             if (matcher.matches()) {
                 String instance = matcher.group(1);
                 if (instance.equals(id)) {
-                    newConfiguration.put(matcher.group(2), configuration.get(key).toString().trim());
+                    newConfiguration.put(matcher.group(2), propsFromFile.get(key).toString().trim());
                 }
             }
         }
-        configuration = newConfiguration;
+        propsFromFile = newConfiguration;
         // Resolve ${..}
         pattern = Pattern.compile("\\$\\{([^}]+)}");
-        for (Object key : configuration.keySet()) {
-            String value = configuration.getProperty(key.toString());
+        for (Object key : propsFromFile.keySet()) {
+            String value = propsFromFile.getProperty(key.toString());
             Matcher matcher = pattern.matcher(value);
             StringBuffer newValue = new StringBuffer(100);
             while (matcher.find()) {
@@ -356,23 +404,23 @@ public class Play {
                 matcher.appendReplacement(newValue, r.replaceAll("\\\\", "\\\\\\\\"));
             }
             matcher.appendTail(newValue);
-            configuration.setProperty(key.toString(), newValue.toString());
+            propsFromFile.setProperty(key.toString(), newValue.toString());
         }
         // Include
         Map<Object, Object> toInclude = new HashMap<Object, Object>(16);
-        for (Object key : configuration.keySet()) {
+        for (Object key : propsFromFile.keySet()) {
             if (key.toString().startsWith("@include.")) {
                 try {
-                    toInclude.putAll(IO.readUtf8Properties(appRoot.child("conf/" + configuration.getProperty(key.toString())).inputstream()));
+                    String filenameToInclude = propsFromFile.getProperty(key.toString());
+                    toInclude.putAll( readOneConfigurationFile(filenameToInclude, seenFileNames) );
                 } catch (Exception ex) {
                     Logger.warn("Missing include: %s", key);
                 }
             }
         }
-        configuration.putAll(toInclude);
-        // Plugins
-        pluginCollection.onConfigurationRead();
+        propsFromFile.putAll(toInclude);
 
+        return propsFromFile;
     }
 
     /**
@@ -386,16 +434,18 @@ public class Play {
                 stop();
             }
 
-            if(!shutdownHookEnabled){
-                //registeres shutdown hook - New there's a good chance that we can notify
-                //our plugins that we're going down when some calls ctrl+c or just kills our process..
-                shutdownHookEnabled = true;
-
-                Runtime.getRuntime().addShutdownHook( new Thread() {
-                    public void run(){
-                        Play.stop();
-                    }
-                 });
+            if( standalonePlayServer) {
+                // Can only register shutdown-hook if running as standalone server
+                if (!shutdownHookEnabled) {
+                    //registers shutdown hook - Now there's a good chance that we can notify
+                    //our plugins that we're going down when some calls ctrl+c or just kills our process..
+                    shutdownHookEnabled = true;
+                    Runtime.getRuntime().addShutdownHook(new Thread() {
+                        public void run() {
+                            Play.stop();
+                        }
+                    });
+                }
             }
 
             if (mode == Mode.DEV) {
@@ -412,9 +462,10 @@ public class Play {
             // Configure logs
             String logLevel = configuration.getProperty("application.log", "INFO");
             //only override log-level if Logger was not configured manually
-            if( !Logger.configuredManually) {
+            if (!Logger.configuredManually) {
                 Logger.setUp(logLevel);
             }
+            Logger.recordCaller = Boolean.parseBoolean(configuration.getProperty("application.log.recordCaller", "false"));
 
             // Locales
             langs = new ArrayList<String>(Arrays.asList(configuration.getProperty("application.langs", "").split(",")));
@@ -430,6 +481,20 @@ public class Play {
             if (secretKey.length() == 0) {
                 Logger.warn("No secret key defined. Sessions will not be encrypted");
             }
+
+            // Default web encoding
+            String _defaultWebEncoding = configuration.getProperty("application.web_encoding");
+            if (_defaultWebEncoding != null) {
+                Logger.info("Using custom default web encoding: " + _defaultWebEncoding);
+                defaultWebEncoding = _defaultWebEncoding;
+                // Must update current response also, since the request/response triggering
+                // this configuration-loading in dev-mode have already been
+                // set up with the previous encoding
+                if (Http.Response.current() != null) {
+                    Http.Response.current().encoding = _defaultWebEncoding;
+                }
+            }
+
 
             // Try to load all classes
             Play.classloader.getAllClasses();
@@ -467,9 +532,11 @@ public class Play {
 
         } catch (PlayException e) {
             started = false;
+            try { Cache.stop(); } catch(Exception ignored) {}
             throw e;
         } catch (Exception e) {
             started = false;
+            try { Cache.stop(); } catch(Exception ignored) {}
             throw new UnexpectedException(e);
         }
     }
@@ -500,31 +567,31 @@ public class Play {
                 return true;
             }
             Logger.error("Precompiled classes are missing!!");
-            try {
-                System.exit(-1);
-            } catch (Exception ex) {
-                // Will not work in some application servers
-            }
+            fatalServerErrorOccurred();
             return false;
         }
         try {
             Logger.info("Precompiling ...");
+            Thread.currentThread().setContextClassLoader(Play.classloader);
             long start = System.currentTimeMillis();
             classloader.getAllClasses();
-            Logger.trace("%sms to precompile the Java stuff", System.currentTimeMillis() - start);
+
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("%sms to precompile the Java stuff", System.currentTimeMillis() - start);
+            }
+
             if (!lazyLoadTemplates) {
                 start = System.currentTimeMillis();
                 TemplateLoader.getAllTemplate();
-                Logger.trace("%sms to precompile the templates", System.currentTimeMillis() - start);
+
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("%sms to precompile the templates", System.currentTimeMillis() - start);
+                }
             }
             return true;
         } catch (Throwable e) {
             Logger.error(e, "Cannot start in PROD mode with errors");
-            try {
-                System.exit(-1);
-            } catch (Exception ex) {
-                // Will not work in some application servers
-            }
+            fatalServerErrorOccurred();
             return false;
         }
     }
@@ -538,7 +605,9 @@ public class Play {
         }
         try {
             pluginCollection.beforeDetectingChanges();
-            classloader.detectChanges();
+            if(!pluginCollection.detectClassesChange()) {
+                classloader.detectChanges();
+            }
             Router.detectChanges(ctxPath);
             if (conf.lastModified() > startedAt) {
                 start();
@@ -558,7 +627,7 @@ public class Play {
 
     @SuppressWarnings("unchecked")
     public static <T> T plugin(Class<T> clazz) {
-        return (T)pluginCollection.getPluginInstance((Class<? extends PlayPlugin>)clazz);
+        return (T) pluginCollection.getPluginInstance((Class<? extends PlayPlugin>) clazz);
     }
 
 
@@ -604,7 +673,11 @@ public class Play {
                     if (!modulePath.exists() || !modulePath.isDirectory()) {
                         Logger.error("Module %s will not be loaded because %s does not exist", modulePath.getName(), modulePath.getAbsolutePath());
                     } else {
-                        addModule(modulePath.getName(), modulePath);
+                        final String modulePathName = modulePath.getName();
+                        final String moduleName = modulePathName.contains("-") ?
+                                modulePathName.substring(0, modulePathName.lastIndexOf("-")) :
+                                modulePathName;
+                        addModule(moduleName, modulePath);
                     }
                 }
             }
@@ -648,7 +721,7 @@ public class Play {
             }
         }
         // Auto add special modules
-        if (Play.runingInTestMode()) {
+        if (Play.runningInTestMode()) {
             addModule("_testrunner", new File(Play.frameworkPath, "modules/testrunner"));
         }
         if (Play.mode == Mode.DEV) {
@@ -700,14 +773,31 @@ public class Play {
     }
 
     /**
-     * Returns true if application is runing in test-mode.
+     * Returns true if application is running in test-mode.
      * Test-mode is resolved from the framework id.
      *
      * Your app is running in test-mode if the framwork id (Play.id)
      * is 'test' or 'test-?.*'
      * @return true if testmode
      */
-    public static boolean runingInTestMode(){
+    public static boolean runningInTestMode() {
         return id.matches("test|test-?.*");
     }
+
+    /**
+     * Call this method when there has been a fatal error that Play cannot recover from
+     */
+    public static void fatalServerErrorOccurred() {
+        if (standalonePlayServer) {
+            // Just quit the process
+            System.exit(-1);
+        } else {
+            // Cannot quit the process while running inside an applicationServer
+            String msg = "A fatal server error occurred";
+            Logger.error(msg);
+            throw new Error(msg);
+        }
+    }
+
+
 }

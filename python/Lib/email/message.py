@@ -19,18 +19,22 @@ from email import errors
 
 SEMISPACE = '; '
 
-# Regular expression used to split header parameters.  BAW: this may be too
-# simple.  It isn't strictly RFC 2045 (section 5.1) compliant, but it catches
-# most headers found in the wild.  We may eventually need a full fledged
-# parser eventually.
-paramre = re.compile(r'\s*;\s*')
 # Regular expression that matches `special' characters in parameters, the
 # existance of which force quoting of the parameter value.
 tspecials = re.compile(r'[ \(\)<>@,;:\\"/\[\]\?=]')
 
 
-
 # Helper functions
+def _splitparam(param):
+    # Split header parameters.  BAW: this may be too simple.  It isn't
+    # strictly RFC 2045 (section 5.1) compliant, but it catches most headers
+    # found in the wild.  We may eventually need a full fledged parser
+    # eventually.
+    a, sep, b = param.partition(';')
+    if not sep:
+        return a.strip(), None
+    return a.strip(), b.strip()
+
 def _formatparam(param, value=None, quote=True):
     """Convenience function to format and return a key=value pair.
 
@@ -252,7 +256,7 @@ class Message:
                             charset=charset.get_output_charset())
         else:
             self.set_param('charset', charset.get_output_charset())
-        if str(charset) <> charset.get_output_charset():
+        if str(charset) != charset.get_output_charset():
             self._payload = charset.body_encode(self._payload)
         if not self.has_key('Content-Transfer-Encoding'):
             cte = charset.get_body_encoding()
@@ -301,7 +305,7 @@ class Message:
         name = name.lower()
         newheaders = []
         for k, v in self._headers:
-            if k.lower() <> name:
+            if k.lower() != name:
                 newheaders.append((k, v))
         self._headers = newheaders
 
@@ -436,9 +440,9 @@ class Message:
         if value is missing:
             # This should have no parameters
             return self.get_default_type()
-        ctype = paramre.split(value)[0].lower().strip()
+        ctype = _splitparam(value)[0].lower()
         # RFC 2045, section 5.2 says if its invalid, use text/plain
-        if ctype.count('/') <> 1:
+        if ctype.count('/') != 1:
             return 'text/plain'
         return ctype
 
@@ -601,7 +605,7 @@ class Message:
                     ctype = append_param
                 else:
                     ctype = SEMISPACE.join([ctype, append_param])
-        if ctype <> self.get(header):
+        if ctype != self.get(header):
             del self[header]
             self[header] = ctype
 
@@ -617,13 +621,13 @@ class Message:
             return
         new_ctype = ''
         for p, v in self.get_params(header=header, unquote=requote):
-            if p.lower() <> param.lower():
+            if p.lower() != param.lower():
                 if not new_ctype:
                     new_ctype = _formatparam(p, v, requote)
                 else:
                     new_ctype = SEMISPACE.join([new_ctype,
                                                 _formatparam(p, v, requote)])
-        if new_ctype <> self.get(header):
+        if new_ctype != self.get(header):
             del self[header]
             self[header] = new_ctype
 

@@ -268,16 +268,23 @@ public abstract class FunctionalTest extends BaseTest {
             @Override
             public InvocationContext getInvocationContext() {
                 ActionInvoker.resolve(request, response);
-                return new InvocationContext(request.invokedMethod.getAnnotations(), request.invokedMethod.getDeclaringClass().getAnnotations());
+                return new InvocationContext(Http.invocationType,
+                        request.invokedMethod.getAnnotations(),
+                        request.invokedMethod.getDeclaringClass().getAnnotations());
             }
 
         });
         try {
             invocationResult.get(30, TimeUnit.SECONDS);
             if (savedCookies == null) {
-                savedCookies = response.cookies;
-            } else {
-                savedCookies.putAll(response.cookies);
+                savedCookies = new HashMap<String, Http.Cookie>();
+            }
+            for(Map.Entry<String,Http.Cookie> e : response.cookies.entrySet()) {
+                // If Max-Age is unset, browsers discard on exit; if
+                // 0, they discard immediately.
+                if(e.getValue().maxAge == null || e.getValue().maxAge > 0) {
+                    savedCookies.put(e.getKey(), e.getValue());
+                }
             }
             response.out.flush();
         } catch (Exception ex) {
@@ -288,6 +295,18 @@ public abstract class FunctionalTest extends BaseTest {
     public static Response makeRequest(final Request request) {
         Response response = newResponse();
         makeRequest(request, response);
+
+        if (response.status == 302) { // redirect
+            // if Location-header is pressent, fix it to "look like" a functional-test-url
+            Http.Header locationHeader = response.headers.get("Location");
+            if (locationHeader != null) {
+                String locationUrl = locationHeader.value();
+                if (locationUrl.startsWith("http://localhost/")) {
+                    locationHeader.values.clear();
+                    locationHeader.values.add( locationUrl.substring(16));//skip 'http://localhost'
+                }
+            }
+        }
         return response;
     }
 
@@ -298,12 +317,22 @@ public abstract class FunctionalTest extends BaseTest {
     }
 
     public static Request newRequest() {
-        Request request = new Request();
-        request.domain = "localhost";
-        request.port = 80;
-        request.method = "GET";
-        request.path = "/";
-        request.querystring = "";
+        Request request = Request.createRequest(
+                null,
+                "GET",
+                "/",
+                "",
+                null,
+                null,
+                null,
+                null,
+                false,
+                80,
+                "localhost",
+                false,
+                null,
+                null
+        );
         return request;
     }
 
@@ -394,7 +423,7 @@ public abstract class FunctionalTest extends BaseTest {
     public static String getContent(Response response) {
         byte[] data = response.out.toByteArray();
         try {
-            return new String(data, "utf-8");
+            return new String(data, response.encoding);
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }

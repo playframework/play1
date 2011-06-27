@@ -4,7 +4,7 @@ The router is the component in charge of translating incoming HTTP Requests into
 
 An HTTP request is seen as an event by the MVC framework. The event contains two major pieces of information:
 
-* The Request path (such as /clients/1542, /photos/list), including the query string.
+* The Request path (such as @/clients/1542@, @/photos/list@), including the query string.
 * The HTTP method (GET, POST, PUT, DELETE)
 
 h2. <a name="rest">About REST</a>
@@ -32,7 +32,7 @@ If an application follows the main REST design principles, the application is RE
 
 h2. <a name="syntax">The routes file syntax</a>
 
-The **conf/routes** file is the configuration file used by the Router. This file lists all the routes needed by the application. Each route consists of an HTTP method + URI pattern associated with a Java call.
+The @conf/routes@ file is the configuration file used by the Router. This file lists all the routes needed by the application. Each route consists of an HTTP method + URI pattern associated with a Java call.
 
 Let’s see what a route definition looks like:
 
@@ -40,7 +40,7 @@ bc. GET    /clients/{id}             Clients.show
 
 Each route starts with the HTTP method, followed by the URI pattern. The last element of a route is the Java call definition.
 
-You can add a comment to the route file, with the **"#"** character.
+You can add a comment to the route file, with the @#@ character.
 
 bc. # Display a client
 GET    /clients/{id}             Clients.show           
@@ -55,7 +55,9 @@ The HTTP method can be any of the valid methods supported by HTTP:
 * **DELETE**
 * **HEAD**
 
-If you specify * as method, this route will match the HTTP Request for any method.
+It also supports @WS@ as action method to indicate a "WebSocket":asynchronous#UsingWebSockets request.
+
+If you specify @*@ as the method, this route will match the HTTP Request for any method.
 
 bc. *   /clients/{id}             Clients.show           
 
@@ -88,7 +90,7 @@ A URI pattern may have more than one dynamic part:
 
 bc. /clients/{id}/accounts/{accountId}
 
-The default matching strategy for a dynamic part is defined by the regular expression **/[^/]+/**. You can define your own regular expression for a dynamic part.
+The default matching strategy for a dynamic part is defined by the regular expression @/[^/]+/@. You can define your own regular expression for a dynamic part.
 
 This regex will only accept numerical values as id:
 
@@ -116,11 +118,18 @@ p(note). The URI pattern cannot have any optional part except for that trailing 
 
 h3. Java call definition
 
-The last part of a route definition is the Java call. This part is defined by the fully-qualified name of an action method. The action method must be a **public static void** method of a Controller class. A Controller class must be defined in the **controllers** package and must be a subclass of **play.mvc.Controller**.
+The last part of a route definition is the Java call. This part is defined by the fully-qualified name of an action method. The action method must be a @public static void@ method of a Controller class. A Controller class must be defined in the @controllers@ package and must be a subclass of @play.mvc.Controller@.
 
-You can add a Java package before the Controller class name if it isn’t defined directly under the controllers package. The **controllers** package itself is implicit, so you don’t need to specify it. 
+You can add a Java package before the Controller class name if it isn’t defined directly under the controllers package. The @controllers@ package itself is implicit, so you don’t need to specify it. 
 
 bc. GET    /admin             admin.Dashboard.index           
+
+h3. 404 as action
+
+You can also directly use @404@ as a route action to mark a URL path that must be ignored by your application. For example:
+
+bc. # Ignore favicon requests
+GET     /favicon.ico            404
 
 h3. Assign static args
 
@@ -146,7 +155,7 @@ The first route is equivalent to the second one when the page ID is ‘home’. 
 
 h3. Variables and scripts
 
-You can also use the **${ … }** syntax for variables, and the **%{ … }** syntax for scripts in the **routes** file, as you can in templates. For example:
+You can also use the @${…}@ syntax for variables, and the @%{…}@ syntax for scripts in the @routes@ file, as you can in templates. For example:
 
 bc. %{ context = play.configuration.getProperty('context', '') }%
  
@@ -154,7 +163,7 @@ bc. %{ context = play.configuration.getProperty('context', '') }%
 GET    ${context}         Secure.login
 GET    ${context}/        Secure.login
 
-Another example is the CRUD module’s **routes** file, which uses the **crud.types** tag to loop over model types to generate controller route definitions for each type.
+Another example is the CRUD module’s @routes@ file, which uses the @crud.types@ tag to loop over model types to generate controller route definitions for each type.
 
 
 h2. <a name="priority">Routes priority</a>
@@ -175,15 +184,24 @@ will be intercepted by the first route and will call Clients.listAll (even if th
 
 h2. <a name="static">Serving static resources</a>
 
-Use the special action **staticDir**, to point to each folder you wish to publish as a static resources container.
+h3. staticDir: mapping
+
+Use the special action @staticDir@, to point to each folder you wish to publish as a static resources container.
 
 For example:
 
 bc. GET    /public/           staticDir:public
 
-When supplied with a request for a /public/* path, Play will serve your files from the application /public folder.
+When supplied with a request for a @/public/*@ path, Play will serve your files from the application /public folder.
 
-Priorities are applied as for a standard route.
+Priorities are applied as for standard routes.
+
+h3. staticFile: mapping
+
+You can also directly map a URL path to a static file rendering.
+
+bc. # Serve index.html static file for home requests
+GET     /home                   staticFile:/public/html/index.html
 
 
 h2. <a name="reverse">Reverse routing: generate some URL</a>
@@ -197,7 +215,7 @@ bc. GET    /clients/{id}      Clients.show
 From your code, you can generate the URL able to invoke Clients.show:
 
 bc. map.put("id", 1541);
-String url = Router.reverse("Clients.show", map).url;  // GET /clients/1541
+String url = Router.reverse("Clients.show", map).url;// GET /clients/1541
 
 p(note). The URL generation is integrated into many of the framework’s components. You never should use the Router.reverse operation directly.
 
@@ -205,22 +223,23 @@ If you add parameters that are not included in the URI pattern, these parameters
 
 bc. map.put("id", 1541);
 map.put("display", "full");
-String url = Router.reverse("Clients.show", map).url; // GET /clients/1541?display=full
+// GET /clients/1541?display=full
+String url = Router.reverse("Clients.show", map).url;
 
 The priority order is again used to find the most specific Route able to generate the URL.
 
 
 h2. <a name="content-types">Setting content types</a>
 
-Play selects a "media type":http://en.wikipedia.org/wiki/Internet_media_type for the HTTP response according to the value of **request.format**. This value determines which view template file to use, by file extension, and also sets the response **Content-type** to the media type that Play's **mime-types.properties** file maps the format to. 
+Play selects a "media type":http://en.wikipedia.org/wiki/Internet_media_type for the HTTP response according to the value of @request.format@. This value determines which view template file to use, by file extension, and also sets the response @Content-type@ to the media type that Play's @mime-types.properties@ file maps the format to. 
 
-The default format for a Play request is **html**. The default template for the **index()** controller method (and **html** format) is therefore the file **index.html**. If you specify a different format, in one of several ways, you can select an alternate template. 
+The default format for a Play request is @html@. The default template for the @index()@ controller method (and @html@ format) is therefore the file @index.html@. If you specify a different format, in one of several ways, you can select an alternate template. 
 
-You can set the format programmatically before calling the **render** method. For example, to serve a Cascading Style Sheet with media type **text/css**, you can do:
+You can set the format programmatically before calling the @render@ method. For example, to serve a Cascading Style Sheet with media type @text/css@, you can do:
 
 bc. request.format = "css";  
 
-However, a cleaner approach is to use the URL to specify the format in the **routes** file. You can add formats as specific routes, by specifying the format for the controller method. For example, the following route will handle a request for **/index.xml**, setting the format to **xml** and rendering the **index.xml** template. 
+However, a cleaner approach is to use the URL to specify the format in the @routes@ file. You can add formats as specific routes, by specifying the format for the controller method. For example, the following route will handle a request for @/index.xml@, setting the format to @xml@ and rendering the @index.xml@ template. 
 
 bc. GET    /index.xml         Application.index(format:'xml')  
 
@@ -232,28 +251,28 @@ Play can also extract the format directly from the URL, with a route such as the
 
 bc. GET    /index.{format}    Application.index 
 
-With this route, a request for **/index.xml** will set the format to **xml** and render the XML template, while **/index.txt** will render the plain text template. 
+With this route, a request for @/index.xml@ will set the format to @xml@ and render the XML template, while @/index.txt@ will render the plain text template. 
 
 Play can also set the format automatically using HTTP content negotiation.
 
 
 h2. <a name="content-negotiation">HTTP content negotiation</a>
 
-One thing that Play has in common with other RESTful architectures is the direct use of HTTP functionality, instead of trying to hide HTTP or put an abstraction layer on top of it. "Content negotiation":http://en.wikipedia.org/wiki/Content_negotiation is an HTTP feature that allows an HTTP server to serve different "media types":http://en.wikipedia.org/wiki/Internet_media_type for the same URL, according to which media types are requested by the HTTP client. The client specifies acceptable content types using media types in the **Accept** header, such as requiring an XML response with: 
+One thing that Play has in common with other RESTful architectures is the direct use of HTTP functionality, instead of trying to hide HTTP or put an abstraction layer on top of it. "Content negotiation":http://en.wikipedia.org/wiki/Content_negotiation is an HTTP feature that allows an HTTP server to serve different "media types":http://en.wikipedia.org/wiki/Internet_media_type for the same URL, according to which media types are requested by the HTTP client. The client specifies acceptable content types using media types in the @Accept@ header, such as requiring an XML response with: 
 
 bc. Accept: application/xml
 
-A client may specify more than one media type, and also specify that any media type is acceptable with a catch-all wild-card media type (***/***): 
+A client may specify more than one media type, and also specify that any media type is acceptable with a catch-all wild-card media type (@*/*@): 
 
 bc. Accept: application/xml, image/png, */*
 
-Conventional web browsers always include the wild-card value in the **Accept** header: they will accept any media type, and Play will serve HTML - the default 'format'. Content negotiation is more likely to be used by custom clients, such as an Ajax request that requires a JSON response, or an e-book reader that requires a PDF or EPUB version of a document. 
+Conventional web browsers always include the wild-card value in the @Accept@ header: they will accept any media type, and Play will serve HTML - the default 'format'. Content negotiation is more likely to be used by custom clients, such as an Ajax request that requires a JSON response, or an e-book reader that requires a PDF or EPUB version of a document. 
 
 h3. Setting the content type from HTTP headers 
 
-Play selects its default request format, **html**, if the **Accept** header contains **text/html** or **application/xhtml**, or as a result of the wildcard ***/*** value. The default format is not selected if the wildcard value is not present.
+Play selects its default request format, @html@, if the @Accept@ header contains @text/html@ or @application/xhtml@, or as a result of the wildcard @*/*@ value. The default format is not selected if the wildcard value is not present.
 
-Play has built-in support for a few formats: **html**, **txt**, **json** and **xml**. For example, define a controller method that renders some data: 
+Play has built-in support for a few formats: @html@, @txt@, @json@ and @xml@. For example, define a controller method that renders some data: 
 
 bc. public static void index() { 
    final String name = "Peter Hilton"; 
@@ -262,9 +281,9 @@ bc. public static void index() {
    render(name, organisation, url); 
 } 
 
-If you request a URL that is mapped to this method (**http://localhost:9000/** in a new Play application) in a web browser, then play will render the **index.html** template, because web browsers send an **Accept** header that includes the value **text/html**. 
+If you request a URL that is mapped to this method (@http://localhost:9000/@ in a new Play application) in a web browser, then play will render the @index.html@ template, because web browsers send an @Accept@ header that includes the value @text/html@. 
 
-Play responds to a request with the header **Accept: text/xml** by setting the request format to **xml** and rendering an **index.xml** template, such as: 
+Play responds to a request with the header @Accept: text/xml@ by setting the request format to @xml@ and rendering an @index.xml@ template, such as: 
 
 bc. <?xml version="1.0"?> 
 <contact> 
@@ -273,7 +292,7 @@ bc. <?xml version="1.0"?>
 <url>${url}</url> 
 </contact> 
 
-The built in **Accept** header format mappings work as follows, for an **index()** controller method: the accept header contains a media type that Play maps to a format, which is in turn mapped to a template file. 
+The built in @Accept@ header format mappings work as follows, for an @index()@ controller method: the accept header contains a media type that Play maps to a format, which is in turn mapped to a template file. 
 
 |_. Accept header |_. Format |_. Template file name |_. Mapping | 
 | null | null | index.html | Default template extension for null format | 
@@ -290,7 +309,7 @@ The built in **Accept** header format mappings work as follows, for an **index()
 
 h3. Custom formats 
 
-You can add content negotiation for your own custom types by inspecting the request headers and setting the format accordingly, so that you only set that format when the HTTP request selects the corresponding media type. For example, to serve a "vCard":http://en.wikipedia.org/wiki/Vcard with media type **text/x-vcard**, in your controller, check for your custom format before all requests: 
+You can add content negotiation for your own custom types by inspecting the request headers and setting the format accordingly, so that you only set that format when the HTTP request selects the corresponding media type. For example, to serve a "vCard":http://en.wikipedia.org/wiki/Vcard with media type @text/x-vcard@, in your controller, check for your custom format before all requests: 
 
 bc. @Before 
 static void setFormat() { 
@@ -299,7 +318,7 @@ static void setFormat() {
 	} 
 } 
 
-Now, a request with an **Accept: text/x-vcard** header will render an **index.vcf** template, such as: 
+Now, a request with an @Accept: text/x-vcard@ header will render an @index.vcf@ template, such as: 
 
 bc. BEGIN:VCARD 
 VERSION:3.0 

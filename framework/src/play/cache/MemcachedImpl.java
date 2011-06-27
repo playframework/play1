@@ -19,6 +19,8 @@ import play.exceptions.ConfigurationException;
 
 /**
  * Memcached implementation (using http://code.google.com/p/spymemcached/)
+ *
+ * expiration is specified in seconds
  */
 public class MemcachedImpl implements CacheImpl {
 
@@ -38,7 +40,7 @@ public class MemcachedImpl implements CacheImpl {
         } else if (forceClientInit) {
             // When you stop the client, it sets the interrupted state of this thread to true. If you try to reinit it with the same thread in this state,
             // Memcached client errors out. So a simple call to interrupted() will reset this flag
-            Thread.currentThread().interrupted();
+            Thread.interrupted();
             uniqueInstance.initClient();
         }
         return uniqueInstance;
@@ -130,11 +132,11 @@ public class MemcachedImpl implements CacheImpl {
     }
 
     public long incr(String key, int by) {
-        return client.incr(key, by);
+        return client.incr(key, by, 0);
     }
 
     public long decr(String key, int by) {
-        return client.decr(key, by);
+        return client.decr(key, by, 0);
     }
 
     public void replace(String key, Object value, int expiration) {

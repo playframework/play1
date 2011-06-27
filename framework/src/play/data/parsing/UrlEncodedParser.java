@@ -4,10 +4,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import play.Logger;
 import play.exceptions.UnexpectedException;
+import play.mvc.Http;
 import play.utils.Utils;
 
 /**
@@ -19,7 +22,8 @@ public class UrlEncodedParser extends DataParser {
     
     public static Map<String, String[]> parse(String urlEncoded) {
         try {
-            return new UrlEncodedParser().parse(new ByteArrayInputStream(urlEncoded.getBytes("utf-8")));
+            final String encoding = Http.Request.current().encoding;
+            return new UrlEncodedParser().parse(new ByteArrayInputStream(urlEncoded.getBytes( encoding )));
         } catch (UnsupportedEncodingException ex) {
             throw new UnexpectedException(ex);
         }
@@ -33,77 +37,89 @@ public class UrlEncodedParser extends DataParser {
 
     @Override
     public Map<String, String[]> parse(InputStream is) {
+        // Encoding is either retrieved from contentType or it is the default encoding
+        final String encoding = Http.Request.current().encoding;
         try {
             Map<String, String[]> params = new HashMap<String, String[]>();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            int b;
-            while ((b = is.read()) != -1) {
-                os.write(b);
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ( (bytesRead = is.read(buffer)) > 0 ) {
+                os.write( buffer, 0, bytesRead);
             }
-            byte[] data = os.toByteArray();
-            // add the complete body as a parameters
-            if(!forQueryString) {
-                params.put("body", new String[] {new String(data, "utf-8")});
+
+            String data = new String(os.toByteArray(), encoding);
+            if (data.length() == 0) {
+                //data is empty - can skip the rest
+                return new HashMap<String, String[]>(0);
             }
-            
-            int ix = 0;
-            int ox = 0;
-            String key = null;
-            String value = null;
-            while (ix < data.length) {
-                byte c = data[ix++];
-                switch ((char) c) {
-                    case '&':
-                        value = new String(data, 0, ox, "utf-8");
-                        if (key != null) {
-                            Utils.Maps.mergeValueInMap(params, key, value);
-                            key = null;
-                        } else {
-                            Utils.Maps.mergeValueInMap(params, value, (String) null);
-                        }
-                        ox = 0;
-                        break;
-                    case '=':
-                        if (key == null) {
-                            key = new String(data, 0, ox, "utf-8");
-                            ox = 0;
-                        } else {
-                            data[ox++] = c;
-                        }
-                        break;
-                    case '+':
-                        data[ox++] = (byte) ' ';
-                        break;
-                    case '%':
-                        data[ox++] = (byte) ((convertHexDigit(data[ix++]) << 4) + convertHexDigit(data[ix++]));
-                        break;
-                    default:
-                        data[ox++] = c;
+
+            // data is o the form:
+            // a=b&b=c%12...
+
+            // Let us parse in two phases - we wait until everything is parsed before
+            // we decoded it - this makes it possible for use to look for the
+            // special _charset_ param which can hold the charset the form is encoded in.
+            //
+            // http://www.crazysquirrel.com/computing/general/form-encoding.jspx
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=18643
+            //
+            // NB: _charset_ must always be used with accept-charset and it must have the same value
+
+            String[] keyValues = data.split("&");
+            for (String keyValue : keyValues) {
+                // split this key-value on the first '='
+                int i = keyValue.indexOf('=');
+                String key=null;
+                String value=null;
+                if ( i > 0) {
+                    key = keyValue.substring(0,i);
+                    value = keyValue.substring(i+1);
+                } else {
+                    key = keyValue;
+                }
+                if (key.length()>0) {
+                    Utils.Maps.mergeValueInMap(params, key, value);
                 }
             }
-            //The last value does not end in '&'.  So save it now.
-            value = new String(data, 0, ox, "utf-8");
-            if (key != null) {
-                Utils.Maps.mergeValueInMap(params, key, value);
-            } else if (!value.isEmpty()) {
-                Utils.Maps.mergeValueInMap(params, value, (String) null);
+
+            // Second phase - look for _charset_ param and do the encoding
+            String charset = encoding;
+            if (params.containsKey("_charset_")) {
+                // The form contains a _charset_ param - When this is used together
+                // with accept-charset, we can use _charset_ to extract the encoding.
+                // PS: When rendering the view/form, _charset_ and accept-charset must be given the
+                // same value - since only Firefox and sometimes IE actually sets it when Posting
+                String providedCharset = params.get("_charset_")[0];
+                // Must be sure the providedCharset is a valid encoding..
+                try {
+                    "test".getBytes(providedCharset);
+                    charset = providedCharset; // it works..
+                } catch (Exception e) {
+                    Logger.debug("Got invalid _charset_ in form: " + providedCharset);
+                    // lets just use the default one..
+                }
             }
-            return params;
+
+            // We're ready to decode the params
+            Map<String, String[]> decodedParams = new HashMap<String, String[]>(params.size());
+            for (Map.Entry<String, String[]> e : params.entrySet()) {
+                String key = URLDecoder.decode(e.getKey(),charset);
+                for (String value : e.getValue()) {
+
+                    Utils.Maps.mergeValueInMap(decodedParams, key, (value==null ? null : URLDecoder.decode(value,charset)));
+                }
+            }
+
+            // add the complete body as a parameters
+            if(!forQueryString) {
+                decodedParams.put("body", new String[] {data});
+            }
+
+            return decodedParams;
         } catch (Exception e) {
             throw new UnexpectedException(e);
         }
     }
 
-    private static byte convertHexDigit(byte b) {
-        if ((b >= '0') && (b <= '9')) {
-            return (byte) (b - '0');
-        }
-        if ((b >= 'a') && (b <= 'f')) {
-            return (byte) (b - 'a' + 10);
-        }
-        if ((b >= 'A') && (b <= 'F')) {
-            return (byte) (b - 'A' + 10);
-        }
-        return 0;
-    }
 }

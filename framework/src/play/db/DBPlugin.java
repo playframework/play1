@@ -1,27 +1,19 @@
 package play.db;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.Driver;
-import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Properties;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import jregex.Matcher;
-import org.apache.commons.lang.StringUtils;
-import play.Logger;
 import play.Play;
 import play.PlayPlugin;
-import play.exceptions.DatabaseException;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
@@ -31,13 +23,20 @@ import play.mvc.Http.Response;
  */
 public class DBPlugin extends PlayPlugin {
 
-    public static String url = "";
     org.h2.tools.Server h2Server;
 
     @Override
     public boolean rawInvocation(Request request, Response response) throws Exception {
-        if(Play.mode.isDev() && request.path.equals("/@db")) {
+        if (Play.mode.isDev() && request.path.equals("/@db")) {
             response.status = Http.StatusCode.MOVED;
+
+            // For H2 embeded database, we'll also start the Web console
+            if (h2Server != null) {
+                h2Server.stop();
+            }
+            h2Server = org.h2.tools.Server.createWebServer();
+            h2Server.start();
+
             response.setHeader("Location", "http://localhost:8082/");
             return true;
         }
@@ -46,192 +45,75 @@ public class DBPlugin extends PlayPlugin {
 
     @Override
     public void onApplicationStart() {
-        if (changed()) {
-            try {
+        System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
+        System.setProperty("com.mchange.v2.log.FallbackMLog.DEFAULT_CUTOFF_LEVEL", "OFF");
 
-                Properties p = Play.configuration;
+        List<String> dbConfigNames = new ArrayList<String>(1);
 
-                if (p.getProperty("db", "").startsWith("java:")) {
+        // first we must look for and configure the default dbConfig
+        if (isDefaultDBConfigPresent(Play.configuration)) {
+            // Can only add default db config-name if it is present in config-file.
+            // Must do this to be able to detect if user removes default db config from config file
+            dbConfigNames.add(DBConfig.defaultDbConfigName);
+        }
 
-                    Context ctx = new InitialContext();
-                    DB.datasource = (DataSource) ctx.lookup(p.getProperty("db"));
+        //look for other configurations
+        dbConfigNames.addAll(detectedExtraDBConfigs(Play.configuration));
 
-                } else {
+        DB.setConfigurations(dbConfigNames);
 
-                    // Try the driver
-                    String driver = p.getProperty("db.driver");
-                    try {
-                        Driver d = (Driver) Class.forName(driver, true, Play.classloader).newInstance();
-                        DriverManager.registerDriver(new ProxyDriver(d));
-                    } catch (Exception e) {
-                        throw new Exception("Driver not found (" + driver + ")");
-                    }
+    }
 
-                    // Try the connection
-                    Connection fake = null;
-                    try {
-                        if (p.getProperty("db.user") == null) {
-                            fake = DriverManager.getConnection(p.getProperty("db.url"));
-                        } else {
-                            fake = DriverManager.getConnection(p.getProperty("db.url"), p.getProperty("db.user"), p.getProperty("db.pass"));
-                        }
-                    } finally {
-                        if (fake != null) {
-                            fake.close();
-                        }
-                    }
-
-                    System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
-                    System.setProperty("com.mchange.v2.log.FallbackMLog.DEFAULT_CUTOFF_LEVEL", "OFF");
-                    ComboPooledDataSource ds = new ComboPooledDataSource();
-                    ds.setDriverClass(p.getProperty("db.driver"));
-                    ds.setJdbcUrl(p.getProperty("db.url"));
-                    ds.setUser(p.getProperty("db.user"));
-                    ds.setPassword(p.getProperty("db.pass"));
-                    ds.setAcquireRetryAttempts(10);
-                    ds.setCheckoutTimeout(Integer.parseInt(p.getProperty("db.pool.timeout", "5000")));
-                    ds.setBreakAfterAcquireFailure(false);
-                    ds.setMaxPoolSize(Integer.parseInt(p.getProperty("db.pool.maxSize", "30")));
-                    ds.setMinPoolSize(Integer.parseInt(p.getProperty("db.pool.minSize", "1")));
-                    ds.setIdleConnectionTestPeriod(10);
-                    ds.setTestConnectionOnCheckin(true);
-                    DB.datasource = ds;
-                    url = ds.getJdbcUrl();
-                    Connection c = null;
-                    try {
-                        c = ds.getConnection();
-                    } finally {
-                        if (c != null) {
-                            c.close();
-                        }
-                    }
-                    Logger.info("Connected to %s", ds.getJdbcUrl());
-
-                    // For H2 embeded database, we'll also start the Web console
-                    if(Play.mode.isDev() && "org.h2.Driver".equals(p.get("db.driver"))) {
-                        if(h2Server != null) {
-                            h2Server.stop();
-                        }
-                        h2Server = org.h2.tools.Server.createWebServer();
-                        h2Server.start();
-                    }
-
-                }
-
-            } catch (Exception e) {
-                DB.datasource = null;
-                Logger.error(e, "Cannot connected to the database : %s", e.getMessage());
-                if (e.getCause() instanceof InterruptedException) {
-                    throw new DatabaseException("Cannot connected to the database. Check the configuration.", e);
-                }
-                throw new DatabaseException("Cannot connected to the database, " + e.getMessage(), e);
+    /**
+     * @return true if default db config properties is found
+     */
+    protected boolean isDefaultDBConfigPresent(Properties props) {
+        Pattern pattern = Pattern.compile("^db(?:$|\\..*)");
+        for( String propName : props.stringPropertyNames()) {
+            Matcher m = pattern.matcher(propName);
+            if (m.find()) {
+                return true;
             }
+        }
+        return false;
+    }
+
+    /**
+     * Looks for extra db configs in config.
+     *
+     * Properties starting with 'db_'
+     * @return list of all extra db config names found
+     */
+    protected Set<String> detectedExtraDBConfigs(Properties props) {
+        Set<String> names = new LinkedHashSet<String>(0); //preserve order
+        Pattern pattern = Pattern.compile("^db\\_([^\\.]+)(?:$|\\..*)");
+        for( String propName : props.stringPropertyNames()) {
+            Matcher m = pattern.matcher(propName);
+            if (m.find()) {
+                String configName = m.group(1);
+                if (!names.contains(configName)) {
+                    names.add(configName);
+                }
+            }
+        }
+        return names;
+    }
+
+    @Override
+    public void onApplicationStop() {
+        if (Play.mode.isProd()) {
+            DB.destroy();
         }
     }
 
-    
     @Override
     public String getStatus() {
-        StringWriter sw = new StringWriter();
-        PrintWriter out = new PrintWriter(sw);
-        if (DB.datasource == null || !(DB.datasource instanceof ComboPooledDataSource)) {
-            out.println("Datasource:");
-            out.println("~~~~~~~~~~~");
-            out.println("(not yet connected)");
-            return sw.toString();
-        }
-        ComboPooledDataSource datasource = (ComboPooledDataSource) DB.datasource;
-        out.println("Datasource:");
-        out.println("~~~~~~~~~~~");
-        out.println("Jdbc url: " + datasource.getJdbcUrl());
-        out.println("Jdbc driver: " + datasource.getDriverClass());
-        out.println("Jdbc user: " + datasource.getUser());
-        out.println("Jdbc password: " + datasource.getPassword());
-        out.println("Min pool size: " + datasource.getMinPoolSize());
-        out.println("Max pool size: " + datasource.getMaxPoolSize());
-        out.println("Initial pool size: " + datasource.getInitialPoolSize());
-        out.println("Checkout timeout: " + datasource.getCheckoutTimeout());
-        return sw.toString();
+        return DB.getStatus();
     }
 
     @Override
     public void invocationFinally() {
         DB.close();
-    }
-
-    private static void check(Properties p, String mode, String property) {
-        if (!StringUtils.isEmpty(p.getProperty(property))) {
-            Logger.warn("Ignoring " + property + " because running the in " + mode + " db.");
-        }
-    }
-
-    private static boolean changed() {
-        Properties p = Play.configuration;
-
-        if ("mem".equals(p.getProperty("db"))) {
-            // If db.url or db.user or db.pass or db.driver is set but db=mem warn the user
-            check(p, "memory", "db.driver");
-            check(p, "memory", "db.url");
-
-            p.put("db.driver", "org.h2.Driver");
-            p.put("db.url", "jdbc:h2:mem:play;MODE=MYSQL");
-            p.put("db.user", "sa");
-            p.put("db.pass", "");
-        }
-
-        if ("fs".equals(p.getProperty("db"))) {
-            // If db.url or db.user or db.pass or db.driver is set but db=fs warn the user
-            check(p, "fs", "db.driver");
-            check(p, "fs", "db.url");
-
-            p.put("db.driver", "org.h2.Driver");
-            p.put("db.url", "jdbc:h2:" + (new File(Play.applicationPath, "db/h2/play").getAbsolutePath()) + ";MODE=MYSQL");
-            p.put("db.user", "sa");
-            p.put("db.pass", "");
-        }
-
-        if (p.getProperty("db", "").startsWith("java:")) {
-            if (DB.datasource == null) {
-                return true;
-            }
-        }
-
-        Matcher m = new jregex.Pattern("^mysql:(({user}[\\w]+)(:({pwd}[^@]+))?@)?({name}[\\w]+)$").matcher(p.getProperty("db", ""));
-        if (m.matches()) {
-            String user = m.group("user");
-            String password = m.group("pwd");
-            String name = m.group("name");
-            p.put("db.driver", "com.mysql.jdbc.Driver");
-            p.put("db.url", "jdbc:mysql://localhost/" + name + "?useUnicode=yes&characterEncoding=UTF-8&connectionCollation=utf8_general_ci");
-            if (user != null) {
-                p.put("db.user", user);
-            }
-            if (password != null) {
-                p.put("db.pass", password);
-            }
-        }
-
-        if ((p.getProperty("db.driver") == null) || (p.getProperty("db.url") == null)) {
-            return false;
-        }
-        if (DB.datasource == null) {
-            return true;
-        } else {
-            ComboPooledDataSource ds = (ComboPooledDataSource) DB.datasource;
-            if (!p.getProperty("db.driver").equals(ds.getDriverClass())) {
-                return true;
-            }
-            if (!p.getProperty("db.url").equals(ds.getJdbcUrl())) {
-                return true;
-            }
-            if (!p.getProperty("db.user", "").equals(ds.getUser())) {
-                return true;
-            }
-            if (!p.getProperty("db.pass", "").equals(ds.getPassword())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

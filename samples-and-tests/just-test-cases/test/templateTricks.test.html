@@ -13,8 +13,8 @@
 	
 	// Check #render
 	assertTextPresent('Inner template with:')
-	assertTextPresent('b:9')
-	assertTextPresent('a:Hello')
+	assertTextPresent('b=9')
+	assertTextPresent('a=Hello')
 	
 	// Check static access resolution (and conflicts)
 	open('/mapping.mappingrules/index')

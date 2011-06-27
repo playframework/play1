@@ -4,7 +4,7 @@ Here some simple tips to optimize your application for production.
 
 h2. <a name="application">Configure your application.conf</a>
 
-First off, the best way to specify production mode is to give a specific ID to your production framework. Let’s pick **production** as an example. Refer "manage application.conf in several environments":ids to see how.
+First off, the best way to specify production mode is to give a specific ID to your production framework. Let’s pick @production@ as an example. Refer "manage application.conf in several environments":ids to see how.
 
 h3. Set the framework in prod mode:
 
@@ -14,7 +14,7 @@ In this mode, the framework will pre-compile all Java sources and templates. If 
 
 h3. Define a real database:
 
-If you have used a development database (either **db=mem** or **db=fs**), you should configure a more robust database engine:
+If you have used a development database (either @db=mem@ or @db=fs@), you should configure a more robust database engine:
 
 bc. %production.db.url=jdbc:mysql://localhost/prod
 %production.db.driver=com.mysql.jdbc.Driver
@@ -37,14 +37,14 @@ The Play secret key is used to secure cryptographic functions, like the session 
 
 bc. %production.application.secret=c12d1c59af499d20f4955d07255ed8ea333
 
-You can use the **play secret** command to generate a new secure and random key (at least on a ‘real’ OS). If you plan to distribute your application to several servers, remember to use the **same key** for all application instances!
+You can use the @play secret@ command to generate a new secure and random key (at least on a ‘real’ OS). If you plan to distribute your application to several servers, remember to use the @same key@ for all application instances!
 
 
 h2. <a name="logging">Configure logging</a>
 
-For production it’s a good idea to use rolling log files. Do not send logging to the Console, since it will be written to the **logs/system.out** file and it will grow without bound!
+For production it’s a good idea to use rolling log files. Do not send logging to the Console, since it will be written to the @logs/system.out@ file and it will grow without bound!
 
-Create a custom **log4j.properties** in the **conf/** directory:
+Create a custom @log4j.properties@ in the @conf/@ directory:
 
 bc. log4j.rootLogger=ERROR, Rolling
  
@@ -60,7 +60,7 @@ log4j.appender.Rolling.layout.ConversionPattern=%d{ABSOLUTE} %-5p ~ %m%n
 
 h2. <a name="server">Set-up a front-end HTTP server</a>
 
-You can easily deploy your application as a stand-alone server by setting the application HTTP port to **80**:
+You can easily deploy your application as a stand-alone server by setting the application HTTP port to @80@:
 
 bc. %production.http.port=80
 
@@ -72,14 +72,14 @@ h3. Set-up with lighttpd
 
 This example shows you how to configure "lighttpd":http://www.lighttpd.net/ as a front-end web server. Note that you can do the same with Apache, but if you only need virtual hosting or load balancing, lighttpd is a very good choice and much easier to configure!
 
-The **/etc/lighttpd/lighttpd.conf** file should define things like this:
+The @/etc/lighttpd/lighttpd.conf@ file should define things like this:
 
 bc. server.modules = (
       "mod_access",
       "mod_proxy",
       "mod_accesslog" 
 )
-...
+…
 $HTTP["host"] =~ "www.myapp.com" {
     proxy.balance = "round-robin" proxy.server = ( "/" =>
         ( ( "host" => "127.0.0.1", "port" => 9000 ) ) )
@@ -97,7 +97,7 @@ h3. Set-up with Apache
 The example below shows a simple set-up with "Apache httpd server":http://httpd.apache.org/ running in front of a standard Play configuration. 
 
 bc. LoadModule proxy_module modules/mod_proxy.so
-...
+…
 <VirtualHost *:80>
   ProxyPreserveHost On
   ServerName www.loadbalancedapp.com
@@ -177,7 +177,24 @@ bc. ProxyPreserveHost on
 
 The host: header will be the original host request header issued by the client. By combining theses two techniques, your app will appear to be directly exposed.
 
+h2. <a name="nopython">Deploying Without Python</a>
+
+Python is installed by default on most Unix machines, and a Windows version is embedded with Play. However there may be cases where you need to deploy an application on a server without any Python executable.
+
+For that, a build.xml file providing limited functionalities is provided with Play applications.
+
+From the application folder, you can start the server using:
+
+bc. ant start -Dplay.path=/path/to/playdirectory
+
+Warning: using the @play@ command the output will be redirected to @System.out@; however using Ant the standard output is not accessible. It is necessary to provide a Log4j properties file where you specify a file appended.
+
+To stop the server:
+
+bc. ant stop -Dplay.path=/path/to/playdirectory
+
+Note that you can also specify the path to Play framework in an environment variable or directly in your application's @build.xml@.
 
 p(note). **Continuing the discussion**
  
-Next: %(next)"Play modules":modules%.
+Next: %(next)"Deployment options":deployment%.

@@ -73,10 +73,15 @@ __all__ = ["HTTPServer", "BaseHTTPRequestHandler"]
 import sys
 import time
 import socket # For gethostbyaddr()
-import mimetools
+from warnings import filterwarnings, catch_warnings
+with catch_warnings():
+    if sys.py3kwarning:
+        filterwarnings("ignore", ".*mimetools has been removed",
+                        DeprecationWarning)
+    import mimetools
 import SocketServer
 
-# Default error message
+# Default error message template
 DEFAULT_ERROR_MESSAGE = """\
 <head>
 <title>Error response</title>
@@ -88,6 +93,8 @@ DEFAULT_ERROR_MESSAGE = """\
 <p>Error code explanation: %(code)s = %(explain)s.
 </body>
 """
+
+DEFAULT_ERROR_CONTENT_TYPE = "text/html"
 
 def _quote_html(html):
     return html.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
@@ -216,6 +223,12 @@ class BaseHTTPRequestHandler(SocketServer.StreamRequestHandler):
     # where each string is of the form name[/version].
     server_version = "BaseHTTP/" + __version__
 
+    # The default request version.  This only affects responses up until
+    # the point where the request line is parsed, so it mainly decides what
+    # the client gets back when sending a malformed request line.
+    # Most web servers default to HTTP 0.9, i.e. don't send a status line.
+    default_request_version = "HTTP/0.9"
+
     def parse_request(self):
         """Parse a request (internal).
 
@@ -228,7 +241,7 @@ class BaseHTTPRequestHandler(SocketServer.StreamRequestHandler):
 
         """
         self.command = None  # set in case of error on the first line
-        self.request_version = version = "HTTP/0.9" # Default
+        self.request_version = version = self.default_request_version
         self.close_connection = 1
         requestline = self.raw_requestline
         if requestline[-2:] == '\r\n':
@@ -342,13 +355,14 @@ class BaseHTTPRequestHandler(SocketServer.StreamRequestHandler):
         content = (self.error_message_format %
                    {'code': code, 'message': _quote_html(message), 'explain': explain})
         self.send_response(code, message)
-        self.send_header("Content-Type", "text/html")
+        self.send_header("Content-Type", self.error_content_type)
         self.send_header('Connection', 'close')
         self.end_headers()
         if self.command != 'HEAD' and code >= 200 and code not in (204, 304):
             self.wfile.write(content)
 
     error_message_format = DEFAULT_ERROR_MESSAGE
+    error_content_type = DEFAULT_ERROR_CONTENT_TYPE
 
     def send_response(self, code, message=None):
         """Send the response header and log the response code.
@@ -396,7 +410,7 @@ class BaseHTTPRequestHandler(SocketServer.StreamRequestHandler):
         self.log_message('"%s" %s %s',
                          self.requestline, str(code), str(size))
 
-    def log_error(self, *args):
+    def log_error(self, format, *args):
         """Log an error.
 
         This is called when a request cannot be fulfilled.  By
@@ -408,7 +422,7 @@ class BaseHTTPRequestHandler(SocketServer.StreamRequestHandler):
 
         """
 
-        self.log_message(*args)
+        self.log_message(format, *args)
 
     def log_message(self, format, *args):
         """Log an arbitrary message.

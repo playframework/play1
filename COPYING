@@ -38,6 +38,7 @@ http://www.apache.org/licenses/LICENSE-2.0
     - Signpost
 
 http://www.gnu.org/licenses/lgpl.html
+    - Bytecodeparser
     - c3p0
     - Hibernate
 

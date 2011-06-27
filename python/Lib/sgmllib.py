@@ -9,6 +9,11 @@
 # not supported at all.
 
 
+from warnings import warnpy3k
+warnpy3k("the sgmllib module has been removed in Python 3.0",
+         stacklevel=2)
+del warnpy3k
+
 import markupbase
 import re
 
@@ -428,7 +433,7 @@ class SGMLParser(markupbase.ParserBase):
         if replacement is None:
             self.unknown_entityref(name)
         else:
-            self.handle_data(self.convert_entityref(name))
+            self.handle_data(replacement)
 
     # Example -- handle data, should be overridden
     def handle_data(self, data):

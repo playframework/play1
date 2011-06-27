@@ -2,8 +2,13 @@ package play.test;
 
 import org.junit.Rule;
 import org.junit.runner.RunWith;
+import play.db.DB;
+import play.db.DBConfig;
 import play.db.jpa.JPA;
+import play.db.jpa.JPAConfig;
 import play.exceptions.UnexpectedException;
+
+import javax.persistence.EntityManager;
 
 @RunWith(PlayJUnitRunner.class)
 public class BaseTest extends org.junit.Assert {
@@ -27,8 +32,15 @@ public class BaseTest extends org.junit.Assert {
      */
     @Deprecated
     public void clearJPASession() {
-        JPA.em().flush();
-        JPA.em().clear();
+        for (DBConfig dbConfig : DB.getDBConfigs()) {
+            JPAConfig jpaConfig = JPA.getJPAConfig(dbConfig.getDBConfigName(), true);
+            if (jpaConfig != null) {
+                EntityManager em = jpaConfig.getJPAContext().em();
+                em.flush();
+                em.clear();
+            }
+        }
+
     }
     
 }

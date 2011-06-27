@@ -52,8 +52,8 @@ def execute(**kargs):
     shutil.copytree(os.path.join(play_env["basedir"], 'resources/eclipse/.settings'), dotSettings)
     replaceAll(dotProject, r'%PROJECT_NAME%', application_name)
 
-    playJarPath = os.path.join(play_env["basedir"], 'framework', 'framework/play-%s.jar' % play_env['version'])
-    playSourcePath = os.path.dirname(playJarPath)
+    playJarPath = os.path.join(play_env["basedir"], 'framework', 'play-%s.jar' % play_env['version'])
+    playSourcePath = os.path.join(os.path.dirname(playJarPath), 'src')
     if os.name == 'nt':
         playSourcePath=playSourcePath.replace('\\','/').capitalize()
 
@@ -61,6 +61,12 @@ def execute(**kargs):
     for el in classpath:
         if os.path.basename(el) != "conf" and el.endswith('-sources.jar'):
             cpJarToSource[el.replace('-sources', '')] = el
+
+    javadocLocation = {}
+    for el in classpath:
+        urlFile = el.replace(r'.jar','.docurl')
+        if os.path.basename(el) != "conf" and os.path.exists(urlFile):
+            javadocLocation[el] = urlFile
 
     cpXML = ""
     for el in classpath:
@@ -71,7 +77,17 @@ def execute(**kargs):
                 if cpJarToSource.has_key(el):
                     cpXML += '<classpathentry kind="lib" path="%s" sourcepath="%s"/>\n\t' % (os.path.normpath(el), cpJarToSource[el])
                 else:
-                    cpXML += '<classpathentry kind="lib" path="%s"/>\n\t' % os.path.normpath(el)
+                    if javadocLocation.has_key(el):
+                        cpXML += '<classpathentry kind="lib" path="%s">\n\t\t' % os.path.normpath(el)
+                        cpXML += '<attributes>\n\t\t\t'
+                        f = file(javadocLocation[el])
+                        url = f.readline()
+                        f.close()
+                        cpXML += '<attribute name="javadoc_location" value="%s"/>\n\t\t' % (url.strip())
+                        cpXML += '</attributes>\n\t'
+                        cpXML += '</classpathentry>\n\t'
+                    else:
+                        cpXML += '<classpathentry kind="lib" path="%s"/>\n\t' % os.path.normpath(el)
     if not is_application:
         cpXML += '<classpathentry kind="src" path="src"/>'
     replaceAll(dotClasspath, r'%PROJECTCLASSPATH%', cpXML)
@@ -91,7 +107,7 @@ def execute(**kargs):
                 lXML += '<link><name>conf/%s</name><type>2</type><location>%s/conf</location></link>\n' % (os.path.basename(module), module.replace('\\', '/'))
             if os.path.exists(os.path.join(module, "public")):
                 lXML += '<link><name>public/%s</name><type>2</type><location>%s/public</location></link>\n' % (os.path.basename(module), module.replace('\\', '/'))
-            cXML += '<classpathentry kind="src" path="%s"/>' % (os.path.basename(module))
+            cXML += '<classpathentry kind="src" path="%s"/>\n\t' % (os.path.basename(module))
         replaceAll(dotProject, r'%LINKS%', '<linkedResources>%s</linkedResources>' % lXML)
         replaceAll(dotClasspath, r'%MODULES%', cXML)
     else:
@@ -104,25 +120,19 @@ def execute(**kargs):
         replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PLAY_ID%', play_env["id"])
         replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%JPDA_PORT%', str(app.jpda_port))
         replaceAll(os.path.join(app.path, 'eclipse/debug.launch'), r'%PLAY_VERSION%', play_env["version"])
-    
+
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PROJECT_NAME%', application_name)
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_BASE%', play_env["basedir"])
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_ID%', play_env["id"])
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%JPDA_PORT%', str(app.jpda_port))
         replaceAll(os.path.join(app.path, 'eclipse/test.launch'), r'%PLAY_VERSION%', play_env["version"])
-    
+
         replaceAll(os.path.join(app.path, 'eclipse/connect.launch'), r'%PROJECT_NAME%', application_name)
         replaceAll(os.path.join(app.path, 'eclipse/connect.launch'), r'%JPDA_PORT%', str(app.jpda_port))
-    
+
         os.rename(os.path.join(app.path, 'eclipse/connect.launch'), os.path.join(app.path, 'eclipse/Connect JPDA to %s.launch' % application_name))
         os.rename(os.path.join(app.path, 'eclipse/test.launch'), os.path.join(app.path, 'eclipse/Test %s.launch' % application_name))
         os.rename(os.path.join(app.path, 'eclipse/debug.launch'), os.path.join(app.path, 'eclipse/%s.launch' % application_name))
-
-    # Module-specific modifications
-    for module in modules:
-        commands = os.path.join(module, 'commands.py')
-        if os.path.exists(commands):
-            execfile(commands)
 
     print "~ OK, the application is ready for eclipse"
     print "~ Use File/Import/General/Existing project to import %s into eclipse" % os.path.normpath(app.path)

@@ -16,7 +16,7 @@ def execute(**kargs):
     play_env = kargs.get("env")
 
     try:
-        optlist, args = getopt.getopt(remaining_args, 't:', ['css','layout','template='])
+        optlist, args = getopt.getopt(remaining_args, 't:', ['css','index','layout','template='])
         for o, a in optlist:
             if o in ('-t', '--template'):
                 c = a.split('/')[0]
@@ -30,6 +30,11 @@ def execute(**kargs):
                 print "~ "
                 return
 
+            if o == '--index':
+            	app.override('app/views/CRUD/index.html', 'app/views/CRUD/index.html')
+            	print "~ "
+            	return
+
             if o == '--css':
                 app.override('public/stylesheets/crud.css', 'public/stylesheets/crud.css')
                 print "~ "
@@ -42,6 +47,7 @@ def execute(**kargs):
 
     print "~ Specify the template to override, ex : -t Users/list" 
     print "~ "
-    print "~ Use --css to override the CRUD css" 
+    print "~ Use --css to override the CRUD css"
+    print "~ Use --index to override the CRUD index"
     print "~ Use --layout to override the CRUD layout" 
     print "~ "

@@ -7,7 +7,7 @@
 #   Copyright (C) 2006 Python Software Foundation.
 # See C source code for _functools credits/copyright
 
-from _functools import partial
+from _functools import partial, reduce
 
 # update_wrapper() and wraps() are tools to help write
 # wrapper functions that can handle naive introspection
@@ -25,7 +25,7 @@ def update_wrapper(wrapper,
        assigned is a tuple naming the attributes assigned directly
        from the wrapped function to the wrapper function (defaults to
        functools.WRAPPER_ASSIGNMENTS)
-       updated is a tuple naming the attributes off the wrapper that
+       updated is a tuple naming the attributes of the wrapper that
        are updated with the corresponding attribute from the wrapped
        function (defaults to functools.WRAPPER_UPDATES)
     """

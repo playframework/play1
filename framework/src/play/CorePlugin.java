@@ -9,12 +9,14 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import org.apache.commons.lang.StringUtils;
 import play.Play.Mode;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.classloading.enhancers.ContinuationEnhancer;
 import play.classloading.enhancers.ControllersEnhancer;
 import play.classloading.enhancers.Enhancer;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer;
+import play.classloading.enhancers.LVEnhancer;
 import play.classloading.enhancers.MailerEnhancer;
 import play.classloading.enhancers.PropertiesEnhancer;
 import play.classloading.enhancers.SigEnhancer;
@@ -30,7 +32,7 @@ import play.mvc.Http.Response;
 public class CorePlugin extends PlayPlugin {
 
     /**
-     * Get the appication status
+     * Get the application status
      */
     public static String computeApplicationStatus(boolean json) {
         if (json) {
@@ -49,7 +51,7 @@ public class CorePlugin extends PlayPlugin {
             }
             return o.toString();
         }
-        StringBuffer dump = new StringBuffer(16);
+        StringBuilder dump = new StringBuilder(16);
         for (PlayPlugin plugin : Play.pluginCollection.getEnabledPlugins()) {
             try {
                 String status = plugin.getStatus();
@@ -72,7 +74,11 @@ public class CorePlugin extends PlayPlugin {
     public boolean rawInvocation(Request request, Response response) throws Exception {
         if (Play.mode == Mode.DEV && request.path.equals("/@kill")) {
             System.out.println("@KILLED");
-            System.exit(0);
+            if (Play.standalonePlayServer) {
+                System.exit(0);
+            } else {
+                Logger.error("Cannot execute @kill since Play is not running as standalone server");
+            }
         }
         if (request.path.equals("/@status") || request.path.equals("/@status.json")) {
             if(!Play.started) {
@@ -118,7 +124,7 @@ public class CorePlugin extends PlayPlugin {
         out.println("~~~~~~~~~~~~~~~");
         out.println("Version: " + Play.version);
         out.println("Path: " + Play.frameworkPath);
-        out.println("ID: " + (Play.id == null || Play.id.isEmpty() ? "(not set)" : Play.id));
+        out.println("ID: " + (StringUtils.isEmpty(Play.id) ? "(not set)" : Play.id));
         out.println("Mode: " + Play.mode);
         out.println("Tmp dir: " + (Play.tmpDir == null ? "(no tmp dir)" : Play.tmpDir));
         out.println();
@@ -283,16 +289,18 @@ public class CorePlugin extends PlayPlugin {
         Class<?>[] enhancers = new Class[]{
             SigEnhancer.class,
             ControllersEnhancer.class,
+            LVEnhancer.class,
             ContinuationEnhancer.class,
             MailerEnhancer.class,
-            PropertiesEnhancer.class,
-            LocalvariablesNamesEnhancer.class
+            PropertiesEnhancer.class
         };
         for (Class<?> enhancer : enhancers) {
             try {
                 long start = System.currentTimeMillis();
                 ((Enhancer) enhancer.newInstance()).enhanceThisClass(applicationClass);
-                Logger.trace("%sms to apply %s to %s", System.currentTimeMillis() - start, enhancer.getSimpleName(), applicationClass.name);
+                if (Logger.isTraceEnabled()) {
+                    Logger.trace("%sms to apply %s to %s", System.currentTimeMillis() - start, enhancer.getSimpleName(), applicationClass.name);
+                }
             } catch (Exception e) {
                 throw new UnexpectedException("While applying " + enhancer + " on " + applicationClass.name, e);
             }

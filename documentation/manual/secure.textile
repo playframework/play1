@@ -1,17 +1,17 @@
 h1. Secure module
 
-The simple **Secure** module helps you to set-up basic authentication and authorization management in your application. It provides a simple **controllers.Secure** controller that defines a set of interceptors that you can easily add to your own controllers using the **@With** annotation.
+The simple **Secure** module helps you to set-up basic authentication and authorization management in your application. It provides a simple @controllers.Secure@ controller that defines a set of interceptors that you can easily add to your own controllers using the <code>@With</code> annotation.
 
 h2. <a>Enable the Secure module for the application</a>
 
-In the **/conf/application.conf** file, enable the Secure module by adding this line:
+In the @/conf/dependencies.yml@ file, enable the Secure module by adding a line after @require:@
 
-bc. # The secure module
-module.secure=${play.path}/modules/secure
+bc. require:
+    - play -> secure
 
 h2. <a>Import default Secure routes</a>
 
-In the **conf/routes** file, import the default module routes by adding this line:
+In the @conf/routes@ file, import the default module routes by adding this line:
 
 bc. # Import Secure routes
 *      /                module:secure
@@ -20,7 +20,7 @@ p(note). **Note** that it’s not required to use the default routes file. You c
 
 h2. <a>Protecting a controller</a>
 
-To protect a controller you just have to annotate it using **@With**. For example:
+To protect a controller you just have to annotate it using <code>@With</code>. For example:
 
 bc. @With(Secure.class)
 public class Application extends Controller {
@@ -28,14 +28,13 @@ public class Application extends Controller {
     public static void index() {
         render();
     }
-    
 }
 
 This controller will be automatically protected with the default authentication page.
 
 h2. <a>Customize the authentication mechanism</a>
 
-By default, the login page will accept any login/password. To customize it your application has to provide a **Security** provider. Just create a class in the **controllers** package that extends the **controllers.Secure.Security** class. Then you can override the **authenticate(String username, String password)** method.
+By default, the login page will accept any login/password. To customize it your application has to provide a **Security** provider. Just create a class in the @controllers@ package that extends the @controllers.Secure.Security@ class. Then you can override the @authenticate(String username, String password)@ method.
 
 bc. package controllers;
  
@@ -44,8 +43,7 @@ public class Security extends Secure.Security {
     static boolean authenticate(String username, String password) {
         User user = User.find("byEmail", username).first();
         return user != null && user.password.equals(password);
-    }    
-    
+    }
 }
 
 p(note). **Note** that you can also override other methods to customize how the application should react to authentication events (onAuthenticated, onDisconnected).
@@ -61,34 +59,30 @@ public class Application extends Controller {
         String user = Security.connected();
         render(user);
     }
-    
 }
 
 h2. <a>Adding authorization check</a>
 
-You can use the **@Check** annotation either on controller classes or action methods to tell the Secure module to check that the connected user has the required authorization to call this action.
+You can use the <code>@Check</code> annotation either on controller classes or action methods to tell the Secure module to check that the connected user has the required authorization to call this action.
 
 For example:
 
 bc. @With(Secure.class)
-public class Application extends Controller {
-    
-   ...
+public class Application extends Controller { 
+   …
    
    @Check("isAdmin")
    public static void delete(Long id) {
-       ...
+       …
    }
-    
 }
 
-By default the secure module will always authorize all checks. You have to customize by overriding one more method in your **Security** class.
+By default the secure module will always authorize all checks. You have to customize by overriding one more method in your @Security@ class.
 
 bc. package controllers;
  
 public class Security extends Secure.Security {
-    
-    ...
+    …
     
     static boolean check(String profile) {
         User user = User.find("byEmail", connected()).first();
@@ -99,5 +93,4 @@ public class Security extends Secure.Security {
             return false;
         }
     }    
-    
 }

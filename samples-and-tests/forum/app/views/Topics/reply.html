@@ -9,7 +9,7 @@
 	by ${connected.name}
 </p>
 
-<form id="post" action="@{Topics.createReply(topic.forum.id, topic.id)}" method="POST" accept-charset="utf-8">
+<form id="post" action="@{Topics.createReply(topic.forum.id, topic.id)}" method="POST" accept-charset="${_response_encoding}">
 	<p>
 		<textarea name="content" rows="8" cols="40" id="contentText"></textarea>
 	</p>

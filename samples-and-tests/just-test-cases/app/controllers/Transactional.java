@@ -1,9 +1,14 @@
 package controllers;
 
 import play.mvc.*;
+import play.db.*;
 import play.db.jpa.*;
+import play.Logger;
 
 import models.*;
+import models.otherdb.*;
+import models.otherdb.sub.*;
+import play.exceptions.JPAException;
 
 
 public class Transactional extends Controller {
@@ -48,12 +53,58 @@ public class Transactional extends Controller {
 	//This should be excluded from any transactions.
 	@play.db.jpa.NoTransaction
 	public static void disabledTransactionTest() {
-		renderText("isInsideTransaction: " + JPA.isInsideTransaction());
+		// try to do JPA action and it will fail because of @NoTransaction
+		try {
+		    Post.count();
+		} catch(JPAException e) {
+		    renderText("isInsideTransaction: false");
+		}
 	}
 	
 	//This should automatically run inside transaction and return true
 	public static void verifyIsInsideTransaction() {
+	    // must execute JPA action to lazy initialize transaction
+	    Post.count();
 		renderText("isInsideTransaction: " + JPA.isInsideTransaction());
+	}
+	
+	public static void useMultipleJPAConfigs() {
+	    
+	    Logger.info("Other db url: " + DB.getDBConfig("other").getUrl());
+	    
+	    EntityInOtherDb other = new EntityInOtherDb();
+	    other.name = "test";
+	    other.create();
+	    
+	    other = EntityInOtherDb.find("byName", "test").first();
+	    
+	    if (!other.name.equals("test")) {
+	        renderText("failed");
+	    }
+	    
+	    // do something with the default db also
+	    Post.count();
+	    
+	    // other db again
+	    long otherCount = EntityInOtherDb.count();
+	    
+	    // also check that Entity annotated via package-info works
+	    Entity2InOtherDb other2 = new Entity2InOtherDb();
+    	other2.name = "test2";
+    	other2.create();
+
+        other2 = Entity2InOtherDb.find("byName", "test2").first();
+
+	    if (!other2.name.equals("test2")) {
+	        renderText("failed2");
+	    }
+	    
+	    // make sure Entity2InOtherDb resolved to correct JPAConfig
+	    if (!other2.getJPAContext().getJPAConfig().equals(JPA.getJPAConfig("other")) ) {
+	        renderText("package-info annotation resolving does not work");
+	    }
+	    
+	    renderText("ok " + otherCount);
 	}
 	
 }

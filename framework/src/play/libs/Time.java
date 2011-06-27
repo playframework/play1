@@ -15,6 +15,8 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.NotImplementedException;
+
 /**
  * Time utils
  */
@@ -61,11 +63,36 @@ public class Time {
     /**
      * Parse a CRON expression
      * @param cron The CRON String
-     * @return The next Date that satisfie teh expression
+     * @return The next Date that satisfy the expression
      */
     public static Date parseCRONExpression(String cron) {
         try {
             return new CronExpression(cron).getNextValidTimeAfter(new Date());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid CRON pattern : " + cron, e);
+        }
+    }
+
+    /**
+     * Compute the number of milliseconds between the next valid date and the one after
+     * @param cron The CRON String
+     * @return the number of milliseconds between the next valid date and the one after,
+     * with an invalid interval between
+     */
+    public static long cronInterval(String cron) {
+        return cronInterval(cron, new Date());
+    }
+
+    /**
+     * Compute the number of milliseconds between the next valid date and the one after
+     * @param cron The CRON String
+     * @param date The date to start search
+     * @return the number of milliseconds between the next valid date and the one after,
+     * with an invalid interval between
+     */
+    public static long cronInterval(String cron, Date date) {
+        try {
+            return new CronExpression(cron).getNextInterval(date);
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid CRON pattern : " + cron, e);
         }
@@ -196,7 +223,7 @@ public class Time {
      * month&quot;.
      * <P>
      * The '#' character is allowed for the day-of-week field. This character is
-     * used to specify &quot;the nth&quot; XXX day of the month. For example, the 
+     * used to specify &quot;the nth&quot; xxx day of the month. For example, the 
      * value of &quot;6#3&quot; in the day-of-week field means the third Friday of 
      * the month (day 6 = Friday and &quot;#3&quot; = the 3rd one in the month). 
      * Other examples: &quot;2#1&quot; = the first Monday of the month and 
@@ -229,7 +256,7 @@ public class Time {
      * @author Contributions from Mads Henderson
      * @author Refactoring from CronTrigger to CronExpression by Aaron Craven
      */
-    static class CronExpression implements Serializable, Cloneable {
+    public static class CronExpression implements Serializable, Cloneable {
 
         private static final long serialVersionUID = 12423409423L;
         protected static final int SECOND = 0;
@@ -356,8 +383,6 @@ public class Time {
 
             Date newDate = null;
 
-            //TODO: (QUARTZ-481) IMPROVE THIS! The following is a BAD solution to this problem. Performance will be very bad here, depending on the cron expression. It is, however A solution.
-
             //keep getting the next included time until it's farther than one second
             // apart. At that point, lastDate is the last valid fire time. We return
             // the second immediately following it.
@@ -372,6 +397,18 @@ public class Time {
             }
 
             return new Date(lastDate.getTime() + 1000);
+        }
+
+        /**
+         * Return the interval between the next valid date and the one after
+         * @param date the date/time at which to begin the search
+         * @return the number of milliseconds between the next valid and the one after
+         */
+        public long getNextInterval(Date date) {
+            Date nextValid = getNextValidTimeAfter(date);
+            Date nextInvalid = getNextInvalidTimeAfter(nextValid);
+            Date nextNextValid = getNextValidTimeAfter(nextInvalid);
+            return nextNextValid.getTime() - nextValid.getTime();
         }
 
         /**
@@ -487,7 +524,7 @@ public class Time {
         }
 
         protected int storeExpressionVals(int pos, String s, int type)
-                throws ParseException {
+        throws ParseException {
 
             int incr = 0;
             int i = skipWhiteSpace(pos, s);
@@ -665,7 +702,7 @@ public class Time {
         }
 
         protected int checkNext(int pos, String s, int val, int type)
-                throws ParseException {
+        throws ParseException {
 
             int end = -1;
             int i = pos;
@@ -903,7 +940,7 @@ public class Time {
         }
 
         protected void addToSet(int val, int end, int incr, int type)
-                throws ParseException {
+        throws ParseException {
 
             TreeSet<Integer> set = getSet(type);
 
@@ -1004,22 +1041,22 @@ public class Time {
 
         protected TreeSet<Integer> getSet(int type) {
             switch (type) {
-                case SECOND:
-                    return seconds;
-                case MINUTE:
-                    return minutes;
-                case HOUR:
-                    return hours;
-                case DAY_OF_MONTH:
-                    return daysOfMonth;
-                case MONTH:
-                    return months;
-                case DAY_OF_WEEK:
-                    return daysOfWeek;
-                case YEAR:
-                    return years;
-                default:
-                    return null;
+            case SECOND:
+                return seconds;
+            case MINUTE:
+                return minutes;
+            case HOUR:
+                return hours;
+            case DAY_OF_MONTH:
+                return daysOfMonth;
+            case MONTH:
+                return months;
+            case DAY_OF_WEEK:
+                return daysOfWeek;
+            case YEAR:
+                return years;
+            default:
+                return null;
             }
         }
 
@@ -1256,8 +1293,8 @@ public class Time {
                         continue;
                     }
                 } else if (dayOfWSpec && !dayOfMSpec) { // get day by day of week rule
-                    if (lastdayOfWeek) { // are we looking for the last XXX day of
-                        // the month?
+                    if (lastdayOfWeek) {
+                        // are we looking for the last day of the month?
                         int dow = daysOfWeek.first().intValue(); // desired
                         // d-o-w
                         int cDow = cl.get(Calendar.DAY_OF_WEEK); // current d-o-w
@@ -1300,7 +1337,7 @@ public class Time {
                         }
 
                     } else if (nthdayOfWeek != 0) {
-                        // are we looking for the Nth XXX day in the month?
+                        // are we looking for the Nth day in the month?
                         int dow = daysOfWeek.first().intValue(); // desired
                         // d-o-w
                         int cDow = cl.get(Calendar.DAY_OF_WEEK); // current d-o-w
@@ -1382,8 +1419,7 @@ public class Time {
                     }
                 } else { // dayOfWSpec && !dayOfMSpec
                     throw new UnsupportedOperationException(
-                            "Support for specifying both a day-of-week AND a day-of-month parameter is not implemented.");
-                // TODO:
+                    "Support for specifying both a day-of-week AND a day-of-month parameter is not implemented.");
                 }
                 cl.set(Calendar.DAY_OF_MONTH, day);
 
@@ -1473,8 +1509,7 @@ public class Time {
          * that the <code>CronExpression</code> matches.
          */
         protected Date getTimeBefore(Date endTime) {
-            // TODO: implement QUARTZ-423
-            return null;
+            throw new NotImplementedException();
         }
 
         /**
@@ -1482,8 +1517,7 @@ public class Time {
          * <code>CronExpression</code> will match.
          */
         public Date getFinalFireTime() {
-            // TODO: implement QUARTZ-423
-            return null;
+            throw new NotImplementedException();
         }
 
         protected boolean isLeapYear(int year) {
@@ -1493,37 +1527,37 @@ public class Time {
         protected int getLastDayOfMonth(int monthNum, int year) {
 
             switch (monthNum) {
-                case 1:
-                    return 31;
-                case 2:
-                    return (isLeapYear(year)) ? 29 : 28;
-                case 3:
-                    return 31;
-                case 4:
-                    return 30;
-                case 5:
-                    return 31;
-                case 6:
-                    return 30;
-                case 7:
-                    return 31;
-                case 8:
-                    return 31;
-                case 9:
-                    return 30;
-                case 10:
-                    return 31;
-                case 11:
-                    return 30;
-                case 12:
-                    return 31;
-                default:
-                    throw new IllegalArgumentException("Illegal month number: " + monthNum);
+            case 1:
+                return 31;
+            case 2:
+                return (isLeapYear(year)) ? 29 : 28;
+            case 3:
+                return 31;
+            case 4:
+                return 30;
+            case 5:
+                return 31;
+            case 6:
+                return 30;
+            case 7:
+                return 31;
+            case 8:
+                return 31;
+            case 9:
+                return 30;
+            case 10:
+                return 31;
+            case 11:
+                return 30;
+            case 12:
+                return 31;
+            default:
+                throw new IllegalArgumentException("Illegal month number: " + monthNum);
             }
         }
 
         private void readObject(java.io.ObjectInputStream stream)
-                throws java.io.IOException, ClassNotFoundException {
+        throws java.io.IOException, ClassNotFoundException {
 
             stream.defaultReadObject();
             try {
