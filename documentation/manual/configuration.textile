@@ -867,5 +867,3 @@ h3(#XForwardedSupport). XForwardedSupport
 A comma-separated list of IP addresses that are allowed @X-Forwarded-For@ HTTP request header values, used to restrict local addresses when an @X-Forwarded-For@ request header is set by a proxy server.
 
 Default: @127.0.0.1@
-
-
