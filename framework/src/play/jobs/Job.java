@@ -1,11 +1,9 @@
 package play.jobs;
 
+import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
 
 import play.Invoker;
 import play.Invoker.InvocationContext;
@@ -13,8 +11,11 @@ import play.Logger;
 import play.Play;
 import play.exceptions.JavaExecutionException;
 import play.exceptions.PlayException;
-import play.libs.Time;
 import play.libs.F.Promise;
+import play.libs.Time;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
 
 /**
  * A job is an asynchronously executed unit of work
@@ -22,14 +23,18 @@ import play.libs.F.Promise;
  */
 public class Job<V> extends Invoker.Invocation implements Callable<V> {
 
+    public static final String invocationType = "Job";
+    
     protected ExecutorService executor;
     protected long lastRun = 0;
     protected boolean wasError = false;
     protected Throwable lastException = null;
 
+    Date nextPlannedExecution = null;
+
     @Override
     public InvocationContext getInvocationContext() {
-        return new InvocationContext(this.getClass().getAnnotations());
+        return new InvocationContext(invocationType, this.getClass().getAnnotations());
     }
     
     /**
@@ -109,7 +114,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
     public void every(int seconds) {
         JobsPlugin.executor.scheduleWithFixedDelay(this, seconds, seconds, TimeUnit.SECONDS);
     }
-    
+
     // Customize Invocation
     @Override
     public void onException(Throwable e) {
@@ -133,6 +138,7 @@ public class Job<V> extends Invoker.Invocation implements Callable<V> {
             if (init()) {
                 before();
                 V result = null;
+
                 try {
                     lastException = null;
                     lastRun = System.currentTimeMillis();

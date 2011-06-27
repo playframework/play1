@@ -1,6 +1,6 @@
 h1. Starting up the project
 
-h2. <a>Introduction</a>
+h2. <a name="introduction">Introduction</a>
 
 In this tutorial you will learn the Play framework by coding a real web application, from start to finish. In this application, we will try to use everything you would need in a real project, while introducing good practices for Play application development.
 
@@ -8,7 +8,7 @@ We have split the tutorial into several independent parts. Each part will introd
 
 p(note). **All the code** included in this tutorial can be used for your projects. We encourage you to copy and paste snippets of code or steal whole chunks.
 
-h2. <a>The project</a>
+h2. <a name="project">The project</a>
 
 We chose to create yet another blog engine. It’s not a very imaginative choice but it will allow us to explore most of the functionality needed by a modern web application. 
 
@@ -20,7 +20,7 @@ We will call this blog engine project **yabe**.
 
 p(note). This tutorial is also distributed as a sample application. You can find the final code in your Play installation’s **samples-and-tests/yabe/** directory.
 
-h2. <a>Prerequisites</a>
+h2. <a name="prerequisites">Prerequisites</a>
 
 First of all, make sure that you have a working Java installation. Play requires **Java 5 or later**.
 
@@ -32,7 +32,7 @@ You will of course need a text editor. If you are accustomed to using a fully-fe
 
 Later in this tutorial we will use Lighttpd and MySql to show how to deploy a Play application in ‘production’ mode. But Play can work without these components so if you can’t install them, it’s not a problem.
 
-h2. <a>Installing the Play framework</a>
+h2. <a name="install">Installing the Play framework</a>
 
 Installation is very simple. Just download the latest binary package from the download page and unzip it to any path.
 
@@ -40,7 +40,7 @@ p(note). If you’re using Windows, it is generally a good idea to avoid space c
 
 To work efficiently, you need to add the Play directory to your working path. It allows you to just type **play** at the command prompt to use the play utility. To check that the installation worked, just open a new command line and type **play**; it should show you the play basic usage help.
 
-h2. <a>Project creation</a>
+h2. <a name="new">Project creation</a>
 
 Now that Play is correctly installed, it’s time to create the blog application. Creating a Play application is pretty easy and fully managed by the play command line utility. That allows for standard project layouts between all Play applications. 
 
@@ -72,7 +72,7 @@ That allows two very important things in the development process. The first one 
 
 p(note). In fact Play keeps a bytecode cache in the application’s **tmp/** directory, but only to speed things up between restart on large applications. You can discard this cache using the **play clean** command if needed.
 
-h2. <a>Running the application</a>
+h2. <a name="run">Running the application</a>
 
 We can now test the newly-created application. Just return to the command line, go to the newly-created **yabe/** directory and type **play run**. Play will now load the application and start a web server on port 9000.
 
@@ -178,7 +178,7 @@ Like for Java code changes, just refresh the page in the browser to see the modi
 
 p(note). We will now start to code the blog application. You can either continue to work with a text editor or open the project in a Java IDE like Eclipse or NetBeans. If you want to set-up a Java IDE, see "Setting-up your preferred IDE":ide. 
 
-h2. <a>Setting-up the database</a>
+h2. <a name="db">Setting-up the database</a>
 
 One more thing before starting to code. For the blog engine, we will need a database. For development purposes, Play comes with a stand alone SQL database management system called H2. This is the best way to start a project before switching to a more robust database if needed. You can choose to have either an in-memory database or a filesystem database that will keep your data between application restarts. 
 
@@ -194,23 +194,50 @@ Now, go back to your browser and refresh the welcome page. Play will automatical
 
 bc. INFO  ~ Connected to jdbc:h2:mem:play
 
-h2. <a>Using a version control system 	to track changes</a>
+h2. <a name="vcs">Using a version control system 	to track changes</a>
 
-When you work on a project, it’s highly recommended to store your source code in a version control system (VCS). It allows you to revert to a previous version if a change breaks something, work with several people and give access to all the successive versions of the application. Of course you can use any VCS to store your project, but here we will use Bazaar as an example. "Bazaar":http://bazaar-vcs.org/ is a distributed source version control system.
+When you work on a project, it is highly recommended to store your source code in a version control system (VCS). This allows you to revert to a previous version if a change breaks something, work with several people and give access to all the successive versions of the application.
 
-Installing Bazaar is beyond the scope of this tutorial but it is very easy on any system. Once you have a working installation of Bazaar, go to the blog directory and init the application versioning by typing:
+When storing a Play application in a VCS, it is important to exclude the **tmp/**, **modules/**, **lib/**, **test-result/** and **logs/** directories.
+
+h3. <a name="bazaar">Bazaar</a>
+
+Here we will use Bazaar as an example. "Bazaar":http://bazaar-vcs.org/ is a distributed source version control system.
+
+Installing Bazaar is beyond the scope of this tutorial but it is very easy on any system. Once you have a working installation of Bazaar, go to the blog directory and initialise versioning by typing:
 
 bc. $ bzr init
-
-When storing a Play application in a VCS, it’s important to exclude the **tmp/** and **logs/** directories.
-
-bc. $ bzr ignore tmp
+$ bzr ignore tmp
+$ bzr ignore modules
+$ bzr ignore lib
+$ bzr ignore test-result
 $ bzr ignore logs
 
 Now we can commit our first blog engine version:
 
 bc. $ bzr add
 $ bzr commit -m "YABE inital version"
+
+h3. <a name="git">Git</a>
+
+"Git":http://git-scm.com is another distributed version control system, see its documentation for more information.
+
+Create a git working repository at the application root directory:
+
+bc. $ git init
+
+Create a @.gitignore@ file in the same directory, containing the following content:
+
+bc. /tmp
+/modules
+/lib
+/test-result
+/logs
+
+Add the application’s files and commit:
+
+bc. $ git add .
+$ git commit -m "YABE initial version"
 
 Version 1 is committed and we now have a solid foundation for our project. 
 

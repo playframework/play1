@@ -3,6 +3,9 @@ h2. Controller - Libraries
 *==WS.url("http://s.com/posts").get().toJSON();==*
 HTTP GET request to JSON
 
+*==WS.withEncoding("iso-8859-1").url("http://s.com/posts").get().toJSON();==*
+HTTP GET request to JSON using iso-8859-1 encoding
+
 *==WS.url("http://s.com/").post().toXML();==*
 HTTP POST request to XML
 

@@ -7,18 +7,18 @@ To run the Play framework, you need "Java 5 or later":http://java.sun.com. If yo
 
 p(note). If you are using MacOS, Java is just built-in. If you are using Linux, make sure to use either the Sun-JDK or OpenJDK (and not gcj which is the default Java command on many Linux distros). If you are using Windows, just download and install the latest JDK package.
 
-Be sure to have Java in the current path (enter **java -version** to check). Play will use the default Java or the one available at the **$JAVA_HOME** path if defined.
+Be sure to have Java in the current path (enter @java -version@ to check). Play will use the default Java or the one available at the @$JAVA_HOME@ path if defined.
 
 The *play* command line utility uses Python. So it should work out of the box on any UNIX system (however it requires at least Python 2.5). If you’re running Windows, don’t worry, a Python runtime is bundled with the framework.
 
 
 h2. <a>Download the binary package</a>
 
-Download the latest "Play binary package":http://download.playframework.org/ and extract the archive. For convenience, you should add the framework installation directory to your system PATH. If you’re on UNIX, make sure that the *play* script is runnable (otherwise simply do a **chmod +x play**). That’s all.
+Download the latest "Play binary package":http://download.playframework.org/ and extract the archive. For convenience, you should add the framework installation directory to your system PATH. If you’re on UNIX, make sure that the *play* script is runnable (otherwise simply do a @chmod +x play@). That’s all.
 
 p(note). *Tip*
  
-If you need to rebuild the framework for some reason, run **ant** in the **$PLAY_HOME/framework/** directory.
+If you need to rebuild the framework for some reason, run @ant@ in the @$PLAY_HOME/framework/@ directory.
 
 
 h2. <a>Build from the latest sources</a>
@@ -50,7 +50,7 @@ bc. # play help run
 
 h2. <a>Creating a new application</a>
 
-Use the **new** command to create a new application. You must give a non-existent path where the application will be created.
+Use the @new@ command to create a new application. You must give a non-existent path where the application will be created.
 
 bc. # play new myApp
 

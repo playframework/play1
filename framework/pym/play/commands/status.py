@@ -3,7 +3,10 @@ import shutil
 import getopt
 import hmac
 import urllib2
-from hashlib import sha1 as sha
+try:
+   from hashlib import sha1 as sha
+except ImportError:
+   import sha
 
 from play.utils import *
 
@@ -52,7 +55,7 @@ def execute(**kargs):
         req = urllib2.Request(url)
         req.add_header('Authorization', authorization)
         opener = urllib2.build_opener(proxy_handler)
-        status = opener.open(req);
+        status = opener.open(req)
         print '~ Status from %s,' % url
         print '~'
         print status.read()

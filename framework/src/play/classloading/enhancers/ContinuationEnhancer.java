@@ -1,18 +1,24 @@
 package play.classloading.enhancers;
 
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import javassist.CannotCompileException;
 import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import org.apache.commons.javaflow.bytecode.transformation.asm.AsmClassTransformer;
+import play.Play;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 public class ContinuationEnhancer extends Enhancer {
 
     static final List<String> continuationMethods = new ArrayList<String>();
+
     static {
         continuationMethods.add("play.mvc.Controller.await(java.lang.String)");
         continuationMethods.add("play.mvc.Controller.await(int)");
@@ -22,8 +28,21 @@ public class ContinuationEnhancer extends Enhancer {
         continuationMethods.add("play.mvc.WebSocketController.await(java.util.concurrent.Future)");
     }
 
+    public static boolean isEnhanced(String appClassName) {
+        ApplicationClass appClass = Play.classes.getApplicationClass( appClassName);
+        if ( appClass == null) {
+            return false;
+        }
+
+        // All classes enhanced for Continuations are implementing the interface EnhancedForContinuations
+        return EnhancedForContinuations.class.isAssignableFrom( appClass.javaClass );
+    }
+
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
+        if (isScala(applicationClass)) {
+            return;
+        }
 
         CtClass ctClass = makeClass(applicationClass);
 
@@ -31,36 +50,48 @@ public class ContinuationEnhancer extends Enhancer {
             return;
         }
 
-        final boolean[] needsContinuations = new boolean[] {false};
+        final boolean[] needsContinuations = new boolean[]{false};
 
-        for(CtMethod m : ctClass.getDeclaredMethods()) {
+        for (CtMethod m : ctClass.getDeclaredMethods()) {
             m.instrument(new ExprEditor() {
 
                 @Override
                 public void edit(MethodCall m) throws CannotCompileException {
                     try {
-                        if(continuationMethods.contains(m.getMethod().getLongName())) {
+                        if (continuationMethods.contains(m.getMethod().getLongName())) {
                             needsContinuations[0] = true;
                         }
-                    } catch(Exception e) {                        
+                    } catch (Exception e) {
                     }
                 }
-
             });
 
-            if(needsContinuations[0]) {
+            if (needsContinuations[0]) {
                 break;
             }
         }
 
-        if(!needsContinuations[0]) {
+        if (!needsContinuations[0]) {
             return;
         }
 
+
+        // To be able to runtime detect if a class is enhanced for Continuations,
+        // we add the interface EnhancedForContinuations to the class
+        CtClass enhancedForContinuationsInterface;
+        try {
+            InputStream in = getClass().getClassLoader().getResourceAsStream("play/classloading/enhancers/EnhancedForContinuations.class");
+            enhancedForContinuationsInterface = classPool.makeClass( in );
+            in.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        ctClass.addInterface( enhancedForContinuationsInterface );
+
         // Apply continuations
-        applicationClass.enhancedByteCode = new AsmClassTransformer().transform(applicationClass.enhancedByteCode);
+        applicationClass.enhancedByteCode = new AsmClassTransformer().transform( ctClass.toBytecode());
 
         ctClass.defrost();
+        enhancedForContinuationsInterface.defrost();
     }
-
 }

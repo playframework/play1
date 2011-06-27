@@ -1,8 +1,8 @@
 h1. Documentation
 
-Welcome to the play framework documentation. This documentation is intended for the *1.1 release* and may significantly differs from previous versions of the framework. 
+Welcome to the Play framework documentation. This documentation is intended for the *1.2 release* and may significantly differ from previous framework versions’ documentation. 
 
-Check the "version 1.1 release notes":releasenotes-1.1.
+Check the "version 1.2 release notes":releasenotes-1.2.
 
 h2. <a name="started">Getting started</a>
 
@@ -17,13 +17,6 @@ Your first steps with Play and your first 5 minutes of fun.
 # "Setting-up your preferred IDE":ide
 # "Your first application — the ‘Hello World’ tutorial":firstapp
 # "Sample applications":samples
-# "Live coding script - to practice, and impress your colleagues with":http://www.lunatech-research.fr/archives/2010/06/14/how-demo-play-framework-live-coding-script
-# "Play framework cheat sheets - Controllers":cheatsheet/controllers
-# "Play framework cheat sheets - Templates":cheatsheet/templates
-# "Play framework cheat sheets - Model":cheatsheet/model
-# "Play framework cheat sheets - Testing":cheatsheet/tests
-# "Play framework cheat sheets - Multi Environment":cheatsheet/multiEnvironment
-# "Play framework cheat sheets - Command Line":cheatsheet/commandLine
 
 
 h2. <a name="guide">Tutorial -- Play guide, a real world app step-by-step</a>
@@ -93,37 +86,22 @@ Everything you need to know about Play.
 ## "Counting objects":jpa#counting
 ## "Explicit save":jpa#save
 ## "More about generic typing problems":jpa#typing
-# "Logging configuration":logs
-## "Logging from your application":logs#logging
-## "Configure log levels":logs#levels
-# "Configuration in several environments":ids
-## "The framework ID":ids#id
-## "Setting the framework ID from the command line":ids#command
-# "Testing the application":test
-## "Writing tests":test#writing
-## "Fixtures":test#fixtures
-## "Running the tests":test#running
-## "Continuous integration":test#continuous
-# "Dependency management":dependency
-## "Dependency format":dependency#format
-## "dependencies.yml":dependency#yml
-## "Conflicts resolution":dependency#conflicts
-## "Adding new repositories":dependency#repositories
-# "Deployment options":deployment
-## "Standalone Play application":deployment#standalone
-## "Running on JEE application servers":deployment#appservers
-## "Google Application Engine":deployment#gae
-## "Stax cloud hosting platform":deployment#stax
-# "Production deployment":production
-## "Configure your application.conf":production#application
-## "Configure logging":production#logging
-## "Set-up a front-end HTTP server":production#server
-# "Modules and the module repository":modules
-## "What is a module?":modules#what
-## "How to load a module from an application":modules#loading
-## "Load default routes from modules":modules#routes
-## "Using the module repository":modules#repository
-## "Contributing a new module to the module repository":modules#contributing
+# "Play libs":libs
+## "XML parsing using XPath":libs#ParsingXMLusingXPath
+## "Web Service client":libs#WebServiceclient
+## "Functional programming with Java":libs#FunctionalprogrammingwithJava
+## "OAuth":libs#OAuth
+## "OpenID":libs#OpenID
+# "Asynchronous Jobs":jobs
+## "Bootstrap jobs":jobs#concepts
+## "Scheduled jobs":jobs#scheduling
+## "Triggering task jobs":jobs#tasks
+# "Asynchronous programming with HTTP":asynchronous
+## "Suspending HTTP requests":asynchronous#SuspendingHTTPrequests
+## "HTTP response streaming":asynchronous#HTTPresponsestreaming
+## "Using WebSockets":asynchronous#UsingWebSockets
+# "Ajax requests":ajax
+## "Making Ajax requests with JQuery":ajax#jsaction
 # "Internationalization":i18n
 ## "Only use UTF-8":i18n#utf8
 ## "Externalize your messages":i18n#messages
@@ -134,24 +112,71 @@ Everything you need to know about Play.
 ## "The cache API":cache#api
 ## "Don’t use the Session as a cache":cache#session
 ## "Configure memcached":cache#memcached
-# "Asynchronous execution using jobs":jobs
-## "Bootstrap jobs":jobs#concepts
-## "Scheduled jobs":jobs#scheduling
-## "Suspendable requests":jobs#suspendable
 # "Sending e-mail":emails
 ## "Mail and MVC integration":emails#mvc
 ## "SMTP configuration":emails#smtp
 ## "More about configuration":emails#configuration
 ## "Using Gmail":emails#gmail
+# "Testing the application":test
+## "Writing tests":test#writing
+## "Fixtures":test#fixtures
+## "Running the tests":test#running
+## "Continuous integration":test#continuous
 # "Security Guide":security
 ## "Sessions":security#sessions
 ## "Cross-Site Scripting":security#xss
 ## "SQL Injection":security#sql
 ## "Cross-Site Request Forgery":security#csrf
-# "Ajax with JQuery":ajax
-# "OpenID integration":openid
-# "OAuth integration":oauth
+# "Modules and the module repository":modules
+## "What is a module?":modules#what
+## "How to load a module from an application":modules#loading
+## "Load default routes from modules":modules#routes
+## "Using the module repository":modules#repository
+## "Contributing a new module to the module repository":modules#contributing
+# "Dependency management":dependency
+## "Dependency format":dependency#format
+## "dependencies.yml":dependency#yml
+## "Conflict resolution":dependency#conflicts
+## "Adding new repositories":dependency#repositories
+# "Managing your database evolutions":evolutions
+## "Evolutions scripts":evolutions#script
+## "Synchronizing concurrent changes":evolutions#Synchronizingconcurrentchanges
+## "Inconsistent states":evolutions#Inconsistentstates
+## "Evolutions commands":evolutions#Evolutionscommands
+# "Logging configuration":logs
+## "Logging from your application":logs#logging
+## "Configure log levels":logs#levels
+# "Configuration in several environments":ids
+## "The framework ID":ids#id
+## "Setting the framework ID from the command line":ids#command
+# "Production deployment":production
+## "Configure your application.conf":production#application
+## "Configure logging":production#logging
+## "Set-up a front-end HTTP server":production#server
+# "Deployment options":deployment
+## "Standalone Play application":deployment#standalone
+## "Running on JEE application servers":deployment#appservers
+## "Google Application Engine":deployment#gae
+## "Stax cloud hosting platform":deployment#stax
 
+
+h2. <a name="references">References</a>
+
+Extended references for day-to-day hacking.
+
+# "Quick index":index
+# "API documentation (Javadoc)":/@api/index.html
+# "Cheat sheets":cheatsheet/commandLine
+## "Command Line":cheatsheet/commandLine
+## "Controllers":cheatsheet/controllers
+## "Templates":cheatsheet/templates
+## "Model":cheatsheet/model
+## "Testing":cheatsheet/tests
+## "Multi-environment":cheatsheet/multiEnvironment
+# "Built-in extensions":tags
+## "Template tags":tags
+## "Java extensions":javaextensions
+## "Validations":validation-builtin
 
 h2. <a name="modules">Distribution Modules</a>
 
@@ -160,17 +185,11 @@ These optional modules are included with the standard distribution. "More module
 # "CRUD":crud
 # "Secure":secure
 
-h2. <a name="references">References</a>
-
-Extended references for day-to-day hacking.
-
-# "The missing cheat sheet":http://download.playframework.org/miscellaneous/play-cheat-sheet.pdf
-# "The ultimate Play cheat sheet":http://www.crionics.com/products/opensource/play/TheUltimatePlayCheatSheet.pdf
-# "Browse API documentation":/@api/index.html (Javadoc)
-# "Template tags and extensions reference":tags
-# "Java extensions":javaextensions
-# "Built-in validations":validation-builtin
-
 h2. <a name="versionnotes">Version notes</a>
 
-New versions of Play include certain changes. Check release notes for "Play 1.1":releasenotes-1.1, "Play 1.0.3":releasenotes-1.0.3, "Play 1.0.2":releasenotes-1.0.2, and "Play 1.0.1":releasenotes-1.0.1.
+New versions of Play include certain changes. Check older release notes for:
+
+# "Play 1.1":releasenotes-1.1
+# "Play 1.0.3":releasenotes-1.0.3
+# "Play 1.0.2":releasenotes-1.0.2
+# "Play 1.0.1":releasenotes-1.0.1

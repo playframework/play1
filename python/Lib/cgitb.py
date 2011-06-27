@@ -23,7 +23,7 @@ The default handler displays output as HTML.
 
 __author__ = 'Ka-Ping Yee'
 
-__version__ = '$Revision: 55349 $'
+__version__ = '$Revision: 55348 $'
 
 import sys
 

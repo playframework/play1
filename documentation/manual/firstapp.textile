@@ -15,9 +15,9 @@ h2. <a>Installing the Play framework</a>
 
 Installation is very simple. Just download the latest binary package from the download page and unzip it to any path.
 
-p(note). If you're using Windows, it is generally a good idea to avoid space characters in the path, so for example **c:\Play** would be a better choice than **c:\Documents And Settings\user\play**.
+p(note). If you're using Windows, it is generally a good idea to avoid space characters in the path, so for example @c:\Play@ would be a better choice than @c:\Documents And Settings\user\play@.
 
-To work efficiently, you need to add the Play directory to your working path. It allows to type just **play** at the command prompt to use the Play utility. To check that the installation worked, just open a new command line and type **play**; it should show you the Play basic usage help.
+To work efficiently, you need to add the Play directory to your working path. It allows to type just @play@ at the command prompt to use the Play utility. To check that the installation worked, just open a new command line and type @play@; it should show you the Play basic usage help.
 
 h2. <a>Project creation</a>
 
@@ -27,21 +27,21 @@ Open a new command line and type:
 
 bc. ~$ play new helloworld
 
-It will prompt you for the application full name. Type **Hello world**.
+It will prompt you for the application full name. Type @Hello world@.
 
 !images/firstapp-1!
 
-The **play new** command creates a new directory **helloworld/** and populates it with a series of files and directories, the most important being:
+The @play new@ command creates a new directory @helloworld/@ and populates it with a series of files and directories, the most important being:
 
-**app/** contains the application’s core, split between models, controllers and views directories. It can contain other Java package as well. This is the directory where **.java** source files live.
+@app/@ contains the application’s core, split between models, controllers and views directories. It can contain other Java package as well. This is the directory where @.java@ source files live.
 
-**conf/** contains all the application’s configuration files, especially the main **application.conf** file, the **routes** definition files and the **messages** files used for internationalization.
+@conf/@ contains all the application’s configuration files, especially the main @application.conf@ file, the @routes@ definition files and the @messages@ files used for internationalization.
 
-**lib/** contains all optional Java libraries packaged as standard .jar files.
+@lib/@ contains all optional Java libraries packaged as standard .jar files.
 
-**public/** contains all the publicly available resources, which includes JavaScript, stylesheets and images directories.
+@public/@ contains all the publicly available resources, which includes JavaScript, stylesheets and images directories.
 
-**test/** contains all the application tests. Tests are either written either as Java JUnit tests or as Selenium tests.
+@test/@ contains all the application tests. Tests are either written either as Java JUnit tests or as Selenium tests.
 
 p(note). Because **Play uses UTF-8** as single encoding, it's very important that all text files hosted in these directories are encoded using this charset. Make sure to configure your text editor accordingly.
 
@@ -51,7 +51,7 @@ That allows two very important things in the development process. The first one 
 
 h2. <a>Running the application</a>
 
-We can now test the newly-created application. Just return to the command line, go to the newly-created **helloworld/** directory and type **play run**. Play will now load the application and start a Web server on port 9000.
+We can now test the newly-created application. Just return to the command line, go to the newly-created @helloworld/@ directory and type @play run@. Play will now load the application and start a Web server on port 9000.
 
 You can see the new application by opening a browser to "http://localhost:9000":http://localhost:9000. A new application has a standard welcome page that just tells you that it was successfully created.
 
@@ -59,11 +59,11 @@ You can see the new application by opening a browser to "http://localhost:9000":
 
 Let’s see how the new application can display this page. 
 
-The main entry point of your application is the **conf/routes** file. This file defines all of the application’s accessible URLs. If you open the generated routes file you will see this first ‘route’:
+The main entry point of your application is the @conf/routes@ file. This file defines all of the application’s accessible URLs. If you open the generated routes file you will see this first ‘route’:
 
 bc. GET		/			Application.index
 
-That simply tells Play that when the web server receives a **GET** request for the **/** path, it must call the **Application.index** Java method. In this case, **Application.index** is a shortcut for **controllers.Application.index**, because the controllers package is implicit. 
+That simply tells Play that when the web server receives a **GET** request for the @/@ path, it must call the @Application.index@ Java method. In this case, @Application.index@ is a shortcut for @controllers.Application.index@, because the controllers package is implicit. 
 
 When you create standalone Java applications you generally use a single entry point defined by a method such as:
 
@@ -73,7 +73,7 @@ bc. public static void main(String[] args) {
 
 A Play application has several entry points, one for each URL. We call these methods **action** methods. Action methods are defined in special classes that we call **controllers**.
 
-Let’s see how the **controllers.Application** controller looks like. Open the **helloworld/app/controllers/Application.java** source file:
+Let’s see how the @controllers.Application@ controller looks like. Open the @helloworld/app/controllers/Application.java@ source file:
 
 bc. package controllers;
  
@@ -87,26 +87,26 @@ public class Application extends Controller {
  
 }
 
-You see that controller classes extend the **play.mvc.Controller** class. This class provides all useful methods for controllers, like the **render()** method we use in the index action.
+You see that controller classes extend the @play.mvc.Controller@ class. This class provides all useful methods for controllers, like the @render()@ method we use in the index action.
 
-The index action is defined as a **public static void** method. This is how action methods are defined. You can see that action methods are static, because the controller classes are never instantiated. They are marked public to authorize the framework to call them in response of a URL. They always return void.  
+The index action is defined as a @public static void@ method. This is how action methods are defined. You can see that action methods are static, because the controller classes are never instantiated. They are marked public to authorize the framework to call them in response of a URL. They always return void.  
 
-The default index action is simple: it calls the **render()** method which tells Play to render a template. Using a template is the most common way (but not the only one) to generate the HTTP response.
+The default index action is simple: it calls the @render()@ method which tells Play to render a template. Using a template is the most common way (but not the only one) to generate the HTTP response.
 
-Templates are simple text files that live in the **/app/views** directory. Because we didn’t specify a template, the default one for this action will be used: **Application/index.html**
+Templates are simple text files that live in the @/app/views@ directory. Because we didn’t specify a template, the default one for this action will be used: @Application/index.html@
 
-To see what the template looks like, open the **helloworld/app/views/Application/index.html** file:
+To see what the template looks like, open the @helloworld/app/views/Application/index.html@ file:
 
 bc. #{extends 'main.html' /}
 #{set title:'Home' /}
  
 #{welcome /}
 
-The template content seems pretty light. In fact, all you see are Play tags. Play tags are very close to JSP taglib. This is the **#{welcome /}** tag that generates the welcome message you’ve seen in the browser. 
+The template content seems pretty light. In fact, all you see are Play tags. Play tags are very close to JSP taglib. This is the @#{welcome /}@ tag that generates the welcome message you’ve seen in the browser. 
 
-The **#{extends /}** tags tells Play that this template inherits another template called **main.html**. Template inheritance is a powerful concept that allows to create complex web pages by reusing common parts.
+The @#{extends /}@ tags tells Play that this template inherits another template called @main.html@. Template inheritance is a powerful concept that allows to create complex web pages by reusing common parts.
 
-Open the **helloworld/app/views/main.html** template:
+Open the @helloworld/app/views/main.html@ template:
 
 bc. <!DOCTYPE html>
 <html>
@@ -123,13 +123,13 @@ bc. <!DOCTYPE html>
     </body>
 </html>
 
-Can you see the **#{doLayout /}** tag? This is where the content of **Application/index.html** will be inserted.
+Can you see the @#{doLayout /}@ tag? This is where the content of @Application/index.html@ will be inserted.
 
 h2. <a>Creating the form</a>
 
 We will start the ‘Hello World’ application with a form where you can enter your name.
 
-Edit the **helloworld/app/views/Application/index.html** template:
+Edit the @helloworld/app/views/Application/index.html@ template:
 
 bc. #{extends 'main.html' /}
 #{set title:'Home' /}
@@ -141,11 +141,11 @@ bc. #{extends 'main.html' /}
 
 p(note). Note that we use GET as form submission method, because the form submission does not have any side effect and is idempotent.
 
-We use the **@{…}** notation to ask Play to automatically generate the URL able to invoke the **Application.sayHello** action. Now, refresh the home page in the browser.
+We use the <code>@{…}</code> notation to ask Play to automatically generate the URL able to invoke the @Application.sayHello@ action. Now, refresh the home page in the browser.
 
 !images/firstapp-2!
 
-Oops, you get an error. This is because you reference the non-existent action **Application.sayHello**. Let’s create it in the **helloworld/app/controllers/Application.java** file:
+Oops, you get an error. This is because you reference the non-existent action @Application.sayHello@. Let’s create it in the @helloworld/app/controllers/Application.java@ file:
 
 bc. package controllers;
  
@@ -163,7 +163,7 @@ public class Application extends Controller {
  
 }
 
-We have declared the **myName** parameter in the action method signature, so it will automatically be filled with the value of the HTTP **myName** parameter, coming from the form submission. And we call render to just display a template; as we pass the **myName** variable to the **render()** call, this one will be available from the template.
+We have declared the @myName@ parameter in the action method signature, so it will automatically be filled with the value of the HTTP @myName@ parameter, coming from the form submission. And we call render to just display a template; as we pass the @myName@ variable to the @render()@ call, this one will be available from the template.
 
 !images/firstapp-3!
 
@@ -171,7 +171,7 @@ Now, if you try to enter your name and submit the form, you will get another err
 
 !images/firstapp3!
 
-The error is pretty clear. Play tries to render the default template for this action method, but it doesn’t exist. Let’s create it in the file **helloworld/app/views/Application/sayHello.html**:
+The error is pretty clear. Play tries to render the default template for this action method, but it doesn’t exist. Let’s create it in the file @helloworld/app/views/Application/sayHello.html@:
 
 bc. #{extends 'main.html' /}
 #{set title:'Home' /}
@@ -184,7 +184,7 @@ You can refresh the page.
 
 !images/firstapp-4!
 
-Look how we have used Groovy’s **?:** operator. It switches to a default value if the **myName** variable is not filled. So if you try to submit the form without entering any name, it will display ‘Hello guest’.
+Look how we have used Groovy’s @?:@ operator. It switches to a default value if the @myName@ variable is not filled. So if you try to submit the form without entering any name, it will display ‘Hello guest’.
 
 h2. <a>Providing a better URL</a>
 
@@ -196,7 +196,7 @@ It is not very pretty. This is because Play used the default ‘catch all’ rou
 
 bc. *       /{controller}/{action}                  {controller}.{action}
 
-We can have a better URL by specifying a custom path for the **Application.sayHello** action. Edit the **helloworld/conf/routes** file and add this route after the first one:
+We can have a better URL by specifying a custom path for the @Application.sayHello@ action. Edit the @helloworld/conf/routes@ file and add this route after the first one:
 
 bc. GET     /hello                                  Application.sayHello
 
@@ -204,7 +204,7 @@ Now go back to the form and submit it again to check that it uses the new URL pa
 
 h2. <a>Customizing the layout</a>
 
-As both templates that the application use so far inherit from the same **main.html** template, you can easily add a custom layout. Edit the **helloworld/app/views/main.html** file:
+As both templates that the application use so far inherit from the same @main.html@ template, you can easily add a custom layout. Edit the @helloworld/app/views/main.html@ file:
 
 bc. ...
 <body>
@@ -223,7 +223,7 @@ h2. <a>Adding validation</a>
 
 We will add a little validation to the form, to make the name field required. We can use the Play validation framework to do that.
 
-Edit the **helloworld/app/controllers/Application.java** controller, and the **sayHello** action:
+Edit the @helloworld/app/controllers/Application.java@ controller, and the @sayHello@ action:
 
 bc. ...
 public static void sayHello(@Required String myName) {
@@ -235,11 +235,11 @@ public static void sayHello(@Required String myName) {
 }
 ...
 
-And don’t forget to import the **play.data.validation.*** package to get the **@Required** annotation. Play will automatically check that the myName field is filled or will add an error object to the **errors** scope. Then if there is any error, we add a message to the **flash** scope and redirect to the **index** action.
+And don’t forget to import the @play.data.validation.*@ package to get the <code>@Required</code> annotation. Play will automatically check that the myName field is filled or will add an error object to the **errors** scope. Then if there is any error, we add a message to the **flash** scope and redirect to the @index@ action.
 
 The flash scope allows to keep messages during action redirection.
 
-Now you just have to display the **error** message if any. Edit the **helloworld/app/views/Application/index.html**:
+Now you just have to display the **error** message if any. Edit the @helloworld/app/views/Application/index.html@:
 
 bc. #{extends 'main.html' /}
 #{set title:'Home' /}
@@ -263,11 +263,11 @@ h2. <a>Writing an automated test suite</a>
 
 We will finish by writing a test for the application. As there is no Java logic to test, we need to test the Web application itself. So we will write a Selenium test.
 
-First, you need to run your application in **test mode**. Stop the application and restart it with the **test** command:
+First, you need to run your application in **test mode**. Stop the application and restart it with the @test@ command:
 
 bc. $ play test
 
-The **play test** command is almost the same as **play run**, except that it loads a test runner module that allows to run test suite directly from a browser. 
+The @play test@ command is almost the same as @play run@, except that it loads a test runner module that allows to run test suite directly from a browser. 
 
 Open a browser to the "http://localhost:9000/@tests":http://localhost:9000/@tests URL to see the test runner. Try to select all the default tests and run them; all should be green… But these default tests don’t really test anything.
 
@@ -275,7 +275,7 @@ Open a browser to the "http://localhost:9000/@tests":http://localhost:9000/@test
 
 A selenium test suite is typically written as an HTML file. The HTML syntax required by selenium is a little tedious (formatted using an HTML table element) to write. The good news is that Play will help you to generate it using the Play template engine and a set of tags that support a simplified syntax for selenium scenarios. 
 
-The default test suite of a newly created Play application already contains a selenium test. Open the **helloworld/test/Application.test.html** file:
+The default test suite of a newly created Play application already contains a selenium test. Open the @helloworld/test/Application.test.html@ file:
 
 bc. *{ You can use plain selenium command using the selenium tag }*
  

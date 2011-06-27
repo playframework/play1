@@ -8,11 +8,12 @@
 ~ 
 ~ Synopsis:
 ~ ~~~~~~~~~
-~ play javadoc [app_path]
+~ play javadoc [app_path] [additional_args]
 ~
 ~ Description:
 ~ ~~~~~~~~~~~~
 ~ Generate the Javadoc for your project, not including Play classes. Resulting
 ~ html file will be in a javadoc folder in your application directory. The
-~ commands' logs are logs/javadoc.log and logs/javadoc.err.
+~ commands' logs are logs/javadoc.log and logs/javadoc.err. Any additonal
+~ arguments provided are passed to the javadoc command.
 ~

@@ -28,6 +28,7 @@ import os
 import time
 import sys
 from urlparse import urljoin as basejoin
+import warnings
 
 __all__ = ["urlopen", "URLopener", "FancyURLopener", "urlretrieve",
            "urlcleanup", "quote", "quote_plus", "unquote", "unquote_plus",
@@ -35,7 +36,7 @@ __all__ = ["urlopen", "URLopener", "FancyURLopener", "urlretrieve",
            "localhost", "thishost", "ftperrors", "basejoin", "unwrap",
            "splittype", "splithost", "splituser", "splitpasswd", "splitport",
            "splitnport", "splitquery", "splitattr", "splitvalue",
-           "splitgophertype", "getproxies"]
+           "getproxies"]
 
 __version__ = '1.17'    # XXX This version is not always updated :-(
 
@@ -69,7 +70,11 @@ else:
 # Shortcut for basic usage
 _urlopener = None
 def urlopen(url, data=None, proxies=None):
-    """urlopen(url [, data]) -> open file-like object"""
+    """Create a file-like object for the specified URL to read from."""
+    from warnings import warnpy3k
+    warnings.warnpy3k("urllib.urlopen() has been removed in Python 3.0 in "
+                        "favor of urllib2.urlopen()", stacklevel=2)
+
     global _urlopener
     if proxies is not None:
         opener = FancyURLopener(proxies=proxies)
@@ -90,6 +95,14 @@ def urlretrieve(url, filename=None, reporthook=None, data=None):
 def urlcleanup():
     if _urlopener:
         _urlopener.cleanup()
+
+# check for SSL
+try:
+    import ssl
+except:
+    _have_ssl = False
+else:
+    _have_ssl = True
 
 # exception raised when downloaded size does not match content-length
 class ContentTooShortError(IOError):
@@ -326,13 +339,16 @@ class URLopener:
         if data is not None:
             h.send(data)
         errcode, errmsg, headers = h.getreply()
+        fp = h.getfile()
         if errcode == -1:
+            if fp: fp.close()
             # something went wrong with the HTTP status line
             raise IOError, ('http protocol error', 0,
                             'got a bad status line', None)
-        fp = h.getfile()
-        if errcode == 200:
-            return addinfourl(fp, headers, "http:" + url)
+        # According to RFC 2616, "2xx" code indicates that the client's
+        # request was successfully received, understood, and accepted.
+        if (200 <= errcode < 300):
+            return addinfourl(fp, headers, "http:" + url, errcode)
         else:
             if data is None:
                 return self.http_error(url, fp, errcode, errmsg, headers)
@@ -360,9 +376,10 @@ class URLopener:
         fp.close()
         raise IOError, ('http error', errcode, errmsg, headers)
 
-    if hasattr(socket, "ssl"):
+    if _have_ssl:
         def open_https(self, url, data=None):
             """Use HTTPS protocol."""
+
             import httplib
             user_passwd = None
             proxy_passwd = None
@@ -417,37 +434,22 @@ class URLopener:
             if data is not None:
                 h.send(data)
             errcode, errmsg, headers = h.getreply()
+            fp = h.getfile()
             if errcode == -1:
+                if fp: fp.close()
                 # something went wrong with the HTTP status line
                 raise IOError, ('http protocol error', 0,
                                 'got a bad status line', None)
-            fp = h.getfile()
-            if errcode == 200:
-                return addinfourl(fp, headers, "https:" + url)
+            # According to RFC 2616, "2xx" code indicates that the client's
+            # request was successfully received, understood, and accepted.
+            if (200 <= errcode < 300):
+                return addinfourl(fp, headers, "https:" + url, errcode)
             else:
                 if data is None:
                     return self.http_error(url, fp, errcode, errmsg, headers)
                 else:
                     return self.http_error(url, fp, errcode, errmsg, headers,
                                            data)
-
-    def open_gopher(self, url):
-        """Use Gopher protocol."""
-        if not isinstance(url, str):
-            raise IOError, ('gopher error', 'proxy support for gopher protocol currently not implemented')
-        import gopherlib
-        host, selector = splithost(url)
-        if not host: raise IOError, ('gopher error', 'no host given')
-        host = unquote(host)
-        type, selector = splitgophertype(selector)
-        selector, query = splitquery(selector)
-        selector = unquote(selector)
-        if query:
-            query = unquote(query)
-            fp = gopherlib.send_query(selector, query, host)
-        else:
-            fp = gopherlib.send_selector(selector, host)
-        return addinfourl(fp, noheaders(), "gopher:" + url)
 
     def open_file(self, url):
         """Use local file or FTP depending on form of URL."""
@@ -460,7 +462,7 @@ class URLopener:
 
     def open_local_file(self, url):
         """Use local file."""
-        import mimetypes, mimetools, email.Utils
+        import mimetypes, mimetools, email.utils
         try:
             from cStringIO import StringIO
         except ImportError:
@@ -472,7 +474,7 @@ class URLopener:
         except OSError, e:
             raise IOError(e.errno, e.strerror, e.filename)
         size = stats.st_size
-        modified = email.Utils.formatdate(stats.st_mtime, usegmt=True)
+        modified = email.utils.formatdate(stats.st_mtime, usegmt=True)
         mtype = mimetypes.guess_type(url)[0]
         headers = mimetools.Message(StringIO(
             'Content-Type: %s\nContent-Length: %d\nLast-modified: %s\n' %
@@ -613,7 +615,7 @@ class FancyURLopener(URLopener):
 
     def http_error_default(self, url, fp, errcode, errmsg, headers):
         """Default error handling -- don't raise an exception."""
-        return addinfourl(fp, headers, "http:" + url)
+        return addinfourl(fp, headers, "http:" + url, errcode)
 
     def http_error_302(self, url, fp, errcode, errmsg, headers, data=None):
         """Error 302 -- relocated (temporarily)."""
@@ -835,19 +837,21 @@ def noheaders():
 class ftpwrapper:
     """Class used by open_ftp() for cache of open FTP connections."""
 
-    def __init__(self, user, passwd, host, port, dirs):
+    def __init__(self, user, passwd, host, port, dirs,
+                 timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
         self.user = user
         self.passwd = passwd
         self.host = host
         self.port = port
         self.dirs = dirs
+        self.timeout = timeout
         self.init()
 
     def init(self):
         import ftplib
         self.busy = 0
         self.ftp = ftplib.FTP()
-        self.ftp.connect(self.host, self.port)
+        self.ftp.connect(self.host, self.port, self.timeout)
         self.ftp.login(self.user, self.passwd)
         for dir in self.dirs:
             self.ftp.cwd(dir)
@@ -874,9 +878,19 @@ class ftpwrapper:
         if not conn:
             # Set transfer mode to ASCII!
             self.ftp.voidcmd('TYPE A')
-            # Try a directory listing
-            if file: cmd = 'LIST ' + file
-            else: cmd = 'LIST'
+            # Try a directory listing. Verify that directory exists.
+            if file:
+                pwd = self.ftp.pwd()
+                try:
+                    try:
+                        self.ftp.cwd(file)
+                    except ftplib.error_perm, reason:
+                        raise IOError, ('ftp error', reason), sys.exc_info()[2]
+                finally:
+                    self.ftp.cwd(pwd)
+                cmd = 'LIST ' + file
+            else:
+                cmd = 'LIST'
             conn = self.ftp.ntransfercmd(cmd)
         self.busy = 1
         # Pass back both a suitably decorated object and a retrieval length
@@ -955,13 +969,17 @@ class addinfo(addbase):
 class addinfourl(addbase):
     """class to add info() and geturl() methods to an open file."""
 
-    def __init__(self, fp, headers, url):
+    def __init__(self, fp, headers, url, code=None):
         addbase.__init__(self, fp)
         self.headers = headers
         self.url = url
+        self.code = code
 
     def info(self):
         return self.headers
+
+    def getcode(self):
+        return self.code
 
     def geturl(self):
         return self.url
@@ -979,7 +997,6 @@ class addinfourl(addbase):
 # splitattr('/path;attr1=value1;attr2=value2;...') ->
 #   '/path', ['attr1=value1', 'attr2=value2', ...]
 # splitvalue('attr=value') --> 'attr', 'value'
-# splitgophertype('/Xselector') --> 'X', 'selector'
 # unquote('abc%20def') -> 'abc def'
 # quote('abc def') -> 'abc%20def')
 
@@ -1139,12 +1156,6 @@ def splitvalue(attr):
     if match: return match.group(1, 2)
     return attr, None
 
-def splitgophertype(selector):
-    """splitgophertype('/Xselector') --> 'X', 'selector'."""
-    if selector[:1] == '/' and selector[1:2]:
-        return selector[1], selector[2:]
-    return None, selector
-
 _hextochr = dict(('%02x' % i, chr(i)) for i in range(256))
 _hextochr.update(('%02X' % i, chr(i)) for i in range(256))
 
@@ -1292,42 +1303,256 @@ def getproxies_environment():
             proxies[name[:-6]] = value
     return proxies
 
+def proxy_bypass_environment(host):
+    """Test if proxies should not be used for a particular host.
+
+    Checks the environment for a variable named no_proxy, which should
+    be a list of DNS suffixes separated by commas, or '*' for all hosts.
+    """
+    no_proxy = os.environ.get('no_proxy', '') or os.environ.get('NO_PROXY', '')
+    # '*' is special case for always bypass
+    if no_proxy == '*':
+        return 1
+    # strip port off host
+    hostonly, port = splitport(host)
+    # check if the host ends with any of the DNS suffixes
+    for name in no_proxy.split(','):
+        if name and (hostonly.endswith(name) or host.endswith(name)):
+            return 1
+    # otherwise, don't bypass
+    return 0
+
+
 if sys.platform == 'darwin':
-    def getproxies_internetconfig():
+
+    def _CFSetup(sc):
+        from ctypes import c_int32, c_void_p, c_char_p, c_int
+        sc.CFStringCreateWithCString.argtypes = [ c_void_p, c_char_p, c_int32 ]
+        sc.CFStringCreateWithCString.restype = c_void_p
+        sc.SCDynamicStoreCopyProxies.argtypes = [ c_void_p ]
+        sc.SCDynamicStoreCopyProxies.restype = c_void_p
+        sc.CFDictionaryGetValue.argtypes = [ c_void_p, c_void_p ]
+        sc.CFDictionaryGetValue.restype = c_void_p
+        sc.CFStringGetLength.argtypes = [ c_void_p ]
+        sc.CFStringGetLength.restype = c_int32
+        sc.CFStringGetCString.argtypes = [ c_void_p, c_char_p, c_int32, c_int32 ]
+        sc.CFStringGetCString.restype = c_int32
+        sc.CFNumberGetValue.argtypes = [ c_void_p, c_int, c_void_p ]
+        sc.CFNumberGetValue.restype = c_int32
+        sc.CFRelease.argtypes = [ c_void_p ]
+        sc.CFRelease.restype = None
+
+    def _CStringFromCFString(sc, value):
+        from ctypes import create_string_buffer
+        length = sc.CFStringGetLength(value) + 1
+        buff = create_string_buffer(length)
+        sc.CFStringGetCString(value, buff, length, 0)
+        return buff.value
+
+    def _CFNumberToInt32(sc, cfnum):
+        from ctypes import byref, c_int
+        val = c_int()
+        kCFNumberSInt32Type = 3
+        sc.CFNumberGetValue(cfnum, kCFNumberSInt32Type, byref(val))
+        return val.value
+
+
+    def proxy_bypass_macosx_sysconf(host):
+        """
+        Return True iff this host shouldn't be accessed using a proxy
+
+        This function uses the MacOSX framework SystemConfiguration
+        to fetch the proxy information.
+        """
+        from ctypes import cdll
+        from ctypes.util import find_library
+        import re
+        import socket
+        from fnmatch import fnmatch
+
+        def ip2num(ipAddr):
+            parts = ipAddr.split('.')
+            parts = map(int, parts)
+            if len(parts) != 4:
+                parts = (parts + [0, 0, 0, 0])[:4]
+            return (parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3]
+
+        sc = cdll.LoadLibrary(find_library("SystemConfiguration"))
+        _CFSetup(sc)
+
+        hostIP = None
+
+        if not sc:
+            return False
+
+        kSCPropNetProxiesExceptionsList = sc.CFStringCreateWithCString(0, "ExceptionsList", 0)
+        kSCPropNetProxiesExcludeSimpleHostnames = sc.CFStringCreateWithCString(0,
+                "ExcludeSimpleHostnames", 0)
+
+
+        proxyDict = sc.SCDynamicStoreCopyProxies(None)
+        if proxyDict is None:
+            return False
+
+        try:
+            # Check for simple host names:
+            if '.' not in host:
+                exclude_simple = sc.CFDictionaryGetValue(proxyDict,
+                        kSCPropNetProxiesExcludeSimpleHostnames)
+                if exclude_simple and _CFNumberToInt32(sc, exclude_simple):
+                    return True
+
+
+            # Check the exceptions list:
+            exceptions = sc.CFDictionaryGetValue(proxyDict, kSCPropNetProxiesExceptionsList)
+            if exceptions:
+                # Items in the list are strings like these: *.local, 169.254/16
+                for index in xrange(sc.CFArrayGetCount(exceptions)):
+                    value = sc.CFArrayGetValueAtIndex(exceptions, index)
+                    if not value: continue
+                    value = _CStringFromCFString(sc, value)
+
+                    m = re.match(r"(\d+(?:\.\d+)*)(/\d+)?", value)
+                    if m is not None:
+                        if hostIP is None:
+                            hostIP = socket.gethostbyname(host)
+                            hostIP = ip2num(hostIP)
+
+                        base = ip2num(m.group(1))
+                        mask = int(m.group(2)[1:])
+                        mask = 32 - mask
+
+                        if (hostIP >> mask) == (base >> mask):
+                            return True
+
+                    elif fnmatch(host, value):
+                        return True
+
+            return False
+
+        finally:
+            sc.CFRelease(kSCPropNetProxiesExceptionsList)
+            sc.CFRelease(kSCPropNetProxiesExcludeSimpleHostnames)
+
+
+
+    def getproxies_macosx_sysconf():
         """Return a dictionary of scheme -> proxy server URL mappings.
 
-        By convention the mac uses Internet Config to store
-        proxies.  An HTTP proxy, for instance, is stored under
-        the HttpProxy key.
-
+        This function uses the MacOSX framework SystemConfiguration
+        to fetch the proxy information.
         """
-        try:
-            import ic
-        except ImportError:
+        from ctypes import cdll
+        from ctypes.util import find_library
+
+        sc = cdll.LoadLibrary(find_library("SystemConfiguration"))
+        _CFSetup(sc)
+
+        if not sc:
             return {}
 
-        try:
-            config = ic.IC()
-        except ic.error:
-            return {}
+        kSCPropNetProxiesHTTPEnable = sc.CFStringCreateWithCString(0, "HTTPEnable", 0)
+        kSCPropNetProxiesHTTPProxy = sc.CFStringCreateWithCString(0, "HTTPProxy", 0)
+        kSCPropNetProxiesHTTPPort = sc.CFStringCreateWithCString(0, "HTTPPort", 0)
+
+        kSCPropNetProxiesHTTPSEnable = sc.CFStringCreateWithCString(0, "HTTPSEnable", 0)
+        kSCPropNetProxiesHTTPSProxy = sc.CFStringCreateWithCString(0, "HTTPSProxy", 0)
+        kSCPropNetProxiesHTTPSPort = sc.CFStringCreateWithCString(0, "HTTPSPort", 0)
+
+        kSCPropNetProxiesFTPEnable = sc.CFStringCreateWithCString(0, "FTPEnable", 0)
+        kSCPropNetProxiesFTPPassive = sc.CFStringCreateWithCString(0, "FTPPassive", 0)
+        kSCPropNetProxiesFTPPort = sc.CFStringCreateWithCString(0, "FTPPort", 0)
+        kSCPropNetProxiesFTPProxy = sc.CFStringCreateWithCString(0, "FTPProxy", 0)
+
+        kSCPropNetProxiesGopherEnable = sc.CFStringCreateWithCString(0, "GopherEnable", 0)
+        kSCPropNetProxiesGopherPort = sc.CFStringCreateWithCString(0, "GopherPort", 0)
+        kSCPropNetProxiesGopherProxy = sc.CFStringCreateWithCString(0, "GopherProxy", 0)
+
         proxies = {}
-        # HTTP:
-        if 'UseHTTPProxy' in config and config['UseHTTPProxy']:
-            try:
-                value = config['HTTPProxyHost']
-            except ic.error:
-                pass
-            else:
-                proxies['http'] = 'http://%s' % value
-        # FTP: XXXX To be done.
-        # Gopher: XXXX To be done.
+        proxyDict = sc.SCDynamicStoreCopyProxies(None)
+
+        try:
+            # HTTP:
+            enabled = sc.CFDictionaryGetValue(proxyDict, kSCPropNetProxiesHTTPEnable)
+            if enabled and _CFNumberToInt32(sc, enabled):
+                proxy = sc.CFDictionaryGetValue(proxyDict, kSCPropNetProxiesHTTPProxy)
+                port = sc.CFDictionaryGetValue(proxyDict, kSCPropNetProxiesHTTPPort)
+
+                if proxy:
+                    proxy = _CStringFromCFString(sc, proxy)
+                    if port:
+                        port = _CFNumberToInt32(sc, port)
+                        proxies["http"] = "http://%s:%i" % (proxy, port)
+                    else:
+                        proxies["http"] = "http://%s" % (proxy, )
+
+            # HTTPS:
+            enabled = sc.CFDictionaryGetValue(proxyDict, kSCPropNetProxiesHTTPSEnable)
+            if enabled and _CFNumberToInt32(sc, enabled):
+                proxy = sc.CFDictionaryGetValue(proxyDict, kSCPropNetProxiesHTTPSProxy)
+                port = sc.CFDictionaryGetValue(proxyDict, kSCPropNetProxiesHTTPSPort)
+
+                if proxy:
+                    proxy = _CStringFromCFString(sc, proxy)
+                    if port:
+                        port = _CFNumberToInt32(sc, port)
+                        proxies["https"] = "http://%s:%i" % (proxy, port)
+                    else:
+                        proxies["https"] = "http://%s" % (proxy, )
+
+            # FTP:
+            enabled = sc.CFDictionaryGetValue(proxyDict, kSCPropNetProxiesFTPEnable)
+            if enabled and _CFNumberToInt32(sc, enabled):
+                proxy = sc.CFDictionaryGetValue(proxyDict, kSCPropNetProxiesFTPProxy)
+                port = sc.CFDictionaryGetValue(proxyDict, kSCPropNetProxiesFTPPort)
+
+                if proxy:
+                    proxy = _CStringFromCFString(sc, proxy)
+                    if port:
+                        port = _CFNumberToInt32(sc, port)
+                        proxies["ftp"] = "http://%s:%i" % (proxy, port)
+                    else:
+                        proxies["ftp"] = "http://%s" % (proxy, )
+
+            # Gopher:
+            enabled = sc.CFDictionaryGetValue(proxyDict, kSCPropNetProxiesGopherEnable)
+            if enabled and _CFNumberToInt32(sc, enabled):
+                proxy = sc.CFDictionaryGetValue(proxyDict, kSCPropNetProxiesGopherProxy)
+                port = sc.CFDictionaryGetValue(proxyDict, kSCPropNetProxiesGopherPort)
+
+                if proxy:
+                    proxy = _CStringFromCFString(sc, proxy)
+                    if port:
+                        port = _CFNumberToInt32(sc, port)
+                        proxies["gopher"] = "http://%s:%i" % (proxy, port)
+                    else:
+                        proxies["gopher"] = "http://%s" % (proxy, )
+        finally:
+            sc.CFRelease(proxyDict)
+
+        sc.CFRelease(kSCPropNetProxiesHTTPEnable)
+        sc.CFRelease(kSCPropNetProxiesHTTPProxy)
+        sc.CFRelease(kSCPropNetProxiesHTTPPort)
+        sc.CFRelease(kSCPropNetProxiesFTPEnable)
+        sc.CFRelease(kSCPropNetProxiesFTPPassive)
+        sc.CFRelease(kSCPropNetProxiesFTPPort)
+        sc.CFRelease(kSCPropNetProxiesFTPProxy)
+        sc.CFRelease(kSCPropNetProxiesGopherEnable)
+        sc.CFRelease(kSCPropNetProxiesGopherPort)
+        sc.CFRelease(kSCPropNetProxiesGopherProxy)
+
         return proxies
 
-    def proxy_bypass(x):
-        return 0
+
+
+    def proxy_bypass(host):
+        if getproxies_environment():
+            return proxy_bypass_environment(host)
+        else:
+            return proxy_bypass_macosx_sysconf(host)
 
     def getproxies():
-        return getproxies_environment() or getproxies_internetconfig()
+        return getproxies_environment() or getproxies_macosx_sysconf()
 
 elif os.name == 'nt':
     def getproxies_registry():
@@ -1384,7 +1609,7 @@ elif os.name == 'nt':
         """
         return getproxies_environment() or getproxies_registry()
 
-    def proxy_bypass(host):
+    def proxy_bypass_registry(host):
         try:
             import _winreg
             import re
@@ -1443,12 +1668,22 @@ elif os.name == 'nt':
                     return 1
         return 0
 
+    def proxy_bypass(host):
+        """Return a dictionary of scheme -> proxy server URL mappings.
+
+        Returns settings gathered from the environment, if specified,
+        or the registry.
+
+        """
+        if getproxies_environment():
+            return proxy_bypass_environment(host)
+        else:
+            return proxy_bypass_registry(host)
+
 else:
     # By default use environment variables
     getproxies = getproxies_environment
-
-    def proxy_bypass(host):
-        return 0
+    proxy_bypass = proxy_bypass_environment
 
 # Test and time quote() and unquote()
 def test1():
@@ -1480,7 +1715,6 @@ def test(args=[]):
             'file:/etc/passwd',
             'file://localhost/etc/passwd',
             'ftp://ftp.gnu.org/pub/README',
-##          'gopher://gopher.micro.umn.edu/1/',
             'http://www.python.org/index.html',
             ]
         if hasattr(URLopener, "open_https"):

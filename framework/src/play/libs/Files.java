@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
+import play.exceptions.UnexpectedException;
 
 /**
  * Files utils
@@ -28,7 +30,7 @@ public class Files {
         try {
             is = new FileInputStream(from);
             os = new FileOutputStream(to);
-            int read = -1;
+            int read;
             byte[] buffer = new byte[10000];
             while ((read = is.read(buffer)) > 0) {
                 os.write(buffer, 0, read);
@@ -38,11 +40,11 @@ public class Files {
         } finally {
             try {
                 is.close();
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
             try {
                 os.close();
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
     }
@@ -65,11 +67,11 @@ public class Files {
     public static boolean deleteDirectory(File path) {
         if (path.exists()) {
             File[] files = path.listFiles();
-            for (int i = 0; i < files.length; i++) {
-                if (files[i].isDirectory()) {
-                    deleteDirectory(files[i]);
+            for (File file: files) {
+                if (file.isDirectory()) {
+                    deleteDirectory(file);
                 } else {
-                    files[i].delete();
+                    file.delete();
                 }
             }
         }
@@ -97,11 +99,44 @@ public class Files {
                 }
                 File f = new File(to, entry.getName());
                 f.getParentFile().mkdirs();
-                IO.copy(zipFile.getInputStream(entry), new FileOutputStream(f));
+                FileOutputStream os = new FileOutputStream(f);
+                IO.copy(zipFile.getInputStream(entry), os);
+                os.close();
             }
             zipFile.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static void zip(File directory, File zipFile) {
+        try {
+            FileOutputStream os = new FileOutputStream(zipFile);
+            ZipOutputStream zos = new ZipOutputStream(os);
+            zipDirectory(directory, directory, zos);
+            zos.close();
+            os.close();
+        } catch (Exception e) {
+            throw new UnexpectedException(e);
+        }
+    }
+
+    static void zipDirectory(File root, File directory, ZipOutputStream zos) throws Exception {
+        for (File item : directory.listFiles()) {
+            if (item.isDirectory()) {
+                zipDirectory(root, item, zos);
+            } else {
+                byte[] readBuffer = new byte[2156];
+                int bytesIn;
+                FileInputStream fis = new FileInputStream(item);
+                String path = item.getAbsolutePath().substring(root.getAbsolutePath().length() + 1);
+                ZipEntry anEntry = new ZipEntry(path);
+                zos.putNextEntry(anEntry);
+                while ((bytesIn = fis.read(readBuffer)) != -1) {
+                    zos.write(readBuffer, 0, bytesIn);
+                }
+                fis.close();
+            }
         }
     }
 }

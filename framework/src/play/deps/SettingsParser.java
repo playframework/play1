@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.matcher.PatternMatcher;
 import org.apache.ivy.plugins.resolver.ChainResolver;
@@ -56,12 +57,14 @@ public class SettingsParser {
 
             Map data = (Map) o;
 
+            parseIncludes(settings, data);
+
             if (data.containsKey("repositories")) {
                 if (data.get("repositories") instanceof List) {
 
                     List repositories = (List) data.get("repositories");
                     List<Map<String, String>> modules = new ArrayList<Map<String, String>>();
-                    for (Object dep : repositories) {
+                    for (Object dep: repositories) {
                         if (dep instanceof Map) {
                             settings.addResolver(parseRepository((Map) dep, modules));
                         } else {
@@ -69,7 +72,7 @@ public class SettingsParser {
                         }
                     }
 
-                    for (Map attributes : modules) {
+                    for (Map attributes: modules) {
                         settings.addModuleConfiguration(attributes, settings.getMatcher(PatternMatcher.EXACT_OR_REGEXP), (String) attributes.remove("resolver"), null, null, null);
                     }
 
@@ -88,11 +91,34 @@ public class SettingsParser {
         }
     }
 
+    /**
+     * Look for an "include" property containing a list of yaml descriptors and load their repositories.
+     */
+    private void parseIncludes(IvySettings settings, Map data) throws Oops {
+        if (data.containsKey("include") && data.get("include") != null) {
+            if (data.get("include") instanceof List) {
+                List<?> includes = (List)data.get("include");
+                if (includes != null) {
+                    for (Object inc : includes) {
+                        File include = new File(substitute(inc.toString()));
+                        new SettingsParser(logger).parse(settings, include); // Load found descriptors
+                    }
+                }
+            } else {
+                throw new Oops("\"include\" property must be a list");
+            }
+        }
+    }
+
     DependencyResolver parseRepository(Map repoDescriptor, List<Map<String, String>> modules) throws Oops {
 
-        String repName = ((Map) repoDescriptor).keySet().iterator().next().toString().trim();
-        Map options = (Map) ((Map) repoDescriptor).values().iterator().next();
+        Object key = repoDescriptor.keySet().iterator().next();
+        String repName = key.toString().trim();
+        Map options = (Map) repoDescriptor.get(key);
 
+        if (options == null) {
+            throw new Oops("Parsing error in " + repName + ": check the format and the indentation.");
+        }
         String type = get(options, "type", String.class);
         if (type == null) {
             throw new Oops("Repository type need to be specified -> " + repName + ": " + options);
@@ -121,6 +147,7 @@ public class SettingsParser {
             if (get(options, "artifact", String.class) != null) {
                 fileSystemResolver.addArtifactPattern(get(options, "artifact", String.class));
             }
+            fileSystemResolver.setCheckmodified(true);
             resolver = fileSystemResolver;
         }
 
@@ -142,7 +169,11 @@ public class SettingsParser {
             chainResolver.setName(repName);
             chainResolver.setReturnFirst(true);
             for (Object o : get(options, "using", List.class, new ArrayList())) {
-                chainResolver.add(parseRepository((Map) o, modules));
+                DependencyResolver res = parseRepository((Map) o, modules);
+                if(res instanceof FileSystemResolver) {
+                    chainResolver.setCheckmodified(true);
+                }
+                chainResolver.add(res);
             }
             resolver = chainResolver;
         }
@@ -201,13 +232,12 @@ public class SettingsParser {
     }
 
     @SuppressWarnings("unchecked")
-    <T> T get(Map data, String key, Class<T> type) {
+    <T> T get(Map data, String key, Class<T> type) throws Oops {
         if (data.containsKey(key) && data.get(key) != null) {
             Object o = data.get(key);
             if (type.isAssignableFrom(o.getClass())) {
                 if (o instanceof String) {
-                    o = o.toString().replace("${play.path}", System.getProperty("play.path"));
-                    o = o.toString().replace("${application.path}", System.getProperty("application.path"));
+                    o = substitute(o.toString());
                 }
                 return (T) o;
             }
@@ -215,7 +245,29 @@ public class SettingsParser {
         return null;
     }
 
-    <T> T get(Map data, String key, Class<T> type, T defaultValue) {
+    /**
+     * Substitute environment variables found in a <code>String</code> with their value.
+     * This function search for <code>${variable}</code> patterns and replace them with
+     * their value taken from current environment.
+     *
+     * @param s <code>String</code> to substitute
+     * @return The substituted <code>String</code>
+     * @throws Oops If an environment variable is not found
+     */
+    private String substitute(String s) throws Oops {
+        Matcher m = Pattern.compile("\\$\\{([^\\}]*)\\}").matcher((String)s); //search of ${something} group(1) => something
+        while (m.find()) {
+            String propertyValue = System.getProperty(m.group(1));
+            if(propertyValue != null){
+                s = s.replace("${" + m.group(1) + "}",propertyValue);
+            } else {
+                throw new Oops("Unknown property " + m.group(1) + " in " + s);
+            }
+        }
+        return s;
+    }
+
+    <T> T get(Map data, String key, Class<T> type, T defaultValue) throws Oops {
         T o = get(data, key, type);
         if (o == null) {
             return defaultValue;

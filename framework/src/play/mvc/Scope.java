@@ -5,6 +5,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +30,7 @@ public class Scope {
     public static final boolean COOKIE_SECURE = Play.configuration.getProperty("application.session.secure", "false").toLowerCase().equals("true");
     public static final String COOKIE_EXPIRE = Play.configuration.getProperty("application.session.maxAge");
     public static final boolean SESSION_HTTPONLY = Play.configuration.getProperty("application.session.httpOnly", "false").toLowerCase().equals("true");
+    public static final boolean SESSION_SEND_ONLY_IF_CHANGED = Play.configuration.getProperty("application.session.sendOnlyIfChanged", "false").toLowerCase().equals("true");
 
     /**
      * Flash scope
@@ -61,6 +63,10 @@ public class Scope {
                 // Some request like WebSocket don't have any response
                 return;
             }
+            if (out.isEmpty()) {
+                Http.Response.current().setCookie(COOKIE_PREFIX + "_FLASH", "", null, "/", 0, COOKIE_SECURE);
+                return;
+            }
             try {
                 StringBuilder flash = new StringBuilder();
                 for (String key : out.keySet()) {
@@ -76,7 +82,7 @@ public class Scope {
                 throw new UnexpectedException("Flash serializationProblem", e);
             }
         }        // ThreadLocal access
-        static ThreadLocal<Flash> current = new ThreadLocal<Flash>();
+        public static ThreadLocal<Flash> current = new ThreadLocal<Flash>();
 
         public static Flash current() {
             return current.get();
@@ -158,12 +164,15 @@ public class Scope {
     public static class Session {
 
         static Pattern sessionParser = Pattern.compile("\u0000([^:]*):([^\u0000]*)\u0000");
+        static final String AT_KEY = "___AT";
+        static final String ID_KEY = "___ID";
+        static final String TS_KEY = "___TS";
 
         static Session restore() {
             try {
                 Session session = new Session();
                 Http.Cookie cookie = Http.Request.current().cookies.get(COOKIE_PREFIX + "_SESSION");
-                if (cookie != null && Play.started) {
+                if (cookie != null && Play.started && cookie.value != null && !cookie.value.trim().equals("")) {
                     String value = cookie.value;
                     String sign = value.substring(0, value.indexOf("-"));
                     String data = value.substring(value.indexOf("-") + 1);
@@ -176,26 +185,33 @@ public class Scope {
                     }
                     if (COOKIE_EXPIRE != null) {
                         // Verify that the session contains a timestamp, and that it's not expired
-                        if (!session.contains("___TS")) {
+                        if (!session.contains(TS_KEY)) {
                             session = new Session();
                         } else {
-                            if (Long.parseLong(session.get("___TS")) < System.currentTimeMillis()) {
+                            if (Long.parseLong(session.get(TS_KEY)) < System.currentTimeMillis()) {
                                 // Session expired
                                 session = new Session();
                             }
                         }
-                        session.put("___TS", System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
+                        session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
+                    } else {
+                        // Just restored. Nothing changed. No cookie-expire.
+                        session.changed = false;
+                    }
+                } else {
+                    // no previous cookie to restore; but we may have to set the timestamp in the new cookie
+                    if (COOKIE_EXPIRE != null) {
+                        session.put(TS_KEY, System.currentTimeMillis() + (Time.parseDuration(COOKIE_EXPIRE) * 1000));
                     }
                 }
-                if (!session.contains("___ID")) {
-                    session.put("___ID", Codec.UUID());
-                }
+
                 return session;
             } catch (Exception e) {
                 throw new UnexpectedException("Corrupted HTTP session from " + Http.Request.current().remoteAddress, e);
             }
         }
         Map<String, String> data = new HashMap<String, String>(); // ThreadLocal access
+        boolean changed = false;
         public static ThreadLocal<Session> current = new ThreadLocal<Session>();
 
         public static Session current() {
@@ -203,7 +219,11 @@ public class Scope {
         }
 
         public String getId() {
-            return data.get("___ID");
+            if (!data.containsKey(ID_KEY)) {
+                data.put(ID_KEY, Codec.UUID());
+            }
+            return data.get(ID_KEY);
+
         }
 
         public Map<String, String> all() {
@@ -211,12 +231,28 @@ public class Scope {
         }
 
         public String getAuthenticityToken() {
-            return Crypto.sign(getId());
+            if (!data.containsKey(AT_KEY)) {
+                data.put(AT_KEY, Crypto.sign(UUID.randomUUID().toString()));
+            }
+            return data.get(AT_KEY);
+        }
+
+        void change() {
+            changed = true;
         }
 
         void save() {
             if (Http.Response.current() == null) {
                 // Some request like WebSocket don't have any response
+                return;
+            }
+            if(!changed && SESSION_SEND_ONLY_IF_CHANGED && COOKIE_EXPIRE == null) {
+                // Nothing changed and no cookie-expire, consequently send nothing back.
+                return;
+            }
+            if (isEmpty()) {
+                // The session is empty: delete the cookie
+                Http.Response.current().setCookie(COOKIE_PREFIX + "_SESSION", "", null, "/", 0, COOKIE_SECURE, SESSION_HTTPONLY);
                 return;
             }
             try {
@@ -244,6 +280,7 @@ public class Scope {
             if (key.contains(":")) {
                 throw new IllegalArgumentException("Character ':' is invalid in a session key.");
             }
+            change();
             if (value == null) {
                 data.remove(key);
             } else {
@@ -252,6 +289,7 @@ public class Scope {
         }
 
         public void put(String key, Object value) {
+            change();
             if (value == null) {
                 put(key, (String) null);
             }
@@ -263,6 +301,7 @@ public class Scope {
         }
 
         public boolean remove(String key) {
+            change();
             return data.remove(key) != null;
         }
 
@@ -273,7 +312,21 @@ public class Scope {
         }
 
         public void clear() {
+            change();
             data.clear();
+        }
+
+        /**
+         * Returns true if the session is empty,
+         * e.g. does not contain anything else than the timestamp
+         */
+        public boolean isEmpty() {
+            for (String key : data.keySet()) {
+                if (!TS_KEY.equals(key)) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public boolean contains(String key) {
@@ -352,7 +405,7 @@ public class Scope {
         public <T> T get(String key, Class<T> type) {
             try {
                 // TODO: This is used by the test, but this is not the most convenient.
-                return (T) Binder.directBind(key, null, get(key), type);
+                return (T) Binder.bind(key, type, type, null, data);
             } catch (Exception e) {
                 Validation.addError(key, "validation.invalid");
                 return null;
@@ -419,6 +472,7 @@ public class Scope {
 
         public String urlEncode() {
             checkAndParse();
+            String encoding = Http.Response.current().encoding;
             StringBuilder ue = new StringBuilder();
             for (String key : data.keySet()) {
                 if (key.equals("body")) {
@@ -427,9 +481,9 @@ public class Scope {
                 String[] values = data.get(key);
                 for (String value : values) {
                     try {
-                        ue.append(URLEncoder.encode(key, "utf-8")).append("=").append(URLEncoder.encode(value, "utf-8")).append("&");
+                        ue.append(URLEncoder.encode(key, encoding)).append("=").append(URLEncoder.encode(value, encoding)).append("&");
                     } catch (Exception e) {
-                        Logger.error(e, "Error (utf-8 ?)");
+                        Logger.error(e, "Error (encoding ?)");
                     }
                 }
             }

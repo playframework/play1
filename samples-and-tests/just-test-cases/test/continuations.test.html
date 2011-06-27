@@ -4,6 +4,9 @@
 
     open('@{WithContinuations.loopWithWait()}')
     assertTextPresent('0:true;1:true;2:true;3:true;4:true')
+    
+    open('@{WithContinuations.waitAndThenRedirect()}')
+    assertTextPresent('Hello -> DONE:100')
 
     open('@{WithContinuations.waitFuture()}')
     assertTextPresent('0:true[DONE:100];1:true[DONE:100];2:true[DONE:100];3:true[DONE:100];4:true[DONE:100]')
@@ -76,5 +79,24 @@
     
     open('@{WithContinuations.callbackWithResults()}')
     assertTextPresent('yep -> [DONE:100, DONE:200]')
+    
+    open('@{WithContinuations.waitWithTimeout()}')
+    assertTextPresent('Timeout! Partial result is  + Task1 -> DONE:100')
+
+    open('@{WithContinuations.renderTemplateWithVariablesAssignedBeforeAwait()}')
+    assertBodyText('1-A-B-C-D-E')
+
+	open('/useAwaitViaOtherClass')
+    assertTextPresent('failCount: 2')
+
+	open('@{WithContinuations.useAwaitInWebSocketControllerWithContinuations()}')
+    assertTextPresent('ok')
+
+	open('@{WithContinuations.useAwaitInWebSocketControllerWithoutContinuations()}')
+    assertTextPresent('failCount: 1')
+
+    open('@{WithContinuations.usingRenderArgsAndAwait()}')
+    assertBodyText('true')
+
 
 #{/selenium}

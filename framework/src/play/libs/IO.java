@@ -33,11 +33,6 @@ public class IO {
         Properties properties = new OrderSafeProperties();
         try {
             properties.load(is);
-            for (Object key : properties.keySet()) {
-                String value = properties.getProperty(key.toString());
-                String goodValue = new String(value.getBytes("iso8859-1"), "utf-8");
-                properties.setProperty(key.toString(), goodValue);
-            }
             is.close();
         } catch (Exception e) {
             throw new RuntimeException(e);

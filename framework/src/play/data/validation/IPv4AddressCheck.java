@@ -1,9 +1,5 @@
 package play.data.validation;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 import net.sf.oval.Validator;
 import net.sf.oval.configuration.annotation.AbstractAnnotationCheck;
 import net.sf.oval.context.OValContext;
@@ -25,9 +21,15 @@ public class IPv4AddressCheck extends AbstractAnnotationCheck<IPv4Address> {
             return true;
         }
         try {
-            InetAddress addr = InetAddress.getByName(value.toString());
-            return addr instanceof Inet4Address;
-        } catch (UnknownHostException e) {
+            String[] parts = value.toString().split("[.]");
+            for(int i=0; i<parts.length; i++) {
+                int p = Integer.valueOf(parts[i]);
+                if(p < 0 || p > 255) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (Exception e) {
             return false;
         }
     }

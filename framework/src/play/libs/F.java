@@ -1,6 +1,8 @@
 package play.libs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Iterator;
@@ -80,7 +82,11 @@ public class F {
         }
 
         public static <T> Promise<List<T>> waitAll(final Promise<T>... promises) {
-            final CountDownLatch waitAllLock = new CountDownLatch(promises.length);
+            return waitAll(Arrays.asList(promises));
+        }
+
+        public static <T> Promise<List<T>> waitAll(final Collection<Promise<T>> promises) {
+            final CountDownLatch waitAllLock = new CountDownLatch(promises.size());
             final Promise<List<T>> result = new Promise<List<T>>() {
 
                 @Override
@@ -158,14 +164,40 @@ public class F {
             return result;
         }
 
-        public static <A, B, C> Promise<F.Tuple3<A, B, C>> wait3(Promise<A> tA, Promise<B> tB, Promise<C> tC) {
-            final Promise<F.Tuple3<A, B, C>> result = new Promise<F.Tuple3<A, B, C>>();
+        public static <A, B, C> Promise<F.T3<A, B, C>> wait3(Promise<A> tA, Promise<B> tB, Promise<C> tC) {
+            final Promise<F.T3<A, B, C>> result = new Promise<F.T3<A, B, C>>();
             final Promise<List<Object>> t = waitAll(new Promise[]{tA, tB, tC});
             t.onRedeem(new F.Action<Promise<List<Object>>>() {
 
                 public void invoke(Promise<List<Object>> completed) {
                     List<Object> values = completed.getOrNull();
-                    result.invoke(new F.Tuple3((A) values.get(0), (B) values.get(1), (C) values.get(2)));
+                    result.invoke(new F.T3((A) values.get(0), (B) values.get(1), (C) values.get(2)));
+                }
+            });
+            return result;
+        }
+
+        public static <A, B, C, D> Promise<F.T4<A, B, C, D>> wait4(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD) {
+            final Promise<F.T4<A, B, C, D>> result = new Promise<F.T4<A, B, C, D>>();
+            final Promise<List<Object>> t = waitAll(new Promise[]{tA, tB, tC, tD});
+            t.onRedeem(new F.Action<Promise<List<Object>>>() {
+
+                public void invoke(Promise<List<Object>> completed) {
+                    List<Object> values = completed.getOrNull();
+                    result.invoke(new F.T4((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3)));
+                }
+            });
+            return result;
+        }
+
+        public static <A, B, C, D, E> Promise<F.T5<A, B, C, D, E>> wait5(Promise<A> tA, Promise<B> tB, Promise<C> tC, Promise<D> tD, Promise<E> tE) {
+            final Promise<F.T5<A, B, C, D, E>> result = new Promise<F.T5<A, B, C, D, E>>();
+            final Promise<List<Object>> t = waitAll(new Promise[]{tA, tB, tC, tD, tE});
+            t.onRedeem(new F.Action<Promise<List<Object>>>() {
+
+                public void invoke(Promise<List<Object>> completed) {
+                    List<Object> values = completed.getOrNull();
+                    result.invoke(new F.T5((A) values.get(0), (B) values.get(1), (C) values.get(2), (D) values.get(3), (E) values.get(4)));
                 }
             });
             return result;
@@ -208,8 +240,8 @@ public class F {
             return result;
         }
 
-        public static <A, B, C> Promise<F.Either3<A, B, C>> waitEither(final Promise<A> tA, final Promise<B> tB, final Promise<C> tC) {
-            final Promise<F.Either3<A, B, C>> result = new Promise<F.Either3<A, B, C>>();
+        public static <A, B, C> Promise<F.E3<A, B, C>> waitEither(final Promise<A> tA, final Promise<B> tB, final Promise<C> tC) {
+            final Promise<F.E3<A, B, C>> result = new Promise<F.E3<A, B, C>>();
             final Promise<F.Tuple<Integer, Promise<Object>>> t = waitEitherInternal(tA, tB, tC);
 
             t.onRedeem(new F.Action<Promise<F.Tuple<Integer, Promise<Object>>>>() {
@@ -218,14 +250,76 @@ public class F {
                     F.Tuple<Integer, Promise<Object>> value = completed.getOrNull();
                     switch (value._1) {
                         case 1:
-                            result.invoke(F.Either3.<A, B, C>_1((A) value._2.getOrNull()));
+                            result.invoke(F.E3.<A, B, C>_1((A) value._2.getOrNull()));
                             break;
                         case 2:
-                            result.invoke(F.Either3.<A, B, C>_2((B) value._2.getOrNull()));
+                            result.invoke(F.E3.<A, B, C>_2((B) value._2.getOrNull()));
                             break;
                         case 3:
-                            result.invoke(F.Either3.<A, B, C>_3((C) value._2.getOrNull()));
+                            result.invoke(F.E3.<A, B, C>_3((C) value._2.getOrNull()));
                             break;
+                    }
+
+                }
+            });
+
+            return result;
+        }
+
+        public static <A, B, C, D> Promise<F.E4<A, B, C, D>> waitEither(final Promise<A> tA, final Promise<B> tB, final Promise<C> tC, final Promise<D> tD) {
+            final Promise<F.E4<A, B, C, D>> result = new Promise<F.E4<A, B, C, D>>();
+            final Promise<F.Tuple<Integer, Promise<Object>>> t = waitEitherInternal(tA, tB, tC, tD);
+
+            t.onRedeem(new F.Action<Promise<F.Tuple<Integer, Promise<Object>>>>() {
+
+                public void invoke(Promise<F.Tuple<Integer, Promise<Object>>> completed) {
+                    F.Tuple<Integer, Promise<Object>> value = completed.getOrNull();
+                    switch (value._1) {
+                        case 1:
+                            result.invoke(F.E4.<A, B, C, D>_1((A) value._2.getOrNull()));
+                            break;
+                        case 2:
+                            result.invoke(F.E4.<A, B, C, D>_2((B) value._2.getOrNull()));
+                            break;
+                        case 3:
+                            result.invoke(F.E4.<A, B, C, D>_3((C) value._2.getOrNull()));
+                            break;
+                        case 4:
+                            result.invoke(F.E4.<A, B, C, D>_4((D) value._2.getOrNull()));
+                            break;
+                    }
+
+                }
+            });
+
+            return result;
+        }
+
+        public static <A, B, C, D, E> Promise<F.E5<A, B, C, D, E>> waitEither(final Promise<A> tA, final Promise<B> tB, final Promise<C> tC, final Promise<D> tD, final Promise<E> tE) {
+            final Promise<F.E5<A, B, C, D, E>> result = new Promise<F.E5<A, B, C, D, E>>();
+            final Promise<F.Tuple<Integer, Promise<Object>>> t = waitEitherInternal(tA, tB, tC, tD, tE);
+
+            t.onRedeem(new F.Action<Promise<F.Tuple<Integer, Promise<Object>>>>() {
+
+                public void invoke(Promise<F.Tuple<Integer, Promise<Object>>> completed) {
+                    F.Tuple<Integer, Promise<Object>> value = completed.getOrNull();
+                    switch (value._1) {
+                        case 1:
+                            result.invoke(F.E5.<A, B, C, D, E>_1((A) value._2.getOrNull()));
+                            break;
+                        case 2:
+                            result.invoke(F.E5.<A, B, C, D, E>_2((B) value._2.getOrNull()));
+                            break;
+                        case 3:
+                            result.invoke(F.E5.<A, B, C, D, E>_3((C) value._2.getOrNull()));
+                            break;
+                        case 4:
+                            result.invoke(F.E5.<A, B, C, D, E>_4((D) value._2.getOrNull()));
+                            break;
+                        case 5:
+                            result.invoke(F.E5.<A, B, C, D, E>_5((E) value._2.getOrNull()));
+                            break;
+
                     }
 
                 }
@@ -261,6 +355,7 @@ public class F {
 
         static Timer timer = new Timer("F.Timeout", true);
         final public String token;
+        final public long delay;
 
         public Timeout(String delay) {
             this(Time.parseDuration(delay) * 1000);
@@ -275,6 +370,7 @@ public class F {
         }
 
         public Timeout(String token, long delay) {
+            this.delay = delay;
             this.token = token;
             final Timeout timeout = this;
             timer.schedule(new TimerTask() {
@@ -285,6 +381,12 @@ public class F {
                 }
             }, delay);
         }
+
+        @Override
+        public String toString() {
+            return "Timeout(" + delay + ")";
+        }
+
     }
 
     public static Timeout Timeout(String delay) {
@@ -335,8 +437,9 @@ public class F {
         }
 
         void notifyNewEvent() {
+            T value = events.peek();
             for (Promise<T> task : waiting) {
-                task.invoke(events.peek());
+                task.invoke(value);
             }
             waiting.clear();
         }
@@ -364,7 +467,7 @@ public class F {
                 return value;
             }
 
-            void markAsRead(T value) {
+            private void markAsRead(T value) {
                 if (value != null) {
                     events.remove(value);
                 }
@@ -457,7 +560,6 @@ public class F {
                 }
                 if (filter.trigger()) {
                     it.remove();
-                    break;
                 }
             }
         }
@@ -510,6 +612,10 @@ public class F {
         public static <T> Some<T> Some(T value) {
             return new Some<T>(value);
         }
+    }
+
+    public static <A> Some<A> Some(A a) {
+        return new Some(a);
     }
 
     public static class None<T> extends Option<T> {
@@ -574,46 +680,131 @@ public class F {
         }
 
         public static <A, B> Either<A, B> _1(A value) {
-            return new Either(Option.Some(value), Option.None());
+            return new Either(Some(value), None);
         }
 
         public static <A, B> Either<A, B> _2(B value) {
-            return new Either(Option.None(), Option.Some(value));
+            return new Either(None, Some(value));
         }
 
         @Override
         public String toString() {
-            return "Either(_1: " + _1 + ", _2: " + _2 + ")";
+            return "E2(_1: " + _1 + ", _2: " + _2 + ")";
         }
     }
 
-    public static class Either3<A, B, C> {
+    public static class E2<A, B> extends Either<A, B> {
+
+        private E2(Option<A> _1, Option<B> _2) {
+            super(_1, _2);
+        }
+    }
+
+    public static class E3<A, B, C> {
 
         final public Option<A> _1;
         final public Option<B> _2;
         final public Option<C> _3;
 
-        private Either3(Option<A> _1, Option<B> _2, Option<C> _3) {
+        private E3(Option<A> _1, Option<B> _2, Option<C> _3) {
             this._1 = _1;
             this._2 = _2;
             this._3 = _3;
         }
 
-        public static <A, B, C> Either3<A, B, C> _1(A value) {
-            return new Either3(Option.Some(value), Option.None(), Option.None());
+        public static <A, B, C> E3<A, B, C> _1(A value) {
+            return new E3(Some(value), None, None);
         }
 
-        public static <A, B, C> Either3<A, B, C> _2(B value) {
-            return new Either3(Option.None(), Option.Some(value), Option.None());
+        public static <A, B, C> E3<A, B, C> _2(B value) {
+            return new E3(None, Some(value), None);
         }
 
-        public static <A, B, C> Either3<A, B, C> _3(C value) {
-            return new Either3(Option.None(), Option.None(), Option.Some(value));
+        public static <A, B, C> E3<A, B, C> _3(C value) {
+            return new E3(None, None, Some(value));
         }
 
         @Override
         public String toString() {
-            return "Either3(_1: " + _1 + ", _2: " + _2 + ", _3:" + _3 + ")";
+            return "E3(_1: " + _1 + ", _2: " + _2 + ", _3:" + _3 + ")";
+        }
+    }
+
+    public static class E4<A, B, C, D> {
+
+        final public Option<A> _1;
+        final public Option<B> _2;
+        final public Option<C> _3;
+        final public Option<D> _4;
+
+        private E4(Option<A> _1, Option<B> _2, Option<C> _3, Option<D> _4) {
+            this._1 = _1;
+            this._2 = _2;
+            this._3 = _3;
+            this._4 = _4;
+        }
+
+        public static <A, B, C, D> E4<A, B, C, D> _1(A value) {
+            return new E4(Option.Some(value), None, None, None);
+        }
+
+        public static <A, B, C, D> E4<A, B, C, D> _2(B value) {
+            return new E4(None, Some(value), None, None);
+        }
+
+        public static <A, B, C, D> E4<A, B, C, D> _3(C value) {
+            return new E4(None, None, Some(value), None);
+        }
+
+        public static <A, B, C, D> E4<A, B, C, D> _4(D value) {
+            return new E4(None, None, None, Some(value));
+        }
+
+        @Override
+        public String toString() {
+            return "E4(_1: " + _1 + ", _2: " + _2 + ", _3:" + _3 + ", _4:" + _4 + ")";
+        }
+    }
+
+    public static class E5<A, B, C, D, E> {
+
+        final public Option<A> _1;
+        final public Option<B> _2;
+        final public Option<C> _3;
+        final public Option<D> _4;
+        final public Option<E> _5;
+
+        private E5(Option<A> _1, Option<B> _2, Option<C> _3, Option<D> _4, Option<E> _5) {
+            this._1 = _1;
+            this._2 = _2;
+            this._3 = _3;
+            this._4 = _4;
+            this._5 = _5;
+        }
+
+        public static <A, B, C, D, E> E5<A, B, C, D, E> _1(A value) {
+            return new E5(Option.Some(value), None, None, None, None);
+        }
+
+        public static <A, B, C, D, E> E5<A, B, C, D, E> _2(B value) {
+            return new E5(None, Option.Some(value), None, None, None);
+        }
+
+        public static <A, B, C, D, E> E5<A, B, C, D, E> _3(C value) {
+            return new E5(None, None, Option.Some(value), None, None);
+        }
+
+        public static <A, B, C, D, E> E5<A, B, C, D, E> _4(D value) {
+            return new E5(None, None, None, Option.Some(value), None);
+        }
+
+        public static <A, B, C, D, E> E5<A, B, C, D, E> _5(E value) {
+            return new E5(None, None, None, None, Option.Some(value));
+        }
+
+        @Override
+        public String toString() {
+            return "E5(_1: " + _1 + ", _2: " + _2 + ", _3:" + _3 + ", _4:" + _4 + ", _5:" + _5 + ")";
         }
     }
 
@@ -629,17 +820,32 @@ public class F {
 
         @Override
         public String toString() {
-            return "Tuple(_1: " + _1 + ", _2: " + _2 + ")";
+            return "T2(_1: " + _1 + ", _2: " + _2 + ")";
         }
     }
 
-    public static class Tuple3<A, B, C> {
+    public static <A, B> Tuple<A, B> Tuple(A a, B b) {
+        return new Tuple(a, b);
+    }
+
+    public static class T2<A, B> extends Tuple<A, B> {
+
+        public T2(A _1, B _2) {
+            super(_1, _2);
+        }
+    }
+
+    public static <A, B> T2<A, B> T2(A a, B b) {
+        return new T2(a, b);
+    }
+
+    public static class T3<A, B, C> {
 
         final public A _1;
         final public B _2;
         final public C _3;
 
-        public Tuple3(A _1, B _2, C _3) {
+        public T3(A _1, B _2, C _3) {
             this._1 = _1;
             this._2 = _2;
             this._3 = _3;
@@ -647,8 +853,62 @@ public class F {
 
         @Override
         public String toString() {
-            return "Tuple3(_1: " + _1 + ", _2: " + _2 + ", _3:" + _3 + ")";
+            return "T3(_1: " + _1 + ", _2: " + _2 + ", _3:" + _3 + ")";
         }
+    }
+
+    public static <A, B, C> T3<A, B, C> T3(A a, B b, C c) {
+        return new T3(a, b, c);
+    }
+
+    public static class T4<A, B, C, D> {
+
+        final public A _1;
+        final public B _2;
+        final public C _3;
+        final public D _4;
+
+        public T4(A _1, B _2, C _3, D _4) {
+            this._1 = _1;
+            this._2 = _2;
+            this._3 = _3;
+            this._4 = _4;
+        }
+
+        @Override
+        public String toString() {
+            return "T4(_1: " + _1 + ", _2: " + _2 + ", _3:" + _3 + ", _4:" + _4 + ")";
+        }
+    }
+
+    public static <A, B, C, D> T4<A, B, C, D> T4(A a, B b, C c, D d) {
+        return new T4<A, B, C, D>(a, b, c, d);
+    }
+
+    public static class T5<A, B, C, D, E> {
+
+        final public A _1;
+        final public B _2;
+        final public C _3;
+        final public D _4;
+        final public E _5;
+
+        public T5(A _1, B _2, C _3, D _4, E _5) {
+            this._1 = _1;
+            this._2 = _2;
+            this._3 = _3;
+            this._4 = _4;
+            this._5 = _5;
+        }
+
+        @Override
+        public String toString() {
+            return "T5(_1: " + _1 + ", _2: " + _2 + ", _3:" + _3 + ", _4:" + _4 + ", _5:" + _5 + ")";
+        }
+    }
+
+    public static <A, B, C, D, E> T5<A, B, C, D, E> T5(A a, B b, C c, D d, E e) {
+        return new T5<A, B, C, D, E>(a, b, c, d, e);
     }
 
     public static abstract class Matcher<T, R> {

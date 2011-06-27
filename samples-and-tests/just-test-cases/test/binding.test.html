@@ -74,7 +74,8 @@
         assertTextPresent('Incorrect value')
 
 		<!-- Now unbind dates -->
-		open('@{Application.book(new java.util.Date(2879877856556))}')
+        open('/databinding/changeLanguage/en/')
+        open('@{Application.book(new java.util.Date(2879877856556))}')
 		assertTextPresent('Booked at 04/04/61 !!')
 		
 		<!-- Binding internal enum with empty string -->

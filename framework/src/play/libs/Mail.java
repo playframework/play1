@@ -9,6 +9,7 @@ import play.exceptions.MailException;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -253,7 +254,7 @@ public class Mail {
                 for (int i = 0; i < part.getCount(); i++) {
                     BodyPart bodyPart = part.getBodyPart(i);
                     if (!Message.ATTACHMENT.equals(bodyPart.getDisposition())) {
-                        text += getContent(part.getBodyPart(i));
+                        text += getContent(bodyPart);
                     } else {
                         text += "attachment: \n" +
                        "\t\t name: " + (StringUtils.isEmpty(bodyPart.getFileName()) ? "none" : bodyPart.getFileName()) + "\n" +
@@ -289,7 +290,11 @@ public class Mail {
                 email.setMailSession(session);
 
                 email.buildMimeMessage();
-                final String body = getContent(email.getMimeMessage());
+
+                MimeMessage msg = email.getMimeMessage();
+                msg.saveChanges();
+
+                String body = getContent(msg);
 
                 content.append("From Mock Mailer\n\tNew email received by");
 

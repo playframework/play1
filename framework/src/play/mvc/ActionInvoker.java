@@ -14,10 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.PatternLayout;
 import play.Logger;
 import play.Play;
-import play.PlayPlugin;
 import play.cache.CacheFor;
 import play.classloading.enhancers.ControllersEnhancer.ControllerInstrumentation;
 import play.classloading.enhancers.ControllersEnhancer.ControllerSupport;
@@ -37,10 +35,12 @@ import play.utils.Utils;
 
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
+import java.util.Stack;
 import java.util.concurrent.Future;
 import org.apache.commons.javaflow.Continuation;
 import org.apache.commons.javaflow.bytecode.StackRecorder;
 import play.Invoker.Suspend;
+import play.classloading.enhancers.ControllersEnhancer;
 import play.mvc.results.NotFound;
 
 /**
@@ -63,6 +63,8 @@ public class ActionInvoker {
         Scope.RouteArgs.current.set(new Scope.RouteArgs());
         Scope.Session.current.set(Scope.Session.restore());
         Scope.Flash.current.set(Scope.Flash.restore());
+
+        ControllersEnhancer.currentAction.set(new Stack<String>());
 
         if (request.resolved) {
             return;
@@ -87,7 +89,10 @@ public class ActionInvoker {
             request.action = request.controller + "." + request.actionMethod;
             request.invokedMethod = actionMethod;
 
-            Logger.trace("------- %s", actionMethod);
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("------- %s", actionMethod);
+            }
+
             request.resolved = true;
 
         } catch (ActionNotFoundException e) {
@@ -108,9 +113,9 @@ public class ActionInvoker {
             // 1. Prepare request params
             Scope.Params.current().__mergeWith(request.routeArgs);
 
-            // add parameters from the URI query string 
-            Scope.Params.current()._mergeWith(UrlEncodedParser.parseQueryString(new ByteArrayInputStream(request.querystring.getBytes("utf-8"))));
-            Lang.resolvefrom(request);
+            // add parameters from the URI query string
+            String encoding = Http.Request.current().encoding;
+            Scope.Params.current()._mergeWith(UrlEncodedParser.parseQueryString(new ByteArrayInputStream(request.querystring.getBytes(encoding))));
 
             // 2. Easy debugging ...
             if (Play.mode == Play.Mode.DEV) {
@@ -257,6 +262,25 @@ public class ActionInvoker {
         }
     }
 
+    private static boolean isActionMethod(Method method) {
+        if (method.isAnnotationPresent(Before.class)) {
+            return false;
+        }
+        if (method.isAnnotationPresent(After.class)) {
+            return false;
+        }
+        if (method.isAnnotationPresent(Finally.class)) {
+            return false;
+        }
+        if (method.isAnnotationPresent(Catch.class)) {
+            return false;
+        }
+        if (method.isAnnotationPresent(Util.class)) {
+            return false;
+        }
+        return true;
+    }
+
     private static void handleBefores(Http.Request request) throws Exception {
         List<Method> befores = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Before.class);
         Collections.sort(befores, new Comparator<Method>() {
@@ -352,10 +376,10 @@ public class ActionInvoker {
 
         if (Controller.getControllerClass() == null) {
             //skip it
-            return ;
+            return;
         }
 
-        try{
+        try {
             List<Method> allFinally = Java.findAllAnnotatedMethods(Controller.getControllerClass(), Finally.class);
             Collections.sort(allFinally, new Comparator<Method>() {
 
@@ -395,7 +419,7 @@ public class ActionInvoker {
 
                     //check if method accepts Throwable as only parameter
                     Class[] parameterTypes = aFinally.getParameterTypes();
-                    if( parameterTypes.length == 1 && parameterTypes[0] == Throwable.class ){
+                    if (parameterTypes.length == 1 && parameterTypes[0] == Throwable.class) {
                         //invoking @Finally method with caughtException as parameter
                         invokeControllerMethod(aFinally, new Object[]{caughtException});
                     } else {
@@ -473,11 +497,17 @@ public class ActionInvoker {
     }
 
     static Object invoke(Method method, Object instance, Object[] realArgs) throws Exception {
-        return invokeWithContinuation(method, instance, realArgs);
+        if(isActionMethod(method)) {
+            return invokeWithContinuation(method, instance, realArgs);
+        } else {
+            return method.invoke(instance, realArgs);
+        }
     }
     static final String C = "__continuation";
     static final String A = "__callback";
     static final String F = "__future";
+    static final String CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES = "__CONTINUATIONS_STORE_LOCAL_VARIABLE_NAMES";
+    static final String CONTINUATIONS_STORE_RENDER_ARGS = "__CONTINUATIONS_STORE_RENDER_ARGS";
 
     static Object invokeWithContinuation(Method method, Object instance, Object[] realArgs) throws Exception {
         // Callback case
@@ -590,7 +620,10 @@ public class ActionInvoker {
             } else {
                 params.putAll(Scope.Params.current().all());
             }
-            Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.join(method.getParameterAnnotations()[i], " ") + "]");
+
+            if (Logger.isTraceEnabled()) {
+                Logger.trace("getActionMethodArgs name [" + paramsNames[i] + "] annotation [" + Utils.join(method.getParameterAnnotations()[i], " ") + "]");
+            }
 
             rArgs[i] = Binder.bind(paramsNames[i], method.getParameterTypes()[i], method.getGenericParameterTypes()[i], method.getParameterAnnotations()[i], params, o, method, i + 1);
         }

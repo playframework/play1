@@ -1,58 +1,58 @@
 #{set title:'Your application is ready !' /}
 
 #{if play.mode.toString() == 'DEV'}
-    
+
 #{set 'moreStyles'}
-	<link rel="stylesheet" href="@{'/public/playmanual/manual.css'}" type="text/css" media="screen" charset="utf-8">
-	<link rel="stylesheet" href="@{'/public/playmanual/wiki.css'}" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="@{'/public/playmanual/manual.css'}" type="text/css" media="screen">
+    <link rel="stylesheet" href="@{'/public/playmanual/wiki.css'}" type="text/css" media="screen">
 #{/set}
 
 <div class="wrapper">
 
-	<div id="docSidebar">
-		
-		<div id="logo">
-			<img src="@{'/public/playmanual/logo.png'}">				
-			<h2 id="version">Play ${play.version}</h2>
-		</div>
+    <div id="docSidebar">
+
+        <div id="logo">
+            <img src="@{'/public/playmanual/logo.png'}">
+            <h2 id="version">Play ${play.version}</h2>
+        </div>
 
         <h2>Browse</h2>
         <ul>
             <li id="gotoc"><a href="/@documentation/home">Local documentation</a></li>
-            <li id="gotoc"><a href="/@api/index.html">Browse Java API</a></li>
+            <li id="goapi"><a href="/@api/index.html">Browse Java API</a></li>
         </ul>
 
         <h2>Contents</h2>
         <div id="toc"></div>
 
-		#{if modules}
-            <h2>Installed modules</h2>
-            <ul>
-                #{list modules, as:'module'}
-                    <li>
-                        <a href="modules/${module}/home">${module}</a>
-                        #{if apis.contains(module)}
-                            — <a href="/@api/-${module}/index.html">Browse API</a>
-                        #{/if}
-                    </li>
-                #{/list}
-            </ul>
-        #{/if}
+#{if modules}
+        <h2>Installed modules</h2>
+        <ul>
+        #{list modules, as:'module'}
+            <li>
+                <a href="modules/${module}/home">${module}</a>
+                #{if apis.contains(module)}
+                    — <a href="/@api/-${module}/index.html">Browse API</a>
+                #{/if}
+            </li>
+        #{/list}
+        </ul>
+#{/if}
 
         <h2>Search</h2>
         <p>Get help with google</p>
-        <div id="searchBox"><form action="http://www.google.com/cse" id="cse-search-box"><div><input type="hidden" name="cx" value="002614023023983855063:jn1mu_7bof0" /><input type="hidden" name="ie" value="UTF-8" /><input type="text" name="q" size="28" style="font-size:14px"/></div></form><script type="text/javascript" src="http://www.google.com/coop/cse/brand?form=cse-search-box&lang=en"></script></div>
+        <div id="searchBox"><form action="http://www.google.com/cse" id="cse-search-box"><div><input type="hidden" name="cx" value="002614023023983855063:jn1mu_7bof0" /><input type="hidden" name="ie" value="UTF-8" /><input type="text" name="q" size="28" style="font-size:14px"/></div></form><script type="text/javascript" src="http://www.google.com/coop/cse/brand?form=cse-search-box&amp;lang=en"></script></div>
 
     </div>
 
-	<div id="pageContent">
+    <div id="pageContent">
 
-		<div class="wikistyle">
+        <div class="wikistyle">
             <h1>Your new application is ready!</h1>
             <p>
                 Congratulation, you've just created a new play application. This page will help you in the few next steps.
             </p>
-            <h2><a name="why">Why do you see this page?</a></h2>
+            <h2 id="why">Why do you see this page?</h2>
             <p>
                 The <strong>conf/routes</strong> file defines a route that tell play to invoke the <strong>Application.index</strong> action
                 when a browser requests the <strong>/</strong> URI using the <strong>GET</strong> method:
@@ -77,7 +77,7 @@ GET     /         Application.index</code></pre>
                 This template extends the <strong>app/views/main.html</strong>, and uses the <strong>&#35;{welcome /}</strong> tag to display this
                 welcome page.
             </p>
-            <h2><a name="ide">Need to set up a Java IDE?</a></h2>
+            <h2 id="ide">Need to set up a Java IDE?</h2>
             <p>
                 You can start right now to hack your application using any text editor. Any changes will be automatically realoaded at the
                 next page refresh, including modifications made to Java sources files.
@@ -86,7 +86,7 @@ GET     /         Application.index</code></pre>
                 If you want to set up your application in <strong>Eclipse</strong>, <strong>Netbeans</strong> or any other Java IDE, check
                 the <a href="/@documentation/ide">Setting up your preferred IDE</a> page.
             </p>
-            <h2><a name="db">Need to connect to a database?</a></h2>
+            <h2 id="db">Need to connect to a database?</h2>
             <p>
                 You can quickly set up a developement database (either in memory or written to the filesystem), by adding one of these
                 lines to the <strong>conf/application.conf</strong> file:
@@ -99,7 +99,7 @@ db=fs</code></pre>
             <p>
                 If you want to connect to an existing <strong>MySQL5 server</strong>, use:
             </p>
-<pre><code>db=mysql:user:pwd@database_name</code></pre>            
+<pre><code>db=mysql:user:pwd@database_name</code></pre>
             <p>
                 If you need to connect to another JDBC compliant database, first add the corresponding driver library to the
                 <strong>lib/</strong> directory of your application, and add these lines to the <strong>conf/application.conf</strong> file:
@@ -107,8 +107,8 @@ db=fs</code></pre>
             <pre><code>db.url=jdbc:postgresql:database_name
 db.driver=org.postgresql.Driver
 db.user=root
-db.pass=secret</code></pre>      
-            <h2><a name="doc">Need more help?</a></h2>
+db.pass=secret</code></pre>
+            <h2 id="doc">Need more help?</h2>
             <p>
                 When your application run in <strong>DEV</strong> mode, you can access directly the current documentation at the
                 <a href="/@documentation">/@documentation</a> URL or go to <a href="http://www.playframework.org">http://www.playframework.org</a>.
@@ -120,14 +120,10 @@ db.pass=secret</code></pre>
             </p>
         </div>
     </div>
-			
-		</div>
-
-	</div>
 
 </div>
-	
-<script type="text/javascript" src="@{'/public/playmanual/jquery-1.3.2.min.js'}"></script>
+
+<script type="text/javascript" src="@{'/public/playmanual/jquery-1.6.min.js'}"></script>
 <script type="text/javascript" src="@{'/public/playmanual/navigation.js'}"></script>
 
 #{/if}

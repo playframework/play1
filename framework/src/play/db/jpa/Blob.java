@@ -8,9 +8,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import org.hibernate.Hibernate;
+
 import org.hibernate.HibernateException;
+import org.hibernate.type.StringType;
 import org.hibernate.usertype.UserType;
+
 import play.Play;
 import play.db.Model.BinaryField;
 import play.exceptions.UnexpectedException;
@@ -84,12 +86,8 @@ public class Blob implements BinaryField, UserType {
         return o.hashCode();
     }
 
-    // TODO: After we switch to Hibernate 3.6, Hibernate.STRING must be changed to
-    // Hibernate.StringType.INSTANCE (how stupid is that to deprecate stuff before offering
-    // an alternative?
-    @SuppressWarnings("deprecation")
     public Object nullSafeGet(ResultSet rs, String[] names, Object o) throws HibernateException, SQLException {
-        String val = (String) Hibernate.STRING.nullSafeGet(rs, names[0]);
+        String val = (String) StringType.INSTANCE.nullSafeGet(rs, names[0]);
         if(val == null || val.length() == 0 || !val.contains("|")) {
             return new Blob();
         }

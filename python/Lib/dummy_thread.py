@@ -11,16 +11,12 @@ Suggested usage is::
         import dummy_thread as thread
 
 """
-__author__ = "Brett Cannon"
-__email__ = "brett@python.org"
-
-# Exports only things specified by thread documentation
-# (skipping obsolete synonyms allocate(), start_new(), exit_thread())
+# Exports only things specified by thread documentation;
+# skipping obsolete synonyms allocate(), start_new(), exit_thread().
 __all__ = ['error', 'start_new_thread', 'exit', 'get_ident', 'allocate_lock',
            'interrupt_main', 'LockType']
 
 import traceback as _traceback
-import warnings
 
 class error(Exception):
     """Dummy implementation of thread.error."""
@@ -107,18 +103,15 @@ class LockType(object):
         aren't triggered and throw a little fit.
 
         """
-        if waitflag is None:
+        if waitflag is None or waitflag:
             self.locked_status = True
-            return None
-        elif not waitflag:
+            return True
+        else:
             if not self.locked_status:
                 self.locked_status = True
                 return True
             else:
                 return False
-        else:
-            self.locked_status = True
-            return True
 
     __enter__ = acquire
 

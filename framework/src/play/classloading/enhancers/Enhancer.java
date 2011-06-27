@@ -1,8 +1,10 @@
 package play.classloading.enhancers;
 
+import java.io.File;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.FileInputStream;
 import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -18,6 +20,7 @@ import javassist.NotFoundException;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.annotation.MemberValue;
 import play.Play;
+import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 
 /**
@@ -57,6 +60,14 @@ public abstract class Enhancer {
     public static class ApplicationClassesClasspath implements ClassPath {
 
         public InputStream openClassfile(String className) throws NotFoundException {
+            if(Play.usePrecompiled) {
+                try {
+                    File file = Play.getFile("precompiled/java/" + className.replace(".", "/") + ".class");
+                    return new FileInputStream(file);
+                } catch(Exception e) {
+                    Logger.error("Missing class %s", className);
+                }
+            }
             return new ByteArrayInputStream(Play.classes.getApplicationClass(className).enhancedByteCode);
         }
 
@@ -162,6 +173,23 @@ public abstract class Enhancer {
             ctMethod.getMethodInfo().addAttribute(annotationsAttribute);
         }
         return annotationsAttribute;
+    }
+
+    boolean isScalaObject(CtClass ctClass) throws Exception {
+        for(CtClass i : ctClass.getInterfaces()) {
+            if(i.getName().equals("scala.ScalaObject")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean isScala(ApplicationClass app) {
+        return app.javaFile.getName().endsWith(".scala");
+    }
+
+    boolean isAnon(ApplicationClass app) {
+        return app.name.contains("$anonfun$") || app.name.contains("$anon$");
     }
     
 }

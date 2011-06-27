@@ -3,6 +3,8 @@
 
 <h1>It works !</h1>
 
+#{include './inc1.html' /}
+
 #{form action:@hello(), id:'form'}
 	<input id="name" type="text" name="name" />
 	<input id="sayHello" value="Say hello" type="submit" />
@@ -28,6 +30,8 @@ ${'Coucou'.up()}
     <a id="wp1" href="@{sample.Photo.index()}">with package</a>, <a id="wp2" href="@{admin.Test.index()}">with package 2</a>, #{a @@admin.Test.index(), id:'wp3'}with package 3#{/a}
 </p>
 
+#{include './inc2.html' /}
+
 <h2>1: @@{'/public2/assets1/hello.html'}</h2>
 <h2>2: @{'/public2/assets1/hello.html'}</h2>
 <h2>3: @@{'/public2/assets2/hello.html'}</h2>
@@ -46,3 +50,4 @@ ${'Coucou'.up()}
 <h2>16: @@{Application.ok(12345)}</h2>
 <h2>17: @@{Application.ok('A')}</h2>
 <h2>18: @@{Application.ok('TITI')}</h2>
+<h2>19: @@{Application.imagesAssets()}</h2>

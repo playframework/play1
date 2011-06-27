@@ -16,9 +16,9 @@ import com.jamonapi.MonitorFactory;
 import java.util.ArrayList;
 
 import play.Play.Mode;
-import play.classloading.enhancers.LocalvariablesNamesEnhancer.LocalVariablesNamesTracer;
 import play.exceptions.PlayException;
 import play.exceptions.UnexpectedException;
+import play.i18n.Lang;
 import play.libs.F;
 import play.libs.F.Promise;
 import play.utils.PThreadFactory;
@@ -88,21 +88,31 @@ public class Invoker {
     public static class InvocationContext {
 
         public static ThreadLocal<InvocationContext> current = new ThreadLocal<InvocationContext>();
-        private List<Annotation> annotations = new ArrayList<Annotation>();
+        private final List<Annotation> annotations;
+        private final String invocationType;
 
         public static InvocationContext current() {
             return current.get();
         }
 
-        public InvocationContext(List<Annotation> annotations) {
+        public InvocationContext(String invocationType) {
+            this.invocationType = invocationType;
+            this.annotations = new ArrayList<Annotation>();
+        }
+
+        public InvocationContext(String invocationType, List<Annotation> annotations) {
+            this.invocationType = invocationType;
             this.annotations = annotations;
         }
 
-        public InvocationContext(Annotation[] annotations) {
+        public InvocationContext(String invocationType, Annotation[] annotations) {
+            this.invocationType = invocationType;
             this.annotations = Arrays.asList(annotations);
         }
 
-        public InvocationContext(Annotation[]... annotations) {
+        public InvocationContext(String invocationType, Annotation[]... annotations) {
+            this.invocationType = invocationType;
+            this.annotations = new ArrayList<Annotation>();
             for (Annotation[] some : annotations) {
                 this.annotations.addAll(Arrays.asList(some));
             }
@@ -131,9 +141,20 @@ public class Invoker {
             return false;
         }
 
+        /**
+         * Returns the InvocationType for this invocation - Ie: A plugin can use this to
+         * find out if it runs in the context of a background Job
+         */
+        public String getInvocationType() {
+            return invocationType;
+        }
+
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
+            builder.append("InvocationType: ");
+            builder.append(invocationType);
+            builder.append(". annotations: ");
             for (Annotation annotation : annotations) {
                 builder.append(annotation.toString()).append(",");
             }
@@ -157,6 +178,17 @@ public class Invoker {
          */
         public abstract void execute() throws Exception;
 
+
+        /**
+         * Needs this method to do stuff *before* init() is executed.
+         * The different Invocation-implementations does a lot of stuff in init()
+         * and they might do it before calling super.init()
+         */
+        protected void preInit() {
+            // clear language for this request - we're resolving it later when it is needed
+            Lang.clear();
+        }
+
         /**
          * Init the call (especially usefull in DEV mode to detect changes)
          */
@@ -173,9 +205,8 @@ public class Invoker {
             return true;
         }
 
-        public InvocationContext getInvocationContext() {
-            return new InvocationContext(new ArrayList<Annotation>());
-        }
+
+        public abstract InvocationContext getInvocationContext();
 
         /**
          * Things to do before an Invocation
@@ -191,7 +222,6 @@ public class Invoker {
          */
         public void after() {
             Play.pluginCollection.afterInvocation();
-            LocalVariablesNamesTracer.checkEmpty(); // detect bugs ....
         }
 
         /**
@@ -229,6 +259,7 @@ public class Invoker {
          */
         public void _finally() {
             Play.pluginCollection.invocationFinally();
+            InvocationContext.current.remove();
         }
 
         /**
@@ -239,6 +270,7 @@ public class Invoker {
                 waitInQueue.stop();
             }
             try {
+                preInit();
                 if (init()) {
                     before();
                     execute();
@@ -261,6 +293,8 @@ public class Invoker {
      */
     public static abstract class DirectInvocation extends Invocation {
 
+        public static final String invocationType = "DirectInvocation";
+
         Suspend retry = null;
 
         @Override
@@ -272,6 +306,11 @@ public class Invoker {
         @Override
         public void suspend(Suspend suspendRequest) {
             retry = suspendRequest;
+        }
+
+        @Override
+        public InvocationContext getInvocationContext() {
+            return new InvocationContext(invocationType);
         }
     }
 

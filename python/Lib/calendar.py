@@ -5,7 +5,6 @@ default, these calendars have Monday as the first day of the week, and
 Sunday as the last (the European convention). Use setfirstweekday() to
 set the first day of the week (0=Monday, 6=Sunday)."""
 
-from __future__ import with_statement
 import sys
 import datetime
 import locale as _locale
@@ -47,7 +46,7 @@ mdays = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 class _localized_month:
 
-    _months = [datetime.date(2001, i+1, 1).strftime for i in xrange(12)]
+    _months = [datetime.date(2001, i+1, 1).strftime for i in range(12)]
     _months.insert(0, lambda x: "")
 
     def __init__(self, format):
@@ -67,7 +66,7 @@ class _localized_month:
 class _localized_day:
 
     # January 1, 2001, was a Monday.
-    _days = [datetime.date(2001, 1, i+1).strftime for i in xrange(7)]
+    _days = [datetime.date(2001, 1, i+1).strftime for i in range(7)]
 
     def __init__(self, format):
         self.format = format
@@ -146,7 +145,7 @@ class Calendar(object):
         Return a iterator for one week of weekday numbers starting with the
         configured first one.
         """
-        for i in xrange(self.firstweekday, self.firstweekday + 7):
+        for i in range(self.firstweekday, self.firstweekday + 7):
             yield i%7
 
     def itermonthdates(self, year, month):
@@ -194,7 +193,7 @@ class Calendar(object):
         Each row represents a week; week entries are datetime.date values.
         """
         dates = list(self.itermonthdates(year, month))
-        return [ dates[i:i+7] for i in xrange(0, len(dates), 7) ]
+        return [ dates[i:i+7] for i in range(0, len(dates), 7) ]
 
     def monthdays2calendar(self, year, month):
         """
@@ -204,7 +203,7 @@ class Calendar(object):
         are zero.
         """
         days = list(self.itermonthdays2(year, month))
-        return [ days[i:i+7] for i in xrange(0, len(days), 7) ]
+        return [ days[i:i+7] for i in range(0, len(days), 7) ]
 
     def monthdayscalendar(self, year, month):
         """
@@ -212,7 +211,7 @@ class Calendar(object):
         Each row represents a week; days outside this month are zero.
         """
         days = list(self.itermonthdays(year, month))
-        return [ days[i:i+7] for i in xrange(0, len(days), 7) ]
+        return [ days[i:i+7] for i in range(0, len(days), 7) ]
 
     def yeardatescalendar(self, year, width=3):
         """
@@ -223,9 +222,9 @@ class Calendar(object):
         """
         months = [
             self.monthdatescalendar(year, i)
-            for i in xrange(January, January+12)
+            for i in range(January, January+12)
         ]
-        return [months[i:i+width] for i in xrange(0, len(months), width) ]
+        return [months[i:i+width] for i in range(0, len(months), width) ]
 
     def yeardays2calendar(self, year, width=3):
         """
@@ -236,9 +235,9 @@ class Calendar(object):
         """
         months = [
             self.monthdays2calendar(year, i)
-            for i in xrange(January, January+12)
+            for i in range(January, January+12)
         ]
-        return [months[i:i+width] for i in xrange(0, len(months), width) ]
+        return [months[i:i+width] for i in range(0, len(months), width) ]
 
     def yeardayscalendar(self, year, width=3):
         """
@@ -248,9 +247,9 @@ class Calendar(object):
         """
         months = [
             self.monthdayscalendar(year, i)
-            for i in xrange(January, January+12)
+            for i in range(January, January+12)
         ]
-        return [months[i:i+width] for i in xrange(0, len(months), width) ]
+        return [months[i:i+width] for i in range(0, len(months), width) ]
 
 
 class TextCalendar(Calendar):
@@ -343,7 +342,7 @@ class TextCalendar(Calendar):
         header = self.formatweekheader(w)
         for (i, row) in enumerate(self.yeardays2calendar(theyear, m)):
             # months in this row
-            months = xrange(m*i+1, min(m*(i+1)+1, 13))
+            months = range(m*i+1, min(m*(i+1)+1, 13))
             a('\n'*l)
             names = (self.formatmonthname(theyear, k, colwidth, False)
                      for k in months)
@@ -354,7 +353,7 @@ class TextCalendar(Calendar):
             a('\n'*l)
             # max number of weeks for this row
             height = max(len(cal) for cal in row)
-            for j in xrange(height):
+            for j in range(height):
                 weeks = []
                 for cal in row:
                     if j >= len(cal):
@@ -446,9 +445,9 @@ class HTMLCalendar(Calendar):
         a('<table border="0" cellpadding="0" cellspacing="0" class="year">')
         a('\n')
         a('<tr><th colspan="%d" class="year">%s</th></tr>' % (width, theyear))
-        for i in xrange(January, January+12, width):
+        for i in range(January, January+12, width):
             # months in this row
-            months = xrange(i, min(i+width, 13))
+            months = range(i, min(i+width, 13))
             a('<tr>')
             for m in months:
                 a('<td>')
@@ -473,7 +472,7 @@ class HTMLCalendar(Calendar):
         a('<meta http-equiv="Content-Type" content="text/html; charset=%s" />\n' % encoding)
         if css is not None:
             a('<link rel="stylesheet" type="text/css" href="%s" />\n' % css)
-        a('<title>Calendar for %d</title\n' % theyear)
+        a('<title>Calendar for %d</title>\n' % theyear)
         a('</head>\n')
         a('<body>\n')
         a(self.formatyear(theyear, width))

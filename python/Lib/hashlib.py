@@ -1,6 +1,6 @@
-# $Id: hashlib.py 52533 2006-10-29 18:01:12Z georg.brandl $
+# $Id: hashlib.py 66093 2008-08-31 16:34:18Z gregory.p.smith $
 #
-#  Copyright (C) 2005   Gregory P. Smith (greg@electricrain.com)
+#  Copyright (C) 2005   Gregory P. Smith (greg@krypto.org)
 #  Licensed to PSF under a Contributor Agreement.
 #
 
@@ -17,6 +17,9 @@ md5(), sha1(), sha224(), sha256(), sha384(), and sha512()
 
 More algorithms may be available on your platform but the above are
 guaranteed to exist.
+
+NOTE: If you want the adler32 or crc32 hash functions they are available in
+the zlib module.
 
 Choose your hash function wisely.  Some have known collision weaknesses.
 sha384 and sha512 will be slow on 32 bit platforms.
@@ -42,7 +45,7 @@ spammish repetition':
     >>> m.update("Nobody inspects")
     >>> m.update(" the spammish repetition")
     >>> m.digest()
-    '\xbbd\x9c\x83\xdd\x1e\xa5\xc9\xd9\xde\xc9\xa1\x8d\xf0\xff\xe9'
+    '\\xbbd\\x9c\\x83\\xdd\\x1e\\xa5\\xc9\\xd9\\xde\\xc9\\xa1\\x8d\\xf0\\xff\\xe9'
 
 More condensed:
 

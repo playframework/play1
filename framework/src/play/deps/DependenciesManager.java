@@ -108,13 +108,13 @@ public class DependenciesManager {
             System.out.println("~");
         } else if (!notSync.isEmpty()) {
             System.out.println("~");
-            System.out.println("~ ******************************************************************************************************************************");
+            System.out.println("~ *****************************************************************************");
             System.out.println("~ WARNING: Your lib/ and modules/ directories and not synced with current dependencies (use --sync to automatically delete them)");
             System.out.println("~");
             for (File f : notSync) {
                 System.out.println("~ \tUnknown: " + f.getAbsolutePath());
             }
-            System.out.println("~ ******************************************************************************************************************************");
+            System.out.println("~ *****************************************************************************");
         }
     }
 
@@ -122,13 +122,13 @@ public class DependenciesManager {
         if (logger != null) {
             if (!logger.notFound.isEmpty()) {
                 System.out.println("~");
-                System.out.println("~ ************************************************************************************************************");
+                System.out.println("~ *****************************************************************************");
                 System.out.println("~ WARNING: These dependencies are missing, your application may not work properly (use --verbose for details),");
                 System.out.println("~");
                 for (String d : logger.notFound) {
                     System.out.println("~\t" + d);
                 }
-                System.out.println("~ ************************************************************************************************************");
+                System.out.println("~ *****************************************************************************");
                 return true;
             }
         }
@@ -223,9 +223,8 @@ public class DependenciesManager {
     }
 
     private boolean isFrameworkLocal(ArtifactDownloadReport artifact) throws Exception {
-        String frameworkPath = framework.getCanonicalPath();
-        String filePath = artifact.getLocalFile().getCanonicalPath();
-        return filePath.startsWith(frameworkPath);
+        String artifactFileName = artifact.getLocalFile().getName();
+        return new File(framework, "framework/lib/" + artifactFileName).exists() || new File(framework, "framework/" + artifactFileName).exists();
     }
 
     private boolean isPlayModule(ArtifactDownloadReport artifact) throws Exception {
@@ -267,7 +266,7 @@ public class DependenciesManager {
         ResolveEngine resolveEngine = ivy.getResolveEngine();
         ResolveOptions resolveOptions = new ResolveOptions();
         resolveOptions.setConfs(new String[]{"default"});
-        resolveOptions.setArtifactFilter(FilterHelper.getArtifactTypeFilter(new String[]{"jar"}));
+        resolveOptions.setArtifactFilter(FilterHelper.getArtifactTypeFilter(new String[]{"jar", "bundle"}));
 
         return resolveEngine.resolve(ivyModule.toURI().toURL(), resolveOptions);
     }

@@ -53,6 +53,8 @@ all_feature_names = [
     "division",
     "absolute_import",
     "with_statement",
+    "print_function",
+    "unicode_literals",
 ]
 
 __all__ = ["all_feature_names"] + all_feature_names
@@ -66,6 +68,8 @@ CO_GENERATOR_ALLOWED = 0        # generators (obsolete, was 0x1000)
 CO_FUTURE_DIVISION   = 0x2000   # division
 CO_FUTURE_ABSOLUTE_IMPORT = 0x4000 # perform absolute imports by default
 CO_FUTURE_WITH_STATEMENT  = 0x8000   # with statement
+CO_FUTURE_PRINT_FUNCTION  = 0x10000   # print function
+CO_FUTURE_UNICODE_LITERALS = 0x20000 # unicode string literals
 
 class _Feature:
     def __init__(self, optionalRelease, mandatoryRelease, compiler_flag):
@@ -114,3 +118,11 @@ absolute_import = _Feature((2, 5, 0, "alpha", 1),
 with_statement = _Feature((2, 5, 0, "alpha", 1),
                           (2, 6, 0, "alpha", 0),
                           CO_FUTURE_WITH_STATEMENT)
+
+print_function = _Feature((2, 6, 0, "alpha", 2),
+                          (3, 0, 0, "alpha", 0),
+                          CO_FUTURE_PRINT_FUNCTION)
+
+unicode_literals = _Feature((2, 6, 0, "alpha", 2),
+                            (3, 0, 0, "alpha", 0),
+                            CO_FUTURE_UNICODE_LITERALS)

@@ -1,4 +1,4 @@
-# Copyright 2001-2007 by Vinay Sajip. All Rights Reserved.
+# Copyright 2001-2008 by Vinay Sajip. All Rights Reserved.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted,
@@ -21,10 +21,15 @@ comp.lang.python, and influenced by Apache's log4j system.
 Should work under Python versions >= 1.5.2, except that source line
 information is not available unless 'sys._getframe()' is.
 
-Copyright (C) 2001-2007 Vinay Sajip. All Rights Reserved.
+Copyright (C) 2001-2008 Vinay Sajip. All Rights Reserved.
 
 To use, simply 'import logging' and log away!
 """
+
+__all__ = ['BASIC_FORMAT', 'BufferingFormatter', 'CRITICAL', 'DEBUG', 'ERROR',
+           'FATAL', 'FileHandler', 'Filter', 'Filterer', 'Formatter', 'Handler',
+           'INFO', 'LogRecord', 'Logger', 'Manager', 'NOTSET', 'PlaceHolder',
+           'RootLogger', 'StreamHandler', 'WARN', 'WARNING']
 
 import sys, os, types, time, string, cStringIO, traceback
 
@@ -41,8 +46,8 @@ except ImportError:
 
 __author__  = "Vinay Sajip <vinay_sajip@red-dove.com>"
 __status__  = "production"
-__version__ = "0.5.0.2"
-__date__    = "16 February 2007"
+__version__ = "0.5.0.5"
+__date__    = "24 January 2008"
 
 #---------------------------------------------------------------------------
 #   Miscellaneous module data
@@ -234,7 +239,9 @@ class LogRecord:
         # 'Value is %d' instead of 'Value is 0'.
         # For the use case of passing a dictionary, this should not be a
         # problem.
-        if args and (len(args) == 1) and args[0] and (type(args[0]) == types.DictType):
+        if args and len(args) == 1 and (
+                                        type(args[0]) == types.DictType
+                                       ) and args[0]:
             args = args[0]
         self.args = args
         self.levelname = getLevelName(level)
@@ -243,7 +250,7 @@ class LogRecord:
         try:
             self.filename = os.path.basename(pathname)
             self.module = os.path.splitext(self.filename)[0]
-        except:
+        except (TypeError, ValueError, AttributeError):
             self.filename = pathname
             self.module = "Unknown module"
         self.exc_info = exc_info
@@ -255,7 +262,7 @@ class LogRecord:
         self.relativeCreated = (self.created - _startTime) * 1000
         if logThreads and thread:
             self.thread = thread.get_ident()
-            self.threadName = threading.currentThread().getName()
+            self.threadName = threading.current_thread().name
         else:
             self.thread = None
             self.threadName = None
@@ -712,6 +719,7 @@ class StreamHandler(Handler):
     to a stream. Note that this class does not close the stream, as
     sys.stdout or sys.stderr may be used.
     """
+
     def __init__(self, strm=None):
         """
         Initialize the handler.
@@ -728,17 +736,19 @@ class StreamHandler(Handler):
         """
         Flushes the stream.
         """
-        self.stream.flush()
+        if self.stream and hasattr(self.stream, "flush"):
+            self.stream.flush()
 
     def emit(self, record):
         """
         Emit a record.
 
         If a formatter is specified, it is used to format the record.
-        The record is then written to the stream with a trailing newline
-        [N.B. this may be removed depending on feedback]. If exception
-        information is present, it is formatted using
-        traceback.print_exception and appended to the stream.
+        The record is then written to the stream with a trailing newline.  If
+        exception information is present, it is formatted using
+        traceback.print_exception and appended to the stream.  If the stream
+        has an 'encoding' attribute, it is used to encode the message before
+        output to the stream.
         """
         try:
             msg = self.format(record)
@@ -747,7 +757,10 @@ class StreamHandler(Handler):
                 self.stream.write(fs % msg)
             else:
                 try:
-                    self.stream.write(fs % msg)
+                    if getattr(self.stream, 'encoding', None) is not None:
+                        self.stream.write(fs % msg.encode(self.stream.encoding))
+                    else:
+                        self.stream.write(fs % msg)
                 except UnicodeError:
                     self.stream.write(fs % msg.encode("UTF-8"))
             self.flush()
@@ -760,29 +773,56 @@ class FileHandler(StreamHandler):
     """
     A handler class which writes formatted logging records to disk files.
     """
-    def __init__(self, filename, mode='a', encoding=None):
+    def __init__(self, filename, mode='a', encoding=None, delay=0):
         """
         Open the specified file and use it as the stream for logging.
         """
-        if codecs is None:
-            encoding = None
-        if encoding is None:
-            stream = open(filename, mode)
-        else:
-            stream = codecs.open(filename, mode, encoding)
-        StreamHandler.__init__(self, stream)
         #keep the absolute path, otherwise derived classes which use this
         #may come a cropper when the current directory changes
+        if codecs is None:
+            encoding = None
         self.baseFilename = os.path.abspath(filename)
         self.mode = mode
+        self.encoding = encoding
+        if delay:
+            self.stream = None
+        else:
+            stream = self._open()
+            StreamHandler.__init__(self, stream)
 
     def close(self):
         """
         Closes the stream.
         """
-        self.flush()
-        self.stream.close()
-        StreamHandler.close(self)
+        if self.stream:
+            self.flush()
+            if hasattr(self.stream, "close"):
+                self.stream.close()
+            StreamHandler.close(self)
+            self.stream = None
+
+    def _open(self):
+        """
+        Open the current base file with the (original) mode and encoding.
+        Return the resulting stream.
+        """
+        if self.encoding is None:
+            stream = open(self.baseFilename, self.mode)
+        else:
+            stream = codecs.open(self.baseFilename, self.mode, self.encoding)
+        return stream
+
+    def emit(self, record):
+        """
+        Emit a record.
+
+        If the stream was not opened because 'delay' was specified in the
+        constructor, open it before calling the superclass's emit.
+        """
+        if self.stream is None:
+            stream = self._open()
+            StreamHandler.__init__(self, stream)
+        StreamHandler.emit(self, record)
 
 #---------------------------------------------------------------------------
 #   Manager classes and functions
@@ -863,7 +903,7 @@ class Manager:
         rv = None
         _acquireLock()
         try:
-            if self.loggerDict.has_key(name):
+            if name in self.loggerDict:
                 rv = self.loggerDict[name]
                 if isinstance(rv, PlaceHolder):
                     ph = rv
@@ -891,7 +931,7 @@ class Manager:
         rv = None
         while (i > 0) and not rv:
             substr = name[:i]
-            if not self.loggerDict.has_key(substr):
+            if substr not in self.loggerDict:
                 self.loggerDict[substr] = PlaceHolder(alogger)
             else:
                 obj = self.loggerDict[substr]
@@ -965,10 +1005,8 @@ class Logger(Filterer):
 
         logger.debug("Houston, we have a %s", "thorny problem", exc_info=1)
         """
-        if self.manager.disable >= DEBUG:
-            return
-        if DEBUG >= self.getEffectiveLevel():
-            apply(self._log, (DEBUG, msg, args), kwargs)
+        if self.isEnabledFor(DEBUG):
+            self._log(DEBUG, msg, args, **kwargs)
 
     def info(self, msg, *args, **kwargs):
         """
@@ -979,10 +1017,8 @@ class Logger(Filterer):
 
         logger.info("Houston, we have a %s", "interesting problem", exc_info=1)
         """
-        if self.manager.disable >= INFO:
-            return
-        if INFO >= self.getEffectiveLevel():
-            apply(self._log, (INFO, msg, args), kwargs)
+        if self.isEnabledFor(INFO):
+            self._log(INFO, msg, args, **kwargs)
 
     def warning(self, msg, *args, **kwargs):
         """
@@ -993,10 +1029,8 @@ class Logger(Filterer):
 
         logger.warning("Houston, we have a %s", "bit of a problem", exc_info=1)
         """
-        if self.manager.disable >= WARNING:
-            return
         if self.isEnabledFor(WARNING):
-            apply(self._log, (WARNING, msg, args), kwargs)
+            self._log(WARNING, msg, args, **kwargs)
 
     warn = warning
 
@@ -1009,16 +1043,14 @@ class Logger(Filterer):
 
         logger.error("Houston, we have a %s", "major problem", exc_info=1)
         """
-        if self.manager.disable >= ERROR:
-            return
         if self.isEnabledFor(ERROR):
-            apply(self._log, (ERROR, msg, args), kwargs)
+            self._log(ERROR, msg, args, **kwargs)
 
     def exception(self, msg, *args):
         """
         Convenience method for logging an ERROR with exception information.
         """
-        apply(self.error, (msg,) + args, {'exc_info': 1})
+        self.error(*((msg,) + args), **{'exc_info': 1})
 
     def critical(self, msg, *args, **kwargs):
         """
@@ -1029,10 +1061,8 @@ class Logger(Filterer):
 
         logger.critical("Houston, we have a %s", "major disaster", exc_info=1)
         """
-        if self.manager.disable >= CRITICAL:
-            return
-        if CRITICAL >= self.getEffectiveLevel():
-            apply(self._log, (CRITICAL, msg, args), kwargs)
+        if self.isEnabledFor(CRITICAL):
+            self._log(CRITICAL, msg, args, **kwargs)
 
     fatal = critical
 
@@ -1050,10 +1080,8 @@ class Logger(Filterer):
                 raise TypeError, "level must be an integer"
             else:
                 return
-        if self.manager.disable >= level:
-            return
         if self.isEnabledFor(level):
-            apply(self._log, (level, msg, args), kwargs)
+            self._log(level, msg, args, **kwargs)
 
     def findCaller(self):
         """
@@ -1078,7 +1106,7 @@ class Logger(Filterer):
         specialized LogRecords.
         """
         rv = LogRecord(name, level, fn, lno, msg, args, exc_info, func)
-        if extra:
+        if extra is not None:
             for key in extra:
                 if (key in ["message", "asctime"]) or (key in rv.__dict__):
                     raise KeyError("Attempt to overwrite %r in LogRecord" % key)
@@ -1191,6 +1219,96 @@ class RootLogger(Logger):
 
 _loggerClass = Logger
 
+class LoggerAdapter:
+    """
+    An adapter for loggers which makes it easier to specify contextual
+    information in logging output.
+    """
+
+    def __init__(self, logger, extra):
+        """
+        Initialize the adapter with a logger and a dict-like object which
+        provides contextual information. This constructor signature allows
+        easy stacking of LoggerAdapters, if so desired.
+
+        You can effectively pass keyword arguments as shown in the
+        following example:
+
+        adapter = LoggerAdapter(someLogger, dict(p1=v1, p2="v2"))
+        """
+        self.logger = logger
+        self.extra = extra
+
+    def process(self, msg, kwargs):
+        """
+        Process the logging message and keyword arguments passed in to
+        a logging call to insert contextual information. You can either
+        manipulate the message itself, the keyword args or both. Return
+        the message and kwargs modified (or not) to suit your needs.
+
+        Normally, you'll only need to override this one method in a
+        LoggerAdapter subclass for your specific needs.
+        """
+        kwargs["extra"] = self.extra
+        return msg, kwargs
+
+    def debug(self, msg, *args, **kwargs):
+        """
+        Delegate a debug call to the underlying logger, after adding
+        contextual information from this adapter instance.
+        """
+        msg, kwargs = self.process(msg, kwargs)
+        self.logger.debug(msg, *args, **kwargs)
+
+    def info(self, msg, *args, **kwargs):
+        """
+        Delegate an info call to the underlying logger, after adding
+        contextual information from this adapter instance.
+        """
+        msg, kwargs = self.process(msg, kwargs)
+        self.logger.info(msg, *args, **kwargs)
+
+    def warning(self, msg, *args, **kwargs):
+        """
+        Delegate a warning call to the underlying logger, after adding
+        contextual information from this adapter instance.
+        """
+        msg, kwargs = self.process(msg, kwargs)
+        self.logger.warning(msg, *args, **kwargs)
+
+    def error(self, msg, *args, **kwargs):
+        """
+        Delegate an error call to the underlying logger, after adding
+        contextual information from this adapter instance.
+        """
+        msg, kwargs = self.process(msg, kwargs)
+        self.logger.error(msg, *args, **kwargs)
+
+    def exception(self, msg, *args, **kwargs):
+        """
+        Delegate an exception call to the underlying logger, after adding
+        contextual information from this adapter instance.
+        """
+        msg, kwargs = self.process(msg, kwargs)
+        kwargs["exc_info"] = 1
+        self.logger.error(msg, *args, **kwargs)
+
+    def critical(self, msg, *args, **kwargs):
+        """
+        Delegate a critical call to the underlying logger, after adding
+        contextual information from this adapter instance.
+        """
+        msg, kwargs = self.process(msg, kwargs)
+        self.logger.critical(msg, *args, **kwargs)
+
+    def log(self, level, msg, *args, **kwargs):
+        """
+        Delegate a log call to the underlying logger, after adding
+        contextual information from this adapter instance.
+        """
+        msg, kwargs = self.process(msg, kwargs)
+        self.logger.log(level, msg, *args, **kwargs)
+
 root = RootLogger(WARNING)
 Logger.root = root
 Logger.manager = Manager(Logger.root)
@@ -1247,7 +1365,7 @@ def basicConfig(**kwargs):
         hdlr.setFormatter(fmt)
         root.addHandler(hdlr)
         level = kwargs.get("level")
-        if level:
+        if level is not None:
             root.setLevel(level)
 
 #---------------------------------------------------------------------------
@@ -1281,7 +1399,7 @@ def critical(msg, *args, **kwargs):
     """
     if len(root.handlers) == 0:
         basicConfig()
-    apply(root.critical, (msg,)+args, kwargs)
+    root.critical(*((msg,)+args), **kwargs)
 
 fatal = critical
 
@@ -1291,14 +1409,14 @@ def error(msg, *args, **kwargs):
     """
     if len(root.handlers) == 0:
         basicConfig()
-    apply(root.error, (msg,)+args, kwargs)
+    root.error(*((msg,)+args), **kwargs)
 
 def exception(msg, *args):
     """
     Log a message with severity 'ERROR' on the root logger,
     with exception information.
     """
-    apply(error, (msg,)+args, {'exc_info': 1})
+    error(*((msg,)+args), **{'exc_info': 1})
 
 def warning(msg, *args, **kwargs):
     """
@@ -1306,7 +1424,7 @@ def warning(msg, *args, **kwargs):
     """
     if len(root.handlers) == 0:
         basicConfig()
-    apply(root.warning, (msg,)+args, kwargs)
+    root.warning(*((msg,)+args), **kwargs)
 
 warn = warning
 
@@ -1316,7 +1434,7 @@ def info(msg, *args, **kwargs):
     """
     if len(root.handlers) == 0:
         basicConfig()
-    apply(root.info, (msg,)+args, kwargs)
+    root.info(*((msg,)+args), **kwargs)
 
 def debug(msg, *args, **kwargs):
     """
@@ -1324,7 +1442,7 @@ def debug(msg, *args, **kwargs):
     """
     if len(root.handlers) == 0:
         basicConfig()
-    apply(root.debug, (msg,)+args, kwargs)
+    root.debug(*((msg,)+args), **kwargs)
 
 def log(level, msg, *args, **kwargs):
     """
@@ -1332,7 +1450,7 @@ def log(level, msg, *args, **kwargs):
     """
     if len(root.handlers) == 0:
         basicConfig()
-    apply(root.log, (level, msg)+args, kwargs)
+    root.log(*((level, msg)+args), **kwargs)
 
 def disable(level):
     """

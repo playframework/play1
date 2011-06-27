@@ -22,12 +22,13 @@ Apache's log4j system.
 Should work under Python versions >= 1.5.2, except that source line
 information is not available unless 'sys._getframe()' is.
 
-Copyright (C) 2001-2007 Vinay Sajip. All Rights Reserved.
+Copyright (C) 2001-2008 Vinay Sajip. All Rights Reserved.
 
 To use, simply 'import logging' and log away!
 """
 
-import sys, logging, socket, types, os, string, cPickle, struct, time, glob
+import logging, socket, types, os, string, cPickle, struct, time, re
+from stat import ST_DEV, ST_INO
 
 try:
     import codecs
@@ -52,13 +53,13 @@ class BaseRotatingHandler(logging.FileHandler):
     Not meant to be instantiated directly.  Instead, use RotatingFileHandler
     or TimedRotatingFileHandler.
     """
-    def __init__(self, filename, mode, encoding=None):
+    def __init__(self, filename, mode, encoding=None, delay=0):
         """
         Use the specified filename for streamed logging
         """
         if codecs is None:
             encoding = None
-        logging.FileHandler.__init__(self, filename, mode, encoding)
+        logging.FileHandler.__init__(self, filename, mode, encoding, delay)
         self.mode = mode
         self.encoding = encoding
 
@@ -83,7 +84,7 @@ class RotatingFileHandler(BaseRotatingHandler):
     Handler for logging to a set of files, which switches from one file
     to the next when the current file reaches a certain size.
     """
-    def __init__(self, filename, mode='a', maxBytes=0, backupCount=0, encoding=None):
+    def __init__(self, filename, mode='a', maxBytes=0, backupCount=0, encoding=None, delay=0):
         """
         Open the specified file and use it as the stream for logging.
 
@@ -106,7 +107,7 @@ class RotatingFileHandler(BaseRotatingHandler):
         """
         if maxBytes > 0:
             mode = 'a' # doesn't make sense otherwise!
-        BaseRotatingHandler.__init__(self, filename, mode, encoding)
+        BaseRotatingHandler.__init__(self, filename, mode, encoding, delay)
         self.maxBytes = maxBytes
         self.backupCount = backupCount
 
@@ -130,10 +131,8 @@ class RotatingFileHandler(BaseRotatingHandler):
                 os.remove(dfn)
             os.rename(self.baseFilename, dfn)
             #print "%s -> %s" % (self.baseFilename, dfn)
-        if self.encoding:
-            self.stream = codecs.open(self.baseFilename, 'w', self.encoding)
-        else:
-            self.stream = open(self.baseFilename, 'w')
+        self.mode = 'w'
+        self.stream = self._open()
 
     def shouldRollover(self, record):
         """
@@ -157,10 +156,11 @@ class TimedRotatingFileHandler(BaseRotatingHandler):
     If backupCount is > 0, when rollover is done, no more than backupCount
     files are kept - the oldest ones are deleted.
     """
-    def __init__(self, filename, when='h', interval=1, backupCount=0, encoding=None):
-        BaseRotatingHandler.__init__(self, filename, 'a', encoding)
+    def __init__(self, filename, when='h', interval=1, backupCount=0, encoding=None, delay=0, utc=0):
+        BaseRotatingHandler.__init__(self, filename, 'a', encoding, delay)
         self.when = string.upper(when)
         self.backupCount = backupCount
+        self.utc = utc
         # Calculate the real rollover interval, which is just the number of
         # seconds between rollovers.  Also set the filename suffix used when
         # a rollover occurs.  Current 'when' events supported:
@@ -177,15 +177,19 @@ class TimedRotatingFileHandler(BaseRotatingHandler):
         if self.when == 'S':
             self.interval = 1 # one second
             self.suffix = "%Y-%m-%d_%H-%M-%S"
+            self.extMatch = r"^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$"
         elif self.when == 'M':
             self.interval = 60 # one minute
             self.suffix = "%Y-%m-%d_%H-%M"
+            self.extMatch = r"^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$"
         elif self.when == 'H':
             self.interval = 60 * 60 # one hour
             self.suffix = "%Y-%m-%d_%H"
+            self.extMatch = r"^\d{4}-\d{2}-\d{2}_\d{2}$"
         elif self.when == 'D' or self.when == 'MIDNIGHT':
             self.interval = 60 * 60 * 24 # one day
             self.suffix = "%Y-%m-%d"
+            self.extMatch = r"^\d{4}-\d{2}-\d{2}$"
         elif self.when.startswith('W'):
             self.interval = 60 * 60 * 24 * 7 # one week
             if len(self.when) != 2:
@@ -194,9 +198,11 @@ class TimedRotatingFileHandler(BaseRotatingHandler):
                 raise ValueError("Invalid day specified for weekly rollover: %s" % self.when)
             self.dayOfWeek = int(self.when[1])
             self.suffix = "%Y-%m-%d"
+            self.extMatch = r"^\d{4}-\d{2}-\d{2}$"
         else:
             raise ValueError("Invalid rollover interval specified: %s" % self.when)
 
+        self.extMatch = re.compile(self.extMatch)
         self.interval = self.interval * interval # multiply by units requested
         self.rolloverAt = currentTime + self.interval
 
@@ -209,7 +215,10 @@ class TimedRotatingFileHandler(BaseRotatingHandler):
         # the rest.  Note that this code doesn't care about leap seconds. :)
         if self.when == 'MIDNIGHT' or self.when.startswith('W'):
             # This could be done with less code, but I wanted it to be clear
-            t = time.localtime(currentTime)
+            if utc:
+                t = time.gmtime(currentTime)
+            else:
+                t = time.localtime(currentTime)
             currentHour = t[3]
             currentMinute = t[4]
             currentSecond = t[5]
@@ -239,22 +248,54 @@ class TimedRotatingFileHandler(BaseRotatingHandler):
                         daysToWait = self.dayOfWeek - day
                     else:
                         daysToWait = 6 - day + self.dayOfWeek + 1
-                    self.rolloverAt = self.rolloverAt + (daysToWait * (60 * 60 * 24))
+                    newRolloverAt = self.rolloverAt + (daysToWait * (60 * 60 * 24))
+                    if not utc:
+                        dstNow = t[-1]
+                        dstAtRollover = time.localtime(newRolloverAt)[-1]
+                        if dstNow != dstAtRollover:
+                            if not dstNow:  # DST kicks in before next rollover, so we need to deduct an hour
+                                newRolloverAt = newRolloverAt - 3600
+                            else:           # DST bows out before next rollover, so we need to add an hour
+                                newRolloverAt = newRolloverAt + 3600
+                    self.rolloverAt = newRolloverAt
 
         #print "Will rollover at %d, %d seconds from now" % (self.rolloverAt, self.rolloverAt - currentTime)
 
     def shouldRollover(self, record):
         """
-        Determine if rollover should occur
+        Determine if rollover should occur.
 
         record is not used, as we are just comparing times, but it is needed so
-        the method siguratures are the same
+        the method signatures are the same
         """
         t = int(time.time())
         if t >= self.rolloverAt:
             return 1
         #print "No need to rollover: %d, %d" % (t, self.rolloverAt)
         return 0
+
+    def getFilesToDelete(self):
+        """
+        Determine the files to delete when rolling over.
+
+        More specific than the earlier method, which just used glob.glob().
+        """
+        dirName, baseName = os.path.split(self.baseFilename)
+        fileNames = os.listdir(dirName)
+        result = []
+        prefix = baseName + "."
+        plen = len(prefix)
+        for fileName in fileNames:
+            if fileName[:plen] == prefix:
+                suffix = fileName[plen:]
+                if self.extMatch.match(suffix):
+                    result.append(os.path.join(dirName, fileName))
+        result.sort()
+        if len(result) < self.backupCount:
+            result = []
+        else:
+            result = result[:len(result) - self.backupCount]
+        return result
 
     def doRollover(self):
         """
@@ -267,23 +308,90 @@ class TimedRotatingFileHandler(BaseRotatingHandler):
         self.stream.close()
         # get the time that this sequence started at and make it a TimeTuple
         t = self.rolloverAt - self.interval
-        timeTuple = time.localtime(t)
+        if self.utc:
+            timeTuple = time.gmtime(t)
+        else:
+            timeTuple = time.localtime(t)
         dfn = self.baseFilename + "." + time.strftime(self.suffix, timeTuple)
         if os.path.exists(dfn):
             os.remove(dfn)
         os.rename(self.baseFilename, dfn)
         if self.backupCount > 0:
             # find the oldest log file and delete it
-            s = glob.glob(self.baseFilename + ".20*")
-            if len(s) > self.backupCount:
-                s.sort()
-                os.remove(s[0])
+            #s = glob.glob(self.baseFilename + ".20*")
+            #if len(s) > self.backupCount:
+            #    s.sort()
+            #    os.remove(s[0])
+            for s in self.getFilesToDelete():
+                os.remove(s)
         #print "%s -> %s" % (self.baseFilename, dfn)
-        if self.encoding:
-            self.stream = codecs.open(self.baseFilename, 'w', self.encoding)
+        self.mode = 'w'
+        self.stream = self._open()
+        newRolloverAt = self.rolloverAt + self.interval
+        currentTime = int(time.time())
+        while newRolloverAt <= currentTime:
+            newRolloverAt = newRolloverAt + self.interval
+        #If DST changes and midnight or weekly rollover, adjust for this.
+        if (self.when == 'MIDNIGHT' or self.when.startswith('W')) and not self.utc:
+            dstNow = time.localtime(currentTime)[-1]
+            dstAtRollover = time.localtime(newRolloverAt)[-1]
+            if dstNow != dstAtRollover:
+                if not dstNow:  # DST kicks in before next rollover, so we need to deduct an hour
+                    newRolloverAt = newRolloverAt - 3600
+                else:           # DST bows out before next rollover, so we need to add an hour
+                    newRolloverAt = newRolloverAt + 3600
+        self.rolloverAt = newRolloverAt
+
+class WatchedFileHandler(logging.FileHandler):
+    """
+    A handler for logging to a file, which watches the file
+    to see if it has changed while in use. This can happen because of
+    usage of programs such as newsyslog and logrotate which perform
+    log file rotation. This handler, intended for use under Unix,
+    watches the file to see if it has changed since the last emit.
+    (A file has changed if its device or inode have changed.)
+    If it has changed, the old file stream is closed, and the file
+    opened to get a new stream.
+
+    This handler is not appropriate for use under Windows, because
+    under Windows open files cannot be moved or renamed - logging
+    opens the files with exclusive locks - and so there is no need
+    for such a handler. Furthermore, ST_INO is not supported under
+    Windows; stat always returns zero for this value.
+
+    This handler is based on a suggestion and patch by Chad J.
+    Schroeder.
+    """
+    def __init__(self, filename, mode='a', encoding=None, delay=0):
+        logging.FileHandler.__init__(self, filename, mode, encoding, delay)
+        if not os.path.exists(self.baseFilename):
+            self.dev, self.ino = -1, -1
         else:
-            self.stream = open(self.baseFilename, 'w')
-        self.rolloverAt = self.rolloverAt + self.interval
+            stat = os.stat(self.baseFilename)
+            self.dev, self.ino = stat[ST_DEV], stat[ST_INO]
+
+    def emit(self, record):
+        """
+        Emit a record.
+
+        First check if the underlying file has changed, and if it
+        has, close the old stream and reopen the file to get the
+        current stream.
+        """
+        if not os.path.exists(self.baseFilename):
+            stat = None
+            changed = 1
+        else:
+            stat = os.stat(self.baseFilename)
+            changed = (stat[ST_DEV] != self.dev) or (stat[ST_INO] != self.ino)
+        if changed and self.stream is not None:
+            self.stream.flush()
+            self.stream.close()
+            self.stream = self._open()
+            if stat is None:
+                stat = os.stat(self.baseFilename)
+            self.dev, self.ino = stat[ST_DEV], stat[ST_INO]
+        logging.FileHandler.emit(self, record)
 
 class SocketHandler(logging.Handler):
     """
@@ -319,12 +427,14 @@ class SocketHandler(logging.Handler):
         self.retryMax = 30.0
         self.retryFactor = 2.0
 
-    def makeSocket(self):
+    def makeSocket(self, timeout=1):
         """
         A factory method which allows subclasses to define the precise
         type of socket they want.
         """
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if hasattr(s, 'settimeout'):
+            s.settimeout(timeout)
         s.connect((self.host, self.port))
         return s
 
@@ -346,7 +456,7 @@ class SocketHandler(logging.Handler):
             try:
                 self.sock = self.makeSocket()
                 self.retryTime = None # next time, no delay before trying
-            except:
+            except socket.error:
                 #Creation failed, so set the retry time and return.
                 if self.retryTime is None:
                     self.retryPeriod = self.retryStart
@@ -679,22 +789,25 @@ class SMTPHandler(logging.Handler):
     """
     A handler class which sends an SMTP email for each logging event.
     """
-    def __init__(self, mailhost, fromaddr, toaddrs, subject):
+    def __init__(self, mailhost, fromaddr, toaddrs, subject, credentials=None):
         """
         Initialize the handler.
 
         Initialize the instance with the from and to addresses and subject
         line of the email. To specify a non-standard SMTP port, use the
-        (host, port) tuple format for the mailhost argument.
+        (host, port) tuple format for the mailhost argument. To specify
+        authentication credentials, supply a (username, password) tuple
+        for the credentials argument.
         """
         logging.Handler.__init__(self)
         if type(mailhost) == types.TupleType:
-            host, port = mailhost
-            self.mailhost = host
-            self.mailport = port
+            self.mailhost, self.mailport = mailhost
         else:
-            self.mailhost = mailhost
-            self.mailport = None
+            self.mailhost, self.mailport = mailhost, None
+        if type(credentials) == types.TupleType:
+            self.username, self.password = credentials
+        else:
+            self.username = None
         self.fromaddr = fromaddr
         if type(toaddrs) == types.StringType:
             toaddrs = [toaddrs]
@@ -737,8 +850,8 @@ class SMTPHandler(logging.Handler):
         try:
             import smtplib
             try:
-                from email.Utils import formatdate
-            except:
+                from email.utils import formatdate
+            except ImportError:
                 formatdate = self.date_time
             port = self.mailport
             if not port:
@@ -750,6 +863,8 @@ class SMTPHandler(logging.Handler):
                             string.join(self.toaddrs, ","),
                             self.getSubject(record),
                             formatdate(), msg)
+            if self.username:
+                smtp.login(self.username, self.password)
             smtp.sendmail(self.fromaddr, self.toaddrs, msg)
             smtp.quit()
         except (KeyboardInterrupt, SystemExit):

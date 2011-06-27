@@ -15,6 +15,7 @@ import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewConstructor;
 import javassist.NotFoundException;
+import javassist.bytecode.AccessFlag;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
 import play.Logger;
@@ -29,8 +30,12 @@ public class PropertiesEnhancer extends Enhancer {
 
     @Override
     public void enhanceThisClass(ApplicationClass applicationClass) throws Exception {
+
         final CtClass ctClass = makeClass(applicationClass);
         if (ctClass.isInterface()) {
+            return;
+        }
+        if(ctClass.getName().endsWith(".package")) {
             return;
         }
 
@@ -44,7 +49,7 @@ public class PropertiesEnhancer extends Enhancer {
                 }
             }
             if (!hasDefaultConstructor && !ctClass.isInterface()) {
-                CtConstructor defaultConstructor = CtNewConstructor.make("private " + ctClass.getSimpleName() + "() {}", ctClass);
+                CtConstructor defaultConstructor = CtNewConstructor.make("public " + ctClass.getSimpleName() + "() {}", ctClass);
                 ctClass.addConstructor(defaultConstructor);
             }
         } catch (Exception e) {
@@ -52,15 +57,13 @@ public class PropertiesEnhancer extends Enhancer {
             throw new UnexpectedException("Error in PropertiesEnhancer", e);
         }
 
-
-        for (CtClass itf : ctClass.getInterfaces()) {
-            if (itf.getName().equals("scala.ScalaObject")) {
-                // Done.
-                applicationClass.enhancedByteCode = ctClass.toBytecode();
-                ctClass.defrost();
-                return;
-            }
+        if (isScala(applicationClass)) {
+            // Temporary hack for Scala. Done.
+            applicationClass.enhancedByteCode = ctClass.toBytecode();
+            ctClass.defrost();
+            return;
         }
+
         for (CtField ctField : ctClass.getDeclaredFields()) {
             try {
 
@@ -81,6 +84,7 @@ public class PropertiesEnhancer extends Enhancer {
                         // Créé le getter
                         String code = "public " + ctField.getType().getName() + " " + getter + "() { return this." + ctField.getName() + "; }";
                         CtMethod getMethod = CtMethod.make(code, ctClass);
+                        getMethod.setModifiers(getMethod.getModifiers() | AccessFlag.SYNTHETIC);
                         ctClass.addMethod(getMethod);
                     }
 
@@ -92,6 +96,7 @@ public class PropertiesEnhancer extends Enhancer {
                     } catch (NotFoundException noSetter) {
                         // Créé le setter
                         CtMethod setMethod = CtMethod.make("public void " + setter + "(" + ctField.getType().getName() + " value) { this." + ctField.getName() + " = value; }", ctClass);
+                        setMethod.setModifiers(setMethod.getModifiers() | AccessFlag.SYNTHETIC);
                         ctClass.addMethod(setMethod);
                         createAnnotation(getAnnotations(setMethod), PlayPropertyAccessor.class);
                     }
@@ -149,7 +154,7 @@ public class PropertiesEnhancer extends Enhancer {
                             // On n'intercepte pas le getter de sa propre property
                             if (propertyName == null || !propertyName.equals(fieldAccess.getFieldName())) {
 
-                                String invocationPoint = ctClass.getName() + "." + ctMethod.getName() + ", ligne " + fieldAccess.getLineNumber();
+                                String invocationPoint = ctClass.getName() + "." + ctMethod.getName() + ", line " + fieldAccess.getLineNumber();
 
                                 if (fieldAccess.isReader()) {
 

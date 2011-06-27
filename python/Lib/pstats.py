@@ -140,7 +140,7 @@ class Stats:
             self.total_calls += nc
             self.prim_calls  += cc
             self.total_tt    += tt
-            if callers.has_key(("jprofile", 0, "profiler")):
+            if ("jprofile", 0, "profiler") in callers:
                 self.top_level[func] = None
             if len(func_std_string(func)) > self.max_name_len:
                 self.max_name_len = len(func_std_string(func))
@@ -238,7 +238,7 @@ class Stats:
             stats_list.append((cc, nc, tt, ct) + func +
                               (func_std_string(func), func))
 
-        stats_list.sort(TupleComp(sort_tuple).compare)
+        stats_list.sort(key=CmpToKey(TupleComp(sort_tuple).compare))
 
         self.fcn_list = fcn_list = []
         for tuple in stats_list:
@@ -471,6 +471,16 @@ class TupleComp:
                 return direction
         return 0
 
+def CmpToKey(mycmp):
+    """Convert a cmp= function into a key= function"""
+    class K(object):
+        def __init__(self, obj):
+            self.obj = obj
+        def __lt__(self, other):
+            return mycmp(self.obj, other.obj) == -1
+    return K
+
+
 #**************************************************************************
 # func_name is a triple (file:string, line:int, name:string)
 
@@ -512,7 +522,8 @@ def add_callers(target, source):
         new_callers[func] = caller
     for func, caller in source.iteritems():
         if func in new_callers:
-            new_callers[func] = caller + new_callers[func]
+            new_callers[func] = tuple([i[0] + i[1] for i in
+                                       zip(caller, new_callers[func])])
         else:
             new_callers[func] = caller
     return new_callers

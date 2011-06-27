@@ -6,19 +6,19 @@ h2. <a>Defining a framework ID</a>
 
 You will typically deploy your application on a different computer (a server) than the one you used for development. So you will have a different Play installation.
 
-Play allows to assign each framework installation a different ID, then to manage different configurations in the same **application.conf** file. Let’s say that the **server01** will host your production application.
+Play allows to assign each framework installation a different ID, then to manage different configurations in the same @application.conf@ file. Let’s say that the @server01@ will host your production application.
 
-Once the Play framework is installed on this server, let’s define the framework ID using the **‘play id’** command. Type:
+Once the Play framework is installed on this server, let’s define the framework ID using the @play id@ command. Type:
 
 bc. $ play id
 
-And assign **server01** as id. Now we can define special keys in the yabe configuration file that will be used only when the application is running on the server.
+And assign @server01@ as id. Now we can define special keys in the yabe configuration file that will be used only when the application is running on the server.
 
 h2. <a>Setting the application in PROD mode</a>
 
-The first configuration key we want specialize for the server deployment is the **application.mode** property. So far we have used the **DEV** mode that allows Play to hot reload and recompile Java files and display detailed messages when an error occurs. In **PROD** mode however, Play will compile all Java sources and templates at startup time and will never check again for changes.
+The first configuration key we want specialize for the server deployment is the @application.mode@ property. So far we have used the **DEV** mode that allows Play to hot reload and recompile Java files and display detailed messages when an error occurs. In **PROD** mode however, Play will compile all Java sources and templates at startup time and will never check again for changes.
 
-In the **yabe/conf/application.conf** file, define:
+In the @yabe/conf/application.conf@ file, define:
 
 bc. %server01.application.mode=PROD
 
@@ -28,17 +28,17 @@ h2. <a>Configuring a MySQL server</a>
 
 For production use, we will use a MySQL server as database server instead of the in-memory H2 Database we have used so far. Play comes with the JDBC driver for MySQL so we don’t need to install anything more.
 
-Edit the database configuration in the **yabe/conf/application.conf** file:
+Edit the database configuration in the @yabe/conf/application.conf@ file:
 
 bc. %server01.db=mysql:root:secret@yabe
 
 We will now tweak the way Hibernate manages the database schema for us. It’s very useful when Hibernate automatically updates the database schema as the Java model objects change. 
 
-Change the **jpa.ddl** configuration key:
+Change the @jpa.ddl@ configuration key:
 
 bc. %server01.jpa.ddl=update
 
-However it’s kind of unpredictable, and running magical things on a production database is never a good thing. So you should always have a backup before a new deployement. If you don't want that hibernate update your database, change the **jpa.ddl** configuration key to validate:
+However it’s kind of unpredictable, and running magical things on a production database is never a good thing. So you should always have a backup before a new deployement. If you don't want that hibernate update your database, change the @jpa.ddl@ configuration key to validate:
 
 bc. %server01.jpa.ddl=validate
 
@@ -55,13 +55,13 @@ bc. server.modules = (
       "mod_proxy",
       "mod_accesslog" 
 )
-...
+…
 $HTTP["host"] =~ "www.yabe.com" {
     proxy.balance = "round-robin" proxy.server = ( "/" =>
         ( ( "host" => "127.0.0.1", "port" => 9000 ) ) )
 }
 
-And then allow a local reverse proxy to connect to your Play application by adding this key to the **application.conf** file:
+And then allow a local reverse proxy to connect to your Play application by adding this key to the @application.conf@ file:
 
 bc. %server01.XForwardedSupport=127.0.0.1
 

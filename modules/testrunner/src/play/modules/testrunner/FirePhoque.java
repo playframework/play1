@@ -47,7 +47,7 @@ public class FirePhoque {
             }
             in.close();
         } catch(Exception e) {
-            System.out.println("~ The application does not start. There are compilation errors.");
+            System.out.println("~ The application does not start. There are errors: " + e);
             System.exit(-1);
         }
 
