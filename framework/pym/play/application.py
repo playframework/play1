@@ -240,7 +240,7 @@ class PlayApplication(object):
         if self.play_env.has_key('https.port'):
             args += ["--https.port=%s" % self.play_env['https.port']]
             
-        java_args.append('-Dfile.encoding=utf-8')
+#        java_args.append('-Dfile.encoding=utf-8')
 
         if self.readConf('application.mode') == 'dev':
             if not self.play_env["disable_check_jpda"]: self.check_jpda()
