@@ -48,6 +48,10 @@ public class Fixtures {
     static Pattern keyPattern = Pattern.compile("([^(]+)\\(([^)]+)\\)");
     static Map<String, Object> idCache = new HashMap<String, Object>();
 
+    public static void clearIdCache(){
+    	idCache.clear();
+    }
+    
     public static void executeSQL(String sqlScript) {
         for(String sql: sqlScript.split(";")) {
             if(sql.trim().length() > 0) {
