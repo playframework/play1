@@ -43,14 +43,6 @@ try:
     else:
         play_env["id"] = ''
 
-    # ~~~~~~~~~~~~~~~~~~~~~~ Display logo
-    print r"~        _            _ "
-    print r"~  _ __ | | __ _ _  _| |"
-    print r"~ | '_ \| |/ _' | || |_|"
-    print r"~ |  __/|_|\____|\__ (_)"
-    print r"~ |_|            |__/   "
-    print r"~"
-
     play_version_file = os.path.join(play_env["basedir"], 'framework', 'src', 'play', 'version')
     if not os.path.exists(play_version_file):
         print "~ Oops. %s file not found" % os.path.normpath(os.path.join(play_env["basedir"], 'framework', 'src', 'play', 'version'))
@@ -59,6 +51,21 @@ try:
         sys.exit(-1)
 
     play_env["version"] = open(play_version_file).readline().strip()
+
+    # ~~~~~~~~~~~~~~~~~~~~~~ Just displays the version
+    if len(sys.argv) == 2 and sys.argv[1] == '--version':
+        print play_env["version"]
+        sys.exit(0)
+
+    # ~~~~~~~~~~~~~~~~~~~~~~ Display logo
+    print r"~        _            _ "
+    print r"~  _ __ | | __ _ _  _| |"
+    print r"~ | '_ \| |/ _' | || |_|"
+    print r"~ |  __/|_|\____|\__ (_)"
+    print r"~ |_|            |__/   "
+    print r"~"
+
+    
 
     print "~ play! %s, http://www.playframework.org" % (play_env["version"])
 
@@ -108,7 +115,7 @@ try:
 
     if play_env["id"] is not '':
         print "~ framework ID is %s" % play_env["id"]
-    print "~"
+    #print "~"
     
     # ~~~~~~~~~~~~~~~~~ Checking for disable_check_jpda
     disable_check_jpda = False
@@ -143,12 +150,12 @@ try:
             module = cmdloader.modules[name]
             if 'before' in dir(module):
                 module.before(command=play_command, app=play_app, args=remaining_args, env=play_env)
-        status = cmdloader.commands[play_command].execute(command=play_command, app=play_app, args=remaining_args, env=play_env, cmdloader=cmdloader)
+        cmdloader.commands[play_command].execute(command=play_command, app=play_app, args=remaining_args, env=play_env, cmdloader=cmdloader)
         for name in cmdloader.modules:
             module = cmdloader.modules[name]
             if 'after' in dir(module):
                 module.after(command=play_command, app=play_app, args=remaining_args, env=play_env)
-        sys.exit(status)
+        sys.exit(0)
 
     # ~~~~~~~~~~~~~~~~~~~~~~ Invalid command
     print "~ Usage: play cmd [app_path] [--options]"
